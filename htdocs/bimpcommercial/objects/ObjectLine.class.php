@@ -25,7 +25,7 @@ class ObjectLine extends BimpObject
     public static $product_line_data = array(
         'id_product'     => array('label' => 'Produit / Service', 'type' => 'int', 'required' => 1),
         'id_fourn_price' => array('label' => 'Prix d\'achat fournisseur', 'type' => 'int'),
-        'desc'           => array('label' => 'Description', 'type' => 'html', 'required' => 0, 'default' => ''),
+        'desc'           => array('label' => 'Description', 'type' => 'html', 'required' => 0, 'default' => null),
         'qty'            => array('label' => 'Quantité', 'type' => 'float', 'required' => 1, 'default' => 1),
         'pu_ht'          => array('label' => 'PU HT', 'type' => 'float', 'required' => 0, 'default' => null),
         'tva_tx'         => array('label' => 'Taux TVA', 'type' => 'float', 'required' => 0, 'default' => null),
@@ -111,6 +111,35 @@ class ObjectLine extends BimpObject
         return 0;
     }
 
+    public function isFieldEditable($field, $force_edit = false)
+    {
+        global $user;
+        if (in_array($field, array("pu_ht"))) {
+            return $this->canEditPrixVente();
+        }
+//        
+        return parent::isFieldEditable($field, $force_edit);
+    }
+
+    public function isActionAllowed($action, &$errors = array())
+    {
+        if (!$this->isLoaded()) {
+            $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
+            return 0;
+        }
+
+        switch ($action) {
+            case 'attributeEquipment':
+                if (!$this->isEditable()) {
+                    $errors[] = $this->getLabel('the') . ' n\'est pas modifiable';
+                    return 0;
+                }
+                return 1;
+        }
+
+        return (int) parent::isActionAllowed($action, $errors);
+    }
+
     public function isRemisable()
     {
         $product = $this->getProduct();
@@ -189,11 +218,6 @@ class ObjectLine extends BimpObject
         return array();
     }
 
-    public function isEquipmentEditable()
-    {
-        return 1;
-    }
-
     public function isLimited()
     {
         if (!$this->isLoaded()) {
@@ -225,6 +249,32 @@ class ObjectLine extends BimpObject
         }
 
         return parent::isChild($instance);
+    }
+
+    public function isValid(&$errors = array())
+    {
+        if (!$this->isLoaded()) {
+            $errors[] = 'ID ' . $this->getLabel('of_the');
+            return 0;
+        }
+
+        if ((int) $this->getData('type') === self::LINE_PRODUCT) {
+            $product = $this->getProduct();
+
+            if (!BimpObject::objectLoaded($product)) {
+                $errors[] = 'Produit absent';
+                return 0;
+            }
+
+            if ($product->dol_field_exists('validate')) {
+                if (!(int) $product->getData('validate')) {
+                    $errors[] = 'Le produit "' . $product->getRef() . ' - ' . $product->getData('label') . '" n\'est pas validé';
+                    return 0;
+                }
+            }
+        }
+
+        return 1;
     }
 
     public function hasEquipmentToAttribute()
@@ -347,11 +397,11 @@ class ObjectLine extends BimpObject
     {
         $buttons = array();
         if ($this->isLoaded()) {
-            if ((int) $this->id_product && $this->isEquipmentEditable()) {
+            if ((int) $this->id_product) {
                 $product = $this->getProduct();
                 if (BimpObject::objectLoaded($product)) {
                     if ($product->isSerialisable() && $this->equipment_required) {
-                        if ($this->isEditable() && $this->hasEquipmentToAttribute()) {
+                        if ($this->isActionAllowed('attributeEquipment') && $this->hasEquipmentToAttribute()) {
                             $data = array();
                             if (BimpObject::objectLoaded($this->post_equipment)) {
                                 $data['id_equipment'] = (int) $this->post_equipment->id;
@@ -675,7 +725,7 @@ class ObjectLine extends BimpObject
 
                 case 'desc':
                     $desc = $this->desc;
-                    if ($id_product && ((is_null($desc) || !(string) $desc || (int) $this->id_product !== $id_product))) {
+                    if ($id_product && ((is_null($desc) || (int) $this->id_product !== $id_product))) {
                         $desc = (string) $product->dol_object->description;
                         $product_label = (string) $product->getData('label');
 
@@ -881,6 +931,26 @@ class ObjectLine extends BimpObject
         return array();
     }
 
+    public function getNewEquipmentDefaultPlaceValues()
+    {
+        $values = array();
+        $parent = $this->getParentInstance();
+        if (BimpObject::objectLoaded($parent)) {
+            $entrepot = $parent->getChildObject('entrepot');
+            if (BimpObject::objectLoaded($entrepot)) {
+                BimpObject::loadClass('bimpequipment', 'BE_Place');
+                $values = array(
+                    'fields' => array(
+                        'type'        => BE_Place::BE_PLACE_ENTREPOT,
+                        'id_entrepot' => (int) $entrepot->id
+                    )
+                );
+            }
+        }
+
+        return $values;
+    }
+
     public function getQtyDecimals()
     {
         $product = $this->getProduct();
@@ -892,16 +962,6 @@ class ObjectLine extends BimpObject
         }
 
         return 3;
-    }
-
-    public function isFieldEditable($field, $force_edit = false)
-    {
-        global $user;
-        if (in_array($field, array("pu_ht"))) {
-            return $this->canEditPrixVente();
-        }
-//        
-        return parent::isFieldEditable($field, $force_edit);
     }
 
     // Affichages: 
@@ -2002,12 +2062,6 @@ class ObjectLine extends BimpObject
         if ($this->isLoaded()) {
             $remises_infos = $this->getRemiseTotalInfos(true, $remise_globale_rate);
 
-//            echo 'parent: ';
-//            
-//            $parent = $this->getParentInstance();
-//            
-//            $parent->printData();
-
             if (is_null($this->remise) || (float) $this->remise !== (float) $remises_infos['total_percent'] ||
                     $remises_infos['total_percent'] !== (float) $this->getData('remise') ||
                     $remises_infos['total_percent'] !== (float) $this->getInitData('remise')) {
@@ -2337,7 +2391,7 @@ class ObjectLine extends BimpObject
                     $html = '<input type="hidden" value="' . $value . '" name="' . $prefixe . 'pu_ht"/>';
                     $html .= BimpTools::displayMoneyValue($value, 'EUR');
                     if (!$this->isEditable()) {
-                        $html .= ' <span class="warning">(non modifiable)</span>';
+                        $html .= ' <span class="inputInfo warning">(non modifiable)</span>';
                     }
                 } else {
                     $html = BimpInput::renderInput('text', $prefixe . 'pu_ht', (float) $value, array(
@@ -2356,7 +2410,7 @@ class ObjectLine extends BimpObject
                     $html = '<input type="hidden" value="' . $value . '" name="' . $prefixe . 'tva_tx"/>';
                     $html .= $value . ' %';
                     if (!$this->isEditable()) {
-                        $html .= ' <span class="warning">(non modifiable)</span>';
+                        $html .= ' <span class="inputInfo warning">(non modifiable)</span>';
                     }
                 } else {
                     $html = BimpInput::renderInput('text', $prefixe . 'tva_tx', (float) $value, array(
@@ -2383,7 +2437,7 @@ class ObjectLine extends BimpObject
                                 'addon_right' => '<i class="fa fa-percent"></i>'
                     ));
                 } else {
-                    $html = $value . ' % <span class="warning">(non modifiable)</span>';
+                    $html = $value . ' % <span class="inputInfo warning">(non modifiable)</span>';
                 }
 
                 break;
@@ -3261,7 +3315,7 @@ class ObjectLine extends BimpObject
             return $errors;
         }
 
-        if (!$this->isEditable($force_create)) {
+        if (!$this->isCreatable($force_create)) {
             return array('Création de la ligne impossible');
         }
 

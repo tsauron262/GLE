@@ -89,7 +89,7 @@ class pdf_bimpsupport_pret extends ModeleBimpSupport
       \param        outputlangs        Lang object for output language
       \return        int             1=ok, 0=ko
      */
-    function write_file(BS_SavPret $sav_pret, $outputlangs = '')
+    function write_file(BS_Pret $sav_pret, $outputlangs = '')
     {
         if (!BimpObject::objectLoaded($sav_pret)) {
             $this->errors[] = 'Prêt SAV invalide';
@@ -467,7 +467,7 @@ class pdf_bimpsupport_pret extends ModeleBimpSupport
     function _pagehead(&$pdf, $object, $showadress = 1, $outputlangs = '', $currentPage = 0)
     {
         $sav = null;
-        if (BimpObject::objectLoaded($object) && is_a($object, 'BS_SavPret')) {
+        if (BimpObject::objectLoaded($object) && is_a($object, 'BS_Pret')) {
             $sav = $object->getParentInstance();
         }
 

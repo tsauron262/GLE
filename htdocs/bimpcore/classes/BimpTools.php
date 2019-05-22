@@ -21,9 +21,9 @@ class BimpTools
     {
         // Cette fonction n'a rien à faire ici, daplacée dans BimpCache, deplus quelques erreurs dans le code: une même instance est affecté à chaque entrée du tableau.
         // Donc: toutes les entrées du tableau contiendront le dernier user qui aura été fetché. 
-        
+
         return BimpCache::getSocieteCommerciauxObjectsList($socid);
-        
+
 //        global $db;
 //        $conf;
 //        require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
@@ -49,7 +49,7 @@ class BimpTools
 //        $instance = null;
 //        return $return;
     }
-    
+
     // Gestion GET / POST
 
     public static function isSubmit($key)
@@ -1439,7 +1439,7 @@ class BimpTools
     }
 
     // Traitements sur des strings: 
-     
+
     public static function ucfirst($str)
     {
         if (preg_match('/^[éèêëàâäïîöôùûüŷÿ].*/', $str)) {
@@ -1472,7 +1472,7 @@ class BimpTools
 
         return lcfirst($str);
     }
-    
+
     public static function replaceBr($text, $replacement = "\n")
     {
         return preg_replace("/<[ \/]*br[ \/]*>/", $replacement, $text);
@@ -1485,9 +1485,36 @@ class BimpTools
 
         return $string;
     }
-    
+
+    public static function cleanStringForUrl($text, $separator = '_', $charset = 'utf-8')
+    {
+        $text = mb_convert_encoding($text, 'HTML-ENTITIES', $charset);
+        $text = strtolower(trim($text));
+
+        // On vire les accents
+        $text = preg_replace(array('/ß/', '/&(..)lig;/', '/&([aouAOU])uml;/', '/&(.)[^;]*;/'), array('ss', "$1", "$1" . 'e', "$1"), $text);
+
+        // on vire tout ce qui n'est pas alphanumérique
+        $text_clear = preg_replace('/[^a-zA-Z0-9_\-]/', ' ', trim($text)); // ^a-zA-Z0-9_-
+        
+        // Nettoyage pour un espace maxi entre les mots
+        $array = explode(' ', $text_clear);
+        $str = '';
+        $i = 0;
+        foreach ($array as $key => $valeur) {
+            if (trim($valeur) != '' && trim($valeur) != $separator && $i > 0) {
+                $str .= $separator . $valeur;
+            } elseif (trim($valeur) != '' && trim($valeur) != $separator && $i == 0) {
+                $str .= $valeur;
+            }
+            $i++;
+        }
+
+        return $str;
+    }
+
     // Traitements sur des array: 
-    
+
     public static function getMsgFromArray($msgs, $title = '')
     {
         $msg = '';
@@ -1516,7 +1543,7 @@ class BimpTools
 
         return $msg;
     }
-    
+
     public static function unsetArrayValue($array, $value)
     {
         if (is_array($array)) {
@@ -1526,10 +1553,10 @@ class BimpTools
                 }
             }
         }
-        
+
         return $array;
     }
-    
+
     // Divers:
 
     public static function getContext()

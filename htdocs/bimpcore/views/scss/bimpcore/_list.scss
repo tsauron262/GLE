@@ -78,10 +78,11 @@ table.objectlistTable {
             .inputContainer {
                 display: inline-block;
                 width: 99%;
-                
-                .inputHelp {
-                    display: none;
-                }
+            }
+
+            .inputHelp,
+            .inputInfo {
+                display: none;
             }
 
             input, textarea, select {
@@ -98,7 +99,7 @@ table.objectlistTable {
             .popover {
                 color: $gray-darker;
             }
-            
+
             .toggle-label-off,
             .toggle-label-on {
                 display: none;

@@ -25,7 +25,7 @@ class Equipment extends BimpObject
 
     public function __construct($db)
     {
-        require_once(DOL_DOCUMENT_ROOT."/bimpequipment/objects/BE_Place.class.php");
+        require_once(DOL_DOCUMENT_ROOT . "/bimpequipment/objects/BE_Place.class.php");
         self::$typesPlace = BE_Place::$types;
         parent::__construct("bimpequipment", get_class($this));
         $this->iconeDef = "fa-laptop";
@@ -240,7 +240,7 @@ class Equipment extends BimpObject
                         'part_type' => 'middle',
                         'part'      => $value
                     ),
-                    'place_entrepot.ref'      => array(
+                    'place_entrepot.ref'       => array(
                         'part_type' => 'middle',
                         'part'      => $value
                     ),
@@ -277,7 +277,7 @@ class Equipment extends BimpObject
             $filters['placeType.position'] = 1;
             $filters['or_placeType'] = array(
                 'or' => array(
-                    'placeType.type'         => array(
+                    'placeType.type' => array(
                         'part_type' => 'middle',
                         'part'      => $value
                     )
@@ -394,7 +394,7 @@ class Equipment extends BimpObject
 
         return '';
     }
-    
+
     public function displayCurrentPlaceType()
     {
         $place = $this->getCurrentPlace();
@@ -667,17 +667,21 @@ class Equipment extends BimpObject
 
                 if ($id_entrepot) {
                     $place = $this->getCurrentPlace();
-                    if ((int) $place->getData('type') !== BE_Place::BE_PLACE_ENTREPOT ||
-                            (int) $place->getData('id_entrepot') !== $id_entrepot) {
-                        BimpTools::loadDolClass('product/stock', 'entrepot');
-                        $entrepot = new Entrepot($this->db->db);
-                        $entrepot->fetch($id_entrepot);
-                        if (BimpObject::objectLoaded($entrepot)) {
-                            $label = '"' . $entrepot->libelle . '"';
-                        } else {
-                            $label = 'sélectionné';
+                    if (BimpObject::objectLoaded($place)) {
+                        if ((int) $place->getData('type') !== BE_Place::BE_PLACE_ENTREPOT ||
+                                (int) $place->getData('id_entrepot') !== $id_entrepot) {
+                            BimpTools::loadDolClass('product/stock', 'entrepot');
+                            $entrepot = new Entrepot($this->db->db);
+                            $entrepot->fetch($id_entrepot);
+                            if (BimpObject::objectLoaded($entrepot)) {
+                                $label = '"' . $entrepot->libelle . '"';
+                            } else {
+                                $label = 'sélectionné';
+                            }
+                            $errors[] = 'L\'équipement ' . $this->getData('serial') . ' n\'est pas disponible dans l\'entrepot ' . $label;
                         }
-                        $errors[] = 'L\'équipement ' . $this->getData('serial') . ' n\'est pas disponible dans l\'entrepot ' . $label;
+                    } else {
+                        $errors[] = 'Aucun emplacement défini pour l\'équipement "' . $this->getData('serial') . '"';
                     }
                 }
             }

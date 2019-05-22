@@ -361,6 +361,18 @@ forms:
             - field: date_warranty_end
             - association: contrats
             
+    light_place: 
+        rows: 
+            - field: serial
+            - field: id_product
+            - field: product_label
+            - field: type
+            - field: available
+            - field: date_purchase
+            - field: warranty_type
+            - field: date_warranty_end
+            - object: places
+            
 list:
     checkboxes: 1
     bulk_actions: 

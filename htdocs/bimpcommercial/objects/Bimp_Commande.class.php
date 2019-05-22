@@ -355,7 +355,9 @@ class Bimp_Commande extends BimpComm
                 $buttons[] = array(
                     'label'   => 'Cloner',
                     'icon'    => 'copy',
-                    'onclick' => $this->getJsActionOnclick('duplicate', array(), array(
+                    'onclick' => $this->getJsActionOnclick('duplicate', array(
+                        'date_commande' => date('Y-m-d')
+                            ), array(
                         'form_name' => 'duplicate'
                     ))
                 );
@@ -1162,7 +1164,7 @@ class Bimp_Commande extends BimpComm
         ));
 
         $html .= '<button class="btn btn-default" onclick="' . $onclick . '">';
-        $html .= BimpRender::renderIcon('fas_file-invoice-dollar', 'iconLeft') . 'Nouvelle facture';
+        $html .= BimpRender::renderIcon('fas_file-invoice-dollar', 'iconLeft') . 'Nouvelle facture anticipée';
         $html .= '</button>';
 
         // Ajout ligne: 
@@ -1336,6 +1338,7 @@ class Bimp_Commande extends BimpComm
         }
 
         $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
+        $facture->checkLines();
 
         if (!BimpObject::objectLoaded($facture)) {
             $errors[] = 'La facture d\'ID ' . $id_facture . ' n\'existe pas';
@@ -1611,13 +1614,21 @@ class Bimp_Commande extends BimpComm
                 $this->dol_object->generateDocument($this->getModelPdf(), $langs);
             }
         } else {
-            if (!$this->getData('validComm') || !(int) $this->getData('validFin')) {
-                $comm_errors = BimpTools::getErrorsFromDolObject($this->dol_object, null, null, $warnings);
-                if (count($comm_errors)) {
-                    $errors = array_merge($errors, $comm_errors);
+            $comm_errors = BimpTools::getErrorsFromDolObject($this->dol_object, null, null, $warnings);
+
+            if (!count($comm_errors)) {
+                if (!(int) $this->getData('validComm')) {
+                    $comm_errors[] = 'Commande en attente de validation commerciale';
                 }
+                if (!(int) $this->getData('validFin')) {
+                    $comm_errors[] = 'Commande en attente de validation financière';
+                }
+            }
+
+            if (!count($comm_errors)) {
+                $errors[] = 'Echec de la validation pour une raison inconnue';
             } else {
-                $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object, null, null, $warnings), 'Des erreurs sont survenues lors de la validation ' . $this->getLabel('of_the'));
+                $errors[] = BimpTools::getMsgFromArray($comm_errors, 'Des erreurs sont survenues lors de la validation ' . $this->getLabel('of_the'));
             }
         }
 

@@ -69,7 +69,7 @@ objects:
         relation: hasMany
         delete: 1
         instance: 
-            bimp_object: BS_SavPret
+            bimp_object: BS_Pret
             
 associations: 
     propales:

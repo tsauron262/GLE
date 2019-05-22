@@ -1441,7 +1441,6 @@ class BimpController
             'request_id'         => BimpTools::getValue('request_id', 0)
         )));
     }
-
     
     protected function ajaxProcessLoadObjectStatsList()
     {

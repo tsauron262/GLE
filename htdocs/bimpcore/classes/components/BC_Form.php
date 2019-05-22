@@ -32,14 +32,14 @@ class BC_Form extends BC_Panel
         'depends_on' => array(),
     );
     public static $custom_row_params = array(
-        'input_name'   => array('required' => true, 'default' => ''),
-        'display_if'   => array('data_type' => 'array'),
-        'depends_on'   => array(),
-        'data_type'    => array('default' => 'string'),
-        'value'        => array('data_type' => 'any', 'default' => ''),
-        'no_container' => array('data_type' => 'bool', 'default' => 0),
-        'multiple'     => array('data_type' => 'bool', 'default' => 0),
-        'keep_new_value'     => array('data_type' => 'bool', 'default' => 0)
+        'input_name'     => array('required' => true, 'default' => ''),
+        'display_if'     => array('data_type' => 'array'),
+        'depends_on'     => array(),
+        'data_type'      => array('default' => 'string'),
+        'value'          => array('data_type' => 'any', 'default' => ''),
+        'no_container'   => array('data_type' => 'bool', 'default' => 0),
+        'multiple'       => array('data_type' => 'bool', 'default' => 0),
+        'keep_new_value' => array('data_type' => 'bool', 'default' => 0)
     );
     public static $object_params = array(
         'form_name'   => array('default' => 'default'),
@@ -123,6 +123,7 @@ class BC_Form extends BC_Panel
         }
 
         // $id_parent a pu être fourni via params['values']. 
+        
         if (!is_null($object)) {
             $this->id_parent = (int) $object->getParentId();
 
@@ -236,10 +237,10 @@ class BC_Form extends BC_Panel
                 }
                 $html .= $this->renderFieldRow($field_name);
             }
-        } else {            
+        } else {
             foreach ($this->params['rows'] as $row) {
                 $row_params = parent::fetchParams($this->config_path . '/rows/' . $row, self::$row_params);
-                
+
                 if (!(int) $row_params['show']) {
                     continue;
                 }

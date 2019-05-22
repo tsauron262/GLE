@@ -31,28 +31,66 @@ class Interfacevalidate extends DolibarrTriggers
     {
         global $conf, $user;
 
-        if ($action == 'ORDER_VALIDATE') {
-            
-        }
-
         if ($action == 'PROPAL_VALIDATE') {
             $bimp_object = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $object->id);
-            $bimp_object->dol_object->statut = 0;
-            $bimp_object->checkLines();
+
+            if (!(int) $bimp_object->lines_locked) {
+                $prev_statut = $bimp_object->dol_object->statut;
+                $bimp_object->dol_object->statut = 0;
+                $bimp_object->checkLines();
+                $bimp_object->dol_object->statut = $prev_statut;
+            }
+
+            return 1;
+        }
+
+        if ($action == 'ORDER_VALIDATE') {
+            $bimp_object = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $object->id);
+
+            if (BimpObject::objectLoaded($bimp_object)) {
+                // Véfication de la validité des lignes: 
+                $errors = array();
+                if (!$bimp_object->areLinesValid($errors)) {
+                    $object->errors = array_merge($object->errors, $errors);
+                    return -1;
+                }
+            }
+
+            return 1;
         }
 
         if ($action == 'BILL_VALIDATE') {
             $bimp_object = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $object->id);
             if (BimpObject::objectLoaded($bimp_object)) {
+                // Véfication de la validité des lignes: 
+                $errors = array();
+                if (!$bimp_object->areLinesValid($errors)) {
+                    $object->errors = array_merge($object->errors, $errors);
+                    return -1;
+                }
+
                 $bimp_object->onValidate();
             }
+
+            return 1;
         }
-        
+
         if ($action == 'BILL_SUPPLIER_CREATE') {
             $bimp_object = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureFourn', $object->id);
             if (BimpObject::objectLoaded($bimp_object)) {
                 $bimp_object->onCreate();
             }
+
+            return 1;
+        }
+
+        if ($action == 'BILL_DELETE') {
+            $bimp_object = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $object->id);
+            if (BimpObject::objectLoaded($bimp_object)) {
+                $bimp_object->onDelete();
+            }
+
+            return 1;
         }
 
         return 0;

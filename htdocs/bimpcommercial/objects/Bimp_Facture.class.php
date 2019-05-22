@@ -10,7 +10,7 @@ $langs->load('errors');
 class Bimp_Facture extends BimpComm
 {
 
-    public $redirectMode = 4;//5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
+    public $redirectMode = 4; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
     public static $dol_module = 'facture';
     public static $status_list = array(
         0 => array('label' => 'Brouillon', 'icon' => 'fas_file-alt', 'classes' => array('warning')),
@@ -1220,17 +1220,19 @@ class Bimp_Facture extends BimpComm
 
     public function onDelete()
     {
-        $this->db->update('br_commande_shipment', array(
-            'status' => 1
-                ), '`id_facture` = ' . (int) $this->id . ' AND `status` = 4');
+        if ($this->isLoaded()) {
+            $lines = $this->getChildrenObjects('lines', array(
+                'linked_object_name' => 'commande_line'
+            ));
 
-        $this->db->update('br_commande_shipment', array(
-            'id_facture' => 0
-                ), '`id_facture` = ' . (int) $this->id);
+            foreach ($lines as $line) {
+                $commande_line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $line->getData('linked_id_object'));
 
-        $this->db->update('commande', array(
-            'id_facture' => 0
-                ), '`id_facture` = ' . (int) $this->id);
+                if (BimpObject::objectLoaded($commande_line)) {
+                    $commande_line->onFactureDelete($this->id);
+                }
+            }
+        }
     }
 
     public function createFromCommande(Commande $commande, $id_account = 0, $public_note = '', $private_note = '')

@@ -9,6 +9,7 @@ class BimpComm extends BimpDolObject
     public static $external_contact_type_required = true;
     public static $internal_contact_type_required = true;
     public $remise_globale_line_rate = null;
+    public $lines_locked = 0;
     public static $pdf_periodicities = array(
         0  => 'Aucune',
         1  => 'Mensuelle',
@@ -43,6 +44,21 @@ class BimpComm extends BimpDolObject
         }
 
         return 1;
+    }
+
+    public function areLinesValid(&$errors = array())
+    {
+        $result = 1;
+        foreach ($this->getLines() as $line) {
+            $line_errors = array();
+
+            if (!$line->isValid($line_errors)) {
+                $errors[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n°' . $line->getData('position'));
+                $result = 0;
+            }
+        }
+
+        return $result;
     }
 
     public function hasRemiseGlobale()
@@ -155,6 +171,22 @@ class BimpComm extends BimpDolObject
         }
 
         return $buttons;
+    }
+
+    public function getLinesListHeaderExtraBtn()
+    {
+        $product = BimpObject::getInstance('bimpcore', 'Bimp_Product');
+
+        return array(
+            array(
+                'label'       => 'Créer un produit',
+                'icon_before' => 'fas_box',
+                'classes'     => array('btn', 'btn-default'),
+                'attr'        => array(
+                    'onclick' => $product->getJsLoadModalForm('light', 'Nouveau produit')
+                )
+            )
+        );
     }
 
     public function getRequestSelectRemisesFilters()
@@ -754,6 +786,7 @@ class BimpComm extends BimpDolObject
             $remise_globale_lines_rate = (float) $this->getRemiseGlobaleLineRate(true);
 
             foreach ($lines as $line) {
+                $line->parent = $this;
                 $line->calcRemise($remise_globale_lines_rate);
             }
         }
@@ -1598,6 +1631,10 @@ class BimpComm extends BimpDolObject
     {
         $errors = array();
 
+        if ($this->lines_locked) {
+            return array();
+        }
+
         if (($this->isLoaded())) {
             $dol_lines = array();
             $bimp_lines = array();
@@ -1820,6 +1857,16 @@ class BimpComm extends BimpDolObject
 
             $lines_new[(int) $line->id] = (int) $line_instance->id;
 
+            // Attribution des équipements si nécessaire: 
+            if ($line->equipment_required && $line_instance->equipment_required && $line->isProductSerialisable()) {
+                $equipmentlines = $line->getEquipmentLines();
+
+                foreach ($equipmentlines as $equipmentLine) {
+                    $data = $equipmentLine->getDataArray();
+                    $line_instance->attributeEquipment($data['id_equipment'], $data['pu_ht'], $data['tva_tx'], $data['id_fourn_price']);
+                }
+            }
+
             // Création des remises pour la ligne en cours:
             $remises = $line->getRemises();
             if (!is_null($remises) && count($remises)) {
@@ -1912,6 +1959,7 @@ class BimpComm extends BimpDolObject
         global $conf, $langs, $user;
 
         $result = $this->dol_object->valid($user);
+        
         if ($result > 0) {
             if (empty($conf->global->MAIN_DISABLE_PDF_AUTOUPDATE)) {
                 $this->fetch($this->id);
@@ -2330,6 +2378,11 @@ class BimpComm extends BimpDolObject
         $errors = parent::create($warnings, $force_create);
 
         if (!count($errors)) {
+            if (method_exists($this->dol_object, 'fetch_lines')) {
+                $this->dol_object->fetch_lines();
+            }
+            $this->checkLines(); // Des lignes ont pu être créées via un trigger.
+
             if ($origin && $origin_id) {
                 $warnings = array_merge($warnings, $this->createLinesFromOrigin($origin_object));
                 if ($this->field_exists('remise_globale') && $origin_object->field_exists('remise_globale')) {

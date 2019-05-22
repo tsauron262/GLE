@@ -477,11 +477,12 @@ class BimpInput
                 }
                 $options['options'] = BimpCache::getUsersArray($options['include_empty']);
                 return self::renderInput('select', $field_name, $value, $options, $form, $option, $input_id);
+                
             case 'search_group':
                 if (!isset($options['include_empty'])) {
                     $options['include_empty'] = 0;
                 }
-                $options['options'] = BimpCache::getgroupsArray($options['include_empty']);
+                $options['options'] = BimpCache::getUserGroupsArray($options['include_empty']);
                 return self::renderInput('select', $field_name, $value, $options, $form, $option, $input_id);
 
             case 'search_contact':
@@ -1015,7 +1016,13 @@ class BimpInput
 
             $sql = 'SELECT ';
             $i = 1;
+            $fl = true;
             foreach ($field_return_label as $field_name) {
+                if (!$fl) {
+                    $sql .= ', ';
+                } else {
+                    $fl = false;
+                }
                 $sql .= $field_name . ' as label_' . $i;
                 $i++;
             }

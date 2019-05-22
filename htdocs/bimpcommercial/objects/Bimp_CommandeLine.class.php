@@ -476,6 +476,8 @@ class Bimp_CommandeLine extends ObjectLine
                             $qty += (int) $r['qty'];
                         }
                     }
+                } else {
+                    $qty += (float) $this->getShippedQty($id_shipment);
                 }
             }
 
@@ -2089,7 +2091,7 @@ class Bimp_CommandeLine extends ObjectLine
                 }
             }
         }
-        
+
         return $errors;
     }
 
@@ -2267,6 +2269,19 @@ class Bimp_CommandeLine extends ObjectLine
 
         $this->set('factures', $factures);
         return $this->update($warnings, true);
+    }
+
+    public function onFactureDelete($id_facture)
+    {
+        if ($this->isLoaded()) {
+            $factures = $this->getData('factures');
+
+            if (isset($factures[(int) $id_facture])) {
+                unset($factures[(int) $id_facture]);
+
+                $this->updateField('factures', $factures);
+            }
+        }
     }
 
     // Traitements divers: 

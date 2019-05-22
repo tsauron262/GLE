@@ -18,10 +18,6 @@ class commandeController extends BimpCommController
         $langs->load('sendings');
         $langs->load('products');
         $langs->load('other');
-
-//        echo '<pre>';
-//        print_r($this->config->params);
-//        exit;
     }
     
 //    public function renderLogisticTab()

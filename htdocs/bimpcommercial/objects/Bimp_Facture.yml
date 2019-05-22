@@ -426,6 +426,10 @@ lists:
             total_ttc: 
             pdf:
         
+    client: 
+        extends: default
+        cols: 
+            soc: unset
 cards: 
     default: 
         title: 

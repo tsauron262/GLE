@@ -42,7 +42,7 @@ class BE_Place extends BimpObject
 
         return $contacts;
     }
-    
+
     public function getTdStyle()
     {
         if ($this->isLoaded()) {
@@ -118,11 +118,14 @@ class BE_Place extends BimpObject
                     break;
 
                 case self::BE_PLACE_PRET:
-                    if (!$this->getData('code_centre')) {
-                        return array('Valeur obligatoire absente: "Centre"');
+                    if (!(int) $this->getData('id_entrepot')) {
+                        if (!$this->getData('code_centre')) {
+                            return array('Valeur obligatoire absente: "Centre" ou "Entrepot"');
+                        }
+                        global $tabCentre;
+                        $this->set('id_entrepot', (int) $tabCentre[$this->getData('code_centre')][8]);
                     }
-                    global $tabCentre;
-                    $this->set('id_entrepot', (int) $tabCentre[$this->getData('code_centre')][8]);
+
                     $this->set('id_client', 0);
                     $this->set('id_user', 0);
                     $this->set('place_name', '');

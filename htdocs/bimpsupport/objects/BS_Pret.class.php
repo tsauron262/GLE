@@ -2,7 +2,7 @@
 
 require_once DOL_DOCUMENT_ROOT . '/bimpsupport/centre.inc.php';
 
-class BS_SavPret extends BimpObject
+class BS_Pret extends BimpObject
 {
 
     public function getCreateJsCallback()
@@ -23,15 +23,38 @@ class BS_SavPret extends BimpObject
     {
         $equipments = array();
 
-        $sav = $this->getParentInstance();
-        $code_centre = (string) $sav->getData('code_centre');
-        if ($code_centre) {
-            $unreturned = $this->getUnreturnedEquipments($code_centre);
-            $instance = BimpObject::getInstance('bimpequipment', 'Equipment');
-            $list = $instance->getList(array(
+        $sav = $this->getChildObject('sav');
+
+        $equipment_instance = BimpObject::getInstance('bimpequipment', 'Equipment');
+        $unreturned = array();
+        
+        if (BimpObject::objectLoaded($sav)) {
+            $code_centre = $this->getData('code_centre');
+            if (!$code_centre) {
+                $code_centre = (string) $sav->getData('code_centre');
+            }
+            if ($code_centre) {
+                $unreturned = $this->getSavUnreturnedEquipments($code_centre);
+                $list = $equipment_instance->getList(array(
+                    'p.position'    => 1,
+                    'p.type'        => 7,
+                    'p.code_centre' => $code_centre
+                        ), null, null, 'id', 'desc', 'array', array('a.id'), array(
+                    array(
+                        'table' => 'be_equipment_place',
+                        'alias' => 'p',
+                        'on'    => 'p.id_equipment = a.id'
+                    )
+                ));
+            }
+        } else {
+            $id_entrepot = (int) BimpTools::getPostFieldValue('id_entrepot', 0);
+            $unreturned = $this->getUnreturnedEquipments($id_entrepot);
+            
+            $list = $equipment_instance->getList(array(
                 'p.position'    => 1,
                 'p.type'        => 7,
-                'p.code_centre' => $code_centre
+                'p.id_entrepot' => (int) $this->getData('id_entrept')
                     ), null, null, 'id', 'desc', 'array', array('a.id'), array(
                 array(
                     'table' => 'be_equipment_place',
@@ -39,27 +62,50 @@ class BS_SavPret extends BimpObject
                     'on'    => 'p.id_equipment = a.id'
                 )
             ));
-            foreach ($list as $item) {
-                if (in_array((int) $item['id'], $unreturned)) {
-                    continue;
-                }
-                $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $item['id']);
-                if ($equipment->isLoaded()) {
-                    $equipments[(int) $item['id']] = $equipment->getData('serial') . ' - ' . $equipment->displayProduct('nom', true);
-                }
+        }
+
+        foreach ($list as $item) {
+            if (in_array((int) $item['id'], $unreturned)) {
+                continue;
+            }
+            $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $item['id']);
+            if ($equipment->isLoaded()) {
+                $equipments[(int) $item['id']] = $equipment->getData('serial') . ' - ' . $equipment->displayProduct('nom', true);
             }
         }
 
         return $equipments;
     }
 
-    public function getUnreturnedEquipments($code_centre = '')
+    public function getSavUnreturnedEquipments($code_centre = '')
     {
         $filters = array(
             'returned' => 0,
         );
         if ($code_centre) {
             $filters['code_centre'] = $code_centre;
+        }
+        $list = $this->getList($filters, null, null, 'id', 'desc', 'array', array('id'));
+        $items = array();
+        foreach ($list as $item) {
+            $instance = BimpCache::getBimpObjectInstance($this->module, $this->object_name, (int) $item['id']);
+            if ($instance->isLoaded()) {
+                $asso = new BimpAssociation($instance, 'equipments');
+                foreach ($asso->getAssociatesList() as $id_equipment) {
+                    $items[] = (int) $id_equipment;
+                }
+            }
+        }
+        return $items;
+    }
+    
+    public function getUnreturnedEquipments($id_entrepot = 0)
+    {
+        $filters = array(
+            'returned' => 0,
+        );
+        if ($id_entrepot) {
+            $filters['id_entrepot'] = $id_entrepot;
         }
         $list = $this->getList($filters, null, null, 'id', 'desc', 'array', array('id'));
         $items = array();
@@ -144,34 +190,46 @@ class BS_SavPret extends BimpObject
 
     // Overrides: 
 
+    public function checkObject()
+    {
+        if (!(int) $this->getData('id_entrepot') && $this->getData('code_centre')) {
+            require_once DOL_DOCUMENT_ROOT . '/bimpsupport/centre.inc.php';
+            global $tabCentre;
+
+            if (isset($tabCentre[$this->getData('code_centre')][8])) {
+                $id_entrepot = (int) $tabCentre[$this->getData('code_centre')][8];
+                $this->updateField('id_entrepot', $id_entrepot);
+            }
+        }
+    }
+
+    public function validate()
+    {
+        if ((int) $this->getData('id_sav')) {
+            $sav = $this->getChildObject('sav');
+            if (BimpObject::objectLoaded($sav)) {
+                if (!(int) $this->getData('id_client')) {
+                    $this->set('id_client', (int) $sav->getData('id_client'));
+                }
+                if (!(int) $this->getData('id_entrepot')) {
+                    $this->set('id_entrepot', (int) $sav->getData('id_entrepot'));
+                }
+                if (!(string) $this->getData('code_centre')) {
+                    $this->set('code_centre', $sav->getData('code_centre'));
+                }
+            }
+        }
+
+        return parent::validate();
+    }
+
     public function create()
     {
-        $sav = $this->getParentInstance();
-        if (BimpObject::objectLoaded($sav)) {
-            $id_client = (int) $sav->getData('id_client');
-            if (!$id_client) {
-                return array('Aucun client enregistré pour ce SAV');
-            }
-            $code_centre = (string) $sav->getData('code_centre');
-            if (!$code_centre) {
-                return array('Aucun centre enregistré pour ce SAV');
-            }
-            $this->set('id_client', $id_client);
-            $this->set('code_centre', $code_centre);
-        } else {
-            return array('SAV non spécifié');
-        }
-        
         $errors = array();
+        $errors = parent::create();
 
-        if (!count($this->associations['equipments'])) {
-            $errors[] = 'Aucun équipement sélectionné';
-        } else {
-            $errors = parent::create();
-
-            if ($this->isLoaded()) {
-                $this->updateField('ref', 'PRET' . $this->id);
-            }
+        if ($this->isLoaded()) {
+            $this->updateField('ref', 'PRET' . $this->id);
         }
 
         return $errors;

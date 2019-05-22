@@ -1445,7 +1445,6 @@ class Bimp_CommandeLine extends ObjectLine
                         $qty = (int) ceil($this->getFullQty() - (float) $reserved_qties['total']);
 
                         if ($qty > 0) {
-//                            echo $qty . '<br/>';
                             // On Vérifie l'existence d'une réservation au statut "à traiter" pour cette ligne de commande: 
                             $reservation = BimpCache::findBimpObjectInstance('bimpreservation', 'BR_Reservation', array(
                                         'type'                    => BR_Reservation::BR_RESERVATION_COMMANDE,
@@ -1457,7 +1456,6 @@ class Bimp_CommandeLine extends ObjectLine
                             if (BimpObject::objectLoaded($reservation)) {
                                 // Mise à jour des quantités de la réservation: 
                                 $qty += (int) $reservation->getData('qty');
-//                                echo 'NEW QTY (' . $reservation->getData('ref') . ') <br/>';
                                 $reservation->set('qty', $qty);
                                 $res_warnings = array();
                                 $res_errors = $reservation->update($res_warnings, true);
@@ -1471,8 +1469,6 @@ class Bimp_CommandeLine extends ObjectLine
                                 $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
 
                                 $ref = (string) $this->getData('ref_reservations');
-
-//                                echo 'NEW RES (' . $ref . ', ' . $qty . ') <br/>';
 
                                 $res_errors = $reservation->validateArray(array(
                                     'ref'                     => $ref,
@@ -2782,14 +2778,6 @@ class Bimp_CommandeLine extends ObjectLine
     }
 
     // Overrides:
-
-    public function checkObject()
-    {
-//        if ($this->isLoaded()) {
-//            echo 'CHECK <br/>';
-//            $this->createReservation();
-//        }
-    }
 
     public function create(&$warnings = array(), $force_create = false)
     {

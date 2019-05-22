@@ -1138,6 +1138,26 @@ class Bimp_CommandeFourn extends BimpComm
 
     // Overrides - BimpComm: 
 
+    public function duplicate($new_data = array(), &$warnings = array(), $force_create = false)
+    {
+        $new_data['billed'] = 0;
+        $new_data['invoice_status'] = 0;
+        $new_data['attente_info'] = 0;
+
+        $new_data['date_creation'] = date('Y-m-d H:i:s');
+        $new_data['date_valid'] = null;
+        $new_data['date_approve'] = null;
+        $new_data['date_approve2'] = null;
+
+        $new_data['fk_user_author'] = 0;
+        $new_data['fk_user_modif'] = 0;
+        $new_data['fk_user_approve'] = 0;
+        $new_data['fk_user_approve2'] = 0;
+        $new_data['fk_user_resp'] = 0;
+
+        return parent::duplicate($new_data, $warnings, $force_create);
+    }
+
     public function create(&$warnings = array(), $force_create = false)
     {
         if (is_null($this->data['fk_user_resp']) || !(int) $this->data['fk_user_resp']) {

@@ -1489,7 +1489,6 @@ class BimpTools
     public static function cleanStringForUrl($text, $separator = '_', $charset = 'utf-8')
     {
         $text = mb_convert_encoding($text, 'HTML-ENTITIES', $charset);
-//        $text = strtolower(trim($text));
 
         // On vire les accents
         $text = preg_replace(array('/ß/', '/&(..)lig;/', '/&([aouAOU])uml;/', '/&(.)[^;]*;/'), array('ss', "$1", "$1" . 'e', "$1"), $text);

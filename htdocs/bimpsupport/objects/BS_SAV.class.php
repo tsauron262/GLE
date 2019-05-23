@@ -1041,6 +1041,22 @@ class BS_SAV extends BimpObject
         return $html;
     }
 
+    public function renderPretsList()
+    {
+        $html = '';
+
+        if ($this->isLoaded()) {
+            $pret = BimpObject::getInstance('bimpsupport', 'BS_Pret');
+
+            $list = new BC_ListTable($pret, 'sav');
+            $list->addFieldFilterValue('id_sav', $this->id);
+
+            $html = $list->renderHtml();
+        }
+
+        return $html;
+    }
+
     // Traitements:
 
     public function checkObject()
@@ -3170,13 +3186,13 @@ class BS_SAV extends BimpObject
                                     } else {
                                         $facture->fetch($facture->id);
                                         $facture->addline("Résolution : " . $this->getData('resolution'), 0, 1, 0, 0, 0, 0, 0, null, null, null, null, null, 'HT', 0, 3);
-                                        
+
                                         // Intégration de la remise globale: 
                                         if ((float) $propal->getData('remise_globale')) {
                                             $bimpFacture->updateField('remise_globale_label', $propal->getData('remise_globale_label'));
                                             $bimpFacture->setRemiseGlobalePercent((float) $propal->getData('remise_globale'));
                                         }
-                                        
+
                                         if ($facture->validate($user, '') <= 0) { //pas d'entrepot pour pas de destock
                                             $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($facture), 'Echec de la validation de la facture');
                                         } else {

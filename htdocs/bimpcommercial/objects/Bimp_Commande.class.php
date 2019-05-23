@@ -183,7 +183,7 @@ class Bimp_Commande extends BimpComm
 
     public function getModelsPdfArray()
     {
-        if (!class_exists('ModelePDFPropales')) {
+        if (!class_exists('ModelePDFCommandes')) {
             require_once DOL_DOCUMENT_ROOT . '/core/modules/commande/modules_commande.php';
         }
 

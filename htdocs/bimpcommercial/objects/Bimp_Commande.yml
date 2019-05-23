@@ -330,20 +330,10 @@ forms:
               show: 
                   callback: isEditable
             - field: fk_cond_reglement
-              show: 
-                  callback: areLinesEditable
             - field: fk_mode_reglement
-              show: 
-                  callback: areLinesEditable
             - field: date_commande
-              show: 
-                  callback: areLinesEditable
             - field: date_livraison
-              show: 
-                  callback: areLinesEditable
             - field: fk_availability
-              show: 
-                  callback: areLinesEditable
             - field: model_pdf
               show: 
                   callback: isNotLoaded

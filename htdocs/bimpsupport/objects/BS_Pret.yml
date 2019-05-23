@@ -6,8 +6,8 @@ parent_object: Bimp_Client
 parent_id_property: id_client
 
 labels: 
-    name: prêt matériel
-    name_plur: prêts matériel
+    name: prêt de matériel
+    name_plur: prêts de matériel
     
 objects: 
     equipment:
@@ -68,9 +68,6 @@ fields:
         input: 
             type: search_entrepot
         required: 1
-        display_if: 
-            field_name: id_sav
-            show_values: 0
     code_centre: 
         label: Centre
         values: 
@@ -97,19 +94,27 @@ fields:
 forms: 
     default: 
         rows: 
-            - field: id_entrepot
-            - field: id_client
             - field: id_sav
+            - field: id_entrepot
+              display_if: 
+                  field_name: id_sav
+                  show_values: 0
+            - field: id_client
+              display_if: 
+                  field_name: id_sav
+                  show_values: 0
               hidden: 1
             - field: date_begin
             - field: date_end
             - field: caution
             - association: equipments
-            - object: products
-              multiple: 1
+#            - object: products
+#              multiple: 1
           
 fields_tables: 
     default: 
+        panel: 1
+        panel_header: 0
         rows: 
             - field: id_client
               display: nom_url
@@ -118,6 +123,7 @@ fields_tables:
               show: 
                   field_value: id_sav
             - field: id_entrepot
+              display: nom_url
             - field: code_centre
               show: 
                   field_value: id_sav
@@ -138,12 +144,11 @@ views:
                 - type: fields_table
                   fields_table: 
                       name: default
-                      panel: 0
-            - cols: 
-                - type: list
-                  list: 
-                      name: default
-                      children: products
+#            - cols: 
+#                - type: list
+#                  list: 
+#                      name: default
+#                      children: products
                 
 lists: 
     default: 
@@ -207,6 +212,8 @@ lists:
                 field: date_begin
             date_end: 
                 field: date_end
+            caution: 
+                field: caution
             returned: 
                 field: returned
                 edit: 1

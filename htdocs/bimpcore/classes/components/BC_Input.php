@@ -524,7 +524,6 @@ class BC_Input extends BimpComponent
                         $values[$value] = $value;
                     }
                 }
-
                 $content = BimpInput::renderMultipleValuesInput($this->object, $this->name_prefix . $this->input_name, $content, $values, $label_input_suffixe, $autosave, $required, $sortable);
             }
         }

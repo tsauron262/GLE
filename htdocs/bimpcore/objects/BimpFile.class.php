@@ -452,6 +452,23 @@ class BimpFile extends BimpObject
         return parent::validate();
     }
 
+    public function checkObject()
+    {
+        if ($this->isLoaded()) {
+            $name = BimpTools::cleanStringForUrl($this->getData('file_name'));
+
+            if ($name !== $this->getData('file_name')) {
+                $ext = $this->getData('file_ext');
+                $old_name = $this->getData('file_name') . '.' . $ext;
+                $new_name = $name . '.' . $ext;
+                $error = BimpTools::renameFile($this->getFileDir(), $old_name, $new_name);
+                if (!$error) {
+                    $this->updateField('file_name', $name);
+                }
+            }
+        }
+    }
+
     public function create(&$warnings = array(), $force_create = false)
     {
         $errors = array();
@@ -470,7 +487,7 @@ class BimpFile extends BimpObject
             } else {
                 $name = BimpTools::cleanStringForUrl($name);
             }
-            
+
             $this->set('file_name', $name);
 
             if (!count($errors)) {

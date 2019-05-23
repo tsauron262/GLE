@@ -227,8 +227,7 @@ forms:
             - field: ref_supplier
             - field: libellle
             - field: date_livraison
-        
-            
+         
 fields_tables: 
     infos: 
         rows: 

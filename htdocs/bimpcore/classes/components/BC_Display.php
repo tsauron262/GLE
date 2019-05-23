@@ -227,8 +227,10 @@ class BC_Display extends BimpComponent
                                         break;
                                     }
                                     else{
-                                        if(method_exists($instance, "getFullName"))
-                                            $html .= $instance->getFullName();
+                                        if(method_exists($instance, "getFullName")){
+                                            global $langs;
+                                            $html .= $instance->getFullName($langs);
+                                        }
                                         elseif(method_exists($instance, "getName"))
                                             $html .= $instance->getName();
                                         break;

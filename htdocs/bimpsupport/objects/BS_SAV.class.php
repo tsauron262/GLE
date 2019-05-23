@@ -1747,11 +1747,12 @@ class BS_SAV extends BimpObject
 //            }
 //        }
 
+        
         $line = BimpCache::findBimpObjectInstance('bimpsupport', 'BS_SavPropalLine', array(
                     'id_obj'             => (int) $propal->id,
                     'linked_id_object'   => (int) $this->id,
                     'linked_object_name' => 'sav_garantie'
-                        ), true, true);
+                        ), true, true, true);
 
         if (!BimpObject::objectLoaded($line)) {
             $line = BimpObject::getInstance('bimpsupport', 'BS_SavPropalLine');
@@ -2733,7 +2734,7 @@ class BS_SAV extends BimpObject
                     $i = 0;
                     foreach ($lines_list as $item) {
                         $i++;
-                        $propalLine = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SavPropalLine', (int) $item['id']);
+                        $propalLine = BimpObject::getInstance('bimpsupport', 'BS_SavPropalLine', (int) $item['id']);
                         if ($propalLine->isLoaded()) {
                             $remises = $propalLine->getRemises();
                             $eq_lines = $propalLine->getEquipmentLines();

@@ -8,6 +8,7 @@ class BimpComm extends BimpDolObject
     public static $email_type = '';
     public static $external_contact_type_required = true;
     public static $internal_contact_type_required = true;
+    public $acomptes_allowed = false;
     public $remise_globale_line_rate = null;
     public $lines_locked = 0;
     public static $pdf_periodicities = array(
@@ -23,6 +24,19 @@ class BimpComm extends BimpDolObject
         12 => 'an'
     );
 
+    // Gestion des droits: 
+
+    protected function canView()
+    {
+        global $user;
+
+        if (isset($user->rights->bimpcommercial->read) && (int) $user->rights->bimpcommercial->read) {
+            return 1;
+        }
+
+        return 0;
+    }
+
     // Getters booléens: 
 
     public function isDeletable($force_delete = false)
@@ -32,6 +46,50 @@ class BimpComm extends BimpDolObject
 
     public function isFieldEditable($field, $force_edit = false)
     {
+        return 1;
+    }
+
+    public function isActionAllowed($action, &$errors = array())
+    {
+        switch ($action) {
+            case 'setRemiseGlobale':
+                if (!$this->isLoaded()) {
+                    $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
+                    return 0;
+                }
+                if (!$this->field_exists('remise_globale')) {
+                    $errors[] = 'Les remises globales ne sont pas disponibles pour ' . $this->getLabel('the_plur');
+                    return 0;
+                }
+                if (!$this->areLinesEditable()) {
+                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' ne peut plus être éditée';
+                    return 0;
+                }
+                return 1;
+
+            case 'addAcompte':
+                if (!$this->acomptes_allowed) {
+                    $errors[] = 'Acomptes non autorisés pour les ' . $this->getLabel('name_plur');
+                    return 0;
+                }
+                if (!$this->isLoaded()) {
+                    $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
+                    return 0;
+                }
+                if (!$this->areLinesEditable()) {
+                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' ne peut plus être éditée';
+                    return 0;
+                }
+
+                $client = $this->getChildObject('client');
+
+                if (!BimpObject::objectLoaded($client)) {
+                    $errors[] = 'Client absent';
+                    return 0;
+                }
+                return 1;
+        }
+
         return 1;
     }
 
@@ -132,7 +190,7 @@ class BimpComm extends BimpDolObject
         if ($this->isActionAllowed('setRemiseGlobale') && $this->canSetAction('setRemiseGlobale')) {
             $buttons[] = array(
                 'label'   => 'Remise globale',
-                'icon'    => 'percent',
+                'icon'    => 'fas_percent',
                 'onclick' => $this->getJsActionOnclick('setRemiseGlobale', array(
                     'remise_globale'       => (float) $this->getData('remise_globale'),
                     'remise_globale_label' => addslashes($this->getData('remise_globale_label'))
@@ -142,6 +200,23 @@ class BimpComm extends BimpDolObject
             );
         }
 
+        // Ajout acompte: 
+        if ($this->isActionAllowed('addAcompte') && $this->canSetAction('addAcompte')) {
+            $id_mode_paiement = 0;
+            $client = $this->getChildObject('client');
+            if (BimpObject::objectLoaded($client)) {
+                $id_mode_paiement = $client->dol_object->mode_reglement_id;
+            }
+            $buttons[] = array(
+                'label'   => 'Ajouter un acompte',
+                'icon'    => 'fas_hand-holding-usd',
+                'onclick' => $this->getJsActionOnclick('addAcompte', array(
+                    'id_mode_paiement' => $id_mode_paiement
+                        ), array(
+                    'form_name' => 'acompte'
+                ))
+            );
+        }
 
         $note = BimpObject::getInstance("bimpcore", "BimpNote");
         $buttons[] = array(
@@ -2345,7 +2420,32 @@ class BimpComm extends BimpDolObject
             'warnings' => $warnings
         );
     }
+    
+    public function actionAddAcompte($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Acompte créé avec succès';
 
+        $id_mode_paiement = isset($data['id_mode_paiement']) ? (int) $data['id_mode_paiement'] : 0;
+        $amount = isset($data['amount']) ? (float) $data['amount'] : 0;
+
+        if (!$id_mode_paiement) {
+            $errors[] = 'Mode de paiement absent';
+        }
+        if (!$amount) {
+            $errors[] = 'Montant absent';
+        }
+        
+        if (!count($errors)) {
+            
+        }
+        
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
     // Overrides BimpObject:
 
     public function create(&$warnings = array(), $force_create = false)
@@ -2410,40 +2510,5 @@ class BimpComm extends BimpDolObject
         }
 
         return $errors;
-    }
-
-    // Gestion des droits: 
-
-    protected function canView()
-    {
-        global $user;
-
-        if (isset($user->rights->bimpcommercial->read) && (int) $user->rights->bimpcommercial->read) {
-            return 1;
-        }
-
-        return 0;
-    }
-
-    public function isActionAllowed($action, &$errors = array())
-    {
-        switch ($action) {
-            case 'setRemiseGlobale':
-                if (!$this->isLoaded()) {
-                    $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
-                    return 0;
-                }
-                if (!$this->field_exists('remise_globale')) {
-                    $errors[] = 'Les remises globales ne sont pas disponibles pour ' . $this->getLabel('the_plur');
-                    return 0;
-                }
-                if (!$this->areLinesEditable()) {
-                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' ne peut plus être éditée';
-                    return 0;
-                }
-                return 1;
-        }
-
-        return 1;
     }
 }

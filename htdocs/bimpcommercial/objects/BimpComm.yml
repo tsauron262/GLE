@@ -410,6 +410,26 @@ forms:
                           prop: object_name
                       id_parent: 
                           prop: id
+                          
+    acompte: 
+        title: Ajouter un acompte
+        icon: fas_hand-holding-usd
+        rows: 
+            - custom: 1
+              label: Mode de paiement
+              input_name: id_mode_paiement
+              data_type: id
+              required: 1
+              input: 
+                  type: select_payment
+                  include_empty: 1
+            - custom: 1
+              label: Montant
+              input_name: amount
+              data_type: money
+              required: 1
+              input: 
+                  type: text
                   
 fields_tables: 
     infos: 

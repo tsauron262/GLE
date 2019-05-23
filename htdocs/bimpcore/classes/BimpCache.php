@@ -87,7 +87,7 @@ class BimpCache
         return self::$cache[$cache_key];
     }
 
-    public static function findBimpObjectInstance($module, $object_name, $filters, $return_first = false, $delete_if_multiple = false)
+    public static function findBimpObjectInstance($module, $object_name, $filters, $return_first = false, $delete_if_multiple = false, $force_delete = false)
     {
         $instance = BimpObject::getInstance($module, $object_name);
 
@@ -118,8 +118,8 @@ class BimpCache
             $rows = self::getBdb()->executeS($sql, 'array');
 
             if (!is_null($rows) && count($rows)) {
-                if (count($rows) > 1 && !$return_first) {
-                    if ($delete_if_multiple) {
+                if (count($rows) > 1) {
+                    if (!empty($filters) && $delete_if_multiple) {
                         $fl = true;
                         foreach ($rows as $r) {
                             if ($fl) {
@@ -130,7 +130,8 @@ class BimpCache
                             }
                             $obj = self::getBimpObjectInstance($module, $object_name, (int) $r[$primary]);
                             if ($obj->isLoaded()) {
-                                $obj->delete();
+                                $warnings = array();
+                                $obj->delete($warnings, $force_delete);
                             }
                         }
                     }

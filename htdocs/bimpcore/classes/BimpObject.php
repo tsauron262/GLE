@@ -76,7 +76,6 @@ class BimpObject extends BimpCache
             if (!class_exists($object_name)) {
                 require_once $file;
             }
-
             $instance = new $object_name($module, $object_name);
         } else {
             $instance = new BimpObject($module, $object_name);

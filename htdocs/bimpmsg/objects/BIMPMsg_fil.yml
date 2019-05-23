@@ -3,8 +3,6 @@ controller: msg
 
 icon: fas_tasks
 header_list_name: default
-header_btn:
-    callback: getButtons
 list_page_url: 
     controller: index
         

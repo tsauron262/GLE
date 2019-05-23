@@ -2719,6 +2719,8 @@ class BS_SAV extends BimpObject
                         $i++;
                         $propalLine = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SavPropalLine', (int) $item['id']);
                         if ($propalLine->isLoaded()) {
+                            if($propalLine->getData('linked_object_name') == 'sav_garantie')
+                                continue;
                             $remises = $propalLine->getRemises();
                             $eq_lines = $propalLine->getEquipmentLines();
                             $propalLine->id = null;

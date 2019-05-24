@@ -86,7 +86,7 @@ class BS_SAV extends BimpObject
 
         define("NOT_VERIF", true);
 
-        $this->useCaisseForPayments = BimpCore::getConf('sav_use_caisse_for_payments');
+        $this->useCaisseForPayments = BimpCore::getConf('use_caisse_for_payments');
     }
 
     public function renderHeaderExtraLeft()
@@ -1061,6 +1061,7 @@ class BS_SAV extends BimpObject
 
     public function checkObject()
     {
+        // Ne pas faire $this->update() ici sinon boucle infinie. 
         if ($this->isLoaded()) {
             $this->resetMsgs();
 

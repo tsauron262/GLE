@@ -11,6 +11,7 @@ class BimpComm extends BimpDolObject
     public $acomptes_allowed = false;
     public $remise_globale_line_rate = null;
     public $lines_locked = 0;
+    public $useCaisseForPayments = false;
     public static $pdf_periodicities = array(
         0  => 'Aucune',
         1  => 'Mensuelle',
@@ -23,6 +24,12 @@ class BimpComm extends BimpDolObject
         3  => 'trimestre',
         12 => 'an'
     );
+
+    public function __construct($module, $object_name)
+    {
+        $this->useCaisseForPayments = BimpCore::getConf('use_caisse_for_payments');
+        parent::__construct($module, $object_name);
+    }
 
     // Gestion des droits: 
 
@@ -1884,6 +1891,7 @@ class BimpComm extends BimpDolObject
             return array('Element d\'origine absent ou invalide');
         }
 
+        $isClone = ($this->object_name === $origin->object_name);
 
         $lines = $origin->getChildrenObjects('lines', array(), 'position', 'asc');
 
@@ -1895,7 +1903,14 @@ class BimpComm extends BimpDolObject
 
         foreach ($lines as $line) {
             $i++;
-            $line_instance = BimpObject::getInstance($this->module, $this->object_name . 'Line');
+
+            // Lignes à ne pas copier en cas de clonage: 
+            if ($isClone && in_array($line->getData('linked_object_name'), array(
+                        'discount' // Acomptes
+                    ))) {
+                continue;
+            }
+                $line_instance = BimpObject::getInstance($this->module, $this->object_name . 'Line');
             $line_instance->validateArray(array(
                 'id_obj'    => (int) $this->id,
                 'type'      => $line->getData('type'),
@@ -2021,6 +2036,163 @@ class BimpComm extends BimpDolObject
         }
 
         return count($errors) ? 0 : 1;
+    }
+
+    public function createAcompte($amount, $id_mode_paiement, &$warnings = array())
+    {
+        global $user, $langs;
+        $errors = array();
+
+        $caisse = null;
+        $id_caisse = 0;
+
+        if ($this->useCaisseForPayments) {
+            $caisse = BimpObject::getInstance('bimpcaisse', 'BC_Caisse');
+            $id_caisse = (int) $caisse->getUserCaisse((int) $user->id);
+            if (!$id_caisse) {
+                $errors[] = 'Veuillez-vous <a href="' . DOL_URL_ROOT . '/bimpcaisse/index.php" target="_blank">connecter à une caisse</a> pour l\'enregistrement de l\'acompte';
+            } else {
+                $caisse = BimpCache::getBimpObjectInstance('bimpcaisse', 'BC_Caisse', $id_caisse);
+                if (!$caisse->isLoaded()) {
+                    $errors[] = 'La caisse à laquelle vous êtes connecté est invalide.';
+                } else {
+                    $caisse->isValid($errors);
+                }
+            }
+        }
+
+        if (count($errors)) {
+            return $errors;
+        }
+
+        $client = $this->getChildObject('client');
+
+        if (!BimpObject::objectLoaded($client)) {
+            $errors[] = 'Client absent';
+            return $errors;
+        }
+
+        $id_client = (int) $client->id;
+
+        if ($amount > 0 && !count($errors)) {
+            // Création de la facture: 
+            BimpTools::loadDolClass('compta/facture', 'facture');
+            $factureA = new Facture($this->db->db);
+            $factureA->type = 3;
+            $factureA->date = dol_now();
+            $factureA->socid = $id_client;
+            $factureA->cond_reglement_id = 1;
+            $factureA->modelpdf = 'bimpfact';
+
+            if ($this->field_exists('ef_type') && $this->dol_field_exists('ef_type')) {
+                $factureA->array_options['options_type'] = $this->getData('ef_type');
+            }
+            if ($this->field_exists('entrepot') && $this->dol_field_exists('entrepot')) {
+                $factureA->array_options['options_entrepot'] = $this->getData('entrepot');
+            }
+            if ($factureA->create($user) <= 0) {
+                $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($factureA), 'Des erreurs sont survenues lors de la création de la facture d\'acompte');
+            } else {
+                $factureA->addline("Acompte", $amount / 1.2, 1, 20, null, null, null, 0, null, null, null, null, null, 'HT', null, 1, null, null, null, null, null, null, $amount / 1.2);
+                $factureA->validate($user);
+
+                // Création du paiement: 
+                BimpTools::loadDolClass('compta/paiement', 'paiement');
+                $payement = new Paiement($this->db->db);
+                $payement->amounts = array($factureA->id => $amount);
+                $payement->datepaye = dol_now();
+                $payement->paiementid = (int) $id_mode_paiement;
+                if ($payement->create($user) <= 0) {
+                    $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($payement), 'Des erreurs sont survenues lors de la création du paiement de la facture d\'acompte');
+                } else {
+                    if ($this->useCaisseForPayments) {
+                        $id_account = (int) $caisse->getData('id_account');
+                    } else {
+                        $id_account = (int) BimpCore::getConf('bimpcaisse_id_default_account');
+                    }
+
+                    // Ajout du paiement au compte bancaire: 
+                    if ($payement->addPaymentToBank($user, 'payment', '(CustomerInvoicePayment)', $id_account, '', '') < 0) {
+                        $account_label = '';
+
+                        if ($this->useCaisseForPayments) {
+                            $account = $caisse->getChildObject('account');
+
+                            if (BimpObject::objectLoaded($account)) {
+                                $account_label = '"' . $account->bank . '"';
+                            }
+                        }
+
+                        if (!$account_label) {
+                            $account_label = ' d\'ID ' . $id_account;
+                        }
+                        $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($payement), 'Echec de l\'ajout de l\'acompte au compte bancaire ' . $account_label);
+                    }
+
+                    // Enregistrement du paiement caisse: 
+                    if ($this->useCaisseForPayments) {
+                        $errors = array_merge($errors, $caisse->addPaiement($payement, $factureA->id));
+                    }
+
+                    $factureA->set_paid($user);
+                }
+
+                // Création de la remise client: 
+                BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
+                $discount = new DiscountAbsolute($this->db->db);
+                $discount->description = "Acompte";
+                $discount->fk_soc = $factureA->socid;
+                $discount->fk_facture_source = $factureA->id;
+                $discount->amount_ht = $amount / 1.2;
+                $discount->amount_ttc = $amount;
+                $discount->amount_tva = $amount - ($amount / 1.2);
+                $discount->tva_tx = 20;
+                if ($discount->create($user) <= 0) {
+                    $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($discount), 'Des erreurs sont survenues lors de la création de la remise sur acompte');
+                } else {
+                    $line = $this->getLineInstance();
+
+                    $line_errors = $line->validateArray(array(
+                        'id_obj'             => (int) $this->id,
+                        'type'               => ObjectLine::LINE_FREE,
+                        'deletable'          => 0,
+                        'editable'           => 0,
+                        'remisable'          => 0,
+                        'linked_id_object'   => (int) $discount->id,
+                        'linked_object_name' => 'discount'
+                    ));
+
+                    if (!count($line_errors)) {
+                        $line->desc = 'Acompte';
+                        $line->id_product = 0;
+                        $line->pu_ht = -$discount->amount_ht;
+                        $line->pa_ht = -$discount->amount_ht;
+                        $line->qty = 1;
+                        $line->tva_tx = 20;
+                        $line->id_remise_except = (int) $discount->id;
+                        $line->remise = 0;
+
+                        $line_warnings = array();
+                        $line_errors = $line->create($line_warnings, true);
+                        $line_errors = array_merge($line_errors, $line_warnings);
+                    }
+
+                    if (count($line_errors)) {
+                        $warnings[] = BimpTools::getMsgFromArray($line_errors, 'Des erreurs sont survenues lors de la création de la ligne d\'acompte');
+                    }
+                }
+
+                addElementElement(static::$dol_module, $factureA->table_element, $this->id, $factureA->id);
+
+                include_once(DOL_DOCUMENT_ROOT . '/core/modules/facture/modules_facture.php');
+                if ($factureA->generateDocument('bimpfact', $langs) <= 0) {
+                    $fac_errors = BimpTools::getErrorsFromDolObject($factureA, $error = null, $langs);
+                    $warnings[] = BimpTools::getMsgFromArray($fac_errors, 'Echec de la création du fichier PDF de la facture d\'acompte');
+                }
+            }
+        }
+
+        return $errors;
     }
 
     // Actions:
@@ -2420,7 +2592,7 @@ class BimpComm extends BimpDolObject
             'warnings' => $warnings
         );
     }
-    
+
     public function actionAddAcompte($data, &$success)
     {
         $errors = array();
@@ -2436,16 +2608,18 @@ class BimpComm extends BimpDolObject
         if (!$amount) {
             $errors[] = 'Montant absent';
         }
-        
+
         if (!count($errors)) {
-            
+            $errors = $this->createAcompte($amount, $id_mode_paiement, $warnings);
         }
-        
+
         return array(
             'errors'   => $errors,
-            'warnings' => $warnings
+            'warnings' => $warnings,
+            'success_callback' => 'bimp_reloadPage();'
         );
     }
+
     // Overrides BimpObject:
 
     public function create(&$warnings = array(), $force_create = false)

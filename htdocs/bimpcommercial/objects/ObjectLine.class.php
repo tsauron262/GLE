@@ -5,6 +5,8 @@ class ObjectLine extends BimpObject
 
     public static $parent_comm_type = '';
     public static $dol_line_primary = 'rowid';
+    public static $check_on_update = false;
+    
     public $equipment_required = false;
 
     const LINE_PRODUCT = 1;
@@ -1096,7 +1098,7 @@ class ObjectLine extends BimpObject
                         }
                     }
 
-                    if ($field !== 'desc_light' && $desc) {
+                    if ((!$text || $field !== 'desc_light') && $desc) {
                         $text .= ($text ? '<br/>' : '') . (string) $desc;
                     }
 
@@ -1415,15 +1417,18 @@ class ObjectLine extends BimpObject
                     $class_name = get_class($object);
                     switch ($class_name) {
                         case 'Propal':
+//                            addline($desc, $pu_ht, $qty, $txtva, $txlocaltax1=0.0, $txlocaltax2=0.0, $fk_product=0, $remise_percent=0.0, $price_base_type='HT', $pu_ttc=0.0, $info_bits=0, $type=0, $rang=-1, $special_code=0, $fk_parent_line=0, $fk_fournprice=0, $pa_ht=0, $label='',$date_start='', $date_end='',$array_options=0, $fk_unit=null, $origin='', $origin_id=0, $pu_ht_devise=0, $fk_remise_except=0)
                             $result = $object->addLine((string) $this->desc, (float) $this->pu_ht, $this->qty, (float) $this->tva_tx, 0, 0, (int) $this->id_product, (float) $this->remise, 'HT', 0, 0, 0, (int) $this->getData('position'), 0, 0, (int) $this->id_fourn_price, (float) $this->pa_ht, '', $date_from, $date_to, 0, null, '', 0, 0, (int) $this->id_remise_except);
                             break;
 
                         case 'Facture':
-                            $result = $object->addLine((string) $this->desc, (float) $this->pu_ht, $this->qty, (float) $this->tva_tx, 0, 0, (int) $this->id_product, (float) $this->remise, $date_from, $date_to, 0, 0, '', 'HT', 0, Facture::TYPE_STANDARD, (int) $this->getData('position'), 0, '', 0, 0, (int) $this->id_fourn_price, (float) $this->pa_ht);
+//                            addline($desc, $pu_ht, $qty, $txtva, $txlocaltax1=0, $txlocaltax2=0, $fk_product=0, $remise_percent=0, $date_start='', $date_end='', $ventil=0, $info_bits=0, $fk_remise_except='', $price_base_type='HT', $pu_ttc=0, $type=self::TYPE_STANDARD, $rang=-1, $special_code=0, $origin='', $origin_id=0, $fk_parent_line=0, $fk_fournprice=null, $pa_ht=0, $label='', $array_options=0, $situation_percent=100, $fk_prev_id=0, $fk_unit = null, $pu_ht_devise = 0)
+                            $result = $object->addLine((string) $this->desc, (float) $this->pu_ht, $this->qty, (float) $this->tva_tx, 0, 0, (int) $this->id_product, (float) $this->remise, $date_from, $date_to, 0, 0, $this->id_remise_except, 'HT', 0, Facture::TYPE_STANDARD, (int) $this->getData('position'), 0, '', 0, 0, (int) $this->id_fourn_price, (float) $this->pa_ht);
                             break;
 
                         case 'Commande':
-                            $result = $object->addLine((string) $this->desc, (float) $this->pu_ht, $this->qty, (float) $this->tva_tx, 0, 0, (int) $this->id_product, (float) $this->remise, 0, 0, 'HT', 0, $date_from, $date_to, 0, (int) $this->getData('position'), 0, 0, (int) $this->id_fourn_price, (float) $this->pa_ht);
+//                            addline($desc, $pu_ht, $qty, $txtva, $txlocaltax1=0, $txlocaltax2=0, $fk_product=0, $remise_percent=0, $info_bits=0, $fk_remise_except=0, $price_base_type='HT', $pu_ttc=0, $date_start='', $date_end='', $type=0, $rang=-1, $special_code=0, $fk_parent_line=0, $fk_fournprice=null, $pa_ht=0, $label='',$array_options=0, $fk_unit=null, $origin='', $origin_id=0, $pu_ht_devise = 0)
+                            $result = $object->addLine((string) $this->desc, (float) $this->pu_ht, $this->qty, (float) $this->tva_tx, 0, 0, (int) $this->id_product, (float) $this->remise, 0, (int) $this->id_remise_except, 'HT', 0, $date_from, $date_to, 0, (int) $this->getData('position'), 0, 0, (int) $this->id_fourn_price, (float) $this->pa_ht);
                             break;
 
                         case 'CommandeFournisseur':

@@ -56,8 +56,11 @@ class Interfacevalidate extends DolibarrTriggers
             }
         }
 
-        if ($action == 'ORDER_VALIDATE') {
-            $bimp_object = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $object->id);
+        if ($action == 'ORDER_VALIDATE' || $action == 'BILL_VALIDATE') {
+            if ($action == 'ORDER_VALIDATE')
+                $bimp_object = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $object->id);
+            else
+                $bimp_object = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $object->id);
 
             if (BimpObject::objectLoaded($bimp_object)) {
                 // Véfication de la validité des lignes: 
@@ -108,21 +111,6 @@ class Interfacevalidate extends DolibarrTriggers
             }
         }
 
-        if ($action == 'BILL_VALIDATE') {
-            $bimp_object = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $object->id);
-            if (BimpObject::objectLoaded($bimp_object)) {
-                // Véfication de la validité des lignes: 
-                $errors = array();
-                if (!$bimp_object->areLinesValid($errors)) {
-                    $object->errors = array_merge($object->errors, $errors);
-                    return -1;
-                }
-
-                $bimp_object->onValidate();
-            }
-
-            return 1;
-        }
 
         if ($action == 'BILL_DELETE') {
             $bimp_object = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $object->id);

@@ -1,4 +1,9 @@
 <?php
+
+if (!defined('BIMP_LIB')) {
+    require_once __DIR__ . '/../Bimp_Lib.php';
+}
+
 class BimpDolObject extends BimpObject
 {
     public static $dol_module = '';

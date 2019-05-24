@@ -8,6 +8,6 @@ bimpcore:
         display_errors: 1
     objects: 
 #        Affiche les requêtes sql pour les listes objets: 
-        print_list_sql: 1
+        print_list_sql: 0
 bimpcommercial: 
     no_validate: 0

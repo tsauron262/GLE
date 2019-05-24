@@ -14,11 +14,11 @@ class Bimp_Product extends BimpObject
     );
     public static $product_type = array(
 //        "" => '',
-        0  => array('label' => 'Produit', 'icon' => 'fas_box'),
-        1  => array('label' => 'Service', 'icon' => 'fas_hand-holding')
+        0 => array('label' => 'Produit', 'icon' => 'fas_box'),
+        1 => array('label' => 'Service', 'icon' => 'fas_hand-holding')
     );
     public static $price_base_types = array(
-        'HT' => 'HT',
+        'HT'  => 'HT',
         'TTC' => 'TTC'
     );
 
@@ -413,9 +413,25 @@ class Bimp_Product extends BimpObject
 
 
         return array(
-            'errors'   => $errors,
-            'warnings' => $warnings,
+            'errors'           => $errors,
+            'warnings'         => $warnings,
             'success_callback' => $success_callback
         );
+    }
+
+    // Overrides:
+
+    public function validatePost()
+    {
+        $marque = BimpTools::getValue('marque', '');
+        $ref_const = BimpTools::getValue('ref_constructeur', '');
+
+        if ($marque && $ref_const) {
+            $ref = strtoupper(substr($marque, 0, 3));
+            $ref .= '-' . $ref_const;
+            $this->set('ref', $ref);
+        }
+        
+        return parent::validatePost();
     }
 }

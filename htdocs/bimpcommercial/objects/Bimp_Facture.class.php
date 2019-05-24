@@ -12,6 +12,7 @@ class Bimp_Facture extends BimpComm
 
     public $redirectMode = 4; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
     public static $dol_module = 'facture';
+    public static $email_type = 'facture_send';
     public static $status_list = array(
         0 => array('label' => 'Brouillon', 'icon' => 'fas_file-alt', 'classes' => array('warning')),
         1 => array('label' => 'Validée', 'icon' => 'check', 'classes' => array('info')),
@@ -27,7 +28,66 @@ class Bimp_Facture extends BimpComm
         5 => array('label' => 'Facture de situation')
     );
 
-    // Getters:
+    // Gestion des droits: 
+
+    public function canCreate()
+    {
+        global $user;
+        return $user->rights->facture->creer;
+    }
+
+    protected function canEdit()
+    {
+        return $this->can("create");
+    }
+
+    public function canSetAction($action)
+    {
+        global $conf, $user;
+
+        switch ($action) {
+            case 'validate':
+                if ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && !empty($user->rights->facture->creer)) ||
+                        (!empty($conf->global->MAIN_USE_ADVANCED_PERMS) && !empty($user->rights->facture->invoice_advance->validate))) {
+                    return 1;
+                }
+                return 0;
+
+            case 'reopen':
+                if ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && $user->rights->facture->creer) ||
+                        (!empty($conf->global->MAIN_USE_ADVANCED_PERMS) && $user->rights->facture->invoice_advance->reopen)) {
+                    return 1;
+                }
+                return 0;
+
+            case 'convertToReduc':
+            case 'addContact':
+            case 'cancel':
+                return $this->can("create");
+
+            case 'classifyPaid':
+                if ($user->rights->facture->paiement) {
+                    return 1;
+                }
+                return 0;
+//
+//            case 'close':
+//            case 'reopen':
+//                if (!empty($user->rights->propal->cloturer)) {
+//                    return 1;
+//                }
+//                return 0;
+//
+            case 'sendMail':
+                if (empty($conf->global->MAIN_USE_ADVANCED_PERMS) || $user->rights->facture->invoice_advance->send) {
+                    return 1;
+                }
+                return 0;
+        }
+        return 1;
+    }
+
+    // Getters booléens:
 
     public function isDeletable($force_delete = false)
     {
@@ -101,6 +161,8 @@ class Bimp_Facture extends BimpComm
 
         return 0;
     }
+
+    // Getters Array: 
 
     public function getSelectTypesArray()
     {
@@ -255,36 +317,7 @@ class Bimp_Facture extends BimpComm
         return $options;
     }
 
-    public function getRemainToPay()
-    {
-        if ($this->isLoaded()) {
-            if ($this->dol_object->paye) {
-                return 0;
-            }
-
-            $paid = (float) $this->dol_object->getSommePaiement();
-            $paid += (float) $this->dol_object->getSumCreditNotesUsed();
-            $paid += (float) $this->dol_object->getSumDepositsUsed();
-
-            return (float) $this->dol_object->total_ttc - $paid;
-        }
-        return 0;
-    }
-
-    public function getRef($withGeneric = true)
-    {
-        return $this->getData('facnumber');
-    }
-
-    public function getRefProperty()
-    {
-        return 'facnumber';
-    }
-
-    public function getModelPdf()
-    {
-        return $this->getData('model_pdf');
-    }
+    // Getters params: 
 
     public function getActionsButtons()
     {
@@ -419,11 +452,12 @@ class Bimp_Facture extends BimpComm
                     $msg = '';
                     if (!$objectidnext) {
                         if ($this->canSetAction('sendMail')) {
-                            $onclick = 'bimpModal.loadAjaxContent($(this), \'loadMailForm\', {id: ' . $this->id . '}, \'Envoyer par email\')';
                             $buttons[] = array(
-                                'label'   => 'Envoyer par email',
+                                'label'   => 'Envoyer par e-mail',
                                 'icon'    => 'envelope',
-                                'onclick' => $onclick
+                                'onclick' => $this->getJsActionOnclick('sendEmail', array(), array(
+                                    'form_name' => 'email'
+                                ))
                             );
                         } else {
                             $msg = 'Vous n\'avez pas la permission';
@@ -619,6 +653,39 @@ class Bimp_Facture extends BimpComm
         }
 
         return $buttons;
+    }
+
+    // Getters données: 
+
+    public function getRemainToPay()
+    {
+        if ($this->isLoaded()) {
+            if ($this->dol_object->paye) {
+                return 0;
+            }
+
+            $paid = (float) $this->dol_object->getSommePaiement();
+            $paid += (float) $this->dol_object->getSumCreditNotesUsed();
+            $paid += (float) $this->dol_object->getSumDepositsUsed();
+
+            return (float) $this->dol_object->total_ttc - $paid;
+        }
+        return 0;
+    }
+
+    public function getRef($withGeneric = true)
+    {
+        return $this->getData('facnumber');
+    }
+
+    public function getRefProperty()
+    {
+        return 'facnumber';
+    }
+
+    public function getModelPdf()
+    {
+        return $this->getData('model_pdf');
     }
 
     public function getDirOutput()
@@ -2118,64 +2185,5 @@ class Bimp_Facture extends BimpComm
         }
 
         return $errors;
-    }
-
-    // Gestion des droits: 
-
-    public function canCreate()
-    {
-        global $user;
-        return $user->rights->facture->creer;
-    }
-
-    protected function canEdit()
-    {
-        return $this->can("create");
-    }
-
-    public function canSetAction($action)
-    {
-        global $conf, $user;
-
-        switch ($action) {
-            case 'validate':
-                if ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && !empty($user->rights->facture->creer)) ||
-                        (!empty($conf->global->MAIN_USE_ADVANCED_PERMS) && !empty($user->rights->facture->invoice_advance->validate))) {
-                    return 1;
-                }
-                return 0;
-
-            case 'reopen':
-                if ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && $user->rights->facture->creer) ||
-                        (!empty($conf->global->MAIN_USE_ADVANCED_PERMS) && $user->rights->facture->invoice_advance->reopen)) {
-                    return 1;
-                }
-                return 0;
-
-            case 'convertToReduc':
-            case 'addContact':
-            case 'cancel':
-                return $this->can("create");
-
-            case 'classifyPaid':
-                if ($user->rights->facture->paiement) {
-                    return 1;
-                }
-                return 0;
-//
-//            case 'close':
-//            case 'reopen':
-//                if (!empty($user->rights->propal->cloturer)) {
-//                    return 1;
-//                }
-//                return 0;
-//
-            case 'sendMail':
-                if (empty($conf->global->MAIN_USE_ADVANCED_PERMS) || $user->rights->facture->invoice_advance->send) {
-                    return 1;
-                }
-                return 0;
-        }
-        return 1;
     }
 }

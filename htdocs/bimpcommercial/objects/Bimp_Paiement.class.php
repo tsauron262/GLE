@@ -7,7 +7,7 @@ class Bimp_Paiement extends BimpObject
 
     public function __construct($module, $object_name)
     {
-        $this->useCaisse = (int) BimpCore::getConf('sav_use_caisse_for_payments');
+        $this->useCaisse = (int) BimpCore::getConf('use_caisse_for_payments');
 
         parent::__construct($module, $object_name);
     }

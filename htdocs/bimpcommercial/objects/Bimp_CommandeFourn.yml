@@ -165,8 +165,8 @@ fields:
 #        type: id_object
 #        object: account
         
-    libelle: unset
-    ef_type: unset
+#    libelle: unset
+#    ef_type: unset
     ref_client: unset
     total: unset
     fk_availability: unset
@@ -221,11 +221,11 @@ forms:
     duplicate_commande_fourn: 
         title: Cloner
         rows: 
-#            - field: entrepot
-#            - field: ef_type
+            - field: libelle
+            - field: entrepot
+            - field: ef_type
             - field: fk_soc
             - field: ref_supplier
-            - field: libellle
             - field: date_livraison
          
 fields_tables: 
@@ -279,8 +279,8 @@ fields_tables:
             - field: total_ttc
             
 views: 
-    objects_change_reload: Bimp_CommandeFournLine
     default: 
+        objects_change_reload: Bimp_CommandeFournLine
         rows: 
             0: 
                 cols: 

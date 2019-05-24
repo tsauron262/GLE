@@ -177,7 +177,7 @@ class BS_Pret extends BimpObject
         $errors = bimpsupport_pdf_create($this->db->db, $this, 'sav', 'pret');
 
         if (!count($errors)) {
-            $sav = $this->getParentInstance();
+            $sav = $this->getChildObject('sav');
             $ref = 'Pret-' . $sav->getData('ref') . '-' . $this->getData('ref');
             $file_url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . htmlentities('sav/' . $sav->id . '/' . $ref . '.pdf');
         }

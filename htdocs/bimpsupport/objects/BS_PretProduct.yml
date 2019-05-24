@@ -5,7 +5,8 @@ parent_object: BS_Pret
 parent_id_property: id_pret
 
 labels: 
-    name: produit prêtés
+    name: produit prêté
+    name_plur: produits prêtés
     
 fields: 
     id_pret: 

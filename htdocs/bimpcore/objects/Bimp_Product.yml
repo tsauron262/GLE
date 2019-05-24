@@ -16,10 +16,6 @@ fields:
     ref: 
         label: Réf.
         
-    ref_constructeur: 
-        label: Réf. constructeur
-        dol_extra_field: 1
-        
     label: 
         label: Libellé
         
@@ -98,6 +94,7 @@ fields:
     tva_tx: 
         label: Taux de TVA
         type: percent
+        default_value: 20
         
     recuperableonly: 
         label: TVA récupérable seulement
@@ -238,9 +235,25 @@ fields:
 forms: 
     light: 
         rows: 
-            - field: label
-            - field: description
+            - custom: 1
+              label: Marque
+              input_name: marque
+              input: 
+                  type: text
+              show: 
+                  callback: isNotLoaded
+            - custom: 1
+              label: Ref. constructeur
+              input_name: ref_constructeur
+              input: 
+                  type: text            
+              show: 
+                  callback: isNotLoaded
             - field: ref
+              show: 
+                  callback: isLoaded
+            - field: label
+            - field: description  
             - field: ref_constructeur
             - field: fk_product_type
             - field: type2
@@ -248,10 +261,7 @@ forms:
             - field: tva_tx
             - field: pa_prevu
             - field: infos_pa
-            - field: validate
             - field: serialisable
-            - field: tosell
-            - field: tobuy
             - field: note
             
     etiquettes: 

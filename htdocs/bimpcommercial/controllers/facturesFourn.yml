@@ -1,5 +1,5 @@
 bootstrap: 1
-title: Commandes fournisseurs
+title: Factures fournisseurs
 
 objects: 
     facture_fourn: 

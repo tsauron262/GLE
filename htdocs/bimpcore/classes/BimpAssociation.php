@@ -589,14 +589,13 @@ class BimpAssociation
             return BimpRender::renderAlerts('Input non défini dans la configuration pour cette association');
         }
 
-        $values = array();
-
         if ($this->object->isLoaded()) {
             $items = $this->getAssociatesList();
         } else {
             $items = array();
         }
 
+        $values = array();
         foreach ($items as $id_item) {
             if ($id_item) {
                 $values[$id_item] = $this->object->displayAssociate($this->association, $item_display, $id_item);
@@ -604,10 +603,11 @@ class BimpAssociation
         }
 
         $field_params = array(
-                'required' => $required
+            'required' => $required,
+            'values'   => $values
         );
-        
-        $input = new BC_Input($this->object, 'int', $this->association, 'associations/' . $this->association . '/input', $values, $field_params);
+
+        $input = new BC_Input($this->object, 'int', $this->association, 'associations/' . $this->association . '/input', $items, $field_params);
         $input->setNamePrefix($name_prefix);
         $input->extraClasses[] = 'no-modified';
         $input->extraData['values_field'] = $name_prefix . $this->association;

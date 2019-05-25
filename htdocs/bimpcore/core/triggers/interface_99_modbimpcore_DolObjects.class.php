@@ -42,7 +42,22 @@ class InterfaceDolObjects extends DolibarrTriggers
     public $description = "Rechargement des BimpObjects en cache lors d'une mise à jour sur l'objet Dolibarr associé";
     public $version = self::VERSION_DOLIBARR;
     public static $dolObjectsUpdates = array(
-        'PROPAL' => array('bimpcommercial', 'Bimp_Propal')
+        // Objets BimpComm: 
+        'PROPAL' => array('bimpcommercial', 'Bimp_Propal'),
+        'LINEPROPAL' => array('bimpcommercial', 'Bimp_PropalLine'),
+        'ORDER' => array('bimpcommercial', 'Bimp_Commande'),
+        'LINEORDER' => array('bimpcommercial', 'Bimp_CommandeLine'),
+        'BILL' => array('bimpcommercial', 'Bimp_Facture'),
+        'LINEBILL' => array('bimpcommercial', 'Bimp_FactureLine'),
+        'ORDER_SUPPLIER' => array('bimpcommercial'),
+        'LINEORDER_SUPPLIER' => array('bimpcommercial'),
+        'BILL_SUPPLIER' => array('bimpcommercial'),
+        'LINEBILL_SUPPLIER' => array('bimpcommercial'),
+        // objets BimpCore: 
+        'COMPANY' => array('bimpcore', 'Bimp_Societe'),
+        'CONTACT' => array('bimpcore', 'Bimp_Contact'),
+        'PRODUCT' => array('bimpcore', 'Bimp_Product'),
+        'USER' => array('bimpcore', 'Bimp_User'),
     );
 
     /**

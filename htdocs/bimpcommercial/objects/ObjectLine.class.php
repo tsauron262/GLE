@@ -6,7 +6,6 @@ class ObjectLine extends BimpObject
     public static $parent_comm_type = '';
     public static $dol_line_primary = 'rowid';
     public static $check_on_update = false;
-    
     public $equipment_required = false;
 
     const LINE_PRODUCT = 1;
@@ -272,8 +271,8 @@ class ObjectLine extends BimpObject
                 if (!(int) $product->getData('validate')) {
                     global $user;
                     $errors[] = 'Le produit "' . $product->getRef() . ' - ' . $product->getData('label') . '" n\'est pas validé';
-                    if(mailSyn2("Validation produit", "XX_Achats@bimp.fr", null, "Bonjour ".$user->getNomUrl(1). "souhaite que vous validiez ".$product->getNomUrl(1)."<br/>Cordialement"))
-                            $errors[] = "Un mai a été envoyé pour validation du produit.";
+                    if (mailSyn2("Validation produit", "XX_Achats@bimp.fr", null, "Bonjour " . $user->getNomUrl(1) . "souhaite que vous validiez " . $product->getNomUrl(1) . "<br/>Cordialement"))
+                        $errors[] = "Un mai a été envoyé pour validation du produit.";
                     return 0;
                 }
             }
@@ -768,7 +767,6 @@ class ObjectLine extends BimpObject
 //            case 'label':
 //                return $this->getData('label');
         }
-
 
         return self::$product_line_data[$field]['default'];
     }

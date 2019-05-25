@@ -1748,7 +1748,7 @@ class BS_SAV extends BimpObject
 //            }
 //        }
 
-        
+
         $line = BimpCache::findBimpObjectInstance('bimpsupport', 'BS_SavPropalLine', array(
                     'id_obj'             => (int) $propal->id,
                     'linked_id_object'   => (int) $this->id,
@@ -1832,35 +1832,42 @@ class BS_SAV extends BimpObject
             return array($error_msg . ' - Centre absent');
         }
 
-
         $signature = file_get_contents("http://bimp.fr/emailing/signatures/signevenementiel2.php?prenomnom=BIMP%20SAV&adresse=Centre%20de%20Services%20Agr%C3%A9%C3%A9%20Apple", stream_context_create(array(
             'http' => array(
                 'timeout' => 2   // Timeout in seconds
         ))));
 
         $propal = $this->getChildObject('propal');
+        $propal->fetch($propal->id);
 
         $tabFile = $tabFile2 = $tabFile3 = array();
 
         if (!is_null($propal)) {
             if ($propal->isLoaded()) {
-                $fileProp = DOL_DATA_ROOT . "/bimpcore/sav/" . $this->id . "/PC-" . $this->getData('ref') . ".pdf";
+                $ref_propal = $propal->getData('ref');
+                $fileProp = DOL_DATA_ROOT . "/bimpcore/sav/" . $this->id . "/PC-" . $ref_propal . ".pdf";
                 if (is_file($fileProp)) {
                     $tabFile[] = $fileProp;
                     $tabFile2[] = "application/pdf";
-                    $tabFile3[] = "PC-" . $this->getData('ref') . ".pdf";
+                    $tabFile3[] = "PC-" . $ref_propal . ".pdf";
                 }
 
-                $fileProp = DOL_DATA_ROOT . "/propale/" . $propal->dol_object->ref . "/" . $propal->dol_object->ref . ".pdf";
+                $fileProp = DOL_DATA_ROOT . "/propale/" . $ref_propal . "/" . $ref_propal . ".pdf";
                 if (is_file($fileProp)) {
                     $tabFile[] = $fileProp;
                     $tabFile2[] = "application/pdf";
-                    $tabFile3[] = $propal->dol_object->ref . ".pdf";
+                    $tabFile3[] = $ref_propal . ".pdf";
+//                    $errors[] = 'DEVIS OK: ' . $ref_propal;
+                } elseif (in_array((int) $this->getData('status'), self::$need_propal_status)) {
+//                    $errors[] = 'DEVIS KO: ' . $ref_propal;
+                    $errors[] = 'Attention: PDF du devis non trouvé et donc non envoyé au client';
                 }
             } else {
                 unset($propal);
                 $propal = null;
             }
+        } elseif (in_array((int) $this->getData('status'), self::$need_propal_status)) {
+            $errors[] = 'Attention: devis absent';
         }
 
         $tech = '';
@@ -2610,6 +2617,8 @@ class BS_SAV extends BimpObject
             if (!(int) $this->getData('id_user_tech')) {
                 $this->updateField('id_user_tech', (int) $user->id);
             }
+
+            $propal->hydrateFromDolObject();
 
             if (isset($data['send_msg']) && (int) $data['send_msg']) {
                 $warnings = array_merge($warnings, $this->sendMsg('Devis'));

@@ -16,8 +16,7 @@ objects:
                 file: usergroup
                 class: UserGroup
             id_object:
-                field_value:
-                    fk_group_dest
+                field_value: fk_group_dest
     
 fields: 
     obj_type: 

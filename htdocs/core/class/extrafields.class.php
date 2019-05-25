@@ -779,7 +779,7 @@ class ExtraFields
 		}
 
 		// We should not have several time this log. If we have, there is some optimization to do by calling a simple $object->fetch_optionals() that include cache management.
-		dol_syslog("fetch_name_optionals_label elementtype=".$elementtype);
+//		dol_syslog("fetch_name_optionals_label elementtype=".$elementtype);
 
 		$sql = "SELECT rowid,name,label,type,size,elementtype,fieldunique,fieldrequired,param,pos,alwayseditable,perms,langs,list,fielddefault,fieldcomputed,entity,enabled";
 		$sql.= " FROM ".MAIN_DB_PREFIX."extrafields";

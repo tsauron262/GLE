@@ -17,7 +17,7 @@ class BimpTicketRestaurant {
         $month = $row_date->format('m');
         $year = $row_date->format('Y');
 
-//        $year -= 1; // TODO remove
+        $year -= 1; // TODO remove
         // Get date
         try {
             $date_work_plus_1 = new DateTime($year . '-' . ((int) $month + 2));
@@ -40,8 +40,8 @@ class BimpTicketRestaurant {
                 $users[$h->fk_user]->ticket_restau -= $h->ticket_to_remove;
         }
 
-        $this->exportCSV($users, $date_work);
-
+        $path_to_file = $this->exportCSV($users, $date_work);
+        $this->sendMailTR($path_to_file, $date_work);
         // TODO send email
     }
 
@@ -114,10 +114,25 @@ class BimpTicketRestaurant {
             101, // SALLE REUNION 2
             102, // SALLE REUNION 3
             103, // VÉHICULE DE SERVICE TWINGO
+            104, // VÉHICULE DE SERVICE 207
+            115, // TEST
+            123, // VÉHICULE DE SERVICE C
+            130, // MAG 26;Extra 26
+            147, // VÉHICULE DE SERVICE TRAFIC
+            200, // TESTSYNCH
+            205, // BIMP;Accueil13
+            207, // BIMP;Hotline;
+            212, // BIMP;HotlineMetaldyne
+            215, // BIMP;Gle_suivi
+            216, // BIMP;XIVO
+            263, // COMPTE;FERME;
             272, // VÉHICULE DE SERVICE TWIZY
+            326, // EXTERNE;USER;
+            352, // TEST;TEMP;20;
+            353, // TEST;Temp2;20;
             364, // VÉHICULE DE SERVICE TRANSIT
             383  // VÉHICULE DE SERVICE QASHQAI
-        );
+        ); // 222;JON;Jon;20; ???
 
         $sql = 'SELECT rowid, lastname, firstname';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'user';
@@ -142,10 +157,10 @@ class BimpTicketRestaurant {
         $dir = DOL_DATA_ROOT . '/bimpticketrestaurant/';
         if (!file_exists($dir))
             mkdir($dir);
-        $path_to_file = $dir . $date->format('m-Y') . '.csv';
+        $path_to_file = $dir . 'TR-' . $date->format('m-Y') . '.csv';
 
         // Header
-        $out .= 'ID' . $sep;
+//        $out .= 'ID' . $sep;
         $out .= 'Nom' . $sep;
         $out .= 'Prénom' . $sep;
         $out .= 'Nombre de ticket' . $sep;
@@ -153,14 +168,52 @@ class BimpTicketRestaurant {
 
         // Content
         foreach ($users as $u) {
-            $out .= $u->rowid . $sep;
+//            $out .= $u->rowid . $sep;
             $out .= $u->lastname . $sep;
             $out .= $u->firstname . $sep;
             $out .= $u->ticket_restau . $sep;
             $out .= $sep_line;
         }
 
+        echo $out;
+
         file_put_contents($path_to_file, $out);
+
+        return $path_to_file;
+    }
+
+    private function sendMailTR($path_to_file, $date) {
+        global $conf;
+
+        $exploded_path_to_file = explode('/', $path_to_file);
+        $filename = end($exploded_path_to_file);
+
+        $subject = "Ticket restaurant du " . $date->format('m-Y');
+        $from = 'Application BIMP-ERP ' . $conf->global->MAIN_INFO_SOCIETE_NOM . ' <gle@' . strtolower(str_replace(" ", "", $conf->global->MAIN_INFO_SOCIETE_NOM)) . '.fr>';
+        $to = "Romain PELEGRIN <r.pelegrin@bimp.fr>";
+        $message = "Bonjour<br/><br/>La liste des tickets restaurants pour le " . $date->format('m-Y') . " se trouve en pièce-jointe.<br/>";
+        $filename_list = array($path_to_file);
+        $mimetype_list = array('csv');
+        $mimefilename_list = array($filename);
+
+//        echo $subject;
+//        echo $to;
+//        echo $from;
+//        echo $message;
+//        print_r($filename_list);
+//        print_r($mimetype_list);
+//        print_r($mimefilename_list);
+//        die();
+
+        if (isset($to) && $to != '') {
+            require_once DOL_DOCUMENT_ROOT . '/core/class/CMailFile.class.php';
+            $mailfile = new CMailFile($subject, $to, $from, $message, $filename_list, $mimetype_list, $mimefilename_list);
+            $return = $mailfile->sendfile();
+            if (!$return)
+                dol_syslog("Problème lors de l'envoie du compte rendu des tickets restaurants", 3);
+
+            return $return;
+        }
     }
 
 }

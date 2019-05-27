@@ -1,16 +1,32 @@
-table: bs_sav_pret
+table: bs_pret
 icon: mobile
 
-parent_object: BS_SAV
-parent_id_property: id_sav
+parent_module: bimpcore
+parent_object: Bimp_Client
+parent_id_property: id_client
 
 labels: 
-    name: prêt
+    name: prêt de matériel
+    name_plur: prêts de matériel
     
 objects: 
     equipment:
         instance: 
             id_object: unset
+            
+    sav: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: BS_SAV
+            id_object: 
+                field_value: id_sav
+                
+    products: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: BS_PretProduct
 
 associations: 
     equipments:
@@ -25,9 +41,19 @@ associations:
                 array: equipments
 
 fields: 
+    id_client: 
+        label: Client
+        type: id_parent
+        input: 
+            type: search_societe
+            societe_type: customer
+        display_if: 
+            field_name: id_sav
+            show_values: 0
     id_sav: 
         label: SAV
-        type: id_parent
+        type: id_object
+        object: sav
         input: 
             type: search_list
             search_list:
@@ -35,32 +61,33 @@ fields:
                 field_return_value: s.id
                 field_return_label: s.ref
                 fields_search: s.id,s.ref
+    id_entrepot: 
+        label: Entrepot
+        type: id_object
+        object: entrepot
+        input: 
+            type: search_entrepot
+        required: 1
     code_centre: 
         label: Centre
         values: 
             array: centres
     ref: 
         label: Référence
-    id_client: 
-        label: Client
-        type: id_object
-        object: client
-        input: 
-            type: hidden
-        search: 
-            input: 
-                type: search_societe
-                societe_type: customer
     date_begin: 
         label: Début du prêt
-        type: datetime
+        type: date
         required: 1
     date_end: 
         label: Fin du prêt
-        type: datetime
+        type: date
         required: 1
     returned: 
         label: Restitué
+        type: bool
+        default_value: 0
+    caution: 
+        label: Chèque de caution
         type: bool
         default_value: 0
         
@@ -68,24 +95,45 @@ forms:
     default: 
         rows: 
             - field: id_sav
+            - field: id_entrepot
+              display_if: 
+                  field_name: id_sav
+                  show_values: 0
+            - field: id_client
+              display_if: 
+                  field_name: id_sav
+                  show_values: 0
               hidden: 1
-            - association: equipments
-              required: 1
             - field: date_begin
             - field: date_end
+            - field: caution
+            - association: equipments
+#            - object: products
+#              multiple: 1
           
 fields_tables: 
     default: 
+        panel: 1
+        panel_header: 0
         rows: 
-            - field: id_sav
-              display: nom_url
-            - field: code_centre
-            - association: equipments
             - field: id_client
               display: nom_url
+            - field: id_sav
+              display: nom_url
+              show: 
+                  field_value: id_sav
+            - field: id_entrepot
+              display: nom_url
+            - field: code_centre
+              show: 
+                  field_value: id_sav
+            - association: equipments
             - field: date_begin
             - field: date_end
             - field: returned
+              edit: 1
+            - field: caution
+              edit: 1
 
 views: 
     default:
@@ -96,7 +144,11 @@ views:
                 - type: fields_table
                   fields_table: 
                       name: default
-                      panel: 0
+#            - cols: 
+#                - type: list
+#                  list: 
+#                      name: default
+#                      children: products
                 
 lists: 
     default: 
@@ -115,21 +167,24 @@ lists:
         edit_btn: 1
         modal_view: default
         cols: 
-            centre: 
-                field: code_centre
+            entrepot: 
+                field: id_entrepot
+                display: nom_url
             ref: 
                 field: ref
-            sav: 
-                field: id_sav
-                display: nom_url
             client: 
                 field: id_client
+                display: nom_url
+            sav: 
+                field: id_sav
                 display: nom_url
             date_end: 
                 field: date_end
             returned: 
                 field: returned
                 edit: 1
+            caution: 
+                field: caution
                 
     sav: 
         title: Matériels prêtés pour ce SAV
@@ -157,6 +212,8 @@ lists:
                 field: date_begin
             date_end: 
                 field: date_end
+            caution: 
+                field: caution
             returned: 
                 field: returned
                 edit: 1

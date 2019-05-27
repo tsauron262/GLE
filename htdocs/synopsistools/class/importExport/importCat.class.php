@@ -4,6 +4,7 @@ require_once DOL_DOCUMENT_ROOT . "/synopsistools/class/importExport/import8sens.
 
 class importCat extends import8sens {
     var $catDef = 2;
+//    var $catDef = 12986;
     var $marqueOk = false;
     var $obsolescenceOk = false;
     var $tabConvert = array(
@@ -396,6 +397,10 @@ class importCat extends import8sens {
             ),
             "CONSOMMABLES" => array(
                 array("Gamme", "Consommable")
+            ),
+            "CONTRAT PRO" => array(
+                array("Gamme", "Service"),
+                array("Marque", "BIMP")
             ),
             "ECRANS" => array(
                 array("Gamme", "Ecran")

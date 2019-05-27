@@ -162,11 +162,11 @@ if ($action == 'create') {
         }
 
         // Si aucun jours ouvrés dans la demande
-        $nbopenedday = num_open_day($date_debut_gmt, $date_fin_gmt, 0, 1, $halfday);
+        $nbopenedday = num_open_dayUser($userid, $date_debut_gmt, $date_fin_gmt, 0, 1, $halfday);
 
         // hack (si 1 seul jour : num_open_day() ne vérifie pas s'il s'agit d'un jour férié)
         if ($date_debut_gmt == $date_fin_gmt && $nbopenedday == 1) {
-            $nb_ferie = num_public_holiday($date_debut_gmt, $date_fin_gmt);
+            $nb_ferie = num_public_holidayUser($userid, $date_debut_gmt, $date_fin_gmt);
             if ($nb_ferie)
                 $nbopenedday = 0;
         }
@@ -291,12 +291,12 @@ if ($action == 'update') {
             }
 
             // Si pas de jours ouvrés dans la demande
-            $nbopenedday = num_open_day($date_debut_gmt, $date_fin_gmt, 0, 1, $halfday);
+            $nbopenedday = num_open_dayUser($userid, $date_debut_gmt, $date_fin_gmt, 0, 1, $halfday);
             // hack (si 1 seul jour : num_open_day() ne vérifie pas s'il s'agit d'un jour férié)
             if ($date_debut_gmt == $date_fin_gmt && $nbopenedday == 1) {
                 global $userHoliday;
                 $userHoliday = $userid;
-                $nb_ferie = num_public_holiday($date_debut_gmt, $date_fin_gmt);
+                $nb_ferie = num_public_holidayUser($userid, $date_debut_gmt, $date_fin_gmt);
                 if ($nb_ferie)
                     $nbopenedday = 0;
             }
@@ -475,7 +475,7 @@ if ($action == 'confirm_send') {
                         }
                     }
                 } else if ($cp->type_conges == 2) {
-                    $nbopenedday = num_open_day($cp->date_debut_gmt, $cp->date_fin_gmt, 0, 1, $cp->halfday);
+                    $nbopenedday = num_open_dayUser($cp->fk_user, $cp->date_debut_gmt, $cp->date_fin_gmt, 0, 1, $cp->halfday);
                     if ($nbopenedday > $cp->getRTTforUser($cp->fk_user)) {
                         $message .= "\n";
                         $message .= 'L\'utilisateur ayant fait cette demande de RTT n\'a pas le solde requis.' . "\n";
@@ -646,7 +646,7 @@ if ($action == 'drh_confirm_valid') {
 
                 case 2: // RTT
                     // Calcule du nombre de jours consommés: 
-                    $nbopenedday = num_open_day($cp->date_debut_gmt, $cp->date_fin_gmt, 0, 1, $cp->halfday);
+                    $nbopenedday = num_open_dayUser($cp->fk_user, $cp->date_debut_gmt, $cp->date_fin_gmt, 0, 1, $cp->halfday);
                     $soldeActuel = $cp->getRTTforUser($cp->fk_user);
                     $newSolde = $soldeActuel - ($nbopenedday * $cp->getConfCP('nbRTTDeducted'));
                     $cp->addLogCP($user->id, $cp->fk_user, 'RTT', $newSolde, true);
@@ -1453,7 +1453,7 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
         $nextCPYearDate = $cp->getCPNextYearDate(true, false);
         $nextCPYearDateAfter = $cp->getCPNextYearDate(true, true);
         $nbRtt = $cp->getRTTforUser($user->id) / $cp->getConfCP('nbRTTDeducted');
-        /*  print '<b>Année en cours : </b>';
+          print '<b>Année en cours : </b>';
           print $langs->trans('SoldeCPUser', round($nb_holiday_current, 2)) . ($nbdeduced != 1 ? ' (' . $nbaquis_current . ' / ' . $nbdeduced . ')' : '');
           print '&nbsp;(A utiliser avant le <b>' . $nextCPYearDate . '</b>).';
           print '<br/>';
@@ -1462,7 +1462,7 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
           print '&nbsp;(A utiliser à partir du <b>' . $nextCPYearDate . '</b> et avant le <b>' . $nextCPYearDateAfter . '</b>).';
           print '<br/>';
           print 'Solde RTT : <b>' . round($nbRtt, 2) . ' jours</b>';
-         */
+         
         print '</div></div>';
 
         if ($isDrh) {
@@ -1850,7 +1850,7 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
                 }
                 print '<tr>';
                 print '<td>' . $langs->trans('NbUseDaysCP') . '</td>';
-                print '<td>' . num_open_day($cp->date_debut_gmt, $cp->date_fin_gmt, 0, 1, $cp->halfday) . '</td>';
+                print '<td>' . num_open_dayUser($cp->fk_user, $cp->date_debut_gmt, $cp->date_fin_gmt, 0, 1, $cp->halfday) . '</td>';
                 print '</tr>';
 
                 // Status

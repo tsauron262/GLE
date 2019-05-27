@@ -19,7 +19,7 @@ fields:
         object: contrat
     next_facture_date:
         label: Date de la prochaine facture
-        type: date
+        type: datetime
     next_facture_amount:
         label: Montant de la prochaine facture
         type: money
@@ -53,4 +53,19 @@ lists:
             validate:
                 field: validate
                 edit: 1
-                
+                      
+views:
+    fiche_contrat:
+        title: echeancier
+        rows:
+            - cols: 
+                - type: rows
+                  col_lg: 12
+                  col_md: 12
+                  rows:                        
+                      - cols: 
+                          - type: view
+                            col_lg: 12
+                            view: 
+                                name: echeancier
+                                object: contrat

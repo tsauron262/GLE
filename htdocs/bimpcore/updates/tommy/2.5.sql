@@ -1,0 +1,1 @@
+uPDATE `llx_propal` SET `fk_cond_reglement` = '1' WHERE `fk_cond_reglement` = 0

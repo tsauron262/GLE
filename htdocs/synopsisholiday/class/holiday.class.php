@@ -1769,28 +1769,28 @@ class SynopsisHoliday extends Holiday {
             $hd_end = 1;
 
         // Jours ouvrés total: 
-        $solde['nbOpenDayTotal'] = num_open_day($beginDateGMT, $endDateGMT, 0, 1, $halfday);
+        $solde['nbOpenDayTotal'] = num_open_dayUser($user_id, $beginDateGMT, $endDateGMT, 0, 1, $halfday);
 
         // Jours ouvrés de la période sur l'année en cours:
         if ($beginDate < $nextYearDate) {
             if ($endDate < $nextYearDate)
                 $solde['nbOpenDayCurrent'] = $solde['nbOpenDayTotal'];
             else {
-                $solde['nbOpenDayCurrent'] = num_open_day($beginDateGMT, $nextYearDateGMT, 0, 0, $hd_begin);
+                $solde['nbOpenDayCurrent'] = num_open_dayUser($user_id, $beginDateGMT, $nextYearDateGMT, 0, 0, $hd_begin);
             }
         }
 
         // Jours ouvrés de la période sur l'année n+1:
         if ($beginDate < $nextYearDate) {
             if ($endDate < $nextYearDateAfter)
-                $solde['nbOpenDayNext'] = num_open_day($nextYearDateGMT, $endDateGMT, 0, 1, $hd_end);
+                $solde['nbOpenDayNext'] = num_open_dayUser($user_id, $nextYearDateGMT, $endDateGMT, 0, 1, $hd_end);
             else
-                $solde['nbOpenDayNext'] = num_open_day($nextYearDateGMT, $nextYearDateAfterGMT, 0, 0, 0);
+                $solde['nbOpenDayNext'] = num_open_dayUser($user_id, $nextYearDateGMT, $nextYearDateAfterGMT, 0, 0, 0);
         } else if ($beginDate < $nextYearDateAfter) {
             if ($endDate < $nextYearDateAfter)
                 $solde['nbOpenDayNext'] = $solde['nbOpenDayTotal'];
             else
-                $solde['nbOpenDayNext'] = num_open_day($beginDateGMT, $nextYearDateAfterGMT, 0, 0, $hd_begin);
+                $solde['nbOpenDayNext'] = num_open_dayUser($user_id, $beginDateGMT, $nextYearDateAfterGMT, 0, 0, $hd_begin);
         }
 
         // Jours ouvrés de la période > à l'année n+1:
@@ -1798,7 +1798,7 @@ class SynopsisHoliday extends Holiday {
             if ($beginDate >= $nextYearDateAfter) {
                 $solde['nbOpenDayNextAfter'] = $solde['nbOpenDayTotal'];
             } else {
-                $solde['nbOpenDayNextAfter'] = num_open_day($nextYearDateAfterGMT, $endDateGMT, 0, 1, $hd_end);
+                $solde['nbOpenDayNextAfter'] = num_open_dayUser($user_id, $nextYearDateAfterGMT, $endDateGMT, 0, 1, $hd_end);
             }
         }
         return $solde;
@@ -2814,7 +2814,7 @@ class SynopsisHoliday extends Holiday {
         } else {
             $tabUser = $this->fk_user;
         }
-        $nbopenedday = num_open_day($this->date_debut_gmt, $this->date_fin_gmt, 0, 1, $this->halfday);
+        $nbopenedday = num_open_dayUser($this->fk_user, $this->date_debut_gmt, $this->date_fin_gmt, 0, 1, $this->halfday);
         foreach ($tabUser as $fk_user) {
             global $userHoliday;
         $userHoliday = $fk_user;

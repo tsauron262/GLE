@@ -178,7 +178,7 @@ if(strtotime($holiday['date_fin']) > strtotime(date('Y-m-d', strtotime($dateFin)
                     
                     
                     
-		$nbopenedday=num_open_day($start_date_gmt, $end_date_gmt, 0, 1, $holiday['halfday']);
+		$nbopenedday=num_open_dayUser($holiday['fk_user'], $start_date_gmt, $end_date_gmt, 0, 1, $holiday['halfday']);
                 }
 
                 $type = $holiday['type_conges'];

@@ -167,7 +167,15 @@ class securLogSms {
     }
 
     function createSendCode() {
-        global $user;
+        global $user, $langs;
+        if (!is_object($langs)) { // This can occurs when calling page with NOREQUIRETRAN defined, however we need langs for error messages.
+            include_once DOL_DOCUMENT_ROOT . '/core/class/translate.class.php';
+            $langs = new Translate("", $conf);
+            $langcode = (GETPOST('lang', 'aZ09', 1) ? GETPOST('lang', 'aZ09', 1) : (empty($conf->global->MAIN_LANG_DEFAULT) ? 'auto' : $conf->global->MAIN_LANG_DEFAULT));
+            if (defined('MAIN_LANG_DEFAULT'))
+                $langcode = constant('MAIN_LANG_DEFAULT');
+            $langs->setDefaultLang($langcode);
+        }
         $okSms = $okMail = false;
         $code = rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9);
         $this->user->array_options['options_code_sms'] = $code;
@@ -228,6 +236,26 @@ class securLogSms {
             setEventMessages($message, null, 'warnings');
             setEventMessages($message, null, 'warnings');
             setEventMessages($message, null, 'warnings');
+        }
+        
+        $tabMsg = array();
+        $tabMsg['newVersion'] = "Nouvelle version, si vous rencontrez des problèmes, les signaler au plus vite.<br/>debugerp@bimp.fr - 06 28 33 50 81";
+        
+        foreach($tabMsg as $name => $detailMsg){
+            if(!is_array($detailMsg))
+                $detailMsg = array("msg"=>$detailMsg);
+            if(!isset($detailMsg['mode']))
+                $detailMsg['mode'] = 'warnings';
+            if(!isset($detailMsg['nb']))
+                $detailMsg['nb'] = 3;
+            
+            if(!isset($_SESSION['msgsPerso'][$name]))
+                $_SESSION['msgsPerso'][$name] = 0;
+            if($_SESSION['msgsPerso'][$name] < $detailMsg['nb']){
+                setEventMessages($detailMsg['msg'], null, $detailMsg['mode']);
+                $_SESSION['msgsPerso'][$name]++;
+                
+            }
         }
     }
 

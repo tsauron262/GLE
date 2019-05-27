@@ -1,4 +1,5 @@
 <?php
+
 require_once DOL_DOCUMENT_ROOT . '/core/lib/date.lib.php';
 
 class BimpTicketRestaurant {
@@ -10,102 +11,55 @@ class BimpTicketRestaurant {
         $this->db = $db;
     }
 
-    public function getTicket() {
+    public function getTicket($id_user) {
 
         // Now
         $row_date = new DateTime('now');
         $month = $row_date->format('m');
         $year = $row_date->format('Y');
 
+
         $year -= 1; // TODO remove
         // Get date
         try {
-            $date_work_plus_1 = new DateTime($year . '-' . ((int) $month + 2));
-            $date_work = new DateTime($year . '-' . ((int) $month + 1));
-            $date_holiday = new DateTime($year . '-' . (int) $month);
-//            $date_expense_report = new DateTime($year . '-' . ((int) $month -1));
+            $date_debut = new DateTime($year . '-' . ((int) $month) . '-01');
+            $date_debut->sub(new DateInterval('P6M'));
+//            $nb_day_of_month = cal_days_in_month(CAL_GREGORIAN, $date_debut->format('m'), $date_debut->format('Y'));
+            $date_fin = clone($date_debut);
+            $date_fin->add(new DateInterval('P1M'));
+            $date_fin->sub(new DateInterval('P1D'));
+            $date_fin->sub(new DateInterval('P1D'));
         } catch (Exception $e) {
             $this->errors[] = $e->getMessage();
             return -1;
         }
 
-        $days_worked = num_open_day($date_work->getTimestamp(), $date_work_plus_1->getTimestamp(), 0, 1);
+        $days_worked = num_open_dayUser($id_user, $date_debut->getTimestamp(), $date_fin->getTimestamp(), 0, 1);
 
-        $holidays = $this->getHolidays($date_holiday);
+        $holidays = getNbHolidays($date_debut, $date_fin, $id_user);
 
-        $users = $this->getUsersAndInitTicketRestau($days_worked);
+        $nbNotefrais = 0;
 
-        foreach ($holidays as $h) {
-            if (isset($users[$h->fk_user]))
-                $users[$h->fk_user]->ticket_restau -= $h->ticket_to_remove;
+        $nbTicket = $days_worked - $holidays - $nbNotefrais;
+
+        if (1) {//debug
+            echo '<br/>Entre le ' . $date_debut->format('d/m/Y') . ' et le ' . $date_fin->format('d/m/Y') . ' il y a :';
+            echo '<br/>' . $days_worked . ' jour de travail';
+            echo '<br/>' . $holidays . ' congé';
+            echo '<br/>' . $nbNotefrais . ' note de frais';
+
+            echo '<br/>Soit ' . $nbTicket . ' tickets restaurant';
         }
 
-        $path_to_file = $this->exportCSV($users, $date_work);
-        $this->sendMailTR($path_to_file, $date_work);
+//        echo '<pre>';
+//        print_r($holidays);
+//        $path_to_file = $this->exportCSV($users, $date_work);
+//        $this->sendMailTR($path_to_file, $date_work);
+        //$this->exportCSV($users, $date_work);
         // TODO send email
-    }
 
-    private function getHolidays($date_month) {
-
-        $holidays = array();
-        $month_to_check = (int) $date_month->format('m');
-
-        $nb_day_of_month = cal_days_in_month(CAL_GREGORIAN, $date_month->format('m'), $date_month->format('Y'));
-
-
-        $sql = 'SELECT fk_user, date_debut, date_fin, type_conges';
-        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'holiday';
-        $sql .= ' WHERE statut=6';
-        $sql .= ' AND  (';
-        $sql .= '("' . $date_month->format('Y-m-1') . '" BETWEEN date_debut AND date_fin)';
-        $sql .= ' OR ("' . $date_month->format('Y-m-' . $nb_day_of_month) . '" BETWEEN date_debut AND date_fin)';
-        $sql .= ')';
-
-
-        // Retrieve holy days
-        $result = $this->db->query($sql);
-        while ($obj = $this->db->fetch_object($result)) {
-            $holidays[] = $obj;
-        }
-
-        foreach ($holidays as $i => $h) {
-            $date_start = new DateTime($h->date_debut);
-            $date_end = new DateTime($h->date_fin);
-
-            $h_month_start = (int) $date_start->format('m');
-            $h_month_end = (int) $date_end->format('m');
-
-            // Start and end are in the same month
-            if ($h_month_start == $h_month_end) {
-                $holidays[$i]->ticket_to_remove = num_open_day($date_start->getTimestamp(), $date_end->getTimestamp(), 0, 1);
-//                echo 'entre ' . $date_start->format('Y-m-d') . ' et ' . $date_end->format('Y-m-d') . ' il y a ' . $holidays[$i]->ticket_to_remove . '<br/>';
-                $holidays[$i]->id = 1;
-            }
-            // Overlap with previous month
-            elseif ($h_month_start < $month_to_check and ( $h_month_start + 1) == $month_to_check) {
-                $holidays[$i]->ticket_to_remove = num_open_day($date_month->getTimestamp(), $date_end->getTimestamp(), 0, 1);
-//                echo 'entre ' . $date_month->format('Y-m-d') . ' et ' . $date_end->format('Y-m-d') . ' il y a ' . $holidays[$i]->ticket_to_remove . '<br/>';
-                $holidays[$i]->id = 2;
-            }
-            // Overlap with next month
-            elseif ($month_to_check < $h_month_end and ( $month_to_check + 1) == $h_month_end) {
-                $date_end_month = new DateTime($date_start->format('Y-m-' . $nb_day_of_month));
-                $holidays[$i]->ticket_to_remove = num_open_day($date_start->getTimestamp(), $date_end_month->getTimestamp(), 0, 1);
-//                echo 'entre ' . $date_start->format('Y-m-d') . ' et ' . $date_end_month->format('Y-m-d') . ' il y a ' . $holidays[$i]->ticket_to_remove . '<br/>';
-                $holidays[$i]->id = 3;
-            }
-            // start and end in other month
-            else {
-                $date_end_month = new DateTime($date_start->format('Y-m-' . $nb_day_of_month));
-                $holidays[$i]->ticket_to_remove = num_open_day($date_month->getTimestamp(), $date_end_month->getTimestamp(), 0, 1);
-//                echo 'entre ' . $date_month->format('Y-m-d') . ' et ' . $date_end_month->format('Y-m-d') . ' il y a ' . $holidays[$i]->ticket_to_remove . '<br/>';
-                $holidays[$i]->id = 4;
-            }
-        }
-        return $holidays;
-    }
-
-    private function getUsersAndInitTicketRestau($ticket_restau) {
+        return $nbTicket;
+    }    private function getUsersAndInitTicketRestau($ticket_restau) {
         $users = array();
 
         $user_exclude = array(

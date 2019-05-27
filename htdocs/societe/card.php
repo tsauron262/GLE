@@ -383,7 +383,7 @@ if (empty($reshook))
             setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Code postal")), null, 'errors');
             $error++;
         }
-        if (GETPOST('zipcode') && strlen(GETPOST('zipcode')) < 5)
+        if (GETPOST('zipcode') && strlen(GETPOST('zipcode')) < 5 && GETPOST('country_id') == 1)
         {            
             setEventMessages($langs->trans("ErrorFieldFormat", $langs->transnoentitiesnoconv("Code postal")), null, 'errors');
             $error++;

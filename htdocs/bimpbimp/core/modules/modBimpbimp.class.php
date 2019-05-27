@@ -57,7 +57,8 @@ class modBimpbimp extends DolibarrModules {
         
         
         $this->module_parts = array(
-            'hooks' => array('contactcard')
+            'hooks' => array('contactcard'),
+            'triggers' => 1
         );
     }
 

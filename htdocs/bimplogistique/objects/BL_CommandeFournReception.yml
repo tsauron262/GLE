@@ -1,0 +1,215 @@
+table: bl_commande_fourn_reception
+common_fields: 1
+icon: fas_arrow-circle-down
+
+parent_module: bimpcommercial
+parent_object: Bimp_CommandeFourn
+parent_id_property: id_commande_fourn
+
+labels: 
+    name: réception
+    is_female: 1
+        
+objects: 
+    commande_fourn:
+        instance: 
+            id_object: 
+                field_value: id_commande_fourn
+    
+fields: 
+    id_commande_fourn: 
+        label: Commande fournisseur
+        type: id_parent
+        object: commande_fourn
+        required: 1
+        input: 
+            type: hidden
+        
+    id_entrepot: 
+        label: Entrepôt d'arrivée
+        type: id_object
+        object: entrepot
+        input: 
+            type: search_entrepot
+        required: 1
+        display: 
+            default: 
+                type: nom_url
+                
+    ref: 
+        label: Référence BR
+        required: 1
+    
+    status: 
+        label: Statut
+        type: int
+        values: 
+            array: status_list
+        default_value: 0
+            
+    num_reception:
+        label: Numéro de réception
+        type: int
+        default_value: 1
+        unsigned: 1
+        
+    date_received: 
+        label: Date de réception
+        type: datetime
+        input: 
+            display_now: 1
+        
+    info: 
+        label: Informations
+        type: text        
+        input: 
+            auto_expand: 1
+            rows: 1
+            
+    assign_lines_to_commandes_client:
+        label: Assigner les équipements reçus aux commandes client d'origine
+        type: bool
+        default_value: 1
+        
+forms: 
+    default: 
+        rows: 
+            - field: id_commande_fourn
+              hidden: 1
+            - field: id_entrepot
+            - field: ref
+            - field: assign_lines_to_commandes_client
+            - field: info
+#            - custom: 1
+#              label: Lignes commande fournisseur
+#              show: 
+#                  callback: isNotLoaded
+#              input_name: lines
+#              content: 
+#                  callback: renderCommandeFournLinesForm
+                  
+    validate: 
+        rows: 
+            - field: date_received
+            - custom: 1
+              label: Unités réceptionnées
+              input_name: lines
+              content: 
+                  callback: renderDetailsView
+                 
+fields_tables: 
+    data: 
+        title: Infos
+        panel: 1
+        rows: 
+            - field: id_commande_fourn
+              display: card
+            - field: ref
+            - field: status
+            - field: num_reception
+            - field: id_entrepot
+            - field: date_received
+            - field: info
+              edit: 1
+            
+views: 
+    default: 
+        rows: 
+            - cols: 
+                - type: object_header
+            
+            - cols: 
+                - type: fields_table
+                  fields_table: 
+                      name: data
+                      
+    details: 
+        rows: 
+            - cols: 
+                - type: custom
+                  custom: 
+                      callback: renderDetailsView
+                      
+lists_cols: 
+    commande: 
+        field: id_commande_fourn
+        display: nom_url
+    num_reception:
+        label: N°
+        field: num_reception
+        max_width: 30px
+    ref: 
+        field: ref
+    entrepot: 
+        field: id_entrepot
+        display: nom_url
+    status: 
+        field: status
+    date: 
+        label: Reçue le
+        field: date_received
+    info: 
+        field: info
+        edit: 1
+                    
+lists: 
+    default: 
+        sort_field: id
+        sort_way: desc
+        n: 25
+        edit_btn: 1
+        delete_btn: 1
+        update_btn: 1
+        edit_form: edit
+        modal_view: default
+        objects_change_reload: BR_Reservation
+        extra_btn: 
+            callback: getListsExtraBtn
+        cols:
+            commande: 
+            num_reception:
+            ref:
+            date: 
+            entrepot:
+                    
+    commandes_fourn: 
+        checkboxes: 1
+        bulk_actions: 
+            callback: getCommandesFournListbulkActions
+        enable_search: 0
+        pagination: 0
+        sort_field: id
+        sort_way: asc
+        n: 0
+        edit_btn: 1
+        update_btn: 1
+        add_btn: 1
+        add_btn_label: Nouvelle réception
+        add_form_name: default
+        delete_btn: 1
+        edit_form: default
+        modal_view: default
+        objects_change_reload: BR_Reservation
+        extra_btn: 
+            callback: getListsExtraBtn
+        cols:
+            num_reception:
+            ref:
+            status:
+            date: 
+            entrepot:
+            info: 
+                    
+cards: 
+    default: 
+        title: nom
+        fields: 
+            - label: N°
+              field: num_reception
+            - label: Ref. BR
+              field: ref
+            - label: Entrepôt
+              field: id_entrepot
+              display: nom_url
+            - label: Infos
+              field: info

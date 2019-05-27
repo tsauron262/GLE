@@ -28,7 +28,9 @@ class BimpTimer extends BimpObject
             $this->set('session_start', time());
         }
 
-        if (count($this->create($warnings, true))) {
+        $errors = $this->create($warnings, true);
+        
+        if (count($errors)) {
             return false;
         }
         return true;

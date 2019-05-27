@@ -21,6 +21,7 @@ class BimpCore
             '/bimpcore/views/js/view.js',
             '/bimpcore/views/js/viewsList.js',
             '/bimpcore/views/js/listCustom.js',
+            '/bimpcore/views/js/statsList.js',
             '/bimpcore/views/js/page.js',
             '/bimpcore/views/js/table2csv.js'
 
@@ -176,10 +177,10 @@ class BimpCore
 
     public static function getParam($full_path, $default_value = '', $type = 'string')
     {
-
-        if ($full_path == "pdf/primary")
-            return "EF7D00"; //"ff9300";
         if (is_null(self::$config)) {
+            if (!file_exists(DOL_DATA_ROOT. '/bimpcore/config.yml')) {
+                copy(DOL_DOCUMENT_ROOT.'/bimpcore/default_config.yml', DOL_DATA_ROOT.'/bimpcore/config.yml');
+            }
             if (file_exists(DOL_DATA_ROOT . '/bimpcore/config.yml')) {
                 self::$config = new BimpConfig(DOL_DATA_ROOT . '/bimpcore/', 'config.yml', new BimpObject('', ''));
             }

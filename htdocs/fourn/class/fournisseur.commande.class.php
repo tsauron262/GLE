@@ -1449,7 +1449,9 @@ class CommandeFournisseur extends CommonOrder
         include_once DOL_DOCUMENT_ROOT.'/core/lib/price.lib.php';
 
         // Clean parameters
-        if (! $qty) $qty=1;
+        /*moddrsi*/
+//        if (! $qty) $qty=1;
+        /*fmoddrsi*/
         if (! $info_bits) $info_bits=0;
         if (empty($txtva)) $txtva=0;
         if (empty($txlocaltax1)) $txlocaltax1=0;

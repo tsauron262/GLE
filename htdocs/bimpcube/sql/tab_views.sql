@@ -1721,6 +1721,60 @@ VIEW `llx_olap_view_transport` AS
 	`llx_mat_view_categorie`.`id_leaf` AS `id_leaf` 
 from `llx_mat_view_categorie` where `llx_mat_view_categorie`.`path` like '%Gamme > Transport%');
 --
+-- Final view structure for view llx_olap_view_gamme
+--
+DROP TABLE IF EXISTS `llx_olap_view_gamme`;
+DROP VIEW IF EXISTS `llx_olap_view_gamme`;
+CREATE 
+    ALGORITHM = UNDEFINED 
+    DEFINER = `root`@`%` 
+    SQL SECURITY DEFINER
+VIEW `llx_olap_view_gamme` AS
+    SELECT 
+        `llx_mat_view_categorie`.`rowid` AS `rowid`,
+        `llx_mat_view_categorie`.`type` AS `type`,
+        `llx_mat_view_categorie`.`path` AS `path`,
+        `llx_mat_view_categorie`.`lvl` AS `lvl`,
+        `llx_mat_view_categorie`.`root` AS `root`,
+        `llx_mat_view_categorie`.`id_root` AS `id_root`,
+        `llx_mat_view_categorie`.`subroot` AS `subroot`,
+        `llx_mat_view_categorie`.`id_subroot` AS `id_subroot`,
+        `llx_mat_view_categorie`.`rootsubroot` AS `rootsubroot`,
+        `llx_mat_view_categorie`.`level_1` AS `level_1`,
+        `llx_mat_view_categorie`.`id_level_1` AS `id_level_1`
+    FROM
+        `llx_mat_view_categorie`
+    WHERE
+        `llx_mat_view_categorie`.`path` LIKE '%Gamme >%'
+    GROUP BY `llx_mat_view_categorie`.`id_level_1`;
+--
+-- Final view structure for view llx_olap_view_recurr
+--
+DROP TABLE IF EXISTS `llx_olap_view_recurr`;
+DROP VIEW IF EXISTS `llx_olap_view_recurr`;
+CREATE 
+    ALGORITHM = UNDEFINED 
+    DEFINER = `root`@`%` 
+    SQL SECURITY DEFINER
+VIEW `llx_olap_view_recurr` AS
+    SELECT 
+        `llx_mat_view_categorie`.`rowid` AS `rowid`,
+        `llx_mat_view_categorie`.`type` AS `type`,
+        `llx_mat_view_categorie`.`path` AS `path`,
+        `llx_mat_view_categorie`.`lvl` AS `lvl`,
+        `llx_mat_view_categorie`.`root` AS `root`,
+        `llx_mat_view_categorie`.`id_root` AS `id_root`,
+        `llx_mat_view_categorie`.`subroot` AS `subroot`,
+        `llx_mat_view_categorie`.`id_subroot` AS `id_subroot`,
+        `llx_mat_view_categorie`.`rootsubroot` AS `rootsubroot`,
+        `llx_mat_view_categorie`.`level_1` AS `level_1`,
+        `llx_mat_view_categorie`.`id_level_1` AS `id_level_1`
+    FROM
+        `llx_mat_view_categorie`
+    WHERE
+        `llx_mat_view_categorie`.`path` LIKE '%Recurrence >%'
+    GROUP BY `llx_mat_view_categorie`.`id_level_1`;
+--
 -- Final view structure for view llx_olap_view_user
 --
 DROP TABLE IF EXISTS `llx_olap_view_user`;

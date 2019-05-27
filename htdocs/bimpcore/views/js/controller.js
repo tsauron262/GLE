@@ -1,11 +1,21 @@
 function loadTabContent(url, tab_name) {
     var $container = $('#controllerTabContentContainer');
     var $tabs = $('.tabs');
+    if (!$.isOk($tabs)) {
+        return;
+    }
+    
+    var $tab = $tabs.find('#'+tab_name);
+    
+    if (!$.isOk($tab)) {
+        return;
+    }
+
     $tabs.find('.tabactive').each(function () {
         $(this).removeClass('tabactive').addClass('tabunactive');
     });
 
-    $tabs.find('#' + tab_name).removeClass('tabunactive').addClass('tabactive');
+    $tab.removeClass('tabunactive').addClass('tabactive');
 
     if ($container.length) {
         $container.fadeOut(250, function () {
@@ -112,4 +122,20 @@ $(document).ready(function () {
     } else {
         $('#openModalBtn').css('bottom', '0');
     }
+
+    $('body').on('objectChange', function (e) {
+        reloadObjectHeader({
+            module: e.module,
+            object_name: e.object_name,
+            id_object: e.id_object
+        });
+    });
+
+    $('body').on('objectDelete', function (e) {
+        reloadObjectHeader({
+            module: e.module,
+            object_name: e.object_name,
+            id_object: e.id_object
+        });
+    });
 });

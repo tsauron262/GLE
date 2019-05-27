@@ -59,7 +59,7 @@ class BF_Demande extends BimpObject
 
     // Autorisations et droits:
 
-    public function isFieldEditable($field)
+    public function isFieldEditable($field, $force_edit = false)
     {
         if (in_array($field, array('duration', 'periodicity', 'vr', 'vr_vente', 'mode_calcul'))) {
             if ((int) $this->getData('accepted')) {
@@ -68,7 +68,7 @@ class BF_Demande extends BimpObject
             return 1;
         }
 
-        return parent::isFieldEditable($field);
+        return parent::isFieldEditable($field, $force_edit);
     }
 
     public function isActionAllowed($action, &$errors = array())

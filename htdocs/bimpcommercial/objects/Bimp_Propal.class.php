@@ -275,7 +275,6 @@ class Bimp_Propal extends BimpComm
                 }
 
                 // Classer facturée
-
                 if ($this->isActionAllowed('classifyBilled') && $this->canSetAction('classifyBilled')) {
                     $buttons[] = array(
                         'label'   => 'Classer facturée',
@@ -289,7 +288,9 @@ class Bimp_Propal extends BimpComm
                     $buttons[] = array(
                         'label'   => 'Cloner',
                         'icon'    => 'copy',
-                        'onclick' => $this->getJsActionOnclick('duplicate', array(), array(
+                        'onclick' => $this->getJsActionOnclick('duplicate', array(
+                            'datep' => date('Y-m-d')
+                        ), array(
                             'form_name' => 'duplicate_propal'
                         ))
                     );
@@ -419,12 +420,20 @@ class Bimp_Propal extends BimpComm
                         'label'       => $ref . '.pdf',
                         'icon_before' => 'fas_file-pdf',
                         'attr'        => array(
-                            'href' => $url,
+                            'href'   => $url,
                             'target' => '_blanck',
                         )
-            ), "a");
+                            ), "a");
         }
 
+        $html .= BimpRender::renderButton(array(
+                    'classes'     => array('btn', 'btn-default'),
+                    'label'       => 'Ancienne version',
+                    'icon_before' => 'fa_file',
+                    'attr'        => array(
+                        'href' => "../comm/propal/card.php?id=" . $this->id
+                    )
+                        ), "a");
 
         $html .= '</div>';
 

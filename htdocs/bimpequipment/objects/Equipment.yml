@@ -152,11 +152,15 @@ fields:
     warranty_type: 
         label: Type de garantie
         type: string
-            
+        
     prix_achat:
         label: Prix d'achat HT
         type: money
         default_value: 0
+        
+    achat_tva_tx: 
+        label: Tx TVA achat
+        type: percent
         
     prix_vente_except: 
         label: Prix de vente exceptionnel (TTC)
@@ -164,6 +168,10 @@ fields:
         default_value: 0
         input: 
             help: Laisser vide pour utiliser le prix de vente du produit
+            
+    vente_tva_tx: 
+        label: Tx TVA vente
+        type: percent
         
     prix_vente: 
         label: Prix de vente
@@ -247,6 +255,7 @@ fields_tables:
             - field: available
             - field: date_purchase
             - field: prix_achat
+            - field: achat_tva_tx
             - field: prix_vente_except 
             - field: warranty_type
             - field: date_warranty_end
@@ -298,7 +307,19 @@ views:
                             - type: fields_table
                               fields_table:
                                   name: vente
-                                  
+                              
+    full: 
+        rows: 
+            - cols: 
+                - type: view
+                  view: 
+                      name: default
+            - cols: 
+                - type: list
+                  list: 
+                      name: default
+                      children: places
+                      
     reservations: 
         panel: 0
         rows: 
@@ -317,7 +338,9 @@ forms:
             - field: available
             - field: date_purchase
             - field: prix_achat
+            - field: achat_tva_tx
             - field: prix_vente_except
+            - field: vente_tva_tx
             - field: origin_element
             - field: origin_id_element
             - field: warranty_type
@@ -338,6 +361,18 @@ forms:
             - field: date_warranty_end
             - association: contrats
             
+    light_place: 
+        rows: 
+            - field: serial
+            - field: id_product
+            - field: product_label
+            - field: type
+            - field: available
+            - field: date_purchase
+            - field: warranty_type
+            - field: date_warranty_end
+            - object: places
+            
 list:
     checkboxes: 1
     bulk_actions: 
@@ -351,6 +386,13 @@ list:
     list_filters: 
         callback:
             method: getListFilters
+    add_form_name: default
+    edit_btn: 1
+    update_btn: 1
+    delete_btn: 1
+    view_btn: 1
+    page_btn: 1
+    modal_view: full
     cols:
         id:
             label: ID
@@ -401,13 +443,6 @@ list:
         available: 
             field: available
             edit: 1
-    add_form_name: default
-    edit_btn: 1
-    update_btn: 1
-    delete_btn: 1
-    view_btn: 1
-    page_btn: 1
-    modal_view: default
     
 searches:
     default: 

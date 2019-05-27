@@ -8,23 +8,25 @@ class ObjectLineEquipment extends BimpObject
         $buttons = array();
 
         if ($this->isLoaded()) {
-            $objectLine = $this->getParentInstance();
-            if (BimpObject::objectLoaded($objectLine)) {
-                $onclick = $objectLine->getJsActionOnclick('attributeEquipment', array(
-                    'id_line_equipment' => (int) $this->id,
-                    'id_equipment'      => (int) $this->getData('id_equipment'),
-                    'pu_ht'             => (float) $this->getData('pu_ht'),
-                    'tva_tx'            => (float) $this->getData('tva_tx'),
-                    'id_fourn_price'    => (float) $this->getData('id_fourn_price'),
-                    'pu_ht'             => (float) $this->getData('pu_ht'),
-                        ), array(
-                    'form_name' => 'equipment'
-                ));
-                $buttons[] = array(
-                    'label'   => 'Editer',
-                    'icon'    => 'edit',
-                    'onclick' => $onclick
-                );
+            if ((int) $this->getData('id_equipment')) {
+                $objectLine = $this->getParentInstance();
+                if (BimpObject::objectLoaded($objectLine) && $objectLine->isActionAllowed('attributeEquipment')) {
+                    $onclick = $objectLine->getJsActionOnclick('attributeEquipment', array(
+                        'id_line_equipment' => (int) $this->id,
+                        'id_equipment'      => (int) $this->getData('id_equipment'),
+                        'pu_ht'             => (float) $this->getData('pu_ht'),
+                        'tva_tx'            => (float) $this->getData('tva_tx'),
+                        'id_fourn_price'    => (float) $this->getData('id_fourn_price'),
+                        'pu_ht'             => (float) $this->getData('pu_ht'),
+                            ), array(
+                        'form_name' => 'equipment'
+                    ));
+                    $buttons[] = array(
+                        'label'   => 'Editer',
+                        'icon'    => 'fas_edit',
+                        'onclick' => $onclick
+                    );
+                }
             }
         }
 
@@ -73,7 +75,7 @@ class ObjectLineEquipment extends BimpObject
                 if (!count($errors)) {
                     $this->updateField('id_equipment', (int) $id_equipment);
                     if (!is_null($equipment))
-                    $equipment->updateField('available', 0);
+                        $equipment->updateField('available', 0);
                 }
             }
         } else {

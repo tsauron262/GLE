@@ -1,6 +1,7 @@
 table: bic_user
 icon: fas_user
 controller: pageUser
+common_fields: 0
 
 objects:
     user_client_contrat:
@@ -78,6 +79,8 @@ fields:
         type: int
         values:
             array: role
+        default_value: 
+            callback: what_is_the_context
     status:
         label:
             callback:
@@ -95,7 +98,7 @@ fields:
                     - mustChangePassword
         type: bool
     lang:
-        label: Langue par defaut
+        label: Langue par défaut
         type: int
         values: 
             array: langs_list

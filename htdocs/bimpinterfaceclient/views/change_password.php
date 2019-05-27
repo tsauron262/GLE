@@ -5,7 +5,6 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <style type="text/css" >
-            @import url(https://fonts.googleapis.com/css?family=Montserrat);
             html {
                 background:#FFFFFF;
                 -webkit-background-size: cover;
@@ -63,7 +62,7 @@
                 border-bottom:2px solid #FBD75C;
             }
 
-            #email {
+            #confirme_password {
                 border-bottom:2px solid #F2B07E;
             }
 
@@ -116,7 +115,20 @@
             }
 
         </style>
-
+        
+        <script ype="text/javascript">
+            function verif_for_active_button() {
+                var password = document.getElementById('password').value;
+                var confirme = document.getElementById('confirme_password').value;
+                var btn = document.getElementById('button');
+                if(confirme == password && password != '' && confirme != '') {
+                    btn.style.display = 'block';
+                } else {
+                    btn.style.display = 'none';
+                }
+            }
+        </script>
+        
     </head>
     <body>
 
@@ -126,13 +138,15 @@
             echo DOL_URL_ROOT . '/viewimage.php?cache=1&modulepart=mycompany&file=' . $mysoc->logo
             ?>" style="width: 70%"> 
             <span>
-                <h4>Changement de votre mot de passe requis</h4>
+                <h4>Le changement de votre mot de passe est requis</h4>
                 <div id="erp_bimp">
                     <label for="password">Nouveau mot de passe</label>
                     <br />
                     <input id="password" type="password" name="new_password"  placeholder="Nouveau mot de passe">
+                    <br />
+                    <input id="confirme_password" onkeyup="verif_for_active_button()" type="password" name="confirme_password"  placeholder="Confirmer votre mot de passe">
                     <br /><br /><br />
-                    <input id="button" type="submit" value="Changer mon mot de passe">
+                    <input id="button" style="display:none" type="submit" value="Changer mon mot de passe">
                 </div>
         </form>
     </body>

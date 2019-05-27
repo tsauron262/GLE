@@ -657,16 +657,23 @@ function asPosition($str) {
 function mailSyn2($subject, $to, $from, $msg, $filename_list = array(), $mimetype_list = array(), $mimefilename_list = array(), $addr_cc = "", $addr_bcc = "", $deliveryreceipt = 0, $msgishtml = 1, $errors_to = '', $css = '') {
     global $dolibarr_main_url_root, $conf;
 
-    $subject = str_replace($dolibarr_main_url_root, DOL_URL_ROOT, $subject);
-    $msg = str_replace($dolibarr_main_url_root, DOL_URL_ROOT, $msg);
+    $subject = str_replace(array($dolibarr_main_url_root, $_SERVER['SERVER_NAME'].DOL_URL_ROOT), DOL_URL_ROOT, $subject);
+    $msg = str_replace(array($dolibarr_main_url_root, $_SERVER['SERVER_NAME'].DOL_URL_ROOT), DOL_URL_ROOT, $msg);
 
     $subject = str_replace(DOL_URL_ROOT, $dolibarr_main_url_root, $subject);
     $msg = str_replace(DOL_URL_ROOT . "/", $dolibarr_main_url_root . "/", $msg);
 
     $mailOk = true;
 
-    if ($from == '')
-        $from = 'Application BIMP-ERP ' . $conf->global->MAIN_INFO_SOCIETE_NOM . ' <gle@' . strtolower(str_replace(" ", "", $conf->global->MAIN_INFO_SOCIETE_NOM)) . '.fr>';
+    if ($from == ''){
+        $from = 'Application BIMP-ERP ' . $conf->global->MAIN_INFO_SOCIETE_NOM . ' <';
+        if(isset($conf->global->MAIN_INFO_SOCIETE_MAIL) && $conf->global->MAIN_INFO_SOCIETE_MAIL != '')
+            $from .= $conf->global->MAIN_INFO_SOCIETE_MAIL;
+        else
+            $from .= 'admin@' . strtolower(str_replace(" ", "", $conf->global->MAIN_INFO_SOCIETE_NOM)) . '.fr';
+        
+        $from .= '>';
+    }
 
     $toReplay = "Tommy SAURON <tommy@drsi.fr>";
     $ccAdmin = "";
@@ -1071,5 +1078,72 @@ function traiteNumMobile($to){
             $to = "+33" . substr($to, 1, 10);
         return $to;
 }
+
+function setUserJourConge($id_user){
+    global $jourCongeUser, $db;
+    $jourCongeUser = 6;
+    $userT = new User($db);
+    $userT->fetch($id_user);
+    if(isset($userT->array_options['options_j_repos']) && $userT->array_options['options_j_repos'])
+        $jourCongeUser = $userT->array_options['options_j_repos'];  
+//    echo 'jour :'.$jourCongeUser;
+}
+function num_open_dayUser($id_user, $timestampStart, $timestampEnd, $inhour=0, $lastday=0, $halfday=0, $country_code=''){
+    setUserJourConge($id_user);
+    return num_open_day($timestampStart, $timestampEnd, $inhour, $lastday, $halfday, $country_code);
+}
+function num_public_holidayUser($id_user, $timestampnum_public_holidayStart, $timestampEnd, $countrycode='FR', $lastday=0){
+    setUserJourConge($id_user);
+    return num_public_holiday($timestampnum_public_holidayStart, $timestampEnd, $countrycode, $lastday);
+}
+
+function getNbHolidays($date_debut, $date_fin, $id_user, $type = -1) {
+    global $db;
+        $holidays = array();
+
+
+        $sql = 'SELECT fk_user, date_debut, date_fin, type_conges, halfday, rowid';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'holiday';
+        $sql .= ' WHERE statut=6';
+        $sql .= ' AND  (';
+        $sql .= '(date_debut BETWEEN "' . $date_debut->format('Y-m-d') . '" AND "' . $date_fin->format('Y-m-d') . '")';
+        $sql .= ' OR (date_fin BETWEEN "' . $date_debut->format('Y-m-d') . '" AND "' . $date_fin->format('Y-m-d') . '")';
+        $sql .= ') AND fk_user = '.$id_user;
+        if($type >= 0){
+            $sql .= " AND type_conges =".$type;
+        }
+//die($sql);
+
+        // Retrieve holy days
+        $result = $db->query($sql);
+        $nb = 0;
+        while ($obj = $db->fetch_object($result)) {
+            $date_start = new DateTime($obj->date_debut);
+            $date_end = new DateTime($obj->date_fin);
+
+            $h_month_start = (int) $date_start->format('m');
+            $h_month_end = (int) $date_end->format('m');
+
+            // Start and end are in the same month
+            
+            if($date_start < $date_debut)
+                $date_start = $date_debut;
+            if($date_end > $date_fin)
+                $date_end = $date_fin;
+            
+//            $date_end->add(new DateInterval('PT1H'));
+//            $date_end_month = new DateTime($date_start->format('Y-m-' . $nb_day_of_month));
+            $obj->ticket_to_remove = num_open_dayUser($id_user, $date_start->getTimestamp(), $date_end->getTimestamp(), 0, 1, $obj->halfday);
+                
+            $nb += $obj->ticket_to_remove;
+            $holidays[] = $obj;
+        }
+        
+//        echo "<pre>";
+//        print_r($holidays);
+//        echo "</pre>";
+
+        return $nb;
+    }
 
 ?>

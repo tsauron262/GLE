@@ -3,7 +3,7 @@
 class BR_ReservationCmdFourn extends BimpObject
 {
 
-    public function getProductFournisseursArray()
+    public function getProdFournisseursArray()
     {
         $fournisseurs = array();
 
@@ -26,7 +26,7 @@ class BR_ReservationCmdFourn extends BimpObject
         return $fournisseurs;
     }
 
-    public function getProductFournisseursPricesArray()
+    public function getProdFournisseursPricesArray()
     {
         $id_product = (int) $this->getData('id_product');
         $id_price = (int) $this->getData('id_price');

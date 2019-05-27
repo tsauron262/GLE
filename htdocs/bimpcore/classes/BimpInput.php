@@ -18,6 +18,7 @@ class BimpInput
             global $db;
             $form = new Form($db);
         }
+
         $extra_class = isset($options['extra_class']) ? $options['extra_class'] : '';
 
         switch ($type) {
@@ -133,8 +134,11 @@ class BimpInput
                     $html .= '<span class="qtyUp">';
                     $html .= '<i class="fa fa-plus"></i>';
                     $html .= '</span>';
+                    if (isset($options['min_label']) && $options['min_label']) {
+                        $html .= '<span class="inputHelp max_label">' . ((isset($options['data']['min']) && $option['data']['min'] !== 'none') ? 'Min: ' . $options['data']['min'] : '') . '</span>';
+                    }
                     if (isset($options['max_label']) && $options['max_label']) {
-                        $html .= '<span class="inputHelp max_label">Max: ' . (isset($options['data']['max']) ? 'Max: ' . $options['data']['max'] : '') . '</span>';
+                        $html .= '<span class="inputHelp max_label">' . ((isset($options['data']['max']) && $option['data']['max'] !== 'none') ? 'Max: ' . $options['data']['max'] : '') . '</span>';
                     }
                     $html .= '</div>';
 
@@ -164,8 +168,11 @@ class BimpInput
                     $html .= '<span class="qtyUp">';
                     $html .= '<i class="fa fa-plus"></i>';
                     $html .= '</span>';
+                    if (isset($options['min_label']) && $options['min_label']) {
+                        $html .= '<span class="inputHelp max_label">' . ((isset($options['data']['min']) && $option['data']['min'] !== 'none') ? 'Min: ' . $options['data']['min'] : '') . '</span>';
+                    }
                     if (isset($options['max_label']) && $options['max_label']) {
-                        $html .= '<span class="inputHelp max_label">' . (isset($options['data']['max']) ? 'Max: ' . $options['data']['max'] : '') . '</span>';
+                        $html .= '<span class="inputHelp max_label">' . ((isset($options['data']['max']) && $option['data']['max'] !== 'none') ? 'Max: ' . $options['data']['max'] : '') . '</span>';
                     }
                     $html .= '</div>';
                 }
@@ -181,6 +188,9 @@ class BimpInput
                 if (!isset($options['note'])) {
                     $options['note'] = false;
                 }
+                if (!isset($options['tab_key_as_enter'])) {
+                    $options['tab_key_as_enter'] = false;
+                }
 
                 if (isset($options['maxlength']) && $options['maxlength']) {
                     $html .= '<p class="inputHelp" style="text-align: right">Caractères max: ' . $options['maxlength'] . '</p>';
@@ -188,7 +198,7 @@ class BimpInput
 
                 $html .= '<textarea id="' . $input_id . '" rows="' . $options['rows'] . '" name="' . $field_name . '"';
                 if ($options['auto_expand'] || $options['note']) {
-                    $html .= ' class="' . ($options['auto_expand'] ? 'auto_expand' : '') . ($options['note'] ? ' note' : '') . ' ' . $extra_class . '"';
+                    $html .= ' class="' . ($options['auto_expand'] ? 'auto_expand' : '') . ($options['note'] ? ' note' : '') . ($options['tab_key_as_enter'] ? ' tab_key_as_enter' : '') . ' ' . $extra_class . '"';
                     $html .= ' data-min_rows="' . $options['rows'] . '"';
                 }
                 if (isset($options['maxlength']) && $options['maxlength']) {
@@ -456,7 +466,7 @@ class BimpInput
                     }
                 }
                 $filter[] = 'status=1';
-                
+
 
                 $html .= $form->select_company((int) $value, $field_name, implode(" AND ", $filter), '', 0, 0, array(), 20);
                 break;
@@ -466,6 +476,13 @@ class BimpInput
                     $options['include_empty'] = 0;
                 }
                 $options['options'] = BimpCache::getUsersArray($options['include_empty']);
+                return self::renderInput('select', $field_name, $value, $options, $form, $option, $input_id);
+                
+            case 'search_group':
+                if (!isset($options['include_empty'])) {
+                    $options['include_empty'] = 0;
+                }
+                $options['options'] = BimpCache::getUserGroupsArray($options['include_empty']);
                 return self::renderInput('select', $field_name, $value, $options, $form, $option, $input_id);
 
             case 'search_contact':
@@ -590,7 +607,26 @@ class BimpInput
                         }
                     }
 
-                    $html = '<div class="check_list_container">';
+                    if (!isset($options['max'])) {
+                        $options['max'] = 'none';
+                    }
+
+                    $nb_selected = 0;
+
+                    $html = '<div class="check_list_container"';
+                    $html .= ' data-max="' . $options['max'] . '"';
+                    $html .= ' data-max_input_name="' . (isset($options['max_input_name']) ? $options['max_input_name'] : '') . '"';
+                    $html .= '>';
+                    if (count($options['items']) > 3 && (!isset($options['select_all_buttons']) || (int) $options['select_all_buttons'])) {
+                        $html .= '<div class="smallActionsContainer">';
+                        $html .= '<span class="small-action" onclick="checkAll($(this).parent().parent(), \'.' . $field_name . '_check\');">';
+                        $html .= BimpRender::renderIcon('fas_check-square', 'iconLeft') . 'Tout sélectionner';
+                        $html .= '</span>';
+                        $html .= '<span class="small-action" onclick="uncheckAll($(this).parent().parent(), \'.' . $field_name . '_check\');">';
+                        $html .= BimpRender::renderIcon('far_square', 'iconLeft') . 'Tout désélectionner';
+                        $html .= '</span>';
+                        $html .= '</div>';
+                    }
                     $i = 1;
                     foreach ($options['items'] as $idx => $item) {
                         if (is_array($item)) {
@@ -605,12 +641,22 @@ class BimpInput
                         $html .= '<div class="check_list_item">';
                         $html .= '<input type="checkbox" name="' . $field_name . '[]" value="' . $item_value . '" id="' . $input_id . '_' . $i . '_' . $rand . '"';
                         if (in_array($item_value, $value)) {
+                            $nb_selected++;
                             $html .= ' checked';
                         }
-                        $html .= '/>';
+                        $html .= ' class="' . $field_name . '_check check_list_item_input"/>';
                         $html .= '<label for="' . $input_id . '_' . $i . '_' . $rand . '">';
                         $html .= $item_label;
                         $html .= '</label>';
+                        $html .= '</div>';
+                    }
+
+                    if ($options['max'] !== 'none' || $options['max_input_name']) {
+                        $max = ($options['max'] !== 'none') ? (int) $options['max'] : 0;
+                        $html .= '<p class="small">Max: <span class="check_list_max_label">' . $max . '</span></p>';
+
+                        $html .= '<div class="check_list_max_alert"' . ($nb_selected > $max ? '' : ' style="display: none"') . '>';
+                        $html .= BimpRender::renderAlerts('Veuillez désélectionner <span class="check_list_nb_items_to_unselect">' . ($nb_selected - $max) . '</span> élément(s)', 'danger');
                         $html .= '</div>';
                     }
                     $html .= '</div>';
@@ -970,7 +1016,13 @@ class BimpInput
 
             $sql = 'SELECT ';
             $i = 1;
+            $fl = true;
             foreach ($field_return_label as $field_name) {
+                if (!$fl) {
+                    $sql .= ', ';
+                } else {
+                    $fl = false;
+                }
                 $sql .= $field_name . ' as label_' . $i;
                 $i++;
             }
@@ -1070,7 +1122,7 @@ class BimpInput
         return $html;
     }
 
-    public static function renderMultipleValuesInput($object, $input_name, $add_input_content, $values, $label_input_suffixe = '', $auto_save = false, $required = false, $sortable = false)
+    public static function renderMultipleValuesInput($object, $input_name, $add_input_content, $values, $label_input_suffixe = '', $auto_save = false, $required = false, $sortable = false, $max_values = 'none')
     {
         $html = '';
 
@@ -1085,12 +1137,12 @@ class BimpInput
         $content .= '</div>';
 
         $html = $content;
-        $html .= self::renderMultipleValuesList($object, $input_name, $values, $label_input_name, $auto_save, $required, $sortable);
+        $html .= self::renderMultipleValuesList($object, $input_name, $values, $label_input_name, $auto_save, $required, $sortable, $max_values);
 
         return $html;
     }
 
-    public static function renderMultipleValuesList(BimpObject $object, $field_name, $values, $label_input_name = null, $autosave = false, $required = 0, $sortable = 0)
+    public static function renderMultipleValuesList(BimpObject $object, $field_name, $values, $label_input_name = null, $autosave = false, $required = 0, $sortable = 0, $max_values = 'none')
     {
         if (is_null($values) || $values === '') {
             $values = array();
@@ -1126,6 +1178,7 @@ class BimpInput
             $html .= ' data-id_object="' . $object->id . '"';
         }
         $html .= ' data-required="' . $required . '"';
+        $html .= ' data-max_values="' . $max_values . '"';
         $html .= '>';
 
         $html .= '<div class="inputMultipleValues">';
@@ -1168,6 +1221,10 @@ class BimpInput
         $html .= '</table>';
         $html .= '</div>';
 
+        if ($max_values !== 'none') {
+            $html .= '<p class="inputHelp">Max: ' . $max_values . ' élément' . ((int) $max_values > 1 ? 's' : '') . '</p>';
+        }
+
         $html .= '</div>';
 
         return $html;
@@ -1178,13 +1235,18 @@ class BimpInput
         if (is_null($value)) {
             $value = '';
         }
+        
         if (is_array($value)) {
             $value = implode(',', $value);
         }
 
+        if (is_string($value)) {
+            $value = htmlentities($value);
+        }
+        
         $html .= '<div class="inputContainer ' . $field_prefix . $input_name . '_inputContainer ' . $extra_class . '"';
         $html .= ' data-field_name="' . $field_prefix . $input_name . '"';
-        $html .= ' data-initial_value="' . $value . '"';
+        $html .= ' data-initial_value="' . htmlentities($value) . '"';
         $html .= ' data-multiple="' . (int) $multiple . '"';
         $html .= ' data-field_prefix="' . $field_prefix . '"';
         $html .= ' data-required="' . (int) $required . '"';

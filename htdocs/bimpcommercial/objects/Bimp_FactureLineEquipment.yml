@@ -1,0 +1,7 @@
+
+extends: 
+    module: bimpcommercial
+    object_name: ObjectLineEquipment
+    
+parent_module: bimpcommercial
+parent_object: Bimp_FactureLine

@@ -254,6 +254,10 @@ function submitForm(form_id) {
         return;
     }
 
+    if (parseInt($form.data('no_auto_submit'))) {
+        return;
+    }
+
     var $modal = $form.findParentByClass('modal');
     if ($.isOk($modal)) {
         var modal_idx = parseInt($form.data('modal_idx'));
@@ -286,14 +290,14 @@ function loadObjectFormFromForm(title, result_input_name, parent_form_id, module
     var $form = $('#' + parent_form_id);
 
     if (!$form.length) {
-        bimp_msg('Une erreur est survenue. Impossible de charger le formulaire', 'danger');
+        bimp_msg('Une erreur est survenue. Impossible de charger le formulaire (1)', 'danger');
         return;
     }
 
     var $resultContainer = $form.find('#' + parent_form_id + '_result');
 
     if (!$resultContainer) {
-        bimp_msg('Une erreur est survenue. Impossible de charger le formulaire', 'danger');
+        bimp_msg('Une erreur est survenue. Impossible de charger le formulaire (2)', 'danger');
         return;
     }
 
@@ -387,7 +391,11 @@ function loadObjectFormFromForm(title, result_input_name, parent_form_id, module
                                                 bimpAjax.$parentFormSubmit.removeClass('disabled');
                                             }
                                             if (bimpAjax.result_input_name) {
+                                                var $resultInput = bimpAjax.$parentForm.find('[name="' + bimpAjax.result_input_name + '"]');
                                                 if (bimpAjax.reload_input) {
+                                                    if ($resultInput.length) {
+                                                        $resultInput.val(saveResult.id_object);
+                                                    }
                                                     var fields = getInputsValues(bimpAjax.$parentForm);
                                                     var $inputContainer = bimpAjax.$parentForm.find('.' + bimpAjax.result_input_name + '_inputContainer');
                                                     if ($inputContainer.data('multiple') || $inputContainer.find('.check_list_container').length) {
@@ -395,9 +403,8 @@ function loadObjectFormFromForm(title, result_input_name, parent_form_id, module
                                                     } else {
                                                         fields[bimpAjax.result_input_name] = saveResult.id_object;
                                                     }
-                                                    reloadObjectInput(bimpAjax.$parentForm.attr('id'), bimpAjax.result_input_name, fields);
+                                                    reloadObjectInput(bimpAjax.$parentForm.attr('id'), bimpAjax.result_input_name, fields, 1);
                                                 } else {
-                                                    var $resultInput = bimpAjax.$parentForm.find('[name="' + bimpAjax.result_input_name + '"]');
                                                     if ($resultInput.length) {
                                                         $resultInput.val(saveResult.id_object).change();
                                                     }
@@ -598,7 +605,7 @@ function reloadObjectInput(form_id, input_name, fields, keep_new_value) {
         if ($container.length) {
             is_object = 1;
         } else {
-            bimp_msg('Erreur: champ "' + input_name + '" non trouvé');
+            bimp_msg('Erreur: champ "' + input_name + '" non trouvé', 'warning');
         }
     }
 
@@ -776,6 +783,8 @@ function getFieldValue($form, field_name) {
     return '';
 }
 
+// Traitements des inputs: 
+
 function getInputsValues($container) {
     var values = {};
     $container.find('.inputContainer').each(function () {
@@ -863,6 +872,21 @@ function addMultipleInputCurrentValue($button, value_input_name, label_input_nam
 
     var $value_input = $inputContainer.find('[name=' + value_input_name + ']');
     var $label_input = $inputContainer.find('[name=' + label_input_name + ']');
+
+    var max_values = $container.data('max_values');
+    if (max_values !== 'none') {
+        max_values = parseInt(max_values);
+
+        var $items = $container.find('tbody.multipleValuesList').find('tr.itemRow');
+        if ($items.length >= max_values) {
+            var msg = 'Vous ne pouvez sélectionner qu\'au maximum ' + max_values + ' élément';
+            if (max_values > 1) {
+                msg += 's';
+            }
+            bimp_msg(msg, 'danger');
+            return;
+        }
+    }
 
     var value = '';
     var label = '';
@@ -1127,6 +1151,54 @@ function checkTextualInput($input, skip_min) {
     }
 }
 
+function checkTotalMaxQtyInput($input) {
+    if ($.isOk($input) && $input.hasClass('total_max')) {
+        var total_max_value = $input.data('total_max_value');
+        var inputs_class = $input.data('total_max_inputs_class');
+
+        if (typeof (total_max_value) !== 'undefined' && typeof (inputs_class) !== 'undefined') {
+            total_max_value = parseFloat(total_max_value);
+            if (!isNaN(total_max_value) && inputs_class !== '') {
+                var $inputsContainer = $input.findParentByClass(inputs_class + '_container');
+                if ($.isOk($inputsContainer)) {
+                    var total_set = 0;
+                    var $inputs = $inputsContainer.find('input.' + inputs_class);
+                    $inputs.each(function () {
+                        var val = parseFloat($(this).val());
+                        if (!isNaN(val)) {
+                            total_set += val;
+                        }
+                    });
+
+                    if (total_set > total_max_value) {
+                        var diff = total_set - total_max_value;
+                        var cur_val = parseFloat($input.val());
+                        if (isNaN(cur_val)) {
+                            cur_val = 0;
+                        }
+                        cur_val -= diff;
+                        $input.val(cur_val).change();
+                    } else {
+                        var remain = total_max_value - total_set;
+                        $inputs.each(function () {
+                            var val = parseFloat($(this).val());
+                            if (isNaN(val)) {
+                                val = 0;
+                            }
+                            var max = remain + val;
+                            $(this).data('max', max);
+                            var $label = $(this).parent().find('.max_label');
+                            if ($label.length) {
+                                $label.text('Max: ' + max);
+                            }
+                        });
+                    }
+                }
+            }
+        }
+    }
+}
+
 function displayInputMsg($input, msg, className) {
     if (typeof (className) === 'undefined') {
         className = 'info';
@@ -1301,6 +1373,10 @@ function resetInputValue($container) {
     var initial_value = $container.data('initial_value');
 
     if (typeof (initial_value) !== 'undefined') {
+        if (typeof (initial_value) === 'string' && initial_value) {
+            initial_value = bimp_htmlDecode(initial_value);
+        }
+
         var $input = $container.find('[name="' + input_name + '"]');
         if ($input.length) {
             $input.val(initial_value);
@@ -1312,6 +1388,36 @@ function resetInputValue($container) {
                     $container.find('.search_input_selected_label').hide().find('span').html('');
                 }
             }
+        }
+    }
+}
+
+function checkCheckList($container) {
+    var max = $container.data('max');
+
+    if (typeof (max) !== 'undefined' && max !== 'none') {
+        max = parseInt(max);
+
+        var $selected = $container.find('.check_list_item_input:checked');
+
+        if ($selected.length > max) {
+            $container.find('span.check_list_nb_items_to_unselect').text($selected.length - max);
+            $container.find('.check_list_max_alert').stop().slideDown(250);
+        } else {
+            $container.find('.check_list_max_alert').stop().slideUp(250);
+        }
+    }
+
+}
+
+function onCheckListMaxInputChange($container, $input) {
+    if ($.isOk($container) && $.isOk($input)) {
+        var max = $input.val();
+        if (!isNaN(max)) {
+            max = parseInt(max);
+            $container.data('max', max);
+            $container.find('.check_list_max_label').text(max);
+            checkCheckList($container);
         }
     }
 }
@@ -1934,51 +2040,60 @@ function setInputsEvents($container) {
     });
     $container.find('input.total_max').each(function () {
         $(this).change(function () {
-            var $input = $(this);
-            var total_max_value = $input.data('total_max_value');
-            var inputs_class = $input.data('total_max_inputs_class');
+            checkTotalMaxQtyInput($(this));
+        });
+    });
+    $container.find('.check_list_container').each(function () {
+        if (!parseInt($(this).data('check_list_events_init'))) {
+            var $checkListContainer = $(this);
+            $(this).find('.check_list_item_input').each(function () {
+                $(this).change(function () {
+                    var $checkListContainer = $(this).findParentByClass('check_list_container');
+                    if ($.isOk($checkListContainer)) {
+                        checkCheckList($checkListContainer);
+                    }
+                });
+            });
 
-            if (typeof (total_max_value) !== 'undefined' && typeof (inputs_class) !== 'undefined') {
-                total_max_value = parseFloat(total_max_value);
-                if (!isNaN(total_max_value) && inputs_class !== '') {
-                    var $inputsContainer = $input.findParentByClass(inputs_class + '_container');
-                    if ($.isOk($inputsContainer)) {
-                        var total_set = 0;
-                        var $inputs = $inputsContainer.find('input.' + inputs_class);
-                        $inputs.each(function () {
-                            var val = parseFloat($(this).val());
-                            if (!isNaN(val)) {
-                                total_set += val;
-                            }
+            var max_input_name = $(this).data('max_input_name');
+            if (max_input_name) {
+                var $form = $(this).findParentByClass('object_form');
+                if (!$.isOk($form)) {
+                    $form = $(this).findParentByTag('form');
+                }
+                if ($.isOk($form)) {
+                    var $input = $form.find('[name="' + max_input_name + '"]');
+                    if ($input.length) {
+                        $input.change(function () {
+                            onCheckListMaxInputChange($checkListContainer, $(this));
                         });
-
-                        if (total_set > total_max_value) {
-                            var diff = total_set - total_max_value;
-                            var cur_val = parseFloat($input.val());
-                            if (isNaN(cur_val)) {
-                                cur_val = 0;
-                            }
-                            cur_val -= diff;
-                            $input.val(cur_val).change();
-                        } else {
-                            var remain = total_max_value - total_set;
-                            $inputs.each(function () {
-                                var val = parseFloat($(this).val());
-                                if (isNaN(val)) {
-                                    val = 0;
-                                }
-                                var max = remain + val;
-                                $(this).data('max', max);
-                                var $label = $(this).parent().find('.max_label');
-                                if ($label.length) {
-                                    $label.text('Max: ' + max);
-                                }
-                            });
-                        }
+                        onCheckListMaxInputChange($checkListContainer, $input);
                     }
                 }
             }
-        });
+
+            checkCheckList($checkListContainer);
+            $(this).data('check_list_events_init', 1);
+        }
+    });
+    $container.find('.tab_key_as_enter').each(function () {
+        if (!parseInt($(this).data('tab_key_as_enter_event_init'))) {
+            $(this).keydown(function (e) {
+                if (e.key === 'Tab') {
+                    e.preventDefault();
+                    var val = $(this).val();
+                    val += "\n";
+                    $(this).val(val).change();
+                    checkInputAutoExpand(this);
+                }
+            });
+            $(this).change(function () {
+                var val = $(this).val();
+                val = val.replace("\t", "\n");
+                $(this).val(val);
+            });
+            $(this).data('tab_key_as_enter_event_init', 1);
+        }
     });
 }
 

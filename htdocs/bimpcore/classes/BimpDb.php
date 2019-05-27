@@ -12,6 +12,10 @@ class BimpDb
 
     public function insert($table, $data, $return_id = false)
     {
+        if (empty($data)) {
+            return 1;
+        }
+
         $fields = '(';
         $values = ' VALUES (';
 
@@ -52,6 +56,10 @@ class BimpDb
 
     public function update($table, $data, $where = '1')
     {
+        if (empty($data)) {
+            return 1;
+        }
+
         $sql = 'UPDATE ' . MAIN_DB_PREFIX . $table . ' SET ';
         $first_loop = true;
         foreach ($data as $name => $value) {

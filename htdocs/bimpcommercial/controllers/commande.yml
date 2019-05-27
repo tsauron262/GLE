@@ -21,11 +21,17 @@ sections:
             logistic: 
                 label: Logistique
                 show: 
-                    field_value: 
-                        field_name: fk_statut
+                    callback: 
+                        method: isLogistiqueActive
                         object: commande
                 module: bimplogistique
                 controller: commande
+                url_params: 
+                    id: 
+                        request: id
+            prepacommande: 
+                label: Prepa/Commande
+                url: ../Synopsis_PrepaCommande/prepacommande.php?new=1
                 url_params: 
                     id: 
                         request: id

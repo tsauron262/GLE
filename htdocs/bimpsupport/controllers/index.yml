@@ -22,7 +22,7 @@ objects:
                         
     sav_pret: 
         instance: 
-            bimp_object: BS_SavPret
+            bimp_object: BS_Pret
             
 sections:
     - type: tabs

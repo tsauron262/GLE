@@ -265,7 +265,7 @@ class BimpLivraison {
     }
 
     public function getNomUrl($withpicto = 0) {
-        $link = DOL_URL_ROOT . '/bimpequipment/manageequipment/viewOrderSupplier.php?id=' . $this->orderId;
+        $link = DOL_URL_ROOT . '/bimplogistique/index.php?fc=commandeFourn&id=' . $this->orderId;
         if ($withpicto == 0)
             $name = $this->ref;
         else

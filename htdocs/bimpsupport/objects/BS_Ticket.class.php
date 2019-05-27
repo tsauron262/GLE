@@ -12,11 +12,13 @@ class BS_Ticket extends BimpObject
     const BS_TICKET_CLOT = 999;
 
     public static $priorities = array(
+        0 => array('label' => ''),
         1 => array('label' => 'Non urgent', 'classes' => array('success'), 'icon' => 'hourglass-start'),
         2 => array('label' => 'Urgent', 'classes' => array('warning'), 'icon' => 'hourglass-half'),
         3 => array('label' => 'Très urgent', 'classes' => array('danger'), 'icon' => 'hourglass-end'),
     );
     public static $impacts = array(
+        0 => array('label' => ''),
         1 => array('label' => 'Faible', 'classes' => array('info'), 'icon' => 'star-o'),
         2 => array('label' => 'Moyen', 'classes' => array('warning'), 'icon' => 'star-half-o'),
         3 => array('label' => 'Haut', 'classes' => array('danger'), 'icon' => 'star'),
@@ -195,7 +197,7 @@ class BS_Ticket extends BimpObject
             unset($covers[1]);
         } else {
             unset($covers[2]);
-            unset($covers[3]);
+            //unset($covers[3]);
         }
 
         return $covers;
@@ -206,7 +208,7 @@ class BS_Ticket extends BimpObject
         $buttons = array();
         if ($this->isLoaded()) {
             $openInters = $this->getOpenIntersArray();
-            if (count($openInters) && BimpTools::getContext() == 'private') {
+            if (count($openInters) && BimpTools::getContext() != 'public') {
                 $buttons[] = array(
                     'label'   => 'Fermer des interventions',
                     'icon'    => 'fas_times',
@@ -215,7 +217,7 @@ class BS_Ticket extends BimpObject
                     ))
                 );
             }
-            if($this->getData('status') == self::BS_TICKET_DEMANDE_CLIENT && BimpTools::getContext() == 'private'){
+            if($this->getData('status') == self::BS_TICKET_DEMANDE_CLIENT && BimpTools::getContext() != 'public'){
                 $buttons[] = array(
                     'label' => 'Prendre en compte le ticket',
                     'icon' => 'fas_thumbs-up',
@@ -236,13 +238,10 @@ class BS_Ticket extends BimpObject
         global $user, $userClient;
         if($this->getData('id_user_client') > 0){
             $instance = BimpObject::getInstance('bimpinterfaceclient', 'BIC_UserClient', $this->getData('id_user_client'));
-            $listDest = $instance->getData('email');
-            $listDest .= $instance->get_dest('admin');
-            $commerciaux = BimpTools::getCommercialArray($instance->getData('attached_societe'));
-            foreach ($commerciaux as $id_commercial) {
-                $listDest .= ', ' . $id_commercial->email;
-            }
-            mailSyn2("BIMP CLIENT : Prise en compte du ticket : " . $this->getData('ticket_number'), $listDest, 'noreply@bimp.fr', "Votre ticket numéro ".$this->getData('ticket_number')." à été pris en compte par nos équipes<br /> Responssable de votre demande : " . $user->firstname . ' ' . $user->lastname);
+            $liste_destinataires = Array($instance->getData('email'));
+            $liste_destinataires = array_merge($liste_destinataires, $instance->get_dest('admin'));
+            $liste_destinataires = array_merge($liste_destinataires, $instance->get_dest('commerciaux'));
+            mailSyn2("BIMP CLIENT : Prise en compte du ticket : " . $this->getData('ticket_number'), implode(', ', $liste_destinataires), 'noreply@bimp.fr', "Votre ticket numéro ".$this->getData('ticket_number')." à été pris en compte par nos équipes<br /> Responssable de votre demande : " . $user->firstname . ' ' . $user->lastname);
         }
         $this->updateField('id_user_resp', $user->id);
         $this->updateField('status', self::BS_TICKET_EN_COURS);
@@ -537,6 +536,8 @@ class BS_Ticket extends BimpObject
         $errors = parent::create($warnings, $force_create);
 
         if (!count($errors)) {
+            $this->updateField('priorite_demande_client', $this->getData('priorite'));
+            $this->updateField('impact_demande_client', $this->getData('impact'));
             if ((int) BimpTools::getValue('start_timer', 0)) {
                 $timer = BimpObject::getInstance('bimpcore', 'BimpTimer');
                 if (!$timer->setObject($this, 'appels_timer', true)) {
@@ -550,6 +551,7 @@ class BS_Ticket extends BimpObject
 
     public function update(&$warnings, $force_update = false)
     {
+        global $userClient;
         if ((int) $this->getData('status') === self::BS_TICKET_CLOT) {
             $open_inters = $this->getOpenIntersArray();
             if (count($open_inters)) {
@@ -567,13 +569,29 @@ class BS_Ticket extends BimpObject
             return $errors;
         }
         
-        if($this->getData('status') == self::BS_TICKET_DEMANDE_CLIENT && $this->getData('id_user_client') > 0) {
+        if($this->getData('status') == self::BS_TICKET_DEMANDE_CLIENT && $this->getInitData('status') != self::BS_TICKET_DEMANDE_CLIENT && $this->getData('id_user_client') > 0 && BimpTools::getContext() == 'private') {
             return 'Impossible de repasser le ticket en demande client';
         }
         
         $errors = parent::update($warnings, $force_update);
         
         if(!count($errors) && $this->getData('id_user_client') > 0) {
+            
+            if(isset($userClient)) {
+                $this->updateField('priorite', $this->getData('priorite_demande_client'));
+                $this->updateField('impact', $this->getData('impact_demande_client'));
+            }
+            
+            if($this->getData('cover') == 3) {
+                // On envois un mail au commercial
+                $instance = $this->getInstance('bimpinterfaceclient', 'BIC_UserClient', $this->getData('id_user_client'));
+                $destinaitaire_commercial = $instance->get_dest('commerciaux');
+                $msg = 'Bonjour,<br />';
+                $msg .= 'Le ticket <a href="'.DOL_URL_ROOT .'/bimpsupport/index.php?fc=ticket&id='.$this->id.'">'.$this->getData('ticket_number').'</a>';
+                $msg .= '<br /><b style="color:red" >N\'est pas couvert par le contrat</b>';
+                mailSyn2('Demande client non couverte', implode(', ', $destinaitaire_commercial), 'noreply@bimp.fr', $msg);
+            }
+
             $instance = BimpObject::getInstance('bimpinterfaceclient', 'BIC_UserClient', $this->getData('id_user_client'));
             $listDest = $instance->getData('email');
             $commerciaux = BimpTools::getCommercialArray($instance->getData('attached_societe'));
@@ -581,7 +599,7 @@ class BS_Ticket extends BimpObject
                 $listDest .= ', ' . $id_commercial->email;
             }
             $listDest .= $instance->get_dest('admin');
-            mailSyn2('BIMP-CLIENT - Modification de votre ticket', $listDest, 'noreply@bimp.fr', 'Votre ticket ' . $this->getData('ticket_number') . ' à été modifier');
+            mailSyn2('BIMP-CLIENT - Modification de votre ticket', $listDest, 'noreply@bimp.fr', 'Votre ticket ' . $this->getData('ticket_number') . ' a été modifié');
         }
         
         if (!count($errors) && (int) $this->getData('status') === self::BS_TICKET_CLOT) {
@@ -655,13 +673,35 @@ class BS_Ticket extends BimpObject
         return 0;
     }
 
-    public function canClientCreate() {
-        $instance = $this->getInstance('bimpcontract', 'BContract_contrat', $_REQUEST['id']);
-        if($instance->getData('statut') == 1) {
-            return 1;
+    public function canClientCreate($id_contrat = 0) {
+        if($id_contrat == 0){
+            if(/*$this->isLoaded() && */$this->getData('id_contrat') > 0){
+                $id_contrat = $this->getData('id_contrat');
+            }
+            elseif(BimpTools::getValue("fc") == "contrat_ticket" && BimpTools::getValue("id") > 0){
+                $id_contrat = BimpTools::getValue("id");
+            }
         }
+        if($id_contrat > 0){
+            $instance = $this->getInstance('bimpcontract', 'BContract_contrat', $id_contrat);
+            if($id_contrat >0) {
+                if($instance->getData('statut') == 1) {
+                    return 1;
+                }
+            }
+        }
+        
         return 0;
         
+    }
+    
+    public function isFieldEditable($field) {
+        
+        if($field == 'sujet' && BimpTools::getContext() != "public") {
+            return $this->it_is_not_a_customer_requets();
+        }
+        
+        return parent::isFieldEditable($field);
     }
     
     public function it_is_a_customer_request() {

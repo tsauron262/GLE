@@ -53,13 +53,29 @@ objects:
             filters: 
                 type: 2
                 
-    shipments: 
-        relation: hasMany
+    shipment: 
+        relation: none
         delete: 0
+        instance: 
+            bimp_object: 
+                module: bimplogistique
+                name: BL_CommandeShipment
+                
+    old_shipments: 
+        relation: hasMany
+        delete: 1
         instance: 
             bimp_object: 
                 module: bimpreservation
                 name: BR_CommandeShipment
+                
+    shipments: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: 
+                module: bimplogistique
+                name: BL_CommandeShipment
                 
     fournisseur_price: 
         relation: none
@@ -82,8 +98,26 @@ objects:
             values:
                 fields: 
                     parent_object_name: Bimp_Commande
+                    
+    user_resp: 
+        extends: user
+        instance: 
+            id_object: 
+                field_value: id_user_resp
+                
+    client_facture: 
+        extends: client
+        instance: 
+            id_object: 
+                field_value: id_client_facture
                 
 associations: 
+    factures: 
+        object: facture
+        label: Factures
+        display: 
+            default: 
+                type: nom_url
     avoirs: 
         object: facture
         label: Avoirs
@@ -92,14 +126,6 @@ associations:
                 type: nom_url
                 
 fields: 
-    entrepot: 
-        label: Entrepôt
-        dol_extra_field: 1
-        type: id_object
-        object: entrepot
-        input: 
-            type: search_entrepot
-            
     validComm:
         label: Validation Commerciale
         type: bool
@@ -109,17 +135,6 @@ fields:
         label: Validation Financiére
         type: bool
         edit: 0
-            
-    ef_type: 
-        label: Secteur
-        dol_extra_field: 1
-        values: 
-            array: secteurs
-        required: 1
-            
-    libelle: 
-        label: Libellé
-        dol_extra_field: 1
         
     id_facture: 
         label: Facture globale
@@ -147,20 +162,16 @@ fields:
         label: Fermée le
         type: datetime
         
-    fk_user_modif: 
-        label: Dernière modification par
-        type: int
-        default_value: 0
+#    fk_user_modif: 
+#        label: Dernière modification par
+#        type: int
         
     fk_user_valid: 
-        label: Validée par
-        type: int
-        default_value: 0
+        dol_prop: user_valid
         
-    fk_user_cloture: 
-        label: Fermée par
-        type: int
-        default_value: 0
+#    fk_user_cloture: 
+#        label: Fermée par
+#        type: int
         
     date_livraison: 
         label: Date prévue de livraison
@@ -169,13 +180,55 @@ fields:
     total_ttc: 
         label: Total TTC
         type: money
+    
+    logistique_status: 
+        label: Statut logistique
+        type: int
+        values: 
+            array: logistique_status
+        default_value: 0
+        
+    shipment_status: 
+        label: Statut expédition
+        type: int
+        values: 
+            array: shipment_status
+        default_value: 0
+            
+    invoice_status: 
+        label: Statut facturation
+        type: int
+        values: 
+            array: invoice_status
+        default_value: 0
+        
+    id_user_resp: 
+        label: Responsable logistique
+        type: id_object
+        object: user_resp
+        default_value: 0
         
     total: unset
+    
+    id_client_facture: 
+        label: Client facturation
+        type: id_object
+        object: client_facture
+        default_value: 
+            field_value: 0
+        input: 
+            type: search_societe
+            societe_type: customer
+            card: default
+            help: Laissez vide si même client
         
 fields_tables: 
     infos: 
         rows: 
             - field: fk_statut
+            - field: logistique_status
+            - field: shipment_status
+            - field: invoice_status
             - field: entrepot
               display: nom_url
               edit: 1
@@ -208,6 +261,10 @@ fields_tables:
         rows: 
             - field: fk_soc
               display: card
+            - field: id_client_facture
+              display: card
+              show: 
+                  field_value: id_client_facture
             - field: ref_client
               edit: 
                   callback: isEditable
@@ -231,6 +288,29 @@ fields_tables:
             - field: tva
             - field: total_ttc
                   
+views: 
+    default: 
+        objects_change_reload: Bimp_CommandeLine,ObjectLineRemise,BimpFile
+    content_infos: 
+        objects_change_reload: Bimp_CommandeLine,ObjectLineRemise,BimpFile
+    full: 
+        objects_change_reload: Bimp_CommandeLine,ObjectLineRemise,BimpFile
+    commandes_fourn: 
+        title: Liste des commandes fournisseurs
+        icon: fas_cart-arrow-down
+        objects_change_reload: Bimp_CommandeLine,BR_Reservation,Bimp_CommandeFournLine
+        rows: 
+            - cols:
+                - type: custom
+                  custom:  
+                      callback: renderCommandeFournisseursList
+    logistique_equipments: 
+        rows: 
+            - cols: 
+                - type: custom
+                  custom: 
+                      callback: renderLogistiqueEquipmentsView
+        
 forms: 
     default: 
         msgs:
@@ -239,30 +319,21 @@ forms:
             - field: libelle
             - field: entrepot
               show: 
-                  callback: isEditable
+                  callback: areLinesEditable
             - field: ef_type
             - field: fk_soc
               show: 
                   callback: isNotLoaded
+            - field: id_client_facture
             - field: ref_client
             - field: fk_input_reason
               show: 
                   callback: isEditable
             - field: fk_cond_reglement
-              show: 
-                  callback: isEditable
             - field: fk_mode_reglement
-              show: 
-                  callback: isEditable
             - field: date_commande
-              show: 
-                  callback: isEditable
             - field: date_livraison
-              show: 
-                  callback: isEditable
             - field: fk_availability
-              show: 
-                  callback: isEditable
             - field: model_pdf
               show: 
                   callback: isNotLoaded
@@ -279,7 +350,7 @@ forms:
               input: 
                   type: hidden
               value: 
-                  request: param_values/fields/origin
+                  request_field: origin
             - custom: 1
               hidden: 1
               label: ID élément d'origine
@@ -287,7 +358,7 @@ forms:
               input: 
                   type: hidden
               value: 
-                  request: param_values/fields/origin_id
+                  request_field: origin_id
             - custom: 1
               hidden: 1
               input_name: close_propal
@@ -295,147 +366,6 @@ forms:
                   type: hidden
               value: 
                   request: param_values/fields/close_propal
-            
-    remove_lines: 
-        title: Retirer des produits / services
-        rows: 
-            - object: order_lines
-              label: Produits / Services
-              form_name: remove
-              multiple: 1
-              on_edit: 1
-              
-    facture:
-        title: Créer une facture à partir des produits non facturés de cette commande
-        rows: 
-            - custom: 1
-              label: Conditions de réglement
-              input_name: cond_reglement
-              value: 
-                  callback: getCommandeCondReglement
-              input: 
-                  type: select_cond_reglement
-            - custom: 1
-              label: Compte financier
-              input_name: id_account
-              data_type: id_object
-              input: 
-                  type: select_mysoc_account
-              required: 1
-            - custom: 1
-              label: Avoirs client à utiliser
-              input_name: id_remises_list
-              input: 
-                  multiple: 1
-                  type: select_remises
-                  id_client:
-                      prop:
-                          name: socid
-                          object:
-                              prop: dol_object
-            - custom: 1
-              label: Note publique
-              input_name: note_public
-              data_type: text
-              input: 
-                  type: textarea
-                  rows: 3
-                  auto_expand: 1
-              value: 
-                  prop: 
-                      name: note_public
-                      object: 
-                          prop: dol_object
-                  
-            - custom: 1
-              label: Note privée
-              input_name: note_private
-              data_type: text
-              input: 
-                  type: textarea
-                  rows: 3
-                  auto_expand: 1
-              value: 
-                  prop: 
-                      name: note_private
-                      object: 
-                          prop: dol_object
-                  
-    add_line: 
-        title: Ajouter un produit / service
-        rows: 
-            - custom: 1
-              label: Produit / Service
-              data_type: id_object
-              input_name: id_product
-              input: 
-                  type: search_product
-              required: 1
-            - custom: 1
-              label: Quantité
-              input_name: qty
-              data_type: int
-              input: 
-                  type: qty
-              value: 1
-              min: 1
-            - custom: 1
-              label: Réduction
-              input_name: reduc
-              data_type: percent
-              input: 
-                  type: text
-            - custom: 1
-              label: Prix d'achat
-              input_name: id_fournisseur_price
-              data_type: id_object
-              object: fournisseur_price
-              input: 
-                  type: select
-                  options:
-                      array: productFournisseursPrices
-              display_if: 
-                  field_name: id_product
-                  hide_values: 0,
-              depends_on: id_product
-              create_form: default
-              create_form_values: 
-                  fields: 
-                      fk_product: 
-                          request: fields/id_product
-              value: 
-                  request: fields/id_fournisseur_price
-            - custom: 1
-              label: Description
-              input_name: desc
-              data_type: html
-              input: 
-                  type: html
-            - custom: 1
-              label: Service à durée limitée
-              input_name: limited
-              data_type: bool
-              input: 
-                  type: toggle
-              value: 0
-            - custom: 1
-              label: Du
-              input_name: date_start
-              data_type: date
-              input: 
-                  type: date
-              display_if: 
-                  field_name: limited
-                  show_values: 1
-            - custom: 1
-              label: Au
-              input_name: date_end
-              data_type: date
-              input: 
-                  type: date
-              display_if: 
-                  field_name: limited
-                  show_values: 1 
                   
     duplicate:
         rows: 
@@ -450,9 +380,189 @@ forms:
             6: 
                 field: fk_availability
                   
+    shipment: 
+        title: Expédition
+        icon: fas_shipping-fast
+        rows: 
+            - custom: 1
+              label: Expédition
+              input_name: id_shipment
+              data_type: id_object
+              object: shipment
+              create_form: default
+              create_form_values: 
+                  fields: 
+                      id_commande_client: 
+                          field_value: id_obj
+              card: default
+              content: 
+                  callback: renderShipmentsInput
+            - custom: 1
+              label: Lignes
+              hidden: 1
+              input_name: shipment_lines_list
+              content: 
+                  callback: renderShipmentLinesListInput
+            - custom: 1
+              label: Quantités et équipements
+              input_name: shipment_lines
+              content: 
+                  callback: renderShipmentLinesInputs
+              depends_on: id_shipment,shipment_lines_list
+        
+    invoice: 
+        title: Facturation
+        icon: fas_file-invoice-dollar
+        rows: 
+            - custom: 1
+              label: Facture
+              input_name: id_facture
+              data_type: id_object
+              card: default
+              content: 
+                  callback: renderFacturesInput
+              hidden: 
+                  request_field: new_facture
+            - custom: 1
+              label: Client
+              input_name: id_client_facture
+              data_type: id_object
+              object: client_facture
+              card: default
+              input: 
+                  type: search_societe
+                  societe_type: customer
+              display_if: 
+                  field_name: id_facture
+                  show_values: 0
+            - custom: 1
+              label: Contact
+              input_name: id_contact
+              data_type: id
+              input: 
+                  type: select
+                  options: 
+                      array: clientFactureContacts
+              display_if: 
+                  field_name: id_facture
+                  show_values: 0
+              depends_on: id_client_facture
+            - custom: 1
+              label: Conditions de réglement
+              input_name: id_cond_reglement
+              data_type: id
+              input: 
+                  type: select_cond_reglement
+              display_if: 
+                  field_name: id_facture
+                  show_values: 0
+              depends_on: id_client_facture
+              value: 
+                  callback: getCondReglementBySociete
+            - custom: 1
+              label: Compte financier
+              input_name: id_account
+              data_type: id_object
+              input: 
+                  type: select_mysoc_account
+              required: 1
+              display_if: 
+                  field_name: id_facture
+                  show_values: 0
+            - custom: 1
+              label: Avoirs client à utiliser
+              input_name: id_remises_list
+              input: 
+                  multiple: 1
+                  type: select_remises
+                  id_client:
+                      request_field: id_client_facture
+              depends_on: id_client_facture
+              display_if: 
+                  field_name: id_facture
+                  show_values: 0
+            - custom: 1
+              label: Note publique
+              input_name: note_public
+              data_type: text
+              input: 
+                  type: textarea
+                  rows: 3
+                  auto_expand: 1
+              display_if: 
+                  field_name: id_facture
+                  show_values: 0
+            - custom: 1
+              label: Note privée
+              input_name: note_private
+              data_type: text
+              input: 
+                  type: textarea
+                  rows: 3
+                  auto_expand: 1
+              display_if: 
+                  field_name: id_facture
+                  show_values: 0
+            - custom: 1
+              label: Lignes
+              hidden: 1
+              input_name: facture_lines_list
+              content: 
+                  callback: renderFactureLinesListInput
+            - custom: 1
+              label: Quantités et équipements
+              input_name: facture_lines
+              content: 
+                  callback: renderFactureLinesInputs
+              depends_on: id_facture,facture_lines_list
+                  
+    shipment_equipments:
+        title: Attribution d'équipements à une expédition
+        icon: fas_arrow-circle-right
+        rows: 
+            - custom: 1
+              hidden: 1
+              label: Réservations sélectionnées
+              input_name: reservations
+              input: 
+                  type: hidden
+            - custom: 1
+              label: Expédition
+              input_name: id_shipment
+              data_type: id_object
+              required: 1
+              object: shipment
+              input: 
+                  type: select
+                  options: 
+                      array: shipments
+                  card: default
+            - custom: 1
+              label: Equipements
+              input_name: equipments
+              content: 
+                  callback: renderEquipmentsToAddToShipmentCheckList
+              depends_on: id_shipment,reservations
+            
+filters_panels: 
+    default: 
+        filters: 
+            id_user_resp: 
+                field: id_user_resp
+            total_ttc: 
+                field: total_ttc
+            date_create: 
+                field: date_creation
+            logistique_status:
+                field: logistique_status
+            shipment_status: 
+                field: shipment_status
+            invoice_status: 
+                field: invoice_status
+            date_livraison: 
+                field: date_livraison
+            
 lists_cols: 
-    ef_type:
-        field: ef_type
     date_create: 
         field: date_creation
         date_commande:
@@ -462,8 +572,6 @@ lists_cols:
         field: date_livraison
     total_ttc: 
         field: total_ttc
-    libelle: 
-        field: libelle
     facture: 
         field: id_facture
         display: nom_url
@@ -475,33 +583,32 @@ lists_cols:
         label: Valid. fin.
         field: validFin
         max_width: 45px
-    
+    logistique_status:
+        field: logistique_status
+    shipment_status: 
+        field: shipment_status
+    invoice_status: 
+        field: invoice_status
+    id_user_resp: 
+        field: id_user_resp
+    client_facture:
+        field: id_client_facture
+        display: nom_url
+        
 lists: 
     default: 
         title: Liste des commandes
         icon: fas_dolly
-        configurable: 1
-        checkboxes: 1
         bulk_actions:
             - label: supprimer les commandes sélectionnées
-              icon: fas_trash-alt
-              onclick: deleteSelectedObjects('list_id', $(this))
         sort_field: date_creation
         sort_way: desc
-        n: 10
-        add_form_name: default
         add_form_values: 
             fields: 
                 entrepot: 
                     request: id_entrepot
                 fk_soc:
                     request: id_client
-        edit_btn: 1
-        edit_form: default
-        delete_btn: 
-            callback: isDeletable
-        modal_view: full
-        page_btn: 1
         cols: 
             ref: 
             statut: 
@@ -510,3 +617,22 @@ lists:
             soc:
             date_create: 
             total_ttc:
+    client: 
+        extends: default
+        cols: 
+            client: unset
+            
+searches:
+    default: 
+        fields_search: 
+            - a.ref
+            - ef.libelle
+            - s.nom
+        joins:
+            - table: propal_extrafields
+              on: a.rowid = ef.fk_object
+              alias: ef
+            - table: societe
+              on: a.fk_soc = s.rowid
+              alias: s
+

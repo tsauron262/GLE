@@ -1,3 +1,7 @@
+#NOTE IMPORTANTE: 
+#    NE PAS INTERCALER NE NOUVEAUX CHAMPS DANS LE FORM DEFAULT (PLUSIEURS EXTENSIONS UTILISENT DES CLES NU%ERIQUES) 
+#   AJOUTER DES NOUVEAUX CHAMPS EN LES PLACANT UNIQUEMENT A LA FIN DU FORMULAIRE
+
 positions: 1
 position_insert: after
 common_fields: 0
@@ -33,6 +37,15 @@ objects:
                 module: bimpcommercial
                 name: ObjectLineRemise
                 
+    equipment: 
+        relation: none
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpequipment
+                name: Equipment
+            id_object: unset
+            
 fields: 
     id_obj: 
         label: Objet parent
@@ -56,6 +69,13 @@ fields:
         values: 
             array: types
         required: 1
+        
+#    label: 
+#        label: Libellé
+#        display_if: 
+#            field_name: type
+#            hide_values: 3
+#        depends_on: id_product
         
     deletable: 
         label: Supprimable
@@ -92,6 +112,25 @@ fields:
         type: percent
         default_value: 0
         decimals: 8
+        
+    remise_pa: 
+        label: Remise sur le prix d'achat
+        type: percent
+        default_value: 0
+        decimals: 8
+        
+    remise_crt: 
+        label: Remise CRT 
+        type: bool
+        default_value: 0
+        
+    hide_product_label: 
+        label: Ne pas afficher l'intitulé du produit
+        type: bool
+        default_value: 0
+        display_if: 
+            field_name: type
+            show_values: 1
 
 forms: 
     default: 
@@ -100,203 +139,230 @@ forms:
                 remises: 
                     callback: getClientDefaultRemiseFormValues
         rows: 
-            - field: id_parent_line
-              
-            - field: type
-              hidden: 
-                  field_value: id
-            
-            - custom: 1
-              label: Produit
-              value: 
-                  callback: getIdProductFromPost
-              input_name: id_product
-              content: 
-                  callback: 
-                      method: renderLineInput
-                      params: 
-                          - id_product
-              display_if: 
-                  field_name: type
-                  hide_values: 2
-              show:
-                  callback: isProductEditable
-                          
-            - custom: 1
-              label: Prix unitaire HT
-              value: 
-                  prop: pu_ht
-              input_name: pu_ht
-              content: 
-                  callback: 
-                      method: renderLineInput
-                      params: 
-                          - pu_ht
-              display_if: 
-                  field_name: type
-                  show_values: 1
-              depends_on: id_product
-              
-            - custom: 1
-              label: Taux de TVA
-              value: 
-                  prop: tva_tx
-              input_name: tva_tx
-              content: 
-                  callback: 
-                      method: renderLineInput
-                      params: 
-                          - tva_tx
-              display_if: 
-                  field_name: type
-                  show_values: 1
-              depends_on: id_product
-              
-            - custom: 1
-              label: Quantité
-              value: 
-                  prop: qty
-              input_name: qty
-              content: 
-                  callback: 
-                      method: renderLineInput
-                      params: 
-                          - qty
-              display_if: 
-                  field_name: type
-                  show_values: 1
-              depends_on: id_product
-                  
-#            - custom: 1
-#              label: Remise
-#              value: 
-#                  prop: remise
-#              input_name: remise
-#              content: 
-#                  callback: 
-#                      method: renderLineInput
-#                      params: 
-#                          - remise
-#              display_if: 
-#                  field_name: type
-#                  show_values: 1
-            
-            - custom: 1
-              label: Prix d'achat
-              input_name: id_fourn_price
-              data_type: id_object
-              object: fournisseur_price
-              content: 
-                  callback: 
-                      method: renderLineInput
-                      params: 
-                          - id_fourn_price
-              display_if: 
-                  field_name: type
-                  show_values: 1
-              depends_on: id_product
-              create_form: 
-                  callback: getFournisseurPriceCreateForm
-              create_form_values: 
-                  fields: 
-                      fk_product: 
-                          callback: getIdProductFromPost
-              value: 
-                  callback: getIdFournPriceFromPost
-                  
-            - custom: 1
-              label: Service à durée limitée
-              input_name: limited
-              data_type: bool
-              input: 
-                  type: toggle
-              value: 
-                  callback: isLimited
-              display_if: 
-                  field_name: type
-                  show_values: 1
-                  
-            - custom: 1
-              label: Du
-              input_name: date_from
-              data_type: date
-              content: 
-                  callback: 
-                      method: renderLineInput
-                      params: 
-                          - date_from
-              display_if: 
-                  fields_names: type,limited
-                  type: 
-                      show_values: 1
-                  limited: 
-                      hide_values: 0
-                          
-            - custom: 1
-              label: Au
-              input_name: date_to
-              data_type: date
-              content: 
-                  callback: 
-                      method: renderLineInput
-                      params: 
-                          - date_to
-              display_if: 
-                  fields_names: type,limited
-                  type: 
-                      show_values: 1
-                  limited: 
-                      hide_values: 0
-                      
-            - custom: 1
-              label: Marges
-              input_name: margins_table
-              content: 
-                  callback: renderFormMargins
-              show: 
-                  callback: showMarginsInForms
-              display_if: 
-                  field_name: type
-                  hide_values: 2
-              
-            - custom: 1
-              label: Description
-              value: 
-                  prop: desc
-              input_name: desc
-              content: 
-                  callback: 
-                      method: renderLineInput
-                      params: 
-                          - desc
-            
-            - field: force_qty_1
-                     
-            - custom: 1
-              label: Remises autorisées
-              input_name: remisable
-              content: 
-                  callback: 
-                      method: renderLineInput
-                      params:
-                          - remisable
-              depends_on: id_product
-              display_if: 
-                  field_name: type
-                  show_values: 1
-              
-            - object: remises
-              multiple: 1
-              form_values: 
-                  fields: 
-                      object_type: 
-                          callback: getParentCommType
-              display_if: 
-                  fields_names: type,remisable
-                  type: 
-                      show_values: 1
-                  remisable: 
-                      hide_values: 0
+            id_parent_line: 
+                field: id_parent_line
+            type: 
+                field: type
+                show: 
+                    callback: isNotLoaded
+            type_edit: 
+                custom: 1
+                show: 
+                    callback: isLoaded
+                hidden: 1
+                input: 
+                    type: hidden
+                input_name: type
+                data_type: 1
+                value: 
+                    field_value: type
+            product: 
+                custom: 1
+                label: Produit
+                value: 
+                    callback: getIdProductFromPost
+                input_name: id_product
+                content: 
+                    callback: 
+                        method: renderLineInput
+                        params: 
+                            - id_product
+                display_if: 
+                    field_name: type
+                    hide_values: 2,3
+                show:
+                    callback: isProductEditable
+            pu_ht: 
+                custom: 1
+                label: Prix unitaire HT
+                value: 
+                    prop: pu_ht
+                input_name: pu_ht
+                content: 
+                    callback: 
+                        method: renderLineInput
+                        params: 
+                            - pu_ht
+                display_if: 
+                    field_name: type
+                    show_values: 1,3
+                depends_on: id_product
+            tva_tx: 
+                custom: 1
+                label: Taux de TVA
+                value: 
+                    prop: tva_tx
+                input_name: tva_tx
+                content: 
+                    callback: 
+                        method: renderLineInput
+                        params: 
+                            - tva_tx
+                display_if: 
+                    field_name: type
+                    show_values: 1,3
+                depends_on: id_product
+            qty:
+                custom: 1
+                label: Quantité
+                value: 
+                    prop: qty
+                input_name: qty 
+                content: 
+                    callback: 
+                        method: renderLineInput
+                        params: 
+                            - qty
+                display_if: 
+                    field_name: type
+                    show_values: 1,3
+                depends_on: id_product
+            fourn_price:
+                custom: 1
+                label: Prix d'achat
+                input_name: id_fourn_price
+                data_type: id_object
+                object: fournisseur_price
+                content: 
+                    callback: 
+                        method: renderLineInput
+                        params: 
+                            - id_fourn_price
+                display_if: 
+                    field_name: type
+                    show_values: 1,3
+                depends_on: id_product
+                create_form: 
+                    callback: getFournisseurPriceCreateForm
+                create_form_values: 
+                    fields: 
+                        fk_product: 
+                            callback: getIdProductFromPost
+                value: 
+                    callback: getIdFournPriceFromPost
+            limited: 
+                custom: 1
+                label: Service à durée limitée
+                input_name: limited
+                data_type: bool
+                input: 
+                    type: toggle
+                value: 
+                    callback: isLimited
+                display_if: 
+                    field_name: type
+                    show_values: 1,3
+            date_from: 
+                custom: 1
+                label: Du
+                input_name: date_from
+                data_type: date
+                content: 
+                    callback: 
+                        method: renderLineInput
+                        params: 
+                            - date_from
+                display_if: 
+                    fields_names: type,limited
+                    type: 
+                        show_values: 1,3
+                    limited: 
+                        hide_values: 0
+            date_to: 
+                custom: 1
+                label: Au
+                input_name: date_to
+                data_type: date
+                content: 
+                    callback: 
+                        method: renderLineInput
+                        params: 
+                            - date_to
+                display_if: 
+                    fields_names: type,limited
+                    type: 
+                        show_values: 1,3
+                    limited: 
+                        hide_values: 0
+            margins: 
+                custom: 1
+                label: Marges
+                input_name: margins_table
+                content: 
+                    callback: renderFormMargins
+                show: 
+                    callback: showMarginsInForms
+                display_if: 
+                    field_name: type
+                    hide_values: 2
+            desc: 
+                custom: 1
+                label: Description
+                value: 
+                    prop: desc
+                input_name: desc
+                content: 
+                    callback: 
+                        method: renderLineInput
+                        params: 
+                            - desc
+                depends_on: id_product
+            hide_product_label: 
+                field: hide_product_label
+            force_qty_1: 
+                field: force_qty_1
+            remisable: 
+                custom: 1
+                label: Remises autorisées
+                input_name: remisable
+                content: 
+                    callback: 
+                        method: renderLineInput
+                        params:
+                            - remisable
+                depends_on: id_product
+                display_if: 
+                    field_name: type
+                    show_values: 1,3
+            remise_crt: 
+                custom: 1
+                label: Remise CRT
+                input_name: remise_crt
+                content: 
+                    callback: 
+                        method: renderLineInput
+                        params: 
+                            - remise_crt
+                depends_on: id_product
+                display_if: 
+                    field_name: type
+                    show_values: 1
+            remise_pa:
+                custom: 1
+                label: Remise sur le prix d'achat
+                input_name: remise_pa
+                content: 
+                    callback: 
+                        method: renderLineInput
+                        params: 
+                            - remise_pa
+                depends_on: id_product,remise_crt
+                display_if: 
+                    field_name: type
+                    show_values: 1
+            remises: 
+                object: remises
+                multiple: 1
+                form_values: 
+                    fields: 
+                        object_type: 
+                            callback: getParentCommType
+                display_if: 
+                    fields_names: type,remisable
+                    type: 
+                        show_values: 1,3
+                    remisable: 
+                        hide_values: 0
                           
     equipment:
         title: Attribuer un équipement
@@ -311,7 +377,16 @@ forms:
             - custom: 1
               label: Equipement
               input_name: id_equipment
-              data_type: int
+              data_type: id_object
+              object: equipment
+              create_form: light_place
+              create_form_values: 
+                  fields: 
+                      id_product: 
+                          prop: id_product
+                  objects: 
+                      places: 
+                          callback: getNewEquipmentDefaultPlaceValues
               input: 
                   type: search_list
                   search_list:
@@ -329,12 +404,10 @@ forms:
                   callback: 
                       method: renderLineInput
                       params: 
-                          - pu_ht
-                          - 1
+                          0: pu_ht
+                          1:
+                              callback: isParentEditable
               depends_on: id_equipment
-              show: 
-                  callback: isParentEditable
-              
             - custom: 1
               label: Taux de TVA
               value: 
@@ -344,11 +417,11 @@ forms:
                   callback: 
                       method: renderLineInput
                       params: 
-                          - tva_tx
-                          - 1
+                          0: tva_tx
+                          1: 
+                              callback: isParentEditable
+                              
               depends_on: id_equipment
-              show: 
-                  callback: isParentEditable
             - custom: 1
               label: Prix d'achat
               input_name: id_fourn_price
@@ -357,13 +430,94 @@ forms:
                   callback: 
                       method: renderLineInput
                       params: 
-                          - id_fourn_price
-                          - 1
+                          0: id_fourn_price
+                          1:
+                              callback: isParentEditable
               depends_on: id_equipment
-              show: 
-                  callback: isParentEditable
+                  
+    line_forced: 
+        extends: default
+        force_edit: 1
+        rows: 
+            product: 
+                content: 
+                    callback: 
+                        method: renderLineInput
+                        params: 
+                            - id_product
+                            - 0
+                            - ''
+                            - 1            
+            pu_ht: 
+                content: 
+                    callback: 
+                        method: renderLineInput
+                        params: 
+                            - pu_ht
+                            - 0
+                            - ''
+                            - 1
+            tva_tx:
+                content: 
+                    callback: 
+                        method: renderLineInput
+                        params: 
+                            - tva_tx
+                            - 0
+                            - ''
+                            - 1
+            qty:
+                content: 
+                    callback: 
+                        method: renderLineInput
+                        params: 
+                            - qty
+                            - 0
+                            - ''
+                            - 1
+            fourn_price:
+                content: 
+                    callback: 
+                        method: renderLineInput
+                        params: 
+                            - id_fourn_price
+                            - 0
+                            - ''
+                            - 1
+            desc:
+                content: 
+                    callback: 
+                        method: renderLineInput
+                        params: 
+                            - desc
+                            - 0
+                            - ''
+                            - 1
+            remise_crt:
+                content: 
+                    callback: 
+                        method: renderLineInput
+                        params: 
+                            - remise_crt
+                            - 0
+                            - ''
+                            - 1
+            remise_pa:
+                content: 
+                    callback: 
+                        method: renderLineInput
+                        params: 
+                            - remise_pa
+                            - 0
+                            - ''
+                            - 1
 
 lists_cols: 
+    position: 
+        label: N°
+        field: position
+        max_width: 40px
+        min_width: 40px;
     desc:
         label: Description
         value: 
@@ -372,6 +526,7 @@ lists_cols:
                 params:
                     - desc
         max_width: 460px
+#        min_width: 280px
     pu_ht: 
         label: PU HT
         value: 
@@ -379,6 +534,7 @@ lists_cols:
                 method: displayLineData
                 params:
                     - pu_ht
+                    - 1
     pu_ht_remise: 
         label: PU HT Remisé
         value: 
@@ -390,6 +546,8 @@ lists_cols:
                 method: displayLineData
                 params:
                     - tva_tx
+        max_width: 45px
+        min_width: 45px
     pa_ht: 
         label: PA HT
         value: 
@@ -444,7 +602,16 @@ lists_cols:
                 method: displayLineData
                 params:
                     - margin        
-
+    remise_crt: 
+        label: Rem. CRT
+        field: remise_crt
+        edit: 1
+        max_width: 50px
+        min_width: 50px
+    remise_pa: 
+        label: Remise PA
+        field: remise_pa
+    
 lists: 
     default: 
         configurable: 1
@@ -482,13 +649,19 @@ lists:
             callback: isDeletable
         extra_btn: 
             callback: getListExtraBtn
+        header_buttons:
+            callback: 
+                method: getLinesListHeaderExtraBtn
+                object: 
+                    callback: getParentInstance
         cols:
+            position: 
             desc:
             pu_ht: 
             tva:
+            remise_crt:
             pa_ht: 
             qty: 
             remise: 
             total_ttc: 
-            margin: 
-                  
+            margin:

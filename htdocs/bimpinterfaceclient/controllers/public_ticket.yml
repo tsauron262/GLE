@@ -1,11 +1,9 @@
 bootstrap: 1
     
-objects:
+objects:  
     ticket:
         instance:
-            bimp_object:
-                module: bimpsupport
-                name: BS_Ticket
+            bimp_object: BIC_UserTickets
             id_object:
                 request: id
     inters:
@@ -26,7 +24,7 @@ sections:
             struct: 
                 type: view
                 view: 
-                    panel: 0
+                    panel: 1
                     name: client
                     object: ticket
           - id: interventions

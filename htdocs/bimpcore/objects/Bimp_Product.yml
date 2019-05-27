@@ -5,20 +5,27 @@ dol_object:
 table: product
 primary: rowid
 icon: fas_box
-
+controller: product
 labels: 
     name: produit
-    
+
+#A effacer une fois lu: 
+#force_extrafields_update: 1 => ce paramètre n'est pas nécessaire pour les produits, à utiliser uniquement pour les objets dolibarr qui ne mettent pas à jour les extrafields dans update() (très rare). 
+
 fields: 
     ref: 
         label: Réf.
+        
     label: 
         label: Libellé
+        
     description: 
         label: Description
         type: html
+        
     url: 
         label: URL publique
+        
     note: 
         label: Note
         type: text
@@ -39,6 +46,7 @@ fields:
         
     barcode: 
         label: Code-barres
+        
     fk_barcode_type: 
         label: Type de code-barres
         dol_prop: barcode_type
@@ -47,26 +55,47 @@ fields:
     price: 
         label: Prix
         type: money
+        
     price_ttc: 
         label: Prix TTC
         type: money
+        
     price_min: 
         label: Prix minimum
         type: money
+        
     price_min_ttc: 
         label: Prix minimum TTC
         type: money
+        
     price_base_type: 
         label: Base du prix
+        values: 
+            array: price_base_types
+        
     cost_price: 
         label: Prix de revient
         type: money
         
+    pa_prevu: 
+        label: Prix d'achat prévu
+        dol_extra_field: 1
+        type: money
+        default_value: 0
+        
+    infos_pa: 
+        label: Informations prix d'achat
+        dol_extra_field: 1
+        type: text
+        
     default_vat_code: 
         label: Code TVA par défaut
+        
     tva_tx: 
         label: Taux de TVA
-        type: float
+        type: percent
+        default_value: 20
+        
     recuperableonly: 
         label: TVA récupérable seulement
         dol_prop: tva_npr
@@ -76,63 +105,87 @@ fields:
         label: En vente
         dol_prop: status
         type: bool
+        default_value: 1
+        
     tobuy: 
         label: En achat
         dol_prop: status_buy
         type: bool
+        default_value: 1
         
     customcode: 
         label: Code douane
+        
     fk_country: 
         label: Pays d'origine
         dol_prop: country_id
-    
+        
     weight: 
         label: Poids 
         type: float
+        
     weight_units: 
         label: Unité de poids
         type: int
+        
     length: 
         label: Longueur
         type: float
+        
     length_units: 
         label: Unité de longueur
         type: int
+        
     width: 
         label: Largeur
         type: float
+        
     width_units: 
         label: Unité de largeur
         type: int
+        
     height: 
         label: Hauteur
         type: float
+        
     height_units: 
         label: Unité de hauteur
         type: int
+        
     surface: 
         label: Surface
         type: float
+        
     surface_units: 
         label: Unité de surface
         type: int
+        
     volume: 
         label: Volume
         type: float
+        
     volume_units:
         label: Unité de volume
         type: int
+        
+    validate: 
+        label: Validé
+        dol_extra_field: 1
+        type: bool
+        default_value: 0
+        
     serialisable: 
         label: Sérialisable
         type: bool
         dol_extra_field: 1
         default_value: 0
+        
     remisable: 
         label: Remisable
         type: bool
         dol_extra_field: 1
         default_value: 1
+        
     type2: 
         label: Sous-type
         type: int
@@ -141,67 +194,171 @@ fields:
         dol_extra_field: 1
         default_value: 0
         
+    crt: 
+        label: Remise CRT
+        type: percent
+        decimals: 3
+        dol_extra_field: 1
+        default_value: 0
+        
+    accountancy_code_sell:
+        label: Code comptable (Vente)
+        type: string
+        
+    accountancy_code_buy:
+        label: Code comptable (Achat)
+        type: string
+        
+    deee:
+        label: Eco-Taxe
+        type: money
+        dol_extra_field: 1
+        
+    rpcp:
+        label: Copie privée
+        type: money
+        dol_extra_field: 1
+        
 #    Champs non gérés
 #    ref_ext
 #    localtax1_tx
 #    localtax2_tx
 #    localtax1_type
 #    localtax2_type
-#    tosell
-#    tobuy
 #    tobatch
 #    duration
 #    finished
 #    seuil_stock_alerte
 #    canvas
-#    accountancy_code_buy
-#    accountancy_code_sell
 #    pmp
 
 forms: 
     light: 
         rows: 
+            - custom: 1
+              label: Marque
+              input_name: marque
+              input: 
+                  type: text
+              show: 
+                  callback: isNotLoaded
+            - custom: 1
+              label: Ref. constructeur
+              input_name: ref_constructeur
+              input: 
+                  type: text            
+              show: 
+                  callback: isNotLoaded
             - field: ref
+              show: 
+                  callback: isLoaded
             - field: label
-            - field: barcode
+            - field: description  
+            - field: ref_constructeur
+            - field: fk_product_type
             - field: type2
+            - field: price
+            - field: tva_tx
+            - field: pa_prevu
+            - field: infos_pa
             - field: serialisable
-            - field: tosell
-            - field: tobuy
-            - field: description
             - field: note
+            
+    etiquettes: 
+        title: Générer des etiquettes
+        icon: fas_sticky-note
+        rows: 
+            - custom: 1
+              label: Type d'étiquette à générer
+              input_name: type
+              input: 
+                  type: select
+                  options: 
+                      stock: Stock
+                      magasin: Magasin
+            - custom: 1
+              label: Nombre
+              input_name: qty
+              data_type: int
+              input: 
+                  type: qty
+              decimals: 0
+              min: 1
 
 fields_tables: 
     infos: 
         title: Informations
-        icon: info-circle
+        icon: fas_info-circle
         rows:  
             - field: ref
             - field: label
+            - field: description
+            - field: fk_product_type
             - field: type2
             - field: barcode
             - field: customcode
-            - field: description
+            - field: accountancy_code_buy
+            - field: accountancy_code_sell
             - field: note
             
     prices: 
-        title: Prix
-        icon: euro
+        title: Prix de vente
+        icon: fas_euro-sign
         rows:  
+            - field: price
+              label: Prix HT
+            - field: tva_tx
+            - field: deee
+            - field: rpcp
             - field: price_ttc
             - field: price_min_ttc
             - field: cost_price
+    
+    prices_buy: 
+        title: Prix d'achat
+        icon: fas_euro-sign
+        rows:  
+            - field: price
+              label: Prix HT
             - field: tva_tx
-        
+            - field: price_ttc
+            - field: price_min_ttc
+            - field: cost_price
+       
     status: 
-        title: statut
-        icon: check-square
+        title: Statuts
+        icon: fas_check-square
         rows: 
+            - field: validate
+              edit: 1
             - field: serialisable
+              edit: 1
             - field: type2
+              edit: 1
             - field: tosell
+              edit: 1
             - field: tobuy
+              edit: 1
             - field: stock
+    
+    infos_complementaires:
+        title: Informations complémentaires
+        icon: plus
+        rows:
+            - field: url
+            - field: stock
+            - field: fk_country
+            - field: weight_units
+            - field: weight
+            - field: length_units
+            - field: length
+            - field: width_units
+            - field: width
+            - field: surface_units
+            - field: surface
+            - field: volume_units
+            - field: volume
+            
         
     measures: 
         title: Mesures
@@ -229,6 +386,50 @@ views:
                   col_sm: 12
                   fields_table: 
                       name: status
+    
+    fiche:
+        rows:
+            - cols: 
+                - type: fields_table
+                  col_lg: 7
+                  col_md: 7
+                  fields_table: 
+                      name: infos
+                - type: fields_table
+                  col_lg: 5
+                  col_md: 5
+                  fields_table: 
+                      name: status
+                - type: fields_table
+                  col_lg: 7
+                  col_md: 7
+                  col_sm: 12
+                  fields_table: 
+                      name: infos_complementaires
+            
+    
+    product_price:
+        rows:
+            - cols:
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  fields_table: 
+                      name: prices
+                
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  fields_table: 
+                      name: prices_buy
+                - type: custom
+                  col_lg: 12
+                  col_md: 12
+                  custom:
+                      callback: renderListeFournisseur
+            
                       
 lists: 
     default: 

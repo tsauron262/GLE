@@ -19,7 +19,7 @@ objects:
             id_object:
                 field_value: id_client
                 
-    note:
+    notes:
         instance:
             bimp_object:
                 module: bimpsupport
@@ -36,24 +36,24 @@ fields:
         label: Contrat
         type: id_object
         object: contrat
+        display: nom
     
     id_client:
         label: Pour la société
         type: id_object
         object: societe
-        
-    sujet:
-        label: Sujet
-        type: text
-        require: 1
     
     id_user_client:
         label: Demandeur
         type: id_object
         object: userClient
+        
+    priorite_demande_client:
+        label: Priorité
     
-    sujet:
-        type: html
+    impact_demande_client:
+        label: Impact
+    
 lists:
     interface_client:
         title: Tickets support
@@ -89,7 +89,9 @@ lists:
             id:
             sujet:
             status:
-            priorite:
+            priorite_demande_client:
+                field: priorite_demande_client
+                
             date_create:
             id_user_client:
                 field: id_user_client
@@ -106,6 +108,7 @@ lists:
             id_contrat:
                 label: Contrat
                 field: id_contrat
+                display: nom
     pageClient:
         extends: interface_client
         add_btn: 0
@@ -136,9 +139,7 @@ forms:
             
     addUserTicket:
         msgs:
-            - content: Ne pas mettre d'informations confidentielles dans le champ sujet
-              type: info
-            - content: Pour envoyer un fichier joint merci d'aller sur la page ticket après sa création
+            - content: Ne pas mettre d'informations confidentielles dans le sujet du ticket
               type: info
         rows:
             - field: id_client
@@ -154,5 +155,14 @@ forms:
               required: 1
             - field: priorite
             - field: impact
-            - object: note
+            - object: notes
+              form_name: addClientNote
               multiple: 1
+            - object: files
+              multiple: 1
+              form_name: upload
+              form_values:
+                  fields:
+                      parent_module: bimpsupport
+                      parent_object_name: BS_Ticket
+                      id_parent: 1

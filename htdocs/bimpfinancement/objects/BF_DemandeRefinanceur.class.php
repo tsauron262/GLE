@@ -64,7 +64,7 @@ class BF_DemandeRefinanceur extends BimpObject {
         'total_loyer' => 0,
     );
 
-    public function isCreatable() {
+    public function isCreatable($force_create = false) {
         $demande = $this->getParentInstance();
 
         if (BimpObject::objectLoaded($demande)) {
@@ -76,12 +76,12 @@ class BF_DemandeRefinanceur extends BimpObject {
         return 0;
     }
 
-    public function isEditable() {
-        return $this->isCreatable();
+    public function isEditable($force_edit = false) {
+        return $this->isCreatable($force_edit);
     }
 
-    public function isDeletable() {
-        return $this->isCreatable();
+    public function isDeletable($force_delete = false) {
+        return $this->isCreatable($force_delete);
     }
 
     public function isEchouar() {

@@ -51,7 +51,7 @@ class client_savController extends BimpController
         $return .= $list->renderHtml();
         
         
-        $pret = BimpObject::getInstance('bimpsupport', 'BS_SavPret');
+        $pret = BimpObject::getInstance('bimpsupport', 'BS_Pret');
 
         $list = new BC_ListTable($pret, 'default', 1, null, 'Pret enregistrés pour ce client', 'wrench');
         $list->addFieldFilterValue('id_client', (int) $client->id);

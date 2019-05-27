@@ -576,7 +576,10 @@ function num_public_holiday($timestampStart, $timestampEnd, $countrycode='FR', $
 	$nbFerie = 0;
 
 	// Check to ensure we use correct parameters
-	if ((($timestampEnd - $timestampStart) % 86400) != 0) return 'ErrorDates must use same hours and must be GMT dates';
+//	if ((($timestampEnd - $timestampStart) % 86400) != 0  
+//               && (($timestampEnd - $timestampStart) % 86400) != 82800 //passage  a l'heure d'ete
+//               && (($timestampEnd - $timestampStart) % 86400) != 3600) //passage  a l'heure d'hiver
+//                    return die(($timestampEnd - $timestampStart) % 86400 .' ErrorDates must use same hours and must be GMT dates debut : '.$timestampStart." || ".$timestampEnd);
 
 	$i=0;
 	while (( ($lastday == 0 && $timestampStart < $timestampEnd) || ($lastday && $timestampStart <= $timestampEnd) )
@@ -654,7 +657,11 @@ function num_public_holiday($timestampStart, $timestampEnd, $countrycode='FR', $
 			// Calul des samedis et dimanches
 			$jour_julien = unixtojd($timestampStart);
 			$jour_semaine = jddayofweek($jour_julien, 0);
-			if($jour_semaine == 0 || $jour_semaine == 6) $ferie=true;
+                        /*moddrsi pour choisir le jours de congé*/
+                        global $jourCongeUser;
+                        $jourConge = (isset($jourCongeUser) && $jourCongeUser > 0)? $jourCongeUser : 6;
+			if($jour_semaine == 0 || $jour_semaine == $jourConge) $ferie=true;
+                        /*fmoddrsi*/
 			// Samedi (6) et dimanche (0)
 		}
 

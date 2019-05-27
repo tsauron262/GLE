@@ -78,25 +78,31 @@ table.objectlistTable {
             .inputContainer {
                 display: inline-block;
                 width: 99%;
+            }
 
-                input, textarea, select {
-                    width: 100%;
-                    color: $input-color;
-                    font-weight: normal;
-                }
+            .inputHelp,
+            .inputInfo {
+                display: none;
+            }
 
-                .select2-container {
-                    width: 100%important;
-                    min-width: 100%;
-                }
+            input, textarea, select {
+                width: 100%;
+                color: $input-color;
+                font-weight: normal;
+            }
 
-                .inputHelp {
-                    display: none;
-                }
+            .select2-container {
+                width: 100%important;
+                min-width: 100%;
             }
 
             .popover {
                 color: $gray-darker;
+            }
+
+            .toggle-label-off,
+            .toggle-label-on {
+                display: none;
             }
         }
 
@@ -704,7 +710,7 @@ td.buttons {
         &:hover {
             background-color: #489FF5;
         }
-        
+
         .bimp_filter_value_remove_btn {
 
             margin-left: 10px;

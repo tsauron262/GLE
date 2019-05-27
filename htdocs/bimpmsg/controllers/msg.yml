@@ -1,0 +1,25 @@
+bootstrap: 1
+objects:
+    fil: 
+        instance: 
+            bimp_object: BIMPMsg_fil
+            id_object: 
+                request: id
+    
+sections:
+    - type: object_header
+      object_header: 
+          object: fil
+    - type: view
+      view:
+          name: default
+          object: fil
+          panel: 1
+    - type: buttons
+      buttons:
+          - label: Liste des fils de messages
+            url:
+                controller: index
+            icon_before: chevron-left
+            classes: 
+                array: btn,btn-primary

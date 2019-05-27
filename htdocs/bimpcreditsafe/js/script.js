@@ -1,5 +1,5 @@
 $(window).on("load", function () {
-    if ($("#idprof1").length > 0) 
+    if ($("#idprof1").length > 0 && $("#idprof2").length > 0) 
     {
         var infoSoc = new InfoSoc($("#idprof1"), $("#idprof2"));
     }
@@ -12,6 +12,7 @@ function InfoSoc(elem,elem2) {
     this.elem2 = elem2;
     this.erreur = "";
     this.typeTier = $("#typent_id");
+    this.pays = $("#selectcountry_id");
     this.useSiret = true;
     
     
@@ -74,12 +75,16 @@ function InfoSoc(elem,elem2) {
     this.promptSiren = function(textDef = "") {
         if(textDef == "")
             textDef = "SIREN";
-        var siren = window.prompt("Numéro de SIREN/SIRET ou p pour un PARTICULIER \n "+this.erreur, textDef);
+        var siren = window.prompt("Numéro de SIREN/SIRET ou p pour un PARTICULIER, h pour un Hors de France \n "+this.erreur, textDef);
         if(siren == null){
             history.back();
             return 0;
         }
         siren = siren.replace(" ", "").replace(" ", "").replace(" ", "").replace(" ", "").replace("	", "").replace("   ", "");
+        if(siren == "Hors" || siren == "h" || siren == "H"){
+            $("#selectcountry_id option[value='1']").remove();
+            return "";
+        }
         if(siren == "PARTICULIER" || siren == "P" || siren == "p"){
             this.typeTier.val(8);
             return "";

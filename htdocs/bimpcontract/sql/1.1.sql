@@ -1,0 +1,2 @@
+ALTER TABLE `llx_bcontract_prelevement` CHANGE `next_facture_date` `next_facture_date` datetime NULL;
+ALTER TABLE `llx_bcontract_prelevement` CHANGE `next_facture_amount` `next_facture_amount` double NULL;

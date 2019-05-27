@@ -58,19 +58,19 @@ class BimpCache
     public static function getBimpObjectInstance($module, $object_name, $id_object, $parent = null)
     {
         // Pas très propre mais seule solution trouvée: 
-        if ($object_name === 'Bimp_Propal' && (int) $id_object) {
-            $id_sav = (int) self::getBdb()->getValue('bs_sav', 'id', '`id_propal` = ' . (int) $id_object);
-            if ($id_sav) {
-                $module = 'bimpsupport';
-                $object_name = 'BS_SavPropal';
-            }
-        } elseif ($object_name === 'Bimp_PropalLine' && (int) $id_object) {
-            $result = self::$bdb->executeS('SELECT s.id FROM ' . MAIN_DB_PREFIX . 'bs_sav s LEFT JOIN ' . MAIN_DB_PREFIX . 'bs_sav_propal_line l ON l.id_obj = s.id_propal WHERE l.id = ' . (int) $id_object);
-            if (isset($result[0]['id']) && (int) $result[0]['id']) {
-                $module = 'bimpsupport';
-                $object_name = 'BS_SavPropalLine';
-            }
-        }
+//        if ($object_name === 'Bimp_Propal' && (int) $id_object) {
+//            $id_sav = (int) self::getBdb()->getValue('bs_sav', 'id', '`id_propal` = ' . (int) $id_object);
+//            if ($id_sav) {
+//                $module = 'bimpsupport';
+//                $object_name = 'BS_SavPropal';
+//            }
+//        } elseif ($object_name === 'Bimp_PropalLine' && (int) $id_object) {
+//            $result = self::$bdb->executeS('SELECT s.id FROM ' . MAIN_DB_PREFIX . 'bs_sav s LEFT JOIN ' . MAIN_DB_PREFIX . 'bs_sav_propal_line l ON l.id_obj = s.id_propal WHERE l.id = ' . (int) $id_object);
+//            if (isset($result[0]['id']) && (int) $result[0]['id']) {
+//                $module = 'bimpsupport';
+//                $object_name = 'BS_SavPropalLine';
+//            }
+//        }
 
         if (!is_int($id_object)) {
             if (preg_match('/^[0-9]+$/', $id_object)) {

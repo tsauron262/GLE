@@ -96,14 +96,14 @@ if (!is_null($rows)) {
                                 $line->pa_ht = (float) $pr['buy_price_ht'];
                                 $line->id_fourn_price = (int) $r['fk_product_fournisseur_price'];
 
-                                if ($bdb->update('facturedet', array(
-                                    'buy_price_ht'                 => (float) $pr['buy_price_ht'],
-                                    'fk_product_fournisseur_price' => (int) $r['fk_product_fournisseur_price']
-                                        ), '`rowid` = ' . (int) $line->getData('id_line')) <= 0) {
-                                    echo '[ECHEC] '.$bdb->db->lasterror();
-                                } else {
-                                    echo '[OK]';
-                                }
+//                                if ($bdb->update('facturedet', array(
+//                                    'buy_price_ht'                 => (float) $pr['buy_price_ht'],
+//                                    'fk_product_fournisseur_price' => (int) $r['fk_product_fournisseur_price']
+//                                        ), '`rowid` = ' . (int) $line->getData('id_line')) <= 0) {
+//                                    echo '[ECHEC] '.$bdb->db->lasterror();
+//                                } else {
+//                                    echo '[OK]';
+//                                }
 
                                 echo '<br/>';
                             } else {

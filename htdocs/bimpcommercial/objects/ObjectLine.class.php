@@ -671,11 +671,11 @@ class ObjectLine extends BimpObject
                             return BimpTools::calculatePriceTaxEx((float) $this->post_equipment->getData('prix_vente_except'), (float) $product->getData('tva_tx'));
                         }
                     }
-                    $pu_ht = (float) $this->pu_ht;
+                    $pu_ht = $this->pu_ht;
                     if ($this->isLoaded() && $this->field_exists('def_pu_ht')) {
                         $pu_ht = (float) $this->getData('def_pu_ht');
                     }
-                    if ($id_product && (!(float) $pu_ht || (int) $this->id_product !== $id_product)) {
+                    if ($id_product && (is_null($pu_ht) || (int) $this->id_product !== $id_product)) {
                         return $product->getData('price');
                     }
                     return $pu_ht;
@@ -698,7 +698,7 @@ class ObjectLine extends BimpObject
                     if ($this->isLoaded() && $this->field_exists('def_id_fourn_price')) {
                         $id_fourn_price = (int) $this->getData('def_id_fourn_price');
                     }
-                    if ($id_product && (!(int) $id_fourn_price || (int) $this->id_product !== $id_product)) {
+                    if ($id_product && (is_null($id_fourn_price) || (int) $this->id_product !== $id_product)) {
                         if ((int) $this->id_fourn_price) {
                             $pfp = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ProductFournisseurPrice', (int) $this->id_fourn_price);
                             if (BimpObject::objectLoaded($pfp)) {

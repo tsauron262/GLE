@@ -182,9 +182,9 @@ class BimpController
     public function display()
     {
         global $user;
-        if ($user->id < 1)
-            die("Pas de User <a href='" . DOL_URL_ROOT . "'> Allé a la page de login</a>");
-
+        if ($user->id < 1) {
+            die("Pas de User <a href='" . DOL_URL_ROOT . "'> Allez à la page de login</a>");
+        }
 
         if (BimpTools::isSubmit('ajax')) {
             $this->ajaxProcess();
@@ -1441,7 +1441,7 @@ class BimpController
             'request_id'         => BimpTools::getValue('request_id', 0)
         )));
     }
-    
+
     protected function ajaxProcessLoadObjectStatsList()
     {
         $errors = array();
@@ -1480,7 +1480,7 @@ class BimpController
             'request_id'         => BimpTools::getValue('request_id', 0)
         )));
     }
-    
+
     protected function ajaxProcessLoadObjectCard()
     {
         $errors = array();

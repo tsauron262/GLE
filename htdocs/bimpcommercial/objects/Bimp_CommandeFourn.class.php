@@ -159,7 +159,7 @@ class Bimp_CommandeFourn extends BimpComm
                     $errors[] = 'Factures désactivées';
                     return 0;
                 }
-                if ((int) $this->getData('billed') || (int) $this->getData('invoice_status')) {
+                if (/*(int) $this->getData('billed') || */(int) $this->getData('invoice_status')) {
                     $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' a déjà été facturée';
                     return 0;
                 }

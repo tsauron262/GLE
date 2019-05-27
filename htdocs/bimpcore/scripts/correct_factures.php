@@ -48,6 +48,9 @@ $sql .= BimpTools::getSqlWhere(array(
 $rows = $bdb->executeS($sql, 'array');
 
 if (!is_null($rows)) {
+    $n1 = 0;
+    $n2 = 0;
+
     foreach ($rows as $r) {
         $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $r['id_facture']);
         if (!BimpObject::objectLoaded($facture)) {
@@ -56,7 +59,7 @@ if (!is_null($rows)) {
             $lines = $facture->getLines('not_text');
 
             if (count($lines)) {
-                echo 'FAC ' . $r['id_facture'] . '<br/>';
+//                echo 'FAC ' . $r['id_facture'] . '<br/>';
 
                 $propal_lines_done = array();
                 foreach ($lines as $line) {
@@ -90,21 +93,34 @@ if (!is_null($rows)) {
 
                             echo 'MAJ LINE ' . $line->id . ': ' . $pr['rowid'] . ': ' . $pr['buy_price_ht'] . ', ' . $pr['fk_product_fournisseur_price'];
 
-                            if (!is_null($pr)) {
+                            if (!is_null($pr) && ((float) $pr['buy_price_ht'] || (int) $pr['fk_product_fournisseur_price'])) {
+//                                if ((float) $pr['buy_price_ht']) {
+//                                    echo $facture->getData('facnumber') . ': ligne ' . $line->id . ' - ' . $line->desc . '. PA HT: ' . $pr['buy_price_ht'];
+//                                    echo '<br/>';
+//                                    $n1++;
+//                                } elseif ((int) $pr['fk_product_fournisseur_price']) {
+//                                    $pfp = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ProductFournPrice', (int) $pr['fk_product_fournisseur_price']);
+//                                    if (BimpObject::objectLoaded($pfp)) {
+//                                        $price = (float) $pfp->getData('price');
+//                                        echo '<strong>' . $facture->getData('facnumber') . ': ligne ' . $line->id . ' - ' . $line->desc . '. PA HT: ' . $price . '</strong>';
+//                                        echo '<br/>';
+//                                        $n2++;
+//                                    }
+//                                }
+
                                 $propal_lines_done[] = (int) $pr['rowid'];
 
                                 $line->pa_ht = (float) $pr['buy_price_ht'];
                                 $line->id_fourn_price = (int) $r['fk_product_fournisseur_price'];
 
-//                                if ($bdb->update('facturedet', array(
-//                                    'buy_price_ht'                 => (float) $pr['buy_price_ht'],
-//                                    'fk_product_fournisseur_price' => (int) $r['fk_product_fournisseur_price']
-//                                        ), '`rowid` = ' . (int) $line->getData('id_line')) <= 0) {
-//                                    echo '[ECHEC] '.$bdb->db->lasterror();
-//                                } else {
-//                                    echo '[OK]';
-//                                }
-
+                                if ($bdb->update('facturedet', array(
+                                    'buy_price_ht'                 => (float) $pr['buy_price_ht'],
+                                    'fk_product_fournisseur_price' => (int) $r['fk_product_fournisseur_price']
+                                        ), '`rowid` = ' . (int) $line->getData('id_line')) <= 0) {
+                                    echo '[ECHEC] '.$bdb->db->lasterror();
+                                } else {
+                                    echo '[OK]';
+                                }
                                 echo '<br/>';
                             } else {
                                 echo 'AUCUNE LIGNE DE PROPAL CORRESPONDANTE TROUVEE <br/>';
@@ -115,11 +131,14 @@ if (!is_null($rows)) {
 
                         echo '<br/>';
                     }
-                    echo '<br/>';
                 }
             }
         }
     }
+
+    echo '<br/><br/>';
+    echo 'N1: ' . $n1 . '<br/>';
+    echo 'N2: ' . $n2 . '<br/>';
 } else {
     echo 'AUCUNE FACTURE TROUVEE';
 }

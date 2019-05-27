@@ -2860,6 +2860,13 @@ class Bimp_CommandeLine extends ObjectLine
                 }
             }
         }
+
+        // Vérification des réservations: 
+        $commande = $this->getParentInstance();
+
+        if (BimpObject::objectLoaded($commande) && $commande->isLogistiqueActive()) {
+            $this->createReservation(); // les quantités sont vérifiées dans cette méthode.
+        }
     }
 
     public function create(&$warnings = array(), $force_create = false)

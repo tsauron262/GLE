@@ -2,6 +2,8 @@ dol_object:
     instance: 
         dol_object: synopsisdemandeinterv
         
+        
+        
 table: synopsisdemandeinterv
 primary: rowid
 controller: demandinter

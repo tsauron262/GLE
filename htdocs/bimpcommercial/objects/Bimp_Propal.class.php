@@ -757,7 +757,7 @@ class Bimp_Propal extends BimpComm
         if (!count($errors)) {
             $id_user = (int) BimpTools::getValue('id_user_commercial', 0);
             if ($id_user) {
-                if ($this->dol_object->add_contact($id_user, 'SALESREPFOLL', 'internal') <= 0) {
+                if ($this->dol_object->add_contact($id_user, 'SALESREPSIGN', 'internal') <= 0) {
                     $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'enregistrement du commercial signataire');
                 }
             }

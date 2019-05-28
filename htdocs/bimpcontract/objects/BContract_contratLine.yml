@@ -79,7 +79,7 @@ fields:
         dol_extra_field: 1
         type: text
         input:
-            help: Merci de déparer les numéros de série par une virgule (,)
+            help: Merci de séparer les numéros de série par une virgule (,)
     nb_materiel:
         label: Qté matériel
         dol_extra_field: 1
@@ -147,6 +147,7 @@ forms:
               input:
                   type: qty
               label: Nb matériel
+              default_value: 0
               required: 1
               input_name: nb_materiel
             - field: serials

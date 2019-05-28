@@ -1,6 +1,7 @@
 <?php
 
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/classes/BimpInput.php';
+require_once DOL_DOCUMENT_ROOT . '/bimpcontract/objects/BContract_contrat.class.php';
 
 class BContract_echeancier extends BimpObject {
 
@@ -137,7 +138,6 @@ class BContract_echeancier extends BimpObject {
             $date_facture->getTimestamp();
 
             if ($date_database > $date_facture) {
-                //echo 'chidos';
                 $this->updateLine($this->getData('id_contrat'), $date_database->format('Y-m-d'));
             }
         }
@@ -147,9 +147,80 @@ class BContract_echeancier extends BimpObject {
             $this->updateLine($this->getData('id_contrat'), $parent->getData('date_start'));
         }
 
+        // facture personnalisé
+        //$html .= '' . $this->display_select();
+        $html .= ' ' . $this->display_facture_perso();
+        
 //        echo '<pre>';
 //        print_r($this->tab_echeancier);
         return $html;
+    }
+
+//    public function display_select() {
+//
+//        // facture personnalisé
+//
+//        $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}';
+//
+//        $html .= '<form action="#" method="POST"><select id="date_debut_select" name="date_debut_select">';
+//        foreach ($this->tab_echeancier as $tab => $attr) {
+//            $html .= '<option value="">' . $attr['date_debut'] . '</option>';
+//        }
+//        $html .= '</select>';
+//        $html .= ' au '
+//                . '<select id="date_fin_select" name="date_fin_select">';
+//        foreach ($this->tab_echeancier as $tab => $attr) {
+//            $html .= '<option value="">' . $attr['date_fin'] . '</option>';
+//        }
+//        $html .= '</select>';
+//        $html .= '<br /><input class="btn btn-primary saveButton" value="Créer facture perso" onclick="' .
+//                $this->getJsActionOnclick("create_facture_perso", array(), array(
+//                    "success_callback" => $callback
+//                )) . '">';
+//        $html .= '<input type="submit" name="submit" value="Get Selected Values" /></form>';
+//
+//        return $html;
+//    }
+
+    public function display_facture_perso() {
+        $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}';
+
+        $html .= '<br /><form action="#" method="post">'
+                . 'Du <input class="datePicker" name="date_debut_select" placeholder="Date de début" /input> au '
+                . '<input class="datePicker" name="date_fin_select" placeholder="Date de fin" /input><br />'
+//                . '<input type="submit" name="submit" class="btn btn-primary saveButton" value="Créer facture perso" onclick="' .
+//                $this->getJsActionOnclick("create_facture_perso", array(), array(
+//                    "success_callback" => $callback
+//                )) . '">';
+                . '<input class="btn btn-primary saveButton" type="submit" name="submit" value="Créee facture personnalisé" /></form>';
+
+        if (isset($_POST['submit'])) {
+            $select_debut = $_POST['date_debut_select'];
+            $select_fin = $_POST['date_fin_select'];
+            //echo "test : Du " . $select_debut . ' au ' . $select_fin;
+            //$html .= '<input type="submit" name="submit" class="btn btn-primary saveButton" value="Créer facture perso" onclick="' .
+//                $this->getJsActionOnclick("create_facture_perso", array(), array(
+//                    "success_callback" => $callback
+//                )) . '">';
+
+            $converted_date_debut = $this->formatDate($select_debut);
+            $converted_date_fin = $this->formatDate($select_fin);
+            //echo 'test = ' . $dd;
+            $this->actionCreate_facture_perso($converted_date_debut, $converted_date_fin);
+        }
+        return $html;
+    }
+
+    public function formatDate($date) { {
+            if (strpos($date, '/') !== false) :
+                $date = str_replace('/', '-', $date);
+                $date = date('Y-m-d', strtotime($date));
+            else :
+                $date = date('d-m-Y', strtotime($date));
+                $date = str_replace('-', '/', $date);
+            endif;
+            return $date;
+        }
     }
 
     public function display_info() {
@@ -356,6 +427,46 @@ class BContract_echeancier extends BimpObject {
         $this->updateLine($parent->id);
 
         $success = 'Facture ' . $facture->id . ' créer avec succès d\'un montant de ' . price($this->getData('next_facture_amount')) . ' €';
+    }
+
+    public function actionCreate_facture_perso($select_debut, $select_fin) {
+
+        global $user, $db;
+        $bimp = new BimpDb($db);
+        $success = '';
+
+        BimpTools::loadDolClass('compta/facture', 'facture');
+        $facture = new Facture($db);
+        $parent = $this->getParentInstance();
+        $facture->date = $select_debut;
+        $facture->socid = $parent->getData('fk_soc');
+        $facture->array_options['options_type'] = "C";
+        $facture->array_options['options_entrepot'] = 50;
+        $facture->array_options['options_libelle'] = "Facture N°" . $this->getNbFacture() . " du contrat " . $parent->getData('ref');
+        if ($facture->create($user) > 0) {
+            $nb_period = $parent->getData('duree_mois') / $parent->getData('periodicity');
+            $facture->addline("Période de facturation : Du <b>" . dol_print_date($select_debut) . "</b> au <b>" . dol_print_date($select_fin) . "</b>", number_format($this->get_total_contrat() / $nb_period, 2, '.', ''), 1, 20);
+            addElementElement('contrat', 'facture', $parent->id, $facture->id);
+        } else {
+            return Array('errors' => 'error facture');
+        }
+        $this->updateLine($parent->id);
+
+        $success = 'Facture personnalisé ' . $facture->id . ' créer avec succès d\'un montant de ' . price($this->getData('next_facture_amount')) . ' €';
+    }
+    
+    // check end date to stop echeancier on facture perso
+    public function check_date_facture_perso($date){
+        $parent = $this->getParentInstance();
+        $end_date_contrat = $parent->displayEndDate();
+        if ($date === $end_date_contrat){
+            echo 'same';
+        } else {
+            echo 'not same';
+        }
+        
+        
+        echo 'test : ' . $end_date_contrat;
     }
 
     public function cron_create_facture() {

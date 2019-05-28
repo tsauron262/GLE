@@ -16,7 +16,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
     var $pdf;
     public $db;
     var $margin_bottom = 2;
-    
+
     function __construct($db) {
         global $conf, $langs, $mysoc;
         $langs->load("main");
@@ -647,7 +647,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
         }
         return $returnAsString ? implode($seperator, $rgbArray) : $rgbArray; // returns the rgb string or the associative array
     }
-
+   
 }
 
 ?>

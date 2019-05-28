@@ -12,6 +12,10 @@ class BimpDb
 
     public function insert($table, $data, $return_id = false)
     {
+        if (empty($data)) {
+            return 1;
+        }
+
         $fields = '(';
         $values = ' VALUES (';
 
@@ -38,6 +42,9 @@ class BimpDb
 
         $sql = 'INSERT INTO ' . MAIN_DB_PREFIX . $table . $fields . $values;
 
+        if (BimpDebug::isActive('bimpcore/objects/print_insert_sql')) {
+            echo 'SQL: ' . $sql . '<br/>';
+        }
         $result = $this->db->query($sql);
         if ($result > 0) {
             if ($return_id) {
@@ -52,6 +59,10 @@ class BimpDb
 
     public function update($table, $data, $where = '1')
     {
+        if (empty($data)) {
+            return 1;
+        }
+
         $sql = 'UPDATE ' . MAIN_DB_PREFIX . $table . ' SET ';
         $first_loop = true;
         foreach ($data as $name => $value) {
@@ -67,6 +78,11 @@ class BimpDb
             $sql .= '"' . $this->db->escape($value) . '"';
         }
         $sql .= ' WHERE ' . $where;
+        
+        if (BimpDebug::isActive('bimpcore/objects/print_update_sql')) {
+            echo 'SQL: ' . $sql . '<br/>';
+        }
+        
         return $this->execute($sql);
     }
 

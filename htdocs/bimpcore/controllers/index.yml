@@ -18,6 +18,16 @@ objects:
         instance: 
             bimp_object: Bimp_Product
             
+    correctifs: 
+        instance: 
+            bimp_object: BimpCorrectif
+            
+    vente:
+        instance: 
+            bimp_object: 
+                module: bimpcommercial
+                name: Bimp_Vente
+            
 sections:
     - type: tabs
       tabs: 
@@ -51,4 +61,20 @@ sections:
                   list: 
                       panel: 1
                       object: products
+                      name: default
+        correctifs: 
+            label: Correctifs
+            sections: 
+                - type: list
+                  list: 
+                      panel: 1
+                      object: correctifs
+                      name: default
+        stats: 
+            label: Test stats
+            sections: 
+                - type: stats_list
+                  stats_list: 
+                      panel: 1
+                      object: vente
                       name: default

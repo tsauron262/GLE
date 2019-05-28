@@ -10,7 +10,7 @@ class FournObjectLine extends ObjectLine
         'id_product'     => array('label' => 'Produit / Service', 'type' => 'int', 'required' => 1),
         'id_fourn_price' => array('label' => 'Prix d\'achat fournisseur', 'type' => 'int', 'required' => 1),
         'desc'           => array('label' => 'Description', 'type' => 'html', 'required' => 0, 'default' => ''),
-        'qty'            => array('label' => 'Quantité', 'type' => 'float', 'required' => 1, 'default' => 1),
+        'qty'            => array('label' => 'Quantité', 'type' => 'float', 'required' => 1, 'default' => 0),
         'pu_ht'          => array('label' => 'PU HT', 'type' => 'float', 'required' => 0, 'default' => 0),
         'tva_tx'         => array('label' => 'Taux TVA', 'type' => 'float', 'required' => 0, 'default' => 0),
         'remise'         => array('label' => 'Remise', 'type' => 'float', 'required' => 0, 'default' => 0),
@@ -93,7 +93,7 @@ class FournObjectLine extends ObjectLine
         return $html;
     }
 
-    public function renderLineInput($field, $attribute_equipment = false)
+    public function renderLineInput($field, $attribute_equipment = false, $prefixe = '', $force_edit = false)
     {
         $html = '';
 
@@ -104,7 +104,7 @@ class FournObjectLine extends ObjectLine
                 break;
 
             default:
-                $html = parent::renderLineInput($field, $attribute_equipment);
+                $html = parent::renderLineInput($field, $attribute_equipment, $prefixe, $force_edit);
                 break;
         }
 
@@ -127,26 +127,28 @@ class FournObjectLine extends ObjectLine
     {
         $errors = parent::validatePost();
 
-        switch ((int) $this->getData('type')) {
-            case self::LINE_PRODUCT:
-                if ((int) $this->id_fourn_price) {
-                    $pfp = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ProductFournisseurPrice', (int) $this->id_fourn_price);
-                    if (!$pfp->isLoaded()) {
-                        $errors[] = 'Le prix d\'achat fournisseur d\'ID ' . $this->id_fourn_price . ' n\'existe pas';
-                        $this->id_fourn_price = 0;
-                    } else {
-                        $this->pu_ht = (float) $pfp->getData('price');
+        if (!count($errors)) {
+            switch ((int) $this->getData('type')) {
+                case self::LINE_PRODUCT:
+                    if ((int) $this->id_fourn_price) {
+                        $pfp = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ProductFournisseurPrice', (int) $this->id_fourn_price);
+                        if (!$pfp->isLoaded()) {
+                            $errors[] = 'Le prix d\'achat fournisseur d\'ID ' . $this->id_fourn_price . ' n\'existe pas';
+                            $this->id_fourn_price = 0;
+                        } else {
+                            $this->pu_ht = (float) $pfp->getData('price');
+                        }
                     }
-                }
 
-                if (!(int) $this->id_fourn_price) {
-                    $this->pu_ht = (float) BimpTools::getValue('pa_except', (float) $this->pu_ht);
-                }
-                break;
+                    if (!(int) $this->id_fourn_price) {
+                        $this->pu_ht = (float) BimpTools::getValue('pa_except', (float) $this->pu_ht);
+                    }
+                    break;
 
-            case self::LINE_FREE:
-                $this->pu_ht = (float) BimpTools::getValue('pa_except', 0);
-                break;
+                case self::LINE_FREE:
+                    $this->pu_ht = (float) BimpTools::getValue('pa_except', 0);
+                    break;
+            }
         }
 
         return $errors;
@@ -168,6 +170,7 @@ class FournObjectLine extends ObjectLine
                             $this->id_fourn_price = 0;
                         } else {
                             $this->pu_ht = (float) $pfp->getData('price');
+                            $this->tva_tx = (float) $pfp->getData('tva_tx');
                         }
                     }
                     break;

@@ -237,6 +237,26 @@ class securLogSms {
             setEventMessages($message, null, 'warnings');
             setEventMessages($message, null, 'warnings');
         }
+        
+        $tabMsg = array();
+        $tabMsg['newVersion'] = "Nouvelle version, si vous rencontrez des problèmes, les signaler au plus vite.<br/>debugerp@bimp.fr - 06 28 33 50 81";
+        
+        foreach($tabMsg as $name => $detailMsg){
+            if(!is_array($detailMsg))
+                $detailMsg = array("msg"=>$detailMsg);
+            if(!isset($detailMsg['mode']))
+                $detailMsg['mode'] = 'warnings';
+            if(!isset($detailMsg['nb']))
+                $detailMsg['nb'] = 3;
+            
+            if(!isset($_SESSION['msgsPerso'][$name]))
+                $_SESSION['msgsPerso'][$name] = 0;
+            if($_SESSION['msgsPerso'][$name] < $detailMsg['nb']){
+                setEventMessages($detailMsg['msg'], null, $detailMsg['mode']);
+                $_SESSION['msgsPerso'][$name]++;
+                
+            }
+        }
     }
 
     public function traitePhone() {

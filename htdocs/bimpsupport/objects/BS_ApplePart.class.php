@@ -340,6 +340,26 @@ class BS_ApplePart extends BimpObject
             }
             if (count($line_errors)) {
                 $warnings[] = BimpTools::getMsgFromArray($line_errors, 'Des erreurs sont survenues lors de la création de la ligne du devis');
+            } else {
+                // Création de la remise client par défaut. 
+                $client = $sav->getChildObject('client');
+                if (BimpObject::objectLoaded($client)) {
+                    $remise_percent = (float) $client->dol_object->remise_percent;
+                    if ($remise_percent > 0) {
+                        $remise = BimpObject::getInstance('bimpcommercial', 'ObjectLineRemise');
+                        $remise->validateArray(array(
+                            'id_object_line' => (int) $line->id,
+                            'object_type'    => $line::$parent_comm_type,
+                            'label'          => 'Remise client par défaut',
+                            'type'           => (int) ObjectLineRemise::OL_REMISE_PERCENT,
+                            'percent'        => $remise_percent
+                        ));
+                        $remise_errors = $remise->create($warnings, true);
+                        if (count($remise_errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($remise_errors, 'Echec de la création de la remise client par défaut');
+                        }
+                    }
+                }
             }
         }
 

@@ -23,7 +23,9 @@ class BC_Input extends BimpComponent
             'allow_custom' => array('data_type' => 'bool', 'default' => 1)
         ),
         'qty'                         => array(
-            'step' => array('data_type' => 'float', 'default' => 1)
+            'step'      => array('data_type' => 'float', 'default' => 1),
+            'min_label' => array('data_type' => 'bool', 'default' => 0),
+            'max_label' => array('data_type' => 'bool', 'default' => 0),
         ),
         'time'                        => array(
             'display_now' => array('data_type' => 'bool', 'default' => 0)
@@ -35,10 +37,11 @@ class BC_Input extends BimpComponent
             'display_now' => array('data_type' => 'bool', 'default' => 0)
         ),
         'textarea'                    => array(
-            'rows'        => array('data_type' => 'int', 'default' => 3),
-            'auto_expand' => array('data_type' => 'bool', 'default' => 0),
-            'note'        => array('data_type' => 'bool', 'default' => 0),
-            'values'      => array('data_type' => 'array', 'default' => array()),
+            'rows'             => array('data_type' => 'int', 'default' => 3),
+            'auto_expand'      => array('data_type' => 'bool', 'default' => 0),
+            'note'             => array('data_type' => 'bool', 'default' => 0),
+            'tab_key_as_enter' => array('data_type' => 'bool', 'default' => 0),
+            'values'           => array('data_type' => 'array', 'default' => array()),
         ),
         'select'                      => array(
             'options'      => array('data_type' => 'array', 'compile' => true, 'default' => array()),
@@ -53,7 +56,8 @@ class BC_Input extends BimpComponent
             'toggle_off' => array('default' => 'NON')
         ),
         'check_list'                  => array(
-            'items' => array('data_type' => 'array', 'default' => array(), 'compile' => true)
+            'items'              => array('data_type' => 'array', 'default' => array(), 'compile' => true),
+            'select_all_buttons' => array('data_type' => 'bool', 'default' => 1)
         ),
         'custom'                      => array(
             'content' => array('default' => '')
@@ -102,7 +106,7 @@ class BC_Input extends BimpComponent
             'country_field' => array('default' => '')
         ),
         'select_remises'              => array(
-            'id_client'     => array('data_type' => 'int', 'required' => 1),
+            'id_client'     => array('data_type' => 'int', 'default' => 0),
             'extra_filters' => array('default' => '')
         ),
         'select_remises_fourn'        => array(
@@ -232,9 +236,10 @@ class BC_Input extends BimpComponent
                 $options['allow_custom'] = (int) (isset($this->params['allow_custom']) ? $this->params['allow_custom'] : 1);
             case 'qty':
                 $options['data'] = array();
-                if ($this->params['type'] === 'qty') {
-                    $options['step'] = $this->params['step'];
-                }
+                $options['step'] = isset($this->params['step']) ? $this->params['step'] : 1;
+                $options['min_label'] = isset($this->params['min_label']) ? $this->params['min_label'] : 0;
+                $options['max_label'] = isset($this->params['max_label']) ? $this->params['max_label'] : 0;
+
                 $min = 'none';
                 $max = 'none';
                 $decimals = 0;
@@ -280,6 +285,7 @@ class BC_Input extends BimpComponent
                 $options['rows'] = isset($this->params['rows']) ? $this->params['rows'] : 3;
                 $options['auto_expand'] = isset($this->params['auto_expand']) ? $this->params['auto_expand'] : 0;
                 $options['note'] = isset($this->params['note']) ? $this->params['note'] : 0;
+                $options['tab_key_as_enter'] = isset($this->params['tab_key_as_enter']) ? $this->params['tab_key_as_enter'] : 0;
                 $options['values'] = isset($this->params['values']) ? $this->params['values'] : array();
                 break;
 
@@ -300,6 +306,7 @@ class BC_Input extends BimpComponent
 
             case 'check_list':
                 $options['items'] = isset($this->params['items']) ? $this->params['items'] : array();
+                $options['select_all_buttons'] = isset($this->params['select_all_buttons']) ? $this->params['select_all_buttons'] : 1;
                 break;
 
             case 'items_list':
@@ -517,7 +524,6 @@ class BC_Input extends BimpComponent
                         $values[$value] = $value;
                     }
                 }
-
                 $content = BimpInput::renderMultipleValuesInput($this->object, $this->name_prefix . $this->input_name, $content, $values, $label_input_suffixe, $autosave, $required, $sortable);
             }
         }
@@ -529,6 +535,16 @@ class BC_Input extends BimpComponent
             $path = 'fields/' . $this->input_name . '/object';
             $module = $this->object->config->getObjectModule($path);
             $object_name = $this->object->config->getObjectName($path);
+
+            if (!$module || !$object_name) {
+                $instance = $this->object->config->getObject('', $this->field_params['object']);
+                if (is_a($instance, 'BimpObject') && get_class($instance) !== 'BimpObject') {
+                    $module = $instance->module;
+                    $object_name = $instance->object_name;
+                }
+            }
+
+
             if ($module && $object_name) {
                 $extra_data['object_module'] = $module;
                 $extra_data['object_name'] = $object_name;

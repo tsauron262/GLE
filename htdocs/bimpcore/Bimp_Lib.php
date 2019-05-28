@@ -40,6 +40,7 @@ if (!defined('BIMP_LIB')) {
     require_once $dir . 'components/BC_ListTable.php';
     require_once $dir . 'components/BC_ListViews.php';
     require_once $dir . 'components/BC_ListCustom.php';
+    require_once $dir . 'components/BC_StatsList.php';
     require_once $dir . 'components/BC_FieldsTable.php';
     require_once $dir . 'components/BC_Form.php';
     require_once $dir . 'components/BC_View.php';
@@ -48,6 +49,7 @@ if (!defined('BIMP_LIB')) {
 
     require_once $dir . 'BimpStruct.php';
     require_once $dir . 'BimpAssociation.php';
+    require_once $dir . 'BimpObject.php';
     require_once $dir . 'BimpObject.php';
     require_once $dir . 'BimpStats.php';
     require_once $dir . 'BimpCore.php';

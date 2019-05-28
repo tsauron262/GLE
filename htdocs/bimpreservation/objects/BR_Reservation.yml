@@ -6,7 +6,17 @@ labels:
     name: réservation
     is_female: 1
 
-objects:                 
+objects:
+    entrepot: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            dol_object: 
+                module: product/stock
+                file: entrepot
+            id_object: 
+                field_value: id_entrepot
+        
     commercial: 
         extends: user
         instance: 
@@ -14,15 +24,23 @@ objects:
                 field_value: id_commercial
                 
     commande_client: 
+        extends: commande
         relation: hasOne
-        delete: 0
         instance: 
-            dol_object: commande
             id_object: 
                 field_value: id_commande_client
         cards: 
             default: 
                 type: commande_client_card
+                
+    commande_client_line: 
+        relation: hasOne
+        instance: 
+            bimp_object: 
+                module: bimpcommercial
+                name: Bimp_CommandeLine
+            id_object: 
+                field_value: id_commande_client_line
 
     commande_fournisseur:
         relation: hasOne
@@ -60,7 +78,9 @@ objects:
                 
     shipment: 
         instance: 
-            bimp_object: BR_CommandeShipment
+            bimp_object: 
+                module: bimplogistique
+                name: BL_CommandeShipment
         
 fields: 
     ref: 
@@ -170,7 +190,8 @@ fields:
         
     id_commande_client_line: 
         label: Ligne commande client
-        type: id
+        type: id_object
+        object: commande_client_line
         values: 
             array: commandeClientLines
         display_if: 
@@ -292,6 +313,7 @@ forms:
             - field: origin_element
             - field: origin_id_element
             - field: note
+            
     new_status: 
         rows: 
             - custom: 1
@@ -318,6 +340,26 @@ forms:
               input_name: new_status
               data_type: bool
               content: <input type="hidden" name="new_status" value="1"/>
+              
+    reserve_equipments: 
+        no_auto_submit: 1
+        rows: 
+            - custom: 1
+              hidden: 1
+              input_name: status
+              data_type: bool
+              input: 
+                  type: hidden
+              value: 
+                  field_value: status
+            - custom: 1
+              label: Equipements
+              input_name: equipments
+              data_type: list
+              multiple: 1
+              content: 
+                  callback: renderReserveEquipmentsInput
+        
     remove: 
         rows: 
             - custom: 1
@@ -346,6 +388,7 @@ forms:
                   options: 
                       array: avoirs
                   select_first: 1 
+                  
     shipment: 
         title: Ajouter à une expédition
         rows: 
@@ -409,11 +452,9 @@ views:
         delete_btn: 1
         rows:
             - cols: 
-                  - type: object_common_fields
-                    col_lg: 3
-                    col_sm: 12
+                  - type: object_header
+            - cols: 
                   - type: fields_table
-                    col_lg: 9
                     fields_table:
                         name: default
                
@@ -470,7 +511,7 @@ lists:
         pagination: 0
         bulk_actions: 
             callback: getCommandesListBulkActions
-        objects_change_reload: BR_ReservationCmdFourn,BR_ReservationShipment,BR_CommandeShipment
+        objects_change_reload: BR_ReservationCmdFourn,BR_ReservationShipment,BL_CommandeShipment
         modal_view: default
         sort_field: id_product
         sort_way: asc

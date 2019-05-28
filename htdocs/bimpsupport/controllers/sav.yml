@@ -60,11 +60,11 @@ sections:
                               object: sav
                               name: materiel
                     - cols: 
-                        - type: list
-                          list:
-                              name: sav
-                              object: sav
-                              children: prets
+                        - type: custom
+                          custom: 
+                              callback: 
+                                  method: renderPretsList
+                                  object: sav
           - id: devis
             title: Devis
             struct: 

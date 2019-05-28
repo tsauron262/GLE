@@ -92,7 +92,7 @@ class modBimpcore extends DolibarrModules
 		//							'dir' => array('output' => 'othermodulename'),      // To force the default directories names
 		//							'workflow' => array('WORKFLOW_MODULE1_YOURACTIONTYPE_MODULE2'=>array('enabled'=>'! empty($conf->module1->enabled) && ! empty($conf->module2->enabled)', 'picto'=>'yourpicto@mymodule')) // Set here all workflow context managed by module
 		//                        );
-		$this->module_parts = array('login'=>1, 'hooks' => array('productdao', 'thirdpartycard', 'main'));
+		$this->module_parts = array('login'=>1, 'hooks' => array('productdao', 'thirdpartycard', 'main'), 'triggers' => 1);
 
 		// Data directories to create when module is enabled.
 		// Example: this->dirs = array("/mymodule/temp");

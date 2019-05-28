@@ -22,3 +22,220 @@ objects:
                 class: OrderLine
             id_object: 
                 field_value: id_line
+                
+    shipment: 
+        instance: 
+            bimp_object: 
+                module: bimpreservation
+                name: BL_CommandeShipment
+            id_object: 
+                field_value: id_shipment
+                
+fields: 
+    ref_reservations: 
+        label: Référence réservations
+        
+    shipments: 
+        label: Expéditions
+        type: json
+        
+    factures: 
+        label: Factures
+        type: json
+        
+    qty_modif: 
+        label: Qté modifiée
+        type: qty
+        min: none
+        max: none
+        decimals: 3
+        unsigned: 0
+        default_value: 0
+        
+forms: 
+    commande_fourn: 
+        title: Ajouter à une commande fournisseur
+        icon: fas_cart-arrow-down
+        rows: 
+            - custom: 1
+              label: Quantité
+              input_name: qty
+              content: 
+                  callback: renderCommandeFournQtyInput
+            - custom: 1
+              label: Type de prix
+              data_type: int
+              input_name: type_price
+              input: 
+                  type: select
+                  options: 
+                      1: Prix fournisseur
+                      2: Prix d'achat exceptionnel
+              value: 1
+              
+            - custom: 1
+              label: Prix d'achat fournisseur
+              input_name: id_fourn_price
+              data_type: id_object
+              object: fourn_price
+              create_form: default
+              create_form_values: 
+                  fields: 
+                      fk_product: 
+                          prop: id_product
+              input: 
+                  type: select
+                  options: 
+                      array: productFournisseursPrices
+              value: 
+                  prop: id_fourn_price
+              display_if: 
+                  field_name: type_price
+                  show_values: 1
+              required_if: type_price=1
+              
+            - custom: 1
+              label: Fournisseur
+              input_name: id_fourn
+              data_type: id_object
+              input: 
+                  type: select
+                  options: 
+                      array: prodFournisseurs
+              display_if: 
+                  field_name: type_price
+                  show_values: 2
+              required_if: type_price=2
+              
+            - custom: 1
+              label: Prix d'achat exceptionnel (HT)
+              input_name: pa_ht
+              data_type: money
+              value: 0
+              input: 
+                  type: text
+              display_if: 
+                  field_name: type_price
+                  show_values: 2
+              required_if: type_price=2
+              
+            - custom: 1
+              label: Taux de TVA pour le prix d'achat exceptionnel
+              input_name: tva_tx
+              data_type: percent
+              max: 100
+              input:
+                  type: text
+              value: 20
+              display_if: 
+                  field_name: type_price
+                  show_values: 2
+            - custom: 1
+              label: Remise sur le prix d'achat
+              input_name: remise_pa
+              data_type: percent
+              min: 0
+              max: 100
+              input: 
+                  type: text
+            - custom: 1
+              label: Intitulé de la remise sur le prix d'achat
+              input_name: remise_pa_label
+              data_type: string
+              input: 
+                  type: text
+              display_if: 
+                  field_name: remise_pa
+                  hide_values: 0
+            - custom: 1
+              label: Commande fournisseur
+              input_name: id_commande_fourn
+              value: new
+              input: 
+                  type: select
+                  options: 
+                      array: commandesFournisseurs
+              depends_on: type_price,id_fourn_price,id_fourn
+              
+    qty_modified: 
+        rows: 
+            - custom: 1
+              label: Quantité totale commande
+              input_name: qty_modified
+              content: 
+                  callback: renderQtyModifiedInput
+            
+views: 
+    shipments: 
+        panel: 0
+        rows: 
+            - cols: 
+                - type: custom
+                  custom: 
+                      callback: renderShipmentsView
+                      
+    invoices: 
+        panel: 0
+        rows: 
+            - cols: 
+                - type: custom
+                  custom: 
+                      callback: renderInvoicesView
+                      
+lists_cols:
+    qties: 
+        label: Quantités
+        value: 
+            callback: displayQties
+    reservations: 
+        label: Statuts
+        value: 
+            callback: displayReservationsStatus
+        min_width: 620px
+    
+lists: 
+    default: 
+        add_btn: 
+            callback: isCreatable
+        edit_btn: 
+            callback: isParentEditable
+            
+    logistique:
+        extends: default
+        title: Logistique produits / services
+        icon: fas_truck-loading
+        configurable: 0
+        list_filters: 
+            - name: type
+              filter: 
+                  operator: <>
+                  value: 2
+        item_checkbox: 
+            callback: isNotTypeText
+        after_list_content: unset
+        objects_change_reload: Bimp_Commande,ObjectLineRemise,BR_Reservation,BL_CommandeShipment
+        bulk_actions: 
+            callback: getLogistiqueBulkActions
+        extra_btn: 
+            callback: getLogistiqueExtraButtons
+        footer_extra_content:
+            callback: renderLogistiqueListFooterExtraContent
+        cols: 
+            desc:
+                value: 
+                    callback: 
+                        method: displayLineData
+                        params:
+                           - desc_light
+            pu_ht: unset
+            tva: unset
+            pa_ht: unset
+            qty: unset
+            qties: 
+            remise: unset
+            total_ttc: unset
+            margin: unset
+            reservations:
+        
+    
+    

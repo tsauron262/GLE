@@ -11,7 +11,7 @@ class equipmentController extends BimpController
             return BimpRender::renderAlerts('ID de l\'équipement absent');
         }
 
-        $list = new BC_ListTable(BimpObject::getInstance('bimpsupport', 'BS_SavPret'), 'default', 1, null, 'Prêts de l\'équipement');
+        $list = new BC_ListTable(BimpObject::getInstance('bimpsupport', 'BS_Pret'), 'default', 1, null, 'Prêts de l\'équipement');
         $list->addAssociateAssociationFilter('equipments', BimpTools::getValue('id', 0));
         return $list->renderHtml();
     }

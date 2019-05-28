@@ -185,10 +185,14 @@ class BContract_echeancier extends BimpObject {
         $list_fact = $this->get_total_facture();
         for ($i = 0; $i < $nb_period; $i++) {
             $facture = $this->getInstance('bimpcommercial', 'Bimp_Facture', $list_fact[$i]['id_facture']);
-            $this->tab_echeancier[$i] = array('date_debut' => $date_debut->format('Y-m-d'), 'date_fin' => $date_fin->format('Y-m-d'), 'montant_ht' => $montant_facturer_ht, 'montant_ttc' => $montant_facturer_ttc);
+            $format = 'Y-m-d';
+            if ($date_debut->format('d') == '01') {
+                $format = 'Y-m-t';
+                $date_fin->sub(new DateInterval("P1D"));
+            }
+            $this->tab_echeancier[$i] = array('date_debut' => $date_debut->format('Y-m-d'), 'date_fin' => $date_fin->format("$format"), 'montant_ht' => $montant_facturer_ht, 'montant_ttc' => $montant_facturer_ttc);
             $date_debut->add(new DateInterval("P" . $parent->getData('periodicity') . "M"));
             $date_fin->add(new DateInterval("P" . $parent->getData('periodicity') . "M"));
-           
             if (array_key_exists($i, $list_fact)) {
                 $this->tab_echeancier[$i]['statut'] = $facture->getData('fk_statut');
                 $this->tab_echeancier[$i]['facture'] = $list_fact[$i]['id_facture'];

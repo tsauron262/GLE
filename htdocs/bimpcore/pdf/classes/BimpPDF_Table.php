@@ -25,7 +25,7 @@ class BimpPDF_Table
         } else {
             $this->styles = file_get_contents(BimpModelPDF::$tpl_dir . '/table/table_no_borders.css');
         }
-        
+
         $primary = BimpCore::getParam('pdf/primary', '000000');
         $this->styles = str_replace('{primary}', $primary, $this->styles);
     }
@@ -105,13 +105,13 @@ class BimpPDF_Table
     {
         $nbRow = count($this->rows);
         $nbRow = 1;
-        $coef = (200 - ($nbRow * 10)) / 100;//A 10 lignes on est en taille normal a 20 on est a 0
-        $cellpadding = $coef*$this->cellpadding;
-        
-        if($cellpadding < 0.5)
+        $coef = (200 - ($nbRow * 10)) / 100; //A 10 lignes on est en taille normal a 20 on est a 0
+        $cellpadding = $coef * $this->cellpadding;
+
+        if ($cellpadding < 0.5)
             $cellpadding = 0.5;
-        
-        
+
+
         $html = '';
         $html .= '<table class="' . $class . '';
         foreach ($this->table_classes as $tableClass) {
@@ -187,13 +187,13 @@ class BimpPDF_Table
                     }
                 }
             }
-            
-            
-            
-            if(is_object($row['object'])){
+
+
+
+            if (is_object($row['object'])) {
                 $content .= $this->addDEEEandRPCP($key, $row['object'], $row['qte']);
             }
-            
+
 
             $html .= '<td style="width: ' . $col_width . 'px';
             if ($style) {
@@ -208,40 +208,41 @@ class BimpPDF_Table
 
         $html .= '</tr>';
         $html .= '</table>';
-        
-        $pdf->writeHTML('<style>' . $this->styles . '</style>' . "\n" . $html."", false, false, true, false, '');
+
+        $pdf->writeHTML('<style>' . $this->styles . '</style>' . "\n" . $html . "", false, false, true, false, '');
     }
-    
-    public function addDEEEandRPCP($key, $object, $qty){
+
+    public function addDEEEandRPCP($key, $object, $qty)
+    {
         $content = "";
         $htmlAv = '<br/><span style="text-align:right;font-style: italic; font-size: 5px; font-weight: bold;">';
         $htmlAp = '</span>';
         $eco = 0;
-        if(isset($object->array_options['options_deee']) && $object->array_options['options_deee'] > 0)
+        if (isset($object->array_options['options_deee']) && $object->array_options['options_deee'] > 0)
             $eco = $object->array_options['options_deee'];
 
-        if($key == "desc" && $eco > 0)
-                $content .= $htmlAv.'Dont écotaxe'.$htmlAp;
-        if($key == "pu_ht" && $eco > 0)
-                $content .= $htmlAv.price($eco).$htmlAp;
-        if($key == "total_ht" && $eco > 0)
-                $content .= $htmlAv.price($eco*$qty).$htmlAp;
-        if($key == "total_ttc" && $eco > 0)
-                $content .= $htmlAv.price($eco*$qty*1.2).$htmlAp;
+        if ($key == "desc" && $eco > 0)
+            $content .= $htmlAv . 'Dont écotaxe' . $htmlAp;
+        if ($key == "pu_ht" && $eco > 0)
+            $content .= $htmlAv . price($eco) . $htmlAp;
+        if ($key == "total_ht" && $eco > 0)
+            $content .= $htmlAv . price($eco * $qty) . $htmlAp;
+        if ($key == "total_ttc" && $eco > 0)
+            $content .= $htmlAv . price($eco * $qty * 1.2) . $htmlAp;
 
-        
-        
+
+
         $rpcp = 0;
-        if(isset($object->array_options['options_rpcp']) && $object->array_options['options_rpcp'] > 0)
+        if (isset($object->array_options['options_rpcp']) && $object->array_options['options_rpcp'] > 0)
             $rpcp = $object->array_options['options_rpcp'];
-        if($key == "desc" && $rpcp > 0)
-                $content .= $htmlAv.'Dont droit copie privé'.$htmlAp;
-        if($key == "pu_ht" && $rpcp > 0)
-                $content .= $htmlAv.price($rpcp).$htmlAp;
-        if($key == "total_ht" && $rpcp > 0)
-                $content .= $htmlAv.price($rpcp*$qty).$htmlAp;
-        if($key == "total_ttc" && $rpcp > 0)
-                $content .= $htmlAv.price($rpcp*$qty*1.2).$htmlAp;
+        if ($key == "desc" && $rpcp > 0)
+            $content .= $htmlAv . 'Dont droit copie privé' . $htmlAp;
+        if ($key == "pu_ht" && $rpcp > 0)
+            $content .= $htmlAv . price($rpcp) . $htmlAp;
+        if ($key == "total_ht" && $rpcp > 0)
+            $content .= $htmlAv . price($rpcp * $qty) . $htmlAp;
+        if ($key == "total_ttc" && $rpcp > 0)
+            $content .= $htmlAv . price($rpcp * $qty * 1.2) . $htmlAp;
         return $content;
     }
 

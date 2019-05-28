@@ -39,6 +39,8 @@ fields:
             
     file_name:
         label: Nom
+        input: 
+            help: caractères alphanumériques et tirets (- ou _) seulements. Pas d'espaces ni d'accents. 
             
     file_ext: 
         label: Extension

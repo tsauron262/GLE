@@ -12,6 +12,11 @@ objects:
         instance: 
             bimp_object: BS_SavPropalLine
             
+                     
+fields:
+    pdf_hide_ref: 
+        default_value: 1
+            
 fields_tables: 
     sav_infos: 
         title: Informations
@@ -33,6 +38,8 @@ fields_tables:
             - field: pdf_hide_reduc
               edit: 1
             - field: pdf_hide_total
+              edit: 1
+            - field: pdf_hide_ref
               edit: 1
             - field: pdf_proforma
               edit: 1

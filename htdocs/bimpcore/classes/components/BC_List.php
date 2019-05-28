@@ -579,7 +579,7 @@ class BC_List extends BC_Panel
             }
         }
 
-        if ($this->object->isCreatable()) {
+        if ($this->object->isCreatable(false)) {
             if ((int) $this->params['add_btn'] && !is_null($this->params['add_form_name']) && $this->params['add_form_name']) {
                 $label = '';
                 $on_save = ($this->params['add_form_on_save'] ? $this->params['add_form_on_save'] : $this->object->getConf('forms/' . $this->params['add_form_name'] . '/on_save', 'close'));

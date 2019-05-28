@@ -25,7 +25,7 @@ class Equipment extends BimpObject
 
     public function __construct($db)
     {
-        require_once(DOL_DOCUMENT_ROOT."/bimpequipment/objects/BE_Place.class.php");
+        require_once(DOL_DOCUMENT_ROOT . "/bimpequipment/objects/BE_Place.class.php");
         self::$typesPlace = BE_Place::$types;
         parent::__construct("bimpequipment", get_class($this));
         $this->iconeDef = "fa-laptop";
@@ -127,27 +127,6 @@ class Equipment extends BimpObject
         }
 
         return $return;
-    }
-
-    public function defaultDisplayContratsItem($id_contrat)
-    {
-        $contrat = BimpObject::getDolInstance('contrat');
-        if ($contrat->fetch((int) $id_contrat) > 0) {
-            $label = $contrat->ref;
-            if (isset($contrat->societe) && is_a($contrat->societe, 'Societe')) {
-                $label .= ' (client: ' . $contrat->societe->nom . ')';
-            } elseif (isset($contrat->socid) && $contrat->socid) {
-                global $db;
-                $client = new Societe($db);
-                if ($client->fetch($contrat->socid) > 0) {
-                    $label .= ' (client: ' . $client->nom . ')';
-                }
-                unset($client);
-            }
-            unset($contrat);
-            return $label;
-        }
-        return BimpRender::renderAlerts('Le contrat d\'ID ' . $id_contrat . ' semble ne plus exister');
     }
 
     public function getCurrentPlace()
@@ -261,7 +240,7 @@ class Equipment extends BimpObject
                         'part_type' => 'middle',
                         'part'      => $value
                     ),
-                    'place_entrepot.ref'      => array(
+                    'place_entrepot.ref'       => array(
                         'part_type' => 'middle',
                         'part'      => $value
                     ),
@@ -298,7 +277,7 @@ class Equipment extends BimpObject
             $filters['placeType.position'] = 1;
             $filters['or_placeType'] = array(
                 'or' => array(
-                    'placeType.type'         => array(
+                    'placeType.type' => array(
                         'part_type' => 'middle',
                         'part'      => $value
                     )
@@ -322,41 +301,48 @@ class Equipment extends BimpObject
         }
     }
 
-    public function checkAvailability($id_entrepot = 0, $allowed_id_reservation = 0)
+    public static function getAvailableEquipmentsArray($id_entrepot = null, $id_product = null)
     {
-        $errors = array();
+        $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
 
-        if (!$this->isLoaded()) {
-            $errors[] = 'Equipement invalide';
-        } else {
-            if (!(int) $this->getData('available')) {
-                $errors[] = 'L\'équipement ' . $this->getData('serial') . ' n\'est pas disponible';
-            } else {
-                $reservations = $this->getReservationsList();
-                if (count($reservations)) {
-                    if (!$allowed_id_reservation || ($allowed_id_reservation && !in_array($allowed_id_reservation, $reservations))) {
-                        $errors[] = 'L\'équipement ' . $this->getData('serial') . ' est réservé';
-                    }
-                }
+        $joins = array(
+            'eq' => array(
+                'table' => 'be_equipment',
+                'alias' => 'eq',
+                'on'    => 'a.id_equipment = eq.id'
+            )
+        );
 
-                if ($id_entrepot) {
-                    $place = $this->getCurrentPlace();
-                    if ((int) $place->getData('type') !== BE_Place::BE_PLACE_ENTREPOT ||
-                            (int) $place->getData('id_entrepot') !== $id_entrepot) {
-                        BimpTools::loadDolClass('product/stock', 'entrepot');
-                        $entrepot = new Entrepot($this->db->db);
-                        $entrepot->fetch($id_entrepot);
-                        if (BimpObject::objectLoaded($entrepot)) {
-                            $label = '"' . $entrepot->libelle . '"';
-                        } else {
-                            $label = 'sélectionné';
-                        }
-                        $errors[] = 'L\'équipement ' . $this->getData('serial') . ' n\'est pas disponible dans l\'entrepot ' . $label;
+        $filters = array(
+            'a.position'   => 1,
+            'eq.available' => 1
+        );
+
+        if (!is_null($id_entrepot)) {
+            $filters['a.type'] = BE_Place::BE_PLACE_ENTREPOT;
+            $filters['a.id_entrepot'] = $id_entrepot;
+        }
+
+        if (!is_null($id_product)) {
+            $filters['eq.id_product'] = $id_product;
+        }
+
+        $list = $place->getList($filters, null, null, 'id', 'asc', 'array', array('a.id_equipment'), $joins);
+
+        $equipments = array();
+
+        if (!is_null($list)) {
+            foreach ($list as $item) {
+                $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $item['id_equipment']);
+                if (BimpObject::objectLoaded($equipment)) {
+                    if (!count($equipment->checkAvailability($id_entrepot))) {
+                        $equipments[(int) $equipment->id] = $equipment->getRef();
                     }
                 }
             }
         }
-        return $errors;
+
+        return $equipments;
     }
 
     // Affichage: 
@@ -408,7 +394,7 @@ class Equipment extends BimpObject
 
         return '';
     }
-    
+
     public function displayCurrentPlaceType()
     {
         $place = $this->getCurrentPlace();
@@ -435,6 +421,27 @@ class Equipment extends BimpObject
         }
 
         return $this->displayData('product_label', 'default', ($no_html ? 0 : 1), $no_html);
+    }
+
+    public function defaultDisplayContratsItem($id_contrat)
+    {
+        $contrat = BimpObject::getDolInstance('contrat');
+        if ($contrat->fetch((int) $id_contrat) > 0) {
+            $label = $contrat->ref;
+            if (isset($contrat->societe) && is_a($contrat->societe, 'Societe')) {
+                $label .= ' (client: ' . $contrat->societe->nom . ')';
+            } elseif (isset($contrat->socid) && $contrat->socid) {
+                global $db;
+                $client = new Societe($db);
+                if ($client->fetch($contrat->socid) > 0) {
+                    $label .= ' (client: ' . $client->nom . ')';
+                }
+                unset($client);
+            }
+            unset($contrat);
+            return $label;
+        }
+        return BimpRender::renderAlerts('Le contrat d\'ID ' . $id_contrat . ' semble ne plus exister');
     }
 
 //    Traitements: 
@@ -639,6 +646,47 @@ class Equipment extends BimpObject
         }
 
         return $equipments;
+    }
+
+    public function checkAvailability($id_entrepot = 0, $allowed_id_reservation = 0)
+    {
+        $errors = array();
+
+        if (!$this->isLoaded()) {
+            $errors[] = 'Equipement invalide';
+        } else {
+            if (!(int) $this->getData('available')) {
+                $errors[] = 'L\'équipement ' . $this->getData('serial') . ' n\'est pas disponible';
+            } else {
+                $reservations = $this->getReservationsList();
+                if (count($reservations)) {
+                    if (!$allowed_id_reservation || ($allowed_id_reservation && !in_array($allowed_id_reservation, $reservations))) {
+                        $errors[] = 'L\'équipement ' . $this->getData('serial') . ' est réservé';
+                    }
+                }
+
+                if ($id_entrepot) {
+                    $place = $this->getCurrentPlace();
+                    if (BimpObject::objectLoaded($place)) {
+                        if ((int) $place->getData('type') !== BE_Place::BE_PLACE_ENTREPOT ||
+                                (int) $place->getData('id_entrepot') !== $id_entrepot) {
+                            BimpTools::loadDolClass('product/stock', 'entrepot');
+                            $entrepot = new Entrepot($this->db->db);
+                            $entrepot->fetch($id_entrepot);
+                            if (BimpObject::objectLoaded($entrepot)) {
+                                $label = '"' . $entrepot->libelle . '"';
+                            } else {
+                                $label = 'sélectionné';
+                            }
+                            $errors[] = 'L\'équipement ' . $this->getData('serial') . ' n\'est pas disponible dans l\'entrepot ' . $label;
+                        }
+                    } else {
+                        $errors[] = 'Aucun emplacement défini pour l\'équipement "' . $this->getData('serial') . '"';
+                    }
+                }
+            }
+        }
+        return $errors;
     }
 
 //    Renders: 

@@ -41,12 +41,25 @@ objects:
                     parent_module: bimpcommercial
                     parent_object_name: BimpComm
             
+    user_author:
+        extends: user
+        instance: 
+            id_object: 
+                field_value: fk_user_author
+            
+    user_valid:
+        extends: user
+        instance: 
+            id_object: 
+                field_value: fk_user_valid
+                
 fields:
     entrepot: 
         label: Entrepôt
         dol_extra_field: 1
         type: id_object
         object: entrepot
+        required: 1
         input: 
             type: search_entrepot
         default_value: 
@@ -72,6 +85,16 @@ fields:
         create_form: light
     ref_client: 
         label: Référence client
+    libelle: 
+        label: Libellé
+        dol_extra_field: 1
+        required: 1
+    ef_type: 
+        label: Secteur
+        dol_extra_field: 1
+        values: 
+            array: secteurs
+        required: 1
     fk_cond_reglement: 
         label: Conditions de règlement
         dol_prop: cond_reglement_id
@@ -121,6 +144,9 @@ fields:
         object: user_author
         input: 
             type: hidden
+        filter: 
+            input: 
+                type: search_user
     fk_user_valid: 
         label: Validée par
         dol_prop: user_valid_id
@@ -128,6 +154,9 @@ fields:
         object: user_valid
         input: 
             type: hidden
+        filter: 
+            input: 
+                type: search_user
     total: 
         label: Total TTC
         dol_prop: total_ttc
@@ -169,35 +198,6 @@ fields:
             auto_expand: 1
         default_value: 
             callback: getDefaultRemiseGlobaleLabel
-        
-lists_cols: 
-    entrepot: 
-        field: entrepot
-        display: nom_url
-    ref: 
-        label: Réf. 
-        field: ref
-    soc: 
-        field: fk_soc
-        display: nom_url
-    ref_client: 
-        field: ref_client
-    statut: 
-        field: fk_statut
-    total_ht: 
-        field: total_ht
-    total_ttc: 
-        field: total
-    total_tva: 
-        field: tva
-    cond_reglement: 
-        field: fk_cond_reglement
-    mode_reglement: 
-        field: fk_mode_reglement
-    availability: 
-        field: fk_availability
-    input_reason: 
-        field: fk_input_reason
     
 forms: 
     contact:
@@ -410,6 +410,26 @@ forms:
                           prop: object_name
                       id_parent: 
                           prop: id
+                          
+    acompte: 
+        title: Ajouter un acompte
+        icon: fas_hand-holding-usd
+        rows: 
+            - custom: 1
+              label: Mode de paiement
+              input_name: id_mode_paiement
+              data_type: id
+              required: 1
+              input: 
+                  type: select_payment
+                  include_empty: 1
+            - custom: 1
+              label: Montant
+              input_name: amount
+              data_type: money
+              required: 1
+              input: 
+                  type: text
                   
 fields_tables: 
     infos: 
@@ -446,22 +466,97 @@ fields_tables:
 filters_panels: 
     default: 
         filters: 
-            - field: fk_soc
-            - field: entrepot
-            - field: fk_availability
-            - field: fk_cond_reglement
-            - field: fk_mode_reglement
-            - field: fk_statut
-            - field: note_private
-            - field: note_public
-            - field: ref
-            - field: ref_client
-            - field: remise_globale
-            - field: total_ht
-            - field: total
+            ref: 
+                field: ref
+            ref_client: 
+                field: ref_client
+            statut: 
+                field: fk_statut
+            soc: 
+                field: fk_soc
+            entrepot: 
+                field: entrepot
+            secteur: 
+                field: ef_type
+            libelle: 
+                field: libelle
+            user_create: 
+                field: fk_user_author
+            user_valid: 
+                field: fk_user_valid
+            date_create: 
+                field: datec
+            availability:
+                field: fk_availability
+            cond_reglement: 
+                field: fk_cond_reglement
+            mode_reglement: 
+                field: fk_mode_reglement
+            total_ht: 
+                field: total_ht
+            total_ttc: 
+                field: total
+            remise_globale: 
+                field: remise_globale
+            note_private: 
+                field: note_private
+            note_public: 
+                field: note_public
+                    
+lists_cols: 
+    libelle: 
+        field: libelle
+    secteur:
+        field: ef_type
+    entrepot: 
+        field: entrepot
+        display: nom_url
+    ref: 
+        label: Réf. 
+        field: ref
+    soc: 
+        field: fk_soc
+        display: nom_url
+    ref_client: 
+        field: ref_client
+    statut: 
+        field: fk_statut
+    total_ht: 
+        field: total_ht
+    total_ttc: 
+        field: total
+    total_tva: 
+        field: tva
+    cond_reglement: 
+        field: fk_cond_reglement
+    mode_reglement: 
+        field: fk_mode_reglement
+    availability: 
+        field: fk_availability
+    input_reason: 
+        field: fk_input_reason
+    user_create:
+        field: fk_user_author
+        display: nom_url
+    user_valid: 
+        field: fk_user_valid
+        display: nom_url
         
 lists: 
     default: 
+        configurable: 1
+        checkboxes: 1
+        filters_panel: default
+        bulk_actions:
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this))
+        n: 10
+        add_form_name: default
+        edit_btn: 1
+        edit_form: default
+        delete_btn: 1
+        modal_view: full
+        page_btn: 1
         extra_btn: 
             callback: getDefaultListExtraButtons
         list_filters: 
@@ -478,7 +573,7 @@ lists:
             
 views: 
     default: 
-        objects_change_reload: Bimp_File
+        objects_change_reload: BimpFile,BimpNote
         delete_btn: 1
         edit_form: default
         footer_extra_btn: 
@@ -514,6 +609,13 @@ views:
                             - type: fields_table
                               fields_table: 
                                   name: notes
+            - cols:
+                  - type: custom
+                    custom: 
+                        callback: 
+                            method: renderNotesList
+                            params:
+                                - 1
                             
     full: 
         objects_change_reload: Bimp_File
@@ -529,7 +631,7 @@ views:
                   view: 
                       name: content
         
-    content: 
+    content_infos: 
         rows: 
             - cols: 
                 - type: rows
@@ -563,24 +665,18 @@ views:
                   col_sm: 12
                   custom: 
                       callback: renderContentExtraRight
-                                
+                
+    content: 
+        no_reload: 1
+        rows:          
+            - cols: 
+                - type: view
+                  view: 
+                      name: content_infos
+                      panel: 0
             - cols: 
                 - type: list
                   list: 
                       name: default
                       children: lines
                       title: Lignes
-                      
-    full: 
-        objects_change_reload: Bimp_File
-        rows: 
-            - cols: 
-                - type: object_header
-            - cols: 
-                - type: view
-                  view: 
-                      name: default
-            - cols: 
-                - type: view
-                  view: 
-                      name: content

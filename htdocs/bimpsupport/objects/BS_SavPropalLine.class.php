@@ -30,6 +30,37 @@ class BS_SavPropalLine extends Bimp_PropalLine
         return 0;
     }
 
+    public function isActionAllowed($action, &$errors = array())
+    {
+        if (!$this->isLoaded()) {
+            $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
+            return 0;
+        }
+
+        switch ($action) {
+            case 'attributeEquipment':
+                $propal = $this->getParentInstance();
+                if (!BimpObject::objectLoaded($propal)) {
+                    $errors[] = 'ID du devis absent';
+                    return 0;
+                }
+
+                $sav = $propal->getSav();
+                if (!BimpObject::objectLoaded($sav)) {
+                    $errors[] = 'ID du SAV absent';
+                    return 0;
+                }
+
+                if (in_array((int) $sav->getData('status'), array(BS_SAV::BS_SAV_A_RESTITUER, BS_SAV::BS_SAV_FERME))) {
+                    $errors[] = 'SAV Terminé';
+                    return 0;
+                }
+                return 1;
+        }
+
+        return (int) parent::isActionAllowed($action, $errors);
+    }
+
     public function showWarranty()
     {
         if (in_array($this->getData('type'), array(self::LINE_PRODUCT, self::LINE_FREE))) {
@@ -183,22 +214,6 @@ class BS_SavPropalLine extends Bimp_PropalLine
         return $equipment->checkAvailability($id_entrepot, $id_reservation);
     }
 
-    public function isEquipmentEditable()
-    {
-        $propal = $this->getParentInstance();
-
-        if (BimpObject::objectLoaded($propal)) {
-            $sav = $propal->getSav();
-            if (BimpObject::objectLoaded($sav)) {
-                if (!in_array($sav->getData('status'), array(9, 999))) {
-                    return 1;
-                }
-            }
-        }
-
-        return 0;
-    }
-
     public function getValueByProduct($field)
     {
         if ($this->getData('linked_object_name') === 'sav_apple_part') {
@@ -207,18 +222,23 @@ class BS_SavPropalLine extends Bimp_PropalLine
                     return 20;
 
                 case 'pu_ht':
-                    $part = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_ApplePart', (int) $this->getData('linked_id_object'));
-                    if ($part->isLoaded()) {
-                        return $part->convertPrix((float) $this->pa_ht, $part->getData('part_number'), $part->getData('label'));
+                    if (is_null($this->pu_ht) || !(float) $this->pu_ht) {
+                        $part = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_ApplePart', (int) $this->getData('linked_id_object'));
+                        if ($part->isLoaded()) {
+                            return $part->convertPrix((float) $this->pa_ht, $part->getData('part_number'), $part->getData('label'));
+                        }
+                        
+                        return 0;
                     }
-                    return 0;
+
+                    return (float) $this->pu_ht;
             }
         }
 
         return parent::getValueByProduct($field);
     }
 
-    public function isFieldEditable($field)
+    public function isFieldEditable($field, $force_edit = false)
     {
         if ($field === 'qty') {
             if (!(int) $this->getData('editable')) {
@@ -227,7 +247,7 @@ class BS_SavPropalLine extends Bimp_PropalLine
             return 1;
         }
 
-        return (int) parent::isFieldEditable($field);
+        return (int) parent::isFieldEditable($field, $force_edit);
     }
 
     public function validate()

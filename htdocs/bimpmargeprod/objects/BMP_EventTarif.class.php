@@ -13,17 +13,17 @@ class BMP_EventTarif extends BimpObject
         return 0;
     }
 
-    public function isCreatable()
+    public function isCreatable($force_create = false)
     {
         return (int) $this->isParentEditable();
     }
 
-    public function isEditable()
+    public function isEditable($force_edit = false)
     {
         return (int) $this->isParentEditable();
     }
 
-    public function isDeletable()
+    public function isDeletable($force_delete = false)
     {
         if (!$this->isLoaded()) {
             return 0;
@@ -48,7 +48,7 @@ class BMP_EventTarif extends BimpObject
         return 1;
     }
 
-    public function isFieldEditable($field)
+    public function isFieldEditable($field, $force_edit = false)
     {
         if (in_array($field, array('name', 'amount', 'previsionnel'))) {
             return (int) $this->isParentEditable();

@@ -1,0 +1,138 @@
+table: facturedet
+primary: rowid
+
+parent_module: bimpcommercial
+parent_object: Bimp_Facture
+parent_id_property: fk_facture
+
+labels: 
+    name: vente
+    is_female: 1
+    
+objects:
+    facture_line: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcommercial
+                name: Bimp_FactureLine
+                
+    product: 
+        instance: 
+            id_object: fk_product
+            
+    category: 
+        relation: none
+        delete: 0
+        instance: 
+            dol_object: 
+                module: categories
+                file: categorie
+                
+fields: 
+#    Champs facturedet: 
+    fk_facture: 
+        label: Facture
+        type: id_parent
+        
+    fk_product: 
+        label: Produit
+        type: id_object
+        object: product
+        
+    subprice: 
+        label: Prix unitaire HT
+        type: money
+        
+    tva_tx: 
+        label: Taux de TVA
+        type: percent
+        
+    qty: 
+        label: Quantité
+        type: qty
+        decimals: 3
+        
+    remise_percent: 
+        label: Remise (%)
+        type: percent
+        
+    total_ht: 
+        label: Total HT
+        type: money
+        
+    total_tva: 
+        label: Total TVA
+        type: money
+        
+    total_ttc: 
+        label: Total TTC
+        type: money
+        
+#    Champs extra: 
+    
+    date: 
+        label: Date
+        extra: 1
+        type: date
+        
+    id_client: 
+        label: Client
+        extra: 1
+        type: id_object
+        object: client
+        
+    id_entrepot: 
+        label: Entrepot
+        extra: 1
+        type: id_object
+        object: entrepot
+        values: 
+            array: entrepots
+        
+    id_user: 
+        label: Utilisateur
+        extra: 1
+        type: id_object
+        object: user
+        values: 
+            array: users
+            
+    secteur:
+        label: Secteur
+        extra: 1
+        values: 
+            array: secteurs
+        
+    product_categories: 
+        label: Catégories produit
+        extra: 1
+        type: items_list
+        items_data_type: id_object
+        object: category
+     
+filters_panels: 
+    default: 
+        filters: 
+            dates: 
+                field: date
+            entrepot: 
+                field: id_entrepot
+            secteur: 
+                field: secteur
+            user: 
+                field: id_user
+            client: 
+                field: id_client
+            product: 
+                field: fk_product
+        
+stats_lists: 
+    default: 
+        filters_panel: default
+        group_by_options: 
+            - id_entrepot
+            - secteur
+        
+        

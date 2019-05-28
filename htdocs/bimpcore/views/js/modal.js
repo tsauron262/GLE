@@ -14,7 +14,7 @@ function BimpModal($modal) {
     this.$nextBtn = $modal.find('.modal-nav-next');
     this.$historyToggle = $modal.find('.modal-nav-history').find('.dropdown-toggle');
 
-    this.newContent = function (title, loading_text, $button) {
+    this.newContent = function (title, content_html, show_loading, loading_text, $button) {
         hidePopovers(modal.$modal);
 
         modal.$footer.find('.extra_button').hide();
@@ -37,13 +37,20 @@ function BimpModal($modal) {
         modal.next_idx++;
 
         modal.$titles.append('<span class="modal_title" id="modal_title_' + modal.idx + '">' + title + '</span>');
-        if (!loading_text || typeof (loading_text) !== 'string') {
-            loading_text = 'Chargement';
+
+        if (show_loading) {
+            if (!loading_text || typeof (loading_text) !== 'string') {
+                loading_text = 'Chargement';
+            }
+
+            modal.$loading.find('.loading-text').text(loading_text);
+            modal.$loading.show();
+        } else {
+            modal.$loading.hide();
         }
 
-        modal.$loading.find('.loading-text').text(loading_text);
-        modal.$loading.show();
         modal.$modal.modal('show');
+
         modal.$modal.on('hide.bs.modal', function (e) {
             modal.$loading.hide();
             if ($.isOk($button)) {
@@ -52,6 +59,7 @@ function BimpModal($modal) {
         });
 
         var html = '<div class="modal_content" id="modal_content_' + modal.idx + '" data-idx="' + modal.idx + '" data-format="medium" data-width="">';
+        html += content_html;
         html += '</div>';
 
         modal.$contents.prepend(html);
@@ -68,6 +76,18 @@ function BimpModal($modal) {
             modal.displayContent(parseInt($content.data('idx')));
         }
         modal.hide();
+    };
+
+    this.clearAllContents = function () {
+        modal.$contents.find('.modal_content').each(function () {
+            var idx = parseInt($(this).data('idx'));
+            if (idx) {
+                modal.removeContent(idx, false);
+            }
+        });
+
+        modal.checkContents();
+//        modal.hide();
     };
 
     this.removeContent = function (idx, check_contents) {
@@ -219,7 +239,8 @@ function BimpModal($modal) {
         if ($button.hasClass('disabled')) {
             return;
         }
-        modal.newContent(title, loading_text);
+
+        modal.newContent(title, '', true, loading_text, null);
 
         if (!ajax_params || typeof (ajax_params) === 'undefined') {
             ajax_params = {};
@@ -256,7 +277,7 @@ function BimpModal($modal) {
             modal.$loading.hide();
             bimpAjax.$modal.modal('handleUpdate');
         };
-        
+
         ajax_data['modal_idx'] = modal.idx;
 
         BimpAjax(ajax_action, ajax_data, modal.$contents.find('#modal_content_' + modal.idx), ajax_params);
@@ -272,7 +293,7 @@ function BimpModal($modal) {
 
         $button.addClass('disabled');
 
-        this.newContent(title, 'Chargement', $button);
+        this.newContent(title, '', true, 'Chargement', $button);
 
         var $container = modal.$contents.find('#modal_content_' + modal.idx);
         var html = '<div style="overflow: hidden"><iframe class="page_modal_iframe" frameborder="0" src="' + url + '" width="100%" height="630px"></iframe></div>';
@@ -295,7 +316,7 @@ function BimpModal($modal) {
         }
 
         $button.addClass('disabled');
-        modal.newContent(title, 'Chargement de l\'image', $button);
+        modal.newContent(title, '', true, 'Chargement de l\'image', $button);
 
         var html = '<div class="align-center"><img class="page_modal_img" src="' + src + '" alt="' + title + '"/></div>';
         var $container = modal.$contents.find('#modal_content_' + modal.idx);

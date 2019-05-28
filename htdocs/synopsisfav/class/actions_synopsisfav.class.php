@@ -334,7 +334,12 @@ class favoriCli {
                 require_once DOL_DOCUMENT_ROOT . $data['path'];
                 $nomObj = $data['obj'];
                 if (class_exists($nomObj)) {
-                    $obj = new $nomObj($db);
+                    if(stripos($nomObj, "bimp") !== false){
+                        $obj = BimpObject::getInstance($data['module'], $nomObj);
+                    }
+                    else{
+                        $obj = new $nomObj($db);
+                    }
                     if (!method_exists($obj, "getNomUrl")) {
                         dol_syslog("Pas de methode getNomUrl dans la class " . $nomObj, 3);
                         $obj = false;

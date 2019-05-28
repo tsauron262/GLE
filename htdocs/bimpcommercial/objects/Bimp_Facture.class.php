@@ -10,7 +10,9 @@ $langs->load('errors');
 class Bimp_Facture extends BimpComm
 {
 
+    public $redirectMode = 4; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
     public static $dol_module = 'facture';
+    public static $email_type = 'facture_send';
     public static $status_list = array(
         0 => array('label' => 'Brouillon', 'icon' => 'fas_file-alt', 'classes' => array('warning')),
         1 => array('label' => 'Validée', 'icon' => 'check', 'classes' => array('info')),
@@ -26,9 +28,68 @@ class Bimp_Facture extends BimpComm
         5 => array('label' => 'Facture de situation')
     );
 
-    // Getters:
+    // Gestion des droits: 
 
-    public function isDeletable()
+    public function canCreate()
+    {
+        global $user;
+        return $user->rights->facture->creer;
+    }
+
+    protected function canEdit()
+    {
+        return $this->can("create");
+    }
+
+    public function canSetAction($action)
+    {
+        global $conf, $user;
+
+        switch ($action) {
+            case 'validate':
+                if ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && !empty($user->rights->facture->creer)) ||
+                        (!empty($conf->global->MAIN_USE_ADVANCED_PERMS) && !empty($user->rights->facture->invoice_advance->validate))) {
+                    return 1;
+                }
+                return 0;
+
+            case 'reopen':
+                if ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && $user->rights->facture->creer) ||
+                        (!empty($conf->global->MAIN_USE_ADVANCED_PERMS) && $user->rights->facture->invoice_advance->reopen)) {
+                    return 1;
+                }
+                return 0;
+
+            case 'convertToReduc':
+            case 'addContact':
+            case 'cancel':
+                return $this->can("create");
+
+            case 'classifyPaid':
+                if ($user->rights->facture->paiement) {
+                    return 1;
+                }
+                return 0;
+//
+//            case 'close':
+//            case 'reopen':
+//                if (!empty($user->rights->propal->cloturer)) {
+//                    return 1;
+//                }
+//                return 0;
+//
+            case 'sendMail':
+                if (empty($conf->global->MAIN_USE_ADVANCED_PERMS) || $user->rights->facture->invoice_advance->send) {
+                    return 1;
+                }
+                return 0;
+        }
+        return 1;
+    }
+
+    // Getters booléens:
+
+    public function isDeletable($force_delete = false)
     {
         if (!$this->isLoaded()) {
             return 0;
@@ -100,6 +161,8 @@ class Bimp_Facture extends BimpComm
 
         return 0;
     }
+
+    // Getters Array: 
 
     public function getSelectTypesArray()
     {
@@ -254,36 +317,7 @@ class Bimp_Facture extends BimpComm
         return $options;
     }
 
-    public function getRemainToPay()
-    {
-        if ($this->isLoaded()) {
-            if ($this->dol_object->paye) {
-                return 0;
-            }
-
-            $paid = (float) $this->dol_object->getSommePaiement();
-            $paid += (float) $this->dol_object->getSumCreditNotesUsed();
-            $paid += (float) $this->dol_object->getSumDepositsUsed();
-
-            return (float) $this->dol_object->total_ttc - $paid;
-        }
-        return 0;
-    }
-
-    public function getRef($withGeneric = true)
-    {
-        return $this->getData('facnumber');
-    }
-
-    public function getRefProperty()
-    {
-        return 'facnumber';
-    }
-
-    public function getModelPdf()
-    {
-        return $this->getData('model_pdf');
-    }
+    // Getters params: 
 
     public function getActionsButtons()
     {
@@ -418,11 +452,12 @@ class Bimp_Facture extends BimpComm
                     $msg = '';
                     if (!$objectidnext) {
                         if ($this->canSetAction('sendMail')) {
-                            $onclick = 'bimpModal.loadAjaxContent($(this), \'loadMailForm\', {id: ' . $this->id . '}, \'Envoyer par email\')';
                             $buttons[] = array(
-                                'label'   => 'Envoyer par email',
+                                'label'   => 'Envoyer par e-mail',
                                 'icon'    => 'envelope',
-                                'onclick' => $onclick
+                                'onclick' => $this->getJsActionOnclick('sendEmail', array(), array(
+                                    'form_name' => 'email'
+                                ))
                             );
                         } else {
                             $msg = 'Vous n\'avez pas la permission';
@@ -620,21 +655,44 @@ class Bimp_Facture extends BimpComm
         return $buttons;
     }
 
+    // Getters données: 
+
+    public function getRemainToPay()
+    {
+        if ($this->isLoaded()) {
+            if ($this->dol_object->paye) {
+                return 0;
+            }
+
+            $paid = (float) $this->dol_object->getSommePaiement();
+            $paid += (float) $this->dol_object->getSumCreditNotesUsed();
+            $paid += (float) $this->dol_object->getSumDepositsUsed();
+
+            return (float) $this->dol_object->total_ttc - $paid;
+        }
+        return 0;
+    }
+
+    public function getRef($withGeneric = true)
+    {
+        return $this->getData('facnumber');
+    }
+
+    public function getRefProperty()
+    {
+        return 'facnumber';
+    }
+
+    public function getModelPdf()
+    {
+        return $this->getData('model_pdf');
+    }
+
     public function getDirOutput()
     {
         global $conf;
 
         return $conf->facture->dir_output;
-    }
-
-    public function getRequestOrigin()
-    {
-        return BimpTools::getValue('origin', BimpTools::getValue('param_values/fields/origin', ''));
-    }
-
-    public function getRequestIdOrigin()
-    {
-        return BimpTools::getValue('id_origin', BimpTools::getValue('param_values/fields/id_origin', 0));
     }
 
     public function getRequestIdFactureReplaced()
@@ -1100,7 +1158,7 @@ class Bimp_Facture extends BimpComm
         if ($this->isLoaded()) {
             $type = (int) $this->getData('type');
             $mult = 1;
-            $title = 'Paiements effectuées';
+            $title = 'Paiements effectués';
 
 
             $rows = $this->db->getRows('paiement_facture', '`fk_facture` = ' . (int) $this->id, null, 'array');
@@ -1211,19 +1269,37 @@ class Bimp_Facture extends BimpComm
 
     // Traitements: 
 
+    public function onValidate()
+    {
+        if ($this->isLoaded()) {
+            $this->set('fk_statut', Facture::STATUS_VALIDATED);
+            $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande');
+            $asso = new BimpAssociation($commande, 'factures');
+
+            $list = $asso->getObjectsList((int) $this->id);
+
+            foreach ($list as $id_commande) {
+                $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $id_commande);
+                $commande->checkInvoiceStatus($this->id);
+            }
+        }
+    }
+
     public function onDelete()
     {
-        $this->db->update('br_commande_shipment', array(
-            'status' => 1
-                ), '`id_facture` = ' . (int) $this->id . ' AND `status` = 4');
+        if ($this->isLoaded()) {
+            $lines = $this->getChildrenObjects('lines', array(
+                'linked_object_name' => 'commande_line'
+            ));
 
-        $this->db->update('br_commande_shipment', array(
-            'id_facture' => 0
-                ), '`id_facture` = ' . (int) $this->id);
+            foreach ($lines as $line) {
+                $commande_line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $line->getData('linked_id_object'));
 
-        $this->db->update('commande', array(
-            'id_facture' => 0
-                ), '`id_facture` = ' . (int) $this->id);
+                if (BimpObject::objectLoaded($commande_line)) {
+                    $commande_line->onFactureDelete($this->id);
+                }
+            }
+        }
     }
 
     public function createFromCommande(Commande $commande, $id_account = 0, $public_note = '', $private_note = '')
@@ -1303,6 +1379,7 @@ class Bimp_Facture extends BimpComm
 
         if ($ret > 0) {
             $this->fetch($this->dol_object->id);
+            $this->checkLines();
 
             // Actions hooked (by external module)
             $hookmanager->initHooks(array('invoicedao'));
@@ -1459,78 +1536,100 @@ class Bimp_Facture extends BimpComm
     {
         $errors = array();
         $warnings = array();
-        $success = BimpTools::ucfirst($this->getLabel('')) . ' validé';
-        if ($this->isLabelFemale()) {
-            $success .= 'e';
-        }
-        $success .= ' avec succès';
+        $success = '';
+        $success_callback = '';
+        $modal_html = '';
 
-        $success_callback = 'bimp_reloadPage();';
-
-        global $conf, $langs, $user, $mysoc;
-        $langs->load("errors");
-
-        $this->dol_object->fetch_thirdparty();
-
-        $id_entrepot = (int) $this->getData('entrepot');
-
-        // Check parameters
-        // Check for mandatory prof id (but only if country is than than ours)
-        if ($mysoc->country_id > 0 && $this->dol_object->thirdparty->country_id == $mysoc->country_id) {
-            for ($i = 1; $i <= 6; $i++) {
-                $idprof_mandatory = 'SOCIETE_IDPROF' . ($i) . '_INVOICE_MANDATORY';
-                $idprof = 'idprof' . $i;
-                if (!$this->dol_object->thirdparty->$idprof && !empty($conf->global->$idprof_mandatory)) {
-                    $errors[] = $langs->trans('ErrorProdIdIsMandatory', $langs->transcountry('ProfId' . $i, $this->dol_object->thirdparty->country_code));
-                }
+        if (!isset($data['force_validate']) || !(int) $data['force_validate']) {
+            $lines_errors = array();
+            if (!$this->checkEquipmentsAttribution($lines_errors)) {
+                $modal_html = BimpRender::renderAlerts($lines_errors, 'warning');
+                $onclick = $this->getJsActionOnclick('validate', array(
+                    'force_validate' => 1
+                ));
+                $modal_html .= '<div style="text-align: center">';
+                $modal_html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+                $modal_html .= BimpRender::renderIcon('fas_check', 'iconLeft') . 'Forcer la validation';
+                $modal_html .= '</span>';
+                $modal_html .= '</div>';
             }
         }
 
-        $qualified_for_stock_change = 0;
-        if (empty($conf->global->STOCK_SUPPORTS_SERVICES)) {
-            $qualified_for_stock_change = $this->dol_object->hasProductsOrServices(2);
-        } else {
-            $qualified_for_stock_change = $this->dol_object->hasProductsOrServices(1);
-        }
-
-        // Check for warehouse
-        // todo: checker si les stocks doivent être corrigés ou non selon le type de la facture.
-        if ((int) $this->getData('type') != Facture::TYPE_DEPOSIT && !empty($conf->global->STOCK_CALCULATE_ON_BILL) && $qualified_for_stock_change) {
-            if (!$id_entrepot) {
-                $errors[] = $langs->trans('ErrorFieldRequired', $langs->transnoentitiesnoconv("Warehouse"));
+        if (!$modal_html) {
+            $success = BimpTools::ucfirst($this->getLabel('')) . ' validé';
+            if ($this->isLabelFemale()) {
+                $success .= 'e';
             }
-        }
+            $success .= ' avec succès';
 
-        if (!count($errors)) {
-            $result = $this->dol_object->validate($user, '', $id_entrepot);
-            if ($result >= 0) {
-                // Define output language
-                if (empty($conf->global->MAIN_DISABLE_PDF_AUTOUPDATE)) {
-                    $outputlangs = $langs;
-                    $newlang = '';
-                    if ($conf->global->MAIN_MULTILANGS)
-                        $newlang = $this->dol_object->thirdparty->default_lang;
-                    if (!empty($newlang)) {
-                        $outputlangs = new Translate("", $conf);
-                        $outputlangs->setDefaultLang($newlang);
-                    }
-                    $model = $this->getModelPdf();
-                    $this->fetch($this->id);
+            $success_callback = 'bimp_reloadPage();';
 
-                    $result = $this->dol_object->generateDocument($model, $outputlangs);
-                    if ($result <= 0) {
-                        $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Des erreurs sont survenues lors de la génération du document PDF');
+            global $conf, $langs, $user, $mysoc;
+            $langs->load("errors");
+
+            $this->dol_object->fetch_thirdparty();
+
+            $id_entrepot = (int) $this->getData('entrepot');
+
+            // Check parameters
+            // Check for mandatory prof id (but only if country is than than ours)
+            if ($mysoc->country_id > 0 && $this->dol_object->thirdparty->country_id == $mysoc->country_id) {
+                for ($i = 1; $i <= 6; $i++) {
+                    $idprof_mandatory = 'SOCIETE_IDPROF' . ($i) . '_INVOICE_MANDATORY';
+                    $idprof = 'idprof' . $i;
+                    if (!$this->dol_object->thirdparty->$idprof && !empty($conf->global->$idprof_mandatory)) {
+                        $errors[] = $langs->trans('ErrorProdIdIsMandatory', $langs->transcountry('ProfId' . $i, $this->dol_object->thirdparty->country_code));
                     }
                 }
+            }
+
+            $qualified_for_stock_change = 0;
+            if (empty($conf->global->STOCK_SUPPORTS_SERVICES)) {
+                $qualified_for_stock_change = $this->dol_object->hasProductsOrServices(2);
             } else {
-                $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de la validation');
+                $qualified_for_stock_change = $this->dol_object->hasProductsOrServices(1);
+            }
+
+            // Check for warehouse
+            // todo: checker si les stocks doivent être corrigés ou non selon le type de la facture.
+            if ((int) $this->getData('type') != Facture::TYPE_DEPOSIT && !empty($conf->global->STOCK_CALCULATE_ON_BILL) && $qualified_for_stock_change) {
+                if (!$id_entrepot) {
+                    $errors[] = $langs->trans('ErrorFieldRequired', $langs->transnoentitiesnoconv("Warehouse"));
+                }
+            }
+
+            if (!count($errors)) {
+                $result = $this->dol_object->validate($user, '', $id_entrepot);
+                if ($result >= 0) {
+                    // Define output language
+                    if (empty($conf->global->MAIN_DISABLE_PDF_AUTOUPDATE)) {
+                        $outputlangs = $langs;
+                        $newlang = '';
+                        if ($conf->global->MAIN_MULTILANGS)
+                            $newlang = $this->dol_object->thirdparty->default_lang;
+                        if (!empty($newlang)) {
+                            $outputlangs = new Translate("", $conf);
+                            $outputlangs->setDefaultLang($newlang);
+                        }
+                        $model = $this->getModelPdf();
+                        $this->fetch($this->id);
+
+                        $result = $this->dol_object->generateDocument($model, $outputlangs);
+                        if ($result <= 0) {
+                            $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Des erreurs sont survenues lors de la génération du document PDF');
+                        }
+                    }
+                } else {
+                    $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de la validation');
+                }
             }
         }
 
         return array(
             'errors'           => $errors,
             'warnings'         => $warnings,
-            'success_callback' => $success_callback
+            'success_callback' => $success_callback,
+            'modal_html'       => $modal_html
         );
     }
 
@@ -2086,64 +2185,5 @@ class Bimp_Facture extends BimpComm
         }
 
         return $errors;
-    }
-
-    // Gestion des droits: 
-
-    public function canCreate()
-    {
-        global $user;
-        return $user->rights->facture->creer;
-    }
-
-    protected function canEdit()
-    {
-        return $this->can("create");
-    }
-
-    public function canSetAction($action)
-    {
-        global $conf, $user;
-
-        switch ($action) {
-            case 'validate':
-                if ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && !empty($user->rights->facture->creer)) ||
-                        (!empty($conf->global->MAIN_USE_ADVANCED_PERMS) && !empty($user->rights->facture->invoice_advance->validate))) {
-                    return 1;
-                }
-                return 0;
-
-            case 'reopen':
-                if ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && $user->rights->facture->creer) ||
-                        (!empty($conf->global->MAIN_USE_ADVANCED_PERMS) && $user->rights->facture->invoice_advance->reopen)) {
-                    return 1;
-                }
-                return 0;
-
-            case 'convertToReduc':
-            case 'addContact':
-            case 'cancel':
-                return $this->can("create");
-
-            case 'classifyPaid':
-                if ($user->rights->facture->paiement) {
-                    return 1;
-                }
-                return 0;
-//
-//            case 'close':
-//            case 'reopen':
-//                if (!empty($user->rights->propal->cloturer)) {
-//                    return 1;
-//                }
-//                return 0;
-//
-            case 'sendMail':
-                if (empty($conf->global->MAIN_USE_ADVANCED_PERMS) || $user->rights->facture->invoice_advance->send) {
-                    return 1;
-                }
-                return 0;
-        }
-        return 1;
     }
 }

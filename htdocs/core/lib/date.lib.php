@@ -576,10 +576,10 @@ function num_public_holiday($timestampStart, $timestampEnd, $countrycode='FR', $
 	$nbFerie = 0;
 
 	// Check to ensure we use correct parameters
-	if ((($timestampEnd - $timestampStart) % 86400) != 0  
-               && (($timestampEnd - $timestampStart) % 86400) != 82800 //passage  a l'heure d'ete
-               && (($timestampEnd - $timestampStart) % 86400) != 3600) //passage  a l'heure d'hiver
-                    return die(($timestampEnd - $timestampStart) % 86400 .' ErrorDates must use same hours and must be GMT dates debut : '.$timestampStart." || ".$timestampEnd);
+//	if ((($timestampEnd - $timestampStart) % 86400) != 0  
+//               && (($timestampEnd - $timestampStart) % 86400) != 82800 //passage  a l'heure d'ete
+//               && (($timestampEnd - $timestampStart) % 86400) != 3600) //passage  a l'heure d'hiver
+//                    return die(($timestampEnd - $timestampStart) % 86400 .' ErrorDates must use same hours and must be GMT dates debut : '.$timestampStart." || ".$timestampEnd);
 
 	$i=0;
 	while (( ($lastday == 0 && $timestampStart < $timestampEnd) || ($lastday && $timestampStart <= $timestampEnd) )

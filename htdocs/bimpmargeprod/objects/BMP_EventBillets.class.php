@@ -15,7 +15,7 @@ class BMP_EventBillets extends BimpObject
         return 0;
     }
 
-    public function isFieldEditable($field)
+    public function isFieldEditable($field, $force_edit = false)
     {
         if ($this->isLoaded()) {
             if (in_array($field, array('quantity', 'dl_dist', 'dl_prod', 'id_coprod'))) {
@@ -26,12 +26,12 @@ class BMP_EventBillets extends BimpObject
         return 1;
     }
 
-    public function isCreatable()
+    public function isCreatable($force_create = false)
     {
         return (int) $this->isEventEditable();
     }
 
-    public function isDeletable()
+    public function isDeletable($force_delete = false)
     {
         return (int) $this->isEventEditable();
     }

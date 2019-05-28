@@ -3,8 +3,20 @@ common_fields: 1
 icon: fas_sticky-note
 
 labels: 
-    name: note
-    is_female: 1
+    name: message
+    is_female: 0
+    
+objects:
+    user_group:
+        relation: hasOne
+        delete: 0
+        instance: 
+            dol_object: 
+                module: user
+                file: usergroup
+                class: UserGroup
+            id_object:
+                field_value: fk_group_dest
     
 fields: 
     obj_type: 
@@ -60,6 +72,38 @@ fields:
         label: Vue
         type: bool
         default_value: 0
+    type_dest: 
+        label: Type Destinataire
+        type: int
+        values: 
+            array: types_dest
+        default_value: 0
+    fk_user_dest:
+        label: Destinataire user
+        type: id_object
+        object: user
+        input: 
+            type: search_user
+            include_empty: 1
+        display_if: 
+            field_name: type_dest
+            show_values: 1
+    fk_group_dest:
+        label: Destinataire group
+        type: id_object
+        object: user_group
+        input: 
+            type: search_group
+            include_empty: 1
+        display_if: 
+            field_name: type_dest
+            show_values: 2
+        values:
+            array: userGroups
+    auto:
+        label: Note Auto
+        type: boolean
+        default_value: 0
         
 forms: 
     default: 
@@ -72,6 +116,36 @@ forms:
             - field: id_societe
             - field: email
             - field: visibility
+            - field: type_dest
+            - field: fk_user_dest
+            - field: fk_group_dest
+            - field: content
+    msg: 
+        rows: 
+            - field: obj_type
+            - field: obj_module
+            - field: obj_name
+            - field: id_obj
+            - field: type_author
+              hidden: 1
+            - field: type_dest
+            - field: fk_user_dest
+            - field: fk_group_dest
+            - field: content
+    rep: 
+        rows: 
+            - field: obj_type
+            - field: obj_module
+            - field: obj_name
+            - field: id_obj
+            - field: type_author
+              hidden: 1
+            - field: type_dest
+              hidden: 1
+            - field: fk_group_dest
+              edit: 0
+            - field: fk_user_dest
+              edit: 0
             - field: content
                             
 lists:
@@ -90,6 +164,8 @@ lists:
         update_btn: 1
         delete_btn: 1
         add_form_name: default
+        extra_btn: 
+            callback: getListExtraBtn
         cols:
             date_create:
                 label: Date
@@ -105,8 +181,40 @@ lists:
                 field: content
                 edit: 1
                 min_width: 40%
+            to:
+                label: Destinataire(s)
+                value: 
+                    callback: displayDestinataire
             viewed:
                 field: viewed
                 edit: 1
+    message:
+        extends: default
+        title: Messages
+        add_form_name: msg
+        add_form_values: 
+            fields:
+                type_author: 1
+                type_dest: 1
+        cols:
+            to:
+                label: Destinataire(s)
+                value: 
+                    callback: displayDestinataire
+            visibilite: unset
+    chat:
+        title: Messages
+        n: 100
+        add_form_name: msg
+        add_form_values: 
+            fields:
+                type_author: 1
+                type_dest: 1
+        cols:
+            chatmsg:
+                label: Destinataire(s)
+                value: 
+                    callback: displayChatmsg
+            
             
         

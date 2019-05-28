@@ -94,7 +94,7 @@ class BIC_UserClient extends BimpObject {
             }
         }
 
-        if ($this->id == $userClient->id) {
+        if (0 &&$this->id == $userClient->id) {
             $buttons[] = array(
                 'label' => 'Télécharger mes données personnelles',
                 'icon' => 'fas_cloud-download-alt',
@@ -141,7 +141,7 @@ class BIC_UserClient extends BimpObject {
         $mot_de_passe = $this->generatePassword();
         $this->updateField('password', $mot_de_passe->sha256);
         $this->updateField('renew_required', 1);
-        mailSyn2('Mot de passe BIMP ERP Interface Client', $this->getData('email'), 'noreply@bimp.fr', 'Identifiant : ' . $this->getData('email') . '<br />Mot de passe (Généré automatiquement) : ' . $mot_de_passe->clear);
+        mailSyn2('Mot de passe BIMP ERP Interface Client', $this->getData('email'), '', 'Identifiant : ' . $this->getData('email') . '<br />Mot de passe (Généré automatiquement) : ' . $mot_de_passe->clear);
     }
 
     public function displayEmail() {
@@ -284,14 +284,14 @@ class BIC_UserClient extends BimpObject {
 
     public function change_password($post) {
         $this->updateField('password', hash('sha256', $post));
-        mailSyn2('Changement de votre mot de passe', $this->getData('email'), 'noreply@bimp.fr', "Votre mot de passe a été changé, si vous n'êtes pas à l'origine de cette action veuillez contacter votre administrateur");
+        mailSyn2('Changement de votre mot de passe', $this->getData('email'), '', "Votre mot de passe a été changé, si vous n'êtes pas à l'origine de cette action veuillez contacter votre administrateur");
         $this->updateField('renew_required', 0);
     }
 
     public function actionReinit_password($data, &$success) {
         $passwords = $this->generatePassword();
         $this->updateField('renew_required', 1);
-        mailSyn2('Changement de mot de passe', $this->getData('email'), 'noreply@bimp.fr', "Votre mot de passe a été changé par votre administrateur <br /> Votre nouveau mot de passe est : $passwords->clear");
+        mailSyn2('Changement de mot de passe', $this->getData('email'), '', "Votre mot de passe a été changé par votre administrateur <br /> Votre nouveau mot de passe est : $passwords->clear");
         $this->updateField('password', $passwords->sha256);
         $success = 'Mot de passe réinitialisé';
         return array(
@@ -338,10 +338,14 @@ class BIC_UserClient extends BimpObject {
             $this->updateField('password', $mot_de_passe->sha256);
             $this->updateField('renew_required', 1);
             if ($this->use_email && BimpTools::getValue('send_mail')) {
+                if(stripos(DOL_URL_ROOT, $_SERVER['SERVER_NAME']) === false)
+                    $url = $_SERVER['SERVER_NAME']. DOL_URL_ROOT . '/bimpinterfaceclient/client.php';
+                else
+                    $url = DOL_URL_ROOT . '/bimpinterfaceclient/client.php';
                 $sujet = "Mot de passe BIMP ERP Interface Client";
                 $message = 'Bonjour,<br /> Voici votre accès à votre espace client <br />'
-                        . '<a href="'.$_SERVER['SERVER_NAME']. DOL_URL_ROOT . '/bimpinterfaceclient/client.php">Espace client BIMP ERP</a><br />Identifiant : ' . $this->getData('email') . '<br />Mot de passe (Généré automatiquement) : ' . $mot_de_passe->clear;
-                mailSyn2($sujet, $this->getData('email'), 'noreply@bimp.fr', $message);
+                        . '<a href="'.$url.'">Espace client BIMP ERP</a><br />Identifiant : ' . $this->getData('email') . '<br />Mot de passe (Généré automatiquement) : ' . $mot_de_passe->clear;
+                mailSyn2($sujet, $this->getData('email'), '', $message);
             }
         }
     }

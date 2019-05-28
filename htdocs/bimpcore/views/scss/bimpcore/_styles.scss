@@ -408,10 +408,64 @@ i.iconRight {
         margin-left: 6px;
     }
 }
+
 /*Panels*/
 
 .panel {
+    .panel_header_icon {
+        display: inline-block;
+        margin: 10px 3px;
+
+        i {
+            @include transition(all 0.3s ease);
+        }
+    }
+
+    &.panel-default {
+        .panel_header_icon i {
+            color: lighten($panel-default-heading-bg, 25%);
+        }
+    }
+
+    &.panel-secondary {
+        .panel_header_icon i {
+            color: lighten($panel-secondary-heading-bg, 25%);
+        }
+    }
+
+    &.panel-primary {
+        .panel_header_icon i {
+            color: lighten($panel-primary-heading-bg, 25%);
+        }
+    }
+
+    &.panel-success {
+        .panel_header_icon i {
+            color: lighten($panel-success-heading-bg, 25%);
+        }
+    }
+
+    &.panel-info {
+        .panel_header_icon i {
+            color: lighten($panel-info-heading-bg, 25%);
+        }
+    }
+
+    &.panel-warning {
+        .panel_header_icon i {
+            color: lighten($panel-warning-heading-bg, 25%);
+        }
+    }
+
+    &.panel-danger {
+        .panel_header_icon i {
+            color: lighten($panel-danger-heading-bg, 25%);
+        }
+    }
+
     .panel-body {
+        /*overflow-x: auto;*/
+
         .beforePanelContainer {
             margin-bottom: 10px;
         }
@@ -419,7 +473,12 @@ i.iconRight {
             margin-top: 10px;
         }
     }
+
+    .panel_header_icon:hover i {
+        color: #fff;
+    }
 }
+
 /*Modales*/
 
 .modal {

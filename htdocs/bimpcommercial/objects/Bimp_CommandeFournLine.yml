@@ -7,7 +7,7 @@ table: bimp_commande_fourn_line
 parent_module: bimpcommercial
 parent_object: Bimp_CommandeFourn
 
-labels: 
+labels:
     name: ligne de commande fournisseur
     name_plur: lignes de commande fournisseur
     is_female: 1
@@ -23,3 +23,71 @@ objects:
                 class: CommandeFournisseurLigne
             id_object: 
                 field_value: id_line
+
+fields: 
+    qty_modif: 
+        label: Qté modifiée
+        type: qty
+        min: none
+        max: none
+        decimals: 3
+        unsigned: 0
+        default_value: 0
+        
+    receptions: 
+        label: Réception
+        type: json
+        
+forms: 
+    qty_modified: 
+        rows: 
+            - custom: 1
+              label: Quantité totale reçue
+              input_name: qty_modified
+              content: 
+                  callback: renderQtyModifiedInput
+        
+views: 
+    reception: 
+        title: Réceptionner
+        icon: fas_arrow-circle-down
+        rows: 
+            - cols: 
+                - type: custom
+                  custom: 
+                      callback: renderReceptionForm
+                      
+lists_cols: 
+    qties: 
+        label: Quantités
+        value: 
+            callback: displayQties
+    commande_client: 
+        label: Commmande client
+        value: 
+            callback: displayCommandeClient
+            
+lists: 
+    logistique:
+        extends: default
+        title: Logistique produits / services
+        icon: fas_truck-loading
+        configurable: 0
+        item_checkbox: 1
+        after_list_content: unset
+        objects_change_reload: Bimp_CommandeFourn,ObjectLineRemise,BR_Reservation,BL_CommandeFournReception
+        bulk_actions: 
+            callback: getLogistiqueBulkActions
+        extra_btn: 
+            callback: getLogistiqueExtraButtons
+        cols: 
+            desc:
+            pu_ht: unset
+            tva: unset
+            pa_ht: unset
+            qty: unset
+            qties: 
+            remise: unset
+            total_ttc: unset
+            margin: unset
+            commande_client:

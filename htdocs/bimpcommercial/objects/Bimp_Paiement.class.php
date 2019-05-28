@@ -7,18 +7,13 @@ class Bimp_Paiement extends BimpObject
 
     public function __construct($module, $object_name)
     {
-        $this->useCaisse = (int) BimpCore::getConf('sav_use_caisse_for_payments');
+        $this->useCaisse = (int) BimpCore::getConf('use_caisse_for_payments');
 
         parent::__construct($module, $object_name);
     }
 
     // Getters: 
-
-    public function getClient()
-    {
-        return BimpTools::getPostFieldValue('id_client', 0);
-        }
-
+    
     public function getAmountFromFacture()
     {
         $id_facture = (int) BimpTools::getValue('fields/id_facture', 0);
@@ -103,8 +98,7 @@ class Bimp_Paiement extends BimpObject
 
     public function renderFacturesAmountsInputs()
     {
-        $id_client = (int) $this->getClient();
-
+        $id_client = (int) BimpTools::getPostFieldValue('id_client', 0);
 
         if (!$id_client) {
             return BimpRender::renderAlerts('Client absent');
@@ -301,9 +295,6 @@ class Bimp_Paiement extends BimpObject
 
     public function create(&$warnings = array())
     {
-//        echo '<pre>';
-//        print_r($_POST);
-//        exit;
         $errors = array();
 
         global $db, $user, $conf;

@@ -4,7 +4,7 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/objects/BimpDolObject.class.php';
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 
 class BContract_contrat extends BimpDolObject {
-
+    public $redirectMode = 4;
     // Les status
     CONST CONTRAT_STATUS_BROUILLON = 0;
     CONST CONTRAT_STATUS_VALIDE = 1;
@@ -92,9 +92,6 @@ class BContract_contrat extends BimpDolObject {
 
     
     function __construct($module, $object_name) {
-        if(BimpTools::getContext() == 'public') {
-            $this->redirectMode = 4;
-        }
         return parent::__construct($module, $object_name);
     }
 

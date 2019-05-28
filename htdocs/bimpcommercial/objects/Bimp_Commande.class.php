@@ -806,7 +806,7 @@ class Bimp_Commande extends BimpComm
                 $html .= $line->getData('position');
                 $html .= '</td>';
                 $html .= '<td>';
-                $html .= $line->displayLineData('desc');
+                $html .= $line->displayLineData('desc_light');
                 $html .= '</td>';
                 $html .= '<td>';
                 $html .= $line->displayLineData('pu_ht');

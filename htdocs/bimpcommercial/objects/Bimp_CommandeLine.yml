@@ -43,6 +43,10 @@ fields:
         label: Factures
         type: json
         
+    equipments_returned: 
+        label: Equipements retournés
+        type: json
+        
     qty_modif: 
         label: Qté modifiée
         type: qty
@@ -164,6 +168,22 @@ forms:
               input_name: qty_modified
               content: 
                   callback: renderQtyModifiedInput
+                  
+    equipments_return: 
+        title: Equipements retournés
+        rows: 
+            - custom: 1
+              label: Equipements
+              input_name: equipments
+              multiple: 1
+              data_type: items_list
+              items_data_type: id_object
+              object: equipment
+              create_form: light_place
+              create_form_values: 
+                  callback: getNewEquipmentToReturnCreateFormValues
+              content: 
+                  callback: renderEquipmentsReturnInput
             
 views: 
     shipments: 

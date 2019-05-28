@@ -47,6 +47,7 @@ class Bimp_user_client_controller extends BimpController {
         define('NOLOGIN', 1);
         require_once '../main.inc.php';
         if (BimpCore::getConf('module_version_bimpinterfaceclient') == "") {
+            BimpTools::setContext('private');
             accessforbidden();
         }
         $userClient = BimpObject::getInstance('bimpinterfaceclient', 'BIC_UserClient');

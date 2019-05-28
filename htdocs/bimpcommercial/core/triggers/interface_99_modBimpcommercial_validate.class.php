@@ -42,8 +42,6 @@ class Interfacevalidate extends DolibarrTriggers
                 $bimp_object->checkLines();
                 $bimp_object->dol_object->statut = $prev_statut;
             }
-
-            return 1;
         }
         
         
@@ -70,7 +68,6 @@ class Interfacevalidate extends DolibarrTriggers
                 }
             }
 
-            return 1;
         }
   
         if ($action == 'ORDER_UNVALIDATE' || ($action == 'ORDER_DELETE' && $object->statut == 1)) {
@@ -117,7 +114,6 @@ class Interfacevalidate extends DolibarrTriggers
                 $bimp_object->onDelete();
             }
 
-            return 1;
         }
 
         if ($action == 'BILL_SUPPLIER_CREATE') {
@@ -125,8 +121,6 @@ class Interfacevalidate extends DolibarrTriggers
             if (BimpObject::objectLoaded($bimp_object)) {
                 $bimp_object->onCreate();
             }
-
-            return 1;
         }
         
         //Classé facturé
@@ -194,6 +188,7 @@ class Interfacevalidate extends DolibarrTriggers
                 }
             }
             
+        }
             if($action == 'ORDER_VALIDATE' || $action == 'PROPAL_VALIDATE' || $action == 'BILL_VALIDATE'){
                 $tabConatact = $object->getIdContact('internal', 'SALESREPFOLL');
                 if (count($tabConatact) < 1) {
@@ -218,14 +213,12 @@ class Interfacevalidate extends DolibarrTriggers
                     $object->add_contact($user->id, 'SALESREPSIGN', 'internal');
                 }
 
-
                 $idEn = $object->array_options['options_entrepot'];
                 if ($idEn < 1) {
                     setEventMessages("Pas d'entrepôt associé", null, 'errors');
                     return -2;
                 }
             }
-        }
 
 
         return 0;

@@ -511,6 +511,20 @@ class Bimp_FactureFourn extends BimpComm
 
     // Overrides - BimpComm: 
 
+    public function getDbData($fields)
+    {
+        $final_fields = array();
+
+        foreach ($fields as $field) {
+            if ($field === 'fk_user_valid') {
+                continue;
+            }
+
+            $final_fields[] = $field;
+        }
+        return parent::getDbData($final_fields);
+    }
+
     public function createLinesFromOrigin($origin)
     {
         $errors = array();

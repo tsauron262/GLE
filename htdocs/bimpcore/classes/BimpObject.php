@@ -3276,7 +3276,7 @@ class BimpObject extends BimpCache
                     }
 
                     $data = $this->getDbData($fields);
-
+                    
                     if (!empty($data)) {
                         $up_result = $this->db->update($this->getTable(), $data, '`' . $this->getPrimary() . '` = ' . (int) $result);
 

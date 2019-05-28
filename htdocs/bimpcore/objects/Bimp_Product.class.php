@@ -238,7 +238,11 @@ class Bimp_Product extends BimpObject
 
     public function getProductFournisseursPricesArray()
     {
-        
+        $sql = 'SELECT MAX(fp.rowid) as id FROM ' . MAIN_DB_PREFIX . 'product_fournisseur_price fp WHERE fp.fk_product = ' . (int) $id_product;
+        $result = $this->db->executeS($sql);
+        if (isset($result[0]->id)) {
+            return (int) $result[0]->id;
+        }
     }
 
     public function getCategoriesArray()
@@ -277,6 +281,49 @@ class Bimp_Product extends BimpObject
         }
 
         return $buttons;
+    }
+
+    public function getCurrentFournPriceId($id_fourn = null)
+    {
+        if ($this->isLoaded()) {
+            $sql = 'SELECT MAX(fp.rowid) as id FROM ' . MAIN_DB_PREFIX . 'product_fournisseur_price fp WHERE fp.fk_product = ' . $this->id;
+
+            if (!is_null($id_fourn) && (int) $id_fourn) {
+                $sql .= ' AND `fk_soc` = ' . (int) $id_fourn;
+            }
+
+            $result = $this->db->executeS($sql);
+            if (isset($result[0]->id)) {
+                return (int) $result[0]->id;
+            }
+        }
+        
+        return null;
+    }
+
+    public function getCurrentFournPriceObject($id_fourn = null)
+    {
+        $id_pfp = (int) $this->getCurrentFournPriceId($id_fourn);
+
+        if ($id_pfp) {
+            $pfp = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ProductFournisseurPrice', $id_pfp);
+            if (BimpObject::objectLoaded($pfp)) {
+                return $pfp;
+            }
+        }
+
+        return null;
+    }
+
+    public function getCurrentFournPriceAmount($id_fourn = null)
+    {
+        $pfp = $this->getCurrentFournPriceObject($id_fourn);
+        
+        if (BimpObject::objectLoaded($pfp)) {
+            return (float) $pfp->getData('price');
+        }
+        
+        return 0;
     }
 
     // Traitements: 
@@ -431,7 +478,7 @@ class Bimp_Product extends BimpObject
             $ref .= '-' . $ref_const;
             $this->set('ref', $ref);
         }
-        
+
         return parent::validatePost();
     }
 }

@@ -2098,7 +2098,7 @@ class BC_Vente extends BimpObject
 
         // Ajout des produits vendus: 
         foreach ($articles as $article) {
-            $product = $article->getChildObject('product');
+            $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $article->getData('id_product'));
             $serial = '';
             $equipment = $article->getChildObject('equipment');
             if (!is_null($equipment) && $equipment->isLoaded()) {
@@ -2106,7 +2106,7 @@ class BC_Vente extends BimpObject
             }
 
             $fk_product = $product->id;
-            $desc = $product->label . ' - Réf. ' . $product->ref . ($serial ? ' - N° de série: ' . $serial : '');
+            $desc = $product->getData('label') . ' - Réf. ' . $product->getData('ref') . ($serial ? ' - N° de série: ' . $serial : '');
             $qty = (int) $article->getData('qty');
 
             if ((int) $this->getData('vente_ht')) {
@@ -2121,6 +2121,15 @@ class BC_Vente extends BimpObject
 
             $remise_percent = (float) $article->getTotalRemisesPercent($globale_remise_percent);
 
+            $fk_fournprice = 0;
+            $pa_ht = 0;
+
+            $pfp = $product->getCurrentFournPriceObject();
+            if (BimpObject::objectLoaded($pfp)) {
+                $fk_fournprice = $pfp->id;
+                $pa_ht = (float) $pfp->getData('price');
+            }
+
             $txlocaltax1 = 0;
             $txlocaltax2 = 0;
             $price_base_type = 'TTC';
@@ -2129,8 +2138,15 @@ class BC_Vente extends BimpObject
             $ventil = 0;
             $info_bits = 0;
             $fk_remise_except = '';
+            $type = Facture::TYPE_STANDARD;
+            $rang = -1;
+            $special_code = 0;
+            $origin = '';
+            $origin_id = 0;
+            $fk_parent_line = 0;
 
-            $facture->addline($desc, $pu_ht, $qty, $txtva, $txlocaltax1, $txlocaltax2, $fk_product, $remise_percent, $date_start, $date_end, $ventil, $info_bits, $fk_remise_except, $price_base_type, $pu_ttc);
+//            addline($desc, $pu_ht, $qty, $txtva, $txlocaltax1=0, $txlocaltax2=0, $fk_product=0, $remise_percent=0, $date_start='', $date_end='', $ventil=0, $info_bits=0, $fk_remise_except='', $price_base_type='HT', $pu_ttc=0, $type=self::TYPE_STANDARD, $rang=-1, $special_code=0, $origin='', $origin_id=0, $fk_parent_line=0, $fk_fournprice=null, $pa_ht=0, $label='', $array_options=0, $situation_percent=100, $fk_prev_id=0, $fk_unit = null, $pu_ht_devise = 0)
+            $facture->addline($desc, $pu_ht, $qty, $txtva, $txlocaltax1, $txlocaltax2, $fk_product, $remise_percent, $date_start, $date_end, $ventil, $info_bits, $fk_remise_except, $price_base_type, $pu_ttc, $type, $rang, $special_code, $origin, $origin_id, $fk_parent_line, $fk_fournprice, $pa_ht);
 
             // Enregistrement des données de la vente dans le cas d'un équipement:
             if (!is_null($equipment) && $equipment->isLoaded()) {

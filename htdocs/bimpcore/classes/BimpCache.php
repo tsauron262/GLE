@@ -51,7 +51,7 @@ class BimpCache
     // Objets:
 
     public static function isBimpObjectInCache($module, $object_name, $id_object)
-    {        
+    {
         return self::cacheExists('bimp_object_' . $module . '_' . $object_name . '_' . $id_object);
     }
 
@@ -642,6 +642,45 @@ class BimpCache
                 if (!is_null($rows)) {
                     foreach ($rows as $r) {
                         self::$cache[$cache_key][(int) $r['rowid']] = $r['ref'];
+                    }
+                }
+            }
+
+            return self::$cache[$cache_key];
+        }
+
+        return array();
+    }
+
+    public static function getSocieteProductEquipmentsArray($id_societe, $id_product)
+    {
+        if ((int) $id_societe) {
+            $cache_key = 'societe_' . $id_societe . '_product_' . (int) $id_product . '_equipments_array';
+
+            if (!isset(self::$cache[$cache_key])) {
+                self::$cache[$cache_key] = array(
+                    0 => ''
+                );
+                BimpObject::loadClass('bimpequipment', 'BE_Place');
+                $sql = BimpTools::getSqlSelect(array('a.id', 'a.serial'));
+                $sql .= BimpTools::getSqlFrom('be_equipment', array(
+                            'p' => array(
+                                'table' => 'be_equipment_place',
+                                'alias' => 'p',
+                                'on'    => 'p.id_equipment = a.id'
+                            )
+                ));
+                $sql .= BimpTools::getSqlWhere(array(
+                            'a.id_product' => (int) $id_product,
+                            'p.type'       => BE_Place::BE_PLACE_CLIENT,
+                            'p.id_client'  => (int) $id_societe
+                ));
+
+                $rows = self::getBdb()->executeS($sql, 'array');
+                
+                if (!is_null($rows)) {
+                    foreach ($rows as $r) {
+                        self::$cache[$cache_key][(int) $r['id']] = $r['serial'];
                     }
                 }
             }

@@ -156,21 +156,19 @@ class BContract_contrat extends BimpDolObject {
     public function getActionsButtons()
     {
         global $conf, $langs, $user;
-
         $buttons = Array();
-         $buttons[] = array(
+        if ($this->isLoaded() && BimpTools::getContext() != 'public') {
+            $status = $this->getData('statut');
+            $buttons[] = array(
                 'label'   => 'Générer le PDF du contrat',
                 'icon'    => 'fas_sync',
                 'onclick' => $this->getJsActionOnclick('generatePdf', array(), array())
             );
-         $buttons[] = array(
+            $buttons[] = array(
                 'label'   => 'Générer le PDF du courrier',
                 'icon'    => 'fas_sync',
                 'onclick' => $this->getJsActionOnclick('generatePdfCourrier', array(), array())
             );
-        if ($this->isLoaded()) {
-            $status = $this->getData('statut');
-            
             $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}';
             if ($this->getData('statut') == self::CONTRAT_STATUS_BROUILLON) {
                 $buttons[] = array(

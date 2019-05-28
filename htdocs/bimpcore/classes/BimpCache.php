@@ -5,6 +5,7 @@ class BimpCache
 
     public static $bdb = null;
     public static $cache = array();
+    public static $nextBimpObjectCacheId = 1;
 
     public static function getBdb()
     {
@@ -47,10 +48,30 @@ class BimpCache
         return 0;
     }
 
-    // Objets: 
+    // Objets:
+
+    public static function isBimpObjectInCache($module, $object_name, $id_object)
+    {        
+        return self::cacheExists('bimp_object_' . $module . '_' . $object_name . '_' . $id_object);
+    }
 
     public static function getBimpObjectInstance($module, $object_name, $id_object, $parent = null)
     {
+        // Pas très propre mais seule solution trouvée: 
+//        if ($object_name === 'Bimp_Propal' && (int) $id_object) {
+//            $id_sav = (int) self::getBdb()->getValue('bs_sav', 'id', '`id_propal` = ' . (int) $id_object);
+//            if ($id_sav) {
+//                $module = 'bimpsupport';
+//                $object_name = 'BS_SavPropal';
+//            }
+//        } elseif ($object_name === 'Bimp_PropalLine' && (int) $id_object) {
+//            $result = self::$bdb->executeS('SELECT s.id FROM ' . MAIN_DB_PREFIX . 'bs_sav s LEFT JOIN ' . MAIN_DB_PREFIX . 'bs_sav_propal_line l ON l.id_obj = s.id_propal WHERE l.id = ' . (int) $id_object);
+//            if (isset($result[0]['id']) && (int) $result[0]['id']) {
+//                $module = 'bimpsupport';
+//                $object_name = 'BS_SavPropalLine';
+//            }
+//        }
+
         if (!is_int($id_object)) {
             if (preg_match('/^[0-9]+$/', $id_object)) {
                 $id_object = (int) $id_object;
@@ -80,6 +101,8 @@ class BimpCache
         if (!isset(self::$cache[$cache_key])) {
             self::$cache[$cache_key] = BimpObject::getInstance($module, $object_name, $id_object, $parent);
             if (BimpObject::objectLoaded(self::$cache[$cache_key])) {
+                self::$cache[$cache_key]->cache_id = self::$nextBimpObjectCacheId;
+                self::$nextBimpObjectCacheId++;
                 self::$cache[$cache_key]->checkObject();
             }
         }
@@ -87,7 +110,7 @@ class BimpCache
         return self::$cache[$cache_key];
     }
 
-    public static function findBimpObjectInstance($module, $object_name, $filters, $return_first = false, $delete_if_multiple = false)
+    public static function findBimpObjectInstance($module, $object_name, $filters, $return_first = false, $delete_if_multiple = false, $force_delete = false)
     {
         $instance = BimpObject::getInstance($module, $object_name);
 
@@ -118,8 +141,8 @@ class BimpCache
             $rows = self::getBdb()->executeS($sql, 'array');
 
             if (!is_null($rows) && count($rows)) {
-                if (count($rows) > 1 && !$return_first) {
-                    if ($delete_if_multiple) {
+                if (count($rows) > 1) {
+                    if (!empty($filters) && $delete_if_multiple) {
                         $fl = true;
                         foreach ($rows as $r) {
                             if ($fl) {
@@ -130,7 +153,8 @@ class BimpCache
                             }
                             $obj = self::getBimpObjectInstance($module, $object_name, (int) $r[$primary]);
                             if ($obj->isLoaded()) {
-                                $obj->delete();
+                                $warnings = array();
+                                $obj->delete($warnings, $force_delete);
                             }
                         }
                     }
@@ -165,6 +189,8 @@ class BimpCache
         if (is_a($object, 'BimpObject') && $object->isLoaded()) {
             $cache_key = 'bimp_object_' . $object->module . '_' . $object->object_name . '_' . $object->id;
             self::$cache[$cache_key] = $object;
+            self::$cache[$cache_key]->cache_id = self::$nextBimpObjectCacheId;
+            self::$nextBimpObjectCacheId++;
         }
     }
 

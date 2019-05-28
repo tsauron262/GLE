@@ -351,9 +351,11 @@ forms:
               input: 
                   type: toggle
               value: 1
-            - object: prets
-              multiple: 1
-              depends_on: code_centre
+              
+#              NE PAS DECOMMENTER: les prêts ne sont plus des objets enfant de SAV
+#            - object: prets 
+#              multiple: 1
+#              depends_on: code_centre
             
     edit: 
         rows: 

@@ -25,7 +25,8 @@ class BC_Form extends BC_Panel
         'display'            => array('default' => 'default'),
         'hidden'             => array('data_type' => 'bool', 'default' => 0),
         'required'           => array('data_type' => 'bool', 'default' => null),
-        'edit'               => array('data_type' => 'bool', 'default' => 1)
+        'edit'               => array('data_type' => 'bool', 'default' => 1),
+        'display_if'         => array('data_type' => 'array', 'compile' => 1, 'default' => null)
     );
     public static $association_params = array(
         'display_if' => array('data_type' => 'array'),
@@ -123,7 +124,7 @@ class BC_Form extends BC_Panel
         }
 
         // $id_parent a pu être fourni via params['values']. 
-        
+
         if (!is_null($object)) {
             $this->id_parent = (int) $object->getParentId();
 
@@ -324,14 +325,21 @@ class BC_Form extends BC_Panel
         $label = (isset($params['label']) && $params['label']) ? $params['label'] : $field->params['label'];
         $required = (!is_null($params['required']) ? (int) $params['required'] : (int) $field->params['required']);
         $input_type = $this->object->getConf('fields/' . $field_name . '/input/type', 'text', false);
-        $display_if = (bool) $this->object->config->isDefined('fields/' . $field_name . '/display_if');
+        $display_if = (bool) (!is_null($params['display_if']));
+        if (!$display_if) {
+            $display_if = (bool) $this->object->config->isDefined('fields/' . $field_name . '/display_if');
+        }
         $depends_on = (bool) $this->object->config->isDefined('fields/' . $field_name . '/depends_on');
 
         $html = '';
 
         $html .= '<div class="row formRow' . (($input_type === 'hidden' || (int) $params['hidden']) ? ' hidden' : '') . ($display_if ? ' display_if' : '') . '"';
         if ($display_if) {
-            $html .= $field->renderDisplayIfData();
+            if (!is_null($params['display_if'])) {
+                $html .= BC_Field::renderDisplayifDataStatic($params['display_if'], $this->fields_prefix);
+            } else {
+                $html .= $field->renderDisplayIfData();
+            }
         }
         $html .= '>';
 

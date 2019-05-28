@@ -5,6 +5,7 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/objects/BimpComm.class.php';
 class Bimp_Commande extends BimpComm
 {
 
+    public $acomptes_allowed = true;
     public $redirectMode = 4; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
     public static $dol_module = 'commande';
     public static $email_type = 'order_send';
@@ -37,7 +38,7 @@ class Bimp_Commande extends BimpComm
     public static $logistique_active_status = array(1, 2, 3);
 
     // Gestion des droits et autorisations: 
-
+    
     public function canCreate()
     {
         if (defined('NOLOGIN')) {
@@ -183,7 +184,7 @@ class Bimp_Commande extends BimpComm
 
     public function getModelsPdfArray()
     {
-        if (!class_exists('ModelePDFPropales')) {
+        if (!class_exists('ModelePDFCommandes')) {
             require_once DOL_DOCUMENT_ROOT . '/core/modules/commande/modules_commande.php';
         }
 
@@ -597,9 +598,10 @@ class Bimp_Commande extends BimpComm
 
         if (empty($lines)) {
             $lines = array();
-            foreach ($this->getChildrenObjects('lines', array(
-                'type' => ObjectLine::LINE_TEXT
-            )) as $line) {
+            foreach ($this->getLines('not_text') as $line) {
+                if (!$line->isShippable()) {
+                    continue;
+                }
                 $lines[] = $line->id;
             }
         }
@@ -636,8 +638,11 @@ class Bimp_Commande extends BimpComm
         foreach ($lines as $id_line) {
             $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $id_line);
 
+            if (!$line->isShippable()) {
+                continue;
+            }
             if ($line->isLoaded()) {
-                $available_qty = (float) $line->getFullQty() - (float) $line->getShippedQty();
+                $available_qty = (float) $line->getShipmentsQty() - (float) $line->getShippedQty();
 
                 if ($id_shipment) {
                     $shipment_data = $line->getShipmentData($id_shipment);
@@ -1028,7 +1033,7 @@ class Bimp_Commande extends BimpComm
                         'selected'       => array()
                     );
                     $line_shipments = $line->getData('shipments');
-                    $line_total_qty = (int) $line->getFullQty();
+                    $line_total_qty = (int) $line->getShipmentsQty();
                     $remain_qty = $line_total_qty;
                     foreach ($line_shipments as $id_s => $shipment_data) {
                         if ((int) $id_s === $id_shipment) {
@@ -1537,7 +1542,7 @@ class Bimp_Commande extends BimpComm
                     $hasShipment = 1;
                 }
 
-                if ($shipped_qty < (float) $line->getFullQty()) {
+                if ($shipped_qty < (float) $line->getShipmentsQty()) {
                     $isFullyShipped = 0;
                 }
             }
@@ -1708,7 +1713,7 @@ class Bimp_Commande extends BimpComm
                         $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $line_data['id_line']);
                         if (!BimpObject::objectLoaded($line)) {
                             $errors[] = 'La ligne de commande d\'ID ' . $line_data['id_line'] . ' n\'existe pas';
-                        } else {
+                        } elseif ($line->isShippable()) {
                             $line_warnings = array();
                             $line_errors = $line->setShipmentData($shipment, $line_data, $line_warnings);
 

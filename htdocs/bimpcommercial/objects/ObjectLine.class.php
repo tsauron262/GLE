@@ -5,6 +5,7 @@ class ObjectLine extends BimpObject
 
     public static $parent_comm_type = '';
     public static $dol_line_primary = 'rowid';
+    public static $check_on_update = false;
     public $equipment_required = false;
 
     const LINE_PRODUCT = 1;
@@ -268,7 +269,10 @@ class ObjectLine extends BimpObject
 
             if ($product->dol_field_exists('validate')) {
                 if (!(int) $product->getData('validate')) {
+                    global $user;
                     $errors[] = 'Le produit "' . $product->getRef() . ' - ' . $product->getData('label') . '" n\'est pas validé';
+                    if (mailSyn2("Validation produit", "XX_Achats@bimp.fr", null, "Bonjour " . $user->getNomUrl(1) . "souhaite que vous validiez " . $product->getNomUrl(1) . "<br/>Cordialement"))
+                        $errors[] = "Un mai a été envoyé pour validation du produit.";
                     return 0;
                 }
             }
@@ -667,11 +671,11 @@ class ObjectLine extends BimpObject
                             return BimpTools::calculatePriceTaxEx((float) $this->post_equipment->getData('prix_vente_except'), (float) $product->getData('tva_tx'));
                         }
                     }
-                    $pu_ht = (float) $this->pu_ht;
+                    $pu_ht = $this->pu_ht;
                     if ($this->isLoaded() && $this->field_exists('def_pu_ht')) {
                         $pu_ht = (float) $this->getData('def_pu_ht');
                     }
-                    if ($id_product && (!(float) $pu_ht || (int) $this->id_product !== $id_product)) {
+                    if ($id_product && (is_null($pu_ht) || (int) $this->id_product !== $id_product)) {
                         return $product->getData('price');
                     }
                     return $pu_ht;
@@ -694,7 +698,7 @@ class ObjectLine extends BimpObject
                     if ($this->isLoaded() && $this->field_exists('def_id_fourn_price')) {
                         $id_fourn_price = (int) $this->getData('def_id_fourn_price');
                     }
-                    if ($id_product && (!(int) $id_fourn_price || (int) $this->id_product !== $id_product)) {
+                    if ($id_product && (is_null($id_fourn_price) || (int) $this->id_product !== $id_product)) {
                         if ((int) $this->id_fourn_price) {
                             $pfp = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ProductFournisseurPrice', (int) $this->id_fourn_price);
                             if (BimpObject::objectLoaded($pfp)) {
@@ -763,7 +767,6 @@ class ObjectLine extends BimpObject
 //            case 'label':
 //                return $this->getData('label');
         }
-
 
         return self::$product_line_data[$field]['default'];
     }
@@ -1096,7 +1099,7 @@ class ObjectLine extends BimpObject
                         }
                     }
 
-                    if ($field !== 'desc_light' && $desc) {
+                    if ((!$text || $field !== 'desc_light') && $desc) {
                         $text .= ($text ? '<br/>' : '') . (string) $desc;
                     }
 
@@ -1415,15 +1418,18 @@ class ObjectLine extends BimpObject
                     $class_name = get_class($object);
                     switch ($class_name) {
                         case 'Propal':
-                            $result = $object->addLine((string) $this->desc, (float) $this->pu_ht, $this->qty, (float) $this->tva_tx, 0, 0, (int) $this->id_product, (float) $this->remise, 'HT', 0, 0, 0, (int) $this->getData('position'), 0, (int) $this->id_parent_line, (int) $this->id_fourn_price, (float) $this->pa_ht, '', $date_from, $date_to, 0, null, '', 0, 0, (int) $this->id_remise_except);
+//                            addline($desc, $pu_ht, $qty, $txtva, $txlocaltax1=0.0, $txlocaltax2=0.0, $fk_product=0, $remise_percent=0.0, $price_base_type='HT', $pu_ttc=0.0, $info_bits=0, $type=0, $rang=-1, $special_code=0, $fk_parent_line=0, $fk_fournprice=0, $pa_ht=0, $label='',$date_start='', $date_end='',$array_options=0, $fk_unit=null, $origin='', $origin_id=0, $pu_ht_devise=0, $fk_remise_except=0)
+                            $result = $object->addLine((string) $this->desc, (float) $this->pu_ht, $this->qty, (float) $this->tva_tx, 0, 0, (int) $this->id_product, (float) $this->remise, 'HT', 0, 0, 0, (int) $this->getData('position'), 0, 0, (int) $this->id_fourn_price, (float) $this->pa_ht, '', $date_from, $date_to, 0, null, '', 0, 0, (int) $this->id_remise_except);
                             break;
 
                         case 'Facture':
-                            $result = $object->addLine((string) $this->desc, (float) $this->pu_ht, $this->qty, (float) $this->tva_tx, 0, 0, (int) $this->id_product, (float) $this->remise, $date_from, $date_to, 0, 0, '', 'HT', 0, Facture::TYPE_STANDARD, (int) $this->getData('position'), 0, '', (int) $this->id_parent_line, (int) $this->id_fourn_price, (float) $this->pa_ht);
+//                            addline($desc, $pu_ht, $qty, $txtva, $txlocaltax1=0, $txlocaltax2=0, $fk_product=0, $remise_percent=0, $date_start='', $date_end='', $ventil=0, $info_bits=0, $fk_remise_except='', $price_base_type='HT', $pu_ttc=0, $type=self::TYPE_STANDARD, $rang=-1, $special_code=0, $origin='', $origin_id=0, $fk_parent_line=0, $fk_fournprice=null, $pa_ht=0, $label='', $array_options=0, $situation_percent=100, $fk_prev_id=0, $fk_unit = null, $pu_ht_devise = 0)
+                            $result = $object->addLine((string) $this->desc, (float) $this->pu_ht, $this->qty, (float) $this->tva_tx, 0, 0, (int) $this->id_product, (float) $this->remise, $date_from, $date_to, 0, 0, $this->id_remise_except, 'HT', 0, Facture::TYPE_STANDARD, (int) $this->getData('position'), 0, '', 0, 0, (int) $this->id_fourn_price, (float) $this->pa_ht);
                             break;
 
                         case 'Commande':
-                            $result = $object->addLine((string) $this->desc, (float) $this->pu_ht, $this->qty, (float) $this->tva_tx, 0, 0, (int) $this->id_product, (float) $this->remise, 0, 0, 'HT', 0, $date_from, $date_to, 0, (int) $this->getData('position'), 0, (int) $this->id_parent_line, (int) $this->id_fourn_price, (float) $this->pa_ht);
+//                            addline($desc, $pu_ht, $qty, $txtva, $txlocaltax1=0, $txlocaltax2=0, $fk_product=0, $remise_percent=0, $info_bits=0, $fk_remise_except=0, $price_base_type='HT', $pu_ttc=0, $date_start='', $date_end='', $type=0, $rang=-1, $special_code=0, $fk_parent_line=0, $fk_fournprice=null, $pa_ht=0, $label='',$array_options=0, $fk_unit=null, $origin='', $origin_id=0, $pu_ht_devise = 0)
+                            $result = $object->addLine((string) $this->desc, (float) $this->pu_ht, $this->qty, (float) $this->tva_tx, 0, 0, (int) $this->id_product, (float) $this->remise, 0, (int) $this->id_remise_except, 'HT', 0, $date_from, $date_to, 0, (int) $this->getData('position'), 0, 0, (int) $this->id_fourn_price, (float) $this->pa_ht);
                             break;
 
                         case 'CommandeFournisseur':
@@ -3155,9 +3161,9 @@ class ObjectLine extends BimpObject
         if (!count($errors)) {
             switch ($this->getData('type')) {
                 case self::LINE_TEXT:
-                    if (is_null($this->desc) || !$this->desc) {
-                        $errors[] = 'Description obligatoire';
-                    }
+//                    if (is_null($this->desc) || !$this->desc) {
+//                        $errors[] = 'Description obligatoire';
+//                    }
                     $this->id_product = null;
                     $this->id_fourn_price = null;
                     $this->tva_tx = null;

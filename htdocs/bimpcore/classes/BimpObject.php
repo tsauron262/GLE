@@ -76,7 +76,6 @@ class BimpObject extends BimpCache
             if (!class_exists($object_name)) {
                 require_once $file;
             }
-
             $instance = new $object_name($module, $object_name);
         } else {
             $instance = new BimpObject($module, $object_name);
@@ -187,7 +186,8 @@ class BimpObject extends BimpCache
 
     protected function addCommonFieldsConfig()
     {
-        $this->config->params['fields']['id'] = array(
+        $primary = $this->getPrimary();
+        $this->config->params['fields'][$primary] = array(
             'label'    => 'ID',
             'type'     => 'id',
             'input'    => array(
@@ -840,7 +840,7 @@ class BimpObject extends BimpCache
         $primary = $this->getPrimary();
 
         foreach ($this->data as $field => $value) {
-            if ($field === $primary) {
+            if ($field === $primary || $field === 'id') {
                 continue;
             }
 
@@ -1853,7 +1853,7 @@ class BimpObject extends BimpCache
                 }
             }
         }
-
+            
         // Vérification des filtres: 
         $filters = $this->checkSqlFilters($filters, $has_extrafields, $joins);
 
@@ -3276,7 +3276,7 @@ class BimpObject extends BimpCache
                     }
 
                     $data = $this->getDbData($fields);
-
+                    
                     if (!empty($data)) {
                         $up_result = $this->db->update($this->getTable(), $data, '`' . $this->getPrimary() . '` = ' . (int) $result);
 

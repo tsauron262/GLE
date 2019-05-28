@@ -8,6 +8,8 @@ class Bimp_CommandeLine extends ObjectLine
     public static $parent_comm_type = 'commande';
     public static $dol_line_table = 'commandedet';
     public static $reservations_ordered_status = array(3, 100);
+    public static $notShippableLines = array();
+    public static $notEditableInLogistiqueLines = array('discount');
 
     // Getters booléens:
 
@@ -76,10 +78,27 @@ class Bimp_CommandeLine extends ObjectLine
                     $errors[] = 'Le statut actuel de la commande ne permet pas cette action';
                     return 0;
                 }
+                if (in_array($this->getData('linked_object_name'), self::$notEditableInLogistiqueLines)) {
+                    $errors[] = 'Modification des quantités non autorisée sur cette ligne';
+                    return 0;
+                }
                 return 1;
         }
 
         return parent::isActionAllowed($action, $errors);
+    }
+
+    public function isShippable()
+    {
+        if (in_array((string) $this->getData('linked_object_name'), self::$notShippableLines)) {
+            return 0;
+        }
+
+        if ((float) $this->getFullQty() < 0) {
+            return 0;
+        }
+
+        return 1;
     }
 
     // Getters params:
@@ -148,12 +167,14 @@ class Bimp_CommandeLine extends ObjectLine
                 }
 
                 if ($type !== self::LINE_TEXT) {
-                    $buttons[] = array(
-                        'label'   => 'Gérer les expéditions',
-                        'icon'    => 'fas_shipping-fast',
-                        'onclick' => $this->getJsLoadModalView('shipments', 'Gestion des expéditions')
-                    );
-
+                    $shipments_qty = (float) $this->getShipmentsQty();
+                    if ($shipments_qty > 0) {
+                        $buttons[] = array(
+                            'label'   => 'Gérer les expéditions',
+                            'icon'    => 'fas_shipping-fast',
+                            'onclick' => $this->getJsLoadModalView('shipments', 'Gestion des expéditions')
+                        );
+                    }
                     $buttons[] = array(
                         'label'   => 'Gérer les factures',
                         'icon'    => 'fas_file-invoice-dollar',
@@ -330,6 +351,21 @@ class Bimp_CommandeLine extends ObjectLine
 
         foreach ($reservations as $reservation) {
             $qty += (int) $reservation->getData('qty');
+        }
+
+        return $qty;
+    }
+
+    public function getShipmentsQty()
+    {
+        if (in_array($this->getData('linked_object_name'), self::$notShippableLines)) {
+            return 0;
+        }
+
+        $qty = (float) $this->getFullQty();
+
+        if ($qty < 0) {
+            return 0;
         }
 
         return $qty;
@@ -694,46 +730,51 @@ class Bimp_CommandeLine extends ObjectLine
         }
         $html .= '</div>';
 
-        // Qté expédiée:
         $html .= '<div style="display: inline-block;">';
-        $qty_shipped = (float) $this->getShippedQty();
-        $qty_shipped_valid = (float) $this->getShippedQty(null, true);
 
-        if ($qty_shipped_valid <= 0) {
-            $class = 'danger';
-        } elseif ($qty_shipped < $total_qty) {
-            $class = 'warning';
-        } else {
-            $class = 'success';
+        // Qté expédiée:
+        $shipments_qty = (float) $this->getShipmentsQty();
+
+        if ($shipments_qty > 0) {
+            $qty_shipped = (float) $this->getShippedQty();
+            $qty_shipped_valid = (float) $this->getShippedQty(null, true);
+
+            if ($qty_shipped_valid <= 0) {
+                $class = 'danger';
+            } elseif ($qty_shipped < $shipments_qty) {
+                $class = 'warning';
+            } else {
+                $class = 'success';
+            }
+
+            $html .= '<span class="bs-popover ' . $class . '" style="display: inline-block; margin-right: 15px; padding: 3px 0;"';
+            $html .= BimpRender::renderPopoverData('Qtés ajoutées à une expédition / Qtés expédiées');
+            $html .= '>';
+            $html .= BimpRender::renderIcon('fas_shipping-fast', 'iconLeft');
+
+            if ($qty_shipped <= 0) {
+                $class = 'danger';
+            } elseif ($qty_shipped < $shipments_qty) {
+                $class = 'warning';
+            } else {
+                $class = 'success';
+            }
+
+            $html .= '<span class="' . $class . '">' . $qty_shipped . '</span>';
+
+            $html .= ' / ';
+
+            if ($qty_shipped_valid <= 0) {
+                $class = 'danger';
+            } elseif ($qty_shipped_valid < $shipments_qty) {
+                $class = 'warning';
+            } else {
+                $class = 'success';
+            }
+            $html .= '<span class="' . $class . '">' . $qty_shipped_valid . '</span>';
+
+            $html .= '</span>';
         }
-
-        $html .= '<span class="bs-popover ' . $class . '" style="display: inline-block; margin-right: 15px; padding: 3px 0;"';
-        $html .= BimpRender::renderPopoverData('Qtés ajoutées à une expédition / Qtés expédiées');
-        $html .= '>';
-        $html .= BimpRender::renderIcon('fas_shipping-fast', 'iconLeft');
-
-        if ($qty_shipped <= 0) {
-            $class = 'danger';
-        } elseif ($qty_shipped < $total_qty) {
-            $class = 'warning';
-        } else {
-            $class = 'success';
-        }
-
-        $html .= '<span class="' . $class . '">' . $qty_shipped . '</span>';
-
-        $html .= ' / ';
-
-        if ($qty_shipped_valid <= 0) {
-            $class = 'danger';
-        } elseif ($qty_shipped_valid < $total_qty) {
-            $class = 'warning';
-        } else {
-            $class = 'success';
-        }
-        $html .= '<span class="' . $class . '">' . $qty_shipped_valid . '</span>';
-
-        $html .= '</span>';
 
         // Qté facturée: 
         $qty_billed = (float) $this->getBilledQty();
@@ -889,7 +930,7 @@ class Bimp_CommandeLine extends ObjectLine
             }
         }
 
-        $max = (float) $this->getFullQty() - (float) $this->getShippedQty() + $shipment_qty;
+        $max = (float) $this->getShipmentsQty() - (float) $this->getShippedQty() + $shipment_qty;
 
         if (!$decimals) {
             $max = (int) floor($max);
@@ -909,7 +950,7 @@ class Bimp_CommandeLine extends ObjectLine
         );
 
         if ($with_total_max) {
-            $options['data']['total_max_value'] = (float) $this->getFullQty();
+            $options['data']['total_max_value'] = (float) $this->getShipmentsQty();
             $options['data']['total_max_inputs_class'] = 'line_shipment_qty';
             $options['extra_class'] .= ' total_max';
         }
@@ -1115,6 +1156,10 @@ class Bimp_CommandeLine extends ObjectLine
     public function renderShipmentsView()
     {
         $html = '';
+
+        if (!$this->isShippable()) {
+            return BimpRender::renderAlerts('Cette ligne de commande n\'est pas expédiable');
+        }
 
         $commande = $this->getParentInstance();
         $product = null;
@@ -1646,8 +1691,8 @@ class Bimp_CommandeLine extends ObjectLine
                 }
             }
 
-            if ($total_qty_shipped > (float) $this->getFullQty()) {
-                $errors[] = 'Le nombre total d\'unités ajoutées à des expéditions (' . $total_qty_shipped . ') dépasse le nombre d\'unités enregistrées pour cette ligne de commande (' . $this->getFullQty() . ')';
+            if ($total_qty_shipped > (float) $this->getShipmentsQty()) {
+                $errors[] = 'Le nombre total d\'unités ajoutées à des expéditions (' . $total_qty_shipped . ') dépasse le nombre total d\'unités expédiables pour cette ligne de commande (' . $this->getShipmentsQty() . ')';
             }
 
             // Equipements:
@@ -1725,8 +1770,8 @@ class Bimp_CommandeLine extends ObjectLine
             $total_qty_shipped += (float) $data['qty'];
         }
 
-        if ($total_qty_shipped > (float) $this->getFullQty()) {
-            $errors[] = 'Les quantités totales ajoutées à des expéditions dépasse le nombre d\'unités enregistrées pour cette ligne de commande. Veuillez corriger';
+        if ($total_qty_shipped > (float) $this->getShipmentsQty()) {
+            $errors[] = 'Les quantités totales ajoutées à des expéditions dépasse le nombre d\'unités expédiables pour cette ligne de commande. Veuillez corriger';
         }
 
         if (!count($errors)) {
@@ -2001,7 +2046,7 @@ class Bimp_CommandeLine extends ObjectLine
         $shipments = $this->getData('shipments');
         if (!is_null($new_qty)) {
             if ((int) $new_qty !== (int) $shipment_data['qty']) {
-                $remain = (int) $this->getFullQty();
+                $remain = (int) $this->getShipmentsQty();
                 foreach ($shipments as $id_s => $s_data) {
                     if ((int) $id_s !== (int) $id_shipment) {
                         $remain -= (int) $s_data['qty'];
@@ -2778,6 +2823,51 @@ class Bimp_CommandeLine extends ObjectLine
     }
 
     // Overrides:
+
+    public function checkObject()
+    {
+        if ((int) $this->id_remise_except && (float) $this->qty) {
+            BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
+            $discount = new DiscountAbsolute($this->db->db);
+            $discount->fetch((int) $this->id_remise_except);
+
+            $id_facture = 0;
+            if ((int) $discount->fk_facture) {
+                $id_facture = (int) $discount->fk_facture;
+            } elseif ((int) $discount->fk_facture_line) {
+                $id_facture = (int) $this->db->getValue('facturedet', 'fk_facture', '`rowid` = ' . (int) $discount->fk_facture_line);
+            }
+
+            if ($id_facture) {
+                $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_facture);
+                if (BimpObject::objectLoaded($facture)) {
+                    $elements = BimpTools::getDolObjectLinkedObjectsList($facture->dol_object, $this->db);
+                    $id_commande = (int) $this->getParentId();
+
+                    $isOk = false;
+                    foreach ($elements as $element) {
+                        if ($element['type'] === 'commande' && (int) $element['id_object'] === $id_commande) {
+                            $isOk = true;
+                            break;
+                        }
+                    }
+                    if (!$isOk) {
+                        $this->qty = 0;
+                        $this->desc .= ($this->desc ? '<br/>' : '') . '<span class="danger">Remise déjà consommée dans la facture ' . $facture->getNomUrl() . '</span>';
+                        $warnings = array();
+                        $this->update($warnings, true);
+                    }
+                }
+            }
+        }
+
+        // Vérification des réservations: 
+        $commande = $this->getParentInstance();
+
+        if (BimpObject::objectLoaded($commande) && $commande->isLogistiqueActive()) {
+            $this->createReservation(); // les quantités sont vérifiées dans cette méthode.
+        }
+    }
 
     public function create(&$warnings = array(), $force_create = false)
     {

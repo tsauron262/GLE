@@ -42,6 +42,9 @@ class BimpDb
 
         $sql = 'INSERT INTO ' . MAIN_DB_PREFIX . $table . $fields . $values;
 
+        if (BimpDebug::isActive('bimpcore/objects/print_insert_sql')) {
+            echo 'SQL: ' . $sql . '<br/>';
+        }
         $result = $this->db->query($sql);
         if ($result > 0) {
             if ($return_id) {
@@ -75,6 +78,11 @@ class BimpDb
             $sql .= '"' . $this->db->escape($value) . '"';
         }
         $sql .= ' WHERE ' . $where;
+        
+        if (BimpDebug::isActive('bimpcore/objects/print_update_sql')) {
+            echo 'SQL: ' . $sql . '<br/>';
+        }
+        
         return $this->execute($sql);
     }
 

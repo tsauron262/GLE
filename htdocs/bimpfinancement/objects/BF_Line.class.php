@@ -80,16 +80,16 @@ class BF_Line extends BimpLine
 
     // Getters - booléens
 
-    public function isFieldEditable($field)
+    public function isFieldEditable($field, $force_edit = false)
     {
         if (in_array($field, array('type', 'id_product', 'label', 'pu_ht', 'pa_ht', 'tva_tx', 'id_fourn_price', 'id_fournisseur', 'description', 'remisable'))) {
             return (int) $this->areAllCommandesFournEditable();
         }
 
-        return (int) parent::isFieldEditable($field);
+        return (int) parent::isFieldEditable($field, $force_edit);
     }
 
-    public function isCreatable()
+    public function isCreatable($force_create = false)
     {
         $demande = $this->getParentInstance();
 
@@ -102,14 +102,14 @@ class BF_Line extends BimpLine
         return 0;
     }
 
-    public function isEditable()
+    public function isEditable($force_edit = false)
     {
-        return $this->isCreatable();
+        return $this->isCreatable($force_edit);
     }
 
-    public function isDeletable()
+    public function isDeletable($force_delete = false)
     {
-        return (int) ($this->areAllCommandesFournEditable() && $this->isCreatable());
+        return (int) ($this->areAllCommandesFournEditable() && $this->isCreatable($force_delete));
     }
 
     public function areAllCommandesFournEditable()

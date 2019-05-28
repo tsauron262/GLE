@@ -1841,6 +1841,11 @@ function dolGetElementUrl($objectid,$objecttype,$withpicto=0,$option='')
 		$module='stock';
 		$subelement='stock';
 	}
+	if ($objecttype == 'action') {
+		$classpath = 'comm/action/class';
+		$module='agenda';
+		$subelement='actioncomm';
+	}
 
 	//print "objecttype=".$objecttype." module=".$module." subelement=".$subelement;
 

@@ -934,7 +934,7 @@ class BimpConfig
             if (is_null($params)) {
                 $params = array();
             }
-
+            
             if ($is_static) {
                 return forward_static_call_array(array(
                     $instance, $method

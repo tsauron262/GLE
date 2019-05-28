@@ -50,17 +50,6 @@ objects:
             bimp_object: 
                 module: bimpcore
                 name: Bimp_User
-    user_author: 
-        extends: user
-        instance: 
-            id_object: 
-                field_value: fk_user_author
-            
-    user_valid: 
-        extends: user
-        instance: 
-            id_object: 
-                field_value: fk_user_valid
     account: 
         relation: hasOne
         delete: 0
@@ -86,8 +75,6 @@ fields:
         values: 
             array: types
         default_value: 0
-    libelle: 
-        label: Libellé
     paye:
         label: Payée
         type: bool
@@ -120,7 +107,7 @@ fields:
         label: Créée le
         type: datetime
     datef: 
-        label: Date
+        label: Date facturation
         dol_prop: date
         type: date
     date_lim_reglement: 
@@ -128,13 +115,9 @@ fields:
         dol_prop: date_echeance
         type: date
     fk_user_author: 
-        label: Créée par
-        type: id_object
-        object: user_author
+        dol_prop: unset
     fk_user_valid: 
-        label: Validée par
-        type: id_object
-        object: user_valid
+        dol_prop: unset
     fk_facture_source: 
         label: Facture d'origine
         type: int
@@ -146,6 +129,7 @@ fields:
         values: 
             array: comptes
         
+    ef_type: unset
     fk_availability: unset
     fk_input_reason: unset
     ref_client: unset
@@ -153,9 +137,46 @@ fields:
     remise_globale: unset
     remise_globale_label: unset
     
+forms:
+    default: 
+        title: Création d'une facture fournisseur standard
+        msgs: 
+            callback: getCreateFromOriginCheckMsg
+        rows: 
+            - custom: 1
+              lable: Origine
+              input_name: origin
+              input: 
+                  type: hidden
+              value: 
+                  request_field: origin
+              hidden: 1
+              
+            - custom: 1
+              lable: Origine
+              input_name: origin_id
+              data_type: int
+              input: 
+                  type: hidden
+              value: 
+                  request_field: origin_id
+              hidden: 1
+              
+            - field: entrepot
+            - field: fk_soc
+            - field: ref_supplier
+            - field: datef
+            - field: date_lim_reglement
+            - field: fk_cond_reglement
+            - field: fk_mode_reglement
+            - field: model_pdf
+            - field: note_public
+            - field: note_private
+            
 fields_tables: 
     infos: 
         rows: 
+            - field: entrepot
             - field: libelle
               edit: 1
             - field: datef
@@ -200,6 +221,29 @@ fields_tables:
             - field: total_tva
             - field: total_ttc
         
+views: 
+    default: 
+        objects_change_reload: Bimp_FactureFournLine
+    content_infos: 
+        objects_change_reload: Bimp_FactureFournLine
+filters_panels: 
+    default: 
+        filters: 
+            total_ttc: 
+                field: total_ttc
+            ref_supplier: 
+                field: ref_supplier
+            type: 
+                field: type
+            paye: 
+                field: paye
+                
+            entrepot: unset
+            secteur: unset
+            availability: unset
+            remise_globale: unset
+            ref_client: unset
+            
 lists_cols: 
     ref_supplier: 
         field: ref_supplier
@@ -236,32 +280,20 @@ lists_cols:
         field: fk_account
         display: nom_url
         
+    entrepot: unset
+    secteur: unset
     ref_client: unset
     availability: unset
     input_reason: unset
     
 lists: 
     default: 
-        title: Facture fournisseurs
+        title: Factures fournisseurs
         icon: fas_file-invoice-dollar
-        configurable: 1
-        checkboxes: 1
         bulk_actions:
             - label: supprimer les factures fournisseurs sélectionnées
-              icon: fas_trash-alt
-              onclick: deleteSelectedObjects('list_id', $(this))
-        list_filters: 
-            callback: getListFilters
         sort_field: datec
         sort_way: desc
-        n: 10
-        add_form_name: default
-        edit_btn: 1
-        edit_form: default
-        delete_btn: 
-            callback: isDeletable
-        modal_view: full
-        page_btn: 1
         cols: 
             ref: 
             statut: 
@@ -269,3 +301,4 @@ lists:
             user_author:
             soc: 
             total_ttc:
+    

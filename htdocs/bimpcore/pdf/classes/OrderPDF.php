@@ -547,29 +547,31 @@ class OrderPDF extends BimpDocumentPDF
 class BLPDF extends OrderPDF
 {
 
-    public $num_bl = null;
+    public $shipment = null;
     public $total_ht = 0;
     public $total_ttc = 0;
 
-    public function __construct($db, $num_bl = null, $id_contact_shipment = null)
+    public function __construct($db, $shipment = null)
     {
-        $this->num_bl = $num_bl;
+        if (BimpObject::objectLoaded($shipment)) {
+            $this->shipment = $shipment;
+        }
 
-        $this->prefName = "BL_" . $num_bl . "_";
+        if (is_null($this->shipment)) {
+            $this->errors[] = 'ID de l\'expédition absent';
+        } else {
+            $this->prefName = "BL_" . $this->shipment->getData('num_livraison') . "_";
+        }
 
         $this->typeObject = "commande";
 
         parent::__construct($db, 'bl');
 
-        if (is_null($this->num_bl)) {
-            $this->errors[] = 'Numéro du bon de livraison absent';
-        }
-
         if (!is_null($id_contact_shipment) && $id_contact_shipment) {
             BimpTools::loadDolClass('contact');
             $this->contact_shipment = new Contact($this->db);
-            if ($this->contact_shipment->fetch($id_contact_shipment) <= 0) {
-                $this->errors[] = 'Contact pour la livraison non trouvé (ID ' . $id_contact_shipment . ')';
+            if ($this->contact_shipment->fetch((int) $shipment->getcontact()) <= 0) {
+                $this->errors[] = 'Contact pour la livraison non trouvé (ID ' . $shipment->getcontact() . ')';
                 unset($this->contact_shipment);
                 $this->contact_shipment = null;
             }
@@ -595,8 +597,7 @@ class BLPDF extends OrderPDF
         BimpTools::loadDolClass('product');
 
         BimpObject::loadClass('bimpreservation', 'BR_Reservation');
-        $shipped_qties = BR_Reservation::getShippedQuantities($this->commande->id, null, $this->num_bl);
-        $bl_qtie = BR_Reservation::getShippedQuantities($this->commande->id, $this->num_bl);
+        $qties = $this->shipment->getPDFQtiesAndSerials();
 
         $i = 0;
 
@@ -627,12 +628,11 @@ class BLPDF extends OrderPDF
                 }
             } else {
                 if (!is_null($product)) {
-                    $serials = BR_Reservation::getShippedSerials($this->commande->id, $line->id, $this->num_bl);
-                    if (count($serials)) {
+                    if (isset($qties[(int) $line->id]['serials']) && count($qties[(int) $line->id]['serials'])) {
                         $desc .= '<br/>';
                         $desc .= '<strong>N° de série</strong>: ';
                         $first = true;
-                        foreach ($serials as $serial) {
+                        foreach ($qties[(int) $line->id]['serials'] as $serial) {
                             if (!$first) {
                                 $desc .= ', ';
                             } else {
@@ -650,9 +650,10 @@ class BLPDF extends OrderPDF
 
                 if ($this->hideReduc && $line->remise_percent) {
                     $pu_ht = (float) ($line->subprice - ($line->subprice * ($line->remise_percent / 100)));
+                    
                     $row['pu_ht'] = price($pu_ht, 0, $this->langs);
                 } else {
-                    $pu_ht = (float) $line->supprice;
+                    $pu_ht = (float) $line->subprice;
                     $row['pu_ht'] = pdf_getlineupexcltax($this->object, $i, $this->langs);
                 }
 
@@ -660,28 +661,12 @@ class BLPDF extends OrderPDF
                     $row['tva'] = pdf_getlinevatrate($this->object, $i, $this->langs);
                 }
 
-                $totalQty = (int) $line->qty;
-                $qty = $totalQty;
-                $shipped = 0;
-                $toShip = $totalQty;
-
-                if (isset($shipped_qties[(int) $line->id])) {
-                    $shipped = (int) $shipped_qties[(int) $line->id];
-                    $toShip -= $shipped;
-                }
-
-                if (isset($bl_qtie[(int) $line->id])) {
-                    $qty = (int) $bl_qtie[(int) $line->id];
-                    $shipped -= $qty;
-                } else {
-                    $qty = 0;
-                }
-
+                $qty = isset($qties[(int) $line->id]['qty']) ? $qties[(int) $line->id]['qty'] : 0;
                 $row['qte'] = $qty;
-                $row['dl'] = $shipped;
-                $row['ral'] = $toShip;
+                $row['dl'] = isset($qties[(int) $line->id]['shipped_qty']) ? $qties[(int) $line->id]['shipped_qty'] : 0;
+                $row['ral'] = isset($qties[(int) $line->id]['to_ship_qty']) ? $qties[(int) $line->id]['to_ship_qty'] : 0;
 
-                $total_ht = (int) $qty * (float) $pu_ht;
+                $total_ht = (float) $qty * (float) $pu_ht;
 
                 $row['total_ht'] = price($total_ht);
 

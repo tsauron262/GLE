@@ -15,3 +15,15 @@ objects:
             id_object: 
                 request: id
 
+sections: 
+    0: 
+        tabs: 
+            logistic: 
+                label: Logistique
+                show: 
+                    callback: showLogistique
+                module: bimplogistique
+                controller: commandeFourn
+                url_params: 
+                    id: 
+                        request: id

@@ -37,6 +37,12 @@ objects:
             values:
                 fields: 
                     parent_object_name: Bimp_Propal
+                    
+    user_close: 
+        extends: user
+        instance: 
+            id_object: 
+                field_value: fk_user_cloture
                 
 fields:
     datec: 
@@ -55,16 +61,6 @@ fields:
     date_livraison: 
         label: Date de livraison
         type: date
-    libelle: 
-        label: Libellé
-        dol_extra_field: 1
-        required: 1
-    ef_type: 
-        label: Secteur
-        dol_extra_field: 1
-        values: 
-            array: secteurs
-        required: 1
     model_pdf: 
         default_value: bimpdevis
     pdf_hide_reduc: 
@@ -110,9 +106,16 @@ fields:
         dol_extra_field: 1
         type: bool
         default_value: 0
+    fk_user_cloture: 
+        label: Fermée par
+        dol_prop: user_close_id
+        type: id_object
+        object: user_close
+        input: 
+            type: hidden
                 
 forms: 
-    default:
+    default: 
         on_save: redirect
         rows: 
             - custom: 1
@@ -202,6 +205,7 @@ forms:
             - field: fk_soc
             - field: libelle
             - field: ef_type
+            - field: datep
             - field: date_livraison
             
 fields_tables: 
@@ -286,19 +290,12 @@ fields_tables:
 views: 
     default: 
         objects_change_reload: Bimp_PropalLine,ObjectLineRemise,BimpFile
-    content: 
+    content_infos: 
         objects_change_reload: Bimp_PropalLine,ObjectLineRemise,BimpFile
     full: 
         objects_change_reload: Bimp_PropalLine,ObjectLineRemise,BimpFile
      
 lists_cols: 
-    libelle: 
-        field: libelle
-    secteur:
-        field: ef_type
-    entrepot: 
-        field: entrepot
-        display: nom_url
     commercial: 
         label: Commercial
         value: 
@@ -320,44 +317,23 @@ lists_cols:
 filters_panels: 
     default: 
         filters: 
-            20: 
-                field: datec
-            21: 
+            date_propal: 
                 field: datep
-            22: 
+            date_livraison: 
                 field: date_livraison
-            23: 
-                field: libelle
-            24: 
-                field: ef_type
                 
 lists: 
     default: 
         title: Propositions commerciales
         icon: fas_file-invoice
-        configurable: 1
-        checkboxes: 1
-        filters_panel: default
         bulk_actions:
             - label: supprimer les propositions commerciales sélectionnées
-              icon: fas_trash-alt
-              onclick: deleteSelectedObjects('list_id', $(this))
-        list_filters: 
-            callback: getListFilters
-        n: 10
-        add_form_name: default
         add_form_values: 
             fields: 
                 entrepot: 
                     request: id_entrepot
                 fk_soc:
                     request: id_client
-        edit_btn: 1
-        edit_form: default
-        delete_btn: 
-            callback: isDeletable
-        modal_view: full
-        page_btn: 1
         cols: 
             ref: 
             libelle: 
@@ -369,10 +345,9 @@ lists:
             commercial:
             total_ttc: 
         
-        
     user: 
-        title: Mes propositions commerciales
         extends: default
+        title: Mes propositions commerciales
         cols: 
             commercial: unset
                 

@@ -25,14 +25,22 @@ class BimpLine extends BimpObject
 
     // Getters: 
 
-    public function isEditable()
+    public function isEditable($force_edit = false)
     {
-        return $this->isParentEditable();
+        if (!$force_edit) {
+            return $this->isParentEditable();
+        }
+
+        return 1;
     }
 
-    public function isDeletable()
+    public function isDeletable($force_delete = false)
     {
-        return $this->isParentEditable();
+        if (!$force_delete) {
+            return $this->isParentEditable();
+        }
+
+        return 1;
     }
 
     public function isFormAllowed($form_name, &$errors = array())
@@ -279,7 +287,7 @@ class BimpLine extends BimpObject
                         $html .= "\n";
                         $html .= $product->getData('label');
                     } else {
-                $html .= $this->displayData('id_product', 'nom_url', $display_input_value, $no_html);
+                        $html .= $this->displayData('id_product', 'nom_url', $display_input_value, $no_html);
                         $html .= '<br/>';
                         $html .= $product->getData('label');
                     }

@@ -33,9 +33,9 @@ fields:
         label: Objet parent
         type: id_parent
         required: 1
-    rowid:
-        label: Id
-        type: int
+#    rowid:
+#        label: Id
+#        type: int
     fk_typeinterv:
         label: Nature de l'inter
         type: int

@@ -2,196 +2,291 @@ extends:
     module: bimpcommercial
     object_name: ObjectLine
     
+fields: 
+    remise_pa: unset
+    remise_crt: unset
+    
 forms: 
     fournline: 
         rows: 
-            - field: type
-              hidden: 
-                  callback: isLoaded
-            
-            - custom: 1
-              label: Produit
-              value: 
-                  callback: getIdProductFromPost
-              input_name: id_product
-              content: 
-                  callback: 
-                      method: renderLineInput
-                      params: 
-                          - id_product
-              display_if: 
-                  field_name: type
-                  hide_values: 2
-              show:
-                  callback: isProductEditable
-                  
-            - custom: 1
-              show: 
-                  callback: isNotLoaded  
-              label: Prix d'achat
-              input_name: id_fourn_price
-              data_type: id_object
-              object: fournisseur_price
-              content: 
-                  callback: 
-                      method: renderLineInput
-                      params: 
-                          - id_fourn_price
-              required: 1
-              display_if: 
-                  fields_names: type,id_product
-                  type: 
-                      show_values: 1
-                  id_product: 
-                      hide_values: 0
-              depends_on: id_product
-              create_form: 
-                  callback: getFournisseurPriceCreateForm
-              create_form_values: 
-                  fields: 
-                      fk_product: 
-                          callback: getIdProductFromPost
-                      fk_soc: 
-                          field_value: 
-                              field_name: fk_soc
-                              object: 
-                                  callback: getParentInstance
-              value: 
-                  callback: getIdFournPriceFromPost
-                  
-            - custom: 1
-              label: Prix d'achat unitaire
-              input_name: pa_except
-              data_type: money
-              input: 
-                  type: text
-              value: 
-                  prop: pu_ht
-              display_if: 
-                  field_name: id_fourn_price
-                  show_values: 0
-                  
-            - custom: 1
-              label: Taux de TVA
-              value: 
-                  prop: tva_tx
-              input_name: tva_tx
-              content: 
-                  callback: 
-                      method: renderLineInput
-                      params: 
-                          - tva_tx
-              display_if: 
-                  field_name: type
-                  show_values: 1
-              depends_on: id_fourn_price
-              
-            - custom: 1
-              label: Quantité
-              value: 
-                  prop: qty
-              input_name: qty
-              content: 
-                  callback: 
-                      method: renderLineInput
-                      params: 
-                          - qty
-              display_if: 
-                  field_name: type
-                  show_values: 1
-              depends_on: id_product
-                  
-            - custom: 1
-              label: Référence fournisseur
-              input_name: ref_supplier
-              data_type: string
-              content: 
-                  callback: 
-                      method: renderLineInput
-                      params: 
-                          - ref_supplier
-              depends_on: id_fourn_price
-                  
-            - custom: 1
-              label: Service à durée limitée
-              input_name: limited
-              data_type: bool
-              input: 
-                  type: toggle
-              value: 
+            type: 
+                field: type
+                hidden: 
+                    callback: isLoaded
+            product: 
+                custom: 1
+                label: Produit
+                value: 
+                    callback: getIdProductFromPost
+                input_name: id_product
+                content: 
+                    callback: 
+                        method: renderLineInput
+                        params: 
+                            - id_product
+                display_if: 
+                    field_name: type
+                    hide_values: 2
+                show:
+                    callback: isProductEditable
+            fourn_price: 
+                custom: 1
+                show: 
+                    callback: isNotLoaded  
+                label: Prix d'achat
+                input_name: id_fourn_price
+                data_type: id_object
+                object: fournisseur_price
+                content: 
+                    callback: 
+                        method: renderLineInput
+                        params: 
+                            - id_fourn_price
+                display_if: 
+                    fields_names: type,id_product
+                    type: 
+                        show_values: 1
+                    id_product: 
+                        hide_values: 0
+                depends_on: id_product
+                create_form: 
+                    callback: getFournisseurPriceCreateForm
+                create_form_values: 
+                    fields: 
+                        fk_product: 
+                            callback: getIdProductFromPost
+                        fk_soc: 
+                            field_value: 
+                                field_name: fk_soc
+                                object: 
+                                    callback: getParentInstance
+                value: 
+                    callback: getIdFournPriceFromPost
+            pa_except: 
+                custom: 1
+                label: Prix d'achat unitaire
+                input_name: pa_except
+                data_type: money
+                input: 
+                    type: text
+                value: 
+                    prop: pu_ht
+                display_if: 
+                    fields_names: id_fourn_price,type
+                    id_fourn_price: 
+                        show_values: 0
+                    type: 
+                        hide_values: 2
+            tva_tx: 
+                custom: 1
+                label: Taux de TVA
+                value: 
+                    prop: tva_tx
+                input_name: tva_tx
+                content: 
+                    callback: 
+                        method: renderLineInput
+                        params: 
+                            - tva_tx
+                display_if: 
+                    field_name: type
+                    show_values: 1
+                depends_on: id_fourn_price
+            qty: 
+                custom: 1
+                label: Quantité
+                value: 
+                    prop: qty
+                input_name: qty
+                content: 
+                    callback: 
+                        method: renderLineInput
+                        params: 
+                            - qty
+                display_if: 
+                    field_name: type
+                    show_values: 1
+                depends_on: id_product
+            ref_supplier: 
+                custom: 1
+                label: Référence fournisseur
+                input_name: ref_supplier
+                data_type: string
+                content: 
+                    callback: 
+                        method: renderLineInput
+                        params: 
+                            - ref_supplier
+                depends_on: id_fourn_price
+                display_if: 
+                    field_name: type
+                    hide_values: 2
+            limited: 
+                custom: 1
+                label: Service à durée limitée
+                input_name: limited
+                data_type: bool
+                input: 
+                    type: toggle
+                value: 
                   callback: isLimited
-              display_if: 
-                  field_name: type
-                  show_values: 1
-                  
-            - custom: 1
-              label: Du
-              input_name: date_from
-              data_type: date
-              content: 
-                  callback: 
-                      method: renderLineInput
-                      params: 
-                          - date_from
-              display_if: 
-                  fields_names: type,limited
-                  type: 
-                      show_values: 1
-                  limited: 
+                display_if: 
+                    field_name: type
+                    show_values: 1
+            date_from:
+                custom: 1
+                label: Du
+                input_name: date_from
+                data_type: date
+                content: 
+                    callback: 
+                        method: renderLineInput
+                        params: 
+                            - date_from
+                display_if: 
+                    fields_names: type,limited
+                    type: 
+                        show_values: 1
+                    limited: 
+                        hide_values: 0
+            date_to: 
+                custom: 1
+                label: Au
+                input_name: date_to
+                data_type: date
+                content: 
+                    callback: 
+                        method: renderLineInput
+                        params: 
+                            - date_to
+                display_if: 
+                    fields_names: type,limited
+                    type: 
+                        show_values: 1
+                    limited: 
                       hide_values: 0
-                          
-            - custom: 1
-              label: Au
-              input_name: date_to
-              data_type: date
-              content: 
-                  callback: 
-                      method: renderLineInput
-                      params: 
-                          - date_to
-              display_if: 
-                  fields_names: type,limited
-                  type: 
-                      show_values: 1
-                  limited: 
-                      hide_values: 0
-              
-            - custom: 1
-              label: Description
-              value: 
-                  prop: desc
-              input_name: desc
-              content: 
-                  callback: 
-                      method: renderLineInput
-                      params: 
-                          - desc
-                          
-            - custom: 1
-              label: Remises autorisées
-              input_name: remisable
-              content: 
-                  callback: 
-                      method: renderLineInput
-                      params:
-                          - remisable
-              depends_on: id_product
-              display_if: 
-                  field_name: type
-                  show_values: 1
-              
-            - object: remises
-              multiple: 1
-              form_values: 
-                  fields: 
-                      object_type: 
-                          callback: getParentCommType
-              display_if: 
-                  fields_names: type,remisable
-                  type: 
-                      show_values: 1
-                  remisable: 
-                      hide_values: 0
+            desc: 
+                custom: 1
+                label: Description
+                value: 
+                    prop: desc
+                input_name: desc
+                content: 
+                    callback: 
+                        method: renderLineInput
+                        params: 
+                            - desc
+            remisable: 
+                custom: 1
+                label: Remises autorisées
+                input_name: remisable
+                content: 
+                    callback: 
+                        method: renderLineInput
+                        params:
+                            - remisable
+                depends_on: id_product
+                display_if: 
+                    field_name: type
+                    show_values: 1
+            remises: 
+                object: remises
+                multiple: 1
+                form_values: 
+                    fields: 
+                        object_type: 
+                            callback: getParentCommType
+                display_if: 
+                    fields_names: type,remisable
+                    type: 
+                        show_values: 1
+                    remisable: 
+                        hide_values: 0
+                        
+    fournline_forced: 
+        extends: fournline
+        force_edit: 1
+        rows: 
+            product: 
+                content: 
+                    callback: 
+                        params: 
+                            - id_product
+                            - 0
+                            - ''
+                            - 1    
+            fourn_price:
+                content: 
+                    callback: 
+                        method: renderLineInput
+                        params: 
+                            - id_fourn_price
+                            - 0
+                            - ''
+                            - 1                  
+            tva_tx:
+                content: 
+                    callback: 
+                        method: renderLineInput
+                        params: 
+                            - tva_tx
+                            - 0
+                            - ''
+                            - 1
+            qty:
+                content: 
+                    callback: 
+                        method: renderLineInput
+                        params: 
+                            - qty
+                            - 0
+                            - ''
+                            - 1
+            ref_supplier:
+                content: 
+                    callback: 
+                        method: renderLineInput
+                        params: 
+                            - ref_supplier
+                            - 0
+                            - ''
+                            - 1
+            date_from:
+                content: 
+                    callback: 
+                        method: renderLineInput
+                        params: 
+                            - date_from
+                            - 0
+                            - ''
+                            - 1
+            date_to:
+                content: 
+                    callback: 
+                        method: renderLineInput
+                        params: 
+                            - date_to
+                            - 0
+                            - ''
+                            - 1
+            desc:
+                content: 
+                    callback: 
+                        method: renderLineInput
+                        params: 
+                            - desc
+                            - 0
+                            - ''
+                            - 1
+            remisable:
+                content: 
+                    callback: 
+                        method: renderLineInput
+                        params:
+                            - remisable
+                            - 0
+                            - ''
+                            - 1
              
 lists_cols: 
     ref_supplier: 
@@ -201,6 +296,9 @@ lists_cols:
                 method: displayLineData
                 params: 
                     - ref_supplier
+                    
+    remise_crt: unset
+    remise_pa: unset
                     
 lists: 
     default: 

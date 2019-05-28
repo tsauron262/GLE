@@ -161,5 +161,55 @@ abstract class extraFI extends BimpDolObject{
         return '';
     }
     
-
+    
+   
+    
+    public function asParentCommande(){
+        $parent = $this->getParentInstance();
+        if($parent->isLoaded())
+            return ($parent->getData("fk_commande") > 0)? 1 : 0;
+        return 0;
+    }
+    
+    public function asParentContrat(){
+        $parent = $this->getParentInstance();
+        if($parent->isLoaded())
+            return ($parent->getData("fk_contrat") > 0)? 1 : 0;
+        return 0;
+    }
+    
+    public function traitePriceProd(&$warnings){
+        if($this->getData("fk_commandedet") > 0){//on est en mode commande
+            if($this->getData("fk_commandedet") != $this->getInitData("fk_commandedet")){//on a changé de ligne commande
+                $sql = $this->db->db->query("SELECT subprice FROM `llx_commandedet` WHERE `rowid` = ".$this->getData("fk_commandedet"));
+//                die("SELECT subprice FROM `llx_commandedet` WHERE `rowid` = ".$this->getData("fk_commandedet"));
+                while($ln = $this->db->db->fetch_object($sql)){
+                    $this->set("pu_ht", $ln->subprice);
+                    $this->data["pu_ht"] = $ln->subprice;
+                    $warnings[] = "Prix de la ligne maj avec prix commande";
+                }
+            }
+        }
+        elseif($this->getData("fk_contratdet") > 0){//on est en mode contrat
+            if($this->getData("fk_contratdet") != $this->getInitData("fk_contratdet") || $this->getData("fk_commandedet") != $this->getInitData("fk_commandedet")){//on a changé de ligne commande
+                $sql = $this->db->db->query("SELECT subprice FROM `llx_contratdet` WHERE `rowid` = ".$this->getData("fk_contratdet"));
+//                die("SELECT subprice FROM `llx_commandedet` WHERE `rowid` = ".$this->getData("fk_commandedet"));
+                while($ln = $this->db->db->fetch_object($sql)){
+                    $this->set("pu_ht", $ln->subprice);
+                    $warnings[] = "Prix de la ligne maj avec prix contrat";
+                }
+            }
+        }
+    }
+    
+    public function update(&$warnings = array(), $force_update = false) {
+        $this->traitePriceProd($warnings);
+        
+        return parent::update($warnings, $force_update);
+    }
+    
+    public function create(&$warnings = array(), $force_create = false) {
+        $this->traitePriceProd($warnings);
+        return parent::create($warnings, $force_create);
+    }
 }

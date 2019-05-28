@@ -104,6 +104,18 @@
                 background: linear-gradient(to right,  #f2b07e 0%,#fbd75c 100%); /* W3C */
                 filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f2b07e', endColorstr='#fbd75c',GradientType=1 ); /* IE6-9 */
             }
+            
+            #button:disabled {
+                background:lightgrey;
+                border:none;
+                width:100%;
+                min-height:50px;
+                margin:10px 0 10px;
+                border-radius:2.5%;
+                color:white;
+                padding:0.5% 0 0;
+                font-size:1.75em;
+            }
 
 
             #button:hover {
@@ -117,14 +129,15 @@
         </style>
         
         <script ype="text/javascript">
+            //document.getElementById('button').prop('disabled', 'disabled');
             function verif_for_active_button() {
                 var password = document.getElementById('password').value;
                 var confirme = document.getElementById('confirme_password').value;
                 var btn = document.getElementById('button');
                 if(confirme == password && password != '' && confirme != '') {
-                    btn.style.display = 'block';
+                    btn.disabled = false;
                 } else {
-                    btn.style.display = 'none';
+                    btn.disabled = true;
                 }
             }
         </script>
@@ -142,11 +155,11 @@
                 <div id="erp_bimp">
                     <label for="password">Nouveau mot de passe</label>
                     <br />
-                    <input id="password" type="password" name="new_password"  placeholder="Nouveau mot de passe">
+                    <input id="password" type="password" name="new_password" onkeyup="verif_for_active_button()"  placeholder="Nouveau mot de passe">
                     <br />
                     <input id="confirme_password" onkeyup="verif_for_active_button()" type="password" name="confirme_password"  placeholder="Confirmer votre mot de passe">
                     <br /><br /><br />
-                    <input id="button" style="display:none" type="submit" value="Changer mon mot de passe">
+                    <input id="button" type="submit" value="Changer mon mot de passe" disabled>
                 </div>
         </form>
     </body>

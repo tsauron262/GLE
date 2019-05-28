@@ -216,12 +216,16 @@ fields:
         type: int
         values: 
             array: impacts
+        show:
+            callback: it_is_a_customer_request
 
     priorite_demande_client:
         label: Priorité lors de la demande client
         type: int
         values:
             array: priorities
+        show:
+            callback: it_is_a_customer_request
 
     contact_in_soc:
         label: Contact dans la société

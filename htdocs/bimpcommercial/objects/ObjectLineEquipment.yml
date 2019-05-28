@@ -5,6 +5,9 @@ parent_module: bimpcommercial
 parent_object: ObjectLine
 parent_id_property: id_object_line
 
+labels: 
+    name: équipement
+    
 objects:                 
     fournisseur_price: 
         extends: fourn_price
@@ -52,8 +55,6 @@ lists:
         sort_field: id
         sort_way: asc
         n: 0
-        edit_btn: 
-            callback: isEditable
         update_btn: 
             callback: isEditable
         extra_btn: 

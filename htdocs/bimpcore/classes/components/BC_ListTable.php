@@ -1038,17 +1038,14 @@ class BC_ListTable extends BC_List
         $html .= '<' . $tag . ' class="rowButton' . (isset($btn_params['class']) ? ' ' . $btn_params['class'] : '');
 
         if (isset($btn_params['label'])) {
-            $html .= ' bs-popover"';
-            $html .= ' data-toggle="popover"';
-            $html .= ' data-trigger="hover"';
-            $html .= ' data-placement="top"';
-            $html .= ' data-content="' . $btn_params['label'];
+            $html .= ' bs-popover"';            
+            $html .= BimpRender::renderPopoverData($btn_params['label']);
+        } else {
+            $html .= '"';
         }
         if (isset($btn_params['onclick'])) {
-            $html .= '" onclick="' . str_replace('<list_id>', $this->identifier, $btn_params['onclick']);
+            $html .= ' onclick="' . str_replace('<list_id>', $this->identifier, $btn_params['onclick']).'"';
         }
-
-        $html .= '"';
 
         if (isset($btn_params['attrs'])) {
             $html .= BimpRender::displayTagAttrs($btn_params['attrs']);

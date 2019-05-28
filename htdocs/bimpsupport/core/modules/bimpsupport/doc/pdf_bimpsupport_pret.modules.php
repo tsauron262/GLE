@@ -73,6 +73,7 @@ class pdf_bimpsupport_pret extends ModeleBimpSupport
 
 
 
+
             
 // Defini position des colonnes
         $this->posxdesc = $this->marge_gauche + 1;
@@ -89,14 +90,14 @@ class pdf_bimpsupport_pret extends ModeleBimpSupport
       \param        outputlangs        Lang object for output language
       \return        int             1=ok, 0=ko
      */
-    function write_file(BS_SavPret $sav_pret, $outputlangs = '')
+    function write_file(BS_Pret $pret, $outputlangs = '')
     {
-        if (!BimpObject::objectLoaded($sav_pret)) {
-            $this->errors[] = 'Prêt SAV invalide';
+        if (!BimpObject::objectLoaded($pret)) {
+            $this->errors[] = 'Prêt de matériel invalide';
             return 0;
         }
-
-        $sav = $sav_pret->getParentInstance();
+        
+        $sav = $pret->getChildObject('sav');
 
         if (!BimpObject::objectLoaded($sav)) {
             $this->errors[] = 'SAV invalide';
@@ -133,7 +134,7 @@ class pdf_bimpsupport_pret extends ModeleBimpSupport
 //            $dir = $conf->synopsischrono->dir_output;
 //            $file = $dir . "/SPECIMEN.pdf";
 //        } else {
-        $file = $dir . "Pret-" . $ref . "-" . $sav_pret->getData('ref') . ".pdf";
+        $file = $dir . "Pret-" . $ref . "-" . $pret->getData('ref') . ".pdf";
 //        }
 
         if (file_exists($dir)) {
@@ -189,11 +190,11 @@ class pdf_bimpsupport_pret extends ModeleBimpSupport
             $totalTtc = 0;
             $y = 98;
 
-            $asso = new BimpAssociation($sav_pret, 'equipments');
+            $asso = new BimpAssociation($pret, 'equipments');
 
             $list = $asso->getAssociatesList();
             if (!count($list)) {
-                $this->errors[] = 'Erreur: aucun équipement de prêt enregistré pour le prêt SAV d\'ID ' . $sav_pret->id;
+                $this->errors[] = 'Erreur: aucun équipement de prêt enregistré pour le prêt SAV d\'ID ' . $pret->id;
                 return 0;
             }
             foreach ($list as $id_equipment) {
@@ -309,19 +310,19 @@ class pdf_bimpsupport_pret extends ModeleBimpSupport
             $pdf->MultiCell(300, 6, $address . "\n" . ($tel ? $tel . ' - ' : '') . $mail, 0, 'L');
 
             $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 8);
-            $tabT = explode(" ", $sav_pret->getData('date_begin'));
+            $tabT = explode(" ", $pret->getData('date_begin'));
             $datetime1 = new DateTime($tabT[0]);
-            $datetime2 = new DateTime($sav_pret->getData('date_end'));
+            $datetime2 = new DateTime($pret->getData('date_end'));
             $interval = $datetime1->diff($datetime2);
 
             $pdf->SetXY('32', '42.6');
             $pdf->MultiCell(50, 6, $interval->format('%a') . " jours", 0, 'L');
 
             $pdf->SetXY('32', '46.7');
-            $pdf->MultiCell(50, 6, $sav_pret->displayData('date_begin', 'default', false, true), 0, 'L');
+            $pdf->MultiCell(50, 6, $pret->displayData('date_begin', 'default', false, true), 0, 'L');
 
             $pdf->SetXY('32', '50.4');
-            $pdf->MultiCell(50, 6, $sav_pret->displayData('date_end', 'default', false, true), 0, 'L');
+            $pdf->MultiCell(50, 6, $pret->displayData('date_end', 'default', false, true), 0, 'L');
 
             $user_create = $sav->getChildObject('user_create');
 
@@ -467,8 +468,8 @@ class pdf_bimpsupport_pret extends ModeleBimpSupport
     function _pagehead(&$pdf, $object, $showadress = 1, $outputlangs = '', $currentPage = 0)
     {
         $sav = null;
-        if (BimpObject::objectLoaded($object) && is_a($object, 'BS_SavPret')) {
-            $sav = $object->getParentInstance();
+        if (BimpObject::objectLoaded($object) && is_a($object, 'BS_Pret')) {
+            $sav = $object->getChildObject('sav');
         }
 
 
@@ -730,4 +731,5 @@ class pdf_bimpsupport_pret extends ModeleBimpSupport
         return $returnAsString ? implode($seperator, $rgbArray) : $rgbArray; // returns the rgb string or the associative array
     }
 }
+
 ?>

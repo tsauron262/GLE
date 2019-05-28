@@ -11,50 +11,56 @@ class BimpFile extends BimpObject
         1 => 'Membres Bimp et client',
         2 => 'Membres BIMP',
     );
-    
+
     // CAN CONTEXTE CLIENT
-    public function canClientView(){
+
+    public function canClientView()
+    {
         global $userClient;
-        if(isset($userClient)){
+        if (isset($userClient)) {
             return 1;
         }
         return 0;
     }
-    
-    public function canClientCreate() {
-       $instance = $this->getInstance('bimpsupport', 'BS_Ticket', $this->getData('id_parent'));
-       if($instance->getData('status') != 999) {
-           return 1;
-       }
-       return 0;
+
+    public function canClientCreate()
+    {
+        $instance = $this->getInstance('bimpsupport', 'BS_Ticket', $this->getData('id_parent'));
+        if ($instance->getData('status') != 999) {
+            return 1;
+        }
+        return 0;
     }
-    
-    public function canClientEdit() {
+
+    public function canClientEdit()
+    {
         return $this->canClientCreate();
     }
-    
-    public function currentContext($default_value = null) {
-        if(BimpTools::getContext() == 'public') {
-            if($default_value == 'default_value')
+
+    public function currentContext($default_value = null)
+    {
+        if (BimpTools::getContext() == 'public') {
+            if ($default_value == 'default_value')
                 return 1;
             return 0;
         }
-        if($default_value = 'default_value')
-                return 2;
+        if ($default_value = 'default_value')
+            return 2;
         return 1;
     }
-    
-    public function getFilterListInterfaceClient() {
-        if(BimpTools::getContext() == 'public') {
+
+    public function getFilterListInterfaceClient()
+    {
+        if (BimpTools::getContext() == 'public') {
             return Array(
                 Array(
-                    'name' => 'visibility',
+                    'name'   => 'visibility',
                     'filter' => 1
                 )
             );
         }
     }
-    
+
     // Getters: 
 
     public function getFilePath()
@@ -74,7 +80,7 @@ class BimpFile extends BimpObject
 
         return $dir . $file . '.' . $ext;
     }
-    
+
     public function getFileDir()
     {
         $parent = $this->getParentInstance();
@@ -114,7 +120,7 @@ class BimpFile extends BimpObject
         return DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . urlencode($file);
     }
 
-    public function isDeletable()
+    public function isDeletable($force_delete = false)
     {
         return (int) (!(int) $this->getData('deleted'));
     }
@@ -201,7 +207,7 @@ class BimpFile extends BimpObject
     }
 
     // Affichages: 
-    
+
     public function displayType($text_only = 0, $icon_only = 0, $no_html = 0)
     {
         $ext = (string) $this->getData('file_ext');
@@ -309,11 +315,16 @@ class BimpFile extends BimpObject
 
                     $path_info = pathinfo($file_dir . '/' . $f);
 
+                    $file_name = BimpTools::cleanStringForUrl($path_info['filename']);
+                    if ($file_name !== $path_info['filename']) {
+                        BimpTools::renameFile($file_dir, $f, $file_name . '.' . $path_info['extension']);
+                    }
+
                     if (!count($this->validateArray(array(
                                         'parent_module'      => $module,
                                         'parent_object_name' => $object_name,
                                         'id_parent'          => $id_object,
-                                        'file_name'          => $path_info['filename'],
+                                        'file_name'          => $file_name,
                                         'file_ext'           => $path_info['extension'],
                                         'file_size'          => filesize($file_dir . '/' . $f)
                             )))) {
@@ -432,6 +443,32 @@ class BimpFile extends BimpObject
         return parent::getList($filters, $n, $p, $order_by, $order_way, $return, $return_fields, $joins);
     }
 
+    public function validate()
+    {
+        $name = $this->getData('file_name');
+        $name = BimpTools::cleanStringForUrl($name);
+        $this->set('file_name', $name);
+
+        return parent::validate();
+    }
+
+    public function checkObject()
+    {
+        if ($this->isLoaded()) {
+            $name = BimpTools::cleanStringForUrl($this->getData('file_name'));
+
+            if ($name !== $this->getData('file_name')) {
+                $ext = $this->getData('file_ext');
+                $old_name = $this->getData('file_name') . '.' . $ext;
+                $new_name = $name . '.' . $ext;
+                $error = BimpTools::renameFile($this->getFileDir(), $old_name, $new_name);
+                if (!$error) {
+                    $this->updateField('file_name', $name);
+                }
+            }
+        }
+    }
+
     public function create(&$warnings = array(), $force_create = false)
     {
         $errors = array();
@@ -442,30 +479,35 @@ class BimpFile extends BimpObject
             $name = (string) $this->getData('file_name');
 
             if (!$name) {
-                $name = pathinfo($_FILES['file']['name'], PATHINFO_FILENAME);
+                $name = BimpTools::cleanStringForUrl(pathinfo($_FILES['file']['name'], PATHINFO_FILENAME));
 
                 if (!$name) {
                     $errors[] = 'Nom du fichier invalide';
                 }
-                $this->set('file_name', $name);
+            } else {
+                $name = BimpTools::cleanStringForUrl($name);
             }
 
-            $ext = pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION);
+            $this->set('file_name', $name);
 
-            if (!(string) $ext) {
-                $errors[] = 'Extension du fichier absente. Veuillez renommer le fichier à envoyer avec une extension valide';
-            }
             if (!count($errors)) {
-                $this->set('file_ext', $ext);
-                $this->set('file_size', $_FILES['file']['size']);
-                $errors = $this->uploadFile();
+                $ext = pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION);
 
-                if (!count($errors)) {
-                    $errors = parent::create($warnings, $force_create);
+                if (!(string) $ext) {
+                    $errors[] = 'Extension du fichier absente. Veuillez renommer le fichier à envoyer avec une extension valide';
                 }
+                if (!count($errors)) {
+                    $this->set('file_ext', $ext);
+                    $this->set('file_size', $_FILES['file']['size']);
+                    $errors = $this->uploadFile();
 
-                if (count($errors) && !$this->dontRemove) {
-                    $this->removeFile();
+                    if (!count($errors)) {
+                        $errors = parent::create($warnings, $force_create);
+                    }
+
+                    if (count($errors) && !$this->dontRemove) {
+                        $this->removeFile();
+                    }
                 }
             }
         }
@@ -479,23 +521,29 @@ class BimpFile extends BimpObject
             return array('ID Absent');
         }
 
-        $current_name = (string) $this->getInitData('file_name');
-        if (!is_null($current_name)) {
-            $new_name = (string) $this->getData('file_name');
-            if ($new_name) {
-                if ($new_name !== $current_name) {
-                    $dir = $this->getFileDir();
-                    $ext = $this->getData('file_ext');
-                    if (file_exists($dir . $current_name . '.' . $ext)) {
-                        if ($error = BimpTools::renameFile($dir, $current_name . '.' . $ext, $new_name . '.' . $ext)) {
-                            return array($error);
+        $errors = $this->validate();
+
+        if (!count($errors)) {
+            $current_name = (string) $this->getInitData('file_name');
+            if (!is_null($current_name)) {
+                $new_name = (string) $this->getData('file_name');
+                if ($new_name) {
+                    if ($new_name !== $current_name) {
+                        $dir = $this->getFileDir();
+                        $ext = $this->getData('file_ext');
+                        if (file_exists($dir . $current_name . '.' . $ext)) {
+                            if ($error = BimpTools::renameFile($dir, $current_name . '.' . $ext, $new_name . '.' . $ext)) {
+                                return array($error);
+                            }
                         }
                     }
                 }
             }
+
+            $errors = parent::update($warnings, $force_update);
         }
 
-        return parent::update($warnings, $force_update);
+        return $errors;
     }
 
     public function delete(&$warnings = array(), $force_delete = false)

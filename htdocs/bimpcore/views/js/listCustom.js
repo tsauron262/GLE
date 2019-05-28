@@ -5,7 +5,6 @@ function reloadObjectListCustom(list_id, callback) {
         return;
     }
 
-    var $result = $('#' + list_id + '_result');
     var $resultContainer = $('#' + list_id + '_ajax_content');
     var object_name = $list.data('object_name');
     var id_parent_object = parseInt($list.find('#' + object_name + '_id_parent').val());
@@ -80,7 +79,6 @@ function reloadObjectListCustom(list_id, callback) {
         success: function (result, bimpAjax) {
             if (result.html) {
                 hidePopovers($list);
-                bimpAjax.$list.find('tbody.listRows').html(result.rows_html);
 
                 if (result.filters_panel_html) {
                     bimpAjax.$list.find('.listFiltersPanelContainer').each(function () {
@@ -92,7 +90,7 @@ function reloadObjectListCustom(list_id, callback) {
                     });
                 }
 
-                onListRefeshed(bimpAjax.$list);
+                onListCustomRefeshed(bimpAjax.$list);
 
                 if (typeof (callback) === 'function') {
                     callback(true);
@@ -104,7 +102,6 @@ function reloadObjectListCustom(list_id, callback) {
             }
         },
         error: function () {
-            $list.find('.headerTools').find('.loadingIcon').css('opacity', 0);
             if (typeof (callback) === 'function') {
                 callback(false);
             }

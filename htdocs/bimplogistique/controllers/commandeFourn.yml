@@ -1,0 +1,35 @@
+bootstrap: 1
+
+js:
+    - /bimpreservation/views/js/reservation.js
+    - /bimplogistique/views/js/logistique.js
+    - /bimpcommercial/views/js/bimpcomm.js
+
+objects: 
+    commande_fourn: 
+        instance: 
+            bimp_object:
+                module: bimpcommercial
+                name: Bimp_CommandeFourn
+            id_object: 
+                request: id
+                
+sections: 
+    - type: tabs
+      tabs: 
+          card: 
+              label: Fiche
+              module: bimpcommercial
+              controller: commandeFourn
+              url_params: 
+                  id: 
+                      request: id
+          default: 
+              label: Logistique
+              sections: 
+                  - type: object_header
+                    object_header: 
+                        object: commande_fourn
+                  - type: custom
+                    custom: 
+                        callback: renderContentHtml

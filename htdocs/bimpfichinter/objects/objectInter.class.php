@@ -6,6 +6,7 @@ require_once DOL_DOCUMENT_ROOT.'/bimpfichinter/objects/extraFI.class.php';
 class ObjectInter extends extraFI{
     public static $dirDol = "synopsisfichinter";
     public static $controller_name;
+    public $redirectMode = 5;//5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
     
     public $extra_left = '';
 

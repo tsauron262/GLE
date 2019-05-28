@@ -88,7 +88,7 @@ fields:
                 fk_product: 
                     field_value: id_product
         values: 
-            array: productFournisseursPrices
+            array: prodFournisseursPrices
         default_value: 0
         display_if: 
             field_name: type
@@ -101,7 +101,7 @@ fields:
         type: id_object
         object: fournisseur
         values: 
-            array: productFournisseurs
+            array: prodFournisseurs
         display_if: 
             field_name: type
             show_values: 2

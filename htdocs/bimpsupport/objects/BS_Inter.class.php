@@ -13,7 +13,7 @@ class BS_Inter extends BimpObject
 
     // Getters: 
 
-    public function isCreatable()
+    public function isCreatable($force_create = false)
     {
         $parent = $this->getParentInstance();
         if (BimpObject::objectLoaded($parent) && is_a($parent, 'BS_Ticket')) {
@@ -153,7 +153,7 @@ class BS_Inter extends BimpObject
 
     public function create(&$warnings = array(), $force_create = false)
     {
-        if (!$this->isCreatable()) {
+        if (!$this->isCreatable($force_create)) {
             return array('Ticket clos. Impossible de créer une nouvelle intervention');
         }
 

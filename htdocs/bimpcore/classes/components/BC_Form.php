@@ -25,20 +25,22 @@ class BC_Form extends BC_Panel
         'display'            => array('default' => 'default'),
         'hidden'             => array('data_type' => 'bool', 'default' => 0),
         'required'           => array('data_type' => 'bool', 'default' => null),
-        'edit'               => array('data_type' => 'bool', 'default' => 1)
+        'edit'               => array('data_type' => 'bool', 'default' => 1),
+        'display_if'         => array('data_type' => 'array', 'compile' => 1, 'default' => null)
     );
     public static $association_params = array(
         'display_if' => array('data_type' => 'array'),
         'depends_on' => array(),
     );
     public static $custom_row_params = array(
-        'input_name'   => array('required' => true, 'default' => ''),
-        'display_if'   => array('data_type' => 'array'),
-        'depends_on'   => array(),
-        'data_type'    => array('default' => 'string'),
-        'value'        => array('data_type' => 'any', 'default' => ''),
-        'no_container' => array('data_type' => 'bool', 'default' => 0),
-        'keep_new_value'     => array('data_type' => 'bool', 'default' => 0)
+        'input_name'     => array('required' => true, 'default' => ''),
+        'display_if'     => array('data_type' => 'array'),
+        'depends_on'     => array(),
+        'data_type'      => array('default' => 'string'),
+        'value'          => array('data_type' => 'any', 'default' => ''),
+        'no_container'   => array('data_type' => 'bool', 'default' => 0),
+        'multiple'       => array('data_type' => 'bool', 'default' => 0),
+        'keep_new_value' => array('data_type' => 'bool', 'default' => 0)
     );
     public static $object_params = array(
         'form_name'   => array('default' => 'default'),
@@ -57,6 +59,9 @@ class BC_Form extends BC_Panel
         $this->params_def['associations_params'] = array('data_type' => 'array', 'request' => true, 'json' => true);
         $this->params_def['on_save'] = array('default' => 'close');
         $this->params_def['sub_objects'] = array('type' => 'keys');
+        $this->params_def['no_auto_submit'] = array('data_type' => 'bool', 'default' => 0);
+        $this->params_def['force_edit'] = array('data_type' => 'bool', 'default' => 0);
+
         $this->id_parent = $id_parent;
 
         $path = null;
@@ -119,6 +124,7 @@ class BC_Form extends BC_Panel
         }
 
         // $id_parent a pu être fourni via params['values']. 
+
         if (!is_null($object)) {
             $this->id_parent = (int) $object->getParentId();
 
@@ -133,6 +139,7 @@ class BC_Form extends BC_Panel
         }
 
         $this->data['on_save'] = $this->params['on_save'];
+        $this->data['no_auto_submit'] = $this->params['no_auto_submit'];
     }
 
     public function setValues($values)
@@ -217,6 +224,7 @@ class BC_Form extends BC_Panel
         $html .= '<input type="hidden" name="' . $this->fields_prefix . 'module" value="' . $this->object->module . '"/>';
         $html .= '<input type="hidden" name="' . $this->fields_prefix . 'object_name" value="' . $this->object->object_name . '"/>';
         $html .= '<input type="hidden" name="' . $this->fields_prefix . 'id_object" value="' . ((isset($this->object->id) && $this->object->id) ? $this->object->id : 0) . '"/>';
+        $html .= '<input type="hidden" name="' . $this->fields_prefix . 'force_edit" value="' . $this->params['force_edit'] . '"/>';
 
         if (!is_null($parent_id_property)) {
             $html .= '<input type="hidden" name="' . $this->fields_prefix . $parent_id_property . '" value="' . $this->id_parent . '"/>';
@@ -233,6 +241,7 @@ class BC_Form extends BC_Panel
         } else {
             foreach ($this->params['rows'] as $row) {
                 $row_params = parent::fetchParams($this->config_path . '/rows/' . $row, self::$row_params);
+
                 if (!(int) $row_params['show']) {
                     continue;
                 }
@@ -291,7 +300,7 @@ class BC_Form extends BC_Panel
 
     public function renderFieldRow($field_name, $params = array(), $label_cols = 3)
     {
-        $field = new BC_Field($this->object, $field_name, true);
+        $field = new BC_Field($this->object, $field_name, true, 'fields', true);
         $field->name_prefix = $this->fields_prefix;
         $field->display_card_mode = 'visible';
 
@@ -303,6 +312,10 @@ class BC_Form extends BC_Panel
             return '';
         }
 
+        if ((int) $this->params['force_edit']) {
+            $field->force_edit = true;
+        }
+
         if ($this->object->isDolObject()) {
             if (!$this->object->dol_field_exists($field_name)) {
                 return '';
@@ -312,14 +325,21 @@ class BC_Form extends BC_Panel
         $label = (isset($params['label']) && $params['label']) ? $params['label'] : $field->params['label'];
         $required = (!is_null($params['required']) ? (int) $params['required'] : (int) $field->params['required']);
         $input_type = $this->object->getConf('fields/' . $field_name . '/input/type', 'text', false);
-        $display_if = (bool) $this->object->config->isDefined('fields/' . $field_name . '/display_if');
+        $display_if = (bool) (!is_null($params['display_if']));
+        if (!$display_if) {
+            $display_if = (bool) $this->object->config->isDefined('fields/' . $field_name . '/display_if');
+        }
         $depends_on = (bool) $this->object->config->isDefined('fields/' . $field_name . '/depends_on');
 
         $html = '';
 
         $html .= '<div class="row formRow' . (($input_type === 'hidden' || (int) $params['hidden']) ? ' hidden' : '') . ($display_if ? ' display_if' : '') . '"';
         if ($display_if) {
-            $html .= $field->renderDisplayIfData();
+            if (!is_null($params['display_if'])) {
+                $html .= BC_Field::renderDisplayifDataStatic($params['display_if'], $this->fields_prefix);
+            } else {
+                $html .= $field->renderDisplayIfData();
+            }
         }
         $html .= '>';
 
@@ -652,6 +672,7 @@ class BC_Form extends BC_Panel
             }
             $field_params['required'] = (int) $params['required'];
             $input = new BC_Input($this->object, $params['data_type'], $params['input_name'], $row_path . '/input', $params['value'], $field_params);
+            $input->display_card_mode = 'visible';
             $input->setNamePrefix($this->fields_prefix);
             $input->extraClasses[] = 'customField';
             $input->extraData['form_row'] = $row;
@@ -676,7 +697,10 @@ class BC_Form extends BC_Panel
                         }
                     }
                 }
-                $html .= BimpInput::renderInputContainer($params['input_name'], $params['value'], $content, $this->fields_prefix, $params['required'], 0, 'customField', $extra_data);
+                if ($params['multiple']) {
+                    $extra_data['values_field'] = $params['input_name'];
+                }
+                $html .= BimpInput::renderInputContainer($params['input_name'], $params['value'], $content, $this->fields_prefix, $params['required'], $params['multiple'], 'customField', $extra_data);
             } else {
                 $html .= $content;
             }

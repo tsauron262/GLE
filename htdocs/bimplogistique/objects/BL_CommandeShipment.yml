@@ -16,18 +16,6 @@ objects:
         instance: 
             id_object: 
                 field_value: id_commande_client
-                
-    reservation_shipments: 
-        relation: hasMany
-        delete: 1
-        instance: 
-            bimp_object: BR_ReservationShipment
-            
-    service_shipments:
-        relation: hasMany
-        delete: 1
-        instance: 
-            bimp_object: BR_ServiceShipment
     
 fields: 
     id_commande_client: 
@@ -39,11 +27,11 @@ fields:
             type: hidden
         
     id_entrepot: 
-        label: Centre
+        label: Entrepôt de départ
         type: id_object
         object: entrepot
         input: 
-            type: hidden
+            type: search_entrepot
         
     num_livraison:
         label: Numéro de livraison
@@ -75,6 +63,10 @@ fields:
         type: id_object
         object: facture
         default_value: 0
+        display: 
+            card_light: 
+                type: card
+                card: light
         
     signed: 
         label: Signé
@@ -95,9 +87,16 @@ forms:
     default: 
         rows: 
             - field: id_commande_client
-              hidden: 1
+            - field: id_entrepot
             - field: id_contact
             - field: info
+            - custom: 1
+              label: Lignes de commande
+              show: 
+                  callback: isNotLoaded
+              input_name: lines
+              content: 
+                  callback: renderCommandeLinesForm
             
     edit: 
         rows: 
@@ -114,19 +113,33 @@ forms:
                   type: hidden
               value: 1
             - custom: 1
-              label: Produits inclus
-              input_name: products
+              label: Produits / Services inclus
+              input_name: lines
               content: 
-                  callback: renderProductsQties
-              value: 1
-            - label: Services à inclure
-              custom: 1
-              input_name: services
-              content: 
-                  callback: renderServicesQties
+                  callback: renderLinesQties
                   
     facture: 
         rows: 
+            - custom: 1
+              label: Client
+              input_name: id_client
+              data_type: id_object
+              object: client
+              card: default
+              input: 
+                  type: search_societe
+                  societe_type: customer
+            - custom: 1
+              label: Contact
+              input_name: id_contact
+              data_type: id
+              input: 
+                  type: select
+                  options: 
+                      callback: 
+                          method: getClientContactsArray
+                          object: commande
+              depends_on: id_client
             - custom: 1
               label: Conditions de réglement
               input_name: cond_reglement
@@ -148,7 +161,8 @@ forms:
                   multiple: 1
                   type: select_remises
                   id_client:
-                      callback: getIdClient
+                      request_field: id_client
+              depends_on: id_client
             - custom: 1
               label: Note publique
               input_name: note_public
@@ -165,6 +179,37 @@ forms:
                   type: textarea
                   rows: 3
                   auto_expand: 1
+            - custom: 1
+              label: Quantités et équipements
+              input_name: lines
+              content: 
+                  callback: renderFactureFormLinesInputs
+                  
+    facture_edit: 
+        rows: 
+            - custom: 1
+              label: Facture
+              content: 
+                  callback: 
+                      method: displayData
+                      params: 
+                          - id_facture
+                          - card_light
+            - custom: 1
+              label: Quantités et équipements
+              input_name: lines
+              content: 
+                  callback: renderFactureFormLinesInputs
+                  
+    vignettes: 
+        rows: 
+            - custom: 1
+              label: Nombre de vignettes à générer
+              data_type: qty
+              input_name: qty
+              input: 
+                  type: qty
+              value: 1
                   
 fields_tables: 
     data: 
@@ -198,23 +243,21 @@ views:
                   col_sm: 12
                   fields_table: 
                       name: data
+                      
     lines: 
         title: Produits / services inclus dans l'expédition
         rows: 
             - cols: 
-                - type: list
-                  list: 
-                      name: default
-                      children: reservation_shipments
-            - cols: 
-                - type: list
-                  list: 
-                      name: default
-                      children: service_shipments
+                - type: custom
+                  custom: 
+                      callback: renderShipmentLines
                       
 lists_cols: 
     commande: 
         field: id_commande_client
+        display: nom_url
+    entrepot: 
+        field: id_entrepot
         display: nom_url
     num_livraison:
         label: N°
@@ -244,6 +287,10 @@ lists_cols:
                 method: displayPdfButtons
                 params: 
                     - 1
+    facture: 
+        field: id_facture
+        display: nom_url
+                    
 lists: 
     default: 
         sort_field: id
@@ -259,6 +306,7 @@ lists:
         cols:
             commande: 
             num_livraison:
+            entrepot:
             status: 
             contact: 
             commercial: 
@@ -278,6 +326,7 @@ lists:
         edit_btn: 1
         update_btn: 1
         add_btn: 1
+        add_btn_label: Nouvelle expédition
         add_form_name: default
         edit_form: default
         modal_view: default
@@ -286,6 +335,7 @@ lists:
             callback: getExtraBtn
         cols:
             num_livraison:
+            entrepot:
             status: 
             contact: 
             date: 
@@ -301,5 +351,8 @@ cards:
             - label: Destinataire
               field: id_contact
               display: default
+            - label: Entrepôt de départ
+              field: id_entrepot
+              display: nom_url
             - label: Infos
               field: info

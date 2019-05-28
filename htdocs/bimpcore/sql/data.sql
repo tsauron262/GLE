@@ -5,7 +5,7 @@ INSERT INTO `llx_bimpcore_conf`(`name`, `value`) VALUES ('bimpcaisse_id_cond_reg
 INSERT INTO `llx_bimpcore_conf`(`name`, `value`) VALUES ('bimpcaisse_secteur_code', 'X');
 INSERT INTO `llx_bimpcore_conf`(`name`, `value`) VALUES ('bimpcaisse_id_default_account', 1);
 INSERT INTO `llx_bimpcore_conf`(`name`, `value`) VALUES ('defectived_id_entrepot', '');
-INSERT INTO `llx_bimpcore_conf`(`name`, `value`) VALUES ('sav_use_caisse_for_payments', 0);
+INSERT INTO `llx_bimpcore_conf`(`name`, `value`) VALUES ('use_caisse_for_payments', 0);
 INSERT INTO `llx_bimpcore_conf`(`name`, `value`) VALUES ('bimpcomm_tx_marque', 1);
 INSERT INTO `llx_bimpcore_conf`(`name`, `value`) VALUES ('CGV_BIMP', 1);
 INSERT INTO `llx_bimpcore_conf`(`name`, `value`) VALUES ('tva_default', 2462);

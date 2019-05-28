@@ -16,7 +16,8 @@ class BR_Reservation extends BimpObject
         2   => array('label' => 'A réserver', 'icon' => 'exclamation-circle', 'classes' => array('important')),
         3   => array('label' => 'Cmde fourn. à finaliser', 'icon' => 'cart-arrow-down', 'classes' => array('important')),
         100 => array('label' => 'En attente de réception', 'icon' => 'hourglass-start', 'classes' => array('warning')),
-        200 => array('label' => 'Attribué', 'icon' => 'lock', 'classes' => array('danger')),
+        101 => array('label' => 'Reçu - Attente attribution', 'icon' => 'hourglass-start', 'classes' => array('important')),
+        200 => array('label' => 'Réservé / Attribué', 'icon' => 'lock', 'classes' => array('danger')),
         201 => array('label' => 'Transfert en cours', 'icon' => 'lock', 'classes' => array('danger')),
         202 => array('label' => 'Réservé', 'icon' => 'lock', 'classes' => array('danger')),
         203 => array('label' => 'Réservé SAV', 'icon' => 'lock', 'classes' => array('danger')),
@@ -27,11 +28,12 @@ class BR_Reservation extends BimpObject
         303 => array('label' => 'Reservation annulée', 'icon' => 'times', 'classes' => array('success')),
         304 => array('label' => 'Livré au client', 'icon' => 'sign-out', 'classes' => array('success')),
     );
-    public static $commande_status = array(0, 2, 3, 100, 200, 250, 300, 303);
+    public static $commande_status = array(0, 2, 3, 100, 101, 200, 250, 300, 303);
     public static $transfert_status = array(201, 301, 303);
     public static $temp_status = array(202, 302, 303);
     public static $sav_status = array(203, 303, 304);
     public static $need_equipment_status = array(200, 201, 202, 250, 300, 301, 303, 304);
+    public static $unavailable_status = array(200, 201, 202, 203, 250, 300, 301, 304);
     public static $types = array(
         1 => 'Commande',
         2 => 'Transfert',
@@ -40,7 +42,16 @@ class BR_Reservation extends BimpObject
     );
     protected $brOrderLine = null;
 
-    // Getters: 
+    // Gestion des droits users: 
+
+    public function canDelete()
+    {
+//        global $user;
+//        return (int) $user->admin;
+        return 0;
+    }
+
+    // Getters booléens: 
 
     public function isEquipment()
     {
@@ -96,6 +107,59 @@ class BR_Reservation extends BimpObject
         return 0;
     }
 
+    public function isNewStatusAllowed($new_status, &$errors = array())
+    {
+        $new_status = (int) $new_status;
+
+        if (!$this->isLoaded()) {
+            $errors[] = 'ID de la réservation absent';
+            return 0;
+        }
+
+        if (!array_key_exists($new_status, self::$status_list)) {
+            $errors[] = 'Le satut d\'ID ' . $new_status . ' n\'existe pas';
+            return 0;
+        }
+
+        $type = (int) $this->getData('type');
+
+        $error_label = 'Impossible de passer la réservation au statut "' . self::$status_list[$new_status]['label'] . '"';
+
+        switch ($type) {
+            case self::BR_RESERVATION_COMMANDE:
+                if (!in_array($new_status, self::$commande_status)) {
+                    $errors[] = $error_label . '. La réservation doit être liée à une commande client';
+                    return 0;
+                }
+                break;
+
+            case self::BR_RESERVATION_TRANSFERT:
+                if (!in_array($new_status, self::$transfert_status)) {
+                    $errors[] = $error_label . '. La réservation doit être liée à un transfert';
+                    return 0;
+                }
+                break;
+
+            case self::BR_RESERVATION_TEMPORAIRE:
+                if (!in_array($new_status, self::$transfert_status)) {
+                    $errors[] = $error_label . '. La réservation doit être de type temporaire';
+                    return 0;
+                }
+                break;
+
+            case self::BR_RESERVATION_SAV:
+                if (!in_array($new_status, self::$sav_status)) {
+                    $errors[] = $error_label . '. La réservation doit être liée à un SAV';
+                    return 0;
+                }
+                break;
+        }
+
+        return 1;
+    }
+
+    // getters array: 
+
     public function getAvoirsArray()
     {
         $avoirs = array(
@@ -122,51 +186,27 @@ class BR_Reservation extends BimpObject
         return $avoirs;
     }
 
-    public function getEquipmentFormTitle()
-    {
-        $equipment = $this->getChildObject('equipment');
-        if (!is_null($equipment) && $equipment->isLoaded()) {
-            if ($this->isLoaded()) {
-                return 'Edition de la réservation ' . $this->id . ' pour l\'équipement ' . $equipment->id . ' (serial: ' . $equipment->getData('serial') . ')';
-            } else {
-                return 'Ajout d\'une réservation pour l\'équipement ' . $equipment->id . ' (serial: ' . $equipment->getData('serial') . ')';
-            }
-        }
-
-        return 'Erreur: aucun équipement spécifié';
-    }
-
     public function getCommandeClientLinesArray()
     {
         $commande = $this->getChildObject('commande_client');
-        if (is_null($commande) || !isset($commande->id) || !$commande->id) {
+        if (!BimpObject::objectLoaded($commande)) {
             return array();
         }
 
         $id_product = (int) $this->getData('id_product');
 
-        $commande->fetch_lines();
         $lines = array();
 
-        foreach ($commande->lines as $n => $line) {
+        $n = 0;
+        foreach ($commande->getChildrenObjects('lines') as $line) {
+            $n++;
             if ($id_product) {
-                if ((int) $line->fk_product !== $id_product) {
+                if ((int) $line->id_product !== $id_product) {
                     continue;
                 }
             }
-            $label = 'Ligne ' . ($n + 1);
-            if (isset($line->product_label) && $line->product_label) {
-                $label .= '- produit: "' . $line->product_label . '"';
-                if (isset($line->product_ref) && $line->product_ref) {
-                    $label .= ' (ref: "' . $line->product_ref . '")';
-                }
-            } elseif (isset($line->label) && $line->label) {
-                $label .= ' - ' . $line->label;
-            } elseif (isset($line->description) && $line->description) {
-                $label .= ' - ' . $line->description;
-            }
 
-            $lines[(int) $line->id] = $label;
+            $lines[(int) $line->id] = 'Ligne ' . $n . ' - Produit: ' . $line->displayLineData('id_product', 0, 'ref_nom', true);
         }
 
         return $lines;
@@ -198,327 +238,6 @@ class BR_Reservation extends BimpObject
         }
 
         return $lines;
-    }
-
-    public function getIdCommandeforShipment()
-    {
-        $id_commande_client = (int) $this->getData('id_commande_client');
-
-        if (!$id_commande_client) {
-            if (BimpTools::isSubmit('extra_data')) {
-                $extra_data = BimpTools::getValue('extra_data', array());
-                if (isset($extra_data['id_commande_client'])) {
-                    $id_commande_client = (int) $extra_data['id_commande_client'];
-                }
-            }
-        }
-
-        return (int) $id_commande_client;
-    }
-
-    public function getShipmentsArray()
-    {
-        $shipments = array();
-
-        $id_commande_client = $this->getIdCommandeforShipment();
-
-        if (!$id_commande_client) {
-            if (BimpTools::isSubmit('fields')) {
-                $fields = BimpTools::getValue('fields', array());
-                if (isset($fields['id_shipment'])) {
-                    $shipment = BimpCache::getBimpObjectInstance('bimpreservation', 'BR_CommandeShipment', (int) $fields['id_shipment']);
-                    if (BimpObject::objectLoaded($shipment)) {
-                        $id_commande_client = (int) $shipment->getData('id_commande_client');
-                    }
-                }
-            }
-        }
-        if ($id_commande_client) {
-            $cs = BimpObject::getInstance($this->module, 'BR_CommandeShipment');
-            foreach ($cs->getList(array(
-                'id_commande_client' => $id_commande_client,
-                'status'             => 1
-            )) as $row) {
-                $shipments[(int) $row['id']] = 'Expédition n°' . $row['num_livraison'];
-            }
-        }
-
-        return $shipments;
-    }
-
-    public function getListExtraBtn()
-    {
-        $buttons = array();
-        if ($this->isLoaded()) {
-            $status = (int) $this->getData('status');
-            $qty = (int) $this->getData('qty');
-            $product = $this->getChildObject('product');
-            $type = (int) $this->getData('type');
-
-            if ($status < 300) {
-                switch ($status) {
-                    case 0:
-//                        $title = 'Produits à commander';
-//                        $values = htmlentities('\'{"fields": {"status": 1}}\'');
-//                        $onclick = 'loadModalForm($(this), {module: \'bimpreservation\', object_name: \'BR_Reservation\', id_object: ' . $this->id . ', ';
-//                        $onclick .= 'form_name: \'new_status\', param_values: ' . $values . '}, \'' . $title . '\');';
-//                        $buttons[] = array(
-//                            'label'   => 'A Commander',
-//                            'icon'    => 'sign-in',
-//                            'onclick' => $onclick,
-//                            'class'   => 'newStatusButton',
-//                            'attrs'   => array(
-//                                'data' => array(
-//                                    'new_status' => 1
-//                                )
-//                            )
-//                        );
-                        if ($qty === 1) {
-                            $onclick = 'setReservationStatus($(this), ' . $this->id . ', 2)';
-                        } else {
-                            $title = 'Produits à réserver';
-                            $values = htmlentities('\'{"fields": {"status": 2}}\'');
-                            $onclick = 'loadModalForm($(this), {module: \'bimpreservation\', object_name: \'BR_Reservation\', id_object: ' . $this->id . ', ';
-                            $onclick .= 'form_name: \'new_status\', param_values: ' . $values . '}, \'' . $title . '\');';
-                        }
-
-                        $buttons[] = array(
-                            'label'   => 'A réserver',
-                            'icon'    => 'lock',
-                            'onclick' => $onclick,
-                            'class'   => 'newStatusButton',
-                            'attrs'   => array(
-                                'data' => array(
-                                    'new_status' => 2
-                                )
-                            )
-                        );
-
-
-                        if ($type === self::BR_RESERVATION_COMMANDE) {
-                            $id_commande_client = (int) $this->getData('id_commande_client');
-                            $id_entrepot = (int) $this->getData('id_entrepot');
-                            $id_product = (int) $this->getData('id_product');
-                            $ref = $this->getData('ref');
-
-                            if (!is_null($ref) && $ref && $id_entrepot && $id_product && $id_commande_client) {
-                                $title = 'Ajouter à une commande fournisseur';
-                                $values = htmlentities('\'{"fields": {"id_reservation": ' . $this->id . ', "ref_reservation": "' . $ref . '", "id_entrepot": ' . $id_entrepot . ', "id_commande_client": ' . $id_commande_client . ', "id_product": ' . $id_product . ', "qty": ' . $qty . '}}\'');
-                                $onclick = 'loadModalForm($(this), {module: \'bimpreservation\', object_name: \'BR_ReservationCmdFourn\', id_object: 0, ';
-                                $onclick .= 'form_name: \'default\', param_values: ' . $values . '}, \'' . $title . '\');';
-                                $buttons[] = array(
-                                    'label'   => 'Commander',
-                                    'icon'    => 'cart-plus',
-                                    'onclick' => $onclick,
-                                );
-                            }
-                        }
-                        break;
-
-                    case 2:
-                        if ($product->isSerialisable() || $qty > 1) {
-                            $title = 'Réserver des produits';
-                            $values = htmlentities('\'{"fields": {"status": 200}}\'');
-                            $onclick = 'loadModalForm($(this), {module: \'bimpreservation\', object_name: \'BR_Reservation\', id_object: ' . $this->id . ', ';
-                            $onclick .= 'form_name: \'new_status\', param_values: ' . $values . '}, \'' . $title . '\');';
-                        } else {
-                            $onclick = 'setReservationStatus($(this), ' . $this->id . ', 200)';
-                        }
-
-                        $buttons[] = array(
-                            'label'   => 'Réserver',
-                            'icon'    => 'lock',
-                            'onclick' => $onclick,
-                            'class'   => 'newStatusButton',
-                            'attrs'   => array(
-                                'data' => array(
-                                    'new_status' => 200
-                                )
-                            )
-                        );
-                        break;
-
-                    case 100:
-                        if ($product->isSerialisable() || $qty > 1) {
-                            $title = 'Attribuer des produits / équipements';
-                            $values = htmlentities('\'{"fields": {"status": 200}}\'');
-                            $onclick = 'loadModalForm($(this), {module: \'bimpreservation\', object_name: \'BR_Reservation\', id_object: ' . $this->id . ', ';
-                            $onclick .= 'form_name: \'new_status\', param_values: ' . $values . '}, \'' . $title . '\');';
-                        } else {
-                            $onclick = 'setReservationStatus($(this), ' . $this->id . ', 200)';
-                        }
-
-                        $buttons[] = array(
-                            'label'   => 'Attribuer des équipements',
-                            'icon'    => 'arrow-circle-down',
-                            'onclick' => $onclick,
-                            'class'   => 'newStatusButton',
-                            'attrs'   => array(
-                                'data' => array(
-                                    'new_status' => 200
-                                )
-                            )
-                        );
-                        break;
-
-                    case 200:
-                        if ($type === self::BR_RESERVATION_COMMANDE) {
-                            $id_commande_client = (int) $this->getData('id_commande_client');
-                            $ref = $this->getData('ref');
-
-                            if (!is_null($ref) && $ref && $id_commande_client) {
-                                $id_equipment = (int) $this->getData('id_equipment');
-
-                                $title = 'Ajouter à une expédition';
-                                $values = htmlentities('\'{"fields": {"id_commande_client": ' . $id_commande_client . ', "ref_reservation": "' . $ref . '", "qty": ' . $qty . ', "id_equipment": ' . $id_equipment . '}}\'');
-                                $onclick = 'loadModalForm($(this), {module: \'bimpreservation\', object_name: \'BR_ReservationShipment\', id_object: 0, ';
-                                $onclick .= 'form_name: \'default\', param_values: ' . $values . '}, \'' . $title . '\');';
-
-                                $buttons[] = array(
-                                    'label'   => 'Ajouter à une expédition',
-                                    'icon'    => 'sign-out',
-                                    'onclick' => $onclick
-                                );
-                            }
-                        }
-                        break;
-
-                    case 201:
-                        if ($type === self::BR_RESERVATION_TRANSFERT) {
-                            if ($qty === 1) {
-                                $onclick = 'setReservationStatus($(this), ' . $this->id . ', 301)';
-                            } else {
-                                $title = 'Produits transférés';
-                                $values = htmlentities('\'{"fields": {"status": 301}}\'');
-                                $onclick = 'loadModalForm($(this), {module: \'bimpreservation\', object_name: \'BR_Reservation\', id_object: ' . $this->id . ', ';
-                                $onclick .= 'form_name: \'new_status\', param_values: ' . $values . '}, \'' . $title . '\');';
-                            }
-
-                            $buttons[] = array(
-                                'label'   => 'Transféré',
-                                'icon'    => 'sign-out',
-                                'onclick' => $onclick,
-                                'class'   => 'newStatusButton',
-                                'attrs'   => array(
-                                    'data' => array(
-                                        'new_status' => 301
-                                    )
-                                )
-                            );
-                        }
-                        break;
-
-                    case 202:
-                        if ($type === self::BR_RESERVATION_TEMPORAIRE) {
-                            if ($qty === 1) {
-                                $onclick = 'setReservationStatus($(this), ' . $this->id . ', 302)';
-                            } else {
-                                $title = 'Réservations terminées';
-                                $values = htmlentities('\'{"fields": {"status": 302}}\'');
-                                $onclick = 'loadModalForm($(this), {module: \'bimpreservation\', object_name: \'BR_Reservation\', id_object: ' . $this->id . ', ';
-                                $onclick .= 'form_name: \'new_status\', param_values: ' . $values . '}, \'' . $title . '\');';
-                            }
-
-                            $buttons[] = array(
-                                'label'   => 'Réservation terminée',
-                                'icon'    => 'unlock',
-                                'onclick' => $onclick,
-                                'class'   => 'newStatusButton',
-                                'attrs'   => array(
-                                    'data' => array(
-                                        'new_status' => 302
-                                    )
-                                )
-                            );
-                        }
-                        break;
-
-                    case 203:
-                        if ($type === self::BR_RESERVATION_SAV) {
-                            if ($qty === 1) {
-                                $onclick = 'setReservationStatus($(this), ' . $this->id . ', 300)';
-                            }
-
-                            $buttons[] = array(
-                                'label'   => 'Livré au client',
-                                'icon'    => 'sign-out',
-                                'onclick' => $onclick,
-                                'class'   => 'newStatusButton',
-                                'attrs'   => array(
-                                    'data' => array(
-                                        'new_status' => 300
-                                    )
-                                )
-                            );
-                        }
-                        break;
-                }
-
-                switch ($type) {
-                    case self::BR_RESERVATION_COMMANDE:
-                        if ((int) $status && $status < 250) {
-                            $onclick = 'setReservationStatus($(this), ' . $this->id . ', 0)';
-                            $buttons[] = array(
-                                'label'   => 'Réinitialiser la réservation',
-                                'icon'    => 'undo',
-                                'onclick' => $onclick,
-                                'class'   => 'newStatusButton',
-                                'attrs'   => array(
-                                    'data' => array(
-                                        'new_status' => 0
-                                    )
-                                )
-                            );
-                        }
-                        break;
-
-                    case self::BR_RESERVATION_TEMPORAIRE:
-                    case self::BR_RESERVATION_TRANSFERT:
-                    case self::BR_RESERVATION_SAV:
-                        $onclick = 'setReservationStatus($(this), ' . $this->id . ', 303)';
-                        $buttons[] = array(
-                            'label'   => 'Annuler la réservation',
-                            'icon'    => 'times-circle',
-                            'onclick' => $onclick,
-                            'class'   => 'newStatusButton',
-                            'attrs'   => array(
-                                'data' => array(
-                                    'new_status' => 303
-                                )
-                            )
-                        );
-                        break;
-                }
-            }
-
-            if (in_array($status, array(0, 2, 200, 303))) {
-                $buttons[] = array(
-                    'label'   => 'Retirer de la commande client',
-                    'icon'    => 'times-circle',
-                    'onclick' => $this->getJsActionOnclick('removeFromOrder', array(), array(
-                        'form_name' => 'remove'
-                    )),
-                );
-            }
-        }
-
-        return $buttons;
-    }
-
-    public function getCommandesListBulkActions()
-    {
-        return array(
-            array(
-                'label'   => 'Réinitialiser',
-                'icon'    => 'undo',
-                'onclick' => 'setSelectedReservationStatus($(this), \'list_id\', 0);'
-            ),
-            array(
-                'label'   => 'Ajouter à une expédition',
-                'icon'    => 'sign-out',
-                'onclick' => 'setSelectedObjectsAction($(this), \'list_id\', \'addToShipment\', {id_commande_client: list_filter_id_commande_client}, \'shipment\', null)'
-            )
-        );
     }
 
     public function getStatusListArray()
@@ -557,6 +276,384 @@ class BR_Reservation extends BimpObject
         }
 
         return $status;
+    }
+
+    public function getShipmentsArray()
+    {
+        $shipments = array();
+
+        $id_commande_client = $this->getIdCommandeforShipment();
+
+        if (!$id_commande_client) {
+            if (BimpTools::isSubmit('fields')) {
+                $fields = BimpTools::getValue('fields', array());
+                if (isset($fields['id_shipment'])) {
+                    $shipment = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeShipment', (int) $fields['id_shipment']);
+                    if (BimpObject::objectLoaded($shipment)) {
+                        $id_commande_client = (int) $shipment->getData('id_commande_client');
+                    }
+                }
+            }
+        }
+        if ($id_commande_client) {
+            $cs = BimpObject::getInstance('bimplogistique', 'BL_CommandeShipment');
+            foreach ($cs->getList(array(
+                'id_commande_client' => $id_commande_client,
+                'status'             => 1
+            )) as $row) {
+                $shipments[(int) $row['id']] = 'Expédition n°' . $row['num_livraison'];
+            }
+        }
+
+        return $shipments;
+    }
+
+    // Getters params: 
+
+    public function getEquipmentFormTitle()
+    {
+        $equipment = $this->getChildObject('equipment');
+        if (!is_null($equipment) && $equipment->isLoaded()) {
+            if ($this->isLoaded()) {
+                return 'Edition de la réservation ' . $this->id . ' pour l\'équipement ' . $equipment->id . ' (serial: ' . $equipment->getData('serial') . ')';
+            } else {
+                return 'Ajout d\'une réservation pour l\'équipement ' . $equipment->id . ' (serial: ' . $equipment->getData('serial') . ')';
+            }
+        }
+
+        return 'Erreur: aucun équipement spécifié';
+    }
+
+    public function getListExtraBtn()
+    {
+        $buttons = array();
+        if ($this->isLoaded()) {
+            $status = (int) $this->getData('status');
+            $qty = (int) $this->getData('qty');
+            $product = $this->getChildObject('product');
+            $type = (int) $this->getData('type');
+
+            if ($status < 300) {
+                switch ($status) {
+                    // Si à traiter
+                    case 0: // OK
+//                        $title = 'Produits à commander';
+//                        $values = htmlentities('\'{"fields": {"status": 1}}\'');
+//                        $onclick = 'loadModalForm($(this), {module: \'bimpreservation\', object_name: \'BR_Reservation\', id_object: ' . $this->id . ', ';
+//                        $onclick .= 'form_name: \'new_status\', param_values: ' . $values . '}, \'' . $title . '\');';
+//                        $buttons[] = array(
+//                            'label'   => 'A Commander',
+//                            'icon'    => 'sign-in',
+//                            'onclick' => $onclick,
+//                            'class'   => 'newStatusButton',
+//                            'attrs'   => array(
+//                                'data' => array(
+//                                    'new_status' => 1
+//                                )
+//                            )
+//                        );
+                        // A Reserver: 
+                        $params = array();
+                        if ($qty > 1) {
+                            $params['form_name'] = 'new_status';
+                        }
+
+                        $buttons[] = array(
+                            'label'   => 'A réserver',
+                            'icon'    => 'fas_exclamation-circle',
+                            'onclick' => $this->getJsActionOnclick('setNewStatus', array(
+                                'status' => 2
+                                    ), $params),
+                            'class'   => 'newStatusButton',
+                            'attrs'   => array(
+                                'data' => array(
+                                    'new_status' => 2
+                                )
+                            )
+                        );
+
+
+                    // Ajouter à une commande fournisseur: 
+//                        if ($type === self::BR_RESERVATION_COMMANDE) {
+//                            $id_commande_client = (int) $this->getData('id_commande_client');
+//                            $id_entrepot = (int) $this->getData('id_entrepot');
+//                            $id_product = (int) $this->getData('id_product');
+//                            $ref = $this->getData('ref');
+//
+//                            if (!is_null($ref) && $ref && $id_entrepot && $id_product && $id_commande_client) {
+//                                $title = 'Ajouter à une commande fournisseur';
+//                                $values = array(
+//                                    'fields' => array(
+//                                        'id_reservation'     => (int) $this->id,
+//                                        'ref_reservation'    => $ref,
+//                                        'id_entrepot'        => (int) $id_entrepot,
+//                                        'id_commande_client' => (int) $id_commande_client,
+//                                        'id_product'         => (int) $id_product,
+//                                        'qty'                => (int) $qty
+//                                    )
+//                                );
+//
+//                                $reservation_cmd_fourn = BimpObject::getInstance('bimpreservation', 'BR_ReservationCmdFourn');
+//                                $onclick = $reservation_cmd_fourn->getJsLoadModalForm('default', $title, $values);
+//
+//                                $buttons[] = array(
+//                                    'label'   => 'Commander',
+//                                    'icon'    => 'cart-plus',
+//                                    'onclick' => $onclick,
+//                                );
+//                            }
+//                        }
+//                        break;
+                    // Si à réserver: 
+                    case 2: // OK
+                    case 101:
+                        // Réserver: 
+                        $params = array();
+                        if ($product->isSerialisable()) {
+                            $params['form_name'] = 'reserve_equipments';
+                        } elseif ($qty > 1) {
+                            $params['form_name'] = 'new_status';
+                        }
+
+                        $buttons[] = array(
+                            'label'   => 'Réserver',
+                            'icon'    => 'fas_lock',
+                            'onclick' => $this->getJsActionOnclick('setNewStatus', array(
+                                'status' => 200
+                                    ), $params),
+                            'class'   => 'newStatusButton',
+                            'attrs'   => array(
+                                'data' => array(
+                                    'new_status' => 200
+                                )
+                            )
+                        );
+                        break;
+
+                    // Si en attente de réception
+                    case 100: // A Tester
+                        // Réceptionner une commande fournisseur: 
+//                        $params = array();
+//                        if ($product->isSerialisable() || $qty > 1) {
+//                            $params['form_name'] = 'new_status';
+//                        }
+//
+//                        $buttons[] = array(
+//                            'label'   => 'Réceptionner',
+//                            'icon'    => 'fas_arrow-circle-down',
+//                            'onclick' => $this->getJsActionOnclick('setNewStatus', array(
+//                                'status' => 200
+//                                    ), $params),
+//                            'class'   => 'newStatusButton',
+//                            'attrs'   => array(
+//                                'data' => array(
+//                                    'new_status' => 200
+//                                )
+//                            )
+//                        );
+                        break;
+
+//                    // Si réservé / attribué
+//                    case 200: // A Tester
+//                        // Ajouter à une expédition: 
+//                        if ($type === self::BR_RESERVATION_COMMANDE) {
+//                            $id_commande_client = (int) $this->getData('id_commande_client');
+//                            $ref = $this->getData('ref');
+//
+//                            if (!is_null($ref) && $ref && $id_commande_client) {
+//                                $id_equipment = (int) $this->getData('id_equipment');
+//
+//                                $title = 'Ajouter à une expédition';
+////                                $values = htmlentities('\'{"fields": {"id_commande_client": ' . $id_commande_client . ', "ref_reservation": "' . $ref . '", "qty": ' . $qty . ', "id_equipment": ' . $id_equipment . '}}\'');
+////                                $onclick = 'loadModalForm($(this), {module: \'bimpreservation\', object_name: \'BR_ReservationShipment\', id_object: 0, ';
+////                                $onclick .= 'form_name: \'default\', param_values: ' . $values . '}, \'' . $title . '\');';
+//
+//                                $values = array(
+//                                    'fields' => array(
+//                                        'id_commande_client' => (int) $id_commande_client,
+//                                        'ref_reservation'    => $ref,
+//                                        'qty'                => $qty,
+//                                        'id_equipment'       => (int) $id_equipment,
+//                                    )
+//                                );
+//
+//                                $reservation_shipment = BimpObject::getInstance('bimpreservation', 'BR_ReservationShipment');
+//                                $buttons[] = array(
+//                                    'label'   => 'Ajouter à une expédition',
+//                                    'icon'    => 'sign-out',
+//                                    'onclick' => $reservation_shipment->getJsLoadModalForm('default', $title, $values)
+//                                );
+//                            }
+//                        }
+//                        break;
+                    // Si transfert en cours: 
+                    case 201: // Non modifié
+                        if ($type === self::BR_RESERVATION_TRANSFERT) {
+                            // Transféré: 
+                            if ($qty === 1) {
+                                $onclick = 'setReservationStatus($(this), ' . $this->id . ', 301)';
+                            } else {
+                                $title = 'Produits transférés';
+                                $values = htmlentities('\'{"fields": {"status": 301}}\'');
+                                $onclick = 'loadModalForm($(this), {module: \'bimpreservation\', object_name: \'BR_Reservation\', id_object: ' . $this->id . ', ';
+                                $onclick .= 'form_name: \'new_status\', param_values: ' . $values . '}, \'' . $title . '\');';
+                            }
+
+                            $buttons[] = array(
+                                'label'   => 'Transféré',
+                                'icon'    => 'sign-out',
+                                'onclick' => $onclick,
+                                'class'   => 'newStatusButton',
+                                'attrs'   => array(
+                                    'data' => array(
+                                        'new_status' => 301
+                                    )
+                                )
+                            );
+                        }
+                        break;
+
+                    // Si réservé (Rés. temporaire): 
+                    case 202: // Non modifié
+                        // Réservation terminée
+                        if ($type === self::BR_RESERVATION_TEMPORAIRE) {
+                            if ($qty === 1) {
+                                $onclick = 'setReservationStatus($(this), ' . $this->id . ', 302)';
+                            } else {
+                                $title = 'Réservations terminées';
+                                $values = htmlentities('\'{"fields": {"status": 302}}\'');
+                                $onclick = 'loadModalForm($(this), {module: \'bimpreservation\', object_name: \'BR_Reservation\', id_object: ' . $this->id . ', ';
+                                $onclick .= 'form_name: \'new_status\', param_values: ' . $values . '}, \'' . $title . '\');';
+                            }
+
+                            $buttons[] = array(
+                                'label'   => 'Réservation terminée',
+                                'icon'    => 'unlock',
+                                'onclick' => $onclick,
+                                'class'   => 'newStatusButton',
+                                'attrs'   => array(
+                                    'data' => array(
+                                        'new_status' => 302
+                                    )
+                                )
+                            );
+                        }
+                        break;
+
+                    // Si Réservé SAV: 
+                    case 203: // Non modifié
+                        if ($type === self::BR_RESERVATION_SAV) {
+                            if ($qty === 1) {
+                                $onclick = 'setReservationStatus($(this), ' . $this->id . ', 300)';
+                            }
+
+                            $buttons[] = array(
+                                'label'   => 'Livré au client',
+                                'icon'    => 'sign-out',
+                                'onclick' => $onclick,
+                                'class'   => 'newStatusButton',
+                                'attrs'   => array(
+                                    'data' => array(
+                                        'new_status' => 300
+                                    )
+                                )
+                            );
+                        }
+                        break;
+                }
+
+                switch ($type) {
+                    case self::BR_RESERVATION_COMMANDE: // A Tester
+                        // Réinitialisation de la réservation: 
+                        if ((int) $status && $status < 250) {
+                            $params = array();
+                            if ($qty > 1) {
+                                $params['form_name'] = 'new_status';
+                            }
+                            $onclick = 'setReservationStatus($(this), ' . $this->id . ', 0)';
+                            $buttons[] = array(
+                                'label'   => 'Réinitialiser',
+                                'icon'    => 'undo',
+                                'onclick' => $this->getJsActionOnclick('setNewStatus', array(
+                                    'status' => 0
+                                        ), $params),
+                                'class'   => 'newStatusButton',
+                                'attrs'   => array(
+                                    'data' => array(
+                                        'new_status' => 0
+                                    )
+                                )
+                            );
+                        }
+                        break;
+
+                    case self::BR_RESERVATION_TEMPORAIRE:
+                    case self::BR_RESERVATION_TRANSFERT:
+                    case self::BR_RESERVATION_SAV: // Non modifié
+                        // Annulation de la réservation: 
+                        $onclick = 'setReservationStatus($(this), ' . $this->id . ', 303)';
+                        $buttons[] = array(
+                            'label'   => 'Annuler la réservation',
+                            'icon'    => 'times-circle',
+                            'onclick' => $onclick,
+                            'class'   => 'newStatusButton',
+                            'attrs'   => array(
+                                'data' => array(
+                                    'new_status' => 303
+                                )
+                            )
+                        );
+                        break;
+                }
+            }
+
+            // Retrait de la commande client: 
+//            if (in_array($status, array(0, 2, 200, 303))) {
+//                $buttons[] = array(
+//                    'label'   => 'Retirer de la commande client',
+//                    'icon'    => 'times-circle',
+//                    'onclick' => $this->getJsActionOnclick('removeFromOrder', array(), array(
+//                        'form_name' => 'remove'
+//                    )),
+//                );
+//            }
+        }
+
+        return $buttons;
+    }
+
+    public function getCommandesListBulkActions()
+    {
+        return array(
+            array(
+                'label'   => 'Réinitialiser',
+                'icon'    => 'undo',
+                'onclick' => 'setSelectedReservationStatus($(this), \'list_id\', 0);'
+            ),
+            array(
+                'label'   => 'Ajouter à une expédition',
+                'icon'    => 'sign-out',
+                'onclick' => 'setSelectedObjectsAction($(this), \'list_id\', \'addToShipment\', {id_commande_client: list_filter_id_commande_client}, \'shipment\', null)'
+            )
+        );
+    }
+
+    // Getters valeurs: 
+
+    public function getIdCommandeforShipment()
+    {
+        $id_commande_client = (int) $this->getData('id_commande_client');
+
+        if (!$id_commande_client) {
+            if (BimpTools::isSubmit('extra_data')) {
+                $extra_data = BimpTools::getValue('extra_data', array());
+                if (isset($extra_data['id_commande_client'])) {
+                    $id_commande_client = (int) $extra_data['id_commande_client'];
+                }
+            }
+        }
+
+        return (int) $id_commande_client;
     }
 
     public function getBrOrderLine()
@@ -658,6 +755,64 @@ class BR_Reservation extends BimpObject
         ));
     }
 
+    public function renderReserveEquipmentsInput()
+    {
+        $html = '';
+
+        $errors = array();
+        if (!$this->isLoaded()) {
+            $errors[] = 'ID de la réservation absent';
+        } else {
+            $product = $this->getChildObject('product');
+            if (!BimpObject::objectLoaded($product)) {
+                $errors[] = 'Produit absent';
+            } elseif (!$product->isSerialisable()) {
+                $errors[] = 'Produit non sérialisable';
+            } else {
+                $entrepot = $this->getChildObject('entrepot');
+                if (!BimpObject::objectLoaded($entrepot)) {
+                    if ((int) $this->getData('id_entrepot')) {
+                        $errors[] = 'L\'entrepôt d\'ID ' . $this->getData('id_entrepot') . ' n\'existe pas';
+                    } else {
+                        $errors[] = 'Entrepôt absent';
+                    }
+                } else {
+                    BimpObject::loadClass('bimpequipment', 'Equipment');
+                    $equipments = Equipment::getAvailableEquipmentsArray((int) $entrepot->id, (int) $product->id);
+
+                    if (!count($equipments)) {
+                        $html .= BimpRender::renderAlerts('Aucun équipement disponible dans l\'entrepôt ' . $entrepot->getNomUrl(1), 'warning');
+                    } else {
+                        $input_name = 'equipments';
+                        $max_values = (int) $this->getData('qty');
+
+                        $content = '<div style="display: inline-block; margin-right: 15px;">';
+                        $content .= '<span class="small">Numéro de série: </span><br/>';
+                        $content .= BimpInput::renderInput('text', 'search_serial', '', array(
+                                    'style' => 'border: 1px solid #DCDCDC'
+                        ));
+                        $content .= '</div>';
+
+                        $content .= BimpInput::renderInput('select', $input_name . '_add_value', '', array(
+                                    'options' => $equipments
+                        ));
+
+                        $html .= '<h4>Equipements disponibles dans l\'entrepôt: ' . $entrepot->getNomUrl(1) . '<br/><br/>';
+                        $html .= 'Pour le produit ' . $product->getNomUrl(1) . '</h4><br/>';
+
+                        $html .= BimpInput::renderMultipleValuesInput($this, $input_name, $content, array(), '', false, false, false, $max_values);
+                    }
+                }
+            }
+        }
+
+        if (count($errors)) {
+            $html .= BimpRender::renderAlerts($errors);
+        }
+
+        return $html;
+    }
+
     // Gestion des réservations:
 
     public function createReservationsFromCommandeClient($id_entrepot, $id_commande_client)
@@ -693,77 +848,75 @@ class BR_Reservation extends BimpObject
 
     public function createFromCommandeClientLine($id_entrepot, Commande $commande, OrderLine $line, BR_OrderLine $br_orderLine)
     {
-        $this->reset();
-
-        if (is_null($line) || !isset($line->id) || !$line->id) {
-            return array('Ligne de Commande client invalide');
-        }
-
-        if (!isset($line->fk_product) || !$line->fk_product) {
-            return array();
-        }
-
-        $this->set('id_product', $line->fk_product);
-        $product = $this->getChildObject('product');
-//        echo '<pre>';
-//        $product->printData();
-//        echo '</pre>';
-        if (is_null($product) || !$product->isLoaded()) {
-            return array('Produit d\'ID ' . $line->fk_product . ' invalide');
-        } else {
-//            $service = BimpObject::getInstance($this->module, 'BR_Service');
-//            $service_errors = $service->validateArray(array(
-//                'id_commande_client'      => (int) $commande->id,
-//                'id_commande_client_line' => (int) $line->id,
-//                'qty'                     => (int) $line->qty,
-//                'shipped'                 => 0
-//            ));
-//            if (!count($service_errors)) {
-//                $service_errors = $service->create();
+        $errors = array();
+//        $this->reset();
+//
+//        if (is_null($line) || !isset($line->id) || !$line->id) {
+//            return array('Ligne de Commande client invalide');
+//        }
+//
+//        if (!isset($line->fk_product) || !$line->fk_product) {
+//            return array();
+//        }
+//
+//        $this->set('id_product', $line->fk_product);
+//        $product = $this->getChildObject('product');
+//        if (is_null($product) || !$product->isLoaded()) {
+//            return array('Produit d\'ID ' . $line->fk_product . ' invalide');
+//        } else {
+////            $service = BimpObject::getInstance($this->module, 'BR_Service');
+////            $service_errors = $service->validateArray(array(
+////                'id_commande_client'      => (int) $commande->id,
+////                'id_commande_client_line' => (int) $line->id,
+////                'qty'                     => (int) $line->qty,
+////                'shipped'                 => 0
+////            ));
+////            if (!count($service_errors)) {
+////                $service_errors = $service->create();
+////            }
+////            if (count($service_errors)) {
+////                $errors[] = 'Echec de l\'ajout du service pour la ligne d\'ID ' . $line->id;
+////                $errors = array_merge($errors, $service_errors);
+////            }
+//            if (is_null($commande) || !isset($commande->id) || !$commande->id) {
+//                return array('Commande client invalide');
 //            }
-//            if (count($service_errors)) {
-//                $errors[] = 'Echec de l\'ajout du service pour la ligne d\'ID ' . $line->id;
-//                $errors = array_merge($errors, $service_errors);
+//
+//            // Création de la ligne de commande: 
+//            $errors = $br_orderLine->createFromOrderLine($commande, $line, $product);
+//
+//            if (count($errors)) {
+//                return $errors;
 //            }
-            if (is_null($commande) || !isset($commande->id) || !$commande->id) {
-                return array('Commande client invalide');
-            }
-
-            // Création de la ligne de commande: 
-            $errors = $br_orderLine->createFromOrderLine($commande, $line, $product);
-
-            if (count($errors)) {
-                return $errors;
-            }
-
-            if ((int) $product->getData('fk_product_type') === 0) {
-                // Création de la réservation
-                $errors = $this->set('id_commande_client_line', $line->id);
-                $this->set('id_commande_client', $line->fk_commande);
-
-                $errors = array_merge($errors, $this->set('id_entrepot', $id_entrepot));
-
-                if (count($errors)) {
-                    return $errors;
-                }
-
-                $this->set('id_client', $commande->socid);
-                $this->set('date_from', date('Y-m-d H:i:s'));
-                if (isset($commande->user_author_id)) {
-                    $this->set('id_commercial', $commande->user_author_id);
-                }
-
-                $this->set('type', self::BR_RESERVATION_COMMANDE);
-
-                $qty = (int) $line->qty;
-                $this->set('qty', $qty);
-                $this->set('status', 0);
-                $this->set('id_equipment', 0);
-
-                $errors = array_merge($errors, $this->create($warnings, true));
-            }
-        }
-
+//
+//            if ((int) $product->getData('fk_product_type') === 0) {
+//                // Création de la réservation
+//                $errors = $this->set('id_commande_client_line', $line->id);
+//                $this->set('id_commande_client', $line->fk_commande);
+//
+//                $errors = array_merge($errors, $this->set('id_entrepot', $id_entrepot));
+//
+//                if (count($errors)) {
+//                    return $errors;
+//                }
+//
+//                $this->set('id_client', $commande->socid);
+//                $this->set('date_from', date('Y-m-d H:i:s'));
+//                if (isset($commande->user_author_id)) {
+//                    $this->set('id_commercial', $commande->user_author_id);
+//                }
+//
+//                $this->set('type', self::BR_RESERVATION_COMMANDE);
+//
+//                $qty = (int) $line->qty;
+//                $this->set('qty', $qty);
+//                $this->set('status', 0);
+//                $this->set('id_equipment', 0);
+//
+//                $errors = array_merge($errors, $this->create($warnings, true));
+//            }
+//        }
+//
         return $errors;
     }
 
@@ -900,21 +1053,38 @@ class BR_Reservation extends BimpObject
         }
 
         $errors = array();
+
+        if (!$this->isNewStatusAllowed($status, $errors)) {
+            return $errors;
+        }
+
         $ref = $this->getData('ref');
 
         if (!$ref) {
             return array('Référence de la réservation absente');
         }
 
+        if ((int) $this->getData('id_equipment') && (int) $this->getData('type') === self::BR_RESERVATION_COMMANDE && $status < 200) {
+            $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $this->getData('id_commande_client_line'));
+            if (BimpObject::objectLoaded($line)) {
+                $line_errors = $line->removeEquipmentFromShipment((int) $this->getData('id_equipment'));
+
+                if (count($line_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n°' . $line->getData('position') . ', statut "' . self::$status_list[(int) $this->getData('status')]['label'] . '"');
+                    return $errors;
+                }
+            }
+        }
+
         $this->set('status', $status);
 
-        $current_status = (int) $this->getSavedData('status');
+        $current_status = (int) $this->getInitData('status');
 
         if ($status === $current_status) {
             return array('Cette réservation a déjà ce statut');
         }
 
-        if (in_array($status, self::$need_equipment_status) && ($current_status <= 100 || ($this->getData('type') === self::BR_RESERVATION_SAV)) && $this->isProductSerialisable()) {
+        if (in_array($status, self::$need_equipment_status) && ($current_status < 200 || ($this->getData('type') === self::BR_RESERVATION_SAV)) && $this->isProductSerialisable()) {
             if (is_null($id_equipment) || !$id_equipment) {
                 return array('Produit sérialisable: équipement obligatoire');
             }
@@ -934,49 +1104,49 @@ class BR_Reservation extends BimpObject
             $this->updateField('id_equipment', 0);
         }
 
-        if (!$status && (in_array($current_status, array(3, 100))) && ((int) $this->getData('type') === self::BR_RESERVATION_COMMANDE)) {
-            $rcf = BimpObject::getInstance($this->module, 'BR_ReservationCmdFourn');
-            $list = $rcf->getList(array(
-                'ref_reservation' => $ref
-            ));
-
-            if (!is_null($list) && count($list)) {
-                foreach ($list as $item) {
-                    $rcf = BimpCache::getBimpObjectInstance($this->module, 'BR_ReservationCmdFourn', (int) $item['id']);
-                    if ($rcf->isLoaded()) {
-                        $delete = true;
-                        if ((int) $rcf->getData('id_commande_fournisseur')) {
-                            $remove_errors = array();
-                            if (!$rcf->removeFromCommandeFournisseur($remove_errors)) {
-                                $errors = array_merge($errors, $remove_errors);
-                                $delete = false;
-                            }
-                        }
-
-                        if ($delete) {
-                            $del_warnings = array();
-                            $delete_errors = $rcf->delete($del_warnings, true);
-                            if (count($delete_errors)) {
-                                $errors[] = 'Echec de la suppression de la ligne de commande fournisseur d\'ID ' . $item['id'];
-                                $errors = array_merge($errors, $delete_errors);
-                                $qty -= (int) $rcf->getData('qty');
-                            }
-                        } else {
-                            $qty -= (int) $rcf->getData('qty');
-                        }
-                    }
-                }
-            }
-
-            if ($qty <= 0) {
-                return $errors;
-            }
-        }
+//        if (!$status && (in_array($current_status, array(3, 100))) && ((int) $this->getData('type') === self::BR_RESERVATION_COMMANDE)) {
+//            $rcf = BimpObject::getInstance($this->module, 'BR_ReservationCmdFourn');
+//            $list = $rcf->getList(array(
+//                'ref_reservation' => $ref
+//            ));
+//
+//            if (!is_null($list) && count($list)) {
+//                foreach ($list as $item) {
+//                    $rcf = BimpCache::getBimpObjectInstance($this->module, 'BR_ReservationCmdFourn', (int) $item['id']);
+//                    if ($rcf->isLoaded()) {
+//                        $delete = true;
+//                        if ((int) $rcf->getData('id_commande_fournisseur')) {
+//                            $remove_errors = array();
+//                            if (!$rcf->removeFromCommandeFournisseur($remove_errors)) {
+//                                $errors = array_merge($errors, $remove_errors);
+//                                $delete = false;
+//                            }
+//                        }
+//
+//                        if ($delete) {
+//                            $del_warnings = array();
+//                            $delete_errors = $rcf->delete($del_warnings, true);
+//                            if (count($delete_errors)) {
+//                                $errors[] = 'Echec de la suppression de la ligne de commande fournisseur d\'ID ' . $item['id'];
+//                                $errors = array_merge($errors, $delete_errors);
+//                                $qty -= (int) $rcf->getData('qty');
+//                            }
+//                        } else {
+//                            $qty -= (int) $rcf->getData('qty');
+//                        }
+//                    }
+//                }
+//            }
+//
+//            if ($qty <= 0) {
+//                return $errors;
+//            }
+//        }
 
         if ($this->isProductSerialisable()) {
             $equipment = $this->getChildObject('equipment');
             if (is_null($equipment) || !$equipment->isLoaded()) {
-                $errors[] = 'Equipement invalide';
+                $errors[] = 'Equipement invalide - ' . $this->getData('id_equipment') . ' - ' . $id_equipment;
             } else {
                 if ($current_qty > 1) {
                     $new_reservation = BimpObject::getInstance($this->module, $this->object_name, $this->id);
@@ -994,6 +1164,7 @@ class BR_Reservation extends BimpObject
                         $this->set('status', $current_status);
                         $this->set('qty', $current_qty - 1);
                         $this->set('id_equipment', 0);
+                        $this->update();
                     }
                 } else {
                     $this->set('qty', 1);
@@ -1048,6 +1219,7 @@ class BR_Reservation extends BimpObject
             } elseif ($qty < $current_qty) {
                 $new_reservation = BimpObject::getInstance($this->module, $this->object_name, $this->id);
                 $new_reservation->id = null;
+                $new_reservation->set('id', null);
                 $new_reservation->set('qty', $qty);
                 $new_reservation->set('status', $status);
                 $new_reservation->set('ref', $ref);
@@ -1060,12 +1232,18 @@ class BR_Reservation extends BimpObject
                     $this->set('id_equipment', 0);
                     $this->set('status', $current_status);
                     $this->set('qty', ($current_qty - $qty));
-                    $this->update();
+                    $up_errors = $this->update();
+                    if (count($up_errors)) {
+                        $errors[] = BimpTools::getMsgFromArray($up_errors, 'Erreurs lors de la mise à jour de la réservation actuelle');
+                    }
                 }
             } else {
                 $this->set('qty', $qty);
                 $this->set('status', $status);
-                $this->update();
+                $up_errors = $this->update();
+                if (count($up_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($up_errors, 'Erreurs lors de la mise à jour de la réservation actuelle');
+                }
             }
         }
 
@@ -1142,6 +1320,40 @@ class BR_Reservation extends BimpObject
     }
 
     // Actions: 
+
+    public function actionSetNewStatus($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Statut mis à jour avec succès';
+
+        if (!isset($data['status'])) {
+            $errors[] = 'Nouveau statut absent';
+        } elseif ($this->isNewStatusAllowed((int) $data['status'], $errors)) {
+            if (isset($data['equipments'])) {
+                if (!count($data['equipments'])) {
+                    $errors[] = 'Aucun équipement sélectionné';
+                } else {
+                    foreach ($data['equipments'] as $id_equipment) {
+                        $res_errors = $this->setNewStatus((int) $data['status'], 1, $id_equipment);
+                        if (count($res_errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($res_errors, 'Equipement ' . $id_equipment);
+                        }
+                    }
+                }
+            } else {
+                $qty = isset($data['qty']) ? (int) $data['qty'] : null;
+                $id_equipment = isset($data['id_equipment']) ? (int) $data['id_equipment'] : null;
+
+                $errors = $this->setNewStatus((int) $data['status'], $qty, $id_equipment);
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
 
     public function actionAddToShipment($data, &$success)
     {
@@ -1240,14 +1452,14 @@ class BR_Reservation extends BimpObject
         }
 
         $commande = $this->getChildObject('commande_client');
-        if (!is_null($commande) && isset($commande->id) && $commande->id) {
-            $this->set('id_client', (int) $commande->socid);
+        if (BimpObject::objectLoaded($commande)) {
+            $this->set('id_client', (int) $commande->getData('fk_soc'));
         } else {
             return array('Commande invalide');
         }
 
         $equipment = $this->getChildObject('equipment');
-        if (!is_null($equipment) && $equipment->isLoaded()) {
+        if (BimpObject::objectLoaded($equipment)) {
             $this->set('id_product', (int) $equipment->getData('id_product'));
         }
 
@@ -1259,21 +1471,20 @@ class BR_Reservation extends BimpObject
 
         $id_product = (int) $this->getData('id_product');
 
-        global $db;
-        $line = new OrderLine($db);
-        if ($line->fetch($id_line) > 0) {
-            if (isset($line->fk_product) && $line->fk_product) {
+        $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', $id_line);
+        if ($line->isLoaded()) {
+            if ((int) $line->id_product) {
                 if (!$id_product) {
-                    $id_product = (int) $line->fk_product;
-                    $this->set('id_product', (int) $line->fk_product);
-                } elseif ($id_product !== (int) $line->fk_product) {
+                    $id_product = (int) $line->id_product;
+                    $this->set('id_product', (int) $line->id_product);
+                } elseif ($id_product !== (int) $line->id_product) {
                     $errors[] = 'Le produit sélectionné ne correspond pas à la ligne de commande sélectionnée';
                 }
             }
         }
 
         $product = $this->getChildObject('product');
-        if (is_null($product) || !$product->isLoaded()) {
+        if (!BimpObject::objectLoaded($product)) {
             $errors[] = 'Aucun produit ' . ($status !== 100 ? 'ou équipement ' : '') . 'sélectionné';
         } elseif ($status !== 303 && $status >= 200 && $product->isSerialisable() && (is_null($equipment) || !$equipment->isLoaded())) {
             $errors[] = 'Produit sérialisable: sélection d\'un équipement obligatoire';
@@ -1449,9 +1660,9 @@ class BR_Reservation extends BimpObject
         }
     }
 
-    public function create()
+    public function create(&$warnings = array(), $force_create = false)
     {
-        $errors = parent::create();
+        $errors = parent::create($warnings, $force_create);
 
         if ($this->isLoaded()) {
             $ref = $this->getData('ref');
@@ -1473,21 +1684,26 @@ class BR_Reservation extends BimpObject
                         $ref = 'RES-SAV-' . $this->id;
                 }
                 if ($ref) {
-                    if (!$this->db->update($this->getTable(), array(
-                                'ref' => $ref
-                                    ), '`id` = ' . (int) $this->id)) {
-                        $msg = 'Echec de l\'enregistrement de la référence pour cette réservation';
-                        $sqlError = $this->db->db->lasterror();
-                        if ($sqlError) {
-                            $msg .= ' - ' . $sqlError;
-                        }
-                        $errors[] = $msg;
+                    $up_errors = $this->updateField('ref', $ref);
+                    if (count($up_errors)) {
+                        $warnings[] = BimpTools::getMsgFromArray($up_errors, 'Echec de l\'enregistrement de la référence pour cette réservation');
                     }
                 }
             }
         }
 
         return $errors;
+    }
+
+    public function onSave(&$errors = array(), &$warnings = array())
+    {
+        if ((int) $this->getData('id_commande_client')) {
+            $commande = $this->getChildObject('commande_client');
+
+            if (BimpObject::objectLoaded($commande)) {
+                $commande->checkLogistiqueStatus();
+            }
+        }
     }
 
     // Méthodes statiques: 
@@ -1539,7 +1755,7 @@ class BR_Reservation extends BimpObject
 
         $date_max = '';
         if (!is_null($num_bl_max)) {
-            $commandeShipment = BimpObject::getInstance('bimpreservation', 'BR_CommandeShipment');
+            $commandeShipment = BimpObject::getInstance('bimplogistique', 'BL_CommandeShipment');
             if ($commandeShipment->find(array(
                         'id_commande_client' => (int) $id_commande,
                         'num_livraison'      => (int) $num_bl_max
@@ -1691,14 +1907,5 @@ class BR_Reservation extends BimpObject
         }
 
         return $serials;
-    }
-
-    // Gestion des droits: 
-
-    public function canDelete()
-    {
-//        global $user;
-//        return (int) $user->admin;
-        return 0;
     }
 }

@@ -7,7 +7,21 @@ function reloadPage(page_id) {
 // Gestion en-tête des pages objets: 
 
 function reloadObjectHeader(object_data) {
+    if (!object_data.module || !object_data.object_name || !object_data.id_object) {
+        return;
+    }
 
+    var $container = $('#' + object_data.object_name + '_' + object_data.id_object + '_header');
+    
+    if ($.isOk($container)) {
+        BimpAjax('reloadObjectHeader', object_data, $container, {
+            display_success: false,
+            display_errors: false,
+            display_warnings: false,
+            append_html: true,
+            remove_current_content: false
+        });
+    }
 }
 
 function setObjectHeaderPosition($header) {

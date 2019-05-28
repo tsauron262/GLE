@@ -40,6 +40,11 @@ class BimpController
 
     public function __construct($module, $controller = 'index')
     {
+        if (BimpDebug::isActive('bimpcore/controller/display_errors')) {
+            ini_set('display_errors', 1);
+            error_reporting(E_ERROR);
+        }
+
         global $main_controller;
 
         if (is_null($main_controller)) {
@@ -135,6 +140,11 @@ class BimpController
         );
     }
 
+    public function can($right)
+    {
+        return 1;
+    }
+
     // Affichages:
 
     public function displayHeaderFiles($echo = true)
@@ -172,9 +182,9 @@ class BimpController
     public function display()
     {
         global $user;
-        if ($user->id < 1)
-            die("Pas de User <a href='" . DOL_URL_ROOT . "'> Allé a la page de login</a>");
-
+        if ($user->id < 1) {
+            die("Pas de User <a href='" . DOL_URL_ROOT . "'> Allez à la page de login</a>");
+        }
 
         if (BimpTools::isSubmit('ajax')) {
             $this->ajaxProcess();
@@ -535,15 +545,12 @@ class BimpController
         return $html;
     }
 
-    public function can($right)
-    {
-        return 1;
-    }
-
     // Traitements Ajax:
 
     protected function ajaxProcess()
     {
+        ini_set('display_errors', 1);
+
         $errors = array();
         if (BimpTools::isSubmit('action')) {
             $action = BimpTools::getvalue('action');
@@ -1006,6 +1013,7 @@ class BimpController
         $form_name = BimpTools::getValue('form_name', 'default');
         $form_id = BimpTools::getValue('form_id', null);
         $full_panel = BimpTools::getValue('full_panel', false);
+        $force_edit = BimpTools::getValue('force_edit', 0);
 
         if (is_null($object_name) || !$object_name) {
             $errors[] = 'Type de l\'objet absent';
@@ -1025,6 +1033,9 @@ class BimpController
 
             if (!count($errors)) {
                 $form = new BC_Form($object, $id_parent, $form_name, 1, !$full_panel);
+                if ($force_edit) {
+                    $form->force_edit = true;
+                }
                 if (!is_null($form_id)) {
                     $form->identifier = $form_id;
                 } else {
@@ -1254,6 +1265,44 @@ class BimpController
         )));
     }
 
+    protected function ajaxProcessLoadObjectNotes()
+    {
+        $errors = array();
+
+        $html = '';
+
+        $id_parent = BimpTools::getValue('id_parent', null);
+        if (!$id_parent) {
+            $id_parent = null;
+        }
+
+        $module = BimpTools::getValue('module', $this->module);
+        $object_name = BimpTools::getValue('object_name');
+        $id_object = (int) BimpTools::getValue('id_object');
+        $filter_by_user = (int) BimpTools::getValue('filter_by_user', 1);
+        $list_model = BimpTools::getValue('list_model', 'default');
+
+        if (is_null($object_name) || !$object_name) {
+            $errors[] = 'Type d\'objet absent';
+        }
+
+        if (!$id_object) {
+            $errors[] = 'ID de l\'objet absent';
+        }
+
+        if (!count($errors)) {
+            $object = BimpCache::getBimpObjectInstance($module, $object_name, $id_object);
+            $html = $object->renderHeader();
+            $html .= $object->renderNotesList($filter_by_user, $list_model);
+        }
+
+        die(json_encode(array(
+            'errors'     => $errors,
+            'html'       => $html,
+            'request_id' => BimpTools::getValue('request_id', 0)
+        )));
+    }
+
     protected function ajaxProcessLoadObjectView()
     {
         $errors = array();
@@ -1377,6 +1426,45 @@ class BimpController
         if (!count($errors)) {
             $object = BimpObject::getInstance($module, $object_name);
             $list = new BC_ListCustom($object, $list_name, $id_parent);
+            if (!is_null($list_id)) {
+                $list->identifier = $list_id;
+            }
+            $html = $list->renderListContent();
+            $filters_panel_html = $list->renderFiltersPanel();
+        }
+
+        die(json_encode(array(
+            'errors'             => $errors,
+            'html'               => $html,
+            'filters_panel_html' => $filters_panel_html,
+            'list_id'            => $list_id,
+            'request_id'         => BimpTools::getValue('request_id', 0)
+        )));
+    }
+
+    protected function ajaxProcessLoadObjectStatsList()
+    {
+        $errors = array();
+        $html = '';
+        $filters_panel_html = '';
+
+        $id_parent = BimpTools::getValue('id_parent', null);
+        if (!$id_parent) {
+            $id_parent = null;
+        }
+
+        $module = BimpTools::getValue('module', $this->module);
+        $object_name = BimpTools::getValue('object_name');
+        $list_name = BimpTools::getValue('list_name', 'default');
+        $list_id = BimpTools::getValue('list_id', null);
+
+        if (is_null($object_name) || !$object_name) {
+            $errors[] = 'Type d\'objet absent';
+        }
+
+        if (!count($errors)) {
+            $object = BimpObject::getInstance($module, $object_name);
+            $list = new BC_StatsList($object, $list_name, $id_parent);
             if (!is_null($list_id)) {
                 $list->identifier = $list_id;
             }
@@ -1883,6 +1971,47 @@ class BimpController
 
         die(json_encode(array(
             'errors'     => $errors,
+            'html'       => $html,
+            'request_id' => BimpTools::getValue('request_id', 0)
+        )));
+    }
+
+    protected function ajaxProcessReloadObjectHeader()
+    {
+        $errors = array();
+        $sucess = '';
+        $html = '';
+
+        $module = BimpTools::getValue('module', '');
+        $object_name = BimpTools::getValue('object_name', '');
+        $id_object = BimpTools::getValue('id_object', 0);
+
+        if (!$module) {
+            $errors[] = 'Nom du module absent';
+        }
+        if (!$object_name) {
+            $errors[] = 'Type d\'object absent';
+        }
+        if (!$id_object) {
+            $errors[] = 'ID de l\'objet absent';
+        }
+
+        if (!count($errors)) {
+            $object = BimpCache::getBimpObjectInstance($module, $object_name, $id_object);
+            if (!BimpObject::objectLoaded($object)) {
+                if (!is_a($object, 'BimpObject')) {
+                    $errors[] = BimpTools::ucfirst($object->getLabel('the')) . ' d\'ID ' . $id_object . ' n\'existe pas';
+                } else {
+                    $errors[] = 'l\'Objet de type "' . $object_name . '" d\'ID ' . $id_object . ' n\'existe pas';
+                }
+            } else {
+                $html = $object->renderHeader(true);
+            }
+        }
+
+        die(json_encode(array(
+            'errors'     => $errors,
+            'success'    => $sucess,
             'html'       => $html,
             'request_id' => BimpTools::getValue('request_id', 0)
         )));

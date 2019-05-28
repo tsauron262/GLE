@@ -51,8 +51,8 @@ class BimpPDF extends TCPDF
         $this->AddPage();
     }
 
-    public function render($filename, $display = true)
-    {
+    public function render($filename, $display = true, $display_only = false)
+    {        
         $this->lastPage();
 
         if (stripos($filename, ".pdf") === false)
@@ -98,7 +98,7 @@ class BimpPDF extends TCPDF
         }
 
 
-        if ($output == "I") {
+        if ($output == "I" && !$display_only) {
             $afficher = true;
             $output = "F";
         }

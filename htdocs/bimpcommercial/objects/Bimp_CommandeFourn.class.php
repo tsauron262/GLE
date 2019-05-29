@@ -164,7 +164,7 @@ class Bimp_CommandeFourn extends BimpComm
                     return 0;
                 }
                 if ($status < 5) {
-                    $errors[] = 'La commande doit avoir entièrement réceptionnée pour pouvoir créer une facture';
+                    $errors[] = 'La commande doit avoir été entièrement réceptionnée pour pouvoir créer une facture fournisseur';
                     return 0;
                 }
                                 

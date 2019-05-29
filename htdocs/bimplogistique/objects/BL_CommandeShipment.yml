@@ -290,9 +290,18 @@ lists_cols:
     facture: 
         field: id_facture
         display: nom_url
+    total_ht: 
+        label: Total HT
+        value: 
+            callback: displayTotalHT
+    total_ttc: 
+        label: Total TTC
+        value: 
+            callback: displayTotalTTC
                     
 lists: 
     default: 
+        configurable: 1
         sort_field: id
         sort_way: desc
         n: 25
@@ -310,11 +319,13 @@ lists:
             status: 
             contact: 
             commercial: 
+            total_ht: 
             date: 
             signed: 
             pdf:
                     
     commandes: 
+        configurable: 1
         checkboxes: 1
         bulk_actions: 
             callback: getCommandesListbulkActions
@@ -339,6 +350,7 @@ lists:
             status: 
             contact: 
             date: 
+            total_ht: 
             signed: 
             facture: 
             pdf:

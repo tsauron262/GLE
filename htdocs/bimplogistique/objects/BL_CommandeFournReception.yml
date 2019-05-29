@@ -151,9 +151,18 @@ lists_cols:
     info: 
         field: info
         edit: 1
+    total_ht: 
+        label: Total HT
+        value: 
+            callback: displayTotalHT
+    total_ttc: 
+        label: Total TTC
+        value: 
+            callback: displayTotalTTC
                     
 lists: 
     default: 
+        configurable: 1
         sort_field: id
         sort_way: desc
         n: 25
@@ -170,10 +179,12 @@ lists:
             num_reception:
             ref:
             date: 
+            total_ht: 
             entrepot:
                     
     commandes_fourn: 
         checkboxes: 1
+        configurable: 1
         bulk_actions: 
             callback: getCommandesFournListbulkActions
         enable_search: 0
@@ -197,6 +208,7 @@ lists:
             ref:
             status:
             date: 
+            total_ht: 
             entrepot:
             info: 
                     

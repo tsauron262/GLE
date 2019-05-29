@@ -620,6 +620,18 @@ class Bimp_CommandeLine extends ObjectLine
         return $equipments;
     }
 
+    public function getShipmentTotalHT($id_shipment)
+    {
+        $data = $this->getShipmentData($id_shipment);
+        return ((float) $this->getUnitPriceHTWithRemises() * (float) $data['qty']);
+    }
+
+    public function getShipmentTotalTTC($id_shipment)
+    {
+        $data = $this->getShipmentData($id_shipment);
+        return ((float) $this->getUnitPriceTTC() * (float) $data['qty']);
+    }
+
     // Getters Array:
 
     public function getSelectShipmentsArray()
@@ -694,12 +706,28 @@ class Bimp_CommandeLine extends ObjectLine
         return $commandes;
     }
 
-    public function getClientEquipmentsArray()
+    public function getClientEquipmentsArray($return_available_only = true)
     {
         $commande = $this->getParentInstance();
 
         if (BimpObject::objectLoaded($commande) && (int) $this->id_product) {
-            return BimpCache::getSocieteProductEquipmentsArray((int) $commande->getData('fk_soc'), (int) $this->id_product);
+            $items = BimpCache::getSocieteProductEquipmentsArray((int) $commande->getData('fk_soc'), (int) $this->id_product);
+
+            if ($return_available_only) {
+                foreach ($items as $id_equipment => $label) {
+                    $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+                    if (!BimpObject::objectLoaded($equipment)) {
+                        unset($items[$id_equipment]);
+                        continue;
+                    }
+
+                    if (!(int) $equipment->getData('return_available')) {
+                        unset($items[$id_equipment]);
+                    }
+                }
+            }
+
+            return $items;
         }
 
         return array();
@@ -953,24 +981,63 @@ class Bimp_CommandeLine extends ObjectLine
                 $html .= '<tbody>';
                 $html .= '<tr>';
                 $html .= '<td><strong>Equipements retournés: </strong></td>';
-                $html .= '<td style="text-align: right">';
+                $html .= '<td colspan="2" style="text-align: right">';
 
-                $onclick = $this->getJsActionOnclick('addReturnedEquipments', array(), array(
-                    'form_name' => 'equipments_return'
-                ));
+                if ((abs($this->getFullQty()) - count($equipments)) > 0) {
+                    $onclick = $this->getJsActionOnclick('addReturnedEquipments', array(), array(
+                        'form_name' => 'equipments_return'
+                    ));
 
-                $html .= '<span class="btn btn-default btn-small" onclick="' . $onclick . '">';
-                $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Ajouter des équipements';
-                $html .= '</span>';
+                    $html .= '<span class="btn btn-default btn-small" onclick="' . $onclick . '">';
+                    $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Ajouter des équipements';
+                    $html .= '</span>';
+                }
+
                 $html .= '</td>';
                 $html .= '</tr>';
 
                 if (empty($equipments)) {
-                    $html .= '<td colspan="2">';
+                    $html .= '<tr>';
+                    $html .= '<td colspan="3">';
                     $html .= '<div style="text-align: center">';
                     $html .= BimpRender::renderAlerts('Aucun équipement retourné enregistré', 'info');
                     $html .= '</div>';
                     $html .= '</td>';
+                    $html .= '</tr>';
+                } else {
+                    foreach ($equipments as $id_equipment) {
+                        $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+                        if (BimpObject::objectLoaded($equipment)) {
+                            $html .= '<tr>';
+                            $html .= '<td>';
+                            $html .= $equipment->getNomUrl(1, 1, 1, 'default');
+                            $html .= '</td>';
+                            $html .= '<td>';
+                            $id_facture = $this->getEquipmentIdFacture($id_equipment);
+                            $facture = null;
+                            if ($id_facture) {
+                                $html .= 'Fac.: ';
+                                $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_facture);
+                                if (BimpObject::objectLoaded($facture)) {
+                                    $html .= $facture->getNomUrl(1, 1, 1, 'full');
+                                } else {
+                                    $html .= BimpRender::renderAlerts('La facture d\'ID ' . $id_facture . ' n\'existe plus');
+                                }
+                            }
+                            $html .= '</td>';
+                            $html .= '<td style="text-align: right">';
+                            if (!BimpObject::objectLoaded($facture) || !(int) $facture->getData('fk_statut')) {
+                                $onclick = $this->getJsActionOnclick('removeReturnedEquipments', array(
+                                    'equipments' => $id_equipment
+                                        ), array(
+                                    'confirm_msg' => 'Veuillez confirmer le retrait de l\\\'équipement ' . $equipment->getData('serial')
+                                ));
+                                $html .= BimpRender::renderRowButton('Retirer', 'fas_trash-alt', $onclick);
+                            }
+                            $html .= '</td>';
+                            $html .= '</tr>';
+                        }
+                    }
                 }
 
                 $html .= '</tbody>';
@@ -1558,7 +1625,7 @@ class Bimp_CommandeLine extends ObjectLine
 
             $equipments = $this->getData('equipments_returned');
 
-            $max = abs((float) $this->getFullQty() - count($equipments));
+            $max = abs((float) $this->getFullQty()) - count($equipments);
 
             $values = array();
 
@@ -2516,6 +2583,39 @@ class Bimp_CommandeLine extends ObjectLine
         return $errors;
     }
 
+    public function checkReturnedEquipment($id_equipment)
+    {
+        $errors = array();
+
+        $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+        $commande = $this->getParentInstance();
+
+        if (!BimpObject::objectLoaded($commande)) {
+            $errors[] = 'ID de la commande absent';
+            return $errors;
+        }
+
+        if (!BimpObject::objectLoaded($equipment)) {
+            $errors[] = 'L\'équipement d\'ID ' . $id_equipment . ' n\'existe pas';
+        } else {
+            $place = $equipment->getCurrentPlace();
+
+            // Si Aucun emplacement : on considère que c'est OK
+            if (BimpObject::objectLoaded($place)) {
+                if ((int) $place->getData('type') !== BE_Place::BE_PLACE_CLIENT ||
+                        (int) $place->getData('id_client') !== (int) $commande->getData('fk_soc')) {
+                    $errors[] = 'Emplacement actuel de l\'équipement "' . $equipment->getData('serial') . '" invalide';
+                }
+            }
+
+            if (!(int) $equipment->getData('return_available')) {
+                $errors[] = 'L\'équipement "' . $equipment->getData('serial') . '" est marqué comme non disponible pour un retour (un retour est probablement déjà en cours)';
+            }
+        }
+
+        return $errors;
+    }
+
     // Actions:
 
     public function actionSaveShipments($data, &$success)
@@ -2956,9 +3056,9 @@ class Bimp_CommandeLine extends ObjectLine
         } elseif (!isset($data['equipments']) || empty($data['equipments'])) {
             $errors[] = 'Aucun équipement sélectionné';
         } else {
-            $equipments = $this->getData('equipments');
+            $equipments = $this->getData('equipments_returned');
 
-            $max = abs($this->getFullQty() - count($equipments));
+            $max = abs($this->getFullQty()) - count($equipments);
 
             if (!$max) {
                 $errors[] = 'Tous les équipement à retournés ont déjà été sélectionnés';
@@ -2966,28 +3066,132 @@ class Bimp_CommandeLine extends ObjectLine
                 $errors[] = 'Vous ne pouvez sélectionner que ' . $max . ' équipement(s)';
             } else {
                 foreach ($data['equipments'] as $id_equipment) {
-                    $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+                    $errors = $this->checkReturnedEquipment($id_equipment);
 
-                    if (!BimpObject::objectLoaded($equipment)) {
-                        $errors[] = 'L\'équipement d\'ID ' . $id_equipment . ' n\'existe pas';
-                    } else {
-                        $place = $equipment->getCurrentPlace();
+                    if (!count($errors)) {
+                        $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
 
-                        // Si Aucun emplacement : on considère que c'est OK
-                        if (BimpObject::objectLoaded($place)) {
-                            if ((int) $place->getData('type') !== BE_Place::BE_PLACE_CLIENT ||
-                                    (int) $place->getData('id_client') !== (int) $commande->getData('fk_soc')) {
-                                $errors[] = 'Emplacement actuel de l\'équipement "' . $equipement->getData('serial') . '" invalide';
-                            }
+                        $eq_errors = $equipment->updateField('return_available', 0);
+                        if (count($eq_errors)) {
+                            $warnings[] = BimpTools::getMsgFromArray($eq_errors, 'Echec de la mise à jour de l\'équipement "' . $equipment->getData('serial') . '" - Cet équipement n\'a donc pas été ajouté à la liste des équipement retournés');
+                        } else {
+                            $equipments[] = (int) $id_equipment;
                         }
-
-                        $equipments[] = (int) $id_equipment;
                     }
                 }
 
                 if (!count($errors)) {
                     $errors = $this->updateField('equipments_returned', $equipments);
                 }
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionRemoveReturnedEquipments($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+
+        if (!$this->isLoaded()) {
+            $errors[] = 'ID de la ligne de commande absent';
+        } elseif (!isset($data['equipments'])) {
+            $errors[] = 'Aucun équipement spécifié';
+        } else {
+            $equipments = $this->getData('equipments_returned');
+            $removed = array();
+            foreach (explode(',', $data['equipments']) as $id_equipment) {
+                $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+                if (!BimpObject::objectLoaded($equipment)) {
+                    $warnings[] = 'L\'équipement d\'ID ' . $id_equipment . ' n\'existe pas';
+                    $removed[] = $id_equipment;
+                    continue;
+                }
+                if (!in_array($id_equipment, $equipments)) {
+                    $warnings[] = 'L\'équipement "' . $equipment->getData('serial') . '" ne fait pas partie de la liste des équipement retournés';
+                    $removed[] = $id_equipment;
+                    continue;
+                }
+
+                $id_facture = $this->getEquipmentIdFacture($id_equipment);
+                $facture = null;
+                if ($id_facture) {
+                    $facture = BimpCache::getBimpObjectFullListArray('bimpcommercial', 'Bimp_Facture', (int) $id_facture);
+                    if (BimpObject::objectLoaded($facture)) {
+                        if ((int) $facture->getData('fk_statut') > 0) {
+                            $warnings[] = 'L\'équipement "' . $equipment->getData('serial') . '" ne peux pas être retiré car il a été attribué à une facture validée';
+                            continue;
+                        }
+                    }
+                }
+
+                $eq_errors = $equipment->updateField('return_available', 1);
+                if (count($eq_errors)) {
+                    $warnings[] = BimpTools::getMsgFromArray($eq_errors, 'Equipement "' . $equipment->getData('serial') . '"');
+                } else {
+                    $removed[] = $id_equipment;
+
+                    if (!is_null($facture)) {
+                        $fac_line = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_FactureLine', array(
+                                    'id_obj'             => (int) $facture->id,
+                                    'linked_object_name' => 'commande_line',
+                                    'linked_id_object'   => (int) $this->id
+                                        ), true);
+
+                        if (BimpObject::objectLoaded($fac_line)) {
+                            $fac_errors = $fac_line->removeEquipment($id_equipment);
+                            if (count($fac_errors)) {
+                                $warnings[] = BimpTools::getMsgFromArray($fac_errors, 'Echec du retrait de l\'équipement "' . $equipment->getData('serial') . '" de la facture "' . $facture->getRef() . '"');
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (!empty($removed)) {
+                if (count($removed) > 1) {
+                    $success = count($equipment) . ' retirés avec succès';
+                } else {
+                    $success = 'Un équipement retiré avec succès';
+                }
+
+                $factures = $this->getData('factures');
+
+                foreach ($factures as $id_facture => $facture_data) {
+                    if (isset($facture_data['equipments']) && !empty($facture_data['equipments'])) {
+                        $fac_equipments = array();
+                        foreach ($facture_data['equipments'] as $id_equipment) {
+                            if (!in_array($id_equipment, $removed)) {
+                                $fac_equipments[] = $id_equipment;
+                            }
+                        }
+                        $factures[(int) $id_facture]['equipments'] = $fac_equipments;
+                    }
+                }
+
+                $up_errors = $this->updateField('factures', $factures);
+                if (count($up_errors)) {
+                    $warnings[] = BimpTools::getMsgFromArray($up_errors);
+                }
+
+                $new_equipments = array();
+                foreach ($equipments as $id_equipment) {
+                    if (!in_array((int) $id_equipment, $removed)) {
+                        $new_equipments[] = $id_equipment;
+                    }
+                }
+
+                $up_errors = $this->updateField('equipments_returned', $new_equipments);
+                if (count($up_errors)) {
+                    $warnings[] = BimpTools::getMsgFromArray($up_errors);
+                }
+            } elseif (empty($errors)) {
+                $errors[] = 'Aucun équipement retiré';
             }
         }
 

@@ -590,28 +590,30 @@ class Bimp_FactureFourn extends BimpComm
 
                     $lines_new[(int) $line->id] = (int) $line_instance->id;
 
+                    // NOTE: on intègre pas les remises de la ligne de commande: celles-ci sont déjà déduites dans le pu_ht.
+                     
                     // Création des remises pour la ligne en cours:
-                    $remises = $line->getRemises();
-                    if (!is_null($remises) && count($remises)) {
-                        $j = 0;
-                        foreach ($remises as $r) {
-                            $j++;
-                            $remise = BimpObject::getInstance('bimpcommercial', 'ObjectLineRemise');
-                            $remise->validateArray(array(
-                                'id_object_line' => (int) $line_instance->id,
-                                'object_type'    => $line_instance::$parent_comm_type,
-                                'label'          => $r->getData('label'),
-                                'type'           => (int) $r->getData('type'),
-                                'percent'        => (float) $r->getData('percent'),
-                                'montant'        => (float) $r->getData('montant'),
-                                'per_unit'       => (int) $r->getData('per_unit')
-                            ));
-                            $remise_errors = $remise->create($warnings, true);
-                            if (count($remise_errors)) {
-                                $errors[] = BimpTools::getMsgFromArray($remise_errors, 'Echec de la création de la remise n°' . $j . ' pour la ligne n°' . $i);
-                            }
-                        }
-                    }
+//                    $remises = $line->getRemises();
+//                    if (!is_null($remises) && count($remises)) {
+//                        $j = 0;
+//                        foreach ($remises as $r) {
+//                            $j++;
+//                            $remise = BimpObject::getInstance('bimpcommercial', 'ObjectLineRemise');
+//                            $remise->validateArray(array(
+//                                'id_object_line' => (int) $line_instance->id,
+//                                'object_type'    => $line_instance::$parent_comm_type,
+//                                'label'          => $r->getData('label'),
+//                                'type'           => (int) $r->getData('type'),
+//                                'percent'        => (float) $r->getData('percent'),
+//                                'montant'        => (float) $r->getData('montant'),
+//                                'per_unit'       => (int) $r->getData('per_unit')
+//                            ));
+//                            $remise_errors = $remise->create($warnings, true);
+//                            if (count($remise_errors)) {
+//                                $errors[] = BimpTools::getMsgFromArray($remise_errors, 'Echec de la création de la remise n°' . $j . ' pour la ligne n°' . $i);
+//                            }
+//                        }
+//                    }
 
                     // Ajout des équipements: 
                     if ($isSerialisable) {

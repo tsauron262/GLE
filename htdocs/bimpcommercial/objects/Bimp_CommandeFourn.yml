@@ -111,6 +111,8 @@ fields:
     date_commande: 
         label: Date de la commande
         type: date
+        input: 
+            display_now: 1
     date_livraison: 
         label: Date prévue de livraison
         type: date

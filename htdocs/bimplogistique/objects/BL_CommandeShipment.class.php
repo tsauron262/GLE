@@ -355,6 +355,48 @@ class BL_CommandeShipment extends BimpObject
         return $qties;
     }
 
+    public function getTotalHT()
+    {
+        if (!$this->isLoaded()) {
+            return 0;
+        }
+
+        $commande = $this->getParentInstance();
+
+        if (!BimpObject::objectLoaded($commande)) {
+            return 0;
+        }
+
+        $total_ht = 0;
+
+        foreach ($commande->getLines('not_text') as $line) {
+            $total_ht += (float) $line->getShipmentTotalHT($this->id);
+        }
+
+        return $total_ht;
+    }
+
+    public function getTotalTTC()
+    {
+        if (!$this->isLoaded()) {
+            return 0;
+        }
+
+        $commande = $this->getParentInstance();
+
+        if (!BimpObject::objectLoaded($commande)) {
+            return 0;
+        }
+
+        $total_ttc = 0;
+
+        foreach ($commande->getLines('not_text') as $line) {
+            $total_ttc += (float) $line->getShipmentTotalTTC($this->id);
+        }
+
+        return $total_ttc;
+    }
+
     // Affichages: 
 
     public function displayContact()
@@ -464,6 +506,16 @@ class BL_CommandeShipment extends BimpObject
         }
 
         return '';
+    }
+
+    public function displayTotalHT()
+    {
+        return BimpTools::displayMoneyValue($this->getTotalHT());
+    }
+
+    public function displayTotalTTC()
+    {
+        return BimpTools::displayMoneyValue($this->getTotalTTC());
     }
 
     // Rendus: 

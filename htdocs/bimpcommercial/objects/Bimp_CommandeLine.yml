@@ -233,6 +233,7 @@ lists:
         item_checkbox: 
             callback: isNotTypeText
         after_list_content: unset
+        header_buttons: unset
         objects_change_reload: Bimp_Commande,ObjectLineRemise,BR_Reservation,BL_CommandeShipment
         bulk_actions: 
             callback: getLogistiqueBulkActions

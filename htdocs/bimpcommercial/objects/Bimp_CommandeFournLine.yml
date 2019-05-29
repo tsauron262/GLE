@@ -75,6 +75,7 @@ lists:
         configurable: 0
         item_checkbox: 1
         after_list_content: unset
+        header_buttons: unset
         objects_change_reload: Bimp_CommandeFourn,ObjectLineRemise,BR_Reservation,BL_CommandeFournReception
         bulk_actions: 
             callback: getLogistiqueBulkActions

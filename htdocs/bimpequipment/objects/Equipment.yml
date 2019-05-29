@@ -135,6 +135,11 @@ fields:
         type: bool
         default_value: 1
         
+    return_available: 
+        label: Disponible pour retour
+        type: bool
+        default_value: 1
+        
     date_purchase: 
         label: Date d'achat
         type: date

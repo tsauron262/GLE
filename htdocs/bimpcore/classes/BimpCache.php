@@ -672,12 +672,13 @@ class BimpCache
                 ));
                 $sql .= BimpTools::getSqlWhere(array(
                             'a.id_product' => (int) $id_product,
+                            'p.position'   => 1,
                             'p.type'       => BE_Place::BE_PLACE_CLIENT,
                             'p.id_client'  => (int) $id_societe
                 ));
 
                 $rows = self::getBdb()->executeS($sql, 'array');
-                
+
                 if (!is_null($rows)) {
                     foreach ($rows as $r) {
                         self::$cache[$cache_key][(int) $r['id']] = $r['serial'];

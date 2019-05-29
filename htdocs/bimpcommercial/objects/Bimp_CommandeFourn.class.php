@@ -163,8 +163,8 @@ class Bimp_CommandeFourn extends BimpComm
                     $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' a déjà été facturée entièrement';
                     return 0;
                 }
-                if ($status < 3) {
-                    $errors[] = 'La commande doit avoir été validée et approuvée pour créer un facture fournisseur';
+                if ($status < 5) {
+                    $errors[] = 'La commande doit avoir entièrement réceptionnée pour pouvoir créer une facture';
                     return 0;
                 }
                                 
@@ -210,7 +210,7 @@ class Bimp_CommandeFourn extends BimpComm
 
         $this->checkInvoiceStatus();
 
-        if ((int) $this->getData('billed') || (int) $this->getData('invoice_status')) {
+        if ((int) $this->getData('billed') || (int) $this->getData('invoice_status') === 2) {
             return 1;
         }
 

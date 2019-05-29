@@ -150,37 +150,11 @@ class BContract_echeancier extends BimpObject {
         // facture personnalisé
         //$html .= '' . $this->display_select();
         $html .= ' ' . $this->display_facture_perso();
-        
+
 //        echo '<pre>';
 //        print_r($this->tab_echeancier);
         return $html;
     }
-
-//    public function display_select() {
-//
-//        // facture personnalisé
-//
-//        $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}';
-//
-//        $html .= '<form action="#" method="POST"><select id="date_debut_select" name="date_debut_select">';
-//        foreach ($this->tab_echeancier as $tab => $attr) {
-//            $html .= '<option value="">' . $attr['date_debut'] . '</option>';
-//        }
-//        $html .= '</select>';
-//        $html .= ' au '
-//                . '<select id="date_fin_select" name="date_fin_select">';
-//        foreach ($this->tab_echeancier as $tab => $attr) {
-//            $html .= '<option value="">' . $attr['date_fin'] . '</option>';
-//        }
-//        $html .= '</select>';
-//        $html .= '<br /><input class="btn btn-primary saveButton" value="Créer facture perso" onclick="' .
-//                $this->getJsActionOnclick("create_facture_perso", array(), array(
-//                    "success_callback" => $callback
-//                )) . '">';
-//        $html .= '<input type="submit" name="submit" value="Get Selected Values" /></form>';
-//
-//        return $html;
-//    }
 
     public function display_facture_perso() {
         $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}';
@@ -198,19 +172,13 @@ class BContract_echeancier extends BimpObject {
             $select_debut = $_POST['date_debut_select'];
             $select_fin = $_POST['date_fin_select'];
             //echo "test : Du " . $select_debut . ' au ' . $select_fin;
-            //$html .= '<input type="submit" name="submit" class="btn btn-primary saveButton" value="Créer facture perso" onclick="' .
-//                $this->getJsActionOnclick("create_facture_perso", array(), array(
-//                    "success_callback" => $callback
-//                )) . '">';
 
             $converted_date_debut = $this->formatDate($select_debut);
             $converted_date_fin = $this->formatDate($select_fin);
-            //echo 'test = ' . $dd;
-            $this->actionCreate_facture_perso($converted_date_debut, $converted_date_fin);
         }
         return $html;
     }
-
+    
     public function formatDate($date) { {
             if (strpos($date, '/') !== false) :
                 $date = str_replace('/', '-', $date);
@@ -453,20 +421,6 @@ class BContract_echeancier extends BimpObject {
         $this->updateLine($parent->id);
 
         $success = 'Facture personnalisé ' . $facture->id . ' créer avec succès d\'un montant de ' . price($this->getData('next_facture_amount')) . ' €';
-    }
-    
-    // check end date to stop echeancier on facture perso
-    public function check_date_facture_perso($date){
-        $parent = $this->getParentInstance();
-        $end_date_contrat = $parent->displayEndDate();
-        if ($date === $end_date_contrat){
-            echo 'same';
-        } else {
-            echo 'not same';
-        }
-        
-        
-        echo 'test : ' . $end_date_contrat;
     }
 
     public function cron_create_facture() {

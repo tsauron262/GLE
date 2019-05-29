@@ -44,17 +44,38 @@ class BContract_echeancier extends BimpObject {
                 . '<th class="th_checkboxes" width="40px" style="text-align: center">Action facture</th>'
                 . '</tr></thead>'
                 . '<tbody class="listRows">';
+            
         foreach ($this->tab_echeancier as $lignes) {
             $html .= '<tr class="objectListItemRow" >'
                     . '<td style="text-align:center" >'
                     . 'Du ' . dol_print_date($lignes['date_debut']) . ' au ' . dol_print_date($lignes['date_fin']);
-
+            $total_facture_ht = 0;
+            $total_facture_ttc = 0;
+            $new_price_ht = $this->get_total_contrat('ht');
+            $new_price_ttc = $this->get_total_contrat('ttc');
+            
+            $have_facture = false;
             if ($lignes['facture'] > 0) {
+                $have_facture = true;
                 $facture->fetch($lignes['facture']);
+                $new_price_ht =  $facture->total_ht;
+                $new_price_ttc =  $facture->total_ttc;
+                $total_facture_ht += $facture->total_ht;
+                $total_facture_ttc += $facture->total_ttc;
             } else {
                 $facture = null;
+                                
+            }            
+            if($have_facture){
+                $affichage_ht = $new_price_ht;
+                $affichage_ttc = $new_price_ttc;
+            } else {
+                $tab_total_fact = $this->get_total_facture();
+                $affichage_ht = ($tab_total_fact['info']['reste_a_payer_ht']) / $nb_period_restante;
+                $affichage_ttc = ($tab_total_fact['info']['reste_a_payer_ttc']) / $nb_period_restante;
             }
-
+            
+            
             if ($facture->paye) {
                 $paye = '<i class="fa fa-check" style="color:green"><b> Payée</b></i>';
             } elseif (is_object($facture) && $facture->paye == 0) {
@@ -72,8 +93,8 @@ class BContract_echeancier extends BimpObject {
             $actionsButtons .= (!$this->canViewObject($facture)) ? '<span style="cursor: not-allowed" class="rowButton bs-popover" data-trigger="hover" data-placement="top"  data-content="Pas de facture à voir" onclick="")"><i class="far fa-eye-slash"></i></span>' : '';
 
             $html .= '</td>'
-                    . '<td style="text-align:center">' . price($lignes['montant_ht']) . ' € </td>'
-                    . '<td style="text-align:center">' . price($lignes['montant_ttc']) . ' € </td>'
+                    . '<td style="text-align:center">' . price($affichage_ht) . ' € </td>'
+                    . '<td style="text-align:center">' . price($affichage_ttc) . ' € </td>'
                     . '<td style="text-align:center">' . (is_object($facture) ? $facture->getNomUrl(1) : "<b style='color:grey'>Pas encore de facture</b>") . '</td>'
                     . '<td style="text-align:center">' . $paye . '</td>'
                     . '<td style="text-align:center; margin-right:10%">'
@@ -387,7 +408,9 @@ class BContract_echeancier extends BimpObject {
         $facture->array_options['options_libelle'] = "Facture N°" . $this->getNbFacture() . " du contrat " . $parent->getData('ref');
         if ($facture->create($user) > 0) {
             $nb_period = $parent->getData('duree_mois') / $parent->getData('periodicity');
-            $facture->addline("Période de facturation : Du <b>" . dol_print_date($facture->date) . "</b> au <b>" . dol_print_date($this->calc_next_date(true)) . "</b>", number_format($this->get_total_contrat() / $nb_period, 2, '.', ''), 1, 20);
+            $nb_period_restante = $nb_period - $this->nb_facture;
+            $rest = $this->get_total_facture();
+            $facture->addline("Période de facturation : Du <b>" . dol_print_date($facture->date) . "</b> au <b>" . dol_print_date($this->calc_next_date(true)) . "</b>", price($rest['info']['reste_a_payer_ht'] / $nb_period_restante), 1, 20);
             addElementElement('contrat', 'facture', $parent->id, $facture->id);
         } else {
             return Array('errors' => 'error facture');

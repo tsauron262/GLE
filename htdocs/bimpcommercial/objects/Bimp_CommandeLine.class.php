@@ -605,12 +605,22 @@ class Bimp_CommandeLine extends ObjectLine
         $equipments = array();
 
         if ($this->isLoaded()) {
-            $reservations = $this->getReservations();
-            foreach ($reservations as $reservation) {
-                $id_equipment = (int) $reservation->getData('id_equipment');
-                if ($id_equipment) {
-                    $id_shipment = (int) $this->getEquipmentIdFacture($id_equipment);
-                    if (!$id_shipment) {
+            if ((float) $this->getFullQty() >= 0) {
+                $reservations = $this->getReservations();
+                foreach ($reservations as $reservation) {
+                    $id_equipment = (int) $reservation->getData('id_equipment');
+                    if ($id_equipment) {
+                        $id_facture = (int) $this->getEquipmentIdFacture($id_equipment);
+                        if (!$id_facture) {
+                            $equipments[] = $id_equipment;
+                        }
+                    }
+                }
+            } else {
+                $returned_equipments = $this->getData('equipments_returned');
+                foreach ($returned_equipments as $id_equipment) {
+                    $id_facture = (int) $this->getEquipmentIdFacture($id_equipment);
+                    if (!$id_facture) {
                         $equipments[] = $id_equipment;
                     }
                 }
@@ -1143,9 +1153,15 @@ class Bimp_CommandeLine extends ObjectLine
         if ($qty >= 0) {
             $max = $qty - (float) $this->getBilledQty() + $facture_qty;
             $min = 0;
+            if (is_null($value)) {
+                $value = (!$with_total_max && !(float) $facture_qty && !(int) $id_facture ? $max : $facture_qty);
+            }
         } else {
             $min = $qty - (float) $this->getBilledQty() + $facture_qty;
             $max = 0;
+            if (is_null($value)) {
+                $value = (!$with_total_max && !(float) $facture_qty && !(int) $id_facture ? $min : $facture_qty);
+            }
         }
 
         if (!$decimals) {
@@ -1163,17 +1179,20 @@ class Bimp_CommandeLine extends ObjectLine
                 'max'       => $max
             ),
             'extra_class' => 'line_facture_qty',
-            'max_label'   => 1
         );
 
         if ($with_total_max) {
-            $options['data']['total_max_value'] = (float) $this->getFullQty();
-            $options['data']['total_max_inputs_class'] = 'line_facture_qty';
-            $options['extra_class'] .= ' total_max';
-        }
-
-        if (is_null($value)) {
-            $value = (!$with_total_max && !(float) $facture_qty && !(int) $id_facture ? $max : $facture_qty);
+            if ($qty >= 0) {
+                $options['data']['total_max_value'] = $qty;
+                $options['data']['total_max_inputs_class'] = 'line_facture_qty';
+                $options['extra_class'] .= ' total_max';
+                $options['max_label'] = 1;
+            } else {
+                $options['data']['total_min_value'] = $qty;
+                $options['data']['total_min_inputs_class'] = 'line_facture_qty';
+                $options['extra_class'] .= ' total_min';
+                $options['min_label'] = 1;
+            }
         }
 
         $html .= BimpInput::renderInput('qty', 'line_' . $this->id . '_facture_' . $id_facture . '_qty', $value, $options);
@@ -1256,7 +1275,6 @@ class Bimp_CommandeLine extends ObjectLine
         $items = array();
         $values = array();
 
-
         $factureData = $this->getFactureData($id_fature);
 
         if (isset($factureData['equipments'])) {
@@ -1292,6 +1310,9 @@ class Bimp_CommandeLine extends ObjectLine
 
             if (!is_null($qty_input_name)) {
                 $options['max_input_name'] = $qty_input_name;
+                if ((float) $this->getFullQty() < 0) {
+                    $options['max_input_abs'] = 1;
+                }
             }
 
             $html .= BimpInput::renderInput('check_list', $input_name, $values, $options);
@@ -1536,7 +1557,8 @@ class Bimp_CommandeLine extends ObjectLine
 
                                 $html .= BimpInput::renderInput('check_list', 'line_' . $this->id . '_facture_' . $facture->id . '_equipments', $values, array(
                                             'items'          => $items,
-                                            'max_input_name' => 'line_' . $this->id . '_facture_' . $facture->id . '_qty'
+                                            'max_input_name' => 'line_' . $this->id . '_facture_' . $facture->id . '_qty',
+                                            'max_input_abs'  => ($this->getFullQty() < 0 ? 1 : 0)
                                 ));
                             } else {
                                 foreach ($facture_data['equipments'] as $id_equipment) {
@@ -2369,12 +2391,24 @@ class Bimp_CommandeLine extends ObjectLine
                         }
                         $errors[] = 'L\'équipement ' . $label . ' est déjà assigné à une facture';
                     } else {
-                        $reservation = BimpCache::findBimpObjectInstance('bimpreservation', 'BR_Reservation', array(
-                                    'id_commande_client_line' => (int) $this->id,
-                                    'id_equipment'            => (int) $id_equipment
-                                        ), false, false);
+                        $check = true;
+                        if ($this->getFullQty() >= 0) {
+                            $reservation = BimpCache::findBimpObjectInstance('bimpreservation', 'BR_Reservation', array(
+                                        'id_commande_client_line' => (int) $this->id,
+                                        'id_equipment'            => (int) $id_equipment
+                                            ), false, false);
 
-                        if (!BimpObject::objectLoaded($reservation)) {
+                            if (!BimpObject::objectLoaded($reservation)) {
+                                $check = false;
+                            }
+                        } else {
+                            $returned_equipments = $this->getData('equipments_returned');
+                            if (!is_array($returned_equipments) || !in_array((int) $id_equipment, $returned_equipments)) {
+                                $check = false;
+                            }
+                        }
+
+                        if (!$check) {
                             $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
                             if (BimpObject::objectLoaded($equipment)) {
                                 $label = '"' . $equipment->getData('serial') . '" (ID: ' . $id_equipment . ')';

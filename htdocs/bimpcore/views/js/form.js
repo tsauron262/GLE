@@ -1199,6 +1199,54 @@ function checkTotalMaxQtyInput($input) {
     }
 }
 
+function checkTotalMinQtyInput($input) {
+    if ($.isOk($input) && $input.hasClass('total_min')) {
+        var total_min_value = $input.data('total_min_value');
+        var inputs_class = $input.data('total_min_inputs_class');
+
+        if (typeof (total_min_value) !== 'undefined' && typeof (inputs_class) !== 'undefined') {
+            total_min_value = parseFloat(total_min_value);
+            if (!isNaN(total_min_value) && inputs_class !== '') {
+                var $inputsContainer = $input.findParentByClass(inputs_class + '_container');
+                if ($.isOk($inputsContainer)) {
+                    var total_set = 0;
+                    var $inputs = $inputsContainer.find('input.' + inputs_class);
+                    $inputs.each(function () {
+                        var val = parseFloat($(this).val());
+                        if (!isNaN(val)) {
+                            total_set += val;
+                        }
+                    });
+
+                    if (total_set < total_min_value) {
+                        var diff = total_min_value - total_set;
+                        var cur_val = parseFloat($input.val());
+                        if (isNaN(cur_val)) {
+                            cur_val = 0;
+                        }
+                        cur_val += diff;
+                        $input.val(cur_val).change();
+                    } else {
+                        var remain = total_set - total_min_value;
+                        $inputs.each(function () {
+                            var val = parseFloat($(this).val());
+                            if (isNaN(val)) {
+                                val = 0;
+                            }
+                            var min = val - remain;
+                            $(this).data('min', min);
+                            var $label = $(this).parent().find('.min_label');
+                            if ($label.length) {
+                                $label.text('Min: ' + min);
+                            }
+                        });
+                    }
+                }
+            }
+        }
+    }
+}
+
 function displayInputMsg($input, msg, className) {
     if (typeof (className) === 'undefined') {
         className = 'info';
@@ -1412,8 +1460,11 @@ function checkCheckList($container) {
 
 function onCheckListMaxInputChange($container, $input) {
     if ($.isOk($container) && $.isOk($input)) {
-        var max = $input.val();
+        var max = parseInt($input.val());
         if (!isNaN(max)) {
+            if (parseInt($container.data('max_input_abs'))) {
+                max = Math.abs(max);
+            }
             max = parseInt(max);
             $container.data('max', max);
             $container.find('.check_list_max_label').text(max);

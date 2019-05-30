@@ -24,6 +24,11 @@ class BimpComm extends BimpDolObject
         3  => 'trimestre',
         12 => 'an'
     );
+    public static $zones_vente = array(
+        1 => 'France',
+//        2 => 'Union Européenne',
+//        3 => 'hors UE'
+    );
 
     public function __construct($module, $object_name)
     {
@@ -53,6 +58,10 @@ class BimpComm extends BimpDolObject
 
     public function isFieldEditable($field, $force_edit = false)
     {
+        switch ($field) {
+            case 'zone_vente':
+                return (int) $this->areLinesEditable();
+        }
         return 1;
     }
 
@@ -1822,6 +1831,10 @@ class BimpComm extends BimpDolObject
         $new_object->set('fk_statut', 0);
         $new_object->set('remise_globale', 0);
 
+        if ($this->dol_field_exists('zone_vente')) {
+            $new_object->set('zone_vente', 1);
+        }
+
         $new_soc = false;
 
         if (isset($new_data['fk_soc']) && ((int) $new_data['fk_soc'] !== (int) $this->getData('fk_soc'))) {
@@ -1910,7 +1923,7 @@ class BimpComm extends BimpDolObject
                     ))) {
                 continue;
             }
-                $line_instance = BimpObject::getInstance($this->module, $this->object_name . 'Line');
+            $line_instance = BimpObject::getInstance($this->module, $this->object_name . 'Line');
             $line_instance->validateArray(array(
                 'id_obj'    => (int) $this->id,
                 'type'      => $line->getData('type'),
@@ -2614,13 +2627,19 @@ class BimpComm extends BimpDolObject
         }
 
         return array(
-            'errors'   => $errors,
-            'warnings' => $warnings,
+            'errors'           => $errors,
+            'warnings'         => $warnings,
             'success_callback' => 'bimp_reloadPage();'
         );
     }
 
     // Overrides BimpObject:
+
+    public function validate()
+    {
+
+        return parent::validate();
+    }
 
     public function create(&$warnings = array(), $force_create = false)
     {

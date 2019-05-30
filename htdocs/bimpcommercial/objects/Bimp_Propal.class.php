@@ -16,7 +16,7 @@ class Bimp_Propal extends BimpComm
         3 => array('label' => 'Non signée (fermée)', 'icon' => 'exclamation-circle', 'classes' => array('important')),
         4 => array('label' => 'Facturée (fermée)', 'icon' => 'check', 'classes' => array('success')),
     );
-    public $redirectMode = 4;//5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
+    public $redirectMode = 4; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
 
     // Getters: 
 
@@ -290,7 +290,7 @@ class Bimp_Propal extends BimpComm
                         'icon'    => 'copy',
                         'onclick' => $this->getJsActionOnclick('duplicate', array(
                             'datep' => date('Y-m-d')
-                        ), array(
+                                ), array(
                             'form_name' => 'duplicate_propal'
                         ))
                     );
@@ -945,10 +945,11 @@ class Bimp_Propal extends BimpComm
 
         return 1;
     }
-    
-    public function iAmAdminRedirect() {
+
+    public function iAmAdminRedirect()
+    {
         global $user;
-        if(in_array($user->id, array(60,282)))
+        if (in_array($user->id, array(60, 282)))
             return true;
         return parent::iAmAdminRedirect();
     }

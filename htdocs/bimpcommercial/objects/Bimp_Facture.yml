@@ -248,7 +248,7 @@ forms:
             - field: model_pdf
               show: 
                   callback: isNotLoaded
-                  
+            - field: zone_vente
             - field: remise_globale_label
               show: 
                   callback: hasRemiseGlobale
@@ -314,6 +314,8 @@ fields_tables:
             - field: datef
               edit: 
                   callback: isEditable
+            - field: zone_vente
+              edit: 1
     
     client: 
         rows: 

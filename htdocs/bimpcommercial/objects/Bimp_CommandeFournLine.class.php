@@ -376,7 +376,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
                 $qty = (float) (isset($qty_data['qty']) ? $qty_data['qty'] : 0);
                 $pu_ht = (float) (isset($qty_data['pu_ht']) ? $qty_data['pu_ht'] : $this->getUnitPriceHTWithRemises());
                 $tva_tx = (float) (isset($qty_data['tva_tx']) ? $qty_data['tva_tx'] : $this->tva_tx);
-                
+
                 $total_ttc += ($qty * BimpTools::calculatePriceTaxIn($pu_ht, $tva_tx));
             }
         }

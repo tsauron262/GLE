@@ -2094,6 +2094,11 @@ function setInputsEvents($container) {
             checkTotalMaxQtyInput($(this));
         });
     });
+    $container.find('input.total_min').each(function() {
+        $(this).change(function () {
+            checkTotalMinQtyInput($(this));
+        });
+    });
     $container.find('.check_list_container').each(function () {
         if (!parseInt($(this).data('check_list_events_init'))) {
             var $checkListContainer = $(this);

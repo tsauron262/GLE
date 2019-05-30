@@ -169,7 +169,7 @@ class BimpInput
                     $html .= '<i class="fa fa-plus"></i>';
                     $html .= '</span>';
                     if (isset($options['min_label']) && $options['min_label']) {
-                        $html .= '<span class="small max_label">' . ((isset($options['data']['min']) && $option['data']['min'] !== 'none') ? 'Min: ' . $options['data']['min'] : '') . '</span>';
+                        $html .= '<span class="small min_label">' . ((isset($options['data']['min']) && $option['data']['min'] !== 'none') ? 'Min: ' . $options['data']['min'] : '') . '</span>';
                     }
                     if (isset($options['max_label']) && $options['max_label']) {
                         $html .= '<span class="small max_label">' . ((isset($options['data']['max']) && $option['data']['max'] !== 'none') ? 'Max: ' . $options['data']['max'] : '') . '</span>';

@@ -1216,7 +1216,7 @@ class Bimp_Commande extends BimpComm
             $lines = $this->getChildrenObjects('lines');
 
             foreach ($lines as $line) {
-                $errors = array_merge($errors, $line->createReservation());
+                $errors = array_merge($errors, $line->checkReservations());
             }
         } else {
             $errors[] = 'ID de la commande absent';

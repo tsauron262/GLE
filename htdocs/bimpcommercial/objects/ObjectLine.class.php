@@ -704,6 +704,14 @@ class ObjectLine extends BimpObject
 
     public function getValueByProduct($field)
     {
+        if ($field === 'tva_tx') {
+            $parent = $this->getParentInstance();
+
+            if (BimpObject::objectLoaded($parent) && !$parent->isTvaActive()) {
+                return 0;
+            }
+        }
+
         $product = $this->getProduct();
 
         if (BimpObject::objectLoaded($product)) {
@@ -2515,7 +2523,12 @@ class ObjectLine extends BimpObject
                 break;
 
             case 'tva_tx':
-                if (!$this->isEditable($force_edit) || $attribute_equipment || !$this->canEditPrixVente()) {
+                $parent = $this->getParentInstance();
+                
+                if (BimpObject::objectLoaded($parent) && !$parent->isTvaActive()) {
+                    $html = '<input type="hidden" value="' . $value . '" name="' . $prefixe . 'tva_tx"/>';
+                    $html .= ' <span class="inputInfo warning">Non applicable</span>';
+                } elseif (!$this->isEditable($force_edit) || $attribute_equipment || !$this->canEditPrixVente()) {
                     $html = '<input type="hidden" value="' . $value . '" name="' . $prefixe . 'tva_tx"/>';
                     $html .= $value . ' %';
                     if (!$this->isEditable()) {
@@ -3383,6 +3396,12 @@ class ObjectLine extends BimpObject
                             $this->pa_ht = (float) $this->post_equipment->getData('prix_achat');
                             $this->id_fourn_price = 0;
                         }
+                    }
+
+                    // Pas de TVA si vente hors UE: 
+                    $parent = $this->getParentInstance();
+                    if (BimpObject::objectLoaded($parent) && !$parent->isTvaActive()) {
+                        $this->tva_tx = 0;
                     }
 
                     if ((!is_null($this->date_from) && $this->date_from) || (!is_null($this->date_to) && $this->date_to)) {

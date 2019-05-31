@@ -324,7 +324,7 @@ class BC_Vente extends BimpObject
                         $url = DOL_URL_ROOT . '/bimpcaisse/ticket.php?id_vente=' . $this->id;
                         $buttons[] = array(
                             'label'   => 'Ticket de caisse',
-                            'icon'    => 'fas_copy',
+                            'icon'    => 'fas_receipt',
                             'onclick' => htmlentities('window.open(\'' . $url . '\', \'_blank\', "menubar=no, status=no, width=370, height=600");')
                         );
                     }
@@ -508,6 +508,22 @@ class BC_Vente extends BimpObject
         $html .= '<div id="curVenteGlobal" class="row">';
 
         $html .= '<div id="currentVenteErrors" class="col-lg-12"></div>';
+        
+        // Choix Commercial: 
+        $id_user_resp = (int) $this->getData('id_user_resp');
+        if (!$id_user_resp) {
+            global $user;
+            $id_user_resp = $user->id;
+        }
+        $html .= '<div class="col-lg-12">';
+        $html .= '<div id="curVenteCommercial" class="venteSection">';
+        $html .= '<span style="font-weight: bold; font-size: 14px;">';
+        $html .= BimpRender::renderIcon('fas_user-circle', 'iconLeft');
+        $html .= 'Commercial: ';
+        $html .= '</span>';
+        $html .= BimpInput::renderInput('search_user', 'id_user_resp', $id_user_resp);
+        $html .= '</div>';
+        $html .= '</div>';
 
         // Partie de gauche (Choix Client / Ajout produit / paiements)         
         $html .= '<div id="curVenteLeft" class="col-sm-12 col-md-7 col-lg-8">';
@@ -1299,7 +1315,11 @@ class BC_Vente extends BimpObject
         $html .= '</span>';
         $html .= '</div>';
         $html .= '<div class="product_info"><strong>Réf: </strong>' . $product->ref . '</div>';
-        $html .= '<div class="product_info"><strong>Prix unitaire TTC: </strong>' . BimpTools::displayMoneyValue($product->price_ttc, 'EUR') . '</div>';
+        if ((int) $this->getData('vente_ht')) {
+            $html .= '<div class="product_info"><strong>Prix unitaire HT: </strong>' . BimpTools::displayMoneyValue($product->price, 'EUR') . '</div>';
+        } else {
+            $html .= '<div class="product_info"><strong>Prix unitaire TTC: </strong>' . BimpTools::displayMoneyValue($product->price_ttc, 'EUR') . '</div>';
+        }
         $html .= '<div class="article_remises">';
         $html .= '<div class="title">Remises: </div>';
         $html .= '<div class="content"></div>';
@@ -1324,9 +1344,9 @@ class BC_Vente extends BimpObject
         $html .= '<span class="final_price">';
 
         if ((int) $this->getData('vente_ht')) {
-            BimpTools::displayMoneyValue($product->price, 'EUR');
+            $html .= BimpTools::displayMoneyValue($product->price, 'EUR');
         } else {
-            BimpTools::displayMoneyValue($product->price_ttc, 'EUR');
+            $html .= BimpTools::displayMoneyValue($product->price_ttc, 'EUR');
         }
 
         $html .= '</span>';
@@ -1656,6 +1676,16 @@ class BC_Vente extends BimpObject
             $errors[] = 'Caisse absente ou invalide';
         }
 
+        $client = $this->getChildObject('client');
+
+        if ((int) $this->getData('vente_ht')) {
+            if (!BimpObject::objectLoaded($client)) {
+                $errors[] = 'Vente au prix HT: compte client obligatoire (avec n° de TVA intracommunautaire renseigné)';
+            } elseif (!(string) $client->getData('tva_intra')) {
+                $errors[] = 'Vente au prix HT: le n° de TVA intracommunautaire du client doit être renseigné';
+            }
+        }
+
         $has_equipment = false;
         foreach ($articles as $article) {
             $product = $article->getChildObject('product');
@@ -1703,8 +1733,6 @@ class BC_Vente extends BimpObject
 
         $asso = new BimpAssociation($this, 'discounts');
         $discounts = $asso->getAssociatesList();
-
-        $client = $this->getChildObject('client');
 
         if (count($discounts)) {
             if (!BimpObject::objectLoaded($client)) {

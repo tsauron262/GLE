@@ -23,3 +23,7 @@ objects:
                 class: PropaleLigne
             id_object: 
                 field_value: id_line
+                
+lists: 
+    default: 
+        objects_change_reload: ObjectLineRemise,Bimp_Propal

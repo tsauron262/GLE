@@ -340,6 +340,8 @@ forms:
               show: 
                   callback: isNotLoaded
             - field: zone_vente
+              show: 
+                  callback: isLoaded
             - field: note_private
             - field: note_public
             - field: remise_globale

@@ -534,7 +534,7 @@ function validateForm($form) {
                             var data_type = $(this).data('data_type');
                             if (data_type && (data_type === 'id_object')) {
                                 if (!parseInt($input.val()) || parseInt($input.val()) <= 0) {
-//                                    bimp_msg($input.attr('name'));
+//                                    bimp_msg($input.tagName() + $input.attr('name') + ': ' + $input.val());
                                     data_missing = true;
                                     $(this).addClass('value_required');
                                 } else {
@@ -2094,7 +2094,7 @@ function setInputsEvents($container) {
             checkTotalMaxQtyInput($(this));
         });
     });
-    $container.find('input.total_min').each(function() {
+    $container.find('input.total_min').each(function () {
         $(this).change(function () {
             checkTotalMinQtyInput($(this));
         });

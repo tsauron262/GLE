@@ -173,6 +173,8 @@ forms:
             - field: pdf_periods_number
             - field: pdf_proforma
             - field: zone_vente
+              show: 
+                  callback: isLoaded
             - field: remise_globale_label
               show: 
                   callback: hasRemiseGlobale

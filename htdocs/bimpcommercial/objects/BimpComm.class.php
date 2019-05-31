@@ -5,6 +5,10 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/objects/BimpDolObject.class.php';
 class BimpComm extends BimpDolObject
 {
 
+    const BC_ZONE_FR = 1;
+    const BC_ZONE_UE = 2;
+    const BC_ZONE_HORS_UE = 3;
+
     public static $email_type = '';
     public static $external_contact_type_required = true;
     public static $internal_contact_type_required = true;
@@ -25,9 +29,9 @@ class BimpComm extends BimpDolObject
         12 => 'an'
     );
     public static $zones_vente = array(
-        1 => 'France',
-//        2 => 'Union Européenne',
-//        3 => 'hors UE'
+        self::BC_ZONE_FR      => 'France',
+        self::BC_ZONE_UE      => 'Union Européenne',
+        self::BC_ZONE_HORS_UE => 'Hors UE'
     );
 
     public function __construct($module, $object_name)
@@ -142,6 +146,17 @@ class BimpComm extends BimpDolObject
         }
 
         return 0;
+    }
+
+    public function isTvaActive()
+    {
+        if ($this->field_exists('zone_vente') && $this->dol_field_exists('zone_vente')) {
+            if ((int) $this->getData('zone_vente') === self::BC_ZONE_HORS_UE) {
+                return 0;
+            }
+        }
+
+        return 1;
     }
 
     // Getters array: 
@@ -814,6 +829,29 @@ class BimpComm extends BimpDolObject
         }
 
         return 0;
+    }
+
+    public static function getZoneByCountry($id_country)
+    {
+        $zone = self::BC_ZONE_FR;
+        if (!(int) $id_country) {
+            $id_country = BimpCore::getConf('default_id_country');
+        }
+
+        if ((int) $id_country) {
+            $country = self::getBdb()->getRow('c_country', '`rowid` = ' . (int) $id_country);
+            if (!is_null($country)) {
+                if ($country->code === 'FR') {
+                    $zone = self::BC_ZONE_FR;
+                } elseif ((int) $country->in_ue) {
+                    $zone = self::BC_ZONE_UE;
+                } else {
+                    $zone = self::BC_ZONE_HORS_UE;
+                }
+            }
+        }
+
+        return $zone;
     }
 
     // Getters - Overrides BimpObject
@@ -2208,6 +2246,28 @@ class BimpComm extends BimpDolObject
         return $errors;
     }
 
+    public function removeLinesTvaTx()
+    {
+        $errors = array();
+
+        if (!$this->areLinesEditable()) {
+            $errors[] = 'Les lignes ' . $this->getLabel('of_this') . ' ne sont pas éditables';
+            return $errors;
+        }
+
+        $lines = $this->getLines('no_text');
+
+        foreach ($lines as $line) {
+            $line->tva_tx = 0;
+            $line_errors = $line->update();
+            if (count($line_errors)) {
+                $errors[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n°' . $line->getData('position'));
+            }
+        }
+
+        return $errors;
+    }
+
     // Actions:
 
     public function actionValidate($data, &$success)
@@ -2637,6 +2697,17 @@ class BimpComm extends BimpDolObject
 
     public function validate()
     {
+        if ($this->field_exists('zone_vente') && $this->dol_field_exists('zone_vente')) {
+            $zone = self::BC_ZONE_FR;
+
+            if ((int) $this->getData('fk_soc') !== (int) $this->getInitData('fk_soc')) {
+                $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', (int) $this->getData('fk_soc'));
+                if (BimpObject::objectLoaded($client)) {
+                    $zone = $this->getZoneByCountry((int) $client->getData('fk_pays'));
+                    $this->set('zone_vente', $zone);
+                }
+            }
+        }
 
         return parent::validate();
     }
@@ -2697,6 +2768,28 @@ class BimpComm extends BimpDolObject
 
                     if (count($rem_errors)) {
                         $warnings[] = BimpTools::getMsgFromArray($rem_errors, 'Erreurs lors de l\'ajout de la remise globale');
+                    }
+                }
+            }
+        }
+
+        return $errors;
+    }
+
+    public function update(&$warnings = array(), $force_update = false)
+    {
+        $init_zone = (int) $this->getInitData('zone_vente');
+
+        $errors = parent::update($warnings, $force_update);
+
+        if (!count($errors)) {
+            if ($this->areLinesEditable()) {
+                $cur_zone = (int) $this->getData('zone_vente');
+
+                if ($cur_zone !== $init_zone && $cur_zone === self::BC_ZONE_HORS_UE) {
+                    $lines_errors = $this->removeLinesTvaTx();
+                    if (count($lines_errors)) {
+                        $warnings[] = BimpTools::getMsgFromArray($lines_errors, 'Des erreurs sont survenues lors de la suppression des taux de TVA');
                     }
                 }
             }

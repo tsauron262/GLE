@@ -249,6 +249,8 @@ forms:
               show: 
                   callback: isNotLoaded
             - field: zone_vente
+              show: 
+                  callback: isLoaded
             - field: remise_globale_label
               show: 
                   callback: hasRemiseGlobale

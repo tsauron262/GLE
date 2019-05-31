@@ -508,20 +508,35 @@ class BimpTools
                             if (isset($params['id_object']['field_value'])) {
                                 $field = $params['id_object']['field_value'];
                                 if ($instance->field_exists($field)) {
-
-                                    if ($instance->isDolObject()) {
-                                        if ($instance->isDolExtraField($field)) {
-                                            $table .= '_extrafields';
+                                    if ($instance->isExtraField($field)) {
+                                        $primary = $instance->getPrimary();
+                                        $nFails = 0;
+                                        $nTotal = 0;
+                                        foreach ($instance->getList(array(
+                                            $field => $old_id
+                                                ), null, null, $primary, 'asc', 'array', array($primary)) as $item) {
+                                            $nTotal++;
+                                            if (count($instance->updateField($field, $new_id, (int) $item[$primary], true))) {
+                                                $nFails++;
+                                            }
                                         }
-                                    }
+                                        if ($nFails) {
+                                            $fails[] = 'Objet: "' . $instance->object_name . '", Champ additionnel: "' . $field . '" (Echecs de la mise à jour de ' . $nFails . ') élément(s) sur ' . $nTotal;
+                                        }
+                                    } else {
+                                        if ($instance->isDolObject()) {
+                                            if ($instance->isDolExtraField($field)) {
+                                                $table .= '_extrafields';
+                                            }
+                                        }
+                                        // echo $instance->object_name . ': ' . $field . '<br/>';
+                                        $result = $bdb->update($table, array(
+                                            $field => $new_id
+                                                ), '`' . $field . '` = ' . (int) $old_id);
 
-//                                    echo $instance->object_name . ': ' . $field . '<br/>';
-                                    $result = $bdb->update($table, array(
-                                        $field => $new_id
-                                            ), '`' . $field . '` = ' . (int) $old_id);
-
-                                    if ($result <= 0) {
-                                        $fails[] = 'Table: "' . $table . '", Champ: "' . $field . '"';
+                                        if ($result <= 0) {
+                                            $fails[] = 'Table: "' . $table . '", Champ: "' . $field . '"';
+                                        }
                                     }
                                 }
                             }
@@ -1416,7 +1431,7 @@ class BimpTools
     {
         return BimpCache::getTaxes($id_country);
     }
-    
+
     public static function getDefaultTva($id_country = null)
     {
         return 20;
@@ -1500,7 +1515,6 @@ class BimpTools
 
         // on vire tout ce qui n'est pas alphanumérique
         $text_clear = preg_replace('/[^a-zA-Z0-9_\-\(\)]/', ' ', trim($text)); // ^a-zA-Z0-9_-
-        
         // Nettoyage pour un espace maxi entre les mots
         $array = explode(' ', $text_clear);
         $str = '';

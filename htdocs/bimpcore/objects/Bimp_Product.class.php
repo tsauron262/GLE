@@ -356,6 +356,27 @@ class Bimp_Product extends BimpObject
 
     // Rendus HTML: 
 
+    public function renderHeaderStatusExtra()
+    {
+        $html = '';
+
+        if ($this->isLoaded()) {
+            if ((int) $this->getData('validate')) {
+                $html .= '<span class="success">';
+                $html .= BimpRender::renderIcon('fas_check', 'iconLeft');
+                $html .= 'Validé';
+                $html .= '</span>';
+            } else {
+                $html .= '<span class="danger">';
+                $html .= BimpRender::renderIcon('fas_times', 'iconLeft');
+                $html .= 'Non validé';
+                $html .= '</span>';
+            }
+        }
+
+        return $html;
+    }
+    
     public function renderStocksByEntrepots($id_entrepot = null)
     {
         if (!$this->isLoaded()) {

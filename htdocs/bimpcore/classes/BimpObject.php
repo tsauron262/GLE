@@ -486,6 +486,19 @@ class BimpObject extends BimpCache
         );
     }
 
+    public function getListPageUrl($list_name = 'default')
+    {
+        if (is_string($this->params['list_page_url'])) {
+            if ($this->params['list_page_url'] === 'list') {
+                return DOL_URL_ROOT . '/bimpcore/index.php?fc=list&module=' . $this->module . '&object_name=' . $this->object_name . '&list_name=' . $list_name;
+            }
+
+            return '';
+        }
+
+        return BimpTools::makeUrlFromConfig($this->config, 'list_page_url', $this->module, $this->getController());
+    }
+
     // Getters boolééns: 
 
     public function isLoaded()
@@ -1853,7 +1866,7 @@ class BimpObject extends BimpCache
                 }
             }
         }
-            
+
         // Vérification des filtres: 
         $filters = $this->checkSqlFilters($filters, $has_extrafields, $joins);
 
@@ -3276,7 +3289,7 @@ class BimpObject extends BimpCache
                     }
 
                     $data = $this->getDbData($fields);
-                    
+
                     if (!empty($data)) {
                         $up_result = $this->db->update($this->getTable(), $data, '`' . $this->getPrimary() . '` = ' . (int) $result);
 
@@ -4060,32 +4073,33 @@ class BimpObject extends BimpCache
             } elseif ($this->field_exists('fk_statut')) {
                 $status = $this->displayData('fk_statut');
             }
+
+            $html .= '<div class="header_status">';
             if ($status) {
-                $html .= '<div class="header_status">';
                 $html .= $status;
-                if (method_exists($this, 'renderHeaderStatusExtra')) {
-                    $html .= $this->renderHeaderStatusExtra();
-                }
-                $html .= '</div>';
-                $html .= '<div class="header_tools">';
-                if (isset($params['allow_lock']) && (int) $params['allow_lock']) {
-                    $locked = (isset($params['locked']) ? (int) $params['locked'] : 1);
-
-                    $html .= '<span class="headerIconButton bs-popover unlock_object_header_button"';
-                    $html .= BimpRender::renderPopoverData('Dévérouiller l\'en-tête (Cesser de maintenir l\'affichage lors du défilement vertical)', 'bottom');
-                    $html .= (!$locked ? ' style="display: none;"' : '') . '>';
-                    $html .= BimpRender::renderIcon('fas_lock-open');
-                    $html .= '</span>';
-
-                    $html .= '<span class="headerIconButton bs-popover lock_object_header_button"';
-                    $html .= BimpRender::renderPopoverData('Vérouiller l\'en-tête (Maintenir l\'affichage lors du défilement vertical)', 'bottom');
-                    $html .= ($locked ? ' style="display: none;"' : '') . '>';
-                    $html .= BimpRender::renderIcon('fas_lock');
-                    $html .= '</span>';
-                }
-
-                $html .= '</div>';
             }
+            if (method_exists($this, 'renderHeaderStatusExtra')) {
+                $html .= $this->renderHeaderStatusExtra();
+            }
+            $html .= '</div>';
+            $html .= '<div class="header_tools">';
+            if (isset($params['allow_lock']) && (int) $params['allow_lock']) {
+                $locked = (isset($params['locked']) ? (int) $params['locked'] : 1);
+
+                $html .= '<span class="headerIconButton bs-popover unlock_object_header_button"';
+                $html .= BimpRender::renderPopoverData('Dévérouiller l\'en-tête (Cesser de maintenir l\'affichage lors du défilement vertical)', 'bottom');
+                $html .= (!$locked ? ' style="display: none;"' : '') . '>';
+                $html .= BimpRender::renderIcon('fas_lock-open');
+                $html .= '</span>';
+
+                $html .= '<span class="headerIconButton bs-popover lock_object_header_button"';
+                $html .= BimpRender::renderPopoverData('Vérouiller l\'en-tête (Maintenir l\'affichage lors du défilement vertical)', 'bottom');
+                $html .= ($locked ? ' style="display: none;"' : '') . '>';
+                $html .= BimpRender::renderIcon('fas_lock');
+                $html .= '</span>';
+            }
+
+            $html .= '</div>';
 
             $this->params['header_btn'] = $this->config->getCompiledParams('header_btn');
             if (is_null($this->params['header_btn'])) {
@@ -4184,7 +4198,7 @@ class BimpObject extends BimpCache
         $html = '';
         if (!is_null($this->params['header_list_name']) && $this->params['header_list_name']) {
             $html .= '<div class="header_button">';
-            $url = BimpTools::makeUrlFromConfig($this->config, 'list_page_url', $this->module, $this->getController());
+            $url = $this->getListPageUrl($this->params['header_list_name']);
             if ($url) {
                 $items = array(
                     '<span class="dropdown-title">' . BimpRender::renderIcon('fas_list', 'iconLeft') . 'Liste des ' . $this->getLabel('name_plur') . '</span>'
@@ -4463,7 +4477,7 @@ class BimpObject extends BimpCache
 
         if (!count($errors)) {
             if ($this->params['list_page_url']) {
-                $url = BimpTools::makeUrlFromConfig($this->config, 'list_page_url', $this->module, $this->getController());
+                $url = $this->getListPageUrl();
                 if ($url) {
                     $list_button = '<div class="buttonsContainer">';
                     $list_button .= '<a class="btn btn-primary" href="' . $url . '">';

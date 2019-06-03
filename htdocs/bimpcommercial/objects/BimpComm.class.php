@@ -96,10 +96,16 @@ class BimpComm extends BimpDolObject
                     $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
                     return 0;
                 }
-                if (!$this->areLinesEditable()) {
-                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' ne peut plus être éditée';
+                if($this->getData('invoice_status') === null || $this->getData('invoice_status') > 0){
+                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' est déja facturé';
                     return 0;
                 }
+                    
+                
+//                if (!$this->areLinesEditable()) {
+//                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' ne peut plus être éditée';
+//                    return 0;
+//                }
 
                 $client = $this->getChildObject('client');
 

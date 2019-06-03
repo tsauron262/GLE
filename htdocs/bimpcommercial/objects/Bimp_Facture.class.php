@@ -1273,15 +1273,19 @@ class Bimp_Facture extends BimpComm
     {
         if ($this->isLoaded()) {
             $this->set('fk_statut', Facture::STATUS_VALIDATED);
-            $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande');
-            $asso = new BimpAssociation($commande, 'factures');
+            $this->majStatusOtherPiece();
+        }
+    }
+    
+    public function majStatusOtherPiece(){
+        $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande');
+        $asso = new BimpAssociation($commande, 'factures');
 
-            $list = $asso->getObjectsList((int) $this->id);
+        $list = $asso->getObjectsList((int) $this->id);
 
-            foreach ($list as $id_commande) {
-                $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $id_commande);
-                $commande->checkInvoiceStatus($this->id);
-            }
+        foreach ($list as $id_commande) {
+            $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $id_commande);
+            $commande->checkInvoiceStatus($this->id);
         }
     }
 
@@ -1299,6 +1303,14 @@ class Bimp_Facture extends BimpComm
                     $commande_line->onFactureDelete($this->id);
                 }
             }
+        }
+        $this->majStatusOtherPiece();
+    }
+    
+    public function onUnValidate(){
+        if ($this->isLoaded()) {
+            $this->set('fk_statut', Facture::STATUS_DRAFT);
+            $this->majStatusOtherPiece();
         }
     }
 

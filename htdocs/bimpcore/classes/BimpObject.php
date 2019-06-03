@@ -21,6 +21,7 @@ class BimpObject extends BimpCache
     public static $numeric_types = array('id', 'id_parent', 'id_object', 'int', 'float', 'money', 'percent', 'bool', 'qty');
     public static $name_properties = array('public_name', 'name', 'nom', 'label', 'libelle', 'title', 'titre', 'description');
     public static $ref_properties = array('ref', 'reference', 'code');
+    public static $status_properties = array('status', 'fk_statut', 'statut');
     public $use_commom_fields = false;
     public $use_positions = false;
     public $params_defs = array(
@@ -420,6 +421,17 @@ class BimpObject extends BimpCache
     public function getRefProperty()
     {
         foreach (self::$ref_properties as $prop) {
+            if ($this->field_exists($prop)) {
+                return $prop;
+            }
+        }
+
+        return '';
+    }
+
+    public function getStatusProperty()
+    {
+        foreach (self::$status_properties as $prop) {
             if ($this->field_exists($prop)) {
                 return $prop;
             }
@@ -1019,6 +1031,17 @@ class BimpObject extends BimpCache
 
         if ($withGeneric) {
             return BimpTools::ucfirst($this->getLabel()) . ' #' . $this->id;
+        }
+
+        return '';
+    }
+
+    public function getStatus()
+    {
+        $prop = $this->getStatusProperty();
+
+        if ($this->field_exists($prop) && isset($this->data[$prop]) && $this->data[$prop]) {
+            return $this->data[$prop];
         }
 
         return '';
@@ -1981,6 +2004,91 @@ class BimpObject extends BimpCache
     }
 
     // Affichage des données:
+
+    public function display($display_name = 'nom', $options = array())
+    {
+        $link = isset($options['link']) ? (int) $options['link'] : 0;
+        $no_html = isset($options['no_html']) ? (int) $options['no_html'] : 0;
+        $icon = isset($options['icon']) ? (int) $options['icon'] : 1;
+        $status_icon = isset($options['status_icon']) ? (int) $options['status_icon'] : 0;
+        $status_color = isset($options['status_color']) ? (int) $options['status_color'] : 0;
+
+        $external_link_icon = isset($options['objects_icons']['external_link']) ? (int) $options['objects_icons']['external_link'] : $link;
+        $modal_view_icon = isset($options['objects_icons']['modal_view']) ? (string) $options['objects_icons']['modal_view'] : ($link ? 'default' : '');
+
+        $label = '';
+
+        $ref = $this->getRef();
+        $nom = $this->getName();
+
+        if (!$ref) {
+            $ref = '#' . $this->id;
+        }
+        if (!$nom) {
+            $nom = BimpTools::ucfirst($this->getLabel());
+        }
+
+        switch ($display_name) {
+            case 'nom':
+                $label = $nom;
+                break;
+
+            case 'ref':
+                $label = $ref;
+                break;
+
+            case 'ref_nom':
+                $label = $ref . ' - ' . $nom;
+
+            case 'nom_ref':
+                $label = $nom . ' - ' . $ref;
+                break;
+
+            default:
+                if (is_string($display_name)) {
+                    $label = $display_name;
+                }
+        }
+
+        if (!$label) {
+            $label = $nom . ' ' . $ref;
+        }
+
+        if ($no_html) {
+            return $label;
+        }
+
+        $html = '';
+
+        $url = '';
+        if ($link) {
+            $url = $this->getUrl();
+            if ($url) {
+                $html .= '<a href="' . $url . '">';
+            }
+        }
+
+        $html = '<span ';
+        $status = $this->getStatus();
+
+        if ($status_color && $status !== '') {
+            
+        }
+
+        $html .= '>';
+
+        if ($icon && $this->params['icon']) {
+            $html .= BimpRender::renderIcon($this->params['icon'], 'iconLeft');
+        }
+
+        $html .= '</span>';
+
+        if ($url) {
+            $html .= '</a>';
+        }
+
+        return $html;
+    }
 
     public function displayData($field, $display_name = 'default', $display_input_value = true, $no_html = false)
     {
@@ -5242,6 +5350,15 @@ class BimpObject extends BimpCache
             $url = BimpTools::getDolObjectListUrl($object);
         }
 
+        return $url;
+    }
+
+    public function getCommonListUrl($list_name = 'default', $filters = array())
+    {
+        $url = DOL_URL_ROOT . '/bimpcore/index.php?fc=list&module=' . $this->module . '&object_name=' . $this->object_name . '&list_name=' . $list_name;
+        if (!empty($filters)) {
+            $url .= '&filters=' . urlencode(json_encode($filters));
+        }
         return $url;
     }
 

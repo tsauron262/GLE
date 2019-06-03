@@ -82,6 +82,16 @@ fields:
             note: 1
             auto_expand: 1
             rows: 3
+            
+    total_ht: 
+        label: Total HT
+        type: money
+        default_value: 0
+        
+    total_ttc: 
+        label: Total TTC
+        type: money
+        default_value: 0
         
 forms: 
     default: 
@@ -227,6 +237,8 @@ fields_tables:
               display: card
               show: 
                   field_value: id_facture
+            - field: total_ht
+            - field: total_ttc
             
 views: 
     default: 
@@ -291,13 +303,9 @@ lists_cols:
         field: id_facture
         display: nom_url
     total_ht: 
-        label: Total HT
-        value: 
-            callback: displayTotalHT
+        field: total_ht
     total_ttc: 
-        label: Total TTC
-        value: 
-            callback: displayTotalTTC
+        field: total_ttc
                     
 lists: 
     default: 

@@ -921,12 +921,18 @@ class Bimp_CommandeFournLine extends FournObjectLine
     {
         $errors = array();
 
+        $reception = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeFournReception', (int) $id_reception);
+        
+        if (!BimpObject::objectLoaded($reception)) {
+            $errors[] = 'La réception d\'ID '.$id_reception.' n\'existe pas';
+            return $errors;
+        }
+        
         $isSerialisable = $this->isProductSerialisable();
 
         if ($isSerialisable) {
             $edit = 1;
-            $reception = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeFournReception', (int) $id_reception);
-            if (BimpObject::objectLoaded($reception) && ((int) $reception->getData('status') !== BL_CommandeFournReception::BLCFR_BROUILLON)) {
+            if ((int) $reception->getData('status') !== BL_CommandeFournReception::BLCFR_BROUILLON) {
                 $edit = 0;
             }
 
@@ -965,6 +971,10 @@ class Bimp_CommandeFournLine extends FournObjectLine
 
         $this->set('receptions', $receptions);
         $errors = $this->update($warnings, true);
+        
+        if (!count($errors)) {
+            $reception->onLinesChange();
+        }
 
         $errors = array_merge($errors, $warnings);
 

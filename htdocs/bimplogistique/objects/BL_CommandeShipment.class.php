@@ -508,16 +508,6 @@ class BL_CommandeShipment extends BimpObject
         return '';
     }
 
-    public function displayTotalHT()
-    {
-        return BimpTools::displayMoneyValue($this->getTotalHT());
-    }
-
-    public function displayTotalTTC()
-    {
-        return BimpTools::displayMoneyValue($this->getTotalTTC());
-    }
-
     // Rendus: 
 
     public function renderLinesQties()
@@ -1299,6 +1289,38 @@ class BL_CommandeShipment extends BimpObject
             $errors[] = BimpTools::getMsgFromArray($update_errors, 'Echec de la mise à jour de l\'expédition');
         }
 
+        $this->onLinesChange();
+
+        return $errors;
+    }
+
+    public function onLinesChange()
+    {
+        $errors = array();
+        if ($this->isLoaded()) {
+            $total_ht = $this->getTotalHT();
+            $total_ttc = $this->getTotalTTC();
+
+            $update = false;
+
+            if ((float) $this->getInitData('total_ht') !== $total_ht) {
+                $this->set('total_ht', $total_ht);
+                $update = true;
+            }
+
+            if ((float) $this->getInitData('total_ttc') !== $total_ttc) {
+                $this->set('total_ttc', $total_ttc);
+                $update = true;
+            }
+
+            if ($update) {
+                $warnings = array();
+                $errors = $this->update($warnings, true);
+            }
+        } else {
+            $errors[] = 'ID de l\'expédition absent';
+        }
+
         return $errors;
     }
 
@@ -1378,6 +1400,8 @@ class BL_CommandeShipment extends BimpObject
                     }
                 }
             }
+
+            $this->onLinesChange();
         }
 
 

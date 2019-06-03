@@ -282,7 +282,7 @@ class BC_List extends BC_Panel
                 $this->params['add_form_values']['associations'][$asso_name] = $value;
             }
         }
-        
+
         if (isset($values['objects'])) {
             foreach ($values['objects'] as $object_name => $value) {
                 $this->params['add_form_values']['objects'][$object_name] = $value;
@@ -484,6 +484,20 @@ class BC_List extends BC_Panel
 
         if (method_exists($this->object, 'listItemsOverride')) {
             $this->object->listItemsOverride($this->name, $this->items);
+        }
+    }
+
+    public function setItems($items = array())
+    {
+        $this->items = array();
+
+        if ($this->isOk()) {
+            $primary = $this->object->getPrimary();
+            foreach ($items as $id_item) {
+                $this->items[] = array(
+                    $primary => (int) $id_item
+                );
+            }
         }
     }
 

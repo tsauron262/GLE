@@ -1343,4 +1343,20 @@ class BimpInput
 
         return $html;
     }
+
+    public static function renderDispatcherAvailableItems($title, $input_name, $items, $options = array())
+    {
+        $html = '';
+
+        return $html;
+    }
+
+    public static function renderDispatchedItems($input_name, $items, $options = array())
+    {
+        $html = '';
+
+
+
+        return $html;
+    }
 }

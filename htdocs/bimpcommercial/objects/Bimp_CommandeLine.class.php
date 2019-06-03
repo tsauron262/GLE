@@ -1511,11 +1511,15 @@ class Bimp_CommandeLine extends ObjectLine
         $commande = $this->getParentInstance();
         $product = null;
         $isSerialisable = false;
+        $dispatcher = null;
 
         if ((int) $this->getData('type') === ObjectLine::LINE_PRODUCT) {
             $product = $this->getProduct();
             if (BimpObject::objectLoaded($product) && $product->isSerialisable()) {
                 $isSerialisable = true;
+                $equipment_instance = BimpObject::getInstance('bimpequipment', 'Equipment');
+                $dispatcher = new BC_Dispatcher($equipment_instance, '', '');
+                $dispatcher->setItems($this->getEquipementsToAttributeToFacture());
             }
         }
 
@@ -1528,11 +1532,22 @@ class Bimp_CommandeLine extends ObjectLine
 
             if (!empty($factures_list)) {
                 $html .= '<div id="commande_line_' . $this->id . '_factures_form' . '" class="commande_factures_form line_facture_qty_container">';
+
+                if ($isSerialisable) {
+                    $html .= '<div class="row">';
+                    $html .= '<div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">';
+
+                    $html .= $dispatcher->renderHtml();
+
+                    $html .= '</div>';
+                    $html .= '<div class="col-lg-8 col-md-8 col-sm-6 col-xs-12">';
+                }
+
                 $html .= '<form>';
                 $html .= '<table class="bimp_list_table">';
                 $html .= '<thead>';
                 $html .= '<tr>';
-                $html .= '<th style="width: 400px;">Facture</th>';
+                $html .= '<th style="width: 250px;">Facture</th>';
                 $html .= '<th>Qté</th>';
                 if ($isSerialisable) {
                     $html .= '<th>Equipements</th>';
@@ -1545,7 +1560,7 @@ class Bimp_CommandeLine extends ObjectLine
                     $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_facture);
 
                     $html .= '<tr id="commande_line_facture_' . $id_facture . '_row" class="facture_row" data-id_facture="' . $id_facture . '" data-facture_ref="' . $facture->getData('facnumber') . '">';
-                    $html .= '<td style="width: 400px;">';
+                    $html .= '<td style="width: 250px;">';
                     $card = new BC_Card($facture, null, 'light');
                     $card->params['view_btn'] = 0;
                     $html .= $card->renderHtml();
@@ -1613,6 +1628,11 @@ class Bimp_CommandeLine extends ObjectLine
                 $html .= BimpRender::renderIcon('fas_save', 'iconLeft') . 'Enregistrer';
                 $html .= '</button>';
                 $html .= '</div>';
+
+                if ($isSerialisable) {
+                    $html .= '</div>';
+                    $html .= '</div>';
+                }
 
                 $html .= '</div>';
             } else {
@@ -2029,6 +2049,11 @@ class Bimp_CommandeLine extends ObjectLine
             if (!count($errors)) {
                 $this->set('shipments', $shipments);
                 $errors = $this->update($warnings, true);
+
+                $ship_errors = $shipment->onLinesChange();
+                if (count($ship_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($ship_errors, 'Expédition n°' . $shipment->getData('num_livraison'));
+                }
             }
         } else {
             $errors[] = 'Expédition invalide';
@@ -2067,6 +2092,11 @@ class Bimp_CommandeLine extends ObjectLine
 
             if (isset($data['group']) && $shipment_editable) {
                 $shipments[$id_shipment]['group'] = (int) $data['group'];
+            }
+
+            $ship_errors = $shipment->onLinesChange();
+            if (count($ship_errors)) {
+                $errors[] = BimpTools::getMsgFromArray($ship_errors, 'Expédition n°' . $shipment->getData('num_livraison'));
             }
         }
 

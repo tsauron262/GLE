@@ -71,6 +71,16 @@ fields:
         type: bool
         default_value: 1
         
+    total_ht: 
+        label: Total HT
+        type: money
+        default_value: 0
+        
+    total_ttc: 
+        label: Total TTC
+        type: money
+        default_value: 0
+        
 forms: 
     default: 
         rows: 
@@ -111,6 +121,8 @@ fields_tables:
             - field: date_received
             - field: info
               edit: 1
+            - field: total_ht
+            - field: total_ttc
             
 views: 
     default: 
@@ -152,13 +164,9 @@ lists_cols:
         field: info
         edit: 1
     total_ht: 
-        label: Total HT
-        value: 
-            callback: displayTotalHT
+        field: total_ht
     total_ttc: 
-        label: Total TTC
-        value: 
-            callback: displayTotalTTC
+        field: total_ttc
                     
 lists: 
     default: 

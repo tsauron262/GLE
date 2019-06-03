@@ -85,9 +85,9 @@ class BimpTransfer {
         $sql.= ', ' . $fk_warehouse_source;
         $sql.= ', ' . $fk_warehouse_dest;
         $sql.= ', ' . $fk_user;
-        $sql.= ', ' . $this->db->idate(dol_now());
+        $sql.= ', "' . $this->db->idate(dol_now()).'"';
         $sql.= ')';
-
+        
         $result = $this->db->query($sql);
         if ($result) {
             $last_insert_id = $this->db->last_insert_id(MAIN_DB_PREFIX . 'be_transfer');

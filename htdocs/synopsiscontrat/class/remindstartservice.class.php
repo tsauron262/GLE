@@ -1,11 +1,11 @@
 <?php
 
-if(!isset($conf))
+if (!isset($conf))
     require_once('../../main.inc.php');
 include_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 include_once DOL_DOCUMENT_ROOT . '/contrat/class/contrat.class.php';
 
-class RemindEndService {
+class RemindStartService {
 
     private $db;
     public $errors;
@@ -15,16 +15,12 @@ class RemindEndService {
         $this->errors = array();
     }
 
-    /**
-     * @param $days number day to reach urgence
-     * @return array of service
-     */
-    public function getUrgentService($days) {
+    public function getOutdatedService() {
         $this->output = '';
         $services = array();
 
         // Select contrat
-        $sql = 'SELECT c.rowid as c_rowid, ';
+        $sql = 'SELECT c.rowid as c_rowid,';
         // Select contradet 
         $sql .= ' cd.rowid as cd_rowid, cd.statut as statut_line,';
         // Select societe_commerciaux
@@ -33,14 +29,12 @@ class RemindEndService {
         // From contrat
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'contrat as c';
 
-
         // Join societe_commerciaux
         $sql .= ' LEFT JOIN (';
         $sql .= ' SELECT * FROM ' . MAIN_DB_PREFIX . 'societe_commerciaux';
         $sql .= ' ) as sc';
         $sql .= ' ON c.fk_soc=sc.fk_soc';
 
-        
         // Join contradet
         $sql .= ' JOIN (';
         $sql .= ' SELECT * FROM ' . MAIN_DB_PREFIX . 'contratdet';
@@ -50,11 +44,12 @@ class RemindEndService {
         $sql .= ' ) as cd';
         $sql .= ' ON c.rowid=cd.fk_contrat';
 
-        $sql .= ' WHERE cd.statut=4 '; // contrat line open
-        $sql .= ' AND cd.date_fin_validite <= NOW() + INTERVAL ' . $days . ' DAY';
+        $sql .= ' WHERE cd.statut=' . ContratLigne::STATUS_INITIAL; // contrat line open
+        $sql .= ' AND cd.date_ouverture_prevue <= NOW()';
         $sql .= ' AND c.statut > 0'; // contrat isn't draft
         $sql .= ' ORDER BY c.rowid';
 //die($sql);
+
         $result = $this->db->query($sql);
         if ($result) {
             while ($obj = $this->db->fetch_object($result)) {
@@ -77,27 +72,28 @@ class RemindEndService {
     /**
      * 
      * @global type $conf dolibarr conf
-     * @param  type $days  number day to reach urgence
      * @return type return number of task sent or -($number_of_errors) if there are some
      */
-    public function setTaskForService($days = 3) {
-        $services = $this->getUrgentService($days);
+    public function setTaskForService() {
+        // TODO init cron
+        $services = $this->getOutdatedService();
         global $conf;
-        $newTasksSends = 0;
+        $newTasksSent = 0;
 
         foreach ($services as $service) {
             if (isset($conf->global->MAIN_MODULE_BIMPTASK)) {
                 // prevent multiple task for 1 contrat
                 if ($service['id_user'] < 1)
                     $service['id_user'] = 62;
+
                 $task = BimpObject::getInstance("bimptask", "BIMP_Task");
-                $test = "contratdet:rowid=" . $service['id_line'] . ' AND statut=5';
+                $test = "contratdet:rowid=" . $service['id_line'] . ' AND statut>' . ContratLigne::STATUS_INITIAL;
                 $tasks = $task->getList(array('test_ferme' => $test, "id_user_owner" => $service['id_user']));
                 if (count($tasks) == 0) {
                     $param = array(
                         "src" => "",
                         "dst" => "suivicontrat@bimp.fr",
-                        "subj" => "Service à relancer",
+                        "subj" => "Service à activer",
                         "id_user_owner" => $service['id_user'],
                         "txt" => $service['nom'] . $service['nom_url'],
                         "test_ferme" => $test);
@@ -105,7 +101,7 @@ class RemindEndService {
                     $this->errors = array_merge($this->errors, $task->validateArray($param)); // check params
                     $this->errors = array_merge($this->errors, $task->create()); // create task
                     if ($errors_befor == sizeof($this->errors))
-                        $newTasksSends++;
+                        $newTasksSent++;
                     else
                         $this->errors[] = "Erreur sur le contrat " . $service['id_contrat'];
                 }
@@ -117,7 +113,7 @@ class RemindEndService {
 
         $errors = sizeof($this->errors);
         $errorString = (sizeof($this->errors) == 0) ? ' Aucune' : implode(',', $this->errors);
-        $this->output = "Nombre de tâche envoyé: " . $newTasksSends . '. Erreurs:' . $errorString;
+        $this->output = "Nombre de tâche envoyé: " . $newTasksSent . '. Erreurs:' . $errorString;
 
         if ($errors != 0)
             return -$errors;

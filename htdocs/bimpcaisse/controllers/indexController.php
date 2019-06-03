@@ -882,6 +882,42 @@ class indexController extends BimpController
         )));
     }
 
+    protected function ajaxProcessSaveCommercial()
+    {
+        $errors = array();
+
+        $id_vente = BimpTools::getValue('id_vente', 0);
+        $id_user_resp = BimpTools::getValue('id_user_resp', 0);
+
+        if (!$id_vente) {
+            $errors[] = 'ID de la vente absent';
+        }
+
+        if (!$id_user_resp) {
+            $errors[] = 'Aucun utilisateur spécifié pour le commercial';
+        }
+        
+        if (!count($errors)) {
+            $vente = BimpCache::getBimpObjectInstance($this->module, 'BC_Vente', (int) $id_vente);
+            if (!$vente->isLoaded()) {
+                $errors[] = 'Cette vente n\'existe plus';
+            } else {
+                if ($vente->getData('status') === 2) {
+                    $errors[] = 'Cette vente ne peut pas être modifée car elle a été validée';
+                } else {
+                    $vente->set('id_user_resp', $id_user_resp);
+                    $errors = $vente->update();
+                }
+            }
+        }
+
+        die(json_encode(array(
+            'errors'     => $errors,
+            'success'    => 'Commercial de la vente enregistré avec succès',
+            'request_id' => BimpTools::getValue('request_id', 0),
+        )));
+    }
+    
     protected function ajaxProcessSaveCondReglement()
     {
         $errors = array();

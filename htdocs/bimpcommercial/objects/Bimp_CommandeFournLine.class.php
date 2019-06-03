@@ -298,7 +298,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
             if ($is_serialisable) {
                 if (isset($reception_data['equipments'])) {
                     foreach ($reception_data['equipments'] as $id_equiment => $equipment_data) {
-                        $pu_ht = (string) (isset($equipment_data['pu_ht']) ? (float) $equipment_data['pu_ht'] : (float) $this->pu_ht);
+                        $pu_ht = (string) (isset($equipment_data['pu_ht']) ? (float) $equipment_data['pu_ht'] : (float) $this->getUnitPriceHTWithRemises());
                         $tva_tx = (string) (isset($equipment_data['tva_tx']) ? (float) $equipment_data['tva_tx'] : (float) $this->tva_tx);
 
                         if (!isset($lines[$pu_ht])) {
@@ -317,7 +317,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
                 if (isset($reception_data['qties'])) {
                     foreach ($reception_data['qties'] as $qty_data) {
                         $qty = (float) (isset($qty_data['qty']) ? $qty_data['qty'] : 0);
-                        $pu_ht = (string) (isset($qty_data['pu_ht']) ? $qty_data['pu_ht'] : $this->pu_ht);
+                        $pu_ht = (string) (isset($qty_data['pu_ht']) ? $qty_data['pu_ht'] : $this->getUnitPriceHTWithRemises());
                         $tva_tx = (string) (isset($qty_data['tva_tx']) ? $qty_data['tva_tx'] : $this->tva_tx);
 
                         if (!isset($lines[$pu_ht])) {
@@ -335,6 +335,53 @@ class Bimp_CommandeFournLine extends FournObjectLine
         }
 
         return $lines;
+    }
+
+    public function getReceptionTotalHt($id_reception)
+    {
+        $data = $this->getReceptionData($id_reception);
+
+        $total_ht = 0;
+
+        if ($this->isProductSerialisable()) {
+            foreach ($data['equipments'] as $id_equiment => $equipment_data) {
+                $pu_ht = (float) (isset($equipment_data['pu_ht']) ? (float) $equipment_data['pu_ht'] : (float) $this->getUnitPriceHTWithRemises());
+                $total_ht += $pu_ht;
+            }
+        } else {
+            foreach ($data['qties'] as $qty_data) {
+                $qty = (float) (isset($qty_data['qty']) ? $qty_data['qty'] : 0);
+                $pu_ht = (float) (isset($qty_data['pu_ht']) ? $qty_data['pu_ht'] : $this->getUnitPriceHTWithRemises());
+
+                $total_ht += ($qty * $pu_ht);
+            }
+        }
+
+        return $total_ht;
+    }
+
+    public function getReceptionTotalTTC($id_reception)
+    {
+        $data = $this->getReceptionData($id_reception);
+
+        $total_ttc = 0;
+
+        if ($this->isProductSerialisable()) {
+            foreach ($data['equipments'] as $id_equiment => $equipment_data) {
+                $pu_ht = (float) (isset($equipment_data['pu_ht']) ? (float) $equipment_data['pu_ht'] : (float) $this->getUnitPriceHTWithRemises());
+                $total_ttc += $pu_ht;
+            }
+        } else {
+            foreach ($data['qties'] as $qty_data) {
+                $qty = (float) (isset($qty_data['qty']) ? $qty_data['qty'] : 0);
+                $pu_ht = (float) (isset($qty_data['pu_ht']) ? $qty_data['pu_ht'] : $this->getUnitPriceHTWithRemises());
+                $tva_tx = (float) (isset($qty_data['tva_tx']) ? $qty_data['tva_tx'] : $this->tva_tx);
+
+                $total_ttc += ($qty * BimpTools::calculatePriceTaxIn($pu_ht, $tva_tx));
+            }
+        }
+
+        return $total_ttc;
     }
 
     // Getters config: 
@@ -365,9 +412,9 @@ class Bimp_CommandeFournLine extends FournObjectLine
                 ))
             );
         }
-        
+
         $product = $this->getProduct();
-        
+
         if (BimpObject::objectLoaded($product)) {
             $buttons = array_merge($buttons, $product->getListsButtons((int) ceil($this->qty)));
         }
@@ -524,7 +571,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
                     $html .= '<tr>';
                     $html .= '<th>Réception</th>';
                     $html .= '<th>Qté / NS</th>';
-                    $html .= '<th>Prix d\'achat</th>';
+                    $html .= '<th>Prix d\'achat (remises incluses)</th>';
                     $html .= '<th>Tx TVA</th>';
                     $html .= '<th></th>';
                     $html .= '</tr>';
@@ -557,12 +604,12 @@ class Bimp_CommandeFournLine extends FournObjectLine
                                 $html .= '<div style="margin: 15px 0; padding: 10px 0;">';
                                 $html .= 'Commande client associée: ' . $commande_client->getNomUrl(1, 1, 1) . '<br/>';
                                 $product = $this->getProduct();
-                                if (BimpObject::objectLoaded($product) && $product->isSerialisable()) {
+                                if (BimpObject::objectLoaded($product)) {
                                     $html .= '<div style="vertical-align: top">';
                                     $html .= '<span style="display: inline-block; padding-top: 6px; vertical-align: top">';
-                                    $html .= 'Assigner les équipements reçus à cette commande client: ';
+                                    $html .= 'Assigner les unités reçues à cette commande client: ';
                                     $html .= '</span>';
-                                    $html .= BimpInput::renderInput('toggle', 'assign_to_commande_client', 0);
+                                    $html .= BimpInput::renderInput('toggle', 'assign_to_commande_client', 1);
                                     $html .= '</div>';
                                 }
                                 $html .= '</div>';
@@ -1371,8 +1418,11 @@ class Bimp_CommandeFournLine extends FournObjectLine
                                 'qty'                       => 0,
                                 'qties'                     => array(),
                                 'serials'                   => array(),
-                                'assign_to_commande_client' => 0
+                                'assign_to_commande_client' => (int) $reception->getData('assign_lines_to_commandes_client')
                             );
+                        }
+                        if (isset($reception_data['assign_to_commande_client'])) {
+                            $receptions[(int) $reception->id]['assign_to_commande_client'] = (int) $reception_data['assign_to_commande_client'];
                         }
                         if ($isSerialisable) {
                             $serials = $this->explodeSerials($reception_data['serials']);
@@ -1498,11 +1548,11 @@ class Bimp_CommandeFournLine extends FournObjectLine
             $errors[] = 'ID de la commande fournisseur absent';
             return $errors;
         }
-        
-        if ((int) $commande_fourn->isBilled()) {
-            $errors[] = 'Une facture a été créée pour cette commande fournisseur';
-            return $errors;
-        }
+
+//        if ((int) $commande_fourn->isBilled()) {
+//            $errors[] = 'Une facture a été créée pour cette commande fournisseur';
+//            return $errors;
+//        }
 
         $is_extra_line = false;
         $current_commande_status = (int) $commande_fourn->getData('fk_statut');

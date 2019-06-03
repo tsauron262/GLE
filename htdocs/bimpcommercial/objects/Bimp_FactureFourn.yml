@@ -136,6 +136,7 @@ fields:
     total: unset
     remise_globale: unset
     remise_globale_label: unset
+    zone_vente: unset
     
 forms:
     default: 

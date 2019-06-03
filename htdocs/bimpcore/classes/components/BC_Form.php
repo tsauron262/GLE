@@ -662,10 +662,6 @@ class BC_Form extends BC_Panel
 
         if (($params['data_type'] === 'id_object' || (($params['data_type'] === 'items_list') && isset($params['items_data_type']) && $params['items_data_type'] === 'id_object')) && $params['object'] && $params['create_form']) {
             $html .= self::renderCreateObjectButton($this->object, $this->identifier, $params['object'], $this->fields_prefix . $params['input_name'], $params['create_form'], $params['create_form_values'], $params['create_form_label']);
-        } else {
-            $html .= '<pre>';
-            $html .= print_r($params, 1);
-            $html .= '</pre>';
         }
 
         if ($this->object->config->isDefined($row_path . '/input')) {

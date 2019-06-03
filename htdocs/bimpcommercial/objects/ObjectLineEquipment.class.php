@@ -62,9 +62,7 @@ class ObjectLineEquipment extends BimpObject
                     if ((int) $id_equipment && $current === $id_equipment) {
                         $errors[] = 'Cet équipement a déjà été attribué';
                     } else {
-                        $this->db->update('be_equipment', array(
-                            'available' => 1
-                                ), '`id` = ' . (int) $current);
+                        $equipment->updateField('available', 1);
                     }
                 }
                 if (!count($errors) && !is_null($equipment)) {
@@ -80,6 +78,25 @@ class ObjectLineEquipment extends BimpObject
             }
         } else {
             $errors[] = 'ID de la ligne d\'équipement absent';
+        }
+
+        return $errors;
+    }
+
+    public function removeEquipment()
+    {
+        $errors = array();
+
+        if ($this->isLoaded() && (int) $this->getData('id_equipment')) {
+            $id_equipment = (int) $this->getData('id_equipment');
+            $errors = $this->updateField('id_equipment', 0);
+
+            if (!count($errors)) {
+                $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $id_equipment);
+                if (BimpObject::objectLoaded($equipment)) {
+                    $equipment->updateField('available', 1);
+                }
+            }
         }
 
         return $errors;

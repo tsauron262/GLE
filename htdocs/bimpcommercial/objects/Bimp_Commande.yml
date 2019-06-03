@@ -247,6 +247,8 @@ fields_tables:
                   callback: isEditable
             - field: validComm
             - field: validFin
+            - field: zone_vente
+              edit: 1
                   
     payment:
         rows:
@@ -337,6 +339,9 @@ forms:
             - field: model_pdf
               show: 
                   callback: isNotLoaded
+            - field: zone_vente
+              show: 
+                  callback: isLoaded
             - field: note_private
             - field: note_public
             - field: remise_globale

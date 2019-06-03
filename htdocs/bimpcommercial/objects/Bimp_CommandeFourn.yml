@@ -111,6 +111,8 @@ fields:
     date_commande: 
         label: Date de la commande
         type: date
+        input: 
+            display_now: 1
     date_livraison: 
         label: Date prévue de livraison
         type: date
@@ -160,6 +162,9 @@ fields:
         label: Facturé
         type: bool
         default_value: 0
+    status_forced: 
+        label: Status forcés
+        type: json
 #    fk_account: 
 #        label: Compte bancaire
 #        type: id_object
@@ -173,6 +178,7 @@ fields:
     fk_input_reason: unset
     remise_globale: unset
     remise_globale_label: unset
+    zone_vente: unset
     
 forms: 
     default: 
@@ -227,6 +233,47 @@ forms:
             - field: fk_soc
             - field: ref_supplier
             - field: date_livraison
+            
+    force_status: 
+        title: Forcer un statut
+        msgs: 
+            - content: Lorqu&apos;un statut est forcé, il cesse d&apos;être déterminé automatiquement<br/>Pour annuler un forçage, sélectionnez "Aucun forçage"
+              type: info
+        rows: 
+            - custom: 1
+              label: Type de statut
+              input_name: status_type
+              input: 
+                  type: select
+                  options: 
+                      reception: Statut réception
+                      invoice: Statut facturation
+            - custom: 1
+              label: Forcer le statut à
+              input_name: reception_status
+              display_if: 
+                  field_name: status_type
+                  show_values: reception
+              input: 
+                  type: select
+                  options:
+                      -1: Aucun forçage
+                      3: En attente de réception
+                      4: Reçue partiellement
+                      5: Reçue entièrement
+            - custom: 1
+              label: Forcer le statut à
+              input_name: invoice_status
+              display_if: 
+                  field_name: status_type
+                  show_values: invoice
+              input: 
+                  type: select
+                  options:
+                      -1: Aucun forçage
+                      0: Non facturée
+                      1: Facturée partiellement
+                      2: Facturée
          
 fields_tables: 
     infos: 

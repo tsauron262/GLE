@@ -282,6 +282,12 @@ class BC_List extends BC_Panel
                 $this->params['add_form_values']['associations'][$asso_name] = $value;
             }
         }
+        
+        if (isset($values['objects'])) {
+            foreach ($values['objects'] as $object_name => $value) {
+                $this->params['add_form_values']['objects'][$object_name] = $value;
+            }
+        }
     }
 
     public function setNewValues($new_values)

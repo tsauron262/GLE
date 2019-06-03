@@ -46,9 +46,9 @@ class BR_Reservation extends BimpObject
 
     public function canDelete()
     {
-//        global $user;
-//        return (int) $user->admin;
-        return 0;
+        global $user;
+        return (int) $user->admin;
+//        return 0;
     }
 
     // Getters booléens: 

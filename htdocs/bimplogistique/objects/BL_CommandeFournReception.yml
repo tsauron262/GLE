@@ -142,6 +142,19 @@ views:
                   custom: 
                       callback: renderDetailsView
                       
+filters_panel: 
+    default: 
+        filters: 
+            - field: ref
+            - field: num_reception
+            - field: id_entrepot
+            - field: id_commande_fourn
+            - field: status
+            - field: date_received
+            - field: total_ht
+            - field: total_ttc
+            - field: info
+            
 lists_cols: 
     commande: 
         field: id_commande_fourn
@@ -171,6 +184,7 @@ lists_cols:
 lists: 
     default: 
         configurable: 1
+        filters_panel: default
         sort_field: id
         sort_way: desc
         n: 25

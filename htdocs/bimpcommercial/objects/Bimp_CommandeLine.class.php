@@ -3349,8 +3349,10 @@ class Bimp_CommandeLine extends ObjectLine
         if ($current_commande_status !== 0) {
             $is_extra_line = true;
 
-            $this->set('qty_modif', (float) $this->qty);
-            $this->qty = 0;
+            if(!$force_create){
+                $this->set('qty_modif', (float) $this->qty);
+                $this->qty = 0;
+            }
             $commande->set('fk_statut', 0);
             $commande->dol_object->statut = 0;
         }

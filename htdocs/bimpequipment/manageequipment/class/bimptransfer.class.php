@@ -466,7 +466,7 @@ class BimpTransfer {
 
         $sql = 'UPDATE ' . MAIN_DB_PREFIX . 'be_transfer';
         $sql .= ' SET status=' . $code_status;
-        $sql .= ', date_closing=' . (($code_status < $this::STATUS_RECEIVED) ? ' NULL' : $this->db->idate(dol_now()));
+        $sql .= ', date_closing="' . (($code_status < $this::STATUS_RECEIVED) ? ' NULL' : $this->db->idate(dol_now())).'"';
         $sql .= ' WHERE rowid=' . $this->id;
 
         $result = $this->db->query($sql);

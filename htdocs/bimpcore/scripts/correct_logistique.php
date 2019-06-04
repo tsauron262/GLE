@@ -23,31 +23,31 @@ echo '<body>';
 global $db;
 $bdb = new BimpDb($db);
 
-//$rows = $bdb->getRows('br_commande_shipment', 1, null, 'array', array('id'));
-//
-//if (!is_null($rows) && count($rows)) {
-//    foreach ($rows as $r) {
-//        $shipment = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeShipment', (int) $r['id']);
-//        if (BimpObject::objectLoaded($shipment)) {
-//            echo 'MAJ EXPE ' . $r['id'];
-//
-//            $errors = $shipment->onLinesChange();
-//
-//            if (count($errors)) {
-//                echo 'FAIL <br/>';
-//                echo '<pre>';
-//                print_r($errors);
-//                echo '</pre>';
-//            } else {
-//                echo 'OK';
-//            }
-//        } else {
-//            echo 'EXPE D\'ID ' . $r['id'] . ' ABSENTE';
-//        }
-//
-//        echo '<br/>';
-//    }
-//}
+$rows = $bdb->getRows('br_commande_shipment', 1, null, 'array', array('id'));
+
+if (!is_null($rows) && count($rows)) {
+    foreach ($rows as $r) {
+        $shipment = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeShipment', (int) $r['id']);
+        if (BimpObject::objectLoaded($shipment)) {
+            echo 'MAJ EXPE ' . $r['id'];
+
+            $errors = $shipment->onLinesChange();
+
+            if (count($errors)) {
+                echo 'FAIL <br/>';
+                echo '<pre>';
+                print_r($errors);
+                echo '</pre>';
+            } else {
+                echo 'OK';
+            }
+        } else {
+            echo 'EXPE D\'ID ' . $r['id'] . ' ABSENTE';
+        }
+
+        echo '<br/>';
+    }
+}
 
 $rows = $bdb->getRows('bl_commande_fourn_reception', 1, null, 'array', array('id'));
 

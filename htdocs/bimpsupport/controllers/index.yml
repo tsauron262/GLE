@@ -1,4 +1,5 @@
 bootstrap: 1
+
 js:
     - /bimpcore/views/js/BimpTimer.js
     - /bimpsupport/views/js/ticket.js
@@ -12,6 +13,7 @@ objects:
     tickets:
         instance:
             bimp_object: BS_Ticket
+            
     inters: 
         instance:
             bimp_object: BS_Inter

@@ -24,6 +24,14 @@ fields:
         required: 1
         input: 
             type: hidden
+        search: 
+            input: 
+                type: search_list
+                search_list: 
+                    table: commande_fournisseur
+                    fields_search: rowid,ref
+                    field_return_label: ref
+                    field_return_value: rowid
         
     id_entrepot: 
         label: Entrepôt d'arrivée
@@ -180,6 +188,14 @@ lists_cols:
         field: total_ht
     total_ttc: 
         field: total_ttc
+    commande_status: 
+        label: Statut commande
+        field: fk_statut
+        child: parent
+    commande_invoice_status: 
+        label: Statut facturation commande
+        field: invoice_status
+        child: parent
                     
 lists: 
     default: 

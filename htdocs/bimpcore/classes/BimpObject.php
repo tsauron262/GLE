@@ -290,6 +290,27 @@ class BimpObject extends BimpCache
                 'editable' => 0
             );
         }
+
+        $parentModule = $this->getParentModule();
+        $parentObjectName = $this->getParentObjectName();
+        $parentIdProperty = $this->getParentIdProperty();
+
+        if ($parentModule && $parentObjectName && $parentIdProperty) {
+            $this->config->params['objects']['parent'] = array(
+                'relation' => 'hasOne',
+                'delete'   => 0,
+                'instance' => array(
+                    'bimp_object' => array(
+                        'module' => $parentModule,
+                        'name'   => $parentObjectName
+                    ),
+                    'id_object'   => array(
+                        'field_value' => $parentIdProperty
+                    )
+                )
+            );
+            $this->params['objects'][] = 'parent';
+        }
     }
 
     // Getters configuation: 
@@ -1725,6 +1746,10 @@ class BimpObject extends BimpCache
 
     public function getChildObject($object_name, $id_object = null)
     {
+        if ($object_name === 'parent') {
+            return $this->getParentInstance();
+        }
+        
         $child = $this->config->getObject('', $object_name, $id_object);
 
         if (!is_null($child)) {

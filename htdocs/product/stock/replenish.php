@@ -294,10 +294,17 @@ $sql.= ' ,'.$sqldesiredtock.' as desiredstock, '.$sqlalertstock.' as alertstock,
 $sql.= ' SUM('.$db->ifsql("s.reel IS NULL", "0", "s.reel").') as stock_physique';
 $sql.= ' FROM ' . MAIN_DB_PREFIX . 'product as p';
 $sql.= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'product_stock as s';
-$sql.= ' ON (p.rowid = s.fk_product AND s.fk_entrepot IN (SELECT ent.rowid FROM '.MAIN_DB_PREFIX.'entrepot AS ent WHERE ent.entity IN('.getEntity('stock').')))';
+$sql.= ' ON (p.rowid = s.fk_product AND ';
+if($fk_entrepot > 0)
+    $sql .= 's.fk_entrepot = '.$fk_entrepot;
+else
+    $sql.=  's.fk_entrepot IN (SELECT ent.rowid FROM '.MAIN_DB_PREFIX.'entrepot AS ent WHERE ent.entity IN('.getEntity('stock').'))';
+
+$sql.= ')';
 if($fk_supplier > 0) {
 	$sql.= ' INNER JOIN '.MAIN_DB_PREFIX.'product_fournisseur_price pfp ON (pfp.fk_product = p.rowid AND pfp.fk_soc = '.$fk_supplier.')';
 }
+//todo ajouter left join s2 avec filtre entrepot
 if(!empty($conf->global->STOCK_ALLOW_ADD_LIMIT_STOCK_BY_WAREHOUSE) && $fk_entrepot > 0) {
 	$sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.'product_warehouse_properties AS pse ON (p.rowid = pse.fk_product AND pse.fk_entrepot = '.$fk_entrepot.')';
 }
@@ -581,7 +588,7 @@ while ($i < ($limit ? min($num, $limit) : $num))
 		{
 			$stock = $prod->stock_reel;
 		}
-                if($fk_entrepot > 0)
+//                if($fk_entrepot > 0)
                     $stock = $objp->stock_physique;
 
 		// Force call prod->load_stats_xxx to choose status to count (otherwise it is loaded by load_stock function)

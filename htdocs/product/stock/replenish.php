@@ -581,6 +581,8 @@ while ($i < ($limit ? min($num, $limit) : $num))
 		{
 			$stock = $prod->stock_reel;
 		}
+                if($fk_entrepot > 0)
+                    $stock = $objp->stock_physique;
 
 		// Force call prod->load_stats_xxx to choose status to count (otherwise it is loaded by load_stock function)
 		if(isset($draftchecked)){

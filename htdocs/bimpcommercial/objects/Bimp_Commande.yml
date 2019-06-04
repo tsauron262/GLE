@@ -207,6 +207,8 @@ fields:
         type: id_object
         object: user_resp
         default_value: 0
+        input: 
+            type: search_user
         
     total: unset
     
@@ -221,6 +223,10 @@ fields:
             societe_type: customer
             card: default
             help: Laissez vide si même client
+            
+    status_forced: 
+        label: Status forcés
+        type: json
         
 fields_tables: 
     infos: 

@@ -339,9 +339,22 @@ filters_panels:
             - field: id_entrepot
             - field: status
             - field: date_shipped
+            - field: id_user_resp
+              child: parent
             - field: total_ht
             - field: total_ttc
             - field: info
+            - field: fk_statut
+              child: parent
+            - field: logistique_status
+              child: parent
+            - field: shipment_status
+              child: parent
+            - field: invoice_status
+              child: parent
+            - field: date_commande
+              child: parent
+            - field: id_facture
             
 lists: 
     default: 

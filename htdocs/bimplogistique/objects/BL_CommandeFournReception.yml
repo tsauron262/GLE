@@ -162,6 +162,10 @@ filters_panel:
             - field: total_ht
             - field: total_ttc
             - field: info
+            - field: fk_statut
+              child: parent
+            - field: invoice_status
+              child: parent
             
 lists_cols: 
     commande: 

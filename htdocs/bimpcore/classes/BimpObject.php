@@ -361,6 +361,19 @@ class BimpObject extends BimpCache
         return $property;
     }
 
+    public function getChildIdProperty($child_name)
+    {
+        if ($child_name === 'parent') {
+            return $this->getParentIdProperty();
+        }
+        
+        if (isset($this->config->params['objects'][$child_name]['instance']['id_object']['field_value'])) {
+            return $this->config->params['objects'][$child_name]['instance']['id_object']['field_value'];
+        }
+
+        return '';
+    }
+
     public function getParentId()
     {
         $prop = $this->getParentIdProperty();
@@ -1749,7 +1762,7 @@ class BimpObject extends BimpCache
         if ($object_name === 'parent') {
             return $this->getParentInstance();
         }
-        
+
         $child = $this->config->getObject('', $object_name, $id_object);
 
         if (!is_null($child)) {
@@ -1942,7 +1955,9 @@ class BimpObject extends BimpCache
         $sql .= BimpTools::getSqlWhere($filters);
         $sql .= BimpTools::getSqlOrderBy($order_by, $order_way, 'a', $extra_order_by, $extra_order_way);
         $sql .= BimpTools::getSqlLimit($n, $p);
-
+//
+//        echo $sql; exit;
+        
         if (BimpDebug::isActive('bimpcore/objects/print_list_sql') || BimpTools::isSubmit('list_sql')) {
             echo BimpRender::renderDebugInfo($sql, 'SQL Liste - Module: "' . $this->module . '" Objet: "' . $this->object_name . '"');
         }
@@ -5785,12 +5800,25 @@ class BimpObject extends BimpCache
 
             $filters = (isset($data['filters']) && is_array($data['filters']) ? $data['filters'] : array());
 
-            $values = array();
+            $values = array(
+                'fields'   => array(),
+                'children' => array()
+            );
             if (!empty($filters)) {
-                foreach ($filters as $field_name => $filter) {
+                foreach ($filters['fields'] as $field_name => $filter) {
                     if (isset($filter['values']) && is_array($filter['values']) && !empty($filter['values'])) {
-                        $values[$field_name] = $filter['values'];
+                        $values['fields'][$field_name] = $filter['values'];
                     }
+                }
+                foreach ($filters['children'] as $child => $fields) {
+                    if (!isset($values['children'][$child])) {
+                        $values['children'][$child] = array();
+                    }
+
+                    foreach ($fields as $field_name => $filter)
+                        if (isset($filter['values']) && is_array($filter['values']) && !empty($filter['values'])) {
+                            $values['children'][$child][$field_name] = $filter['values'];
+                        }
                 }
             }
 

@@ -399,7 +399,7 @@ lists:
         add_form_name: default
         edit_form: default
         modal_view: default
-        objects_change_reload: BR_Reservation,BR_ReservationShipment,BR_Service,BR_ServiceShipment
+        objects_change_reload: BR_Reservation,Bimp_CommandeLine,Bimp_Commande
         extra_btn: 
             callback: getExtraBtn
         cols:

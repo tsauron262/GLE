@@ -35,6 +35,11 @@ class Bimp_Commande extends BimpComm
         1 => array('label' => 'Facturée partiellement', 'icon' => 'fas_file-invoice-dollar', 'classes' => array('warning')),
         2 => array('label' => 'Facturée', 'icon' => 'fas_file-invoice-dollar', 'classes' => array('success'))
     );
+    public static $revalorisations = array(
+        0 => array('label' => 'NON', 'icon' => 'fas_times', 'classes' => array('danger')),
+        1 => array('label' => 'OUI', 'icon' => 'fas_exclamation', 'classes' => array('warning')),
+        2 => array('label' => 'Traité', 'icon' => 'fas_check', 'classes' => array('success'))
+    );
     public static $logistique_active_status = array(1, 2, 3);
 
     // Gestion des droits et autorisations: 
@@ -1518,7 +1523,7 @@ class Bimp_Commande extends BimpComm
         return $errors;
     }
 
-    // Checks statuts: 
+    // Checks status: 
 
     public function checkLogistiqueStatus()
     {
@@ -1571,7 +1576,7 @@ class Bimp_Commande extends BimpComm
             if (isset($status_forced['shipment']) && (int) $status_forced['shipment']) {
                 return;
             }
-            
+
             $lines = $this->getLines('not_text');
 
             $hasShipment = 0;
@@ -1612,7 +1617,7 @@ class Bimp_Commande extends BimpComm
             if (isset($status_forced['invoice']) && (int) $status_forced['invoice']) {
                 return;
             }
-            
+
             $lines = $this->getLines('not_text');
 
             $hasInvoice = 0;
@@ -1642,6 +1647,15 @@ class Bimp_Commande extends BimpComm
             if ($new_status !== $current_status) {
                 $this->updateField('invoice_status', $new_status);
             }
+        }
+    }
+
+    // Gestion des lignes:
+
+    public function setRevalorisation()
+    {
+        if (!(int) $this->getData('revalorisation')) {
+            $this->updateField('revalorisation', 1);
         }
     }
 

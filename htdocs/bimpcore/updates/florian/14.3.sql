@@ -1,0 +1,1 @@
+ALTER TABLE `llx_commande` ADD `revalorisation` INT NOT NULL DEFAULT '0'; 

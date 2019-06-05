@@ -1263,7 +1263,7 @@ class Bimp_Commande extends BimpComm
 
     // Traitements factures: 
 
-    public function createFacture(&$errors = array(), $id_client = null, $id_contact = null, $cond_reglement = null, $id_account = null, $public_note = '', $private_note = '')
+    public function createFacture(&$errors = array(), $id_client = null, $id_contact = null, $cond_reglement = null, $id_account = null, $public_note = '', $private_note = '', $remises = array())
     {
         if (!$this->isLoaded()) {
             $errors[] = 'ID de la commande client absent ou invalide';
@@ -1339,6 +1339,18 @@ class Bimp_Commande extends BimpComm
         $asso = new BimpAssociation($this, 'factures');
         $asso->addObjectAssociation($id_facture);
 
+        // Insertion des accomptes:
+        if (count($remises)) {
+            foreach ($remises as $id_remise) {
+                $facture->dol_object->error = '';
+                $facture->dol_object->errors = array();
+
+                if ($facture->dol_object->insert_discount((int) $id_remise) <= 0) {
+                    $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($facture->dol_object), 'Echec de l\'insertion de la remise client d\'ID ' . $id_remise);
+                }
+            }
+        }
+        
         return $id_facture;
     }
 
@@ -1835,11 +1847,11 @@ class Bimp_Commande extends BimpComm
                     $id_contact = isset($data['id_contact']) ? $data['id_contact'] : null;
                     $id_cond_reglement = isset($data['id_cond_reglement']) ? $data['id_cond_reglement'] : null;
                     $id_account = isset($data['id_account']) ? (int) $data['id_account'] : null;
-                    $remises = isset($data['id_remises_list']) ? (int) $data['id_remises_list'] : array();
-                    $note_public = isset($data['note_public']) ? (int) $data['note_public'] : '';
-                    $note_private = isset($data['note_private']) ? (int) $data['note_private'] : '';
-
-                    $id_facture = $this->createFacture($errors, $id_client, $id_contact, $id_cond_reglement, $id_account, $note_public, $note_private);
+                    $remises = isset($data['id_remises_list']) ? $data['id_remises_list'] : array();
+                    $note_public = isset($data['note_public']) ? $data['note_public'] : '';
+                    $note_private = isset($data['note_private']) ? $data['note_private'] : '';
+                    
+                    $id_facture = $this->createFacture($errors, $id_client, $id_contact, $id_cond_reglement, $id_account, $note_public, $note_private, $remises);
 
                     // Ajout des lignes à la facture: 
                     if ($id_facture && !count($errors)) {

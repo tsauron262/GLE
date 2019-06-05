@@ -1,7 +1,5 @@
 <?php
 
-//$path = dirname(__FILE__) . '/';
-
 if(!isset($conf))
     require_once('../../main.inc.php');
 include_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
@@ -113,7 +111,7 @@ class RemindEndService {
                 }
             } else {
                 $this->errors[] = "Le module bimptask n'est pas activé,"
-                        . " le rappel des tâche urgente pour les commerciaux n'est pas pû être effectué";
+                        . " le rappel des tâches urgentes pour les commerciaux n'a pas pû être effectué";
             }
         }
 

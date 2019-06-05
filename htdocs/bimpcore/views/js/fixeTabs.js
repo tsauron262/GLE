@@ -2,12 +2,12 @@ var window_active = true;
 var reload_fixe_tabs_hold = false;
 var randomId = getRandomInt(9999999999999);
 var reload_fixe_tabs_processing = false;
-
+ 
 function reloadFixeTabs(iterate, reload_fixe_tabs_delay) {
     if (!window_active || reload_fixe_tabs_processing) {
         return;
     }
-
+ 
     if (!reload_fixe_tabs_delay) {
         reload_fixe_tabs_delay = 1000;
     }
@@ -16,7 +16,7 @@ function reloadFixeTabs(iterate, reload_fixe_tabs_delay) {
 //            reloadFixeTabs(iterate);
 //        }, 3000);
 //    } else {
-
+ 
     reload_fixe_tabs_processing = true;
     BimpAjax('loadFixeTabs', {randomId: randomId}, null, {
         display_success: false,
@@ -28,13 +28,13 @@ function reloadFixeTabs(iterate, reload_fixe_tabs_delay) {
                 $('#bimp_fixe_tabs').html(result.html);
             }
             setFixeTabsEvents();
-
+ 
             if (iterate) {
                 setTimeout(function () {
                     reloadFixeTabs(true);
                 }, reload_fixe_tabs_delay);
             }
-
+ 
             $('body').trigger($.Event('fixeTabsReloaded', {}));
         },
         error: function () {
@@ -45,12 +45,12 @@ function reloadFixeTabs(iterate, reload_fixe_tabs_delay) {
                 }, reload_fixe_tabs_delay);
             }
         }
-
+ 
     });
-
+ 
 //    }
 }
-
+ 
 function setFixeTabsEvents() {
     $('#bimp_fixe_tabs_captions').find('.fixe_tab_caption').each(function () {
         if (!parseInt($(this).data('fixe_tab_caption_event_init'))) {
@@ -66,22 +66,22 @@ function setFixeTabsEvents() {
                 }
                 $('#bimp_fixe_tabs_contents').stop().slideDown(250);
             });
-
+ 
             $(this).data('fixe_tab_caption_event_init', 1);
         }
     });
-
+ 
     $('bimp_fixe_tabs_contents').each(function () {
         if (!parseInt($(this).data('fixe_tab_content_event_init'))) {
             setCommonEvents($(this));
         }
     });
 }
-
+ 
 $(document).ready(function () {
     if (!parseInt($(this).data('fixe_tabs_events_init'))) {
         setFixeTabsEvents();
-
+ 
         $('#bimp_fixe_tabs').mouseleave(function () {
             reload_fixe_tabs_hold = false;
             $(this).find('.fixe_tab_caption').removeClass('active');
@@ -90,7 +90,7 @@ $(document).ready(function () {
                 $(this).removeAttr('style');
             });
         });
-
+ 
         $('body').on('objectChange', function (e) {
             if (e.module === 'bimpsupport') {
                 if (e.object_name === 'BS_Ticket' ||
@@ -99,7 +99,7 @@ $(document).ready(function () {
                 }
             }
         });
-
+ 
         $('body').on('objectDelete', function (e) {
             if (e.module === 'bimpsupport') {
                 if (e.object_name === 'BS_Ticket' ||
@@ -111,7 +111,7 @@ $(document).ready(function () {
         setTimeout(function () {
             reloadFixeTabs(true);
         }, 2000);
-
+ 
         if (!parseInt($(window).data('focus_event_init'))) {
             $(window).focus(function () {
                 window_active = true;
@@ -120,10 +120,10 @@ $(document).ready(function () {
             $(window).blur(function () {
                 window_active = false;
             });
-
+ 
             $(window).data('focus_event_init', 1);
         }
-
+ 
         $(this).data('fixe_tabs_events_init', 1);
     }
 });

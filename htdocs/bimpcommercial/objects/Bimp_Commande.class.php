@@ -38,7 +38,7 @@ class Bimp_Commande extends BimpComm
     public static $logistique_active_status = array(1, 2, 3);
 
     // Gestion des droits et autorisations: 
-    
+
     public function canCreate()
     {
         if (defined('NOLOGIN')) {
@@ -88,6 +88,9 @@ class Bimp_Commande extends BimpComm
                 return (int) $this->can("create");
 
             case 'processLogitique':
+                return 1;
+
+            case 'forceStatus':
                 return 1;
         }
         return 1;
@@ -146,6 +149,13 @@ class Bimp_Commande extends BimpComm
                 }
                 if ((int) $this->getData('logistique_status') > 0) {
                     $errors[] = 'La logistique est déjà prise en charge pour cette commande';
+                    return 0;
+                }
+                return 1;
+
+            case 'forceStatus':
+                if (!$this->isLogistiqueActive()) {
+                    $errors[] = 'La logistique n\'est pas active';
                     return 0;
                 }
                 return 1;
@@ -373,6 +383,27 @@ class Bimp_Commande extends BimpComm
                         'confirm_msg' => $langs->trans('ConfirmCancelOrder', $ref)
                     ))
                 );
+            }
+
+            // Forcer statut: 
+            if ($this->isActionAllowed('forceStatus')) {
+                if ($this->canSetAction('forceStatus')) {
+                    $buttons[] = array(
+                        'label'   => 'Forcer un statut',
+                        'icon'    => 'far_check-square',
+                        'onclick' => $this->getJsActionOnclick('forceStatus', array(), array(
+                            'form_name' => 'force_status'
+                        )),
+                    );
+                } else {
+                    $buttons[] = array(
+                        'label'    => 'Forcer un statut',
+                        'icon'     => 'far_check-square',
+                        'onclick'  => '',
+                        'disabled' => 1,
+                        'popover'  => 'Vous n\'avez pas la permission'
+                    );
+                }
             }
 
             if ($user->admin) {
@@ -806,7 +837,7 @@ class Bimp_Commande extends BimpComm
                 $html .= $line->getData('position');
                 $html .= '</td>';
                 $html .= '<td>';
-                $html .= $line->displayLineData('desc');
+                $html .= $line->displayLineData('desc_light');
                 $html .= '</td>';
                 $html .= '<td>';
                 $html .= $line->displayLineData('pu_ht');
@@ -1216,7 +1247,7 @@ class Bimp_Commande extends BimpComm
             $lines = $this->getChildrenObjects('lines');
 
             foreach ($lines as $line) {
-                $errors = array_merge($errors, $line->createReservation());
+                $errors = array_merge($errors, $line->checkReservations());
             }
         } else {
             $errors[] = 'ID de la commande absent';
@@ -1492,6 +1523,12 @@ class Bimp_Commande extends BimpComm
     public function checkLogistiqueStatus()
     {
         if ($this->isLoaded()) {
+            $status_forced = $this->getData('status_forced');
+
+            if (isset($status_forced['logistique']) && (int) $status_forced['logistique']) {
+                return;
+            }
+
             if (!in_array((int) $this->getData('logistique_status'), array(0, 4, 5))) {
                 $lines = $this->getLines('not_text');
 
@@ -1529,6 +1566,12 @@ class Bimp_Commande extends BimpComm
     public function checkShipmentStatus()
     {
         if ($this->isLoaded()) {
+            $status_forced = $this->getData('status_forced');
+
+            if (isset($status_forced['shipment']) && (int) $status_forced['shipment']) {
+                return;
+            }
+            
             $lines = $this->getLines('not_text');
 
             $hasShipment = 0;
@@ -1564,6 +1607,12 @@ class Bimp_Commande extends BimpComm
     public function checkInvoiceStatus()
     {
         if ($this->isLoaded()) {
+            $status_forced = $this->getData('status_forced');
+
+            if (isset($status_forced['invoice']) && (int) $status_forced['invoice']) {
+                return;
+            }
+            
             $lines = $this->getLines('not_text');
 
             $hasInvoice = 0;
@@ -1936,6 +1985,106 @@ class Bimp_Commande extends BimpComm
             'errors'           => $errors,
             'warnings'         => $warnings,
             'success_callback' => 'bimp_reloadPage();'
+        );
+    }
+
+    public function actionForceStatus($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Statut forcé enregistré avec succès';
+
+        if (!isset($data['status_type']) || !(string) $data['status_type']) {
+            $errors[] = 'Type de statut absent';
+        }
+
+        if (!count($errors)) {
+            $status_forced = $this->getData('status_forced');
+
+            switch ($data['status_type']) {
+                case 'logistique':
+                    if (!isset($data['logistique_status'])) {
+                        $errors[] = 'Statut logistique absent';
+                    } elseif (!in_array((int) $data['logistique_status'], array(-1, 0, 1, 2, 3, 4, 5))) {
+                        $errors[] = 'Statut logistique invalide';
+                    } else {
+                        if ((int) $data['logistique_status'] === -1) {
+                            if (isset($status_forced['logistique'])) {
+                                unset($status_forced['logistique']);
+                                $errors = $this->updateField('status_forced', $status_forced);
+                            }
+                            if (!count($errors)) {
+                                $this->checkLogistiqueStatus();
+                            }
+                        } else {
+                            $status_forced['logistique'] = 1;
+                            $sub_errors = $this->updateField('logistique_status', (int) $data['logistique_status']);
+                            if (count($sub_errors)) {
+                                $errors[] = BimpTools::getMsgFromArray($sub_errors, 'Echec de la mise à jour du statut logistique de la commande');
+                            } else {
+                                $errors = $this->updateField('status_forced', $status_forced);
+                            }
+                        }
+                    }
+                    break;
+
+                case 'shipment':
+                    if (!isset($data['shipment_status'])) {
+                        $errors[] = 'Statut expédition absent';
+                    } elseif (!in_array((int) $data['shipment_status'], array(-1, 0, 1, 2))) {
+                        $errors[] = 'Statut expédition invalide';
+                    } else {
+                        if ((int) $data['shipment_status'] === -1) {
+                            if (isset($status_forced['shipment'])) {
+                                unset($status_forced['shipment']);
+                                $errors = $this->updateField('status_forced', $status_forced);
+                            }
+                            if (!count($errors)) {
+                                $this->checkShipmentStatus();
+                            }
+                        } else {
+                            $status_forced['shipment'] = 1;
+                            $sub_errors = $this->updateField('shipment_status', (int) $data['shipment_status']);
+                            if (count($sub_errors)) {
+                                $errors[] = BimpTools::getMsgFromArray($sub_errors, 'Echec de la mise à jour du statut expédition de la commande');
+                            } else {
+                                $errors = $this->updateField('status_forced', $status_forced);
+                            }
+                        }
+                    }
+                    break;
+
+                case 'invoice':
+                    if (!isset($data['invoice_status'])) {
+                        $errors[] = 'Statut facturation absent';
+                    } elseif (!in_array((int) $data['invoice_status'], array(-1, 0, 1, 2))) {
+                        $errors[] = 'Statut facturation invalide';
+                    } else {
+                        if ((int) $data['invoice_status'] === -1) {
+                            if (isset($status_forced['invoice'])) {
+                                unset($status_forced['invoice']);
+                                $errors = $this->updateField('status_forced', $status_forced);
+                            }
+                            if (!count($errors)) {
+                                $this->checkInvoiceStatus();
+                            }
+                        } else {
+                            $status_forced['invoice'] = 1;
+                            $sub_errors = $this->updateField('invoice_status', (int) $data['invoice_status']);
+                            if (count($sub_errors)) {
+                                $errors[] = BimpTools::getMsgFromArray($sub_errors, 'Echec de la mise à jour du statut facturation de la commande');
+                            } else {
+                                $errors = $this->updateField('status_forced', $status_forced);
+                            }
+                        }
+                    }
+                    break;
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
         );
     }
 

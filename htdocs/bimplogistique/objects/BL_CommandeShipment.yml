@@ -25,6 +25,14 @@ fields:
         required: 1
         input: 
             type: hidden
+        search: 
+            input: 
+                type: search_list
+                search_list: 
+                    table: commande
+                    fields_search: rowid,ref
+                    field_return_label: ref
+                    field_return_value: rowid
         
     id_entrepot: 
         label: Entrepôt de départ
@@ -82,6 +90,16 @@ fields:
             note: 1
             auto_expand: 1
             rows: 3
+            
+    total_ht: 
+        label: Total HT
+        type: money
+        default_value: 0
+        
+    total_ttc: 
+        label: Total TTC
+        type: money
+        default_value: 0
         
 forms: 
     default: 
@@ -227,6 +245,8 @@ fields_tables:
               display: card
               show: 
                   field_value: id_facture
+            - field: total_ht
+            - field: total_ttc
             
 views: 
     default: 
@@ -290,9 +310,56 @@ lists_cols:
     facture: 
         field: id_facture
         display: nom_url
+    total_ht: 
+        field: total_ht
+    total_ttc: 
+        field: total_ttc
+    commande_status: 
+        label: Statut commande
+        field: fk_statut
+        child: parent
+    commande_logistique_status: 
+        label: Statut logistique commande
+        field: logistique_status
+        child: parent
+    commande_shipment_status: 
+        label: Statut expéditions commande
+        field: shipment_status
+        child: parent
+    commande_invoice_status: 
+        label: Statut facturation commande
+        field: invoice_status
+        child: parent
                     
+filters_panels: 
+    default: 
+        filters: 
+            - field: num_livraison
+            - field: id_commande_client
+            - field: id_entrepot
+            - field: status
+            - field: date_shipped
+            - field: id_user_resp
+              child: parent
+            - field: total_ht
+            - field: total_ttc
+            - field: info
+            - field: fk_statut
+              child: parent
+            - field: logistique_status
+              child: parent
+            - field: shipment_status
+              child: parent
+            - field: invoice_status
+              child: parent
+            - field: date_commande
+              child: parent
+            - field: id_facture
+            
 lists: 
     default: 
+        configurable: 1
+        filters_panel: default
         sort_field: id
         sort_way: desc
         n: 25
@@ -310,11 +377,13 @@ lists:
             status: 
             contact: 
             commercial: 
+            total_ht: 
             date: 
             signed: 
             pdf:
                     
     commandes: 
+        configurable: 1
         checkboxes: 1
         bulk_actions: 
             callback: getCommandesListbulkActions
@@ -339,6 +408,7 @@ lists:
             status: 
             contact: 
             date: 
+            total_ht: 
             signed: 
             facture: 
             pdf:

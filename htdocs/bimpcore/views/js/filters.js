@@ -123,39 +123,43 @@ function removeBimpFilterValue(e, $button) {
     }
 }
 
-function getAllListFieldsFilters($filters, width_open_value) {
-    if (typeof (width_open_value) === 'undefined') {
-        width_open_value = true;
+function getAllListFieldsFilters($filters, with_open_value) {
+    if (typeof (with_open_value) === 'undefined') {
+        with_open_value = true;
     }
 
-    var filters = {};
+    var filters = {
+        fields: {},
+        children: {}
+    };
 
     if ($.isOk($filters)) {
         $filters.find('.bimp_filter_container').each(function () {
             var $container = $(this);
             var field_name = $container.data('field_name');
+            var child_name = $container.data('child_name');
 
-            filters[field_name] = {
+            var filter = {
                 values: []
             };
 
-            if (width_open_value) {
+            if (with_open_value) {
                 var open = 1;
                 if ($container.hasClass('closed')) {
                     open = 0;
                 }
-                filters[field_name].open = open;
+                filter.open = open;
             }
 
             if ($container.data('type') === 'check_list') {
                 $container.find('[name="add_' + field_name + '_filter[]"]').each(function () {
                     if ($(this).prop('checked')) {
-                        filters[field_name].values.push($(this).val());
+                        filter.values.push($(this).val());
                     }
                 });
             } else {
                 $container.find('.bimp_filter_value').each(function () {
-                    filters[field_name].values.push($(this).data('value'));
+                    filter.values.push($(this).data('value'));
                 });
             }
 
@@ -163,23 +167,32 @@ function getAllListFieldsFilters($filters, width_open_value) {
                 switch ($container.data('type')) {
                     case 'value':
                     case 'value_part':
-                        filters[field_name].values.push($container.find('[name="add_' + field_name + '_filter"]').val());
+                        filter.values.push($container.find('[name="add_' + field_name + '_filter"]').val());
                         break;
 
                     case 'date_range':
                         var values = {};
                         values.min = $container.find('[name="add_' + field_name + '_filter_from"]').val();
                         values.max = $container.find('[name="add_' + field_name + '_filter_to"]').val();
-                        filters[field_name].values.push(values);
+                        filter.values.push(values);
                         break;
 
                     case 'range':
                         var values = {};
                         values.min = $container.find('[name="add_' + field_name + '_filter_min"]').val();
                         values.max = $container.find('[name="add_' + field_name + '_filter_max"]').val();
-                        filters[field_name].values.push(values);
+                        filter.values.push(values);
                         break;
                 }
+            }
+
+            if (child_name) {
+                if (typeof (filters['children'][child_name]) === 'undefined') {
+                    filters['children'][child_name] = {};
+                }
+                filters['children'][child_name][field_name] = filter;
+            } else {
+                filters['fields'][field_name] = filter;
             }
         });
     }
@@ -285,6 +298,8 @@ function loadSavedFilters($button, filters_id) {
                     append_html: true,
                     remove_current_content: false,
                     success: function (result, bimpAjax) {
+                        var $filters = bimpAjax.$resultContainer.find('.object_filters_panel');
+                        onListFiltersPanelLoaded($filters);
                         $('body').trigger($.Event('listFiltersChange', {
                             $filters: bimpAjax.$filters
                         }));

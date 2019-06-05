@@ -175,8 +175,11 @@ class histoNavigation {
             $obj = self::getObj($element_type);
             if ($obj) {
                 if($obj->fetch($element_id)){
-                    if(method_exists($obj, "getData"))
-                            $ref = $obj->getData("ref");
+//                    if(method_exists($obj, "getData"))
+//                            $ref = $obj->getData("ref");
+                    if(method_exists($obj, "getName")){
+                            $ref = $obj->getName();
+                    }
                     else
                         $ref = $obj->ref;
                     global $user, $db;

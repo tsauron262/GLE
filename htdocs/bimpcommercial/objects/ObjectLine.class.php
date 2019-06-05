@@ -51,6 +51,47 @@ class ObjectLine extends BimpObject
     protected $bimp_line_only = false;
     protected $remises_total_infos = null;
 
+    // Gestion des droits utilisateurs:
+
+    public function canEditField($field_name)
+    {
+        switch ($field_name) {
+            case 'pu_ht':
+                return $this->canEditPrixVente();
+
+            case 'pa_ht':
+                return $this->canEditPrixAchat();
+        }
+
+        return parent::canEditField($field_name);
+    }
+
+    public function canEditPrixAchat()
+    {
+        global $user;
+        if (isset($user->rights->bimpcommercial->priceAchat) && (int) $user->rights->bimpcommercial->priceAchat) {
+            return 1;
+        }
+        return 0;
+    }
+
+    public function canEditPrixVente()
+    {
+        global $user;
+        if (isset($user->rights->bimpcommercial->priceVente) && (int) $user->rights->bimpcommercial->priceVente == 1) {
+            return 1;
+        }
+        if ($this->getChildObject("product") && $this->getChildObject("product")->id > 0)
+            if ($this->getChildObject("product")->getData("price") == 1 || $this->getChildObject("product")->getData("price") == 0)
+                return 1;
+        return 0;
+    }
+
+    public function canEditRemisePa()
+    {
+        return 0;
+    }
+
     // Getters booléens: 
 
     public function isCreatable($force_create = false)
@@ -114,11 +155,22 @@ class ObjectLine extends BimpObject
 
     public function isFieldEditable($field, $force_edit = false)
     {
-        global $user;
-        if (in_array($field, array("pu_ht"))) {
-            return $this->canEditPrixVente();
+        switch ($field) {
+            case 'remisable':
+                $product = $this->getProduct();
+                if (BimpObject::objectLoaded($product)) {
+                    if (!(int) $product->getData('remisable')) {
+                        return 0;
+                    }
+                }
+
+                if ((float) $this->getTotalHT() < 0) {
+                    return 0;
+                }
+
+                return 1;
         }
-//        
+
         return parent::isFieldEditable($field, $force_edit);
     }
 
@@ -149,6 +201,11 @@ class ObjectLine extends BimpObject
                 return 0;
             }
         }
+
+        if ((float) $this->getTotalHT() < 0) {
+            return 0;
+        }
+
         return (int) $this->getData('remisable');
     }
 
@@ -579,42 +636,31 @@ class ObjectLine extends BimpObject
 
     public function getIdFournPriceFromPost()
     {
-        $id = 0;
+        $id = BimpTools::getPostFieldValue('id_fourn_price', null);
 
-        if (BimpTools::isSubmit('id_fourn_price')) {
-            $id = (int) BimpTools::getValue('id_fourn_price', 0);
-        } elseif (BimpTools::isSubmit('fields/id_fourn_price')) {
-            $id = (int) BimpTools::getValue('fields/id_fourn_price', 0);
-        } else {
-            $id = (int) $this->id_fourn_price;
+        if (!is_null($id)) {
+            $this->id_fourn_price = (int) $id;
         }
 
-        $this->id_fourn_price = $id;
-
-        return $id;
+        return (int) $this->id_fourn_price;
     }
 
     public function getIdProductFromPost()
     {
         if (is_null($this->post_id_product) || !(int) $this->post_id_product) {
             $id_product = 0;
-            $id_equipment = 0;
+            $id_equipment = null;
 
             if (!$this->no_equipment_post) {
-                if (BimpTools::isSubmit('id_equipment')) {
-                    $id_equipment = (int) BimpTools::getValue('id_equipment');
-                } elseif (BimpTools::isSubmit('fields/id_equipment')) {
-                    $id_equipment = (int) BimpTools::getValue('fields/id_equipment');
-                } elseif (BimpTools::isSubmit('param_values/fields/id_equipment')) {
-                    $id_equipment = (int) BimpTools::getValue('param_values/fields/id_equipment');
-                }
+                $id_equipment = BimpTools::getPostFieldValue('id_equipment', null);
             }
 
-            if (!$id_equipment && BimpObject::objectLoaded($this->post_equipment)) {
+            if (is_null($id_equipment) && BimpObject::objectLoaded($this->post_equipment)) {
                 $id_equipment = (int) $this->post_equipment->id;
             }
 
-            if ($id_equipment) {
+            if (!is_null($id_equipment)) {
+                $id_equipment = (int) $id_equipment;
                 if (!BimpObject::objectLoaded($this->post_equipment) || ($this->post_equipment->id !== $id_equipment)) {
                     if (BimpObject::objectLoaded($this->post_equipment)) {
                         unset($this->post_equipment);
@@ -632,14 +678,12 @@ class ObjectLine extends BimpObject
             }
 
             if (!$id_product) {
-                if (BimpTools::isSubmit('id_product')) {
-                    $id_product = (int) BimpTools::getValue('id_product', 0);
-                } elseif (BimpTools::isSubmit('fields/id_product')) {
-                    $id_product = BimpTools::getValue('fields/id_product', 0);
-                } elseif (BimpTools::isSubmit('param_values/fields/id_product')) {
-                    $id_product = BimpTools::getValue('param_values/fields/id_product', 0);
-                } elseif ((int) $this->id_product) {
+                $id_product = BimpTools::getPostFieldValue('id_product', null);
+
+                if (is_null($id_product)) {
                     $id_product = (int) $this->id_product;
+                } else {
+                    $id_product = (int) $id_product;
                 }
             }
 
@@ -660,6 +704,14 @@ class ObjectLine extends BimpObject
 
     public function getValueByProduct($field)
     {
+        if ($field === 'tva_tx') {
+            $parent = $this->getParentInstance();
+
+            if (BimpObject::objectLoaded($parent) && !$parent->isTvaActive()) {
+                return 0;
+            }
+        }
+
         $product = $this->getProduct();
 
         if (BimpObject::objectLoaded($product)) {
@@ -673,7 +725,7 @@ class ObjectLine extends BimpObject
                     }
                     $pu_ht = $this->pu_ht;
                     if ($this->isLoaded() && $this->field_exists('def_pu_ht')) {
-                        $pu_ht = (float) $this->getData('def_pu_ht');
+                        $pu_ht = $this->getData('def_pu_ht');
                     }
                     if ($id_product && (is_null($pu_ht) || (int) $this->id_product !== $id_product)) {
                         return $product->getData('price');
@@ -689,14 +741,14 @@ class ObjectLine extends BimpObject
                         return (float) $product->getData('tva_tx');
                     }
                     if (is_null($tva_tx)) {
-                        $tva_tx = 20;
+                        $tva_tx = BimpTools::getDefaultTva();
                     }
                     return (float) $tva_tx;
 
                 case 'id_fourn_price':
-                    $id_fourn_price = (int) $this->id_fourn_price;
+                    $id_fourn_price = $this->id_fourn_price;
                     if ($this->isLoaded() && $this->field_exists('def_id_fourn_price')) {
-                        $id_fourn_price = (int) $this->getData('def_id_fourn_price');
+                        $id_fourn_price = $this->getData('def_id_fourn_price');
                     }
                     if ($id_product && (is_null($id_fourn_price) || (int) $this->id_product !== $id_product)) {
                         if ((int) $this->id_fourn_price) {
@@ -707,19 +759,11 @@ class ObjectLine extends BimpObject
                                 }
                             }
                         }
-                        $sql = 'SELECT MAX(fp.rowid) as id FROM ' . MAIN_DB_PREFIX . 'product_fournisseur_price fp WHERE fp.fk_product = ' . (int) $id_product;
-                        $result = $this->db->executeS($sql);
-                        if (isset($result[0]->id)) {
-                            return (int) $result[0]->id;
-                        }
-//                        BimpTools::loadDolClass('fourn', 'fournisseur.product', 'ProductFournisseur');
-//                        $pf = new ProductFournisseur($this->db->db);
-//                        if ($pf->find_min_price_product_fournisseur($id_product, $this->getData('qty'))) {
-//                            return (int) $pf->product_fourn_price_id;
-//                        }
-                        return 0;
+
+                        // Récupération du dernier prix d'achat enregistré: 
+                        return (int) $product->getCurrentFournPriceId();
                     }
-                    return $id_fourn_price;
+                    return (int) $id_fourn_price;
 
                 case 'remisable':
                     if ($id_product && (int) $this->id_product !== $id_product) {
@@ -785,6 +829,19 @@ class ObjectLine extends BimpObject
         }
 
         return $this->product;
+    }
+
+    public function getEquipmentLine($id_equipment)
+    {
+        if ($this->isLoaded() && static::$parent_comm_type && (int) $id_equipment) {
+            return BimpCache::findBimpObjectInstance('bimpcommercial', 'ObjectLineEquipment', array(
+                        'id_object_line' => (int) $this->id,
+                        'object_type'    => static::$parent_comm_type,
+                        'id_equipment'   => (int) $id_equipment
+                            ), true);
+        }
+
+        return null;
     }
 
     public function getEquipmentLines()
@@ -1304,6 +1361,10 @@ class ObjectLine extends BimpObject
         $errors = array();
 
         if (BimpObject::objectLoaded($line)) {
+            if ($this->isLoaded()) {
+                BimpCache::unsetBimpObjectInstance($this->module, $this->object_name, $this->id);
+            }
+
             $parent = $this->parent;
             $this->reset();
             $this->parent = $parent;
@@ -1768,7 +1829,7 @@ class ObjectLine extends BimpObject
 
         if ((int) $this->getData('type') !== self::LINE_TEXT && (int) $this->id_product) {
             if (is_null($qty)) {
-                $qty = (int) $this->qty;
+                $qty = abs((int) $this->qty);
             }
 
             $product = $this->getProduct();
@@ -1984,8 +2045,10 @@ class ObjectLine extends BimpObject
             }
         }
 
-        if (count($new_equipments) > (int) $this->qty) {
-            $errors[] = 'Le nombre d\'équipements (' . count($new_equipments) . ') dépasse le nombre d\'unités asssignées à cette facture (' . $this->qty . ')';
+        $qty = abs($this->qty);
+
+        if (count($new_equipments) > (int) $qty) {
+            $errors[] = 'Le nombre d\'équipements (' . count($new_equipments) . ') dépasse le nombre d\'unités asssignées à cette facture (' . $qty . ')';
             return $errors;
         }
 
@@ -2012,13 +2075,16 @@ class ObjectLine extends BimpObject
         // Equipements à supprimer:         
         foreach ($line_equipments as $line_equipment) {
             $id_equipment = (int) $line_equipment->getData('id_equipment');
-            if (!$id_equipment || !in_array($id_equipment, $new_equipments)) {
-                $del_warnings = array();
-                $del_errors = $line_equipment->delete($del_warnings, true);
-                $del_errors = array_merge($del_errors, $del_warnings);
-
-                if (count($del_errors)) {
-                    $errors[] = BimpTools::getMsgFromArray($del_errors, 'Erreur lors de la suppression de la ligne d\'équipement d\'ID ' . $line_equipment->id);
+            if ($id_equipment && !in_array($id_equipment, $new_equipments)) {
+                $line_errors = $line_equipment->removeEquipment();
+                if (count($line_errors)) {
+                    $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+                    if (BimpObject::objectLoaded($equipment)) {
+                        $eq_label = '"' . $equipment->getData('serial') . '"';
+                    } else {
+                        $eq_label = ' d\'ID ' . $id_equipment;
+                    }
+                    $errors[] = BimpTools::getMsgFromArray($line_errors, 'Erreurs lors de la désattribution de l\'équipement ' . $eq_label);
                 }
             }
         }
@@ -2056,6 +2122,19 @@ class ObjectLine extends BimpObject
                     }
                 }
             }
+        }
+
+        return $errors;
+    }
+
+    public function removeEquipment($id_equipment)
+    {
+        $errors = array();
+
+        $eq_line = $this->getEquipmentLine($id_equipment);
+
+        if (BimpObject::objectLoaded($eq_line)) {
+            $errors = $eq_line->removeEquipment();
         }
 
         return $errors;
@@ -2298,8 +2377,16 @@ class ObjectLine extends BimpObject
                 }
 
                 $values = $this->getProductFournisseursPricesArray();
-//                return 'f: '.(int) $force_edit . ' p:' .$prefixe;
-                if (!$attribute_equipment && $this->canEditPrixAchat() && $this->isEditable($force_edit)) {
+
+                $has_values = false;
+                foreach ($values as $value => $label) {
+                    if ((int) $value) {
+                        $has_values = true;
+                        break;
+                    }
+                }
+
+                if ($has_values && !$attribute_equipment && $this->canEditPrixAchat() && $this->isEditable($force_edit)) {
                     $html = BimpInput::renderInput('select', $prefixe . 'id_fourn_price', (int) $value, array(
                                 'options' => $values
                     ));
@@ -2315,6 +2402,30 @@ class ObjectLine extends BimpObject
                             $html .= $values[$value];
                         } else {
                             $html .= BimpRender::renderAlerts('Le prix fournisseur d\'ID ' . $value . ' n\'est pas enregistré pour ce produit');
+                        }
+                    } else {
+                        $pa_ht = $this->pa_ht;
+                        $is_pa_prevu = false;
+
+                        $product = $this->getProduct();
+                        if (BimpObject::objectLoaded($product)) {
+                            $pa_prevu = (float) $product->getData('pa_prevu');
+
+                            if (is_null($pa_ht && $pa_prevu)) {
+                                $pa_ht = $pa_prevu;
+                            }
+
+                            if ($pa_ht === $pa_prevu) {
+                                $is_pa_prevu = true;
+                            }
+                        }
+
+                        if (!is_null($pa_ht)) {
+                            $html .= '<input type="hidden" name="' . $prefixe . 'pa_ht" value="' . $pa_ht . '"/>';
+                            $html .= BimpTools::displayMoneyValue($pa_ht);
+                            if ($is_pa_prevu) {
+                                $html .= ' (prévisionnel)';
+                            }
                         }
                     }
                 }
@@ -2412,7 +2523,12 @@ class ObjectLine extends BimpObject
                 break;
 
             case 'tva_tx':
-                if (!$this->isEditable($force_edit) || $attribute_equipment || !$this->canEditPrixVente()) {
+                $parent = $this->getParentInstance();
+                
+                if (BimpObject::objectLoaded($parent) && !$parent->isTvaActive()) {
+                    $html = '<input type="hidden" value="' . $value . '" name="' . $prefixe . 'tva_tx"/>';
+                    $html .= ' <span class="inputInfo warning">Non applicable</span>';
+                } elseif (!$this->isEditable($force_edit) || $attribute_equipment || !$this->canEditPrixVente()) {
                     $html = '<input type="hidden" value="' . $value . '" name="' . $prefixe . 'tva_tx"/>';
                     $html .= $value . ' %';
                     if (!$this->isEditable()) {
@@ -2462,14 +2578,12 @@ class ObjectLine extends BimpObject
                 break;
 
             case 'remisable':
-                $product = $this->getProduct();
-                if (BimpObject::objectLoaded($product)) {
-                    if (!(int) $product->getData('remisable')) {
-                        $html .= '<input type="hidden" value="0" name="' . $prefixe . 'remisable"/>';
-                        $html .= '<span class="danger">NON</span>';
-                        break;
-                    }
+                if (!$this->isFieldEditable('remisable')) {
+                    $html .= '<input type="hidden" value="0" name="' . $prefixe . 'remisable"/>';
+                    $html .= '<span class="danger">NON</span>';
+                    break;
                 }
+
                 $html .= BimpInput::renderInput('toggle', $prefixe . 'remisable', (int) $value);
                 break;
 
@@ -3215,8 +3329,14 @@ class ObjectLine extends BimpObject
 
                             $product = $this->getProduct();
 
+                            if (!(int) $this->id_fourn_price && !(float) $this->pa_ht) {
+                                if (!(int) $product->getData('validate') && (float) $product->getData('pa_prevu')) {
+                                    $this->pa_ht = (float) $product->getData('pa_prevu');
+                                }
+                            }
+
                             if ((int) $this->getData('remisable')) {
-                                if (!(int) $product->getData('remisable')) {
+                                if (!(int) $product->getData('remisable') || (float) $this->getTotalHT() < 0) {
                                     $this->set('remisable', 0);
                                 }
                             }
@@ -3276,6 +3396,12 @@ class ObjectLine extends BimpObject
                             $this->pa_ht = (float) $this->post_equipment->getData('prix_achat');
                             $this->id_fourn_price = 0;
                         }
+                    }
+
+                    // Pas de TVA si vente hors UE: 
+                    $parent = $this->getParentInstance();
+                    if (BimpObject::objectLoaded($parent) && !$parent->isTvaActive()) {
+                        $this->tva_tx = 0;
                     }
 
                     if ((!is_null($this->date_from) && $this->date_from) || (!is_null($this->date_to) && $this->date_to)) {
@@ -3412,8 +3538,7 @@ class ObjectLine extends BimpObject
 
         if ((int) $this->id_product) {
             $product = $this->getProduct();
-            if (BimpObject::objectLoaded($product) && $product->isSerialisable()) {
-
+            if ($this->equipment_required && BimpObject::objectLoaded($product) && $product->isSerialisable()) {
                 if (!BimpObject::objectLoaded($line)) {
                     return array('ID de la ligne correspondante absent');
                 }
@@ -3431,8 +3556,9 @@ class ObjectLine extends BimpObject
 
                 // Vérification de la quantité de lignes d'équipement et création/suppression si nécessaire: 
                 $eq_lines = $this->getEquipmentLines();
-                if ((int) $this->qty !== $prev_qty) {
-                    $diff = $this->qty - $prev_qty;
+                $eq_qty = abs($this->qty);
+                if ((int) $eq_qty !== $prev_qty) {
+                    $diff = $eq_qty - $prev_qty;
 
                     if ($diff > 0) {
                         $this->createEquipmentsLines($diff);
@@ -3652,34 +3778,6 @@ class ObjectLine extends BimpObject
         }
 
         return $errors;
-    }
-
-    // Gestion des droits utilisateurs:
-
-    public function canEditPrixAchat()
-    {
-        global $user;
-        if (isset($user->rights->bimpcommercial->priceAchat) && (int) $user->rights->bimpcommercial->priceAchat) {
-            return 1;
-        }
-        return 0;
-    }
-
-    public function canEditPrixVente()
-    {
-        global $user;
-        if (isset($user->rights->bimpcommercial->priceVente) && (int) $user->rights->bimpcommercial->priceVente == 1) {
-            return 1;
-        }
-        if ($this->getChildObject("product") && $this->getChildObject("product")->id > 0)
-            if ($this->getChildObject("product")->getData("price") == 1 || $this->getChildObject("product")->getData("price") == 0)
-                return 1;
-        return 0;
-    }
-
-    public function canEditRemisePa()
-    {
-        return 0;
     }
 
     // Méthodes statiques: 

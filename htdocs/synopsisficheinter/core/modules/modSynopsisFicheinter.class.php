@@ -1,5 +1,5 @@
 <?php
-
+ 
 /* Copyright (C) 2003      Rodolphe Quiedeville <rodolphe@quiedeville.org>
  * Copyright (C) 2004-2008 Laurent Destailleur  <eldy@users.sourceforge.net>
  * Copyright (C) 2004      Sebastien Di Cintio  <sdicintio@ressource-toi.org>
@@ -33,7 +33,7 @@
  */
 /*
  */
-
+ 
 /**
   \defgroup   ficheinter     Module intervention cards
   \brief      Module to manage intervention cards
@@ -45,13 +45,13 @@
   \brief      Fichier de description et activation du module Ficheinter
  */
 include_once(DOL_DOCUMENT_ROOT . "/core/modules/DolibarrModules.class.php");
-
+ 
 /**
   \class      modFicheinter
   \brief      Classe de description et activation du module Ficheinter
  */
 class modSynopsisFicheinter extends DolibarrModules {
-
+ 
     /**
      *   \brief      Constructeur. Definit les noms, constantes et boites
      *   \param      DB      handler d'acces base
@@ -59,25 +59,25 @@ class modSynopsisFicheinter extends DolibarrModules {
     function modSynopsisFicheinter($DB) {
         $this->db = $DB;
         $this->numero = 8745;
-
+ 
         $this->family = "Synopsis";
         $this->name = "Fiche inter +";
         $this->description = "Gestion des fiches d'intervention amélioré";
         $this->dir_output = "fichinter";
-
+ 
 //        $this->revision = explode(" ", "$Revision: 1.33 $");
         $this->version = "1";
-
+ 
         $this->const_name = 'MAIN_MODULE_SYNOPSISFICHEINTER';
         $this->special = 0;
         $this->picto = "intervention";
-
+ 
         // Dir
         $this->dirs = array();
-
+ 
         // Config pages
         $this->config_page_url = array("synopsis_fichinter.php");
-
+ 
         // Dependances
         $this->depends = array("modSociete");
         $this->requiredby = array("modSynopsisdemandeinterv");
@@ -90,11 +90,11 @@ class modSynopsisFicheinter extends DolibarrModules {
         
         $this->tabs = array('order:+inter:Inter:bimpcore@bimpcore:1:/synopsisficheinter/tabs/order.php?id=__ID__',
             'thirdparty:+inter:Inter:bimpcore@bimpcore:1:/synopsisficheinter/tabs/client.php?id=__ID__');
-
+ 
         // Constantes
         $this->const = array();
         $r = 0;
-
+ 
         $this->const[$r][0] = "FICHEINTER_ADDON_PDF";
         $this->const[$r][1] = "chaine";
         $this->const[$r][2] = "BIMP";
@@ -104,74 +104,74 @@ class modSynopsisFicheinter extends DolibarrModules {
 //        $this->const[$r][1] = "chaine";
 //        $this->const[$r][2] = "48pacific";
 //        $r++;
-
+ 
         // Boites
         $this->boxes = array();
 //        $this->boxes[0][1] = "box_ficheinter.php";
-
+ 
         // Permissions
         $this->rights = array();
         $this->rights_class = 'synopsisficheinter';
-
+ 
         $r = 0;
-
+ 
         $this->rights[$r][0] = $this->numero . $r; // this->numero ."". 1
         $this->rights[$r][1] = 'Lire les fiches d\'intervention';
         $this->rights[$r][2] = 'r';
         $this->rights[$r][3] = 1;
         $this->rights[$r][4] = 'lire';
         $r++;
-
+ 
         $this->rights[$r][0] = $this->numero . $r; // this->numero ."". 1
         $this->rights[$r][1] = 'Creer/modifier les fiches d\'intervention';
         $this->rights[$r][2] = 'w';
         $this->rights[$r][3] = 0;
         $this->rights[$r][4] = 'creer';
         $r++;
-
+ 
         $this->rights[$r][0] = $this->numero . $r; // this->numero ."". 1
         $this->rights[$r][1] = 'Supprimer les fiches d\'intervention';
         $this->rights[$r][2] = 'd';
         $this->rights[$r][3] = 0;
         $this->rights[$r][4] = 'supprimer';
         $r++;
-
+ 
         $this->rights[$r][0] = $this->numero . $r; // this->numero ."". 1
         $this->rights[$r][1] = 'Voir les prix dans les fiches d\'intervention';
         $this->rights[$r][2] = 'w';
         $this->rights[$r][3] = 0;
         $this->rights[$r][4] = 'voirPrix';
         $r++;
-
+ 
         $this->rights[$r][0] = $this->numero . $r; // this->numero ."". 1
         $this->rights[$r][1] = 'Rapport sur toutes les interventions';
         $this->rights[$r][2] = 'w';
         $this->rights[$r][3] = 0;
         $this->rights[$r][4] = 'rapportTous';
         $r++;
-
+ 
         $this->rights[$r][0] = $this->numero . $r; // this->numero ."". 1
         $this->rights[$r][1] = 'Rattacher une intervention &agrave; un contrat ou une commande';
         $this->rights[$r][2] = 'w';
         $this->rights[$r][3] = 0;
         $this->rights[$r][4] = 'rattacher';
         $r++;
-
+ 
         $this->rights[$r][0] = $this->numero . $r; // this->numero ."". 1
         $this->rights[$r][1] = 'Modifier une FI apr&egrave;s la validation';
         $this->rights[$r][2] = 'w';
         $this->rights[$r][3] = 0;
         $this->rights[$r][4] = 'modifAfterValid';
         $r++;
-
+ 
         $this->rights[$r][0] = $this->numero . $r; // this->numero ."". 1
         $this->rights[$r][1] = 'Configurer le module';
         $this->rights[$r][2] = 'w';
         $this->rights[$r][3] = 0;
         $this->rights[$r][4] = 'config';
-
-
-
+ 
+ 
+ 
         $this->menus = array();            // List of menus to add
         $r = 0;
 //TODO position
@@ -188,10 +188,10 @@ class modSynopsisFicheinter extends DolibarrModules {
             'target' => '',
             'user' => 0);
         $r++;
-
+ 
         // Left menu linked to top menu
         //index d module deplacement
-
+ 
         /*$this->menu[$r] = array('fk_menu' => 'r=0',
             'type' => 'left',
             'titre' => 'Deplacements',
@@ -203,7 +203,7 @@ class modSynopsisFicheinter extends DolibarrModules {
             'target' => '',
             'user' => 0);
         $r++;
-
+ 
 //        1er lien
         $this->menu[$r] = array('fk_menu' => 'r=1',
             'type' => 'left',
@@ -229,8 +229,8 @@ class modSynopsisFicheinter extends DolibarrModules {
             'user' => 0,
             'constraints' => array(0 => '$leftmenu==deplacement'));
         $r++;*/
-
-
+ 
+ 
         //index menu intervention
         // Left menu linked to top menu
         $this->menu[$r] = array('fk_menu' => 'r=0',
@@ -260,7 +260,7 @@ class modSynopsisFicheinter extends DolibarrModules {
             'constraints' => array(0 => '$leftmenu==ficheinter'));
         $rem2 = $r;
         $r++;
-
+ 
         $this->menu[$r] = array('fk_menu' => 'r=' . $rem2,
             'type' => 'left',
             'titre' => 'ListOfMyInterventions',
@@ -273,7 +273,7 @@ class modSynopsisFicheinter extends DolibarrModules {
             'user' => 0,
             'constraints' => array(0 => '$leftmenu==ficheinter'));
         $r++;
-
+ 
         $this->menu[$r] = array('fk_menu' => 'r=' . $rem2,
             'type' => 'left',
             'titre' => 'NewIntervention',
@@ -287,8 +287,8 @@ class modSynopsisFicheinter extends DolibarrModules {
             'constraints' => array(0 => '$leftmenu==ficheinter'));
         $r++;
         //2eme lien
-
-
+ 
+ 
         $this->menu[$r] = array('fk_menu' => 'r=' . $rem2,
             'type' => 'left',
             'titre' => 'Rapport FI',
@@ -301,7 +301,7 @@ class modSynopsisFicheinter extends DolibarrModules {
             'user' => 0,
             'constraints' => array(0 => '$leftmenu==ficheinter'));
         $r++;
-
+ 
         $this->menu[$r] = array('fk_menu' => 'r=' . $rem,
             'type' => 'left',
             'titre' => 'AllDI',
@@ -315,7 +315,7 @@ class modSynopsisFicheinter extends DolibarrModules {
             'constraints' => array(0 => '$leftmenu==ficheinter'));
         $rem2 = $r;
         $r++;
-
+ 
         $this->menu[$r] = array('fk_menu' => 'r=' . $rem2,
             'type' => 'left',
             'titre' => 'ListOfMyDIs',
@@ -328,7 +328,7 @@ class modSynopsisFicheinter extends DolibarrModules {
             'user' => 0,
             'constraints' => array(0 => '$leftmenu==ficheinter'));
         $r++;
-
+ 
         $this->menu[$r] = array('fk_menu' => 'r=' . $rem2,
             'type' => 'left',
             'titre' => 'NewDI',
@@ -395,25 +395,25 @@ class modSynopsisFicheinter extends DolibarrModules {
         $r++;
         
     }
-
+ 
     /**
      *   \brief      Fonction appelee lors de l'activation du module. Insere en base les constantes, boites, permissions du module.
      *               Definit egalement les repertoires de donnees a creer pour ce module.
      */
     function init() {
         global $conf;
-
+ 
         // Permissions
         $this->remove();
-
+ 
         // Dir
         $this->dirs[0] = $conf->facture->dir_output;
-
+ 
         $sql = array(
             "DELETE FROM " . MAIN_DB_PREFIX . "document_model WHERE nom = '" . $this->const[0][2] . "'",
             "INSERT IGNORE INTO " . MAIN_DB_PREFIX . "document_model (nom, type) VALUES('" . $this->const[0][2] . "','ficheinter')",
         );
-
+ 
 //        $sql[] = "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "synopsis_fichinter` (
 //  `rowid` int(11) NOT NULL auto_increment,
 //  `fk_soc` int(11) NOT NULL,
@@ -463,7 +463,7 @@ class modSynopsisFicheinter extends DolibarrModules {
 //  `isForfait` tinyint(1) default NULL,
 //  PRIMARY KEY  (`rowid`)
 //) ENGINE=InnoDB  DEFAULT CHARSET=utf8 ;";
-
+ 
         
         $sql[] = "CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."synopsisfichinter` (
   `rowid` int(11) NOT NULL AUTO_INCREMENT,
@@ -502,7 +502,7 @@ class modSynopsisFicheinter extends DolibarrModules {
   `decountTkt` tinyint(4) default NULL,
   PRIMARY KEY  (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 ;";
-
+ 
         $sql[] = "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "synopsisfichinter_c_typeInterv` (
   `id` int(11) NOT NULL auto_increment,
   `label` varchar(50) default NULL,
@@ -514,8 +514,8 @@ class modSynopsisFicheinter extends DolibarrModules {
   `decountTkt` tinyint(4) default NULL,
   PRIMARY KEY  (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 ;";
-
-
+ 
+ 
         $sql[] = "INSERT IGNORE INTO `" . MAIN_DB_PREFIX . "synopsisfichinter_c_typeInterv` (`id`, `label`, `active`, `rang`, `default`, `isDeplacement`, `inTotalRecap`, `decountTkt`) VALUES
 (1, 'Prestation', 1, 1, 1, NULL, 1, NULL),
 (2, 'Impondérable', 1, 6, NULL, NULL, 1, NULL),
@@ -538,7 +538,7 @@ class modSynopsisFicheinter extends DolibarrModules {
 (19, 'Presta regie', 1, 20, NULL, NULL, 1, NULL),
 (20, 'Visite contrat', 1, 9, NULL, NULL, 1, NULL),
 (21, 'Télémaintenance contrat', 1, 8, NULL, NULL, 1, 1);";
-
+ 
         $sql[] = "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "synopsisfichinter_extra_key` (
   `id` int(11) NOT NULL auto_increment,
   `label` varchar(50) default NULL,
@@ -552,7 +552,7 @@ class modSynopsisFicheinter extends DolibarrModules {
   `inDi` tinyint(4) default '0',
   PRIMARY KEY  (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 ;";
-
+ 
         $sql[] = "INSERT IGNORE INTO `" . MAIN_DB_PREFIX . "synopsisfichinter_extra_key` (`id`, `label`, `type`, `active`, `description`, `isQuality`, `rang`, `isInMainPanel`, `fullLine`) VALUES
 (13, 'Total bons', 'text', 1, NULL, NULL, 6, NULL, 0),
 (14, 'Bon remis', 'text', 1, NULL, NULL, 1, NULL, 0),
@@ -577,7 +577,7 @@ class modSynopsisFicheinter extends DolibarrModules {
 (34, 'Proposition Contrat', 'radio', 1, NULL, NULL, 22, 1, 1),
 (35, 'Forfait', 'checkbox', 1, NULL, NULL, 11, 1, 1),
 (36, 'Description non imprimable', 'text', 1, NULL, NULL, 2, NULL, 0);";
-
+ 
         $sql[] = "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "synopsisfichinter_extra_value` (
   `id` int(11) NOT NULL auto_increment,
   `interv_refid` int(11) default NULL,
@@ -586,7 +586,7 @@ class modSynopsisFicheinter extends DolibarrModules {
   `typeI` enum('DI','FI') default NULL,
   PRIMARY KEY  (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 ;";
-
+ 
         $sql[] = "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "synopsisfichinter_extra_values_choice` (
   `id` int(11) NOT NULL auto_increment,
   `label` varchar(150) default NULL,
@@ -595,7 +595,7 @@ class modSynopsisFicheinter extends DolibarrModules {
   PRIMARY KEY  (`id`),
   UNIQUE KEY `uniq_extra_choice_interv` (`label`,`value`,`key_refid`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 ;";
-
+ 
         $sql[] = "INSERT IGNORE INTO `" . MAIN_DB_PREFIX . "synopsisfichinter_extra_values_choice` (`id`, `label`, `value`, `key_refid`) VALUES
 (8, 'Contrat 8H', 1, 34),
 (9, 'Contrat Hotline', 2, 34),
@@ -603,7 +603,7 @@ class modSynopsisFicheinter extends DolibarrModules {
 (6, 'Direction Technique', 1, 20),
 (7, 'Service Commercial', 2, 20),
 (11, 'Contrat de suivie', 4, 34);";
-
+ 
         $sql[] = "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "synopsisfichinter_User_PrixDepInterv` (
   `id` int(11) NOT NULL auto_increment,
   `user_refid` int(11) default NULL,
@@ -611,7 +611,7 @@ class modSynopsisFicheinter extends DolibarrModules {
   `prix_ht` double default NULL,
   PRIMARY KEY  (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 ;";
-
+ 
         $sql[] = "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "synopsisfichinter_User_PrixTypeInterv` (
   `id` int(11) NOT NULL auto_increment,
   `user_refid` int(11) default NULL,
@@ -638,20 +638,20 @@ FROM ". MAIN_DB_PREFIX ."fichinterdet f  left join ".MAIN_DB_PREFIX."synopsisfic
 //        $sql[] = "DROP VIEW IF EXISTS ". MAIN_DB_PREFIX ."fichinter;";
 //        
 //        $sql[] = "CREATE VIEW ". MAIN_DB_PREFIX ."fichinter as (SELECT `rowid`, `fk_soc`, `fk_projet`, `fk_contrat`, `ref`, 1 as `entity`, `tms`, `datec`, `date_valid`, `datei`, `fk_user_author`, `fk_user_valid`, `fk_statut`, `duree`, `description`, `note_private`, `note_public`, `model_pdf`, '' as `extraparams` FROM `". MAIN_DB_PREFIX ."synopsis_fichinter` WHERE 1);";
-
+ 
         return $this->_init($sql);
     }
-
+ 
     /**
      *    \brief      Fonction appelee lors de la desactivation d'un module.
      *                Supprime de la base les constantes, boites et permissions du module.
      */
     function remove() {
         $sql = array();
-
+ 
         return $this->_remove($sql);
     }
-
+ 
 }
-
+ 
 ?>

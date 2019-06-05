@@ -6,6 +6,10 @@ table: product
 primary: rowid
 icon: fas_box
 controller: product
+
+header_list_name: default
+list_page_url: list
+    
 labels: 
     name: produit
 
@@ -430,11 +434,26 @@ views:
                   custom:
                       callback: renderListeFournisseur
             
-                      
+filters_panels: 
+    default: 
+        filters: 
+            - field: ref
+            - field: label
+            - field: fk_product_type
+            - field: price
+            - field: price_ttc
+            - field: barcode
+            - field: serialisable
+            - field: remisable
+            - field: tosell
+            - field: tobuy
+            
+                
 lists: 
     default: 
         title: Produits
         icon: fas_box
+        filters_panel: default
         sort_field: id
         sort_way: desc
         n: 50

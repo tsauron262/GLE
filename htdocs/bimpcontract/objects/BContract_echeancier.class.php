@@ -44,7 +44,7 @@ class BContract_echeancier extends BimpObject {
                 . '<th class="th_checkboxes" width="40px" style="text-align: center">Action facture</th>'
                 . '</tr></thead>'
                 . '<tbody class="listRows">';
-            
+
         foreach ($this->tab_echeancier as $lignes) {
             $html .= '<tr class="objectListItemRow" >'
                     . '<td style="text-align:center" >'
@@ -53,20 +53,19 @@ class BContract_echeancier extends BimpObject {
             $total_facture_ttc = 0;
             $new_price_ht = $this->get_total_contrat('ht');
             $new_price_ttc = $this->get_total_contrat('ttc');
-            
+
             $have_facture = false;
             if ($lignes['facture'] > 0) {
                 $have_facture = true;
                 $facture->fetch($lignes['facture']);
-                $new_price_ht =  $facture->total_ht;
-                $new_price_ttc =  $facture->total_ttc;
+                $new_price_ht = $facture->total_ht;
+                $new_price_ttc = $facture->total_ttc;
                 $total_facture_ht += $facture->total_ht;
                 $total_facture_ttc += $facture->total_ttc;
             } else {
                 $facture = null;
-                                
-            }            
-            if($have_facture){
+            }
+            if ($have_facture) {
                 $affichage_ht = $new_price_ht;
                 $affichage_ttc = $new_price_ttc;
             } else {
@@ -74,8 +73,8 @@ class BContract_echeancier extends BimpObject {
                 $affichage_ht = ($tab_total_fact['info']['reste_a_payer_ht']) / $nb_period_restante;
                 $affichage_ttc = ($tab_total_fact['info']['reste_a_payer_ttc']) / $nb_period_restante;
             }
-            
-            
+
+
             if ($facture->paye) {
                 $paye = '<i class="fa fa-check" style="color:green"><b> Payée</b></i>';
             } elseif (is_object($facture) && $facture->paye == 0) {
@@ -171,9 +170,9 @@ class BContract_echeancier extends BimpObject {
         // facture personnalisé
         //$html .= '' . $this->display_select();
         $html .= ' ' . $this->display_facture_perso();
-        
-//        echo '<pre>';
-//        print_r($this->tab_echeancier);
+        //$this->match_key_with_dates();
+        //echo '<pre>';
+        //print_r($this->tab_echeancier);
         return $html;
     }
 
@@ -193,15 +192,9 @@ class BContract_echeancier extends BimpObject {
             $select_debut = $_POST['date_debut_select'];
             $select_fin = $_POST['date_fin_select'];
             //echo "test : Du " . $select_debut . ' au ' . $select_fin;
-            //$html .= '<input type="submit" name="submit" class="btn btn-primary saveButton" value="Créer facture perso" onclick="' .
-//                $this->getJsActionOnclick("create_facture_perso", array(), array(
-//                    "success_callback" => $callback
-//                )) . '">';
 
             $converted_date_debut = $this->formatDate($select_debut);
             $converted_date_fin = $this->formatDate($select_fin);
-            //echo 'test = ' . $dd;
-            $this->actionCreate_facture_perso($converted_date_debut, $converted_date_fin);
         }
         return $html;
     }
@@ -266,6 +259,29 @@ class BContract_echeancier extends BimpObject {
                 $this->tab_echeancier[$i]['facture'] = 0;
             }
         }
+    }
+
+    public function match_key_with_dates() {
+        $parent = $this->getParentInstance();
+        $nb_period = $parent->getData('duree_mois') / $parent->getData('periodicity');
+        $date1 = "2019-05-17";
+        $date2 = "2019-08-16";
+
+        while ($fruit_name = current($this->tab_echeancier)) {
+            if ($fruit_name['date_debut'] == $date1) {
+                $result1 = key($this->tab_echeancier);
+                $result1 = $result1 + 1;
+                echo $result1 . '<br />';
+            } elseif ($fruit_name['date_fin'] == $date2) {
+                $result2 = key($this->tab_echeancier);
+                echo $result2 . '<br />';
+            } else {
+                
+            }
+            next($this->tab_echeancier);
+        }
+        $result = $result1 + $result2;
+        echo $result . '<br />';
     }
 
     public function calc_next_facture_amount_ht() {
@@ -450,20 +466,6 @@ class BContract_echeancier extends BimpObject {
         $this->updateLine($parent->id);
 
         $success = 'Facture personnalisé ' . $facture->id . ' créer avec succès d\'un montant de ' . price($this->getData('next_facture_amount')) . ' €';
-    }
-    
-    // check end date to stop echeancier on facture perso
-    public function check_date_facture_perso($date){
-        $parent = $this->getParentInstance();
-        $end_date_contrat = $parent->displayEndDate();
-        if ($date === $end_date_contrat){
-            echo 'same';
-        } else {
-            echo 'not same';
-        }
-        
-        
-        echo 'test : ' . $end_date_contrat;
     }
 
     public function cron_create_facture() {

@@ -320,7 +320,7 @@ forms:
                         method: renderLineInput
                         params:
                             - remisable
-                depends_on: id_product
+                depends_on: id_product,qty
                 display_if: 
                     field_name: type
                     show_values: 1,3

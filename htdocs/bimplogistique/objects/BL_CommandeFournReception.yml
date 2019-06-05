@@ -24,6 +24,14 @@ fields:
         required: 1
         input: 
             type: hidden
+        search: 
+            input: 
+                type: search_list
+                search_list: 
+                    table: commande_fournisseur
+                    fields_search: rowid,ref
+                    field_return_label: ref
+                    field_return_value: rowid
         
     id_entrepot: 
         label: Entrepôt d'arrivée
@@ -71,6 +79,16 @@ fields:
         type: bool
         default_value: 1
         
+    total_ht: 
+        label: Total HT
+        type: money
+        default_value: 0
+        
+    total_ttc: 
+        label: Total TTC
+        type: money
+        default_value: 0
+        
 forms: 
     default: 
         rows: 
@@ -111,6 +129,8 @@ fields_tables:
             - field: date_received
             - field: info
               edit: 1
+            - field: total_ht
+            - field: total_ttc
             
 views: 
     default: 
@@ -130,6 +150,23 @@ views:
                   custom: 
                       callback: renderDetailsView
                       
+filters_panel: 
+    default: 
+        filters: 
+            - field: ref
+            - field: num_reception
+            - field: id_entrepot
+            - field: id_commande_fourn
+            - field: status
+            - field: date_received
+            - field: total_ht
+            - field: total_ttc
+            - field: info
+            - field: fk_statut
+              child: parent
+            - field: invoice_status
+              child: parent
+            
 lists_cols: 
     commande: 
         field: id_commande_fourn
@@ -151,9 +188,23 @@ lists_cols:
     info: 
         field: info
         edit: 1
+    total_ht: 
+        field: total_ht
+    total_ttc: 
+        field: total_ttc
+    commande_status: 
+        label: Statut commande
+        field: fk_statut
+        child: parent
+    commande_invoice_status: 
+        label: Statut facturation commande
+        field: invoice_status
+        child: parent
                     
 lists: 
     default: 
+        configurable: 1
+        filters_panel: default
         sort_field: id
         sort_way: desc
         n: 25
@@ -170,10 +221,12 @@ lists:
             num_reception:
             ref:
             date: 
+            total_ht: 
             entrepot:
                     
     commandes_fourn: 
         checkboxes: 1
+        configurable: 1
         bulk_actions: 
             callback: getCommandesFournListbulkActions
         enable_search: 0
@@ -197,6 +250,7 @@ lists:
             ref:
             status:
             date: 
+            total_ht: 
             entrepot:
             info: 
                     

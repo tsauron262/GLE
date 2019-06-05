@@ -8,7 +8,10 @@ class BC_FiltersPanel extends BC_Panel
     public $list_type = '';
     public $list_name = '';
     public $list_identifier = '';
-    protected $values = array();
+    protected $values = array(
+        'fields'   => array(),
+        'children' => array()
+    );
 
     public function __construct(BimpObject $object, $list_type, $list_name, $list_identifier, $name = 'default')
     {
@@ -33,14 +36,41 @@ class BC_FiltersPanel extends BC_Panel
 
     public function setFiltersValues($values)
     {
-        $this->values = $values;
+        if (!isset($values['fields']) && !isset($values['children']) && !empty($values)) {
+            $this->values['fields'] = $values;
+        }
+
+        if (isset($values['fields'])) {
+            $this->values['fields'] = $values['fields'];
+        }
+
+        if (isset($values['children'])) {
+            $this->values['children'] = $values['children'];
+        }
+    }
+
+    public function getValues($field, $child = '')
+    {
+        $values = array();
+        if ($child) {
+            if (isset($this->values['children'][$child][$field])) {
+                $values = $this->values['children'][$child][$field];
+            }
+        } elseif (isset($this->values['fields'][$field])) {
+            $values = $this->values['fields'][$field];
+        }
+        
+        return $values;
     }
 
     public function loadSavedValues($id_list_filters)
     {
         $errors = array();
 
-        $this->values = array();
+        $this->values = array(
+            'fields'   => array(),
+            'children' => array()
+        );
 
         $listFilters = BimpCache::getBimpObjectInstance('bimpcore', 'ListFilters', (int) $id_list_filters);
         if (!BimpObject::objectLoaded($listFilters)) {
@@ -49,7 +79,7 @@ class BC_FiltersPanel extends BC_Panel
             $values = $listFilters->getData('filters');
 
             if (is_array($values) && !empty($values)) {
-                $this->values = $values;
+                $this->setFiltersValues($values);
             } else {
                 $errors[] = 'Aucun filtre trouvé pour cet enregistrement';
             }
@@ -63,38 +93,58 @@ class BC_FiltersPanel extends BC_Panel
         $errors = array();
 
         foreach ($this->params['filters'] as $filter) {
-            if (isset($this->values[$filter['field']])) {
-                $bc_filter = new BC_Filter($this->object, $filter, $this->values[$filter['field']]);
-                $errors = array_merge($bc_filter->getSqlFilters($filters, $joins), $errors);
+            if (isset($filter['field']) && $filter['field']) {
+                $values = $this->getValues($filter['field'], isset($filter['child']) ? $filter['child'] : '');
+                if (!empty($values)) {
+                    $bc_filter = new BC_FieldFilter($this->object, $filter, $values);
+                    $errors = array_merge($bc_filter->getSqlFilters($filters, $joins), $errors);
+                }
+            } else {
+                // todo: cutom ...
             }
         }
 
         return $errors;
     }
 
-    public function addFieldFilterValues($field_name, $values)
+    public function addFieldFilterValues($field_name, $values, $child = '')
     {
         if (!is_array($values)) {
             $values = array($values);
         }
 
-        if (!isset($this->values[$field_name])) {
-            $this->values[$field_name] = $values;
+        if ($child) {
+            if (!isset($this->values['children'])) {
+                $this->values['children'] = array();
+            }
+            if (!isset($this->values['children'][$child])) {
+                $this->values['children'][$child] = array();
+            }
+
+            $array = &$this->values['children'][$child];
+        } else {
+            if (!isset($this->values['fields'])) {
+                $this->values['fields'] = array();
+            }
+            $array = &$this->values['fields'];
+        }
+        if (!isset($array[$field_name])) {
+            $array[$field_name] = $values;
             return;
         }
 
-        if (!is_array($this->values[$field_name])) {
-            $this->values[$field_name] = array($this->values[$field_name]);
+        if (!is_array($array[$field_name])) {
+            $array[$field_name] = array($array[$field_name]);
         }
 
         foreach ($values as $value) {
             if (!is_array($value)) {
-                if (!in_array($value, $this->values[$field_name])) {
-                    $this->values[$field_name][] = $value;
+                if (!in_array($value, $array[$field_name])) {
+                    $array[$field_name][] = $value;
                 }
             } else {
                 $check = true;
-                foreach ($this->values[$field_name] as $val) {
+                foreach ($array[$field_name] as $val) {
                     if (is_array($val)) {
                         $check = false;
                         foreach ($value as $key => $subVal) {
@@ -109,7 +159,7 @@ class BC_FiltersPanel extends BC_Panel
                     }
                 }
                 if ($check) {
-                    $this->values[$field_name][] = $value;
+                    $array[$field_name][] = $value;
                 }
             }
         }
@@ -154,11 +204,15 @@ class BC_FiltersPanel extends BC_Panel
         }
 
         foreach ($this->params['filters'] as $filter) {
-            $values = (isset($this->values[$filter['field']]) ? $this->values[$filter['field']] : array());
+            if (isset($filter['field']) && (string) $filter['field']) {
+                $values = $this->getValues($filter['field'], isset($filter['child']) ? $filter['child'] : '');
 
-            $bc_filter = new BC_Filter($this->object, $filter, $values);
+                $bc_filter = new BC_FieldFilter($this->object, $filter, $values);
 
-            $html .= $bc_filter->renderHtml();
+                $html .= $bc_filter->renderHtml();
+            } else {
+                // todo: custom...
+            }
         }
 
         return $html;

@@ -332,6 +332,10 @@ class modBimpCommercial extends DolibarrModules
                 $extrafields->addExtraField('pa_prevu', 'Prix d\'achat HT prévu', 'decimal', 1, '24,8', 'product', 0, 0, 0);
                 $extrafields->addExtraField('infos_pa', 'Informations prix d\'achat', 'text', 1, 2000, 'product');
                 
+                $extrafields->addExtraField('zone_vente', 'Zone de vente', 'int', 1, 255, 'propal', 0, 0, 1);
+                $extrafields->addExtraField('zone_vente', 'Zone de vente', 'int', 1, 255, 'commande', 0, 0, 1);
+                $extrafields->addExtraField('zone_vente', 'Zone de vente', 'int', 1, 255, 'facture', 0, 0, 1);
+                
                 // Nécessaire pour valider tous les produits actuels seulement si le champ validate n\'existe pas déjà (Etant donné qu'on défini la valeur par défaut à 0): 
                 if (!$this->db->num_rows($this->db->query('SELECT `rowid` FROM '.MAIN_DB_PREFIX.'extrafields WHERE elementtype = \'product\' AND `name` = \'validate\''))) {
                     $extrafields->addExtraField('validate', 'Validé', 'boolean', 1, 1, 'product', 0, 0, 0);

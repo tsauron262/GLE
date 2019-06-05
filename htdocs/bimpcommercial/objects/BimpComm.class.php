@@ -5,6 +5,10 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/objects/BimpDolObject.class.php';
 class BimpComm extends BimpDolObject
 {
 
+    const BC_ZONE_FR = 1;
+    const BC_ZONE_UE = 2;
+    const BC_ZONE_HORS_UE = 3;
+
     public static $email_type = '';
     public static $external_contact_type_required = true;
     public static $internal_contact_type_required = true;
@@ -23,6 +27,11 @@ class BimpComm extends BimpDolObject
         1  => 'mois',
         3  => 'trimestre',
         12 => 'an'
+    );
+    public static $zones_vente = array(
+        self::BC_ZONE_FR      => 'France',
+        self::BC_ZONE_UE      => 'Union Européenne',
+        self::BC_ZONE_HORS_UE => 'Hors UE'
     );
 
     public function __construct($module, $object_name)
@@ -53,6 +62,10 @@ class BimpComm extends BimpDolObject
 
     public function isFieldEditable($field, $force_edit = false)
     {
+        switch ($field) {
+            case 'zone_vente':
+                return (int) $this->areLinesEditable();
+        }
         return 1;
     }
 
@@ -83,10 +96,16 @@ class BimpComm extends BimpDolObject
                     $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
                     return 0;
                 }
-                if (!$this->areLinesEditable()) {
-                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' ne peut plus être éditée';
+                if($this->getData('invoice_status') === null || $this->getData('invoice_status') > 0){
+                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' est déja facturé';
                     return 0;
                 }
+                    
+                
+//                if (!$this->areLinesEditable()) {
+//                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' ne peut plus être éditée';
+//                    return 0;
+//                }
 
                 $client = $this->getChildObject('client');
 
@@ -133,6 +152,17 @@ class BimpComm extends BimpDolObject
         }
 
         return 0;
+    }
+
+    public function isTvaActive()
+    {
+        if ($this->field_exists('zone_vente') && $this->dol_field_exists('zone_vente')) {
+            if ((int) $this->getData('zone_vente') === self::BC_ZONE_HORS_UE) {
+                return 0;
+            }
+        }
+
+        return 1;
     }
 
     // Getters array: 
@@ -805,6 +835,29 @@ class BimpComm extends BimpDolObject
         }
 
         return 0;
+    }
+
+    public static function getZoneByCountry($id_country)
+    {
+        $zone = self::BC_ZONE_FR;
+        if (!(int) $id_country) {
+            $id_country = BimpCore::getConf('default_id_country');
+        }
+
+        if ((int) $id_country) {
+            $country = self::getBdb()->getRow('c_country', '`rowid` = ' . (int) $id_country);
+            if (!is_null($country)) {
+                if ($country->code === 'FR') {
+                    $zone = self::BC_ZONE_FR;
+                } elseif ((int) $country->in_ue) {
+                    $zone = self::BC_ZONE_UE;
+                } else {
+                    $zone = self::BC_ZONE_HORS_UE;
+                }
+            }
+        }
+
+        return $zone;
     }
 
     // Getters - Overrides BimpObject
@@ -1822,6 +1875,10 @@ class BimpComm extends BimpDolObject
         $new_object->set('fk_statut', 0);
         $new_object->set('remise_globale', 0);
 
+        if ($this->dol_field_exists('zone_vente')) {
+            $new_object->set('zone_vente', 1);
+        }
+
         $new_soc = false;
 
         if (isset($new_data['fk_soc']) && ((int) $new_data['fk_soc'] !== (int) $this->getData('fk_soc'))) {
@@ -1910,7 +1967,7 @@ class BimpComm extends BimpDolObject
                     ))) {
                 continue;
             }
-                $line_instance = BimpObject::getInstance($this->module, $this->object_name . 'Line');
+            $line_instance = BimpObject::getInstance($this->module, $this->object_name . 'Line');
             $line_instance->validateArray(array(
                 'id_obj'    => (int) $this->id,
                 'type'      => $line->getData('type'),
@@ -2189,6 +2246,28 @@ class BimpComm extends BimpDolObject
                     $fac_errors = BimpTools::getErrorsFromDolObject($factureA, $error = null, $langs);
                     $warnings[] = BimpTools::getMsgFromArray($fac_errors, 'Echec de la création du fichier PDF de la facture d\'acompte');
                 }
+            }
+        }
+
+        return $errors;
+    }
+
+    public function removeLinesTvaTx()
+    {
+        $errors = array();
+
+        if (!$this->areLinesEditable()) {
+            $errors[] = 'Les lignes ' . $this->getLabel('of_this') . ' ne sont pas éditables';
+            return $errors;
+        }
+
+        $lines = $this->getLines('no_text');
+
+        foreach ($lines as $line) {
+            $line->tva_tx = 0;
+            $line_errors = $line->update();
+            if (count($line_errors)) {
+                $errors[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n°' . $line->getData('position'));
             }
         }
 
@@ -2614,13 +2693,30 @@ class BimpComm extends BimpDolObject
         }
 
         return array(
-            'errors'   => $errors,
-            'warnings' => $warnings,
+            'errors'           => $errors,
+            'warnings'         => $warnings,
             'success_callback' => 'bimp_reloadPage();'
         );
     }
 
     // Overrides BimpObject:
+
+    public function validate()
+    {
+        if ($this->field_exists('zone_vente') && $this->dol_field_exists('zone_vente')) {
+            $zone = self::BC_ZONE_FR;
+
+            if ((int) $this->getData('fk_soc') !== (int) $this->getInitData('fk_soc')) {
+                $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', (int) $this->getData('fk_soc'));
+                if (BimpObject::objectLoaded($client)) {
+                    $zone = $this->getZoneByCountry((int) $client->getData('fk_pays'));
+                    $this->set('zone_vente', $zone);
+                }
+            }
+        }
+
+        return parent::validate();
+    }
 
     public function create(&$warnings = array(), $force_create = false)
     {
@@ -2678,6 +2774,28 @@ class BimpComm extends BimpDolObject
 
                     if (count($rem_errors)) {
                         $warnings[] = BimpTools::getMsgFromArray($rem_errors, 'Erreurs lors de l\'ajout de la remise globale');
+                    }
+                }
+            }
+        }
+
+        return $errors;
+    }
+
+    public function update(&$warnings = array(), $force_update = false)
+    {
+        $init_zone = (int) $this->getInitData('zone_vente');
+
+        $errors = parent::update($warnings, $force_update);
+
+        if (!count($errors)) {
+            if ($this->areLinesEditable()) {
+                $cur_zone = (int) $this->getData('zone_vente');
+
+                if ($cur_zone !== $init_zone && $cur_zone === self::BC_ZONE_HORS_UE) {
+                    $lines_errors = $this->removeLinesTvaTx();
+                    if (count($lines_errors)) {
+                        $warnings[] = BimpTools::getMsgFromArray($lines_errors, 'Des erreurs sont survenues lors de la suppression des taux de TVA');
                     }
                 }
             }

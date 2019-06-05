@@ -111,6 +111,8 @@ fields:
     date_commande: 
         label: Date de la commande
         type: date
+        input: 
+            display_now: 1
     date_livraison: 
         label: Date prévue de livraison
         type: date
@@ -176,6 +178,7 @@ fields:
     fk_input_reason: unset
     remise_globale: unset
     remise_globale_label: unset
+    zone_vente: unset
     
 forms: 
     default: 

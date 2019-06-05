@@ -1,10 +1,11 @@
 table: bc_vente
+icon: fas_money-check-alt
 
 labels: 
     name: vente
     is_female: 1
     
-objects:                                               
+objects: 
     client_contact:
         extends: contact
         instance:
@@ -57,6 +58,12 @@ objects:
                 module: core
                 file: discount
                 class: DiscountAbsolute
+                
+    user_resp: 
+        extends: user
+        instance: 
+            id_object: 
+                field_value: id_user_resp
                 
 associations: 
     discounts: 
@@ -167,6 +174,13 @@ fields:
             type: hidden        
         default_value: 0
         
+    id_user_resp: 
+        label: Commercial
+        type: id_object
+        object: user_resp
+        input: 
+            type: search_user
+        
     vente_ht: 
         label: Vente au prix hors-taxes
         type: bool
@@ -182,6 +196,8 @@ fields_tables:
               display: nom
             - field: id_caisse
               display: nom
+            - field: id_user_resp
+              display: nom_url
             - field: id_client
               display: nom_url
             - field: id_client_contact
@@ -222,8 +238,7 @@ views:
     default: 
         rows:
             - cols: 
-                  - type: object_common_fields
-                    col_lg: 4
+                  - type: object_header
             - cols: 
                   - type: fields_table
                     col_lg: 6
@@ -275,39 +290,61 @@ views:
                 - type: custom
                   custom:
                       callback: renderCreationViewHtml
-        
+
+lists_cols: 
+    ref: 
+        label: Ref.
+        field: id
+    status: 
+        field: status
+    date: 
+        label: Date et heure
+        field: date_create
+    client: 
+        field: id_client
+        display: nom_url
+    user_resp: 
+        field: id_user_resp
+        display: nom_url
+    articles: 
+        label: Nb articles
+        value: 
+            callback: displayNbArticles
+    total_ttc: 
+        field: total_ttc
+    facture: 
+        field: id_facture   
+    avoir: 
+        field: id_avoir
+    centre: 
+        field: id_entrepot
+        display: nom
+    caisse: 
+        field: id_caisse
+        display: nom
+
 lists: 
     default: 
+        configurable: 1
         sort_field: date_create
         sort_way: desc
         modal_view: default
         n: 10
         cols:
             ref: 
-                label: Ref.
-                field: id
             status: 
-                field: status
             date: 
-                label: Date et heure
-                field: date_create
             client: 
-                field: id_client
-                display: nom_url
+            user_resp: 
             articles: 
-                label: Nb articles
-                value: 
-                    callback: displayNbArticles
             total_ttc: 
-                field: total_ttc
             facture: 
-                field: id_facture   
             avoir: 
-                field: id_avoir
         extra_btn:
             callback: getDefaultListExtraButtons
             
     full:
+        configurable: 1
         checkboxes: 1
         item_checkbox: 
             callback: isDeletable
@@ -324,32 +361,16 @@ lists:
         n: 10
         cols:
             ref: 
-                label: Ref.
-                field: id
             centre: 
-                field: id_entrepot
-                display: nom
             caisse: 
-                field: id_caisse
-                display: nom
             status: 
-                field: status
             date: 
-                label: Date et heure
-                field: date_create
             client: 
-                field: id_client
-                display: nom_url
+            user_resp:
             articles: 
-                label: Nb articles
-                value: 
-                    callback: displayNbArticles
-            facture: 
-                field: id_facture   
+            facture:  
             avoir: 
-                field: id_avoir
             total_ttc: 
-                field: total_ttc
         extra_btn:
             callback: getDocumentExtraButtons
             

@@ -557,7 +557,7 @@ function saveCurrentVente($button, status) {
                 var url = ticket_url + '?id_vente=' + bimpAjax.id_vente;
                 window.open(url, 'Ticket de caisse', "menubar=no, status=no, width=370, height=600");
             }
-            
+
             $('body').trigger($.Event('objectChange', {
                 module: 'bimpcaisse',
                 object_name: 'BC_Vente',
@@ -674,6 +674,17 @@ function selectClientFromList($button) {
     }
 
     $('#bc_main_container').find('a[href="#ventes"]').click();
+}
+
+function saveCommercial() {
+    BimpAjax('saveCommercial', {
+        id_user_resp: parseInt($('#id_user_resp').val()),
+        id_vente: Vente.id_vente
+    }, null, {
+        display_success_in_popup_only: true,
+        display_errors_in_popup_only: true,
+        display_warnings_in_popup_only: true
+    });
 }
 
 function saveClient() {
@@ -1158,7 +1169,16 @@ function setCartLineEvents($line) {
 }
 
 function onVenteLoaded() {
-    var $input = $('#venteSearchProduct');
+    var $input = $('#id_user_resp');
+
+    if ($input.length && !parseInt($input.data('event_init'))) {
+        $input.change(function() {
+            saveCommercial();
+        });
+        $input.data('event_init', 1);
+    }
+
+    $input = $('#venteSearchProduct');
 
     if ($input.length && !$input.data('event_init')) {
         $input.keyup(function (e) {

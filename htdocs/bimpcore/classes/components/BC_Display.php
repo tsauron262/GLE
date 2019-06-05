@@ -75,6 +75,7 @@ class BC_Display extends BimpComponent
         } elseif (isset($field_params['type']) && !is_null($field_params['type'])) {
             switch ($field_params['type']) {
                 case 'id_object':
+                case 'id_parent':
                     $this->params_def['type']['default'] = 'ref_nom';
                     break;
 
@@ -179,6 +180,9 @@ class BC_Display extends BimpComponent
 
                         if ($this->field_name === $this->object->getParentIdProperty()) {
                             $instance = $this->object->getParentInstance();
+                            if (is_a($instance, 'BimpObject') && !$instance->isLoaded() && (int) $this->value) {
+                                $instance = BimpCache::getBimpObjectInstance($instance->module, $instance->object_name, (int) $this->value);
+                            }
                         } elseif (isset($this->field_params['object'])) {
                             $instance = $this->object->getChildObject($this->field_params['object']);
                             if (is_object($instance) && (int) $this->value && (!BimpObject::objectLoaded($instance) || (int) $instance->id !== (int) $this->value)) {
@@ -221,17 +225,15 @@ class BC_Display extends BimpComponent
                                     break;
 
                                 case 'nom_url':
-                                    if (!$this->no_html){
+                                    if (!$this->no_html) {
                                         $html .= BimpObject::getInstanceNomUrl($instance);
                                         $html .= BimpRender::renderObjectIcons($instance, (int) $this->params['external_link'], $this->params['modal_view']);
                                         break;
-                                    }
-                                    else{
-                                        if(method_exists($instance, "getFullName")){
+                                    } else {
+                                        if (method_exists($instance, "getFullName")) {
                                             global $langs;
                                             $html .= $instance->getFullName($langs);
-                                        }
-                                        elseif(method_exists($instance, "getName"))
+                                        } elseif (method_exists($instance, "getName"))
                                             $html .= $instance->getName();
                                         break;
                                     }

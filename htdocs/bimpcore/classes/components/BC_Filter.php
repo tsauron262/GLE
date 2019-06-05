@@ -310,6 +310,8 @@ class BC_Filter extends BimpComponent
 
         if ($this->object->config->isDefined('fields/' . $this->field->name . '/filter/input')) {
             $input_path = 'fields/' . $this->field->name . '/filter/input';
+        } elseif ($this->object->config->isDefined('fields/' . $this->field->name . '/search/input')) {
+            $input_path = 'fields/' . $this->field->name . '/search/input';
         } else {
             $input_path = 'fields/' . $this->field->name . '/input';
         }

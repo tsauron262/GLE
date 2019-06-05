@@ -183,6 +183,8 @@ lists:
         update_btn: 1
         edit_btn: 1
         modal_view: default
+        extra_btn: 
+            callback: getListExtraBtn
         cols: 
             entrepot: 
                 field: id_entrepot

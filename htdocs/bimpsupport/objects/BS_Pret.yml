@@ -107,8 +107,8 @@ forms:
             - field: date_end
             - field: caution
             - association: equipments
-#            - object: products
-#              multiple: 1
+            - object: products
+              multiple: 1
 
     sav: 
         rows: 
@@ -118,8 +118,8 @@ forms:
             - field: date_end
             - field: caution
             - association: equipments
-#            - object: products
-#              multiple: 1
+            - object: products
+              multiple: 1
 
 fields_tables: 
     default: 
@@ -154,11 +154,11 @@ views:
                 - type: fields_table
                   fields_table: 
                       name: default
-#            - cols: 
-#                - type: list
-#                  list: 
-#                      name: default
-#                      children: products
+            - cols: 
+                - type: list
+                  list: 
+                      name: default
+                      children: products
                 
 lists: 
     default: 

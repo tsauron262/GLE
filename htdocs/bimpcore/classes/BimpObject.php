@@ -3044,6 +3044,8 @@ class BimpObject extends BimpCache
     {
         BimpLog::actionStart('bimpobject_delete', 'Suppression', $this);
 
+        self::setBimpObjectInstance($this);
+        
         $errors = array();
 
         if (!$this->isLoaded()) {

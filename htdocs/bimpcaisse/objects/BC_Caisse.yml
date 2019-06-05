@@ -44,7 +44,6 @@ fields:
             type: select_mysoc_account
     compte_comptable:
         label: Compte comptable de la caisse
-        type: string
 
 forms: 
     default: 

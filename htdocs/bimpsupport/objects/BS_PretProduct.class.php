@@ -3,7 +3,7 @@
 class BS_PretProduct extends BimpObject
 {
 
-    public function decreaseStock($qty = null)
+    public function decreaseStock($qty = null, $label_ext = null)
     {
         if (is_null($qty)) {
             $qty = (float) $this->getData('qty');
@@ -27,7 +27,10 @@ class BS_PretProduct extends BimpObject
                     $errors[] = 'ID du prêt absent';
                 } else {
                     global $user;
-                    $label = 'Prêt de matériel ';
+                    $label = 'Prêt de matériel #' . $pret->id;
+                    if (!is_null($label_ext)) {
+                        $label .= ' - ' . $label_ext;
+                    }
                     $codemove = $pret->getRef() . '_' . $this->id;
                     if ($product->dol_object->correct_stock($user, (int) $pret->getData('id_entrepot'), $qty, 1, $label, 0, $codemove, '', 0) <= 0) {
                         $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($product->dol_object));
@@ -39,7 +42,7 @@ class BS_PretProduct extends BimpObject
         return $errors;
     }
 
-    public function increaseStock($qty = null)
+    public function increaseStock($qty = null, $label_ext = null)
     {
         if (is_null($qty)) {
             $qty = (float) $this->getData('qty');
@@ -50,7 +53,7 @@ class BS_PretProduct extends BimpObject
         }
 
         $errors = array();
-        ;
+
         if (!(int) $this->getData('id_product')) {
             $errors[] = 'produit absent';
         } else {
@@ -63,7 +66,12 @@ class BS_PretProduct extends BimpObject
                     $errors[] = 'ID du prêt absent';
                 } else {
                     global $user;
-                    $label = 'Prêt de matériel ';
+                    $label = 'Prêt de matériel #' . $pret->id;
+                    if (!is_null($label_ext)) {
+                        $label .= ' - ' . $label_ext;
+                    } else {
+                        $label .= ' - Retour';
+                    }
                     $codemove = $pret->getRef() . '_' . $this->id;
                     if ($product->dol_object->correct_stock($user, (int) $pret->getData('id_entrepot'), $qty, 0, $label, 0, $codemove, '', 0) <= 0) {
                         $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($product->dol_object));
@@ -141,9 +149,9 @@ class BS_PretProduct extends BimpObject
                 if ($qty_diff) {
                     $stock_errors = array();
                     if ($qty_diff > 0) {
-                        $stock_errors = $this->decreaseStock($qty_diff);
+                        $stock_errors = $this->decreaseStock($qty_diff, 'Mise à jour des quantités');
                     } else {
-                        $stock_errors = $this->increaseStock(abs($qty_diff));
+                        $stock_errors = $this->increaseStock(abs($qty_diff), 'Mise à jour des quantités');
                     }
 
                     if (count($stock_errors)) {
@@ -161,16 +169,15 @@ class BS_PretProduct extends BimpObject
         $errors = array();
 
         $pret = $this->getParentInstance();
-        if (!BimpObject::objectLoaded($pret)) {
-            $errors[] = 'ID du prêt absent';
-            return $errors;
-        }
-
-        if (!(int) $pret->getData('returned')) {
-            $stock_errors = $this->increaseStock();
-            if (count($stock_errors)) {
-                $errors[] = BimpTools::getMsgFromArray($stock_errors, 'Erreurs lors de la correction des stocks. Prêt de produit non supprimé');
+        if (BimpObject::objectLoaded($pret)) {
+            if (!(int) $pret->getData('returned')) {
+                $stock_errors = $this->increaseStock(null, 'Suppression du prêt');
+                if (count($stock_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($stock_errors, 'Erreurs lors de la correction des stocks. Prêt de produit non supprimé');
+                }
             }
+        } else {
+            $errors[] = 'ID du prêt absent';
         }
 
         if (!count($errors)) {

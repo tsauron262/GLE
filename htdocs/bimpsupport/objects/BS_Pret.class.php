@@ -297,32 +297,4 @@ class BS_Pret extends BimpObject
 
         return $errors;
     }
-
-    public function delete(&$warnings = array(), $force_delete = false)
-    {
-        $init_returned = (int) $this->getInitData('returned');
-
-        $errors = parent::delete($warnings, $force_delete);
-
-        if (!count($errors)) {
-            if (!$init_returned) {
-                $products = $this->getChildrenObjects('products');
-
-                foreach ($products as $pret_product) {
-                    $prod_errors = $pret_product->increaseStock();
-                    if (count($prod_errors)) {
-                        $product = $pret_product->getChildObject('product');
-                        if (BimpObject::objectLoaded($product)) {
-                            $prod_label = '"' . $product->getRef() . '"';
-                        } else {
-                            $prod_label = ' d\'ID ' . $pret_product->getData('id_product');
-                        }
-                        $warnings[] = BimpTools::getMsgFromArray($prod_errors, 'Produit ' . $prod_label . ': erreurs lors de la correction des stocks');
-                    }
-                }
-            }
-        }
-
-        return $errors;
-    }
 }

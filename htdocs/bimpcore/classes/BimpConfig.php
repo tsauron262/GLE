@@ -1030,6 +1030,10 @@ class BimpConfig
 
         if ($object_name === 'default') {
             return $this->instance;
+        } elseif ($object_name === 'parent') {
+            if (is_a($this->instance, 'BimpObject')) {
+                return $this->instance->getParentInstance();
+            }
         }
 
         $up_path = $path;
@@ -1055,6 +1059,13 @@ class BimpConfig
                 break;
             }
         }
+        
+//        if ($object_name === 'parent') {
+//            echo '<pre>';
+//            print_r($params);
+//            exit;
+//        }
+        
         if (!is_null($params)) {
             return $this->getInstance($params, $instance_path, $id_object);
         }

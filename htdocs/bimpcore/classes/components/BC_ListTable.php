@@ -272,7 +272,7 @@ class BC_ListTable extends BC_List
                         if ($col_params['child']) {
                             $obj = $object->getChildObject($col_params['child']);
                             if (is_null($obj) || !is_a($obj, 'BimpObject')) {
-                                $row['cols'][$col_name]['content'] = BimpRender::renderAlerts('Objet "' . $col_params['col_name'] . '" invalide');
+                                $row['cols'][$col_name]['content'] = BimpRender::renderAlerts('Objet "' . $col_params['child'] . '" invalide');
                                 continue;
                             }
                             if (!$obj->isLoaded()) {

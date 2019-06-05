@@ -48,6 +48,7 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
 
     this.append_html = false;
     this.remove_current_content = true;
+    this.append_html_transition = true;
 
     this.processing_msg = 'Traitement en cours';
     this.success_msg = 'Opération effectuée avec succès';
@@ -226,27 +227,52 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
                     }
                 } else {
                     bimpAjax.display_result_success(result);
+                    var no_callbacks = false;
 
                     if (bimpAjax.append_html) {
                         if ($.isOk(bimpAjax.$resultContainer) && typeof (result.html) === 'string') {
                             if (bimpAjax.remove_current_content) {
-                                bimpAjax.$resultContainer.stop().slideUp(250, function () {
-                                    bimpAjax.$resultContainer.html(result.html).slideDown(250, function () {
-                                        setCommonEvents(bimpAjax.$resultContainer);
-                                        setInputsEvents(bimpAjax.$resultContainer);
-                                        bimpAjax.$resultContainer.css('height', 'auto');
-                                        if (typeof (bimpAjax.success) === 'function') {
-                                            bimpAjax.success(result, bimpAjax);
-                                        }
+                                if (bimpAjax.append_html_transition) {
+                                    no_callbacks = true;
+                                    bimpAjax.$resultContainer.stop().slideUp(250, function () {
+                                        bimpAjax.$resultContainer.html(result.html).slideDown(250, function () {
+                                            setCommonEvents(bimpAjax.$resultContainer);
+                                            setInputsEvents(bimpAjax.$resultContainer);
+                                            bimpAjax.$resultContainer.css('height', 'auto');
+                                            if (typeof (bimpAjax.success) === 'function') {
+                                                bimpAjax.success(result, bimpAjax);
+                                            }
+                                            if (result.success_callback && typeof (result.success_callback) === 'string') {
+                                                eval(result.success_callback);
+                                            }
+                                        });
                                     });
-                                });
+                                } else {
+                                    bimpAjax.$resultContainer.html(result.html);
+                                    setCommonEvents(bimpAjax.$resultContainer);
+                                    setInputsEvents(bimpAjax.$resultContainer);
+                                }
+
                             } else {
-                                bimpAjax.$resultContainer.stop().fadeOut(250, function () {
-                                    bimpAjax.$resultContainer.html(result.html).fadeIn(250, function () {
-                                        setCommonEvents(bimpAjax.$resultContainer);
-                                        setInputsEvents(bimpAjax.$resultContainer);
+                                if (bimpAjax.append_html_transition) {
+                                    no_callbacks = true;
+                                    bimpAjax.$resultContainer.stop().fadeOut(250, function () {
+                                        bimpAjax.$resultContainer.html(result.html).fadeIn(250, function () {
+                                            setCommonEvents(bimpAjax.$resultContainer);
+                                            setInputsEvents(bimpAjax.$resultContainer);
+                                            if (typeof (bimpAjax.success) === 'function') {
+                                                bimpAjax.success(result, bimpAjax);
+                                            }
+                                            if (result.success_callback && typeof (result.success_callback) === 'string') {
+                                                eval(result.success_callback);
+                                            }
+                                        });
                                     });
-                                });
+                                } else {
+                                    bimpAjax.$resultContainer.html(result.html);
+                                    setCommonEvents(bimpAjax.$resultContainer);
+                                    setInputsEvents(bimpAjax.$resultContainer);
+                                }
                             }
                         }
                     }
@@ -260,12 +286,14 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
                         bimpModal.newContent(modal_title, result.modal_html, false, '', null);
                     }
 
-                    if (typeof (bimpAjax.success) === 'function') {
-                        bimpAjax.success(result, bimpAjax);
-                    }
+                    if (!no_callbacks) {
+                        if (typeof (bimpAjax.success) === 'function') {
+                            bimpAjax.success(result, bimpAjax);
+                        }
 
-                    if (result.success_callback && typeof (result.success_callback) === 'string') {
-                        eval(result.success_callback);
+                        if (result.success_callback && typeof (result.success_callback) === 'string') {
+                            eval(result.success_callback);
+                        }
                     }
                 }
 
@@ -306,8 +334,7 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
                     if (context != "public") {
                         html += '<iframe id="bimp_login_iframe" frameborder="0" src="' + dol_url_root + '/bimpcore/ajax_login.php"></iframe>';
 
-                    }
-                    else
+                    } else
                         html += '<span class="red">todo formulaire ou iframe (moins classe)       pour relog userClient dans /bimpcore/views/js/ajax.js line 284</span>';
                     html += '</div>';
                     $container.append(html);

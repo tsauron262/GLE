@@ -314,6 +314,22 @@ lists_cols:
         field: total_ht
     total_ttc: 
         field: total_ttc
+    commande_status: 
+        label: Statut commande
+        field: fk_statut
+        child: parent
+    commande_logistique_status: 
+        label: Statut logistique commande
+        field: logistique_status
+        child: parent
+    commande_shipment_status: 
+        label: Statut expéditions commande
+        field: shipment_status
+        child: parent
+    commande_invoice_status: 
+        label: Statut facturation commande
+        field: invoice_status
+        child: parent
                     
 filters_panels: 
     default: 
@@ -323,9 +339,22 @@ filters_panels:
             - field: id_entrepot
             - field: status
             - field: date_shipped
+            - field: id_user_resp
+              child: parent
             - field: total_ht
             - field: total_ttc
             - field: info
+            - field: fk_statut
+              child: parent
+            - field: logistique_status
+              child: parent
+            - field: shipment_status
+              child: parent
+            - field: invoice_status
+              child: parent
+            - field: date_commande
+              child: parent
+            - field: id_facture
             
 lists: 
     default: 
@@ -370,7 +399,7 @@ lists:
         add_form_name: default
         edit_form: default
         modal_view: default
-        objects_change_reload: BR_Reservation,BR_ReservationShipment,BR_Service,BR_ServiceShipment
+        objects_change_reload: BR_Reservation,Bimp_CommandeLine,Bimp_Commande
         extra_btn: 
             callback: getExtraBtn
         cols:

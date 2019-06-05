@@ -6,7 +6,7 @@ class BS_Pret extends BimpObject
 {
 
     // Getters: 
-    
+
     public function getCreateJsCallback()
     {
         if ((int) $this->getData('id_sav')) {
@@ -248,17 +248,79 @@ class BS_Pret extends BimpObject
                 }
             }
         }
-        
+
         return $errors;
     }
 
-    public function create()
+    public function create(&$warnings = array(), $force_create = false)
     {
         $errors = array();
-        $errors = parent::create();
+        $errors = parent::create($warnings, $force_create);
 
         if ($this->isLoaded()) {
             $this->updateField('ref', 'PRET' . $this->id);
+        }
+
+        return $errors;
+    }
+
+    public function update(&$warnings = array(), $force_update = false)
+    {
+        $init_returned = (int) $this->getInitData('returned');
+
+        $errors = parent::update($warnings, $force_update);
+
+        if (!count($errors)) {
+            if ((int) $this->getData('returned') !== $init_returned) {
+                $products = $this->getChildrenObjects('products');
+
+                foreach ($products as $pret_product) {
+                    $prod_errors = array();
+                    if ((int) $this->getData('returned')) {
+                        $prod_errors = $pret_product->increaseStock();
+                    } else {
+                        $prod_errors = $pret_product->decreaseStock();
+                    }
+
+                    if (count($prod_errors)) {
+                        $product = $pret_product->getChildObject('product');
+                        if (BimpObject::objectLoaded($product)) {
+                            $prod_label = '"' . $product->getRef() . '"';
+                        } else {
+                            $prod_label = ' d\'ID ' . $pret_product->getData('id_product');
+                        }
+                        $warnings[] = BimpTools::getMsgFromArray($prod_errors, 'Produit ' . $prod_label . ': erreurs lors de la correction des stocks');
+                    }
+                }
+            }
+        }
+
+        return $errors;
+    }
+
+    public function delete(&$warnings = array(), $force_delete = false)
+    {
+        $init_returned = (int) $this->getInitData('returned');
+
+        $errors = parent::delete($warnings, $force_delete);
+
+        if (!count($errors)) {
+            if (!$init_returned) {
+                $products = $this->getChildrenObjects('products');
+
+                foreach ($products as $pret_product) {
+                    $prod_errors = $pret_product->increaseStock();
+                    if (count($prod_errors)) {
+                        $product = $pret_product->getChildObject('product');
+                        if (BimpObject::objectLoaded($product)) {
+                            $prod_label = '"' . $product->getRef() . '"';
+                        } else {
+                            $prod_label = ' d\'ID ' . $pret_product->getData('id_product');
+                        }
+                        $warnings[] = BimpTools::getMsgFromArray($prod_errors, 'Produit ' . $prod_label . ': erreurs lors de la correction des stocks');
+                    }
+                }
+            }
         }
 
         return $errors;

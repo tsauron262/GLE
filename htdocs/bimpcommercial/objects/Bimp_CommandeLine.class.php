@@ -2068,6 +2068,8 @@ class Bimp_CommandeLine extends ObjectLine
 
         $shipments = $this->getData('shipments');
 
+        $updated_shipments = array();
+
         foreach ($shipments_data as $data) {
             $id_shipment = isset($data['id_shipment']) ? (int) $data['id_shipment'] : 0;
             if (!$id_shipment) {
@@ -2094,10 +2096,7 @@ class Bimp_CommandeLine extends ObjectLine
                 $shipments[$id_shipment]['group'] = (int) $data['group'];
             }
 
-            $ship_errors = $shipment->onLinesChange();
-            if (count($ship_errors)) {
-                $errors[] = BimpTools::getMsgFromArray($ship_errors, 'Expédition n°' . $shipment->getData('num_livraison'));
-            }
+            $updated_shipments[] = $shipment;
         }
 
         $total_qty_shipped = 0;
@@ -2112,6 +2111,15 @@ class Bimp_CommandeLine extends ObjectLine
         if (!count($errors)) {
             $this->set('shipments', $shipments);
             $errors = $this->update($warnings, true);
+        }
+
+        if (!count($errors)) {
+            foreach ($updated_shipments as $shipment) {
+                $ship_errors = $shipment->onLinesChange();
+                if (count($ship_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($ship_errors, 'Expédition n°' . $shipment->getData('num_livraison'));
+                }
+            }
         }
 
         return $errors;
@@ -3379,7 +3387,7 @@ class Bimp_CommandeLine extends ObjectLine
         if ($current_commande_status !== 0) {
             $is_extra_line = true;
 
-            if(!$force_create){
+            if (!$force_create) {
                 $this->set('qty_modif', (float) $this->qty);
                 $this->qty = 0;
             }
@@ -3389,19 +3397,25 @@ class Bimp_CommandeLine extends ObjectLine
 
         $errors = parent::create($warnings, $force_create);
 
-        if ($is_extra_line) {
-            if (in_array((int) $current_commande_status, Bimp_Commande::$logistique_active_status)) {
-                $res_errors = $this->checkReservations();
-                if (count($res_errors)) {
-                    $warnings[] = BimpTools::getMsgFromArray($res_errors);
+        if (!count($errors)) {
+            if ($is_extra_line) {
+                if (in_array((int) $current_commande_status, Bimp_Commande::$logistique_active_status)) {
+                    $res_errors = $this->checkReservations();
+                    if (count($res_errors)) {
+                        $warnings[] = BimpTools::getMsgFromArray($res_errors);
+                    }
                 }
+
+                $commande->set('fk_statut', $current_commande_status);
+                $commande->dol_object->statut = $current_commande_status;
+
+                $commande->checkShipmentStatus();
+                $commande->checkInvoiceStatus();
             }
-
-            $commande->set('fk_statut', $current_commande_status);
-            $commande->dol_object->statut = $current_commande_status;
-
-            $commande->checkShipmentStatus();
-            $commande->checkInvoiceStatus();
+            
+            if ((int) $this->getData('remise_crt')) {
+                $commande->setRevalorisation();
+            }
         }
 
         return $errors;
@@ -3411,7 +3425,7 @@ class Bimp_CommandeLine extends ObjectLine
     {
         $prev_commande_status = null;
         $commande = $this->getParentInstance();
-//
+        
         if (BimpObject::objectLoaded($commande)) {
             if ((int) $commande->getData('fk_statut') === 1) {
                 $prev_commande_status = 1;
@@ -3420,6 +3434,8 @@ class Bimp_CommandeLine extends ObjectLine
             }
         }
 
+        $init_remise_crt = (int) $this->getInitData('remise_crt');
+        
         $errors = parent::update($warnings, $force_update);
 
         if (!is_null($prev_commande_status)) {
@@ -3433,7 +3449,34 @@ class Bimp_CommandeLine extends ObjectLine
                 $warnings[] = BimpTools::getMsgFromArray($res_errors);
             }
         }
+        
+        if (!count($errors)) {
+            if (!$init_remise_crt && (int) $this->getData('remise_crt')) {
+                $commande->setRevalorisation();
+            }
+        }
 
+        return $errors;
+    }
+    
+    public function updateField($field, $value, $id_object = null, $force_update = true, $do_not_validate = false)
+    {
+        $init_remise_crt = (int) $this->getInitData('remise_crt');
+        
+        $errors = parent::updateField($field, $value, $id_object, $force_update, $do_not_validate);
+        
+        if (!count($errors)) {
+            if ($field === 'remise_crt') {
+                if (!$init_remise_crt && (int) $this->getData('remise_crt')) {
+                    $commande = $this->getParentInstance();
+                    
+                    if (BimpObject::objectLoaded($commande)) {
+                        $commande->setRevalorisation();
+                    }
+                }
+            }
+        }
+        
         return $errors;
     }
 }

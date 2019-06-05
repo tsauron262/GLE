@@ -9,7 +9,7 @@ bimpcore:
     objects: 
 #        Affiche les requêtes sql pour les listes objets: 
         print_list_sql: 0
-        print_insert_sql: 1
-        print_update_sql: 1
+        print_insert_sql: 0
+        print_update_sql: 0
 bimpcommercial: 
     no_validate: 0

@@ -265,16 +265,15 @@ class BContract_contrat extends BimpDolObject {
     public function actionValidation($data, &$success) {
         global $user;
         if($this->dol_object->validate($user) <= 0) {
-            $this->updateField('statut', self::CONTRAT_STATUS_VALIDE);
-            
+            $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object));
+            return 0;
         }
+        $this->dol_object->activateAll($user);
         $instance = $this->getInstance('bimpcontract', 'BContract_echeancier');
         $instance->find(Array('id_contrat' => $this->id));
         if($instance->updateLine($this->id, $this->getData('date_start') )) {
             $success .= 'Contrat et échéancier créer avec succes';
         }
-        
-        
     }
     
     public function actionAddContact($data, &$success)

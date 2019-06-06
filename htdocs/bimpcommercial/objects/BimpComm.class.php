@@ -2778,6 +2778,26 @@ class BimpComm extends BimpDolObject
                 }
             }
         }
+        $this->hydrateFromDolObject();
+        
+        
+        
+         //ajout des exterafileds du parent qui ne sont pas envoyé   
+        if(!count($errors) && $origin_object && isset($origin_object->dol_object)){
+            $update = false;
+            foreach($origin_object->dol_object->array_options as $options_key => $value) {
+                    if(!isset($this->data[$options_key]));
+                        $options_key = str_replace ("options_", "", $options_key);
+
+                    if(isset($this->data[$options_key]) && !BimpTools::isSubmit($options_key)){
+                        $update = true;
+                        $this->set($options_key, $value);
+                    }
+            }
+            if($update){
+                $errors = $this->update();
+            }
+        }
 
         return $errors;
     }

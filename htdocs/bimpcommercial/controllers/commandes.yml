@@ -10,21 +10,3 @@ objects:
         instance: 
             module: bimplogistique
             name: BL_CommandeShipment
-            
-sections: 
-    - type: tabs
-      tabs: 
-        default:
-            label: Commandes
-            sections:
-                - type: list
-                  list: 
-                      object: commande
-                      
-        shipments: 
-            label: Expéditions
-            sections: 
-                - type: list
-                  list: 
-                      object: shipment
-                  

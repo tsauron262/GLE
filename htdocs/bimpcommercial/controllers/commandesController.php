@@ -2,20 +2,21 @@
 
 class commandesController extends BimpController
 {
+
     var $socid = "";
 
     public function displayHead()
     {
         global $db, $langs, $user;
-        
-        if(BimpTools::getValue("socid") > 0){
+
+        if (BimpTools::getValue("socid") > 0) {
             $this->socid = BimpTools::getValue("socid");
             require_once DOL_DOCUMENT_ROOT . '/core/lib/company.lib.php';
             $soc = new Societe($db);
             $soc->fetch($this->socid);
             $head = societe_prepare_head($soc);
             dol_fiche_head($head, 'bimpcomm', '');
-            
+
             $linkback = '<a href="' . DOL_URL_ROOT . '/societe/list.php?restore_lastsearch_values=1">' . $langs->trans("BackToList") . '</a>';
 
             dol_banner_tab($soc, 'id', $linkback, ($user->societe_id ? 0 : 1), 'rowid', 'nom', '', '&fc=commandes');
@@ -24,9 +25,25 @@ class commandesController extends BimpController
 
     public function renderHtml()
     {
+        return BimpRender::renderNavTabs(array(
+                    array(
+                        'id'      => 'commandes',
+                        'title'   => 'Commandes',
+                        'content' => $this->renderCommandesTab()
+                    ),
+                    array(
+                        'id'      => 'shipments',
+                        'title'   => 'Expéditions',
+                        'content' => $this->renderShipmentsTab()
+                    )
+        ));
+    }
+
+    public function renderCommandesTab()
+    {
         $list = 'default';
         $titre = 'Commandes';
-        if($this->socid){
+        if ($this->socid) {
             $societe = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $this->socid);
 
             if (!BimpObject::objectLoaded($societe)) {
@@ -39,12 +56,19 @@ class commandesController extends BimpController
         $propal = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande');
 
         $list = new BC_ListTable($propal, $list, 1, null, $titre);
-        
-        
-        if($this->socid){
+
+        if ($this->socid) {
             $list->addFieldFilterValue('fk_soc', (int) $societe->id);
             $list->params['add_form_values']['fields']['fk_soc'] = (int) $societe->id;
         }
-            return $list->renderHtml();
+
+        return $list->renderHtml();
+    }
+
+    public function renderShipmentsTab()
+    {
+        $shipment = BimpObject::getInstance('bimplogistique', 'BL_CommandeShipment');
+        $list = new BC_ListTable($shipment, 'default', 1, null, 'Liste des expéditions', 'fas_shipping-fast');
+        return $list->renderHtml();
     }
 }

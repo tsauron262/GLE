@@ -2524,7 +2524,7 @@ class ObjectLine extends BimpObject
 
             case 'tva_tx':
                 $parent = $this->getParentInstance();
-                
+
                 if (BimpObject::objectLoaded($parent) && !$parent->isTvaActive()) {
                     $html = '<input type="hidden" value="' . $value . '" name="' . $prefixe . 'tva_tx"/>';
                     $html .= ' <span class="inputInfo warning">Non applicable</span>';
@@ -3695,9 +3695,9 @@ class ObjectLine extends BimpObject
         return $errors;
     }
 
-    public function updateField($field, $value, $id_object = null)
+    public function updateField($field, $value, $id_object = null, $force_update = true, $do_not_validate = false)
     {
-        $errors = parent::updateField($field, $value, $id_object);
+        $errors = parent::updateField($field, $value, $id_object, $force_update, $do_not_validate);
 
         if (!count($errors)) {
             if ($field === 'remisable' && !(int) $value) {

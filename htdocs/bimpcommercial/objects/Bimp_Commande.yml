@@ -228,6 +228,13 @@ fields:
         label: Status forcés
         type: json
         
+    revalorisation: 
+        label: Demande de revalorisation
+        type: int
+        values: 
+            array: revalorisations
+        default_value: 0
+        
 fields_tables: 
     infos: 
         rows: 
@@ -254,6 +261,8 @@ fields_tables:
             - field: validComm
             - field: validFin
             - field: zone_vente
+              edit: 1
+            - field: revalorisation
               edit: 1
                   
     payment:
@@ -630,6 +639,10 @@ filters_panels:
                 field: invoice_status
             date_livraison: 
                 field: date_livraison
+            zone_vente:
+                field: zone_vente
+            reval:
+                field: revalorisation
             
 lists_cols: 
     date_create: 
@@ -663,6 +676,11 @@ lists_cols:
     client_facture:
         field: id_client_facture
         display: nom_url
+    zone_vente:
+        field: zone_vente
+    revalorisation:
+        field: revalorisation
+    
         
 lists: 
     default: 

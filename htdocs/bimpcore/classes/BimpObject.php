@@ -366,7 +366,7 @@ class BimpObject extends BimpCache
         if ($child_name === 'parent') {
             return $this->getParentIdProperty();
         }
-        
+
         if (isset($this->config->params['objects'][$child_name]['instance']['id_object']['field_value'])) {
             return $this->config->params['objects'][$child_name]['instance']['id_object']['field_value'];
         }
@@ -1419,8 +1419,8 @@ class BimpObject extends BimpCache
 
             if (BimpTools::isSubmit('search_children')) {
                 foreach (BimpTools::getValue('search_children') as $child_name => $child_fields) {
-                    if ($this->config->isDefined('objects/' . $child_name . '/instance/id_object/field_value')) {
-                        $on_field = $this->config->params['objects'][$child_name]['instance']['id_object']['field_value'];
+                    $on_field = $this->getChildIdProperty($child_name);
+                    if ($on_field) {
                         $instance = $this->getChildObject($child_name);
                         if ($on_field && !is_null($instance) && is_a($instance, 'BimpObject')) {
                             $joins[$child_name] = array(
@@ -1957,7 +1957,7 @@ class BimpObject extends BimpCache
         $sql .= BimpTools::getSqlLimit($n, $p);
 //
 //        echo $sql; exit;
-        
+
         if (BimpDebug::isActive('bimpcore/objects/print_list_sql') || BimpTools::isSubmit('list_sql')) {
             echo BimpRender::renderDebugInfo($sql, 'SQL Liste - Module: "' . $this->module . '" Objet: "' . $this->object_name . '"');
         }
@@ -3044,6 +3044,8 @@ class BimpObject extends BimpCache
     {
         BimpLog::actionStart('bimpobject_delete', 'Suppression', $this);
 
+        self::setBimpObjectInstance($this);
+        
         $errors = array();
 
         if (!$this->isLoaded()) {

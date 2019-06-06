@@ -107,8 +107,8 @@ forms:
             - field: date_end
             - field: caution
             - association: equipments
-#            - object: products
-#              multiple: 1
+            - object: products
+              multiple: 1
 
     sav: 
         rows: 
@@ -118,8 +118,8 @@ forms:
             - field: date_end
             - field: caution
             - association: equipments
-#            - object: products
-#              multiple: 1
+            - object: products
+              multiple: 1
 
 fields_tables: 
     default: 
@@ -154,11 +154,11 @@ views:
                 - type: fields_table
                   fields_table: 
                       name: default
-#            - cols: 
-#                - type: list
-#                  list: 
-#                      name: default
-#                      children: products
+            - cols: 
+                - type: list
+                  list: 
+                      name: default
+                      children: products
                 
 lists: 
     default: 
@@ -167,10 +167,10 @@ lists:
         checkboxes: 1
         list_filters: 
             callback: getListFilters
-#        add_form_values: 
-#            fields: 
-#                id_entrepot: 
-#                    request: id_entrepot
+        add_form_values: 
+            fields: 
+                id_entrepot: 
+                    request: id_entrepot
         bulk_actions:
             - label: Supprimer les prêts sélectionnés
               icon: fas_trash-alt
@@ -178,11 +178,13 @@ lists:
         sort_field: id
         sort_way: desc
         n: 25
-#        add_form_name: default
+        add_form_name: default
         delete_btn: 1
         update_btn: 1
         edit_btn: 1
         modal_view: default
+        extra_btn: 
+            callback: getListExtraBtn
         cols: 
             entrepot: 
                 field: id_entrepot

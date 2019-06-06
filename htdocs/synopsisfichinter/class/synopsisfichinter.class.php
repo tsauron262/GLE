@@ -350,8 +350,8 @@ class Synopsisfichinter extends Fichinter {
         $this->setValid($user);
         
         
-        if($this->total_ttc > 0)
-        mailSyn2("FI Validé", "m.gallet@bimp.fr", null, "Bonjour, la FI ".str_replace("card.php", "document.php", $this->getNomUrl(1))." a été validé pour facturation (".$this->total_ttc." €)");
+//        if($this->total_ttc > 0)
+//        mailSyn2("FI Validé", "m.gallet@bimp.fr", null, "Bonjour, la FI ".str_replace("card.php", "document.php", $this->getNomUrl(1))." a été validé pour facturation (".$this->total_ttc." €)");
 //        global $langs, $conf;
 //        $this->db->begin();
 //

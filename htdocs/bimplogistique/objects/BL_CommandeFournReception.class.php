@@ -488,7 +488,7 @@ class BL_CommandeFournReception extends BimpObject
                                 'auto_expand'      => true,
                                 'tab_key_as_enter' => true
                     ));
-                    $html .= '<p class="inputHelp">Séparateurs possibles: sauts de ligne, espaces, virgules ou points-virgules.<br/>';
+                    $html .= '<p class="inputHelp" style="display: block;">Séparateurs possibles: sauts de ligne, espaces, virgules ou points-virgules.<br/>';
                     $html .= 'Max: ' . $max . ' numéro' . ($max > 1 ? 's' : '') . ' de série.';
                     $html .= '</p>';
 

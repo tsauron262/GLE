@@ -60,7 +60,7 @@ class InterfaceDolObjects extends DolibarrTriggers
                 $object->array_options['options_date_val_mdp'] = (time()+(3600*24*90));
                 $user->updateExtraField('date_val_mdp', false, $user);
                 $_SESSION['dol_events'] = array();
-//                $this->db->query("UPDATE `llx_user_extrafields` SET `date_val_mdp`= FROM_UNIXTIME(".(time()+(3600*24*90)).") WHERE `fk_object` = ".$object->id);
+                $this->db->query("UPDATE `llx_user_extrafields` SET `date_val_mdp`= FROM_UNIXTIME(".(time()+(3600*24*90)).") WHERE `fk_object` = ".$object->id);
 //                $this->db->commit();
             }
         }

@@ -56,8 +56,13 @@ class InterfaceDolObjects extends DolibarrTriggers
     public function runTrigger($action, $object, User $user, Translate $langs, Conf $conf)
     {
         if($action == "USER_NEW_PASSWORD"){
-            if(isset($object->array_options['options_date_val_mdp'])) 
-                $this->db->query("UPDATE `llx_user_extrafields` SET `date_val_mdp`= '".(time()+(3600*24*90))."' WHERE `fk_object` = ".$object->id);
+            if(isset($object->array_options['options_date_val_mdp'])) {
+                $object->array_options['options_date_val_mdp'] = (time()+(3600*24*90));
+                $user->updateExtraField('date_val_mdp', false, $user);
+                $_SESSION['dol_events'] = array();
+//                $this->db->query("UPDATE `llx_user_extrafields` SET `date_val_mdp`= FROM_UNIXTIME(".(time()+(3600*24*90)).") WHERE `fk_object` = ".$object->id);
+//                $this->db->commit();
+            }
         }
         
 

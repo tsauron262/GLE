@@ -447,3 +447,18 @@ cards:
               field: entrepot
               display: nom_url
         view_btn: 1
+        
+        
+searches:
+    default: 
+        fields_search: 
+            - a.ref
+            - ef.libelle
+            - s.nom
+        joins:
+            - table: propal_extrafields
+              on: a.rowid = ef.fk_object
+              alias: ef
+            - table: societe
+              on: a.fk_soc = s.rowid
+              alias: s

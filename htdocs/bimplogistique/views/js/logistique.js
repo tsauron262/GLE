@@ -260,6 +260,11 @@ function saveShipmentLines($button, id_shipment, modal_idx) {
             if ($groupInput.length) {
                 data.group = parseInt($groupInput.val());
             }
+            
+            var $entrepotInput = $row.find('[name="line_' + data.id_line + '_id_entrepot"]');
+            if ($entrepotInput.length) {
+                data.id_entrepot = parseInt($entrepotInput.val());
+            }
 
             var $eq_row = $container.find('#shipment_line_' + data.id_line + '_equipments_row');
             if ($eq_row.length) {
@@ -287,76 +292,76 @@ function saveShipmentLines($button, id_shipment, modal_idx) {
     }
 }
 
-function onShipmentEquipmentFormEquipmentsLoaded($form) {
-    if ($.isOk($form)) {
-        $form.find('.line_equipments_container').each(function () {
-            var $container = $(this);
-            if (!parseInt($container.data('line_equipments_container_events_init'))) {
-                var id_line = parseInt($container.data('id_line'));
-                var $input = $container.find('input[name="line_' + id_line + '_qty"]');
-
-                if ($input.length) {
-                    $input.change(function () {
-                        var qty = parseInt($(this).val());
-                        var min = parseInt($(this).data('min'));
-                        var max_equipments = qty - min;
-
-                        $container.find('.max_nb_equipments').text(max_equipments);
-                        checkShipmentEquipmentsFormEquipmentsNumber($container);
-                    });
-                }
-
-                $container.find('input.equipments_check').each(function () {
-                    $(this).change(function () {
-                        checkShipmentEquipmentsFormEquipmentsNumber($(this).findParentByClass('line_equipments_container'));
-                    });
-                });
-
-                checkShipmentEquipmentsFormEquipmentsNumber($container);
-                $container.data('line_equipments_container_events_init', 1);
-            }
-        });
-    }
-}
-
-function checkShipmentEquipmentsFormEquipmentsNumber($container) {
-    var $selected = $container.find('input.equipments_check:checked');
-    var max = parseInt($container.find('.max_nb_equipments').text());
-
-    var remain = max - $selected.length;
-
-    var msg = '';
-    var className = '';
-    var check = true;
-
-    if (remain > 0) {
-        msg = 'Il reste ' + remain + ' équipement(s) à sélectionner';
-        className = 'warning';
-    } else if (remain < 0) {
-        msg = 'Vous devez désélectionner ' + (-remain) + ' équipement(s)';
-        className = 'danger';
-        check = false;
-    } else {
-        msg = 'Il ne reste plus aucun équipement à sélectionner';
-        className = 'success';
-    }
-
-    var html = '<div class="alert alert-' + className + '">' + msg + '</div>';
-    $container.find('.equipments_selection_infos').html(html);
-
-    var $modal_content = $container.findParentByClass('modal_content');
-    if ($.isOk($modal_content)) {
-        var modal_idx = parseInt($modal_content.data('idx'));
-        var $button = $modal_content.findParentByClass('modal-content').find('.modal-footer').find('button.set_action_button.modal_' + modal_idx);
-        if ($.isOk($button)) {
-            if (!check) {
-                $button.addClass('disabled');
-            } else {
-                $button.removeClass('disabled');
-            }
-        }
-    }
-}
+//function onShipmentEquipmentFormEquipmentsLoaded($form) {
+//    if ($.isOk($form)) {
+//        $form.find('.line_equipments_container').each(function () {
+//            var $container = $(this);
+//            if (!parseInt($container.data('line_equipments_container_events_init'))) {
+//                var id_line = parseInt($container.data('id_line'));
+//                var $input = $container.find('input[name="line_' + id_line + '_qty"]');
+//
+//                if ($input.length) {
+//                    $input.change(function () {
+//                        var qty = parseInt($(this).val());
+//                        var min = parseInt($(this).data('min'));
+//                        var max_equipments = qty - min;
+//
+//                        $container.find('.max_nb_equipments').text(max_equipments);
+//                        checkShipmentEquipmentsFormEquipmentsNumber($container);
+//                    });
+//                }
+//
+//                $container.find('input.equipments_check').each(function () {
+//                    $(this).change(function () {
+//                        checkShipmentEquipmentsFormEquipmentsNumber($(this).findParentByClass('line_equipments_container'));
+//                    });
+//                });
+//
+//                checkShipmentEquipmentsFormEquipmentsNumber($container);
+//                $container.data('line_equipments_container_events_init', 1);
+//            }
+//        });
+//    }
+//}
+//
+//function checkShipmentEquipmentsFormEquipmentsNumber($container) {
+//    var $selected = $container.find('input.equipments_check:checked');
+//    var max = parseInt($container.find('.max_nb_equipments').text());
+//
+//    var remain = max - $selected.length;
+//
+//    var msg = '';
+//    var className = '';
+//    var check = true;
+//
+//    if (remain > 0) {
+//        msg = 'Il reste ' + remain + ' équipement(s) à sélectionner';
+//        className = 'warning';
+//    } else if (remain < 0) {
+//        msg = 'Vous devez désélectionner ' + (-remain) + ' équipement(s)';
+//        className = 'danger';
+//        check = false;
+//    } else {
+//        msg = 'Il ne reste plus aucun équipement à sélectionner';
+//        className = 'success';
+//    }
+//
+//    var html = '<div class="alert alert-' + className + '">' + msg + '</div>';
+//    $container.find('.equipments_selection_infos').html(html);
+//
+//    var $modal_content = $container.findParentByClass('modal_content');
+//    if ($.isOk($modal_content)) {
+//        var modal_idx = parseInt($modal_content.data('idx'));
+//        var $button = $modal_content.findParentByClass('modal-content').find('.modal-footer').find('button.set_action_button.modal_' + modal_idx);
+//        if ($.isOk($button)) {
+//            if (!check) {
+//                $button.addClass('disabled');
+//            } else {
+//                $button.removeClass('disabled');
+//            }
+//        }
+//    }
+//}
 
 function onShipmentEquipmentsFormSubmit($form, extra_data) {
     extra_data['lines'] = [];

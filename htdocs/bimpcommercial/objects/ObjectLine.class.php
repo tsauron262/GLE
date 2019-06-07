@@ -78,6 +78,11 @@ class ObjectLine extends BimpObject
     public function canEditPrixVente()
     {
         global $user;
+
+        if ((float) $this->qty < 0) {
+            return 1;
+        }
+
         if (isset($user->rights->bimpcommercial->priceVente) && (int) $user->rights->bimpcommercial->priceVente == 1) {
             return 1;
         }
@@ -2511,14 +2516,19 @@ class ObjectLine extends BimpObject
                         $html .= ' <span class="inputInfo warning">(non modifiable)</span>';
                     }
                 } else {
-                    $html = BimpInput::renderInput('text', $prefixe . 'pu_ht', (float) $value, array(
-                                'values'      => $this->getProductPricesValuesArray(),
-                                'data'        => array(
-                                    'data_type' => 'number',
-                                    'decimals'  => 2
-                                ),
-                                'addon_right' => '<i class="fa fa-' . BimpTools::getCurrencyIcon('EUR') . '"></i>'
-                    ));
+                    $options = array(
+                        'data'        => array(
+                            'data_type' => 'number',
+                            'decimals'  => 2
+                        ),
+                        'addon_right' => '<i class="fa fa-' . BimpTools::getCurrencyIcon('EUR') . '"></i>'
+                    );
+
+                    if (!is_a($this, 'FournObjectLine')) {
+                        $options['values'] = $this->getProductPricesValuesArray();
+                    }
+
+                    $html = BimpInput::renderInput('text', $prefixe . 'pu_ht', (float) $value, $options);
                 }
                 break;
 

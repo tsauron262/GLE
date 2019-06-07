@@ -673,6 +673,7 @@ class Bimp_Commande extends BimpComm
 
         foreach ($lines as $id_line) {
             $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $id_line);
+            $full_qty = (float) $line->getFullQty();
 
             if (!$line->isShippable()) {
                 continue;
@@ -687,8 +688,14 @@ class Bimp_Commande extends BimpComm
                     }
                 }
 
-                if ($available_qty <= 0) {
-                    continue;
+                if ($full_qty >= 0) {
+                    if ($available_qty <= 0) {
+                        
+                    }
+                } else {
+                    if ($available_qty >= 0) {
+                        continue;
+                    }
                 }
 
                 $product = null;
@@ -709,7 +716,7 @@ class Bimp_Commande extends BimpComm
                 $html .= '</td>';
                 $html .= '<td>';
 
-                if (BimpObject::objectLoaded($product)) {
+                if ($full_qty > 0 && BimpObject::objectLoaded($product)) {
                     if ((int) $product->getData('fk_product_type') === 0 && !$product->isSerialisable()) {
                         $line_shipments = $line->getData('shipments');
                         if (isset($line_shipments[$id_shipment]['group_articles'])) {
@@ -1056,6 +1063,7 @@ class Bimp_Commande extends BimpComm
 
         foreach ($lines as $line) {
             $product = $line->getProduct();
+            $full_qty = (float) $line->getFullQty();
             if (BimpObject::objectLoaded($product)) {
                 if ($product->isSerialisable()) {
                     $line_equipments = array(
@@ -1065,6 +1073,7 @@ class Bimp_Commande extends BimpComm
                         'min'            => 0,
                         'max'            => 0,
                         'equipments_max' => 0,
+                        'equipments_min' => 0,
                         'equipments'     => array(),
                         'selected'       => array()
                     );
@@ -1075,35 +1084,57 @@ class Bimp_Commande extends BimpComm
                         if ((int) $id_s === $id_shipment) {
                             $line_equipments['qty'] = (int) $shipment_data['qty'];
                             if (isset($shipment_data['equipments'])) {
-                                $line_equipments['min'] = count($shipment_data['equipments']);
+                                if ($full_qty >= 0) {
+                                    $line_equipments['min'] = count($shipment_data['equipments']);
+                                } else {
+                                    $line_equipments['max'] = (count($shipment_data['equipments']) * -1);
+                                }
                             }
                         }
-
                         $remain_qty -= (int) $shipment_data['qty'];
                     }
 
-                    $line_equipments['max'] = $line_equipments['qty'] + $remain_qty;
+                    if ($full_qty >= 0) {
+                        $line_equipments['max'] = $line_equipments['qty'] + $remain_qty;
+                    } else {
+                        $line_equipments['min'] = $line_equipments['qty'] + $remain_qty;
+                    }
                     $line_equipments['equipments_max'] = $line_equipments['qty'] - $line_equipments['min'];
 
-                    $list = $reservation->getList(array(
-                        'id_commande_client'      => (int) $this->id,
-                        'id_commande_client_line' => (int) $line->id,
-                        'status'                  => 200,
-                        'id_equipment'            => array(
-                            'operator' => '>',
-                            'value'    => 0
-                        )
-                            ), null, null, 'id', 'asc', 'array', array('id', 'id_equipment'));
-                    if (!is_null($list)) {
-                        foreach ($list as $item) {
-                            $id_shipment = (int) $line->getEquipmentIdShipment((int) $item['id_equipment']);
-                            if (!$id_shipment) {
-                                $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $item['id_equipment']);
-                                if (BimpObject::objectLoaded($equipment)) {
-                                    $line_equipments['equipments'][(int) $equipment->id] = 'Equipement ' . $equipment->id . ' - NS: ' . $equipment->getData('serial');
-                                    if (in_array($item['id'], $selected_reservations)) {
-                                        $line_equipments['selected'][] = (int) $equipment->id;
+                    if ($full_qty >= 0) {
+                        // Equipements à expédier: 
+                        $list = $reservation->getList(array(
+                            'id_commande_client'      => (int) $this->id,
+                            'id_commande_client_line' => (int) $line->id,
+                            'status'                  => 200,
+                            'id_equipment'            => array(
+                                'operator' => '>',
+                                'value'    => 0
+                            )
+                                ), null, null, 'id', 'asc', 'array', array('id', 'id_equipment'));
+                        if (!is_null($list)) {
+                            foreach ($list as $item) {
+                                $id_shipment = (int) $line->getEquipmentIdShipment((int) $item['id_equipment']);
+                                if (!$id_shipment) {
+                                    $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $item['id_equipment']);
+                                    if (BimpObject::objectLoaded($equipment)) {
+                                        $line_equipments['equipments'][(int) $equipment->id] = $equipment->getData('serial');
+                                        if (in_array($item['id'], $selected_reservations)) {
+                                            $line_equipments['selected'][] = (int) $equipment->id;
+                                        }
                                     }
+                                }
+                            }
+                        }
+                    } else {
+                        // Equipements retournés: 
+                        $equipments_returned = $line->getData('equipments_returned');
+                        foreach ($equipments_returned as $id_equipment => $id_entrepot) {
+                            $id_shipment = (int) $line->getEquipmentIdShipment((int) $id_equipment);
+                            if (!$id_shipment) {
+                                $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+                                if (BimpObject::objectLoaded($equipment)) {
+                                    $line_equipments['equipments'][(int) $equipment->id] = $equipment->getData('serial');
                                 }
                             }
                         }
@@ -1136,26 +1167,16 @@ class Bimp_Commande extends BimpComm
                                 'decimals'  => 0,
                                 'unsigned'  => 1
                             ),
-                            'max_label' => 1
+                            'min_label' => ((float) $line_data['min'] < 0 ? 1 : 0),
+                            'max_label' => ((float) $line_data['max'] > 0 ? 1 : 0)
                 ));
                 $html .= '</div>';
 
-                $html .= BimpRender::renderAlerts('Vous pouvez sélectionner jusqu\'à <span class="max_nb_equipments">' . $line_data['equipments_max'] . '</span> équipement(s)', 'info');
-
-                $remain_qty = (int) $line_data['equipments_max'] - (int) count($line_data['selected']);
-
-                $html .= '<div class="equipments_selection_infos">';
-                if ($remain_qty > 0) {
-                    $html .= BimpRender::renderAlerts('Il reste ' . $remain_qty . ' équipement(s) à sélectionner', 'warning');
-                } elseif ($remain_qty < 0) {
-                    $html .= BimpRender::renderAlerts('Vous devez désélectionner ' . (-$remain_qty) . ' équipement(s)', 'danger');
-                } else {
-                    $html .= BimpRender::renderAlerts('Il ne reste plus aucun équipement à sélectionner', 'success');
-                }
-                $html .= '</div>';
-
                 $html .= BimpInput::renderInput('check_list', 'equipments', $line_data['selected'], array(
-                            'items' => $line_data['equipments']
+                            'items'          => $line_data['equipments'],
+                            'max'            => $line_data['equipments_max'],
+                            'max_input_name' => 'line_' . $line_data['id_line'] . '_qty',
+                            'max_input_abs'  => 1
                 ));
 
                 $html .= '</div>';
@@ -1350,7 +1371,7 @@ class Bimp_Commande extends BimpComm
                 }
             }
         }
-        
+
         return $id_facture;
     }
 
@@ -1598,11 +1619,11 @@ class Bimp_Commande extends BimpComm
 
             foreach ($lines as $line) {
                 $shipped_qty = (float) $line->getShippedQty(null, true);
-                if ($shipped_qty > 0) {
+                if ($shipped_qty) {
                     $hasShipment = 1;
                 }
 
-                if ($shipped_qty < (float) $line->getShipmentsQty()) {
+                if (abs($shipped_qty) < abs((float) $line->getShipmentsQty())) {
                     $isFullyShipped = 0;
                 }
             }
@@ -1638,12 +1659,12 @@ class Bimp_Commande extends BimpComm
             $current_status = (int) $this->getInitData('invoice_status');
 
             foreach ($lines as $line) {
-                $billed_qty = (float) $line->getBilledQty(null, true);
-                if ($billed_qty > 0) {
+                $billed_qty = (float) $line->getBilledQty(null, false);
+                if ($billed_qty) {
                     $hasInvoice = 1;
                 }
 
-                if ($billed_qty < (float) $line->getFullQty()) {
+                if (abs($billed_qty) < abs((float) $line->getFullQty())) {
                     $isFullyInvoiced = 0;
                 }
             }
@@ -1850,7 +1871,7 @@ class Bimp_Commande extends BimpComm
                     $remises = isset($data['id_remises_list']) ? $data['id_remises_list'] : array();
                     $note_public = isset($data['note_public']) ? $data['note_public'] : '';
                     $note_private = isset($data['note_private']) ? $data['note_private'] : '';
-                    
+
                     $id_facture = $this->createFacture($errors, $id_client, $id_contact, $id_cond_reglement, $id_account, $note_public, $note_private, $remises);
 
                     // Ajout des lignes à la facture: 

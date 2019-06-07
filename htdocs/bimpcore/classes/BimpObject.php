@@ -5898,18 +5898,20 @@ class BimpObject extends BimpCache
             elseif ($redirectMode != 0)
                 $btn = true;
 
-
+            $search = null;
             if (BimpTools::getValue("sall") != "") {
-                $objName = "";
-                if (isset($this->dol_object) && isset($this->dol_object->element))
-                    $objName = $this->dol_object->element;
-                $url .= "&search=1&object=" . $this->dol_object->element . "&sall=" . BimpTools::getValue("sall");
+                $search = BimpTools::getValue("sall");
             }
             elseif (BimpTools::getValue("search_all") != "") {
+                $search = BimpTools::getValue("search_all");
+            }
+            if($search){
                 $objName = "";
                 if (isset($this->dol_object) && isset($this->dol_object->element))
                     $objName = $this->dol_object->element;
-                $url .= "&search=1&object=" . $this->dol_object->element . "&sall=" . BimpTools::getValue("search_all");
+                if($objName == "order_supplier")
+                    $objName = "commande_fourn";
+                $url .= "&search=1&object=" . $objName . "&sall=" . $search;
             }
             if (BimpTools::getValue("socid") != "") {
                 $objName = "";

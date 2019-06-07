@@ -16,15 +16,15 @@ class Actionsbimpsecurlogin {
         }
         
         
-        if(isset($user->array_options['options_date_val_mdp']) && $user->array_options['options_date_val_mdp'] < (time()))
-            if(stripos($_SERVER['REQUEST_URI'], "/user/card.php") === false)
-                header("Location: ".DOL_URL_ROOT."/user/card.php?id=".$user->id);
+//        if(isset($user->array_options['options_date_val_mdp']) && $user->array_options['options_date_val_mdp'] < (time()))
+//            if(stripos($_SERVER['REQUEST_URI'], "/user/card.php") === false)
+//                header("Location: ".DOL_URL_ROOT."/user/card.php?id=".$user->id);
     }
     
     function printLeftBlock(){
         global $user;
-        if(isset($user->array_options['options_date_val_mdp']) && $user->array_options['options_date_val_mdp'] < (time()+(3600*24*2)))
-            setEventMessages("Merci de changé votre mdp", null, 'errors');
+//        if(isset($user->array_options['options_date_val_mdp']) && $user->array_options['options_date_val_mdp'] < (time()+(3600*24*2)))
+//            setEventMessages("Merci de changé votre mdp", null, 'errors');
         
         
     }

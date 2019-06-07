@@ -5905,6 +5905,12 @@ class BimpObject extends BimpCache
                     $objName = $this->dol_object->element;
                 $url .= "&search=1&object=" . $this->dol_object->element . "&sall=" . BimpTools::getValue("sall");
             }
+            elseif (BimpTools::getValue("search_all") != "") {
+                $objName = "";
+                if (isset($this->dol_object) && isset($this->dol_object->element))
+                    $objName = $this->dol_object->element;
+                $url .= "&search=1&object=" . $this->dol_object->element . "&sall=" . BimpTools::getValue("search_all");
+            }
             if (BimpTools::getValue("socid") != "") {
                 $objName = "";
                 if (isset($this->dol_object) && isset($this->dol_object->element))

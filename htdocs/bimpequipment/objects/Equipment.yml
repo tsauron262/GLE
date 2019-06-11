@@ -289,7 +289,7 @@ fields_tables:
             - field: id_facture
             
 views:
-    default:
+    infos:
         edit_form: default
         delete_btn: 1
         rows:
@@ -307,18 +307,18 @@ views:
                     col_sm: 12
                     rows: 
                         - cols: 
-                            - type: object_common_fields
-                        - cols: 
                             - type: fields_table
                               fields_table:
                                   name: vente
                               
-    full: 
+    default: 
         rows: 
+            - cols: 
+                - type: object_header
             - cols: 
                 - type: view
                   view: 
-                      name: default
+                      name: infos
             - cols: 
                 - type: list
                   list: 
@@ -397,7 +397,7 @@ list:
     delete_btn: 1
     view_btn: 1
     page_btn: 1
-    modal_view: full
+    modal_view: default
     cols:
         id:
             label: ID

@@ -358,9 +358,9 @@ fields_tables:
             
 views: 
     default: 
-        objects_change_reload: Bimp_FactureLine
+        objects_change_reload: Bimp_FactureLine,Bimp_Paiement
     content_infos: 
-        objects_change_reload: Bimp_FactureLine
+        objects_change_reload: Bimp_FactureLine,Bimp_Paiement
       
 filters_panels: 
     default: 

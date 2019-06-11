@@ -50,6 +50,8 @@ class commandeFournController extends BimpController
 //                        'content' => $this->renderFacturesTab($commande)
 //                    ),
         ));
+        
+        $html .= $commande->renderNotesList(true);
 
         return $html;
     }

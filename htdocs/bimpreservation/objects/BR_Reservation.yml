@@ -355,7 +355,12 @@ forms:
             - custom: 1
               label: Equipements
               input_name: equipments
-              data_type: list
+              data_type: items_list
+              items_data_type: id_object
+              object: equipment
+              create_form: light_place
+              create_form_values: 
+                  callback: getEquipmentCreateFormValues
               multiple: 1
               content: 
                   callback: renderReserveEquipmentsInput

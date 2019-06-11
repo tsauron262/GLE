@@ -65,6 +65,12 @@ class BimpComm extends BimpDolObject
         switch ($field) {
             case 'zone_vente':
                 return (int) $this->areLinesEditable();
+
+            case 'entrepot':
+                if ((int) $this->getData('fk_statut') > 0) {
+                    return 0;
+                }
+                return 1;
         }
         return 1;
     }
@@ -96,12 +102,12 @@ class BimpComm extends BimpDolObject
                     $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
                     return 0;
                 }
-                if($this->getData('invoice_status') === null || $this->getData('invoice_status') > 0){
+                if ($this->getData('invoice_status') === null || $this->getData('invoice_status') > 0) {
                     $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' est déja facturé';
                     return 0;
                 }
-                    
-                
+
+
 //                if (!$this->areLinesEditable()) {
 //                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' ne peut plus être éditée';
 //                    return 0;

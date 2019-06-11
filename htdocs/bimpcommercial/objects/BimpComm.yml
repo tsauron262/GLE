@@ -2,6 +2,7 @@ primary: rowid
 
 header_btn: 
     callback: getActionsButtons
+    
 header_list_name: default
     
 objects:
@@ -618,13 +619,6 @@ views:
                             - type: fields_table
                               fields_table: 
                                   name: notes
-            - cols:
-                  - type: custom
-                    custom: 
-                        callback: 
-                            method: renderNotesList
-                            params:
-                                - 1
                             
     full: 
         objects_change_reload: Bimp_File
@@ -639,6 +633,13 @@ views:
                 - type: view
                   view: 
                       name: content
+            - cols:
+                - type: custom
+                  custom: 
+                      callback: 
+                          method: renderNotesList
+                          params:
+                              - 1
         
     content_infos: 
         rows: 

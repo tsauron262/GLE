@@ -72,7 +72,7 @@ lists:
         extends: default
         title: Logistique produits / services
         icon: fas_truck-loading
-        configurable: 0
+        configurable: 1
         item_checkbox: 1
         after_list_content: unset
         header_buttons: unset

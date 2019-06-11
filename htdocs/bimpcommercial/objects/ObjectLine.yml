@@ -611,6 +611,10 @@ lists_cols:
     remise_pa: 
         label: Remise PA
         field: remise_pa
+    product_zone_pr: 
+        label: Emplacement Lyon
+        field: zone_pr
+        child: product
     
 lists: 
     default: 

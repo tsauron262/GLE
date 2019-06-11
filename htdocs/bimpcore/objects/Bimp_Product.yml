@@ -222,6 +222,10 @@ fields:
         label: Copie privée
         type: money
         dol_extra_field: 1
+    zone_pr:
+        label: Emplacement LYON
+        type: text
+        dol_extra_field: 1
         
 #    Champs non gérés
 #    ref_ext
@@ -267,6 +271,7 @@ forms:
             - field: infos_pa
             - field: serialisable
             - field: note
+            - field: zone_pr
             
     etiquettes: 
         title: Générer des etiquettes
@@ -344,6 +349,8 @@ fields_tables:
             - field: tobuy
               edit: 1
             - field: stock
+            - field: zone_pr
+              edit: 1
     
     infos_complementaires:
         title: Informations complémentaires
@@ -447,12 +454,17 @@ filters_panels:
             - field: remisable
             - field: tosell
             - field: tobuy
-            
+          
+ 
+lists_cols: 
+    zone_pr: 
+        field: zone_pr
                 
 lists: 
     default: 
         title: Produits
         icon: fas_box
+        configurable: 1
         filters_panel: default
         sort_field: id
         sort_way: desc

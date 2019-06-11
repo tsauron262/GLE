@@ -221,10 +221,12 @@ class Interfacevalidate extends DolibarrTriggers
                     $object->add_contact($user->id, 'SALESREPSIGN', 'internal');
                 }
 
-                $idEn = $object->array_options['options_entrepot'];
-                if ($idEn < 1) {
-                    setEventMessages("Pas d'entrepôt associé", null, 'errors');
-                    return -2;
+                if(!BimpCore::getConf("NOT_USE_ENTREPOT")){
+                    $idEn = $object->array_options['options_entrepot'];
+                    if ($idEn < 1) {
+                        setEventMessages("Pas d'entrepôt associé", null, 'errors');
+                        return -2;
+                    }
                 }
             }
 

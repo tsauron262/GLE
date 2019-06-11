@@ -41,7 +41,8 @@ class ObjectLine extends BimpObject
     );
     public static $types = array(
         self::LINE_PRODUCT => 'Produit / Service',
-        self::LINE_TEXT    => 'Texte libre'
+        self::LINE_TEXT    => 'Texte libre',
+        self::LINE_FREE    => 'Ligne libre'
     );
     protected $product = null;
     protected $post_id_product = null;

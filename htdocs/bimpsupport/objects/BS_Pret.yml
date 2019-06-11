@@ -61,13 +61,13 @@ fields:
                 field_return_value: s.id
                 field_return_label: s.ref
                 fields_search: s.id,s.ref
+        default_value: 0
     id_entrepot: 
         label: Entrepot
         type: id_object
         object: entrepot
         input: 
             type: search_entrepot
-        required: 1
     code_centre: 
         label: Centre
         values: 
@@ -98,19 +98,29 @@ forms:
             - field: id_entrepot
               display_if: 
                   field_name: id_sav
-                  show_values: 0
+                  show_values: 0,
             - field: id_client
               display_if: 
                   field_name: id_sav
-                  show_values: 0
+                  show_values: 0,
+            - field: date_begin
+            - field: date_end
+            - field: caution
+            - association: equipments
+            - object: products
+              multiple: 1
+
+    sav: 
+        rows: 
+            - field: id_sav
               hidden: 1
             - field: date_begin
             - field: date_end
             - field: caution
             - association: equipments
-#            - object: products
-#              multiple: 1
-          
+            - object: products
+              multiple: 1
+
 fields_tables: 
     default: 
         panel: 1
@@ -144,17 +154,23 @@ views:
                 - type: fields_table
                   fields_table: 
                       name: default
-#            - cols: 
-#                - type: list
-#                  list: 
-#                      name: default
-#                      children: products
+            - cols: 
+                - type: list
+                  list: 
+                      name: default
+                      children: products
                 
 lists: 
     default: 
         title: Matériels prêtés
         icon: mobile
         checkboxes: 1
+        list_filters: 
+            callback: getListFilters
+        add_form_values: 
+            fields: 
+                id_entrepot: 
+                    request: id_entrepot
         bulk_actions:
             - label: Supprimer les prêts sélectionnés
               icon: fas_trash-alt
@@ -162,10 +178,13 @@ lists:
         sort_field: id
         sort_way: desc
         n: 25
+        add_form_name: default
         delete_btn: 1
         update_btn: 1
         edit_btn: 1
         modal_view: default
+        extra_btn: 
+            callback: getListExtraBtn
         cols: 
             entrepot: 
                 field: id_entrepot
@@ -200,7 +219,7 @@ lists:
         n: 25
         delete_btn: 1
         update_btn: 1
-        add_form_name: default
+        add_form_name: sav
         modal_view: default
         edit_btn: 1
         extra_btn: 

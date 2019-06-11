@@ -1,7 +1,8 @@
 <?php
-require_once DOL_DOCUMENT_ROOT."/bimpequipment/controllers/equipmentController.php";
 
-require_once DOL_DOCUMENT_ROOT.'/bimpequipment/controllers/equipmentController.php';
+require_once DOL_DOCUMENT_ROOT . "/bimpequipment/controllers/equipmentController.php";
+
+require_once DOL_DOCUMENT_ROOT . '/bimpequipment/controllers/equipmentController.php';
 
 class entrepotController extends equipmentController
 {
@@ -37,6 +38,16 @@ class entrepotController extends equipmentController
         $list->addFieldFilterValue('epl.id_entrepot', (int) $entrepot->id);
         $list->addFieldFilterValue('epl.position', 1);
         $list->addJoin('be_equipment_place', 'a.id = epl.id_equipment', 'epl');
+        $list->setAddFormValues(array(
+            'objects' => array(
+                'places' => array(
+                    'fields' => array(
+                        'type'        => BE_Place::BE_PLACE_ENTREPOT,
+                        'id_entrepot' => (int) $entrepot->id
+                    )
+                )
+            )
+        ));
         $html .= $list->renderHtml();
 
         $html .= '</div>';

@@ -72,7 +72,7 @@ function getTabTypeObject($typeFiltre = null) {
             'module' => 'bimpcommercial'),
         'Bimp_Commande' => array('urls' => array("bimpcommercial/index.php?fc=commande"),
             'module' => 'bimpcommercial'),
-        'Bimp_Facture' => array('urls' => array("bimpcommercial/index.php?fc=factures"),
+        'Bimp_Facture' => array('urls' => array("bimpcommercial/index.php?fc=facture"),
             'module' => 'bimpcommercial'),
     );
 

@@ -355,6 +355,48 @@ class BL_CommandeShipment extends BimpObject
         return $qties;
     }
 
+    public function getTotalHT()
+    {
+        if (!$this->isLoaded()) {
+            return 0;
+        }
+
+        $commande = $this->getParentInstance();
+
+        if (!BimpObject::objectLoaded($commande)) {
+            return 0;
+        }
+
+        $total_ht = 0;
+
+        foreach ($commande->getLines('not_text') as $line) {
+            $total_ht += (float) $line->getShipmentTotalHT($this->id);
+        }
+
+        return $total_ht;
+    }
+
+    public function getTotalTTC()
+    {
+        if (!$this->isLoaded()) {
+            return 0;
+        }
+
+        $commande = $this->getParentInstance();
+
+        if (!BimpObject::objectLoaded($commande)) {
+            return 0;
+        }
+
+        $total_ttc = 0;
+
+        foreach ($commande->getLines('not_text') as $line) {
+            $total_ttc += (float) $line->getShipmentTotalTTC($this->id);
+        }
+
+        return $total_ttc;
+    }
+
     // Affichages: 
 
     public function displayContact()
@@ -1247,6 +1289,38 @@ class BL_CommandeShipment extends BimpObject
             $errors[] = BimpTools::getMsgFromArray($update_errors, 'Echec de la mise à jour de l\'expédition');
         }
 
+        $this->onLinesChange();
+
+        return $errors;
+    }
+
+    public function onLinesChange()
+    {
+        $errors = array();
+        if ($this->isLoaded()) {
+            $total_ht = $this->getTotalHT();
+            $total_ttc = $this->getTotalTTC();
+
+            $update = false;
+
+            if ((float) $this->getInitData('total_ht') !== $total_ht) {
+                $this->set('total_ht', $total_ht);
+                $update = true;
+            }
+
+            if ((float) $this->getInitData('total_ttc') !== $total_ttc) {
+                $this->set('total_ttc', $total_ttc);
+                $update = true;
+            }
+
+            if ($update) {
+                $warnings = array();
+                $errors = $this->update($warnings, true);
+            }
+        } else {
+            $errors[] = 'ID de l\'expédition absent';
+        }
+
         return $errors;
     }
 
@@ -1326,6 +1400,8 @@ class BL_CommandeShipment extends BimpObject
                     }
                 }
             }
+
+            $this->onLinesChange();
         }
 
 

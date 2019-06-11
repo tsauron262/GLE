@@ -6,7 +6,7 @@ objects:
         instance:
             bimp_object: Bimp_Commande
             
-sections: 
-    - type: list
-      list: 
-          object: commande
+    shipment: 
+        instance: 
+            module: bimplogistique
+            name: BL_CommandeShipment

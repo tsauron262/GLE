@@ -111,6 +111,48 @@ class BL_CommandeFournReception extends BimpObject
     {
         return 'Réception #' . $this->getData('num_reception');
     }
+    
+    public function getTotalHT()
+    {
+        if (!$this->isLoaded()) {
+            return 0;
+        }
+
+        $commande = $this->getParentInstance();
+
+        if (!BimpObject::objectLoaded($commande)) {
+            return 0;
+        }
+
+        $total_ht = 0;
+
+        foreach ($commande->getLines('not_text') as $line) {
+            $total_ht += (float) $line->getReceptionTotalHt($this->id);
+        }
+
+        return $total_ht;
+    }
+
+    public function getTotalTTC()
+    {
+        if (!$this->isLoaded()) {
+            return 0;
+        }
+
+        $commande = $this->getParentInstance();
+
+        if (!BimpObject::objectLoaded($commande)) {
+            return 0;
+        }
+
+        $total_ttc = 0;
+
+        foreach ($commande->getLines('not_text') as $line) {
+            $total_ttc += (float) $line->getReceptionTotalTTC($this->id);
+        }
+
+        return $total_ttc;
+    }
 
     // Getters config: 
 
@@ -160,7 +202,7 @@ class BL_CommandeFournReception extends BimpObject
     {
         return array();
     }
-
+    
     // Rendus HTML: 
 
     public function renderCommandeFournLinesForm()
@@ -363,7 +405,7 @@ class BL_CommandeFournReception extends BimpObject
         $html .= '<tr>';
         $html .= '<th style="min-width: 220px">Ligne</th>';
         $html .= '<th style="width: 220px">Qtés / ' . ($edit ? 'N° de série' : 'Equipements') . '</th>';
-        $html .= '<th style="width: 120px">Prix unitaire HT</th>';
+        $html .= '<th style="width: 120px">Prix unitaire HT (Remises incluses)</th>';
         $html .= '<th style="width: 120px">Tx TVA</th>';
         $html .= '<th></th>';
 
@@ -684,9 +726,9 @@ class BL_CommandeFournReception extends BimpObject
             }
         }
 
-        if (!$has_units) {
-            $errors[] = 'Aucune unité ajouté à cette réception';
-        }
+//        if (!$has_units) {
+//            $errors[] = 'Aucune unité ajouté à cette réception';
+//        }
         return $lines_data;
     }
 
@@ -732,6 +774,8 @@ class BL_CommandeFournReception extends BimpObject
                 }
             }
         }
+        
+        $this->onLinesChange();
 
         return $errors;
     }
@@ -846,7 +890,38 @@ class BL_CommandeFournReception extends BimpObject
             $this->update();
         }
 
+        $this->onLinesChange();
         $commande->checkReceptionStatus();
+
+        return $errors;
+    }
+    
+    public function onLinesChange()
+    {
+        $errors = array();
+        if ($this->isLoaded()) {
+            $total_ht = $this->getTotalHT();
+            $total_ttc = $this->getTotalTTC();
+
+            $update = false;
+
+            if ((float) $this->getInitData('total_ht') !== $total_ht) {
+                $this->set('total_ht', $total_ht);
+                $update = true;
+            }
+
+            if ((float) $this->getInitData('total_ttc') !== $total_ttc) {
+                $this->set('total_ttc', $total_ttc);
+                $update = true;
+            }
+
+            if ($update) {
+                $warnings = array();
+                $errors = $this->update($warnings, true);
+            }
+        } else {
+            $errors[] = 'ID de l\'expédition absent';
+        }
 
         return $errors;
     }

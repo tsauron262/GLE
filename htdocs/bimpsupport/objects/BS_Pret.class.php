@@ -5,18 +5,21 @@ require_once DOL_DOCUMENT_ROOT . '/bimpsupport/centre.inc.php';
 class BS_Pret extends BimpObject
 {
 
+    // Getters: 
+
     public function getCreateJsCallback()
     {
-        $result = $this->actionGeneratePDF(array(), $success);
-        if (count($result['errors'])) {
-            $msg = count($result['errors']) . ' erreur(s) détectée(s): <br/>';
-            foreach ($result['errors'] as $error) {
-                $msg .= ' - ' . $error . '<br/>';
+        if ((int) $this->getData('id_sav')) {
+            $result = $this->actionGeneratePDF(array(), $success);
+            if (count($result['errors'])) {
+                $msg = BimpTools::getMsgFromArray($result['errors'], 'Echec de la génération du bon de prêt');
+                return 'bimp_msg(\'' . addslashes($msg) . '\', \'danger\');';
             }
-            return 'bimp_msg(\'' . addslashes($msg) . '\', \'danger\');';
+
+            return 'window.open("' . $result['file_url'] . '");';
         }
 
-        return 'window.open("' . $result['file_url'] . '");';
+        return '';
     }
 
     public function getEquipmentsArray()
@@ -27,7 +30,7 @@ class BS_Pret extends BimpObject
 
         $equipment_instance = BimpObject::getInstance('bimpequipment', 'Equipment');
         $unreturned = array();
-        
+
         if (BimpObject::objectLoaded($sav)) {
             $code_centre = $this->getData('code_centre');
             if (!$code_centre) {
@@ -50,7 +53,7 @@ class BS_Pret extends BimpObject
         } else {
             $id_entrepot = (int) BimpTools::getPostFieldValue('id_entrepot', 0);
             $unreturned = $this->getUnreturnedEquipments($id_entrepot);
-            
+
             $list = $equipment_instance->getList(array(
                 'p.position'    => 1,
                 'p.type'        => 7,
@@ -98,7 +101,7 @@ class BS_Pret extends BimpObject
         }
         return $items;
     }
-    
+
     public function getUnreturnedEquipments($id_entrepot = 0)
     {
         $filters = array(
@@ -138,6 +141,20 @@ class BS_Pret extends BimpObject
         );
 
         return $buttons;
+    }
+
+    public function getListFilters()
+    {
+        $filters = array();
+        if (BimpTools::isSubmit('id_entrepot')) {
+            $entrepots = explode('-', BimpTools::getValue('id_entrepot'));
+
+            $filters[] = array('name'   => 'id_entrepot', 'filter' => array(
+                    'IN' => implode(',', $entrepots)
+            ));
+        }
+
+        return $filters;
     }
 
     public function defaultDisplayEquipmentsItem($id_equipment)
@@ -205,6 +222,8 @@ class BS_Pret extends BimpObject
 
     public function validate()
     {
+        $errors = parent::validate();
+
         if ((int) $this->getData('id_sav')) {
             $sav = $this->getChildObject('sav');
             if (BimpObject::objectLoaded($sav)) {
@@ -218,18 +237,62 @@ class BS_Pret extends BimpObject
                     $this->set('code_centre', $sav->getData('code_centre'));
                 }
             }
+        } else {
+            $id_client = (int) $this->getData('id_client');
+            if (!$id_client) {
+                $errors[] = 'Veuillez sélectionner un client ou un SAV';
+            } else {
+                $client = $this->getChildObject('client');
+                if (!BimpObject::objectLoaded($client)) {
+                    $errors[] = 'Le client d\'ID ' . $this->getData('id_client') . ' n\'existe pas';
+                }
+            }
         }
 
-        return parent::validate();
+        return $errors;
     }
 
-    public function create()
+    public function create(&$warnings = array(), $force_create = false)
     {
         $errors = array();
-        $errors = parent::create();
+        $errors = parent::create($warnings, $force_create);
 
         if ($this->isLoaded()) {
             $this->updateField('ref', 'PRET' . $this->id);
+        }
+
+        return $errors;
+    }
+
+    public function update(&$warnings = array(), $force_update = false)
+    {
+        $init_returned = (int) $this->getInitData('returned');
+
+        $errors = parent::update($warnings, $force_update);
+
+        if (!count($errors)) {
+            if ((int) $this->getData('returned') !== $init_returned) {
+                $products = $this->getChildrenObjects('products');
+
+                foreach ($products as $pret_product) {
+                    $prod_errors = array();
+                    if ((int) $this->getData('returned')) {
+                        $prod_errors = $pret_product->increaseStock();
+                    } else {
+                        $prod_errors = $pret_product->decreaseStock();
+                    }
+
+                    if (count($prod_errors)) {
+                        $product = $pret_product->getChildObject('product');
+                        if (BimpObject::objectLoaded($product)) {
+                            $prod_label = '"' . $product->getRef() . '"';
+                        } else {
+                            $prod_label = ' d\'ID ' . $pret_product->getData('id_product');
+                        }
+                        $warnings[] = BimpTools::getMsgFromArray($prod_errors, 'Produit ' . $prod_label . ': erreurs lors de la correction des stocks');
+                    }
+                }
+            }
         }
 
         return $errors;

@@ -111,6 +111,8 @@ fields:
     date_commande: 
         label: Date de la commande
         type: date
+        input: 
+            display_now: 1
     date_livraison: 
         label: Date prévue de livraison
         type: date
@@ -176,6 +178,7 @@ fields:
     fk_input_reason: unset
     remise_globale: unset
     remise_globale_label: unset
+    zone_vente: unset
     
 forms: 
     default: 
@@ -444,3 +447,18 @@ cards:
               field: entrepot
               display: nom_url
         view_btn: 1
+        
+        
+searches:
+    default: 
+        fields_search: 
+            - a.ref
+            - ef.libelle
+            - s.nom
+        joins:
+            - table: propal_extrafields
+              on: a.rowid = ef.fk_object
+              alias: ef
+            - table: societe
+              on: a.fk_soc = s.rowid
+              alias: s

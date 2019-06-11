@@ -1,5 +1,4 @@
-<?php
-
+<?php // 
 //class Bimp_Commande {
 //    public function isFullyShipped()
 //    {

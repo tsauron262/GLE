@@ -11,6 +11,9 @@ class BContract_contratLine extends BimpObject {
             $errors[] = 'L\'id du contrat ' . $contrat->id . ' n\'éxiste pas';
             return 0;
         }
+        
+        $instance = $this->getParentInstance();
+        
         if ($data['nb_materiel'] > 0) {
             if (!empty($data['serials'])) {
                 
@@ -25,11 +28,10 @@ class BContract_contratLine extends BimpObject {
             }
         }
         
-        if ($contrat->dol_object->addLine($data['description'], $produit->getData('price'), $data['qty'], $produit->getData('tva_tx'), 0, 0, $produit->id, $data['remise_percent'], date('Y-m-d'), date('Y-m-d'), 'HT', 0.0, 0, null, 0, Array('serials' => $data['serials'], 'nb_materiel' => $data['nb_materiel'], 'fk_contrat' => $contrat->id)) <= 0) {
+        if ($contrat->dol_object->addLine($data['description'], $produit->getData('price'), $data['qty'], $produit->getData('tva_tx'), 0, 0, $produit->id, $data['remise_percent'], $instance->getData('date_start'), $instance->getEndDate()->format('Y-m-d'), 'HT', 0.0, 0, null, 0, Array('serials' => $data['serials'], 'nb_materiel' => $data['nb_materiel'], 'fk_contrat' => $contrat->id)) <= 0) {
             $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($contrat));
             return 0;
         }
-
         return 1;
     }
 

@@ -169,10 +169,10 @@ class BimpInput
                     $html .= '<i class="fa fa-plus"></i>';
                     $html .= '</span>';
                     if (isset($options['min_label']) && $options['min_label']) {
-                        $html .= '<span class="inputHelp max_label">' . ((isset($options['data']['min']) && $option['data']['min'] !== 'none') ? 'Min: ' . $options['data']['min'] : '') . '</span>';
+                        $html .= '<span class="small min_label">' . ((isset($options['data']['min']) && $option['data']['min'] !== 'none') ? 'Min: ' . $options['data']['min'] : '') . '</span>';
                     }
                     if (isset($options['max_label']) && $options['max_label']) {
-                        $html .= '<span class="inputHelp max_label">' . ((isset($options['data']['max']) && $option['data']['max'] !== 'none') ? 'Max: ' . $options['data']['max'] : '') . '</span>';
+                        $html .= '<span class="small max_label">' . ((isset($options['data']['max']) && $option['data']['max'] !== 'none') ? 'Max: ' . $options['data']['max'] : '') . '</span>';
                     }
                     $html .= '</div>';
                 }
@@ -477,7 +477,7 @@ class BimpInput
                 }
                 $options['options'] = BimpCache::getUsersArray($options['include_empty']);
                 return self::renderInput('select', $field_name, $value, $options, $form, $option, $input_id);
-                
+
             case 'search_group':
                 if (!isset($options['include_empty'])) {
                     $options['include_empty'] = 0;
@@ -616,6 +616,7 @@ class BimpInput
                     $html = '<div class="check_list_container"';
                     $html .= ' data-max="' . $options['max'] . '"';
                     $html .= ' data-max_input_name="' . (isset($options['max_input_name']) ? $options['max_input_name'] : '') . '"';
+                    $html .= ' data-max_input_abs="' . (isset($options['max_input_abs']) ? $options['max_input_abs'] : 0) . '"';
                     $html .= '>';
                     if (count($options['items']) > 3 && (!isset($options['select_all_buttons']) || (int) $options['select_all_buttons'])) {
                         $html .= '<div class="smallActionsContainer">';
@@ -1235,7 +1236,7 @@ class BimpInput
         if (is_null($value)) {
             $value = '';
         }
-        
+
         if (is_array($value)) {
             $value = implode(',', $value);
         }
@@ -1243,7 +1244,7 @@ class BimpInput
         if (is_string($value)) {
             $value = htmlentities($value);
         }
-        
+
         $html .= '<div class="inputContainer ' . $field_prefix . $input_name . '_inputContainer ' . $extra_class . '"';
         $html .= ' data-field_name="' . $field_prefix . $input_name . '"';
         $html .= ' data-initial_value="' . htmlentities($value) . '"';
@@ -1339,6 +1340,22 @@ class BimpInput
             $html .= ' data-icon_class="' . $icon . '"';
         }
         $html .= '>' . $label . '</option>';
+
+        return $html;
+    }
+
+    public static function renderDispatcherAvailableItems($title, $input_name, $items, $options = array())
+    {
+        $html = '';
+
+        return $html;
+    }
+
+    public static function renderDispatchedItems($input_name, $items, $options = array())
+    {
+        $html = '';
+
+
 
         return $html;
     }

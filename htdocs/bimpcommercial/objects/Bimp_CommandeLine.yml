@@ -43,6 +43,10 @@ fields:
         label: Factures
         type: json
         
+    equipments_returned: 
+        label: Equipements retournés
+        type: json
+        
     qty_modif: 
         label: Qté modifiée
         type: qty
@@ -164,6 +168,22 @@ forms:
               input_name: qty_modified
               content: 
                   callback: renderQtyModifiedInput
+                  
+    equipments_return: 
+        title: Equipements retournés
+        rows: 
+            - custom: 1
+              label: Equipements
+              input_name: equipments
+              multiple: 1
+              data_type: items_list
+              items_data_type: id_object
+              object: equipment
+              create_form: light_place
+              create_form_values: 
+                  callback: getNewEquipmentToReturnCreateFormValues
+              content: 
+                  callback: renderEquipmentsReturnInput
             
 views: 
     shipments: 
@@ -195,6 +215,7 @@ lists_cols:
     
 lists: 
     default: 
+        objects_change_reload: ObjectLineRemise,Bimp_Commande
         add_btn: 
             callback: isCreatable
         edit_btn: 
@@ -213,6 +234,7 @@ lists:
         item_checkbox: 
             callback: isNotTypeText
         after_list_content: unset
+        header_buttons: unset
         objects_change_reload: Bimp_Commande,ObjectLineRemise,BR_Reservation,BL_CommandeShipment
         bulk_actions: 
             callback: getLogistiqueBulkActions

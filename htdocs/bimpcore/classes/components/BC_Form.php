@@ -40,7 +40,8 @@ class BC_Form extends BC_Panel
         'value'          => array('data_type' => 'any', 'default' => ''),
         'no_container'   => array('data_type' => 'bool', 'default' => 0),
         'multiple'       => array('data_type' => 'bool', 'default' => 0),
-        'keep_new_value' => array('data_type' => 'bool', 'default' => 0)
+        'keep_new_value' => array('data_type' => 'bool', 'default' => 0),
+        'items_data_type' => array()
     );
     public static $object_params = array(
         'form_name'   => array('default' => 'default'),

@@ -144,7 +144,6 @@ fields:
     
     date_commande:
         label: Date
-        dol_prop: date
         type: date
         input: 
             display_now: 1
@@ -207,6 +206,8 @@ fields:
         type: id_object
         object: user_resp
         default_value: 0
+        input: 
+            type: search_user
         
     total: unset
     
@@ -221,6 +222,17 @@ fields:
             societe_type: customer
             card: default
             help: Laissez vide si même client
+            
+    status_forced: 
+        label: Status forcés
+        type: json
+        
+    revalorisation: 
+        label: Demande de revalorisation
+        type: int
+        values: 
+            array: revalorisations
+        default_value: 0
         
 fields_tables: 
     infos: 
@@ -247,6 +259,10 @@ fields_tables:
                   callback: isEditable
             - field: validComm
             - field: validFin
+            - field: zone_vente
+              edit: 1
+            - field: revalorisation
+              edit: 1
                   
     payment:
         rows:
@@ -337,6 +353,9 @@ forms:
             - field: model_pdf
               show: 
                   callback: isNotLoaded
+            - field: zone_vente
+              show: 
+                  callback: isLoaded
             - field: note_private
             - field: note_public
             - field: remise_globale
@@ -543,6 +562,64 @@ forms:
               content: 
                   callback: renderEquipmentsToAddToShipmentCheckList
               depends_on: id_shipment,reservations
+              
+    force_status: 
+        title: Forcer un statut
+        msgs: 
+            - content: Lorqu&apos;un statut est forcé, il cesse d&apos;être déterminé automatiquement<br/>Pour annuler un forçage, sélectionnez "Aucun forçage"
+              type: info
+        rows: 
+            - custom: 1
+              label: Type de statut
+              input_name: status_type
+              input: 
+                  type: select
+                  options: 
+                      logistique: Statut logistique
+                      shipment: Statut expédition
+                      invoice: Statut facturation
+            - custom: 1
+              label: Forcer le statut à
+              input_name: logistique_status
+              display_if: 
+                  field_name: status_type
+                  show_values: logistique
+              input: 
+                  type: select
+                  options:
+                      -1: Aucun forçage
+                      0: A traiter
+                      1: En cours de traitement
+                      2: Traitée
+                      3: Compléte
+                      4: En attente
+                      5: A supprimer
+            - custom: 1
+              label: Forcer le statut à
+              input_name: shipment_status
+              display_if: 
+                  field_name: status_type
+                  show_values: shipment
+              input: 
+                  type: select
+                  options:
+                      -1: Aucun forçage
+                      0: Non expédiée
+                      1: Expédiée partiellement
+                      2: Expédiée
+            - custom: 1
+              label: Forcer le statut à
+              input_name: invoice_status
+              display_if: 
+                  field_name: status_type
+                  show_values: invoice
+              input: 
+                  type: select
+                  options:
+                      -1: Aucun forçage
+                      0: Non facturée
+                      1: Facturée partiellement
+                      2: Facturée
             
 filters_panels: 
     default: 
@@ -561,6 +638,10 @@ filters_panels:
                 field: invoice_status
             date_livraison: 
                 field: date_livraison
+            zone_vente:
+                field: zone_vente
+            reval:
+                field: revalorisation
             
 lists_cols: 
     date_create: 
@@ -594,6 +675,11 @@ lists_cols:
     client_facture:
         field: id_client_facture
         display: nom_url
+    zone_vente:
+        field: zone_vente
+    revalorisation:
+        field: revalorisation
+    
         
 lists: 
     default: 

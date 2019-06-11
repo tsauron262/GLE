@@ -192,7 +192,7 @@ forms:
               data_type: bool
               input: 
                   type: toggle
-              value: 0
+              value: 1
               input_name: avoir_same_lines
               display_if: 
                   fields_names: type,id_facture_to_correct
@@ -248,7 +248,9 @@ forms:
             - field: model_pdf
               show: 
                   callback: isNotLoaded
-                  
+            - field: zone_vente
+              show: 
+                  callback: isLoaded
             - field: remise_globale_label
               show: 
                   callback: hasRemiseGlobale
@@ -314,6 +316,8 @@ fields_tables:
             - field: datef
               edit: 
                   callback: isEditable
+            - field: zone_vente
+              edit: 1
     
     client: 
         rows: 

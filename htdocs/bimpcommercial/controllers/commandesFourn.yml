@@ -7,7 +7,24 @@ objects:
         instance:
             bimp_object: Bimp_CommandeFourn
             
+    reception: 
+        instance: 
+            bimp_object: 
+                module: bimplogistique
+                name: BL_CommandeFournReception
+            
 sections: 
-    - type: list
-      list: 
-          object: commande_fourn
+    - type: tabs
+      tabs: 
+        default:
+            label: Commandes fournisseurs
+            sections:
+                - type: list
+                  list: 
+                      object: commande_fourn
+        receptions: 
+            label: Réceptions
+            sections: 
+                - type: list
+                  list: 
+                      object: reception

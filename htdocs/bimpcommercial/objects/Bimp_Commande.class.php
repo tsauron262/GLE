@@ -40,6 +40,11 @@ class Bimp_Commande extends BimpComm
         1 => array('label' => 'OUI', 'icon' => 'fas_exclamation', 'classes' => array('warning')),
         2 => array('label' => 'Traité', 'icon' => 'fas_check', 'classes' => array('success'))
     );
+    public static $extra_satus = array(
+        0 => array('label' => 'Aucune', 'classes' => array('info')),
+        1 => array('label' => 'A supprimer', 'icon' => 'fas_exclamation-circle', 'classes' => array('danger')),
+        2 => array('label' => 'Non facturable', 'icon' => 'fas_exclamation-circle', 'classes' => array('danger'))
+    );
     public static $logistique_active_status = array(1, 2, 3);
 
     // Gestion des droits et autorisations: 
@@ -593,6 +598,10 @@ class Bimp_Commande extends BimpComm
         $html = '';
 
         if ($this->isLoaded()) {
+            if ((int) $this->getData('extra_status') > 0) {
+                $html .= '<br/>';
+                $html .= $this->displayData('extra_status');
+            }
             if (in_array((int) $this->getData('fk_statut'), self::$logistique_active_status)) {
                 $html .= '<br/>Logistique:';
                 $html .= $this->displayData('logistique_status');
@@ -666,7 +675,7 @@ class Bimp_Commande extends BimpComm
         $html .= '<th>N° ligne</th>';
         $html .= '<th>Libellé</th>';
         $html .= '<th>Qté expédition</th>';
-        $html .= '<th>Grouper les articles</th>';
+        $html .= '<th>Options</th>';
         $html .= '</tr>';
 
         $html .= '<tbody>';
@@ -690,7 +699,7 @@ class Bimp_Commande extends BimpComm
 
                 if ($full_qty >= 0) {
                     if ($available_qty <= 0) {
-                        
+                        continue;
                     }
                 } else {
                     if ($available_qty >= 0) {
@@ -716,32 +725,26 @@ class Bimp_Commande extends BimpComm
                 $html .= '</td>';
                 $html .= '<td>';
 
-                if ($full_qty > 0 && BimpObject::objectLoaded($product)) {
-                    if ((int) $product->getData('fk_product_type') === 0 && !$product->isSerialisable()) {
-                        $line_shipments = $line->getData('shipments');
-                        if (isset($line_shipments[$id_shipment]['group_articles'])) {
-                            $value = (int) $line_shipments[$id_shipment]['group_articles'];
-                        } else {
-                            $value = 0;
+                if (BimpObject::objectLoaded($product) && (int) $product->getData('fk_product_type') === 0) {
+                    if (!$product->isSerialisable()) {
+                        if ($full_qty > 0) {
+                            $shipment_data = $line->getShipmentData($id_shipment);
+                            if (isset($shipment_data['group'])) {
+                                $value = (int) $shipment_data['group'];
+                            } else {
+                                $value = 0;
+                            }
+                            $html .= BimpInput::renderInput('toggle', 'line_' . $line->id . '_group_articles', $value);
                         }
-                        $html .= BimpInput::renderInput('toggle', 'group_articles', $value);
+                    } else {
+                        $html .= '<div id="shipment_line_' . $line->id . '_equipments" class="shipment_line_equipments">';
+                        $html .= $line->renderShipmentEquipmentsInput($id_shipment, null, 'line_' . $line->id . '_shipment_' . $id_shipment . '_qty');
+                        $html .= '</div>';
                     }
                 }
 
                 $html .= '</td>';
                 $html .= '</tr>';
-
-                if (BimpObject::objectLoaded($product)) {
-                    if ($product->isSerialisable()) {
-                        $html .= '<tr id="shipment_line_' . $line->id . '_equipments" class="shipment_line_equipments">';
-                        $html .= '<td colspan="4">';
-                        $html .= '<div style="padding-left: 45px">';
-                        $html .= $line->renderShipmentEquipmentsInput($id_shipment, null, 'line_' . $line->id . '_shipment_' . $id_shipment . '_qty');
-                        $html .= '</div>';
-                        $html .= '</td>';
-                        $html .= '</tr>';
-                    }
-                }
             }
         }
 

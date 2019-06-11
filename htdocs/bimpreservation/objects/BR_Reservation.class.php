@@ -638,6 +638,35 @@ class BR_Reservation extends BimpObject
         );
     }
 
+    public function getEquipmentCreateFormValues()
+    {
+        if (!$this->isLoaded() || !(int) $this->getData('id_product')) {
+            return array();
+        }
+
+        $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $this->getData('id_product'));
+
+        if (!BimpObject::objectLoaded($product) || !$product->isSerialisable()) {
+            return array();
+        }
+
+        BimpObject::loadClass('bimpequipment', 'BE_Place');
+        
+        return array(
+            'fields'  => array(
+                'id_product' => (int) $product->id
+            ),
+            'objects' => array(
+                'places' => array(
+                    'fields' => array(
+                        'type'        => BE_Place::BE_PLACE_ENTREPOT,
+                        'id_entrepot' => (int) $this->getData('id_entrepot')
+                    )
+                )
+            )
+        );
+    }
+
     // Getters valeurs: 
 
     public function getIdCommandeforShipment()

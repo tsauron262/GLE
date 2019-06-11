@@ -15518,23 +15518,31 @@ button.close {
   font-weight: bold;
 }
 
+/* line 20, ../scss/bimpcore/_helpers.scss */
+p.smallInfo {
+  color: #787878;
+  margin: 5px 0;
+  font-size: 11px;
+  font-style: italic;
+}
+
 /*Scrolls*/
-/* line 22, ../scss/bimpcore/_helpers.scss */
+/* line 29, ../scss/bimpcore/_helpers.scss */
 .h_auto_scroll {
   overflow-x: auto;
 }
 
-/* line 26, ../scss/bimpcore/_helpers.scss */
+/* line 33, ../scss/bimpcore/_helpers.scss */
 .v_auto_scroll {
   overflow-y: auto;
 }
 
-/* line 30, ../scss/bimpcore/_helpers.scss */
+/* line 37, ../scss/bimpcore/_helpers.scss */
 .h_scroll {
   overflow-x: scroll;
 }
 
-/* line 34, ../scss/bimpcore/_helpers.scss */
+/* line 41, ../scss/bimpcore/_helpers.scss */
 .v_scroll {
   overflow-y: scroll;
 }

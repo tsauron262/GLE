@@ -55,6 +55,45 @@ function setSelectedCommandeLinesReservationsStatus($button, id_commande, new_st
     bimp_msg('Une erreur est survenue. Opération abandonnée', 'danger');
 }
 
+function onCommandeLinesLogistiqueListLoaded($list) {
+    if ($.isOk($list)) {
+        $list.find('select.equipment_returned_id_entrepot').each(function () {
+            if (!parseInt($(this).data('logistique_events_init'))) {
+                $(this).change(function () {
+                    saveReturnedEquipmentIdEntrepot($(this));
+                });
+                $(this).data('logistique_events_init', 1);
+            }
+        });
+    }
+}
+
+function saveReturnedEquipmentIdEntrepot($select) {
+    if (!$.isOk($select)) {
+        bimp_msg('Une erreur est survenue. Entrepôt non enregistré', 'danger');
+        return;
+    }
+
+    var id_entrepot = parseInt($select.val());
+
+    if (!id_entrepot) {
+        bimp_msg('Veuillez sélectionner un entrepôt', 'warning');
+        return;
+    }
+
+    var id_line = parseInt($select.attr('name').replace(/^line_(\d+)_equipment_(\d+)_id_entrepot$/, '$1'));
+    var id_equipment = parseInt($select.attr('name').replace(/^line_(\d+)_equipment_(\d+)_id_entrepot$/, '$2'));
+
+    setObjectAction(null, {
+        module: 'bimpcommercial',
+        object_name: 'Bimp_CommandeLine',
+        id_object: id_line
+    }, 'saveReturnedEquipmentEntrepot', {
+        id_equipment: id_equipment,
+        id_entrepot: id_entrepot
+    });
+}
+
 // Expéditions commande client: 
 
 function addSelectedCommandeLinesToShipment($button, list_id, id_commande) {
@@ -101,19 +140,27 @@ function onShipmentFormSubmit($form, extra_data) {
     $inputs.each(function () {
         var id_line = parseInt($(this).data('id_line'));
         var qty = parseFloat($(this).val());
-        var equipments = [];
+        var data = {
+            id_line: id_line,
+            qty: qty
+        };
 
-        var $row = $form.find('#shipment_line_' + id_line + '_equipments');
-        if ($row.length) {
-            $row.find('.check_list_item_input:checked').each(function () {
+        var $equipments = $form.find('#shipment_line_' + id_line + '_equipments');
+        if ($equipments.length) {
+            var equipments = [];
+            $equipments.find('.check_list_item_input:checked').each(function () {
                 equipments.push(parseInt($(this).val()));
             });
+            data.equipments = equipments;
         }
-        lines.push({
-            id_line: id_line,
-            qty: qty,
-            equipments: equipments
-        });
+
+
+        var $input = $form.find('[name="line_' + id_line + '_group_articles"]');
+        if ($input.length) {
+            data.group_articles = parseInt($input.val());
+        }
+
+        lines.push(data);
     });
 
     extra_data['lines'] = lines;
@@ -152,10 +199,18 @@ function saveCommandeLineShipments($button, id_line) {
                     bimp_msg('Quantités invalides pour l\'expédition n°' + $row.data('num_livraison') + '<br/>Veuillez corriger', 'danger');
                     return;
                 }
-                var $groupInput = $row.find('input.line_shipment_group');
-                if ($groupInput.length) {
-                    data.group = parseInt($groupInput.val());
+                var $input = $row.find('input.line_shipment_group');
+                if ($input.length) {
+                    data.group = parseInt($input.val());
                 }
+
+                var $input = $row.find('select.line_shipment_entrepot');
+                if ($input.length) {
+                    data.id_entrepot = parseInt($input.val());
+                }
+
+                // todo: intégrer liste équipements
+
                 shipments.push(data);
             });
 
@@ -260,16 +315,16 @@ function saveShipmentLines($button, id_shipment, modal_idx) {
             if ($groupInput.length) {
                 data.group = parseInt($groupInput.val());
             }
-            
+
             var $entrepotInput = $row.find('[name="line_' + data.id_line + '_id_entrepot"]');
             if ($entrepotInput.length) {
                 data.id_entrepot = parseInt($entrepotInput.val());
             }
 
-            var $eq_row = $container.find('#shipment_line_' + data.id_line + '_equipments_row');
-            if ($eq_row.length) {
+            var $equipments = $container.find('#shipment_line_' + data.id_line + '_equipments');
+            if ($equipments.length) {
                 data.equipments = [];
-                $eq_row.find('.line_' + data.id_line + '_equipments_check:checked').each(function () {
+                $equipments.find('.line_' + data.id_line + '_equipments_check:checked').each(function () {
                     data.equipments.push(parseInt($(this).val()));
                 });
             }
@@ -949,10 +1004,24 @@ $(document).ready(function () {
             onCommandeFournLineReceptionViewLoaded(e.$view);
         }
     });
-    
+
     $('body').on('inputReloaded', function (e) {
         if (e.input_name === 'equipments' && $.isOk(e.$form) && e.$form.hasClass('Bimp_Commande_form_shipment_equipments')) {
             onShipmentEquipmentFormEquipmentsLoaded(e.$form);
+        }
+    });
+
+    $('body').on('listLoaded', function (e) {
+        if (e.$list.hasClass('Bimp_CommandeLine_list_table_logistique')) {
+            onCommandeLinesLogistiqueListLoaded(e.$list);
+        }
+    });
+    $('body').on('listLoaded', function (e) {
+        if (e.$list.hasClass('Bimp_CommandeLine_list_table_logistique')) {
+            onCommandeLinesLogistiqueListLoaded(e.$list);
+            e.$list.on('listRefresh', function () {
+                onCommandeLinesLogistiqueListLoaded($(this));
+            });
         }
     });
 });

@@ -111,7 +111,7 @@ class BL_CommandeFournReception extends BimpObject
     {
         return 'Réception #' . $this->getData('num_reception');
     }
-    
+
     public function getTotalHT()
     {
         if (!$this->isLoaded()) {
@@ -202,7 +202,7 @@ class BL_CommandeFournReception extends BimpObject
     {
         return array();
     }
-    
+
     // Rendus HTML: 
 
     public function renderCommandeFournLinesForm()
@@ -774,7 +774,7 @@ class BL_CommandeFournReception extends BimpObject
                 }
             }
         }
-        
+
         $this->onLinesChange();
 
         return $errors;
@@ -895,7 +895,7 @@ class BL_CommandeFournReception extends BimpObject
 
         return $errors;
     }
-    
+
     public function onLinesChange()
     {
         $errors = array();
@@ -997,6 +997,27 @@ class BL_CommandeFournReception extends BimpObject
     }
 
     // Overrides: 
+
+    public function checkObject()
+    {
+        if (!(int) $this->getData('id_user_resp')) {
+            $id_user = (int) $this->getData('user_create');
+            if ($id_user) {
+                $this->updateField('id_user_resp', $id_user);
+            }
+        }
+    }
+
+    public function validate()
+    {
+        if (!(int) $this->getData('id_user_resp')) {
+            global $user;
+            if (BimpObject::ObjectLoaded($user)) {
+                $this->set('id_user_resp', $user->id);
+            }
+        }
+        return parent::validate();
+    }
 
     public function create(&$warnings = array(), $force_create = false)
     {

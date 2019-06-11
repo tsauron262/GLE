@@ -225,7 +225,7 @@ lists:
         extends: default
         title: Logistique produits / services
         icon: fas_truck-loading
-        configurable: 0
+        configurable: 1
         list_filters: 
             - name: type
               filter: 

@@ -332,6 +332,7 @@ class ObjectLine extends BimpObject
                 return 0;
             }
 
+            if(is_object($product) && $product->id > 0)
             if ($product->dol_field_exists('validate')) {
                 if (!(int) $product->getData('validate')) {
                     global $user;

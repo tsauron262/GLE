@@ -4657,10 +4657,11 @@ class BimpObject extends BimpCache
         if (count($cols)) {
             $owner_type = BimpTools::getPostFieldValue('owner_type', '');
             $id_owner = BimpTools::getPostFieldValue('id_owner', 0);
+            $list_name = BimpTools::getPostFieldValue('list_name', 'default');
 
             $values = array();
             if ($owner_type && $id_owner) {
-                $userConfig = $this->getListConfig($owner_type, $id_owner);
+                $userConfig = $this->getListConfig($owner_type, $id_owner, $list_name);
                 if (BimpObject::objectLoaded($userConfig)) {
                     foreach (explode(',', $userConfig->getData('cols')) as $col_name) {
                         if (isset($cols[$col_name])) {

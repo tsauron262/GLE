@@ -1504,6 +1504,7 @@ class ObjectLine extends BimpObject
                             } else {
                                 $ref_supplier = '';
                             }
+                            echo 'qty: ' . $this->qty . '<br/>';
                             $result = $object->addLine((string) $this->desc, (float) $this->pu_ht, $this->qty, (float) $this->tva_tx, 0, 0, (int) $this->id_product, (int) $this->id_fourn_price, $ref_supplier, (float) $this->remise, 'HT', 0.0, 0, 0, false, $date_from, $date_to);
                             break;
 
@@ -1532,7 +1533,7 @@ class ObjectLine extends BimpObject
                     break;
 
                 case self::LINE_TEXT:
-                    $result = $object->addLine((string) $this->desc, 0, 0, 0);
+                    $result = $object->addLine((string) $this->desc, 0, (float) $this->qty, 0);
                     break;
 
                 default:

@@ -112,13 +112,15 @@ class BimpNote extends BimpObject
         $tabReq = array($reqDeb."(".$where.") AND viewed = 0 ".$reqFin, $reqDeb."(".$where." OR (type_author = 1 AND user_create = ".$user->id."))".$reqFin);
         foreach($tabReq as $rang => $req){
             $sql = self::getBdb()->db->query($req);
-            while($ln = self::getBdb()->db->fetch_object($sql)){
-                $hash = $ln->obj_module.$ln->obj_name.$ln->id_obj;
-                if(!isset($tabNoDoublons[$hash])){
-                    $tabNoDoublons[$hash] = true;
-                    if($ln->obj_type == "bimp_object"){
-                        $tabFils[] = array("lu"=>$rang  , "obj"=>BimpObject::getInstance($ln->obj_module, $ln->obj_name, $ln->id_obj), "idNoteRef"=>$ln->idNoteRef);
+            if($sql){
+                while($ln = self::getBdb()->db->fetch_object($sql)){
+                    $hash = $ln->obj_module.$ln->obj_name.$ln->id_obj;
+                    if(!isset($tabNoDoublons[$hash])){
+                        $tabNoDoublons[$hash] = true;
+                        if($ln->obj_type == "bimp_object"){
+                            $tabFils[] = array("lu"=>$rang  , "obj"=>BimpObject::getInstance($ln->obj_module, $ln->obj_name, $ln->id_obj), "idNoteRef"=>$ln->idNoteRef);
 
+                        }
                     }
                 }
             }

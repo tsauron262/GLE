@@ -31,7 +31,7 @@ class Interfacevalidate extends DolibarrTriggers
 
     public function runTrigger($action, $object, User $user, Translate $langs, Conf $conf)
     {
-        global $conf, $user;
+        global $conf;
         
 
         if ($action == 'PROPAL_VALIDATE') {

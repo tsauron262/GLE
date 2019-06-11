@@ -134,6 +134,7 @@ class BContract_echeancier extends BimpObject {
                                 "success_callback" => $callback
                             ))
                             . '"><br /><br />';
+                    $html .= ' ' . $this->display_facture_perso();
                 }
             }
         } else {
@@ -167,16 +168,17 @@ class BContract_echeancier extends BimpObject {
             $this->updateLine($this->getData('id_contrat'), $parent->getData('date_start'));
         }
 
-        // facture personnalisé
-        //$html .= '' . $this->display_select();
-        $html .= ' ' . $this->display_facture_perso();
-        //$this->match_key_with_dates();
+        
         //echo '<pre>';
         //print_r($this->tab_echeancier);
         return $html;
     }
 
     public function display_facture_perso() {
+        global $db;
+        $parent = $this->getParentInstance();
+        $bimp = new BimpDb($db);
+
         $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}';
 
         $html .= '<br /><form action="#" method="post">'
@@ -195,6 +197,28 @@ class BContract_echeancier extends BimpObject {
 
             $converted_date_debut = $this->formatDate($select_debut);
             $converted_date_fin = $this->formatDate($select_fin);
+
+            $value = $this->match_key_with_dates($converted_date_debut, $converted_date_fin);
+            $nb_period = $parent->getData('duree_mois') / $parent->getData('periodicity');
+            $tmp = $nb_period - $value;
+            $calc_period = $nb_period - $tmp;
+            
+            $this->actionCreate_facture_perso($converted_date_debut, $converted_date_fin);
+            $test = $this->get_last(); 
+            foreach ($this->tab_echeancier as $tab => $attr) {
+            
+            }
+            for ($i = 0; $i < $calc_period; $i++) {
+                $attr['facture'] = $test;
+            }
+            
+            $nextdate = new DateTime("$converted_date_debut");
+            $nextdate->getTimestamp();
+            $nextdate->add(new DateInterval("P" . $calc_period . "M"));
+            //$nextdate->sub(new DateInterval("P1D"));
+            $newdate = $nextdate->format('Y-m-d');
+            $udpadeArray = Array('next_facture_date' => $newdate);
+            $bimp->update('bcontract_prelevement', $udpadeArray, 'id_contrat = ' . $parent->id);
         }
         return $html;
     }
@@ -261,27 +285,34 @@ class BContract_echeancier extends BimpObject {
         }
     }
 
-    public function match_key_with_dates() {
+    public function match_key_with_dates($date1, $date2) {
         $parent = $this->getParentInstance();
         $nb_period = $parent->getData('duree_mois') / $parent->getData('periodicity');
-        $date1 = "2019-05-17";
-        $date2 = "2019-08-16";
+        foreach ($this->tab_echeancier as $line) {
+            
+        }
 
-        while ($fruit_name = current($this->tab_echeancier)) {
-            if ($fruit_name['date_debut'] == $date1) {
+        while ($list = current($this->tab_echeancier)) {
+            if ($list['date_debut'] == $date1) {
                 $result1 = key($this->tab_echeancier);
-                $result1 = $result1 + 1;
-                echo $result1 . '<br />';
-            } elseif ($fruit_name['date_fin'] == $date2) {
+                //$result1 = $result1 + 1;
+                echo 'r1 = ' . $result1 . '<br />';
+            } elseif ($list['date_fin'] == $date2) {
                 $result2 = key($this->tab_echeancier);
-                echo $result2 . '<br />';
+                //$result2 = $result2 + 1;
+                echo 'r2 = ' . $result2 . '<br />';
             } else {
                 
             }
+
             next($this->tab_echeancier);
         }
-        $result = $result1 + $result2;
+        $result = $result2 - $result1;
+        $result = $result + 1;
+        //$result = $result1 + $result2;
         echo $result . '<br />';
+
+        return $result;
     }
 
     public function calc_next_facture_amount_ht() {
@@ -432,8 +463,16 @@ class BContract_echeancier extends BimpObject {
             $nb_period = $parent->getData('duree_mois') / $parent->getData('periodicity');
             $nb_period_restante = $nb_period - $this->nb_facture;
             $rest = $this->get_total_facture();
-            $facture->addline("Période de facturation : Du <b>" . dol_print_date($facture->date) . "</b> au <b>" . dol_print_date($this->calc_next_date(true)) . "</b>", price($rest['info']['reste_a_payer_ht'] / $nb_period_restante), 1, 20);
-            addElementElement('contrat', 'facture', $parent->id, $facture->id);
+            if (dol_print_date($facture->date) === dol_print_date($date_debut)) {
+                $facture->addline("Période de facturation : Du <b>" . dol_print_date($facture->date) . "</b> au <b>" . dol_print_date($this->calc_next_date(true)) . "</b>", price($this->get_total_contrat('ht') / $nb_period_restante), 1, 20);
+                addElementElement('contrat', 'facture', $parent->id, $facture->id);
+            } else {
+                $facture->addline("Période de facturation : Du <b>" . dol_print_date($facture->date) . "</b> au <b>" . dol_print_date($this->calc_next_date(true)) . "</b>", price($rest['info']['reste_a_payer_ht'] / $nb_period_restante), 1, 20);
+                addElementElement('contrat', 'facture', $parent->id, $facture->id);
+            }
+
+//            $facture->addline("Période de facturation : Du <b>" . dol_print_date($facture->date) . "</b> au <b>" . dol_print_date($this->calc_next_date(true)) . "</b>", price($this->get_total_contrat('ht') / $nb_period_restante), 1, 20);
+//            addElementElement('contrat', 'facture', $parent->id, $facture->id);
         } else {
             return Array('errors' => 'error facture');
         }
@@ -463,7 +502,7 @@ class BContract_echeancier extends BimpObject {
         } else {
             return Array('errors' => 'error facture');
         }
-        $this->updateLine($parent->id);
+        //$this->updateLine($parent->id);
 
         $success = 'Facture personnalisé ' . $facture->id . ' créer avec succès d\'un montant de ' . price($this->getData('next_facture_amount')) . ' €';
     }
@@ -517,9 +556,14 @@ class BContract_echeancier extends BimpObject {
         return $tab_facture;
     }
 
-    //get last facture id/object to get date last fact
+    //get last line on tab_echeancier
     public function get_last_facture() {
         return(end($this->tab_echeancier));
+    }
+
+    //get last facture id
+    public function get_last() {
+        return(end($this->get_total_facture()));
     }
 
 }

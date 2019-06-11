@@ -41,8 +41,7 @@ class ObjectLine extends BimpObject
     );
     public static $types = array(
         self::LINE_PRODUCT => 'Produit / Service',
-        self::LINE_TEXT    => 'Texte libre',
-        self::LINE_FREE    => 'Ligne libre'
+        self::LINE_TEXT    => 'Texte libre'
     );
     protected $product = null;
     protected $post_id_product = null;
@@ -52,6 +51,14 @@ class ObjectLine extends BimpObject
     protected $bimp_line_only = false;
     protected $remises_total_infos = null;
 
+    
+    public function __construct($module, $object_name) {
+        if(BimpCore::getConf("use_freeline"))
+            self::$types[self::LINE_FREE]    = 'Ligne libre';
+        return parent::__construct($module, $object_name);
+    }
+    
+    
     // Gestion des droits utilisateurs:
 
     public function canEditField($field_name)

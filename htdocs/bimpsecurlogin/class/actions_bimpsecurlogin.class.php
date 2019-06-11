@@ -25,7 +25,7 @@ class Actionsbimpsecurlogin {
 //            if(stripos($_SERVER['REQUEST_URI'], "/user/card.php") === false)
 //                header("Location: ".DOL_URL_ROOT."/user/card.php?id=".$user->id);
         
-        
+        return 0;
     }
     
 

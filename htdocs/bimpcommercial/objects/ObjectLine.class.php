@@ -48,7 +48,7 @@ class ObjectLine extends BimpObject
     protected $post_equipment = null;
     public $no_equipment_post = false;
     public $remises = null;
-    protected $bimp_line_only = false;
+    public $bimp_line_only = false;
     protected $remises_total_infos = null;
 
     // Gestion des droits utilisateurs:

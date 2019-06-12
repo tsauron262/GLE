@@ -1287,7 +1287,7 @@ class Bimp_Commande extends BimpComm
 
     // Traitements factures: 
 
-    public function createFacture(&$errors = array(), $id_client = null, $id_contact = null, $cond_reglement = null, $id_account = null, $public_note = '', $private_note = '', $remises = array())
+    public function createFacture(&$errors = array(), $id_client = null, $id_contact = null, $cond_reglement = null, $id_account = null, $public_note = '', $private_note = '', $remises = array(), $other_commandes = array(), $libelle = null)
     {
         if (!$this->isLoaded()) {
             $errors[] = 'ID de la commande client absent ou invalide';
@@ -1344,8 +1344,18 @@ class Bimp_Commande extends BimpComm
         foreach ($this->dol_object->array_options as $options_key => $value)
             $facture->dol_object->array_options[$options_key] = $value;
 
+        if (!is_null($label)) {
+            $facture->dol_object->array_options['options_libelle'] = $libelle;
+        }
+
         // Possibility to add external linked objects with hooks
-        $facture->dol_object->linked_objects[$facture->dol_object->origin] = $facture->dol_object->origin_id;
+        $facture->dol_object->linked_objects[$facture->dol_object->origin] = array($facture->dol_object->origin_id);
+
+        if (!empty($other_commandes)) {
+            foreach ($other_commandes as $id_commande) {
+                $facture->dol_object->linked_objects[$facture->dol_object->origin][] = $id_commande;
+            }
+        }
         if (!empty($this->dol_object->other_linked_objects) && is_array($this->dol_object->other_linked_objects)) {
             $facture->dol_object->linked_objects = array_merge($facture->dol_object->linked_objects, $this->dol_object->other_linked_objects);
         }
@@ -1360,8 +1370,21 @@ class Bimp_Commande extends BimpComm
             return 0;
         }
 
+        // Associations de la facture: 
         $asso = new BimpAssociation($this, 'factures');
         $asso->addObjectAssociation($id_facture);
+        unset($asso);
+
+        if ($other_commandes) {
+            foreach ($other_commandes as $id_commande) {
+                $commande = BimpCache::getBimpObjectInstance($this->module, $this->object_name, (int) $id_commande);
+                if (BimpObject::ObjectLoaded($commande)) {
+                    $asso = new BimpAssociation($commande, 'factures');
+                    $asso->addObjectAssociation($id_facture);
+                    unset($asso);
+                }
+            }
+        }
 
         // Insertion des accomptes:
         if (count($remises)) {
@@ -1382,17 +1405,10 @@ class Bimp_Commande extends BimpComm
     {
         $errors = array();
 
-        if (!$this->isLoaded()) {
-            $errors[] = 'ID de la commande client absent';
-            return $errors;
-        }
-
         foreach ($lines_qties as $id_line => $qty) {
             $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $id_line);
             if (!BimpObject::objectLoaded($line)) {
                 $errors[] = 'La ligne d\'ID ' . $id_line . ' n\'existe pas';
-            } elseif ((int) $line->getData('id_obj') !== (int) $this->id) {
-                $errors[] = 'La ligne d\'ID ' . $id_line . ' n\'appartient pas à cette commande';
             } else {
                 $line_equipments = isset($lines_equipments[(int) $id_line]) ? $lines_equipments[(int) $id_line] : array();
                 $line_errors = $line->checkFactureData($qty, $line_equipments, $id_facture);

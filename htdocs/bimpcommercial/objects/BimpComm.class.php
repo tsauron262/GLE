@@ -2809,4 +2809,27 @@ class BimpComm extends BimpDolObject
 
         return $errors;
     }
+
+    public function delete(&$warnings = array(), $force_delete = false)
+    {
+        $lines = $this->getLines();
+
+        $errors = parent::delete($warnings, $force_delete);
+
+        if (!count($errors)) {
+            foreach ($lines as $line) {
+                $line_pos = $line->getData('position');
+                $line_warnings = array();
+                $line->bimp_line_only = true;
+                $line_errors = $line->delete($line_warnings, true);
+
+                $line_errors = array_merge($line_warnings, $line_errors);
+                if (count($line_errors)) {
+                    $warnings[] = BimpTools::getMsgFromArray($line_errors, 'Erreurs lors de la suppression de la ligne n°' . $line_pos);
+                }
+            }
+        }
+
+        return $errors;
+    }
 }

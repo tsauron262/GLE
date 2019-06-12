@@ -483,6 +483,48 @@ function onShipmentFactureFormSubmit($form, extra_data) {
     return extra_data;
 }
 
+function onShipmentsBulkFactureFormSubmit($form, extra_data) {
+    var $container = $form.find('.shipments_facture_lines_inputs');
+    var data = {};
+
+    if ($container.length) {
+        var $rows = $container.find('tr.line_row');
+        if ($rows.length) {
+            $rows.each(function () {
+                var id_commande = parseInt($(this).data('id_commande'));
+                if (typeof(data[id_commande]) === 'undefined') {
+                    data[id_commande] = [];
+                }
+                
+                var id_line = parseInt($(this).data('id_line'));
+                if (!isNaN(id_line) && id_line) {
+                    var line = {
+                        id_line: id_line,
+                        qty: 0,
+                        equipments: []
+                    };
+                    var $input = $(this).find('input.line_facture_qty');
+                    if ($input.length) {
+                        line.qty = parseFloat($input.val());
+                    }
+                    var $equipments_row = $container.find('#facture_line_' + id_line + '_equipments');
+                    if ($equipments_row.length) {
+                        $equipments_row.find('[name="line_' + id_line + '_facture_0_equipments[]"]:checked').each(function () {
+                            line.equipments.push(parseInt($(this).val()));
+                        });
+                    }
+                }
+
+                data[id_commande].push(line);
+            });
+        }
+    }
+
+    extra_data.commandes_data = data;
+
+    return extra_data;
+}
+
 // Factures commandes client: 
 
 function onCommandeLineFacturesViewLoaded($view) {

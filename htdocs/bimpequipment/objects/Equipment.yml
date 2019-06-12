@@ -258,6 +258,9 @@ fields_tables:
                           - card
             - field: serial
             - field: available
+              edit: 1
+            - field: return_available
+              edit: 1
             - field: date_purchase
             - field: prix_achat
             - field: achat_tva_tx
@@ -341,6 +344,7 @@ forms:
             - field: product_label
             - field: type
             - field: available
+            - field: return_available
             - field: date_purchase
             - field: prix_achat
             - field: achat_tva_tx

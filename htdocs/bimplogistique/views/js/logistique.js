@@ -94,6 +94,50 @@ function saveReturnedEquipmentIdEntrepot($select) {
     });
 }
 
+function onAddReturnsFromLinesFormSubmit($form, extra_data) {
+    if ($.isOk($form)) {
+        var lines = {};
+
+        $form.find('tr.line_row').each(function () {
+            var id_line = parseInt($(this).data('id_line'));
+            if (id_line) {
+                var line_data = {};
+
+                var $input = $(this).find('[name="line_' + id_line + '_qty"]');
+                if ($input.length) {
+                    line_data.qty = parseFloat($input.val());
+                }
+
+                var id_entrepot = 0;
+                $input = $(this).find('[name="line_' + id_line + '_id_entrepot"]');
+                if ($input.length) {
+                    id_entrepot = parseInt($input.val());
+                }
+
+                var $inputs = $(this).find('.line_' + id_line + '_equipments_check:checked');
+                if ($inputs.length) {
+                    line_data.equipments = [];
+                    $inputs.each(function () {
+                        var id_equipment = parseInt($(this).val());
+                        if (id_equipment) {
+                            line_data.equipments.push({
+                                id_equipment: id_equipment,
+                                id_entrepot: id_entrepot
+                            });
+                        }
+                    });
+                }
+
+                lines[id_line] = line_data;
+            }
+        });
+
+        extra_data.lines = lines;
+    }
+
+    return extra_data;
+}
+
 // Expéditions commande client: 
 
 function addSelectedCommandeLinesToShipment($button, list_id, id_commande) {
@@ -492,10 +536,10 @@ function onShipmentsBulkFactureFormSubmit($form, extra_data) {
         if ($rows.length) {
             $rows.each(function () {
                 var id_commande = parseInt($(this).data('id_commande'));
-                if (typeof(data[id_commande]) === 'undefined') {
+                if (typeof (data[id_commande]) === 'undefined') {
                     data[id_commande] = [];
                 }
-                
+
                 var id_line = parseInt($(this).data('id_line'));
                 if (!isNaN(id_line) && id_line) {
                     var line = {

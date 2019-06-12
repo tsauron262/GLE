@@ -3770,7 +3770,8 @@ class ObjectLine extends BimpObject
         }
 
         $remises = $this->getRemises();
-
+        $lines = $this->getEquipmentLines();
+        
         if (!$this->bimp_line_only) {
             $errors = $this->deleteLine();
         }
@@ -3778,8 +3779,6 @@ class ObjectLine extends BimpObject
         if (!count($errors)) {
             $errors = parent::delete($warnings, $force_delete);
             if (!count($errors)) {
-                $lines = $this->getEquipmentLines();
-
                 if (count($lines)) {
                     foreach ($lines as $line) {
                         $del_warnings = array();

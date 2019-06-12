@@ -2436,7 +2436,7 @@ class BimpObject extends BimpCache
         }
 
         if ($missing && $required) {
-            $errors[] = 'Valeur obligatoire manquante : "' . $label . '"';
+            $errors[] = 'Valeur obligatoire manquante : "' . $label . ' ('.$field.')"';
             return $errors;
         }
 

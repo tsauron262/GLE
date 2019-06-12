@@ -62,7 +62,8 @@ class ObjectLineEquipment extends BimpObject
                     if ((int) $id_equipment && $current === $id_equipment) {
                         $errors[] = 'Cet équipement a déjà été attribué';
                     } else {
-                        $equipment->updateField('available', 1);
+                        $oldEquipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $current);
+                        $oldEquipment->updateField('available', 1);
                     }
                 }
                 if (!count($errors) && !is_null($equipment)) {

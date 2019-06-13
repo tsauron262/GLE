@@ -16153,10 +16153,52 @@ i.iconRight {
 }
 /* line 570, ../scss/bimpcore/_styles.scss */
 .modal .modal-body {
-  max-height: 650px;
+  max-height: 950px;
   padding-bottom: 60px;
   overflow-y: auto;
 }
+@media (max-height: 1200px) {
+    .modal .modal-body {
+        max-height: 850px;
+    }
+}
+@media (max-height: 1100px) {
+    .modal .modal-body {
+        max-height: 750px;
+    }
+}
+@media (max-height: 1000px) {
+    .modal .modal-body {
+        max-height: 650px;
+    }
+}
+@media (max-height: 900px) {
+    .modal .modal-body {
+        max-height: 550px;
+    }
+}
+@media (max-height: 800px) {
+    .modal .modal-body {
+        max-height: 450px;
+    }
+}
+@media (max-height: 700px) {
+    .modal .modal-body {
+        max-height: 350px;
+    }
+}
+@media (max-height: 600px) {
+    .modal .modal-body {
+        max-height: 250px;
+    }
+}
+@media (max-height: 500px) {
+    .modal .modal-body {
+        max-height: 150px;
+    }
+}
+
+
 /* line 575, ../scss/bimpcore/_styles.scss */
 .modal .modal-body .page_modal_img {
   max-width: 100%;

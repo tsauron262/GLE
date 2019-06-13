@@ -59,15 +59,6 @@ class Bimp_Product extends BimpObject
         return array(0, $user);
     }
 
-    public function getInstanceName()
-    {
-        if (!$this->isLoaded()) {
-            return 'Produit';
-        }
-
-        return $this->getData('ref') . ' - ' . $this->getData('label');
-    }
-
     public function getStocksForEntrepot($id_entrepot)
     {
         $stocks = array(

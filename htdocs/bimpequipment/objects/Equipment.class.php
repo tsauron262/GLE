@@ -31,6 +31,15 @@ class Equipment extends BimpObject
         $this->iconeDef = "fa-laptop";
     }
 
+    public function getName()
+    {
+        if ($this->isLoaded()) {
+            return 'Equipement #' . $this->id;
+        }
+
+        return '';
+    }
+
     public function getRef()
     {
         return $this->getData("serial");
@@ -774,15 +783,6 @@ class Equipment extends BimpObject
         }
 
         return $errors;
-    }
-
-    public function getInstanceName($icon = true)
-    {
-        if (!$this->isLoaded()) {
-            return '';
-        }
-
-        return $this->id . ' - S/N: ' . $this->getData('serial');
     }
 
     // Gestion des droits: 

@@ -83,3 +83,11 @@ sections:
                                               panel: 1
                                               object: bimp_comm
                                               children: files
+                                              
+                    - type: custom
+                      custom: 
+                          callback: 
+                              method: renderNotesList
+                              object: bimp_comm
+                              params:
+                                  - 1

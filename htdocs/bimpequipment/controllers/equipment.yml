@@ -24,6 +24,7 @@ sections:
                     - cols: 
                         - type: view
                           view:
+                              name: infos
                               panel: 1
                               object: equipment
                         - type: list

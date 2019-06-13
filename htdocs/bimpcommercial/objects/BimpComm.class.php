@@ -65,6 +65,12 @@ class BimpComm extends BimpDolObject
         switch ($field) {
             case 'zone_vente':
                 return (int) $this->areLinesEditable();
+
+            case 'entrepot':
+                if ((int) $this->getData('fk_statut') > 0) {
+                    return 0;
+                }
+                return 1;
         }
         return 1;
     }
@@ -96,12 +102,12 @@ class BimpComm extends BimpDolObject
                     $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
                     return 0;
                 }
-                if($this->getData('invoice_status') === null || $this->getData('invoice_status') > 0){
+                if ($this->getData('invoice_status') === null || $this->getData('invoice_status') > 0) {
                     $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' est déja facturé';
                     return 0;
                 }
-                    
-                
+
+
 //                if (!$this->areLinesEditable()) {
 //                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' ne peut plus être éditée';
 //                    return 0;
@@ -861,11 +867,14 @@ class BimpComm extends BimpDolObject
     }
 
     // Getters - Overrides BimpObject
-//    public function getName()
-//    {
-//        $name = parent::getName();
-//        return BimpTools::ucfirst($this->getLabel()) . ' ' . ($name ? '"' . $name . '"' : '');
-//    }
+    public function getName()
+    {
+        if ($this->isLoaded()) {
+            return BimpTools::ucfirst($this->getLabel()) . ' #' . $this->id;
+        }
+        
+        return '';
+    }
 
     public function getFilesDir()
     {
@@ -2797,6 +2806,29 @@ class BimpComm extends BimpDolObject
                     if (count($lines_errors)) {
                         $warnings[] = BimpTools::getMsgFromArray($lines_errors, 'Des erreurs sont survenues lors de la suppression des taux de TVA');
                     }
+                }
+            }
+        }
+
+        return $errors;
+    }
+
+    public function delete(&$warnings = array(), $force_delete = false)
+    {
+        $lines = $this->getLines();
+
+        $errors = parent::delete($warnings, $force_delete);
+
+        if (!count($errors)) {
+            foreach ($lines as $line) {
+                $line_pos = $line->getData('position');
+                $line_warnings = array();
+                $line->bimp_line_only = true;
+                $line_errors = $line->delete($line_warnings, true);
+
+                $line_errors = array_merge($line_warnings, $line_errors);
+                if (count($line_errors)) {
+                    $warnings[] = BimpTools::getMsgFromArray($line_errors, 'Erreurs lors de la suppression de la ligne n°' . $line_pos);
                 }
             }
         }

@@ -67,7 +67,7 @@ class BE_Place extends BimpObject
                 case self::BE_PLACE_CLIENT:
                     $client = $this->getChildObject('client');
                     if (BimpObject::ObjectLoaded($client)) {
-                        $name = 'Client: ' . $client->dol_object->nom;
+                        $name = 'Client "' . $client->dol_object->nom . '"';
                     }
                     break;
 
@@ -78,14 +78,14 @@ class BE_Place extends BimpObject
                 case self::BE_PLACE_PRET:
                     $entrepot = $this->getChildObject('entrepot');
                     if (BimpObject::ObjectLoaded($entrepot)) {
-                        $name = 'Entrepôt: ' . $entrepot->lieu;
+                        $name = 'Entrepôt "' . $entrepot->lieu . '"';
                     }
                     break;
 
                 case self::BE_PLACE_USER:
                     $user = $this->getChildObject('user');
                     if (BimpObject::ObjectLoaded($user)) {
-                        $name = 'Utilisateur: ' . $user->getFullName();
+                        $name = 'Utilisateur "' . $user->getFullName() . '"';
                     }
                     break;
 

@@ -1460,25 +1460,24 @@ class BC_Vente extends BimpObject
                     if (count($article_errors)) {
                         $errors = array_merge($errors, $article_errors);
                     } else {
-//                        if (!$article->checkPlace((int) $this->getData('id_entrepot'))) {
-//                            $subject = 'Erreur emplacement équipement';
-//                            $msg = 'Un équipement a été ajouté à une vente en caisse dont l\'entrepôt ne correspond pas à l\'emplacement actuellement enregistré pour cet équipement';
-//                            $msg .= "\n\n";
-//                            $msg .= "\t" . 'Vente n°' . $this->id . "\n";
-//                            $msg .= '\t' . 'Equipement: ' . $equipment->getNomUrl(0, 1, 0, 0) . "\n";
-//                            
-//                            $entrepot = BimpCache::getDolObjectInstance((int) $this->getData('id_entrepot'), 'product/stock', 'entrepot');
-//                            if (BimpObject::ObjectLoaded($entrepot)) {
-//                                $msg .= "\t" . 'Entrepôt de la vente: ' . $entrepot->libelle . "\n";
-//                            }
-//                            
-//                            $place = $equipment->getCurrentPlace();
-//                            if (BimpObject::ObjectLoaded($place)) {
-//                                $msg .= "\t" . 'Emplacement de l\'équipement: ' . $place->getPlaceName();
-//                            }
-////                            mailSyn2($subject, 'logistique@bimp.fr', 'BIMP<no-reply@bimp.fr>', $msg);
-//                            mailSyn2($subject, 'f.martinez@bimp.fr', 'BIMP<no-reply@bimp.fr>', $msg);
-//                        }
+                        if (!$article->checkPlace((int) $this->getData('id_entrepot'))) {
+                            $subject = 'Erreur emplacement équipement';
+                            $msg = 'Un équipement a été ajouté à une vente en caisse dont l\'entrepôt ne correspond pas à l\'emplacement actuellement enregistré pour cet équipement';
+                            $msg .= "\n\n";
+                            $msg .= "\t" . 'Vente n°' . $this->id . "\n";
+                            $msg .= "\t" . 'Equipement: ' . $equipment->getData('serial') . ' (ID: ' . $equipment->id . ')' . "\n";
+
+                            $entrepot = BimpCache::getDolObjectInstance((int) $this->getData('id_entrepot'), 'product/stock', 'entrepot');
+                            if (BimpObject::ObjectLoaded($entrepot)) {
+                                $msg .= "\t" . 'Entrepôt de la vente: ' . $entrepot->libelle . "\n";
+                            }
+
+                            $place = $equipment->getCurrentPlace();
+                            if (BimpObject::ObjectLoaded($place)) {
+                                $msg .= "\t" . 'Emplacement de l\'équipement: ' . $place->getPlaceName();
+                            }
+                            mailSyn2($subject, 'logistique@bimp.fr', '', $msg);
+                        }
 
                         $html .= $this->renderCartEquipmentline($article, $product, $equipment);
                     }

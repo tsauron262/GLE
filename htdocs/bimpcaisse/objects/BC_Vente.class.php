@@ -1009,7 +1009,7 @@ class BC_Vente extends BimpObject
         $id_cond = (int) $this->getData('id_cond_reglement');
         $html .= '<div id="condReglement" style="font-size: 14px">';
         $html .= '<span style="font-weight: bold">Condition de réglement : </span>';
-        $html .= '<select id="condReglementSelect" name="condReglementSelect">';
+        $html .= '<select id="condReglementSelect" name="condReglementSelect"  disabled>';
         foreach ($this->getCond_reglementsArray() as $id => $label) {
             $html .= '<option value="' . $id . '"' . ((int) $id === $id_cond ? ' selected=""' : '') . '>' . $label . '</option>';
         }
@@ -2023,6 +2023,15 @@ class BC_Vente extends BimpObject
             }
             return 0;
         }
+        
+        
+        // Choix Commercial: 
+        $id_user_resp = (int) $this->getData('id_user_resp');
+        if (!$id_user_resp) {
+            global $user;
+            $id_user_resp = $user->id;
+        }
+        $facture->add_contact($id_user_resp, 'SALESREPFOLL', 'internal');
 
         // Ajout des avoirs client utilisés: 
         $asso = new BimpAssociation($this, 'discounts');

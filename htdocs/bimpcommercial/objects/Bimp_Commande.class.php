@@ -1285,9 +1285,145 @@ class Bimp_Commande extends BimpComm
         return $errors;
     }
 
+    public function addReturnFromLine(&$warnings, $id_line, $data)
+    {
+        $errors = array();
+
+        if (!$this->isLoaded()) {
+            $errors[] = 'ID de la commande absent';
+            return $errors;
+        }
+
+        $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', $id_line);
+        if (!BimpObject::ObjectLoaded($line)) {
+            $errors[] = 'La ligne de commande client d\'ID ' . $id_line . ' n\'existe pas';
+            return $errors;
+        }
+
+        if ((float) $line->getFullQty() < 0) {
+            $errors[] = 'Cette ligne est déjà un retour produit';
+            return $errors;
+        }
+
+        $isSerialisable = $line->isProductSerialisable();
+        $equipments = array();
+        $qty = 0;
+
+        $new_line = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', array(
+                    'linked_object_name' => 'return_of_commande_line',
+                    'linked_id_object'   => (int) $line->id
+                        ), true);
+
+        if ($isSerialisable) {
+            if (!isset($data['equipments']) || empty($data['equipments'])) {
+                $errors[] = 'Aucun équipement retourné sélectionné';
+                return $errors;
+            }
+
+            foreach ($data['equipments'] as $equipment_data) {
+                if (!isset($equipment_data['id_equipment']) || !(int) $equipment_data['id_equipment']) {
+                    continue;
+                }
+                $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $equipment_data['id_equipment']);
+                if (!BimpObject::ObjectLoaded($equipment)) {
+                    $errors[] = 'L\'équipement d\'ID ' . $equipment_data['id_equipment'] . 'n\'existe pas';
+                } else {
+                    $id_shipment = (int) $line->getEquipmentIdShipment($equipment->id);
+                    if (!$id_shipment) {
+                        $errors[] = 'L\'équipement ' . $equipment->getData('serial') . ' n\'a pas encore été expédié';
+                    } else {
+                        $shipment = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeShipment', $id_shipment);
+                        if (!BimpObject::objectLoaded($shipment)) {
+                            $errors[] = 'L\'équipement "' . $equipment->getData('serial') . '" est attributé à une expédition qui n\'existe plus';
+                        } else {
+                            if ((int) $shipment->getData('status') !== BL_CommandeShipment::BLCS_EXPEDIEE) {
+                                $errors[] = 'L\'équipement "' . $equipment->getData('serial') . '" n\'a pas encore été expédié (Expédition n°' . $shipment->getData('num_livraison') . ' non validée)';
+                            } else {
+                                $eq_errors = $line->checkReturnedEquipment((int) $equipment->id);
+                                if (count($eq_errors)) {
+                                    $errors[] = BimpTools::getMsgFromArray($eq_errors);
+                                } else {
+                                    $equipments[] = array(
+                                        'id_equipment' => (int) $equipment->id,
+                                        'id_entrepot'  => isset($equipment_data['id_entrepot']) ? (int) $equipment_data['id_entrepot'] : 0
+                                    );
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            $qty = count($equipments);
+        } else {
+            if (!isset($data['qty']) || !(float) $data['qty']) {
+                $errors[] = 'Quantités absentes ou nulles';
+            } else {
+                $qty = (float) $data['qty'];
+            }
+        }
+
+        if (!count($errors) && $qty) {
+            if (BimpObject::ObjectLoaded($new_line)) {
+                $new_line->qty += ($qty * -1);
+                $line_warnings = array();
+                $line_errors = $new_line->update($line_warnings, true);
+                if (count($line_warnings)) {
+                    $warnings[] = BimpTools::getMsgFromArray($line_errors, 'Erreurs suite à la mise à jour des quantités de la ligne de retour');
+                }
+                if (count($line_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec de la mise à jour des quantités de la ligne de retour');
+                }
+            } else {
+                $new_line = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeLine');
+                $new_line->id_product = $line->id_product;
+                $new_line->qty = ($qty * -1);
+                $new_line->pu_ht = $line->getUnitPriceHTWithRemises();
+                $new_line->tva_tx = $line->tva_tx;
+                $new_line->pa_ht = $line->pa_ht;
+                $new_line->id_fourn_price = $line->id_fourn_price;
+
+                $new_line->validateArray(array(
+                    'id_obj'             => (int) $this->id,
+                    'type'               => $line->getData('type'),
+                    'remisable'          => 0,
+                    'hide_product_label' => $line->getData('hide_product_label'),
+                    'linked_object_name' => 'return_of_commande_line',
+                    'linked_id_object'   => (int) $line->id
+                ));
+
+                $line_warnings = array();
+                $line_errors = $new_line->create($line_warnings, true);
+                if (count($line_warnings)) {
+                    $warnings[] = BimpTools::getMsgFromArray($line_errors, 'Erreurs suite à la création de la ligne de retour');
+                }
+                if (count($line_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec de la création de la ligne de retour');
+                }
+            }
+
+            if (!count($errors) && $isSerialisable && count($equipments)) {
+                $line_warnings = array();
+                $line_errors = $new_line->addReturnedEquipments($line_warnings, $equipments);
+                $line_errors = array_merge($line_errors, $line_warnings);
+                if (count($line_errors)) {
+                    $msg = 'Erreur lors de l\'attribution ';
+                    if (count($equipments > 1)) {
+                        $msg .= 'des équipements';
+                    } else {
+                        $msg .= 'de l\'équipement';
+                    }
+                    $warnings[] = BimpTools::getMsgFromArray($line_errors, $msg);
+                }
+            }
+        }
+
+        return $errors;
+    }
+
     // Traitements factures: 
 
-    public function createFacture(&$errors = array(), $id_client = null, $id_contact = null, $cond_reglement = null, $id_account = null, $public_note = '', $private_note = '', $remises = array())
+    public function createFacture(&$errors = array(), $id_client = null, $id_contact = null, $cond_reglement = null, $id_account = null, $public_note = '', $private_note = '', $remises = array(), $other_commandes = array(), $libelle = null)
     {
         if (!$this->isLoaded()) {
             $errors[] = 'ID de la commande client absent ou invalide';
@@ -1344,8 +1480,18 @@ class Bimp_Commande extends BimpComm
         foreach ($this->dol_object->array_options as $options_key => $value)
             $facture->dol_object->array_options[$options_key] = $value;
 
+        if (!is_null($libelle)) {
+            $facture->dol_object->array_options['options_libelle'] = $libelle;
+        }
+
         // Possibility to add external linked objects with hooks
-        $facture->dol_object->linked_objects[$facture->dol_object->origin] = $facture->dol_object->origin_id;
+        $facture->dol_object->linked_objects[$facture->dol_object->origin] = array($facture->dol_object->origin_id);
+
+        if (!empty($other_commandes)) {
+            foreach ($other_commandes as $id_commande) {
+                $facture->dol_object->linked_objects[$facture->dol_object->origin][] = $id_commande;
+            }
+        }
         if (!empty($this->dol_object->other_linked_objects) && is_array($this->dol_object->other_linked_objects)) {
             $facture->dol_object->linked_objects = array_merge($facture->dol_object->linked_objects, $this->dol_object->other_linked_objects);
         }
@@ -1360,8 +1506,21 @@ class Bimp_Commande extends BimpComm
             return 0;
         }
 
+        // Associations de la facture: 
         $asso = new BimpAssociation($this, 'factures');
         $asso->addObjectAssociation($id_facture);
+        unset($asso);
+
+        if ($other_commandes) {
+            foreach ($other_commandes as $id_commande) {
+                $commande = BimpCache::getBimpObjectInstance($this->module, $this->object_name, (int) $id_commande);
+                if (BimpObject::ObjectLoaded($commande)) {
+                    $asso = new BimpAssociation($commande, 'factures');
+                    $asso->addObjectAssociation($id_facture);
+                    unset($asso);
+                }
+            }
+        }
 
         // Insertion des accomptes:
         if (count($remises)) {
@@ -1382,17 +1541,10 @@ class Bimp_Commande extends BimpComm
     {
         $errors = array();
 
-        if (!$this->isLoaded()) {
-            $errors[] = 'ID de la commande client absent';
-            return $errors;
-        }
-
         foreach ($lines_qties as $id_line => $qty) {
             $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $id_line);
             if (!BimpObject::objectLoaded($line)) {
                 $errors[] = 'La ligne d\'ID ' . $id_line . ' n\'existe pas';
-            } elseif ((int) $line->getData('id_obj') !== (int) $this->id) {
-                $errors[] = 'La ligne d\'ID ' . $id_line . ' n\'appartient pas à cette commande';
             } else {
                 $line_equipments = isset($lines_equipments[(int) $id_line]) ? $lines_equipments[(int) $id_line] : array();
                 $line_errors = $line->checkFactureData($qty, $line_equipments, $id_facture);
@@ -1530,6 +1682,19 @@ class Bimp_Commande extends BimpComm
 
                         if (isset($lines_equipments[(int) $id_line])) {
                             foreach ($lines_equipments[(int) $id_line] as $id_equipment) {
+                                $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+
+                                if (!BimpObject::objectLoaded($equipment)) {
+                                    $errors[] = 'Ligne n°' . $line->getData('position') . ': l\'équipement d\'ID ' . $id_equipment . ' n\'existe plus';
+                                    continue;
+                                }
+
+                                if (!(float) $equipment->getData('prix_achat')) {
+                                    $equipment->set('prix_achat', $line->pa_ht);
+                                    $equipment->set('achat_tva_tx', $line->tva_tx);
+                                    $equipment->update();
+                                }
+
                                 $line_equipments[] = array(
                                     'id_equipment' => (int) $id_equipment
                                 );

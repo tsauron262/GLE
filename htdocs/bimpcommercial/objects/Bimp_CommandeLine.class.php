@@ -141,6 +141,16 @@ class Bimp_CommandeLine extends ObjectLine
                 'icon'    => 'fas_file-invoice-dollar',
                 'onclick' => $onclick
             );
+
+            $onclick = 'setSelectedObjectsAction($(this), \'list_id\', \'addReturnsFromLines\', {}, ';
+            $onclick .= '\'returns_from_lines\', null, true, ';
+            $onclick .= 'function($form, extra_data) {return onAddReturnsFromLinesFormSubmit($form, extra_data);})';
+
+            $actions[] = array(
+                'label'   => 'Retours produits / équipements',
+                'icon'    => 'fas_arrow-circle-left',
+                'onclick' => $onclick
+            );
         }
 
         return $actions;
@@ -192,6 +202,29 @@ class Bimp_CommandeLine extends ObjectLine
                             'icon'    => 'fas_edit',
                             'onclick' => $this->getJsActionOnclick('modifyQty', array(), array(
                                 'form_name' => 'qty_modified'
+                            ))
+                        );
+                    }
+
+                    if ((float) $this->getFullQty() > 0 && $this->getShippedQty(null, true)) {
+
+                        $product = $this->getProduct();
+                        if (BimpObject::ObjectLoaded($product)) {
+                            if ($product->isSerialisable()) {
+                                $label = 'Retour équipement';
+                            } else {
+                                $label = 'Retour produit';
+                            }
+                        } else {
+                            $label = 'Retour';
+                        }
+
+                        $buttons[] = array(
+                            'label'   => $label,
+                            'icon'    => 'fas_arrow-circle-left',
+                            'onclick' => $this->getJsActionOnclick('addReturnsFromLines', array(), array(
+                                'form_name'      => 'returns_from_lines',
+                                'on_form_submit' => 'function($form, extra_data) {return onAddReturnsFromLinesFormSubmit($form, extra_data);}'
                             ))
                         );
                     }
@@ -814,15 +847,27 @@ class Bimp_CommandeLine extends ObjectLine
         $html = '';
         $total_qty = (float) $this->getFullQty();
         $modif_qty = (float) $this->getData('qty_modif');
+        $is_return = ($total_qty < 0);
 
         // Qté totale
-        $popover = 'Qtés totales';
         if ($modif_qty) {
-            $popover .= ' (Qtés commandées +/- qtés modifiées)';
+            $popover = 'Qtés totales';
+            if ($is_return) {
+                $popover .= ' (Qtés retournées +/- qtés modifiées)';
+            } else {
+                $popover .= ' (Qtés commandées +/- qtés modifiées)';
+            }
+        } else {
+            if ($is_return) {
+                $popover = 'Qtés retournées';
+            } else {
+                $popover = 'Qtés commandées';
+            }
         }
+
         $html .= '<div style="display: inline-block;">';
         $html .= '<span class="bold bs-popover"' . BimpRender::renderPopoverData($popover) . ' style="margin-right: 15px; padding: 3px 0;">';
-        $html .= BimpRender::renderIcon('fas_dolly', 'iconLeft');
+        $html .= BimpRender::renderIcon($is_return ? 'fas_arrow-circle-left' : 'fas_dolly', 'iconLeft');
         $html .= $total_qty;
 
         if ($modif_qty) {
@@ -1941,6 +1986,182 @@ class Bimp_CommandeLine extends ObjectLine
             $html = BimpInput::renderInputContainer('equipments', '', $content, '', 1, 1, '', array(
                         'values_field' => 'equipments'
             ));
+        }
+
+        return $html;
+    }
+
+    public function renderReturnsFromLinesInputs()
+    {
+        $html = '';
+
+        $id_lines = BimpTools::getPostFieldValue('id_objects', array());
+        $warnings = array();
+
+        if (empty($id_lines) && $this->isLoaded()) {
+            $id_lines = array($this->id);
+        }
+
+        if (!is_array($id_lines) || empty($id_lines)) {
+            $html .= BimpRender::renderAlerts('Aucune ligne de commande sélectionnée');
+        } else {
+            $lines_data = array();
+            BimpObject::loadClass('bimplogistique', 'BL_CommandeShipment');
+            foreach ($id_lines as $id_line) {
+                $line = BimpCache::getBimpObjectInstance($this->module, $this->object_name, (int) $id_line);
+
+                if (!BimpObject::ObjectLoaded($line)) {
+                    $warnings[] = 'La ligne de commande d\'ID ' . $id_line . ' n\'existe pas';
+                    continue;
+                }
+
+                if ((float) $line->getFullQty() < 0) {
+                    $warnings[] = 'La ligne n°' . $line->getData('position') . ' est déjà un retour produits';
+                    continue;
+                }
+
+                $line_warnings = array();
+                $line_data = array();
+                $isSerialisable = (int) $line->isProductSerialisable();
+
+                if ((float) $line->getFullQty()) {
+                    $commande = $line->getParentInstance();
+                    if (!BimpObject::ObjectLoaded($commande)) {
+                        $line_warnings[] = 'ID de la commande absent';
+                        continue;
+                    }
+
+                    $shipments = $commande->getChildrenObjects('shipments', array(
+                        'status' => BL_CommandeShipment::BLCS_EXPEDIEE
+                    ));
+
+                    if ($isSerialisable) {
+                        $line_data['equipments'] = array();
+                    } else {
+                        $line_data['qty'] = 0;
+                    }
+
+                    foreach ($shipments as $shipment) {
+                        $line_shipment_data = $line->getShipmentData((int) $shipment->id);
+                        if ((float) $line_shipment_data['qty']) {
+                            if ($isSerialisable && isset($line_shipment_data['equipments']) && !empty($line_shipment_data['equipments'])) {
+                                foreach ($line_shipment_data['equipments'] as $id_equipment) {
+                                    if (!array_key_exists((int) $id_equipment, $line_data['equipments'])) {
+                                        $eq_errors = $line->checkReturnedEquipment($id_equipment);
+                                        if (!count($eq_errors)) {
+                                            $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+                                            if (BimpObject::ObjectLoaded($equipment)) {
+                                                $line_data['equipments'][$id_equipment] = $equipment->getData('serial');
+                                            }
+                                        } else {
+                                            $line_warnings[] = BimpTools::getMsgFromArray($eq_errors);
+                                        }
+                                    }
+                                }
+                            } else {
+                                $line_data['qty'] += (float) $line_shipment_data['qty'];
+                            }
+                        }
+                    }
+                }
+
+                if (empty($line_data) ||
+                        ($isSerialisable && empty($line_data['equipments'])) ||
+                        (!$isSerialisable && !$line_data['qty'])) {
+                    $line_warnings[] = 'Aucune unité elligible pour un retour';
+                } else {
+                    $lines_data[(int) $line->id] = $line_data;
+                }
+
+                if (count($line_warnings)) {
+                    $warnings[] = BimpTools::getMsgFromArray($line_warnings, 'Ligne n°' . $line->getData('position'));
+                }
+            }
+
+            if (count($warnings)) {
+                $html .= BimpRender::renderAlerts($warnings, 'warning');
+            }
+
+            if (!empty($lines_data)) {
+                $html .= '<table class="bimp_list_table">';
+                $html .= '<thead>';
+                $html .= '<tr>';
+                $html .= '<th>N° ligne</th>';
+                $html .= '<th>Description</th>';
+                $html .= '<th>Qté / équipements</th>';
+                $html .= '<th></th>';
+                $html .= '</tr>';
+                $html .= '</thead>';
+
+                $html .= '<tbody>';
+                foreach ($lines_data as $id_line => $line_data) {
+                    $line = BimpCache::getBimpObjectInstance($this->module, $this->object_name, (int) $id_line);
+
+                    $html .= '<tr class="line_row" data-id_line="' . $id_line . '">';
+                    $html .= '<td>' . $line->getData('position') . '</td>';
+                    $html .= '<td>' . $line->displayLineData('desc_light') . '</td>';
+                    $html .= '<td>';
+                    $return_line = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', array(
+                                'linked_object_name' => 'return_of_commande_line',
+                                'linked_id_object'   => (int) $line->id
+                                    ), true);
+
+                    if (BimpObject::ObjectLoaded($return_line)) {
+                        $returned_qty = abs($return_line->getFullQty());
+                        if ($returned_qty > 0) {
+                            if ($returned_qty > 1) {
+                                $msg = $returned_qty . ' unités ont déjà été retournées pour cette ligne de commande';
+                            } else {
+                                $msg = $returned_qty . ' unité a déjà été retournée pour cette ligne de commande';
+                            }
+                        }
+                        $html .= BimpRender::renderAlerts($msg, 'warning');
+                    }
+
+                    if (isset($line_data['equipments'])) {
+                        $html .= BimpInput::renderInput('check_list', 'line_' . $line->id . '_equipments', array(), array(
+                                    'items' => $line_data['equipments']
+                        ));
+                    } elseif (isset($line_data['qty'])) {
+                        $decimals = 3;
+                        $product = $line->getProduct();
+                        if (BimpObject::ObjectLoaded($product) && !(int) $product->getData('fk_product_type')) {
+                            $decimals = 0;
+                        }
+                        $max = (float) $line_data['qty'];
+                        if (BimpObject::ObjectLoaded($return_line)) {
+                            $max -= abs($return_line->getFullQty());
+                            $line_data['qty'] = $max;
+                        }
+                        $html .= BimpInput::renderInput('qty', 'line_' . $line->id . '_qty', $line_data['qty'], array(
+                                    'data'      => array(
+                                        'data_type' => 'number',
+                                        'min'       => 0,
+                                        'max'       => $max,
+                                        'decimals'  => $decimals,
+                                        'unsigned'  => 0
+                                    ),
+                                    'max_label' => 1,
+                        ));
+                    }
+                    $html .= '</td>';
+                    $html .= '<td>';
+                    if (isset($line_data['equipments'])) {
+                        $commande = $line->getParentInstance();
+                        if (BimpObject::ObjectLoaded($commande)) {
+                            $id_entrepot = (int) $commande->getData('entrepot');
+                        } else {
+                            $id_entrepot = 0;
+                        }
+                        $html .= '<p class="smallInfo">Entrepôt de destination: </p>';
+                        $html .= BimpInput::renderInput('search_entrepot', 'line_' . $line->id . '_id_entrepot', $id_entrepot);
+                    }
+                    $html .= '</td>';
+                    $html .= '</tr>';
+                }
+                $html .= '</tbody>';
+                $html .= '</table>';
+            }
         }
 
         return $html;
@@ -3179,6 +3400,67 @@ class Bimp_CommandeLine extends ObjectLine
         return $errors;
     }
 
+    public function addReturnedEquipments(&$warnings, $equipments)
+    {
+        $errors = array();
+
+        if (!$this->isLoaded()) {
+            $errors[] = 'ID de la ligne de commande absent';
+            return $errors;
+        }
+
+        $commande = $this->getParentInstance();
+
+        if (!BimpObject::objectLoaded($commande)) {
+            $errors[] = 'ID de la commande client absent';
+        } elseif (!isset($equipments) || empty($equipments)) {
+            $errors[] = 'Aucun équipement sélectionné';
+        } else {
+            $equipments_returned = $this->getData('equipments_returned');
+
+            if (is_null($equipments_returned) || !is_array($equipments_returned)) {
+                $equipments_returned = array();
+            }
+
+            $max = abs($this->getFullQty()) - count($equipments_returned);
+
+            if (!$max) {
+                $errors[] = 'Tous les équipement à retournés ont déjà été ajoutés';
+            } elseif (count($equipments) > $max) {
+                $errors[] = 'Vous ne pouvez ajouter que ' . $max . ' équipement(s) à retourner';
+            } else {
+                foreach ($equipments as $equipment_data) {
+                    if (!isset($equipment_data['id_equipment']) || !(int) $equipment_data['id_equipment']) {
+                        continue;
+                    }
+
+                    if (!isset($equipment_data['id_entrepot']) || !(int) $equipment_data['id_entrepot']) {
+                        $equipment_data['id_entrepot'] = (int) $commande->getData('entrepot');
+                    }
+
+                    $errors = $this->checkReturnedEquipment((int) $equipment_data['id_equipment']);
+
+                    if (!count($errors)) {
+                        $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $equipment_data['id_equipment']);
+
+                        $eq_errors = $equipment->updateField('return_available', 0);
+                        if (count($eq_errors)) {
+                            $warnings[] = BimpTools::getMsgFromArray($eq_errors, 'Echec de la mise à jour de l\'équipement "' . $equipment->getData('serial') . '" - Cet équipement n\'a donc pas été ajouté à la liste des équipement retournés');
+                        } else {
+                            $equipments_returned[(int) $equipment->id] = (int) $equipment_data['id_entrepot'];
+                        }
+                    }
+                }
+
+                if (!count($errors)) {
+                    $errors = $this->updateField('equipments_returned', $equipments_returned);
+                }
+            }
+        }
+
+        return $errors;
+    }
+
     // Actions:
 
     public function actionSaveShipments($data, &$success)
@@ -3560,41 +3842,17 @@ class Bimp_CommandeLine extends ObjectLine
         $warnings = array();
         $success = 'Equipements enregistrés avec succès';
 
-        $commande = $this->getParentInstance();
-
-        if (!BimpObject::objectLoaded($commande)) {
-            $errors[] = 'ID de la commande client absent';
-        } elseif (!isset($data['equipments']) || empty($data['equipments'])) {
+        if (!isset($data['equipments']) || empty($data['equipments'])) {
             $errors[] = 'Aucun équipement sélectionné';
         } else {
-            $equipments = $this->getData('equipments_returned');
-
-            $max = abs($this->getFullQty()) - count($equipments);
-
-            if (!$max) {
-                $errors[] = 'Tous les équipement à retournés ont déjà été sélectionnés';
-            } elseif (count($data['equipments']) > $max) {
-                $errors[] = 'Vous ne pouvez sélectionner que ' . $max . ' équipement(s)';
-            } else {
-                foreach ($data['equipments'] as $id_equipment) {
-                    $errors = $this->checkReturnedEquipment($id_equipment);
-
-                    if (!count($errors)) {
-                        $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
-
-                        $eq_errors = $equipment->updateField('return_available', 0);
-                        if (count($eq_errors)) {
-                            $warnings[] = BimpTools::getMsgFromArray($eq_errors, 'Echec de la mise à jour de l\'équipement "' . $equipment->getData('serial') . '" - Cet équipement n\'a donc pas été ajouté à la liste des équipement retournés');
-                        } else {
-                            $equipments[(int) $id_equipment] = (int) $commande->getData('entrepot');
-                        }
-                    }
-                }
-
-                if (!count($errors)) {
-                    $errors = $this->updateField('equipments_returned', $equipments);
-                }
+            $equipments = array();
+            foreach ($data['equipments'] as $id_equipment) {
+                $equipments[] = array(
+                    'id_equipment' => (int) $id_equipment,
+                    'id_entrepot'  => 0
+                );
             }
+            $errors = $this->addReturnedEquipments($warnings, $equipments);
         }
 
         return array(
@@ -3797,6 +4055,60 @@ class Bimp_CommandeLine extends ObjectLine
             if (!count($errors)) {
                 $equipments_returned[$id_equipment] = $id_entrepot;
                 $errors = $this->updateField('equipments_returned', $equipments_returned);
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionAddReturnsFromLines($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+
+        $lines = isset($data['lines']) ? $data['lines'] : array();
+
+        if (!is_array($lines) || empty($lines)) {
+            $errors[] = 'Aucune ligne de commande sélectionnée';
+        }
+
+        if (!count($errors)) {
+            foreach ($lines as $id_line => $line_data) {
+                $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', $id_line);
+                if (!BimpObject::ObjectLoaded($line)) {
+                    $warnings[] = 'La ligne de commande client d\'ID ' . $id_line . ' n\'existe pas';
+                    continue;
+                }
+
+                if ($line->isProductSerialisable()) {
+                    if (!isset($line_data['equipments']) || empty($line_data['equipments'])) {
+                        continue;
+                    }
+                } else {
+                    if (!isset($line_data['qty']) || !(float) $line_data['qty']) {
+                        continue;
+                    }
+                }
+
+                $commande = $line->getParentInstance();
+
+                if (!BimpObject::ObjectLoaded($commande)) {
+                    $warnings[] = 'ID de la commande absent pour la ligne n°' . $line->getData('position');
+                    continue;
+                }
+
+                $line_warnings = array();
+                $line_errors = $commande->addReturnFromLine($line_warnings, $id_line, $line_data);
+                if (count($line_errors)) {
+                    $warnings[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n°' . $line->getData('position'));
+                }
+                if (count($line_warnings)) {
+                    $warnings[] = BimpTools::getMsgFromArray($line_warnings, 'Ligne n°' . $line->getData('position'));
+                }
             }
         }
 

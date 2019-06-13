@@ -29,6 +29,7 @@ class BimpDocumentPDF extends BimpModelPDF
     public $maxLogoHeight = 65; // px
     public $totals = array("DEEE" => 0, "RPCP" => 0);
     public $target_label = '';
+    public $after_totaux_label = '';
 
     public function __construct($db)
     {
@@ -1349,7 +1350,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
         $html .= '<tr>';
 //        $html .= '<td style="text-align: center;">Cachet, Date, Signature et mention <b>"Bon pour Commande"</b></td>';
-        $html .= '<td style="text-align:center;"><i><b>Bon pour Commande</b></i></td>';
+        $html .= '<td style="text-align:center;"><i><b>'.$this->after_totaux_label.'</b></i></td>';
 
         $html .= '<td>Signature + Cachet avec SIRET :</td>';
         $html .= '</tr>';

@@ -1231,12 +1231,13 @@ class BimpTools
                 return false;
 
             case 'json':
-                if (is_string($value)) {
-                    if ($value) {
+                if (!is_array($value)) {
+                    if (is_string($value)) {
                         $value = json_decode($value, true);
+                    } elseif (!empty($value)) {
+                        $value = array($value);
                     }
-
-                    if (!$value) {
+                    if (empty($value)) {
                         $value = array();
                     }
                 }

@@ -19,7 +19,8 @@ class BimpObject extends BimpCache
         'position'
     );
     public static $numeric_types = array('id', 'id_parent', 'id_object', 'int', 'float', 'money', 'percent', 'bool', 'qty');
-    public static $name_properties = array('public_name', 'name', 'nom', 'label', 'libelle', 'title', 'titre', 'description');
+    public static $name_properties = array('public_name', 'name', 'nom');
+    public static $title_properties = array('label', 'libelle', 'title', 'titre', 'description');
     public static $ref_properties = array('ref', 'reference', 'code');
     public static $status_properties = array('status', 'fk_statut', 'statut');
     public $use_commom_fields = false;
@@ -444,6 +445,17 @@ class BimpObject extends BimpCache
     public function getNameProperty()
     {
         foreach (self::$name_properties as $prop) {
+            if ($this->field_exists($prop)) {
+                return $prop;
+            }
+        }
+
+        return '';
+    }
+
+    public function getTitleProperty()
+    {
+        foreach (self::$title_properties as $prop) {
             if ($this->field_exists($prop)) {
                 return $prop;
             }
@@ -1063,8 +1075,15 @@ class BimpObject extends BimpCache
             return $this->data[$prop];
         }
 
-        if ($withGeneric) {
-            return BimpTools::ucfirst($this->getLabel()) . ' #' . $this->id;
+        return BimpTools::ucfirst($this->getLabel()) . ' #' . $this->id;
+    }
+
+    public function getTitle()
+    {
+        $prop = $this->getTitleProperty();
+
+        if ($this->field_exists($prop) && isset($this->data[$prop]) && $this->data[$prop]) {
+            return $this->data[$prop];
         }
 
         return '';
@@ -2436,7 +2455,7 @@ class BimpObject extends BimpCache
         }
 
         if ($missing && $required) {
-            $errors[] = 'Valeur obligatoire manquante : "' . $label . ' ('.$field.')"';
+            $errors[] = 'Valeur obligatoire manquante : "' . $label . ' (' . $field . ')"';
             return $errors;
         }
 
@@ -3045,7 +3064,7 @@ class BimpObject extends BimpCache
         BimpLog::actionStart('bimpobject_delete', 'Suppression', $this);
 
         self::setBimpObjectInstance($this);
-        
+
         $errors = array();
 
         if (!$this->isLoaded()) {
@@ -4178,13 +4197,19 @@ class BimpObject extends BimpCache
                 $html .= '<i class="' . BimpRender::renderIconClass($this->params['icon']) . ' iconLeft"></i>';
             }
             $html .= $name . '</h1>';
-//            $html .= '<span style="color: #787878; font-size: 14px;">' . BimpTools::ucfirst($this->getLabel()) . '</span>';
 
             $ref = $this->getRef(false);
             if ($ref) {
                 $html .= '<h2>';
                 $html .= $ref;
                 $html .= '</h2>';
+            }
+
+            $title = $this->getTitle();
+            if ($title) {
+                $html .= '<h4>';
+                $html .= $title;
+                $html .= '</h4>';
             }
 
             if ($this->use_commom_fields) {
@@ -5902,15 +5927,14 @@ class BimpObject extends BimpCache
             $search = null;
             if (BimpTools::getValue("sall") != "") {
                 $search = BimpTools::getValue("sall");
-            }
-            elseif (BimpTools::getValue("search_all") != "") {
+            } elseif (BimpTools::getValue("search_all") != "") {
                 $search = BimpTools::getValue("search_all");
             }
-            if($search){
+            if ($search) {
                 $objName = "";
                 if (isset($this->dol_object) && isset($this->dol_object->element))
                     $objName = $this->dol_object->element;
-                if($objName == "order_supplier")
+                if ($objName == "order_supplier")
                     $objName = "commande_fourn";
                 $url .= "&search=1&object=" . $objName . "&sall=" . $search;
             }

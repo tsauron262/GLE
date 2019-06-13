@@ -185,6 +185,14 @@ forms:
               content: 
                   callback: renderEquipmentsReturnInput
             
+    returns_from_lines: 
+        rows: 
+            - custom: 1
+              label: Quantités et équipements
+              input_name: lines
+              content: 
+                  callback: renderReturnsFromLinesInputs
+                      
 views: 
     shipments: 
         panel: 0

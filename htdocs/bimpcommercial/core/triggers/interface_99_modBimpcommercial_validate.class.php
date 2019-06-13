@@ -167,9 +167,6 @@ class Interfacevalidate extends DolibarrTriggers
         
                 
         if (!defined("NOT_VERIF") && !BimpDebug::isActive('bimpcommercial/no_validate')) {
-            
-                  
-
             if ($action == 'ORDER_VALIDATE') {
                 $bvo = new BimpValidateOrder($user->db);
                 if ($bvo->checkValidateRights($user, $object) < 1)

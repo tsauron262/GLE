@@ -181,6 +181,13 @@ forms:
                             method: getClientContactsArray
                             object: commande
                 depends_on: id_client
+            libelle: 
+                custom: 1
+                show: 1
+                label: Libellé
+                input_name: libelle
+                input: 
+                    type: text
             cond_reglement: 
                 custom: 1
                 label: Conditions de réglement
@@ -232,6 +239,19 @@ forms:
                 content: 
                     callback: renderFactureFormLinesInputs
         
+    bulk_facture: 
+        extends: facture
+        rows: 
+            client: 
+                value: 
+                    callback: getBulkFactureIdClient
+            libelle: 
+                value: 
+                    callback: getBulkFactureLibelle
+            lines: 
+                content: 
+                    callback: renderBulkFactureFormLinesInputs
+    
     facture_edit: 
         rows: 
             - custom: 1
@@ -332,7 +352,7 @@ lists_cols:
         edit: 1
         max_width: 45px
     pdf:
-        label: Fichiers
+        label: PDF BL
         value: 
             callback: 
                 method: displayPdfButtons

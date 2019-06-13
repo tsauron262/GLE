@@ -628,7 +628,8 @@ forms:
                       -1: Aucun forçage
                       0: Non facturée
                       1: Facturée partiellement
-                      2: Facturée
+                      2: Facturée             
+                  
             
 filters_panels: 
     default: 

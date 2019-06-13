@@ -8,7 +8,7 @@ header_list_name: default
 objects:
     lines: 
         relation: hasMany
-        delete: 1
+        delete: 0
         instance: 
             bimp_object: 
                 module: bimpcommercial

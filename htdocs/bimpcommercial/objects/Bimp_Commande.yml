@@ -144,7 +144,6 @@ fields:
     
     date_commande:
         label: Date
-        dol_prop: date
         type: date
         input: 
             display_now: 1

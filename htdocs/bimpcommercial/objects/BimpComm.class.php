@@ -733,9 +733,9 @@ class BimpComm extends BimpDolObject
                 if ($product->fetch_product_fournisseur_price($line->fk_fournprice))
                     $line->pa_ht = $product->fourn_unitprice * (1 - $product->fourn_remise_percent / 100);
             }
-            if ($bimp_line->getData("remise_pa") > 0) {
-                $line->pa_ht = $line->pa_ht * (100 - $bimp_line->getData("remise_pa")) / 100;
-            }
+//            if ($bimp_line->getData("remise_pa") > 0) {
+//                $line->pa_ht = $line->pa_ht * (100 - $bimp_line->getData("remise_pa")) / 100;
+//            }
 
             // si prix d'achat non renseigné et devrait l'être, alors prix achat = prix vente
             if ((!isset($line->pa_ht) || $line->pa_ht == 0) && $line->subprice > 0 && (isset($conf->global->ForceBuyingPriceIfNull) && $conf->global->ForceBuyingPriceIfNull == 1)) {

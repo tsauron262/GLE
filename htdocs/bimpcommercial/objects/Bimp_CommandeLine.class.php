@@ -175,8 +175,8 @@ class Bimp_CommandeLine extends ObjectLine
                                 'label'   => 'Commander',
                                 'icon'    => 'fas_cart-arrow-down',
                                 'onclick' => $this->getJsActionOnclick('addToCommandeFourn', array(
-                                    'remise_pa'       => (float) $this->getData('remise_pa'),
-                                    'remise_pa_label' => ((int) $this->getData('remise_crt') ? 'Remise CRT' : '')
+//                                    'remise_pa'       => (float) $this->getData('remise_pa'),
+//                                    'remise_pa_label' => ((int) $this->getData('remise_crt') ? 'Remise CRT' : '')
                                         ), array(
                                     'form_name' => 'commande_fourn'
                                 ))
@@ -3645,27 +3645,27 @@ class Bimp_CommandeLine extends ObjectLine
                             if (count($line_errors)) {
                                 $errors[] = BimpTools::getMsgFromArray($line_errors, 'Des erreurs sont survenues durant la création de la ligne de commande fournisseur');
                             } else {
-                                if (isset($data['remise_pa']) && (float) $data['remise_pa']) {
-                                    // Création de la remise sur le prix d'achat: 
-                                    $remise = BimpObject::getInstance('bimpcommercial', 'ObjectLineRemise');
-                                    $rem_errors = $remise->validateArray(array(
-                                        'id_object_line' => (int) $line->id,
-                                        'object_type'    => 'commande_fournisseur',
-                                        'label'          => (isset($data['remise_pa_label']) ? $data['remise_pa_label'] : ''),
-                                        'type'           => 1,
-                                        'percent'        => (float) $data['remise_pa']
-                                    ));
-
-                                    if (!count($rem_errors)) {
-                                        $rem_warnings = array();
-                                        $rem_errors = $remise->create($rem_warnings, true);
-                                        $rem_errors = array_merge($rem_errors, $rem_warnings);
-                                    }
-
-                                    if (count($rem_errors)) {
-                                        $warnings[] = BimpTools::getMsgFromArray($rem_errors, 'Erreurs lors de la création de la remise');
-                                    }
-                                }
+//                                if (isset($data['remise_pa']) && (float) $data['remise_pa']) {
+//                                    // Création de la remise sur le prix d'achat: 
+//                                    $remise = BimpObject::getInstance('bimpcommercial', 'ObjectLineRemise');
+//                                    $rem_errors = $remise->validateArray(array(
+//                                        'id_object_line' => (int) $line->id,
+//                                        'object_type'    => 'commande_fournisseur',
+//                                        'label'          => (isset($data['remise_pa_label']) ? $data['remise_pa_label'] : ''),
+//                                        'type'           => 1,
+//                                        'percent'        => (float) $data['remise_pa']
+//                                    ));
+//
+//                                    if (!count($rem_errors)) {
+//                                        $rem_warnings = array();
+//                                        $rem_errors = $remise->create($rem_warnings, true);
+//                                        $rem_errors = array_merge($rem_errors, $rem_warnings);
+//                                    }
+//
+//                                    if (count($rem_errors)) {
+//                                        $warnings[] = BimpTools::getMsgFromArray($rem_errors, 'Erreurs lors de la création de la remise');
+//                                    }
+//                                }
 
                                 $remain_qty = $qty;
 

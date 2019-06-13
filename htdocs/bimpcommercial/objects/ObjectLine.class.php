@@ -51,14 +51,13 @@ class ObjectLine extends BimpObject
     public $bimp_line_only = false;
     protected $remises_total_infos = null;
 
-    
-    public function __construct($module, $object_name) {
-        if(BimpCore::getConf("use_freeline"))
-            self::$types[self::LINE_FREE]    = 'Ligne libre';
+    public function __construct($module, $object_name)
+    {
+        if (BimpCore::getConf("use_freeline"))
+            self::$types[self::LINE_FREE] = 'Ligne libre';
         return parent::__construct($module, $object_name);
     }
-    
-    
+
     // Gestion des droits utilisateurs:
 
     public function canEditField($field_name)
@@ -337,7 +336,7 @@ class ObjectLine extends BimpObject
                 return 0;
             }
 
-            if(is_object($product) && $product->id > 0){
+            if (is_object($product) && $product->id > 0) {
                 if ($product->dol_field_exists('validate')) {
                     if (!(int) $product->getData('validate')) {
                         global $user;
@@ -1218,17 +1217,19 @@ class ObjectLine extends BimpObject
                     if ($this->field_exists('remise_pa')) {
                         $remise_pa = (float) $this->getData('remise_pa');
                         if ($remise_pa && $pa_ht) {
-                            $pa_ht -= ($pa_ht * ($remise_pa / 100));
+                            $pa_ht -= $remise_pa;
                         }
                     }
                     if ($no_html) {
                         $html = price((float) $pa_ht) . ' €';
+                        if ($remise_pa) {
+                            $html .= "\n" . '(' . price((float) $this->pa_ht) . ' -' . price((float) $remise_pa) . ' €)';
+                        }
                     } else {
                         $html .= BimpTools::displayMoneyValue((float) $pa_ht, 'EUR');
-                    }
-
-                    if ($remise_pa) {
-                        $html .= ' (-' . BimpTools::displayFloatValue($remise_pa, 8) . '%)';
+                        if ($remise_pa) {
+                            $html .= '<br/>(' . BimpTools::displayMoneyValue((float) $this->pa_ht) . ' - ' . BimpTools::displayMoneyValue($remise_pa) . ')';
+                        }
                     }
                     break;
 
@@ -2623,33 +2624,33 @@ class ObjectLine extends BimpObject
                 }
                 break;
 
-            case 'remise_pa':
-                $product = $this->getProduct();
-                if (BimpObject::objectLoaded($product)) {
-                    if ((int) BimpTools::getPostFieldValue('remise_crt', 0)) {
-                        $remise_pa = (float) $product->getRemiseCrt();
-                        $html .= '<input type="hidden" name="' . $prefixe . 'remise_pa" value="' . $remise_pa . '"/>';
-                        $html .= BimpTools::displayFloatValue($remise_pa, 8) . '%';
-                    } elseif ($this->canEditRemisePa()) {
-                        $html .= BimpInput::renderInput('text', $prefixe . 'remise_pa', (float) $value, array(
-                                    'addon_right' => BimpRender::renderIcon('fas_percent'),
-                                    'data'        => array(
-                                        'data_type' => 'number',
-                                        'decimals'  => 8,
-                                        'min'       => 0,
-                                        'max'       => 100,
-                                        'unsigned'  => 1
-                                    )
-                        ));
-                    } else {
-                        $html .= '<input type="hidden" name="' . $prefixe . 'remise_pa" value="0"/>';
-                        $html .= '0%';
-                    }
-                } else {
-                    $html .= '<input type="hidden" name="' . $prefixe . 'remise_pa" value="0"/>';
-                    $html .= '<span class="warning">Attente sélection d\'un produit</span>';
-                }
-                break;
+//            case 'remise_pa':
+//                $product = $this->getProduct();
+//                if (BimpObject::objectLoaded($product)) {
+//                    if ((int) BimpTools::getPostFieldValue('remise_crt', 0)) {
+//                        $remise_pa = (float) $product->getRemiseCrt();
+//                        $html .= '<input type="hidden" name="' . $prefixe . 'remise_pa" value="' . $remise_pa . '"/>';
+//                        $html .= BimpTools::displayFloatValue($remise_pa, 8) . '%';
+//                    } elseif ($this->canEditRemisePa()) {
+//                        $html .= BimpInput::renderInput('text', $prefixe . 'remise_pa', (float) $value, array(
+//                                    'addon_right' => BimpRender::renderIcon('fas_percent'),
+//                                    'data'        => array(
+//                                        'data_type' => 'number',
+//                                        'decimals'  => 8,
+//                                        'min'       => 0,
+//                                        'max'       => 100,
+//                                        'unsigned'  => 1
+//                                    )
+//                        ));
+//                    } else {
+//                        $html .= '<input type="hidden" name="' . $prefixe . 'remise_pa" value="0"/>';
+//                        $html .= '0%';
+//                    }
+//                } else {
+//                    $html .= '<input type="hidden" name="' . $prefixe . 'remise_pa" value="0"/>';
+//                    $html .= '<span class="warning">Attente sélection d\'un produit</span>';
+//                }
+//                break;
         }
 
         return $html;
@@ -3361,22 +3362,19 @@ class ObjectLine extends BimpObject
                                 }
                             }
 
-                            $remise_pa = 0;
-                            if (BimpObject::objectLoaded($product)) {
-                                $remise_pa = (float) $product->getRemiseCrt();
-                            }
-
                             if ((int) $this->getData('remise_crt')) {
-                                if ($remise_pa) {
-                                    $this->set('remise_pa', $remise_pa);
-                                } else {
-                                    $this->set('remise_crt', 0);
-                                    $this->set('remise_pa', 0);
+                                $remise_pa = 0;
+                                if (BimpObject::objectLoaded($product)) {
+                                    $remise_pa_percent = (float) $product->getRemiseCrt();
+                                    if ($remise_pa_percent) {
+                                        $remise_pa = $this->pu_ht * ($remise_pa_percent / 100);
+                                    } else {
+                                        $this->set('remise_crt', 0);
+                                    }
                                 }
-                            } elseif ((int) $this->getInitData('remise_crt')) {
-                                if ($remise_pa === (float) $this->getData('remise_pa')) {
-                                    $this->set('remise_pa', 0);
-                                }
+                                $this->set('remise_pa', $remise_pa);
+                            } else {
+                                $this->set('remise_pa', 0);
                             }
                         }
                     }
@@ -3771,7 +3769,7 @@ class ObjectLine extends BimpObject
 
         $remises = $this->getRemises();
         $lines = $this->getEquipmentLines();
-        
+
         if (!$this->bimp_line_only) {
             $errors = $this->deleteLine();
         }

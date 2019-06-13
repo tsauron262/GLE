@@ -279,12 +279,33 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
             $pdf->setDrawColor(255, 255, 255);
             $pdf->setColor('fill', 236, 147, 0);
             $pdf->setTextColor(255, 255, 255);
-            $pdf->Cell($W, 7, 'N° Série', 1, null, 'C', true);
+            $pdf->Cell($W, 5, 'N° Série', 1, null, 'C', true);
             $pdf->setDrawColor(255, 255, 255);
             $pdf->setColor('fill', 255, 255, 255);
             $pdf->setTextColor(0, 0, 0);
+            
+            $nb_char_serials = strlen($line->array_options['options_serials']);
+            $nb_line = ceil($nb_char_serials / 136);
+            $last_char = 136;
+            $start_char = 0;
+            if($nb_line > 1) {
+               $i = 1;
+               while($i <= $nb_line){
+                    $pdf->Cell($W * 9, 5, substr($line->array_options['options_serials'], $start_char, 136), 1, null, 'L', true);
+                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 5, "", 0, 'L'); 
+                    $start_char = $last_char;
+                    $i++;
+                } 
+                
+            } else {
+                    $pdf->Cell($W * 9, 7, substr($line->array_options['options_serials'], 0, 136), 1, null, 'L', true);
+                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 7, "", 0, 'L'); 
+                }
+            
+            
+            
+            
             $pdf->SetFont('', '', 9);
-            $pdf->Cell($W * 9, 7, "", 1, null, 'L', true);
             $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 7, "", 0, 'L');
             $pdf->SetFont('', 'B', 9);
 
@@ -489,9 +510,10 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $pdf->SetFont('', '', 7);
                 $pdf->Cell($W, 8, $extra->options_duree_mois . " Mois", 1, null, 'L', true);
                 $pdf->SetFont('', 'B', 7);
-                $pdf->Cell($W * 2.5, 8, "Coef de révision des prix :", 1, null, 'L', true);
+                $pdf->Cell($W * 2.5, 8, "Coef de révision des prix : (Syntec)", 1, null, 'L', true);
                 $pdf->SetFont('', '', 7);
-                $pdf->Cell($W * 1.5, 8, ($extra->options_syntec_pdf == 1) ? $extra->options_syntec : "", 1, null, 'L', true);
+                $syntec = ($extra->options_syntec > 0) ? $extra->options_syntec : "";
+                $pdf->Cell($W * 1.5, 8, $syntec, 1, null, 'L', true);
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 8, '', 0, 'L');
 
                 // Ligne 3

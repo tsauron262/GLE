@@ -57,7 +57,8 @@ class modBimpsecurlogin extends DolibarrModules {
         
         
         $this->module_parts = array(
-            'hooks' => array('main')
+            'hooks' => array('main'),
+            'triggers' => 1
         );
         
         $r = 0;

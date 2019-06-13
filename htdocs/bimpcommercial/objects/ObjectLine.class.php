@@ -51,6 +51,14 @@ class ObjectLine extends BimpObject
     public $bimp_line_only = false;
     protected $remises_total_infos = null;
 
+    
+    public function __construct($module, $object_name) {
+        if(BimpCore::getConf("use_freeline"))
+            self::$types[self::LINE_FREE]    = 'Ligne libre';
+        return parent::__construct($module, $object_name);
+    }
+    
+    
     // Gestion des droits utilisateurs:
 
     public function canEditField($field_name)
@@ -329,13 +337,15 @@ class ObjectLine extends BimpObject
                 return 0;
             }
 
-            if ($product->dol_field_exists('validate')) {
-                if (!(int) $product->getData('validate')) {
-                    global $user;
-                    $errors[] = 'Le produit "' . $product->getRef() . ' - ' . $product->getData('label') . '" n\'est pas validé';
-                    if (mailSyn2("Validation produit", "XX_Achats@bimp.fr", null, "Bonjour " . $user->getNomUrl(1) . "souhaite que vous validiez " . $product->getNomUrl(1) . "<br/>Cordialement"))
-                        $errors[] = "Un mai a été envoyé pour validation du produit.";
-                    return 0;
+            if(is_object($product) && $product->id > 0){
+                if ($product->dol_field_exists('validate')) {
+                    if (!(int) $product->getData('validate')) {
+                        global $user;
+                        $errors[] = 'Le produit "' . $product->getRef() . ' - ' . $product->getData('label') . '" n\'est pas validé';
+                        if (mailSyn2("Validation produit", "XX_Achats@bimp.fr", null, "Bonjour " . $user->getNomUrl(1) . "souhaite que vous validiez " . $product->getNomUrl(1) . "<br/>Cordialement"))
+                            $errors[] = "Un mai a été envoyé pour validation du produit.";
+                        return 0;
+                    }
                 }
             }
         }
@@ -3760,7 +3770,8 @@ class ObjectLine extends BimpObject
         }
 
         $remises = $this->getRemises();
-
+        $lines = $this->getEquipmentLines();
+        
         if (!$this->bimp_line_only) {
             $errors = $this->deleteLine();
         }
@@ -3768,8 +3779,6 @@ class ObjectLine extends BimpObject
         if (!count($errors)) {
             $errors = parent::delete($warnings, $force_delete);
             if (!count($errors)) {
-                $lines = $this->getEquipmentLines();
-
                 if (count($lines)) {
                     foreach ($lines as $line) {
                         $del_warnings = array();

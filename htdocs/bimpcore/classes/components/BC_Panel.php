@@ -7,6 +7,7 @@ class BC_Panel extends BimpComponent
     public $identifier;
     public $content_only = false;
     public $level = 1;
+    public $default_modal_format = 'medium';
     public $data = array(
         'identifier'            => '',
         'type'                  => '',
@@ -33,6 +34,7 @@ class BC_Panel extends BimpComponent
         $this->params_def['msgs'] = array('data_type' => 'array', 'default' => null, 'compile' => true);
         $this->params_def['before_content'] = array('default' => '');
         $this->params_def['after_content'] = array('default' => '');
+        $this->params_def['modal_format'] = array('default' => $this->default_modal_format);
 
         $this->content_only = (int) $content_only;
         $this->level = $level;

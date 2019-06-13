@@ -2455,7 +2455,7 @@ class BimpObject extends BimpCache
         }
 
         if ($missing && $required) {
-            $errors[] = 'Valeur obligatoire manquante : "' . $label . ' ('.$field.')"';
+            $errors[] = 'Valeur obligatoire manquante : "' . $label . ' (' . $field . ')"';
             return $errors;
         }
 
@@ -4204,7 +4204,7 @@ class BimpObject extends BimpCache
                 $html .= $ref;
                 $html .= '</h2>';
             }
-            
+
             $title = $this->getTitle();
             if ($title) {
                 $html .= '<h4>';
@@ -5927,15 +5927,14 @@ class BimpObject extends BimpCache
             $search = null;
             if (BimpTools::getValue("sall") != "") {
                 $search = BimpTools::getValue("sall");
-            }
-            elseif (BimpTools::getValue("search_all") != "") {
+            } elseif (BimpTools::getValue("search_all") != "") {
                 $search = BimpTools::getValue("search_all");
             }
-            if($search){
+            if ($search) {
                 $objName = "";
                 if (isset($this->dol_object) && isset($this->dol_object->element))
                     $objName = $this->dol_object->element;
-                if($objName == "order_supplier")
+                if ($objName == "order_supplier")
                     $objName = "commande_fourn";
                 $url .= "&search=1&object=" . $objName . "&sall=" . $search;
             }

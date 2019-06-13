@@ -179,7 +179,7 @@ fields:
         type: percent
         
     prix_vente: 
-        label: Prix de vente
+        label: Prix de vente TTC
         type: money
         default_value: 0
         
@@ -287,7 +287,8 @@ fields_tables:
         icon: euro
         rows: 
             - field: prix_vente
-              label: Vendu au prix de
+              label: Vendu au prix TTC de
+            - field: vente_tva_tx
             - field: date_vente
             - field: id_facture
             

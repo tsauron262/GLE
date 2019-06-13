@@ -1311,7 +1311,7 @@ class Bimp_Commande extends BimpComm
 
         $new_line = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', array(
                     'linked_object_name' => 'return_of_commande_line',
-                    'linked_id_object'    => (int) $line->id
+                    'linked_id_object'   => (int) $line->id
                         ), true);
 
         if ($isSerialisable) {
@@ -1389,7 +1389,7 @@ class Bimp_Commande extends BimpComm
                     'remisable'          => 0,
                     'hide_product_label' => $line->getData('hide_product_label'),
                     'linked_object_name' => 'return_of_commande_line',
-                    'linked_id_object'    => (int) $line->id
+                    'linked_id_object'   => (int) $line->id
                 ));
 
                 $line_warnings = array();
@@ -1682,6 +1682,19 @@ class Bimp_Commande extends BimpComm
 
                         if (isset($lines_equipments[(int) $id_line])) {
                             foreach ($lines_equipments[(int) $id_line] as $id_equipment) {
+                                $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+
+                                if (!BimpObject::objectLoaded($equipment)) {
+                                    $errors[] = 'Ligne n°' . $line->getData('position') . ': l\'équipement d\'ID ' . $id_equipment . ' n\'existe plus';
+                                    continue;
+                                }
+
+                                if (!(float) $equipment->getData('prix_achat')) {
+                                    $equipment->set('prix_achat', $line->pa_ht);
+                                    $equipment->set('achat_tva_tx', $line->tva_tx);
+                                    $equipment->update();
+                                }
+
                                 $line_equipments[] = array(
                                     'id_equipment' => (int) $id_equipment
                                 );

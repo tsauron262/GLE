@@ -1730,6 +1730,18 @@ class BimpObject extends BimpCache
     {
         
     }
+    
+    // Gestion des filtres custom: 
+    
+    public function getCustomFilterValueLabel($field_name, $value)
+    {
+        return $value;
+    }
+    
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array())
+    {
+        
+    }
 
     // Gestion des objets enfants:
 

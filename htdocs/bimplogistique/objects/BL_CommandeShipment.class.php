@@ -65,6 +65,9 @@ class BL_CommandeShipment extends BimpObject
                 if ((int) $this->getData('status') !== self::BLCS_EXPEDIEE) {
                     $errors[] = 'Cette expédition doit avoir le statut "' . self::$status_list[self::BLCS_EXPEDIEE]['label'] . '" pour pouvoire être annulée';
                 }
+                if ((int) $this->getData('id_facture')) {
+                    $errors[] = 'Cette expédition a été facturée';
+                }
                 break;
 
             case 'createFacture':
@@ -514,16 +517,8 @@ class BL_CommandeShipment extends BimpObject
 
             $facture = null;
             $label = 'Facture';
-            if ((int) $this->getData('id_facture')) {
+            if ((int) $this->getData('id_facture') > 0) {
                 $facture = $this->getChildObject('facture');
-            } elseif ($display_global_invoice) {
-                $commande = $this->getParentInstance();
-                if (BimpObject::objectLoaded($commande)) {
-                    if ((int) $commande->getData('id_facture')) {
-                        $facture = $commande->getChildObject('facture');
-                        $label .= ' (globale)';
-                    }
-                }
             }
 
             if (BimpObject::objectLoaded($facture)) {

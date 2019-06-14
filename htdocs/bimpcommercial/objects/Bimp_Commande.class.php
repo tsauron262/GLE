@@ -1608,6 +1608,8 @@ class Bimp_Commande extends BimpComm
                         'force_qty_1'        => $line->getData('force_qty_1'),
                         'linked_id_object'   => (int) $line->id,
                         'linked_object_name' => 'commande_line',
+                        'remise_crt'         => (int) $line->getData('remise_crt'),
+                        'remise_pa'          => (float) $line->getData('remise_pa')
                     ));
 
                     $fac_line->qty = (float) $line_qty;

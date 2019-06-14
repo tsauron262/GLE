@@ -1309,6 +1309,46 @@ class BimpTools
         }
     }
 
+    public static function displayValueByType($value, $type)
+    {
+        switch ($type) {
+            case 'bool':
+                if ((int) $value) {
+                    return 'OUI';
+                }
+                return 'NON';
+
+            case 'percent':
+                return self::displayFloatValue($value, 4) . '%';
+            case 'money':
+                return self::displayMoneyValue($value);
+
+            case 'date':
+                $dt = new DateTime($value);
+                return $dt->format('d / m / Y');
+            case 'time':
+                $dt = new DateTime($value);
+                return $dt->format('H:i:s');
+            case 'datetime':
+                $dt = new DateTime($value);
+                return $dt->format('d / m / Y H:i:s');
+
+            case 'id_object':
+            case 'id_parent':
+            case 'color':
+            case 'string':
+            case 'text':
+            case 'html':
+            case 'int':
+            case 'float':
+            case 'qty':
+            default :
+                return $value;
+        }
+
+        return $value;
+    }
+
     // Gestion des durées:
 
     public static function getTimeDataFromSeconds($total_seconds)

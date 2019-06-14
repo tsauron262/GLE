@@ -134,23 +134,23 @@ forms:
               display_if: 
                   field_name: type_price
                   show_values: 2
-            - custom: 1
-              label: Remise sur le prix d'achat
-              input_name: remise_pa
-              data_type: percent
-              min: 0
-              max: 100
-              input: 
-                  type: text
-            - custom: 1
-              label: Intitulé de la remise sur le prix d'achat
-              input_name: remise_pa_label
-              data_type: string
-              input: 
-                  type: text
-              display_if: 
-                  field_name: remise_pa
-                  hide_values: 0
+#            - custom: 1
+#              label: Remise sur le prix d'achat
+#              input_name: remise_pa
+#              data_type: percent
+#              min: 0
+#              max: 100
+#              input: 
+#                  type: text
+#            - custom: 1
+#              label: Intitulé de la remise sur le prix d'achat
+#              input_name: remise_pa_label
+#              data_type: string
+#              input: 
+#                  type: text
+#              display_if: 
+#                  field_name: remise_pa
+#                  hide_values: 0
             - custom: 1
               label: Commande fournisseur
               input_name: id_commande_fourn

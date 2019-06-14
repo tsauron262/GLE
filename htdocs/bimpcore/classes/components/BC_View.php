@@ -6,6 +6,7 @@ class BC_View extends BC_Panel
     public $component_name = 'Fiche';
     public static $type = 'view';
     public $new_values = array();
+    public $default_modal_format = 'large';
 
     public function __construct(BimpObject $object, $name, $content_only = false, $level = 1, $title = null, $icon = null)
     {

@@ -242,7 +242,7 @@ function loadModalList(module, object_name, list_name, id_parent, $button, title
             bimpModal.removeComponentContent($new_list.attr('id'));
             onListLoaded($new_list);
         }
-    });
+    }, {}, 'large');
 }
 
 function loadModalFormFromList(list_id, form_name, $button, id_object, id_parent, title, on_save) {
@@ -697,7 +697,7 @@ function setSelectedObjectsAction($button, list_id, action, extra_data, form_nam
                                 if (typeof (result.warnings) !== 'undefined' && result.warnings && result.warnings.length) {
                                     bimpModal.$footer.find('.set_action_button.modal_' + $form.data('modal_idx')).remove();
                                 } else {
-                                    bimpModal.hide();
+                                    bimpModal.clearAllContents();
                                 }
                                 if (typeof (successCallback) === 'function') {
                                     successCallback(result);

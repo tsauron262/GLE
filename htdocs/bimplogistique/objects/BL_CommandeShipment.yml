@@ -352,7 +352,7 @@ lists_cols:
         edit: 1
         max_width: 45px
     pdf:
-        label: PDF BL
+        label: Fichiers PDF
         value: 
             callback: 
                 method: displayPdfButtons

@@ -14,7 +14,11 @@ function BimpModal($modal) {
     this.$nextBtn = $modal.find('.modal-nav-next');
     this.$historyToggle = $modal.find('.modal-nav-history').find('.dropdown-toggle');
 
-    this.newContent = function (title, content_html, show_loading, loading_text, $button) {
+    this.newContent = function (title, content_html, show_loading, loading_text, $button, format) {
+        if (typeof (format) === 'undefined') {
+            format = 'medium';
+        }
+
         hidePopovers(modal.$modal);
 
         modal.$footer.find('.extra_button').hide();
@@ -58,7 +62,7 @@ function BimpModal($modal) {
             }
         });
 
-        var html = '<div class="modal_content" id="modal_content_' + modal.idx + '" data-idx="' + modal.idx + '" data-format="medium" data-width="">';
+        var html = '<div class="modal_content" id="modal_content_' + modal.idx + '" data-idx="' + modal.idx + '" data-format="' + format + '" data-width="">';
         html += content_html;
         html += '</div>';
 
@@ -67,6 +71,7 @@ function BimpModal($modal) {
         html = '<li id="modal_history_' + modal.idx + '"><span class="btn btn-light-primary" onclick="bimpModal.displayContent(' + modal.idx + ')">' + title + '</span></li>';
         modal.$history.prepend(html);
         modal.checkContents();
+        modal.checkCurrentContentFormat();
     };
 
     this.clearCurrentContent = function () {
@@ -87,7 +92,7 @@ function BimpModal($modal) {
         });
 
         modal.checkContents();
-//        modal.hide();
+        modal.hide();
     };
 
     this.removeContent = function (idx, check_contents) {
@@ -188,6 +193,7 @@ function BimpModal($modal) {
         }
 
         modal.checkContents();
+        modal.checkCurrentContentFormat();
     };
 
     this.displayPrev = function () {
@@ -235,12 +241,16 @@ function BimpModal($modal) {
         modal.$modal.modal('show');
     };
 
-    this.loadAjaxContent = function ($button, ajax_action, ajax_data, title, loading_text, success_callback, ajax_params) {
+    this.loadAjaxContent = function ($button, ajax_action, ajax_data, title, loading_text, success_callback, ajax_params, modal_format) {
         if ($button.hasClass('disabled')) {
             return;
         }
 
-        modal.newContent(title, '', true, loading_text, null);
+        if (typeof (modal_format) === 'undefined') {
+            modal_format = 'medium';
+        }
+
+        modal.newContent(title, '', true, loading_text, null, modal_format);
 
         if (!ajax_params || typeof (ajax_params) === 'undefined') {
             ajax_params = {};
@@ -271,6 +281,11 @@ function BimpModal($modal) {
                     }
                 });
             }
+
+            if (typeof (result.modal_format) !== 'undefined' && result.modal_format) {
+                modal.setContentFormat(bimpAjax.modal_idx, result.modal_format);
+            }
+
             bimpAjax.$modal.modal('handleUpdate');
         };
         ajax_params.error = function (result, bimpAjax) {
@@ -279,6 +294,7 @@ function BimpModal($modal) {
         };
 
         ajax_data['modal_idx'] = modal.idx;
+        ajax_params.modal_idx = modal.idx;
 
         BimpAjax(ajax_action, ajax_data, modal.$contents.find('#modal_content_' + modal.idx), ajax_params);
     };
@@ -293,7 +309,7 @@ function BimpModal($modal) {
 
         $button.addClass('disabled');
 
-        this.newContent(title, '', true, 'Chargement', $button);
+        this.newContent(title, '', true, 'Chargement', $button, 'large');
 
         var $container = modal.$contents.find('#modal_content_' + modal.idx);
         var html = '<div style="overflow: hidden"><iframe class="page_modal_iframe" frameborder="0" src="' + url + '" width="100%" height="630px"></iframe></div>';
@@ -374,6 +390,44 @@ function BimpModal($modal) {
         }
         html += '>' + label + '</a>';
         modal.$footer.append(html);
+    };
+
+    this.setContentFormat = function (idx, format) {
+        var $content = modal.$contents.find('#modal_content_' + idx);
+        if ($content.length) {
+            $content.data('format', format);
+        }
+
+        modal.checkCurrentContentFormat();
+    };
+
+    this.checkCurrentContentFormat = function () {
+        var $content = modal.$contents.find('#modal_content_' + modal.idx);
+        var $dialog = modal.$modal.find('.modal-dialog');
+        if ($content.length && $dialog.length) {
+            var format = $content.data('format');
+
+            switch (format) {
+                case 'small':
+                    $dialog.removeClass('modal-lg');
+                    $dialog.removeClass('modal-md');
+                    $dialog.addClass('modal-sm');
+                    break;
+
+                default:
+                case 'medium':
+                    $dialog.removeClass('modal-lg');
+                    $dialog.removeClass('modal-sm');
+                    $dialog.addClass('modal-ms');
+                    break;
+
+                case 'large':
+                    $dialog.removeClass('modal-sm');
+                    $dialog.removeClass('modal-md');
+                    $dialog.addClass('modal-lg');
+                    break;
+            }
+        }
     };
 }
 

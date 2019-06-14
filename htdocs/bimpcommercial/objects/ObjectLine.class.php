@@ -4,7 +4,9 @@ class ObjectLine extends BimpObject
 {
 
     public static $parent_comm_type = '';
+    public static $dol_line_table = '';
     public static $dol_line_primary = 'rowid';
+    public static $dol_line_parent_field = '';
     public static $check_on_update = false;
     public $equipment_required = false;
 

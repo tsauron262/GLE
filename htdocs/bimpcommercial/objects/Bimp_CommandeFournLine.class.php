@@ -7,6 +7,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
 
     public static $parent_comm_type = 'commande_fournisseur';
     public static $dol_line_table = 'commande_fournisseurdet';
+    public static $dol_line_parent_field = 'fk_commande';
 
     // Getters booléens: 
 

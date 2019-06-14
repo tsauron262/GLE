@@ -7,6 +7,7 @@ class Bimp_CommandeLine extends ObjectLine
 
     public static $parent_comm_type = 'commande';
     public static $dol_line_table = 'commandedet';
+    public static $dol_line_parent_field = 'fk_commande';
     public static $reservations_ordered_status = array(3, 100);
     public static $notShippableLines = array();
     public static $notEditableInLogistiqueLines = array('discount');
@@ -504,7 +505,7 @@ class Bimp_CommandeLine extends ObjectLine
                 if (!is_null($id_facture) && ((int) $id_facture !== (int) $id_f)) {
                     continue;
                 }
-                if ($invoices_validated_only) {
+                if ($invoices_validated_only && (int) $id_f !== -1) {
                     $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_f);
                     if (!BimpObject::objectLoaded($facture) || (int) $facture->getData('fk_statut') === Facture::STATUS_DRAFT) {
                         continue;
@@ -1077,9 +1078,15 @@ class Bimp_CommandeLine extends ObjectLine
                             $id_facture = (int) $this->getEquipmentIdFacture($id_equipment);
                             if ($id_facture) {
                                 $html .= '<br/>Fac: ';
-                                $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
-                                if (BimpObject::objectLoaded($facture)) {
-                                    $html .= $facture->getNomUrl(1, 1, 1, 'full');
+                                if ($id_facture === -1) {
+                                    $html .= '<span class="warning">Facturé hors BIMP-ERP</span>';
+                                } else {
+                                    $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
+                                    if (BimpObject::objectLoaded($facture)) {
+                                        $html .= $facture->getNomUrl(1, 1, 1, 'full');
+                                    } else {
+                                        $html .= BimpRender::renderAlerts('La facture d\'ID ' . $id_facture . ' n\'existe plus');
+                                    }
                                 }
                             }
                             $html .= '</td>';
@@ -1141,7 +1148,7 @@ class Bimp_CommandeLine extends ObjectLine
                             }
 
                             $id_facture = (int) $this->getEquipmentIdFacture($id_equipment);
-                            if ($id_facture) {
+                            if ($id_facture > 0) {
                                 $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_facture);
                             } else {
                                 $facture = null;
@@ -1190,16 +1197,20 @@ class Bimp_CommandeLine extends ObjectLine
                                     $html .= '<br/>';
                                 }
                                 $html .= 'Fac: ';
-                                if (BimpObject::objectLoaded($facture)) {
-                                    $html .= $facture->getNomUrl(1, 1, 1, 'full');
+                                if ($id_facture === -1) {
+                                    $html .= '<span class="warning">Facturé hors BIMP-ERP</span>';
                                 } else {
-                                    $html .= BimpRender::renderAlerts('La facture d\'ID ' . $id_facture . ' n\'existe plus');
+                                    if (BimpObject::objectLoaded($facture)) {
+                                        $html .= $facture->getNomUrl(1, 1, 1, 'full');
+                                    } else {
+                                        $html .= BimpRender::renderAlerts('La facture d\'ID ' . $id_facture . ' n\'existe plus');
+                                    }
                                 }
                             }
                             $html .= '</td>';
                             $html .= '<td style="text-align: right">';
-                            if ((!BimpObject::objectLoaded($facture) || !(int) $facture->getData('fk_statut')) &&
-                                    (!BimpObject::objectLoaded($shipment) || (int) $shipment->getData('status') === BL_CommandeShipment::BLCS_BROUILLON)) {
+                            if ((int) $id_facture !== -1 && ((!BimpObject::objectLoaded($facture) || !(int) $facture->getData('fk_statut')) &&
+                                    (!BimpObject::objectLoaded($shipment) || (int) $shipment->getData('status') === BL_CommandeShipment::BLCS_BROUILLON))) {
                                 $onclick = $this->getJsActionOnclick('removeReturnedEquipments', array(
                                     'equipments' => $id_equipment
                                         ), array(
@@ -1328,6 +1339,13 @@ class Bimp_CommandeLine extends ObjectLine
             $facture_qty = (float) $facture_data['qty'];
         } else {
             $facture_qty = 0;
+        }
+
+        if ((int) $id_facture === -1) {
+            $html = '<input type="hidden" name="line_' . $this->id . '_facture_' . $id_facture . '_qty" value="' . $facture_qty . '"/>';
+            $html .= $facture_qty . ' ';
+            $html .= '<span class="warning">(Non modifiable)</span>';
+            return $html;
         }
 
         $decimals = 3;
@@ -1817,33 +1835,46 @@ class Bimp_CommandeLine extends ObjectLine
                 $html .= '<tbody>';
 
                 foreach ($line_factures as $id_facture => $facture_data) {
-                    $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_facture);
-
-                    $html .= '<tr id="commande_line_facture_' . $id_facture . '_row" class="facture_row" data-id_facture="' . $id_facture . '" data-facture_ref="' . $facture->getData('facnumber') . '">';
-                    $html .= '<td style="width: 250px;">';
-                    $card = new BC_Card($facture, null, 'light');
-                    $card->params['view_btn'] = 0;
-                    $html .= $card->renderHtml();
-                    $html .= '</td>';
-
-                    if ((int) $facture->getData('fk_statut') === (int) Facture::STATUS_DRAFT) {
-                        $html .= '<td>';
-                        $html .= $this->renderFactureQtyInput($id_facture, true);
-                        $html .= '</td>';
+                    if ((int) $id_facture !== -1) {
+                        $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_facture);
+                        if (!BimpObject::ObjectLoaded($facture)) {
+                            $facture = 0;
+                        }
                     } else {
-                        $html .= '<td>';
-                        $html .= '<input type="hidden" name="line_' . $this->id . '_facture_' . $facture->id . '_qty" value="' . $facture_data['qty'] . '" class="line_facture_qty total_max"/>';
-                        $html .= $facture->getData('facnumber') . ': ' . $facture->getData('fk_statut') . ' - ' . $facture_data['qty'];
-                        $html .= '</td>';
+                        $facture = 0;
                     }
 
+                    $html .= '<tr id="commande_line_facture_' . $id_facture . '_row" class="facture_row" data-id_facture="' . $id_facture . '" data-facture_ref="' . ($facture ? $facture->getData('facnumber') : '') . '">';
+                    $html .= '<td style="width: 250px;">';
+                    if ($facture) {
+                        $card = new BC_Card($facture, null, 'light');
+                        $card->params['view_btn'] = 0;
+                        $html .= $card->renderHtml();
+                    } else {
+                        if ((int) $id_facture === -1) {
+                            $html .= '<span class="warning">Facturé hors BIMP-ERP</span>';
+                        } else {
+                            $html .= BimpRender::renderAlerts('La facture d\'ID ' . $id_facture . ' n\'existe plus');
+                        }
+                    }
+                    $html .= '</td>';
+
+                    $html .= '<td>';
+                    if ($facture && (int) $facture->getData('fk_statut') === (int) Facture::STATUS_DRAFT) {
+                        $html .= $this->renderFactureQtyInput($id_facture, true);
+                    } else {
+
+                        $html .= '<input type="hidden" name="line_' . $this->id . '_facture_' . $id_facture . '_qty" value="' . $facture_data['qty'] . '" class="line_facture_qty total_max"/>';
+                        $html .= $facture_data['qty'];
+                    }
+                    $html .= '</td>';
 
                     if ($isSerialisable) {
                         $html .= '<td>';
                         if (!isset($facture_data['equipments']) || empty($facture_data['equipments'])) {
                             $html .= '<span class="warning">Aucun équipement attribué à cette facture</span>';
                         } else {
-                            if ((int) $facture->getData('fk_statut') === (int) Facture::STATUS_DRAFT) {
+                            if ($facture && (int) $facture->getData('fk_statut') === (int) Facture::STATUS_DRAFT) {
                                 $items = array();
                                 $values = array();
                                 foreach ($facture_data['equipments'] as $id_equipment) {
@@ -3188,16 +3219,21 @@ class Bimp_CommandeLine extends ObjectLine
 
         foreach ($factures_data as $facture_data) {
             if (isset($facture_data['id_facture'])) {
+                if ((int) $facture_data['id_facture'] !== -1) {
+                    continue;
+                }
+
                 $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $facture_data['id_facture']);
                 if (!BimpObject::objectLoaded($facture)) {
                     $errors[] = 'La facture d\'ID ' . $facture_data['id_facture'] . ' n\'existe pas';
-                } else {
-                    if (!isset($facture_data['qty'])) {
-                        $facture_data['qty'] = 0;
-                    }
-
-                    $total_qty += (float) $facture_data['qty'];
+                    continue;
                 }
+
+                if (!isset($facture_data['qty'])) {
+                    $facture_data['qty'] = 0;
+                }
+
+                $total_qty += (float) $facture_data['qty'];
             }
         }
 
@@ -3218,12 +3254,15 @@ class Bimp_CommandeLine extends ObjectLine
         }
 
         foreach ($factures_data as $facture_data) {
+            if ((int) $facture_data['id_facture'] !== -1) {
+                continue;
+            }
             $qty = (float) $facture_data['qty'];
             $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $facture_data['id_facture']);
             $equipments = isset($facture_data['equipments']) ? $facture_data['equipments'] : array();
 
             // Vérification qté et équipements facture: 
-            $check_errors = $this->checkFactureData($qty, $equipments, $facture->id);
+            $check_errors = $this->checkFactureData($qty, $equipments, (int) $facture_data['id_facture']);
 
             if (count($check_errors)) {
                 $errors[] = BimpTools::getMsgFromArray($check_errors, 'Facture "' . $facture->getData('facnumber') . '"');
@@ -3902,11 +3941,15 @@ class Bimp_CommandeLine extends ObjectLine
                 $id_facture = (int) $this->getEquipmentIdFacture($id_equipment);
                 $facture = null;
                 if ($id_facture) {
-                    $facture = BimpCache::getBimpObjectFullListArray('bimpcommercial', 'Bimp_Facture', (int) $id_facture);
-                    if (BimpObject::objectLoaded($facture)) {
-                        if ((int) $facture->getData('fk_statut') > 0) {
-                            $warnings[] = 'L\'équipement "' . $equipment->getData('serial') . '" ne peux pas être retiré car il a été attribué à une facture validée';
-                            continue;
+                    if ((int) $id_facture === -1) {
+                        $warnings[] = 'L\'équipement "' . $equipment->getData('serial') . '" ne peux pas être retiré car il a été facturé (hors BIMP-ERP)';
+                    } else {
+                        $facture = BimpCache::getBimpObjectFullListArray('bimpcommercial', 'Bimp_Facture', (int) $id_facture);
+                        if (BimpObject::objectLoaded($facture)) {
+                            if ((int) $facture->getData('fk_statut') > 0) {
+                                $warnings[] = 'L\'équipement "' . $equipment->getData('serial') . '" ne peux pas être retiré car il a été attribué à une facture validée';
+                                continue;
+                            }
                         }
                     }
                 }
@@ -3917,7 +3960,7 @@ class Bimp_CommandeLine extends ObjectLine
                 } else {
                     $removed[] = $id_equipment;
 
-                    if (!is_null($facture)) {
+                    if (BimpObject::ObjectLoaded($facture)) {
                         $fac_line = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_FactureLine', array(
                                     'id_obj'             => (int) $facture->id,
                                     'linked_object_name' => 'commande_line',
@@ -4043,10 +4086,14 @@ class Bimp_CommandeLine extends ObjectLine
 
                 $id_facture = (int) $this->getEquipmentIdFacture($id_equipment);
                 if ($id_facture) {
-                    $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
-                    if (BimpObject::objectLoaded($facture)) {
-                        if ((int) $facture->getData('fk_statut') > 0) {
-                            $errors[] = 'Impossible de modifier l\'entrepôt de destination: cet équipement a été ajouté à une facture qui n\'est plus au statut "brouillon"';
+                    if ((int) $id_facture === -1) {
+                        $errors[] = 'Impossible de modifier l\'entrepôt de destination: cet équipement a été facturé (hors BIMP-ERP)';
+                    } else {
+                        $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
+                        if (BimpObject::objectLoaded($facture)) {
+                            if ((int) $facture->getData('fk_statut') > 0) {
+                                $errors[] = 'Impossible de modifier l\'entrepôt de destination: cet équipement a été ajouté à une facture qui n\'est plus au statut "brouillon"';
+                            }
                         }
                     }
                 }
@@ -4134,7 +4181,7 @@ class Bimp_CommandeLine extends ObjectLine
                 $id_facture = (int) $this->db->getValue('facturedet', 'fk_facture', '`rowid` = ' . (int) $discount->fk_facture_line);
             }
 
-            if ($id_facture) {
+            if ($id_facture > 0) {
                 $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_facture);
                 if (BimpObject::objectLoaded($facture)) {
                     $elements = BimpTools::getDolObjectLinkedObjectsList($facture->dol_object, $this->db);

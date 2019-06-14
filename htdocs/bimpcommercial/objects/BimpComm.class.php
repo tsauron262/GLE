@@ -349,6 +349,38 @@ class BimpComm extends BimpDolObject
         return 'Remise exceptionnelle sur l\'intégralité ' . $this->getLabel('of_the');
     }
 
+    public function getCustomFilterValueLabel($field_name, $value)
+    {
+        switch ($field_name) {
+            case 'id_product':
+                $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $value);
+                if (BimpObject::ObjectLoaded($product)) {
+                    return $product->getRef();
+                }
+                break;
+        }
+
+        return parent::getCustomFilterValueLabel($field_name, $value);
+    }
+
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array())
+    {
+        switch ($field_name) {
+            case 'id_product':
+                $line = $this->getLineInstance();
+                $alias = $line::$parent_comm_type . '_det';
+                $joins[$alias] = array(
+                    'alias' => $alias,
+                    'table' => $line::$dol_line_table,
+                    'on'    => $alias . '.' . $line::$dol_line_parent_field . ' = a.' . $this->getPrimary()
+                );
+                $filters[$alias . '.fk_product'] = array(
+                    'in' => $values
+                );
+                break;
+        }
+    }
+
     // Getters données: 
 
     public function getLines($types = null)
@@ -736,7 +768,6 @@ class BimpComm extends BimpDolObject
 //            if ($bimp_line->getData("remise_pa") > 0) {
 //                $line->pa_ht = $line->pa_ht * (100 - $bimp_line->getData("remise_pa")) / 100;
 //            }
-
             // si prix d'achat non renseigné et devrait l'être, alors prix achat = prix vente
             if ((!isset($line->pa_ht) || $line->pa_ht == 0) && $line->subprice > 0 && (isset($conf->global->ForceBuyingPriceIfNull) && $conf->global->ForceBuyingPriceIfNull == 1)) {
                 $line->pa_ht = $line->subprice * (1 - ($line->remise_percent / 100));
@@ -872,7 +903,7 @@ class BimpComm extends BimpDolObject
         if ($this->isLoaded()) {
             return BimpTools::ucfirst($this->getLabel()) . ' #' . $this->id;
         }
-        
+
         return '';
     }
 
@@ -2112,6 +2143,11 @@ class BimpComm extends BimpDolObject
         $caisse = null;
         $id_caisse = 0;
 
+        if ((float) $amount > $this->getTotalTtc()) {
+            $errors[] = 'Le montant de l\'acompte dépasse le total TTC ' . $this->getLabel('of_the');
+            return $errors;
+        }
+
         if ($this->useCaisseForPayments) {
             $caisse = BimpObject::getInstance('bimpcaisse', 'BC_Caisse');
             $id_caisse = (int) $caisse->getUserCaisse((int) $user->id);
@@ -2788,22 +2824,23 @@ class BimpComm extends BimpDolObject
             }
         }
         $this->hydrateFromDolObject();
-        
-        
-        
-         //ajout des exterafileds du parent qui ne sont pas envoyé   
-        if(!count($errors) && $origin_object && isset($origin_object->dol_object)){
-            $update = false;
-            foreach($origin_object->dol_object->array_options as $options_key => $value) {
-                    if(!isset($this->data[$options_key]));
-                        $options_key = str_replace ("options_", "", $options_key);
 
-                    if(isset($this->data[$options_key]) && !BimpTools::isSubmit($options_key)){
-                        $update = true;
-                        $this->set($options_key, $value);
-                    }
+
+
+        //ajout des exterafileds du parent qui ne sont pas envoyé   
+        if (!count($errors) && $origin_object && isset($origin_object->dol_object)) {
+            $update = false;
+            foreach ($origin_object->dol_object->array_options as $options_key => $value) {
+                if (!isset($this->data[$options_key]))
+                    ;
+                $options_key = str_replace("options_", "", $options_key);
+
+                if (isset($this->data[$options_key]) && !BimpTools::isSubmit($options_key)) {
+                    $update = true;
+                    $this->set($options_key, $value);
+                }
             }
-            if($update){
+            if ($update) {
                 $errors = $this->update();
             }
         }

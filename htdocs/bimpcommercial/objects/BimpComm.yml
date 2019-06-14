@@ -490,6 +490,14 @@ filters_panels:
                 field: ef_type
             libelle: 
                 field: libelle
+            line_product:
+                custom: 1
+                field: id_product
+                label: Produit
+                data_type: id_object
+                type: value
+                input: 
+                    type: search_product
             user_create: 
                 field: fk_user_author
             user_valid: 

@@ -60,17 +60,17 @@ class BimpConfigDefinitions
         'type'    => array('default' => 'info')
     );
     public static $list_filter = array(
-        'field' => array('required' => true),
-        'child' => array(),
-        'name'  => array('default' => 'default'),
-        'open'  => array('data_type' => 'bool', 'default' => 0)
+        'custom' => array('data_type' => 'bool', 'default' => 0),
+        'field'  => array('default' => true),
+        'child'  => array(),
+        'name'   => array('default' => 'default'),
+        'open'   => array('data_type' => 'bool', 'default' => 0)
     );
     public static $icon_button = array(
         'label'   => array('default' => ''),
         'icon'    => array('required' => true),
         'onclick' => array('default' => '')
     );
-    
     public static $group_by_option = array(
         'field' => array('default' => '')
     );

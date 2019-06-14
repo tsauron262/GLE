@@ -13,9 +13,6 @@ list_page_url: list
 labels: 
     name: produit
 
-#A effacer une fois lu: 
-#force_extrafields_update: 1 => ce paramètre n'est pas nécessaire pour les produits, à utiliser uniquement pour les objets dolibarr qui ne mettent pas à jour les extrafields dans update() (très rare). 
-
 fields: 
     ref: 
         label: Réf.
@@ -222,6 +219,7 @@ fields:
         label: Copie privée
         type: money
         dol_extra_field: 1
+        
     zone_pr:
         label: Emplacement LYON
         type: text
@@ -454,7 +452,6 @@ filters_panels:
             - field: remisable
             - field: tosell
             - field: tobuy
-          
  
 lists_cols: 
     zone_pr: 

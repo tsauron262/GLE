@@ -80,14 +80,32 @@ class Bimp_Product extends BimpObject
                 $stocks['reel'] = $product->stock_warehouse[(int) $id_entrepot]->real;
             }
 
-            $sql = 'SELECT SUM(line.qty) as total_qty FROM ' . MAIN_DB_PREFIX . 'commande_fournisseurdet line';
-            $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commande_fournisseur c ON c.rowid = line.fk_commande';
-            $sql .= ' WHERE line.fk_product = ' . (int) $this->id;
-            $sql .= ' AND c.billed = 0';
 
-            $result = $this->db->executeS($sql);
-            if (!is_null($result) && isset($result['total_qty'])) {
-                $stocks['commandes'] = (int) $result['total_qty'];
+            $sql = 'SELECT line.rowid as id_line, c.rowid as id_commande FROM ' . MAIN_DB_PREFIX . 'commande_fournisseurdet line';
+            $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commande_fournisseur c ON c.rowid = line.fk_commande';
+            $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commande_fournisseur_extrafields cef ON c.rowid = cef.fk_object';
+            $sql .= ' WHERE line.fk_product = ' . (int) $this->id;
+            $sql .= ' AND c.fk_statut < 5';
+            $sql .= ' AND cef.entrepot = ' . (int) $id_entrepot;
+            
+            $rows = $this->db->executeS($sql, 'array');
+            
+            if (!is_null($rows)) {
+                foreach ($rows as $r) {
+                    // Pour être sûr que les BimpLines existent: 
+                    $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn', (int) $r['id_commande']);
+                    if (BimpObject::ObjectLoaded($commande)) {
+                        $commande->checkLines();
+                    }
+
+                    $bimp_line = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFournLine', array(
+                                'id_line' => (int) $r['id_line']
+                                    ), true);
+
+                    if (BimpObject::ObjectLoaded($bimp_line)) {
+                        $stocks['commandes'] += ((float) $bimp_line->getFullQty() - $bimp_line->getReceivedQty(null, true));
+                    }
+                }
             }
 
             BimpObject::loadClass('bimpreservation', 'BR_Reservation');
@@ -288,7 +306,7 @@ class Bimp_Product extends BimpObject
                 return (int) $result[0]->id;
             }
         }
-        
+
         return null;
     }
 
@@ -309,15 +327,80 @@ class Bimp_Product extends BimpObject
     public function getCurrentFournPriceAmount($id_fourn = null)
     {
         $pfp = $this->getCurrentFournPriceObject($id_fourn);
-        
+
         if (BimpObject::objectLoaded($pfp)) {
             return (float) $pfp->getData('price');
         }
-        
+
         return 0;
     }
 
+    // Affichages: 
+
+    public function displayEntrepotStock($id_entrepot)
+    {
+        $html = '';
+
+        if ((int) $this->isLoaded()) {
+            $stocks = $this->getStocksForEntrepot($id_entrepot);
+
+            $html .= '<div style="display: inline-block; margin-right: 8px" class="bs-popover"';
+            $html .= BimpRender::renderPopoverData('Stock réel');
+            $html .= '>';
+            $html .= '<span class="' . ($stocks['reel'] > 0 ? 'success' : 'danger') . '">';
+            $html .= BimpRender::renderIcon('fas_warehouse', 'iconLeft') . $stocks['reel'];
+            $html .= '</span>';
+            $html .= '</div>';
+
+            $html .= '<div style="display: inline-block; margin-right: 8px" class="bs-popover"';
+            $html .= BimpRender::renderPopoverData('Stock disponible');
+            $html .= '>';
+            $html .= '<span class="' . ($stocks['dispo'] > 0 ? 'success' : 'danger') . '">';
+            $html .= BimpRender::renderIcon('fas_check', 'iconLeft') . $stocks['dispo'];
+            $html .= '</span>';
+            $html .= '</div>';
+
+            $html .= '<div style="display: inline-block; margin-right: 8px" class="bs-popover"';
+            $html .= BimpRender::renderPopoverData('Qtés commandées');
+            $html .= '>';
+            $html .= '<span class="' . ($stocks['commandes'] > 0 ? 'success' : 'danger') . '">';
+            $html .= BimpRender::renderIcon('fas_cart-arrow-down', 'iconLeft') . $stocks['commandes'];
+            $html .= '</span>';
+            $html .= '</div>';
+            
+//            $html .= '<div>';
+//            $html .= 'Total réservés: '.$stocks['total_reserves'].'<br/>';
+//            $html .= 'Réel réservés: '.$stocks['reel_reserves'].'<br/>';
+//            $html .= '</div>';
+        }
+
+        return $html;
+    }
+
     // Traitements: 
+
+    public function addConfigExtraParams()
+    {
+        $entrepots = BimpCache::getEntrepotsArray();
+
+        $cols = array();
+
+        foreach ($entrepots as $id_entrepot => $label) {
+            $cols['stock_' . $id_entrepot] = array(
+                'label' => 'Stock ' . $label,
+                'value' => array(
+                    'callback' => array(
+                        'method' => 'displayEntrepotStock',
+                        'params' => array(
+                            $id_entrepot
+                        )
+                    )
+                )
+            );
+        }
+
+        $this->config->addParams('lists_cols', $cols);
+    }
 
     public function fetchStocks()
     {
@@ -367,7 +450,7 @@ class Bimp_Product extends BimpObject
 
         return $html;
     }
-    
+
     public function renderStocksByEntrepots($id_entrepot = null)
     {
         if (!$this->isLoaded()) {

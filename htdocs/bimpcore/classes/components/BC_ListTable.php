@@ -129,8 +129,11 @@ class BC_ListTable extends BC_List
 
         if ($this->params['configurable']) {
             if ($this->object->config->isDefined('lists_cols')) {
-                foreach ($this->object->config->params['lists_cols'] as $col_name => $col_params) {
-                    $cols[] = $col_name;
+                $lists_cols = $this->object->config->getCompiledParams('lists_cols');
+                if (is_array($lists_cols)) {
+                    foreach ($lists_cols as $col_name => $col_params) {
+                        $cols[] = $col_name;
+                    }
                 }
             }
         }
@@ -1038,13 +1041,13 @@ class BC_ListTable extends BC_List
         $html .= '<' . $tag . ' class="rowButton' . (isset($btn_params['class']) ? ' ' . $btn_params['class'] : '');
 
         if (isset($btn_params['label'])) {
-            $html .= ' bs-popover"';            
+            $html .= ' bs-popover"';
             $html .= BimpRender::renderPopoverData($btn_params['label']);
         } else {
             $html .= '"';
         }
         if (isset($btn_params['onclick'])) {
-            $html .= ' onclick="' . str_replace('<list_id>', $this->identifier, $btn_params['onclick']).'"';
+            $html .= ' onclick="' . str_replace('<list_id>', $this->identifier, $btn_params['onclick']) . '"';
         }
 
         if (isset($btn_params['attrs'])) {

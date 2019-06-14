@@ -179,6 +179,8 @@ class BimpObject extends BimpCache
         if (!$this->params['parent_module']) {
             $this->params['parent_module'] = $this->module;
         }
+
+        $this->addConfigExtraParams();
     }
 
     public function isDolObject()
@@ -1731,13 +1733,18 @@ class BimpObject extends BimpCache
         
     }
     
+    public function addConfigExtraParams()
+    {
+        
+    }
+
     // Gestion des filtres custom: 
-    
+
     public function getCustomFilterValueLabel($field_name, $value)
     {
         return $value;
     }
-    
+
     public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array())
     {
         
@@ -3808,7 +3815,6 @@ class BimpObject extends BimpCache
     }
 
     // Gestion des droits users: 
-
 
     public function can($right)
     {

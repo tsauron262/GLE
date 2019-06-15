@@ -3456,6 +3456,9 @@ class ObjectLine extends BimpObject
                     }
                     break;
             }
+            
+            if($this->force_pa_ht > 0)
+                $this->pa_ht = $this->force_pa_ht;
         }
         return $errors;
     }

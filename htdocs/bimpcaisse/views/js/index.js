@@ -158,6 +158,10 @@ function BC_Vente() {
                 returns_html += '<div class="product_title">' + this.returns[k].label;
                 returns_html += '<span class="removeArticle" onclick="removeReturn($(this), ' + this.returns[k].id_return + ')">';
                 returns_html += '<i class="fa fa-trash"></i></span></div>';
+                returns_html += '<div class="product_info"><strong>Ref.: </strong> : ' + this.returns[k].ref + '</div>';
+                if (this.returns[k].serial) {
+                    returns_html += '<div class="product_info"><strong>N° de série: </strong> : ' + this.returns[k].serial + '</div>';
+                }
                 returns_html += '<div class="product_info"><strong>Prix unitaire TTC</strong> : ' + this.returns[k].unit_price + '</div>';
                 returns_html += '<div class="product_info"><strong>Quantité</strong> : ' + this.returns[k].qty + '</div>';
                 returns_html += '<div class="product_info"><strong>Défectueux</strong> : ';
@@ -167,6 +171,11 @@ function BC_Vente() {
                     returns_html += 'NON';
                 }
                 returns_html += '</div>';
+                if (this.returns[k].infos) {
+                    returns_html += '<div class="product_info"><strong>Informations: </strong><br/>';
+                    returns_html += '<div style="padding: 3px 10px; font-style: italic; background-color: #FFFFE1">' + this.returns[k].infos + '</div>';
+                    returns_html += '</div>';
+                }
                 returns_html += '<div class="article_options">';
                 returns_html += '<div class="article_qty">&nbsp;</div>';
                 returns_html += '<div class="product_total_price">';
@@ -1006,6 +1015,21 @@ function saveArticleQty(id_article) {
     }
 }
 
+function saveArticleRemiseCrt($input) {
+    if ($.isOk($input)) {
+        var $container = $input.findParentByClass('cartArticleLine');
+        if (!$.isOk($container)) {
+            bimp_msg('Une erreur est survenue. L\'option n\'a pas pu être enregistrée', 'danger');
+            return;
+        }
+
+        var id_article = parseInt($container.data('id_article'));
+        var remise_crt = parseInt($input.val());
+        
+        saveObjectField('bimpcaisse', 'BC_VenteArticle', id_article, 'remise_crt', remise_crt);
+    }
+}
+
 function setVenteStatus($button, id_vente, status) {
     if ($button.hasClass('disabled')) {
         return;
@@ -1163,6 +1187,10 @@ function setCartLineEvents($line) {
                 });
             }
 
+            $line.find('[name="article_remise_crt"]').change(function () {
+                saveArticleRemiseCrt($(this));
+            });
+
             $line.data('event_init', 1);
         }
     }
@@ -1172,7 +1200,7 @@ function onVenteLoaded() {
     var $input = $('#id_user_resp');
 
     if ($input.length && !parseInt($input.data('event_init'))) {
-        $input.change(function() {
+        $input.change(function () {
             saveCommercial();
         });
         $input.data('event_init', 1);
@@ -1332,6 +1360,11 @@ function checkDiscounts() {
         $container.show();
     }
 }
+
+function setArticleEvents() {
+
+}
+;
 
 $(document).ready(function () {
 

@@ -51,6 +51,11 @@ fields:
         label: Taux de TVA
         type: percent
         
+    remise_crt: 
+        label: Remise CRT
+        type: bool
+        default_value: 0
+        
     
 lists: 
     default: 
@@ -69,6 +74,8 @@ lists:
                 display: nom_url
             qty: 
                 field: qty
+            crt: 
+                field: remise_crt
             pu: 
                 field: unit_price_tax_in
             total:

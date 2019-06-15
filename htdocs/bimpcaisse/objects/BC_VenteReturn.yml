@@ -64,6 +64,13 @@ fields:
         type: bool
         default_value: 0
         
+    infos: 
+        label: informations
+        type: text
+        input: 
+            rows: 1
+            auto_expand: 1
+        
 forms: 
     default: 
         rows: 
@@ -95,6 +102,7 @@ forms:
             - field: id_equipment
             - field: qty
             - field: defective
+            - field: infos
     
 lists: 
     default: 
@@ -123,3 +131,5 @@ lists:
                 label: Total TTC
                 value: 
                     callback: displayTotal
+            infos: 
+                field: infos

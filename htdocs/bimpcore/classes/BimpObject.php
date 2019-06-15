@@ -19,8 +19,7 @@ class BimpObject extends BimpCache
         'position'
     );
     public static $numeric_types = array('id', 'id_parent', 'id_object', 'int', 'float', 'money', 'percent', 'bool', 'qty');
-    public static $name_properties = array('public_name', 'name', 'nom');
-    public static $title_properties = array('label', 'libelle', 'title', 'titre', 'description');
+    public static $name_properties = array('public_name', 'name', 'nom', 'label', 'libelle', 'title', 'titre', 'description');
     public static $ref_properties = array('ref', 'reference', 'code');
     public static $status_properties = array('status', 'fk_statut', 'statut');
     public $use_commom_fields = false;
@@ -447,17 +446,6 @@ class BimpObject extends BimpCache
     public function getNameProperty()
     {
         foreach (self::$name_properties as $prop) {
-            if ($this->field_exists($prop)) {
-                return $prop;
-            }
-        }
-
-        return '';
-    }
-
-    public function getTitleProperty()
-    {
-        foreach (self::$title_properties as $prop) {
             if ($this->field_exists($prop)) {
                 return $prop;
             }
@@ -1077,15 +1065,8 @@ class BimpObject extends BimpCache
             return $this->data[$prop];
         }
 
-        return BimpTools::ucfirst($this->getLabel()) . ' #' . $this->id;
-    }
-
-    public function getTitle()
-    {
-        $prop = $this->getTitleProperty();
-
-        if ($this->field_exists($prop) && isset($this->data[$prop]) && $this->data[$prop]) {
-            return $this->data[$prop];
+        if ($withGeneric) {
+            return BimpTools::ucfirst($this->getLabel()) . ' #' . $this->id;
         }
 
         return '';
@@ -1732,7 +1713,7 @@ class BimpObject extends BimpCache
     {
         
     }
-    
+
     public function addConfigExtraParams()
     {
         
@@ -4198,8 +4179,6 @@ class BimpObject extends BimpCache
     {
         $html = '';
         if ($this->isLoaded()) {
-            $name = $this->getInstanceName();
-
             if (!$content_only) {
                 $html .= '<div id="' . $this->object_name . '_' . $this->id . '_header" class="object_header container-fluid">';
             }
@@ -4214,7 +4193,7 @@ class BimpObject extends BimpCache
             if ($this->params['icon']) {
                 $html .= '<i class="' . BimpRender::renderIconClass($this->params['icon']) . ' iconLeft"></i>';
             }
-            $html .= $name . '</h1>';
+            $html .= BimpTools::ucfirst($this->getLabel()) . ' #' . $this->id . '</h1>';
 
             $ref = $this->getRef(false);
             if ($ref) {
@@ -4223,10 +4202,10 @@ class BimpObject extends BimpCache
                 $html .= '</h2>';
             }
 
-            $title = $this->getTitle();
-            if ($title) {
+            $name = $this->getName(false);
+            if ($name) {
                 $html .= '<h4>';
-                $html .= $title;
+                $html .= $name;
                 $html .= '</h4>';
             }
 

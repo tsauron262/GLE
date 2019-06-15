@@ -10,7 +10,7 @@ class BC_VenteReturn extends BimpObject
         $equipment = $this->getChildObject('equipment');
         if (BimpObject::objectLoaded($equipment)) {
             $label = $equipment->displayProduct('nom', false);
-            $label .= ' - ' . $equipment->getData('serial');
+//            $label .= ' - ' . $equipment->getData('serial');
         } elseif ((int) $this->getData('id_product')) {
             $label = $this->displayData('id_product', 'nom', false, true);
         }

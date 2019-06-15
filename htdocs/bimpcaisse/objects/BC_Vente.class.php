@@ -196,6 +196,25 @@ class BC_Vente extends BimpObject
             $total_returns += $return_total_ttc;
             $nb_returns += $qty;
 
+            $ref = '';
+            $serial = '';
+
+            if ((int) $return->getData('id_equipment')) {
+                $equipment = $return->getChildObject('equipment');
+                if (BimpObject::ObjectLoaded($equipment)) {
+                    $serial = $equipment->getData('serial');
+                    $product = $equipment->getChildObject('product');
+                    if (BimpObject::ObjectLoaded($product)) {
+                        $ref = $product->ref;
+                    }
+                }
+            } else {
+                $product = $return->getChildObject('product');
+                if (BimpObject::ObjectLoaded($product)) {
+                    $ref = $product->ref;
+                }
+            }
+
             $returns[] = array(
                 'id_return'     => (int) $return->id,
                 'label'         => $return->getLabel(),
@@ -204,7 +223,10 @@ class BC_Vente extends BimpObject
                 'unit_price_ht' => BimpTools::displayMoneyValue((float) $return->getData('unit_price_tax_ex'), 'EUR'),
                 'total_ttc'     => BimpTools::displayMoneyValue($return_total_ttc, 'EUR'),
                 'tva'           => (float) $return->getData('tva_tx') . ' %',
-                'defective'     => (int) $return->getData('defective')
+                'defective'     => (int) $return->getData('defective'),
+                'infos'         => htmlentities((string) $return->getData('infos')),
+                'ref'           => $ref,
+                'serial'        => $serial
             );
         }
 
@@ -1273,12 +1295,29 @@ class BC_Vente extends BimpObject
         $html .= '</div>';
         $html .= '<div class="product_info"><strong>Equipement ' . $equipment->id . ' - n° de série: ' . $equipment->getData('serial') . '</strong></div>';
         $html .= '<div class="product_info"><strong>Réf: </strong>' . $product->ref . '</div>';
+
+        // Options article: 
+        $html .= '<div class="article_options">';
+        $html .= '<div class="article_qty">&nbsp;</div>';
+
+        // Champ remise CRT: 
+        $bimp_product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $product->id);
+        if (BimpObject::ObjectLoaded($bimp_product)) {
+            $remise_crt = (float) $bimp_product->getRemiseCrt();
+            if ($remise_crt) {
+                $html .= '<div class="article_remise_crt" style="margin: 10px 0;">';
+                $html .= '<span style="display: inline-block; font-weight: bold; margin-top: -11px; vertical-align: middle; margin-right: 10px;">Remise CRT: </span>';
+                $html .= BimpInput::renderInput('toggle', 'article_remise_crt', (int) $article->getData('remise_crt'));
+                $html .= '</div>';
+            }
+        }
+
+        // Remises: 
         $html .= '<div class="article_remises">';
         $html .= '<div class="title">Remises: </div>';
         $html .= '<div class="content"></div>';
         $html .= '</div>';
-        $html .= '<div class="article_options">';
-        $html .= '<div class="article_qty">&nbsp;</div>';
+
         $html .= '<div class="product_total_price">';
         $html .= '<span class="base_price"></span>';
         $html .= '<span class="final_price">';
@@ -1291,6 +1330,7 @@ class BC_Vente extends BimpObject
 
         $html .= '</span>';
         $html .= '</div>';
+
         $html .= '</div>';
 
         if (!$article->checkPlace((int) $this->getData('id_entrepot'))) {
@@ -1315,15 +1355,15 @@ class BC_Vente extends BimpObject
         $html .= '</span>';
         $html .= '</div>';
         $html .= '<div class="product_info"><strong>Réf: </strong>' . $product->ref . '</div>';
+
         if ((int) $this->getData('vente_ht')) {
             $html .= '<div class="product_info"><strong>Prix unitaire HT: </strong>' . BimpTools::displayMoneyValue($product->price, 'EUR') . '</div>';
         } else {
             $html .= '<div class="product_info"><strong>Prix unitaire TTC: </strong>' . BimpTools::displayMoneyValue($product->price_ttc, 'EUR') . '</div>';
         }
-        $html .= '<div class="article_remises">';
-        $html .= '<div class="title">Remises: </div>';
-        $html .= '<div class="content"></div>';
-        $html .= '</div>';
+
+
+        // Options article: 
         $html .= '<div class="article_options">';
         $html .= '<div class="article_qty">';
         $html .= '<strong>Qté: </strong>';
@@ -1339,6 +1379,25 @@ class BC_Vente extends BimpObject
         $html .= '<span class="qty_up" onclick="changeArticleQty($(this), ' . $article->id . ', \'up\');">';
         $html .= '<i class="fa fa-plus-circle iconRight"></i></span>';
         $html .= '</div>';
+
+        // Champ remise CRT: 
+        $bimp_product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $product->id);
+        if (BimpObject::ObjectLoaded($bimp_product)) {
+            $remise_crt = (float) $bimp_product->getRemiseCrt();
+            if ($remise_crt) {
+                $html .= '<div class="article_remise_crt" style="margin: 10px 0;">';
+                $html .= '<span style="display: inline-block; font-weight: bold; margin-top: -11px; vertical-align: middle; margin-right: 10px;">Remise CRT: </span>';
+                $html .= BimpInput::renderInput('toggle', 'article_remise_crt', (int) $article->getData('remise_crt'));
+                $html .= '</div>';
+            }
+        }
+
+        // Remises: 
+        $html .= '<div class="article_remises">';
+        $html .= '<div class="title">Remises: </div>';
+        $html .= '<div class="content"></div>';
+        $html .= '</div>';
+
         $html .= '<div class="product_total_price">';
         $html .= '<span class="base_price"></span>';
         $html .= '<span class="final_price">';
@@ -2042,8 +2101,8 @@ class BC_Vente extends BimpObject
             }
             return 0;
         }
-        
-        
+
+
         // Choix Commercial: 
         $id_user_resp = (int) $this->getData('id_user_resp');
         if (!$id_user_resp) {
@@ -2215,6 +2274,8 @@ class BC_Vente extends BimpObject
                 $equipment->set('id_facture', $facture->id);
                 $equipment->update();
             }
+
+            // todo: passer par Bimp_FactureLine pour ajouter les lignes. (reprendre commande) 
         }
 
         // Validation de la facture: 
@@ -2381,6 +2442,18 @@ class BC_Vente extends BimpObject
     }
 
     // Overrides
+
+    public function validate()
+    {
+        if (!(int) $this->getData('id_user_resp')) {
+            global $user;
+            if (BimpObject::ObjectLoaded($user)) {
+                $this->set('id_user_resp', (int) $user->id);
+            }
+        }
+        
+        return parent::validate();
+    }
 
     public function update()
     {

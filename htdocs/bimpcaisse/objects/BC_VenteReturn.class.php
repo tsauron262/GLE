@@ -129,50 +129,54 @@ class BC_VenteReturn extends BimpObject
             if (!BimpObject::objectLoaded($equipment)) {
                 $errors[] = 'L\'équipement d\'ID ' . $this->getData('id_equipment') . ' semble ne pas exister';
             } else {
-                $place = $equipment->getCurrentPlace();
-                $id_client = 0;
-                if (BimpObject::objectLoaded($place)) {
-                    if ((int) $place->getData('type') === BE_Place::BE_PLACE_CLIENT) {
-                        $id_client = (int) $place->getData('id_client');
-                    }
-
-                    if (!$id_client || $id_client !== (int) $vente->getData('id_client')) {
-                        return array('L\'équipement sélectionné n\'est pas enregistré pour ce client');
-                    }
-                }
-                $id_product = (int) $equipment->getData('id_product');
-                if ($id_product) {
-                    $this->set('id_product', $id_product);
-                    $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $id_product);
-                    if (!BimpObject::objectLoaded($product)) {
-                        $errors[] = 'Le produit associé à l\'équipement sélectionné semble ne plus exister';
-                    } else {
-                        $this->set('unit_price_tax_ex');
-                        $prix_ht = 0;
-                        $prix_ttc = 0;
-                        $tva_tx = (float) $product->dol_object->tva_tx;
-
-                        if (BimpTools::isSubmit('price_ttc')) {
-                            $prix_ttc = round((float) BimpTools::getValue('price_ttc'), 2);
-                        } else {
-                            if ((float) $equipment->getData('prix_vente') > 0) {
-                                $prix_ttc = round((float) $equipment->getData('prix_vente'), 2);
-                            } elseif ((float) $equipment->getData('prix_vente_except') > 0) {
-                                $prix_ttc = round((float) $equipment->getData('prix_vente_except'), 2);
-                            } else {
-                                $prix_ttc = round((float) $product->dol_object->price_ttc, 2);
-                            }
+                if (!$equipment->getData('return_available')) {
+                    $errors[] = $equipment->displayReturnUnavailable();
+                } else {
+                    $place = $equipment->getCurrentPlace();
+                    $id_client = 0;
+                    if (BimpObject::objectLoaded($place)) {
+                        if ((int) $place->getData('type') === BE_Place::BE_PLACE_CLIENT) {
+                            $id_client = (int) $place->getData('id_client');
                         }
 
-                        $prix_ht = (float) BimpTools::calculatePriceTaxEx($prix_ttc, (float) $tva_tx);
-
-                        $this->set('unit_price_tax_ex', round($prix_ht, 2));
-                        $this->set('unit_price_tax_in', $prix_ttc, 2);
-                        $this->set('tva_tx', $tva_tx);
-                        $this->set('qty', 1);
+                        if (!$id_client || $id_client !== (int) $vente->getData('id_client')) {
+                            return array('L\'équipement sélectionné n\'est pas enregistré pour ce client');
+                        }
                     }
-                } else {
-                    $errors[] = 'Aucun produit associé à l\'équipement ' . $equipment->getData('serial');
+                    $id_product = (int) $equipment->getData('id_product');
+                    if ($id_product) {
+                        $this->set('id_product', $id_product);
+                        $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $id_product);
+                        if (!BimpObject::objectLoaded($product)) {
+                            $errors[] = 'Le produit associé à l\'équipement sélectionné semble ne plus exister';
+                        } else {
+                            $this->set('unit_price_tax_ex');
+                            $prix_ht = 0;
+                            $prix_ttc = 0;
+                            $tva_tx = (float) $product->dol_object->tva_tx;
+
+                            if (BimpTools::isSubmit('price_ttc')) {
+                                $prix_ttc = round((float) BimpTools::getValue('price_ttc'), 2);
+                            } else {
+                                if ((float) $equipment->getData('prix_vente') > 0) {
+                                    $prix_ttc = round((float) $equipment->getData('prix_vente'), 2);
+                                } elseif ((float) $equipment->getData('prix_vente_except') > 0) {
+                                    $prix_ttc = round((float) $equipment->getData('prix_vente_except'), 2);
+                                } else {
+                                    $prix_ttc = round((float) $product->dol_object->price_ttc, 2);
+                                }
+                            }
+
+                            $prix_ht = (float) BimpTools::calculatePriceTaxEx($prix_ttc, (float) $tva_tx);
+
+                            $this->set('unit_price_tax_ex', round($prix_ht, 2));
+                            $this->set('unit_price_tax_in', $prix_ttc, 2);
+                            $this->set('tva_tx', $tva_tx);
+                            $this->set('qty', 1);
+                        }
+                    } else {
+                        $errors[] = 'Aucun produit associé à l\'équipement ' . $equipment->getData('serial');
+                    }
                 }
             }
         } else {

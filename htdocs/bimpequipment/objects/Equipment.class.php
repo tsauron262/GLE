@@ -31,6 +31,94 @@ class Equipment extends BimpObject
         $this->iconeDef = "fa-laptop";
     }
 
+    // Getters booléens: 
+
+    public function isInEntrepot($id_entrepot = 0, &$errors = array())
+    {
+        if (!$this->isLoaded()) {
+            $errors[] = 'ID de l\'équipement absent';
+            return 0;
+        }
+
+        $place = $this->getCurrentPlace();
+        if (in_array($place->getData('type'), BE_Place::$entrepot_types)) {
+            if (!$id_entrepot || (int) $place->getData('id_entrepot') === (int) $id_entrepot) {
+                return 1;
+            }
+        }
+
+        if ($id_entrepot) {
+            $entrepot = BimpCache::getDolObjectInstance($id_entrepot, 'product/stock', 'entrepot');
+            if (BimpObject::objectLoaded($entrepot)) {
+                $entrepot_label = BimpObject::getInstanceNomUrlWithIcons($entrepot);
+            } else {
+                $entrepot_label = 'd\'ID ' . $id_entrepot;
+            }
+            $errors[] = 'L\'équipement ' . $this->getNomUrl(0, 1, 1, 'default') . ' n\'est pas présent dans l\'entrepôt ' . $entrepot_label;
+        } else {
+            $errors[] = 'L\'équipement ' . $this->getNomUrl(0, 1, 1, 'default') . ' n\'est présent dans aucun entrepôt';
+        }
+
+        return 0;
+    }
+
+    public function isAvailable($id_entrepot = 0, &$errors = array())
+    {
+        if (!$this->isLoaded()) {
+            $errors[] = 'ID de l\'équipement absent';
+            return 0;
+        }
+
+        // Check de la présence dans l\'entrepôt. 
+        if ((int) $id_entrepot) {
+            if (!$this->isInEntrepot($id_entrepot, $errors)) {
+                return 0;
+            }
+        }
+
+        // Check des réservations en cours: 
+        $reservations = $this->getReservationsList();
+        if (count($reservations)) {
+            $errors[] = 'L\'équipement ' . $this->getNomUrl(0, 1, 1, 'default') . ' est réservé';
+        }
+
+        // Check des ventes caisse en cours (Brouillons): 
+        if (!$this->isNotInVenteBrouillon($errors))  {
+            return 0;
+        }
+        
+        // Check des ajouts aux devis SAV non validés: 
+        // Check des ajouts aux factures non validées. 
+    }
+
+    public function isNotInVenteBrouillon(&$errors = array())
+    {
+        $check = 1;
+        if ($this->isLoaded()) {
+            BimpObject::loadClass('bimpcaisse', 'BC_Vente');
+
+            $sql = 'SELECT v.id FROM ' . MAIN_DB_PREFIX . 'bc_vente_article a ';
+            $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . ' bc_vente v ON a.id_vente = v.id';
+            $sql .= ' WHERE a.id_equipment = ' . (int) $this->id . ' AND v.status === ' . BC_Vente::BC_VENTE_BROUILLON;
+
+            $rows = $this->db->executeS($sql, 'array');
+            if (!is_null($rows) && !empty($rows)) {
+                foreach ($rows as $r) {
+                    $errors[] = 'L\'équipement ' . $this->getNomUrl(0, 1, 1, 'default') . ' a été ajouté dans une vente caisse en cours (vente #' . $r['id'] . ')';
+                    $check = 0;
+                }
+            }
+        }
+
+        return $check;
+    }
+
+    public function isAvailableForReturn(&$errors = array())
+    {
+        // Check des retours caisse: 
+        // Check de la var "return available" (Définie uniquement dans logistique commande)
+    }
+
     public function getName()
     {
         if ($this->isLoaded()) {
@@ -451,6 +539,24 @@ class Equipment extends BimpObject
             return $label;
         }
         return BimpRender::renderAlerts('Le contrat d\'ID ' . $id_contrat . ' semble ne plus exister');
+    }
+
+    public function displayUnavailable()
+    {
+        if ($this->isLoaded()) {
+            return 'L\'équipement ' . $this->getNomUrl(0, 1, 1, 'default') . ' n\'est pas disponible';
+        }
+
+        return 'ID de l\'équipement absent';
+    }
+
+    public function displayReturnUnavailable()
+    {
+        if ($this->isLoaded()) {
+            return 'L\'équipement ' . $this->getNomUrl(0, 1, 1, 'default') . ' n\'est pas disponible (Un retour est probablement déjà en cours)';
+        }
+
+        return 'ID de l\'équipement absent';
     }
 
 //    Traitements: 

@@ -24,7 +24,10 @@ class BE_Place extends BimpObject
         7 => 'Matériel de prêt',
         8 => 'SAV'
     );
+    public static $entrepot_types = array(self::BE_PLACE_ENTREPOT, self::BE_PLACE_PRESENTATION, self::BE_PLACE_PRET, self::BE_PLACE_SAV, self::BE_PLACE_VOL);
 
+    // Getters booléens: 
+    
     public function getContactsArray()
     {
         $contacts = array();

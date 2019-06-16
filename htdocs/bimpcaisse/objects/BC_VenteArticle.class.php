@@ -139,7 +139,24 @@ class BC_VenteArticle extends BimpObject
 
     public function create(&$warnings = array(), $force_create = false)
     {
+        if ((int) $this->getData('id_equipment')) {
+            $equipment = $this->getChildObject('equipment');
+            if (!BimpObject::objectLoaded($equipment)) {
+                $errors[] = 'L\'équipement d\'ID ' . (int) $this->getData('id_equipment') . ' n\'existe pas';
+            } else {
+                if (!$equipment->getData('available')) {
+                    $errors[] = $equipment->displayUnavailable();
+                }
+            }
+        }
+
+        if (count($errors)) {
+            return $errors;
+        }
+
         $errors = parent::create($warnings, $force_create);
+
+        $warnings = array();
 
         if (!count($errors)) {
             if ((int) $this->getData('id_equipment')) {

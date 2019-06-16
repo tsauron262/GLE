@@ -401,9 +401,8 @@ class BimpTicket
 
         $html .= '<p style="font-size: 11px; line-height: 12px; font-weight: bold;">' . $txt . '</p>';
         $html .= '</div>';
-
-        $html .= 'Tout article déballé ne peut être ni repris ni échangé';
         $html .= '</div>';
+        $html .= '<div style="margin: 10px; text-align: center; font-size: 12px">Tout article déballé ne peut être ni repris ni échangé</div>';
 
         return $html;
     }

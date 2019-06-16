@@ -2160,6 +2160,61 @@ class ObjectLine extends BimpObject
 
     // Gestion remises: 
 
+    public function addRemise($value, $label = '', $type = 1, $per_unit = 0, &$warnings = array(), $force_create = false)
+    {
+        $errors = array();
+
+        // Vérifications: 
+        if (!$this->isLoaded()) {
+            $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
+            return $errors;
+        }
+
+        if (!$this->isRemisable()) {
+            $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' n\'est pas remisable';
+        } elseif (!$this->isEditable($force_create)) {
+            $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' n\'est pas éditable';
+        } else {
+            $parent = $this->getParentInstance();
+            if (!BimpObject::ObjectLoaded($parent)) {
+                if (is_a($parent, 'BimpComm')) {
+                    $errors[] = 'ID ' . $parent->getLabel('of_the') . ' absent';
+                } else {
+                    $errors[] = 'objet parent absent';
+                }
+            } else {
+                if (!$parent->areLinesEditable()) {
+                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' n\'est plus éditable';
+                }
+            }
+        }
+
+        if (!in_array((int) $type, array(1, 2))) {
+            $errors[] = 'Type de la remise invalide';
+        }
+
+        if (count($errors)) {
+            return $errors;
+        }
+
+        // Création de la remise: 
+        $remise = BimpObject::getInstance('bimpcommercial', 'ObjectLineRemise');
+        
+        $remise->validateArray(array(
+            'id_object_line' => (int) $this->id,
+            'object_type'    => static::$parent_comm_type,
+            'label'          => $label,
+            'type'           => (int) $type,
+            'percent'        => ((int) $type === 1 ? (float) $value : 0),
+            'montant'        => ((int) $type === 2 ? (float) $value : 0),
+            'per_unit'       => (int) $per_unit
+        ));
+        
+        $errors = $remise->create($warnings, true);
+
+        return $errors;
+    }
+
     public function calcRemise($remise_globale_rate = null)
     {
         if ($this->isLoaded()) {

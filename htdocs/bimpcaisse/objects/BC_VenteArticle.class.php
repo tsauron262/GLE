@@ -32,7 +32,7 @@ class BC_VenteArticle extends BimpObject
         if ($this->isLoaded()) {
 
             $product = $this->getChildObject('product');
-            if($product->type == 1)//service
+            if ($product->type == 1)//service
                 return 999;
             $product->load_stock();
 
@@ -133,5 +133,23 @@ class BC_VenteArticle extends BimpObject
             }
         }
         return $extra_percent;
+    }
+
+    // Overrides: 
+
+    public function create(&$warnings = array(), $force_create = false)
+    {
+        $errors = parent::create($warnings, $force_create);
+
+        if (!count($errors)) {
+            if ((int) $this->getData('id_equipment')) {
+                $equipment = $this->getChildObject('equipment');
+                if (BimpObject::ObjectLoaded($equipment)) {
+                    $equipment->updateField('available', 0, null, true);
+                }
+            }
+        }
+
+        return $errors;
     }
 }

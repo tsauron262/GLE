@@ -211,6 +211,15 @@ class BC_VenteReturn extends BimpObject
 
         $errors = parent::create($warnings, $force_create);
 
+        if (!count($errors)) {
+            if ((int) $this->getData('id_equipment')) {
+                $equipment = $this->getChildObject('equipment');
+                if (BimpObject::ObjectLoaded($equipment)) {
+                    $equipment->updateField('return_available', 0, null, true);
+                }
+            }
+        }
+
         return $errors;
     }
 }

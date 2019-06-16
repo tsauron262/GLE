@@ -1930,6 +1930,7 @@ class BC_Vente extends BimpObject
                             'date'         => date('Y-m-d H:i:s')
                         ));
                     }
+                    
                     if (!count($place_errors)) {
                         $place_errors = $place->create();
                     }
@@ -2043,19 +2044,9 @@ class BC_Vente extends BimpObject
 
         global $db, $user, $langs, $conf;
 
-        $langs->load('errors');
-        $langs->load('bills');
-        $langs->load('companies');
-        $langs->load('compta');
-        $langs->load('products');
-        $langs->load('banks');
-        $langs->load('main');
+        $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
 
-        if (!class_exists('Facture')) {
-            require_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';
-        }
-
-        $centre = $this->getChildObject('entrepot');
+        $entrepot = $this->getChildObject('entrepot');
         $caisse = $this->getChildObject('caisse');
         $id_account = (int) $caisse->getData('id_account');
         $account = $caisse->getChildObject('account');
@@ -2065,35 +2056,37 @@ class BC_Vente extends BimpObject
         } else {
             $account_label = ' d\'ID ' . $id_account;
         }
+        
+        $note = 'Vente en caisse. Vente n°' . $this->id;
+        $note .= ' - Centre: "' . $entrepot->description . ' (' . $entrepot->libelle . ')"';
+        $note .= ' - Caisse: "' . $caisse->getData('name') . '"';
 
         // Création de la facture
         $is_avoir = ((float) $this->getData('total_ttc') < 0);
 
-        $facture = new Facture($db);
-
-        $facture->date = dol_now();
+        $facture->validateArray(array(
+            'type' => Facture::TYPE_STANDARD,
+            'datef' => date('Y-m-d'),
+            'fk_account' => $id_account,
+            'fk_cond_reglement' => (int) $this->getData('id_cond_reglement')
+        ));
 
         $id_client = (int) $this->getData('id_client');
         if (!$id_client) {
-            $facture->socid = (int) BimpCore::getConf('default_id_client');
+            $$facture->dol_object->socid = (int) BimpCore::getConf('default_id_client');
         } else {
-            $facture->socid = $id_client;
+            $$facture->dol_object->socid = $id_client;
+            if ((int) $this->getData('id_client_contact')) {
+                $$facture->dol_object->contact_id = (int) $this->getData('id_client_contact');
+            }
         }
 
-        $note = 'Vente en caisse. Vente n°' . $this->id;
-        $note .= ' - Centre: "' . $centre->description . ' (' . $centre->libelle . ')"';
-        $note .= ' - Caisse: "' . $caisse->getData('name') . '"';
+        $$facture->dol_object->note_private = $note;
+        $$facture->dol_object->fk_user_author = $user->id;
 
-        $facture->note_private = $note;
-        $facture->fk_user_author = $user->id;
-
-        $facture->array_options['options_type'] = BimpCore::getConf('bimpcaisse_secteur_code');
-        $facture->array_options['options_entrepot'] = (int) $this->getData('id_entrepot');
+        $$facture->dol_object->array_options['options_type'] = BimpCore::getConf('bimpcaisse_secteur_code');
+        $$facture->dol_object->array_options['options_entrepot'] = (int) $this->getData('id_entrepot');
         $facture->type = Facture::TYPE_STANDARD;
-
-        if (!$is_avoir) {
-            $facture->cond_reglement_id = (int) $this->getData('id_cond_reglement');
-        }
 
         if ($facture->create($user) <= 0) {
             if ($facture->error) {

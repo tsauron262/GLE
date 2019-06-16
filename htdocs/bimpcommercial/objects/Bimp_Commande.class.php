@@ -10,12 +10,12 @@ class Bimp_Commande extends BimpComm
     public static $dol_module = 'commande';
     public static $email_type = 'order_send';
     public static $status_list = array(
-        -3 => array('label' => 'Stock insuffisant', 'icon' => 'exclamation-triangle', 'classes' => array('warning')),
-        -1 => array('label' => 'Abandonnée', 'icon' => 'times-circle', 'classes' => array('danger')),
+        -3 => array('label' => 'Stock insuffisant', 'icon' => 'fas_exclamation-triangle', 'classes' => array('warning')),
+        -1 => array('label' => 'Abandonnée', 'icon' => 'fas_times-circle', 'classes' => array('danger')),
         0  => array('label' => 'Brouillon', 'icon' => 'fas_file-alt', 'classes' => array('warning')),
-        1  => array('label' => 'Validée', 'icon' => 'check', 'classes' => array('info')),
-        2  => array('label' => 'Acceptée', 'icon' => 'check-circle', 'classes' => array('success')),
-        3  => array('label' => 'Fermée', 'icon' => 'times', 'classes' => array('danger')),
+        1  => array('label' => 'Validée', 'icon' => 'fas_check', 'classes' => array('info')),
+        2  => array('label' => 'Acceptée', 'icon' => 'fa_check-circle', 'classes' => array('success')),
+        3  => array('label' => 'Fermée', 'icon' => 'fas_times', 'classes' => array('danger')),
     );
     public static $logistique_status = array(
         0 => array('label' => 'A traiter', 'icon' => 'fas_exclamation-circle', 'classes' => array('important')),
@@ -1522,7 +1522,7 @@ class Bimp_Commande extends BimpComm
             }
         }
 
-        // Insertion des accomptes:
+        // Insertion des acomptes:
         if (count($remises)) {
             foreach ($remises as $id_remise) {
                 $facture->dol_object->error = '';

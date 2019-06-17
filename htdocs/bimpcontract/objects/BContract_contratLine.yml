@@ -77,13 +77,13 @@ fields:
     serials:
         label: Numéros de série
         dol_extra_field: 1
-        type: text
+        type: string
         input:
             help: Merci de séparer les numéros de série par une virgule (,)
     nb_materiel:
         label: Qté matériel
         dol_extra_field: 1
-        default_value:
+        value:
             callback: getNbMateriel
         type: qty
         required: 1
@@ -103,6 +103,7 @@ lists:
         add_form_name: add
         delete_btn: 1
         page_btn: 1
+        modal_view: default
         cols: 
             description:
                 field: description
@@ -153,4 +154,26 @@ forms:
             - field: serials
             - field: remise_percent
             - field: tva_tx
-              
+
+fields_tables:
+    infos:
+        panel: 0
+        rows:
+            - field: fk_product
+              display: nom
+    
+
+views:
+    default: 
+        title: Détails de la ligne
+        delete_btn: 1
+        objects_change_reload: Bcontract_contrat
+        rows: 
+            - cols:
+                - type: object_header
+            - cols: 
+                - type: fields_table
+                  col_lg: 8
+                  col_md: 12
+                  fields_table:
+                      name: infos

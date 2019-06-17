@@ -44,7 +44,7 @@ class Bimp_Facture extends BimpComm
     public function canSetAction($action)
     {
         global $conf, $user;
-
+        
         switch ($action) {
             case 'validate':
                 if ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && !empty($user->rights->facture->creer)) ||

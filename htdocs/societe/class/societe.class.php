@@ -1818,6 +1818,9 @@ class Societe extends CommonObject
 		global $conf;
 
 		$reparray=array();
+                
+//                if($conf->entity == "")
+                    $conf->entity= "1";
 
 		$sql = "SELECT DISTINCT u.rowid, u.login, u.lastname, u.firstname, u.email, u.statut, u.entity, u.photo";
 		$sql.= " FROM ".MAIN_DB_PREFIX."societe_commerciaux as sc, ".MAIN_DB_PREFIX."user as u";
@@ -1828,8 +1831,10 @@ class Societe extends CommonObject
 			$sql.= " AND ug.entity = ".$conf->entity.")";
 			$sql.= " OR u.admin = 1)";
 		}
-		else
+		elseif($conf->entity)
 			$sql.= " WHERE entity in (0, ".$conf->entity.")";
+		else
+			$sql.= " WHERE entity in (0)";
 
 		$sql.= " AND u.rowid = sc.fk_user AND sc.fk_soc = ".$this->id;
 

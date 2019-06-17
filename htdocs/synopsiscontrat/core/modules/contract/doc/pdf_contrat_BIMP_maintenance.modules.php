@@ -284,6 +284,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
             $pdf->setColor('fill', 255, 255, 255);
             $pdf->setTextColor(0, 0, 0);
             
+            
             $nb_char_serials = strlen($line->array_options['options_serials']);
             $nb_line = ceil($nb_char_serials / 136);
             $last_char = 136;
@@ -301,40 +302,39 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                     $pdf->Cell($W * 9, 7, substr($line->array_options['options_serials'], 0, 136), 1, null, 'L', true);
                     $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 7, "", 0, 'L'); 
                 }
-            
-            
-            
-            
-            $pdf->SetFont('', '', 9);
-            $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 7, "", 0, 'L');
+            $pdf->SetFont('', '', 7);
+            $pdf->setDrawColor(255, 255, 255);
+            $pdf->setColor('fill', 236, 147, 0);
+            $pdf->setTextColor(255, 255, 255);
+            $pdf->Cell($W, 7, 'Description', 1, null, 'C', true);
+            $pdf->setDrawColor(255, 255, 255);
+            $pdf->setColor('fill', 255, 255, 255);
             $pdf->SetFont('', 'B', 9);
-
             $associate_product = new Product($this->db);
             $associate_product->fetch($line->fk_product);
-            $content_service = explode(',', $associate_product->array_options['options_service_content']);
-            $pdf->SetFont('', '', 8);
-            $first_passage = false;
-
-            foreach ($content_service as $row => $id) {
-
-                if ($array_services[$id]) {
-                    if (!$first_passage) {
-                        $pdf->Cell($W, 7, '', 0, null, 'C', true);
-                        $pdf->setColor('fill', 225, 225, 225);
-                        $pdf->Cell($W * 2, 7, 'Service inclu', 1, null, 'L', true);
-                        $pdf->Cell($W * 7, 7, 'Commentaire sur le service', 1, null, 'L', true);
-                        $pdf->setColor('fill', 255, 255, 255);
-                        $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 7, "", 0, 'L');
-                        $first_passage = true;
-                    }
-                    $pdf->Cell($W, 7, '', 0, null, 'C', true);
-                    $pdf->setColor('fill', 242, 242, 242);
-                    $pdf->Cell($W * 2, 7, $array_services[$id]['titre'], 1, null, 'L', true);
-                    $pdf->Cell($W * 7, 7, (!empty($array_services[$id]['description'])) ? $array_services[$id]['description'] : "Pas de commentaire sur ce service compris", 1, null, 'L', true);
-                    $pdf->setColor('fill', 255, 255, 255);
-                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 7, "", 0, 'L');
-                }
+            $pdf->SetFont('', '', 7);
+            $pdf->setTextColor(0, 0, 0);
+            $nb_char_desc = strlen($associate_product->description);
+            $nb_line = ceil($nb_char_desc / 136);
+            $last_char = 136;
+            $start_char = 0;
+            if($nb_line > 1) {
+               $i = 1;
+               while($i <= $nb_line){
+                    $pdf->Cell($W * 9, 7, substr($associate_product->description, $start_char, 136), 1, null, 'L', true);
+                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 5, "", 0, 'L'); 
+                    $start_char = $last_char;
+                    $i++;
+                } 
+                
+            } else {
+                $pdf->Cell($W * 9, 7, substr($associate_product->description, 0, 136), 1, null, 'L', true);
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 7, "", 0, 'L'); 
             }
+            
+            $first_passage = false;
+            
+            
             $pdf->setDrawColor(220, 220, 220);
             $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, "", "B", 'L');
             $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, "", "T", 'L');

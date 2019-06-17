@@ -48,6 +48,9 @@ fields:
     facnumber: 
         label: Référence
         dol_prop: ref
+    exported:
+        label: Comptabilisée
+        type: int
     type: 
         label: Type
         type: int
@@ -218,7 +221,7 @@ forms:
                       hide_values: 0
               show: 
                   callback: isNotLoaded
-            
+                 
             - field: ef_type
             - field: entrepot
               show: 

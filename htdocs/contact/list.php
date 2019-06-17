@@ -598,7 +598,7 @@ if (! empty($arrayfields['p.fax']['checked']))
 if (! empty($arrayfields['p.email']['checked']))
 {
 	print '<td class="liste_titre">';
-	print '<input class="flat" type="text" name="search_email" size="6" value="'.dol_escape_htmltag($search_email).'">';
+	print '<input class="flat" type="text" name="search_email" size="40" value="'.dol_escape_htmltag($search_email).'">';
 	print '</td>';
 }
 if (! empty($arrayfields['p.skype']['checked']))
@@ -801,7 +801,7 @@ while ($i < min($num,$limit))
 	// EMail
 	if (! empty($arrayfields['p.email']['checked']))
 	{
-		print '<td>'.dol_print_email($obj->email,$obj->rowid,$obj->socid,'AC_EMAIL',18).'</td>';
+		print '<td>'.dol_print_email($obj->email,$obj->rowid,$obj->socid,'AC_EMAIL',50).'</td>';
 		if (! $i) $totalarray['nbfield']++;
 	}
 	// Skype

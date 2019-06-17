@@ -213,17 +213,10 @@ class BC_VenteReturn extends BimpObject
             $this->set('unit_price_tax_ex', round($price_ht, 2));
         }
 
-        $errors = parent::create($warnings, $force_create);
-
-        if (!count($errors)) {
-            if ((int) $this->getData('id_equipment')) {
-                $equipment = $this->getChildObject('equipment');
-                if (BimpObject::ObjectLoaded($equipment)) {
-                    $equipment->updateField('return_available', 0, null, true);
-                }
-            }
+        if (count($errors)) {
+            return $errors;
         }
 
-        return $errors;
+        return parent::create($warnings, $force_create);
     }
 }

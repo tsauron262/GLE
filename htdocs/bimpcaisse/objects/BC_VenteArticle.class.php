@@ -27,45 +27,37 @@ class BC_VenteArticle extends BimpObject
         return '';
     }
 
-    public function getProductStock($id_entrepôt)
+    public function getProductStock($id_entrepôt, $stock_data = 'dispo')
     {
-        if ($this->isLoaded()) {
+        if (!(int) $id_entrepôt) {
+            return 0; // Entrepôt obligatoire. 
+        }
+        $product = $this->getChildObject('product');
 
-            $product = $this->getChildObject('product');
-            if ($product->type == 1)//service
+        if (BimpObject::objectLoaded($product)) {
+            if ($product->isTypeService()) {
                 return 999;
-            $product->load_stock();
+            }
 
-            if (isset($product->stock_warehouse[(int) $id_entrepôt])) {
-                return $product->stock_warehouse[(int) $id_entrepôt]->real;
+            $stocks = $product->getStocksForEntrepot($id_entrepôt);
+            if (array_key_exists($stock_data, $stocks)) {
+                return (float) $stocks[$stock_data];
             }
         }
-
 
         return 0;
     }
 
-    public function checkPlace($id_entrepot)
+    public function checkPlace($id_entrepot, &$errors = array())
     {
         if ($this->isLoaded()) {
             $equipment = $this->getChildObject('equipment');
             if ($equipment->isLoaded()) {
-                $place = $equipment->getCurrentPlace();
-                if (is_null($place) || !$place->isLoaded()) {
-                    return false;
-                } else {
-                    if ((int) $place->getData('type') !== BE_Place::BE_PLACE_ENTREPOT) {
-                        return false;
-                    }
-
-                    if ((int) $place->getData('id_entrepot') !== (int) $id_entrepot) {
-                        return false;
-                    }
-                }
+                return (int) $equipment->isInEntrepot($id_entrepot, $errors);
             }
         }
 
-        return true;
+        return 1;
     }
 
     public function getTotalRemisesPercent($extra_percent = 0)
@@ -133,40 +125,5 @@ class BC_VenteArticle extends BimpObject
             }
         }
         return $extra_percent;
-    }
-
-    // Overrides: 
-
-    public function create(&$warnings = array(), $force_create = false)
-    {
-        if ((int) $this->getData('id_equipment')) {
-            $equipment = $this->getChildObject('equipment');
-            if (!BimpObject::objectLoaded($equipment)) {
-                $errors[] = 'L\'équipement d\'ID ' . (int) $this->getData('id_equipment') . ' n\'existe pas';
-            } else {
-                if (!$equipment->getData('available')) {
-                    $errors[] = $equipment->displayUnavailable();
-                }
-            }
-        }
-
-        if (count($errors)) {
-            return $errors;
-        }
-
-        $errors = parent::create($warnings, $force_create);
-
-        $warnings = array();
-
-        if (!count($errors)) {
-            if ((int) $this->getData('id_equipment')) {
-                $equipment = $this->getChildObject('equipment');
-                if (BimpObject::ObjectLoaded($equipment)) {
-                    $equipment->updateField('available', 0, null, true);
-                }
-            }
-        }
-
-        return $errors;
     }
 }

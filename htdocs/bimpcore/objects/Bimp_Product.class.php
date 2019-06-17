@@ -48,8 +48,26 @@ class Bimp_Product extends BimpObject
         return (int) parent::isActionAllowed($action, $errors);
     }
 
-    // Getters: 
+    public function isTypeProduct()
+    {
+        if ((int) $this->getData('fk_product_type') === 0) {
+            return 1;
+        }
 
+        return 0;
+    }
+
+    public function isTypeService()
+    {
+        if ((int) $this->getData('fk_product_type') === 1) {
+            return 1;
+        }
+
+        return 0;
+    }
+
+    // Getters params: 
+    
     public function getDolObjectUpdateParams()
     {
         global $user;
@@ -58,6 +76,54 @@ class Bimp_Product extends BimpObject
         }
         return array(0, $user);
     }
+
+    public function getFilesDir()
+    {
+        return DOL_DATA_ROOT . '/produit/' . dol_sanitizeFileName($this->getRef()) . '/';
+    }
+
+    public function getFileUrl($file_name)
+    {
+        $dir = $this->getFilesDir();
+        if ($dir) {
+            if (file_exists($dir . $file_name)) {
+                return DOL_URL_ROOT . '/document.php?modulepart=produit&file=' . htmlentities(dol_sanitizeFileName($this->getRef()) . '/' . $file_name);
+            }
+        }
+
+        return '';
+    }
+
+    public function getListsButtons($line_qty = 1)
+    {
+        $buttons = array();
+        if ($this->isActionAllowed('generateEtiquettes')) {
+            $buttons[] = array(
+                'label'   => 'Générer des étiquettes',
+                'icon'    => 'fas_sticky-note',
+                'onclick' => $this->getJsActionOnclick('generateEtiquettes', array(
+                    'qty' => (int) $line_qty
+                        ), array(
+                    'form_name' => 'etiquettes'
+                ))
+            );
+        }
+
+        return $buttons;
+    }
+
+    // Getters données: 
+
+    public function getRemiseCrt()
+    {
+        if ($this->dol_field_exists('crt')) {
+            return (float) $this->getData('crt');
+        }
+
+        return 0;
+    }
+
+    // Getters stocks: 
 
     public function getStocksForEntrepot($id_entrepot)
     {
@@ -87,9 +153,9 @@ class Bimp_Product extends BimpObject
             $sql .= ' WHERE line.fk_product = ' . (int) $this->id;
             $sql .= ' AND c.fk_statut < 5';
             $sql .= ' AND cef.entrepot = ' . (int) $id_entrepot;
-            
+
             $rows = $this->db->executeS($sql, 'array');
-            
+
             if (!is_null($rows)) {
                 foreach ($rows as $r) {
                     // Pour être sûr que les BimpLines existent: 
@@ -121,32 +187,6 @@ class Bimp_Product extends BimpObject
         return $stocks;
     }
 
-    public function getFilesDir()
-    {
-        return DOL_DATA_ROOT . '/produit/' . dol_sanitizeFileName($this->getRef()) . '/';
-    }
-
-    public function getFileUrl($file_name)
-    {
-        $dir = $this->getFilesDir();
-        if ($dir) {
-            if (file_exists($dir . $file_name)) {
-                return DOL_URL_ROOT . '/document.php?modulepart=produit&file=' . htmlentities(dol_sanitizeFileName($this->getRef()) . '/' . $file_name);
-            }
-        }
-
-        return '';
-    }
-
-    public function getRemiseCrt()
-    {
-        if ($this->dol_field_exists('crt')) {
-            return (float) $this->getData('crt');
-        }
-
-        return 0;
-    }
-
     public static function getStockIconStatic($id_product, $id_entrepot = null)
     {
         if (is_null($id_entrepot)) {
@@ -173,6 +213,30 @@ class Bimp_Product extends BimpObject
 
         return $html;
     }
+
+    // Getters Catégories: 
+
+    public function getCategoriesArray()
+    {
+        if ($this->isLoaded()) {
+            return self::getProductCategoriesArray((int) $this->id);
+        }
+
+        return array();
+    }
+
+    public function getCategoriesList()
+    {
+        $categories = array();
+
+        foreach ($this->getCategoriesArray() as $id_category => $label) {
+            $categories[] = (int) $id_category;
+        }
+
+        return $categories;
+    }
+
+    // Getters FournPrice: 
 
     public static function getFournisseursPriceArray($id_product, $id_fournisseur = 0, $id_price = 0, $include_empty = true)
     {
@@ -254,44 +318,6 @@ class Bimp_Product extends BimpObject
         }
     }
 
-    public function getCategoriesArray()
-    {
-        if ($this->isLoaded()) {
-            return self::getProductCategoriesArray((int) $this->id);
-        }
-
-        return array();
-    }
-
-    public function getCategoriesList()
-    {
-        $categories = array();
-
-        foreach ($this->getCategoriesArray() as $id_category => $label) {
-            $categories[] = (int) $id_category;
-        }
-
-        return $categories;
-    }
-
-    public function getListsButtons($line_qty = 1)
-    {
-        $buttons = array();
-        if ($this->isActionAllowed('generateEtiquettes')) {
-            $buttons[] = array(
-                'label'   => 'Générer des étiquettes',
-                'icon'    => 'fas_sticky-note',
-                'onclick' => $this->getJsActionOnclick('generateEtiquettes', array(
-                    'qty' => (int) $line_qty
-                        ), array(
-                    'form_name' => 'etiquettes'
-                ))
-            );
-        }
-
-        return $buttons;
-    }
-
     public function getCurrentFournPriceId($id_fourn = null)
     {
         if ($this->isLoaded()) {
@@ -367,7 +393,7 @@ class Bimp_Product extends BimpObject
             $html .= BimpRender::renderIcon('fas_cart-arrow-down', 'iconLeft') . $stocks['commandes'];
             $html .= '</span>';
             $html .= '</div>';
-            
+
 //            $html .= '<div>';
 //            $html .= 'Total réservés: '.$stocks['total_reserves'].'<br/>';
 //            $html .= 'Réel réservés: '.$stocks['reel_reserves'].'<br/>';

@@ -53,8 +53,8 @@ class BC_Vente extends BimpObject
             $articles = array();
             foreach ($this->getChildrenObjects('articles') as $article) {
                 $product = $article->getChildObject('product');
-                if (isset($product->id) && $product->id) {
-                    $articles[$article->id] = $product->label . ' (Ref: "' . $product->ref . '")';
+                if (BimpObject::objectLoaded($product)) {
+                    $articles[$article->id] = $product->getRef() . ' - ' . $product->getName();
                 }
             }
             return $articles;
@@ -65,16 +65,7 @@ class BC_Vente extends BimpObject
 
     public function getCond_reglementsArray()
     {
-        $rows = $this->db->getRows('c_payment_term', '`active` > 0', null, 'array', array('rowid', 'libelle'), 'sortorder');
-
-        $conds = array();
-        if (!is_null($rows)) {
-            foreach ($rows as $r) {
-                $conds[(int) $r['rowid']] = $r['libelle'];
-            }
-        }
-
-        return $conds;
+        return self::getCondReglementsArray();
     }
 
     public function getAjaxData()
@@ -215,7 +206,7 @@ class BC_Vente extends BimpObject
             } else {
                 $product = $return->getChildObject('product');
                 if (BimpObject::ObjectLoaded($product)) {
-                    $ref = $product->ref;
+                    $ref = $product->getRef();
                 }
             }
 
@@ -1156,13 +1147,13 @@ class BC_Vente extends BimpObject
         if (!$equipment->isLoaded()) {
             $errors[] = 'Erreur: aucun enregistrement trouvé pour l\'équipement d\'ID ' . $id_equipment;
         } else {
-            $id_product = $equipment->getData('id_product');
+            $id_product = (int) $equipment->getData('id_product');
 
-            if (is_null($id_product) || !$id_product) {
+            if (!$id_product) {
                 $errors[] = 'Erreur: aucun produit associé à l\'équipement ' . $id_equipment . ' (n° série "' . $equipment->getData('serial') . '")';
             } else {
                 $product = $equipment->getChildObject('product');
-                if (is_null($product) || !isset($product->id) || !$product->id) {
+                if (!BimpObject::objectLoaded($product)) {
                     $errors[] = 'Erreur: produit d\'ID ' . $equipment->getData('id_product') . ' non trouvé pour l\'équipement d\'ID' . $id_equipment . ' (n° série "' . $equipment->getData('serial') . '")';
                 } else {
                     $price_ttc = 0;
@@ -1189,13 +1180,18 @@ class BC_Vente extends BimpObject
                     if (array_key_exists($id_equipment, $current_equipments)) {
                         $html .= BimpRender::renderAlerts('cet équipement a déjà été ajouté au panier');
                     } else {
-                        $html .= '<div style="margin-top: 10px; text-align: right">';
-                        $html .= '<button type="button" class="btn btn-primary"';
-                        $html .= ' onclick="selectArticle($(this), ' . $id_equipment . ', \'Equipment\')"';
-                        $html .= '>';
-                        $html .= 'Sélectionner<i class="fa fa-chevron-right iconRight"></i>';
-                        $html .= '</button>';
-                        $html .= '</div>';
+                        $eq_errors = array();
+                        if (!$equipment->isAvailable(0, $eq_errors)) {
+                            $html .= BimpRender::renderAlerts($eq_errors);
+                        } else {
+                            $html .= '<div style="margin-top: 10px; text-align: right">';
+                            $html .= '<button type="button" class="btn btn-primary"';
+                            $html .= ' onclick="selectArticle($(this), ' . $id_equipment . ', \'Equipment\')"';
+                            $html .= '>';
+                            $html .= 'Sélectionner<i class="fa fa-chevron-right iconRight"></i>';
+                            $html .= '</button>';
+                            $html .= '</div>';
+                        }
                     }
 
                     $html .= '</div>';
@@ -1259,8 +1255,8 @@ class BC_Vente extends BimpObject
 
             if (!$id_product) {
                 $errors[] = 'Aucun produit enregistré pour cet article';
-            } elseif (is_null($product) || !isset($product->id) || !$product->id) {
-                $errors[] = 'Produit associé à cet article non enregistré';
+            } elseif (!BimpObject::objectLoaded($product)) {
+                $errors[] = 'Le produit associé à cet article n\'existe plus (ID ' . $id_product . ')';
             }
 
             if (!count($errors)) {
@@ -1288,32 +1284,29 @@ class BC_Vente extends BimpObject
         return $html;
     }
 
-    public function renderCartEquipmentline(BC_VenteArticle $article, Product $product, Equipment $equipment)
+    public function renderCartEquipmentline(BC_VenteArticle $article, Bimp_Product $product, Equipment $equipment)
     {
         $html = '';
         $html .= '<div id="cart_article_' . $article->id . '" class="cartArticleLine" data-id_article="' . $article->id . '">';
-        $html .= '<div class="product_title">' . $product->label;
+        $html .= '<div class="product_title">' . $product->getName();
         $html .= '<span class="removeArticle" onclick="removeArticle($(this), ' . $article->id . ');">';
         $html .= '<i class="fa fa-trash"></i>';
         $html .= '</span>';
         $html .= '</div>';
         $html .= '<div class="product_info"><strong>Equipement ' . $equipment->id . ' - n° de série: ' . $equipment->getData('serial') . '</strong></div>';
-        $html .= '<div class="product_info"><strong>Réf: </strong>' . $product->ref . '</div>';
+        $html .= '<div class="product_info"><strong>Réf: </strong>' . $product->getRef() . '</div>';
 
         // Options article: 
         $html .= '<div class="article_options">';
         $html .= '<div class="article_qty">&nbsp;</div>';
 
         // Champ remise CRT: 
-        $bimp_product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $product->id);
-        if (BimpObject::ObjectLoaded($bimp_product)) {
-            $remise_crt = (float) $bimp_product->getRemiseCrt();
-            if ($remise_crt) {
-                $html .= '<div class="article_remise_crt" style="margin: 10px 0;">';
-                $html .= '<span style="display: inline-block; font-weight: bold; margin-top: -11px; vertical-align: middle; margin-right: 10px;">Remise CRT: </span>';
-                $html .= BimpInput::renderInput('toggle', 'article_remise_crt', (int) $article->getData('remise_crt'));
-                $html .= '</div>';
-            }
+        $remise_crt = (float) $product->getRemiseCrt();
+        if ($remise_crt) {
+            $html .= '<div class="article_remise_crt" style="margin: 10px 0;">';
+            $html .= '<span style="display: inline-block; font-weight: bold; margin-top: -11px; vertical-align: middle; margin-right: 10px;">Remise CRT: </span>';
+            $html .= BimpInput::renderInput('toggle', 'article_remise_crt', (int) $article->getData('remise_crt'));
+            $html .= '</div>';
         }
 
         // Remises: 
@@ -1346,24 +1339,23 @@ class BC_Vente extends BimpObject
         return $html;
     }
 
-    public function renderCartProductLine(BC_VenteArticle $article, Product $product)
+    public function renderCartProductLine(BC_VenteArticle $article, Bimp_Product $product)
     {
         $html = '';
         $qty = (int) $article->getData('qty');
-        $stock = (int) $article->getProductStock((int) $this->getData('id_entrepot'));
 
         $html .= '<div id="cart_article_' . $article->id . '" class="cartArticleLine" data-id_article="' . $article->id . '">';
-        $html .= '<div class="product_title">' . $product->label;
+        $html .= '<div class="product_title">' . $product->getName();
         $html .= '<span class="removeArticle" onclick="removeArticle($(this), ' . $article->id . ');">';
         $html .= '<i class="fa fa-trash"></i>';
         $html .= '</span>';
         $html .= '</div>';
-        $html .= '<div class="product_info"><strong>Réf: </strong>' . $product->ref . '</div>';
+        $html .= '<div class="product_info"><strong>Réf: </strong>' . $product->getRef() . '</div>';
 
         if ((int) $this->getData('vente_ht')) {
-            $html .= '<div class="product_info"><strong>Prix unitaire HT: </strong>' . BimpTools::displayMoneyValue($product->price, 'EUR') . '</div>';
+            $html .= '<div class="product_info"><strong>Prix unitaire HT: </strong>' . BimpTools::displayMoneyValue($product->dol_object->price, 'EUR') . '</div>';
         } else {
-            $html .= '<div class="product_info"><strong>Prix unitaire TTC: </strong>' . BimpTools::displayMoneyValue($product->price_ttc, 'EUR') . '</div>';
+            $html .= '<div class="product_info"><strong>Prix unitaire TTC: </strong>' . BimpTools::displayMoneyValue($product->dol_object->price_ttc, 'EUR') . '</div>';
         }
 
 
@@ -1385,15 +1377,12 @@ class BC_Vente extends BimpObject
         $html .= '</div>';
 
         // Champ remise CRT: 
-        $bimp_product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $product->id);
-        if (BimpObject::ObjectLoaded($bimp_product)) {
-            $remise_crt = (float) $bimp_product->getRemiseCrt();
-            if ($remise_crt) {
-                $html .= '<div class="article_remise_crt" style="margin: 10px 0;">';
-                $html .= '<span style="display: inline-block; font-weight: bold; margin-top: -11px; vertical-align: middle; margin-right: 10px;">Remise CRT: </span>';
-                $html .= BimpInput::renderInput('toggle', 'article_remise_crt', (int) $article->getData('remise_crt'));
-                $html .= '</div>';
-            }
+        $remise_crt = (float) $product->getRemiseCrt();
+        if ($remise_crt) {
+            $html .= '<div class="article_remise_crt" style="margin: 10px 0;">';
+            $html .= '<span style="display: inline-block; font-weight: bold; margin-top: -11px; vertical-align: middle; margin-right: 10px;">Remise CRT: </span>';
+            $html .= BimpInput::renderInput('toggle', 'article_remise_crt', (int) $article->getData('remise_crt'));
+            $html .= '</div>';
         }
 
         // Remises: 
@@ -1407,17 +1396,23 @@ class BC_Vente extends BimpObject
         $html .= '<span class="final_price">';
 
         if ((int) $this->getData('vente_ht')) {
-            $html .= BimpTools::displayMoneyValue($product->price, 'EUR');
+            $html .= BimpTools::displayMoneyValue($product->dol_object->price, 'EUR');
         } else {
-            $html .= BimpTools::displayMoneyValue($product->price_ttc, 'EUR');
+            $html .= BimpTools::displayMoneyValue($product->dol_object->price_ttc, 'EUR');
         }
 
         $html .= '</span>';
         $html .= '</div>';
         $html .= '</div>';
-        $html .= '<div class="stockAlert"' . (($stock >= $qty) ? ' style="display: none"' : '') . '>';
-        $html .= BimpRender::renderAlerts('Attention, le stock de ce produit est dépassé.<br/><strong class="stock">Stock: <span>' . $stock . '</span></strong>', 'warning');
-        $html .= '</div>';
+
+        // Check du stock dispo: 
+        if ($product->isTypeProduct()) {
+            $stock_dispo = (int) $article->getProductStock((int) $this->getData('id_entrepot'));
+            $html .= '<div class="stockAlert"' . (($stock_dispo >= $qty) ? ' style="display: none"' : '') . '>';
+            $html .= BimpRender::renderAlerts('Attention, le stock de ce produit est dépassé.<br/><strong class="stock">Stock disponible: <span>' . $stock_dispo . '</span></strong>', 'warning');
+            $html .= '</div>';
+        }
+
         $html .= '</div>';
 
         return $html;
@@ -1461,20 +1456,20 @@ class BC_Vente extends BimpObject
         } else {
             $id_product = (int) $equipment->getData('id_product');
 
-            if (is_null($id_product) || !$id_product) {
-                $errors[] = 'Erreur: aucun produit associé à l\'équipement ' . $id_equipment . ' (n° série "' . $equipment->getData('serial') . '")';
+            if (!$id_product) {
+                $errors[] = 'Erreur: aucun produit associé à l\'équipement ' . $equipment->getNomUrl(0, 1, 1, 'default');
                 return null;
             } else {
-                $place = $equipment->getCurrentPlace();
-                if (!is_null($place) && $place->isLoaded()) {
-                    if (in_array((int) $place->getData('type'), array(1, 4))) {
-                        $errors[] = 'L\'équipement ' . $id_equipment . ' (n° série "' . $equipment->getData('serial') . '") est enregistré comme déjà vendu';
-                        return null;
-                    }
+                $product = $equipment->getChildObject('product');
+                if (!BimpObject::objectLoaded($product)) {
+                    $errors[] = 'Le produit associé à l\'équipement ' . $equipment->getNomUrl(0, 1, 1, 'default') . ' n\'existe plus (ID ' . $id_product . ')';
+                    return null;
                 }
 
-                if (count($equipment->getReservationsList())) {
-                    $errors[] = 'L\'équipement ' . $id_equipment . ' (n° série "' . $equipment->getData('serial') . '") est réservé';
+                if (!$equipment->isAvailable(0, $errors, array(// On ne vérifie pas l'emplacement de l'équipement pour éviter le blocage de la vente. 
+                            'id_vente'   => (int) $this->id,
+                            'id_facture' => (int) $this->getData('id_facture')
+                        ))) {
                     return null;
                 }
             }
@@ -1489,62 +1484,59 @@ class BC_Vente extends BimpObject
 
         $equipment = $this->checkEquipment($id_equipment, $errors);
         if (BimpObject::objectLoaded($equipment)) {
-            $product = $equipment->getChildObject('product');
-            if (is_null($product) || !isset($product->id) || !$product->id) {
-                $errors[] = 'Erreur: produit d\'ID ' . $equipment->getData('id_product') . ' non trouvé pour l\'équipement d\'ID' . $id_equipment . ' (n° série "' . $equipment->getData('serial') . '")';
+            $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $equipment->getData('id_product'));
+            $article = BimpObject::getInstance($this->module, 'BC_VenteArticle');
+            $prix_ht = 0;
+            $prix_ttc = 0;
+
+            $prix_except = (float) $equipment->getData('prix_vente_except');
+            if ($prix_except > 0) {
+                $prix_ttc = $prix_except;
             } else {
-                $article = BimpObject::getInstance($this->module, 'BC_VenteArticle');
-                $prix_ht = 0;
-                $prix_ttc = 0;
+                $prix_ttc = $product->dol_object->price_ttc;
+            }
 
-                $prix_except = (float) $equipment->getData('prix_vente_except');
-                if ($prix_except > 0) {
-                    $prix_ttc = $prix_except;
-                } else {
-                    $prix_ttc = $product->price_ttc;
-                }
+            $prix_ht = BimpTools::calculatePriceTaxEx($prix_ttc, (float) $product->dol_object->tva_tx);
 
-                $prix_ht = BimpTools::calculatePriceTaxEx($prix_ttc, (float) $product->tva_tx);
+            $article_errors = $article->validateArray(array(
+                'id_vente'          => $this->id,
+                'id_product'        => $product->id,
+                'id_equipment'      => (int) $id_equipment,
+                'qty'               => 1,
+                'unit_price_tax_ex' => (float) $prix_ht,
+                'unit_price_tax_in' => (float) round($prix_ttc, 2),
+                'tva_tx'            => (float) $product->dol_object->tva_tx
+            ));
 
-                $article_errors = $article->validateArray(array(
-                    'id_vente'          => $this->id,
-                    'id_product'        => $product->id,
-                    'id_equipment'      => (int) $id_equipment,
-                    'qty'               => 1,
-                    'unit_price_tax_ex' => (float) $prix_ht,
-                    'unit_price_tax_in' => (float) round($prix_ttc, 2),
-                    'tva_tx'            => (float) $product->tva_tx
-                ));
+            if (!count($article_errors)) {
+                $article_errors = $article->create();
 
-                if (count($article_errors)) {
-                    $errors = array_merge($errors, $article_errors);
-                } else {
-                    $article_errors = $article->create();
-                    if (count($article_errors)) {
-                        $errors = array_merge($errors, $article_errors);
-                    } else {
-                        if (!$article->checkPlace((int) $this->getData('id_entrepot'))) {
-                            $subject = 'Erreur emplacement équipement';
-                            $msg = 'Un équipement a été ajouté à une vente en caisse dont l\'entrepôt ne correspond pas à l\'emplacement actuellement enregistré pour cet équipement';
-                            $msg .= "\n\n";
-                            $msg .= "\t" . 'Vente n°' . $this->id . "\n";
-                            $msg .= "\t" . 'Equipement: ' . $equipment->getData('serial') . ' (ID: ' . $equipment->id . ')' . "\n";
+                if (!count($article_errors)) {
+                    if (!$article->checkPlace((int) $this->getData('id_entrepot'))) {
+                        $subject = 'Erreur emplacement équipement';
+                        $msg = 'Un équipement a été ajouté à une vente en caisse dont l\'entrepôt ne correspond pas à l\'emplacement actuellement enregistré pour cet équipement';
+                        $msg .= "\n\n";
+                        $msg .= "\t" . 'Vente n°' . $this->id . "\n";
+                        $msg .= "\t" . 'Equipement: ' . $equipment->getData('serial') . ' (ID: ' . $equipment->id . ')' . "\n";
 
-                            $entrepot = BimpCache::getDolObjectInstance((int) $this->getData('id_entrepot'), 'product/stock', 'entrepot');
-                            if (BimpObject::ObjectLoaded($entrepot)) {
-                                $msg .= "\t" . 'Entrepôt de la vente: ' . $entrepot->libelle . "\n";
-                            }
-
-                            $place = $equipment->getCurrentPlace();
-                            if (BimpObject::ObjectLoaded($place)) {
-                                $msg .= "\t" . 'Emplacement de l\'équipement: ' . $place->getPlaceName();
-                            }
-                            mailSyn2($subject, 'logistique@bimp.fr', '', $msg);
+                        $entrepot = BimpCache::getDolObjectInstance((int) $this->getData('id_entrepot'), 'product/stock', 'entrepot');
+                        if (BimpObject::ObjectLoaded($entrepot)) {
+                            $msg .= "\t" . 'Entrepôt de la vente: ' . $entrepot->libelle . "\n";
                         }
 
-                        $html .= $this->renderCartEquipmentline($article, $product, $equipment);
+                        $place = $equipment->getCurrentPlace();
+                        if (BimpObject::ObjectLoaded($place)) {
+                            $msg .= "\t" . 'Emplacement de l\'équipement: ' . $place->getPlaceName();
+                        }
+                        mailSyn2($subject, 'logistique@bimp.fr', '', $msg);
                     }
+
+                    $html .= $this->renderCartEquipmentline($article, $product, $equipment);
                 }
+            }
+
+            if (count($article_errors)) {
+                $errors[] = BimpTools::getMsgFromArray($article_errors, 'Echec de la création de l\'article');
             }
         }
 
@@ -1554,19 +1546,11 @@ class BC_Vente extends BimpObject
     public function addCartProduct($id_product, &$errors, $qty = 1)
     {
         $html = '';
-        if (!class_exists('Product')) {
-            require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
-        }
 
-        global $db;
-        $product = new Product($db);
+        $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $id_product);
 
-        if ($product->fetch($id_product) <= 0) {
-            $msg = 'Erreur: aucun enregistrement trouvé pour le produit d\'id ' . $id_product;
-            if ($product->error) {
-                $msg .= ' - ' . $product->error;
-            }
-            $errors[] = $msg;
+        if (!BimpObject::objectLoaded($product)) {
+            $errors[] = 'Le produit d\'ID ' . $id_product . ' n\'existe pas';
         } else {
             $article = BimpObject::getInstance($this->module, 'BC_VenteArticle');
             $article_errors = $article->validateArray(array(
@@ -1579,17 +1563,18 @@ class BC_Vente extends BimpObject
                 'tva_tx'            => (float) $product->tva_tx
             ));
 
-            if (count($article_errors)) {
-                $errors = array_merge($errors, $article_errors);
-            } else {
+            if (!count($article_errors)) {
                 $article_errors = $article->create();
-                if (count($article_errors)) {
-                    $errors = array_merge($errors, $article_errors);
-                } else {
+
+                if (!count($article_errors)) {
                     $html .= $this->renderCartProductLine($article, $product);
                 }
             }
+            if (count($article_errors)) {
+                $errors[] = BimpTools::getMsgFromArray($article_errors, 'Echec de la création de l\'article');
+            }
         }
+
         return $html;
     }
 
@@ -1597,13 +1582,10 @@ class BC_Vente extends BimpObject
     {
         $cart_html = '';
         $result_html = '';
-
-        // Recherche d'équipement via n° de série: 
-
         $current_equipments = $this->getCurrentEquipments();
 
+        // Recherche d'équipement via n° de série: 
         $rows = $this->db->getValues('be_equipment', 'id', 'serial = "' . $search . '" || concat("S", serial) = "' . $search . '"');
-
         if (!is_null($rows)) {
             $equipements = array();
 
@@ -1628,7 +1610,9 @@ class BC_Vente extends BimpObject
                 }
             }
         } else {
-            $sql = 'SELECT p.rowid as id, p.label, pe.serialisable FROM ' . MAIN_DB_PREFIX . 'product p ';
+            // Recherche Produits: 
+
+            $sql = 'SELECT p.rowid as id, p.label, p.ref, pe.serialisable FROM ' . MAIN_DB_PREFIX . 'product p ';
             $sql .= 'LEFT JOIN ' . MAIN_DB_PREFIX . 'product_extrafields pe ';
             $sql .= ' ON p.rowid = pe.fk_object';
             $sql .= ' WHERE p.barcode = "' . $search . '" OR p.ref LIKE "%' . $search . '%"';
@@ -1637,13 +1621,12 @@ class BC_Vente extends BimpObject
 
             if (!is_null($rows) && count($rows)) {
                 $products = array();
-
                 $current_products = $this->getCurrentProducts();
 
                 foreach ($rows as $r) {
                     if (!in_array((int) $r['id'], $products)) {
                         if ((int) $r['serialisable']) {
-                            $msg = 'Vous devez obligatoirement saisir le numéro de série pour enregistrer un produit "' . $r['label'] . '"';
+                            $msg = 'Vous devez obligatoirement saisir le numéro de série pour enregistrer un produit "' . $r['ref'] . ' - ' . $r['label'] . '"';
                             $result_html .= BimpRender::renderAlerts($msg, 'warning');
                             continue;
                         }
@@ -1704,7 +1687,6 @@ class BC_Vente extends BimpObject
 
             case 'product':
                 $current_products = $this->getCurrentProducts();
-
                 if (array_key_exists((int) $id_object, $current_products)) {
                     $article = BimpCache::getBimpObjectInstance($this->module, 'BC_VenteArticle', (int) $current_products[$id_object]);
                     if ($article->isLoaded()) {
@@ -1904,7 +1886,7 @@ class BC_Vente extends BimpObject
                             'type'         => BE_Place::BE_PLACE_ENTREPOT,
                             'id_entrepot'  => (int) $id_entrepot,
                             'infos'        => 'Correction automatique suite à la vente de l\'équipement (vente #' . $this->id . ')',
-                            'date'         => date('Y-m-d H:i:s')
+                            'date'         => date('Y-m-d H:i:s'),
                         ));
                         if (!count($place_errors)) {
                             $place_errors = $place->create();
@@ -1925,7 +1907,8 @@ class BC_Vente extends BimpObject
                             'type'         => BE_Place::BE_PLACE_CLIENT,
                             'id_client'    => (int) $id_client,
                             'infos'        => 'Vente #' . $this->id,
-                            'date'         => date('Y-m-d H:i:s')
+                            'date'         => date('Y-m-d H:i:s'),
+                            'code_mvt'     => $codemove . '_ART' . (int) $article->id
                         ));
                     } else {
                         $place_errors = $place->validateArray(array(
@@ -1933,7 +1916,8 @@ class BC_Vente extends BimpObject
                             'type'         => BE_Place::BE_PLACE_FREE,
                             'place_name'   => 'Equipement vendu (client non renseigné)',
                             'infos'        => 'Vente #' . $this->id,
-                            'date'         => date('Y-m-d H:i:s')
+                            'date'         => date('Y-m-d H:i:s'),
+                            'code_mvt'     => $codemove . '_ART' . (int) $article->id
                         ));
                     }
 
@@ -1950,10 +1934,10 @@ class BC_Vente extends BimpObject
                     $equipment->updateField('return_available', 1, null, true);
                 } else {
                     $product = $article->getChildObject('product');
-                    $result = $product->correct_stock($user, $id_entrepot, (int) $article->getData('qty'), 1, 'Vente #' . $this->id, 0, $codemove);
+                    $result = $product->dol_object->correct_stock($user, $id_entrepot, (int) $article->getData('qty'), 1, 'Vente #' . $this->id, 0, $codemove . '_ART' . (int) $article->id);
                     if ($result < 0) {
-                        $msg = 'Echec de la mise à jour du stock pour le produit "' . $product->label . '" (Ref: "' . $product->ref . '", ID: ' . $product->id . ')';
-                        $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($product), $msg);
+                        $msg = 'Echec de la mise à jour du stock pour le produit "' . $product->getRef() . ' - ' . $product->getName() . '" (ID: ' . $product->id . ')';
+                        $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($product->dol_object), $msg);
                         dol_syslog('[ERREUR STOCK] ' . $msg . ' - Vente #' . $this->id . ' - Article #' . $article->id . ' - Qté: ' . (int) $article->getData('qty'), LOG_ERR);
                     }
                 }
@@ -1976,7 +1960,8 @@ class BC_Vente extends BimpObject
                                 'type'         => BE_Place::BE_PLACE_ENTREPOT,
                                 'id_entrepot'  => (int) $id_defective_entrepot,
                                 'infos'        => 'Retour produit défectueux (Vente #' . $this->id . ')',
-                                'date'         => date('Y-m-d H:i:s')
+                                'date'         => date('Y-m-d H:i:s'),
+                                'code_mvt'     => $codemove . '_RET' . (int) $return->id
                             ));
                         } else {
                             $place_errors = $place->validateArray(array(
@@ -1984,7 +1969,8 @@ class BC_Vente extends BimpObject
                                 'type'         => BE_Place::BE_PLACE_ENTREPOT,
                                 'id_entrepot'  => (int) $id_entrepot,
                                 'infos'        => 'Retour produit (Vente #' . $this->id . ')',
-                                'date'         => date('Y-m-d H:i:s')
+                                'date'         => date('Y-m-d H:i:s'),
+                                'code_mvt'     => $codemove . '_RET' . (int) $return->id
                             ));
                         }
                         if (!count($place_errors)) {
@@ -2001,13 +1987,13 @@ class BC_Vente extends BimpObject
                         $product = $return->getChildObject('product');
 
                         if ((int) $return->getData('defective')) {
-                            $result = $product->dol_object->correct_stock($user, $id_defective_entrepot, (int) $return->getData('qty'), 0, 'Retour produit Vente #' . $this->id, 0, $codemove);
+                            $result = $product->dol_object->correct_stock($user, $id_defective_entrepot, (int) $return->getData('qty'), 0, 'Retour produit Vente #' . $this->id, 0, $codemove . '_RET' . (int) $return->id);
                         } else {
-                            $result = $product->dol_object->correct_stock($user, $id_entrepot, (int) $return->getData('qty'), 0, 'Retour produit Vente #' . $this->id, 0, $codemove);
+                            $result = $product->dol_object->correct_stock($user, $id_entrepot, (int) $return->getData('qty'), 0, 'Retour produit Vente #' . $this->id, 0, $codemove . '_RET' . (int) $return->id);
                         }
 
                         if ($result < 0) {
-                            $msg = 'Echec de la mise à jour du stock pour le produit retourné "' . $product->dol_object->label . '" (Ref: "' . $product->dol_object->ref . '")';
+                            $msg = 'Echec de la mise à jour du stock pour le produit "' . $product->getRef() . ' - ' . $product->getName() . '" (ID: ' . $product->id . ')';
                             $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($product->dol_object), $msg);
                             dol_syslog('[ERREUR STOCK] ' . $msg . - ' Vente #' . $this->id . ' - Article #' . $article->id . ' - Qté: ' . (int) $article->getData('qty'), LOG_ERR);
                         }
@@ -2070,7 +2056,7 @@ class BC_Vente extends BimpObject
         } else {
             $account_label = ' d\'ID ' . $id_account;
         }
-        
+
         $note = 'Vente en caisse. Vente n°' . $this->id;
         $note .= ' - Centre: "' . $entrepot->description . ' (' . $entrepot->libelle . ')"';
         $note .= ' - Caisse: "' . $caisse->getData('name') . '"';
@@ -2154,7 +2140,7 @@ class BC_Vente extends BimpObject
             if ((int) $return->getData('id_equipment')) {
                 $equipment = $return->getChildObject('equipment');
                 if (BimpObject::objectLoaded($equipment)) {
-                    $product = $equipment->getChildObject('product');
+                    $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $equipment->getData('id_equipment'));
                     $serial = $equipment->getData('serial');
                 }
             } else {
@@ -2176,7 +2162,7 @@ class BC_Vente extends BimpObject
             ));
 
             $line->id_product = (int) $product->id;
-            $line->desc = ' (RETOUR) ' . $product->label . ' - Réf. ' . $product->ref . ($serial ? ' - N° de série: ' . $serial : '');
+            $line->desc = ' (RETOUR) ' . $product->getName() . ' - Réf. ' . $product->getRef() . ($serial ? ' - N° de série: ' . $serial : '');
             $line->qty = ((int) $return->getData('qty') * -1);
             $line->pu_ht = (float) BimpTools::calculatePriceTaxEx((float) $return->getData('unit_price_tax_in'), $line->tva_tx);
             $line->tva_tx = (float) $return->getData('tva_tx');
@@ -2238,7 +2224,7 @@ class BC_Vente extends BimpObject
             ));
 
             $line->id_product = (int) $product->id;
-            $line->desc = $product->getData('label') . ' - Réf. ' . $product->getData('ref') . ($serial ? ' - N° de série: ' . $serial : '');
+            $line->desc = $product->getName() . ' - Réf. ' . $product->getRef() . ($serial ? ' - N° de série: ' . $serial : '');
             $line->qty = (int) $article->getData('qty');
             $line->pu_ht = (float) $article->getData('unit_price_tax_ex');
             if ((int) $this->getData('vente_ht')) {
@@ -2253,8 +2239,12 @@ class BC_Vente extends BimpObject
                 $line->pa_ht = (float) $pfp->getData('price');
             }
 
-            $line_errors = $line->create();
+            $line_warnings = array();
+            $line_errors = $line->create($line_warnings);
 
+            if (count($line_warnings)) {
+                $warnings[] = BimpTools::getMsgFromArray($line_warnings, 'Article #' . $article->id . ': erreurs suite à la création de la ligne de facture');
+            }
             if (count($line_errors)) {
                 $warnings[] = BimpTools::getMsgFromArray($line_errors, 'Echec de l\'ajout de l\'article #' . $article->id . ' à la facture');
             } else {
@@ -2433,39 +2423,6 @@ class BC_Vente extends BimpObject
         return $facture->id;
     }
 
-    public function onCancel()
-    {
-        if ($this->isLoaded()) {
-            $articles = $this->getChildrenObjects('articles', array(
-                'id_equipment' => array(
-                    'operator' => '>',
-                    'value'    => 0
-                )
-            ));
-
-            foreach ($articles as $article) {
-                $equipment = $article->getChildObject('equipment');
-                if (BimpObject::ObjectLoaded($equipment)) {
-                    $equipment->updateField('available', 1, null, true);
-                }
-            }
-
-            $returns = $this->getChildrenObjects('returns', array(
-                'id_equipment' => array(
-                    'operator' => '>',
-                    'value'    => 0
-                )
-            ));
-
-            foreach ($returns as $return) {
-                $equipment = $return->getChildObject('equipment');
-                if (BimpObject::ObjectLoaded($equipment)) {
-                    $equipment->updateField('available', 1, null, true);
-                }
-            }
-        }
-    }
-
     // Overrides
 
     public function validate()
@@ -2490,18 +2447,7 @@ class BC_Vente extends BimpObject
         $data = $this->getAjaxData();
         $this->set('total_ttc', (float) $data['total_ttc'] - (float) $data['total_remises'] - (float) $data['total_returns'] - (float) $data['total_discounts']);
 
-        $init_status = (int) $this->getInitData('status');
-
         $errors = parent::update($warnings, $force_update);
-
-        if (!count($errors)) {
-            if ($init_status !== (int) $this->getData('status')) {
-                $new_status = (int) $this->getData('status');
-                if ($init_status === self::BC_VENTE_BROUILLON && $new_status === self::BC_VENTE_ABANDON) {
-                    $this->onCancel();
-                }
-            }
-        }
 
         return $errors;
     }

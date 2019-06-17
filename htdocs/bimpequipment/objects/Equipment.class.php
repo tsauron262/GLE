@@ -33,6 +33,101 @@ class Equipment extends BimpObject
 
     // Getters booléens: 
 
+    public function isAvailable($id_entrepot = 0, &$errors = array(), $allowed = array())
+    {
+        if (!$this->isLoaded()) {
+            $errors[] = 'ID de l\'équipement absent';
+            return 0;
+        }
+
+        // Check de la présence dans l\'entrepôt. 
+        if ((int) $id_entrepot) {
+            if (!$this->isInEntrepot($id_entrepot, $errors)) {
+                return 0;
+            }
+        }
+
+        // Check des réservations en cours: 
+        $reservations = $this->getReservationsList();
+        if (count($reservations)) {
+            $errors[] = 'L\'équipement ' . $this->getNomUrl(0, 1, 1, 'default') . ' est réservé';
+        }
+
+        // Check des ventes caisse en cours (Brouillons): 
+        if (!$this->isNotInVenteBrouillon($errors, isset($allowed['id_vente']) ? (int) $allowed['id_vente'] : 0)) {
+            return 0;
+        }
+
+        // Check des SAV: 
+        $filters = array(
+            'status'       => array(
+                'operator' => '<',
+                'value'    => 999
+            ),
+            'id_equipment' => (int) $this->id
+        );
+
+        if (isset($allowed['id_sav']) && (int) $allowed['id_sav']) {
+            $filters['id'] = array(
+                'operator' => '!=',
+                'value'    => (int) $allowed['id_sav']
+            );
+        }
+        $sav = BimpCache::findBimpObjectInstance('bimpsupport', 'BS_SAV', $filters, true);
+
+        if (BimpObject::objectLoaded($sav)) {
+            $errors[] = 'L\'équipement ' . $this->getNomUrl(0, 1, 1, 'default') . ' est en cours de traitement dans le SAV ' . $sav->getNomUrl(0, 1, 1, 'default');
+            return 0;
+        }
+
+        // Check des ajouts aux devis SAV non validés: 
+        $sql = 'SELECT sav.id FROM ' . MAIN_DB_PREFIX . 'bs_sav sav';
+        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'propal p on sav.id_propal = p.rowid';
+        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'bs_sav_propal_line l ON l.id_obj = s.id_propal ';
+        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'object_line_equipment leq ON (leq.id_object_line = l.id AND leq.object_type = \'sav_propal\') ';
+        $sql .= ' WHERE leq.id_equipment = ' . (int) $this->id;
+        $sql .= ' AND p.fk_statut = 0';
+
+        if (isset($allowed['id_propal']) && (int) $allowed['id_propal']) {
+            $sql .= ' AND sav.id_propal != ' . (int) $allowed['id_propal'];
+        }
+
+        $rows = $this->db->executeS($sql, 'array');
+        if (!is_null($rows) && !empty($rows)) {
+            foreach ($rows as $r) {
+                $sav = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SAV', (int) $r['id']);
+                if (BimpObject::objectLoaded($sav)) {
+                    $errors[] = 'L\'équipement ' . $this->getNomUrl(0, 1, 1, 'default') . ' a été ajouté à un devis SAV non validé: ' . $sav->getNomUrl(0, 1, 1, 'default');
+                }
+            }
+            return 0;
+        }
+
+        // Check des ajouts aux factures non validées. 
+        $sql = 'SELECT f.rowid FROM ' . MAIN_DB_PREFIX . 'facture f';
+        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'bimp_facture_line l ON l.id_obj = f.rowid ';
+        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'object_line_equipment leq ON (leq.id_object_line = l.id AND leq.object_type = \'facture\') ';
+        $sql .= ' WHERE leq.id_equipment = ' . (int) $this->id;
+        $sql .= ' AND f.fk_statut = 0';
+
+        if (isset($allowed['id_facture']) && (int) $allowed['id_facture']) {
+            $sql .= ' AND f.rowid != ' . (int) $allowed['id_facture'];
+        }
+
+        $rows = $this->db->executeS($sql, 'array');
+        if (!is_null($rows) && !empty($rows)) {
+            foreach ($rows as $r) {
+                $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $r['id']);
+                if (BimpObject::objectLoaded($facture)) {
+                    $errors[] = 'L\'équipement ' . $this->getNomUrl(0, 1, 1, 'default') . ' a été ajouté à une facture non validée ' . $facture->getNomUrl(0, 1, 1, 'full');
+                }
+            }
+            return 0;
+        }
+
+        return 1;
+    }
+
     public function isInEntrepot($id_entrepot = 0, &$errors = array())
     {
         if (!$this->isLoaded()) {
@@ -62,36 +157,7 @@ class Equipment extends BimpObject
         return 0;
     }
 
-    public function isAvailable($id_entrepot = 0, &$errors = array())
-    {
-        if (!$this->isLoaded()) {
-            $errors[] = 'ID de l\'équipement absent';
-            return 0;
-        }
-
-        // Check de la présence dans l\'entrepôt. 
-        if ((int) $id_entrepot) {
-            if (!$this->isInEntrepot($id_entrepot, $errors)) {
-                return 0;
-            }
-        }
-
-        // Check des réservations en cours: 
-        $reservations = $this->getReservationsList();
-        if (count($reservations)) {
-            $errors[] = 'L\'équipement ' . $this->getNomUrl(0, 1, 1, 'default') . ' est réservé';
-        }
-
-        // Check des ventes caisse en cours (Brouillons): 
-        if (!$this->isNotInVenteBrouillon($errors))  {
-            return 0;
-        }
-        
-        // Check des ajouts aux devis SAV non validés: 
-        // Check des ajouts aux factures non validées. 
-    }
-
-    public function isNotInVenteBrouillon(&$errors = array())
+    public function isNotInVenteBrouillon(&$errors = array(), $id_vente_allowed = 0)
     {
         $check = 1;
         if ($this->isLoaded()) {
@@ -100,6 +166,10 @@ class Equipment extends BimpObject
             $sql = 'SELECT v.id FROM ' . MAIN_DB_PREFIX . 'bc_vente_article a ';
             $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . ' bc_vente v ON a.id_vente = v.id';
             $sql .= ' WHERE a.id_equipment = ' . (int) $this->id . ' AND v.status === ' . BC_Vente::BC_VENTE_BROUILLON;
+
+            if ((int) $id_vente_allowed) {
+                $sql .= ' AND v.id != ' . (int) $id_vente_allowed;
+            }
 
             $rows = $this->db->executeS($sql, 'array');
             if (!is_null($rows) && !empty($rows)) {
@@ -119,6 +189,33 @@ class Equipment extends BimpObject
         // Check de la var "return available" (Définie uniquement dans logistique commande)
     }
 
+    public function isSold()
+    {
+        if ($this->isLoaded()) {
+            if ((int) $this->getData('id_facture')) {
+                return 1;
+            }
+        }
+
+        return 0;
+    }
+
+    public function equipmentExists($serial, $id_product)
+    {
+        if (is_null($id_product)) {
+            $id_product = 0;
+        }
+
+        $value = $this->db->getValue($this->getTable(), 'id', '`serial` = \'' . $serial . '\' AND `id_product` = ' . (int) $id_product);
+        if (!is_null($value) && $value) {
+            return 1;
+        }
+
+        return 0;
+    }
+
+    // Getters données: 
+
     public function getName()
     {
         if ($this->isLoaded()) {
@@ -131,31 +228,6 @@ class Equipment extends BimpObject
     public function getRef()
     {
         return $this->getData("serial");
-    }
-
-    public function equipmentExists($serial, $id_product)
-    {
-        if (is_null($id_product)) {
-            $id_product = 0;
-        }
-
-        $value = $this->db->getValue($this->getTable(), 'id', '`serial` = \'' . $serial . '\' AND `id_product` = ' . (int) $id_product);
-        if (!is_null($value) && $value) {
-            return true;
-        }
-
-        return false;
-    }
-
-    public function isSold()
-    {
-        if ($this->isLoaded()) {
-            if ((int) $this->getData('id_facture')) {
-                return 1;
-            }
-        }
-
-        return 0;
     }
 
     public function getHasReservationsArray()
@@ -584,7 +656,7 @@ class Equipment extends BimpObject
                 $new_place = BimpCache::getBimpObjectInstance($this->module, 'BE_Place', $items[0]['id']);
                 $codemove = $new_place->getData('code_mvt');
                 if (is_null($codemove) || !$codemove) {
-                    $codemove = dol_print_date(dol_now(), '%y%m%d%H%M%S');
+                    $codemove = dol_print_date(dol_now(), 'EQ' . (int) $this->id . '_PLACE' . (int) $new_place->id);
                 }
                 $new_place_infos = $new_place->getData('infos');
                 $label = ($new_place_infos ? $new_place_infos . ' - ' : '') . 'Produit "' . $product->ref . '" - serial: "' . $this->getData('serial') . '"';

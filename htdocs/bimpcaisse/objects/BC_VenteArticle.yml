@@ -6,12 +6,6 @@ labels:
     
 parent_object: BC_Vente
 parent_id_property: id_vente
-
-objects: 
-    product: 
-        instance: 
-            bimp_object: unset
-            dol_object: Product
                 
 fields: 
     id_vente:

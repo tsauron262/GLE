@@ -134,7 +134,7 @@ fields:
         sortable: 0
         
     code_mvt: 
-        label: Code Mouvement
+        label: Code Mouvement de stock
         
 lists:
     default: 

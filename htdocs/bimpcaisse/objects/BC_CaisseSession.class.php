@@ -88,7 +88,7 @@ class BC_CaisseSession extends BimpObject
 
 // Overrides: 
 
-    public function getInstanceName()
+    public function getName($with_generic = true)
     {
         $name = '';
         if ($this->isLoaded()) {

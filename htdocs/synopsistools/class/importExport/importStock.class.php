@@ -43,21 +43,22 @@ class importStock extends import8sens {
             $newStock = round(str_replace(",", ".", $ln['ArdStk']));
 
 
-            if ($this->prodId < 1)
+            if ($this->prodId < 1){
                 if($newStock != 0)
-                $this->alert("Prod introuvable " . $ln['ArdGArtCode']);
+                    $this->error("Prod introuvable " . $ln['ArdGArtCode']);
+            }
             elseif ($this->entrepotId < 1)
                 $this->error("entrepot introuvable " . $ln['ArdGDepCode']);
             else {
                 $sql = $this->db->query("SELECT reel FROM `llx_product_stock` WHERE `fk_product` = " . $this->prodId . " AND `fk_entrepot` = " . $this->entrepotId);
+                $actuel = 0;
                 if ($this->db->num_rows($sql) == 1) {
                     $result = $this->db->fetch_object($sql);
+                    $actuel = $result->reel;
                     $this->tabResult['connue'] ++;
-                    if ($result->reel != $newStock) {
+                    if ($actuel != $newStock) {
                         $this->db->query("UPDATE `llx_product_stock` SET `reel`= '" . $newStock . "' WHERE `fk_product` = " . $this->prodId . " AND `fk_entrepot` = " . $this->entrepotId);
                         $this->tabResult['modifier'] ++;
-                        $this->error("SELECT reel FROM `llx_product_stock` WHERE `fk_product` = " . $this->prodId . " AND `fk_entrepot` = " . $this->entrepotId . " | " . $ln['ArdGArtCode']);
-                        $this->error("UPDATE `llx_product_stock` SET `reel`= '" . $newStock . "' WHERE `fk_product` = " . $this->prodId . " AND `fk_entrepot` = " . $this->entrepotId);
                     }
                 } else {
                     $this->tabResult['creer'] ++;

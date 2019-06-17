@@ -59,7 +59,7 @@ class BC_FiltersPanel extends BC_Panel
         } elseif (isset($this->values['fields'][$field])) {
             $values = $this->values['fields'][$field];
         }
-        
+
         return $values;
     }
 
@@ -92,15 +92,18 @@ class BC_FiltersPanel extends BC_Panel
     {
         $errors = array();
 
-        foreach ($this->params['filters'] as $filter) {
+        foreach ($this->params['filters'] as $key => $filter) {
             if (isset($filter['field']) && $filter['field']) {
                 $values = $this->getValues($filter['field'], isset($filter['child']) ? $filter['child'] : '');
                 if (!empty($values)) {
-                    $bc_filter = new BC_FieldFilter($this->object, $filter, $values);
+                    if ((int) $filter['custom']) {
+                        $path = $this->config_path . '/filters/' . $key;
+                        $bc_filter = new BC_CustomFilter($this->object, $filter, $path, $values);
+                    } else {
+                        $bc_filter = new BC_FieldFilter($this->object, $filter, $values);
+                    }
                     $errors = array_merge($bc_filter->getSqlFilters($filters, $joins), $errors);
                 }
-            } else {
-                // todo: cutom ...
             }
         }
 
@@ -203,15 +206,18 @@ class BC_FiltersPanel extends BC_Panel
             }
         }
 
-        foreach ($this->params['filters'] as $filter) {
+        foreach ($this->params['filters'] as $key => $filter) {
             if (isset($filter['field']) && (string) $filter['field']) {
                 $values = $this->getValues($filter['field'], isset($filter['child']) ? $filter['child'] : '');
-
-                $bc_filter = new BC_FieldFilter($this->object, $filter, $values);
-
+                
+                if ((int) $filter['custom']) {
+                    $path = $this->config_path . '/filters/' . $key;
+                    $bc_filter = new BC_CustomFilter($this->object, $filter, $path, $values);
+                } else {
+                    $bc_filter = new BC_FieldFilter($this->object, $filter, $values);
+                }
+                
                 $html .= $bc_filter->renderHtml();
-            } else {
-                // todo: custom...
             }
         }
 

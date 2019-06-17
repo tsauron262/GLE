@@ -33,7 +33,7 @@ class BimpConfigDefinitions
     public static $search = array(
         'type'             => array('default' => 'field_input'),
         'part_type'        => array('default' => 'middle'),
-        'search_on_key_up' => array('data_type' => 'bool', 'default' => 1),
+        'search_on_key_up' => array('data_type' => 'bool', 'default' => 0),
         'option'           => array(),
         'input'            => array('type' => 'definitions', 'defs_type' => 'input')
     );
@@ -60,17 +60,17 @@ class BimpConfigDefinitions
         'type'    => array('default' => 'info')
     );
     public static $list_filter = array(
-        'field' => array('required' => true),
-        'child' => array(),
-        'name'  => array('default' => 'default'),
-        'open'  => array('data_type' => 'bool', 'default' => 0)
+        'custom' => array('data_type' => 'bool', 'default' => 0),
+        'field'  => array('default' => true),
+        'child'  => array(),
+        'name'   => array('default' => 'default'),
+        'open'   => array('data_type' => 'bool', 'default' => 0)
     );
     public static $icon_button = array(
         'label'   => array('default' => ''),
         'icon'    => array('required' => true),
         'onclick' => array('default' => '')
     );
-    
     public static $group_by_option = array(
         'field' => array('default' => '')
     );

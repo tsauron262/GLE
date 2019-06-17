@@ -618,7 +618,7 @@ class BimpInput
                     $html .= ' data-max_input_name="' . (isset($options['max_input_name']) ? $options['max_input_name'] : '') . '"';
                     $html .= ' data-max_input_abs="' . (isset($options['max_input_abs']) ? $options['max_input_abs'] : 0) . '"';
                     $html .= '>';
-                    if (count($options['items']) > 3 && (!isset($options['select_all_buttons']) || (int) $options['select_all_buttons'])) {
+                    if (count($options['items']) > 1 && (!isset($options['select_all_buttons']) || (int) $options['select_all_buttons'])) {
                         $html .= '<div class="smallActionsContainer">';
                         $html .= '<span class="small-action" onclick="checkAll($(this).parent().parent(), \'.' . $field_name . '_check\');">';
                         $html .= BimpRender::renderIcon('fas_check-square', 'iconLeft') . 'Tout sélectionner';

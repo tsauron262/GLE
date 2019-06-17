@@ -154,7 +154,7 @@ function loadModalForm($button, data, title, successCallback, on_save) {
         }
     }, {
         error_msg: 'Une erreur est survenue. Le formulaire n\'a pas pu être chargé'
-    });
+    }, {}, 'medium');
 }
 
 function reloadForm(form_id) {
@@ -233,11 +233,11 @@ function closeForm(form_id) {
 
     var $modal = $form.findParentByClass('modal');
     if ($.isOk($modal)) {
-        var modal_idx = parseInt($form.data('modal_idx'));
-        if (modal_idx) {
-            bimpModal.removeContent(modal_idx);
-        }
-        bimpModal.hide();
+//        var modal_idx = parseInt($form.data('modal_idx'));
+//        if (modal_idx) {
+//            bimpModal.removeContent(modal_idx);
+//        }
+        bimpModal.clearAllContents();
     } else {
         var $container = $('#' + form_id + '_container');
         if ($container.length) {

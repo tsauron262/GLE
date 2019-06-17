@@ -31,7 +31,7 @@ class Interfacevalidate extends DolibarrTriggers
 
     public function runTrigger($action, $object, User $user, Translate $langs, Conf $conf)
     {
-        global $conf, $user;
+        global $conf;
         
 
         if ($action == 'PROPAL_VALIDATE') {
@@ -167,9 +167,6 @@ class Interfacevalidate extends DolibarrTriggers
         
                 
         if (!defined("NOT_VERIF") && !BimpDebug::isActive('bimpcommercial/no_validate')) {
-            
-                  
-
             if ($action == 'ORDER_VALIDATE') {
                 $bvo = new BimpValidateOrder($user->db);
                 if ($bvo->checkValidateRights($user, $object) < 1)
@@ -221,10 +218,12 @@ class Interfacevalidate extends DolibarrTriggers
                     $object->add_contact($user->id, 'SALESREPSIGN', 'internal');
                 }
 
-                $idEn = $object->array_options['options_entrepot'];
-                if ($idEn < 1) {
-                    setEventMessages("Pas d'entrepôt associé", null, 'errors');
-                    return -2;
+                if(!BimpCore::getConf("NOT_USE_ENTREPOT")){
+                    $idEn = $object->array_options['options_entrepot'];
+                    if ($idEn < 1) {
+                        setEventMessages("Pas d'entrepôt associé", null, 'errors');
+                        return -2;
+                    }
                 }
             }
 

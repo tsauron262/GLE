@@ -1014,6 +1014,7 @@ class BimpController
         $form_id = BimpTools::getValue('form_id', null);
         $full_panel = BimpTools::getValue('full_panel', false);
         $force_edit = BimpTools::getValue('force_edit', 0);
+        $modal_format = 'medium';
 
         if (is_null($object_name) || !$object_name) {
             $errors[] = 'Type de l\'objet absent';
@@ -1033,6 +1034,7 @@ class BimpController
 
             if (!count($errors)) {
                 $form = new BC_Form($object, $id_parent, $form_name, 1, !$full_panel);
+                $modal_format = $form->params['modal_format'];
                 if ($force_edit) {
                     $form->force_edit = true;
                 }
@@ -1050,15 +1052,16 @@ class BimpController
         }
 
         die(json_encode(array(
-            'errors'      => $errors,
-            'html'        => $html,
-            'module'      => $module,
-            'object_name' => $object_name,
-            'id_object'   => $id_object,
-            'id_parent'   => $id_parent,
-            'form_name'   => $form_name,
-            'form_id'     => $form_id,
-            'request_id'  => BimpTools::getValue('request_id', 0)
+            'errors'       => $errors,
+            'html'         => $html,
+            'module'       => $module,
+            'object_name'  => $object_name,
+            'id_object'    => $id_object,
+            'id_parent'    => $id_parent,
+            'form_name'    => $form_name,
+            'form_id'      => $form_id,
+            'modal_format' => $modal_format,
+            'request_id'   => BimpTools::getValue('request_id', 0)
         )));
     }
 
@@ -1233,6 +1236,7 @@ class BimpController
         $object_name = BimpTools::getValue('object_name');
         $list_name = BimpTools::getValue('list_name', 'default');
         $list_id = BimpTools::getValue('list_id', null);
+        $modal_format = 'large';
 
         if (is_null($object_name) || !$object_name) {
             $errors[] = 'Type d\'objet absent';
@@ -1241,6 +1245,7 @@ class BimpController
         if (!count($errors)) {
             $object = BimpObject::getInstance($module, $object_name);
             $list = new BC_ListTable($object, $list_name, 1, $id_parent);
+            $modal_format = $list->params['modal_format'];
             if (!is_null($list_id)) {
                 $list->identifier = $list_id;
             }
@@ -1323,6 +1328,7 @@ class BimpController
         $panel = BimpTools::getValue('panel');
         $modal_idx = BimpTools::getValue('modal_idx', 0);
         $panel_header = BimpTools::getValue('panel_header');
+        $modal_format = 'large';
 
         if (is_null($object_name) || !$object_name) {
             $errors[] = 'Type d\'objet absent';
@@ -1335,6 +1341,7 @@ class BimpController
             $object = BimpObject::getInstance($module, $object_name);
             $object->fetch($id_object);
             $view = new BC_View($object, $view_name, $content_only, 1);
+            $modal_format = $view->params['modal_format'];
             if ($modal_idx) {
                 $view->addIdentifierSuffix('modal_' . $modal_idx);
             }
@@ -1360,11 +1367,12 @@ class BimpController
         }
 
         die(json_encode(array(
-            'errors'      => $errors,
-            'html'        => $html,
-            'header_html' => $header_html,
-            'view_id'     => $view_id,
-            'request_id'  => BimpTools::getValue('request_id', 0)
+            'errors'       => $errors,
+            'html'         => $html,
+            'header_html'  => $header_html,
+            'view_id'      => $view_id,
+            'modal_format' => $modal_format,
+            'request_id'   => BimpTools::getValue('request_id', 0)
         )));
     }
 
@@ -1377,6 +1385,7 @@ class BimpController
         $module = BimpTools::getValue('module', $this->module);
         $object_name = BimpTools::getValue('object_name');
         $views_list_name = BimpTools::getValue('views_list_name');
+        $modal_format = 'large';
 
         if (is_null($object_name) || !$object_name) {
             $errors[] = 'Type d\'objet absent';
@@ -1389,6 +1398,7 @@ class BimpController
         if (!count($errors)) {
             $object = BimpObject::getInstance($module, $object_name);
             $bimpViewsList = new BC_ListViews($object, $views_list_name);
+            $modal_format = $bimpViewsList->params['modal_format'];
             $html = $bimpViewsList->renderItemViews();
             $pagination = $bimpViewsList->renderPagination();
             $views_list_id = $bimpViewsList->identifier;
@@ -1399,6 +1409,7 @@ class BimpController
             'html'          => $html,
             'pagination'    => $pagination,
             'views_list_id' => $views_list_id,
+            'modal_format'  => $modal_format,
             'request_id'    => BimpTools::getValue('request_id', 0)
         )));
     }
@@ -1418,6 +1429,7 @@ class BimpController
         $object_name = BimpTools::getValue('object_name');
         $list_name = BimpTools::getValue('list_name', 'default');
         $list_id = BimpTools::getValue('list_id', null);
+        $modal_format = 'large';
 
         if (is_null($object_name) || !$object_name) {
             $errors[] = 'Type d\'objet absent';
@@ -1426,6 +1438,7 @@ class BimpController
         if (!count($errors)) {
             $object = BimpObject::getInstance($module, $object_name);
             $list = new BC_ListCustom($object, $list_name, $id_parent);
+            $modal_format = $list->params['modal_format'];
             if (!is_null($list_id)) {
                 $list->identifier = $list_id;
             }
@@ -1438,6 +1451,7 @@ class BimpController
             'html'               => $html,
             'filters_panel_html' => $filters_panel_html,
             'list_id'            => $list_id,
+            'modal_format'       => $modal_format,
             'request_id'         => BimpTools::getValue('request_id', 0)
         )));
     }
@@ -1457,6 +1471,7 @@ class BimpController
         $object_name = BimpTools::getValue('object_name');
         $list_name = BimpTools::getValue('list_name', 'default');
         $list_id = BimpTools::getValue('list_id', null);
+        $modal_format = 'large';
 
         if (is_null($object_name) || !$object_name) {
             $errors[] = 'Type d\'objet absent';
@@ -1465,6 +1480,7 @@ class BimpController
         if (!count($errors)) {
             $object = BimpObject::getInstance($module, $object_name);
             $list = new BC_StatsList($object, $list_name, $id_parent);
+            $modal_format = $list->params['modal_format'];
             if (!is_null($list_id)) {
                 $list->identifier = $list_id;
             }
@@ -1477,6 +1493,7 @@ class BimpController
             'html'               => $html,
             'filters_panel_html' => $filters_panel_html,
             'list_id'            => $list_id,
+            'modal_format'       => $modal_format,
             'request_id'         => BimpTools::getValue('request_id', 0)
         )));
     }

@@ -37,8 +37,10 @@ class FixeTabs_bimpmsg extends FixeTabs_module {
                 else {
                     global $db;
                     $sql = $db->query('SELECT MAX(id) max FROM `llx_bimpcore_note` WHERE `obj_type` = "bimp_object" AND `obj_module` = "'.$fil['obj']->module.'" AND `obj_name` = "'.$fil['obj']->object_name.'" AND `id_obj` = '.$fil['obj']->id);
-                    $ln = $db->fetch_object($sql);
-                    $notes->fetch($ln->max);
+                    if($sql){
+                        $ln = $db->fetch_object($sql);
+                        $notes->fetch($ln->max);
+                    }
                 }
                 $content .= "</span>";
                 if(method_exists($fil['obj'], "getChildObject")){

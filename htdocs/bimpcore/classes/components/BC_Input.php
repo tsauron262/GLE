@@ -129,6 +129,7 @@ class BC_Input extends BimpComponent
         $this->params_def['multiple'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['help'] = array('default' => '');
         $this->params_def['card'] = array('default' => '');
+        $this->params_def['auto_save'] = array('data_type' => 'bool', 'default' => 0);
 
         parent::__construct($object, '', $path);
 
@@ -494,7 +495,7 @@ class BC_Input extends BimpComponent
                     $label_input_suffixe = '_label';
                 }
                 $sortable = (isset($this->params['sortable']) ? (int) $this->params['sortable'] : 0);
-                $autosave = false;
+                $autosave = (isset($this->params['auto_save']) ? (int) $this->params['auto_save'] : 0);
 
                 $values = array();
 

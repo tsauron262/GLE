@@ -16,6 +16,12 @@ objects:
             id_object: 
                 field_value: id_commande_fourn
     
+    user_resp: 
+        extends: user
+        instance: 
+            id_object: 
+                field_value: id_user_resp
+                
 fields: 
     id_commande_fourn: 
         label: Commande fournisseur
@@ -89,11 +95,25 @@ fields:
         type: money
         default_value: 0
         
+    id_user_resp: 
+        label: Responsable
+        type: id_object
+        object: user_resp
+        required: 1
+        input: 
+            type: search_user
+        default_value: 
+            prop: 
+                name: id
+                object: 
+                    global: user
+        
 forms: 
     default: 
         rows: 
             - field: id_commande_fourn
               hidden: 1
+            - field: id_user_resp
             - field: id_entrepot
             - field: ref
             - field: assign_lines_to_commandes_client
@@ -124,6 +144,8 @@ fields_tables:
               display: card
             - field: ref
             - field: status
+            - field: id_user_resp
+              edit: 1
             - field: num_reception
             - field: id_entrepot
             - field: date_received
@@ -168,6 +190,9 @@ filters_panel:
               child: parent
             
 lists_cols: 
+    user_resp: 
+        field: id_user_resp
+        display: nom_url
     commande: 
         field: id_commande_fourn
         display: nom_url

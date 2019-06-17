@@ -242,7 +242,7 @@ function loadModalList(module, object_name, list_name, id_parent, $button, title
             bimpModal.removeComponentContent($new_list.attr('id'));
             onListLoaded($new_list);
         }
-    });
+    }, {}, 'large');
 }
 
 function loadModalFormFromList(list_id, form_name, $button, id_object, id_parent, title, on_save) {
@@ -598,7 +598,7 @@ function setSelectedObjectsNewStatus($button, list_id, new_status, extra_data, c
     }
 }
 
-function setSelectedObjectsAction($button, list_id, action, extra_data, form_name, confirm_msg, single_action) {
+function setSelectedObjectsAction($button, list_id, action, extra_data, form_name, confirm_msg, single_action, on_form_submit, success_callback, $resultContainer) {
     if ($button.hasClass('disabled')) {
         return;
     }
@@ -607,6 +607,10 @@ function setSelectedObjectsAction($button, list_id, action, extra_data, form_nam
         if (!confirm(confirm_msg.replace(/&quote;/g, '"'))) {
             return;
         }
+    }
+    
+    if (typeof ($resultContainer) === 'undefined') {
+        $resultContainer = null;
     }
 
     if (typeof (single_action) === 'undefined') {
@@ -637,6 +641,11 @@ function setSelectedObjectsAction($button, list_id, action, extra_data, form_nam
         bimp_msg(msg, 'danger');
     } else {
         if (typeof (form_name) === 'string' && form_name) {
+            extra_data['id_objects'] = [];
+            $selected.each(function () {
+                var $input = $(this);
+                extra_data['id_objects'].push($input.data('id_object'));
+            });
             var title = '';
             if ($.isOk($button)) {
                 title = $button.text();
@@ -670,33 +679,31 @@ function setSelectedObjectsAction($button, list_id, action, extra_data, form_nam
                     bimpModal.addButton('Valider<i class="fa fa-arrow-circle-right iconRight"></i>', '', 'primary', 'set_action_button', modal_idx);
 
                     bimpModal.$footer.find('.set_action_button.modal_' + modal_idx).click(function () {
-                        $form.find('.inputContainer').each(function () {
-                            if ($(this).data('multiple')) {
-                                var field_name = $(this).data('values_field');
-                                var $valuesContainer = $(this).parent().find('.inputMultipleValuesContainer');
-                                if (!$valuesContainer.length) {
-                                    bimp_msg('Erreur: liste de valeurs absente pour le champ "' + field_name + '"', 'danger');
-                                    return;
-                                } else {
-                                    extra_data[field_name] = [];
-                                    $valuesContainer.find('[name="' + field_name + '[]"]').each(function () {
-                                        var value = $(this).val();
-                                        if (value !== '') {
-                                            extra_data[field_name].push(value);
-                                        }
-                                    });
+                        if (validateForm($form)) {
+                            $form.find('.inputContainer').each(function () {
+                                field_name = $(this).data('field_name');
+                                if ($(this).data('multiple')) {
+                                    field_name = $(this).data('values_field');
                                 }
-                            } else {
-                                var field_name = $(this).data('field_name');
-                                if ($(this).find('.cke').length) {
-                                    var html_value = $('#cke_' + field_name).find('iframe').contents().find('body').html();
-                                    $(this).find('[name="' + field_name + '"]').val(html_value);
+                                if (field_name) {
+                                    extra_data[field_name] = getInputValue($(this));
                                 }
-                                extra_data[field_name] = $(this).find('[name="' + field_name + '"]').val();
+                            });
+                            if (typeof (on_form_submit) === 'function') {
+                                extra_data = on_form_submit($form, extra_data);
                             }
-                        });
-                        bimpModal.hide();
-                        setSelectedObjectsAction($button, list_id, action, extra_data, null, null, single_action);
+
+                            setSelectedObjectsAction($button, list_id, action, extra_data, null, null, true, null, function (result) {
+                                if (typeof (result.warnings) !== 'undefined' && result.warnings && result.warnings.length) {
+                                    bimpModal.$footer.find('.set_action_button.modal_' + $form.data('modal_idx')).remove();
+                                } else {
+                                    bimpModal.clearAllContents();
+                                }
+                                if (typeof (successCallback) === 'function') {
+                                    successCallback(result);
+                                }
+                            }, $form.find('.ajaxResultContainer'));
+                        }
                     });
                 }
             });
@@ -711,7 +718,7 @@ function setSelectedObjectsAction($button, list_id, action, extra_data, form_nam
                     module: $list.data('module'),
                     object_name: object_name,
                     id_object: 0
-                }, action, extra_data, null, null, null, null);
+                }, action, extra_data, null, $resultContainer, success_callback, null);
             } else {
                 $button.addClass('disabled');
                 var i = 1;
@@ -722,7 +729,7 @@ function setSelectedObjectsAction($button, list_id, action, extra_data, form_nam
                             module: $list.data('module'),
                             object_name: object_name,
                             id_object: id_object
-                        }, action, extra_data, null, null, null, null);
+                        }, action, extra_data, null, $resultContainer, null, null);
                     } else {
                         var msg = '';
                         if (object_labels[object_name]['is_female']) {

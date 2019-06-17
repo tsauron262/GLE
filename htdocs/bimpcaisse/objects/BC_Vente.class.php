@@ -508,7 +508,7 @@ class BC_Vente extends BimpObject
         $html .= '<div id="curVenteGlobal" class="row">';
 
         $html .= '<div id="currentVenteErrors" class="col-lg-12"></div>';
-        
+
         // Choix Commercial: 
         $id_user_resp = (int) $this->getData('id_user_resp');
         if (!$id_user_resp) {
@@ -1009,7 +1009,7 @@ class BC_Vente extends BimpObject
         $id_cond = (int) $this->getData('id_cond_reglement');
         $html .= '<div id="condReglement" style="font-size: 14px">';
         $html .= '<span style="font-weight: bold">Condition de réglement : </span>';
-        $html .= '<select id="condReglementSelect" name="condReglementSelect">';
+        $html .= '<select id="condReglementSelect" name="condReglementSelect"  disabled>';
         foreach ($this->getCond_reglementsArray() as $id => $label) {
             $html .= '<option value="' . $id . '"' . ((int) $id === $id_cond ? ' selected=""' : '') . '>' . $label . '</option>';
         }
@@ -1460,6 +1460,25 @@ class BC_Vente extends BimpObject
                     if (count($article_errors)) {
                         $errors = array_merge($errors, $article_errors);
                     } else {
+                        if (!$article->checkPlace((int) $this->getData('id_entrepot'))) {
+                            $subject = 'Erreur emplacement équipement';
+                            $msg = 'Un équipement a été ajouté à une vente en caisse dont l\'entrepôt ne correspond pas à l\'emplacement actuellement enregistré pour cet équipement';
+                            $msg .= "\n\n";
+                            $msg .= "\t" . 'Vente n°' . $this->id . "\n";
+                            $msg .= "\t" . 'Equipement: ' . $equipment->getData('serial') . ' (ID: ' . $equipment->id . ')' . "\n";
+
+                            $entrepot = BimpCache::getDolObjectInstance((int) $this->getData('id_entrepot'), 'product/stock', 'entrepot');
+                            if (BimpObject::ObjectLoaded($entrepot)) {
+                                $msg .= "\t" . 'Entrepôt de la vente: ' . $entrepot->libelle . "\n";
+                            }
+
+                            $place = $equipment->getCurrentPlace();
+                            if (BimpObject::ObjectLoaded($place)) {
+                                $msg .= "\t" . 'Emplacement de l\'équipement: ' . $place->getPlaceName();
+                            }
+                            mailSyn2($subject, 'logistique@bimp.fr', '', $msg);
+                        }
+
                         $html .= $this->renderCartEquipmentline($article, $product, $equipment);
                     }
                 }
@@ -2023,6 +2042,15 @@ class BC_Vente extends BimpObject
             }
             return 0;
         }
+        
+        
+        // Choix Commercial: 
+        $id_user_resp = (int) $this->getData('id_user_resp');
+        if (!$id_user_resp) {
+            global $user;
+            $id_user_resp = $user->id;
+        }
+        $facture->add_contact($id_user_resp, 'SALESREPFOLL', 'internal');
 
         // Ajout des avoirs client utilisés: 
         $asso = new BimpAssociation($this, 'discounts');

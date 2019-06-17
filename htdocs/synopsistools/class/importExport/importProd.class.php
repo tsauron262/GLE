@@ -7,6 +7,7 @@ class importProd extends importCat {
     public function __construct($db) {
         parent::__construct($db);
         $this->path .= "../prod/";
+    $this->maxLn = 80;
         $this->sepCollone = "	";
     }
 

@@ -863,6 +863,7 @@ class Product extends CommonObject
 			$sql.= ", tosell = " . $this->status;
 			$sql.= ", tobuy = " . $this->status_buy;
 			$sql.= ", import_key = '" . $this->import_key."'";
+			$sql.= ", pmp = '" . $this->pmp."'";
 			$sql.= ", tobatch = " . ((empty($this->status_batch) || $this->status_batch < 0) ? '0' : $this->status_batch);
 			$sql.= ", finished = " . ((! isset($this->finished) || $this->finished < 0) ? "null" : (int) $this->finished);
 			$sql.= ", weight = " . ($this->weight!='' ? "'".$this->db->escape($this->weight)."'" : 'null');

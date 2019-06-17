@@ -125,7 +125,44 @@ class Equipment extends BimpObject
             return 0;
         }
 
-        return 1;
+        // Check retour en commande client: 
+        if (!(int) $this->getData('id_commande_line_return')) {
+            $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $this->getData('id_commande_line_return'));
+            if (BimpObject::objectLoaded($line)) {
+                $commande = $line->getParentInstance();
+                if (BimpObject::objectLoaded($commande)) {
+                    $msg = 'Un retour est en cours pour l\'équipement ' . $this->getNomUrl(0, 1, 1, 'default');
+                    $msg .= ' dans la commande client ' . $commande->getNomUrl(0, 1, 1, 'full');
+                    $errors[] = $msg;
+                    return 0;
+                }
+            }
+        }
+
+        // Check des retours caisse: 
+        $check = 1;
+
+        if ($this->isLoaded()) {
+            BimpObject::loadClass('bimpcaisse', 'BC_Vente');
+
+            $sql = 'SELECT v.id FROM ' . MAIN_DB_PREFIX . 'bc_vente v ';
+            $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'bc_vente_return r ON r.id_vente = v.id';
+            $sql .= ' WHERE r.id_equipment = ' . (int) $this->id . ' AND v.status = ' . BC_Vente::BC_VENTE_BROUILLON;
+
+            if (isset($allowed['id_vente_return']) && (int) $allowed['id_vente_return']) {
+                $sql .= ' AND v.id != ' . (int) $allowed['id_vente'];
+            }
+
+            $rows = $this->db->executeS($sql, 'array');
+            if (!is_null($rows) && !empty($rows)) {
+                foreach ($rows as $r) {
+                    $errors[] = 'L\'équipement ' . $this->getNomUrl(0, 1, 1, 'default') . ' a été ajouté dans un retour caisse en cours (vente #' . $r['id'] . ')';
+                    $check = 0;
+                }
+            }
+        }
+
+        return $check;
     }
 
     public function isInEntrepot($id_entrepot = 0, &$errors = array())
@@ -164,8 +201,8 @@ class Equipment extends BimpObject
             BimpObject::loadClass('bimpcaisse', 'BC_Vente');
 
             $sql = 'SELECT v.id FROM ' . MAIN_DB_PREFIX . 'bc_vente_article a ';
-            $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . ' bc_vente v ON a.id_vente = v.id';
-            $sql .= ' WHERE a.id_equipment = ' . (int) $this->id . ' AND v.status === ' . BC_Vente::BC_VENTE_BROUILLON;
+            $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'bc_vente v ON a.id_vente = v.id';
+            $sql .= ' WHERE a.id_equipment = ' . (int) $this->id . ' AND v.status = ' . BC_Vente::BC_VENTE_BROUILLON;
 
             if ((int) $id_vente_allowed) {
                 $sql .= ' AND v.id != ' . (int) $id_vente_allowed;
@@ -181,12 +218,6 @@ class Equipment extends BimpObject
         }
 
         return $check;
-    }
-
-    public function isAvailableForReturn(&$errors = array())
-    {
-        // Check des retours caisse: 
-        // Check de la var "return available" (Définie uniquement dans logistique commande)
     }
 
     public function isSold()
@@ -873,6 +904,26 @@ class Equipment extends BimpObject
                 }
             }
         }
+        return $errors;
+    }
+
+    public function checkPlaceForReturn($id_client = 0)
+    {
+        $errors[] = array();
+
+        if ($this->isLoaded()) {
+            $place = $this->getCurrentPlace();
+            if (!BimpObject::objectLoaded($place)) {
+                $errors[] = 'Aucun emplacement enregistré pour l\'équipement ' . $this->getNomUrl(0, 1, 1, 'default');
+            } elseif ((int) $id_client) {
+                if ((int) $place->getData('type') !== BE_Place::BE_PLACE_CLIENT || (int) $place->getData('id_client') !== (int) $id_client) {
+                    $msg = 'L\'emplacement actuel de l\'équipement ' . $this->getNomUrl(0, 1, 1, 'default') . ' ne correspond pas au client sélectionné.<br/>';
+                    $msg .= 'Emplacement actuel: ' . $place->displayPlace();
+                    $errors[] = $msg;
+                }
+            }
+        }
+
         return $errors;
     }
 

@@ -108,77 +108,55 @@ class BC_VenteReturn extends BimpObject
         $vente = $this->getParentInstance();
 
         if (!BimpObject::objectLoaded($vente)) {
-            return array('ID de la vente invalide');
+            return array('ID de la vente absent');
         }
 
         if ((int) $this->getData('id_equipment')) {
-            $currentReturnedEquipments = array();
-            $returns = $vente->getChildrenObjects('returns');
-
-            foreach ($returns as $return) {
-                if ((int) $return->getData('id_equipment')) {
-                    $currentReturnedEquipments[] = (int) $return->getData('id_equipment');
-                }
-            }
+            $currentReturnedEquipments = $vente->getCurrentReturnedEquipments();
 
             if (in_array($this->getData('id_equipment'), $currentReturnedEquipments)) {
-                return array('Cet équipement a déjà été ajouté aux retours produits');
+                $errors[] = 'L\'équipement sélectionné a déjà été ajouté aux retours produits';
+                return $errors;
             }
 
             $equipment = $this->getChildObject('equipment');
             if (!BimpObject::objectLoaded($equipment)) {
-                $errors[] = 'L\'équipement d\'ID ' . $this->getData('id_equipment') . ' semble ne pas exister';
+                $errors[] = 'L\'équipement d\'ID ' . $this->getData('id_equipment') . ' n\'existe pas';
+                return $errors;
+            }
+
+            $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $equipment->getData('id_product'));
+            if (!BimpObject::objectLoaded($product)) {
+                $errors[] = 'Aucun produit n\'est associé à l\'équipement ' . $equipment->getData('serial');
+                return $errors;
+            }
+            
+            if (!$equipment->isAvailable(0, $errors)) {
+                return $errors;
+            }
+            
+            $prix_ht = 0;
+            $prix_ttc = 0;
+            $tva_tx = (float) $product->dol_object->tva_tx;
+
+            if (BimpTools::isSubmit('price_ttc')) {
+                $prix_ttc = round((float) BimpTools::getValue('price_ttc'), 2);
             } else {
-                if (!$equipment->getData('return_available')) {
-                    $errors[] = $equipment->displayReturnUnavailable();
+                if ((float) $equipment->getData('prix_vente') > 0) {
+                    $prix_ttc = round((float) $equipment->getData('prix_vente'), 2);
+                } elseif ((float) $equipment->getData('prix_vente_except') > 0) {
+                    $prix_ttc = round((float) $equipment->getData('prix_vente_except'), 2);
                 } else {
-                    $place = $equipment->getCurrentPlace();
-                    $id_client = 0;
-                    if (BimpObject::objectLoaded($place)) {
-                        if ((int) $place->getData('type') === BE_Place::BE_PLACE_CLIENT) {
-                            $id_client = (int) $place->getData('id_client');
-                        }
-
-                        if (!$id_client || $id_client !== (int) $vente->getData('id_client')) {
-                            return array('L\'équipement sélectionné n\'est pas enregistré pour ce client');
-                        }
-                    }
-                    $id_product = (int) $equipment->getData('id_product');
-                    if ($id_product) {
-                        $this->set('id_product', $id_product);
-                        $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $id_product);
-                        if (!BimpObject::objectLoaded($product)) {
-                            $errors[] = 'Le produit associé à l\'équipement sélectionné semble ne plus exister';
-                        } else {
-                            $this->set('unit_price_tax_ex');
-                            $prix_ht = 0;
-                            $prix_ttc = 0;
-                            $tva_tx = (float) $product->dol_object->tva_tx;
-
-                            if (BimpTools::isSubmit('price_ttc')) {
-                                $prix_ttc = round((float) BimpTools::getValue('price_ttc'), 2);
-                            } else {
-                                if ((float) $equipment->getData('prix_vente') > 0) {
-                                    $prix_ttc = round((float) $equipment->getData('prix_vente'), 2);
-                                } elseif ((float) $equipment->getData('prix_vente_except') > 0) {
-                                    $prix_ttc = round((float) $equipment->getData('prix_vente_except'), 2);
-                                } else {
-                                    $prix_ttc = round((float) $product->dol_object->price_ttc, 2);
-                                }
-                            }
-
-                            $prix_ht = (float) BimpTools::calculatePriceTaxEx($prix_ttc, (float) $tva_tx);
-
-                            $this->set('unit_price_tax_ex', round($prix_ht, 2));
-                            $this->set('unit_price_tax_in', $prix_ttc, 2);
-                            $this->set('tva_tx', $tva_tx);
-                            $this->set('qty', 1);
-                        }
-                    } else {
-                        $errors[] = 'Aucun produit associé à l\'équipement ' . $equipment->getData('serial');
-                    }
+                    $prix_ttc = round((float) $product->dol_object->price_ttc, 2);
                 }
             }
+
+            $prix_ht = (float) BimpTools::calculatePriceTaxEx($prix_ttc, (float) $tva_tx);
+
+            $this->set('unit_price_tax_ex', round($prix_ht, 2));
+            $this->set('unit_price_tax_in', $prix_ttc, 2);
+            $this->set('tva_tx', $tva_tx);
+            $this->set('qty', 1);
         } else {
             if (!(int) $this->getData('id_product')) {
                 return array('Aucun produit sélectionné');
@@ -192,7 +170,7 @@ class BC_VenteReturn extends BimpObject
 
             $product = $this->getChildObject('product');
             if (!BimpObject::objectLoaded($product)) {
-                return array('Le produit d\'ID ' . $id_product . ' semble ne plus exister');
+                return array('Le produit d\'ID ' . (int) $this->getData('id_product') . ' semble ne plus exister');
             }
 
             if ($product->isSerialisable()) {

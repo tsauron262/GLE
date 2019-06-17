@@ -896,7 +896,7 @@ class indexController extends BimpController
         if (!$id_user_resp) {
             $errors[] = 'Aucun utilisateur spécifié pour le commercial';
         }
-        
+
         if (!count($errors)) {
             $vente = BimpCache::getBimpObjectInstance($this->module, 'BC_Vente', (int) $id_vente);
             if (!$vente->isLoaded()) {
@@ -917,7 +917,7 @@ class indexController extends BimpController
             'request_id' => BimpTools::getValue('request_id', 0),
         )));
     }
-    
+
     protected function ajaxProcessSaveCondReglement()
     {
         $errors = array();
@@ -1433,18 +1433,8 @@ class indexController extends BimpController
             BimpObject::loadClass('bimpequipment', 'Equipment');
             BimpObject::loadClass('bimpequipment', 'BE_Place');
 
-            $currentReturnedEquipments = array();
-
-            $returns = $vente->getChildrenObjects('returns');
-
-            foreach ($returns as $return) {
-                $id_equipment = (int) $return->getData('id_equipment');
-                if ($id_equipment) {
-                    $currentReturnedEquipments[] = $id_equipment;
-                }
-            }
-
-            $list = Equipment::findEquipments($serial, $id_client);
+            $currentReturnedEquipments = $vente->getCurrentReturnedEquipments();
+            $list = Equipment::findEquipments($serial);
 
             if (count($list)) {
                 foreach ($list as $id_equipment) {
@@ -1453,28 +1443,43 @@ class indexController extends BimpController
                         continue;
                     }
                     $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
-                    if (BimpObject::objectLoaded($equipment)) {
-                        $place = $equipment->getCurrentPlace();
-                        if ((int) $place->getData('type') === BE_Place::BE_PLACE_CLIENT &&
-                                (int) $place->getData('id_client')) {
-                            $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', (int) $place->getData('id_client'));
-                            if (BimpObject::objectLoaded($client)) {
-                                $equipments[] = array(
-                                    'id'        => (int) $id_equipment,
-                                    'label'     => $equipment->displayProduct('nom', true) . ' - ' . $equipment->getData('serial') . ' (' . $client->getData('nom') . ')',
-                                    'id_client' => (int) $place->getData('id_client')
-                                );
-                            }
-                        }
+                    if (!BimpObject::objectLoaded($equipment)) {
+                        continue;
                     }
+                    $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $equipment->getData('id_product'));
+
+                    if (!BimpObject::objectLoaded($product)) {
+                        continue;
+                    }
+
+                    $eq_errors = array();
+                    if (!$equipment->isAvailable(0, $eq_errors)) {
+                        $warnings[] = BimpTools::getMsgFromArray($eq_errors);
+                        continue;
+                    }
+
+                    $eq_warnings = $equipment->checkPlaceForReturn($id_client);
+                    $place = $equipment->getCurrentPlace();
+
+                    $label = $product->getRef() . ' - NS: ' . $equipment->getData('serial');
+
+                    if (BimpObject::objectLoaded($place)) {
+                        $label .= ' (Emplacement: ' . $place->getPlaceName() . ')';
+                    } else {
+                        $label .= ' (Aucun emplacement)';
+                    }
+
+                    $equipments[] = array(
+                        'id'        => (int) $id_equipment,
+                        'label'     => $label,
+                        'id_client' => (BimpObject::objectLoaded($place) && (int) $place->getData('type') === BE_Place::BE_PLACE_CLIENT ? (int) $place->getData('id_client') : 0),
+                        'warnings'  => $eq_warnings
+                    );
                 }
             }
 
             if (!count($equipments)) {
                 $msg = 'Aucun équipement elligible au retour trouvé pour ce numéro de série';
-                if ($id_client) {
-                    $msg .= ' et le client sélectionné';
-                }
                 $errors[] = $msg;
             }
         }

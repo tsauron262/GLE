@@ -140,6 +140,11 @@ fields:
         type: bool
         default_value: 1
         
+    id_commande_line_return: 
+        label: Ligne commande retour
+        type: id
+        default_value: 0
+        
     date_purchase: 
         label: Date d'achat
         type: date

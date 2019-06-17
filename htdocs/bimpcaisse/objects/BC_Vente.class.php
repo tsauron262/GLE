@@ -307,6 +307,22 @@ class BC_Vente extends BimpObject
         return $list;
     }
 
+    public function getCurrentReturnedEquipments()
+    {
+        $currentReturnedEquipments = array();
+
+        $returns = $this->getChildrenObjects('returns');
+
+        foreach ($returns as $return) {
+            $id_equipment = (int) $return->getData('id_equipment');
+            if ($id_equipment) {
+                $currentReturnedEquipments[] = $id_equipment;
+            }
+        }
+
+        return $currentReturnedEquipments;
+    }
+
     public function getDocumentExtraButtons()
     {
         $buttons = array();
@@ -1332,7 +1348,7 @@ class BC_Vente extends BimpObject
 
         if (!$article->checkPlace((int) $this->getData('id_entrepot'))) {
             $html .= '<div class="placeAlert">';
-            $html .= BimpRender::renderAlerts('Attention, cet équipement n\'est pas enregistré comme étant situé dans votre centre', 'warning');
+            $html .= BimpRender::renderAlerts('Attention, L\'équipement ' . $equipment->getNomUrl(0, 1, 1, 'default') . ' n\'est pas enregistré comme étant situé dans votre centre', 'warning');
             $html .= '</div>';
         }
         $html .= '</div>';

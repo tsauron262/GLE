@@ -1025,7 +1025,7 @@ function saveArticleRemiseCrt($input) {
 
         var id_article = parseInt($container.data('id_article'));
         var remise_crt = parseInt($input.val());
-        
+
         saveObjectField('bimpcaisse', 'BC_VenteArticle', id_article, 'remise_crt', remise_crt);
     }
 }
@@ -1304,6 +1304,7 @@ function searchReturnedEquipment($button) {
                     html += '>' + result.equipments[i].label + '</option>';
                 }
                 html += '</select>';
+
                 bimpAjax.$form.find('.id_equipment_inputContainer').html(html);
                 var $parent = bimpAjax.$form.find('.id_equipment_inputContainer').parent();
                 var $input = bimpAjax.$form.find('[name=id_equipment]');
@@ -1315,12 +1316,23 @@ function searchReturnedEquipment($button) {
                 bimpAjax.$form.find('[name="id_product"]').val(0).findParentByClass('formRow').slideUp(250);
                 bimpAjax.$form.find('[name="show_equipment"]').val(1).change();
                 bimpAjax.$form.find('[name="id_equipment"]').change(function () {
-                    var id_client = $(this).find('option:selected').data('id_client');
-                    if (id_client) {
-                        id_client = parseInt(id_client);
-                        if (id_client !== Vente.id_client) {
-                            $('#venteClientFormContainer').find('[name="id_client"]').val(id_client);
-                            saveClient();
+                    var id_equipment = parseInt($(this).val());
+                    var check = false;
+                    if (!isNaN(id_equipment) && id_equipment) {
+                        for (var i in result.equipments) {
+                            if (result.equipments[i].id == id_equipment) {
+                                if (result.equipments[i].warnings.length) {
+                                    check = true;
+                                    var $container = $(this).findParentByClass('inputContainer');
+                                    $container.find('.equipmentWarnings').remove();
+                                    var wHtml = '<div class="alert alert-warning equipmentWarnings"><ul>';
+                                    for (var j in result.equipments[i].warnings) {
+                                        wHtml += '<li>' + result.equipments[i].warnings[j] + '</li>';
+                                    }
+                                    wHtml += '<ul></div>';
+                                    $container.append(wHtml);
+                                }
+                            }
                         }
                     }
                 }).change();
@@ -1463,11 +1475,9 @@ $(document).ready(function () {
             $(this).popover();
             if (document.exitFullscreen) {
                 document.exitFullscreen();
-            }
-            else if (document.mozCancelFullScreen) {
+            } else if (document.mozCancelFullScreen) {
                 document.mozCancelFullScreen();
-            }
-            else if (document.webkitCancelFullScreen) {
+            } else if (document.webkitCancelFullScreen) {
                 document.webkitCancelFullScreen();
             }
             $('.windowMaximiseButton').show();
@@ -1482,11 +1492,9 @@ $(document).ready(function () {
             var docElm = document.documentElement;
             if (docElm.requestFullscreen) {
                 docElm.requestFullscreen();
-            }
-            else if (docElm.mozRequestFullScreen) {
+            } else if (docElm.mozRequestFullScreen) {
                 docElm.mozRequestFullScreen();
-            }
-            else if (docElm.webkitRequestFullScreen) {
+            } else if (docElm.webkitRequestFullScreen) {
                 docElm.webkitRequestFullScreen();
             }
             $('.windowMaximiseButton').hide();

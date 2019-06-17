@@ -6,9 +6,9 @@ class BimpValidateOrder {
 
     private $db;
     public $errors;
-    private $tabValideComm = array(62 => 100, 201 => 100, 284 => 100, 285 => 100);
+    private $tabValideComm = array(62 => 100, 201 => 100);
     private $tabValideCommEduc = array(51 => 100, 201 => 100);
-    private $tabValideMontant = array(81 => array(0, 1000000000000), 68 => array(0000, 100000000000));
+    private $tabValideMontant = array(81 => array(0, 1000000000000), 68 => array(0000, 100000000000), 284 => array(0000, 100000000000), 285 => array(0000, 100000000000));
     private $tabValideMontantPart = array(7 => array(0, 100000), 81 => array(100000, 1000000000000), 68 => array(100000, 100000000000));
     private $tabValideMontantEduc = array(201 => array(0,100000), 51 => array(0, 100000), 81 => array(100000, 1000000000000), 68 => array(100000, 100000000000));
     private $tabSecteurEduc = array("E", "ENS", "EBTS");

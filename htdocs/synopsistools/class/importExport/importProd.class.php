@@ -35,7 +35,7 @@ class importProd extends importCat {
             } else {
                 $sql = $this->db->query("SELECT rowid as id FROM llx_product WHERE ref = '" . $ln['ArtCode'] . "'");
                 if ($this->db->num_rows($sql) == 0) {
-                    if ($this->isProdActif($ln)) {
+                    if (/*$this->isProdActif($ln)*/1) {
                         $this->tabResult["inc"] ++;
                         $this->updateProd($this->addProd($ln), $ln);
                     }
@@ -122,13 +122,13 @@ class importProd extends importCat {
             $this->traiteChamp("ref", $ln['ArtCode']);
             $this->traiteChamp("import_key", $ln['ArtID']);
             
-            $this->getAllCat();
-
-            $this->traiteCat1("Gamme", $ln["ArtGammeEnu"]);
-            $this->traiteCat1("Categorie", $ln["ArtCategEnu"]);
-            $this->traiteCat1("Nature", $ln["ArtNatureEnu"]);
-            $this->traiteCat1("Collection", $ln["ArtCollectEnu"]);
-            $this->traiteCat1("Famille", $ln["ArtFamilleEnu"]);
+//            $this->getAllCat();
+//
+//            $this->traiteCat1("Gamme", $ln["ArtGammeEnu"]);
+//            $this->traiteCat1("Categorie", $ln["ArtCategEnu"]);
+//            $this->traiteCat1("Nature", $ln["ArtNatureEnu"]);
+//            $this->traiteCat1("Collection", $ln["ArtCollectEnu"]);
+//            $this->traiteCat1("Famille", $ln["ArtFamilleEnu"]);
 
 
             if ($this->updatePrice) {

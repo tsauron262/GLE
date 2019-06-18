@@ -22,7 +22,7 @@ class importProd extends importCat {
                 if ($this->db->num_rows($sql2) > 0) {
                     $result2 = $this->db->fetch_object($sql2);
                     $this->tabResult["error"] ++;
-                    $this->alert("Prod avec ref identique et autre avec id8sens identique");
+                    $this->error("Prod avec ref identique et autre avec id8sens identique");
                     $this->alert("IdIdentique id :" . $result->id . " ref : " . $result->ref . " |  UPDATE llx_commandedet SET fk_product = '" . $result->id . "' WHERE fk_product = '" . $result2->id . "'");
                     $this->alert("RefIdentique id:" . $result2->id . " ref: " . $ln['ArtCode'] . "  |  UPDATE llx_commandedet SET fk_product = '" . $result2->id . "' WHERE fk_product = '" . $result->id . "'");
                 } else {
@@ -113,6 +113,8 @@ class importProd extends importCat {
 
 
             $this->traiteChamp("label", $ln['ArtLib']);
+            
+            $this->traiteChamp("pmp", $ln['ArtLastPA'], true);
             
             $desc = ($ln['ArtGCmtTxt'] != "")? $ln['ArtGCmtTxt'] : $ln['ArtLib'];
             

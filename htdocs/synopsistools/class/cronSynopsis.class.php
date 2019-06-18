@@ -49,22 +49,28 @@ class CronSynopsis {
     
 
     public function extractFact($debug = false) {
-//        require_once(DOL_DOCUMENT_ROOT . "/synopsistools/class/synopsisexport.class.php");
-//        $export = new synopsisexport($this->db, 'file');
-//        $export->exportFactureSav(false);
-        require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/importExport/exportfacture.class.php");
-        $export = new exportfacture($this->db);
-        $export->debug = $debug;
-        $export->exportTout(); 
-        $this->output = $export->output;
+        
+        require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/importExport/importBl.class.php");
+        $import = new importBl($this->db);
+        $import->debug = $debug;
+        $import->go(); 
+        $this->output = $import->output;
+        
+        require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/importExport/importCommande.class.php");
+        $import = new importCommande($this->db);
+        $import->debug = $debug;
+        $import->go(); 
+        $this->output = $import->output;
+        
+        
+        require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/importExport/importProd.class.php");
+        $import = new importProd($this->db);
+        $import->debug = $debug;
+        $import->go(); 
+        $this->output .= $import->output;
         
         
         
-        require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/importExport/exportCommande.class.php");
-        $export = new exportCommande($this->db);
-        $export->debug = $debug;
-        $export->exportTout(); 
-        $this->output .= $export->output;
         
         
         require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/importExport/importDepot.class.php");
@@ -73,11 +79,6 @@ class CronSynopsis {
         $import->go(); 
         $this->output .= $import->output;
 //        
-        require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/importExport/importProd.class.php");
-        $import = new importProd($this->db);
-        $import->debug = $debug;
-        $import->go(); 
-        $this->output .= $import->output;
 //        
         require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/importExport/importStock.class.php");
         $import = new importStock($this->db);
@@ -103,6 +104,27 @@ class CronSynopsis {
         $import->debug = $debug;
         $import->go(); 
         $this->output .= $import->output;
+        
+        
+        
+        
+//        require_once(DOL_DOCUMENT_ROOT . "/synopsistools/class/synopsisexport.class.php");
+//        $export = new synopsisexport($this->db, 'file');
+//        $export->exportFactureSav(false);
+        require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/importExport/exportfacture.class.php");
+        $export = new exportfacture($this->db);
+        $export->debug = $debug;
+        $export->exportTout(); 
+        $this->output = $export->output;
+        
+        
+        
+        require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/importExport/exportCommande.class.php");
+        $export = new exportCommande($this->db);
+        $export->debug = $debug;
+        $export->exportTout(); 
+        $this->output .= $export->output;
+        
 
 
         echo "fin";

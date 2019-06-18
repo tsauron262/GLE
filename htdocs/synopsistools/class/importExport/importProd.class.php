@@ -35,7 +35,7 @@ class importProd extends importCat {
             } else {
                 $sql = $this->db->query("SELECT rowid as id FROM llx_product WHERE ref = '" . $ln['ArtCode'] . "'");
                 if ($this->db->num_rows($sql) == 0) {
-                    if ($this->isProdActif($ln)) {
+                    if (/*$this->isProdActif($ln)*/1) {
                         $this->tabResult["inc"] ++;
                         $this->updateProd($this->addProd($ln), $ln);
                     }

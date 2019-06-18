@@ -17,6 +17,101 @@ class BimpTools
     );
     private static $context = "";
 
+    public static function processCommandesImport($commandes)
+    {
+        echo '<pre>';
+        print_r($commandes);
+        echo '</pre>';
+
+        global $db;
+        $bdb = new BimpDb($db);
+
+        foreach ($commandes as $comm_ref => $lines) {
+            echo 'Traitement ' . $comm_ref . ': <br/>';
+
+            $commande = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_Commande', array(
+                        'ref' => $comm_ref
+            ));
+
+            if (BimpObject::objectLoaded($commande)) {
+                $commande->checkLines();
+                $commShipment = null;
+
+                $id_user_resp = (int) $commande->getData('id_user_resp');
+                if (!$id_user_resp) {
+                    $id_user_resp = (int) $commande->getData('fk_user_valid');
+                }
+
+                $i = 0;
+                foreach ($lines as $line_data) {
+                    $i++;
+                    echo $i . ' - ';
+                    $product = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Product', array(
+                                'ref' => $line_data['ref']
+                    ));
+
+                    if (BimpObject::objectLoaded($product)) {
+                        $where = ' fk_commande = ' . (int) $commande->id;
+                        $where .= ' AND fk_product = ' . (int) $product->id;
+                        $where .= ' AND qty = ' . (float) $line_data['qty'];
+
+                        $rows = $bdb->getRows('commandedet', $where);
+
+                        if (is_null($rows) || empty($rows)) {
+//                            echo $line_data['ref'] . ': AUCUN LIGNE TROUVEE <br/>';
+                        } elseif (count($rows) > 1) {
+//                            echo $line_data['ref'] . ': ' . count($rows) . ' trouvées <br/>';
+                        } else {
+                            echo $line_data['ref'] . ': LIGNE TROUVEE: ' . $rows[0]->rowid . ' <br/>';
+                            $BimpLine = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', array(
+                                        'id_line' => (int) $rows[0]->rowid
+                            ));
+                            if (!BimpObject::objectLoaded($BimpLine)) {
+                                echo 'BIMP LINE NON TROUVEE <br/>';
+                            } else {
+                                if ((float) $line_data['qtyEnBl']) {
+                                    $diff = (float) $line_data['qtyEnBl'] - (float) $BimpLine->getShippedQty();
+                                    if ($diff > 0) {
+                                        echo 'Insertion expé: ';
+
+                                        $sql = 'SELECT MAX(num_livraison) as num FROM ' . MAIN_DB_PREFIX . 'br_commande_shipment ';
+                                        $sql .= 'WHERE `id_commande_client` = ' . (int) $commande->id;
+
+                                        $result = $bdb->executeS($sql);
+                                        if (isset($result[0])) {
+                                            $num = (int) $result[0]->num;
+                                        } else {
+                                            $num = 1;
+                                        }
+
+                                        if (is_null($commShipment)) {
+                                            $id_shipment = $bdb->insert('br_commande_shipment', array(
+                                                'id_commande_client' => (int) $commande->ref,
+                                                'id_entrepot'        => (int) $commande->getData('entrepot'),
+                                                'num_livraison'      => $num,
+                                                'status'             => 2,
+                                                'date_shipped'       => date('Y-m-d'),
+                                                'id_contact'         => 0,
+                                                'signed'             => 1,
+                                                'id_user_resp'       => $id_user_resp
+                                            ));
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        echo 'PRODUIT NON TROUVE: ' . $line_data['ref'] . '<br/>';
+                    }
+                }
+            } else {
+//                echo 'commande non trouvée';
+            }
+
+//            echo '<br/>';
+        }
+    }
+
     public static function getCommercialArray($socid)
     {
         // Cette fonction n'a rien à faire ici, daplacée dans BimpCache, deplus quelques erreurs dans le code: une même instance est affecté à chaque entrée du tableau.

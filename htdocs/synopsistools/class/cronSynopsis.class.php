@@ -105,7 +105,7 @@ class CronSynopsis {
         $import->go(); 
         $this->output .= $import->output;
         
-        
+        return; // A suppr.
         
         
 //        require_once(DOL_DOCUMENT_ROOT . "/synopsistools/class/synopsisexport.class.php");

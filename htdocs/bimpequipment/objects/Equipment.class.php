@@ -50,7 +50,10 @@ class Equipment extends BimpObject
         // Check des réservations en cours: 
         $reservations = $this->getReservationsList();
         if (count($reservations)) {
-            $errors[] = 'L\'équipement ' . $this->getNomUrl(0, 1, 1, 'default') . ' est réservé';
+            if (!isset($allowed['id_reservation']) || !(int) $allowed['id_reservation'] || !in_array((int) $allowed['id_reservation'], $reservations)) {
+                $errors[] = 'L\'équipement ' . $this->getNomUrl(0, 1, 1, 'default') . ' est réservé';
+                return 0;
+            }
         }
 
         // Check des ventes caisse en cours (Brouillons): 
@@ -83,10 +86,10 @@ class Equipment extends BimpObject
         // Check des ajouts aux devis SAV non validés: 
         $sql = 'SELECT sav.id FROM ' . MAIN_DB_PREFIX . 'bs_sav sav';
         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'propal p on sav.id_propal = p.rowid';
-        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'bs_sav_propal_line l ON l.id_obj = s.id_propal ';
+        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'bs_sav_propal_line l ON l.id_obj = sav.id_propal ';
         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'object_line_equipment leq ON (leq.id_object_line = l.id AND leq.object_type = \'sav_propal\') ';
         $sql .= ' WHERE leq.id_equipment = ' . (int) $this->id;
-        $sql .= ' AND p.fk_statut = 0';
+        $sql .= ' AND sav.status < 6';
 
         if (isset($allowed['id_propal']) && (int) $allowed['id_propal']) {
             $sql .= ' AND sav.id_propal != ' . (int) $allowed['id_propal'];
@@ -97,14 +100,14 @@ class Equipment extends BimpObject
             foreach ($rows as $r) {
                 $sav = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SAV', (int) $r['id']);
                 if (BimpObject::objectLoaded($sav)) {
-                    $errors[] = 'L\'équipement ' . $this->getNomUrl(0, 1, 1, 'default') . ' a été ajouté à un devis SAV non validé: ' . $sav->getNomUrl(0, 1, 1, 'default');
+                    $errors[] = 'L\'équipement ' . $this->getNomUrl(0, 1, 1, 'default') . ' a été ajouté à un devis SAV non terminé: ' . $sav->getNomUrl(0, 1, 1, 'default');
+                    return 0;
                 }
             }
-            return 0;
         }
 
         // Check des ajouts aux factures non validées. 
-        $sql = 'SELECT f.rowid FROM ' . MAIN_DB_PREFIX . 'facture f';
+        $sql = 'SELECT f.rowid  as id FROM ' . MAIN_DB_PREFIX . 'facture f';
         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'bimp_facture_line l ON l.id_obj = f.rowid ';
         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'object_line_equipment leq ON (leq.id_object_line = l.id AND leq.object_type = \'facture\') ';
         $sql .= ' WHERE leq.id_equipment = ' . (int) $this->id;
@@ -126,15 +129,17 @@ class Equipment extends BimpObject
         }
 
         // Check retour en commande client: 
-        if (!(int) $this->getData('id_commande_line_return')) {
-            $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $this->getData('id_commande_line_return'));
-            if (BimpObject::objectLoaded($line)) {
-                $commande = $line->getParentInstance();
-                if (BimpObject::objectLoaded($commande)) {
-                    $msg = 'Un retour est en cours pour l\'équipement ' . $this->getNomUrl(0, 1, 1, 'default');
-                    $msg .= ' dans la commande client ' . $commande->getNomUrl(0, 1, 1, 'full');
-                    $errors[] = $msg;
-                    return 0;
+        if ((int) $this->getData('id_commande_line_return')) {
+            if (!isset($allowed['id_commande_line_return']) || ((int) $allowed['id_commande_line_return'] !== (int) $this->getData('id_commande_line_return'))) {
+                $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $this->getData('id_commande_line_return'));
+                if (BimpObject::objectLoaded($line)) {
+                    $commande = $line->getParentInstance();
+                    if (BimpObject::objectLoaded($commande)) {
+                        $msg = 'Un retour est en cours pour l\'équipement ' . $this->getNomUrl(0, 1, 1, 'default');
+                        $msg .= ' dans la commande client ' . $commande->getNomUrl(0, 1, 1, 'full');
+                        $errors[] = $msg;
+                        return 0;
+                    }
                 }
             }
         }
@@ -150,7 +155,7 @@ class Equipment extends BimpObject
             $sql .= ' WHERE r.id_equipment = ' . (int) $this->id . ' AND v.status = ' . BC_Vente::BC_VENTE_BROUILLON;
 
             if (isset($allowed['id_vente_return']) && (int) $allowed['id_vente_return']) {
-                $sql .= ' AND v.id != ' . (int) $allowed['id_vente'];
+                $sql .= ' AND v.id != ' . (int) $allowed['id_vente_return'];
             }
 
             $rows = $this->db->executeS($sql, 'array');
@@ -514,8 +519,7 @@ class Equipment extends BimpObject
         );
 
         $filters = array(
-            'a.position'   => 1,
-            'eq.available' => 1
+            'a.position' => 1
         );
 
         if (!is_null($id_entrepot)) {
@@ -535,7 +539,7 @@ class Equipment extends BimpObject
             foreach ($list as $item) {
                 $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $item['id_equipment']);
                 if (BimpObject::objectLoaded($equipment)) {
-                    if (!count($equipment->checkAvailability($id_entrepot))) {
+                    if ($equipment->isAvailable((int) $id_entrepot)) {
                         $equipments[(int) $equipment->id] = $equipment->getRef();
                     }
                 }
@@ -873,34 +877,30 @@ class Equipment extends BimpObject
         if (!$this->isLoaded()) {
             $errors[] = 'Equipement invalide';
         } else {
-            if (!(int) $this->getData('available')) {
-                $errors[] = 'L\'équipement ' . $this->getData('serial') . ' n\'est pas disponible';
-            } else {
-                $reservations = $this->getReservationsList();
-                if (count($reservations)) {
-                    if (!$allowed_id_reservation || ($allowed_id_reservation && !in_array($allowed_id_reservation, $reservations))) {
-                        $errors[] = 'L\'équipement ' . $this->getData('serial') . ' est réservé';
-                    }
+            $reservations = $this->getReservationsList();
+            if (count($reservations)) {
+                if (!$allowed_id_reservation || ($allowed_id_reservation && !in_array($allowed_id_reservation, $reservations))) {
+                    $errors[] = 'L\'équipement ' . $this->getData('serial') . ' est réservé';
                 }
+            }
 
-                if ($id_entrepot) {
-                    $place = $this->getCurrentPlace();
-                    if (BimpObject::objectLoaded($place)) {
-                        if ((int) $place->getData('type') !== BE_Place::BE_PLACE_ENTREPOT ||
-                                (int) $place->getData('id_entrepot') !== $id_entrepot) {
-                            BimpTools::loadDolClass('product/stock', 'entrepot');
-                            $entrepot = new Entrepot($this->db->db);
-                            $entrepot->fetch($id_entrepot);
-                            if (BimpObject::objectLoaded($entrepot)) {
-                                $label = '"' . $entrepot->libelle . '"';
-                            } else {
-                                $label = 'sélectionné';
-                            }
-                            $errors[] = 'L\'équipement ' . $this->getData('serial') . ' n\'est pas disponible dans l\'entrepot ' . $label;
+            if ($id_entrepot) {
+                $place = $this->getCurrentPlace();
+                if (BimpObject::objectLoaded($place)) {
+                    if ((int) $place->getData('type') !== BE_Place::BE_PLACE_ENTREPOT ||
+                            (int) $place->getData('id_entrepot') !== $id_entrepot) {
+                        BimpTools::loadDolClass('product/stock', 'entrepot');
+                        $entrepot = new Entrepot($this->db->db);
+                        $entrepot->fetch($id_entrepot);
+                        if (BimpObject::objectLoaded($entrepot)) {
+                            $label = '"' . $entrepot->libelle . '"';
+                        } else {
+                            $label = 'sélectionné';
                         }
-                    } else {
-                        $errors[] = 'Aucun emplacement défini pour l\'équipement "' . $this->getData('serial') . '"';
+                        $errors[] = 'L\'équipement ' . $this->getData('serial') . ' n\'est pas disponible dans l\'entrepot ' . $label;
                     }
+                } else {
+                    $errors[] = 'Aucun emplacement défini pour l\'équipement "' . $this->getData('serial') . '"';
                 }
             }
         }
@@ -909,7 +909,7 @@ class Equipment extends BimpObject
 
     public function checkPlaceForReturn($id_client = 0)
     {
-        $errors[] = array();
+        $errors = array();
 
         if ($this->isLoaded()) {
             $place = $this->getCurrentPlace();

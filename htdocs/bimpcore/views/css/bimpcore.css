@@ -16596,9 +16596,39 @@ i.iconRight {
   box-shadow: 3px 3px 6px #636363;
   margin-left: 370px;
 }
+/* line 988, ../scss/bimpcore/_styles.scss */
+#page_notifications #notifications_tools {
+  margin-bottom: 10px;
+  text-align: right;
+}
+/* line 992, ../scss/bimpcore/_styles.scss */
+#page_notifications #notifications_tools .removeAllBimpMsgButton {
+  box-shadow: 4px 4px 4px #505050;
+}
+/* line 997, ../scss/bimpcore/_styles.scss */
+#page_notifications .removeBimpMsgButton {
+  -webkit-transition: all 0.3s ease;
+  -o-transition: all 0.3s ease;
+  transition: all 0.3s ease;
+  display: inline-block;
+  float: right;
+  margin-right: -5px;
+  margin-top: -5px;
+  font-size: 20px;
+  cursor: pointer;
+}
+/* line 1006, ../scss/bimpcore/_styles.scss */
+#page_notifications .removeBimpMsgButton:after {
+  font-family: 'FA5';
+  content: '\f057';
+}
+/* line 1011, ../scss/bimpcore/_styles.scss */
+#page_notifications .removeBimpMsgButton:hover {
+  font-size: 24px;
+}
 
 /*Popup login*/
-/* line 992, ../scss/bimpcore/_styles.scss */
+/* line 1020, ../scss/bimpcore/_styles.scss */
 #bimp_login_popup {
   position: fixed;
   top: 0;
@@ -16609,7 +16639,7 @@ i.iconRight {
   background-color: rgba(20, 20, 20, 0.75);
   text-align: center;
 }
-/* line 1003, ../scss/bimpcore/_styles.scss */
+/* line 1031, ../scss/bimpcore/_styles.scss */
 #bimp_login_popup iframe {
   margin: 5%;
   width: 80%;
@@ -16617,7 +16647,7 @@ i.iconRight {
 }
 
 /*Product Stocks*/
-/* line 1013, ../scss/bimpcore/_styles.scss */
+/* line 1041, ../scss/bimpcore/_styles.scss */
 .productStocksContainer {
   display: none;
   position: absolute;
@@ -16630,17 +16660,17 @@ i.iconRight {
   overflow-y: auto;
   z-index: 10101;
 }
-/* line 1025, ../scss/bimpcore/_styles.scss */
+/* line 1053, ../scss/bimpcore/_styles.scss */
 .productStocksContainer h3 {
   margin-top: 0;
   font-size: 17px;
 }
-/* line 1030, ../scss/bimpcore/_styles.scss */
+/* line 1058, ../scss/bimpcore/_styles.scss */
 .productStocksContainer .stockSearchContainer {
   margin: 10px 0;
   color: #636363;
 }
-/* line 1035, ../scss/bimpcore/_styles.scss */
+/* line 1063, ../scss/bimpcore/_styles.scss */
 .productStocksContainer .productStockTable > thead > tr > th {
   background-color: #fff;
   color: #282828;
@@ -16648,75 +16678,75 @@ i.iconRight {
   border-bottom: 2px solid #282828;
   text-align: center;
 }
-/* line 1042, ../scss/bimpcore/_styles.scss */
+/* line 1070, ../scss/bimpcore/_styles.scss */
 .productStocksContainer .productStockTable > thead > tr > th:first-child {
   text-align: left;
 }
-/* line 1047, ../scss/bimpcore/_styles.scss */
+/* line 1075, ../scss/bimpcore/_styles.scss */
 .productStocksContainer .productStockTable > tbody > tr > td {
   text-align: center;
 }
-/* line 1050, ../scss/bimpcore/_styles.scss */
+/* line 1078, ../scss/bimpcore/_styles.scss */
 .productStocksContainer .productStockTable > tbody > tr > td:first-child {
   text-align: left;
 }
-/* line 1055, ../scss/bimpcore/_styles.scss */
+/* line 1083, ../scss/bimpcore/_styles.scss */
 .productStocksContainer tr.currentEntrepot {
   font-weight: bold;
 }
-/* line 1058, ../scss/bimpcore/_styles.scss */
+/* line 1086, ../scss/bimpcore/_styles.scss */
 .productStocksContainer tr.currentEntrepot td {
   background-color: #E6E6E6 !important;
 }
 
 /*Controller Debug times*/
-/* line 1066, ../scss/bimpcore/_styles.scss */
+/* line 1094, ../scss/bimpcore/_styles.scss */
 #bimpControllerDebugTimeInfos {
   padding: 30px;
   background-color: #fff;
 }
-/* line 1071, ../scss/bimpcore/_styles.scss */
+/* line 1099, ../scss/bimpcore/_styles.scss */
 #bimpControllerDebugTimeInfos table tr td {
   padding: 5px 8px;
 }
-/* line 1075, ../scss/bimpcore/_styles.scss */
+/* line 1103, ../scss/bimpcore/_styles.scss */
 #bimpControllerDebugTimeInfos table tr td:first-child {
   font-weight: bold;
 }
 
 /*Position handles*/
-/* line 1083, ../scss/bimpcore/_styles.scss */
+/* line 1111, ../scss/bimpcore/_styles.scss */
 .positionHandle {
   cursor: grab;
   text-align: center;
 }
-/* line 1087, ../scss/bimpcore/_styles.scss */
+/* line 1115, ../scss/bimpcore/_styles.scss */
 .positionHandle span {
   display: inline-block;
   font-size: 15px;
   margin: 0 6px;
 }
-/* line 1093, ../scss/bimpcore/_styles.scss */
+/* line 1121, ../scss/bimpcore/_styles.scss */
 .positionHandle span:before {
   font-family: 'FontAwesome';
   content: '\f07d';
 }
 
-/* line 1099, ../scss/bimpcore/_styles.scss */
+/* line 1127, ../scss/bimpcore/_styles.scss */
 .select2-results ul li {
   min-height: 30px;
 }
-/* line 1102, ../scss/bimpcore/_styles.scss */
+/* line 1130, ../scss/bimpcore/_styles.scss */
 .select2-results ul li.select2-results__option--highlighted {
   color: #fff !important;
 }
-/* line 1105, ../scss/bimpcore/_styles.scss */
+/* line 1133, ../scss/bimpcore/_styles.scss */
 .select2-results ul li.select2-results__option--highlighted span {
   color: #fff !important;
 }
 
 /*Debug infos*/
-/* line 1113, ../scss/bimpcore/_styles.scss */
+/* line 1141, ../scss/bimpcore/_styles.scss */
 .debug_info {
   margin: 10px;
   padding: 5px 5px 5px 40px;
@@ -16724,14 +16754,14 @@ i.iconRight {
   border-left-width: 3px;
   background-color: #FFF4EB;
 }
-/* line 1120, ../scss/bimpcore/_styles.scss */
+/* line 1148, ../scss/bimpcore/_styles.scss */
 .debug_info i.debug_icon {
   float: left;
   margin-left: -30px;
   font-size: 20px;
   color: #C85300;
 }
-/* line 1127, ../scss/bimpcore/_styles.scss */
+/* line 1155, ../scss/bimpcore/_styles.scss */
 .debug_info .debug_info_title {
   font-weight: bold;
 }

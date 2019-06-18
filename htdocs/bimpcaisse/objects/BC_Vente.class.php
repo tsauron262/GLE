@@ -75,6 +75,7 @@ class BC_Vente extends BimpObject
         }
 
         $vente_ht = (int) $this->getData('vente_ht');
+        $id_client = (int) $this->getData('id_client');
 
         $nb_articles = 0;
         $total_ttc = 0;
@@ -210,6 +211,8 @@ class BC_Vente extends BimpObject
                 }
             }
 
+            $eq_warnings = $equipment->checkPlaceForReturn($id_client);
+
             $returns[] = array(
                 'id_return'     => (int) $return->id,
                 'label'         => $return->getLabel(),
@@ -221,7 +224,8 @@ class BC_Vente extends BimpObject
                 'defective'     => (int) $return->getData('defective'),
                 'infos'         => htmlentities((string) $return->getData('infos')),
                 'ref'           => $ref,
-                'serial'        => $serial
+                'serial'        => $serial,
+                'warnings'      => $eq_warnings
             );
         }
 
@@ -1750,12 +1754,13 @@ class BC_Vente extends BimpObject
         $returns = $this->getChildrenObjects('returns');
         $total_ttc = (float) $this->getData('total_ttc');
 
-        // Vérification de la validité de la vente:
+        // Check de la caisse: 
 
         if (is_null($caisse) || !$caisse->isLoaded()) {
             $errors[] = 'Caisse absente ou invalide';
         }
 
+        // Check du client: 
         $client = $this->getChildObject('client');
 
         if ((int) $this->getData('vente_ht')) {
@@ -1766,51 +1771,70 @@ class BC_Vente extends BimpObject
             }
         }
 
+        // Check des articles: 
+
         $has_equipment = false;
         foreach ($articles as $article) {
             $product = $article->getChildObject('product');
             $id_equipment = (int) $article->getData('id_equipment');
             if (is_null($product) || !isset($product->id) || !$product->id) {
                 $errors[] = 'Produit invalide pour l\'article ' . $article->id;
-            } elseif (isset($product->array_options['options_serialisable']) && $product->array_options['options_serialisable']) {
+            } elseif ($product->isSerialisable()) {
                 if (!$id_equipment) {
                     $errors[] = 'Un numéro de série est obligatoire pour le produit "' . $product->ref . ' - ' . $product->label . '"';
                 }
                 $has_equipment = true;
             }
+
+            if ($id_equipment) {
+                $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+
+                $equipment->isAvailable(0, $errors, array(
+                    'id_vente' => (int) $this->id
+                ));
+            }
         }
 
+        // Checks des retours: 
         $i = 1;
         $has_returns = false;
         foreach ($returns as $return) {
             $has_returns = true;
             $product = null;
+            $id_product = (int) $return->getData('id_product');
             $id_equipment = (int) $return->getData('id_equipment');
-            if ((int) $id_equipment) {
+            if (!$id_product) {
+                $errors[] = 'Produit absent pour le retour n°' . $i;
+            } else {
+                $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $id_product);
+                if (!BimpObject::objectLoaded($product)) {
+                    $errors[] = 'Retour n°' . $i . ': le produit d\'ID ' . $id_product . ' n\'existe pas';
+                } elseif ($product->isSerialisable() && !$id_equipment) {
+                    $errors[] = 'Retour n°' . $i . ': produit sérialisable. Sélection d\'un équipement obligatoire';
+                }
+            }
+            if ($id_equipment) {
                 $has_equipment = true;
                 $equipment = $return->getChildObject('equipment');
                 if (!BimpObject::objectLoaded($equipment)) {
-                    $errors[] = 'Equipement inéxistant pour le retour produit n°' . $i;
+                    $errors[] = 'Retour n°' . $i . ': l\'équipement d\'ID ' . $id_equipment . ' n\'existe pas';
                 } else {
-                    $place = $equipment->getCurrentPlace();
-                    if (!BimpObject::objectLoaded($place)) {
-                        $errors[] = 'Aucun emplacement enregistré pour l\'équipement retourné "' . $equipment->displayProduct('nom', true) . ' - ' . $equipment->getData('serial') . '"';
-                    } elseif ((int) $place->getData('type') !== BE_Place::BE_PLACE_CLIENT ||
-                            (int) $place->getData('id_client') !== (int) $this->getData('id_client')) {
-                        $errors[] = 'L\'emplacement de l\'équipement retourné "' . $equipment->displayProduct('nom', true) . ' - ' . $equipment->getData('serial') . '" ne correspond pas au client sélectionné';
-                    }
-                }
-            } else {
-                $product = $return->getChildObject('product');
-                if (!BimpObject::objectLoaded($product)) {
-                    $errors[] = 'Aucun produit pour le retour n°' . $i;
-                } elseif ($product->isSerialisable()) {
-                    $errors[] = 'Sélection d\'un équipement obligatoire pour le retour produit n°' . $i;
+                    $equipment->isAvailable(0, $errors, array(
+                        'id_vente_return' => (int) $this->id
+                    ));
+//                    $place = $equipment->getCurrentPlace();
+//                    if (!BimpObject::objectLoaded($place)) {
+//                        $errors[] = 'Aucun emplacement enregistré pour l\'équipement retourné "' . $equipment->displayProduct('nom', true) . ' - ' . $equipment->getData('serial') . '"';
+//                    } elseif ((int) $place->getData('type') !== BE_Place::BE_PLACE_CLIENT ||
+//                            (int) $place->getData('id_client') !== (int) $this->getData('id_client')) {
+//                        $errors[] = 'L\'emplacement de l\'équipement retourné "' . $equipment->displayProduct('nom', true) . ' - ' . $equipment->getData('serial') . '" ne correspond pas au client sélectionné';
+//                    }
                 }
             }
             $i++;
         }
 
+        // Checks des avoirs client utilisés:
         $asso = new BimpAssociation($this, 'discounts');
         $discounts = $asso->getAssociatesList();
 
@@ -1828,6 +1852,7 @@ class BC_Vente extends BimpObject
             }
         }
 
+        // Autres checks: 
         $data = $this->getAjaxData();
 
         if (($has_equipment || ($has_returns && $total_ttc < 0) || (int) $data['paiement_differe']) && (is_null($client) || !$client->isLoaded())) {
@@ -2145,7 +2170,6 @@ class BC_Vente extends BimpObject
 
         // Ajout des retours produits: 
         $returns = $this->getChildrenObjects('returns');
-
         $i = 0;
         foreach ($returns as $return) {
             $i++;
@@ -2156,7 +2180,7 @@ class BC_Vente extends BimpObject
             if ((int) $return->getData('id_equipment')) {
                 $equipment = $return->getChildObject('equipment');
                 if (BimpObject::objectLoaded($equipment)) {
-                    $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $equipment->getData('id_equipment'));
+                    $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $equipment->getData('id_product'));
                     $serial = $equipment->getData('serial');
                 }
             } else {
@@ -2178,10 +2202,11 @@ class BC_Vente extends BimpObject
             ));
 
             $line->id_product = (int) $product->id;
-            $line->desc = ' (RETOUR) ' . $product->getName() . ' - Réf. ' . $product->getRef() . ($serial ? ' - N° de série: ' . $serial : '');
+//            $line->desc = ' (RETOUR) ' . $product->getName() . ' - Réf. ' . $product->getRef() . ($serial ? ' - N° de série: ' . $serial : '');
             $line->qty = ((int) $return->getData('qty') * -1);
-            $line->pu_ht = (float) BimpTools::calculatePriceTaxEx((float) $return->getData('unit_price_tax_in'), $line->tva_tx);
             $line->tva_tx = (float) $return->getData('tva_tx');
+            $line->pu_ht = (float) BimpTools::calculatePriceTaxEx((float) $return->getData('unit_price_tax_in'), $line->tva_tx);
+
 
             $line_errors = $line->create();
 
@@ -2240,7 +2265,7 @@ class BC_Vente extends BimpObject
             ));
 
             $line->id_product = (int) $product->id;
-            $line->desc = $product->getName() . ' - Réf. ' . $product->getRef() . ($serial ? ' - N° de série: ' . $serial : '');
+//            $line->desc = $product->getName() . ' - Réf. ' . $product->getRef() . ($serial ? ' - N° de série: ' . $serial : '');
             $line->qty = (int) $article->getData('qty');
             $line->pu_ht = (float) $article->getData('unit_price_tax_ex');
             if ((int) $this->getData('vente_ht')) {

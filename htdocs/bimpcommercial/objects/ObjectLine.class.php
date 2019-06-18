@@ -287,7 +287,25 @@ class ObjectLine extends BimpObject
 
     public function isEquipmentAvailable(Equipment $equipment = null)
     {
-        return array();
+        $errors = array();
+
+        $parent = $this->getParentInstance();
+        if (!BimpObject::objectLoaded($parent)) {
+            $errors[] = 'Objet parent absent';
+        } else {
+            $id_entrepot = 0;
+            if ($parent->field_exists('entrepot')) {
+                $id_entrepot = (int) $parent->getData('entrepot');
+
+                if (!$id_entrepot) {
+                    $errors[] = 'Aucun entrepôt défini pour ' . $parent->getLabel('the') . ' ' . $parent->getNomUrl(0, 1, 1, 'full');
+                } else {
+                    $equipment->isAvailable($id_entrepot, $errors);
+                }
+            }
+        }
+
+        return $errors;
     }
 
     public function isLimited()
@@ -2199,7 +2217,7 @@ class ObjectLine extends BimpObject
 
         // Création de la remise: 
         $remise = BimpObject::getInstance('bimpcommercial', 'ObjectLineRemise');
-        
+
         $remise->validateArray(array(
             'id_object_line' => (int) $this->id,
             'object_type'    => static::$parent_comm_type,
@@ -2209,7 +2227,7 @@ class ObjectLine extends BimpObject
             'montant'        => ((int) $type === 2 ? (float) $value : 0),
             'per_unit'       => (int) $per_unit
         ));
-        
+
         $errors = $remise->create($warnings, true);
 
         return $errors;
@@ -3511,8 +3529,8 @@ class ObjectLine extends BimpObject
                     }
                     break;
             }
-            
-            if($this->force_pa_ht > 0)
+
+            if ($this->force_pa_ht > 0)
                 $this->pa_ht = $this->force_pa_ht;
         }
         return $errors;

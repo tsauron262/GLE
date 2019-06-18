@@ -211,7 +211,12 @@ class BS_SavPropalLine extends Bimp_PropalLine
         }
 
         $id_entrepot = (int) $propal->getData('entrepot');
-        return $equipment->checkAvailability($id_entrepot, $id_reservation);
+        $errors = array();
+        $equipment->isAvailable($id_entrepot, $errors, array(
+            'id_reservation' => (int) $id_reservation
+        ));
+
+        return $errors;
     }
 
     public function getValueByProduct($field)
@@ -227,7 +232,7 @@ class BS_SavPropalLine extends Bimp_PropalLine
                         if ($part->isLoaded()) {
                             return $part->convertPrix((float) $this->pa_ht, $part->getData('part_number'), $part->getData('label'));
                         }
-                        
+
                         return 0;
                     }
 

@@ -13,6 +13,10 @@ objects:
     ventes: 
         instance: 
             bimp_object: BC_Vente
+            
+    session_caisse:
+        instance: 
+            bimp_object: BC_CaisseSession
 sections:
     - type: tabs
       tabs: 
@@ -24,13 +28,14 @@ sections:
                       panel: 1
                       object: caisses
                       
-        fonds:
-            label: Mouvements de fonds
+        sessions: 
+            label: Sessions de caisse
             sections: 
                 - type: list
                   list: 
                       panel: 1
-                      object: mvts
+                      name: default
+                      object: session_caisse
                       
         ventes: 
             label: Ventes
@@ -40,3 +45,13 @@ sections:
                       panel: 1
                       name: full
                       object: ventes
+                      
+        fonds:
+            label: Mouvements de fonds
+            sections: 
+                - type: list
+                  list: 
+                      panel: 1
+                      object: mvts
+                      
+        

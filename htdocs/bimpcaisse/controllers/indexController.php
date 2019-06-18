@@ -478,7 +478,7 @@ class indexController extends BimpController
         }
 
         $bc_paiement = BimpObject::getInstance('bimpcaisse', 'BC_Paiement');
-        $list = new BC_ListTable($bc_paiement, 'session', 1, null, 'Liste des paiements - caisse: "' . $caisse->getData('name') . '"', 'euro');
+        $list = new BC_ListTable($bc_paiement, 'session', 1, null, 'Liste des paiements - caisse: "' . $caisse->getData('name') . '"', 'fas_hand-holding-usd');
         $list->addFieldFilterValue('id_caisse', (int) $caisse->id);
         $list->addFieldFilterValue('id_caisse_session', (int) $caisse->getData('id_current_session'));
         $html .= $list->renderHtml();

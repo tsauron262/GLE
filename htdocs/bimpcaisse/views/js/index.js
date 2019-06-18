@@ -176,6 +176,17 @@ function BC_Vente() {
                     returns_html += '<div style="padding: 3px 10px; font-style: italic; background-color: #FFFFE1">' + this.returns[k].infos + '</div>';
                     returns_html += '</div>';
                 }
+                if (this.returns[k].warnings.length) {
+                    returns_html += '<div class="product_info">';
+                    for (var h in this.returns[k].warnings) {
+                        if (typeof (this.returns[k].warnings[h]) === 'string' && this.returns[k].warnings[h] !== '') {
+                            returns_html += '<div class="alert alert-warning">';
+                            returns_html += this.returns[k].warnings[h];
+                            returns_html += '</div>';
+                        }
+                    }
+                    returns_html += '</div>';
+                }
                 returns_html += '<div class="article_options">';
                 returns_html += '<div class="article_qty">&nbsp;</div>';
                 returns_html += '<div class="product_total_price">';
@@ -248,6 +259,8 @@ function BC_Vente() {
 }
 
 var Vente = new BC_Vente();
+
+// Caisse: 
 
 function openCaisse($button, confirm_fonds) {
     if ($button.hasClass('disabled')) {
@@ -357,6 +370,8 @@ function loadCaisseMvtForm($button) {
         param_values: values
     }, title);
 }
+
+// Vente: 
 
 function loadNewVente(id_client) {
     if (typeof (id_client) === 'undefined') {
@@ -595,6 +610,34 @@ function saveCurrentVente($button, status) {
     });
 }
 
+function setVenteStatus($button, id_vente, status) {
+    if ($button.hasClass('disabled')) {
+        return;
+    }
+
+    if (status === 0) {
+        if (!confirm('Etes-vous sûr de vouloir abandonner cette vente?')) {
+            return;
+        }
+    }
+
+    var data = {
+        id_vente: id_vente,
+        status: status
+    };
+
+    BimpAjax('saveVenteStatus', data, null, {
+        $button: $button,
+        display_success_in_popup_only: true,
+        display_errors_in_popup_only: true,
+        success: function (result, bimpAjax) {
+            reloadObjectList('BC_Vente_default_list_table');
+        }
+    });
+}
+
+// Client vente: 
+
 function loadNewClientForm($button) {
     loadModalForm($button, {
         module: 'bimpcore',
@@ -653,114 +696,6 @@ function loadNewContactForm($button, id_client) {
                     });
                 }
             });
-        }
-    });
-}
-
-function selectClientFromList($button) {
-    var $row = $button.findParentByClass('Bimp_Client_row');
-
-    if (!$row.length) {
-        bimp_msg('Erreur: ID client absent');
-        return;
-    }
-
-    var id_client = parseInt($row.data('id_object'));
-
-    if (!id_client) {
-        bimp_msg('Erreur: ID client absent');
-        return;
-    }
-
-    var $container = $('#venteClientFormContainer');
-    if (!$container.length) {
-        loadNewVente(id_client);
-    } else {
-        $container.find('[name="id_client"]').val(id_client);
-        $container.find('[name="id_client_contact"]').val(0);
-
-        saveClient();
-    }
-
-    $('#bc_main_container').find('a[href="#ventes"]').click();
-}
-
-function saveCommercial() {
-    BimpAjax('saveCommercial', {
-        id_user_resp: parseInt($('#id_user_resp').val()),
-        id_vente: Vente.id_vente
-    }, null, {
-        display_success_in_popup_only: true,
-        display_errors_in_popup_only: true,
-        display_warnings_in_popup_only: true
-    });
-}
-
-function saveClient() {
-    var $container = $('#venteClientFormContainer');
-    var $button = $container.find('#saveClientButton');
-    var $resultContainer = $container.find('#saveClientResult');
-
-    if ($button.hasClass('disabled')) {
-        return;
-    }
-
-    if (!Vente.id_vente) {
-        bimp_msg('Erreur opération impossible (ID de la vente absent)', 'danger');
-        return;
-    }
-
-    var id_client = parseInt($container.find('[name="id_client"]').val());
-
-    BimpAjax('saveClient', {
-        id_vente: Vente.id_vente,
-        id_client: id_client
-    }, $resultContainer, {
-        $container: $container,
-        $button: $button,
-        display_success: false,
-        success: function (result, bimpAjax) {
-            if (typeof (result.html) !== 'undefined' && result.html) {
-                $('#venteClientViewContainer').html(result.html).slideDown(250);
-                bimpAjax.$container.slideUp(250);
-            }
-            if (typeof (result.discounts_html) !== 'undefined') {
-                $('#customerDiscounts').html(result.discounts_html);
-                checkDiscounts();
-            }
-            refreshVente();
-        }
-    });
-}
-
-function saveCondReglement() {
-    if (!Vente.id_vente) {
-        bimp_msg('Erreur opération impossible (ID de la vente absent)', 'danger');
-        return;
-    }
-
-    BimpAjax('saveCondReglement', {
-        id_cond: $('#condReglementSelect').val(),
-        id_vente: Vente.id_vente
-    }, null, {
-        success: function (result, bimpAjax) {
-            Vente.ajaxResult(result);
-        }
-    });
-}
-
-function saveVenteHt() {
-    if (!Vente.id_vente) {
-        bimp_msg('Erreur opération impossible (ID de la vente absent)', 'danger');
-        return;
-    }
-
-    BimpAjax('saveVenteHt', {
-        vente_ht: $('#venteHt').find('[name="vente_ht"]').val(),
-        id_vente: Vente.id_vente
-    }, null, {
-        success: function (result, bimpAjax) {
-            Vente.ajaxResult(result);
         }
     });
 }
@@ -841,6 +776,118 @@ function changeContact($select) {
         append_html: true
     });
 }
+
+function saveClient() {
+    var $container = $('#venteClientFormContainer');
+    var $button = $container.find('#saveClientButton');
+    var $resultContainer = $container.find('#saveClientResult');
+
+    if ($button.hasClass('disabled')) {
+        return;
+    }
+
+    if (!Vente.id_vente) {
+        bimp_msg('Erreur opération impossible (ID de la vente absent)', 'danger');
+        return;
+    }
+
+    var id_client = parseInt($container.find('[name="id_client"]').val());
+
+    BimpAjax('saveClient', {
+        id_vente: Vente.id_vente,
+        id_client: id_client
+    }, $resultContainer, {
+        $container: $container,
+        $button: $button,
+        display_success: false,
+        success: function (result, bimpAjax) {
+            if (typeof (result.html) !== 'undefined' && result.html) {
+                $('#venteClientViewContainer').html(result.html).slideDown(250);
+                bimpAjax.$container.slideUp(250);
+            }
+            if (typeof (result.discounts_html) !== 'undefined') {
+                $('#customerDiscounts').html(result.discounts_html);
+                checkDiscounts();
+            }
+            refreshVente();
+        }
+    });
+}
+
+function selectClientFromList($button) {
+    var $row = $button.findParentByClass('Bimp_Client_row');
+
+    if (!$row.length) {
+        bimp_msg('Erreur: ID client absent');
+        return;
+    }
+
+    var id_client = parseInt($row.data('id_object'));
+
+    if (!id_client) {
+        bimp_msg('Erreur: ID client absent');
+        return;
+    }
+
+    var $container = $('#venteClientFormContainer');
+    if (!$container.length) {
+        loadNewVente(id_client);
+    } else {
+        $container.find('[name="id_client"]').val(id_client);
+        $container.find('[name="id_client_contact"]').val(0);
+
+        saveClient();
+    }
+
+    $('#bc_main_container').find('a[href="#ventes"]').click();
+}
+
+// Données vente: 
+
+function saveCondReglement() {
+    if (!Vente.id_vente) {
+        bimp_msg('Erreur opération impossible (ID de la vente absent)', 'danger');
+        return;
+    }
+
+    BimpAjax('saveCondReglement', {
+        id_cond: $('#condReglementSelect').val(),
+        id_vente: Vente.id_vente
+    }, null, {
+        success: function (result, bimpAjax) {
+            Vente.ajaxResult(result);
+        }
+    });
+}
+
+function saveVenteHt() {
+    if (!Vente.id_vente) {
+        bimp_msg('Erreur opération impossible (ID de la vente absent)', 'danger');
+        return;
+    }
+
+    BimpAjax('saveVenteHt', {
+        vente_ht: $('#venteHt').find('[name="vente_ht"]').val(),
+        id_vente: Vente.id_vente
+    }, null, {
+        success: function (result, bimpAjax) {
+            Vente.ajaxResult(result);
+        }
+    });
+}
+
+function saveCommercial() {
+    BimpAjax('saveCommercial', {
+        id_user_resp: parseInt($('#id_user_resp').val()),
+        id_vente: Vente.id_vente
+    }, null, {
+        display_success_in_popup_only: true,
+        display_errors_in_popup_only: true,
+        display_warnings_in_popup_only: true
+    });
+}
+
+// Articles vente: 
 
 function findProduct($button) {
     if ($button.hasClass('disabled')) {
@@ -1030,39 +1077,7 @@ function saveArticleRemiseCrt($input) {
     }
 }
 
-function setVenteStatus($button, id_vente, status) {
-    if ($button.hasClass('disabled')) {
-        return;
-    }
-
-    if (status === 0) {
-        if (!confirm('Etes-vous sûr de vouloir abandonner cette vente?')) {
-            return;
-        }
-    }
-
-    var data = {
-        id_vente: id_vente,
-        status: status
-    };
-
-    BimpAjax('saveVenteStatus', data, null, {
-        $button: $button,
-        display_success_in_popup_only: true,
-        display_errors_in_popup_only: true,
-        success: function (result, bimpAjax) {
-            reloadObjectList('BC_Vente_default_list_table');
-        }
-    });
-}
-
-function loadRemiseForm($button) {
-    loadModalForm($button, {
-        'module': 'bimpcaisse',
-        'object_name': 'BC_VenteRemise',
-        'id_parent': Vente.id_vente
-    }, 'Ajout d\'une remise');
-}
+// Retours vente: 
 
 function loadReturnForm($button) {
     loadModalForm($button, {
@@ -1070,6 +1085,125 @@ function loadReturnForm($button) {
         'object_name': 'BC_VenteReturn',
         'id_parent': Vente.id_vente
     }, 'Ajout d\'un retour produit');
+}
+
+function searchReturnedEquipment($button) {
+    var $inputContainer = $button.findParentByClass('search_equipment_inputContainer');
+    var $form = $inputContainer.findParentByClass('BC_VenteReturn_form');
+
+    if (!$inputContainer.length || !$form.length) {
+        bimp_msg('Une erreur est survenue', 'danger');
+        return;
+    }
+
+    var serial = $inputContainer.find('[name="search_equipment"]').val();
+
+    if (!serial) {
+        bimp_msg('Aucun numéro de série spécifié', 'danger');
+        return;
+    }
+
+    $inputContainer.find('[name="search_equipment"]').val('');
+
+    BimpAjax('searchEquipmentToReturn', {
+        serial: serial,
+        id_vente: Vente.id_vente
+    }, null, {
+        $button: $button,
+        $inputContainer: $inputContainer,
+        $form: $form,
+        display_success: false,
+        success: function (result, bimpAjax) {
+            if (typeof (result.equipments) === 'object') {
+                var html = '<select name="id_equipment">';
+                var first = true;
+                for (var i in result.equipments) {
+                    html += '<option value="' + result.equipments[i].id + '"';
+                    html += ' data-id_client="' + result.equipments[i].id_client + '"';
+                    if (first) {
+                        html += ' selected="selected"';
+                    }
+                    html += '>' + result.equipments[i].label + '</option>';
+                }
+                html += '</select>';
+
+                bimpAjax.$form.find('.id_equipment_inputContainer').html(html);
+                var $parent = bimpAjax.$form.find('.id_equipment_inputContainer').parent();
+                var $input = bimpAjax.$form.find('[name=id_equipment]');
+                var initial_value = $input.find('option').first().attr('value');
+                bimpAjax.$form.find('.id_equipment_inputContainer').data('initial_value', initial_value);
+                setCommonEvents($parent);
+                setInputsEvents($parent);
+                setInputEvents(bimpAjax.$form.findParentByClass('BC_VenteReturn_form'), $input);
+                bimpAjax.$form.find('[name="id_product"]').val(0).findParentByClass('formRow').slideUp(250);
+                bimpAjax.$form.find('[name="show_equipment"]').val(1).change();
+                bimpAjax.$form.find('[name="id_equipment"]').change(function () {
+                    var $container = $(this).findParentByClass('inputContainer');
+                    var id_equipment = parseInt($(this).val());
+                    var check = false;
+                    if (!isNaN(id_equipment) && id_equipment) {
+                        for (var i in result.equipments) {
+                            if (result.equipments[i].id == id_equipment) {
+                                if (result.equipments[i].warnings.length) {
+                                    $container.find('.equipmentWarnings').remove();
+                                    var has_warnings = false;
+                                    var wHtml = '<div class="alert alert-warning equipmentWarnings"><ul>';
+                                    for (var j in result.equipments[i].warnings) {
+                                        if (typeof (result.equipments[i].warnings[j]) === 'string' && result.equipments[i].warnings[j] !== '') {
+                                            has_warnings = true;
+                                            wHtml += '<li>' + result.equipments[i].warnings[j] + '</li>';
+                                        }
+                                    }
+                                    wHtml += '</ul></div>';
+
+                                    if (has_warnings) {
+                                        check = true;
+                                        $container.append(wHtml);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (!check) {
+                        $container.find('.equipmentWarnings').remove();
+                    }
+                }).change();
+            }
+        }
+    });
+}
+
+function removeReturn($button, id_return) {
+    if ($button.hasClass('disabled')) {
+        return;
+    }
+
+    BimpAjax('removeReturn', {
+        id_vente: Vente.id_vente,
+        id_return: id_return
+    }, null, {
+        $button: $button,
+        id_return: id_return,
+        display_success: false,
+        display_errors_in_popup_only: true,
+        success: function (result, bimpAjax) {
+            $('#cur_vente_return_' + bimpAjax.id_return).fadeOut(250, function () {
+                $(this).remove();
+            });
+            Vente.ajaxResult(result);
+        }
+    });
+}
+
+// Remises vente: 
+
+function loadRemiseForm($button) {
+    loadModalForm($button, {
+        'module': 'bimpcaisse',
+        'object_name': 'BC_VenteRemise',
+        'id_parent': Vente.id_vente
+    }, 'Ajout d\'une remise');
 }
 
 function deleteRemise($button, id_remise) {
@@ -1091,9 +1225,7 @@ function deleteRemise($button, id_remise) {
     });
 }
 
-function addPaiement() {
-
-}
+// Paiements vente: 
 
 function displayNewPaiementForm($button) {
     if ($button.hasClass('selected')) {
@@ -1167,6 +1299,18 @@ function deletePaiement($button, id_paiement) {
         }
     });
 }
+
+function checkDiscounts() {
+    var $container = $('#customerDiscountsContainer');
+
+    if (!$container.find('select[name="discounts_add_value"]').find('option').length) {
+        $container.hide();
+    } else {
+        $container.show();
+    }
+}
+
+// Evénements: 
 
 function setCartLineEvents($line) {
     if ($line.length) {
@@ -1264,119 +1408,6 @@ function onVenteLoaded() {
     checkMultipleValues();
     checkDiscounts();
 }
-
-function searchReturnedEquipment($button) {
-    var $inputContainer = $button.findParentByClass('search_equipment_inputContainer');
-    var $form = $inputContainer.findParentByClass('BC_VenteReturn_form');
-
-    if (!$inputContainer.length || !$form.length) {
-        bimp_msg('Une erreur est survenue', 'danger');
-        return;
-    }
-
-    var serial = $inputContainer.find('[name="search_equipment"]').val();
-
-    if (!serial) {
-        bimp_msg('Aucun numéro de série spécifié', 'danger');
-        return;
-    }
-
-    $inputContainer.find('[name="search_equipment"]').val('');
-
-    BimpAjax('searchEquipmentToReturn', {
-        serial: serial,
-        id_vente: Vente.id_vente
-    }, null, {
-        $button: $button,
-        $inputContainer: $inputContainer,
-        $form: $form,
-        display_success: false,
-        success: function (result, bimpAjax) {
-            if (typeof (result.equipments) === 'object') {
-                var html = '<select name="id_equipment">';
-                var first = true;
-                for (var i in result.equipments) {
-                    html += '<option value="' + result.equipments[i].id + '"';
-                    html += ' data-id_client="' + result.equipments[i].id_client + '"';
-                    if (first) {
-                        html += ' selected="selected"';
-                    }
-                    html += '>' + result.equipments[i].label + '</option>';
-                }
-                html += '</select>';
-
-                bimpAjax.$form.find('.id_equipment_inputContainer').html(html);
-                var $parent = bimpAjax.$form.find('.id_equipment_inputContainer').parent();
-                var $input = bimpAjax.$form.find('[name=id_equipment]');
-                var initial_value = $input.find('option').first().attr('value');
-                bimpAjax.$form.find('.id_equipment_inputContainer').data('initial_value', initial_value);
-                setCommonEvents($parent);
-                setInputsEvents($parent);
-                setInputEvents(bimpAjax.$form.findParentByClass('BC_VenteReturn_form'), $input);
-                bimpAjax.$form.find('[name="id_product"]').val(0).findParentByClass('formRow').slideUp(250);
-                bimpAjax.$form.find('[name="show_equipment"]').val(1).change();
-                bimpAjax.$form.find('[name="id_equipment"]').change(function () {
-                    var id_equipment = parseInt($(this).val());
-                    var check = false;
-                    if (!isNaN(id_equipment) && id_equipment) {
-                        for (var i in result.equipments) {
-                            if (result.equipments[i].id == id_equipment) {
-                                if (result.equipments[i].warnings.length) {
-                                    check = true;
-                                    var $container = $(this).findParentByClass('inputContainer');
-                                    $container.find('.equipmentWarnings').remove();
-                                    var wHtml = '<div class="alert alert-warning equipmentWarnings"><ul>';
-                                    for (var j in result.equipments[i].warnings) {
-                                        wHtml += '<li>' + result.equipments[i].warnings[j] + '</li>';
-                                    }
-                                    wHtml += '<ul></div>';
-                                    $container.append(wHtml);
-                                }
-                            }
-                        }
-                    }
-                }).change();
-            }
-        }
-    });
-}
-
-function removeReturn($button, id_return) {
-    if ($button.hasClass('disabled')) {
-        return;
-    }
-
-    BimpAjax('removeReturn', {
-        id_vente: Vente.id_vente,
-        id_return: id_return
-    }, null, {
-        $button: $button,
-        id_return: id_return,
-        display_success: false,
-        display_errors_in_popup_only: true,
-        success: function (result, bimpAjax) {
-            $('#cur_vente_return_' + bimpAjax.id_return).fadeOut(250, function () {
-                $(this).remove();
-            });
-            Vente.ajaxResult(result);
-        }
-    });
-}
-
-function checkDiscounts() {
-    var $container = $('#customerDiscountsContainer');
-
-    if (!$container.find('select[name="discounts_add_value"]').find('option').length) {
-        $container.hide();
-    } else {
-        $container.show();
-    }
-}
-
-function setArticleEvents() {
-
-}
-;
 
 $(document).ready(function () {
 

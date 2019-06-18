@@ -898,10 +898,18 @@ class BimpComm extends BimpDolObject
     }
 
     // Getters - Overrides BimpObject
-    public function getName()
+    
+    public function getName($with_generic = true)
     {
         if ($this->isLoaded()) {
-            return BimpTools::ucfirst($this->getLabel()) . ' #' . $this->id;
+            $name = (string) $this->getData('libelle');
+            if ($name) {
+                return $name;
+            }
+
+            if ($with_generic) {
+                return BimpTools::ucfirst($this->getLabel()) . ' #' . $this->id;
+            }
         }
 
         return '';

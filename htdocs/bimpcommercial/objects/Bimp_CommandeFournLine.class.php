@@ -70,8 +70,9 @@ class Bimp_CommandeFournLine extends FournObjectLine
                     if (BimpObject::objectLoaded($equipment)) {
 
                         // Vérification de la disponibilité à la vente: 
-                        if (!(int) $equipment->getData('available')) {
-                            $errors[] = 'L\'équipement "' . $equipment->getData('serial') . '" n\'est plus disponible à la vente';
+                        $available_errors = array();
+                        if (!(int) $equipment->isAvailable(0, $available_errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($available_errors);
                             continue;
                         }
 
@@ -923,12 +924,12 @@ class Bimp_CommandeFournLine extends FournObjectLine
         $errors = array();
 
         $reception = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeFournReception', (int) $id_reception);
-        
+
         if (!BimpObject::objectLoaded($reception)) {
-            $errors[] = 'La réception d\'ID '.$id_reception.' n\'existe pas';
+            $errors[] = 'La réception d\'ID ' . $id_reception . ' n\'existe pas';
             return $errors;
         }
-        
+
         $isSerialisable = $this->isProductSerialisable();
 
         if ($isSerialisable) {
@@ -972,7 +973,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
 
         $this->set('receptions', $receptions);
         $errors = $this->update($warnings, true);
-        
+
         if (!count($errors)) {
             $reception->onLinesChange();
         }
@@ -1053,7 +1054,6 @@ class Bimp_CommandeFournLine extends FournObjectLine
                     'id_product'    => $product->id,
                     'type'          => 1, // Dans produits? à sélectionner ? 
                     'serial'        => $serial_data['serial'],
-                    'available'     => 1,
                     'date_purchase' => $commande_fourn->getData('date_commande'),
                     'prix_achat'    => $pu_ht,
                     'achat_tva_tx'  => $tva_tx
@@ -1159,7 +1159,6 @@ class Bimp_CommandeFournLine extends FournObjectLine
                     if ($pa_moyen && $line_qty) {
                         $line_pa = (float) $line->pa_ht;
 //                        $remise_pa = (float) $line->getData('remise_pa');
-
 //                        if ($remise_pa) {
 //                            $line_pa -= ((float) $line->pa_ht * ($remise_pa / 100));
 //                        }
@@ -1331,7 +1330,6 @@ class Bimp_CommandeFournLine extends FournObjectLine
                         if ($pa_total && $line_qty) {
                             $line_pa = (float) $commande_line->pa_ht;
 //                            $remise_pa = (float) $commande_line->getData('remise_pa');
-
 //                            if ($remise_pa) {
 //                                $line_pa -= ($line_pa * ($remise_pa / 100));
 //                            }

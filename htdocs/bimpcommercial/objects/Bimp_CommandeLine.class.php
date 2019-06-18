@@ -245,8 +245,7 @@ class Bimp_CommandeLine extends ObjectLine
             if (BimpObject::objectLoaded($client)) {
                 return array(
                     'fields'  => array(
-                        'id_product' => (int) $this->id_product,
-                        'available'  => 0
+                        'id_product' => (int) $this->id_product
                     ),
                     'objects' => array(
                         'places' => array(
@@ -829,7 +828,7 @@ class Bimp_CommandeLine extends ObjectLine
                         continue;
                     }
 
-                    if (!(int) $equipment->getData('return_available')) {
+                    if (!$equipment->isAvailable()) {
                         unset($items[$id_equipment]);
                     }
                 }
@@ -2782,6 +2781,7 @@ class Bimp_CommandeLine extends ObjectLine
                                 // Mise à jour des emplacements:             
 
                                 foreach ($shipment_data['equipments'] as $id_equipment) {
+                                    $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
                                     $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
                                     $place_errors = $place->validateArray(array(
                                         'id_equipment' => (int) $id_equipment,
@@ -2797,9 +2797,12 @@ class Bimp_CommandeLine extends ObjectLine
                                     }
 
                                     if (count($place_errors)) {
-                                        $errors[] = BimpTools::getMsgFromArray($place_errors, 'Echec de la création du nouvel emplacement pour l\'équipement ' . $equipment->getData('serial') . ' (ID ' . $id_equipment . ')');
-                                        dol_syslog('Echec de la création du nouvel emplacement pour l\'équipement ' . $equipment->getData('serial') . ' (ID ' . $id_equipment . ') - Commande client: ' . $commande->getRef() . '(ID ' . $commande->id . ')', LOG_ERR);
+                                        $msg = BimpTools::getMsgFromArray($place_errors, 'Echec de la création du nouvel emplacement pour l\'équipement ' . $equipment->getData('serial') . ' (ID ' . $id_equipment . ')');
+                                        $errors[] = $msg;
+                                        dol_syslog('[ERREUR STOCK] ' . $msg . ' - Commande client ' . $commande->getRef() . '(#' . $commande->id . ')' . ' - Expédition #' . $shipment->id, LOG_ERR);
                                     }
+
+                                    $equipment->updateField('id_commande_line_return', 0);
                                 }
                             }
                         }
@@ -2812,7 +2815,7 @@ class Bimp_CommandeLine extends ObjectLine
                             if ($product->dol_object->correct_stock($user, (int) $shipment_data['id_entrepot'], abs((float) $shipment_data['qty']), 0, $stock_label, 0, $codemove, 'commande', $commande->id) <= 0) {
                                 $msg = 'Retour produit - Echec de la mise à jour des stocks pour le produit "' . $product->dol_object->ref . '" (ID ' . $product->id . ', quantités à ajouter: ' . $shipment_data['qty'] . ')';
                                 $errors[] = $msg;
-                                dol_syslog($msg, LOG_ERR);
+                                dol_syslog('[ERREUR STOCK] ' . $msg . ' - Commande client ' . $commande->getRef() . '(#' . $commande->id . ')' . ' - Expédition #' . $shipment->id, LOG_ERR);
                             }
                         }
                     }
@@ -2910,8 +2913,9 @@ class Bimp_CommandeLine extends ObjectLine
                                     }
 
                                     if (count($place_errors)) {
-                                        $errors[] = BimpTools::getMsgFromArray($place_errors, 'Echec de la création du nouvel emplacement pour l\'équipement ' . $equipment->getData('serial') . ' (ID ' . $id_equipment . ')');
-                                        dol_syslog('Annulation expédition ' . $shipment->id . ' - Echec de la création du nouvel emplacement pour l\'équipement ' . $equipment->getData('serial') . ' (ID ' . $id_equipment . ') - Commande client: ' . $commande->getRef() . '(ID ' . $commande->id . ')', LOG_ERR);
+                                        $msg = BimpTools::getMsgFromArray($place_errors, 'Echec de la création du nouvel emplacement pour l\'équipement ' . $equipment->getData('serial') . ' (ID ' . $id_equipment . ')');
+                                        $errors[] = $msg;
+                                        dol_syslog('[ERREUR STOCK] Annulation expédition #' . $shipment->id . ': ' . $msg . ' - Commande client: ' . $commande->getRef() . '(ID ' . $commande->id . ')', LOG_ERR);
                                     }
                                 }
                             }
@@ -2940,7 +2944,7 @@ class Bimp_CommandeLine extends ObjectLine
                         if ($product->dol_object->correct_stock($user, $id_entrepot, $shipment_data['qty'], 0, $stock_label, 0, $codemove, 'commande', $commande->id) <= 0) {
                             $msg = 'Echec de la mise à jour des stocks pour le produit "' . $product->dol_object->label . '" (ID ' . $product->id . ', quantités à ajouter: ' . $shipment_data['qty'] . ')';
                             $errors[] = $msg;
-                            dol_syslog('Annulation expédition ' . $shipment->id . ' - ' . $msg, LOG_ERR);
+                            dol_syslog('[ERREUR STOCK] Annulation expédition #' . $shipment->id . ': ' . $msg . ' - Commande client: ' . $commande->getRef() . '(ID ' . $commande->id . ')', LOG_ERR);
                         }
                     }
                 }
@@ -2971,9 +2975,12 @@ class Bimp_CommandeLine extends ObjectLine
                             }
 
                             if (count($place_errors)) {
-                                $errors[] = BimpTools::getMsgFromArray($place_errors, 'Echec de la création du nouvel emplacement pour l\'équipement ' . $equipment->getData('serial') . ' (ID ' . $id_equipment . ')');
-                                dol_syslog('Annulation expédition ' . $shipment->id . ' - Echec de la création du nouvel emplacement pour l\'équipement ' . $equipment->getData('serial') . ' (ID ' . $id_equipment . ') - Commande client: ' . $commande->getRef() . '(ID ' . $commande->id . ')', LOG_ERR);
+                                $msg = BimpTools::getMsgFromArray($place_errors, 'Echec de la création du nouvel emplacement pour l\'équipement ' . $equipment->getData('serial') . ' (ID ' . $id_equipment . ')');
+                                $errors[] = $msg;
+                                dol_syslog('[ERREUR STOCK] Annulation expédition #' . $shipment->id . ': ' . $msg . ' - Commande client: ' . $commande->getRef() . '(ID ' . $commande->id . ')', LOG_ERR);
                             }
+
+                            $equipment->updateField('id_commande_line_return', (int) $this->id);
                         }
                     }
                 } else {
@@ -2983,7 +2990,7 @@ class Bimp_CommandeLine extends ObjectLine
                             $title = 'Echec de la mise à jour des stocks pour le produit "' . $product->dol_object->label . '" (ID ' . $product->id . ', quantités à retirer: ' . abs($shipment_data['qty']) . ')';
                             $msg = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($product->dol_object), $title);
                             $errors[] = $msg;
-                            dol_syslog('Retour produit, Annulation expédition ' . $shipment->id . ' - ' . $msg, LOG_ERR);
+                            dol_syslog('[ERREUR STOCK] Retour produit, Annulation expédition #' . $shipment->id . ' - ' . $msg . ' - Commande client: ' . $commande->getRef() . '(ID ' . $commande->id . ')', LOG_ERR);
                         }
                     }
                 }
@@ -3431,9 +3438,7 @@ class Bimp_CommandeLine extends ObjectLine
                 }
             }
 
-            if (!(int) $equipment->getData('return_available')) {
-                $errors[] = 'L\'équipement "' . $equipment->getData('serial') . '" est marqué comme non disponible pour un retour (un retour est probablement déjà en cours)';
-            }
+            $equipment->isAvailable(0, $errors);
         }
 
         return $errors;
@@ -3482,7 +3487,7 @@ class Bimp_CommandeLine extends ObjectLine
                     if (!count($errors)) {
                         $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $equipment_data['id_equipment']);
 
-                        $eq_errors = $equipment->updateField('return_available', 0);
+                        $eq_errors = $equipment->updateField('id_commande_line_return', (int) $this->id);
                         if (count($eq_errors)) {
                             $warnings[] = BimpTools::getMsgFromArray($eq_errors, 'Echec de la mise à jour de l\'équipement "' . $equipment->getData('serial') . '" - Cet équipement n\'a donc pas été ajouté à la liste des équipement retournés');
                         } else {
@@ -3954,7 +3959,7 @@ class Bimp_CommandeLine extends ObjectLine
                     }
                 }
 
-                $eq_errors = $equipment->updateField('return_available', 1);
+                $eq_errors = $equipment->updateField('id_commande_line_return', 0);
                 if (count($eq_errors)) {
                     $warnings[] = BimpTools::getMsgFromArray($eq_errors, 'Equipement "' . $equipment->getData('serial') . '"');
                 } else {

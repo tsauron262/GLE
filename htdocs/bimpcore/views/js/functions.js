@@ -3,6 +3,8 @@ var bimp_msg_enable = true;
 var ctrl_down = false;
 var bimp_decode_textarea = null;
 
+var notifications_remove_delay = 3000;
+
 function bimp_msg(msg, className, $container) {
     if (!bimp_msg_enable) {
         return;
@@ -11,7 +13,9 @@ function bimp_msg(msg, className, $container) {
     if (typeof (className) === 'undefined') {
         className = 'info';
     }
+
     var html = '<div class="bimp_msg alert alert-' + className + '">';
+    html += '<span class="removeBimpMsgButton" onclick="removeNotification($(this))"></span>';
     html += msg;
     html += '</div>';
 
@@ -28,21 +32,27 @@ function bimp_msg(msg, className, $container) {
 
         $container.append(html).show().css('height', 'auto');
 
-        var $div = $container.find('div.bimp_msg:last-child').css('margin-left', '370px').animate({
+        var $div = $container.find('div.bimp_msg:last-child');
+
+        $div.css('margin-left', '370px').animate({
             'margin-left': 0
         }, {
             'duration': 250,
             complete: function () {
-                setTimeout(function () {
-                    if (!$div.data('hold')) {
-                        $div.fadeOut(500, function () {
-                            $div.remove();
-                            if (!$container.find('div.bimp_msg').length) {
-                                $container.hide();
-                            }
-                        });
-                    }
-                }, 8000);
+                if ($div.hasClass('alert-success')) {
+                    setTimeout(function () {
+                        if (!$div.data('hold')) {
+                            $div.fadeOut(500, function () {
+                                if (!$(this).data('hold')) {
+                                    $div.remove();
+                                    checkNotifications();
+                                } else {
+                                    $div.css('opactity', 1);
+                                }
+                            });
+                        }
+                    }, notifications_remove_delay);
+                }
             }
         });
     }
@@ -76,6 +86,57 @@ function bimp_destroy_element_popover($element) {
     if (typeof ($element.data('bs.popover')) !== 'undefined') {
         $element.popover('destroy');
         $element.removeClass('bs-popover');
+    }
+}
+
+// Notifications: 
+
+function setNotificationsEvents() {
+    var $notifications = $('#page_notifications');
+
+    $notifications.mouseover(function () {
+        $notifications.find('div.bimp_msg.alert-success').each(function () {
+            $(this).data('hold', 1).css('opacity', 1);
+        });
+    }).mouseleave(function () {
+        $notifications.find('div.bimp_msg.alert-success').each(function () {
+            $(this).data('hold', 0);
+            var $div = $(this);
+            setTimeout(function () {
+                if (!$div.data('hold')) {
+                    $div.fadeOut(500, function () {
+                        if (!$(this).data('hold')) {
+                            $div.remove();
+                            checkNotifications();
+                        }
+                    });
+                }
+            }, notifications_remove_delay);
+        });
+    });
+}
+
+function removeNotification($button) {
+    $button.findParentByClass('bimp_msg').fadeOut(250, function () {
+        $(this).remove();
+        checkNotifications();
+    });
+}
+
+function removeAllNotifications() {
+    $('#page_notifications').find('div.bimp_msg').each(function () {
+        $(this).fadeOut(250, function () {
+            $(this).remove();
+            checkNotifications();
+        });
+    });
+}
+
+function checkNotifications() {
+    var $container = $('#page_notifications');
+
+    if (!$container.find('div.bimp_msg').length) {
+        $container.hide();
     }
 }
 
@@ -844,46 +905,16 @@ $(document).ready(function () {
         $(this).find('.hideOnClickOut').hide();
         $(this).find('.bs-popover').popover('hide');
     });
-    $('body').append('<div id="page_notifications"></div>');
-    var $notifications = $('#page_notifications');
-    $notifications.mouseover(function () {
-        $(this).stop().animate({
-            'width': '5px',
-            'padding': 0
-        }, {
-            'duration': 250,
-            complete: function () {
-                $notifications.find('div.bimp_msg').each(function () {
-                    $(this).data('hold', 1);
-                    $(this).stop(false, true);
-                });
-                setTimeout(function () {
-                    $notifications.stop().animate({
-                        'width': '430px',
-                        'padding': '0 30px'
-                    }, {
-                        'duration': 250,
-                        'complete': function () {
-                            $notifications.find('div.bimp_msg').each(function () {
-                                var $div = $(this);
-                                $div.data('hold', 0);
-                                setTimeout(function () {
-                                    if (!$div.data('hold')) {
-                                        $div.fadeOut(500, function () {
-                                            $div.remove();
-                                            if (!$notifications.find('div.bimp_msg').length) {
-                                                $notifications.hide();
-                                            }
-                                        });
-                                    }
-                                }, 8000);
-                            });
-                        }
-                    });
-                }, 1500);
-            }
-        });
-    });
+
+    var html = '<div id="page_notifications">';
+    html += '<div id="notifications_tools">';
+    html += '<span class="btn btn-danger removeAllBimpMsgButton" onclick="removeAllNotifications()"><i class="far fa5-times-circle iconLeft"></i>Masquer toutes les notifications</span>';
+    html += '</div>';
+    html += '</div>';
+
+    $('body').append(html);
+
+    setNotificationsEvents();
 
     $('.object_header').each(function () {
         setCommonEvents($(this));

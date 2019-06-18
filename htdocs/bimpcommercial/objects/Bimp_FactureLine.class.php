@@ -63,8 +63,6 @@ class Bimp_FactureLine extends ObjectLine
                         $equipment->set('achat_tva_tx', $tva_tx);
                         $equipment->set('date_vente', date('Y-m-d H:i:s'));
                         $equipment->set('id_facture', (int) $this->getData('id_obj'));
-                        $equipment->set('available', 0);
-                        $equipment->set('return_available', 1);
 
                         $warnings = array();
                         $equipment->update($warnings, true);

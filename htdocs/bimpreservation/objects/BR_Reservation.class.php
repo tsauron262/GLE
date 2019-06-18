@@ -987,7 +987,7 @@ class BR_Reservation extends BimpObject
 
         if (!$equipment->isLoaded()) {
             $errors[] = 'Equipement d\'ID ' . (int) $this->getData('id_equipment') . ' non trouvé';
-            return false;
+            return 0;
         }
 
         $id_product = (int) $this->getData('id_product');
@@ -997,27 +997,17 @@ class BR_Reservation extends BimpObject
 
         if ($id_product !== (int) $equipment->getData('id_product')) {
             $errors[] = 'L\'équipement spécifié ne correspond pas au produit associé à cette réservation';
-            return false;
-        }
-
-        $current_reservations = $equipment->getReservationsList();
-        if (count($current_reservations)) {
-            if (!$this->isLoaded() || ($this->isLoaded() && !in_array($this->id, $current_reservations))) {
-                $errors[] = 'Cet équipement est déjà réservé';
-                return false;
-            }
+            return 0;
         }
 
         $id_entrepot = (int) $this->getData('id_entrepot');
-        if ($id_entrepot) {
-            $place = $equipment->getCurrentPlace();
-            if (is_null($place) || (int) $place->getData('type') !== BE_Place::BE_PLACE_ENTREPOT || (int) $place->getData('id_entrepot') !== $id_entrepot) {
-                $errors[] = 'L\'équipement ' . $equipment->id . ' n\'est pas disponible dans l\'entrepôt sélectionné';
-                return false;
-            }
+        if (!$equipment->isAvailable($id_entrepot, $errors, array(
+                    'id_reservation' => ($this->isLoaded() ? (int) $this->id : 0)
+                ))) {
+            return 0;
         }
 
-        return true;
+        return 1;
     }
 
     public function findEquipmentToReceive($id_commande_client, $serial, &$errors = array())

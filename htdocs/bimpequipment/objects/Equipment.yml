@@ -130,11 +130,13 @@ fields:
             type: value_part
             part_type: beginning
         
+#   A suppr.
     available: 
         label: Disponible à la vente
         type: bool
         default_value: 1
         
+#   A suppr.     
     return_available: 
         label: Disponible pour retour
         type: bool
@@ -262,10 +264,10 @@ fields_tables:
                       params: 
                           - card
             - field: serial
-            - field: available
-              edit: 1
-            - field: return_available
-              edit: 1
+#            - field: available
+#              edit: 1
+#            - field: return_available
+#              edit: 1
             - field: date_purchase
             - field: prix_achat
             - field: achat_tva_tx
@@ -349,8 +351,8 @@ forms:
             - field: id_product
             - field: product_label
             - field: type
-            - field: available
-            - field: return_available
+#            - field: available
+#            - field: return_available
             - field: date_purchase
             - field: prix_achat
             - field: achat_tva_tx
@@ -370,7 +372,7 @@ forms:
             - field: id_product
             - field: product_label
             - field: type
-            - field: available
+#            - field: available
             - field: date_purchase
             - field: warranty_type
             - field: date_warranty_end
@@ -382,7 +384,7 @@ forms:
             - field: id_product
             - field: product_label
             - field: type
-            - field: available
+#            - field: available
             - field: date_purchase
             - field: warranty_type
             - field: date_warranty_end
@@ -455,9 +457,9 @@ list:
                     options: 
                         options: 
                             array: hasReservations
-        available: 
-            field: available
-            edit: 1
+#        available: 
+#            field: available
+#            edit: 1
     
 searches:
     default: 

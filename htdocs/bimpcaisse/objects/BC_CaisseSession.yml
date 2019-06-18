@@ -1,6 +1,8 @@
 table: bc_caisse_session
 common_fields: 0
 
+icon: fas_user-clock
+
 parent_object: BC_Caisse
 parent_id_property: id_caisse
 
@@ -92,3 +94,50 @@ views:
                       callback: renderPaymentsInfos
                   col_lg: 6
                   col_md: 6
+                  
+    full: 
+        objects_change_reload: BC_Vente,Bimp_Paiement
+        rows: 
+            - cols: 
+                - type: object_header
+            - cols: 
+                - type: view
+                  view: 
+                      name: default
+                      panel: 0
+            - cols: 
+                - type: custom
+                  custom: 
+                      callback: renderPaymentsHistory
+            - cols: 
+                - type: custom
+                  custom: 
+                      callback: renderVentesList
+                  
+lists: 
+    default: 
+        title: Sessions de caisse
+        icon: fas_user-clock
+        sort_field: id
+        sort_way: desc
+        n: 10
+        modal_view: full
+        cols:
+            centre: 
+                field: id_caisse
+                display: nom
+            date_open: 
+                field: date_open
+            date_closed: 
+                field: date_closed
+            user_open: 
+                field: id_user_open
+                display: nom_url
+            user_closed: 
+                field: id_user_closed
+                display: nom_url
+            fonds_begin: 
+                field: fonds_begin
+            fonds_end:
+                field: fonds_end
+                

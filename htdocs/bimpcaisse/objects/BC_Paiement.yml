@@ -1,5 +1,7 @@
 table: bc_paiement
 
+icon: fas_hand-holding-usd
+
 labels: 
     name: Paiement en caisse
     name_plur: paiements en caisse

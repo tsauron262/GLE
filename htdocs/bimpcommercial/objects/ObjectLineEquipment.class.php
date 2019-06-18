@@ -61,9 +61,6 @@ class ObjectLineEquipment extends BimpObject
                 if ($current) {
                     if ((int) $id_equipment && $current === $id_equipment) {
                         $errors[] = 'Cet équipement a déjà été attribué';
-                    } else {
-                        $oldEquipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $current);
-                        $oldEquipment->updateField('available', 1);
                     }
                 }
                 if (!count($errors) && !is_null($equipment)) {
@@ -73,8 +70,6 @@ class ObjectLineEquipment extends BimpObject
                 }
                 if (!count($errors)) {
                     $this->updateField('id_equipment', (int) $id_equipment);
-                    if (!is_null($equipment))
-                        $equipment->updateField('available', 0);
                 }
             }
         } else {
@@ -89,32 +84,7 @@ class ObjectLineEquipment extends BimpObject
         $errors = array();
 
         if ($this->isLoaded() && (int) $this->getData('id_equipment')) {
-            $id_equipment = (int) $this->getData('id_equipment');
             $errors = $this->updateField('id_equipment', 0);
-
-            if (!count($errors)) {
-                $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $id_equipment);
-                if (BimpObject::objectLoaded($equipment)) {
-                    $equipment->updateField('available', 1);
-                }
-            }
-        }
-
-        return $errors;
-    }
-
-    // Overrides: 
-
-    public function delete(&$warnings = array(), $force_delete = false)
-    {
-        $id_equipment = (int) $this->getData('id_equipment');
-        $errors = parent::delete($warnings, $force_delete);
-
-        if (!count($errors) && $id_equipment) {
-            $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $id_equipment);
-            if ($equipment->isLoaded()) {
-                $equipment->updateField('available', 1);
-            }
         }
 
         return $errors;

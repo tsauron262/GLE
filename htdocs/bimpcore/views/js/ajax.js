@@ -155,7 +155,7 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
                 msg = warnings;
             } else if (typeof (warnings) === 'object') {
                 for (var i in warnings) {
-                    msg += '- ' + warnings[i] + '<br/>';
+                    msg += warnings[i] + '<br/>';
                 }
             }
         }

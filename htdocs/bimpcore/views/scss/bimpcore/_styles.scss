@@ -984,6 +984,34 @@ i.iconRight {
 
         margin-left: 370px;
     }
+
+    #notifications_tools {
+        margin-bottom: 10px;
+        text-align: right;
+
+        .removeAllBimpMsgButton {
+            box-shadow: 4px 4px 4px #505050;
+        }
+    }
+
+    .removeBimpMsgButton {
+        @include transition(all 0.3s ease);
+        display: inline-block;
+        float: right;
+        margin-right: -5px;
+        margin-top: -5px;
+        font-size: 20px;
+        cursor: pointer;
+
+        &:after {
+            font-family: 'FA5';
+            content: '\f057';
+        }
+
+        &:hover {
+            font-size: 24px;
+        }
+    }
 }
 
 

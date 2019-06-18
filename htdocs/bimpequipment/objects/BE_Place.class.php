@@ -70,7 +70,7 @@ class BE_Place extends BimpObject
                 case self::BE_PLACE_CLIENT:
                     $client = $this->getChildObject('client');
                     if (BimpObject::ObjectLoaded($client)) {
-                        $name = 'Client "' . $client->dol_object->nom . '"';
+                        $name = 'Client "' . $client->nom . '"';
                     }
                     break;
 

@@ -164,17 +164,31 @@ class BC_FieldFilter extends BC_Filter
         if ($this->field->params['extra']) {
             $filter_key = $this->object->getExtraFieldFilterKey($this->field->name, $joins, $this->child_name);
         } else {
+            $field_name = $this->field->name;
+
             if ($this->child_name) {
-                $filter_key = $this->child_name . '.';
-                if (!isset($joins[$this->child_name])) {
-                    $joins[$this->child_name] = array(
-                        'table' => $this->object->getTable(),
-                        'on'    => $this->child_name . '.' . $this->object->getPrimary() . ' = a.' . $this->base_object->getChildIdProperty($this->child_name),
-                        'alias' => $this->child_name
-                    );
+                if ($this->object->isDolExtraField($field_name)) {
+                    $alias = $this->child_name . '_ef';
+                    $filter_key = $alias . '.';
+                    if (!isset($joins[$alias])) {
+                        $joins[$alias] = array(
+                            'table' => $this->object->getTable() . '_extrafields',
+                            'on'    => $alias . '.fk_object = a.' . $this->base_object->getChildIdProperty($this->child_name),
+                            'alias' => $alias
+                        );
+                    }
+                } else {
+                    $filter_key = $this->child_name . '.';
+                    if (!isset($joins[$this->child_name])) {
+                        $joins[$this->child_name] = array(
+                            'table' => $this->object->getTable(),
+                            'on'    => $this->child_name . '.' . $this->object->getPrimary() . ' = a.' . $this->base_object->getChildIdProperty($this->child_name),
+                            'alias' => $this->child_name
+                        );
+                    }
                 }
             }
-            $filter_key .= $this->field->name;
+            $filter_key .= $field_name;
         }
 
         switch ($this->params['type']) {

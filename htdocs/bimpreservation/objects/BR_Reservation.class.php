@@ -155,6 +155,49 @@ class BR_Reservation extends BimpObject
                 break;
         }
 
+        if ((int) $new_status === 0) {
+            return (int) $this->isReinitialisable($errors);
+        }
+
+        return 1;
+    }
+
+    public function isReinitialisable(&$errors = array())
+    {
+        $status = (int) $this->getData('status');
+
+        if ($status === 0) {
+            $errors[] = 'Cette réservation est déjà au statut "' . self::$status_list[0]['label'] . '"';
+            return 0;
+        }
+
+        if ($status >= 250) {
+            $errors[] = 'Le statut actuel de la réservation (' . self::$status_list[$status]['label'] . ') ne permet pas sa réinitialisation';
+            return 0;
+        }
+
+        switch ((int) $this->getData('type')) {
+            case self::BR_RESERVATION_COMMANDE:
+                if ($status === 200 && (int) $this->getData('id_equipment')) {
+                    $id_equipment = (int) $this->getData('id_equipment');
+                    $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $this->getData('id_commande_client_line'));
+                    if (BimpObject::objectLoaded($line)) {
+                        $id_shipment = (int) $line->getEquipmentIdShipment($id_equipment);
+                        if ($id_shipment) {
+                            $errors[] = 'L\'équipement associé a été attribué à une expédition';
+                            return 0;
+                        }
+
+                        $id_facture = (int) $line->getEquipmentIdFacture($id_equipment);
+                        if ($id_facture) {
+                            $errors[] = 'L\'équipement associé a été attribué à une facture';
+                            return 0;
+                        }
+                    }
+                }
+                break;
+        }
+
         return 1;
     }
 
@@ -565,7 +608,7 @@ class BR_Reservation extends BimpObject
                 switch ($type) {
                     case self::BR_RESERVATION_COMMANDE: // A Tester
                         // Réinitialisation de la réservation: 
-                        if ((int) $status && $status < 250) {
+                        if ($this->isReinitialisable()) {
                             $params = array();
                             if ($qty > 1) {
                                 $params['form_name'] = 'new_status';

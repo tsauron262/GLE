@@ -2322,8 +2322,11 @@ class Bimp_Commande extends BimpComm
         $new_data['shipment_status'] = 0;
         $new_data['invoice_status'] = 0;
         $new_data['logistique_status'] = 0;
+        $new_data['extra_status'] = 0;
+        $new_data['status_forced'] = array();
         $new_data['id_user_resp'] = 0;
-
+        $new_data['revalorisation'] = 0;
+        
         return parent::duplicate($new_data, $warnings, $force_create);
     }
 

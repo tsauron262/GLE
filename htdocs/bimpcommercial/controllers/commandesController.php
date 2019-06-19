@@ -23,22 +23,6 @@ class commandesController extends BimpController
         }
     }
 
-    public function renderHtml()
-    {
-        return BimpRender::renderNavTabs(array(
-                    array(
-                        'id'      => 'commandes',
-                        'title'   => 'Commandes',
-                        'content' => $this->renderCommandesTab()
-                    ),
-                    array(
-                        'id'      => 'shipments',
-                        'title'   => 'Expéditions',
-                        'content' => $this->renderShipmentsTab()
-                    )
-        ));
-    }
-
     public function renderCommandesTab()
     {
         $list = 'default';

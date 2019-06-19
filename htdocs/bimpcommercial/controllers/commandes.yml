@@ -1,6 +1,9 @@
 bootstrap: 1
 title: Commandes
 
+js: 
+    - /bimplogistique/views/js/logistique.js
+    
 objects: 
     commande: 
         instance:
@@ -10,3 +13,19 @@ objects:
         instance: 
             module: bimplogistique
             name: BL_CommandeShipment
+            
+sections: 
+    - type: tabs
+      tabs: 
+        default:
+            label: Commandes
+            sections:
+                - type: custom
+                  custom: 
+                      callback: renderCommandesTab
+        receptions: 
+            label: Expéditions
+            sections: 
+                - type: custom
+                  custom: 
+                      callback: renderShipmentsTab

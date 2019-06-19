@@ -125,11 +125,11 @@ ini_set('display_errors', 1);
             }
         }
         
-        if (!defined('BIMP_LIB')) {
-            require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
-        }
-        
-        BimpTools::processCommandesImport($tabFinal);
+//        if (!defined('BIMP_LIB')) {
+//            require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
+//        }
+//        
+//        BimpTools::processCommandesImport($tabFinal);
         
 //        echo "<pre>";
 //        print_r($errors);

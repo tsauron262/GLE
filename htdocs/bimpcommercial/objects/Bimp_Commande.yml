@@ -185,6 +185,9 @@ fields:
         type: int
         values: 
             array: logistique_status
+        display: 
+            icon:
+                icon_only: 1
         default_value: 0
         
     shipment_status: 
@@ -192,6 +195,9 @@ fields:
         type: int
         values: 
             array: shipment_status
+        display: 
+            icon:
+                icon_only: 1
         default_value: 0
             
     invoice_status: 
@@ -199,6 +205,9 @@ fields:
         type: int
         values: 
             array: invoice_status
+        display: 
+            icon:
+                icon_only: 1
         default_value: 0
         
     extra_status: 
@@ -206,6 +215,9 @@ fields:
         type: int
         values: 
             array: extra_satus
+        display: 
+            icon:
+                icon_only: 1
         default_value: 0
         
     id_user_resp: 
@@ -674,11 +686,23 @@ lists_cols:
         field: validFin
         max_width: 45px
     logistique_status:
+        label: St. log.
         field: logistique_status
+        display: icon
+        max_width: 30px
+        min_width: 30px
     shipment_status: 
+        label: St. exp.
         field: shipment_status
+        display: icon
+        max_width: 30px
+        min_width: 30px
     invoice_status: 
+        label: St. fac.
         field: invoice_status
+        display: icon
+        max_width: 30px
+        min_width: 30px
     id_user_resp: 
         field: id_user_resp
     client_facture:

@@ -300,7 +300,24 @@ class ObjectLine extends BimpObject
                 if (!$id_entrepot) {
                     $errors[] = 'Aucun entrepôt défini pour ' . $parent->getLabel('the') . ' ' . $parent->getNomUrl(0, 1, 1, 'full');
                 } else {
-                    $equipment->isAvailable($id_entrepot, $errors);
+                    $allowed = array();
+
+                    if ($this->getData('linked_object_name') === 'commande_line') {
+                        $id_commande_line = (int) $this->getData('linked_id_object');
+                        if ($id_commande_line) {
+                            $reservation = BimpCache::findBimpObjectInstance('bimpreservation', 'BR_Reservation', array(
+                                        'type'                    => BR_Reservation::BR_RESERVATION_COMMANDE,
+                                        'id_commande_client_line' => (int) $id_commande_line,
+                                        'id_equipment'            => (int) $equipment->id
+                                            ), true);
+
+                            if (BimpObject::objectLoaded($reservation)) {
+                                $allowed['id_reservation'] = (int) $reservation->id;
+                            }
+                        }
+                    }
+
+                    $equipment->isAvailable($id_entrepot, $errors, $allowed);
                 }
             }
         }

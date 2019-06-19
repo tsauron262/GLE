@@ -44,7 +44,8 @@ fields:
         type: id_object
         object: entrepot
         input: 
-            type: search_entrepot
+#            type: search_entrepot
+           type: hidden
         required: 1
         display: 
             default: 
@@ -162,6 +163,8 @@ views:
             
             - cols: 
                 - type: fields_table
+                  col_lg: 6
+                  col_md: 8
                   fields_table: 
                       name: data
                       

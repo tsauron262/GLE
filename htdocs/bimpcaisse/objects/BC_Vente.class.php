@@ -559,6 +559,12 @@ class BC_Vente extends BimpObject
         $html .= 'Commercial: ';
         $html .= '</span>';
         $html .= BimpInput::renderInput('search_user', 'id_user_resp', $id_user_resp);
+
+        // Bouton "Actualiser": 
+        $html .= '<span class="btn btn-default" style="float: right; display: inline-block; margin-top: -2px" onclick="Vente.refresh();">';
+        $html .= BimpRender::renderIcon('fas_redo', 'iconLeft') . 'Actualiser la vente';
+        $html .= '</span>';
+
         $html .= '</div>';
         $html .= '</div>';
 
@@ -1761,6 +1767,7 @@ class BC_Vente extends BimpObject
         }
 
         // Check du client: 
+        $id_client = (int) $this->getData('id_client');
         $client = $this->getChildObject('client');
 
         if ((int) $this->getData('vente_ht')) {
@@ -1800,19 +1807,7 @@ class BC_Vente extends BimpObject
         $has_returns = false;
         foreach ($returns as $return) {
             $has_returns = true;
-            $product = null;
-            $id_product = (int) $return->getData('id_product');
             $id_equipment = (int) $return->getData('id_equipment');
-            if (!$id_product) {
-                $errors[] = 'Produit absent pour le retour n°' . $i;
-            } else {
-                $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $id_product);
-                if (!BimpObject::objectLoaded($product)) {
-                    $errors[] = 'Retour n°' . $i . ': le produit d\'ID ' . $id_product . ' n\'existe pas';
-                } elseif ($product->isSerialisable() && !$id_equipment) {
-                    $errors[] = 'Retour n°' . $i . ': produit sérialisable. Sélection d\'un équipement obligatoire';
-                }
-            }
             if ($id_equipment) {
                 $has_equipment = true;
                 $equipment = $return->getChildObject('equipment');
@@ -1822,13 +1817,25 @@ class BC_Vente extends BimpObject
                     $equipment->isAvailable(0, $errors, array(
                         'id_vente_return' => (int) $this->id
                     ));
-//                    $place = $equipment->getCurrentPlace();
-//                    if (!BimpObject::objectLoaded($place)) {
-//                        $errors[] = 'Aucun emplacement enregistré pour l\'équipement retourné "' . $equipment->displayProduct('nom', true) . ' - ' . $equipment->getData('serial') . '"';
-//                    } elseif ((int) $place->getData('type') !== BE_Place::BE_PLACE_CLIENT ||
-//                            (int) $place->getData('id_client') !== (int) $this->getData('id_client')) {
-//                        $errors[] = 'L\'emplacement de l\'équipement retourné "' . $equipment->displayProduct('nom', true) . ' - ' . $equipment->getData('serial') . '" ne correspond pas au client sélectionné';
-//                    }
+
+                    if ($id_client) {
+                        $place_errors = $equipment->checkPlaceForReturn($id_client);
+                        if (count($place_errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($place_errors, 'Retourn n°' . $i);
+                        }
+                    }
+                }
+            } else {
+                $id_product = (int) $return->getData('id_product');
+                if (!$id_product) {
+                    $errors[] = 'Produit absent pour le retour n°' . $i;
+                } else {
+                    $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $id_product);
+                    if (!BimpObject::objectLoaded($product)) {
+                        $errors[] = 'Retour n°' . $i . ': le produit d\'ID ' . $id_product . ' n\'existe pas';
+                    } elseif ($product->isSerialisable() && !$id_equipment) {
+                        $errors[] = 'Retour n°' . $i . ': produit sérialisable. Sélection d\'un équipement obligatoire';
+                    }
                 }
             }
             $i++;
@@ -1855,7 +1862,7 @@ class BC_Vente extends BimpObject
         // Autres checks: 
         $data = $this->getAjaxData();
 
-        if (($has_equipment || ($has_returns && $total_ttc < 0) || (int) $data['paiement_differe']) && (is_null($client) || !$client->isLoaded())) {
+        if (($has_equipment || $has_returns || (int) $data['paiement_differe']) && !BimpObject::objectLoaded($client)) {
             $errors[] = 'Compte client obligatoire pour cette vente';
         }
 

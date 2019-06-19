@@ -1,6 +1,7 @@
 var ticket_url = './ticket.php';
 
 function BC_Vente() {
+    var ptr = this;
 
     this.reset = function () {
         this.id_vente = 0;
@@ -180,7 +181,7 @@ function BC_Vente() {
                     returns_html += '<div class="product_info">';
                     for (var h in this.returns[k].warnings) {
                         if (typeof (this.returns[k].warnings[h]) === 'string' && this.returns[k].warnings[h] !== '') {
-                            returns_html += '<div class="alert alert-warning">';
+                            returns_html += '<div class="alert alert-danger">';
                             returns_html += this.returns[k].warnings[h];
                             returns_html += '</div>';
                         }
@@ -256,6 +257,20 @@ function BC_Vente() {
     };
 
     this.reset();
+
+    this.refresh = function () {
+        if (ptr.id_vente) {
+            BimpAjax('loadVenteData', {
+                id_vente: ptr.id_vente
+            }, null, {
+                display_success: false,
+                display_errors_in_popup_only: true,
+                success: function (result, bimpAjax) {
+                    ptr.ajaxResult(result);
+                }
+            });
+        }
+    };
 }
 
 var Vente = new BC_Vente();
@@ -498,17 +513,7 @@ function loadVente($button, id_vente) {
 }
 
 function refreshVente() {
-    if (Vente.id_vente) {
-        BimpAjax('loadVenteData', {
-            id_vente: Vente.id_vente
-        }, null, {
-            display_success: false,
-            display_errors_in_popup_only: true,
-            success: function (result, bimpAjax) {
-                Vente.ajaxResult(result);
-            }
-        });
-    }
+    Vente.refresh();
 }
 
 function saveCurrentVente($button, status) {

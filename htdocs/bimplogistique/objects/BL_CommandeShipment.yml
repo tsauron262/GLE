@@ -45,7 +45,8 @@ fields:
         type: id_object
         object: entrepot
         input: 
-            type: search_entrepot
+#            type: search_entrepot
+             type: hidden
         
     num_livraison:
         label: Numéro de livraison
@@ -284,6 +285,8 @@ fields_tables:
         rows: 
             - field: num_livraison
             - field: status
+            - field: id_entrepot
+              display: nom_url
             - field: id_user_resp
               edit: 1
             - field: id_contact
@@ -327,9 +330,17 @@ lists_cols:
     commande: 
         field: id_commande_client
         display: nom_url
+    client: 
+        label: Client
+        field: fk_soc
+        child: parent
+        display: nom_url
     entrepot: 
         field: id_entrepot
         display: nom_url
+    secteur: 
+        field: ef_type
+        child: parent
     num_livraison:
         label: N°
         field: num_livraison
@@ -387,9 +398,11 @@ filters_panels:
         filters: 
             - field: fk_soc
               child: parent
+            - field: id_entrepot
+            - field: ef_type
+              child: parent
             - field: num_livraison
             - field: id_commande_client
-            - field: id_entrepot
             - field: status
             - field: date_shipped
             - field: id_user_resp
@@ -412,6 +425,9 @@ filters_panels:
 lists: 
     default: 
         configurable: 1
+        checkboxes: 1
+        bulk_actions: 
+            callback: getCommandesListbulkActions
         filters_panel: default
         sort_field: id
         sort_way: desc

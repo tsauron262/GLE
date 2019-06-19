@@ -2729,10 +2729,6 @@ class Bimp_CommandeLine extends ObjectLine
                         if (count($res_errors)) {
                             $errors[] = BimpTools::getMsgFromArray($res_errors, 'Echec de la mise à jour du statut de la réservation d\'ID ' . $reservation->id);
                         } else {
-                            $reservation->set('origin', 'commande_shipment');
-                            $reservation->set('id_origin', (int) $shipment->id);
-                            $reservation->update();
-
                             // Retrait des stocks
                             if ($product->dol_object->correct_stock($user, $id_entrepot, $shipment_data['qty'], 1, $stock_label, 0, $codemove, 'commande', $commande->id) <= 0) {
                                 $msg = 'Echec de la mise à jour des stocks pour le produit "' . $product->dol_object->ref . '" (ID ' . $product->id . ', quantités à retirer: ' . $shipment_data['qty'] . ')';
@@ -2923,7 +2919,7 @@ class Bimp_CommandeLine extends ObjectLine
                     }
                 }
             } else {
-                $reservations = $this->getReservations('status', 'asc', '300', (int) $shipment->id);
+                $reservations = $this->getReservations('status', 'asc', '300');
 
                 $remain_qty = $shipment_data['qty'];
 

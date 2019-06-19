@@ -69,6 +69,45 @@ class BimpTools
                         'ref' => $comm_ref
             ));
 
+            if (!BimpObject::objectLoaded($commande)) {
+                echo 'Création commande "' . $comm_ref . '": ';
+
+                $id_entrepot = 0;
+                $id_client = 0;
+
+                $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande');
+                $errors = $commande->validateArray(array(
+                    'entrepot'      => $id_entrepot,
+                    'fk_soc'        => $id_client,
+                    'ef_type'       => 'C',
+                    'validComm'     => 1,
+                    'validFin'      => 1,
+                    'date_commande' => date('Y-m-d'),
+                ));
+
+                if (!count($errors)) {
+                    $warnings = array();
+                    $errors = $commande->create($warnings, true);
+                }
+
+                if (count($errors)) {
+                    echo '<span class="danger">[ECHEC]</span>';
+                    echo BimpRender::renderAlerts($errors);
+                    continue;
+                } else {
+                    echo '<span class="success">[OK]</span>';
+                    if ($bdb->update('commande', array(
+                                'ref'           => $$comm_ref,
+                                'fk_statut'     => 2,
+                                'date_valid'    => date('Y-m-d'),
+                                'fk_user_valid' => 1
+                            )) <= 0) {
+                        echo ' <span class="danger">[ECHEC MAJ DES DONNEES] ' . $bdb->db->lasterror() . '</span>';
+                        continue;
+                    }
+                }
+            }
+
             if (BimpObject::objectLoaded($commande)) {
                 echo '*** Traitement commande "' . $comm_ref . '" ***<br/>';
                 $commande->checkLines();
@@ -131,7 +170,27 @@ class BimpTools
                         $rows = $bdb->getRows('commandedet', $where);
 
                         if (is_null($rows) || empty($rows)) {
-                            echo '<span class="danger">' . $line_data['ref'] . ': AUCUN LIGNE TROUVEE</span><br/>';
+                            echo 'Prod "' . $line_data['ref'] . '" - création de la ligne: ';
+
+                            $BimpLine = BimpObject::getInstance('bimpcommercial', 'Bimp_Line');
+                            $BimpLine->validateArray(array(
+                                'id_obj' => (int) $commande->id,
+                                'type'   => ObjectLine::LINE_PRODUCT
+                            ));
+
+                            $BimpLine->id_product = (int) $product->id;
+                            $BimpLine->pu_ht = (float) $line_data['pv'];
+                            $BimpLine->pa_ht = (float) $line_data['pa'];
+                            $BimpLine->qty = (float) $line_data['qty'];
+                            
+                            $warnings = array();
+                            $errors = $BimpLine->create($warnings, true);
+                            
+                            if (count($errors)) {
+                                // todo... 
+                            }
+                            
+                            // todo ... 
                         } elseif (count($rows) > 1) {
                             echo '<span class="danger">' . $line_data['ref'] . ': ' . count($rows) . ' trouvées</span><br/>';
                         } else {
@@ -306,7 +365,7 @@ class BimpTools
                             }
                         }
                     } else {
-                        echo 'PRODUIT NON TROUVE: ' . $line_data['ref'] . '<br/>';
+                        echo '<span class="danger">PRODUIT NON TROUVE: ' . $line_data['ref'] . '</span><br/>';
                     }
 
                     echo '<br/>';
@@ -316,7 +375,7 @@ class BimpTools
                     // Màj des totaux expédition: 
                     $commShipment->onLinesChange();
                 }
-                
+
                 // Check des status commande: 
                 $commande->checkLogistiqueStatus();
                 $commande->checkShipmentStatus();

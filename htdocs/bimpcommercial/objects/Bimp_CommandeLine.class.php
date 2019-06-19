@@ -842,6 +842,42 @@ class Bimp_CommandeLine extends ObjectLine
 
     // Affichages:
 
+    public function displayQty($qty_type = 'total')
+    {
+        if ($this->field_exists('qty_' . $qty_type)) {
+            $qty = (float) $this->getData('qty_' . $qty_type);
+            $class = '';
+
+            switch ($qty_type) {
+                case 'shipped':
+                case 'billed':
+                    if ($qty <= 0) {
+                        $class = 'danger';
+                    } elseif ($qty < (float) $this->getFullQty()) {
+                        $class = 'warning';
+                    } else {
+                        $class = 'success';
+                    }
+                    break;
+
+                case 'to_ship';
+                case 'to_bill':
+                    if ($qty <= 0) {
+                        $class = 'success';
+                    } elseif ($qty < (float) $this->getFullQty()) {
+                        $class = 'warning';
+                    } else {
+                        $class = 'danger';
+                    }
+                    break;
+            }
+
+            return '<span class="alert ' . ($class ? 'alert-' . $class : '') . '">' . $qty . '</span>';
+        }
+
+        return '';
+    }
+
     public function displayQties()
     {
         $html = '';
@@ -2547,6 +2583,8 @@ class Bimp_CommandeLine extends ObjectLine
             $errors[] = 'Expédition invalide';
         }
 
+        $this->checkQties();
+
         return $errors;
     }
 
@@ -2621,6 +2659,8 @@ class Bimp_CommandeLine extends ObjectLine
                 }
             }
         }
+
+        $this->checkQties();
 
         return $errors;
     }
@@ -2832,6 +2872,8 @@ class Bimp_CommandeLine extends ObjectLine
             }
         }
 
+        $this->checkQties();
+
         return $errors;
     }
 
@@ -3007,6 +3049,8 @@ class Bimp_CommandeLine extends ObjectLine
                 $errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec de la mise à jour de la ligne de commande client');
             }
         }
+
+        $this->checkQties();
 
         return $errors;
     }
@@ -3296,6 +3340,8 @@ class Bimp_CommandeLine extends ObjectLine
             }
         }
 
+        $this->checkQties();
+
         return $errors;
     }
 
@@ -3327,7 +3373,11 @@ class Bimp_CommandeLine extends ObjectLine
         }
 
         $this->set('factures', $factures);
-        return $this->update($warnings, true);
+        $errors = $this->update($warnings, true);
+
+        $this->checkQties();
+
+        return $errors;
     }
 
     public function onFactureDelete($id_facture)
@@ -3340,6 +3390,8 @@ class Bimp_CommandeLine extends ObjectLine
 
                 $this->updateField('factures', $factures);
             }
+
+            $this->checkQties();
         }
     }
 
@@ -3499,6 +3551,41 @@ class Bimp_CommandeLine extends ObjectLine
         }
 
         return $errors;
+    }
+
+    public function checkQties()
+    {
+        if ($this->isLoaded()) {
+            $fullQty = (float) $this->getFullQty();
+            if ($fullQty !== (float) $this->getData('qty_total')) {
+                $this->updateField('qty_toal', $fullQty, null, true);
+            }
+
+            if ((int) $this->getData('type') !== self::LINE_TEXT) {
+                $shipments_qty = (float) $this->getShipmentsQty();
+                $shipped_qty = (float) $this->getShippedQty(null, true);
+                $to_ship_qty = $shipments_qty - $shipped_qty;
+
+                if ($shipped_qty !== (float) $this->getData('qty_shipped')) {
+                    $this->updateField('qty_shipped', $shipped_qty, null, true);
+                }
+
+                if ($to_ship_qty !== (float) $this->getData('qty_to_ship')) {
+                    $this->updateField('qty_to_ship', $to_ship_qty, null, true);
+                }
+
+                $billed_qty = (float) $this->getBilledQty();
+                $to_bill_qty = $fullQty - $billed_qty;
+
+                if ($billed_qty !== (float) $this->getData('qty_billed')) {
+                    $this->updateField('qty_billed', $billed_qty, null, true);
+                }
+
+                if ($to_bill_qty !== (float) $this->getData('qty_to_bill')) {
+                    $this->updateField('qty_to_bill', $to_bill_qty, null, true);
+                }
+            }
+        }
     }
 
     // Actions:
@@ -3870,6 +3957,8 @@ class Bimp_CommandeLine extends ObjectLine
             }
         }
 
+        $this->checkQties();
+
         return array(
             'errors'   => $errors,
             'warnings' => $warnings
@@ -4205,11 +4294,13 @@ class Bimp_CommandeLine extends ObjectLine
             }
         }
 
-        // Vérification des réservations: 
         $commande = $this->getParentInstance();
 
         if (BimpObject::objectLoaded($commande) && $commande->isLogistiqueActive()) {
-            $this->checkReservations(); // les quantités sont vérifiées dans cette méthode.
+            // Vérification des réservations: 
+            $this->checkReservations(); // les quantités des réservations sont vérifiées dans cette méthode.
+            // Vérifications des quantités: 
+            $this->checkQties();
         }
     }
 
@@ -4258,6 +4349,8 @@ class Bimp_CommandeLine extends ObjectLine
             if ((int) $this->getData('remise_crt')) {
                 $commande->setRevalorisation();
             }
+
+            $this->checkQties();
         }
 
         return $errors;
@@ -4296,6 +4389,8 @@ class Bimp_CommandeLine extends ObjectLine
             if (!$init_remise_crt && (int) $this->getData('remise_crt')) {
                 $commande->setRevalorisation();
             }
+
+            $this->checkQties();
         }
 
         return $errors;

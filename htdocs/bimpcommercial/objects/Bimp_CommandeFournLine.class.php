@@ -457,6 +457,40 @@ class Bimp_CommandeFournLine extends FournObjectLine
         return $html;
     }
 
+    public function displayQty($qty_type = 'total')
+    {
+        if ($this->field_exists('qty_' . $qty_type)) {
+            $qty = (float) $this->getData('qty_' . $qty_type);
+            $class = '';
+
+            switch ($qty_type) {
+                case 'received':
+                    if ($qty <= 0) {
+                        $class = 'danger';
+                    } elseif ($qty < (float) $this->getFullQty()) {
+                        $class = 'warning';
+                    } else {
+                        $class = 'success';
+                    }
+                    break;
+
+                case 'to_receive';
+                    if ($qty <= 0) {
+                        $class = 'success';
+                    } elseif ($qty < (float) $this->getFullQty()) {
+                        $class = 'warning';
+                    } else {
+                        $class = 'danger';
+                    }
+                    break;
+            }
+
+            return '<span class="alert ' . ($class ? 'alert-' . $class : '') . '">' . $qty . '</span>';
+        }
+
+        return '';
+    }
+
     public function displayQties()
     {
         $html = '';
@@ -980,6 +1014,8 @@ class Bimp_CommandeFournLine extends FournObjectLine
 
         $errors = array_merge($errors, $warnings);
 
+        $this->checkQties();
+
         return $errors;
     }
 
@@ -1193,6 +1229,8 @@ class Bimp_CommandeFournLine extends FournObjectLine
             $errors[] = BimpTools::getMsgFromArray($up_errors, 'Erreurs lors de la mise à jour de la ligne de commande fournisseur');
         }
 
+        $this->checkQties();
+
         return $errors;
     }
 
@@ -1362,6 +1400,8 @@ class Bimp_CommandeFournLine extends FournObjectLine
             }
         }
 
+        $this->checkQties();
+
         return $errors;
     }
 
@@ -1378,7 +1418,33 @@ class Bimp_CommandeFournLine extends FournObjectLine
             $errors = array_merge($errors, $warnings);
         }
 
+
+        $this->checkQties();
+
         return $errors;
+    }
+
+    public function checkQties()
+    {
+        if ($this->isLoaded()) {
+            $fullQty = (float) $this->getFullQty();
+            if ($fullQty !== (float) $this->getData('qty_total')) {
+                $this->updateField('qty_toal', $fullQty, null, true);
+            }
+
+            if ((int) $this->getData('type') !== self::LINE_TEXT) {
+                $received_qty = (float) $this->getReceivedQty(null, true);
+                $to_receive_qty = $fullQty - $received_qty;
+
+                if ($received_qty !== (float) $this->getData('qty_received')) {
+                    $this->updateField('qty_received', $received_qty, null, true);
+                }
+
+                if ($to_receive_qty !== (float) $this->getData('qty_to_receive')) {
+                    $this->updateField('qty_to_receive', $to_receive_qty, null, true);
+                }
+            }
+        }
     }
 
     // Actions: 
@@ -1540,6 +1606,8 @@ class Bimp_CommandeFournLine extends FournObjectLine
             }
         }
 
+        $this->checkQties();
+
         return array(
             'errors'   => $errors,
             'warnings' => $warnings
@@ -1547,6 +1615,17 @@ class Bimp_CommandeFournLine extends FournObjectLine
     }
 
     // Overrides: 
+
+    public function checkObject()
+    {
+        if ($this->isLoaded()) {
+            $commande = $this->getParentInstance();
+
+            if (BimpObject::objectLoaded($commande) && $commande->isLogistiqueActive()) {
+                $this->checkQties();
+            }
+        }
+    }
 
     public function create(&$warnings = array(), $force_create = false)
     {
@@ -1581,6 +1660,21 @@ class Bimp_CommandeFournLine extends FournObjectLine
             $commande_fourn->set('fk_statut', $current_commande_status);
             $commande_fourn->dol_object->statut = $current_commande_status;
             $commande_fourn->checkReceptionStatus();
+        }
+
+        if (!count($errors)) {
+            $this->checkQties();
+        }
+
+        return $errors;
+    }
+
+    public function update(&$warnings = array(), $force_update = false)
+    {
+        $errors = parent::update($warnings, $force_update);
+
+        if (count($errors)) {
+            $this->checkQties();
         }
 
         return $errors;

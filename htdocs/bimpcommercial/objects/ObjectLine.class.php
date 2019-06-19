@@ -119,7 +119,7 @@ class ObjectLine extends BimpObject
 
     public function isEditable($force_edit = false)
     {
-        if (!$force_edit && !(int) $this->getData('editable')) {
+        if (!$force_edit && !(int) $this->getData('editable') && (!$this->canEditPrixAchat() || !$this->canEditPrixVente())) {
             return 0;
         }
 

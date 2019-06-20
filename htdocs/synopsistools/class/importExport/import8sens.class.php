@@ -16,6 +16,8 @@ abstract class import8sens {
     public $maxLn = 0;
     public $minLn = 0;
     public $nbLigne = 0;//Soit nbLigne soit maxLn
+    private $memoireLn = null;
+    public $mode = 1;
     
     function __construct($db) {
         $this->db = $db;
@@ -74,6 +76,9 @@ abstract class import8sens {
         return $str;
     }
 
+    /*
+     * mode 1 normal 2 une ligne titre une ligne entete
+     */
     function traiteFile($content) {
         if($this->utf8){
             $content = str_replace("\r", "\n", $content);
@@ -90,16 +95,39 @@ abstract class import8sens {
             $tabTitre = explode($this->sepCollone, $tabLigne[0]);
         $tabFinal = $tabTitre2 = array();
         foreach ($tabLigne as $idLn => $ligne) {
-            if (($idLn != 1)) {
-                $tabTmp = explode($this->sepCollone, $ligne);
-                $tabLn = array();
-                foreach ($tabTmp as $idTmp => $chTmp) {
-                    $tabLn[$tabTitre[$idTmp]] = $chTmp;
+            $tabTmp = explode($this->sepCollone, $ligne);
+            $tabLn = array();
+            if($this->mode == 1){
+                if (($idLn != 1)) {
+                    foreach ($tabTmp as $idTmp => $chTmp) {
+                        $tabLn[$tabTitre[$idTmp]] = $chTmp;
+                    }
+                    if ($idLn != 0)
+                        $tabFinal[] = $tabLn;
+                    else
+                        $tabTitre2 = $tabLn;
                 }
-                if ($idLn != 0)
-                    $tabFinal[] = $tabLn;
-                else
-                    $tabTitre2 = $tabLn;
+            }
+            elseif($this->mode == 2){
+                if($idLn == 3){
+                    $tabTitre2 = $tabTmp;
+                }
+                elseif($idLn > 3){
+                    if($tabTmp[0] == "E"){//new ligne
+                        foreach ($tabTmp as $idTmp => $chTmp) {
+                            $tabLn[$tabTitre[$idTmp]] = $chTmp;
+                        }
+                        $tabFinal[] = $tabLn;
+                        $this->memoireLn = count($tabFinal)-1;
+                        $tabFinal[ $this->memoireLn]['lignes'] = array();
+                    }
+                    elseif($tabTmp[0] == "L"){//old ligne
+                        foreach ($tabTmp as $idTmp => $chTmp) {
+                            $tabLn[$tabTitre2[$idTmp]] = $chTmp;
+                        }
+                        $tabFinal[$this->memoireLn]['lignes'][] = $tabLn;
+                    }
+                }
             }
         }
         echo "<pre>";

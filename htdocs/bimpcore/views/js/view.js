@@ -109,7 +109,7 @@ function loadModalView(module, object_name, id_object, view_name, $button, title
             bimpModal.removeComponentContent($new_view.attr('id'));
             onViewLoaded($new_view);
         }
-    });
+    }, {}, 'large');
 }
 
 function deleteObjectFromView(view_id, $button) {

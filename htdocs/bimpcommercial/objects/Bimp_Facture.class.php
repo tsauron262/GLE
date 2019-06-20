@@ -44,7 +44,7 @@ class Bimp_Facture extends BimpComm
     public function canSetAction($action)
     {
         global $conf, $user;
-
+        
         switch ($action) {
             case 'validate':
                 if ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && !empty($user->rights->facture->creer)) ||
@@ -1274,10 +1274,16 @@ class Bimp_Facture extends BimpComm
         if ($this->isLoaded()) {
             $this->set('fk_statut', Facture::STATUS_VALIDATED);
             $this->majStatusOtherPiece();
+
+            $lines = $this->getLines('not_text');
+            foreach ($lines as $line) {
+                $line->onFactureValidate();
+            }
         }
     }
-    
-    public function majStatusOtherPiece(){
+
+    public function majStatusOtherPiece()
+    {
         $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande');
         $asso = new BimpAssociation($commande, 'factures');
 
@@ -1306,8 +1312,9 @@ class Bimp_Facture extends BimpComm
         }
         $this->majStatusOtherPiece();
     }
-    
-    public function onUnValidate(){
+
+    public function onUnValidate()
+    {
         if ($this->isLoaded()) {
             $this->set('fk_statut', Facture::STATUS_DRAFT);
             $this->majStatusOtherPiece();

@@ -34,10 +34,6 @@ class commandeController extends BimpController
 
         $html = '';
 
-//        $html .= '<div class="page_content container-fluid">';
-//        $html .= '<h1>Commande client "' . $commande->dol_object->ref . '"</h1>';
-//        $errors = $commande->checkIntegrity();
-
         if (count($errors)) {
             $html .= BimpRender::renderAlerts('Des incohérences dans les données de cette commande ont été détectées. Des correctifs sont nécessaires');
             $html .= BimpRender::renderAlerts($errors);
@@ -72,8 +68,8 @@ class commandeController extends BimpController
                         'content' => $this->renderFacturesTab($commande)
                     ),
         ));
-
-//        $html .= '</div>';
+        
+        $html .= $commande->renderNotesList(true);
 
         return $html;
     }

@@ -58,6 +58,50 @@ class BE_Place extends BimpObject
         return '';
     }
 
+    public function getPlaceName()
+    {
+        $name = '';
+        $type = $this->getData('type');
+        if (!is_null($type)) {
+            switch ($type) {
+                case self::BE_PLACE_CLIENT:
+                    $client = $this->getChildObject('client');
+                    if (BimpObject::ObjectLoaded($client)) {
+                        $name = 'Client "' . $client->dol_object->nom . '"';
+                    }
+                    break;
+
+                case self::BE_PLACE_ENTREPOT:
+                case self::BE_PLACE_PRESENTATION:
+                case self::BE_PLACE_VOL:
+                case self::BE_PLACE_SAV:
+                case self::BE_PLACE_PRET:
+                    $entrepot = $this->getChildObject('entrepot');
+                    if (BimpObject::ObjectLoaded($entrepot)) {
+                        $name = 'Entrepôt "' . $entrepot->lieu . '"';
+                    }
+                    break;
+
+                case self::BE_PLACE_USER:
+                    $user = $this->getChildObject('user');
+                    if (BimpObject::ObjectLoaded($user)) {
+                        $name = 'Utilisateur "' . $user->getFullName() . '"';
+                    }
+                    break;
+
+                case self::BE_PLACE_FREE:
+                    $name = $this->getData('place_name');
+                    break;
+            }
+        }
+
+        if (!$name) {
+            $name = 'inconnu';
+        }
+
+        return $name;
+    }
+
     public function displayPlace()
     {
         $type = $this->getData('type');

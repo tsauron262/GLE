@@ -248,7 +248,7 @@ function setObjectAction($button, object_data, action, extra_data, form_name, $r
                             if (typeof (result.warnings) !== 'undefined' && result.warnings && result.warnings.length) {
                                 bimpModal.$footer.find('.set_action_button.modal_' + $form.data('modal_idx')).remove();
                             } else {
-                                bimpModal.hide();
+                                bimpModal.clearAllContents();
                             }
                             if (typeof (successCallback) === 'function') {
                                 successCallback(result);

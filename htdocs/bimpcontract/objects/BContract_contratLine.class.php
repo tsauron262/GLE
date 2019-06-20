@@ -58,7 +58,7 @@ class BContract_contratLine extends BimpObject {
     }
     
     public function getNbMateriel() {
-        $list_extrafields = parent::getExtraFields();
-        $list_extrafields['serials'];
+        $list_extrafields = $this->getExtraFields();
+        return 2;
     }
 }

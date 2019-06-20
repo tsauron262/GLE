@@ -15,6 +15,7 @@ class BC_List extends BC_Panel
     public $nbTotalPages = 1;
     protected $nbItems = null;
     public $userConfig = null;
+    public $default_modal_format = 'large';
 
     public function __construct(BimpObject $object, $path, $list_name = 'default', $level = 1, $id_parent = null, $title = null, $icon = null)
     {

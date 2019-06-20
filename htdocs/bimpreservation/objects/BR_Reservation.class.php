@@ -638,6 +638,35 @@ class BR_Reservation extends BimpObject
         );
     }
 
+    public function getEquipmentCreateFormValues()
+    {
+        if (!$this->isLoaded() || !(int) $this->getData('id_product')) {
+            return array();
+        }
+
+        $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $this->getData('id_product'));
+
+        if (!BimpObject::objectLoaded($product) || !$product->isSerialisable()) {
+            return array();
+        }
+
+        BimpObject::loadClass('bimpequipment', 'BE_Place');
+
+        return array(
+            'fields'  => array(
+                'id_product' => (int) $product->id
+            ),
+            'objects' => array(
+                'places' => array(
+                    'fields' => array(
+                        'type'        => BE_Place::BE_PLACE_ENTREPOT,
+                        'id_entrepot' => (int) $this->getData('id_entrepot')
+                    )
+                )
+            )
+        );
+    }
+
     // Getters valeurs: 
 
     public function getIdCommandeforShipment()
@@ -779,29 +808,42 @@ class BR_Reservation extends BimpObject
                 } else {
                     BimpObject::loadClass('bimpequipment', 'Equipment');
                     $equipments = Equipment::getAvailableEquipmentsArray((int) $entrepot->id, (int) $product->id);
+                    $values = array();
+                    $hidden = false;
+                    ;
 
                     if (!count($equipments)) {
                         $html .= BimpRender::renderAlerts('Aucun équipement disponible dans l\'entrepôt ' . $entrepot->getNomUrl(1), 'warning');
+                        $hidden = true;
                     } else {
-                        $input_name = 'equipments';
-                        $max_values = (int) $this->getData('qty');
+                        $selected_equipments = BimpTools::getPostFieldValue('equipments', array());
 
-                        $content = '<div style="display: inline-block; margin-right: 15px;">';
-                        $content .= '<span class="small">Numéro de série: </span><br/>';
-                        $content .= BimpInput::renderInput('text', 'search_serial', '', array(
-                                    'style' => 'border: 1px solid #DCDCDC'
-                        ));
-                        $content .= '</div>';
-
-                        $content .= BimpInput::renderInput('select', $input_name . '_add_value', '', array(
-                                    'options' => $equipments
-                        ));
-
-                        $html .= '<h4>Equipements disponibles dans l\'entrepôt: ' . $entrepot->getNomUrl(1) . '<br/><br/>';
-                        $html .= 'Pour le produit ' . $product->getNomUrl(1) . '</h4><br/>';
-
-                        $html .= BimpInput::renderMultipleValuesInput($this, $input_name, $content, array(), '', false, false, false, $max_values);
+                        if (is_array($selected_equipments) && !empty($selected_equipments)) {
+                            foreach ($selected_equipments as $id_equipment) {
+                                if (array_key_exists((int) $id_equipment, $equipments) && !array_key_exists((int) $id_equipment, $values)) {
+                                    $values[(int) $id_equipment] = $equipments[(int) $id_equipment];
+                                }
+                            }
+                        }
                     }
+                    $input_name = 'equipments';
+                    $max_values = (int) $this->getData('qty');
+
+                    $content = '<div style="display: ' . ($hidden ? 'none' : 'inline-block') . '; margin-right: 15px;">';
+                    $content .= '<span class="small">Numéro de série: </span><br/>';
+                    $content .= BimpInput::renderInput('text', 'search_serial', '', array(
+                                'style' => 'border: 1px solid #DCDCDC'
+                    ));
+                    $content .= '</div>';
+
+                    $content .= BimpInput::renderInput('select', $input_name . '_add_value', '', array(
+                                'options' => $equipments
+                    ));
+
+                    $html .= '<h4>Equipements disponibles dans l\'entrepôt: ' . $entrepot->getNomUrl(1) . '<br/><br/>';
+                    $html .= 'Pour le produit ' . $product->getNomUrl(1) . '</h4><br/>';
+
+                    $html .= BimpInput::renderMultipleValuesInput($this, $input_name, $content, $values, '', false, false, false, $max_values);
                 }
             }
         }

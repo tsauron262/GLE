@@ -483,7 +483,60 @@ i.iconRight {
 
 .modal {
     .modal-dialog {
-        margin-top: 5%;
+        margin-top: 100px;
+
+        .modal-body {
+            max-height: 950px;
+        }
+
+        @media (max-height: 1200px) {
+            .modal-body {
+                max-height: 800px;
+            }
+        }
+        @media (max-height: 1100px) {
+            margin-top: 90px;
+            .modal-body {
+                max-height: 720px;
+            }
+        }
+        @media (max-height: 1000px) {
+            margin-top: 80px;
+            .modal-body {
+                max-height: 640px;
+            }
+        }
+        @media (max-height: 900px) {
+            margin-top: 70px;
+
+            .modal-body {
+                max-height: 560px;
+            }
+        }
+        @media (max-height: 800px) {
+            margin-top: 60px;
+            .modal-body {
+                max-height: 480px;
+            }
+        }
+        @media (max-height: 700px) {
+            margin-top: 40px;
+            .modal-body {
+                max-height: 400px;
+            }
+        }
+        @media (max-height: 600px) {
+            margin-top: 30px;
+            .modal-body {
+                max-height: 320px;
+            }
+        }
+        @media (max-height: 500px) {
+            margin-top: 20px;
+            .modal-body {
+                max-height: 240px;
+            }
+        }
     }
 
     .modal-nav-buttons {
@@ -568,7 +621,6 @@ i.iconRight {
     }
 
     .modal-body {
-        max-height: 650px;
         padding-bottom: 60px;
         overflow-y: auto;
 
@@ -582,6 +634,8 @@ i.iconRight {
         z-index: 11000;
     }
 }
+
+
 
 .modal-ui-dialog {
     margin-top: 1px;

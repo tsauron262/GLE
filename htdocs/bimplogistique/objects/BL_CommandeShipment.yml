@@ -17,6 +17,12 @@ objects:
             id_object: 
                 field_value: id_commande_client
     
+    user_resp: 
+        extends: user
+        instance: 
+            id_object: 
+                field_value: id_user_resp
+                
 fields: 
     id_commande_client: 
         label: Commande client
@@ -101,10 +107,24 @@ fields:
         type: money
         default_value: 0
         
+    id_user_resp: 
+        label: Responsable
+        type: id_object
+        object: user_resp
+        required: 1
+        input: 
+            type: search_user
+        default_value: 
+            prop: 
+                name: id
+                object: 
+                    global: user
+        
 forms: 
     default: 
         rows: 
             - field: id_commande_client
+            - field: id_user_resp
             - field: id_entrepot
             - field: id_contact
             - field: info
@@ -118,6 +138,7 @@ forms:
             
     edit: 
         rows: 
+            - field: id_user_resp
             - field: id_contact
             - field: signed
             - field: info
@@ -138,71 +159,99 @@ forms:
                   
     facture: 
         rows: 
-            - custom: 1
-              label: Client
-              input_name: id_client
-              data_type: id_object
-              object: client
-              card: default
-              input: 
-                  type: search_societe
-                  societe_type: customer
-            - custom: 1
-              label: Contact
-              input_name: id_contact
-              data_type: id
-              input: 
-                  type: select
-                  options: 
-                      callback: 
-                          method: getClientContactsArray
-                          object: commande
-              depends_on: id_client
-            - custom: 1
-              label: Conditions de réglement
-              input_name: cond_reglement
-              value: 
-                  callback: getCommandeCondReglement
-              input: 
-                  type: select_cond_reglement
-            - custom: 1
-              label: Compte financier
-              input_name: id_account
-              data_type: id_object
-              input: 
-                  type: select_mysoc_account
-              required: 1
-            - custom: 1
-              label: Avoirs client à utiliser
-              input_name: id_remises_list
-              input: 
-                  multiple: 1
-                  type: select_remises
-                  id_client:
-                      request_field: id_client
-              depends_on: id_client
-            - custom: 1
-              label: Note publique
-              input_name: note_public
-              data_type: text
-              input: 
-                  type: textarea
-                  rows: 3
-                  auto_expand: 1
-            - custom: 1
-              label: Note privée
-              input_name: note_private
-              data_type: text
-              input: 
-                  type: textarea
-                  rows: 3
-                  auto_expand: 1
-            - custom: 1
-              label: Quantités et équipements
-              input_name: lines
-              content: 
-                  callback: renderFactureFormLinesInputs
-                  
+            client:
+                custom: 1
+                label: Client
+                input_name: id_client
+                data_type: id_object
+                object: client
+                card: default
+                input: 
+                    type: search_societe
+                    societe_type: customer
+            contact: 
+                custom: 1
+                label: Contact
+                input_name: id_contact
+                data_type: id
+                input: 
+                    type: select
+                    options: 
+                        callback: 
+                            method: getClientContactsArray
+                            object: commande
+                depends_on: id_client
+            libelle: 
+                custom: 1
+                show: 1
+                label: Libellé
+                input_name: libelle
+                input: 
+                    type: text
+            cond_reglement: 
+                custom: 1
+                label: Conditions de réglement
+                input_name: cond_reglement
+                value: 
+                    callback: getCommandeCondReglement
+                input: 
+                    type: select_cond_reglement
+            account:
+                custom: 1
+                label: Compte financier
+                input_name: id_account
+                data_type: id_object
+                input: 
+                    type: select_mysoc_account
+                required: 1
+            remises:
+                custom: 1
+                label: Avoirs client à utiliser
+                input_name: id_remises_list
+                input: 
+                    multiple: 1
+                    type: select_remises
+                    id_client:
+                        request_field: id_client
+                depends_on: id_client
+            public_note: 
+                custom: 1
+                label: Note publique
+                input_name: note_public
+                data_type: text
+                input: 
+                    type: textarea
+                    rows: 3
+                    auto_expand: 1
+            private_note: 
+                custom: 1
+                label: Note privée
+                input_name: note_private
+                data_type: text
+                input: 
+                    type: textarea
+                    rows: 3
+                    auto_expand: 1
+            lines: 
+                custom: 1
+                label: Quantités et équipements
+                input_name: lines
+                content: 
+                    callback: renderFactureFormLinesInputs
+        
+    bulk_facture: 
+        extends: facture
+        rows: 
+            client: 
+                value: 
+                    callback: getBulkFactureIdClient
+            libelle: 
+                value: 
+                    callback: getBulkFactureLibelle
+            lines: 
+                content: 
+                    callback: renderBulkFactureFormLinesInputs
+    
     facture_edit: 
         rows: 
             - custom: 1
@@ -231,10 +280,12 @@ forms:
                   
 fields_tables: 
     data: 
-        panel: 0
+        panel_header: 0
         rows: 
             - field: num_livraison
             - field: status
+            - field: id_user_resp
+              edit: 1
             - field: id_contact
             - field: signed
               edit: 1
@@ -252,11 +303,8 @@ views:
     default: 
         rows: 
             - cols: 
-                - type: object_common_fields
-                  col_lg: 4
-                  col_md: 5
-                  col_sm: 12
-                     
+                - type: object_header
+            - cols: 
                 - type: fields_table
                   col_lg: 8
                   col_md: 7
@@ -273,6 +321,9 @@ views:
                       callback: renderShipmentLines
                       
 lists_cols: 
+    user_resp: 
+        field: id_user_resp
+        display: nom_url
     commande: 
         field: id_commande_client
         display: nom_url
@@ -301,7 +352,7 @@ lists_cols:
         edit: 1
         max_width: 45px
     pdf:
-        label: Fichiers
+        label: Fichiers PDF
         value: 
             callback: 
                 method: displayPdfButtons

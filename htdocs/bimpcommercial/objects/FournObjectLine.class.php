@@ -178,6 +178,10 @@ class FournObjectLine extends ObjectLine
                 case self::LINE_FREE:
                     $this->id_fourn_price = 0;
                     break;
+                
+                case self::LINE_TEXT:
+                    $this->qty = 1;
+                    break;
             }
         }
 

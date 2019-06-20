@@ -1,0 +1,1 @@
+ALTER TABLE `llx_facture` ADD `exported` INT(2) DEFAULT 0;

@@ -65,6 +65,12 @@ class BimpComm extends BimpDolObject
         switch ($field) {
             case 'zone_vente':
                 return (int) $this->areLinesEditable();
+
+            case 'entrepot':
+                if ((int) $this->getData('fk_statut') > 0) {
+                    return 0;
+                }
+                return 1;
         }
         return 1;
     }
@@ -96,12 +102,12 @@ class BimpComm extends BimpDolObject
                     $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
                     return 0;
                 }
-                if($this->getData('invoice_status') === null || $this->getData('invoice_status') > 0){
+                if ($this->getData('invoice_status') === null || $this->getData('invoice_status') > 0) {
                     $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' est déja facturé';
                     return 0;
                 }
-                    
-                
+
+
 //                if (!$this->areLinesEditable()) {
 //                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' ne peut plus être éditée';
 //                    return 0;
@@ -341,6 +347,38 @@ class BimpComm extends BimpDolObject
     public function getDefaultRemiseGlobaleLabel()
     {
         return 'Remise exceptionnelle sur l\'intégralité ' . $this->getLabel('of_the');
+    }
+
+    public function getCustomFilterValueLabel($field_name, $value)
+    {
+        switch ($field_name) {
+            case 'id_product':
+                $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $value);
+                if (BimpObject::ObjectLoaded($product)) {
+                    return $product->getRef();
+                }
+                break;
+        }
+
+        return parent::getCustomFilterValueLabel($field_name, $value);
+    }
+
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array())
+    {
+        switch ($field_name) {
+            case 'id_product':
+                $line = $this->getLineInstance();
+                $alias = $line::$parent_comm_type . '_det';
+                $joins[$alias] = array(
+                    'alias' => $alias,
+                    'table' => $line::$dol_line_table,
+                    'on'    => $alias . '.' . $line::$dol_line_parent_field . ' = a.' . $this->getPrimary()
+                );
+                $filters[$alias . '.fk_product'] = array(
+                    'in' => $values
+                );
+                break;
+        }
     }
 
     // Getters données: 
@@ -727,10 +765,9 @@ class BimpComm extends BimpDolObject
                 if ($product->fetch_product_fournisseur_price($line->fk_fournprice))
                     $line->pa_ht = $product->fourn_unitprice * (1 - $product->fourn_remise_percent / 100);
             }
-            if ($bimp_line->getData("remise_pa") > 0) {
-                $line->pa_ht = $line->pa_ht * (100 - $bimp_line->getData("remise_pa")) / 100;
-            }
-
+//            if ($bimp_line->getData("remise_pa") > 0) {
+//                $line->pa_ht = $line->pa_ht * (100 - $bimp_line->getData("remise_pa")) / 100;
+//            }
             // si prix d'achat non renseigné et devrait l'être, alors prix achat = prix vente
             if ((!isset($line->pa_ht) || $line->pa_ht == 0) && $line->subprice > 0 && (isset($conf->global->ForceBuyingPriceIfNull) && $conf->global->ForceBuyingPriceIfNull == 1)) {
                 $line->pa_ht = $line->subprice * (1 - ($line->remise_percent / 100));
@@ -861,11 +898,14 @@ class BimpComm extends BimpDolObject
     }
 
     // Getters - Overrides BimpObject
-//    public function getName()
-//    {
-//        $name = parent::getName();
-//        return BimpTools::ucfirst($this->getLabel()) . ' ' . ($name ? '"' . $name . '"' : '');
-//    }
+    public function getName()
+    {
+        if ($this->isLoaded()) {
+            return BimpTools::ucfirst($this->getLabel()) . ' #' . $this->id;
+        }
+
+        return '';
+    }
 
     public function getFilesDir()
     {
@@ -2103,6 +2143,11 @@ class BimpComm extends BimpDolObject
         $caisse = null;
         $id_caisse = 0;
 
+        if ((float) $amount > $this->getTotalTtc()) {
+            $errors[] = 'Le montant de l\'acompte dépasse le total TTC ' . $this->getLabel('of_the');
+            return $errors;
+        }
+
         if ($this->useCaisseForPayments) {
             $caisse = BimpObject::getInstance('bimpcaisse', 'BC_Caisse');
             $id_caisse = (int) $caisse->getUserCaisse((int) $user->id);
@@ -2779,22 +2824,23 @@ class BimpComm extends BimpDolObject
             }
         }
         $this->hydrateFromDolObject();
-        
-        
-        
-         //ajout des exterafileds du parent qui ne sont pas envoyé   
-        if(!count($errors) && $origin_object && isset($origin_object->dol_object)){
-            $update = false;
-            foreach($origin_object->dol_object->array_options as $options_key => $value) {
-                    if(!isset($this->data[$options_key]));
-                        $options_key = str_replace ("options_", "", $options_key);
 
-                    if(isset($this->data[$options_key]) && !BimpTools::isSubmit($options_key)){
-                        $update = true;
-                        $this->set($options_key, $value);
-                    }
+
+
+        //ajout des exterafileds du parent qui ne sont pas envoyé   
+        if (!count($errors) && $origin_object && isset($origin_object->dol_object)) {
+            $update = false;
+            foreach ($origin_object->dol_object->array_options as $options_key => $value) {
+                if (!isset($this->data[$options_key]))
+                    ;
+                $options_key = str_replace("options_", "", $options_key);
+
+                if (isset($this->data[$options_key]) && !BimpTools::isSubmit($options_key)) {
+                    $update = true;
+                    $this->set($options_key, $value);
+                }
             }
-            if($update){
+            if ($update) {
                 $errors = $this->update();
             }
         }
@@ -2817,6 +2863,29 @@ class BimpComm extends BimpDolObject
                     if (count($lines_errors)) {
                         $warnings[] = BimpTools::getMsgFromArray($lines_errors, 'Des erreurs sont survenues lors de la suppression des taux de TVA');
                     }
+                }
+            }
+        }
+
+        return $errors;
+    }
+
+    public function delete(&$warnings = array(), $force_delete = false)
+    {
+        $lines = $this->getLines();
+
+        $errors = parent::delete($warnings, $force_delete);
+
+        if (!count($errors)) {
+            foreach ($lines as $line) {
+                $line_pos = $line->getData('position');
+                $line_warnings = array();
+                $line->bimp_line_only = true;
+                $line_errors = $line->delete($line_warnings, true);
+
+                $line_errors = array_merge($line_warnings, $line_errors);
+                if (count($line_errors)) {
+                    $warnings[] = BimpTools::getMsgFromArray($line_errors, 'Erreurs lors de la suppression de la ligne n°' . $line_pos);
                 }
             }
         }

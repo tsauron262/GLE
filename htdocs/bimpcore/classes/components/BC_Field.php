@@ -287,18 +287,18 @@ class BC_Field extends BimpComponent
                     if (!is_array($show_values)) {
                         $show_values = explode(',', $show_values);
                     }
-                    
+
                     if (!in_array($field_value, $show_values)) {
                         return 0;
                     }
                 }
-                
+
                 if (isset($this->params['display_if']['hide_values'])) {
                     $hide_values = $this->params['display_if']['hide_values'];
                     if (!is_array($hide_values)) {
                         $hide_values = explode(',', $hide_values);
                     }
-                    
+
                     if (in_array($field_value, $hide_values)) {
                         return 0;
                     }
@@ -307,7 +307,7 @@ class BC_Field extends BimpComponent
         }
 
         // todo : ajouter display_if/fields_names
-        
+
         return 1;
     }
 
@@ -420,6 +420,7 @@ class BC_Field extends BimpComponent
                     case 'html':
                     case 'text':
                     case 'password':
+                    case 'string':
                         $search_type = 'value_part';
                         $input_type = 'text';
                         break;

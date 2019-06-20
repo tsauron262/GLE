@@ -111,7 +111,7 @@ class BL_CommandeFournReception extends BimpObject
     {
         return 'Réception #' . $this->getData('num_reception');
     }
-    
+
     public function getTotalHT()
     {
         if (!$this->isLoaded()) {
@@ -202,7 +202,7 @@ class BL_CommandeFournReception extends BimpObject
     {
         return array();
     }
-    
+
     // Rendus HTML: 
 
     public function renderCommandeFournLinesForm()
@@ -488,7 +488,7 @@ class BL_CommandeFournReception extends BimpObject
                                 'auto_expand'      => true,
                                 'tab_key_as_enter' => true
                     ));
-                    $html .= '<p class="inputHelp">Séparateurs possibles: sauts de ligne, espaces, virgules ou points-virgules.<br/>';
+                    $html .= '<p class="inputHelp" style="display: block;">Séparateurs possibles: sauts de ligne, espaces, virgules ou points-virgules.<br/>';
                     $html .= 'Max: ' . $max . ' numéro' . ($max > 1 ? 's' : '') . ' de série.';
                     $html .= '</p>';
 
@@ -774,7 +774,7 @@ class BL_CommandeFournReception extends BimpObject
                 }
             }
         }
-        
+
         $this->onLinesChange();
 
         return $errors;
@@ -895,7 +895,7 @@ class BL_CommandeFournReception extends BimpObject
 
         return $errors;
     }
-    
+
     public function onLinesChange()
     {
         $errors = array();
@@ -997,6 +997,27 @@ class BL_CommandeFournReception extends BimpObject
     }
 
     // Overrides: 
+
+    public function checkObject()
+    {
+        if (!(int) $this->getData('id_user_resp')) {
+            $id_user = (int) $this->getData('user_create');
+            if ($id_user) {
+                $this->updateField('id_user_resp', $id_user);
+            }
+        }
+    }
+
+    public function validate()
+    {
+        if (!(int) $this->getData('id_user_resp')) {
+            global $user;
+            if (BimpObject::ObjectLoaded($user)) {
+                $this->set('id_user_resp', $user->id);
+            }
+        }
+        return parent::validate();
+    }
 
     public function create(&$warnings = array(), $force_create = false)
     {

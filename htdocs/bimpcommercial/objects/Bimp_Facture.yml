@@ -48,6 +48,9 @@ fields:
     facnumber: 
         label: Référence
         dol_prop: ref
+    exported:
+        label: Comptabilisée
+        type: int
     type: 
         label: Type
         type: int
@@ -218,7 +221,7 @@ forms:
                       hide_values: 0
               show: 
                   callback: isNotLoaded
-            
+                 
             - field: ef_type
             - field: entrepot
               show: 
@@ -358,9 +361,9 @@ fields_tables:
             
 views: 
     default: 
-        objects_change_reload: Bimp_FactureLine
+        objects_change_reload: Bimp_FactureLine,Bimp_Paiement
     content_infos: 
-        objects_change_reload: Bimp_FactureLine
+        objects_change_reload: Bimp_FactureLine,Bimp_Paiement
       
 filters_panels: 
     default: 

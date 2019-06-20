@@ -114,8 +114,8 @@ fields:
         decimals: 8
         
     remise_pa: 
-        label: Remise sur le prix d'achat
-        type: percent
+        label: Remise sur le prix d'achat HT
+        type: money
         default_value: 0
         decimals: 8
         
@@ -337,19 +337,19 @@ forms:
                 display_if: 
                     field_name: type
                     show_values: 1
-            remise_pa:
-                custom: 1
-                label: Remise sur le prix d'achat
-                input_name: remise_pa
-                content: 
-                    callback: 
-                        method: renderLineInput
-                        params: 
-                            - remise_pa
-                depends_on: id_product,remise_crt
-                display_if: 
-                    field_name: type
-                    show_values: 1
+#            remise_pa:
+#                custom: 1
+#                label: Remise sur le prix d'achat
+#                input_name: remise_pa
+#                content: 
+#                    callback: 
+#                        method: renderLineInput
+#                        params: 
+#                            - remise_pa
+#                depends_on: id_product,remise_crt
+#                display_if: 
+#                    field_name: type
+#                    show_values: 1
             remises: 
                 object: remises
                 multiple: 1
@@ -502,15 +502,15 @@ forms:
                             - 0
                             - ''
                             - 1
-            remise_pa:
-                content: 
-                    callback: 
-                        method: renderLineInput
-                        params: 
-                            - remise_pa
-                            - 0
-                            - ''
-                            - 1
+#            remise_pa:
+#                content: 
+#                    callback: 
+#                        method: renderLineInput
+#                        params: 
+#                            - remise_pa
+#                            - 0
+#                            - ''
+#                            - 1
 
 lists_cols: 
     position: 
@@ -611,6 +611,10 @@ lists_cols:
     remise_pa: 
         label: Remise PA
         field: remise_pa
+    product_zone_pr: 
+        label: Emplacement Lyon
+        field: zone_pr
+        child: product
     
 lists: 
     default: 

@@ -2,12 +2,13 @@ primary: rowid
 
 header_btn: 
     callback: getActionsButtons
+    
 header_list_name: default
     
 objects:
     lines: 
         relation: hasMany
-        delete: 1
+        delete: 0
         instance: 
             bimp_object: 
                 module: bimpcommercial
@@ -489,6 +490,14 @@ filters_panels:
                 field: ef_type
             libelle: 
                 field: libelle
+            line_product:
+                custom: 1
+                field: id_product
+                label: Produit
+                data_type: id_object
+                type: value
+                input: 
+                    type: search_product
             user_create: 
                 field: fk_user_author
             user_valid: 
@@ -618,13 +627,6 @@ views:
                             - type: fields_table
                               fields_table: 
                                   name: notes
-            - cols:
-                  - type: custom
-                    custom: 
-                        callback: 
-                            method: renderNotesList
-                            params:
-                                - 1
                             
     full: 
         objects_change_reload: Bimp_File
@@ -639,6 +641,13 @@ views:
                 - type: view
                   view: 
                       name: content
+            - cols:
+                - type: custom
+                  custom: 
+                      callback: 
+                          method: renderNotesList
+                          params:
+                              - 1
         
     content_infos: 
         rows: 

@@ -7,6 +7,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
 
     public static $parent_comm_type = 'commande_fournisseur';
     public static $dol_line_table = 'commande_fournisseurdet';
+    public static $dol_line_parent_field = 'fk_commande';
 
     // Getters booléens: 
 
@@ -1157,17 +1158,17 @@ class Bimp_CommandeFournLine extends FournObjectLine
                     $line_qty = (float) $line->getFullQty();
                     if ($pa_moyen && $line_qty) {
                         $line_pa = (float) $line->pa_ht;
-                        $remise_pa = (float) $line->getData('remise_pa');
+//                        $remise_pa = (float) $line->getData('remise_pa');
 
-                        if ($remise_pa) {
-                            $line_pa -= ((float) $line->pa_ht * ($remise_pa / 100));
-                        }
+//                        if ($remise_pa) {
+//                            $line_pa -= ((float) $line->pa_ht * ($remise_pa / 100));
+//                        }
 
                         $new_line_pa = (float) ((((float) $line_pa * ($line_qty - (float) $reception_data['qty'])) + ($pa_moyen * (float) $reception_data['qty'])) / $line_qty);
 
-                        if ($remise_pa) {
-                            $new_line_pa = ($new_line_pa / (1 - ($remise_pa / 100)));
-                        }
+//                        if ($remise_pa) {
+//                            $new_line_pa = ($new_line_pa / (1 - ($remise_pa / 100)));
+//                        }
 
                         if ($new_line_pa !== (float) $line->pa_ht) {
                             $line->setPrixAchat($new_line_pa);
@@ -1329,18 +1330,18 @@ class Bimp_CommandeFournLine extends FournObjectLine
                         $line_qty = (float) $commande_line->getFullQty();
                         if ($pa_total && $line_qty) {
                             $line_pa = (float) $commande_line->pa_ht;
-                            $remise_pa = (float) $commande_line->getData('remise_pa');
+//                            $remise_pa = (float) $commande_line->getData('remise_pa');
 
-                            if ($remise_pa) {
-                                $line_pa -= ($line_pa * ($remise_pa / 100));
-                            }
+//                            if ($remise_pa) {
+//                                $line_pa -= ($line_pa * ($remise_pa / 100));
+//                            }
 
                             $new_line_pa = (float) ((((float) $line_pa * $line_qty) - $pa_total) / ($line_qty - (float) $reception_data['qty']));
 
 
-                            if ($remise_pa) {
-                                $new_line_pa = ($new_line_pa / (1 - ($remise_pa / 100)));
-                            }
+//                            if ($remise_pa) {
+//                                $new_line_pa = ($new_line_pa / (1 - ($remise_pa / 100)));
+//                            }
 
                             if ($new_line_pa !== (float) $commande_line->pa_ht) {
                                 $commande_line->setPrixAchat($new_line_pa);

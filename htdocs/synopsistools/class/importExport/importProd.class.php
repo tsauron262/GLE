@@ -22,7 +22,7 @@ class importProd extends importCat {
                 if ($this->db->num_rows($sql2) > 0) {
                     $result2 = $this->db->fetch_object($sql2);
                     $this->tabResult["error"] ++;
-                    $this->alert("Prod avec ref identique et autre avec id8sens identique");
+                    $this->error("Prod avec ref identique et autre avec id8sens identique");
                     $this->alert("IdIdentique id :" . $result->id . " ref : " . $result->ref . " |  UPDATE llx_commandedet SET fk_product = '" . $result->id . "' WHERE fk_product = '" . $result2->id . "'");
                     $this->alert("RefIdentique id:" . $result2->id . " ref: " . $ln['ArtCode'] . "  |  UPDATE llx_commandedet SET fk_product = '" . $result2->id . "' WHERE fk_product = '" . $result->id . "'");
                 } else {
@@ -35,7 +35,7 @@ class importProd extends importCat {
             } else {
                 $sql = $this->db->query("SELECT rowid as id FROM llx_product WHERE ref = '" . $ln['ArtCode'] . "'");
                 if ($this->db->num_rows($sql) == 0) {
-                    if ($this->isProdActif($ln)) {
+                    if (/*$this->isProdActif($ln)*/1) {
                         $this->tabResult["inc"] ++;
                         $this->updateProd($this->addProd($ln), $ln);
                     }
@@ -114,19 +114,21 @@ class importProd extends importCat {
 
             $this->traiteChamp("label", $ln['ArtLib']);
             
+            $this->traiteChamp("pmp", $ln['ArtLastPA'], true);
+            
             $desc = ($ln['ArtGCmtTxt'] != "")? $ln['ArtGCmtTxt'] : $ln['ArtLib'];
             
             $this->traiteChamp("description", $desc);
             $this->traiteChamp("ref", $ln['ArtCode']);
             $this->traiteChamp("import_key", $ln['ArtID']);
             
-            $this->getAllCat();
-
-            $this->traiteCat1("Gamme", $ln["ArtGammeEnu"]);
-            $this->traiteCat1("Categorie", $ln["ArtCategEnu"]);
-            $this->traiteCat1("Nature", $ln["ArtNatureEnu"]);
-            $this->traiteCat1("Collection", $ln["ArtCollectEnu"]);
-            $this->traiteCat1("Famille", $ln["ArtFamilleEnu"]);
+//            $this->getAllCat();
+//
+//            $this->traiteCat1("Gamme", $ln["ArtGammeEnu"]);
+//            $this->traiteCat1("Categorie", $ln["ArtCategEnu"]);
+//            $this->traiteCat1("Nature", $ln["ArtNatureEnu"]);
+//            $this->traiteCat1("Collection", $ln["ArtCollectEnu"]);
+//            $this->traiteCat1("Famille", $ln["ArtFamilleEnu"]);
 
 
             if ($this->updatePrice) {

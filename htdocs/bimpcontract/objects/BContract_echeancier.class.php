@@ -168,9 +168,9 @@ class BContract_echeancier extends BimpObject {
             $this->updateLine($this->getData('id_contrat'), $parent->getData('date_start'));
         }
 
-        
-        //echo '<pre>';
-        //print_r($this->tab_echeancier);
+
+//        echo '<pre>';
+//        print_r($this->tab_echeancier);
         return $html;
     }
 
@@ -181,7 +181,7 @@ class BContract_echeancier extends BimpObject {
 
         $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}';
 
-        $html .= '<br /><form action="#" method="post">'
+        $html .= '<br /><form action="" method="post">'
                 . 'Du <input class="datePicker" name="date_debut_select" placeholder="Date de début" /input> au '
                 . '<input class="datePicker" name="date_fin_select" placeholder="Date de fin" /input><br />'
 //                . '<input type="submit" name="submit" class="btn btn-primary saveButton" value="Créer facture perso" onclick="' .
@@ -193,32 +193,27 @@ class BContract_echeancier extends BimpObject {
         if (isset($_POST['submit'])) {
             $select_debut = $_POST['date_debut_select'];
             $select_fin = $_POST['date_fin_select'];
-            //echo "test : Du " . $select_debut . ' au ' . $select_fin;
 
-            $converted_date_debut = $this->formatDate($select_debut);
-            $converted_date_fin = $this->formatDate($select_fin);
+            if ($select_debut == null || $select_fin == null) {
+                echo '<b style="color:red;text-align:center">Dates sélectionnées invalides</b>';
+            } else {
+                $converted_date_debut = $this->formatDate($select_debut);
+                $converted_date_fin = $this->formatDate($select_fin);
 
-            $value = $this->match_key_with_dates($converted_date_debut, $converted_date_fin);
-            $nb_period = $parent->getData('duree_mois') / $parent->getData('periodicity');
-            $tmp = $nb_period - $value;
-            $calc_period = $nb_period - $tmp;
-            
-            $this->actionCreate_facture_perso($converted_date_debut, $converted_date_fin);
-            $test = $this->get_last(); 
-            foreach ($this->tab_echeancier as $tab => $attr) {
-            
+                $value = $this->match_key_with_dates($converted_date_debut, $converted_date_fin);
+                $nb_period = $parent->getData('duree_mois') / $parent->getData('periodicity');
+                $tmp = $nb_period - $value;
+                $calc_period = $nb_period - $tmp;
+
+                $this->actionCreate_facture_perso($converted_date_debut, $converted_date_fin);
+                $nextdate = new DateTime("$converted_date_debut");
+                $nextdate->getTimestamp();
+                $nextdate->add(new DateInterval("P" . $calc_period . "M"));
+                //$nextdate->sub(new DateInterval("P1D"));
+                $newdate = $nextdate->format('Y-m-d');
+                $udpadeArray = Array('next_facture_date' => $newdate);
+                $bimp->update('bcontract_prelevement', $udpadeArray, 'id_contrat = ' . $parent->id);
             }
-            for ($i = 0; $i < $calc_period; $i++) {
-                $attr['facture'] = $test;
-            }
-            
-            $nextdate = new DateTime("$converted_date_debut");
-            $nextdate->getTimestamp();
-            $nextdate->add(new DateInterval("P" . $calc_period . "M"));
-            //$nextdate->sub(new DateInterval("P1D"));
-            $newdate = $nextdate->format('Y-m-d');
-            $udpadeArray = Array('next_facture_date' => $newdate);
-            $bimp->update('bcontract_prelevement', $udpadeArray, 'id_contrat = ' . $parent->id);
         }
         return $html;
     }
@@ -263,16 +258,15 @@ class BContract_echeancier extends BimpObject {
         $nb_period = $parent->getData('duree_mois') / $parent->getData('periodicity');
         $montant_facturer_ttc = $total_ttc / $nb_period;
         $montant_facturer_ht = $total_ht / $nb_period;
-        $date_fin->add(new DateInterval("P" . $parent->getData('periodicity') . "M"));
-        $date_fin->sub(new DateInterval("P1D"));
+        $format = "Y-m-t";
+        if ($date_debut->format('d') !== '01') {
+            $date_fin->add(new DateInterval("P" . $parent->getData('periodicity') . "M"));
+            $date_fin->sub(new DateInterval("P1D"));
+            $format = "Y-m-d";
+        }
         $list_fact = $this->get_total_facture();
         for ($i = 0; $i < $nb_period; $i++) {
             $facture = $this->getInstance('bimpcommercial', 'Bimp_Facture', $list_fact[$i]['id_facture']);
-            $format = 'Y-m-d';
-            if ($date_debut->format('d') == '01') {
-                $format = 'Y-m-t';
-                $date_fin->sub(new DateInterval("P1D"));
-            }
             $this->tab_echeancier[$i] = array('date_debut' => $date_debut->format('Y-m-d'), 'date_fin' => $date_fin->format("$format"), 'montant_ht' => $montant_facturer_ht, 'montant_ttc' => $montant_facturer_ttc);
             $date_debut->add(new DateInterval("P" . $parent->getData('periodicity') . "M"));
             $date_fin->add(new DateInterval("P" . $parent->getData('periodicity') . "M"));
@@ -286,21 +280,13 @@ class BContract_echeancier extends BimpObject {
     }
 
     public function match_key_with_dates($date1, $date2) {
-        $parent = $this->getParentInstance();
-        $nb_period = $parent->getData('duree_mois') / $parent->getData('periodicity');
-        foreach ($this->tab_echeancier as $line) {
-            
-        }
-
         while ($list = current($this->tab_echeancier)) {
             if ($list['date_debut'] == $date1) {
                 $result1 = key($this->tab_echeancier);
-                //$result1 = $result1 + 1;
-                echo 'r1 = ' . $result1 . '<br />';
+                //echo 'r1 = ' . $result1;
             } elseif ($list['date_fin'] == $date2) {
                 $result2 = key($this->tab_echeancier);
-                //$result2 = $result2 + 1;
-                echo 'r2 = ' . $result2 . '<br />';
+                //echo 'r2 = ' . $result2;
             } else {
                 
             }
@@ -310,8 +296,7 @@ class BContract_echeancier extends BimpObject {
         $result = $result2 - $result1;
         $result = $result + 1;
         //$result = $result1 + $result2;
-        echo $result . '<br />';
-
+        //echo $result . '<br />';
         return $result;
     }
 

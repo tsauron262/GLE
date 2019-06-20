@@ -23,6 +23,11 @@ objects:
             id_object: 
                 field_value: id_line
                 
+    dol_line: 
+        instance: 
+            bimp_object: 
+                object_name: CommandeDolLine
+                
     shipment: 
         instance: 
             bimp_object: 
@@ -54,6 +59,29 @@ fields:
         max: none
         decimals: 3
         unsigned: 0
+        default_value: 0
+        
+    qty_total: 
+        label: Qté Totale
+        type: qty
+        default_value: 0
+        
+    qty_shipped: 
+        label: Qté expédiée
+        
+    qty_to_ship: 
+        label: Qté à expédier
+        type: qty
+        default_value: 0
+        
+    qty_billed: 
+        label: Qté facturée
+        type: qty
+        default_value: 0
+        
+    qty_to_bill: 
+        label: Qté à facturer
+        type: qty
         default_value: 0
         
 forms: 
@@ -220,6 +248,48 @@ lists_cols:
         value: 
             callback: displayReservationsStatus
         min_width: 620px
+    qty_total: 
+        field: qty_total
+        value: 
+            callback: 
+                method: displayQty
+                params: 
+                    - total
+    qty_shipped: 
+        field: qty_shipped
+        value: 
+            callback: 
+                method: displayQty
+                params: 
+                    - shipped
+    qty_shipped: 
+        field: qty_shipped
+        value: 
+            callback: 
+                method: displayQty
+                params: 
+                    - shipped
+    qty_to_ship: 
+        field: qty_to_ship
+        value: 
+            callback: 
+                method: displayQty
+                params: 
+                    - to_ship
+    qty_billed: 
+        field: qty_billed
+        value: 
+            callback: 
+                method: displayQty
+                params: 
+                    - billed
+    qty_to_bill: 
+        field: qty_to_bill
+        value: 
+            callback: 
+                method: displayQty
+                params: 
+                    - to_bill
     
 lists: 
     default: 
@@ -266,6 +336,69 @@ lists:
             total_ttc: unset
             margin: unset
             reservations:
+                
+    general:
+        filters_panel: default
+        cols:
+            commande: 
+                label: Commande
+                field: id_obj
+                display: nom_url
+            dolline_product: 
+                field: fk_product
+                child: dol_line
+            desc:
+            pu_ht: 
+            tva:
+            remise_crt:
+            pa_ht: 
+            qty: 
+            remise: 
+            total_ttc: 
+            margin:
+            commande_status: 
+                label: Statut commande
+                field: fk_statut
+                child: parent
+            shipment_status:
+                field: shipment_status
+                child: parent
+            entrepot: 
+                label: Entrepot
+                field: entrepot
+                child: parent
+                display: ref
         
+        
+             
+filters_panels: 
+    default: 
+        filters: 
+            commande: 
+                field: commande
+            desc: 
+                field: desc
+            pu_ht: 
+                field: pu_ht
+            tva:
+                field: tva
+            remise_crt: 
+                field: remise_crt
+            pa_ht: 
+                field: pa_ht
+            qty: 
+                field: qty
+            remise:
+                field: remise
+            total_ttc:
+                field: total_ttc
+            margin:
+                field: margin
+            commande_status:
+                field: fk_statut
+                child: parent
+            shipment_status:
+                field: shipment_status
+                child: parent
     
     

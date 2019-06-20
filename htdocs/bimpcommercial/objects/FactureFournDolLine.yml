@@ -1,0 +1,33 @@
+extends: 
+    module: bimpcommercial
+    object_name: DolLine
+    
+table: facture_fourn_det
+
+labels: 
+    name: ligne de facture fournisseur
+    
+objects: 
+    facture_fourn: 
+        instance: 
+            id_object: 
+                field_value: fk_commande
+            
+fields: 
+    fk_facture_fourn: 
+        label: Facture fournisseur
+        type: id_object
+        object: facture_fourn
+        
+    pu_ht: 
+        label: PU HT
+        type: money
+        
+    tva: 
+        label: Total TVA
+        type: money
+        
+    subprice: unset
+    total_tva: unset
+    buy_price_ht: unset
+    fk_product_fournisseur_price: unset

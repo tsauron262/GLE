@@ -9,6 +9,7 @@ class ObjectLine extends BimpObject
     public static $dol_line_parent_field = '';
     public static $check_on_update = false;
     public $equipment_required = false;
+    public static $equipment_required_in_entrepot = true;
 
     const LINE_PRODUCT = 1;
     const LINE_TEXT = 2;
@@ -294,31 +295,34 @@ class ObjectLine extends BimpObject
             $errors[] = 'Objet parent absent';
         } else {
             $id_entrepot = 0;
-            if ($parent->field_exists('entrepot')) {
-                $id_entrepot = (int) $parent->getData('entrepot');
 
-                if (!$id_entrepot) {
-                    $errors[] = 'Aucun entrepôt défini pour ' . $parent->getLabel('the') . ' ' . $parent->getNomUrl(0, 1, 1, 'full');
-                } else {
-                    $allowed = array();
+            if (static::$equipment_required_in_entrepot) {
+                if ($parent->field_exists('entrepot')) {
+                    if (!$id_entrepot) {
+                        $errors[] = 'Aucun entrepôt défini pour ' . $parent->getLabel('the') . ' ' . $parent->getNomUrl(0, 1, 1, 'full');
+                    }
+                }
+            }
 
-                    if ($this->getData('linked_object_name') === 'commande_line') {
-                        $id_commande_line = (int) $this->getData('linked_id_object');
-                        if ($id_commande_line) {
-                            $reservation = BimpCache::findBimpObjectInstance('bimpreservation', 'BR_Reservation', array(
-                                        'type'                    => BR_Reservation::BR_RESERVATION_COMMANDE,
-                                        'id_commande_client_line' => (int) $id_commande_line,
-                                        'id_equipment'            => (int) $equipment->id
-                                            ), true);
+            if (!count($errors)) {
+                $allowed = array();
 
-                            if (BimpObject::objectLoaded($reservation)) {
-                                $allowed['id_reservation'] = (int) $reservation->id;
-                            }
+                if ($this->getData('linked_object_name') === 'commande_line') {
+                    $id_commande_line = (int) $this->getData('linked_id_object');
+                    if ($id_commande_line) {
+                        $reservation = BimpCache::findBimpObjectInstance('bimpreservation', 'BR_Reservation', array(
+                                    'type'                    => BR_Reservation::BR_RESERVATION_COMMANDE,
+                                    'id_commande_client_line' => (int) $id_commande_line,
+                                    'id_equipment'            => (int) $equipment->id
+                                        ), true);
+
+                        if (BimpObject::objectLoaded($reservation)) {
+                            $allowed['id_reservation'] = (int) $reservation->id;
                         }
                     }
-
-                    $equipment->isAvailable($id_entrepot, $errors, $allowed);
                 }
+
+                $equipment->isAvailable($id_entrepot, $errors, $allowed);
             }
         }
 

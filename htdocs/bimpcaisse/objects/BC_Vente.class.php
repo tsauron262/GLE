@@ -1584,9 +1584,9 @@ class BC_Vente extends BimpObject
                 'id_product'        => $id_product,
                 'id_equipment'      => 0,
                 'qty'               => 1,
-                'unit_price_tax_ex' => (float) BimpTools::calculatePriceTaxEx((float) $product->price_ttc, (float) $product->tva_tx),
-                'unit_price_tax_in' => (float) round($product->price_ttc, 2),
-                'tva_tx'            => (float) $product->tva_tx
+                'unit_price_tax_ex' => (float) BimpTools::calculatePriceTaxEx((float) $product->dol_object->price_ttc, (float) $product->dol_object->tva_tx),
+                'unit_price_tax_in' => (float) round($product->dol_object->price_ttc, 2),
+                'tva_tx'            => (float) $product->dol_object->tva_tx
             ));
 
             if (!count($article_errors)) {

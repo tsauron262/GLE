@@ -14,6 +14,12 @@ objects:
             module: bimplogistique
             name: BL_CommandeShipment
             
+    commades_lines:
+        instance: 
+            bimp_object: 
+                module: bimpcommercial
+                name: Bimp_CommandeLine
+            
 sections: 
     - type: tabs
       tabs: 
@@ -29,3 +35,10 @@ sections:
                 - type: custom
                   custom: 
                       callback: renderShipmentsTab
+        prods: 
+            label: Produit en commandes
+            sections: 
+                - type: list
+                  list: 
+                      object: commades_lines
+                      name: general

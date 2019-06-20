@@ -1,0 +1,20 @@
+extends: 
+    module: bimpcommercial
+    object_name: DolLine
+    
+table: commandedet
+
+labels: 
+    name: ligne de commande
+    
+objects: 
+    commande: 
+        instance: 
+            id_object: 
+                field_value: fk_commande
+            
+fields: 
+    fk_commande: 
+        label: Commande
+        type: id_object
+        object: commande

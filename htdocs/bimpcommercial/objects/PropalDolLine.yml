@@ -1,0 +1,20 @@
+extends: 
+    module: bimpcommercial
+    object_name: DolLine
+    
+table: propaldet
+
+labels: 
+    name: ligne de proposition commerciale
+    
+objects: 
+    propal: 
+        instance: 
+            id_object: 
+                field_value: fk_propal
+            
+fields: 
+    fk_propal: 
+        label: Proposition commerciale
+        type: id_object
+        object: propal

@@ -24,7 +24,16 @@ objects:
             id_object: 
                 field_value: id_line
 
+    dol_line: 
+        instance: 
+            bimp_object: 
+                object_name: CommandeFournDolLine
+                
 fields: 
+    receptions: 
+        label: Réception
+        type: json
+        
     qty_modif: 
         label: Qté modifiée
         type: qty
@@ -34,9 +43,18 @@ fields:
         unsigned: 0
         default_value: 0
         
-    receptions: 
-        label: Réception
-        type: json
+    qty_total: 
+        label: Qté Totale
+        type: qty
+        default_value: 0
+        
+    qty_received: 
+        label: Qté reçue
+        
+    qty_to_receive: 
+        label: Qté à réceptionner
+        type: qty
+        default_value: 0
         
 forms: 
     qty_modified: 
@@ -66,8 +84,27 @@ lists_cols:
         label: Commmande client
         value: 
             callback: displayCommandeClient
-    qty_modif:
-        field: qty_modif
+    qty_total: 
+        field: qty_total
+        value: 
+            callback: 
+                method: displayQty
+                params: 
+                    - total
+    qty_received: 
+        field: qty_received
+        value: 
+            callback: 
+                method: displayQty
+                params: 
+                    - received
+    qty_to_receive: 
+        field: qty_to_receive
+        value: 
+            callback: 
+                method: displayQty
+                params: 
+                    - to_receive
             
 lists: 
     logistique:
@@ -115,6 +152,11 @@ lists:
                 label: Statut commande
                 field: fk_statut
                 child: parent
+            entrepot: 
+                label: Entrepot
+                field: entrepot
+                child: parent
+                display: ref
                 
 filters_panels: 
     default: 

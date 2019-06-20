@@ -327,7 +327,7 @@ fields_tables:
             
 views: 
     default: 
-        objects_change_reload: Bimp_CommandeFournLine
+        objects_change_reload: Bimp_CommandeFournLine,ObjectLineRemise,BimpFile
         rows: 
             0: 
                 cols: 
@@ -337,14 +337,17 @@ views:
                                 cols: 
                                     0: 
                                         fields_table: 
-                                            name: fournisseur  
-                                            
+                                            name: fournisseur
     content: 
-        objects_change_reload: Bimp_CommandeFournLine
         rows: 
             0: 
                 cols: 
                     1: unset
+    
+    content_infos: 
+        objects_change_reload: Bimp_CommandeFournLine,ObjectLineRemise,BimpFile
+    full: 
+        objects_change_reload: Bimp_CommandeFournLine,ObjectLineRemise,BimpFile                 
     
 filters_panels: 
     default: 

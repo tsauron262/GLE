@@ -9,6 +9,14 @@ common_fields: 0
 parent_id_property: id_obj
 
 objects:    
+    dol_line: 
+        instance: 
+            bimp_object: 
+                module: bimpcommercial
+                object_name: DolLine
+            id_object: 
+                field_value: id_line
+                
     product: 
         instance: 
             id_object: 
@@ -669,3 +677,28 @@ lists:
             remise: 
             total_ttc: 
             margin:
+                
+    full: 
+        cols: 
+#            Colonnes à utiliser si besoin de filtrer / trier. 
+            dolline_product: 
+                field: fk_product
+                child: dol_line
+            dolline_pu_ht: 
+                field: subprice
+                child: dol_line
+            dolline_tva_tx: 
+                field: tva_tx
+                child: dol_line
+            dolline_qty: 
+                field: qty
+                child: dol_line
+            dolline_total_ht: 
+                field: total_ht
+                child: dol_line
+            dolline_total_tva:
+                field: total_tva
+                child: dol_line
+            dolline_total_ttc: 
+                field: total_ttc
+                child: dol_line

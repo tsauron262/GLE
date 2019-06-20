@@ -26,7 +26,7 @@ objects:
     dol_line: 
         instance: 
             bimp_object: 
-                object_name: CommandeDolLine
+                name: CommandeDolLine
                 
     shipment: 
         instance: 
@@ -290,7 +290,37 @@ lists_cols:
                 method: displayQty
                 params: 
                     - to_bill
-    
+
+filters_panels: 
+    default: 
+        filters: 
+            commande: 
+                field: commande
+            desc: 
+                field: desc
+            pu_ht: 
+                field: pu_ht
+            tva:
+                field: tva
+            remise_crt: 
+                field: remise_crt
+            pa_ht: 
+                field: pa_ht
+            qty: 
+                field: qty
+            remise:
+                field: remise
+            total_ttc:
+                field: total_ttc
+            margin:
+                field: margin
+            commande_status:
+                field: fk_statut
+                child: parent
+            shipment_status:
+                field: shipment_status
+                child: parent
+                
 lists: 
     default: 
         objects_change_reload: ObjectLineRemise,Bimp_Commande
@@ -336,6 +366,55 @@ lists:
             total_ttc: unset
             margin: unset
             reservations:
-        
+                
+    general:
+        filters_panel: default
+        cols:
+            commande: 
+                label: Commande
+                field: id_obj
+                display: nom_url
+            dl_product: 
+                field: fk_product
+                child: dol_line
+                display: nom_url
+            dl_pu_ht: 
+                field: subprice
+                child: dol_line
+            tva:
+            remise_crt:
+                edit: 0
+            dl_qty: 
+                label: Qté
+                field: qty
+                child: dol_line
+                min_width: 30px
+                max_width: 30px
+            dl_remise: 
+                field: remise_percent
+                child: dol_line
+            total_ttc: 
+                field: total_ttc
+                child: dol_line
+            commande_status: 
+                label: St Cmd
+                field: fk_statut
+                child: parent
+                display: icon
+                min_width: 30px
+                max_width: 30px
+            shipment_status:
+                label: St exp cmd
+                field: shipment_status
+                child: parent
+                display: icon
+                min_width: 30px
+                max_width: 30px
+            entrepot: 
+                label: Entrepot
+                field: entrepot
+                child: parent
+                display: ref
+
     
     

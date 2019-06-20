@@ -578,9 +578,6 @@ class Bimp_Facture extends BimpComm
                 }
             }
             
-            echo '<pre>';
-            print_r($buttons);
-            exit;
         }
         
         

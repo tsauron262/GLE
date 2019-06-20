@@ -12,6 +12,11 @@ objects:
             bimp_object: 
                 module: bimplogistique
                 name: BL_CommandeFournReception
+    commades_lines: 
+        instance: 
+            bimp_object: 
+                module: bimpcommercial
+                name: Bimp_CommandeFournLine
             
 sections: 
     - type: tabs
@@ -28,3 +33,11 @@ sections:
                 - type: list
                   list: 
                       object: reception
+        prods: 
+            label: Produit en commandes
+            sections: 
+                - type: list
+                  list: 
+                      object: commades_lines
+                      name: general
+                      

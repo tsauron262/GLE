@@ -300,6 +300,19 @@ forms:
                   type: textarea
                   rows: 3
                   auto_expand: 1
+                  
+    duplicate:
+        rows: 
+            2: 
+                field: libelle
+            3: 
+                field: ef_type
+            4:
+                field: date_lim_reglement
+            5: 
+                field: datef
+            6:
+                field: fk_account
                       
 fields_tables: 
     infos: 
@@ -361,10 +374,12 @@ fields_tables:
             
 views: 
     default: 
-        objects_change_reload: Bimp_FactureLine,Bimp_Paiement
+        objects_change_reload: Bimp_FactureLine,Bimp_Paiement,ObjectLineRemise,BimpFile
     content_infos: 
-        objects_change_reload: Bimp_FactureLine,Bimp_Paiement
-      
+        objects_change_reload: Bimp_FactureLine,Bimp_Paiement,ObjectLineRemise,BimpFile
+    full: 
+        objects_change_reload: Bimp_FactureLine,Bimp_Paiement,ObjectLineRemise,BimpFile
+        
 filters_panels: 
     default: 
         filters: 

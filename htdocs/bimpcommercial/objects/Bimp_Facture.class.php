@@ -44,11 +44,17 @@ class Bimp_Facture extends BimpComm
     public function canSetAction($action)
     {
         global $conf, $user;
-        
+
         switch ($action) {
             case 'validate':
                 if ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && !empty($user->rights->facture->creer)) ||
                         (!empty($conf->global->MAIN_USE_ADVANCED_PERMS) && !empty($user->rights->facture->invoice_advance->validate))) {
+                    return 1;
+                }
+                return 0;
+
+            case 'modify':
+                if ($this->can("create")) {
                     return 1;
                 }
                 return 0;
@@ -84,7 +90,8 @@ class Bimp_Facture extends BimpComm
                 }
                 return 0;
         }
-        return 1;
+
+        return parent::canSetAction($action);
     }
 
     // Getters booléens:
@@ -114,52 +121,451 @@ class Bimp_Facture extends BimpComm
         return 1;
     }
 
-    public function isValidatable()
+    public function isActionAllowed($action, &$errors = array())
     {
-        if ($this->isLoaded()) {
-            global $conf;
-
-            $isPositive = (in_array((int) $this->getData('type'), array(Facture::TYPE_STANDARD, Facture::TYPE_REPLACEMENT, Facture::TYPE_DEPOSIT, Facture::TYPE_PROFORMA, Facture::TYPE_SITUATION)) && (!empty($conf->global->FACTURE_ENABLE_NEGATIVE) || (float) $this->getData('total_ttc') >= 0));
-            $isNegative = ((int) $this->getData('type') == Facture::TYPE_CREDIT_NOTE && (float) $this->getData('total_ttc') <= 0);
-            $soc = $this->getChildObject('client');
-            if (BimpObject::objectLoaded($soc) && (int) $this->getData('fk_statut') == Facture::STATUS_DRAFT && count($this->dol_object->lines) > 0 && ($isPositive || $isNegative)) {
-                return 1;
+        if (in_array($action, array('validate', 'modify', 'reopen', 'sendMail'))) {
+            if (!$this->isLoaded()) {
+                $errors[] = 'ID de la facture absent';
+                return 0;
             }
         }
 
-        return 0;
-    }
+        global $conf, $langs;
+        $status = (int) $this->getData('fk_statut');
+        $type = (int) $this->getData('type');
 
-    public function isReopenable()
-    {
-        if ($this->isLoaded()) {
-            $discount = new DiscountAbsolute($this->db->db);
-            $discount->fetch(0, $this->id);
-            $status = (int) $this->getData('fk_statut');
-            $type = (int) $this->getData('type');
+        switch ($action) {
+            case 'validate':
+                if ($status !== Facture::STATUS_DRAFT) {
+                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' n\'est plus au statut "brouillon"';
+                    return 0;
+                }
 
-            if ((($type === Facture::TYPE_STANDARD || $type === Facture::TYPE_REPLACEMENT) ||
-                    ($type === Facture::TYPE_CREDIT_NOTE && empty($discount->id)) ||
-                    ($type === Facture::TYPE_DEPOSIT && empty($discount->id))) && ($status === 2 || $status === 3 || ($status === 1 && (int) $this->dol_object->paye))) {
+                $soc = $this->getChildObject('client');
+                if (!BimpObject::objectLoaded($soc)) {
+                    $errors[] = 'Client absent ou invalide';
+                    return 0;
+                }
+
+                if (!count($this->dol_object->lines)) {
+                    $errors[] = 'Aucune ligne ajoutée  ' . $this->getLabel('to');
+                    return 0;
+                }
+
+                if ((in_array($type, array(
+                            Facture::TYPE_STANDARD,
+                            Facture::TYPE_REPLACEMENT,
+                            Facture::TYPE_DEPOSIT,
+                            Facture::TYPE_PROFORMA,
+                            Facture::TYPE_SITUATION
+                        )) &&
+                        (!empty($conf->global->FACTURE_ENABLE_NEGATIVE) ||
+                        (float) $this->getData('total_ttc') < 0))) {
+                    if ($this->isLabelFemale()) {
+                        $errors[] = BimpTools::ucfirst($this->getLabel('name_plur')) . ' négatives non autorisées';
+                    } else {
+                        $errors[] = BimpTools::ucfirst($this->getLabel('name_plur')) . ' négatifs non autorisés';
+                    }
+                    return 0;
+                }
+
+                if (($type == Facture::TYPE_CREDIT_NOTE && (float) $this->getData('total_ttc') > 0)) {
+                    if ($this->isLabelFemale()) {
+                        $errors[] = BimpTools::ucfirst($this->getLabel('name_plur')) . ' positives non autorisées';
+                    } else {
+                        $errors[] = BimpTools::ucfirst($this->getLabel('name_plur')) . ' positifs non autorisés';
+                    }
+                    return 0;
+                }
                 return 1;
-            }
-        }
 
-        return 0;
-    }
-
-    public function isModifiable()
-    {
-        if ($this->isLoaded()) {
-            if ((int) $this->getData('fk_statut') === Facture::STATUS_VALIDATED) {
+            case 'modify':
+                if ($status !== Facture::STATUS_VALIDATED) {
+                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' n\'est pas au statut "Validé"';
+                    return 0;
+                }
                 // On verifie si les lignes de factures ont ete exportees en compta et/ou ventilees:
-                if ((float) $this->getRemainToPay() == $this->dol_object->total_ttc && empty($this->dol_object->paye) && $this->dol_object->getVentilExportCompta() == 0) {
-                    return 1;
+                if ((float) $this->getRemainToPay() != $this->dol_object->total_ttc && empty($this->dol_object->paye)) {
+                    $errors[] = 'Un paiement a été effectué';
+                    return 0;
+                }
+
+                if ($this->dol_object->getVentilExportCompta() == 0) {
+                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' a été exporté' . ($this->isLabelFemale() ? 'e' : '') . ' en compta';
+                    return 0;
+                }
+
+                if (!$this->dol_object->is_last_in_cycle()) {
+                    $errors[] = $langs->trans("NotLastInCycle");
+                    return 0;
+                }
+
+                if ($this->dol_object->getIdReplacingInvoice()) {
+                    $errors[] = $langs->trans("DisabledBecauseReplacedInvoice");
+                    return 0;
+                }
+
+                return 1;
+
+            case 'reopen':
+                $discount = new DiscountAbsolute($this->db->db);
+                $discount->fetch(0, $this->id);
+
+                if (in_array($type, array(
+                            Facture::TYPE_CREDIT_NOTE,
+                            Facture::TYPE_DEPOSIT
+                        )) && !empty($discount->id)) {
+                    $errors[] = 'Une remise a été crée à partir de ' . $this->getLabel('this');
+                    return 0;
+                }
+
+                if (in_array($type, array(
+                            Facture::TYPE_STANDARD,
+                            Facture::TYPE_REPLACEMENT
+                        )) || (empty($discount->id))) {
+                    if (!in_array($status, array(2, 3)) || ($status === 1 && !(int) $this->dol_object->paye)) {
+                        $errors[] = 'Le statut actuel ' . $this->getLabel('of_this') . ' ne permet pas sa réouverture';
+                        return 0;
+                    }
+                }
+
+                if ($this->dol_object->getIdReplacingInvoice() || $this->dol_object->close_code == 'replaced') {
+                    $errors[] = $langs->trans("DisabledBecauseReplacedInvoice");
+                    return 0;
+                }
+                return 1;
+
+            case 'sendMail':
+                if (empty($conf->global->FACTURE_SENDBYEMAIL_FOR_ALL_STATUS) && !in_array($status, array(
+                            Facture::STATUS_VALIDATED,
+                            Facture::STATUS_CLOSED))) {
+                    $errors[] = 'Le statut actuel ' . $this->getLabel('of_this') . ' ne permet pas l\'envoi par e-mail';
+                    return 0;
+                }
+
+                if ($this->dol_object->getIdReplacingInvoice()) {
+                    $errors[] = $langs->trans("DisabledBecauseReplacedInvoice");
+                    return 0;
+                }
+
+                return 1;
+        }
+
+        return (int) parent::isActionAllowed($action, $errors);
+    }
+
+    // Getters params: 
+
+    public function getActionsButtons()
+    {
+        global $conf, $langs, $user;
+
+        $buttons = parent::getActionsButtons();
+        $status = (int) $this->getData('fk_statut');
+        $ref = $this->getRef();
+        $type = (int) $this->getData('type');
+        $paye = (int) $this->dol_object->paye;
+        $remainToPay = (float) $this->getRemainToPay();
+        $total_paid = (float) $this->dol_object->getSommePaiement();
+        $total_credit_notes = (float) $this->dol_object->getSumCreditNotesUsed();
+        $id_replacing_invoice = $this->dol_object->getIdReplacingInvoice();
+
+        $soc = $this->getChildObject('client');
+        $discount = new DiscountAbsolute($this->db->db);
+        $discount->fetch(0, $this->id);
+
+        // Valider:
+        if ($this->isActionAllowed('validate')) {
+            if ($this->canSetAction('validate')) {
+                if (substr($ref, 1, 4) == 'PROV') {
+                    $numref = $this->dol_object->getNextNumRef($soc->dol_object);
+
+                    if (!empty($conf->global->FAC_FORCE_DATE_VALIDATION)) {
+                        $this->dol_object->date = dol_now();
+                        $this->dol_object->date_lim_reglement = $this->dol_object->calculate_date_lim_reglement();
+                        $this->set('datef', BimpTools::getDateFromDolDate($this->dol_object->date));
+                    }
+                } else {
+                    $numref = $ref;
+                }
+
+                $text = $langs->trans('ConfirmValidateBill', $numref);
+                if (!empty($conf->notification->enabled)) {
+                    if (!class_exists('Notify')) {
+                        require_once DOL_DOCUMENT_ROOT . '/core/class/notify.class.php';
+                    }
+                    $notify = new Notify($this->db->db);
+                    $text .= "\n";
+                    $text .= $notify->confirmMessage('BILL_VALIDATE', (int) $this->getData('fk_soc'), $this->dol_object);
+                }
+                $buttons[] = array(
+                    'label'   => 'Valider',
+                    'icon'    => 'check',
+                    'onclick' => $this->getJsActionOnclick('validate', array('new_ref' => $numref), array(
+                        'confirm_msg' => strip_tags($text)
+                    ))
+                );
+            } else {
+                $buttons[] = array(
+                    'label'    => 'Valider',
+                    'icon'     => 'check',
+                    'onclick'  => '',
+                    'disabled' => 1,
+                    'popover'  => 'Vous n\'avez pas la permission de valider cette facture'
+                );
+            }
+        }
+
+        // Editer une facture deja validee, sans paiement effectue et pas exportée en compta
+        if ($status === Facture::STATUS_VALIDATED) {
+            if ($this->canSetAction('modify')) {
+                $errors = array();
+
+                if ($this->isActionAllowed('modify', $errors)) {
+                    $buttons[] = array(
+                        'label'   => 'Modifier',
+                        'icon'    => 'undo',
+                        'onclick' => $this->getJsActionOnclick('modify', array(), array(
+                            'confirm_msg' => strip_tags($langs->trans('ConfirmUnvalidateBill', $ref))
+                    )));
+                } else {
+                    $msg = BimpTools::getMsgFromArray($errors);
+                    $buttons[] = array(
+                        'label'    => 'Modifier',
+                        'icon'     => 'undo',
+                        'onclick'  => '',
+                        'disabled' => 1,
+                        'popover'  => $msg
+                    );
                 }
             }
         }
 
-        return 0;
+        // Réouverture:
+        if ($this->canSetAction('reopen')) {
+            $errors = array();
+            if ($this->isActionAllowed('reopen', $errors)) {
+                $buttons[] = array(
+                    'label'   => 'Réouvrir',
+                    'icon'    => 'undo',
+                    'onclick' => $this->getJsActionOnclick('reopen', array(), array(
+                        'confirm_msg' => 'Veuillez confirmer la réouverture de ' . $this->getLabel('this')
+                    ))
+                );
+            } elseif (in_array($status, array(2, 3))) {
+                if ($this->canSetAction('reopen')) {
+                    $buttons[] = array(
+                        'label'    => 'Réouvrir',
+                        'icon'     => 'undo',
+                        'onclick'  => '',
+                        'disabled' => 1,
+                        'popover'  => BimpTools::getMsgFromArray($errors)
+                    );
+                }
+            }
+        }
+
+        // Envoi mail:
+        if ($this->canSetAction('sendMail')) {
+            $errors = array();
+            if ($this->isActionAllowed('sendMail', $errors)) {
+                $buttons[] = array(
+                    'label'   => 'Envoyer par e-mail',
+                    'icon'    => 'envelope',
+                    'onclick' => $this->getJsActionOnclick('sendEmail', array(), array(
+                        'form_name' => 'email'
+                    ))
+                );
+            } elseif (in_array($status, array(1, 2))) {
+                $buttons[] = array(
+                    'label'    => 'Envoyer par email',
+                    'icon'     => 'envelope',
+                    'onclick'  => '',
+                    'disabled' => 1,
+                    'popover'  => BimpTools::getMsgFromArray($errors)
+                );
+            }
+        }
+        if ($this->isLoaded()) {
+            // Demande de prélèvement
+            $langs->load("withdrawals");
+            if ($status > 0 && !$paye && $user->rights->prelevement->bons->creer) {
+                $url = DOL_URL_ROOT . '/compta/facture/prelevement.php?facid=' . $this->id;
+                $buttons[] = array(
+                    'label'   => $langs->trans("MakeWithdrawRequest"),
+                    'icon'    => 'fas_money-check-alt',
+                    'onclick' => 'window.location = \'' . $url . '\''
+                );
+            }
+
+            // Réglement:
+            if ($type !== Facture::TYPE_CREDIT_NOTE && $status === 1 && !$paye && $user->rights->facture->paiement) {
+                $paiement = BimpObject::getInstance('bimpcommercial', 'Bimp_Paiement');
+                $onclick = $paiement->getJsLoadModalForm('default', 'Paiement Factures', array(
+                    'fields' => array(
+                        'id_client'        => (int) $this->getData('fk_soc'),
+                        'id_mode_paiement' => (int) $this->getData('fk_mode_reglement')
+                    )
+                ));
+
+                $buttons[] = array(
+                    'label'   => 'Saisir réglement',
+                    'icon'    => 'euro',
+                    'onclick' => $onclick
+                );
+            }
+
+            // Remboursements ou conversions en réduction
+            if (in_array($type, array(Facture::TYPE_CREDIT_NOTE, Facture::TYPE_DEPOSIT, Facture::TYPE_STANDARD))) {
+                // Remboursement avoirs: 
+                if ($type === Facture::TYPE_CREDIT_NOTE && $status === 1 && !$paye && $user->rights->facture->paiement && $remainToPay != 0) {
+                    $url = DOL_URL_ROOT . '/compta/paiement.php?facid=' . $this->id . '&action=create&accountid=' . $this->dol_object->fk_account;
+                    $buttons[] = array(
+                        'label'   => $langs->trans('DoPaymentBack'),
+                        'icon'    => 'euro',
+                        'onclick' => 'window.location = \'' . $url . '\''
+                    );
+                }
+
+
+                if ($this->can("create") && $status == 1 && !$paye) {
+                    switch ($type) {
+                        case Facture::TYPE_STANDARD:
+                            if ($remainToPay < 0 && empty($discount->id)) {
+                                // Remboursement excédant payé: 
+                                $buttons[] = array(
+                                    'label'   => $langs->trans('ConvertExcessReceivedToReduc'),
+                                    'icon'    => 'percent',
+                                    'onclick' => $this->getJsActionOnclick('convertToReduc', array(), array(
+                                        'confirm_msg' => strip_tags($langs->trans('ConfirmConvertToReduc', strtolower($langs->transnoentities('ExcessReceived'))))
+                                    ))
+                                );
+                            }
+                            break;
+
+                        case Facture::TYPE_CREDIT_NOTE:
+                            if ($this->dol_object->getSommePaiement() == 0) {
+                                $buttons[] = array(
+                                    'label'   => $langs->trans('ConvertToReduc'),
+                                    'icon'    => 'percent',
+                                    'onclick' => $this->getJsActionOnclick('convertToReduc', array(), array(
+                                        'confirm_msg' => strip_tags($langs->trans('ConfirmConvertToReduc', strtolower($langs->transnoentities('CreditNote'))))
+                                    ))
+                                );
+                            }
+                            break;
+
+                        case Facture::TYPE_DEPOSIT:
+                            if ($remainToPay == 0 && empty($discount->id)) {
+                                $buttons[] = array(
+                                    'label'   => $langs->trans('ConvertToReduc'),
+                                    'icon'    => 'percent',
+                                    'onclick' => $this->getJsActionOnclick('convertToReduc', array(), array(
+                                        'confirm_msg' => strip_tags($langs->trans('ConfirmConvertToReduc', strtolower($langs->transnoentities('Deposit'))))
+                                    ))
+                                );
+                            }
+                            break;
+                    }
+                }
+            }
+
+            if ($status == 1 && !$paye) {
+                // Classer "Payée": 
+                if ((!in_array($type, array(Facture::TYPE_CREDIT_NOTE, Facture::TYPE_DEPOSIT) && $remainToPay <= 0)) ||
+                        ($type === Facture::TYPE_CREDIT_NOTE && $remainToPay >= 0) ||
+                        ($type === Facture::TYPE_DEPOSIT && $this->dol_object->total_ttc > 0 && $remainToPay == 0 && empty($discount->id))) {
+                    $buttons[] = array(
+                        'label'   => $langs->trans('ClassifyPaid'),
+                        'icon'    => 'check',
+                        'onclick' => $this->getJsActionOnclick('classifyPaid', array(), array(
+                            'confirm_msg' => strip_tags($langs->trans('ConfirmClassifyPaidBill', $ref))
+                        ))
+                    );
+                }
+
+                // Classer "Payée partiellement": 
+                if ($remainToPay > 0) {
+                    if ($this->canSetAction('classifyPaid') && $total_paid > 0 || $total_credit_notes > 0) {
+                        $buttons[] = array(
+                            'label'   => $langs->trans('ClassifyPaidPartially'),
+                            'icon'    => 'exclamation',
+                            'onclick' => $this->getJsActionOnclick('classifyPaid', array(), array(
+                                'form_name' => 'paid_partially'
+                            ))
+                        );
+                    } else {
+                        if ($this->canSetAction('cancel') && empty($conf->global->INVOICE_CAN_NEVER_BE_CANCELED)) {
+                            if (!$id_replacing_invoice) {
+                                $buttons[] = array(
+                                    'label'   => $langs->trans('ClassifyCanceled'),
+                                    'icon'    => 'times',
+                                    'onclick' => $this->getJsActionOnclick('cancel', array(), array(
+                                        'form_name' => 'cancel'
+                                    ))
+                                );
+                            } else {
+                                $buttons[] = array(
+                                    'label'    => $langs->trans('ClassifyCanceled'),
+                                    'icon'     => 'time',
+                                    'onclick'  => '',
+                                    'disabled' => 1,
+                                    'popover'  => $langs->trans("DisabledBecauseReplacedInvoice")
+                                );
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Cloner: 
+            if ($this->can("create")) {
+                $buttons[] = array(
+                    'label'   => 'Cloner',
+                    'icon'    => 'copy',
+                    'onclick' => $this->getJsActionOnclick('duplicate', array(), array(
+                        'form_name'   => 'duplicate'
+                    ))
+                );
+            }
+
+
+            if (in_array($type, array(Facture::TYPE_DEPOSIT, Facture::TYPE_STANDARD, Facture::TYPE_PROFORMA)) && $this->can("create")) {
+                if ($status == 0) {
+                    // Convertir en facture modèle:
+                    if (!$id_replacing_invoice && count($this->dol_object->lines) > 0) {
+                        $url = DOL_URL_ROOT . '/compta/facture/fiche-rec.php?facid=' . $this->id . '&action=create';
+                        $buttons[] = array(
+                            'label'   => $langs->trans("ChangeIntoRepeatableInvoice"),
+                            'icon'    => 'fas_copy',
+                            'onclick' => 'window.location = \'' . $url . '\';'
+                        );
+                    }
+                } else {
+                    // Créer un avoir:
+                    $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
+                    $values = array(
+                        'fields' => array(
+                            'fk_soc'                => (int) $this->getData('fk_soc'),
+                            'ref_client'            => $this->getData('ref_client'),
+                            'type'                  => Facture::TYPE_CREDIT_NOTE,
+                            'id_facture_to_correct' => (int) $this->id,
+                            'fk_account'            => (int) $this->getData('fk_account'),
+                            'entrepot'              => (int) $this->getData('entrepot'),
+                            'centre'                => $this->getData('centre'),
+                            'ef_type'               => $this->getData('ef_type')
+                        )
+                    );
+                    $onclick = $facture->getJsLoadModalForm('default', 'Créer un avoir', $values, null, 'redirect');
+                    $buttons[] = array(
+                        'label'   => $langs->trans("CreateCreditNote"),
+                        'icon'    => 'fas_file-import',
+                        'onclick' => $onclick
+                    );
+                }
+            }
+        }
+        return $buttons;
     }
 
     // Getters Array: 
@@ -315,344 +721,6 @@ class Bimp_Facture extends BimpComm
         }
 
         return $options;
-    }
-
-    // Getters params: 
-
-    public function getActionsButtons()
-    {
-        global $conf, $langs, $user;
-
-        $buttons = parent::getActionsButtons();
-
-        if ($this->isLoaded()) {
-            $status = $this->getData('fk_statut');
-            if (!is_null($status)) {
-                $status = (int) $status;
-                $ref = $this->getRef();
-                $type = (int) $this->getData('type');
-                $paye = (int) $this->dol_object->paye;
-                $remainToPay = (float) $this->getRemainToPay();
-                $total_paid = (float) $this->dol_object->getSommePaiement();
-                $total_credit_notes = (float) $this->dol_object->getSumCreditNotesUsed();
-
-                $soc = $this->getChildObject('client');
-                $discount = new DiscountAbsolute($this->db->db);
-                $discount->fetch(0, $this->id);
-
-                $objectidnext = $this->dol_object->getIdReplacingInvoice();
-                $isLastInCycle = $this->dol_object->is_last_in_cycle();
-
-                // Valider:
-                if ($this->isValidatable()) {
-                    if ($this->canSetAction('validate')) {
-                        if (substr($ref, 1, 4) == 'PROV') {
-                            $numref = $this->dol_object->getNextNumRef($soc->dol_object);
-
-                            if (!empty($conf->global->FAC_FORCE_DATE_VALIDATION)) {
-                                $this->dol_object->date = dol_now();
-                                $this->dol_object->date_lim_reglement = $this->dol_object->calculate_date_lim_reglement();
-                                $this->set('datef', BimpTools::getDateFromDolDate($this->dol_object->date));
-                            }
-                        } else {
-                            $numref = $ref;
-                        }
-
-                        $text = $langs->trans('ConfirmValidateBill', $numref);
-                        if (!empty($conf->notification->enabled)) {
-                            if (!class_exists('Notify')) {
-                                require_once DOL_DOCUMENT_ROOT . '/core/class/notify.class.php';
-                            }
-                            $notify = new Notify($this->db->db);
-                            $text .= "\n";
-                            $text .= $notify->confirmMessage('BILL_VALIDATE', (int) $this->getData('fk_soc'), $this->dol_object);
-                        }
-                        $buttons[] = array(
-                            'label'   => 'Valider',
-                            'icon'    => 'check',
-                            'onclick' => $this->getJsActionOnclick('validate', array('new_ref' => $numref), array(
-                                'confirm_msg' => strip_tags($text)
-                            ))
-                        );
-                    } else {
-                        $buttons[] = array(
-                            'label'    => 'Valider',
-                            'icon'     => 'check',
-                            'onclick'  => '',
-                            'disabled' => 1,
-                            'popover'  => 'Vous n\'avez pas la permission de valider cette facture'
-                        );
-                    }
-                }
-
-                // Editer une facture deja validee, sans paiement effectue et pas exportée en compta
-                if ($this->isModifiable()) {
-                    $msg = '';
-                    if (!$objectidnext && $isLastInCycle) {
-                        if ($this->can("create")) {
-                            $buttons[] = array(
-                                'label'   => 'Modifier',
-                                'icon'    => 'undo',
-                                'onclick' => $this->getJsActionOnclick('modify', array(), array(
-                                    'confirm_msg' => strip_tags($langs->trans('ConfirmUnvalidateBill', $ref))
-                                ))
-                            );
-                        } else {
-                            $msg = $langs->trans("NotEnoughPermissions");
-                        }
-                    } else if (!$isLastInCycle) {
-                        $msg = $langs->trans("NotLastInCycle");
-                    } elseif ($objectidnext) {
-                        $msg = $langs->trans("DisabledBecauseReplacedInvoice");
-                    }
-                    if ($msg) {
-                        $buttons[] = array(
-                            'label'    => 'Modifier',
-                            'icon'     => 'undo',
-                            'onclick'  => '',
-                            'disabled' => 1,
-                            'popover'  => $msg
-                        );
-                    }
-                }
-
-                // Réouverture d'une facture standard payée:
-                $msg = '';
-
-                if ($this->isReopenable()) {
-                    if ($this->canSetAction('reopen')) {
-                        if (!$objectidnext && $this->dol_object->close_code !== 'replaced') {
-                            $buttons[] = array(
-                                'label'   => 'Réouvrir',
-                                'icon'    => 'undo',
-                                'onclick' => $this->getJsActionOnclick('reopen', array(), array(
-                                    'confirm_msg' => 'Veuillez confirmer la réouverture de ' . $this->getLabel('this')
-                                ))
-                            );
-                        } else {
-                            $msg = $langs->trans("DisabledBecauseReplacedInvoice");
-                        }
-                    } else {
-                        $msg = 'Vous n\'avez pas la permission de réouvrir ' . $this->getLabel('this');
-                    }
-                }
-
-                if ($msg) {
-                    $buttons[] = array(
-                        'label'    => 'Réouvrir',
-                        'icon'     => 'undo',
-                        'onclick'  => '',
-                        'disabled' => 1,
-                        'popover'  => $msg
-                    );
-                }
-
-                // Envoi mail:
-                if (in_array($status, array(Facture::STATUS_VALIDATED, Facture::STATUS_CLOSED)) || !empty($conf->global->FACTURE_SENDBYEMAIL_FOR_ALL_STATUS)) {
-                    $msg = '';
-                    if (!$objectidnext) {
-                        if ($this->canSetAction('sendMail')) {
-                            $buttons[] = array(
-                                'label'   => 'Envoyer par e-mail',
-                                'icon'    => 'envelope',
-                                'onclick' => $this->getJsActionOnclick('sendEmail', array(), array(
-                                    'form_name' => 'email'
-                                ))
-                            );
-                        } else {
-                            $msg = 'Vous n\'avez pas la permission';
-                        }
-                    } else {
-                        $msg = $langs->trans("DisabledBecauseReplacedInvoice");
-                    }
-                    if ($msg) {
-                        $buttons[] = array(
-                            'label'    => 'Envoyer par email',
-                            'icon'     => 'envelope',
-                            'onclick'  => '',
-                            'disabled' => 1,
-                            'popover'  => $msg
-                        );
-                    }
-                }
-
-                // Demande de prélèvement
-                $langs->load("withdrawals");
-                if ($status > 0 && !$paye && $user->rights->prelevement->bons->creer) {
-                    $url = DOL_URL_ROOT . '/compta/facture/prelevement.php?facid=' . $this->id;
-                    $buttons[] = array(
-                        'label'   => $langs->trans("MakeWithdrawRequest"),
-                        'icon'    => 'fas_money-check-alt',
-                        'onclick' => 'window.location = \'' . $url . '\''
-                    );
-                }
-
-                // Réglement:
-                if ($type !== Facture::TYPE_CREDIT_NOTE && $status === 1 && !$paye && $user->rights->facture->paiement) {
-                    $object_data = '{module: \'bimpcommercial\', object_name: \'Bimp_Paiement\', id_object: 0, ';
-                    $object_data .= 'param_values: {fields: {id_client: ' . (int) $this->getData('fk_soc') . ', id_mode_paiement: ' . (int) $this->getData('fk_mode_reglement') . '}}}';
-                    $buttons[] = array(
-                        'label'   => 'Saisir réglement',
-                        'icon'    => 'euro',
-                        'onclick' => 'loadModalForm($(this), ' . $object_data . ', \'Paiement Factures\')'
-                    );
-                }
-
-                // Remboursements ou conversions en réduction
-                if (in_array($type, array(Facture::TYPE_CREDIT_NOTE, Facture::TYPE_DEPOSIT, Facture::TYPE_STANDARD))) {
-                    // Remboursement avoirs: 
-                    if ($type === Facture::TYPE_CREDIT_NOTE && $status === 1 && !$paye && $user->rights->facture->paiement && $remainToPay != 0) {
-                        $url = DOL_URL_ROOT . '/compta/paiement.php?facid=' . $this->id . '&action=create&accountid=' . $this->dol_object->fk_account;
-                        $buttons[] = array(
-                            'label'   => $langs->trans('DoPaymentBack'),
-                            'icon'    => 'euro',
-                            'onclick' => 'window.location = \'' . $url . '\''
-                        );
-                    }
-
-
-                    if ($this->can("create") && $status == 1 && !$paye) {
-                        switch ($type) {
-                            case Facture::TYPE_STANDARD:
-                                if ($remainToPay < 0 && empty($discount->id)) {
-                                    // Remboursement excédant payé: 
-                                    $buttons[] = array(
-                                        'label'   => $langs->trans('ConvertExcessReceivedToReduc'),
-                                        'icon'    => 'percent',
-                                        'onclick' => $this->getJsActionOnclick('convertToReduc', array(), array(
-                                            'confirm_msg' => strip_tags($langs->trans('ConfirmConvertToReduc', strtolower($langs->transnoentities('ExcessReceived'))))
-                                        ))
-                                    );
-                                }
-                                break;
-
-                            case Facture::TYPE_CREDIT_NOTE:
-                                if ($this->dol_object->getSommePaiement() == 0) {
-                                    $buttons[] = array(
-                                        'label'   => $langs->trans('ConvertToReduc'),
-                                        'icon'    => 'percent',
-                                        'onclick' => $this->getJsActionOnclick('convertToReduc', array(), array(
-                                            'confirm_msg' => strip_tags($langs->trans('ConfirmConvertToReduc', strtolower($langs->transnoentities('CreditNote'))))
-                                        ))
-                                    );
-                                }
-                                break;
-
-                            case Facture::TYPE_DEPOSIT:
-                                if ($remainToPay == 0 && empty($discount->id)) {
-                                    $buttons[] = array(
-                                        'label'   => $langs->trans('ConvertToReduc'),
-                                        'icon'    => 'percent',
-                                        'onclick' => $this->getJsActionOnclick('convertToReduc', array(), array(
-                                            'confirm_msg' => strip_tags($langs->trans('ConfirmConvertToReduc', strtolower($langs->transnoentities('Deposit'))))
-                                        ))
-                                    );
-                                }
-                                break;
-                        }
-                    }
-                }
-
-                if ($status == 1 && !$paye) {
-                    // Classer "Payée": 
-                    if ((!in_array($type, array(Facture::TYPE_CREDIT_NOTE, Facture::TYPE_DEPOSIT) && $remainToPay <= 0)) ||
-                            ($type === Facture::TYPE_CREDIT_NOTE && $remainToPay >= 0) ||
-                            ($type === Facture::TYPE_DEPOSIT && $this->dol_object->total_ttc > 0 && $remainToPay == 0 && empty($discount->id))) {
-                        $buttons[] = array(
-                            'label'   => $langs->trans('ClassifyPaid'),
-                            'icon'    => 'check',
-                            'onclick' => $this->getJsActionOnclick('classifyPaid', array(), array(
-                                'confirm_msg' => strip_tags($langs->trans('ConfirmClassifyPaidBill', $ref))
-                            ))
-                        );
-                    }
-
-                    // Classer "Payée partiellement": 
-                    if ($remainToPay > 0) {
-                        if ($this->canSetAction('classifyPaid') && $total_paid > 0 || $total_credit_notes > 0) {
-                            $buttons[] = array(
-                                'label'   => $langs->trans('ClassifyPaidPartially'),
-                                'icon'    => 'exclamation',
-                                'onclick' => $this->getJsActionOnclick('classifyPaid', array(), array(
-                                    'form_name' => 'paid_partially'
-                                ))
-                            );
-                        } else {
-                            if ($this->canSetAction('cancel') && empty($conf->global->INVOICE_CAN_NEVER_BE_CANCELED)) {
-                                if (!$objectidnext) {
-                                    $buttons[] = array(
-                                        'label'   => $langs->trans('ClassifyCanceled'),
-                                        'icon'    => 'times',
-                                        'onclick' => $this->getJsActionOnclick('cancel', array(), array(
-                                            'form_name' => 'cancel'
-                                        ))
-                                    );
-                                } else {
-                                    $buttons[] = array(
-                                        'label'    => $langs->trans('ClassifyCanceled'),
-                                        'icon'     => 'time',
-                                        'onclick'  => '',
-                                        'disabled' => 1,
-                                        'popover'  => $langs->trans("DisabledBecauseReplacedInvoice")
-                                    );
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // Cloner: 
-                if ($this->can("create")) {
-                    $buttons[] = array(
-                        'label'   => 'Cloner',
-                        'icon'    => 'copy',
-                        'onclick' => $this->getJsActionOnclick('duplicate', array(), array(
-                            'form_name'   => 'duplicate',
-                            'confirm_msg' => 'Etes-vous sûr de vouloir cloner ' . addslashes($this->getLabel('the')) . ' ' . $this->getRef()
-                        ))
-                    );
-                }
-
-
-                if (in_array($type, array(Facture::TYPE_DEPOSIT, Facture::TYPE_STANDARD, Facture::TYPE_PROFORMA)) && $this->can("create")) {
-                    if ($status == 0) {
-                        // Convertir en facture modèle:
-                        if (!$objectidnext && count($this->dol_object->lines) > 0) {
-                            $url = DOL_URL_ROOT . '/compta/facture/fiche-rec.php?facid=' . $this->id . '&action=create';
-                            $buttons[] = array(
-                                'label'   => $langs->trans("ChangeIntoRepeatableInvoice"),
-                                'icon'    => 'fas_copy',
-                                'onclick' => 'window.location = \'' . $url . '\';'
-                            );
-                        }
-                    } else {
-                        // Créer un avoir:
-                        $values = array(
-                            'fields' => array(
-                                'fk_soc'                => (int) $this->getData('fk_soc'),
-                                'ref_client'            => $this->getData('ref_client'),
-                                'type'                  => Facture::TYPE_CREDIT_NOTE,
-                                'id_facture_to_correct' => (int) $this->id,
-                                'fk_account'            => (int) $this->getData('fk_account'),
-                                'entrepot'              => (int) $this->getData('entrepot'),
-                                'centre'                => $this->getData('centre'),
-                                'ef_type'               => $this->getData('ef_type')
-                            )
-                        );
-                        $data = '{module: \'bimpcommercial\', object_name: \'Bimp_Facture\', ';
-                        $data .= 'param_values: ' . htmlentities(json_encode($values)) . '}';
-                        $onclick = 'loadModalForm($(this), ' . $data . ', \'' . $langs->trans("CreateCreditNote") . '\', null, \'redirect\');';
-                        $buttons[] = array(
-                            'label'   => $langs->trans("CreateCreditNote"),
-                            'icon'    => 'fas_file-import',
-                            'onclick' => $onclick
-                        );
-                    }
-                }
-            }
-        }
-
-        return $buttons;
     }
 
     // Getters données: 
@@ -2027,6 +2095,15 @@ class Bimp_Facture extends BimpComm
 
     // Overrides BimpObject:
 
+    public function duplicate($new_data = array(), &$warnings = array(), $force_create = false)
+    {
+        $new_data['datec'] = date('Y-m-d H:i:s');
+        $new_data['fk_user_author'] = 0;
+        $new_data['fk_user_valid'] = 0;
+        
+        return parent::duplicate($new_data, $warnings, $force_create);
+    }
+    
     public function fetch($id, $parent = null)
     {
         $result = parent::fetch($id, $parent);

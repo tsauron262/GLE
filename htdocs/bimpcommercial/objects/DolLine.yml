@@ -1,0 +1,85 @@
+labels: 
+    name: ligne
+    is_female: 1
+    
+primary: rowid
+    
+objects:
+    product: 
+        instance: 
+            id_object: 
+                field_value: fk_product
+                
+    fourn_price: 
+        instance: 
+            id_object: 
+                field_value: fk_product_fournisseur_price
+            
+fields: 
+    fk_product: 
+        label: Produit
+        type: id_object
+        object: product
+        display: 
+            default: nom_url
+            
+    label: 
+        label: Libellé
+        
+    description: 
+        label: Description
+        type: html
+        
+    subprice: 
+        label: PU HT
+        type: money
+        
+    tva_tx: 
+        label: Tx TVA
+        type: percent
+        
+    qty: 
+        label: Qté
+        type: qty
+        
+    remise_percent: 
+        label: Remise
+        type: percent
+        
+    buy_price_ht: 
+        label: PA HT
+        type: money
+        
+    fk_product_fournisseur_price:
+        label: Prix fournisseur
+        type: id_object
+        object: fourn_price
+        display: 
+            default: 
+                callback: 
+                    object: fourn_price
+                    method: displayLabel
+        
+    total_ht: 
+        label: Total HT
+        type: money
+        
+    total_tva: 
+        label: Total TVA
+        type: money
+        
+    total_ttc: 
+        label: Total TTC
+        type: money
+        
+    date_start: 
+        label: Début
+        type: datetime
+        
+    date_end: 
+        label: Fin
+        type: datetime
+        
+        
+        
+    

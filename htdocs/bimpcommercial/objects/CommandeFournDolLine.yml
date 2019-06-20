@@ -1,0 +1,23 @@
+extends: 
+    module: bimpcommercial
+    object_name: DolLine
+    
+table: commande_fournisseurdet
+
+labels: 
+    name: ligne de commande fournisseur
+    
+objects: 
+    commande_fourn: 
+        instance: 
+            id_object: 
+                field_value: fk_commande
+            
+fields: 
+    fk_commande: 
+        label: Commande fournisseur
+        type: id_object
+        object: commande_fourn
+        
+    buy_price_ht: unset
+    fk_product_fournisseur_price: unset

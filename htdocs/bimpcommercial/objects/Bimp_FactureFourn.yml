@@ -224,9 +224,12 @@ fields_tables:
         
 views: 
     default: 
-        objects_change_reload: Bimp_FactureFournLine
+        objects_change_reload: Bimp_FactureFournLine,ObjectLineRemise,BimpFile
     content_infos: 
-        objects_change_reload: Bimp_FactureFournLine
+        objects_change_reload: Bimp_FactureFournLine,ObjectLineRemise,BimpFile
+    full: 
+        objects_change_reload: Bimp_FactureFournLine,ObjectLineRemise,BimpFile
+        
 filters_panels: 
     default: 
         filters: 

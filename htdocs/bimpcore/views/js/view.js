@@ -379,6 +379,7 @@ function onViewLoaded($view) {
             if (objects) {
                 objects = objects.split(',');
             }
+
             if (!$('body').data($view.attr('id') + '_object_events_init')) {
                 $('body').on('objectChange', function (e) {
                     if ((e.module === $view.data('module')) && (e.object_name === $view.data('object_name'))

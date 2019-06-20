@@ -12,6 +12,27 @@ class Bimp_ProductFournisseurPrice extends BimpObject
         parent::__construct($module, $object_name);
     }
 
+    public function displayLabel()
+    {
+        $html = '';
+
+        if ($this->isLoaded()) {
+            $price = (float) $this->getData('price');
+            $tva = (float) $this->getData('tva_tx');
+            $fourn = $this->getChildObject('fournisseur');
+
+            $html .= BimpTools::displayMoneyValue($price);
+            $html .= ' - TVA: ' . BimpTools::displayFloatValue($tva) . '% ';
+            if (BimpObject::objectLoaded($fourn)) {
+                $html .= ' - ' . $fourn->getName();
+            } else {
+                $html .= '<span class="danger">Fournisseur inconnu</span>';
+            }
+        }
+
+        return $html;
+    }
+
     public function createOrUpdate()
     {
         $errors = $this->validate();
@@ -110,7 +131,7 @@ class Bimp_ProductFournisseurPrice extends BimpObject
                 $sql .= 'AND (det.fk_product_fournisseur_price IS NULL OR det.fk_product_fournisseur_price = 0) AND p.fk_statut = 0';
 
                 $rows = $this->db->executeS($sql, 'array');
-                
+
                 if (!is_null($rows)) {
                     foreach ($rows as $r) {
                         $line = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_PropalLine', array(
@@ -131,7 +152,7 @@ class Bimp_ProductFournisseurPrice extends BimpObject
                 $sql .= 'AND (det.fk_product_fournisseur_price IS NULL OR det.fk_product_fournisseur_price = 0) AND c.fk_statut = 0';
 
                 $rows = $this->db->executeS($sql, 'array');
-                
+
                 if (!is_null($rows)) {
                     foreach ($rows as $r) {
                         $line = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', array(
@@ -152,7 +173,7 @@ class Bimp_ProductFournisseurPrice extends BimpObject
                 $sql .= 'AND (det.fk_product_fournisseur_price IS NULL OR det.fk_product_fournisseur_price = 0) AND f.fk_statut = 0';
 
                 $rows = $this->db->executeS($sql, 'array');
-                
+
                 if (!is_null($rows)) {
                     foreach ($rows as $r) {
                         $line = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_FactureLine', array(

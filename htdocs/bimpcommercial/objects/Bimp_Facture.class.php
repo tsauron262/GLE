@@ -137,7 +137,7 @@ class Bimp_Facture extends BimpComm
         switch ($action) {
             case 'validate':
                 if ($status !== Facture::STATUS_DRAFT) {
-                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' n\'est plus au statut "brouillon"';
+                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' n\'est plus au statut brouillon';
                     return 0;
                 }
 
@@ -159,7 +159,7 @@ class Bimp_Facture extends BimpComm
                             Facture::TYPE_PROFORMA,
                             Facture::TYPE_SITUATION
                         )) &&
-                        (!empty($conf->global->FACTURE_ENABLE_NEGATIVE) ||
+                        (empty($conf->global->FACTURE_ENABLE_NEGATIVE) &&
                         (float) $this->getData('total_ttc') < 0))) {
                     if ($this->isLabelFemale()) {
                         $errors[] = BimpTools::ucfirst($this->getLabel('name_plur')) . ' négatives non autorisées';
@@ -260,6 +260,10 @@ class Bimp_Facture extends BimpComm
     {
         global $conf, $langs, $user;
 
+        if (!$this->isLoaded()) {
+            return array();
+        }
+        
         $buttons = parent::getActionsButtons();
         $status = (int) $this->getData('fk_statut');
         $ref = $this->getRef();
@@ -275,7 +279,10 @@ class Bimp_Facture extends BimpComm
         $discount->fetch(0, $this->id);
 
         // Valider:
-        if ($this->isActionAllowed('validate')) {
+        $error_msg = '';
+        $errors = array();
+
+        if ($this->isActionAllowed('validate', $errors)) {
             if ($this->canSetAction('validate')) {
                 if (substr($ref, 1, 4) == 'PROV') {
                     $numref = $this->dol_object->getNextNumRef($soc->dol_object);
@@ -306,14 +313,20 @@ class Bimp_Facture extends BimpComm
                     ))
                 );
             } else {
-                $buttons[] = array(
-                    'label'    => 'Valider',
-                    'icon'     => 'check',
-                    'onclick'  => '',
-                    'disabled' => 1,
-                    'popover'  => 'Vous n\'avez pas la permission de valider cette facture'
-                );
+                $error_msg = 'Vous n\'avez pas la permission de valider cette facture';
             }
+        } else {
+            $error_msg = BimpTools::getMsgFromArray($errors);
+        }
+
+        if ($error_msg) {
+            $buttons[] = array(
+                'label'    => 'Valider',
+                'icon'     => 'check',
+                'onclick'  => '',
+                'disabled' => 1,
+                'popover'  => $error_msg
+            );
         }
 
         // Editer une facture deja validee, sans paiement effectue et pas exportée en compta
@@ -524,7 +537,7 @@ class Bimp_Facture extends BimpComm
                     'label'   => 'Cloner',
                     'icon'    => 'copy',
                     'onclick' => $this->getJsActionOnclick('duplicate', array(), array(
-                        'form_name'   => 'duplicate'
+                        'form_name' => 'duplicate'
                     ))
                 );
             }
@@ -564,7 +577,13 @@ class Bimp_Facture extends BimpComm
                     );
                 }
             }
+            
+            echo '<pre>';
+            print_r($buttons);
+            exit;
         }
+        
+        
         return $buttons;
     }
 
@@ -2100,10 +2119,10 @@ class Bimp_Facture extends BimpComm
         $new_data['datec'] = date('Y-m-d H:i:s');
         $new_data['fk_user_author'] = 0;
         $new_data['fk_user_valid'] = 0;
-        
+
         return parent::duplicate($new_data, $warnings, $force_create);
     }
-    
+
     public function fetch($id, $parent = null)
     {
         $result = parent::fetch($id, $parent);

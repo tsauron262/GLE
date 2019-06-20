@@ -4312,7 +4312,7 @@ class BimpObject extends BimpCache
                             $button['data']['trigger'] = 'hover';
                             $button['data']['container'] = 'body';
                             $button['data']['placement'] = 'top';
-                            $button['data']['html'] = 'false';
+                            $button['data']['html'] = 'true';
                             $button['data']['content'] = $popover;
                         }
                     }
@@ -4324,7 +4324,7 @@ class BimpObject extends BimpCache
 
                 $html .= '<div class="header_buttons">';
                 if (count($header_buttons)) {
-                    if (count($header_buttons) > 4) {
+                    if (count($header_buttons) > 6) {
 
                         $html .= BimpRender::renderDropDownButton('Actions', $header_buttons, array(
                                     'icon'       => 'fas_cogs',

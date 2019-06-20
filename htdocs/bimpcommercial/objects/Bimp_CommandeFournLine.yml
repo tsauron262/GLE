@@ -66,6 +66,8 @@ lists_cols:
         label: Commmande client
         value: 
             callback: displayCommandeClient
+    qty_modif:
+        field: qty_modif
             
 lists: 
     logistique:
@@ -92,3 +94,51 @@ lists:
             total_ttc: unset
             margin: unset
             commande_client:
+    general:
+        filters_panel: default
+        configurable: 1
+        cols: 
+            commande_fourn: 
+                label: Commande fourn
+                field: id_obj
+                display: nom_url
+            desc:
+            pu_ht: 
+            tva:
+            remise_crt:
+            pa_ht: 
+            qty: 
+            remise: 
+            total_ttc: 
+            margin:
+            commande_status: 
+                label: Statut commande
+                field: fk_statut
+                child: parent
+                
+filters_panels: 
+    default: 
+        filters: 
+            commande_fourn: 
+                field: commande_fourn
+            desc: 
+                field: desc
+            pu_ht: 
+                field: pu_ht
+            tva:
+                field: tva
+            remise_crt: 
+                field: remise_crt
+            pa_ht: 
+                field: pa_ht
+            qty: 
+                field: qty
+            remise:
+                field: remise
+            total_ttc:
+                field: total_ttc
+            margin:
+                field: margin
+            commande_status:
+                field: fk_statut
+                child: parent

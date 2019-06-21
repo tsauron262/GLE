@@ -37,6 +37,17 @@ objects:
                 field_value: id_shipment
                 
 fields: 
+    id_obj: 
+        label: Commande
+        search: 
+            input: 
+                type: search_list
+                search_list: 
+                    table: commande
+                    fields_search: rowid,ref
+                    field_return_label: ref
+                    field_return_value: rowid
+                
     ref_reservations: 
         label: Référence réservations
         
@@ -51,7 +62,7 @@ fields:
     equipments_returned: 
         label: Equipements retournés
         type: json
-        
+     
     qty_modif: 
         label: Qté modifiée
         type: qty
@@ -60,29 +71,65 @@ fields:
         decimals: 3
         unsigned: 0
         default_value: 0
+     
+    # Tous les champs qty_xxx suivants sont uniquement à titre indicatifs 
+    # et servent pour la liste "general" (Ne pas utiliser en PHP)   
+    # Attention: les quantités sont en valeur absolues (toujours positifs, même pour les retours, sauf qty_total) . 
         
     qty_total: 
         label: Qté Totale
         type: qty
         default_value: 0
+        display: 
+            badge:
+                type: callback
+                method: displayQty
+                params: 
+                    - total
         
     qty_shipped: 
         label: Qté expédiée
+        type: qty
+        default_value: 0
+        display: 
+            badge:
+                type: callback
+                method: displayQty
+                params: 
+                    - shipped
         
     qty_to_ship: 
         label: Qté à expédier
         type: qty
         default_value: 0
+        display: 
+            badge:
+                type: callback
+                method: displayQty
+                params: 
+                    - to_ship
         
     qty_billed: 
         label: Qté facturée
         type: qty
         default_value: 0
+        display: 
+            badge:
+                type: callback
+                method: displayQty
+                params: 
+                    - billed
         
     qty_to_bill: 
         label: Qté à facturer
         type: qty
         default_value: 0
+        display: 
+            badge:
+                type: callback
+                method: displayQty
+                params: 
+                    - to_bill
         
 forms: 
     commande_fourn: 
@@ -239,6 +286,10 @@ views:
                       callback: renderInvoicesView
                       
 lists_cols:
+    commande: 
+        label: Commande
+        field: id_obj
+        display: nom_url
     qties: 
         label: Quantités
         value: 
@@ -249,77 +300,66 @@ lists_cols:
             callback: displayReservationsStatus
         min_width: 620px
     qty_total: 
+        label: Qté totale
         field: qty_total
-        value: 
-            callback: 
-                method: displayQty
-                params: 
-                    - total
+        display: badge
+        min_width: 60px
+        max_width: 60px
     qty_shipped: 
+        label: Qté expédiée
         field: qty_shipped
-        value: 
-            callback: 
-                method: displayQty
-                params: 
-                    - shipped
-    qty_shipped: 
-        field: qty_shipped
-        value: 
-            callback: 
-                method: displayQty
-                params: 
-                    - shipped
+        display: badge
+        min_width: 60px
+        max_width: 60px
     qty_to_ship: 
+        label: Qté à exp.
         field: qty_to_ship
-        value: 
-            callback: 
-                method: displayQty
-                params: 
-                    - to_ship
+        display: badge
+        min_width: 60px
+        max_width: 60px
     qty_billed: 
+        label: Qté facturée
         field: qty_billed
-        value: 
-            callback: 
-                method: displayQty
-                params: 
-                    - billed
+        display: badge
+        min_width: 60px
+        max_width: 60px
     qty_to_bill: 
+        label: Qté à fac. 
         field: qty_to_bill
-        value: 
-            callback: 
-                method: displayQty
-                params: 
-                    - to_bill
+        display: badge
+        min_width: 60px
+        max_width: 60px
 
 filters_panels: 
     default: 
         filters: 
+            product: 
+                field: fk_product
+                child: dol_line
+            entrepot: 
+                field: entrepot
+                child: parent
             commande: 
-                field: commande
-            desc: 
-                field: desc
-            pu_ht: 
-                field: pu_ht
-            tva:
-                field: tva
-            remise_crt: 
-                field: remise_crt
-            pa_ht: 
-                field: pa_ht
-            qty: 
-                field: qty
-            remise:
-                field: remise
-            total_ttc:
-                field: total_ttc
-            margin:
-                field: margin
+                field: id_obj
             commande_status:
                 field: fk_statut
                 child: parent
             shipment_status:
                 field: shipment_status
                 child: parent
+            invoice_status:
+                field: invoice_status
+                child: parent
+            qty_total: 
+                field: qty_total
+            qty_to_ship:
+                field: qty_to_ship
+            qty_to_bill: 
+                field: qty_to_bill
+            qty_shipped:
+                field: qty_shipped
+            qty_billed: 
+                field: qty_billed
                 
 lists: 
     default: 
@@ -368,53 +408,70 @@ lists:
             reservations:
                 
     general:
+        configurable: 1
         filters_panel: default
+        filters_panel_open: 1
+        sort_field: id
+        sort_way: desc
+        n: 25
+        extra_btn: 
+            callback: getGeneralListExtraButtons
         cols:
-            commande: 
-                label: Commande
-                field: id_obj
-                display: nom_url
-            dl_product: 
-                field: fk_product
-                child: dol_line
-                display: nom_url
-            dl_pu_ht: 
-                field: subprice
-                child: dol_line
-            tva:
-            remise_crt:
-                edit: 0
-            dl_qty: 
-                label: Qté
-                field: qty
-                child: dol_line
-                min_width: 30px
-                max_width: 30px
-            dl_remise: 
-                field: remise_percent
-                child: dol_line
-            total_ttc: 
-                field: total_ttc
-                child: dol_line
-            commande_status: 
-                label: St Cmd
-                field: fk_statut
-                child: parent
-                display: icon
-                min_width: 30px
-                max_width: 30px
-            shipment_status:
-                label: St exp cmd
-                field: shipment_status
-                child: parent
-                display: icon
-                min_width: 30px
-                max_width: 30px
             entrepot: 
                 label: Entrepot
                 field: entrepot
                 child: parent
                 display: ref
+                min_width: 60px
+                max_width: 60px
+            commande_status: 
+                label: St Cmd
+                field: fk_statut
+                child: parent
+                display: icon
+                min_width: 45px
+                max_width: 45px
+            shipment_status:
+                label: Exp Cmd
+                field: shipment_status
+                child: parent
+                display: icon
+                min_width: 45px
+                max_width: 45px
+            invoice_status:
+                label: Fac Cmd
+                field: invoice_status
+                child: parent
+                display: icon
+                min_width: 45px
+                max_width: 45px
+#            dl_product: 
+#                field: fk_product
+#                child: dol_line
+#                display: nom_url
+            commande: 
+            desc:
+                value: 
+                    callback: 
+                        method: displayLineData
+                        params:
+                           - desc_light
+            dl_pu_ht: 
+                field: subprice
+                child: dol_line
+            qty_total:
+            qty_to_ship:
+            qty_to_bill:
+                                
+#            tva:
+#            remise_crt:
+#                edit: 0
+#            dl_remise: 
+#                field: remise_percent
+#                child: dol_line
+#            total_ttc: 
+#                field: total_ttc
+#                child: dol_line
 
     
     

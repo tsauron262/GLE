@@ -467,7 +467,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
                 case 'received':
                     if ($qty <= 0) {
                         $class = 'danger';
-                    } elseif ($qty < (float) $this->getFullQty()) {
+                    } elseif ($qty < abs((float) $this->getFullQty())) {
                         $class = 'warning';
                     } else {
                         $class = 'success';
@@ -477,7 +477,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
                 case 'to_receive';
                     if ($qty <= 0) {
                         $class = 'success';
-                    } elseif ($qty < (float) $this->getFullQty()) {
+                    } elseif ($qty < abs((float) $this->getFullQty())) {
                         $class = 'warning';
                     } else {
                         $class = 'danger';
@@ -485,7 +485,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
                     break;
             }
 
-            return '<span class="alert ' . ($class ? 'alert-' . $class : '') . '">' . $qty . '</span>';
+            return '<span class="badge ' . ($class ? 'badge-' . $class : 'default') . '">' . $qty . '</span>';
         }
 
         return '';
@@ -1429,19 +1429,24 @@ class Bimp_CommandeFournLine extends FournObjectLine
         if ($this->isLoaded()) {
             $fullQty = (float) $this->getFullQty();
             if ($fullQty !== (float) $this->getData('qty_total')) {
-                $this->updateField('qty_toal', $fullQty, null, true);
+                $this->updateField('qty_total', $fullQty, null, true);
             }
 
             if ((int) $this->getData('type') !== self::LINE_TEXT) {
-                $received_qty = (float) $this->getReceivedQty(null, true);
-                $to_receive_qty = $fullQty - $received_qty;
+                $commande = $this->getParentInstance();
 
-                if ($received_qty !== (float) $this->getData('qty_received')) {
-                    $this->updateField('qty_received', $received_qty, null, true);
-                }
+                if (BimpObject::objectLoaded($commande) && $commande->isLogistiqueActive()) {
+                    $fullQty = abs($fullQty);
+                    $received_qty = abs((float) $this->getReceivedQty(null, true));
+                    $to_receive_qty = $fullQty - $received_qty;
 
-                if ($to_receive_qty !== (float) $this->getData('qty_to_receive')) {
-                    $this->updateField('qty_to_receive', $to_receive_qty, null, true);
+                    if ($received_qty !== (float) $this->getData('qty_received')) {
+                        $this->updateField('qty_received', $received_qty, null, true);
+                    }
+
+                    if ($to_receive_qty !== (float) $this->getData('qty_to_receive')) {
+                        $this->updateField('qty_to_receive', $to_receive_qty, null, true);
+                    }
                 }
             }
         }
@@ -1619,11 +1624,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
     public function checkObject()
     {
         if ($this->isLoaded()) {
-            $commande = $this->getParentInstance();
-
-            if (BimpObject::objectLoaded($commande) && $commande->isLogistiqueActive()) {
-                $this->checkQties();
-            }
+            $this->checkQties();
         }
     }
 
@@ -1678,5 +1679,23 @@ class Bimp_CommandeFournLine extends FournObjectLine
         }
 
         return $errors;
+    }
+
+    // Méthodes statiques: 
+
+    public static function checkAllQties()
+    {
+
+        set_time_limit(600);
+        $instance = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFournLine');
+        $rows = $instance->getList(array(), null, null, 'id', 'asc', 'array', array('id'));
+
+        foreach ($rows as $r) {
+            $line = BimpCache::getBimpObjectInstance($instance->module, $instance->object_name, (int) $r['id']);
+
+            if (BimpObject::objectLoaded($line)) {
+                $line->checkQties();
+            }
+        }
     }
 }

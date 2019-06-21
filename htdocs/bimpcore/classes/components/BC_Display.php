@@ -54,7 +54,8 @@ class BC_Display extends BimpComponent
             'format' => array('default' => 'd / m / Y H:i:s')
         ),
         'callback'    => array(
-            'method' => array('required' => true, 'default' => '')
+            'method' => array('required' => true, 'default' => ''),
+            'params' => array('data_type' => 'array', 'default' => array())
         ),
         'password'    => array(
             'hide' => array('data_type' => 'bool', 'default' => 1)
@@ -317,7 +318,7 @@ class BC_Display extends BimpComponent
                                         $check = true;
                                     }
                                 } else {
-                                    if ($this->params['icon_only'] && isset($array[$this->value]['icon'])) {
+                                    if (($this->params['icon_only'] || $this->name === 'icon') && isset($array[$this->value]['icon'])) {
                                         if (!isset($array[$this->value]['classes'])) {
                                             $array[$this->value]['classes'] = array();
                                         }
@@ -416,9 +417,14 @@ class BC_Display extends BimpComponent
 
                     case 'callback':
                         $method = $this->params['method'];
+                        $params = $this->params['params'];
+
                         if (method_exists($this->object, $method)) {
-                            $html .= $this->object->{$method}($this->value);
+                            return call_user_func_array(array(
+                                $this->object, $method
+                                    ), $params);
                         }
+
                         break;
 
                     case 'json':

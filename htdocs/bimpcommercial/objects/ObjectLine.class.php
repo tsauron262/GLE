@@ -573,6 +573,50 @@ class ObjectLine extends BimpObject
         return $buttons;
     }
 
+    public function getDescSearchFilters(&$filters, $value, &$joins = array(), $main_alias = 'a')
+    {
+
+        $alias = self::$dol_line_table;
+
+        if (!isset($joins[$alias])) {
+            $joins[$alias] = array(
+                'alias' => $alias,
+                'table' => $alias,
+                'on'    => $alias . '.rowid = ' . $main_alias . '.id_line'
+            );
+        }
+
+        if (!isset($joins['prod'])) {
+            $joins['prod'] = array(
+                'alias' => 'prod',
+                'table' => 'product',
+                'on'    => $alias . '.fk_product = prod.rowid'
+            );
+        }
+
+        $where = 'prod.ref LIKE \'%' . (string) $value . '%\' OR prod.label LIKE \'%' . (string) $value . '%\' OR prod.barcode = \'' . (string) $value . '\'';
+
+        if (preg_match('/^\d+$/', (string) $value)) {
+            $where .= ' OR prod.rowid = ' . $value;
+        }
+
+        $filters['or_product'] = array(
+            'or' => array(
+                $alias . '.description' => array(
+                    'part_type' => 'middle',
+                    'part'      => $value
+                ),
+                $alias . '.label'       => array(
+                    'part_type' => 'middle',
+                    'part'      => $value
+                ),
+                $alias . '.fk_product'  => array(
+                    'in' => 'SELECT prod.rowid FROM ' . MAIN_DB_PREFIX . 'product prod WHERE ' . $where
+                )
+            )
+        );
+    }
+
     // Getters valeurs:
 
     public function getUnitPriceTTC()

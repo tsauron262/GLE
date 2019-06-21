@@ -128,7 +128,7 @@ class BC_FieldFilter extends BC_Filter
             case 'date_range':
                 if (is_array($value) && (isset($value['min']) || isset($value['max']))) {
                     $label .= 'Min: <strong>';
-                    if (!isset($value['min']) || !(string) $value['min']) {
+                    if (!isset($value['min']) || $value['min'] === '') {
                         $label .= '-&infin;';
                     } else {
                         $this->field->value = $value['min'];
@@ -137,7 +137,7 @@ class BC_FieldFilter extends BC_Filter
 
                     $label .= '</strong><br/>Max: <strong>';
 
-                    if (!isset($value['max']) || !(string) $value['max']) {
+                    if (!isset($value['max']) || $value['max'] === '') {
                         $label .= '&infin;';
                     } else {
                         $this->field->value = $value['max'];
@@ -219,12 +219,12 @@ class BC_FieldFilter extends BC_Filter
                 foreach ($this->values as $value) {
                     if (is_array($value)) {
                         if (isset($value['min']) || isset($value['max'])) {
-                            if ((string) $value['min'] && !(string) $value['max']) {
+                            if ($value['min'] !== '' && $value['max'] === '') {
                                 $or_field[] = array(
                                     'operator' => '>=',
                                     'value'    => $value['min']
                                 );
-                            } elseif ((string) $value['max'] && !(string) $value['min']) {
+                            } elseif ($value['max'] !== '' && $value['min'] === '') {
                                 $or_field[] = array(
                                     'operator' => '<=',
                                     'value'    => $value['max']
@@ -306,11 +306,24 @@ class BC_FieldFilter extends BC_Filter
 
             case 'range':
                 $bc_input = new BC_Input($this->object, $this->field->params['type'], $input_name, $input_path, null, $this->field->params);
-                $input_type = $bc_input->params['type'];
+//                $input_type = $bc_input->params['type'];
                 $input_options = $bc_input->getOptions();
+//
+//                $html .= '<span class="range_input_label">Min: </span>' . BimpInput::renderInput($input_type, $input_name . '_min', '', $input_options);
+//                $html .= '<span class="range_input_label">Max: </span>' . BimpInput::renderInput($input_type, $input_name . '_max', '', $input_options);
 
-                $html .= '<span class="range_input_label">Min: </span>' . BimpInput::renderInput($input_type, $input_name . '_min', '', $input_options);
-                $html .= '<span class="range_input_label">Max: </span>' . BimpInput::renderInput($input_type, $input_name . '_max', '', $input_options);
+                $input_options = array(
+                    'data' => array(
+                        'data_type' => 'number',
+                        'decimals'  => 8,
+                        'min'       => 'none',
+                        'max'       => 'none'
+                    )
+                );
+
+                $html .= '<span class="range_input_label">Min: </span>' . BimpInput::renderInput('text', $input_name . '_min', '', $input_options);
+                $html .= '<span class="range_input_label">Max: </span>' . BimpInput::renderInput('text', $input_name . '_max', '', $input_options);
+
                 $html .= $add_btn_html;
                 break;
 

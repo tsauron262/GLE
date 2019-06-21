@@ -25,6 +25,9 @@ class commandesController extends BimpController
 
     public function renderCommandesTab()
     {
+//        BimpObject::loadClass('bimpcommercial', 'Bimp_CommandeLine');
+//        Bimp_CommandeLine::checkAllQties();
+        
         $list = 'default';
         $titre = 'Commandes';
         if ($this->socid) {
@@ -54,5 +57,26 @@ class commandesController extends BimpController
         $shipment = BimpObject::getInstance('bimplogistique', 'BL_CommandeShipment');
         $list = new BC_ListTable($shipment, 'default', 1, null, 'Liste des expéditions', 'fas_shipping-fast');
         return $list->renderHtml();
+    }
+
+    public function renderProdsTabs()
+    {
+//        $id_entrepot = (int) BimpTools::getValue('id_entrepot', 0);
+
+        $line = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeLine');
+
+        $bc_list = new BC_ListTable($line, 'general', 1, null, 'Liste des produits en commande', 'fas_bars');
+        $bc_list->addJoin('commande', 'a.id_obj = parent.rowid', 'parent');
+        $bc_list->addFieldFilterValue('parent.fk_statut', array(
+            'operator' => '>',
+            'value'    => 0
+        ));
+        
+//        if ($id_entrepot) {
+//            $bc_list->addJoin('commande_extrafields', 'a.id_obj = cef.fk_object', 'cef');
+//            $bc_list->addFieldFilterValue('cef.entrepot', $id_entrepot);
+//        }
+
+        return $bc_list->renderHtml();
     }
 }

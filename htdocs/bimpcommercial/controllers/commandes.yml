@@ -36,9 +36,8 @@ sections:
                   custom: 
                       callback: renderShipmentsTab
         prods: 
-            label: Produit en commandes
+            label: Produits en commande
             sections: 
-                - type: list
-                  list: 
-                      object: commades_lines
-                      name: general
+                - type: custom
+                  custom: 
+                      callback: renderProdsTabs

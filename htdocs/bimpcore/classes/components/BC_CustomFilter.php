@@ -47,7 +47,7 @@ class BC_CustomFilter extends BC_Filter
             case 'date_range':
                 if (is_array($value) && (isset($value['min']) || isset($value['max']))) {
                     $label .= 'Min: <strong>';
-                    if (!isset($value['min']) || !(string) $value['min']) {
+                    if (!isset($value['min']) || $value['min'] === '') {
                         $label .= '-&infin;';
                     } else {
                         $label = BimpTools::displayValueByType($value['min'], $this->params['data_type']);
@@ -55,7 +55,7 @@ class BC_CustomFilter extends BC_Filter
 
                     $label .= '</strong><br/>Max: <strong>';
 
-                    if (!isset($value['max']) || !(string) $value['max']) {
+                    if (!isset($value['max']) || $value['max'] === '') {
                         $label .= '&infin;';
                     } else {
                         $label = BimpTools::displayValueByType($value['max'], $this->params['data_type']);

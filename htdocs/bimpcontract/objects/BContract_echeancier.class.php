@@ -194,9 +194,7 @@ class BContract_echeancier extends BimpObject {
             $select_debut = $_POST['date_debut_select'];
             $select_fin = $_POST['date_fin_select'];
 
-            if ($select_debut == null || $select_fin == null) {
-                echo '<b style="color:red;text-align:center">Dates sélectionnées invalides</b>';
-            } else {
+            if (preg_match("/^[0-9]{1,2}\/[0-9]{1,2}\/[0-9]{4}$/", $select_debut) && preg_match("/^[0-9]{1,2}\/[0-9]{1,2}\/[0-9]{4}$/", $select_fin)) {
                 $converted_date_debut = $this->formatDate($select_debut);
                 $converted_date_fin = $this->formatDate($select_fin);
 
@@ -213,6 +211,10 @@ class BContract_echeancier extends BimpObject {
                 $newdate = $nextdate->format('Y-m-d');
                 $udpadeArray = Array('next_facture_date' => $newdate);
                 $bimp->update('bcontract_prelevement', $udpadeArray, 'id_contrat = ' . $parent->id);
+            } elseif ($select_debut == null || $select_fin == null) {
+                $html .= BimpRender::renderAlerts('Dates sélectionnées invalides ou nulles (dd/mm/yyyy)', 'danger', false);
+            } else {
+                $html .= BimpRender::renderAlerts('Dates sélectionnées invalides ou nulles (dd/mm/yyyy)', 'danger', false);
             }
         }
         return $html;

@@ -52,7 +52,7 @@ $type = GETPOST('type','int');
 $tobuy = GETPOST('tobuy', 'int');
 $salert = GETPOST('salert', 'alpha');
 $mode = GETPOST('mode','alpha');
-$draftorder = GETPOST('draftorder','alpha');
+$draftorder = GETPOST('draftorder','alpha')? GETPOST('draftorder','alpha'): 'on';
 
 
 $fourn_id = GETPOST('fourn_id','int');
@@ -97,7 +97,7 @@ if (GETPOST('button_removefilter_x','alpha') || GETPOST('button_removefilter.x',
     $snom = '';
     $sal = '';
     $salert = '';
-	$draftorder='';
+	$draftorder='on';
 }
 if($draftorder == 'on') $draftchecked = "checked";
 
@@ -184,6 +184,7 @@ if ($action == 'order' && isset($_POST['valid']))
             $sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."commande_fournisseur";
             $sql.= " WHERE fk_soc = ".$suppliersid[$i];
             $sql.= " AND source = 42 AND fk_statut = 0";
+            $sql.= " AND fk_user_create=  ".$user->id;
             $sql.= " AND entity IN (".getEntity('commande_fournisseur').")";
             $sql.= " ORDER BY date_creation DESC";
             $resql = $db->query($sql);

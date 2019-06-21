@@ -70,7 +70,7 @@ printTable('Abandonné', 'canceled');
 if ($transfer->status != $transfer::STATUS_RECEIVED) {
     print '<input id="register" type="button" class="butAction" value="Enregistrer">';
     if ($user->rights->bimpequipment->transfer->close)
-        print '<input id="closeTransfer" type="button" class="butActionDelete" value="Fermer"><br/><br/>';
+        print '<input id="closeTransfer" type="button" class="butActionDelete" value="Clôturer le transfert"><br/><br/>';
 }
 
 $db->close();

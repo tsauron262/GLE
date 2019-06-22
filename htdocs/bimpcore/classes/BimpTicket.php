@@ -250,7 +250,7 @@ class BimpTicket
         $this->town = (string) $this->entrepot->town;
         $phone = (string) $this->entrepot->array_options['options_phone'];
 
-        if ($adress == "")
+        if ($address == "")
             $address = $mysoc->address;
         if ($zip == "")
             $zip = $mysoc->zip;

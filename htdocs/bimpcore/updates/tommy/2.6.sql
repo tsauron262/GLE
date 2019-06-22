@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bc_vente` ADD `note_plus` varchar(200) NOT NULL DEFAULT ''; 

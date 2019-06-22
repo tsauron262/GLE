@@ -107,6 +107,10 @@ lists_cols:
                     - to_receive
             
 lists: 
+    default:
+        extends: default
+        cols: 
+            commande_client:
     logistique:
         extends: default
         title: Logistique produits / services

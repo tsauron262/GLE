@@ -1683,7 +1683,7 @@ class Facture extends CommonInvoice
 			$facligne=new FactureLigne($this->db);
 			$facligne->fk_facture=$this->id;
 			$facligne->fk_remise_except=$remise->id;
-			$facligne->desc=$remise->description;   	// Description ligne
+			$facligne->desc="Acompte ".$remise->description;   	// Description ligne
 			$facligne->vat_src_code=$remise->vat_src_code;
 			$facligne->tva_tx=$remise->tva_tx;
 			$facligne->subprice = -$remise->amount_ht;

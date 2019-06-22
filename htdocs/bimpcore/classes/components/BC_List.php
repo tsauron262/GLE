@@ -147,11 +147,13 @@ class BC_List extends BC_Panel
 
     public function addJoin($table, $on, $alias)
     {
-        $this->params['joins'][$alias] = array(
-            'table' => $table,
-            'on'    => $on,
-            'alias' => $alias
-        );
+        if (!isset($this->params['joins'][$alias])) {
+            $this->params['joins'][$alias] = array(
+                'table' => $table,
+                'on'    => $on,
+                'alias' => $alias
+            );
+        }
     }
 
     // Gestion des filtres associatifs:

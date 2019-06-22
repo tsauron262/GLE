@@ -13,7 +13,7 @@ objects:
         instance: 
             bimp_object: 
                 module: bimpcommercial
-                object_name: DolLine
+                name: DolLine
             id_object: 
                 field_value: id_line
                 

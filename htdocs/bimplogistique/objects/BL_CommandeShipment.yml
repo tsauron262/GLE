@@ -47,6 +47,9 @@ fields:
         input: 
 #            type: search_entrepot
              type: hidden
+        search: 
+            input: 
+                type: search_entrepot
         
     num_livraison:
         label: Numéro de livraison
@@ -377,21 +380,33 @@ lists_cols:
     total_ttc: 
         field: total_ttc
     commande_status: 
-        label: Statut commande
+        label: St. Cmd
         field: fk_statut
         child: parent
+        display: icon
+        min_width: 45px
+        max_width: 45px
     commande_logistique_status: 
-        label: Statut logistique commande
+        label: Log. Cmd
         field: logistique_status
         child: parent
+        display: icon
+        min_width: 45px
+        max_width: 45px
     commande_shipment_status: 
-        label: Statut expéditions commande
+        label: Exp. Cmd
         field: shipment_status
         child: parent
+        display: icon
+        min_width: 45px
+        max_width: 45px
     commande_invoice_status: 
-        label: Statut facturation commande
+        label: Fac. Cmd
         field: invoice_status
         child: parent
+        display: icon
+        min_width: 45px
+        max_width: 45px
                     
 filters_panels: 
     default: 

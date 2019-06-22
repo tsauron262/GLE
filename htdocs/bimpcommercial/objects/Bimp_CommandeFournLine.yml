@@ -27,9 +27,20 @@ objects:
     dol_line: 
         instance: 
             bimp_object: 
-                object_name: CommandeFournDolLine
+                name: CommandeFournDolLine
                 
 fields: 
+    id_obj: 
+        label: Commande
+        search: 
+            input: 
+                type: search_list
+                search_list: 
+                    table: commande_fournisseur
+                    fields_search: rowid,ref
+                    field_return_label: ref
+                    field_return_value: rowid
+                    
     receptions: 
         label: Réception
         type: json
@@ -43,18 +54,42 @@ fields:
         unsigned: 0
         default_value: 0
         
+    # Tous les champs qty_xxx suivants sont uniquement à titre indicatifs 
+    # et servent pour la liste "general" (Ne pas utiliser en PHP)   
+    # Attention: les quantités sont en valeur absolues (toujours positifs, même pour les retours, sauf qty_total) . 
+    
     qty_total: 
         label: Qté Totale
         type: qty
         default_value: 0
+        display: 
+            badge: 
+                type: callback
+                method: displayQty
+                params: 
+                    - total
         
     qty_received: 
         label: Qté reçue
+        type: qty
+        default_value: 0
+        display: 
+            badge: 
+                type: callback
+                method: displayQty
+                params: 
+                    - received
         
     qty_to_receive: 
         label: Qté à réceptionner
         type: qty
         default_value: 0
+        display: 
+            badge: 
+                type: callback
+                method: displayQty
+                params: 
+                    - to_receive
         
 forms: 
     qty_modified: 
@@ -74,7 +109,32 @@ views:
                 - type: custom
                   custom: 
                       callback: renderReceptionForm
-                      
+                     
+filters_panels: 
+    default: 
+        filters: 
+            product: 
+                field: fk_product
+                child: dol_line
+            entrepot: 
+                field: entrepot
+                child: parent
+            commande_fourn: 
+                label: Commande
+                field: id_obj
+            commande_status:
+                field: fk_statut
+                child: parent
+            invoice_status:
+                field: invoice_status
+                child: parent
+            qty_total: 
+                field: qty_total
+            qty_to_receive:
+                field: qty_to_receive
+            qty_received:
+                field: qty_received
+                
 lists_cols: 
     qties: 
         label: Quantités
@@ -86,25 +146,20 @@ lists_cols:
             callback: displayCommandeClient
     qty_total: 
         field: qty_total
-        value: 
-            callback: 
-                method: displayQty
-                params: 
-                    - total
+        display: badge
+        min_width: 60px
+        max_width: 60px
     qty_received: 
         field: qty_received
-        value: 
-            callback: 
-                method: displayQty
-                params: 
-                    - received
+        display: badge
+        min_width: 60px
+        max_width: 60px
     qty_to_receive: 
+        label: Qté à récep. 
         field: qty_to_receive
-        value: 
-            callback: 
-                method: displayQty
-                params: 
-                    - to_receive
+        display: badge
+        min_width: 60px
+        max_width: 60px
             
 lists: 
     default:
@@ -135,56 +190,49 @@ lists:
             total_ttc: unset
             margin: unset
             commande_client:
+                
     general:
-        filters_panel: default
         configurable: 1
+        filters_panel: default
+        filters_panel: default
+        filters_panel_open: 1
+        sort_field: id
+        sort_way: desc
+        n: 25
         cols: 
-            commande_fourn: 
-                label: Commande fourn
-                field: id_obj
-                display: nom_url
-            desc:
-            pu_ht: 
-            tva:
-            remise_crt:
-            pa_ht: 
-            qty: 
-            remise: 
-            total_ttc: 
-            margin:
-            commande_status: 
-                label: Statut commande
-                field: fk_statut
-                child: parent
             entrepot: 
                 label: Entrepot
                 field: entrepot
                 child: parent
                 display: ref
-                
-filters_panels: 
-    default: 
-        filters: 
-            commande_fourn: 
-                field: commande_fourn
-            desc: 
-                field: desc
-            pu_ht: 
-                field: pu_ht
-            tva:
-                field: tva
-            remise_crt: 
-                field: remise_crt
-            pa_ht: 
-                field: pa_ht
-            qty: 
-                field: qty
-            remise:
-                field: remise
-            total_ttc:
-                field: total_ttc
-            margin:
-                field: margin
-            commande_status:
+                min_width: 60px
+                max_width: 60px
+            commande_status: 
+                label: St Cmd
                 field: fk_statut
                 child: parent
+                display: icon
+                min_width: 45px
+                max_width: 45px
+            invoice_status:
+                label: Fac. Cmd
+                field: invoice_status
+                child: parent
+                display: icon
+                min_width: 45px
+                max_width: 45px
+            commande_fourn: 
+                label: Commande
+                field: id_obj
+                display: nom_url
+            desc:
+                value: 
+                    callback: 
+                        method: displayLineData
+                        params:
+                           - desc_light
+            dl_pu_ht: 
+                field: subprice
+                child: dol_line
+            qty_total:
+            qty_to_receive:

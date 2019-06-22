@@ -73,6 +73,9 @@ fields:
         dol_prop: statut
         values: 
             array: status_list
+        display: 
+            icon: 
+                icon_only: 1
     fk_soc: 
         label: Client
         dol_prop: socid

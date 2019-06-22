@@ -27,7 +27,7 @@ objects:
     dol_line: 
         instance: 
             bimp_object: 
-                object_name: FactureDolLine
+                name: FactureDolLine
                 
 lists: 
     default: 

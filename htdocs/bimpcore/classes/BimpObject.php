@@ -1491,6 +1491,17 @@ class BimpObject extends BimpCache
                         }
                     }
 
+                    if ($alias !== 'a' && $this->isDolExtraField($field_name)) {
+                        if (!isset($joins[$alias . '_ef'])) {
+                            $joins[$alias . '_ef'] = array(
+                                'table' => $this->getTable() . '_extrafields',
+                                'on'    => $alias . '.rowid = ' . $alias . '_ef.fk_object',
+                                'alias' => $alias . '_ef'
+                            );
+                        }
+                        $filter_key = $alias . '_ef.' . $field_name;
+                    }
+
                     $bc_field = new BC_Field($this, $field_name);
                     $seach_data = $bc_field->getSearchData();
 
@@ -1533,7 +1544,6 @@ class BimpObject extends BimpCache
             }
             $this->config->setCurrentPath($prev_path);
         }
-
         return $filters;
     }
 
@@ -4312,7 +4322,7 @@ class BimpObject extends BimpCache
                             $button['data']['trigger'] = 'hover';
                             $button['data']['container'] = 'body';
                             $button['data']['placement'] = 'top';
-                            $button['data']['html'] = 'false';
+                            $button['data']['html'] = 'true';
                             $button['data']['content'] = $popover;
                         }
                     }
@@ -4324,7 +4334,7 @@ class BimpObject extends BimpCache
 
                 $html .= '<div class="header_buttons">';
                 if (count($header_buttons)) {
-                    if (count($header_buttons) > 4) {
+                    if (count($header_buttons) > 6) {
 
                         $html .= BimpRender::renderDropDownButton('Actions', $header_buttons, array(
                                     'icon'       => 'fas_cogs',

@@ -409,7 +409,11 @@ lists_cols:
         field: fk_user_resp
         display: nom_url
     invoice_status:
+        label: St. Fac
         field: invoice_status
+        display: icon
+        min_width: 30px;
+        max_width: 30px;
 #    input_method: 
 #        field: fk_input_method
 #        display: nom_url

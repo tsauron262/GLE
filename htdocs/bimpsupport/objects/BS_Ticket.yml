@@ -208,9 +208,7 @@ fields:
         default_value: 1
         display: 
             icon:
-                icon_only: 1
-    
-                
+                icon_only: 1    
     impact_demande_client:
         label: Impact lors de la demande client
         type: int
@@ -218,7 +216,6 @@ fields:
             array: impacts
         show:
             callback: it_is_a_customer_request
-
     priorite_demande_client:
         label: Priorité lors de la demande client
         type: int
@@ -226,13 +223,11 @@ fields:
             array: priorities
         show:
             callback: it_is_a_customer_request
-
     contact_in_soc:
         label: Contact dans la société
         type: string
         show:
             callback: it_is_a_customer_request
-    
     cover:
         label: Type de couverture
         type: int
@@ -376,8 +371,7 @@ forms:
             - field: priorite_demande_client
             - field: impact_demande_client
             - field: sujet
-              
-                                                
+                                                        
 fields_tables: 
     infos: 
         title: Informations générales
@@ -624,6 +618,7 @@ lists:
         add_form_values: 
             fields:
                 status: 20
+                
 cards:
     default:
         title: nom

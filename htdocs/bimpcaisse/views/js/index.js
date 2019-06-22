@@ -892,6 +892,17 @@ function saveCommercial() {
     });
 }
 
+function saveNotePlus() {
+    BimpAjax('saveNotePlus', {
+        note_plus: $('#note_plus').val(),
+        id_vente: Vente.id_vente
+    }, null, {
+        display_success_in_popup_only: true,
+        display_errors_in_popup_only: true,
+        display_warnings_in_popup_only: true
+    });
+}
+
 // Articles vente: 
 
 function findProduct($button) {
@@ -1351,6 +1362,15 @@ function onVenteLoaded() {
     if ($input.length && !parseInt($input.data('event_init'))) {
         $input.change(function () {
             saveCommercial();
+        });
+        $input.data('event_init', 1);
+    }
+
+    $input = $('#note_plus');
+
+    if ($input.length && !parseInt($input.data('event_init'))) {
+        $input.change(function () {
+            saveNotePlus();
         });
         $input.data('event_init', 1);
     }

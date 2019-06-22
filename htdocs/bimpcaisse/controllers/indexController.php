@@ -918,6 +918,38 @@ class indexController extends BimpController
         )));
     }
 
+    protected function ajaxProcessSaveNotePlus()
+    {
+        $errors = array();
+        $id_vente = BimpTools::getValue('id_vente', 0);
+        $note_plus = BimpTools::getValue('note_plus', '');
+
+        if (!$id_vente) {
+            $errors[] = 'ID de la vente absent';
+        }
+
+
+        if (!count($errors)) {
+            $vente = BimpCache::getBimpObjectInstance($this->module, 'BC_Vente', (int) $id_vente);
+            if (!$vente->isLoaded()) {
+                $errors[] = 'Cette vente n\'existe plus';
+            } else {
+                if ($vente->getData('status') === 2) {
+                    $errors[] = 'Cette vente ne peut pas être modifée car elle a été validée';
+                } else {
+                    $vente->set('note_plus', $note_plus);
+                    $errors = $vente->update();
+                }
+            }
+        }
+
+        die(json_encode(array(
+            'errors'     => $errors,
+            'success'    => 'Note la vente enregistré avec succès',
+            'request_id' => BimpTools::getValue('request_id', 0),
+        )));
+    }
+
     protected function ajaxProcessSaveCondReglement()
     {
         $errors = array();

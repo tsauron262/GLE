@@ -194,6 +194,8 @@ class BC_Vente extends BimpObject
 
             $ref = '';
             $serial = '';
+            
+            $eq_warnings = array();
 
             if ((int) $return->getData('id_equipment')) {
                 $equipment = $return->getChildObject('equipment');
@@ -204,6 +206,7 @@ class BC_Vente extends BimpObject
                         $ref = $product->ref;
                     }
                 }
+                $eq_warnings = $equipment->checkPlaceForReturn($id_client);
             } else {
                 $product = $return->getChildObject('product');
                 if (BimpObject::ObjectLoaded($product)) {
@@ -211,7 +214,6 @@ class BC_Vente extends BimpObject
                 }
             }
 
-            $eq_warnings = $equipment->checkPlaceForReturn($id_client);
 
             $returns[] = array(
                 'id_return'     => (int) $return->id,
@@ -559,6 +561,12 @@ class BC_Vente extends BimpObject
         $html .= 'Commercial: ';
         $html .= '</span>';
         $html .= BimpInput::renderInput('search_user', 'id_user_resp', $id_user_resp);
+        
+        $html .= '<br/><span style="font-weight: bold; font-size: 14px;">';
+        $html .= BimpRender::renderIcon('pencil', 'iconLeft');
+        $html .= 'Note: ';
+        $html .= '</span>';
+        $html .= BimpInput::renderInput('text', 'note_plus');
 
         // Bouton "Actualiser": 
         $html .= '<span class="btn btn-default" style="float: right; display: inline-block; margin-top: -2px" onclick="Vente.refresh();">';
@@ -1012,6 +1020,20 @@ class BC_Vente extends BimpObject
         $html .= '<button id="ventePaiementCBButton" type="button" class="ventePaiementButton btn btn-default btn-large"';
         $html .= ' onclick="displayNewPaiementForm($(this));" data-code="AE">';
         $html .= '<i class="fa fa-cc-amex iconLeft"></i>Paiement American Express';
+        $html .= '</button>';
+        $html .= '</div>';
+
+        $html .= '<div class="col-lg-4">';
+        $html .= '<button id="ventePaiementCBButton" type="button" class="ventePaiementButton btn btn-default btn-large"';
+        $html .= ' onclick="displayNewPaiementForm($(this));" data-code="CG">';
+        $html .= '<i class="fa fas fa-envelope iconLeft"></i>Chéque Gallerie';
+        $html .= '</button>';
+        $html .= '</div>';
+
+        $html .= '<div class="col-lg-4">';
+        $html .= '<button id="ventePaiementCBButton" type="button" class="ventePaiementButton btn btn-default btn-large"';
+        $html .= ' onclick="displayNewPaiementForm($(this));" data-code="no">';
+        $html .= '<i class="fa fa-times-circle iconLeft"></i>Financement';
         $html .= '</button>';
         $html .= '</div>';
 
@@ -2113,6 +2135,9 @@ class BC_Vente extends BimpObject
         $note = 'Vente en caisse ' . $this->getNomUrl(1, 1, 0, 'default') . "\n";
         $note .= ' - Centre: "' . $entrepot->description . ' (' . $entrepot->libelle . ')"' . "\n";
         $note .= ' - Caisse: "' . $caisse->getData('name') . '"';
+        
+        if($this->getData('note_plus') != "")
+            $note .= "\n\n".$this->getData('note_plus');
 
         // Création de la facture
         $is_avoir = ((float) $this->getData('total_ttc') < 0);
@@ -2341,31 +2366,34 @@ class BC_Vente extends BimpObject
                 $n++;
                 $montant = $paiement->getData('montant');
                 $code = $paiement->getData('code');
-                $total_paid += $montant;
+                
+                if($code != "no"){
+                    $total_paid += $montant;
 
-                $p = new Paiement($db);
-                $p->datepaye = dol_now();
-                $p->amounts = array(
-                    $facture->id => $montant
-                );
-                $p->paiementid = (int) dol_getIdFromCode($db, $code, 'c_paiement');
-                $p->facid = (int) $facture->id;
+                    $p = new Paiement($db);
+                    $p->datepaye = dol_now();
+                    $p->amounts = array(
+                        $facture->id => $montant
+                    );
+                    $p->paiementid = (int) dol_getIdFromCode($db, $code, 'c_paiement');
+                    $p->facid = (int) $facture->id;
 
-                if ($p->create($user) < 0) {
-                    $msg = 'Echec de l\'ajout à la facture du paiement n°' . $n;
-                    $msg .= ' (' . BC_VentePaiement::$codes[$code]['label'] . ': ' . BimpTools::displayMoneyValue($montant, 'EUR') . ')';
-                    $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($p), $msg);
-                } else {
-                    if (!empty($conf->banque->enabled)) {
-                        if ($p->addPaymentToBank($user, 'payment', '(CustomerInvoicePayment)', $id_account, '', '') < 0) {
-                            $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($p), 'Echec de l\'ajout du paiement n°' . $p->id . ' au compte bancaire ' . $account_label);
+                    if ($p->create($user) < 0) {
+                        $msg = 'Echec de l\'ajout à la facture du paiement n°' . $n;
+                        $msg .= ' (' . BC_VentePaiement::$codes[$code]['label'] . ': ' . BimpTools::displayMoneyValue($montant, 'EUR') . ')';
+                        $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($p), $msg);
+                    } else {
+                        if (!empty($conf->banque->enabled)) {
+                            if ($p->addPaymentToBank($user, 'payment', '(CustomerInvoicePayment)', $id_account, '', '') < 0) {
+                                $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($p), 'Echec de l\'ajout du paiement n°' . $p->id . ' au compte bancaire ' . $account_label);
+                            }
                         }
-                    }
 
-                    // Enregistrement du paiement en caisse
-                    $paiement_errors = $caisse->addPaiement($p, $facture->id, $this->id);
-                    if (count($paiement_errors)) {
-                        $warnings[] = BimpTools::getMsgFromArray($paiement_errors, 'Des erreurs sont survenues lors de l\'enregistrement du paiement n°' . $n);
+                        // Enregistrement du paiement en caisse
+                        $paiement_errors = $caisse->addPaiement($p, $facture->id, $this->id);
+                        if (count($paiement_errors)) {
+                            $warnings[] = BimpTools::getMsgFromArray($paiement_errors, 'Des erreurs sont survenues lors de l\'enregistrement du paiement n°' . $n);
+                        }
                     }
                 }
             }

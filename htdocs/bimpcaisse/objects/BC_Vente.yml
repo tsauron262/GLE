@@ -185,6 +185,8 @@ fields:
         label: Vente au prix hors-taxes
         type: bool
         default_value: 0
+    note_plus: 
+        label: Note
         
 fields_tables: 
     infos: 

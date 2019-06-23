@@ -414,6 +414,14 @@ lists_cols:
         display: icon
         min_width: 30px;
         max_width: 30px;
+    billed: 
+        label: Facturée
+        type: bool
+        default_value: 0
+        input: 
+            type: hidden
+        
+        
 #    input_method: 
 #        field: fk_input_method
 #        display: nom_url

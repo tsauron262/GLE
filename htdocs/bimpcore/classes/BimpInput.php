@@ -1167,7 +1167,7 @@ class BimpInput
         }
 
         if ($autosave) {
-            if (!isset($object->id) || !$object->id) {
+            if (!BimpObject::objectLoaded($object)) {
                 $autosave = false;
             }
         }
@@ -1223,7 +1223,7 @@ class BimpInput
         $html .= '</div>';
 
         if ($max_values !== 'none') {
-            $html .= '<p class="inputHelp">Max: ' . $max_values . ' élément' . ((int) $max_values > 1 ? 's' : '') . '</p>';
+            $html .= '<p class="small">Max: ' . $max_values . ' élément' . ((int) $max_values > 1 ? 's' : '') . '</p>';
         }
 
         $html .= '</div>';

@@ -139,7 +139,7 @@ class BimpTicket
                 $vatrate = (string) $line->tva_tx;
 
                 if (!isset($this->tva[$vatrate])) {
-                    $tva[$vatrate] = 0;
+                    $tva_line = 0;
                 }
 
                 $tva[$vatrate] += $tva_line;

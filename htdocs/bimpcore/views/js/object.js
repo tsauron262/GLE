@@ -270,6 +270,7 @@ function setObjectAction($button, object_data, action, extra_data, form_name, $r
         BimpAjax('setObjectAction', data, $resultContainer, {
             $button: $button,
             display_success_in_popup_only: true,
+            display_warnings_in_popup_only: true,
             module: object_data.module,
             object_name: object_data.object_name,
             id_object: object_data.id_object,

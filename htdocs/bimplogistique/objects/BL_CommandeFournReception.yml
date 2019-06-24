@@ -169,6 +169,7 @@ views:
                       name: data
                       
     details: 
+        modal_format: medium
         rows: 
             - cols: 
                 - type: custom

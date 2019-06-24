@@ -91,7 +91,7 @@ table.objectlistTable {
             }
 
             .select2-container {
-                width: 100%important;
+                width: 100% !important;
                 min-width: 100%;
             }
 
@@ -102,6 +102,10 @@ table.objectlistTable {
             .toggle-label-off,
             .toggle-label-on {
                 display: none;
+            }
+
+            .addValueInputContainer button.addValueBtn {
+                float: right;
             }
         }
 

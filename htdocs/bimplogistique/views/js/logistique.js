@@ -774,63 +774,113 @@ function getReceptionLinesDataFromForm($content, id_reception) {
             var $row = $(this);
             var id_line = parseInt($row.data('id_line'));
             var serialisable = parseInt($row.data('serialisable'));
+            var is_return = parseInt($row.data('is_return'));
 
             if (serialisable) {
-                var serials = [];
-                $row.find('tr.line_' + id_line + '_serial_data').each(function () {
-                    var serial = $(this).find('td.serial').data('serial');
-                    var pu_ht = 0;
-                    var tva_tx = 0;
+                if (!is_return) {
+                    var serials = [];
+                    $row.find('tr.line_' + id_line + '_serial_data').each(function () {
+                        var serial = $(this).find('td.serial').data('serial');
+                        var pu_ht = 0;
+                        var tva_tx = 0;
+                        var $input = $(this).find('[name="line_' + id_line + '_reception_' + id_reception + '_serial_' + serial + '_pu_ht"]');
+                        if ($.isOk($input)) {
+                            pu_ht = parseFloat($input.val());
+                        }
 
-                    var $input = $(this).find('[name="line_' + id_line + '_reception_' + id_reception + '_serial_' + serial + '_pu_ht"]');
-                    if ($.isOk($input)) {
-                        pu_ht = parseFloat($input.val());
-                    }
-
-                    $input = $(this).find('[name="line_' + id_line + '_reception_' + id_reception + '_serial_' + serial + '_tva_tx"]');
-                    if ($.isOk($input)) {
-                        tva_tx = parseFloat($input.val());
-                    }
-                    serials.push({
-                        serial: serial,
-                        pu_ht: pu_ht,
-                        tva_tx: tva_tx
+                        $input = $(this).find('[name="line_' + id_line + '_reception_' + id_reception + '_serial_' + serial + '_tva_tx"]');
+                        if ($.isOk($input)) {
+                            tva_tx = parseFloat($input.val());
+                        }
+                        serials.push({
+                            serial: serial,
+                            pu_ht: pu_ht,
+                            tva_tx: tva_tx
+                        });
                     });
-                });
+                    var new_serials = '';
 
-                var new_serials = '';
+                    var $input = $row.find('[name="line_' + id_line + '_reception_' + id_reception + '_new_serials"]');
+                    if ($input.length) {
+                        new_serials = $input.val();
+                    }
 
-                var $input = $row.find('[name="line_' + id_line + '_reception_' + id_reception + '_new_serials"]');
-                if ($input.length) {
-                    new_serials = $input.val();
+                    var new_serials_pu_ht = 0;
+                    var $input = $row.find('[name="line_' + id_line + '_reception_' + id_reception + '_new_serials_pu_ht"]');
+                    if ($input.length) {
+                        new_serials_pu_ht = parseFloat($input.val());
+                    }
+
+                    var new_serials_tva_tx = 0;
+                    var $input = $row.find('[name="line_' + id_line + '_reception_' + id_reception + '_new_serials_tva_tx"]');
+                    if ($input.length) {
+                        new_serials_tva_tx = parseFloat($input.val());
+                    }
+
+                    var assign_to_commande_client = 0;
+                    var $input = $row.find('[name="line_' + id_line + '_reception_' + id_reception + '_assign_to_commande_client"]');
+                    if ($input.length) {
+                        assign_to_commande_client = parseInt($input.val());
+                    }
+
+                    lines.push({
+                        id_line: id_line,
+                        serials: serials,
+                        new_serials: new_serials,
+                        new_serials_pu_ht: new_serials_pu_ht,
+                        new_serials_tva_tx: new_serials_tva_tx,
+                        assign_to_commande_client: assign_to_commande_client
+                    });
+                } else {
+                    var return_equipments = [];
+
+                    $row.find('tr.line_' + id_line + '_return_equipment_data').each(function () {
+                        var id_equipment = parseInt($(this).find('td.equipment').data('id_equipment'));
+                        var pu_ht = 0;
+                        var tva_tx = 0;
+                        var $input = $(this).find('[name="line_' + id_line + '_reception_' + id_reception + '_return_equipment_' + id_equipment + '_pu_ht"]');
+                        if ($.isOk($input)) {
+                            pu_ht = parseFloat($input.val());
+                        }
+
+                        $input = $(this).find('[name="line_' + id_line + '_reception_' + id_reception + '_return_equipment_' + id_equipment + '_tva_tx"]');
+                        if ($.isOk($input)) {
+                            tva_tx = parseFloat($input.val());
+                        }
+                        return_equipments.push({
+                            id_equipment: id_equipment,
+                            pu_ht: pu_ht,
+                            tva_tx: tva_tx
+                        });
+                    });
+
+                    var new_return_equipments = [];
+
+                    var $inputContainer = $row.find('.line_' + id_line + '_reception_' + id_reception + '_new_return_equipments_inputContainer');
+                    if ($inputContainer.length) {
+                        new_return_equipments = getInputValue($inputContainer);
+                    }
+                    
+                    var new_return_equipments_pu_ht = 0;
+                    var $input = $row.find('[name="line_' + id_line + '_reception_' + id_reception + '_new_return_equipments_pu_ht"]');
+                    if ($input.length) {
+                        new_return_equipments_pu_ht = parseFloat($input.val());
+                    }
+
+                    var new_return_equipments_tva_tx = 0;
+                    var $input = $row.find('[name="line_' + id_line + '_reception_' + id_reception + '_new_return_equipments_tva_tx"]');
+                    if ($input.length) {
+                        new_return_equipments_tva_tx = parseFloat($input.val());
+                    }
+
+                    lines.push({
+                        id_line: id_line,
+                        return_equipments: return_equipments,
+                        new_return_equipments: new_return_equipments,
+                        new_return_equipments_pu_ht: new_return_equipments_pu_ht,
+                        new_return_equipments_tva_tx: new_return_equipments_tva_tx
+                    });
                 }
-
-                var new_serials_pu_ht = 0;
-                var $input = $row.find('[name="line_' + id_line + '_reception_' + id_reception + '_new_serials_pu_ht"]');
-                if ($input.length) {
-                    new_serials_pu_ht = parseFloat($input.val());
-                }
-
-                var new_serials_tva_tx = 0;
-                var $input = $row.find('[name="line_' + id_line + '_reception_' + id_reception + '_new_serials_tva_tx"]');
-                if ($input.length) {
-                    new_serials_tva_tx = parseFloat($input.val());
-                }
-
-                var assign_to_commande_client = 0;
-                var $input = $row.find('[name="line_' + id_line + '_reception_' + id_reception + '_assign_to_commande_client"]');
-                if ($input.length) {
-                    assign_to_commande_client = parseInt($input.val());
-                }
-
-                lines.push({
-                    id_line: id_line,
-                    serials: serials,
-                    new_serials: new_serials,
-                    new_serials_pu_ht: new_serials_pu_ht,
-                    new_serials_tva_tx: new_serials_tva_tx,
-                    assign_to_commande_client: assign_to_commande_client
-                });
             } else {
                 var qties = [];
                 $row.find('tr.line_' + id_line + '_qty_row').each(function () {
@@ -848,7 +898,6 @@ function getReceptionLinesDataFromForm($content, id_reception) {
                     if ($.isOk($input)) {
                         pu_ht = parseFloat($input.val());
                     }
-
                     $input = $(this).find('[name="line_' + id_line + '_reception_' + id_reception + '_qty_' + idx + '_tva_tx"]');
                     if ($.isOk($input)) {
                         tva_tx = parseFloat($input.val());
@@ -896,11 +945,9 @@ function saveCommandeFournReceptionLinesData($button, id_reception, modal_idx) {
     }
 
     var lines = getReceptionLinesDataFromForm($content, id_reception);
-
     setObjectAction($button, {
         module: 'bimplogistique',
-        object_name: 'BL_CommandeFournReception',
-        id_object: id_reception
+        object_name: 'BL_CommandeFournReception', id_object: id_reception
     }, 'saveLinesData', {
         lines: lines
     }, null, $content.find('.ajaxResultContainer'));
@@ -923,7 +970,6 @@ function addCommandeFournLineReceptions($button, id_line, modal_idx) {
     if ($button.hasClass('disabled')) {
         return;
     }
-
     var $container = $('#modal_content_' + modal_idx).find('#commande_fourn_line_' + id_line + '_receptions_rows');
 
     if (!$.isOk($container)) {
@@ -1033,7 +1079,6 @@ function addCommandeFournLineReceptionRow($button, id_line) {
     html += '<span class="rowButton" onclick="removeCommandeFournLineReceptionRow($(this), ' + id_line + ');">';
     html += '<i class="fas fa5-trash"></i></span></td>';
     html += '</tr>';
-
     $container.find('tbody.receptions_rows').append(html);
     $tpl.data('next_idx', idx + 1);
 
@@ -1041,7 +1086,6 @@ function addCommandeFournLineReceptionRow($button, id_line) {
 
     checkTotalMaxQtyInput($container.find('input[name="line_' + id_line + '_reception_' + idx + '_qty"]'));
 }
-
 function removeCommandeFournLineReceptionRow($button, id_line) {
     var $container = $button.findParentByClass('line_reception_rows');
 
@@ -1053,7 +1097,6 @@ function removeCommandeFournLineReceptionRow($button, id_line) {
     $button.parent('td').parent('tr').remove();
     checkTotalMaxQtyInput($container.find('input[name="line_' + id_line + '_reception_1_qty"]'));
 }
-
 function onReceptionValidationFormSubmit($form, extra_data) {
     if ($.isOk($form)) {
         var id_reception = parseInt($form.data('id_object'));
@@ -1075,9 +1118,16 @@ function setAllReceptionLinesToMax($button) {
 
     $container.find('tr.line_qty_row').each(function () {
         $(this).find('.qtyInput').each(function () {
-            var max = parseFloat($(this).data('max'));
-            if (!isNaN(max)) {
-                $(this).val(max).change();
+            if ($(this).hasClass('total_max')) {
+                var max = parseFloat($(this).data('max'));
+                if (!isNaN(max)) {
+                    $(this).val(max).change();
+                }
+            } else if ($(this).hasClass('total_min')) {
+                var min = parseFloat($(this).data('min'));
+                if (!isNaN(min)) {
+                    $(this).val(min).change();
+                }
             }
         });
     });

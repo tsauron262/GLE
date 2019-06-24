@@ -97,7 +97,7 @@ class Bimp_Product extends BimpObject
     public function getListsButtons($line_qty = 1)
     {
         $buttons = array();
-        if ($this->isActionAllowed('generateEtiquettes')) {
+        if ($line_qty >= 0 && $this->isActionAllowed('generateEtiquettes')) {
             $buttons[] = array(
                 'label'   => 'Générer des étiquettes',
                 'icon'    => 'fas_sticky-note',

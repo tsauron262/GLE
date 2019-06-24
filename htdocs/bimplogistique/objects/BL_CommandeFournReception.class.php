@@ -742,11 +742,38 @@ class BL_CommandeFournReception extends BimpObject
                 $html .= '<tbody>';
 
                 if ($isSerialisable) {
-                    foreach ($reception_data['equipments'] as $id_equipment => $equipment_data) {
-                        $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
-                        if (BimpObject::objectLoaded($equipment)) {
+                    if (!$isReturn) {
+                        // *** Affichage équipements reçus: ***
+                        foreach ($reception_data['equipments'] as $id_equipment => $equipment_data) {
                             $html .= '<tr>';
-                            $html .= '<td style="width: 220px">' . $equipment->getNomUrl(1, 1, 1) . '</td>';
+                            $html .= '<td style="width: 220px">';
+                            $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+                            if (BimpObject::objectLoaded($equipment)) {
+                                $html .= $equipment->getNomUrl(1, 1, 1);
+                            } else {
+                                $html .= BimpRender::renderAlerts('L\'équipement #' . $id_equipment . ' n\'existe plus');
+                            }
+                            $html .= '</td>';
+
+                            $html .= '<td style="width: 120px">' . BimpTools::displayMoneyValue((float) isset($equipment_data['pu_ht']) ? $equipment_data['pu_ht'] : $line_pu_ht) . '</td>';
+                            $html .= '<td style="width: 120px">' . BimpTools::displayFloatValue((float) isset($equipment_data['tva_tx']) ? $equipment_data['tva_tx'] : $line->tva_tx, 3) . '%</td>';
+                            $html .= '<td></td>';
+                            $html .= '</tr>';
+                        }
+                    } else {
+                        // *** Affichage équipements retournés: ***
+                        $html .= '<tr><td colspan="4"><span class="danger">Equipements retournés:</span></td></tr>';
+                        foreach ($reception_data['return_equipments'] as $id_equipment => $equipment_data) {
+                            $html .= '<tr>';
+                            $html .= '<td style="width: 220px">';
+                            $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+                            if (BimpObject::objectLoaded($equipment)) {
+                                $html .= $equipment->getNomUrl(1, 1, 1);
+                            } else {
+                                $html .= BimpRender::renderAlerts('L\'équipement #' . $id_equipment . ' n\'existe plus');
+                            }
+                            $html .= '</td>';
+
                             $html .= '<td style="width: 120px">' . BimpTools::displayMoneyValue((float) isset($equipment_data['pu_ht']) ? $equipment_data['pu_ht'] : $line_pu_ht) . '</td>';
                             $html .= '<td style="width: 120px">' . BimpTools::displayFloatValue((float) isset($equipment_data['tva_tx']) ? $equipment_data['tva_tx'] : $line->tva_tx, 3) . '%</td>';
                             $html .= '<td></td>';

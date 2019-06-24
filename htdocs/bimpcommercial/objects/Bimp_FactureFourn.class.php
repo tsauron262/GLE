@@ -550,12 +550,17 @@ class Bimp_FactureFourn extends BimpComm
             $lines_data = $line->getLinesDataByUnitPriceAndTva();
 
             $isSerialisable = $line->isProductSerialisable();
+            $isReturn = ((float) $line->getFullQty());
 
             foreach ($lines_data as $pu_ht => $pu_data) {
                 foreach ($pu_data as $tva_tx => $line_data) {
                     $i++;
                     if ($isSerialisable) {
-                        $qty = count($line_data['equipments']);
+                        if (!$isReturn) {
+                            $qty = count($line_data['equipments']);
+                        } else {
+                            $qty = count($line_data['equipments']) * -1; 
+                        }
                     } else {
                         $qty = (float) $line_data;
                     }
@@ -591,7 +596,6 @@ class Bimp_FactureFourn extends BimpComm
                     $lines_new[(int) $line->id] = (int) $line_instance->id;
 
                     // NOTE: on intègre pas les remises de la ligne de commande: celles-ci sont déjà déduites dans le pu_ht.
-                     
                     // Création des remises pour la ligne en cours:
 //                    $remises = $line->getRemises();
 //                    if (!is_null($remises) && count($remises)) {
@@ -614,13 +618,13 @@ class Bimp_FactureFourn extends BimpComm
 //                            }
 //                        }
 //                    }
-
                     // Ajout des équipements: 
                     if ($isSerialisable) {
-                        foreach ($line_data['equipments'] as $id_equipment) {
+                        $equipments = (isset($line_data['equipments']) ? $line_data['equipments'] : array());
+                        foreach ($equipments as $id_equipment) {
                             $eq_errors = $line_instance->attributeEquipment((int) $id_equipment);
                             if (count($eq_errors)) {
-                                $equipment = BimpCache::getBimpObjectFullListArray('bimpequipment', 'Equipment', (int) $id_equipment);
+                                $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
                                 if (BimpObject::objectLoaded($equipment)) {
                                     $eq_label = '"' . $equipment->getData('serial') . '"';
                                 } else {

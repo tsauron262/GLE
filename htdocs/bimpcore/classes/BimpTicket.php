@@ -108,7 +108,7 @@ class BimpTicket
                 }
 
 //                if (strlen($desc) > 40) {
-//                    $desc = substr($desc, 0, 38);
+//                    $desc = substr($desc, 0, 38)."...";
 //                }
 
                 $html .= '<td colspan="5">' . $desc . '</td>';

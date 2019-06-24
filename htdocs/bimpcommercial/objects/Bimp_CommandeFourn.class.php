@@ -167,7 +167,7 @@ class Bimp_CommandeFourn extends BimpComm
                     $errors[] = 'La commande doit avoir au moins partiellement réceptionnée pour pouvoir créer une facture fournisseur';
                     return 0;
                 }
-                                
+
                 return 1;
 
             case 'classifyBilled':
@@ -844,11 +844,11 @@ class Bimp_CommandeFourn extends BimpComm
     public function checkReceptionStatus()
     {
         $status_forced = $this->getData('status_forced');
-        
+
         if (isset($status_forced['reception']) && (int) $status_forced['reception']) {
             return;
         }
-        
+
         $current_status = (int) $this->getInitData('fk_statut');
 
         if (in_array($current_status, array(0, 1, 2, 6, 7, 9))) {
@@ -891,15 +891,15 @@ class Bimp_CommandeFourn extends BimpComm
         if (!$this->isLoaded()) {
             return;
         }
-        
+
         $status_forced = $this->getData('status_forced');
-        
+
         if (isset($status_forced['invoice']) && (int) $status_forced['invoice']) {
             return;
         }
 
         $invoice_status = 0;
-        
+
         $total_factures_ht = 0;
 
         foreach (BimpTools::getDolObjectLinkedObjectsList($this->dol_object, $this->db) as $item) {
@@ -912,10 +912,10 @@ class Bimp_CommandeFourn extends BimpComm
                 }
             }
         }
-        
-        if ($total_factures_ht >= (float) $this->getData('total_ht')) {
+
+        if (abs($total_factures_ht) >= abs((float) $this->getData('total_ht'))) {
             $invoice_status = 2;
-        } elseif ($total_factures_ht > 0) {
+        } elseif (abs($total_factures_ht) > 0) {
             $invoice_status = 1;
         } else {
             $invoice_status = 0;
@@ -925,10 +925,13 @@ class Bimp_CommandeFourn extends BimpComm
             $this->updateField('invoice_status', $invoice_status);
         }
 
+        $billed = 0;
         if ($invoice_status > 0) {
-            if (!((int) $this->getInitData('billed'))) {
-                $this->updateField('billed', 1);
-            }
+            $billed = 1;
+        }
+        
+        if ($billed !== (int) $this->getInitData('billed')) {
+            $this->updateField('billed', $billed);
         }
     }
 

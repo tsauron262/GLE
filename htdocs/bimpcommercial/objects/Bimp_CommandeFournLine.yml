@@ -194,11 +194,12 @@ lists:
     general:
         configurable: 1
         filters_panel: default
-        filters_panel: default
         filters_panel_open: 1
         sort_field: id
         sort_way: desc
         n: 25
+        extra_btn: 
+            callback: getGeneralListExtraButtons
         cols: 
             entrepot: 
                 label: Entrepot

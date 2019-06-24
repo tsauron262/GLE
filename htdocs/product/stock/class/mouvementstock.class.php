@@ -864,7 +864,7 @@ class MouvementStock extends CommonObject
 	 * @param  int     $origintype     Type origin
 	 * @return string
 	 */
-	function get_origin($fk_origin, $origintype)
+	function get_origin($fk_origin, $origintype, $type = "name")
 	{
 	    $origin='';
 
@@ -907,8 +907,11 @@ class MouvementStock extends CommonObject
 				break;
 		}
 
-		if (empty($origin) || ! is_object($origin)) return '';
+		//if (empty($origin) || ! is_object($origin)) return '';
 
+                if($type == "obj")
+                    return $origin;
+                
 		if ($origin->fetch($fk_origin) > 0) {
 			return $origin->getNomUrl(1);
 		}
@@ -934,6 +937,8 @@ class MouvementStock extends CommonObject
 				if (!class_exists('Project')) require_once DOL_DOCUMENT_ROOT.'/projet/class/project.class.php';
 				$origin = new Project($this->db);
 			}
+                        else
+                            $origin = $this->get_origin($origin_id, $origin_element, "obj");
 
 			if (!empty($origin))
 			{

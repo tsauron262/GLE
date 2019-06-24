@@ -520,17 +520,25 @@ class Bimp_Product extends BimpObject
             $html .= '</tr>';
         }
 
+        $html1 = $html2 = "";
         foreach ($this->stocks as $id_ent => $stocks) {
             if (!is_null($id_entrepot) && ((int) $id_entrepot === (int) $id_ent)) {
                 continue;
             }
-            $html .= '<tr>';
-            $html .= '<td>' . $stocks['entrepot_label'] . '</td>';
-            $html .= '<td>' . $stocks['reel'] . '</td>';
-            $html .= '<td>' . $stocks['dispo'] . '</td>';
-            $html .= '<td>' . $stocks['virtuel'] . '</td>';
-            $html .= '</tr>';
+            $htmlT = '<tr>';
+            $htmlT .= '<td>' . $stocks['entrepot_label'] . '</td>';
+            $htmlT .= '<td>' . $stocks['reel'] . '</td>';
+            $htmlT .= '<td>' . $stocks['dispo'] . '</td>';
+            $htmlT .= '<td>' . $stocks['virtuel'] . '</td>';
+            $htmlT .= '</tr>';
+            if ($stocks['reel'] <= 0) {//stok > 0 au debut
+                $html2 .= $htmlT;
+            }
+            else{
+                $html1 .= $htmlT;
+            }
         }
+        $html .= $html1 . $html2;
 
         $html .= '</tbody>';
         $html .= '</table>';

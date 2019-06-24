@@ -647,7 +647,7 @@ class Bimp_CommandeFourn extends BimpComm
 
     // Getters Array: 
 
-    public function getReceptionsArray($include_empty = false)
+    public function getReceptionsArray($include_empty = false, $draft_only = false)
     {
         if (!$this->isLoaded()) {
             if ($include_empty) {
@@ -659,12 +659,24 @@ class Bimp_CommandeFourn extends BimpComm
             }
         }
 
-        $cache_key = 'commande_fourn_' . $this->id . '_receptions_array';
+        $cache_key = 'commande_fourn_' . $this->id . '_receptions';
+
+        if ($draft_only) {
+            $cache_key .= '_draft_only';
+        }
+
+        $cache_key .= '_array';
 
         if (!isset(self::$cache[$cache_key])) {
             self::$cache[$cache_key] = array();
 
-            $receptions = $this->getChildrenObjects('receptions', array(), 'id', 'desc');
+            $filters = array();
+
+            if ($draft_only) {
+                $filters['status'] = 0;
+            }
+
+            $receptions = $this->getChildrenObjects('receptions', $filters, 'id', 'desc');
             foreach ($receptions as $reception) {
                 $label = $reception->getData('num_reception') . ' - ' . $reception->getData('ref');
                 $entrepot = $reception->getChildObject('entrepot');
@@ -929,7 +941,7 @@ class Bimp_CommandeFourn extends BimpComm
         if ($invoice_status > 0) {
             $billed = 1;
         }
-        
+
         if ($billed !== (int) $this->getInitData('billed')) {
             $this->updateField('billed', $billed);
         }
@@ -1145,7 +1157,6 @@ class Bimp_CommandeFourn extends BimpComm
         $errors = array();
         $warnings = array();
         $success = '';
-
 
         return array(
             'errors'   => $errors,

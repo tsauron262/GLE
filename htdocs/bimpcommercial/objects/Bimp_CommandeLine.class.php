@@ -2778,7 +2778,7 @@ class Bimp_CommandeLine extends ObjectLine
 
                                         if (count($place_errors)) {
                                             $errors[] = BimpTools::getMsgFromArray($place_errors, 'Echec de la création du nouvel emplacement pour l\'équipement ' . $equipment->getData('serial') . ' (ID ' . $id_equipment . ')');
-                                            dol_syslog('Echec de la création du nouvel emplacement pour l\'équipement ' . $equipment->getData('serial') . ' (ID ' . $id_equipment . ') - Commande client: ' . $commande->getRef() . '(ID ' . $commande->id . ')', LOG_ERR);
+                                            dol_syslog('[ERREUR STOCK] ' . 'Echec de la création du nouvel emplacement pour l\'équipement ' . $equipment->getData('serial') . ' (ID ' . $id_equipment . ') - Commande client: ' . $commande->getRef() . '(ID ' . $commande->id . ')', LOG_ERR);
                                         }
                                     }
                                 }
@@ -2807,7 +2807,7 @@ class Bimp_CommandeLine extends ObjectLine
                             if ($product->dol_object->correct_stock($user, $id_entrepot, $shipment_data['qty'], 1, $stock_label, 0, $codemove, 'commande', $commande->id) <= 0) {
                                 $msg = 'Echec de la mise à jour des stocks pour le produit "' . $product->dol_object->ref . '" (ID ' . $product->id . ', quantités à retirer: ' . $shipment_data['qty'] . ')';
                                 $errors[] = $msg;
-                                dol_syslog($msg, LOG_ERR);
+                                dol_syslog('[ERREUR STOCK] ' . $msg, LOG_ERR);
                             }
                         }
                     }

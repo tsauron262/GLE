@@ -960,7 +960,8 @@ function addCommandeFournLineReceptions($button, id_line, modal_idx) {
                 'qty': 0,
                 'serials': '',
                 'pu_ht': null,
-                'tva_tx': null
+                'tva_tx': null,
+                'return_equipments': []
             };
 
             $input = $(this).find('[name="line_' + id_line + '_reception_' + idx + '_equipments"]');
@@ -981,6 +982,12 @@ function addCommandeFournLineReceptions($button, id_line, modal_idx) {
             $input = $(this).find('[name="line_' + id_line + '_reception_' + idx + '_tva_tx"]');
             if ($input.length) {
                 row_data['tva_tx'] = parseFloat($input.val());
+            }
+
+            var $inputContainer = $(this).find('.line_' + id_line + '_reception_' + idx + '_return_equipments_inputContainer');
+
+            if ($inputContainer.length) {
+                row_data['return_equipments'] = getInputValue($inputContainer);
             }
 
             row_data['assign_to_commande_client'] = assign_to_commande_client;

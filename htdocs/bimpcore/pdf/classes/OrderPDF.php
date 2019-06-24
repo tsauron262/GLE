@@ -493,15 +493,17 @@ class OrderPDF extends BimpDocumentPDF
             $html .= $this->langs->transnoentities("PaymentType" . $this->object->mode_reglement_code) != ('PaymentType' . $this->object->mode_reglement_code) ? $this->langs->transnoentities("PaymentType" . $this->object->mode_reglement_code) : $this->langs->convToOutputCharset($this->object->mode_reglement);
             $html .= '</td></tr>';
         }
+        
+        
+        if (!class_exists('Account')) {
+            require_once DOL_DOCUMENT_ROOT . '/compta/bank/class/account.class.php';
+        }
 
         if (empty($this->object->mode_reglement_code) || $this->object->mode_reglement_code == 'CHQ') {
 
             if (!empty($conf->global->FACTURE_CHQ_NUMBER)) {
                 if ($conf->global->FACTURE_CHQ_NUMBER > 0) {
                     $html .= '<tr><td>';
-                    if (!class_exists('Account')) {
-                        require_once DOL_DOCUMENT_ROOT . '/compta/bank/class/account.class.php';
-                    }
                     $account = new Account($this->db);
                     $account->fetch($conf->global->FACTURE_CHQ_NUMBER);
 

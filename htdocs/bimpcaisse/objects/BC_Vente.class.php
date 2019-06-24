@@ -1187,22 +1187,22 @@ class BC_Vente extends BimpObject
         return $html;
     }
 
-    public function renderSelectEquipmentLine($id_equipment, &$errors, $current_equipments = array())
+    public function renderSelectEquipmentLine($id_equipment, $current_equipments = array())
     {
         $html = '';
 
         $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $id_equipment);
         if (!$equipment->isLoaded()) {
-            $errors[] = 'Erreur: aucun enregistrement trouvé pour l\'équipement d\'ID ' . $id_equipment;
+            $html .= BimpRender::renderAlerts('Erreur: aucun enregistrement trouvé pour l\'équipement d\'ID ' . $id_equipment, 'danger');
         } else {
             $id_product = (int) $equipment->getData('id_product');
 
             if (!$id_product) {
-                $errors[] = 'Erreur: aucun produit associé à l\'équipement ' . $id_equipment . ' (n° série "' . $equipment->getData('serial') . '")';
+                $html .= BimpRender::renderAlerts('Erreur: aucun produit associé à l\'équipement ' . $id_equipment . ' (n° série "' . $equipment->getData('serial') . '")', 'danger');
             } else {
                 $product = $equipment->getChildObject('product');
                 if (!BimpObject::objectLoaded($product)) {
-                    $errors[] = 'Erreur: produit d\'ID ' . $equipment->getData('id_product') . ' non trouvé pour l\'équipement d\'ID' . $id_equipment . ' (n° série "' . $equipment->getData('serial') . '")';
+                    $html .= BimpRender::renderAlerts('Erreur: produit d\'ID ' . $equipment->getData('id_product') . ' non trouvé pour l\'équipement d\'ID' . $id_equipment . ' (n° série "' . $equipment->getData('serial') . '")', 'danger');
                 } else {
                     $price_ttc = 0;
                     if ((float) $equipment->getData('prix_vente_except') > 0) {
@@ -1226,11 +1226,11 @@ class BC_Vente extends BimpObject
                     $html .= '</div>';
 
                     if (array_key_exists($id_equipment, $current_equipments)) {
-                        $html .= BimpRender::renderAlerts('cet équipement a déjà été ajouté au panier');
+                        $html .= BimpRender::renderAlerts('cet équipement a déjà été ajouté au panier', 'warning');
                     } else {
                         $eq_errors = array();
                         if (!$equipment->isAvailable(0, $eq_errors)) {
-                            $html .= BimpRender::renderAlerts($eq_errors);
+                            $html .= BimpRender::renderAlerts($eq_errors, 'warning');
                         } else {
                             $html .= '<div style="margin-top: 10px; text-align: right">';
                             $html .= '<button type="button" class="btn btn-primary"';
@@ -1249,7 +1249,7 @@ class BC_Vente extends BimpObject
         return $html;
     }
 
-    public function renderSelectProductLine($id_product, &$errors)
+    public function renderSelectProductLine($id_product)
     {
         $html = '';
 
@@ -1257,25 +1257,21 @@ class BC_Vente extends BimpObject
             require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
         }
 
-        global $db;
-        $product = new Product($db);
+        $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $id_product);
 
-        if ($product->fetch($id_product) <= 0) {
-            $msg = 'Erreur: aucun enregistrement trouvé pour le produit d\'id ' . $id_product;
-            if ($product->error) {
-                $msg .= ' - ' . $product->error;
-            }
-            $errors[] = $msg;
+        if (!BimpObject::objectLoaded($product)) {
+            $html .= BimpRender::renderAlerts('Erreur: aucun enregistrement trouvé pour le produit d\'id ' . $id_product, 'danger');
         } else {
             $html .= '<div class="selectArticleLine">';
-            $html .= '<div class="product_title"><strong>Produit:</strong> "' . $product->label . '"</div>';
-            $html .= '<div class="product_info"><strong>Réf: </strong>' . $product->ref . '</div>';
+            $html .= '<div class="product_title"><strong>Produit:</strong> "' . $product->getName() . '"</div>';
+            $html .= '<div class="product_info"><strong>Réf: </strong>' . $product->getRef() . '</div>';
+            $html .= '<div class="product_info"><strong>Code-barres: </strong>' . $product->getData('barcode') . '</div>';
             $html .= '<div class="product_price">';
 
             if ((int) $this->getData('vente_ht')) {
-                $html .= BimpTools::displayMoneyValue($product->price, 'EUR');
+                $html .= BimpTools::displayMoneyValue($product->dol_object->price, 'EUR');
             } else {
-                $html .= BimpTools::displayMoneyValue($product->price_ttc, 'EUR');
+                $html .= BimpTools::displayMoneyValue($product->dol_object->price_ttc, 'EUR');
             }
 
             $html .= '</div>';
@@ -1600,7 +1596,7 @@ class BC_Vente extends BimpObject
         if (!BimpObject::objectLoaded($product)) {
             $errors[] = 'Le produit d\'ID ' . $id_product . ' n\'existe pas';
         } else {
-            
+
             $article = BimpObject::getInstance($this->module, 'BC_VenteArticle');
             $article_errors = $article->validateArray(array(
                 'id_vente'          => $this->id,
@@ -1631,60 +1627,112 @@ class BC_Vente extends BimpObject
     {
         $cart_html = '';
         $result_html = '';
-        $current_equipments = $this->getCurrentEquipments();
+
+        $equipements = array();
 
         // Recherche d'équipement via n° de série: 
         $rows = $this->db->getValues('be_equipment', 'id', 'serial = "' . $search . '" || concat("S", serial) = "' . $search . '"');
         if (!is_null($rows)) {
-            $equipements = array();
-
             foreach ($rows as $id_eq) {
                 if (!in_array((int) $id_eq, $equipements)) {
                     $equipements[] = (int) $id_eq;
                 }
             }
+        }
 
-            if (count($equipements) > 1) {
-                $msg = count($equipements) . ' équipements trouvés pour le numéro de série "' . $search . '"';
-                $result_html = BimpRender::renderAlerts($msg, 'info');
+        $products = array();
+        $products_warnings = array();
 
-                foreach ($equipements as $id_equipment) {
-                    $result_html .= $this->renderSelectEquipmentLine($id_equipment, $errors, $current_equipments);
-                }
-            } elseif (count($equipements)) {
-                if (array_key_exists($equipements[0], $current_equipments)) {
-                    $errors[] = 'L\'équipement correspondant au numéro de série "' . $search . '" a déjà été ajouté au panier';
-                } else {
-                    $cart_html = $this->addCartEquipement($equipements[0], $errors);
+        // Recherche Produits: 
+        $sql = 'SELECT p.rowid as id, p.label, p.ref, pe.serialisable FROM ' . MAIN_DB_PREFIX . 'product p ';
+        $sql .= 'LEFT JOIN ' . MAIN_DB_PREFIX . 'product_extrafields pe ';
+        $sql .= ' ON p.rowid = pe.fk_object';
+        $sql .= ' WHERE (p.barcode = "' . $search . '" OR p.ref LIKE "%' . $search . '%") AND tosell = 1';
+
+//        echo $sql;
+//        exit;
+
+        $rows = $this->db->executeS($sql, 'array');
+
+        if (!is_null($rows) && count($rows)) {
+            $current_products = $this->getCurrentProducts();
+
+            foreach ($rows as $r) {
+                if (!in_array((int) $r['id'], $products)) {
+                    if ((int) $r['serialisable']) {
+                        $products_warnings[] = 'Vous devez obligatoirement saisir le numéro de série pour enregistrer un produit "' . $r['ref'] . ' - ' . $r['label'] . '"';
+                        continue;
+                    }
+                    $products[] = (int) $r['id'];
                 }
             }
+        }
+
+        // Affichage des résultats: 
+
+        if (!count($equipements) && !count($products)) {
+            $result_html .= BimpRender::renderAlerts('Aucun produit ni équipement trouvé pour la recherche "' . $search . '"');
         } else {
-            // Recherche Produits: 
+            if (count($equipements)) {
+                $current_equipments = $this->getCurrentEquipments();
 
-            $sql = 'SELECT p.rowid as id, p.label, p.ref, pe.serialisable FROM ' . MAIN_DB_PREFIX . 'product p ';
-            $sql .= 'LEFT JOIN ' . MAIN_DB_PREFIX . 'product_extrafields pe ';
-            $sql .= ' ON p.rowid = pe.fk_object';
-            $sql .= ' WHERE (p.barcode = "' . $search . '" OR p.ref LIKE "%' . $search . '%") AND tosell = 1 ';
+                if (count($equipements === 1) && !count($products) && !count($products_warnings)) {
+                    // un seul équipement trouvé, ajout direct au panier:
+                    if (array_key_exists($equipements[0], $current_equipments)) {
+                        $result_html .= BimpRender::renderAlerts('L\'équipement #' . $equipements[0] . ' "' . $search . '" a déjà été ajouté au panier', 'warning');
+                    } else {
+                        $cart_html = $this->addCartEquipement($equipements[0], $errors);
+                    }
+                } else {
+                    // Liste des équipements à sélectionner: 
+                    $result_html .= '<h3>Equipements: </h3>';
+                    $msg = count($equipements) . ' équipements trouvés pour le numéro de série "' . $search . '"';
+                    $result_html .= BimpRender::renderAlerts($msg, 'info');
 
-            $rows = $this->db->executeS($sql, 'array');
-
-            if (!is_null($rows) && count($rows)) {
-                $products = array();
-                $current_products = $this->getCurrentProducts();
-
-                foreach ($rows as $r) {
-                    if (!in_array((int) $r['id'], $products)) {
-                        if ((int) $r['serialisable']) {
-                            $msg = 'Vous devez obligatoirement saisir le numéro de série pour enregistrer un produit "' . $r['ref'] . ' - ' . $r['label'] . '"';
-                            $result_html .= BimpRender::renderAlerts($msg, 'warning');
-                            continue;
+                    foreach ($equipements as $id_equipment) {
+                        if (array_key_exists($equipements[0], $current_equipments)) {
+                            $result_html .= BimpRender::renderAlerts('L\'équipement #' . $id_equipment . ' a déjà été ajouté au panier', 'warning');
+                        } else {
+                            $result_html .= $this->renderSelectEquipmentLine($id_equipment, $current_equipments);
                         }
-                        $products[] = (int) $r['id'];
                     }
                 }
+            }
 
-                if (count($rows) > 1) {
-                    if (count($products) > 6) {
+            if (count($products) || count($products_warnings)) {
+                if (count($products) === 1 && !count($equipements) && !count($products_warnings)) {
+                    // Un seul produit trouvé, ajout direct au panier: 
+                    $check = false;
+                    if (array_key_exists((int) $products[0], $current_products)) {
+                        $article = BimpCache::getBimpObjectInstance($this->module, 'BC_VenteArticle', (int) $current_products[(int) $products[0]]);
+                        if ($article->isLoaded()) {
+                            $check = true;
+                            $qty = (int) $article->getData('qty');
+                            $article->set('qty', ($qty + 1));
+                            $up_errors = $article->update();
+                            if (count($up_errors)) {
+                                $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $products[0]);
+                                if (BimpObject::objectLoaded($product)) {
+                                    $product_label = '"' . $product->getRef() . '"';
+                                } else {
+                                    $product_label = '#' . $products[0];
+                                }
+                                $result_html .= BimpRender::renderAlerts(BimpTools::getMsgFromArray($up_errors, 'Echec de la mise à jour des quantités pour le produit ' . $product_label), 'danger');
+                            }
+                        }
+                    }
+
+                    if (!$check) {
+                        $cart_html = $this->addCartProduct((int) $products[0], $errors);
+                    }
+                } else {
+                    $result_html .= '<h3>Produit non sérialisés: </h3>';
+                    if (count($products_warnings)) {
+                        foreach ($products_warnings as $msg) {
+                            $result_html .= BimpRender::renderAlerts($msg, 'warning');
+                        }
+                    }
+                    if (count($products) > 15) {
                         $msg = 'Un trop grand nombre de produits ont été trouvés.<br/>Veuillez utiliser un terme de recherche plus précis.';
                         $result_html .= BimpRender::renderAlerts($msg, 'warning');
                     } elseif (count($products)) {
@@ -1692,25 +1740,10 @@ class BC_Vente extends BimpObject
                         $result_html .= BimpRender::renderAlerts($msg, 'info');
 
                         foreach ($products as $id_product) {
-                            $result_html .= $this->renderSelectProductLine($id_product, $errors);
+                            $result_html .= $this->renderSelectProductLine($id_product);
                         }
-                    }
-                } elseif (count($products)) {
-                    if (array_key_exists((int) $products[0], $current_products)) {
-                        $article = BimpCache::getBimpObjectInstance($this->module, 'BC_VenteArticle', (int) $current_products[(int) $products[0]]);
-                        if ($article->isLoaded()) {
-                            $qty = (int) $article->getData('qty');
-                            $article->set('qty', ($qty + 1));
-                            $errors = array_merge($errors, $article->update());
-                        } else {
-                            $errors[] = 'Un article a déjà été ajouté au panier pour ce code-barres mais n\'a pas pu être mis à jour';
-                        }
-                    } else {
-                        $cart_html = $this->addCartProduct((int) $products[0], $errors);
                     }
                 }
-            } else {
-                $result_html .= BimpRender::renderAlerts('Aucun produit trouvé', 'warning');
             }
         }
 

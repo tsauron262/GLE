@@ -35,6 +35,18 @@ class Equipment extends BimpObject
 
     public function isAvailable($id_entrepot = 0, &$errors = array(), $allowed = array())
     {
+        // *** Valeurs possibles dans $allowed: ***
+        // id_reservation
+        // id_vente (vente caisse)
+        // id_sav
+        // id_propal
+        // id_facture 
+        // id_commande_line_return (ligne de commande client (Bimp_CommandeLine) pour un retour. 
+        // id_commande_fourn (retour)
+        // id_commande_fourn_line (retour)
+        // id_reception (retour)
+        // id_vente_return (retour en caisse)
+        
         if (!$this->isLoaded()) {
             $errors[] = 'ID de l\'équipement absent';
             return 0;
@@ -52,14 +64,11 @@ class Equipment extends BimpObject
         if (count($reservations)) {
             if (!isset($allowed['id_reservation']) || !(int) $allowed['id_reservation'] || !in_array((int) $allowed['id_reservation'], $reservations)) {
                 $errors[] = 'L\'équipement ' . $this->getNomUrl(0, 1, 1, 'default') . ' est réservé';
-                return 0;
             }
         }
 
         // Check des ventes caisse en cours (Brouillons): 
-        if (!$this->isNotInVenteBrouillon($errors, isset($allowed['id_vente']) ? (int) $allowed['id_vente'] : 0)) {
-            return 0;
-        }
+        $this->isNotInVenteBrouillon($errors, isset($allowed['id_vente']) ? (int) $allowed['id_vente'] : 0);
 
         // Check des SAV: 
         $filters = array(
@@ -80,7 +89,6 @@ class Equipment extends BimpObject
 
         if (BimpObject::objectLoaded($sav)) {
             $errors[] = 'L\'équipement ' . $this->getNomUrl(0, 1, 1, 'default') . ' est en cours de traitement dans le SAV ' . $sav->getNomUrl(0, 1, 1, 'default');
-            return 0;
         }
 
         // Check des ajouts aux devis SAV non validés: 
@@ -101,7 +109,6 @@ class Equipment extends BimpObject
                 $sav = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SAV', (int) $r['id']);
                 if (BimpObject::objectLoaded($sav)) {
                     $errors[] = 'L\'équipement ' . $this->getNomUrl(0, 1, 1, 'default') . ' a été ajouté à un devis SAV non terminé: ' . $sav->getNomUrl(0, 1, 1, 'default');
-                    return 0;
                 }
             }
         }
@@ -125,7 +132,6 @@ class Equipment extends BimpObject
                     $errors[] = 'L\'équipement ' . $this->getNomUrl(0, 1, 1, 'default') . ' a été ajouté à une facture non validée ' . $facture->getNomUrl(0, 1, 1, 'full');
                 }
             }
-            return 0;
         }
 
         // Check retour en commande client: 
@@ -138,15 +144,60 @@ class Equipment extends BimpObject
                         $msg = 'Un retour est en cours pour l\'équipement ' . $this->getNomUrl(0, 1, 1, 'default');
                         $msg .= ' dans la commande client ' . $commande->getNomUrl(0, 1, 1, 'full');
                         $errors[] = $msg;
-                        return 0;
                     }
                 }
             }
         }
 
-        // Check des retours caisse: 
-        $check = 1;
+        // Check retour fournisseur: 
+        $id_product = (int) $this->getData('id_product');
+        if ($id_product) {
+            $sql = 'SELECT l.id FROM ' . MAIN_DB_PREFIX . 'bimp_commande_fourn_line l';
+            $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commande_fournisseurdet det ON l.id_line = det.rowid';
+            $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commande_fournisseur cf ON cf.rowid = l.id_obj';
+            if ((int) $id_entrepot) {
+                $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commande_fournisseur_extrafields cfef ON cfef.fk_object = cf.rowid';
+            }
+            $sql .= ' WHERE cf.fk_statut BETWEEN 3 AND 4';
+            $sql .= ' AND det.fk_product = ' . (int) $id_product;
+            $sql .= ' AND det.qty < 0';
 
+            if ($id_entrepot) {
+                $sql .= ' AND cfef.entrepot = ' . (int) $id_entrepot;
+            }
+
+            if (isset($allowed['id_commande_fourn']) && (int) $allowed['id_commande_fourn']) {
+                $sql .= ' AND cf.rowid != ' . (int) $allowed['id_commande_fourn'];
+            }
+
+            if (isset($allowed['id_commande_fourn_line']) && (int) $allowed['id_commande_fourn_line']) {
+                $sql .= ' AND l.id != ' . (int) $allowed['id_commande_fourn_line'];
+            }
+
+            $rows = $this->db->executeS($sql, 'array');
+            if (!is_null($rows) && !empty($rows)) {                
+                foreach ($rows as $r) {
+                    $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFournLine', (int) $r['id']);
+                    if (BimpObject::objectLoaded($line)) {
+                        $id_reception = (int) $line->getReturnedEquipmentIdReception((int) $this->id);
+                        if ($id_reception) {
+                            if (isset($allowed['id_reception']) && (int) $allowed['id_reception'] === $id_reception) {
+                                continue;
+                            }
+
+                            $commande = $line->getParentInstance();
+
+                            if (BimpObject::objectLoaded($commande)) {
+                                $errors[] = 'L\'équipement ' . $this->getNomUrl(0, 1, 1, 'default') . ' a été ajouté comme retour dans la commande fournisseur ' . $commande->getNomUrl(0, 1, 1, 'full');
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+
+        // Check des retours caisse: 
         if ($this->isLoaded()) {
             BimpObject::loadClass('bimpcaisse', 'BC_Vente');
 
@@ -162,12 +213,11 @@ class Equipment extends BimpObject
             if (!is_null($rows) && !empty($rows)) {
                 foreach ($rows as $r) {
                     $errors[] = 'L\'équipement ' . $this->getNomUrl(0, 1, 1, 'default') . ' a été ajouté dans un retour caisse en cours (vente #' . $r['id'] . ')';
-                    $check = 0;
                 }
             }
         }
 
-        return $check;
+        return (count($errors) ? 0 : 1);
     }
 
     public function isInEntrepot($id_entrepot = 0, &$errors = array())
@@ -666,7 +716,7 @@ class Equipment extends BimpObject
         return 'ID de l\'équipement absent';
     }
 
-//    Traitements: 
+    // Traitements: 
 
     public function onNewPlace()
     {
@@ -927,7 +977,7 @@ class Equipment extends BimpObject
         return $errors;
     }
 
-//    Renders: 
+    // Renders: 
 
     public function renderReservationsList()
     {
@@ -945,7 +995,7 @@ class Equipment extends BimpObject
         return $html;
     }
 
-//    Overrides
+    // Overrides
 
     public function reset()
     {

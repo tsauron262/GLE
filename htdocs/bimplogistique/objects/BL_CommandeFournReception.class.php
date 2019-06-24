@@ -219,7 +219,7 @@ class BL_CommandeFournReception extends BimpObject
                 if ((int) $line->getData('type') === Bimp_CommandeFournLine::LINE_PRODUCT) {
                     $product = $line->getProduct();
                     if (BimpObject::objectLoaded($product) && (int) $product->getData('fk_product_type') === 0) {
-                        if ((float) $line->getFullQty() > (float) $line->getReceivedQty()) {
+                        if (abs((float) $line->getFullQty()) > abs((float) $line->getReceivedQty())) {
                             $lines[] = $line;
                         }
                     }
@@ -244,6 +244,7 @@ class BL_CommandeFournReception extends BimpObject
                     $tpl = $line->renderReceptionFormRowTpl(false);
                     $tpl = str_replace('receptionidx', '1', $tpl);
                     $tpl = str_replace('linetotalmaxinputclass', 'line_' . $line->id . '_reception_max', $tpl);
+                    $tpl = str_replace('linetotalmininputclass', 'line_' . $line->id . '_reception_min', $tpl);
                     $html .= '<tr class="reception_row">';
                     $html .= '<td>' . $line->displayLineData('desc') . '</td>';
                     $html .= $tpl;
@@ -283,18 +284,31 @@ class BL_CommandeFournReception extends BimpObject
         $html = '';
 
         $html .= '<td style="width: 220px;">';
-        $html .= BimpInput::renderInput('qty', 'line_' . $line->id . '_reception_' . $this->id . '_qty_' . $idx . '_qty', (float) $qty, array(
-                    'data'        => array(
-                        'data_type'              => 'number',
-                        'decimals'               => 0,
-                        'min'                    => 0,
-                        'max'                    => $max,
-                        'total_max_value'        => $total_max,
-                        'total_max_inputs_class' => 'line_' . $line->id . '_qty_input'
-                    ),
-                    'max_label'   => 1,
-                    'extra_class' => 'total_max line_' . $line->id . '_qty_input'
-        ));
+
+        $options = array(
+            'data' => array(
+                'data_type' => 'number',
+                'decimals'  => 0,
+                'min'       => 0,
+                'max'       => 0
+            )
+        );
+
+        if ((float) $line->getFullQty() >= 0) {
+            $options['data']['max'] = $max;
+            $options['data']['total_max_value'] = $total_max;
+            $options['data']['total_max_inputs_class'] = 'line_' . $line->id . '_qty_input';
+            $options['max_label'] = 1;
+            $options['extra_class'] = 'total_max line_' . $line->id . '_qty_input';
+        } else {
+            $options['data']['min'] = $max;
+            $options['data']['total_min_value'] = $total_max;
+            $options['data']['total_min_inputs_class'] = 'line_' . $line->id . '_qty_input';
+            $options['min_label'] = 1;
+            $options['extra_class'] = 'total_min line_' . $line->id . '_qty_input';
+        }
+
+        $html .= BimpInput::renderInput('qty', 'line_' . $line->id . '_reception_' . $this->id . '_qty_' . $idx . '_qty', (float) $qty, $options);
         $html .= '</td>';
 
         $html .= '<td style="width: 120px;">';
@@ -324,7 +338,7 @@ class BL_CommandeFournReception extends BimpObject
         $html .= '</td>';
 
         $html .= '<td>';
-        $onclick = '$(this).popover(\'hide\'); $(this).parent(\'td\').parent(\'tr\').remove();';
+        $onclick = '$(this).popover(\'hide\'); var $tr = $(this).parent(\'td\').parent(\'tr\');$tr.find(\'input.line_' . $line->id . '_qty_input\').val(0).change();$tr.remove();';
         $html .= BimpRender::renderRowButton('Suppprimer', 'fas_trash-alt', $onclick);
         $html .= '</td>';
 
@@ -369,19 +383,58 @@ class BL_CommandeFournReception extends BimpObject
         return $html;
     }
 
+    public function renderLineReturnEquipmentInputs($line, Equipment $equipment, $pu_ht, $tva_tx)
+    {
+        $html = '';
+
+        $html .= '<td style="width: 220px" class="equipment" data-id_equipment="' . $equipment->id . '">' . $equipment->getNomUrl(1, 1, 1, 'default') . '</td>';
+        $html .= '<td style="width: 120px">';
+        $html .= BimpInput::renderInput('text', 'line_' . $line->id . '_reception_' . $this->id . '_return_equipment_' . $equipment->id . '_pu_ht', $pu_ht, array(
+                    'addon_right' => BimpRender::renderIcon('fas_euro-sign'),
+                    'data'        => array(
+                        'data_type' => 'number',
+                        'decimals'  => 6,
+                        'min'       => 'none',
+                        'max'       => 'none'
+                    ),
+                    'style'       => 'max-width: 80px!important;'
+        ));
+        $html .= '</td>';
+
+        $html .= '<td style="width: 120px">';
+        $html .= BimpInput::renderInput('text', 'line_' . $line->id . '_reception_' . $this->id . '_return_equipment_' . $equipment->id . '_tva_tx', $tva_tx, array(
+                    'addon_right' => BimpRender::renderIcon('fas_percent'),
+                    'data'        => array(
+                        'data_type' => 'number',
+                        'decimals'  => 3,
+                        'min'       => 0,
+                        'max'       => 100
+                    ),
+                    'style'       => 'max-width: 80px!important;'
+        ));
+        $html .= '</td>';
+
+        $html .= '<td>';
+        $onclick = '$(this).popover(\'hide\');$(this).parent(\'td\').parent(\'tr\').remove();';
+        $html .= BimpRender::renderRowButton('Suppprimer', 'fas_trash-alt', $onclick);
+        $html .= '</td>';
+
+        return $html;
+    }
+
     public function renderDetailsView()
     {
         $html = '';
 
-        $commandes = $this->getParentInstance();
+        $commandeFourn = $this->getParentInstance();
 
         $edit = ($this->getData('status') === self::BLCFR_BROUILLON);
 
-        if (!BimpObject::objectLoaded($commandes)) {
+        if (!BimpObject::objectLoaded($commandeFourn)) {
             return BimpRender::renderAlerts('ID de la commande fournisseur absent');
         }
 
-        $lines = $commandes->getChildrenObjects('lines');
+        $lines = $commandeFourn->getChildrenObjects('lines');
 
         if (empty($lines)) {
             return BimpRender::renderAlerts('Aucune ligne enregistrée pour cette commande fournisseur');
@@ -419,12 +472,14 @@ class BL_CommandeFournReception extends BimpObject
         $has_lines = false;
 
         foreach ($lines as $line) {
-            $max = (float) $line->getReceptionAvailableQty($this->id);
-            $line_pu_ht = (float) $line->getUnitPriceHTWithRemises();
+            $isReturn = ((float) $line->getFullQty() < 0);
 
+            $max = (float) $line->getReceptionAvailableQty($this->id);
             if (!$max) {
                 continue;
             }
+
+            $line_pu_ht = (float) $line->getUnitPriceHTWithRemises();
 
             $reception_data = $line->getReceptionData($this->id);
 
@@ -441,21 +496,21 @@ class BL_CommandeFournReception extends BimpObject
             }
 
             $commande_client_line = null;
-            if ($line->getData('linked_object_name') === 'commande_line') {
+            if (!$isReturn && $line->getData('linked_object_name') === 'commande_line') {
                 $commande_client_line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $line->getData('linked_id_object'));
             }
 
-            $html .= '<tr class="line_row" data-id_line="' . $line->id . '" data-line_position="' . $line->getData('position') . '" data-serialisable="' . (int) $isSerialisable . '">';
+            $html .= '<tr class="line_row" data-id_line="' . $line->id . '" data-line_position="' . $line->getData('position') . '" data-serialisable="' . (int) $isSerialisable . '" data-is_return="' . (int) $isReturn . '">';
 
             // Desc: 
             $html .= '<td>';
             $html .= $line->displayLineData('desc');
             if (BimpObject::objectLoaded($commande_client_line)) {
-                $commande = $commande_client_line->getParentInstance();
-                if (BimpObject::objectLoaded($commande)) {
+                $commandeClient = $commande_client_line->getParentInstance();
+                if (BimpObject::objectLoaded($commandeClient)) {
                     $html .= '<br/><br/>';
                     $html .= '<strong>Commande client d\'origine: </strong>';
-                    $html .= $commande->getNomUrl(1, 1, 1, 'full') . '&nbsp;&nbsp;(Ligne n°' . $commande_client_line->getData('position') . ')';
+                    $html .= $commandeClient->getNomUrl(1, 1, 1, 'full') . '&nbsp;&nbsp;(Ligne n°' . $commande_client_line->getData('position') . ')';
                 }
             }
             $html .= '</td>';
@@ -463,76 +518,172 @@ class BL_CommandeFournReception extends BimpObject
             if ($edit) {
                 if ($isSerialisable) {
                     $html .= '<td colspan="' . $colspan . '">';
-                    if (isset($reception_data['serials']) && !empty($reception_data['serials'])) {
-                        $html .= '<table class="bimp_list_table">';
-                        $html .= '<tbody>';
 
-                        foreach ($reception_data['serials'] as $serial_data) {
-                            if (isset($serial_data['serial']) && (string) $serial_data['serial']) {
-                                $pu_ht = (isset($serial_data['pu_ht']) ? (float) $serial_data['pu_ht'] : $line_pu_ht);
-                                $tva_tx = (isset($serial_data['tva_tx']) ? (float) $serial_data['tva_tx'] : (float) $line->tva_tx);
-                                $html .= '<tr class="line_' . $line->id . '_serial_data">';
-                                $html .= $this->renderLineSerialInputs($line, $serial_data['serial'], $pu_ht, $tva_tx);
-                                $html .= '</tr>';
+                    if (!$isReturn) {
+                        // *** Edition / ajout des nouveaux numéros de série: ***
+
+                        if (isset($reception_data['serials']) && !empty($reception_data['serials'])) {
+                            // Liste des N° de série déjà ajoutés: 
+                            $html .= '<table class="bimp_list_table">';
+                            $html .= '<tbody>';
+
+                            foreach ($reception_data['serials'] as $serial_data) {
+                                if (isset($serial_data['serial']) && (string) $serial_data['serial']) {
+                                    $pu_ht = (isset($serial_data['pu_ht']) ? (float) $serial_data['pu_ht'] : $line_pu_ht);
+                                    $tva_tx = (isset($serial_data['tva_tx']) ? (float) $serial_data['tva_tx'] : (float) $line->tva_tx);
+                                    $html .= '<tr class="line_' . $line->id . '_serial_data">';
+                                    $html .= $this->renderLineSerialInputs($line, $serial_data['serial'], $pu_ht, $tva_tx);
+                                    $html .= '</tr>';
+                                }
                             }
+
+                            $html .= '</tbody>';
+                            $html .= '</table>';
+
+                            $max -= count($reception_data['serials']);
                         }
 
+                        // Nouveaux n° de séries à ajouter: 
+                        $html .= '<div style="margin-top: 12px"><span class="bold">N° de série à ajouter: </span></div>';
+                        $html .= BimpInput::renderInput('textarea', 'line_' . $line->id . '_reception_' . $this->id . '_new_serials', '', array(
+                                    'auto_expand'      => true,
+                                    'tab_key_as_enter' => true
+                        ));
+                        $html .= '<p class="inputHelp" style="display: block;">Séparateurs possibles: sauts de ligne, espaces, virgules ou points-virgules.<br/>';
+                        $html .= 'Max: ' . $max . ' numéro' . ($max > 1 ? 's' : '') . ' de série.';
+                        $html .= '</p>';
+
+                        $html .= '<div style="margin-top: 12px">';
+                        $html .= '<table class="bimp_list_table">';
+                        $html .= '<tbody>';
+                        $html .= '<tr>';
+                        $html .= '<td style="width: 220px"><span class="bold">Nouveaux n° de série: </span></td>';
+                        $html .= '<td style="width: 120px">';
+                        $html .= BimpInput::renderInput('text', 'line_' . $line->id . '_reception_' . $this->id . '_new_serials_pu_ht', $line_pu_ht, array(
+                                    'addon_right' => BimpRender::renderIcon('fas_euro-sign'),
+                                    'data'        => array(
+                                        'data_type' => 'number',
+                                        'decimals'  => 6,
+                                        'min'       => 'none',
+                                        'max'       => 'none'
+                                    ),
+                                    'style'       => 'max-width: 80px!important;'
+                        ));
+                        $html .= '</td>';
+
+                        $html .= '<td style="width: 120px">';
+                        $html .= BimpInput::renderInput('text', 'line_' . $line->id . '_reception_' . $this->id . '_new_serials_tva_tx', $line->tva_tx, array(
+                                    'addon_right' => BimpRender::renderIcon('fas_percent'),
+                                    'data'        => array(
+                                        'data_type' => 'number',
+                                        'decimals'  => 3,
+                                        'min'       => 0,
+                                        'max'       => 100
+                                    ),
+                                    'style'       => 'max-width: 80px!important;'
+                        ));
+                        $html .= '</td>';
+                        $html .= '<td></td>';
+                        $html .= '</tr>';
                         $html .= '</tbody>';
                         $html .= '</table>';
+                        $html .= '</div>';
 
-                        $max -= count($reception_data['serials']);
-                    }
+                        if (BimpObject::objectLoaded($commande_client_line)) {
+                            $assign = (int) (isset($reception_data['assign_to_commande_client']) ? $reception_data['assign_to_commande_client'] : $this->getData('assign_lines_to_commandes_client'));
+                            $html .= '<div style="margin-top: 12px">';
+                            $html .= '<span class="bold">Assigner les équipements reçus à la ligne de commande client d\'origine: </span><br/>';
+                            $html .= BimpInput::renderInput('toggle', 'line_' . $line->id . '_reception_' . $this->id . '_assign_to_commande_client', $assign);
+                            $html .= '</div>';
+                        }
+                    } else {
+                        // *** Edition / Ajout des équipements retournés: ***
+                        if (isset($reception_data['return_equipments']) && !empty($reception_data['return_equipments'])) {
 
-                    $html .= '<div style="margin-top: 12px">N° de série à ajouter: </div>';
-                    $html .= BimpInput::renderInput('textarea', 'line_' . $line->id . '_reception_' . $this->id . '_new_serials', '', array(
-                                'auto_expand'      => true,
-                                'tab_key_as_enter' => true
-                    ));
-                    $html .= '<p class="inputHelp" style="display: block;">Séparateurs possibles: sauts de ligne, espaces, virgules ou points-virgules.<br/>';
-                    $html .= 'Max: ' . $max . ' numéro' . ($max > 1 ? 's' : '') . ' de série.';
-                    $html .= '</p>';
+                            // Liste des équipements déjà ajoutés: 
+                            $id_entrepot = (int) $commandeFourn->getData('entrepot');
 
-                    $html .= '<div style="margin-top: 12px">';
-                    $html .= '<table class="bimp_list_table">';
-                    $html .= '<tbody>';
-                    $html .= '<tr>';
-                    $html .= '<td style="width: 220px">Nouveaux n° de série: </td>';
-                    $html .= '<td style="width: 120px">';
-                    $html .= BimpInput::renderInput('text', 'line_' . $line->id . '_reception_' . $this->id . '_new_serials_pu_ht', $line_pu_ht, array(
-                                'addon_right' => BimpRender::renderIcon('fas_euro-sign'),
-                                'data'        => array(
-                                    'data_type' => 'number',
-                                    'decimals'  => 6,
-                                    'min'       => 'none',
-                                    'max'       => 'none'
-                                ),
-                                'style'       => 'max-width: 80px!important;'
-                    ));
-                    $html .= '</td>';
+                            $html .= '<table class="bimp_list_table">';
+                            $html .= '<tbody>';
 
-                    $html .= '<td style="width: 120px">';
-                    $html .= BimpInput::renderInput('text', 'line_' . $line->id . '_reception_' . $this->id . '_new_serials_tva_tx', $line->tva_tx, array(
-                                'addon_right' => BimpRender::renderIcon('fas_percent'),
-                                'data'        => array(
-                                    'data_type' => 'number',
-                                    'decimals'  => 3,
-                                    'min'       => 0,
-                                    'max'       => 100
-                                ),
-                                'style'       => 'max-width: 80px!important;'
-                    ));
-                    $html .= '</td>';
-                    $html .= '<td></td>';
-                    $html .= '</tr>';
-                    $html .= '</tbody>';
-                    $html .= '</table>';
-                    $html .= '</div>';
+                            foreach ($reception_data['return_equipments'] as $id_equipment => $equipment_data) {
+                                $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+                                $eq_errors = array();
+                                if (!BimpObject::objectLoaded($equipment)) {
+                                    $eq_errors[] = 'L\'équipement d\'ID ' . $id_equipment . ' n\'existe plus';
+                                } else {
+                                    $equipment->isAvailable($id_entrepot, $eq_errors, array(
+                                        'id_reception' => (int) $this->id
+                                    ));
 
-                    if (BimpObject::objectLoaded($commande_client_line)) {
-                        $assign = (int) (isset($reception_data['assign_to_commande_client']) ? $reception_data['assign_to_commande_client'] : $this->getData('assign_lines_to_commandes_client'));
+                                    if (count($eq_errors)) {
+                                        $html .= '<tr>';
+                                        $html .= '<td colspan="4">';
+                                        $html .= BimpRender::renderAlerts($eq_errors);
+                                        $html .= '</td>';
+                                        $html .= '</tr>';
+                                    } else {
+                                        $pu_ht = (isset($equipment_data['pu_ht']) ? (float) $equipment_data['pu_ht'] : $line_pu_ht);
+                                        $tva_tx = (isset($equipment_data['tva_tx']) ? (float) $equipment_data['tva_tx'] : (float) $line->tva_tx);
+                                        $html .= '<tr class="line_' . $line->id . '_return_equipment_data" data-id_equipment="' . $id_equipment . '">';
+                                        $html .= $this->renderLineReturnEquipmentInputs($line, $equipment, $pu_ht, $tva_tx);
+                                        $html .= '</tr>';
+                                        $max++;
+                                    }
+                                }
+                            }
+
+                            $html .= '</tbody>';
+                            $html .= '</table>';
+                        }
+
+                        // Nouveaux Equipements à ajouter aux retours: 
+                        $html .= '<div style="margin-top: 12px"><span class="bold">Equipements à retourner: </span></div>';
+
+                        $input_name = 'line_' . $line->id . '_reception_' . $this->id . '_new_return_equipments';
+                        $equipments_to_return = $line->getReturnableEquipmentsArray();
+                        $input_content = BimpInput::renderInput('select', $input_name . '_add_value', array(), array(
+                                    'options' => $equipments_to_return
+                        ));
+                        $content = BimpInput::renderMultipleValuesInput($this, $input_name, $input_content, array(), '', 0, 0, 1, abs($max));
+                        $html .= BimpInput::renderInputContainer($input_name, '', $content, '', 0, 1, '', array(
+                                    'values_field' => $input_name
+                        ));
+
                         $html .= '<div style="margin-top: 12px">';
-                        $html .= 'Assigner les équipements reçus à la ligne de commande client d\'origine: <br/>';
-                        $html .= BimpInput::renderInput('toggle', 'line_' . $line->id . '_reception_' . $this->id . '_assign_to_commande_client', $assign);
+                        $html .= '<table class="bimp_list_table">';
+                        $html .= '<tbody>';
+                        $html .= '<tr>';
+                        $html .= '<td style="width: 220px"><span class="bold">Nouveaux équipements à retourner: </span></td>';
+                        $html .= '<td style="width: 120px">';
+                        $html .= BimpInput::renderInput('text', 'line_' . $line->id . '_reception_' . $this->id . '_new_return_equipments_pu_ht', $line_pu_ht, array(
+                                    'addon_right' => BimpRender::renderIcon('fas_euro-sign'),
+                                    'data'        => array(
+                                        'data_type' => 'number',
+                                        'decimals'  => 6,
+                                        'min'       => 'none',
+                                        'max'       => 'none'
+                                    ),
+                                    'style'       => 'max-width: 80px!important;'
+                        ));
+                        $html .= '</td>';
+
+                        $html .= '<td style="width: 120px">';
+                        $html .= BimpInput::renderInput('text', 'line_' . $line->id . '_reception_' . $this->id . '_new_return_equipments_tva_tx', $line->tva_tx, array(
+                                    'addon_right' => BimpRender::renderIcon('fas_percent'),
+                                    'data'        => array(
+                                        'data_type' => 'number',
+                                        'decimals'  => 3,
+                                        'min'       => 0,
+                                        'max'       => 100
+                                    ),
+                                    'style'       => 'max-width: 80px!important;'
+                        ));
+                        $html .= '</td>';
+                        $html .= '<td></td>';
+                        $html .= '</tr>';
+                        $html .= '</tbody>';
+                        $html .= '</table>';
                         $html .= '</div>';
                     }
 
@@ -575,7 +726,7 @@ class BL_CommandeFournReception extends BimpObject
                     $html .= '</div>';
                     $html .= '</div>';
 
-                    if (BimpObject::objectLoaded($commande_client_line)) {
+                    if (!$isReturn && BimpObject::objectLoaded($commande_client_line)) {
                         $assign = (int) (isset($reception_data['assign_to_commande_client']) ? $reception_data['assign_to_commande_client'] : $this->getData('assign_lines_to_commandes_client'));
                         $html .= '<div style="margin-top: 12px">';
                         $html .= 'Assigner les unités reçues à la ligne de commande client d\'origine: <br/>';
@@ -591,11 +742,38 @@ class BL_CommandeFournReception extends BimpObject
                 $html .= '<tbody>';
 
                 if ($isSerialisable) {
-                    foreach ($reception_data['equipments'] as $id_equipment => $equipment_data) {
-                        $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
-                        if (BimpObject::objectLoaded($equipment)) {
+                    if (!$isReturn) {
+                        // *** Affichage équipements reçus: ***
+                        foreach ($reception_data['equipments'] as $id_equipment => $equipment_data) {
                             $html .= '<tr>';
-                            $html .= '<td style="width: 220px">' . $equipment->getNomUrl(1, 1, 1) . '</td>';
+                            $html .= '<td style="width: 220px">';
+                            $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+                            if (BimpObject::objectLoaded($equipment)) {
+                                $html .= $equipment->getNomUrl(1, 1, 1);
+                            } else {
+                                $html .= BimpRender::renderAlerts('L\'équipement #' . $id_equipment . ' n\'existe plus');
+                            }
+                            $html .= '</td>';
+
+                            $html .= '<td style="width: 120px">' . BimpTools::displayMoneyValue((float) isset($equipment_data['pu_ht']) ? $equipment_data['pu_ht'] : $line_pu_ht) . '</td>';
+                            $html .= '<td style="width: 120px">' . BimpTools::displayFloatValue((float) isset($equipment_data['tva_tx']) ? $equipment_data['tva_tx'] : $line->tva_tx, 3) . '%</td>';
+                            $html .= '<td></td>';
+                            $html .= '</tr>';
+                        }
+                    } else {
+                        // *** Affichage équipements retournés: ***
+                        $html .= '<tr><td colspan="4"><span class="danger">Equipements retournés:</span></td></tr>';
+                        foreach ($reception_data['return_equipments'] as $id_equipment => $equipment_data) {
+                            $html .= '<tr>';
+                            $html .= '<td style="width: 220px">';
+                            $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+                            if (BimpObject::objectLoaded($equipment)) {
+                                $html .= $equipment->getNomUrl(1, 1, 1);
+                            } else {
+                                $html .= BimpRender::renderAlerts('L\'équipement #' . $id_equipment . ' n\'existe plus');
+                            }
+                            $html .= '</td>';
+
                             $html .= '<td style="width: 120px">' . BimpTools::displayMoneyValue((float) isset($equipment_data['pu_ht']) ? $equipment_data['pu_ht'] : $line_pu_ht) . '</td>';
                             $html .= '<td style="width: 120px">' . BimpTools::displayFloatValue((float) isset($equipment_data['tva_tx']) ? $equipment_data['tva_tx'] : $line->tva_tx, 3) . '%</td>';
                             $html .= '<td></td>';
@@ -651,7 +829,6 @@ class BL_CommandeFournReception extends BimpObject
     {
         $lines_data = array();
 
-        $has_units = false;
         if (isset($data['lines']) && is_array($data['lines']) && !empty($data['lines'])) {
             foreach ($data['lines'] as $line_data) {
                 if (isset($line_data['id_line']) && (int) $line_data['id_line']) {
@@ -665,70 +842,101 @@ class BL_CommandeFournReception extends BimpObject
                     $qty = 0;
                     $qties = array();
                     $serials = array();
+                    $return_equipments = array();
+
+                    $isSerialiable = $line->isProductSerialisable();
+                    $isReturn = ((float) $line->getFullQty() < 0);
 
                     $line_pu_ht = (float) $line->getUnitPriceHTWithRemises();
 
-                    if (isset($line_data['qties']) && !empty($line_data['qties'])) {
-                        foreach ($line_data['qties'] as $qty_data) {
-                            if (isset($qty_data['qty']) && (float) $qty_data['qty']) {
-                                $qties[] = array(
-                                    'qty'    => (float) $qty_data['qty'],
-                                    'pu_ht'  => (float) (isset($qty_data['pu_ht']) ? $qty_data['pu_ht'] : $line_pu_ht),
-                                    'tva_tx' => (float) (isset($qty_data['tva_tx']) ? $qty_data['tva_tx'] : $line->tva_tx),
-                                );
-                                $qty += (float) $qty_data['qty'];
+                    if ($isSerialiable) {
+                        if (!$isReturn) {
+                            if (isset($line_data['serials']) && !empty($line_data['serials'])) {
+                                foreach ($line_data['serials'] as $serial_data) {
+                                    if (isset($serial_data['serial']) && (string) $serial_data['serial']) {
+                                        $serials[] = array(
+                                            'serial' => $serial_data['serial'],
+                                            'pu_ht'  => (float) (isset($serial_data['pu_ht']) ? $serial_data['pu_ht'] : $line_pu_ht),
+                                            'tva_tx' => (float) (isset($serial_data['tva_tx']) ? $serial_data['tva_tx'] : $line->tva_tx),
+                                        );
+                                        $qty++;
+                                    }
+                                }
+                            }
+
+                            if (isset($line_data['new_serials']) && (string) $line_data['new_serials']) {
+                                $new_serials = $line->explodeSerials($line_data['new_serials']);
+                                $pu_ht = (isset($line_data['new_serials_pu_ht']) ? (float) $line_data['new_serials_pu_ht'] : $line_pu_ht);
+                                $tva_tx = (isset($line_data['new_serials_tva_tx']) ? (float) $line_data['new_serials_tva_tx'] : (float) $line->tva_tx);
+
+                                if (count($new_serials)) {
+                                    foreach ($new_serials as $new_serial) {
+                                        $serials[] = array(
+                                            'serial' => $new_serial,
+                                            'pu_ht'  => (float) $pu_ht,
+                                            'tva_tx' => (float) $tva_tx,
+                                        );
+                                        $qty++;
+                                    }
+                                }
+                            }
+                        } else {
+                            if (isset($line_data['return_equipments']) && !empty($line_data['return_equipments'])) {
+                                foreach ($line_data['return_equipments'] as $equipment_data) {
+                                    if (isset($equipment_data['id_equipment']) && (int) $equipment_data['id_equipment']) {
+                                        if (array_key_exists((int) $equipment_data['id_equipment'], $return_equipments)) {
+                                            continue;
+                                        }
+                                        $return_equipments[(int) $equipment_data['id_equipment']] = array(
+                                            'pu_ht'  => (float) (isset($equipment_data['pu_ht']) ? $equipment_data['pu_ht'] : $line_pu_ht),
+                                            'tva_tx' => (float) (isset($equipment_data['tva_tx']) ? $equipment_data['tva_tx'] : $line->tva_tx),
+                                        );
+                                        $qty--;
+                                    }
+                                }
+                            }
+
+                            if (isset($line_data['new_return_equipments']) && is_array($line_data['new_return_equipments']) && !empty($line_data['new_return_equipments'])) {
+                                $pu_ht = (isset($line_data['new_return_equipments_pu_ht']) ? (float) $line_data['new_return_equipments_pu_ht'] : $line_pu_ht);
+                                $tva_tx = (isset($line_data['new_return_equipments_tva_tx']) ? (float) $line_data['new_return_equipments_tva_tx'] : (float) $line->tva_tx);
+
+                                foreach ($line_data['new_return_equipments'] as $id_equipment) {
+                                    if (array_key_exists((int) $id_equipment, $return_equipments)) {
+                                        continue;
+                                    }
+                                    $return_equipments[(int) $id_equipment] = array(
+                                        'pu_ht'  => (float) $pu_ht,
+                                        'tva_tx' => (float) $tva_tx,
+                                    );
+                                    $qty--;
+                                }
+                            }
+                        }
+                    } else {
+                        if (isset($line_data['qties']) && !empty($line_data['qties'])) {
+                            foreach ($line_data['qties'] as $qty_data) {
+                                if (isset($qty_data['qty']) && (float) $qty_data['qty']) {
+                                    $qties[] = array(
+                                        'qty'    => (float) $qty_data['qty'],
+                                        'pu_ht'  => (float) (isset($qty_data['pu_ht']) ? $qty_data['pu_ht'] : $line_pu_ht),
+                                        'tva_tx' => (float) (isset($qty_data['tva_tx']) ? $qty_data['tva_tx'] : $line->tva_tx),
+                                    );
+                                    $qty += (float) $qty_data['qty'];
+                                }
                             }
                         }
                     }
-
-
-                    if (isset($line_data['serials']) && !empty($line_data['serials'])) {
-                        foreach ($line_data['serials'] as $serial_data) {
-                            if (isset($serial_data['serial']) && (string) $serial_data['serial']) {
-                                $serials[] = array(
-                                    'serial' => $serial_data['serial'],
-                                    'pu_ht'  => (float) (isset($serial_data['pu_ht']) ? $serial_data['pu_ht'] : $line_pu_ht),
-                                    'tva_tx' => (float) (isset($serial_data['tva_tx']) ? $serial_data['tva_tx'] : $line->tva_tx),
-                                );
-                                $qty++;
-                            }
-                        }
-                    }
-
-                    if (isset($line_data['new_serials']) && (string) $line_data['new_serials']) {
-                        $new_serials = $line->explodeSerials($line_data['new_serials']);
-                        $pu_ht = (isset($line_data['new_serials_pu_ht']) ? (float) $line_data['new_serials_pu_ht'] : $line_pu_ht);
-                        $tva_tx = (isset($line_data['new_serials_tva_tx']) ? (float) $line_data['new_serials_tva_tx'] : (float) $line->tva_tx);
-
-                        if (count($new_serials)) {
-                            foreach ($new_serials as $new_serial) {
-                                $serials[] = array(
-                                    'serial' => $new_serial,
-                                    'pu_ht'  => (float) $pu_ht,
-                                    'tva_tx' => (float) $tva_tx,
-                                );
-                                $qty++;
-                            }
-                        }
-                    }
-
-                    if ((float) $qty) {
-                        $has_units = true;
-                    }
-
                     $lines_data[(int) $line_data['id_line']] = array(
                         'qty'                       => $qty,
                         'qties'                     => $qties,
                         'serials'                   => $serials,
+                        'return_equipments'         => $return_equipments,
                         'assign_to_commande_client' => (isset($line_data['assign_to_commande_client']) ? (int) $line_data['assign_to_commande_client'] : 0),
                     );
                 }
             }
         }
 
-//        if (!$has_units) {
-//            $errors[] = 'Aucune unité ajouté à cette réception';
-//        }
         return $lines_data;
     }
 

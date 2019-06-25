@@ -1,5 +1,10 @@
 bootstrap: 1
 
+title: 
+    callback: 
+        object: client
+        method: getPageTitle
+        
 objects: 
     client: 
         instance: 

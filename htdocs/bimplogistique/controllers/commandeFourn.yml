@@ -1,5 +1,8 @@
 bootstrap: 1
 
+title: 
+    callback: getPageTitle
+    
 js:
     - /bimpreservation/views/js/reservation.js
     - /bimplogistique/views/js/logistique.js

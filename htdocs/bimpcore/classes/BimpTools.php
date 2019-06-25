@@ -1588,6 +1588,24 @@ class BimpTools
         return (float) $str_number;
     }
 
+    public static function getStringNbLines($string, $maxLineChars)
+    {
+        $words = explode(' ', $string);
+
+        $n = 1;
+        $count = 0;
+
+        foreach ($words as $word) {
+            $count += strlen($word);
+            if ($count > $maxLineChars) {
+                $n++;
+                $count = $maxLineChars;
+            }
+        }
+
+        return $n;
+    }
+
     // Traitements sur des array: 
 
     public static function getMsgFromArray($msgs, $title = '')

@@ -529,6 +529,10 @@ class Bimp_FactureFourn extends BimpComm
     {
         $errors = array();
 
+        if (!$this->isLoaded()) {
+            return array('ID de la facture fournisseur absent');
+        }
+
         if (!BimpObject::objectLoaded($origin) || !is_a($origin, 'BimpComm')) {
             return array('Element d\'origine absent ou invalide');
         }
@@ -559,7 +563,7 @@ class Bimp_FactureFourn extends BimpComm
                         if (!$isReturn) {
                             $qty = count($line_data['equipments']);
                         } else {
-                            $qty = count($line_data['equipments']) * -1; 
+                            $qty = count($line_data['equipments']) * -1;
                         }
                     } else {
                         $qty = (float) $line_data;
@@ -651,6 +655,10 @@ class Bimp_FactureFourn extends BimpComm
                 }
             }
         }
+
+        $asso = new BimpAssociation($origin, 'factures');
+        $asso->addObjectAssociation($this->id);
+
         return $errors;
     }
 

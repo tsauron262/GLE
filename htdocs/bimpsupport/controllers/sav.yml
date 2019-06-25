@@ -1,4 +1,10 @@
 bootstrap: 1
+
+title: 
+    callback: 
+        object: sav
+        method: getPageTitle
+
 js:
     - /bimpapple/views/js/gsx.js
     - /bimpsupport/views/js/sav.js

@@ -10,17 +10,17 @@ labels:
     name: réception
     is_female: 1
         
-objects: 
-    commande_fourn:
-        instance: 
-            id_object: 
-                field_value: id_commande_fourn
-    
+objects:     
     user_resp: 
         extends: user
         instance: 
             id_object: 
                 field_value: id_user_resp
+                
+    facture_fourn: 
+        instance: 
+            id_object: 
+                field_value: id_facture
                 
 fields: 
     id_commande_fourn: 
@@ -108,6 +108,12 @@ fields:
                 name: id
                 object: 
                     global: user
+                    
+    id_facture: 
+        label: Facture
+        type: id_object
+        object: facture_fourn
+        default_value: 0
         
 forms: 
     default: 
@@ -154,6 +160,8 @@ fields_tables:
               edit: 1
             - field: total_ht
             - field: total_ttc
+            - field: id_facture
+              display: card
             
 views: 
     default: 
@@ -229,6 +237,9 @@ lists_cols:
         label: Statut facturation commande
         field: invoice_status
         child: parent
+    facture: 
+        field: id_facture
+        display: nom_url
                     
 lists: 
     default: 

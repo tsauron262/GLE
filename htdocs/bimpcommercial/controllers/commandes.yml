@@ -1,5 +1,5 @@
 bootstrap: 1
-title: Commandes
+title: Commandes clients
 
 js: 
     - /bimplogistique/views/js/logistique.js

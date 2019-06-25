@@ -195,9 +195,19 @@ class BS_Pret extends BimpObject
         $errors = bimpsupport_pdf_create($this->db->db, $this, 'sav', 'pret');
 
         if (!count($errors)) {
-            $sav = $this->getChildObject('sav');
+            $sav = null;
+            if($this->getData('id_sav')){
+                $sav = $this->getChildObject('sav');
+                $id = $sav->id;
+            }
+            else {
+                $sav = $this;
+                $id = "no";
+            }
+            
             $ref = 'Pret-' . $sav->getData('ref') . '-' . $this->getData('ref');
-            $file_url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . htmlentities('sav/' . $sav->id . '/' . $ref . '.pdf');
+            $file_url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . htmlentities('sav/' . $id . '/' . $ref . '.pdf');
+            
         }
 
         return array(

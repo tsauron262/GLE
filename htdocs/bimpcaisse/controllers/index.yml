@@ -1,5 +1,7 @@
 bootstrap: 1
 
+title: Caisse
+
 js: 
     - /bimpcommercial/views/js/paiement.js
     

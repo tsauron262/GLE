@@ -164,6 +164,8 @@ objects:
             bimp_object: 
                 module: bimpcommercial
                 name: Bimp_CommandeFourn
+            id_object: 
+                field_value: id_commande_fourn
     
 #    bimpsupport objects:
     

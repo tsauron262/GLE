@@ -1,5 +1,10 @@
 bootstrap: 1
 
+title: 
+    callback: 
+        object: client
+        method: getPageTitle
+        
 js: 
     - /bimpsupport/views/js/sav.js
     - /bimpequipment/views/js/equipment.js

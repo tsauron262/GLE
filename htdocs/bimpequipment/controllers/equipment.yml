@@ -1,5 +1,10 @@
 bootstrap: 1
 
+title: 
+    callback: 
+        object: equipment
+        method: getPageTitle
+        
 js:
     - /bimpequipment/views/js/equipment.js
 

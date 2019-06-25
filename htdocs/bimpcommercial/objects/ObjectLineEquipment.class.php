@@ -63,9 +63,28 @@ class ObjectLineEquipment extends BimpObject
                         $errors[] = 'Cet équipement a déjà été attribué';
                     }
                 }
-                if (!count($errors) && !is_null($equipment)) {
+                if (!count($errors) && BimpObject::objectLoaded($equipment)) {
                     if ($check_availability) {
-                        $errors = $equipment->checkAvailability();
+                        $id_entrepot = 0;
+
+                        $line = $this->getParentInstance();
+                        if (BimpObject::objectLoaded($line)) {
+                            if ($line::$equipment_required_in_entrepot) {
+                                $lineParent = $line->getParentInstance();
+                                if (BimpObject::objectLoaded($lineParent)) {
+                                    $id_entrepot = (int) $lineParent->getData('entrepot');
+                                    if (!$id_entrepot) {
+                                        $errors[] = 'Aucun entrepôt défini pour ' . $lineParent->getLabel('the') . ' ' . $lineParent->getNomUrl(0, 1, 1, 'full');
+                                    }
+                                } else {
+                                    $errors[] = 'Objet parent absent pour ' . $line->getLabel('the') . ' #' . $line->id;
+                                }
+                            }
+                        }
+
+                        if (!count($errors)) {
+                            $equipment->isAvailable($id_entrepot, $errors);
+                        }
                     }
                 }
                 if (!count($errors)) {

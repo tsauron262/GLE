@@ -1,4 +1,10 @@
 bootstrap: 1
+
+title: 
+    callback: 
+        object: ticket
+        method: getPageTitle
+        
 js:
     - /bimpcore/views/js/BimpTimer.js
     - /bimpsupport/views/js/ticket.js

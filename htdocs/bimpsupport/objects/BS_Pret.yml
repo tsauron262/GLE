@@ -107,6 +107,7 @@ forms:
             - field: date_end
             - field: caution
             - association: equipments
+              depends_on: id_entrepot
             - object: products
               multiple: 1
 

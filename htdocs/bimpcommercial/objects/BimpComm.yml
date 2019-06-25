@@ -65,6 +65,16 @@ fields:
             type: search_entrepot
         default_value: 
             callback: getDefaultEntrepot
+    libelle: 
+        label: Libellé
+        dol_extra_field: 1
+#        required: 1 (Vraiment requis?)
+    ef_type: 
+        label: Secteur
+        dol_extra_field: 1
+        values: 
+            array: secteurs
+        required: 1
     ref: 
         label: Référence
     fk_statut: 
@@ -89,16 +99,6 @@ fields:
         create_form: light
     ref_client: 
         label: Référence client
-    libelle: 
-        label: Libellé
-        dol_extra_field: 1
-        required: 1
-    ef_type: 
-        label: Secteur
-        dol_extra_field: 1
-        values: 
-            array: secteurs
-        required: 1
     fk_cond_reglement: 
         label: Conditions de règlement
         dol_prop: cond_reglement_id

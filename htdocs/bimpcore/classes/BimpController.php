@@ -198,7 +198,7 @@ class BimpController
         if (!defined('BIMP_CONTROLLER_INIT')) {
             define('BIMP_CONTROLLER_INIT', 1);
             $this->addDebugTime('Début affichage page');
-            llxHeader('', '', '', false, false, false);
+            llxHeader('', $this->getConf('title', ''), '', false, false, false);
             $display_footer = true;
         } else {
             $cssFiles = $this->getConf('css', array(), false, 'array');
@@ -233,12 +233,13 @@ class BimpController
         } else {
             if (method_exists($this, 'displayHead')) {
                 $this->displayHead();
-            } else {
-                $title = $this->getConf('title', '');
-                if ($title) {
-                    print load_fiche_titre($title, '', 'title_generic.png');
-                }
             }
+//            else {
+//                $title = $this->getConf('title', '');
+//                if ($title) {
+//                    print load_fiche_titre($title, '', 'title_generic.png');
+//                }
+//            }
 
             if (count($this->msgs)) {
                 foreach ($this->msgs as $msg) {

@@ -628,7 +628,17 @@ forms:
                       -1: Aucun forçage
                       0: Non facturée
                       1: Facturée partiellement
-                      2: Facturée             
+                      2: Facturée    
+                      
+    vignettes: 
+        rows: 
+            - custom: 1
+              label: Nombre de vignettes à générer
+              data_type: qty
+              input_name: qty
+              input: 
+                  type: qty
+              value: 1
                            
 filters_panels: 
     default: 

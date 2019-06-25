@@ -364,10 +364,11 @@ class BL_CommandeShipment extends BimpObject
                         }
                     } elseif (in_array($id_shipment, $prev_shipments)) {
                         $line_qties['shipped_qty'] += (float) $shipment_data['qty'];
-                    } else {
+                    } /*else {
                         $line_qties['to_ship_qty'] += (float) $shipment_data['qty'];
-                    }
+                    }*/
                 }
+                $line_qties['to_ship_qty'] = $line->getData('qty_total') - $line_qties['shipped_qty'] - $line_qties['qty'];
                 $qties[(int) $line->getData('id_line')] = $line_qties;
             }
         }
@@ -506,14 +507,18 @@ class BL_CommandeShipment extends BimpObject
         $html = '';
 
         if ($this->isLoaded()) {
-//            if ((int) $this->getData('status') === 2) {
-            $url = DOL_URL_ROOT . '/bimplogistique/bl.php?id_shipment=' . $this->id;
-            $onclick = 'window.open(\'' . $url . '\')';
-            $html .= '<button type="button" class="btn btn-default" onclick="' . htmlentities($onclick) . '">';
-            $html .= '<i class="' . BimpRender::renderIconClass('fas_file-pdf') . ' iconLeft"></i>';
-            $html .= 'Bon de livraison';
-            $html .= '</button>';
-//            }
+            if ((int) $this->getData('status') > 0) {
+                $url = DOL_URL_ROOT . '/bimplogistique/bl.php?id_shipment=' . $this->id;
+                $onclick = 'window.open(\'' . $url . '\')';
+                $html .= '<button type="button" class="btn btn-default" onclick="' . htmlentities($onclick) . '">';
+                $html .= '<i class="' . BimpRender::renderIconClass('fas_file-pdf') . ' iconLeft"></i>';
+                if ((int) $this->getData('status') === self::BLCS_BROUILLON) {
+                    $html .= 'Bon de préparation';
+                } else {
+                    $html .= 'Bon de livraison';
+                }
+                $html .= '</button>';
+            }
 
             $facture = null;
             $label = 'Facture';

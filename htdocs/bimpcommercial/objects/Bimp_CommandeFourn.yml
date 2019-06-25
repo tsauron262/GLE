@@ -78,6 +78,14 @@ objects:
        instance: 
            id_object: 
               field_value: fk_user_resp
+      
+associations: 
+    factures: 
+        object: facture_fourn
+        label: Factures
+        display: 
+            default: 
+                type: nom_url
                 
 fields: 
     fk_soc: 
@@ -170,8 +178,6 @@ fields:
 #        type: id_object
 #        object: account
         
-#    libelle: unset
-#    ef_type: unset
     ref_client: unset
     total: unset
     fk_availability: unset
@@ -184,6 +190,8 @@ forms:
     default: 
         rows: 
             - field: entrepot
+            - field: libelle
+            - field: ef_type
             - field: fk_soc
             - field: fk_user_resp
             - field: ref_supplier
@@ -274,6 +282,60 @@ forms:
                       0: Non facturée
                       1: Facturée partiellement
                       2: Facturée
+                      
+    invoice: 
+        title: Nouvelle facture fournisseur
+        icon: fas_file-invoice-dollar
+        rows: 
+            - custom: 1
+              label: Référence fournisseur
+              input_name: ref_supplier
+              data_type: string
+              input: 
+                  type: text
+            - custom: 1
+              label: Date facture
+              data_type: date
+              input_name: datef
+              input: 
+                  type: date
+                  display_now: 1
+            - custom: 1
+              label: Conditions de réglement
+              input_name: id_cond_reglement
+              data_type: id
+              input: 
+                  type: select_cond_reglement
+            - custom: 1
+              label: Mode de réglement
+              input_name: id_mode_reglement
+              data_type: id
+              input: 
+                  type: select_payment
+            - custom: 1
+              label: Réceptions de la commande à facturer
+              input_name: receptions
+              data_type: id
+              input: 
+                  type: check_list
+                  items: 
+                      callback: getFactureReceptionsArray
+            - custom: 1
+              label: Note publique
+              input_name: note_public
+              data_type: text
+              input: 
+                  type: textarea
+                  rows: 3
+                  auto_expand: 1
+            - custom: 1
+              label: Note privée
+              input_name: note_private
+              data_type: text
+              input: 
+                  type: textarea
+                  rows: 3
+                  auto_expand: 1
          
 fields_tables: 
     infos: 

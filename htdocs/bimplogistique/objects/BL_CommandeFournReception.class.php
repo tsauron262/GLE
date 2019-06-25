@@ -172,7 +172,7 @@ class BL_CommandeFournReception extends BimpObject
             $success_callback = 'function() {reloadObjectHeader(' . $commande_fourn->getJsObjectData() . ')}';
         }
 
-        if ($this->isActionAllowed('validateReception')) {
+        if ($this->isActionAllowed('validateReception') && $this->canSetAction('validateReception')) {
             $buttons[] = array(
                 'label'   => 'Valider la réception',
                 'icon'    => 'fas_check-circle',
@@ -184,7 +184,7 @@ class BL_CommandeFournReception extends BimpObject
             );
         }
 
-        if ($this->isActionAllowed('cancelReception')) {
+        if ($this->isActionAllowed('cancelReception') && $this->canSetAction('cancelReception')) {
             $buttons[] = array(
                 'label'   => 'Annuler la réception',
                 'icon'    => 'fas_times-circle',
@@ -192,6 +192,23 @@ class BL_CommandeFournReception extends BimpObject
                     'confirm_msg'      => 'Veuillez confirmer l\\\'annulation de cette réception. Les équipements créés seront supprimés',
                     'success_callback' => $success_callback
                 ))
+            );
+        }
+
+        if (!(int) $this->getData('id_facture') && (int) $this->getData('status') === self::BLCFR_RECEPTIONNEE &&
+                $commande_fourn->isActionAllowed('createInvoice') && $commande_fourn->canSetAction('createInvoice')) {
+            $onclick = $commande_fourn->getJsActionOnclick('createInvoice', array(
+                'ref_supplier'      => $commande_fourn->getData('ref_supplier'),
+                'id_cond_reglement' => (int) $commande_fourn->getData('fk_cond_reglement'),
+                'id_mode_reglement' => (int) $commande_fourn->getData('fk_mode_reglement'),
+                'receptions'        => json_encode(array($this->id))
+                    ), array(
+                'form_name' => 'invoice'
+            ));
+            $buttons[] = array(
+                'label'   => 'Créer une facture fournisseur',
+                'icon'    => 'fas_file-invoice-dollar',
+                'onclick' => $onclick
             );
         }
 

@@ -1202,6 +1202,17 @@ class Bimp_Commande extends BimpComm
     {
         $html = '';
 
+        // Etiquettes: 
+        $onclick = $this->getJsActionOnclick('generateVignettes', array(), array(
+            'form_name' => 'vignettes'
+        ));
+
+
+        $html .= '<button class="btn btn-default" onclick="' . $onclick . '">';
+        $html .= BimpRender::renderIcon('fas_sticky-note', 'iconLeft') . 'Etiquettes';
+        $html .= '</button>';
+
+
         // Nouvelle expédition:
         $expedition = BimpObject::getInstance('bimplogistique', 'BL_CommandeShipment');
 
@@ -2305,6 +2316,30 @@ class Bimp_Commande extends BimpComm
         );
     }
 
+    public function actionGenerateVignettes($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+        $success_callback = '';
+
+        if (!$this->isLoaded()) {
+            $errors[] = 'ID de la commande absent';
+        } else {
+            $qty = isset($data['qty']) ? (int) $data['qty'] : 1;
+
+            $url = DOL_URL_ROOT . '/bimplogistique/etiquettes_commande.php?id_commande=' . $this->id . '&qty=' . $qty;
+
+            $success_callback = 'window.open(\'' . $url . '\')';
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $success_callback
+        );
+    }
+
     // Overrides BimpComm:
 
     public function duplicate($new_data = array(), &$warnings = array(), $force_create = false)
@@ -2326,7 +2361,7 @@ class Bimp_Commande extends BimpComm
         $new_data['status_forced'] = array();
         $new_data['id_user_resp'] = 0;
         $new_data['revalorisation'] = 0;
-        
+
         return parent::duplicate($new_data, $warnings, $force_create);
     }
 

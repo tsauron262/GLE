@@ -298,6 +298,7 @@ class ObjectLine extends BimpObject
 
             if (static::$equipment_required_in_entrepot) {
                 if ($parent->field_exists('entrepot')) {
+                    $id_entrepot = (int) $parent->getData('entrepot');
                     if (!$id_entrepot) {
                         $errors[] = 'Aucun entrepôt défini pour ' . $parent->getLabel('the') . ' ' . $parent->getNomUrl(0, 1, 1, 'full');
                     }
@@ -320,6 +321,8 @@ class ObjectLine extends BimpObject
                             $allowed['id_reservation'] = (int) $reservation->id;
                         }
                     }
+                } elseif ($this->getData('linked_object_name') === 'commande_fourn_line') {
+                    $allowed['id_commande_fourn_line'] = (int) $this->getData('linked_id_object');
                 }
 
                 $equipment->isAvailable($id_entrepot, $errors, $allowed);
@@ -2016,7 +2019,7 @@ class ObjectLine extends BimpObject
                     $lines = $this->getEquipmentLines();
 
                     if (!count($lines)) {
-                        $errors[] = 'Aucune ligne d\'équipement n\'est enregistré pour ' . $this->getLabel('this');
+                        $errors[] = 'Aucune ligne d\'équipement n\'est enregistrée pour ' . $this->getLabel('this');
                     } else {
                         foreach ($lines as $l) {
                             if (!(int) $l->getData('id_equipment')) {

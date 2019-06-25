@@ -67,6 +67,7 @@ class pdf_bimpsupport_pret extends ModeleBimpSupport
         if (!$this->emetteur->pays_code)
             $this->emetteur->pays_code = substr($langs->defaultlang, -2);    // Par defaut, si n'etait pas defini
 
+
             
 // Defini position des colonnes
         $this->posxdesc = $this->marge_gauche + 1;
@@ -118,7 +119,7 @@ class pdf_bimpsupport_pret extends ModeleBimpSupport
             $ref = $pret->getRef();
         }
 
-        $dir = DOL_DATA_ROOT . "/bimpcore/sav/" . $sav->id . '/';
+        $dir = DOL_DATA_ROOT . "/bimpcore/sav/" . (!is_null($sav)? $sav->id : 'no') . '/';
 
         if (!file_exists($dir)) {
             if (dol_mkdir($dir) < 0) {
@@ -143,9 +144,7 @@ class pdf_bimpsupport_pret extends ModeleBimpSupport
                 $pdf1->setPrintHeader(false);
                 $pdf1->setPrintFooter(false);
             }
-
-//
-//
+            
             $pdf->SetAutoPageBreak(1, 0);
 //                if (class_exists('TCPDF')) {
 //                    $pdf->setPrintHeader(false);
@@ -162,7 +161,11 @@ class pdf_bimpsupport_pret extends ModeleBimpSupport
 
             // $pdf->SetDrawColor(128, 128, 128);
 
-            $pdf->SetTitle('Prêt SAV : ' . $ref);
+            if (!is_null($sav)) {
+                $pdf->SetTitle('Prêt SAV : ' . $ref);
+            } else {
+                $pdf->SetTitle('Prêt : ' . $ref);
+            }
 
             $pdf->SetSubject($outputlangs->transnoentities("Panier"));
             $pdf->SetCreator("BIMP-ERP " . DOL_VERSION);

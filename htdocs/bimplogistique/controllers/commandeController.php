@@ -15,6 +15,20 @@ class commandeController extends BimpController
 //    }
    
    
+    public function getPageTitle()
+    {
+        $title = 'Logistique ';
+        $commande = $this->config->getObject('', 'commande');
+        
+        if (BimpObject::objectLoaded($commande)) {
+            $title .= $commande->getRef();
+        } else {
+            $title .= 'commande';
+        }
+        
+        return $title;
+    }
+    
     public function renderContentHtml()
     {
         if (!BimpTools::isSubmit('id')) {

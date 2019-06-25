@@ -1042,6 +1042,23 @@ class BimpObject extends BimpCache
         return $value;
     }
 
+    public function getPageTitle()
+    {
+        $title = BimpTools::ucfirst($this->getLabel());
+
+        if ($this->isLoaded()) {
+            $ref = $this->getRef();
+
+            if ($ref) {
+                $title .= ' ' . $ref;
+            } else {
+                $title .= ' #' . $this->id;
+            }
+        }
+
+        return $title;
+    }
+
     public function getRef($withGeneric = true)
     {
         $prop = $this->getRefProperty();

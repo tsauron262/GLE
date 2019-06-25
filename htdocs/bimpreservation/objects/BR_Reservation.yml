@@ -164,9 +164,9 @@ fields:
         label: Produit
         type: id_object
         object: product
-        input: 
-            type: search_product
-            help: Entrez un nom ou une référence pour effectuer une recherche
+#        input: 
+#            type: search_product
+#            help: Entrez un nom ou une référence pour effectuer une recherche
         display_if: 
             field_name: id_equipment
             show_values: 0,
@@ -425,6 +425,8 @@ fields_tables:
             - field: ref
             - field: id_entrepot
             - field: type
+            - field: id_commande_client
+              display: nom_url
             - field: status
             - field: id_product
               display: card

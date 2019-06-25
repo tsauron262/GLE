@@ -48,7 +48,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
                 if (isset($this->object->array_options['options_pdf_hide_price'])) {
                     $this->hidePrice = true;
-                    if($this->typeObject != 'invoice')
+                    if ($this->typeObject != 'invoice')
                         $this->hideTotal = true;
                 }
                 if (isset($this->object->array_options['options_pdf_hide_reduc'])) {
@@ -562,7 +562,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
             $bimpLine = isset($bimpLines[(int) $line->id]) ? $bimpLines[(int) $line->id] : null;
 
-            if ($this->object->type != 3 && ($line->desc == "(DEPOSIT)" || stripos($line->desc,'Acompte') === 0)) {
+            if ($this->object->type != 3 && ($line->desc == "(DEPOSIT)" || stripos($line->desc, 'Acompte') === 0)) {
 //                $acompteHt = $line->subprice * (float) $line->qty;
 //                $acompteTtc = BimpTools::calculatePriceTaxIn($acompteHt, (float) $line->tva_tx);
 
@@ -625,7 +625,8 @@ class BimpDocumentPDF extends BimpModelPDF
                 }
             }
 
-            if ($line->subprice == 0) {
+            if ((BimpObject::objectLoaded($bimpLine) && (int) $bimpLine->getData('type') === ObjectLine::LINE_TEXT) ||
+                    (!BimpObject::objectLoaded($bimpLine) && $line->subprice == 0 && !(int) $line->fk_product)) {
                 $row['desc'] = array(
                     'colspan' => 99,
                     'content' => $desc,
@@ -696,7 +697,7 @@ class BimpDocumentPDF extends BimpModelPDF
                     $row['pu_ht'] = price(str_replace(",", ".", $row['pu_ht']) * $row['qte']);
                     $product->array_options['options_deee'] = $product->array_options['options_deee'] * $row['qte'];
                     $product->array_options['options_rpcp'] = $product->array_options['options_rpcp'] * $row['qte'];
-                    if($row['pu_remise'] > 0)
+                    if ($row['pu_remise'] > 0)
                         $row['pu_remise'] = BimpTools::displayMoneyValue($row['pu_remise'] * $row['qte'], "");
                     $row['qte'] = 1;
                 }
@@ -718,7 +719,7 @@ class BimpDocumentPDF extends BimpModelPDF
             $table->rows[] = $row;
         }
 
-        if (/*!$this->hideReduc && */$remise_globale) {
+        if (/* !$this->hideReduc && */$remise_globale) {
             $remise_infos = $this->bimpCommObject->getRemisesInfos();
 
             $remise_label = $this->bimpCommObject->getData('remise_globale_label');
@@ -736,7 +737,7 @@ class BimpDocumentPDF extends BimpModelPDF
             );
             if (!$this->hideTtc)
                 $row['total_ttc'] = BimpTools::displayMoneyValue(-$remise_infos['remise_globale_amount_ttc'], '');
-            elseif(!$this->hideReduc)
+            elseif (!$this->hideReduc)
                 $row['pu_remise'] = BimpTools::displayMoneyValue(-$remise_infos['remise_globale_amount_ht'], '');
 
             $table->rows[] = $row;
@@ -1350,7 +1351,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
         $html .= '<tr>';
 //        $html .= '<td style="text-align: center;">Cachet, Date, Signature et mention <b>"Bon pour Commande"</b></td>';
-        $html .= '<td style="text-align:center;"><i><b>'.$this->after_totaux_label.'</b></i></td>';
+        $html .= '<td style="text-align:center;"><i><b>' . $this->after_totaux_label . '</b></i></td>';
 
         $html .= '<td>Signature + Cachet avec SIRET :</td>';
         $html .= '</tr>';

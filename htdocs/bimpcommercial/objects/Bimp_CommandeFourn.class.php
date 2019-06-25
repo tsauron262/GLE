@@ -933,6 +933,11 @@ class Bimp_CommandeFourn extends BimpComm
             $this->updateField('fk_statut', $new_status);
         }
     }
+    public function fetch($id, $parent = null) {
+        $return = parent::fetch($id, $parent);
+        $this->checkInvoiceStatus();
+        return $return;
+    }
 
     public function checkInvoiceStatus()
     {

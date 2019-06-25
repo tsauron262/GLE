@@ -3597,13 +3597,21 @@ class Bimp_CommandeLine extends ObjectLine
 
             if ((int) $this->getData('type') !== self::LINE_TEXT) {
                 $commande = $this->getParentInstance();
-
+                
                 if (BimpObject::objectLoaded($commande) && $commande->isLogistiqueActive()) {
+                    $status_forced = $commande->getData('status_forced');
+
                     $fullQty = abs($fullQty);
                     $shipments_qty = abs((float) $this->getShipmentsQty());
-                    $shipped_qty = abs((float) $this->getShippedQty(null, true));
-                    $to_ship_qty = $shipments_qty - $shipped_qty;
 
+                    // Expéditions: 
+                    if (isset($status_forced['shipment']) && (int) $status_forced['shipment'] && (int) $commande->getData('shipment_status') === 2) {
+                        $shipped_qty = $shipments_qty;
+                        $to_ship_qty = 0;
+                    } else {
+                        $shipped_qty = abs((float) $this->getShippedQty(null, true));
+                        $to_ship_qty = $shipments_qty - $shipped_qty;
+                    }
                     if ($shipped_qty !== (float) $this->getData('qty_shipped')) {
                         $this->updateField('qty_shipped', $shipped_qty, null, true);
                     }
@@ -3612,8 +3620,14 @@ class Bimp_CommandeLine extends ObjectLine
                         $this->updateField('qty_to_ship', $to_ship_qty, null, true);
                     }
 
-                    $billed_qty = abs((float) $this->getBilledQty());
-                    $to_bill_qty = $fullQty - $billed_qty;
+                    // Facturation: 
+                    if (isset($status_forced['invoice']) && (int) $status_forced['invoice'] && (int) $commande->getData('invoice_status') === 2) {
+                        $billed_qty = $fullQty;
+                        $to_bill_qty = 0;
+                    } else {
+                        $billed_qty = abs((float) $this->getBilledQty());
+                        $to_bill_qty = $fullQty - $billed_qty;
+                    }
 
                     if ($billed_qty !== (float) $this->getData('qty_billed')) {
                         $this->updateField('qty_billed', $billed_qty, null, true);
@@ -3783,7 +3797,7 @@ class Bimp_CommandeLine extends ObjectLine
                             $commande_fourn = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFourn');
                             $commande_fourn->validateArray(array(
                                 'entrepot' => $id_entrepot,
-                                'ef_type' => $commande->getData('ef_type'),
+                                'ef_type'  => $commande->getData('ef_type'),
                                 'fk_soc'   => $id_fourn
                             ));
 
@@ -4297,8 +4311,12 @@ class Bimp_CommandeLine extends ObjectLine
 
     // Overrides:
 
-    public function checkObject()
+    public function checkObject($context = '', $field = '')
     {
+        if ($context === 'updateField' && in_array($field, array('qty_total', 'qty_shipped', 'qty_to_ship', 'qty_billed', 'qty_to_bill'))) {
+            return;
+        }
+        
         if ((int) $this->id_remise_except && (float) $this->qty) {
             BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
             $discount = new DiscountAbsolute($this->db->db);
@@ -4462,8 +4480,8 @@ class Bimp_CommandeLine extends ObjectLine
 
     public static function checkAllQties()
     {
-
-        set_time_limit(600);
+        ignore_user_abort(0);
+        set_time_limit(60);
         $instance = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeLine');
         $rows = $instance->getList(array(), null, null, 'id', 'asc', 'array', array('id'));
 

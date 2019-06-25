@@ -1059,7 +1059,7 @@ class BS_SAV extends BimpObject
 
     // Traitements:
 
-    public function checkObject()
+    public function checkObject($context = '', $field = '')
     {
         // Ne pas faire $this->update() ici sinon boucle infinie. 
         if ($this->isLoaded()) {
@@ -3664,7 +3664,7 @@ class BS_SAV extends BimpObject
         }
 
         if (!count($errors)) {
-            $this->checkObject();
+            $this->checkObject('create');
         }
 
         return $errors;
@@ -3750,7 +3750,7 @@ class BS_SAV extends BimpObject
 
 
         if (!count($errors)) {
-            $this->checkObject();
+            $this->checkObject('update');
         }
 
         return $errors;

@@ -2308,6 +2308,11 @@ class Bimp_Commande extends BimpComm
                     }
                     break;
             }
+            
+            $lines = $this->getLines('not_text');
+            foreach ($lines as $line) {
+                $line->checkQties();
+            }
         }
 
         return array(

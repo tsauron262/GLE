@@ -1594,9 +1594,11 @@ class BimpObject extends BimpCache
         return $errors;
     }
 
-    public function checkObject()
+    public function checkObject($context = '', $field = '')
     {
-        
+        // Attention au risque de boucle infinie lors de la redéfinition de cette fonction en cas 
+        // de déclenchement de $this->update(), $this->create(), $this->updateField() ou $this->fetch(). 
+        // Utiliser $context pour connaître l'origine de l'appel de cette fonction (create, update, updateField, fetch (via BimpCache::getBimpObjectInstance()). 
     }
 
     public function checkFieldValueType($field, &$value)
@@ -2705,7 +2707,7 @@ class BimpObject extends BimpCache
                     $this->onSave($errors, $warnings);
 
                     if (static::$check_on_create) {
-                        $this->checkObject();
+                        $this->checkObject('create');
                     }
                 } else {
                     $msg = 'Echec de l\'enregistrement ' . $this->getLabel('of_the');
@@ -2797,7 +2799,7 @@ class BimpObject extends BimpCache
 
                         $this->onSave($errors, $warnings);
                         if (static::$check_on_update) {
-                            $this->checkObject();
+                            $this->checkObject('update');
                         }
                     }
                 }
@@ -2936,7 +2938,7 @@ class BimpObject extends BimpCache
                     $this->onSave($errors, $warnings);
 
                     if (static::$check_on_update_field) {
-                        $this->checkObject();
+                        $this->checkObject('updateField', $field);
                     }
                 }
             }

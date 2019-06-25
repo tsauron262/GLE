@@ -103,7 +103,7 @@ class BimpCache
             if (BimpObject::objectLoaded(self::$cache[$cache_key])) {
                 self::$cache[$cache_key]->cache_id = self::$nextBimpObjectCacheId;
                 self::$nextBimpObjectCacheId++;
-                self::$cache[$cache_key]->checkObject();
+                self::$cache[$cache_key]->checkObject('fetch');
             }
         }
 

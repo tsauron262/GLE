@@ -1773,7 +1773,7 @@ class BF_Demande extends BimpObject
         $this->marges['total_marge'] = 0;
     }
 
-    public function checkObject()
+    public function checkObject($context = '', $field = '')
     {
         $this->resetMsgs();
 

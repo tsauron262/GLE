@@ -1976,8 +1976,12 @@ class BL_CommandeShipment extends BimpObject
 
     // Overrides:
 
-    public function checkObject()
+    public function checkObject($context = '', $field = '')
     {
+        if ($field === 'id_user_resp') {
+            return;
+        }
+        
         if (!(int) $this->getData('id_user_resp')) {
             $id_user = (int) $this->getData('user_create');
             if ($id_user) {

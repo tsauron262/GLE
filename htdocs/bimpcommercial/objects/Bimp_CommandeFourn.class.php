@@ -953,7 +953,7 @@ class Bimp_CommandeFourn extends BimpComm
         $lines = $this->getLines('not_text');
 
         $receptions = $this->getChildrenList('receptions', array(
-            'status'    => BL_CommandeFournReception::BLCFR_RECEPTIONNEE,
+            'status'     => BL_CommandeFournReception::BLCFR_RECEPTIONNEE,
             'id_facture' => array(
                 'operator' => '>',
                 'value'    => 0
@@ -972,7 +972,7 @@ class Bimp_CommandeFourn extends BimpComm
                 $billed_qty += isset($reception_data['qty']) ? (float) $reception_data['qty'] : 0;
                 $has_billed = 1;
             }
-            
+
             if (abs($line_qty) > abs($billed_qty)) {
                 $all_billed = 0;
             }
@@ -1476,6 +1476,11 @@ class Bimp_CommandeFourn extends BimpComm
                     }
                     break;
             }
+
+            $lines = $this->getLines('not_text');
+            foreach ($lines as $line) {
+                $line->checkQties();
+            }
         }
 
         return array(
@@ -1485,8 +1490,8 @@ class Bimp_CommandeFourn extends BimpComm
     }
 
     // Overrides - BimpComm: 
-    
-    public function checkObject()
+
+    public function checkObject($context = '', $field = '')
     {
         $this->checkInvoiceStatus();
     }

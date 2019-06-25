@@ -218,8 +218,12 @@ class BS_Pret extends BimpObject
 
     // Overrides: 
 
-    public function checkObject()
+    public function checkObject($context = '', $field = '')
     {
+        if ($field === 'id_entrepot') {
+            return;
+        }
+        
         if (!(int) $this->getData('id_entrepot') && $this->getData('code_centre')) {
             require_once DOL_DOCUMENT_ROOT . '/bimpsupport/centre.inc.php';
             global $tabCentre;

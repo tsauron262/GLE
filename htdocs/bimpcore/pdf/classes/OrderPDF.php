@@ -12,7 +12,8 @@ class OrderPDF extends BimpDocumentPDF
     public $doc_type = 'commande';
     public static $doc_types = array(
         'commande' => 'Commande',
-        'bl'       => 'Bon de livraison'
+        'bl'       => 'Bon de livraison',
+        'bl_draft' => 'Bon de préparation'
     );
     public $contact_invoice = null;
     public $contact_shipment = null;
@@ -162,7 +163,8 @@ class OrderPDF extends BimpDocumentPDF
                 break;
 
             case 'bl':
-                $docRef = $this->langs->transnoentities("Ref") . " : " . 'LIV-' . $this->langs->convToOutputCharset($this->commande->ref) . '-' . $this->num_bl;
+            case 'bl_draft':
+                $docRef = $this->langs->transnoentities("Ref") . " : " . 'LIV-' . $this->langs->convToOutputCharset($this->commande->ref) . (isset($this->num_bl) && $this->num_bl ? '-' . $this->num_bl : '');
                 break;
         }
 
@@ -286,7 +288,7 @@ class OrderPDF extends BimpDocumentPDF
     public function renderDocInfos()
     {
         $primary = BimpCore::getParam('pdf/primary', '000000');
-        
+
         $html = '';
 
         $town = '';
@@ -341,6 +343,7 @@ class OrderPDF extends BimpDocumentPDF
                 break;
 
             case 'bl':
+            case 'bl_draft':
                 if (!is_null($this->contact_shipment)) {
                     $address = pdf_build_address($this->langs, $this->fromCompany, $this->contact_shipment, $this->contact_shipment, 1, 'target');
                 } else {
@@ -493,8 +496,8 @@ class OrderPDF extends BimpDocumentPDF
             $html .= $this->langs->transnoentities("PaymentType" . $this->object->mode_reglement_code) != ('PaymentType' . $this->object->mode_reglement_code) ? $this->langs->transnoentities("PaymentType" . $this->object->mode_reglement_code) : $this->langs->convToOutputCharset($this->object->mode_reglement);
             $html .= '</td></tr>';
         }
-        
-        
+
+
         if (!class_exists('Account')) {
             require_once DOL_DOCUMENT_ROOT . '/compta/bank/class/account.class.php';
         }
@@ -552,11 +555,19 @@ class BLPDF extends OrderPDF
     public $shipment = null;
     public $total_ht = 0;
     public $total_ttc = 0;
+    public $num_bl = '';
 
     public function __construct($db, $shipment = null)
     {
+        $doc_type = 'bl';
+
         if (BimpObject::objectLoaded($shipment)) {
             $this->shipment = $shipment;
+            $this->num_bl = $shipment->getData('num_livraison');
+
+            if ((int) $shipment->getData('status') === BL_CommandeShipment::BLCS_BROUILLON) {
+                $doc_type = 'bl_draft';
+            }
         }
 
         if (is_null($this->shipment)) {
@@ -567,7 +578,7 @@ class BLPDF extends OrderPDF
 
         $this->typeObject = "commande";
 
-        parent::__construct($db, 'bl');
+        parent::__construct($db, $doc_type);
 
         if (!is_null($id_contact_shipment) && $id_contact_shipment) {
             BimpTools::loadDolClass('contact');
@@ -652,7 +663,7 @@ class BLPDF extends OrderPDF
 
                 if ($this->hideReduc && $line->remise_percent) {
                     $pu_ht = (float) ($line->subprice - ($line->subprice * ($line->remise_percent / 100)));
-                    
+
                     $row['pu_ht'] = price($pu_ht, 0, $this->langs);
                 } else {
                     $pu_ht = (float) $line->subprice;
@@ -950,5 +961,14 @@ class BLPDF extends OrderPDF
         $html .= '<br/>';
 
         return $html;
+    }
+
+    public function getAfterTotauxHtml()
+    {
+        if ($this->doc_type === 'bl_draft') {
+            return '';
+        }
+
+        return parent::getAfterTotauxHtml();
     }
 }

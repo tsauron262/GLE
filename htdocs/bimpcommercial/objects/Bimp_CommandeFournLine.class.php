@@ -95,18 +95,19 @@ class Bimp_CommandeFournLine extends FournObjectLine
                                 // On vérifie la réservation de la ligne de commande client associée:  
                                 $reservation = BimpObject::findBimpObjectInstance('bimpreservation', 'BR_Reservation', array(
                                             'id_equipment'            => (int) $id_equipment,
-                                            'status'                  => 200,
                                             'id_commande_client_line' => (int) $line->id
                                                 )
                                 );
-                                if (!BimpObject::objectLoaded($reservation)) {
-                                    $commande = $line->getParentInstance();
-                                    if (BimpObject::objectLoaded($commande)) {
-                                        $commande_ref = '"' . $commande->getRef() . '"';
-                                    } else {
-                                        $commande_ref = 'd\'ID ' . $line->getData('id_obj');
+                                if (BimpObject::objectLoaded($reservation)) {
+                                    if ($reservation->getData('status') !== 200) {
+                                        $commande = $line->getParentInstance();
+                                        if (BimpObject::objectLoaded($commande)) {
+                                            $commande_ref = '"' . $commande->getRef() . '"';
+                                        } else {
+                                            $commande_ref = 'd\'ID ' . $line->getData('id_obj');
+                                        }
+                                        $errors[] = 'L\'équipement "' . $equipment->getData('serial') . '" n\'est plus au statut "Réservé" pour la commande client ' . $commande_ref;
                                     }
-                                    //$errors[] = 'L\'équipement "' . $equipment->getData('serial') . '" n\'est plus au statut "Réservé" pour la commande client ' . $commande_ref;
                                 } else {
                                     // La réservation est ok : on vérifie l'ajout de l'équipement à une facture ou une expédition de la ligne de commande client:
                                     if (in_array((int) $id_equipment, $line_equipments_shipped)) {
@@ -1463,9 +1464,9 @@ class Bimp_CommandeFournLine extends FournObjectLine
             global $user;
 
             if (!$isReturn) {
-                $product->dol_object->correct_stock($user, $entrepot->id, (int) $reception_data['qty'], 0, $stock_label,0, $code_mvt, "order_supplier", $commande_fourn->id);
+                $product->dol_object->correct_stock($user, $entrepot->id, (int) $reception_data['qty'], 0, $stock_label, 0, $code_mvt, "order_supplier", $commande_fourn->id);
             } else {
-                $product->dol_object->correct_stock($user, $entrepot->id, abs((int) $reception_data['qty']), 1, '(Retour au fournisseur) ' . $stock_label,0, $code_mvt, "order_supplier", $commande_fourn->id);
+                $product->dol_object->correct_stock($user, $entrepot->id, abs((int) $reception_data['qty']), 1, '(Retour au fournisseur) ' . $stock_label, 0, $code_mvt, "order_supplier", $commande_fourn->id);
             }
         }
 
@@ -1703,7 +1704,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
                             $stock_label = 'Annulation réception n°' . $reception->getData('num_reception') . ' BR: ' . $reception->getData('ref') . ' - Commande fournisseur: ' . $commande_fourn->getData('ref');
                             $code_mvt = 'ANNUL_CMDF_' . $commande_fourn->id . '_LN_' . $this->id . '_RECEP_' . $reception->id;
 
-                            if ($product->dol_object->correct_stock($user, $id_entrepot, (int) $reception_data['qty'], 1, $stock_label,0, $code_mvt, "order_supplier", $commande_fourn->id) <= 0) {
+                            if ($product->dol_object->correct_stock($user, $id_entrepot, (int) $reception_data['qty'], 1, $stock_label, 0, $code_mvt, "order_supplier", $commande_fourn->id) <= 0) {
                                 $msg = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($product->dol_object), 'Echec de la correction du stock');
                                 $errors[] = $msg;
                                 dol_syslog('[ERREUR STOCK] ' . 'Annulation réception #' . $reception->id . ' - Commande Fourn ' . $commande_fourn->id . ' - ' . $msg, LOG_ERR);

@@ -117,7 +117,7 @@ ini_set('display_errors', 1);
             if(!$find){
                 foreach($data['lignes'] as $lnT){
                     $qty = $lnT['PlvQteATran'];
-                    $lnTemp = array("ref"=>$lnT['PlvGArtCode'], "qty"=>$qty, "qtyEnBl"=>$qty, "qteBlNonFact" => $qty, "pv"=>$lnT['PlvPUNet'], "pa"=>$lnT['PlvPA']);
+                    $lnTemp = array("ref"=>$lnT['PlvGArtCode'], "qty"=>$qty, "qtyEnBl"=>$qty, "qteBlNonFact" => 0, "pv"=>$lnT['PlvPUNet'], "pa"=>$lnT['PlvPA']);
                     $tabFinal[$ref][] = $lnTemp;
                 }
                 
@@ -168,6 +168,17 @@ ini_set('display_errors', 1);
                 ),
             )
         );
+        
+        
+        foreach($tabFinal as $ref =>$data)
+            if(isset($data[0])){
+                $tabFinal[$ref][0]['dep'] = "ACY";
+                $tabFinal[$ref][0]['soc'] = "CLGLE011669";
+            }
+            
+        $tabFinal = array("CO1905-9089"=> $tabFinal["CO1905-9089"]);
+        $commandes = $tabFinal;
+        echo "<pre>"; print_r($commandes);print_r($tabFinal);die;
 
         global $db;
         $bdb = new BimpDb($db);
@@ -298,11 +309,11 @@ ini_set('display_errors', 1);
 
                 $i = 0;
                 foreach ($lines as $line_data) {
-                    $line_data['qty'] = self::stringToFloat($line_data['qty']);
-                    $line_data['pv'] = self::stringToFloat($line_data['pv']);
-                    $line_data['pa'] = self::stringToFloat($line_data['pa']);
-                    $line_data['qtyEnBl'] = self::stringToFloat($line_data['qtyEnBl']);
-                    $line_data['qteBlNonFact'] = self::stringToFloat($line_data['qteBlNonFact']);
+                    $line_data['qty'] = BimpTools::stringToFloat($line_data['qty']);
+                    $line_data['pv'] = BimpTools::stringToFloat($line_data['pv']);
+                    $line_data['pa'] = BimpTools::stringToFloat($line_data['pa']);
+                    $line_data['qtyEnBl'] = BimpTools::stringToFloat($line_data['qtyEnBl']);
+                    $line_data['qteBlNonFact'] = BimpTools::stringToFloat($line_data['qteBlNonFact']);
 
                     $i++;
                     echo $i . ' - ' . $line_data['ref'] . ': <br/>';

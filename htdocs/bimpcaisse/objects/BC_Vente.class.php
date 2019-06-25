@@ -1978,134 +1978,9 @@ class BC_Vente extends BimpObject
             $id_client = (int) $this->getData('id_client');
             $id_entrepot = (int) $this->getData('id_entrepot');
 
-            // Gestion des stocks et emplacements des articles vendus: 
-            foreach ($articles as $article) {
-                $equipment = $article->getChildObject('equipment');
-                if (BimpObject::objectLoaded($equipment)) {
-                    $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
-                    if (!$article->checkPlace($id_entrepot)) {
-                        // Correction de l'emplacement initial en cas d'erreur: 
-                        $place_errors = $place->validateArray(array(
-                            'id_equipment' => (int) $equipment->id,
-                            'type'         => BE_Place::BE_PLACE_ENTREPOT,
-                            'id_entrepot'  => (int) $id_entrepot,
-                            'infos'        => 'Correction automatique suite à la vente de l\'équipement (vente #' . $this->id . ')',
-                            'date'         => date('Y-m-d H:i:s'),
-                        ));
-                        if (!count($place_errors)) {
-                            $place_errors = $place->create();
-                        }
-
-                        if (count($place_errors)) {
-                            $msg = 'Echec de la correction de l\'emplacement pour le n° de série "' . $equipment->getData('serial') . '"';
-                            $errors[] = BimpTools::getMsgFromArray($place_errors, $msg);
-                            dol_syslog('[ERREUR STOCK] ' . $msg . ' Vente #' . $this->id . ' - Article #' . $article->id . ' - Erreurs: ' . BimpTools::getMsgFromArray($place_errors), LOG_ERR);
-                        }
-                    }
-
-                    // Création du nouvel emplacement: 
-                    $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
-                    if ($id_client) {
-                        $place_errors = $place->validateArray(array(
-                            'id_equipment' => (int) $equipment->id,
-                            'type'         => BE_Place::BE_PLACE_CLIENT,
-                            'id_client'    => (int) $id_client,
-                            'infos'        => 'Vente #' . $this->id,
-                            'date'         => date('Y-m-d H:i:s'),
-                            'code_mvt'     => $codemove . '_ART' . (int) $article->id
-                        ));
-                    } else {
-                        $place_errors = $place->validateArray(array(
-                            'id_equipment' => (int) $equipment->id,
-                            'type'         => BE_Place::BE_PLACE_FREE,
-                            'place_name'   => 'Equipement vendu (client non renseigné)',
-                            'infos'        => 'Vente #' . $this->id,
-                            'date'         => date('Y-m-d H:i:s'),
-                            'code_mvt'     => $codemove . '_ART' . (int) $article->id
-                        ));
-                    }
-
-                    if (!count($place_errors)) {
-                        $place_errors = $place->create();
-                    }
-
-                    if (count($place_errors)) {
-                        $msg = 'Echec de l\'enregistrement du nouvel emplacement pour le n° de série "' . $equipment->getData('serial') . '"';
-                        $errors[] = BimpTools::getMsgFromArray($place_errors, $msg);
-                        dol_syslog('[ERREUR STOCK] ' . $msg . ' Vente #' . $this->id . ' - Article #' . $article->id . ' - Erreurs: ' . BimpTools::getMsgFromArray($place_errors), LOG_ERR);
-                    }
-
-                    $equipment->updateField('return_available', 1, null, true);
-                } else {
-                    $product = $article->getChildObject('product');
-                    $result = $product->dol_object->correct_stock($user, $id_entrepot, (int) $article->getData('qty'), 1, 'Vente #' . $this->id, 0, $codemove . '_ART' . (int) $article->id);
-                    if ($result < 0) {
-                        $msg = 'Echec de la mise à jour du stock pour le produit "' . $product->getRef() . ' - ' . $product->getName() . '" (ID: ' . $product->id . ')';
-                        $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($product->dol_object), $msg);
-                        dol_syslog('[ERREUR STOCK] ' . $msg . ' - Vente #' . $this->id . ' - Article #' . $article->id . ' - Qté: ' . (int) $article->getData('qty'), LOG_ERR);
-                    }
-                }
-            }
-
-            // Gestion des stocks et emplacement des produits retournés: 
-            if (count($returns)) {
-                $id_defective_entrepot = BimpCore::getConf('defective_id_entrepot');
-                $i = 1;
-
-                foreach ($returns as $return) {
-                    $equipment = $return->getChildObject('equipment');
-                    if (BimpObject::objectLoaded($equipment)) {
-                        $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
-
-                        // Création du nouvel emplacement: 
-                        if ((int) $return->getData('defective')) {
-                            $place_errors = $place->validateArray(array(
-                                'id_equipment' => (int) $equipment->id,
-                                'type'         => BE_Place::BE_PLACE_ENTREPOT,
-                                'id_entrepot'  => (int) $id_defective_entrepot,
-                                'infos'        => 'Retour produit défectueux (Vente #' . $this->id . ')',
-                                'date'         => date('Y-m-d H:i:s'),
-                                'code_mvt'     => $codemove . '_RET' . (int) $return->id
-                            ));
-                        } else {
-                            $place_errors = $place->validateArray(array(
-                                'id_equipment' => (int) $equipment->id,
-                                'type'         => BE_Place::BE_PLACE_ENTREPOT,
-                                'id_entrepot'  => (int) $id_entrepot,
-                                'infos'        => 'Retour produit (Vente #' . $this->id . ')',
-                                'date'         => date('Y-m-d H:i:s'),
-                                'code_mvt'     => $codemove . '_RET' . (int) $return->id
-                            ));
-                        }
-                        if (!count($place_errors)) {
-                            $place_errors = $place->create();
-                        }
-
-                        if (count($place_errors)) {
-                            $msg = 'Echec de l\'enregistrement du nouvel emplacement du retour produit n° ' . $i . ' (N° série: ' . $equipment->getData('serial') . ')';
-                            $errors[] = BimpTools::getMsgFromArray($place_errors, $msg);
-
-                            dol_syslog('[ERREUR STOCK] ' . $msg . - ' Vente #' . $this->id . ' - Article #' . $article->id . ' - Erreurs: ' . BimpTools::getMsgFromArray($place_errors), LOG_ERR);
-                        }
-                    } else {
-                        $product = $return->getChildObject('product');
-
-                        if ((int) $return->getData('defective')) {
-                            $result = $product->dol_object->correct_stock($user, $id_defective_entrepot, (int) $return->getData('qty'), 0, 'Retour produit Vente #' . $this->id, 0, $codemove . '_RET' . (int) $return->id);
-                        } else {
-                            $result = $product->dol_object->correct_stock($user, $id_entrepot, (int) $return->getData('qty'), 0, 'Retour produit Vente #' . $this->id, 0, $codemove . '_RET' . (int) $return->id);
-                        }
-
-                        if ($result < 0) {
-                            $msg = 'Echec de la mise à jour du stock pour le produit "' . $product->getRef() . ' - ' . $product->getName() . '" (ID: ' . $product->id . ')';
-                            $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($product->dol_object), $msg);
-                            dol_syslog('[ERREUR STOCK] ' . $msg . - ' Vente #' . $this->id . ' - Article #' . $article->id . ' - Qté: ' . (int) $article->getData('qty'), LOG_ERR);
-                        }
-                    }
-                    $i++;
-                }
-            }
-
+            
+            
+            
             // Création de la facture et de l'avoir éventuel:
             $facture_errors = array();
             $facture_warnings = array();
@@ -2124,6 +1999,143 @@ class BC_Vente extends BimpObject
 
             if (count($facture_warnings)) {
                 $errors[] = BimpTools::getMsgFromArray($facture_warnings);
+            }
+            
+            
+            
+            
+            
+            
+            
+            
+            if(count($errors) == 0){
+                // Gestion des stocks et emplacements des articles vendus: 
+                foreach ($articles as $article) {
+                    $equipment = $article->getChildObject('equipment');
+                    if (BimpObject::objectLoaded($equipment)) {
+                        $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
+                        if (!$article->checkPlace($id_entrepot)) {
+                            // Correction de l'emplacement initial en cas d'erreur: 
+                            $place_errors = $place->validateArray(array(
+                                'id_equipment' => (int) $equipment->id,
+                                'type'         => BE_Place::BE_PLACE_ENTREPOT,
+                                'id_entrepot'  => (int) $id_entrepot,
+                                'infos'        => 'Correction automatique suite à la vente de l\'équipement (vente #' . $this->id . ')',
+                                'date'         => date('Y-m-d H:i:s'),
+                            ));
+                            if (!count($place_errors)) {
+                                $place_errors = $place->create();
+                            }
+
+                            if (count($place_errors)) {
+                                $msg = 'Echec de la correction de l\'emplacement pour le n° de série "' . $equipment->getData('serial') . '"';
+                                $errors[] = BimpTools::getMsgFromArray($place_errors, $msg);
+                                dol_syslog('[ERREUR STOCK] ' . $msg . ' Vente #' . $this->id . ' - Article #' . $article->id . ' - Erreurs: ' . BimpTools::getMsgFromArray($place_errors), LOG_ERR);
+                            }
+                        }
+
+                        // Création du nouvel emplacement: 
+                        $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
+                        if ($id_client) {
+                            $place_errors = $place->validateArray(array(
+                                'id_equipment' => (int) $equipment->id,
+                                'type'         => BE_Place::BE_PLACE_CLIENT,
+                                'id_client'    => (int) $id_client,
+                                'infos'        => 'Vente #' . $this->id,
+                                'date'         => date('Y-m-d H:i:s'),
+                                'code_mvt'     => $codemove . '_ART' . (int) $article->id
+                            ));
+                        } else {
+                            $place_errors = $place->validateArray(array(
+                                'id_equipment' => (int) $equipment->id,
+                                'type'         => BE_Place::BE_PLACE_FREE,
+                                'place_name'   => 'Equipement vendu (client non renseigné)',
+                                'infos'        => 'Vente #' . $this->id,
+                                'date'         => date('Y-m-d H:i:s'),
+                                'code_mvt'     => $codemove . '_ART' . (int) $article->id
+                            ));
+                        }
+
+                        if (!count($place_errors)) {
+                            $place_errors = $place->create();
+                        }
+
+                        if (count($place_errors)) {
+                            $msg = 'Echec de l\'enregistrement du nouvel emplacement pour le n° de série "' . $equipment->getData('serial') . '"';
+                            $errors[] = BimpTools::getMsgFromArray($place_errors, $msg);
+                            dol_syslog('[ERREUR STOCK] ' . $msg . ' Vente #' . $this->id . ' - Article #' . $article->id . ' - Erreurs: ' . BimpTools::getMsgFromArray($place_errors), LOG_ERR);
+                        }
+
+                        $equipment->updateField('return_available', 1, null, true);
+                    } else {
+                        $product = $article->getChildObject('product');
+                        $result = $product->dol_object->correct_stock($user, $id_entrepot, (int) $article->getData('qty'), 1, 'Vente #' . $this->id, 0, $codemove . '_ART' . (int) $article->id,'facture',$id_facture);
+                        if ($result < 0) {
+                            $msg = 'Echec de la mise à jour du stock pour le produit "' . $product->getRef() . ' - ' . $product->getName() . '" (ID: ' . $product->id . ')';
+                            $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($product->dol_object), $msg);
+                            dol_syslog('[ERREUR STOCK] ' . $msg . ' - Vente #' . $this->id . ' - Article #' . $article->id . ' - Qté: ' . (int) $article->getData('qty'), LOG_ERR);
+                        }
+                    }
+                }
+
+                // Gestion des stocks et emplacement des produits retournés: 
+                if (count($returns)) {
+                    $id_defective_entrepot = BimpCore::getConf('defective_id_entrepot');
+                    $i = 1;
+
+                    foreach ($returns as $return) {
+                        $equipment = $return->getChildObject('equipment');
+                        if (BimpObject::objectLoaded($equipment)) {
+                            $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
+
+                            // Création du nouvel emplacement: 
+                            if ((int) $return->getData('defective')) {
+                                $place_errors = $place->validateArray(array(
+                                    'id_equipment' => (int) $equipment->id,
+                                    'type'         => BE_Place::BE_PLACE_ENTREPOT,
+                                    'id_entrepot'  => (int) $id_defective_entrepot,
+                                    'infos'        => 'Retour produit défectueux (Vente #' . $this->id . ')',
+                                    'date'         => date('Y-m-d H:i:s'),
+                                    'code_mvt'     => $codemove . '_RET' . (int) $return->id
+                                ));
+                            } else {
+                                $place_errors = $place->validateArray(array(
+                                    'id_equipment' => (int) $equipment->id,
+                                    'type'         => BE_Place::BE_PLACE_ENTREPOT,
+                                    'id_entrepot'  => (int) $id_entrepot,
+                                    'infos'        => 'Retour produit (Vente #' . $this->id . ')',
+                                    'date'         => date('Y-m-d H:i:s'),
+                                    'code_mvt'     => $codemove . '_RET' . (int) $return->id
+                                ));
+                            }
+                            if (!count($place_errors)) {
+                                $place_errors = $place->create();
+                            }
+
+                            if (count($place_errors)) {
+                                $msg = 'Echec de l\'enregistrement du nouvel emplacement du retour produit n° ' . $i . ' (N° série: ' . $equipment->getData('serial') . ')';
+                                $errors[] = BimpTools::getMsgFromArray($place_errors, $msg);
+
+                                dol_syslog('[ERREUR STOCK] ' . $msg . - ' Vente #' . $this->id . ' - Article #' . $article->id . ' - Erreurs: ' . BimpTools::getMsgFromArray($place_errors), LOG_ERR);
+                            }
+                        } else {
+                            $product = $return->getChildObject('product');
+
+                            if ((int) $return->getData('defective')) {
+                                $result = $product->dol_object->correct_stock($user, $id_defective_entrepot, (int) $return->getData('qty'), 0, 'Retour produit Vente #' . $this->id, 0, $codemove . '_RET' . (int) $return->id,'facture',$id_facture);
+                            } else {
+                                $result = $product->dol_object->correct_stock($user, $id_entrepot, (int) $return->getData('qty'), 0, 'Retour produit Vente #' . $this->id, 0, $codemove . '_RET' . (int) $return->id,'facture',$id_facture);
+                            }
+
+                            if ($result < 0) {
+                                $msg = 'Echec de la mise à jour du stock pour le produit "' . $product->getRef() . ' - ' . $product->getName() . '" (ID: ' . $product->id . ')';
+                                $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($product->dol_object), $msg);
+                                dol_syslog('[ERREUR STOCK] ' . $msg . - ' Vente #' . $this->id . ' - Article #' . $article->id . ' - Qté: ' . (int) $article->getData('qty'), LOG_ERR);
+                            }
+                        }
+                        $i++;
+                    }
+                }
             }
         } else {
             $errors[] = 'Cette vente n\'existe pas';

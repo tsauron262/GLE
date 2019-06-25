@@ -10,7 +10,7 @@ class entrepotController extends reservationController
         
     }
 
-    public function renderHtml()
+    public function renderReservationsTab($type)
     {
         if (!BimpTools::isSubmit('id')) {
             return BimpRender::renderAlerts('ID de l\'entrepôt absent');
@@ -21,28 +21,18 @@ class entrepotController extends reservationController
             return BimpRender::renderAlerts('Aucun entrepôt trouvé pour l\'ID ' . BimpTools::getValue('id', ''));
         }
 
-        $html = '';
-
-        $html .= '<div class="page_content container-fluid">';
-        $html .= '<h1>Liste des réservations pour l\'entrepôt "' . $entrepot->libelle . ($entrepot->description ? ' - ' . $entrepot->description : '') . '"</h1>';
-
-        $html .= BimpRender::renderNavTabs(array(
-                    array(
-                        'id'      => 'res_reserve',
-                        'title'   => 'A réserver',
-                        'content' => $this->renderReservationsTab($entrepot, 'Réservations à traiter', 'to_reserve', array(
-                            'in' => '2,100'
-                        ))
-                    ),
-                    array(
-                        'id'      => 'res_to_process',
-                        'title'   => 'A traiter',
-                        'content' => $this->renderReservationsTab($entrepot, 'Réservations à traiter', 'to_process', 0)
-                    ),
-                    array(
-                        'id'      => 'res_to_deliver',
-                        'title'   => 'A livrer',
-                        'content' => $this->renderReservationsTab($entrepot, 'Réservations à livrer', 'to_deliver', array(
+        switch ($type) {
+            default:
+            case 'to_reserve':
+                return $this->renderReservationsTabContent($entrepot, 'A réserver', 'to_reserve', array(
+                    'in' => '2,100'
+                ));
+                
+            case 'to_process':
+                return $this->renderReservationsTabContent($entrepot, 'Réservations à traiter', 'to_reserve', 0);
+                
+            case 'to_deliver':
+                return $this->renderReservationsTabContent($entrepot, 'Réservations à livrer', 'to_deliver', array(
                             'and' => array(
                                 array(
                                     'operator' => '<',
@@ -53,32 +43,20 @@ class entrepotController extends reservationController
                                     'value'    => 200
                                 )
                             )
-                        ))
-                    ),
-                    array(
-                        'id'      => 'res_completed',
-                        'title'   => 'Terminées',
-                        'content' => $this->renderReservationsTab($entrepot, 'Réservations terminées', 'completed', array(
+                        ));
+                
+            case 'completed':
+                return $this->renderReservationsTabContent($entrepot, 'Réservations terminées', 'completed', array(
                             'operator' => '>=',
                             'value'    => 300
-                        ))
-                    ),
-                    array(
-                        'id'      => 'all_res',
-                        'title'   => 'Toutes les Réservations',
-                        'content' => $this->renderReservationsTab($entrepot, 'Toutes les Réservations', 'all', array())
-                    ),
-                    array(
-                        'id'      => 'supplier_orders',
-                        'title'   => 'Gestion des commandes fournisseurs',
-                        'content' => $this->renderSupplierOrdersTab($entrepot)
-                    )
-        ));
-        $html .= '</div>';
-        return $html;
+                        ));
+            case 'all_res': 
+                return $this->renderReservationsTabContent($entrepot, 'Toutes les Réservations', 'all', array());
+                
+        }
     }
 
-    protected function renderReservationsTab($entrepot, $title, $suffixe, $status_filter = array())
+    protected function renderReservationsTabContent($entrepot, $title, $suffixe, $status_filter = array())
     {
         $html = '<div class="row">';
         $html .= '<div class="col-lg-12">';
@@ -99,21 +77,30 @@ class entrepotController extends reservationController
         return $html;
     }
 
-    protected function renderSupplierOrdersTab($entrepot)
-    {
-        $html = '';
-
-        $html .= '<div class="row">';
-        $html .= '<div class="col-lg-12">';
-
-        $rcf = BimpObject::getInstance($this->module, 'BR_ReservationCmdFourn');
-        $list = new BC_ListTable($rcf, 'default', 1, null, 'Liste des réservations en commande / à commander');
-        $list->addFieldFilterValue('id_entrepot', (int) $entrepot->id);
-        $html .= $list->renderHtml();
-
-        $html .= '</div>';
-        $html .= '</div>';
-
-        return $html;
-    }
+//    protected function renderSupplierOrdersTab()
+//    {
+//        if (!BimpTools::isSubmit('id')) {
+//            return BimpRender::renderAlerts('ID de l\'entrepôt absent');
+//        }
+//
+//        $entrepot = $this->config->getObject('', 'entrepot');
+//        if (is_null($entrepot) || !isset($entrepot->id) || !$entrepot->id) {
+//            return BimpRender::renderAlerts('Aucun entrepôt trouvé pour l\'ID ' . BimpTools::getValue('id', ''));
+//        }
+//        
+//        $html = '';
+//
+//        $html .= '<div class="row">';
+//        $html .= '<div class="col-lg-12">';
+//
+//        $rcf = BimpObject::getInstance($this->module, 'BR_ReservationCmdFourn');
+//        $list = new BC_ListTable($rcf, 'default', 1, null, 'Liste des réservations en commande / à commander');
+//        $list->addFieldFilterValue('id_entrepot', (int) $entrepot->id);
+//        $html .= $list->renderHtml();
+//
+//        $html .= '</div>';
+//        $html .= '</div>';
+//
+//        return $html;
+//    }
 }

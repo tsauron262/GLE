@@ -215,6 +215,14 @@ class BC_Input extends BimpComponent
                 $this->value = $input_value;
             }
         }
+
+        switch ($this->params['type']) {
+            case 'check_list':
+                if (is_string($this->value) && preg_match('/^\[.*\]$/', $this->value)) {
+                    $this->value = json_decode($this->value, 1);
+                }
+                break;
+        }
     }
 
     public function setNamePrefix($prefix)

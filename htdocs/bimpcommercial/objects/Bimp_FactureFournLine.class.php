@@ -9,4 +9,5 @@ class Bimp_FactureFournLine extends FournObjectLine
     public static $dol_line_table = 'facture_fourn_det';   
     public static $dol_line_parent_field = 'fk_facture_fourn';
     public $equipment_required = true;
+    public static $equipment_required_in_entrepot = false;
 }

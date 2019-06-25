@@ -129,7 +129,6 @@ fields:
         values: 
             array: comptes
         
-    ef_type: unset
     fk_availability: unset
     fk_input_reason: unset
     ref_client: unset
@@ -178,14 +177,14 @@ fields_tables:
     infos: 
         rows: 
             - field: entrepot
+              display: nom_url
+            - field: ef_type
             - field: libelle
               edit: 1
             - field: datef
               edit: 1
             - field: fk_statut
             - field: paye
-            - field: entrepot
-              display: nom_url
             - field: fk_facture_source
               show: 
                   field_value: fk_facture_source

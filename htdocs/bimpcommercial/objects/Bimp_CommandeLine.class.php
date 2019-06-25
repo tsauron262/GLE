@@ -3783,6 +3783,7 @@ class Bimp_CommandeLine extends ObjectLine
                             $commande_fourn = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFourn');
                             $commande_fourn->validateArray(array(
                                 'entrepot' => $id_entrepot,
+                                'ef_type' => $commande->getData('ef_type'),
                                 'fk_soc'   => $id_fourn
                             ));
 

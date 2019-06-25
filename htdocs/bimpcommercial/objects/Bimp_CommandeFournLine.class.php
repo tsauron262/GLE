@@ -299,7 +299,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
         return $qty;
     }
 
-    public function getLinesDataByUnitPriceAndTva()
+    public function getLinesDataByUnitPriceAndTva(Array $receptions_list)
     {
         $lines = array();
         $full_qty = (float) $this->getFullQty();
@@ -309,6 +309,10 @@ class Bimp_CommandeFournLine extends FournObjectLine
         $receptions = $this->getData('receptions');
 
         foreach ($receptions as $id_reception => $reception_data) {
+            if (!in_array((int) $id_reception, $receptions_list)) {
+                continue;
+            }
+
             if ($is_serialisable) {
                 if (!$isReturn) {
                     if (isset($reception_data['equipments'])) {

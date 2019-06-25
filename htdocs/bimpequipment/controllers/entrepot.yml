@@ -1,5 +1,7 @@
 bootstrap: 1
 
+title: Entrepot
+
 js:
     - /bimpequipment/views/js/equipment.js
     

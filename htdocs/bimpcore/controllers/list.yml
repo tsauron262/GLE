@@ -1,2 +1,4 @@
 bootstrap: 1
 
+title: 
+    callback: getPageTitle

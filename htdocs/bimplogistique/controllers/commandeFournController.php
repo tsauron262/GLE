@@ -13,6 +13,21 @@ class commandeFournController extends BimpController
 //        $head = commande_prepare_head($commande->dol_object);
 //        dol_fiche_head($head, 'bimplogisitquecommande', $langs->trans("CustomerOrder"), -1, 'order');
 //    }
+    
+    public function getPageTitle()
+    {
+        $title = 'Logistique ';
+        $commande = $this->config->getObject('', 'commande_fourn');
+        
+        if (BimpObject::objectLoaded($commande)) {
+            $title .= $commande->getRef();
+        } else {
+            $title .= 'commande fournisseur';
+        }
+        
+        return $title;
+    }
+    
 
     public function renderContentHtml()
     {

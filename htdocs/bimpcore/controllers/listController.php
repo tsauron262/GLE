@@ -27,7 +27,23 @@ class ListController extends BimpController
                 $list->addFieldFilterValue($field, $value);
             }
         }
-        
+
         return $list->renderHtml();
+    }
+
+    public function getPageTitle()
+    {
+        $module = BimpTools::getValue('module', $this->module);
+        $object_name = BimpTools::getValue('object_name', '');
+
+        if ($object_name) {
+            $instance = BimpObject::getInstance($module, $object_name);
+
+            if (is_a($instance, $object_name)) {
+                return 'Liste des ' . $instance->getLabel('name_plur');
+            }
+        }
+
+        return 'Liste';
     }
 }

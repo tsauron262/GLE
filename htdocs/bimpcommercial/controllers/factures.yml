@@ -1,5 +1,5 @@
 bootstrap: 1
-title: Factures
+title: Factures clients
 
 objects: 
     facture: 

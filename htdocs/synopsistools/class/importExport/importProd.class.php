@@ -121,14 +121,17 @@ class importProd extends importCat {
             $this->traiteChamp("description", $desc);
             $this->traiteChamp("ref", $ln['ArtCode']);
             $this->traiteChamp("import_key", $ln['ArtID']);
+            $this->traiteChamp("barcode", $ln['ArtCodeBarre']);
             
-//            $this->getAllCat();
-//
-//            $this->traiteCat1("Gamme", $ln["ArtGammeEnu"]);
-//            $this->traiteCat1("Categorie", $ln["ArtCategEnu"]);
-//            $this->traiteCat1("Nature", $ln["ArtNatureEnu"]);
-//            $this->traiteCat1("Collection", $ln["ArtCollectEnu"]);
-//            $this->traiteCat1("Famille", $ln["ArtFamilleEnu"]);
+            if(!isset($_REQUEST['light'])){
+                $this->getAllCat();
+
+                $this->traiteCat1("Gamme", $ln["ArtGammeEnu"]);
+                $this->traiteCat1("Categorie", $ln["ArtCategEnu"]);
+                $this->traiteCat1("Nature", $ln["ArtNatureEnu"]);
+                $this->traiteCat1("Collection", $ln["ArtCollectEnu"]);
+                $this->traiteCat1("Famille", $ln["ArtFamilleEnu"]);
+            }
 
 
             if ($this->updatePrice) {

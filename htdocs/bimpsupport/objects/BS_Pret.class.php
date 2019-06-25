@@ -52,12 +52,13 @@ class BS_Pret extends BimpObject
             }
         } else {
             $id_entrepot = (int) BimpTools::getPostFieldValue('id_entrepot', 0);
+            
             $unreturned = $this->getUnreturnedEquipments($id_entrepot);
 
             $list = $equipment_instance->getList(array(
                 'p.position'    => 1,
                 'p.type'        => 7,
-                'p.id_entrepot' => (int) $this->getData('id_entrept')
+                'p.id_entrepot' => (int) $id_entrepot
                     ), null, null, 'id', 'desc', 'array', array('a.id'), array(
                 array(
                     'table' => 'be_equipment_place',

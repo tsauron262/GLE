@@ -16,31 +16,27 @@ labels:
 forms:
     default:
         rows:
-            0:
+            soc:
                 label: Fournisseur
                 input_name: id_fourn
                 input: 
                     societe_type: supplier
                 value: 
                     callback: getFourn
-            1:
-                label: Compte
-                input_name: id_account
-                content: unset
-                input: 
-                    type: select_mysoc_account
+            compte:
                 show: 1
-            7:
+            avoirs:
                 label: Avoirs chez ce fournisseur
-                depends_on: id_supplier
+                depends_on: id_fourn
                 input_name: avoirs
                 input: 
                     type: select_remises_fourn
+                    id_client: unset
                     id_fourn: 
                         callback: getFourn
                 display_if: 
                     field_name: id_fourn
-            8:
+            factures:
                 depends_on: id_fourn
                 input_name: factures
                 display_if: 

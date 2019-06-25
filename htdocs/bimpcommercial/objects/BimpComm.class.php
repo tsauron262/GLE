@@ -2751,6 +2751,36 @@ class BimpComm extends BimpDolObject
             'success_callback' => 'bimp_reloadPage();'
         );
     }
+    
+    public function actionRemoveDiscount($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Retrait de la remise effectué avec succès';
+
+        if (!isset($data['id_discount']) || !(int) $data['id_discount']) {
+            $errors[] = 'Aucune remise à retirer spécifiée';
+        } else {
+            if (!class_exists('DiscountAbsolute')) {
+                require_once DOL_DOCUMENT_ROOT . '/core/class/discount.class.php';
+            }
+
+            $discount = new DiscountAbsolute($this->db->db);
+            if ($discount->fetch((int) $data['id_discount']) <= 0) {
+                $errors[] = 'La remise d\'ID ' . $data['id_discount'] . ' n\'existe pas';
+            } else {
+                if ($discount->unlink_invoice() <= 0) {
+                    $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($discount), 'Echec du retrait de la remise');
+                }
+            }
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => 'bimp_reloadPage();'
+        );
+    }
 
     // Overrides BimpObject:
 

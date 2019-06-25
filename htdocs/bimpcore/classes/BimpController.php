@@ -1165,11 +1165,14 @@ class BimpController
                         $html .= $field->renderInput();
                         unset($field);
                     } elseif ($object->config->isDefined('associations/' . $field_name)) {
+                        $form = new BC_Form($object, $id_parent, $form_name, 1, true);
                         $bimpAsso = new BimpAssociation($object, $field_name);
                         if (count($bimpAsso->errors)) {
                             $html = BimpRender::renderAlerts($bimpAsso->errors);
                         } else {
                             $html = $bimpAsso->renderAssociatesCheckList($field_prefix);
+                            // todo: remplacer 'default' par param correspondant (dans form/rows/...) 
+                            $html = $bimpAsso->renderAddAssociateInput('default', false, $field_prefix, 0);
                         }
                     }
                 }

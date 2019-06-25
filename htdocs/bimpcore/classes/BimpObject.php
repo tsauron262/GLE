@@ -4851,7 +4851,7 @@ class BimpObject extends BimpCache
         $data .= 'id_parent: "' . $id_parent . '", ';
         $data .= 'form_name: "' . $form_name . '", ';
 
-        if (count($values)) {
+        if (!empty($values)) {
             $data .= 'param_values: ' . json_encode($values) . ', ';
         }
 

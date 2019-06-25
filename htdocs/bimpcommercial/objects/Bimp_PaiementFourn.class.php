@@ -5,6 +5,8 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/objects/Bimp_Paiement.class.ph
 class Bimp_PaiementFourn extends Bimp_Paiement
 {
 
+    public $useCaisse = false;
+
     public function __construct($module, $object_name)
     {
         BimpObject::__construct($module, $object_name);
@@ -237,8 +239,8 @@ class Bimp_PaiementFourn extends Bimp_Paiement
 
         $type_paiement = $this->db->getValue('c_paiement', 'code', '`id` = ' . (int) $this->dol_object->paiementid);
         if (is_null($type_paiement) || !(string) $type_paiement) {
-            $errors[] = 'Mode paiement invalide';
-        } elseif (($total_paid + $total_avoirs) > $total_to_pay && $type_paiement !== 'LIQ') {
+            $errors[] = 'Mode de paiement invalide';
+        }  elseif (($total_paid + $total_avoirs) > $total_to_pay && $type_paiement !== 'LIQ') {
             $errors[] = 'Le versement d\'une somme supérieure au total des factures n\'est possible que pour un paiement en espèces';
         }
 

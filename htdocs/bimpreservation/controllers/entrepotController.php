@@ -87,7 +87,7 @@ class entrepotController extends reservationController
         $list = new BC_ListTable($resa, 'entrepot', 1, null, $title);
         $list->identifier .= '_' . $suffixe;
         $list->addFieldFilterValue('id_entrepot', (int) $entrepot->id);
-        $list->addFieldFilterValue('type', BR_Reservation::BR_RESERVATION_COMMANDE);
+//        $list->addFieldFilterValue('type', BR_Reservation::BR_RESERVATION_COMMANDE);  // pas que les enstock aussi les pret et autres
         if (count($status_filter)) {
             $list->addFieldFilterValue('status', $status_filter);
         }

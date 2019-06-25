@@ -324,6 +324,9 @@ class modBimpCommercial extends DolibarrModules
                 $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'crabe';";
                 $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimpfact', 1, 'invoice', 'Facture', NULL);";
                 
+                $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'einstein';";
+                $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimpcommande', 1, 'order', 'Commande', NULL);";
+                
 		//$this->_load_tables('/bimpcommercial/sql/');
                 
                 $extrafields = new ExtraFields($this->db);
@@ -361,9 +364,12 @@ class modBimpCommercial extends DolibarrModules
                 $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'bimpcommercial';";
                 $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'bimployerdevis';";
                 $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'bimpdevis';";
+                $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'bimpcommande';";
 
 //                $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'einstein', 1, 'propal', 'einstein', NULL);";
                 $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'azur', 1, 'propal', 'azur', NULL);";
+                
+                $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'einstein', 1, 'order', 'einstein', NULL);";
                 
                 
                 //Facture

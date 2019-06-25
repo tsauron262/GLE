@@ -28,6 +28,7 @@ class OrderPDF extends BimpDocumentPDF
         }
 
         $this->doc_type = $doc_type;
+        $this->typeObject = "commande";
 
         parent::__construct($db);
 

@@ -1024,7 +1024,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
     }
 
     public function checkReceptionData($id_reception, $data)
-    {
+    {        
         $errors = array();
 
         if (!((int) $id_reception)) {
@@ -1042,7 +1042,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
 
         if ($reception->getData('status') === BL_CommandeFournReception::BLCFR_BROUILLON) {
             if ($this->isProductSerialisable()) {
-                if ($isReturn) {
+                if (!$isReturn) {
                     if (isset($data['serials']) && !empty($data['serials'])) {
                         $serials = array();
                         foreach ($data['serials'] as $serial_data) {
@@ -1836,7 +1836,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
         $errors = array();
         $warnings = array();
         $success = '';
-
+        
         if (!count($data)) {
             $errors[] = 'Aucunes données reçues';
         } else {

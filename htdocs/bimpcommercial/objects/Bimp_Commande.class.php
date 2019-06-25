@@ -1822,6 +1822,12 @@ class Bimp_Commande extends BimpComm
             }
         }
     }
+    
+    public function fetch($id, $parent = null) {
+        $return = parent::fetch($id, $parent);
+        $this->checkInvoiceStatus();
+        return $return;
+    }
 
     public function checkInvoiceStatus()
     {

@@ -106,7 +106,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
                                     } else {
                                         $commande_ref = 'd\'ID ' . $line->getData('id_obj');
                                     }
-                                    $errors[] = 'L\'équipement "' . $equipment->getData('serial') . '" n\'est plus au statut "Réservé" pour la commande client ' . $commande_ref;
+                                    //$errors[] = 'L\'équipement "' . $equipment->getData('serial') . '" n\'est plus au statut "Réservé" pour la commande client ' . $commande_ref;
                                 } else {
                                     // La réservation est ok : on vérifie l'ajout de l'équipement à une facture ou une expédition de la ligne de commande client:
                                     if (in_array((int) $id_equipment, $line_equipments_shipped)) {

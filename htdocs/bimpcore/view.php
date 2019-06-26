@@ -1,26 +1,34 @@
 <?php
 
-define('NOLOGIN', '1');
-
 require_once("../main.inc.php");
 
-ini_set('display_errors', 1);
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
-require_once DOL_DOCUMENT_ROOT . '/bimpcore/classes/BimpTicket.php';
-
-echo '<!DOCTYPE html>';
-echo '<html lang="fr">';
-
-echo '<head>';
-echo '<script src="/test2/includes/jquery/js/jquery.min.js?version=6.0.4" type="text/javascript"></script>';
-echo '</head>';
-
-echo '<body>';
 
 $errors = array();
 
-$id_vente = (int) BimpTools::getValue('id_vente', 0);
-$html = '';
+$module = BimpTools::getValue('module', '');                                    
+$object_name = BimpTools::getValue('object_name', '');
+$id_object = BimpTools::getValue('id_object', 0);
+$view = BimpTools::getValue('view', 'default');
+
+if (!$module) {
+    $errors[] = 'Module absent';
+}
+if (!$object_name) {
+    $errors[] = 'Module absent';
+}
+if (!$id_object) {
+    $errors[] = 'Module absent';
+}
+
+if (!count($errors)) {
+    
+}
+
+top_htmlhead('', $title, 0, 0, array(), array());
+BimpCore::displayHeaderFiles();
+
+echo '<body>';
 
 if (!$id_vente) {
     $errors[] = 'ID de la vente absent';

@@ -30,6 +30,16 @@ class BC_CustomFilter extends BC_Filter
 
         switch ($this->params['type']) {
             case 'value':
+                $input_type = $this->object->getConf($this->config_path . '/input/type', '');
+                if ($input_type === 'select') {
+                    if ($this->object->config->isDefined($this->config_path . '/input/options')) {
+                        $options = $this->object->getConf($this->config_path . '/input/options', array(), false, 'array');
+                        if (isset($options[$value])) {
+                            return $options[$value];
+                        }
+                    }
+                }
+
                 $label = $this->object->getCustomFilterValueLabel($this->field_name, $value);
                 break;
 

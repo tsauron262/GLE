@@ -137,6 +137,33 @@ filters_panels:
                 field: qty_to_receive
             qty_received:
                 field: qty_received
+            categ1:
+                custom: 1
+                label: Catégorie (1)
+                field: categ1
+                type: value
+                input:
+                    type: select
+                    options: 
+                        callback: getCategoriesArray
+            categ2:
+                custom: 1
+                label: Catégorie (2)
+                field: categ2
+                type: value
+                input:
+                    type: select
+                    options: 
+                        callback: getCategoriesArray
+            categ3:
+                custom: 1
+                label: Catégorie (3)
+                field: categ3
+                type: value
+                input:
+                    type: select
+                    options: 
+                        callback: getCategoriesArray
                 
 lists_cols: 
     qties: 

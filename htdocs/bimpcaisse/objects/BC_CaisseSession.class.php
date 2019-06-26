@@ -38,6 +38,31 @@ class BC_CaisseSession extends BimpObject
         return $infos;
     }
 
+    public function getListExtraButtons()
+    {
+        $buttons = array();
+
+        if ($this->isLoaded()) {
+            $caisse = $this->getParentInstance();
+            if (BimpObject::objectLoaded($caisse)) {
+                $width = BC_Caisse::$windowWidthByDpi[(int) $caisse->getData('printer_dpi')];
+            } else {
+                $width = 200;
+            }
+
+            $url = DOL_URL_ROOT . '/bimpcore/view.php?module=bimpcaisse&object_name=BC_CaisseSession&id_object=' . $this->id . '&view=recap';
+            $onclick = 'window.open(\'' . $url . '\', \'Récapitulatif session de caisse\', \'menubar=no, status=no, width=' . $width . ', height=900\')';
+
+            $buttons[] = array(
+                'label'   => 'Impression',
+                'icon'    => 'fas_print',
+                'onclick' => $onclick
+            );
+        }
+
+        return $buttons;
+    }
+
     public function renderPaymentsInfos()
     {
         $html = '';
@@ -105,7 +130,7 @@ class BC_CaisseSession extends BimpObject
         $list->addFieldFilterValue('id_caisse_session', (int) $this->id);
         return $list->renderHtml();
     }
-    
+
     public function renderVentesList()
     {
         if (!$this->isLoaded()) {

@@ -156,6 +156,8 @@ lists:
         sort_way: desc
         n: 10
         modal_view: full
+        extra_btn: 
+            callback: getListExtraButtons
         cols:
             centre: 
                 field: id_caisse

@@ -123,6 +123,19 @@ class CronSynopsis {
         $this->output = $import->output;
         
         
+        require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/importExport/importBr.class.php");
+        $import = new importBr($this->db);
+        $import->debug = $debug;
+        $import->go(); 
+        $this->output = $import->output;
+        
+        require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/importExport/importCommandeFourn.class.php");
+        $import = new importCommandeFourn($this->db);
+        $import->debug = $debug;
+        $import->go(); 
+        $this->output = $import->output;
+        
+        
         
         
         

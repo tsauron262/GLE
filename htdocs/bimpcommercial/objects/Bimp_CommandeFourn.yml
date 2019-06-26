@@ -527,7 +527,6 @@ cards:
               display: nom_url
         view_btn: 1
         
-        
 searches:
     default: 
         fields_search: 

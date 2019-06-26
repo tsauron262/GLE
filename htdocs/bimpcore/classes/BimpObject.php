@@ -5275,6 +5275,15 @@ class BimpObject extends BimpCache
         return (int) $this->params['labels']['is_female'];
     }
 
+    public function e()
+    {
+        if ($this->isLabelFemale()) {
+            return 'e';
+        }
+
+        return '';
+    }
+
     public function getInstanceName()
     {
         return $this->getName();

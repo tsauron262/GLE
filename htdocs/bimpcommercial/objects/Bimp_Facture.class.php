@@ -263,7 +263,7 @@ class Bimp_Facture extends BimpComm
         if (!$this->isLoaded()) {
             return array();
         }
-        
+
         $buttons = parent::getActionsButtons();
         $status = (int) $this->getData('fk_statut');
         $ref = $this->getRef();
@@ -577,10 +577,9 @@ class Bimp_Facture extends BimpComm
                     );
                 }
             }
-            
         }
-        
-        
+
+
         return $buttons;
     }
 
@@ -2013,7 +2012,7 @@ class Bimp_Facture extends BimpComm
     {
         $errors = array();
         $warnings = array();
-        $success = BimpTools::ucfirst($this->getLabel('this')) . ' a bien été classée "payé' . ($this->isLabelFemale() ? 'e' : '') . '"';
+        $success = BimpTools::ucfirst($this->getLabel('the')) . ' ' . $this->getRef() . ' a bien été classé' . ($this->isLabelFemale() ? 'e' : '') . ' "payé' . ($this->isLabelFemale() ? 'e' : '') . '"';
 
         global $user;
 
@@ -2028,6 +2027,7 @@ class Bimp_Facture extends BimpComm
 
         $close_code = (isset($data['close_code']) ? $data['close_code'] : '');
         $close_note = (isset($data['close_note']) ? $data['close_note'] : '');
+        
         if ($this->isLoaded() && (int) $this->getData('fk_statut') == 1 && !(int) $this->dol_object->paye &&
                 (($remainToPay > 0 && $close_code) ||
                 (!in_array($type, array(Facture::TYPE_CREDIT_NOTE, Facture::TYPE_DEPOSIT) && $remainToPay <= 0)) ||

@@ -17,25 +17,27 @@ class BimpTools
     );
     private static $context = "";
 
-    public static function processImport()
+    public static function processImport($prefixe)
     {
+//        $prob = array();
+//
 //        $commandes = array(
-//            'CO1904-8050_TEST5' => Array(
+//            'IMPORT_CF' => Array(
 //                Array
 //                    (
-//                    'ref'          => 'MIC-A9W-00007',
+//                    'ref'          => 'APP-TEST2',
 //                    'qty'          => 4,
 //                    'qtyEnBl'      => 0,
-//                    'soc'          => '0096157',
-//                    'pv'           => 396,
-//                    'pa'           => '57,31',
+//                    'soc'          => 'FGLE00409',
+//                    'pv'           => '100,11',
+//                    'pa'           => '50,55',
 //                    'qteBlNonFact' => 0,
 //                    'dep'          => 'PR',
 //                    'soc2'         => 'CLGLE007183'
 //                ),
 //                Array
 //                    (
-//                    'ref'          => 'DEL-CTO-7460',
+//                    'ref'          => 'APP-TESTEST',
 //                    'soc'          => '0096157',
 //                    'dep'          => 'PR',
 //                    'qty'          => 23,
@@ -43,17 +45,17 @@ class BimpTools
 //                    'qteBlNonFact' => 23,
 //                    'pv'           => 1079,
 //                    'pa'           => 910,
-//                    'bl'           => Array
+//                    'br'           => Array
 //                        (
-//                        'LOLY-1902012' => Array
+//                        'BR1' => Array
 //                            (
 //                            'qteBlNonFact' => 4
 //                        ),
-//                        'LOLY-1902044' => Array
+//                        'BR2' => Array
 //                            (
 //                            'qteBlNonFact' => 1
 //                        ),
-//                        'LOLY-1902218' => Array
+//                        'BR3' => Array
 //                            (
 //                            'qteBlNonFact' => 18
 //                        )
@@ -1654,30 +1656,43 @@ class BimpTools
 
     // Traitements sur des array: 
 
-    public static function getMsgFromArray($msgs, $title = '')
+    public static function getMsgFromArray($msgs, $title = '', $no_html = false)
     {
         $msg = '';
-        if ($title) {
-            $msg .= $title . ' : <br/>';
-        }
 
-        if (is_array($msgs)) {
-//            $msg .= '<div style="padding-left: 15px">';
-            $msg .= '<ul>';
-//            $fl = true;
-            foreach ($msgs as $m) {
-//                if (!$fl) {
-//                    $msg .= '<br/>';
-//                } else {
-//                    $fl = false;
-//                }
-//                $msg .= ' - ' . $m;
-                $msg .= '<li>' . $m . '</li>';
+        if ($no_html) {
+            if ($title) {
+                $msg .= $title . ' : ' . "\n";
             }
-            $msg .= '</ul>';
-//            $msg .= '</div>';
+
+            if (is_array($msgs)) {
+                $fl = true;
+                foreach ($msgs as $m) {
+                    if (!$fl) {
+                        $msg .= "\n";
+                    } else {
+                        $fl = false;
+                    }
+
+                    $msg .= "\t" . '- ' . $m;
+                }
+            } else {
+                $msg .= "\t" . '- ' . $msgs;
+            }
         } else {
-            $msg .= '&nbsp;&nbsp;&nbsp;&nbsp;- ' . $msgs;
+            if ($title) {
+                $msg .= $title . ' : <br/>';
+            }
+
+            if (is_array($msgs)) {
+                $msg .= '<ul>';
+                foreach ($msgs as $m) {
+                    $msg .= '<li>' . $m . '</li>';
+                }
+                $msg .= '</ul>';
+            } else {
+                $msg .= '&nbsp;&nbsp;&nbsp;&nbsp;- ' . $msgs;
+            }
         }
 
         return $msg;
@@ -1966,5 +1981,4 @@ class BimpTools
         self::$context = $context;
         $_SESSION['context'] = $context;
     }
-    
 }

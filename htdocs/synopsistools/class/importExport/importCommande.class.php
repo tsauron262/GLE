@@ -2,11 +2,13 @@
 
 require_once DOL_DOCUMENT_ROOT . "/synopsistools/class/importExport/importCat.class.php";
 
-class importCommande extends import8sens {
+class importCommande extends import8sens
+{
 
     var $tabCommande = array();
 
-    public function __construct($db) {
+    public function __construct($db)
+    {
         $this->mode = 2;
         parent::__construct($db);
         $this->path .= "commEnCours/";
@@ -22,7 +24,8 @@ class importCommande extends import8sens {
 //        
 //    }
 
-    function traiteLn($ln) {
+    function traiteLn($ln)
+    {
         $this->tabResult["total"] ++;
 
         $ref = "";
@@ -46,7 +49,8 @@ class importCommande extends import8sens {
         }
     }
 
-    function go() {
+    function go()
+    {
         parent::go();
 
 
@@ -55,9 +59,9 @@ class importCommande extends import8sens {
 
         $tabFinal = array();
         foreach ($this->tabCommande as $ref => $tabLn) {
-                foreach ($tabLn["lignes"] as $dataLn) {
-                        $tabFinal[$ref][] = array("ref" => $dataLn['PlvGArtCode'], "qty" => $dataLn['PlvQteUS'], "qtyEnBl" => $dataLn['PlvQteTr'], "soc" => $dataLn["PlvGCliCode"], "pv" => $dataLn['PlvPUNet'], "pa" => $dataLn['PlvPA'], 'dep' => $dataLn['PlvDDepCode'], 'soc2' => $dataLn['CliFree3']);
-                }
+            foreach ($tabLn["lignes"] as $dataLn) {
+                $tabFinal[$ref][] = array("ref" => $dataLn['PlvGArtCode'], "qty" => $dataLn['PlvQteUS'], "qtyEnBl" => $dataLn['PlvQteTr'], "soc" => $dataLn["PlvGCliCode"], "pv" => $dataLn['PlvPUNet'], "pa" => $dataLn['PlvPA'], 'dep' => $dataLn['PlvDDepCode'], 'soc2' => $dataLn['CliFree3']);
+            }
         }
 
 
@@ -100,8 +104,8 @@ class importCommande extends import8sens {
                 }
             }
         }
-        
-        
+
+
         $prob = array();
 
         if (!defined('BIMP_LIB')) {
@@ -121,8 +125,7 @@ class importCommande extends import8sens {
                 if ($data[$idT]["qty"] == "nc") {
                     $data[$idT]["qty"] = $data[$idT]["qtyEnBl"] = $data[$idT]["qteNonFact"] = $nbBlNonFact;
                     $data[$idT]["qtyFact"] = 0;
-                }
-                else{
+                } else {
                     $nbFact = $data[$idT]["qtyEnBl"] - $nbBlNonFact;
                     $data[$idT]["qtyFact"] = $nbFact;
                     $data[$idT]["qteNonFact"] = $data[$idT]["qty"] - $nbFact;
@@ -134,9 +137,9 @@ class importCommande extends import8sens {
         }
 
         $commandes = $tabFinal2;
-        $commandes = array($prefixe."CO1904-8050"=> $tabFinal2[$prefixe."CO1904-8050"]);
+        $commandes = array($prefixe . "CO1904-8050" => $tabFinal2[$prefixe . "CO1904-8050"]);
 //        echo "<pre>"; print_r($commandes);die;
-        
+
         global $db;
         $bdb = new BimpDb($db);
 
@@ -205,13 +208,13 @@ class importCommande extends import8sens {
 
                 $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande');
                 $errors = $commande->validateArray(array(
-                    'ref' => $comm_ref,
-                    'entrepot' => $id_entrepot,
-                    'fk_soc' => $id_client,
-                    'ef_type' => 'C',
-                    'validComm' => 1,
-                    'validFin' => 1,
-                    'date_commande' => date('Y-m-d'),
+                    'ref'               => $comm_ref,
+                    'entrepot'          => $id_entrepot,
+                    'fk_soc'            => $id_client,
+                    'ef_type'           => 'C',
+                    'validComm'         => 1,
+                    'validFin'          => 1,
+                    'date_commande'     => date('Y-m-d'),
                     'fk_cond_reglement' => 1
                 ));
 
@@ -228,10 +231,10 @@ class importCommande extends import8sens {
                     echo '<span class="success">[OK]</span>';
                     if ($bdb->update('commande', array(
 //                                'ref'           => $comm_ref,
-                                'fk_statut' => 1,
-                                'date_valid' => date('Y-m-d'),
+                                'fk_statut'     => 1,
+                                'date_valid'    => date('Y-m-d'),
                                 'fk_user_valid' => 1
-                            )) <= 0) {
+                                    ), '`rowid` = ' . $commande->id) <= 0) {
                         echo ' <span class="danger">[ECHEC MAJ DES DONNEES] ' . $bdb->db->lasterror() . '</span>';
                         continue;
                     }
@@ -240,7 +243,7 @@ class importCommande extends import8sens {
                 echo '<br/>';
             }
 
-            
+
 //            continue;//vire
             if (BimpObject::objectLoaded($commande)) {
                 echo '*** Traitement commande "' . $comm_ref . '" ***<br/>';
@@ -311,11 +314,12 @@ class importCommande extends import8sens {
                             $BimpLine = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeLine');
                             $BimpLine->validateArray(array(
                                 'id_obj' => (int) $commande->id,
-                                'type' => ObjectLine::LINE_PRODUCT
+                                'type'   => ObjectLine::LINE_PRODUCT
                             ));
 
                             $BimpLine->id_product = (int) $product->id;
                             $BimpLine->pu_ht = $line_data['pv'];
+                            $BimpLine->tva_tx = (float) $product->getData('tva_tx');
                             $BimpLine->pa_ht = $line_data['pa'];
                             $BimpLine->qty = $line_data['qty'];
 
@@ -553,6 +557,7 @@ class importCommande extends import8sens {
                 }
 
                 // Check des status commande: 
+                $commande->fetch($commande->id);
                 $commande->checkLogistiqueStatus();
                 $commande->checkShipmentStatus();
                 $commande->checkInvoiceStatus();
@@ -560,12 +565,12 @@ class importCommande extends import8sens {
                 echo '<br/><br/>';
             }
         }
-        
-        echo "fin<br/>".implode("+", $prob);
-        
+
+        echo "fin<br/>" . implode("+", $prob);
     }
 
-    function getProdId($ref) {
+    function getProdId($ref)
+    {
         $sql = $this->db->query("SELECT `rowid` FROM `llx_product` WHERE `ref` LIKE '" . $ref . "'");
         if ($this->db->num_rows($sql) > 0) {
             $ln = $this->db->fetch_object($sql);
@@ -573,10 +578,10 @@ class importCommande extends import8sens {
         }
         return "";
     }
-
 }
 
-function traiteDate($date, $delim = "-") {
+function traiteDate($date, $delim = "-")
+{
     $tab = explode(" ", $date);
     $tab2 = explode($delim, $tab[0]);
     $date = $tab2[2] . $delim . $tab2[1] . $delim . $tab2[0] . " " . $tab[1];

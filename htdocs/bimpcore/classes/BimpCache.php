@@ -1049,6 +1049,34 @@ class BimpCache
 
         return self::$cache[$cache_key];
     }
+    
+    public static function getCategoriesArray($type = 'product', $full_label = true)
+    {
+        $cache_key = $type . '_categories_array';
+        
+        if ($full_label) {
+            $cache_key .= '_full_label';
+        }
+
+        if (!isset(self::$cache[$cache_key])) {
+            BimpTools::loadDolClass('categories', 'categorie');
+
+            $categorie = new Categorie(self::getBdb()->db);
+
+            $rows = $categorie->get_full_arbo($type);
+            
+            foreach ($rows as $r) {
+                if ($full_label) {
+                    self::$cache[$cache_key][(int) $r['id']] = $r['fulllabel'];
+                } else {
+                    self::$cache[$cache_key][(int) $r['id']] = $r['label'];
+                }
+            }
+            
+        }
+
+        return self::$cache[$cache_key];
+    }
 
     // Emails: 
 

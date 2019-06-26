@@ -620,6 +620,34 @@ class ObjectLine extends BimpObject
         );
     }
 
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array())
+    {
+        switch ($field_name) {
+            case 'categ1':
+            case 'categ2':
+            case 'categ3':
+                $line_alias = 'dol_line';
+                $joins[$line_alias] = array(
+                    'alias' => $line_alias,
+                    'table' => static::$dol_line_table,
+                    'on'    => $line_alias . '.rowid = a.id_line'
+                );
+
+                $alias = 'cat_prod';
+                $joins[$alias] = array(
+                    'alias' => $alias,
+                    'table' => 'categorie_product',
+                    'on'    => $alias . '.fk_product = ' . $line_alias . '.fk_product'
+                );
+                $filters['cat_prod.fk_categorie'] = array(
+                    'in' => $values
+                );
+                return;
+        }
+        
+        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors);
+    }
+
     // Getters valeurs:
 
     public function getUnitPriceTTC()

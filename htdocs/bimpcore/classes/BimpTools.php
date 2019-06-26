@@ -1966,4 +1966,5 @@ class BimpTools
         self::$context = $context;
         $_SESSION['context'] = $context;
     }
+    
 }

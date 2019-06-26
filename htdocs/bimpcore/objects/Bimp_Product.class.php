@@ -235,21 +235,14 @@ class Bimp_Product extends BimpObject
 
     // Getters Catégories: 
 
-    public function getCategoriesArray()
-    {
-        if ($this->isLoaded()) {
-            return self::getProductCategoriesArray((int) $this->id);
-        }
-
-        return array();
-    }
-
     public function getCategoriesList()
     {
         $categories = array();
 
-        foreach ($this->getCategoriesArray() as $id_category => $label) {
-            $categories[] = (int) $id_category;
+        if ($this->isLoaded()) {
+            foreach (self::getProductCategoriesArray((int) $this->id) as $id_category => $label) {
+                $categories[] = (int) $id_category;
+            }
         }
 
         return $categories;

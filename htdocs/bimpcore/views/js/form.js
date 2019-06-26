@@ -2129,22 +2129,6 @@ function setInputsEvents($container) {
             }
 
             $checkListContainer.find('.check_list_group_caption').each(function () {
-//                var $checkBox = $(this).find('input[type="checkbox"]');
-//                $checkBox.change(function () {
-//                    var $parent = $checkBox.findParentByClass('check_list_group');
-//                    if ($.isOk($parent)) {
-//                        if ($checkBox.prop('checked')) {
-//                            $parent.find('.check_list_item_input').each(function () {
-//                                $(this).prop('checked', false);
-//                            });
-//                        } else {
-//                            $parent.find('.check_list_item_input').each(function () {
-//                                $(this).prop('checked', true);
-//                            });
-//                        }
-//                    }
-//                });
-
                 $(this).click(function (e) {
                     var $parent = $(this).findParentByClass('check_list_group');
                     if ($.isOk($parent)) {

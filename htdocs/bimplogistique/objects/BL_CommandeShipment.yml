@@ -57,6 +57,9 @@ fields:
         default_value: 1
         unsigned: 1
         
+    ref: 
+        label: Référence
+        
     status: 
         label: Statut
         type: int
@@ -127,6 +130,7 @@ fields:
 forms: 
     default: 
         rows: 
+            - field: ref
             - field: id_commande_client
             - field: id_user_resp
             - field: id_entrepot
@@ -142,6 +146,7 @@ forms:
             
     edit: 
         rows: 
+            - field: ref
             - field: id_user_resp
             - field: id_contact
             - field: signed
@@ -327,6 +332,8 @@ views:
                       callback: renderShipmentLines
                       
 lists_cols: 
+    ref: 
+        field: ref
     user_resp: 
         field: id_user_resp
         display: nom_url
@@ -417,6 +424,7 @@ filters_panels:
             - field: ef_type
               child: parent
             - field: num_livraison
+            - field: ref
             - field: id_commande_client
             - field: status
             - field: date_shipped

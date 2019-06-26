@@ -2,21 +2,21 @@
 
 require_once DOL_DOCUMENT_ROOT . "/synopsistools/class/importExport/importCat.class.php";
 
-class importCommande extends import8sens {
+class importCommandeFourn extends import8sens {
 
     var $tabCommande = array();
 
     public function __construct($db) {
         $this->mode = 2;
         parent::__construct($db);
-        $this->path .= "commEnCours/";
+        $this->path .= "commFournEnCours/";
         $this->sepCollone = "	";
     }
 
 //    function traiteLn($ln) {
 //        $this->tabResult["total"] ++;
 //        
-//        $this->tabCommande[$ln['PlvCodePcv']][] = $ln;
+//        $this->tabCommande[$ln['PlaCodePca']][] = $ln;
 //        
 //        
 //        
@@ -28,9 +28,9 @@ class importCommande extends import8sens {
         $ref = "";
         $newLines = array();
         foreach ($ln['lignes'] as $ln2) {
-            if ($ln2['PlvCodePcv'] != "")
-                $ref = $ln2['PlvCodePcv'];
-            if ($ln2['PlvQteUV'] != 0 && $ln2['PlvQteUV'] != "")
+            if ($ln2['PlaCodePca'] != "")
+                $ref = $ln2['PlaCodePca'];
+            if ($ln2['PlaQteUA'] != 0 && $ln2['PlaQteUA'] != "")
                 $newLines[] = $ln2;
         }
 
@@ -56,7 +56,7 @@ class importCommande extends import8sens {
         $tabFinal = array();
         foreach ($this->tabCommande as $ref => $tabLn) {
                 foreach ($tabLn["lignes"] as $dataLn) {
-                        $tabFinal[$ref][] = array("ref" => $dataLn['PlvGArtCode'], "qty" => $dataLn['PlvQteUS'], "qtyEnBl" => $dataLn['PlvQteTr'], "soc" => $dataLn["PlvGCliCode"], "pv" => $dataLn['PlvPUNet'], "pa" => $dataLn['PlvPA'], 'dep' => $dataLn['PlvDDepCode'], 'soc2' => $dataLn['CliFree3']);
+                        $tabFinal[$ref][] = array("ref" => ($dataLn['PlaGArtCode']? $dataLn['PlaGArtCode']: $dataLn['PlaCode']), "qty" => $dataLn['PlaQteUA'], "qtyEnBl" => $dataLn['PlaQteTr'], "soc" => $dataLn["PlaGFouCode"], "pv" => $dataLn['PlaPUNet'], "pa" => $dataLn['PlaPUNet'], 'dep' => $dataLn['PlaADepCode'], 'soc2' => $dataLn['CliFree3']);
                 }
         }
 
@@ -69,7 +69,7 @@ class importCommande extends import8sens {
                 $find = $find2 = false;
                 if (isset($tabFinal[$ref])) {
                     foreach ($tabFinal[$ref] as $idT => $ln2) {
-                        if ($ln['PlvGArtCode'] == $ln2['ref']) {//ligne identique
+                        if ($ln['PlaPPlaCodePca'] == $ln2['ref']) {//ligne identique
                             $find2 = true;
                             $qteTotal = $tabFinal[$ref][$idT]['qty'];
                             $qteEnBl = $tabFinal[$ref][$idT]['qtyEnBl'];
@@ -80,9 +80,9 @@ class importCommande extends import8sens {
                                     ($qteTotal < 0 && $newqteEnBlNnFact >= $qteEnBl && $qteEnBl >= $qteTotal) ||
                                     ($qteTotal == "nc" && $qteEnBl == "nc")) {
                                 $find = true;
-                                $tabFinal[$ref][$idT]['bl'][$ln['PlvCodePcv']]['qteBlNonFact'] = $newqteEnBlNnFact;
+                                $tabFinal[$ref][$idT]['br'][$ln['PlaCodePca']]['qteBlNonFact'] = $newqteEnBlNnFact;
                                 $tabFinal[$ref][$idT]['pa'] = $ln['PlvPA'];
-                                $tabFinal[$ref][$idT]['pv'] = $ln['PlvPUNet'];
+                                $tabFinal[$ref][$idT]['pv'] = $ln['PlaPUNet'];
                                 break;
                             }
                         }
@@ -93,30 +93,27 @@ class importCommande extends import8sens {
                 }
                 if (!$find) {
 
-                    $qty = $ln['PlvQteATran'];
-                    $lnTemp = array("ref" => $ln['PlvGArtCode'], "soc" => $ln['PlvGCliCode'], 'dep' => $data['PcvDDepCode'], "qty" => "nc", "qtyEnBl" => "nc", "pv" => $ln['PlvPUNet'], "pa" => $ln['PlvPA']);
-                    $lnTemp['bl'][$ln['PlvCodePcv']]['qteBlNonFact'] = $qty;
+                    $qty = $ln['PlaQteUA'] - $ln['PlaQteTr'];
+                    $lnTemp = array("ref" => $ln['PlaGArtCode'], "soc" => $ln['PlaGFouCode'], 'dep' => $data['PcaADepCode'], "qty" => "nc", "qtyEnBl" => "nc", "pv" => $ln['PlaPUNet'], "pa" => $ln['PlvPA']);
+                    $lnTemp['br'][$ln['PlaCodePca']]['qteBlNonFact'] = $qty;
                     $tabFinal[$ref][] = $lnTemp;
                 }
             }
         }
-        
-        
-        $prob = array();
 
         if (!defined('BIMP_LIB')) {
             require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
         }
 
 
-        $prefixe = "zzzbbbb";
+        $prefixe = "zzzaa";
         $tabFinal2 = array();
         foreach ($tabFinal as $ref => $data) {
             $ref = $prefixe . $ref;
             foreach ($data as $idT => $line) {
 
                 $nbBlNonFact = 0;
-                foreach ($data[$idT]['bl'] as $dataT)
+                foreach ($data[$idT]['br'] as $dataT)
                     $nbBlNonFact += $dataT["qteBlNonFact"];
                 if ($data[$idT]["qty"] == "nc") {
                     $data[$idT]["qty"] = $data[$idT]["qtyEnBl"] = $data[$idT]["qteNonFact"] = $nbBlNonFact;
@@ -127,6 +124,7 @@ class importCommande extends import8sens {
                     $data[$idT]["qtyFact"] = $nbFact;
                     $data[$idT]["qteNonFact"] = $data[$idT]["qty"] - $nbFact;
                 }
+                    
             }
 
 
@@ -134,9 +132,9 @@ class importCommande extends import8sens {
         }
 
         $commandes = $tabFinal2;
-        $commandes = array($prefixe."CO1904-8050"=> $tabFinal2[$prefixe."CO1904-8050"]);
-//        echo "<pre>"; print_r($commandes);die;
-        
+//        $commandes = array($prefixe."CO1904-8050"=> $tabFinal2[$prefixe."CO1904-8050"]);
+        echo "<pre>"; print_r($commandes );die;
+          
         global $db;
         $bdb = new BimpDb($db);
 
@@ -359,9 +357,9 @@ class importCommande extends import8sens {
                             $BimpLine->checkReservations();
 
                             // Traitement qtés expédiées: 
-                            if (isset($line_data['bl']) && !empty($line_data['bl'])) {
+                            if (isset($line_data['br']) && !empty($line_data['br'])) {
                                 $total_diff = 0;
-                                foreach ($line_data['bl'] as $bl_ref => $bl_data) {
+                                foreach ($line_data['br'] as $bl_ref => $bl_data) {
                                     $bl_data['qteBlNonFact'] = BimpTools::stringToFloat($bl_data['qteBlNonFact']);
                                     if (!(float) $bl_data['qteBlNonFact']) {
                                         continue;
@@ -574,11 +572,4 @@ class importCommande extends import8sens {
         return "";
     }
 
-}
-
-function traiteDate($date, $delim = "-") {
-    $tab = explode(" ", $date);
-    $tab2 = explode($delim, $tab[0]);
-    $date = $tab2[2] . $delim . $tab2[1] . $delim . $tab2[0] . " " . $tab[1];
-    return $date;
 }

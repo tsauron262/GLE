@@ -17,21 +17,7 @@ echo '</head>';
 
 echo '<body>';
 
-$timer = BimpObject::getInstance('bimpcore', 'BimpTimer', 10);
-
-BimpObject::loadClass('bimpcore', 'BimpCorrectif');
-
-//$errors = BimpCorrectif::setValue($timer, 'time_session', 222, false);
-
-//if (count($errors)) {
-//    echo '<pre>';
-//    print_r($errors);
-//    echo '</pre>';
-//} else {
-//    echo 'Ok';
-//}
-
-//echo 'val: '.BimpCorrectif::getValue($timer, 'session_start');
+BimpTools::processImport();
 
 echo '</body></html>';
 

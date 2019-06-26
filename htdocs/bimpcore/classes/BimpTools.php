@@ -17,6 +17,52 @@ class BimpTools
     );
     private static $context = "";
 
+    public static function processImport()
+    {
+//        $commandes = array(
+//            'CO1904-8050_TEST5' => Array(
+//                Array
+//                    (
+//                    'ref'          => 'MIC-A9W-00007',
+//                    'qty'          => 4,
+//                    'qtyEnBl'      => 0,
+//                    'soc'          => '0096157',
+//                    'pv'           => 396,
+//                    'pa'           => '57,31',
+//                    'qteBlNonFact' => 0,
+//                    'dep'          => 'PR',
+//                    'soc2'         => 'CLGLE007183'
+//                ),
+//                Array
+//                    (
+//                    'ref'          => 'DEL-CTO-7460',
+//                    'soc'          => '0096157',
+//                    'dep'          => 'PR',
+//                    'qty'          => 23,
+//                    'qtyEnBl'      => 23,
+//                    'qteBlNonFact' => 23,
+//                    'pv'           => 1079,
+//                    'pa'           => 910,
+//                    'bl'           => Array
+//                        (
+//                        'LOLY-1902012' => Array
+//                            (
+//                            'qteBlNonFact' => 4
+//                        ),
+//                        'LOLY-1902044' => Array
+//                            (
+//                            'qteBlNonFact' => 1
+//                        ),
+//                        'LOLY-1902218' => Array
+//                            (
+//                            'qteBlNonFact' => 18
+//                        )
+//                    )
+//                )
+//            )
+//        );
+    }
+
     public static function getCommercialArray($socid)
     {
         // Cette fonction n'a rien à faire ici, daplacée dans BimpCache, deplus quelques erreurs dans le code: une même instance est affecté à chaque entrée du tableau.
@@ -1920,4 +1966,5 @@ class BimpTools
         self::$context = $context;
         $_SESSION['context'] = $context;
     }
+    
 }

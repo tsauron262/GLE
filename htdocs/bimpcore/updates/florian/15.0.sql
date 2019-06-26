@@ -1,0 +1,1 @@
+ALTER TABLE `llx_br_commande_shipment` ADD `ref` VARCHAR(255) NOT NULL AFTER `num_livraison`; 

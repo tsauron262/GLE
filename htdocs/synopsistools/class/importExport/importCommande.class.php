@@ -153,7 +153,7 @@ ini_set('display_errors', 1);
         $commandes = $tabFinal2;
         $commandes = array($prefixe."CO1904-8050"=> $tabFinal2[$prefixe."CO1904-8050"]);
         echo "<pre>"; print_r($commandes);die;
-
+        
         global $db;
         $bdb = new BimpDb($db);
 
@@ -206,25 +206,20 @@ ini_set('display_errors', 1);
                     }
                 }
 
-//                if (!$client_ref) {
-//                    echo BimpRender::renderAlerts('Client absent');
-//                    continue;
-//                } else {
-                    $id_client = (int) $bdb->getValue('societe', 'rowid', '`code_client` = \'' . $client_ref . '\'');
-                    if (!$id_client) {
+                $id_client = (int) $bdb->getValue('societe', 'rowid', '`code_client` = \'' . $client_ref . '\'');
+                if (!$id_client) {
                     $id_client = (int) $bdb->getValue('societe', 'rowid', '`code_client` = \'' . $client_ref2 . '\'');
-                        if (!$id_client) {
+                    if (!$id_client) {
                         $id_client = (int) $bdb->getValue('commande', 'fk_soc', '`ref` = \'' . str_replace($prefixe, "", $comm_ref) . '\'');
-                            if (!$id_client) {
-                                $prob[] = str_replace($prefixe, "", $comm_ref);
-                                echo BimpRender::renderAlerts('Aucun client trouvé pour la réference "' . $client_ref . '"');
-                                continue;
+                        if (!$id_client) {
+                            $prob[] = str_replace($prefixe, "", $comm_ref);
+                            echo BimpRender::renderAlerts('Aucun client trouvé pour la réference "' . $client_ref . '"');
+                            continue;
 //                                $id_client = 340002;
-                            }
                         }
                     }
-//                } 
-//continue;//vire
+                }
+
                 $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande');
                 $errors = $commande->validateArray(array(
                     'ref'               => $comm_ref,
@@ -258,6 +253,8 @@ ini_set('display_errors', 1);
                         continue;
                     }
                 }
+
+                echo '<br/>';
             }
 
             if (BimpObject::objectLoaded($commande)) {
@@ -373,15 +370,26 @@ ini_set('display_errors', 1);
                             echo '<span class="danger">BIMP LINE CORRESPONDANTE NON TROUVEE</span><br/>';
                         } else {
                             echo '<span class="success">LIGNE TROUVEE: ' . $BimpLine->id . '</span><br/>';
-                            
+
                             $BimpLine->checkReservations();
-                            
+
                             // Traitement qtés expédiées: 
-                            if ((float) $line_data['qtyEnBl']) {
-                                $diff = (float) $line_data['qtyEnBl'] - (float) $BimpLine->getShippedQty(null, true);
-                                if ($diff > 0) {
-                                    if (is_null($commShipment)) {
-                                        echo 'Insertion expé: ';
+                            if (isset($line_data['bl']) && !empty($line_data['bl'])) {
+                                $total_diff = 0;
+                                foreach ($line_data['bl'] as $bl_ref => $bl_data) {
+                                    $bl_data['qteBlNonFact'] = BimpTools::stringToFloat($bl_data['qteBlNonFact']);
+                                    if (!(float) $bl_data['qteBlNonFact']) {
+                                        continue;
+                                    }
+
+                                    // Recherche de l'expé:
+                                    $commShipment = BimpCache::findBimpObjectInstance('bimplogistique', 'BL_CommandeShipment', array(
+                                                'id_commande_client' => $commande->id,
+                                                'ref'                => $bl_ref
+                                    ));
+
+                                    if (!BimpObject::objectLoaded($commShipment)) {
+                                        echo 'Insertion expé: "' . $bl_ref . '"';
 
                                         $sql = 'SELECT MAX(num_livraison) as num FROM ' . MAIN_DB_PREFIX . 'br_commande_shipment ';
                                         $sql .= 'WHERE `id_commande_client` = ' . (int) $commande->id;
@@ -397,6 +405,7 @@ ini_set('display_errors', 1);
                                             'id_commande_client' => (int) $commande->id,
                                             'id_entrepot'        => (int) $commande->getData('entrepot'),
                                             'num_livraison'      => $num,
+                                            'ref'                => $bl_ref,
                                             'status'             => 2,
                                             'date_shipped'       => date('Y-m-d'),
                                             'id_contact'         => 0,
@@ -417,100 +426,114 @@ ini_set('display_errors', 1);
                                         echo '<br/>';
                                     }
 
-                                    echo 'Ajout de ' . $diff . ' unité(s) expédiée(s): ';
                                     if (!BimpObject::objectLoaded($commShipment)) {
-                                        echo BimpRender::renderAlerts('Expédition non trouvée');
-                                    } else {
-                                        $shipment_data = $BimpLine->getShipmentData((int) $commShipment->id);
-                                        $shipment_data['qty'] += $diff;
-                                        $shipment_data['shipped'] = 1;
+                                        continue;
+                                    }
 
-                                        $line_shipments = $BimpLine->getData('shipments');
-                                        $line_shipments[(int) $commShipment->id] = $shipment_data;
-                                        $errors = $BimpLine->updateField('shipments', $line_shipments);
-                                        if (count($errors)) {
-                                            echo '<span class="danger">[ECHEC]</span>';
-                                            echo BimpRender::renderAlerts($errors);
+                                    $diff = (float) $bl_data['qteBlNonFact'] - (float) $BimpLine->getShippedQty((int) $commShipment->id, true);
+                                    if ($diff > 0) {
+                                        echo 'Ajout de ' . $diff . ' unité(s) expédiée(s): ';
+                                        if (!BimpObject::objectLoaded($commShipment)) {
+                                            echo BimpRender::renderAlerts('Expédition non trouvée');
                                         } else {
-                                            echo '<span class="success">[OK]</span>';
+                                            $shipment_data = $BimpLine->getShipmentData((int) $commShipment->id);
+                                            $shipment_data['qty'] += $diff;
+                                            $shipment_data['shipped'] = 1;
 
-                                            if ($product->isTypeProduct() && $BimpLine->getFullQty() > 0) {
-                                                // Passage des résas "à traiter" à "expédié" pour qté $diff. 
-                                                echo '<br/>Retrait de ' . $diff . ' qté réservée(s) à traiter: ';
-                                                $line_reservations = $BimpLine->getReservations('status', 'asc', 0);
-                                                $remain_qty = (int) $diff;
-
-                                                $errors = array();
-                                                $ref_resrvations = '';
-                                                foreach ($line_reservations as $res) {
-                                                    $ref_resrvations = $res->getData('ref');
-                                                    if ($remain_qty > 0) {
-                                                        $new_qty = (int) $res->getData('qty') - $remain_qty;
-                                                        if ($new_qty < 0) {
-                                                            $remain_qty = abs($new_qty);
-                                                            $new_qty = 0;
-                                                        } else {
-                                                            $remain_qty = 0;
-                                                        }
-
-                                                        if ($new_qty > 0) {
-                                                            $errors = $res->updateField('qty', $new_qty);
-                                                            if (count($errors)) {
-                                                                echo '<span class="danger">[ECHEC MAJ RES #' . $res->id . ']</span>';
-                                                                echo BimpRender::renderAlerts($errors);
-                                                                break;
-                                                            }
-                                                        } else {
-                                                            $del_warnings = array();
-                                                            $errors = $res->delete($del_warnings, true);
-                                                        }
-                                                    }
+                                            $line_shipments = $BimpLine->getData('shipments');
+                                            $line_shipments[(int) $commShipment->id] = $shipment_data;
+                                            $errors = $BimpLine->updateField('shipments', $line_shipments);
+                                            if (count($errors)) {
+                                                echo '<span class="danger">[ECHEC]</span>';
+                                                echo BimpRender::renderAlerts($errors);
+                                            } else {
+                                                if (BimpObject::objectLoaded($commShipment)) {
+                                                    $commShipment->onLinesChange();
                                                 }
-                                                if (!count($errors)) {
-                                                    if (!$remain_qty) {
-                                                        echo '<span class="success">[OK]</span>';
-                                                    } else {
-                                                        echo '<span class="danger">[ERREUR] ' . $remain_qty . ' unité(s) n\'ont pas été traitée(s)</span>';
-                                                    }
-                                                }
-                                                echo '<br/>';
+                                                $total_diff += $diff;
+                                                echo '<span class="success">[OK]</span>';
+                                            }
+                                        }
+                                        echo '<br/>';
+                                    }
+                                }
 
-                                                $line_reservations = $BimpLine->getReservations('status', 'asc', 300);
-                                                if (!empty($line_reservations)) {
-                                                    echo 'Ajout de ' . $diff . ' qté aux réservations "expédiées": ';
-                                                    $errors = array();
-                                                    foreach ($line_reservations as $res) {
-                                                        $errors = $res->updateField('qty', (int) $res->getData('qty') + (int) $diff);
-                                                        if (count($errors)) {
-                                                            echo '<span class="danger">[ECHEC MAJ RES #' . $res->id . ']</span>';
-                                                            echo BimpRender::renderAlerts($errors);
-                                                        } else {
-                                                            echo '<span class="success">[OK]</span>';
-                                                        }
-                                                        echo '<br/>';
+                                if ($total_diff) {
+                                    if ($product->isTypeProduct() && $BimpLine->getFullQty() > 0) {
+                                        // Passage des résas "à traiter" à "expédié" pour qté $diff. 
+                                        echo '<br/>Retrait de ' . $total_diff . ' qté réservée(s) à traiter: ';
+                                        $line_reservations = $BimpLine->getReservations('status', 'asc', 0);
+                                        $remain_qty = (int) $total_diff;
+
+                                        $errors = array();
+                                        $ref_resrvations = '';
+                                        foreach ($line_reservations as $res) {
+                                            $ref_resrvations = $res->getData('ref');
+                                            if ($remain_qty > 0) {
+                                                $new_qty = (int) $res->getData('qty') - $remain_qty;
+                                                if ($new_qty < 0) {
+                                                    $remain_qty = abs($new_qty);
+                                                    $new_qty = 0;
+                                                } else {
+                                                    $remain_qty = 0;
+                                                }
+
+                                                if ($new_qty > 0) {
+                                                    $errors = $res->updateField('qty', $new_qty);
+                                                    if (count($errors)) {
+                                                        echo '<span class="danger">[ECHEC MAJ RES #' . $res->id . ']</span>';
+                                                        echo BimpRender::renderAlerts($errors);
+                                                        break;
                                                     }
                                                 } else {
-                                                    echo 'Insertion d\'une réservation "Expédiée" pour ' . $diff . ' unité(s): ';
-                                                    $id_res = (int) $bdb->insert('br_reservation', array(
-                                                                'ref'                     => $ref_resrvations,
-                                                                'id_entrepot'             => (int) $commande->getData('entrepot'),
-                                                                'type'                    => 1,
-                                                                'status'                  => 300,
-                                                                'id_product'              => (int) $product->id,
-                                                                'id_commande_client'      => (int) $commande->id,
-                                                                'id_commande_client_line' => (int) $BimpLine->id,
-                                                                'qty'                     => $diff,
-                                                                'user_create'             => (int) $id_user_resp
-                                                    ));
-
-                                                    if (!$id_res) {
-                                                        echo '<span class="danger">[ECHEC] ' . $bdb->db->lasterror() . '</span>';
-                                                    } else {
-                                                        echo '<span class="success">[OK]</span>';
-                                                    }
-                                                    echo '<br/>';
+                                                    $del_warnings = array();
+                                                    $errors = $res->delete($del_warnings, true);
                                                 }
                                             }
+                                        }
+                                        if (!count($errors)) {
+                                            if (!$remain_qty) {
+                                                echo '<span class="success">[OK]</span>';
+                                            } else {
+                                                echo '<span class="danger">[ERREUR] ' . $remain_qty . ' unité(s) n\'ont pas été traitée(s)</span>';
+                                            }
+                                        }
+                                        echo '<br/>';
+
+                                        $line_reservations = $BimpLine->getReservations('status', 'asc', 300);
+                                        if (!empty($line_reservations)) {
+                                            echo 'Ajout de ' . $total_diff . ' qté aux réservations "expédiées": ';
+                                            $errors = array();
+                                            foreach ($line_reservations as $res) {
+                                                $errors = $res->updateField('qty', (int) $res->getData('qty') + (int) $total_diff);
+                                                if (count($errors)) {
+                                                    echo '<span class="danger">[ECHEC MAJ RES #' . $res->id . ']</span>';
+                                                    echo BimpRender::renderAlerts($errors);
+                                                } else {
+                                                    echo '<span class="success">[OK]</span>';
+                                                }
+                                                echo '<br/>';
+                                            }
+                                        } else {
+                                            echo 'Insertion d\'une réservation "Expédiée" pour ' . $total_diff . ' unité(s): ';
+                                            $id_res = (int) $bdb->insert('br_reservation', array(
+                                                        'ref'                     => $ref_resrvations,
+                                                        'id_entrepot'             => (int) $commande->getData('entrepot'),
+                                                        'type'                    => 1,
+                                                        'status'                  => 300,
+                                                        'id_product'              => (int) $product->id,
+                                                        'id_commande_client'      => (int) $commande->id,
+                                                        'id_commande_client_line' => (int) $BimpLine->id,
+                                                        'qty'                     => $total_diff,
+                                                        'user_create'             => (int) $id_user_resp
+                                            ));
+
+                                            if (!$id_res) {
+                                                echo '<span class="danger">[ECHEC] ' . $bdb->db->lasterror() . '</span>';
+                                            } else {
+                                                echo '<span class="success">[OK]</span>';
+                                            }
+                                            echo '<br/>';
                                         }
                                     }
                                 }
@@ -544,11 +567,6 @@ ini_set('display_errors', 1);
                     echo '<br/>';
                 }
 
-                if (BimpObject::objectLoaded($commShipment)) {
-                    // Màj des totaux expédition: 
-                    $commShipment->onLinesChange();
-                }
-
                 // Check des status commande: 
                 $commande->checkLogistiqueStatus();
                 $commande->checkShipmentStatus();
@@ -557,8 +575,6 @@ ini_set('display_errors', 1);
                 echo '<br/><br/>';
             }
         }
-        
-        
         
         echo "fin<br/>".implode("+", $prob);
         

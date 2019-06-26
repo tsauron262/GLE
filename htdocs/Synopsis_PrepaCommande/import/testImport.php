@@ -2383,6 +2383,7 @@ function processUser($import_key, $nomCom, $file, $val) {
         if (isset($result[0]['d']))
             return $result[0]['d'];
         else
+            return 1;
             affErreur("Pas de correspondance pour l'utilisateur dans BIMP-ERP : id 8Sens " . $import_key." non : ".print_r($val,1)." | commande ".$nomCom. " fichier ".$file);
 //        if (!isset($remUserArray[$import_key])) {
 //            $requete = "SELECT rowid FROM " . MAIN_DB_PREFIX . "user WHERE ref_ext = " . $import_key;

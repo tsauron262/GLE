@@ -64,7 +64,7 @@ ini_set('display_errors', 1);
                     else
                         echo "<br/>Pas de prod !!! ".$dataLn['ArtCode']."<br/>";*/
                     
-                    $tabFinal[$ref][] = array("ref"=>$dataLn['ArtCode'], "qty"=>$dataLn['PlvQteUS'], "qtyEnBl" =>$dataLn['PlvQteTr'], "pv" => $dataLn['OpeMontant'], "pa" => $dataLn['OpePA'], "qteBlNonFact" => 0);
+                    $tabFinal[$ref][] = array("ref"=>$dataLn['ArtCode'], "qty"=>$dataLn['PlvQteUS'], "qtyEnBl" =>$dataLn['PlvQteTr'], "soc" => $dataLn["CliCode"], "pv" => $dataLn['OpeMontant'], "pa" => $dataLn['OpePA'], "qteBlNonFact" => 0, 'dep' => $dataLn['DepCode'], 'soc2'=>$dataLn['CliFree3']);
                 }
             }
 
@@ -83,11 +83,17 @@ ini_set('display_errors', 1);
         global $tempDataBl;
         
         foreach($tempDataBl as $ref => $data){
-            $find = $find2= false;
-            if(isset($tabFinal[$ref])){
-                foreach($data['lignes'] as $ln){
+            foreach($data['lignes'] as $ln){
+                $find = $find2= false;
+                if(isset($tabFinal[$ref])){
                     foreach($tabFinal[$ref] as $idT => $ln2){
                         if($ln['PlvGArtCode'] == $ln2['ref']){//ligne identique
+//                            if($ref == "CO1904-8050"){
+//                                echo "<pre>ici";
+//                                print_r($tabFinal[$ref]);
+////                                die("gagner");
+//                            }
+                            
                             $find2 = true;
                             $qteTotal = $tabFinal[$ref][$idT]['qty'];
                             $qteEnBl = $tabFinal[$ref][$idT]['qtyEnBl'];
@@ -95,33 +101,29 @@ ini_set('display_errors', 1);
                             
                             $newqteEnBlNnFact = $ln['PlvQteATran'] + $qteEnBlNonFact;
                             if(($newqteEnBlNnFact <= $qteEnBl && $qteEnBl <= $qteTotal) ||
-                                   ($qteTotal < 0 && $newqteEnBlNnFact >= $qteEnBl && $qteEnBl >= $qteTotal)  ){
-//                                if($ln['PlvPUNet'] == $ln2['pv'] || $ln['PlvPUNet'] == -$ln2['pv']){
+                                   ($qteTotal < 0 && $newqteEnBlNnFact >= $qteEnBl && $qteEnBl >= $qteTotal) ||
+                                   ($qteTotal == "nc" && $qteEnBl == "nc")  ){
                                     $find = true;
-                                    $tabFinal[$ref][$idT]['qteBlNonFact'] = $newqteEnBlNnFact;
+                                    $tabFinal[$ref][$idT]['bl'][$ln['PlvCodePcv']]['qteBlNonFact'] = $newqteEnBlNnFact;
                                     $tabFinal[$ref][$idT]['pa'] = $ln['PlvPA'];
                                     $tabFinal[$ref][$idT]['pv'] = $ln['PlvPUNet'];
                                     break;
-//                                }
-//                                else{
-//                                    echo "probléme de prix ".$ln['PlvPUNet']."¬".$ln2['pv'];
-//                                }
                             }
                         }
                     }
                 }
-            }
-            if($find2 && !$find){
-                                echo "ilogic ".$ref."<br/>";
-            }
-            if(!$find){
-                foreach($data['lignes'] as $lnT){
-                    $qty = $lnT['PlvQteATran'];
-                    $lnTemp = array("ref"=>$lnT['PlvGArtCode'], "qty"=>$qty, "qtyEnBl"=>$qty, "qteBlNonFact" => 0, "pv"=>$lnT['PlvPUNet'], "pa"=>$lnT['PlvPA']);
-                    $tabFinal[$ref][] = $lnTemp;
+                if($find2 && !$find){
+                                    echo "ilogic ".$ref."<br/>";
                 }
-                
-//                echo "<pre>";print_r($tabFinal[$ref]);die;
+                if(!$find){
+
+                    $qty = $ln['PlvQteATran'];
+                    $lnTemp = array("ref"=>$ln['PlvGArtCode'], "soc"=>$ln['PlvGCliCode'], 'dep'=>$data['PcvDDepCode'], "qty"=>"nc", "qtyEnBl"=>"nc", "qteBlNonFact" => "nc", "pv"=>$ln['PlvPUNet'], "pa"=>$ln['PlvPA']);
+                                    $lnTemp['bl'][$ln['PlvCodePcv']]['qteBlNonFact'] = $qty;
+                    $tabFinal[$ref][] = $lnTemp;
+
+    //                echo "<pre>";print_r($data);die;
+                }
             }
         }
         
@@ -129,56 +131,28 @@ ini_set('display_errors', 1);
             require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
         }
         
-        // Données de TEST: 
-        $commandes = array(
-            'TEST_IMPORT_COMM_4' => array(
-                array(
-                    'ref'          => 'PRODSERIAL',
-                    'qty'          => 10,
-                    'qtyEnBl'      => 5,
-                    'qteBlNonFact' => 2,
-                    'pv'           => 0,
-                    'pa'           => 0,
-                    'dep'          => 'ACY',
-                    'soc'          => 'CLGLE011669'
-                ),
-                array(
-                    'ref'          => 'TES-PRODSERIAL2',
-                    'qty'          => 10,
-                    'qtyEnBl'      => 5,
-                    'qteBlNonFact' => 2,
-                    'pv'           => 0,
-                    'pa'           => 0,
-                ),
-                array(
-                    'ref'          => 'SERV-BOUT01',
-                    'qty'          => 10,
-                    'qtyEnBl'      => 5,
-                    'qteBlNonFact' => 2,
-                    'pv'           => 0,
-                    'pa'           => 0,
-                ),
-                array(
-                    'ref'          => 'APP-3A019F/A',
-                    'qty'          => 10,
-                    'qtyEnBl'      => 5,
-                    'qteBlNonFact' => 2,
-                    'pv'           => '445,01',
-                    'pa'           => '400',
-                ),
-            )
-        );
         
-        
-        foreach($tabFinal as $ref =>$data)
-            if(isset($data[0])){
-                $tabFinal[$ref][0]['dep'] = "ACY";
-                $tabFinal[$ref][0]['soc'] = "CLGLE011669";
+        $prefixe = "";
+        $tabFinal2 = array();
+        foreach($tabFinal as $ref =>$data){
+            $ref = $prefixe.$ref;
+            foreach($data as $idT => $line){
+                
+                if($data[$idT]["qty"] == "nc"){
+                    $nb = 0;
+                    foreach($data[$idT]["bl"] as $dataT)
+                        $nb += $dataT["qteBlNonFact"];
+                    $data[$idT]["qty"] = $data[$idT]["qtyEnBl"] = $data[$idT]["qteBlNonFact"] = $nb;
+                }
             }
             
-        $tabFinal = array("CO1905-9089"=> $tabFinal["CO1905-9089"]);
-        $commandes = $tabFinal;
-        echo "<pre>"; print_r($commandes);print_r($tabFinal);die;
+            
+            $tabFinal2[$ref] = $data;
+        }
+            
+        $commandes = $tabFinal2;
+        $commandes = array($prefixe."CO1904-8050"=> $tabFinal2[$prefixe."CO1904-8050"]);
+        echo "<pre>"; print_r($commandes);die;
 
         global $db;
         $bdb = new BimpDb($db);
@@ -223,17 +197,34 @@ ini_set('display_errors', 1);
                     }
                 }
 
-                if (!$client_ref) {
-                    echo BimpRender::renderAlerts('Client absent');
-                    continue;
-                } else {
-                    $id_client = (int) $bdb->getValue('societe', 'rowid', '`code_client` = \'' . $client_ref . '\'');
-                    if (!$id_client) {
-                        echo BimpRender::renderAlerts('Aucun client trouvé pour la réference "' . $client_ref . '"');
-                        continue;
+                $client_ref2 = '';
+
+                foreach ($lines as $line_data) {
+                    if (isset($line_data['soc2'])) {
+                        $client_ref2 = $line_data['soc2'];
+                        break;
                     }
                 }
 
+//                if (!$client_ref) {
+//                    echo BimpRender::renderAlerts('Client absent');
+//                    continue;
+//                } else {
+                    $id_client = (int) $bdb->getValue('societe', 'rowid', '`code_client` = \'' . $client_ref . '\'');
+                    if (!$id_client) {
+                    $id_client = (int) $bdb->getValue('societe', 'rowid', '`code_client` = \'' . $client_ref2 . '\'');
+                        if (!$id_client) {
+                        $id_client = (int) $bdb->getValue('commande', 'fk_soc', '`ref` = \'' . str_replace($prefixe, "", $comm_ref) . '\'');
+                            if (!$id_client) {
+                                $prob[] = str_replace($prefixe, "", $comm_ref);
+                                echo BimpRender::renderAlerts('Aucun client trouvé pour la réference "' . $client_ref . '"');
+                                continue;
+//                                $id_client = 340002;
+                            }
+                        }
+                    }
+//                } 
+//continue;//vire
                 $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande');
                 $errors = $commande->validateArray(array(
                     'ref'               => $comm_ref,
@@ -566,6 +557,10 @@ ini_set('display_errors', 1);
                 echo '<br/><br/>';
             }
         }
+        
+        
+        
+        echo "fin<br/>".implode("+", $prob);
         
 //        echo "<pre>";
 //        print_r($errors);

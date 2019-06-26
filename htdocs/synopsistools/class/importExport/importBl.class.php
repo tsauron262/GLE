@@ -25,8 +25,14 @@ class importBl extends import8sens {
         }
         
         if($ref != "" && count($newLines) > 0){
-            $ln['lignes'] = $newLines;
-            $this->tabCommande[$ref] = $ln;
+            if(isset($this->tabCommande[$ref]['lignes'])){
+                foreach($newLines as $lnT)
+                $this->tabCommande[$ref]['lignes'][] = $lnT;
+            }
+            else{
+                $ln['lignes'] = $newLines;
+                $this->tabCommande[$ref] = $ln;
+            }
 //            echo "<pre>";print_r($this->tabCommande[$ref]);
         }
     }

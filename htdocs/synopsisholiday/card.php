@@ -1217,7 +1217,7 @@ if ($action == 'save_substitute') {
             $rdvErrors = false;
             foreach ($rdvs as $rdv_id) {
                 $sql = 'SELECT `id` FROM ' . MAIN_DB_PREFIX . 'actioncomm WHERE `fk_user_action` = ' . $fk_old_substitute;
-                $sql .= ' AND `fk_element` = ' . $rdv_id;
+                $sql .= ' AND elementtype="action" AND `fk_element` = ' . $rdv_id;
                 $resql = $db->query($sql);
                 if ($resql) {
                     $obj = $db->fetch_object($resql);
@@ -1258,6 +1258,7 @@ if ($action == 'save_substitute') {
                 $actioncomm->fetch($rdv_id);
                 $actioncomm->id = null;
                 $actioncomm->fk_element = $rdv_id;
+                $actioncomm->elementtype = "action";
                 $actioncomm->userownerid = $substitute->id;
                 $note = $actioncomm->note;
                 $actioncomm->note = 'Remplacement de ' . $cpUser->firstname . ' ' . $cpUser->lastname . ($note ? ' - ' . $note : '');

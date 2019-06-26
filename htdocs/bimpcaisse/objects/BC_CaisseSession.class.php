@@ -86,7 +86,7 @@ class BC_CaisseSession extends BimpObject
         return $html;
     }
 
-    public function renderPaymentsHistory()
+    public function renderPaymentsHistory($full_list = false)
     {
         if (!$this->isLoaded()) {
             return BimpRender::renderAlerts('ID de la session de caisse absent');
@@ -99,7 +99,8 @@ class BC_CaisseSession extends BimpObject
         }
 
         $bc_paiement = BimpObject::getInstance('bimpcaisse', 'BC_Paiement');
-        $list = new BC_ListTable($bc_paiement, 'session', 1, null, 'Liste des paiements', 'fas_hand-holding-usd');
+        $list_name = ($full_list ? 'full_session' : 'session');
+        $list = new BC_ListTable($bc_paiement, $list_name, 1, null, 'Liste des paiements', 'fas_hand-holding-usd');
         $list->addFieldFilterValue('id_caisse', (int) $caisse->id);
         $list->addFieldFilterValue('id_caisse_session', (int) $this->id);
         return $list->renderHtml();

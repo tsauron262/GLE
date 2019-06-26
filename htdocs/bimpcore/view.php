@@ -6,7 +6,7 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 
 $errors = array();
 
-$module = BimpTools::getValue('module', '');                                    
+$module = BimpTools::getValue('module', '');
 $object_name = BimpTools::getValue('object_name', '');
 $id_object = BimpTools::getValue('id_object', 0);
 $view = BimpTools::getValue('view', 'default');
@@ -22,38 +22,60 @@ if (!$id_object) {
 }
 
 if (!count($errors)) {
-    
-}
+    $object = BimpCache::getBimpObjectInstance($module, $object_name, $id_object);
 
-top_htmlhead('', $title, 0, 0, array(), array());
-BimpCore::displayHeaderFiles();
-
-echo '<body>';
-
-if (!$id_vente) {
-    $errors[] = 'ID de la vente absent';
-} else {
-    $vente = BimpCache::getBimpObjectInstance('bimpcaisse', 'BC_Vente', $id_vente);
-    if ($vente->isLoaded()) {
-        $html = $vente->renderTicketHtml($errors);
-    } else {
-        $errors[] = 'ID de la vente invalide';
+    if (!BimpObject::objectLoaded($object)) {
+        if (is_null($object)) {
+            $object = BimpObject::getInstance($module, $object_name);
+        }
+        if (!is_a($object, $object_name)) {
+            $errors[] = 'Le type d\'objet ' . $module . ' - ' . $object_name . ' n\'existe pas';
+        } else {
+            $errors[] = BimpTools::ucfirst($object->getLabel('the')) . ' d\'ID ' . $id_object . ' n\'existe pas';
+        }
     }
 }
 
-if (!count($errors)) {
-    echo $html;
-    echo '<script>';
-    echo '$(document).ready(function() {';
-    echo 'window.print();';
-    echo '$(window).click(function() {';
-    echo 'window.close();';
-    echo '});';
-    echo '});';
-    echo '</script>';
-} else {
-    echo '<link rel="stylesheet" type="text/css" href="' . DOL_URL_ROOT . '/bimpcore/views/css/bimpcore.css' . '"/>';
+top_htmlhead('', $title, 0, 0, array(), array());
+
+echo '<body>';
+BimpCore::displayHeaderFiles();
+
+?>
+
+<style>
+    @media print {
+    .no_print,
+    .btn,
+    .objectIcon,
+    .header_buttons,
+    .headerTools,
+    .rowButton,
+    .panel-footer,
+    .paginationContainer {
+        display: none;
+    }
+}
+</style>
+
+<?php 
+
+if (count($errors)) {
     echo BimpRender::renderAlerts($errors);
+} else {
+    $html .= '<div class="buttonsContainer no_print" style="margin: 30px 0;text-align: center">';
+    $html .= '<button class="btn btn-primary btn-large" onclick="window.print();">';
+    $html .= BimpRender::renderIcon('fas_print', 'iconLeft') . 'Imprimer';
+    $html .= '</button>';
+    $html .= '<button class="btn btn-danger btn-large" onclick="window.close();">';
+    $html .= BimpRender::renderIcon('fas_times', 'iconLeft') . 'Fermer';
+    $html .= '</button>';
+    $html .= '</div>';
+    
+    echo $html;
+
+    $bc_view = new BC_View($object, $view);
+    echo $bc_view->renderHtml();
 }
 
 echo '</body></html>';

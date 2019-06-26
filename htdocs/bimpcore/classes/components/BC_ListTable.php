@@ -87,7 +87,6 @@ class BC_ListTable extends BC_List
             if (!(int) $this->object->can("create")) {
                 $this->params['add_object_row'] = 0;
             }
-
             if (!(int) $this->object->can("view")) {
                 $this->errors[] = 'Vous n\'avez pas la permission de voir ' . $this->object->getLabel('the_plur');
             }

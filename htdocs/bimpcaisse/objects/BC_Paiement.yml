@@ -94,3 +94,24 @@ lists:
                 label: Caissier
                 field: user_create
                 
+    full_session: 
+        extends: session
+        n: 0
+        pagination: 0
+        enable_search: 0
+        enable_sort: 0
+        enable_refresh: 0
+        enable_edit: 0
+        cols: 
+            vente: 
+                display: ref
+            facture: 
+                value: 
+                    callback: 
+                        method: displayFacture
+                        params: 
+                            - ref
+            paiement: 
+                display: ref
+            user: 
+                display: nom

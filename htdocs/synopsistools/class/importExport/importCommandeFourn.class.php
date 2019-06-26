@@ -439,7 +439,7 @@ class importCommandeFourn extends import8sens {
         if (count($errors)) {
             $str = count($errors) . ' erreurs' . "\n\n";
 
-            $i = 1;
+            $i = 0;
             foreach ($errors as $e) {
                 $i++;
                 $str .= $i . ' - ' . $e . "\n\n";

@@ -452,6 +452,26 @@ filters_panels:
             - field: remisable
             - field: tosell
             - field: tobuy
+            - custom: 1
+              label: Catégorie (1)
+              field: categ1
+              type: check_list
+              items: 
+                  callback: getCategoriesFullTree
+            - custom: 1
+              label: Catégorie (2)
+              field: categ2
+              type: check_list
+              items: 
+                  callback: getCategoriesFullTree
+            - custom: 1
+              label: Catégorie (3)
+              field: categ3
+              type: check_list
+              items: 
+                  callback: getCategoriesFullTree
+                  
+                          
  
 lists_cols: 
     zone_pr: 

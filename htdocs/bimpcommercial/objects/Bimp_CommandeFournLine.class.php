@@ -1024,7 +1024,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
     }
 
     public function checkReceptionData($id_reception, $data)
-    {
+    {        
         $errors = array();
 
         if (!((int) $id_reception)) {
@@ -1042,7 +1042,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
 
         if ($reception->getData('status') === BL_CommandeFournReception::BLCFR_BROUILLON) {
             if ($this->isProductSerialisable()) {
-                if ($isReturn) {
+                if (!$isReturn) {
                     if (isset($data['serials']) && !empty($data['serials'])) {
                         $serials = array();
                         foreach ($data['serials'] as $serial_data) {
@@ -1803,9 +1803,19 @@ class Bimp_CommandeFournLine extends FournObjectLine
                 $commande = $this->getParentInstance();
 
                 if (BimpObject::objectLoaded($commande) && $commande->isLogistiqueActive()) {
+                    $status_forced = $commande->getData('status_forced');
+                    $cmd_status = (int) $commande->getData('fk_statut');
+
                     $fullQty = abs($fullQty);
-                    $received_qty = abs((float) $this->getReceivedQty(null, true));
-                    $to_receive_qty = $fullQty - $received_qty;
+
+                    // Réceptions: 
+                    if (isset($status_forced['reception']) && (int) $status_forced['reception'] && $cmd_status === 5) {
+                        $received_qty = $fullQty;
+                        $to_receive_qty = 0;
+                    } else {
+                        $received_qty = abs((float) $this->getReceivedQty(null, true));
+                        $to_receive_qty = $fullQty - $received_qty;
+                    }
 
                     if ($received_qty !== (float) $this->getData('qty_received')) {
                         $this->updateField('qty_received', $received_qty, null, true);
@@ -1826,7 +1836,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
         $errors = array();
         $warnings = array();
         $success = '';
-
+        
         if (!count($data)) {
             $errors[] = 'Aucunes données reçues';
         } else {
@@ -2030,8 +2040,12 @@ class Bimp_CommandeFournLine extends FournObjectLine
 
     // Overrides: 
 
-    public function checkObject()
+    public function checkObject($context = '', $field = '')
     {
+        if ($context === 'updateField' && in_array($field, array('qty_total', 'qty_received', 'qty_to_receive'))) {
+            return;
+        }
+        
         if ($this->isLoaded()) {
             $this->checkQties();
         }

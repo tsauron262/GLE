@@ -608,7 +608,7 @@ class BimpAssociation
         );
 
         $input = new BC_Input($this->object, 'int', $this->association, 'associations/' . $this->association . '/input', $items, $field_params);
-        $input->setParam('auto_save', 1);
+        $input->setParam('auto_save', (int) $autosave);
         $input->setNamePrefix($name_prefix);
         $input->extraClasses[] = 'no-modified';
         $input->extraData['values_field'] = $name_prefix . $this->association;

@@ -1770,6 +1770,30 @@ class BimpTools
         return $url;
     }
 
+    public static function makeTreeFromArray($items, $parent_id, $id_parent_key = 'id_parent', $id_key = 'id', $label_key = 'label')
+    {
+        $array = array();
+
+        foreach ($items as $idx => $item) {
+            if (isset($item[$id_parent_key]) && $item[$id_parent_key] == $parent_id) {
+                $data = array(
+                    'label' => (isset($item[$label_key]) ? $item[$label_key] : 'Elément ' . $idx)
+                );
+
+                if (isset($item[$id_key])) {
+                    $children = self::makeTreeFromArray($items, $item[$id_key], $id_parent_key, $id_key, $label_key);
+                    if (!empty($children)) {
+                        $data['children'] = $children;
+                    }
+                }
+
+                $array[(isset($item[$id_key]) ? $item[$id_key] : $idx)] = $data;
+            }
+        }
+
+        return $array;
+    }
+
     // Gestion des couleurs: 
 
     public static function changeColorLuminosity($color_code, $percentage_adjuster = 0)

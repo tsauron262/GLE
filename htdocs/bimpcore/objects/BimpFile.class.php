@@ -452,7 +452,7 @@ class BimpFile extends BimpObject
         return parent::validate();
     }
 
-    public function checkObject()
+    public function checkObject($context = '', $field = '')
     {
         if ($this->isLoaded()) {
             $name = BimpTools::cleanStringForUrl($this->getData('file_name'));

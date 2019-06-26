@@ -28,10 +28,18 @@ function onFacturePaymentChange($container) {
             to_pay = 0;
         }
 
-        if ((value + avoirs) > to_pay) {
-            value = to_pay - avoirs;
-            $(this).val(value);
+        if (to_pay >= 0) {
+            if ((value + avoirs) > to_pay) {
+                value = to_pay - avoirs;
+                $(this).val(value);
+            }
+        } else {
+            if ((value + avoirs) < to_pay) {
+                value = to_pay - avoirs;
+                $(this).val(value);
+            }
         }
+
         total_payments += value;
         total_avoirs += avoirs;
     });
@@ -81,8 +89,14 @@ function onClientTotalPaidAmountChange($container) {
             to_pay = 0;
         }
         to_pay -= avoirs;
-        if (to_pay > rest) {
-            to_pay = Math.round10(rest, -2);
+        if (to_pay >= 0) {
+            if (to_pay > rest) {
+                to_pay = Math.round10(rest, -2);
+            }
+        } else {
+            if (to_pay < rest) {
+                to_pay = Math.round10(rest, -2);
+            }
         }
         $(this).val(to_pay);
         rest -= to_pay;

@@ -948,22 +948,39 @@ class Bimp_CommandeFourn extends BimpComm
 
         $invoice_status = 0;
 
-        $total_factures_ht = 0;
+        BimpObject::loadClass('bimplogistique', 'BL_CommandeFournReception');
 
-        foreach (BimpTools::getDolObjectLinkedObjectsList($this->dol_object, $this->db) as $item) {
-            if ($item['type'] === 'invoice_supplier') {
-                $facture_fourn_instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureFourn', (int) $item['id_object']);
-                if (BimpObject::objectLoaded($facture_fourn_instance)) {
-                    if ((int) $facture_fourn_instance->getData('fk_statut') !== FactureFournisseur::STATUS_ABANDONED) {
-                        $total_factures_ht += (float) $facture_fourn_instance->getData('total_ht');
-                    }
-                }
+        $lines = $this->getLines('not_text');
+
+        $receptions = $this->getChildrenList('receptions', array(
+            'status'     => BL_CommandeFournReception::BLCFR_RECEPTIONNEE,
+            'id_facture' => array(
+                'operator' => '>',
+                'value'    => 0
+            )
+        ));
+
+        $has_billed = 0;
+        $all_billed = 1;
+
+        foreach ($lines as $line) {
+            $line_qty = (float) $line->getFullQty();
+            $billed_qty = 0;
+
+            foreach ($receptions as $id_reception) {
+                $reception_data = $line->getReceptionData((int) $id_reception);
+                $billed_qty += isset($reception_data['qty']) ? (float) $reception_data['qty'] : 0;
+                $has_billed = 1;
+            }
+
+            if (abs($line_qty) > abs($billed_qty)) {
+                $all_billed = 0;
             }
         }
 
-        if (abs($total_factures_ht) >= abs((float) $this->getData('total_ht'))) {
+        if ($all_billed) {
             $invoice_status = 2;
-        } elseif (abs($total_factures_ht) > 0) {
+        } elseif ($has_billed) {
             $invoice_status = 1;
         } else {
             $invoice_status = 0;
@@ -973,13 +990,8 @@ class Bimp_CommandeFourn extends BimpComm
             $this->updateField('invoice_status', $invoice_status);
         }
 
-        $billed = 0;
-        if ($invoice_status > 0) {
-            $billed = 1;
-        }
-
-        if ($billed !== (int) $this->getInitData('billed')) {
-            $this->updateField('billed', $billed);
+        if ((int) $all_billed !== (int) $this->getInitData('billed')) {
+            $this->updateField('billed', (int) $all_billed);
         }
     }
 
@@ -1260,7 +1272,7 @@ class Bimp_CommandeFourn extends BimpComm
                     $i = 0;
                     foreach ($lines as $line) {
                         $lines_data = $line->getLinesDataByUnitPriceAndTva($receptions_list);
-                        
+
                         if (!empty($lines_data)) {
                             $isSerialisable = $line->isProductSerialisable();
                             $isReturn = ((float) $line->getFullQty() < 0);
@@ -1277,7 +1289,7 @@ class Bimp_CommandeFourn extends BimpComm
                                     } else {
                                         $qty = (float) $line_data;
                                     }
-                                    
+
                                     $pu_ht = (float) $pu_ht;
                                     $tva_tx = (float) $tva_tx;
 
@@ -1464,6 +1476,11 @@ class Bimp_CommandeFourn extends BimpComm
                     }
                     break;
             }
+
+            $lines = $this->getLines('not_text');
+            foreach ($lines as $line) {
+                $line->checkQties();
+            }
         }
 
         return array(
@@ -1473,6 +1490,11 @@ class Bimp_CommandeFourn extends BimpComm
     }
 
     // Overrides - BimpComm: 
+
+    public function checkObject($context = '', $field = '')
+    {
+        $this->checkInvoiceStatus();
+    }
 
     public function duplicate($new_data = array(), &$warnings = array(), $force_create = false)
     {

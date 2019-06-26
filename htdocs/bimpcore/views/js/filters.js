@@ -205,9 +205,7 @@ function removeAllListFilters(filters_id) {
 
     if ($.isOk($filters)) {
         $filters.find('.bimp_filter_value').remove();
-        $filters.find('.check_list_item').each(function () {
-            $(this).find('input[type="checkbox"]').prop('checked', false);
-        });
+        $filters.find('.check_list_item_input').prop('checked', false);
 
         $('body').trigger($.Event('listFiltersChange', {
             $filters: $filters

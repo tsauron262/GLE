@@ -170,17 +170,19 @@ lists_cols:
 lists: 
     default:
         extends: default
+        objects_change_reload: Bimp_CommandeFourn,ObjectLineRemise,BR_Reservation,BL_CommandeFournReception,BL_FactureFourn
         cols: 
             commande_client:
+                
     logistique:
         extends: default
+        objects_change_reload: Bimp_CommandeFourn,ObjectLineRemise,BR_Reservation,BL_CommandeFournReception,BL_FactureFourn
         title: Logistique produits / services
         icon: fas_truck-loading
         configurable: 1
         item_checkbox: 1
         after_list_content: unset
         header_buttons: unset
-        objects_change_reload: Bimp_CommandeFourn,ObjectLineRemise,BR_Reservation,BL_CommandeFournReception
         bulk_actions: 
             callback: getLogistiqueBulkActions
         extra_btn: 

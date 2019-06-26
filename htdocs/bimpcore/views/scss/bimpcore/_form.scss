@@ -518,49 +518,6 @@ select.switch {
         color: $success;
     }
 }
-.check_list_container {
-    max-height: 450px;
-    overflow-y: auto;
-    margin: 10px;
-}
-
-.check_list_item {
-    margin: 0;
-    padding: 0;
-
-    input[type=checkbox] {
-        display: none;
-    }
-
-    label {
-        padding: 0 6px 0 30px;
-        background-color: #fff;
-        color: darken($gray, 20%);
-        cursor: pointer;
-        @include transition(all 0.3s ease);
-
-        &:before {
-            font-family: 'FontAwesome';
-            margin-left: -24px;
-            margin-right: 16px;
-            font-weight: normal;
-            content: '\f096';
-            font-size: 14px;
-            vertical-align: middle;
-        }
-    }
-
-    input[type=checkbox]:checked + label {
-        color: $gray-darker;
-
-        &:before {
-            font-size: 16px;
-            content: '\f046';
-            color: $primary;
-
-        }
-    }
-}
 
 .texarea_values {
     padding-left: 10px;
@@ -612,6 +569,107 @@ input[type=text].large_input {
     .btn {
         margin: 0
     }
+}
+
+/*Check lists:*/ 
+
+.check_list_container {
+    max-height: 450px;
+    overflow-y: auto;
+    margin: 10px;
+}
+.check_list_item,
+.check_list_group_caption {
+    margin: 0;
+    padding: 0;
+
+    & > label,
+    & > .check_list_group_title {
+        @include transition(all 0.3s ease);  
+        display: inline-block;
+        max-width: 100%;
+        margin-left: 0!important;
+        font-weight: bold;
+        background-color: #fff;
+        color: darken($gray, 20%);
+        cursor: pointer;
+    }
+}
+
+.check_list_item > input[type=checkbox],
+.check_list_group > input[type=checkbox] {
+    display: none;
+}
+
+.check_list_item > label,
+.check_list_group_caption {
+    margin: 0 0 5px 0;
+    padding: 0 6px 0 24px;
+
+    &:before {
+        font-family: 'FontAwesome';
+        margin-left: -24px;
+        margin-right: 16px;
+        font-weight: normal;
+        content: '\f096';
+        font-size: 14px;
+        vertical-align: middle;
+    }
+}
+
+.check_list_item > input[type=checkbox]:checked + label,
+.check_list_group > input[type=checkbox]:checked + .check_list_group_caption {
+    color: $gray-darker;
+
+    &:before {
+        font-size: 16px;
+        content: '\f046';
+        color: $primary;
+    }
+}
+
+.check_list_group_caption > .check_list_group_title {
+    @include transition(all 0.3s ease);
+
+    &:after {
+        font-family: 'FA5S';
+        margin-right: 0;
+        margin-left: 8px;
+        font-weight: bold;
+        font-size: 14px;
+        vertical-align: middle;
+    }
+
+    &:hover {
+        color: #3C3C3C
+    }
+}
+
+.check_list_group.open {
+    & > .check_list_group_caption > .check_list_group_title:after {
+        content: '\f0d8';
+    }
+
+    & > .check_list_group_items {
+        display: block;
+    }
+}
+
+.check_list_group.closed {
+    & > .check_list_group_caption > .check_list_group_title:after {
+        content: '\f0d7';
+    }
+
+    & > .check_list_group_items {
+        display: none;
+    }
+}
+
+.check_list_group_items {
+    padding-left: 10px;
+    margin-left: 5px;
+
+    border-left: 1px dotted #B4B4B4;
 }
 /*Free Forms*/
 

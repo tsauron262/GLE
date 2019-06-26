@@ -263,7 +263,7 @@ class Bimp_Facture extends BimpComm
         if (!$this->isLoaded()) {
             return array();
         }
-        
+
         $buttons = parent::getActionsButtons();
         $status = (int) $this->getData('fk_statut');
         $ref = $this->getRef();
@@ -577,10 +577,9 @@ class Bimp_Facture extends BimpComm
                     );
                 }
             }
-            
         }
-        
-        
+
+
         return $buttons;
     }
 
@@ -1866,36 +1865,6 @@ class Bimp_Facture extends BimpComm
 
     // Actions: 
 
-    public function actionRemoveDiscount($data, &$success)
-    {
-        $errors = array();
-        $warnings = array();
-        $success = 'Retrait de la remise effectué avec succès';
-
-        if (!isset($data['id_discount']) || !(int) $data['id_discount']) {
-            $errors[] = 'Aucune remise à retirer spécifiée';
-        } else {
-            if (!class_exists('DiscountAbsolute')) {
-                require_once DOL_DOCUMENT_ROOT . '/core/class/discount.class.php';
-            }
-
-            $discount = new DiscountAbsolute($this->db->db);
-            if ($discount->fetch((int) $data['id_discount']) <= 0) {
-                $errors[] = 'La remise d\'ID ' . $data['id_discount'] . ' n\'existe pas';
-            } else {
-                if ($discount->unlink_invoice() <= 0) {
-                    $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($discount), 'Echec du retrait de la remise');
-                }
-            }
-        }
-
-        return array(
-            'errors'           => $errors,
-            'warnings'         => $warnings,
-            'success_callback' => 'bimp_reloadPage();'
-        );
-    }
-
     public function actionReopen($data, &$success)
     {
         $errors = array();
@@ -2043,7 +2012,7 @@ class Bimp_Facture extends BimpComm
     {
         $errors = array();
         $warnings = array();
-        $success = BimpTools::ucfirst($this->getLabel('this')) . ' a bien été classée "payé' . ($this->isLabelFemale() ? 'e' : '') . '"';
+        $success = BimpTools::ucfirst($this->getLabel('the')) . ' ' . $this->getRef() . ' a bien été classé' . ($this->isLabelFemale() ? 'e' : '') . ' "payé' . ($this->isLabelFemale() ? 'e' : '') . '"';
 
         global $user;
 
@@ -2058,6 +2027,7 @@ class Bimp_Facture extends BimpComm
 
         $close_code = (isset($data['close_code']) ? $data['close_code'] : '');
         $close_note = (isset($data['close_note']) ? $data['close_note'] : '');
+        
         if ($this->isLoaded() && (int) $this->getData('fk_statut') == 1 && !(int) $this->dol_object->paye &&
                 (($remainToPay > 0 && $close_code) ||
                 (!in_array($type, array(Facture::TYPE_CREDIT_NOTE, Facture::TYPE_DEPOSIT) && $remainToPay <= 0)) ||

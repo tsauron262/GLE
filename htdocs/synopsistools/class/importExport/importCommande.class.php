@@ -183,11 +183,9 @@ class importCommande extends import8sens {
         }
 
         $commandes = $tabFinal2;
-        $commandes = array($prefixe . "CO1904-8050" => $tabFinal2[$prefixe . "CO1904-8050"]);
-        echo "<pre>";
-        print_r($commandes);
-//        die;
-
+        $commandes = array($prefixe."CO1904-8050"=> $tabFinal2[$prefixe."CO1904-8050"]);
+        echo "<pre>"; print_r($commandes);die;
+        
         global $db;
         $bdb = new BimpDb($db);
 
@@ -240,10 +238,6 @@ class importCommande extends import8sens {
                     }
                 }
 
-//                if (!$client_ref) {
-//                    echo BimpRender::renderAlerts('Client absent');
-//                    continue;
-//                } else {
                 $id_client = (int) $bdb->getValue('societe', 'rowid', '`code_client` = \'' . $client_ref . '\'');
                 if (!$id_client) {
                     $id_client = (int) $bdb->getValue('societe', 'rowid', '`code_client` = \'' . $client_ref2 . '\'');
@@ -257,8 +251,7 @@ class importCommande extends import8sens {
                         }
                     }
                 }
-//                } 
-//continue;//vire
+
                 $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande');
                 $errors = $commande->validateArray(array(
                     'ref' => $comm_ref,

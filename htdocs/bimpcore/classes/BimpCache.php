@@ -1031,6 +1031,25 @@ class BimpCache
         return self::getCacheArray($cache_key, $include_empty, 0, $empty_label);
     }
 
+    // Catégories: 
+
+    public static function getCategoriesFullTree($type = 'product')
+    {
+        $cache_key = $type . '_categories_full_tree';
+
+        if (!isset(self::$cache[$cache_key])) {
+            BimpTools::loadDolClass('categories', 'categorie');
+
+            $categorie = new Categorie(self::getBdb()->db);
+
+            $tree = $categorie->get_full_arbo($type);
+            
+            self::$cache[$cache_key] = BimpTools::makeTreeFromArray($tree, 0, 'fk_parent');
+        }
+
+        return self::$cache[$cache_key];
+    }
+
     // Emails: 
 
     public static function getEmailTemplatesArray($email_type, $include_empty = false)

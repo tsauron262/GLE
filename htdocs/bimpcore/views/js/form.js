@@ -2128,6 +2128,54 @@ function setInputsEvents($container) {
                 }
             }
 
+            $checkListContainer.find('.check_list_group_caption').each(function () {
+//                var $checkBox = $(this).find('input[type="checkbox"]');
+//                $checkBox.change(function () {
+//                    var $parent = $checkBox.findParentByClass('check_list_group');
+//                    if ($.isOk($parent)) {
+//                        if ($checkBox.prop('checked')) {
+//                            $parent.find('.check_list_item_input').each(function () {
+//                                $(this).prop('checked', false);
+//                            });
+//                        } else {
+//                            $parent.find('.check_list_item_input').each(function () {
+//                                $(this).prop('checked', true);
+//                            });
+//                        }
+//                    }
+//                });
+
+                $(this).click(function (e) {
+                    var $parent = $(this).findParentByClass('check_list_group');
+                    if ($.isOk($parent)) {
+                        var $checkBox = $parent.children('input[type="checkbox"]');
+                        if ($checkBox.length) {
+                            if ($checkBox.prop('checked')) {
+                                $checkBox.prop('checked', false).change();
+                            } else {
+                                $checkBox.prop('checked', true).change();
+                            }
+                        }
+                    }
+                });
+
+                $(this).find('.check_list_group_title').click(function (e) {
+                    e.stopPropagation();
+                    var $parent = $(this).findParentByClass('check_list_group');
+                    if ($.isOk($parent)) {
+                        if ($parent.hasClass('open')) {
+                            $parent.children('.check_list_group_items').slideUp(250, function () {
+                                $parent.removeClass('open').addClass('closed');
+                            });
+                        } else {
+                            $parent.children('.check_list_group_items').slideDown(250, function () {
+                                $parent.removeClass('closed').addClass('open');
+                            });
+                        }
+                    }
+                });
+            });
+
             checkCheckList($checkListContainer);
             $(this).data('check_list_events_init', 1);
         }

@@ -630,26 +630,7 @@ class BimpInput
                     }
                     $i = 1;
                     foreach ($options['items'] as $idx => $item) {
-                        if (is_array($item)) {
-                            $item_value = isset($item['value']) ? $item['value'] : $idx;
-                            $item_label = isset($item['label']) ? $item['label'] : 'n°' . $idx;
-                        } else {
-                            $item_value = $idx;
-                            $item_label = (string) $item;
-                        }
-                        $i++;
-                        $rand = rand(111111, 999999);
-                        $html .= '<div class="check_list_item">';
-                        $html .= '<input type="checkbox" name="' . $field_name . '[]" value="' . $item_value . '" id="' . $input_id . '_' . $i . '_' . $rand . '"';
-                        if (in_array($item_value, $value)) {
-                            $nb_selected++;
-                            $html .= ' checked';
-                        }
-                        $html .= ' class="' . $field_name . '_check check_list_item_input"/>';
-                        $html .= '<label for="' . $input_id . '_' . $i . '_' . $rand . '">';
-                        $html .= $item_label;
-                        $html .= '</label>';
-                        $html .= '</div>';
+                        $html .= self::renderCheckListItem($field_name, $input_id, $i, $idx, $item, $nb_selected, $value);
                     }
 
                     if ($options['max'] !== 'none' || $options['max_input_name']) {
@@ -1340,6 +1321,75 @@ class BimpInput
             $html .= ' data-icon_class="' . $icon . '"';
         }
         $html .= '>' . $label . '</option>';
+
+        return $html;
+    }
+
+    public static function renderCheckListItem($field_name, $input_id, &$i, $idx, $item, &$nb_selected, $values = array(), &$child_selected = false)
+    {
+        $html = '';
+
+        $item_children = array();
+
+        if (is_array($item)) {
+            $item_value = isset($item['value']) ? $item['value'] : $idx;
+            $item_label = isset($item['label']) ? $item['label'] : 'n°' . $idx;
+            $item_children = isset($item['children']) ? $item['children'] : array();
+        } else {
+            $item_value = $idx;
+            $item_label = (string) $item;
+        }
+        $i++;
+        $rand = rand(111111, 999999);
+
+        if (!empty($item_children)) {
+            $children_html = '';
+
+            $has_child_selected = false;
+            foreach ($item_children as $child_idx => $child_item) {
+                $children_html .= self::renderCheckListItem($field_name, $input_id, $i, $child_idx, $child_item, $nb_selected, $values, $has_child_selected);
+            }
+
+            if ($has_child_selected) {
+                $child_selected = true;
+            }
+
+            $html .= '<div class="check_list_group ' . ($has_child_selected ? 'open' : 'closed') . '">';
+
+            $html .= '<input type="checkbox" name="' . $field_name . '[]" value="' . $item_value . '" id="' . $input_id . '_' . $i . '_' . $rand . '"';
+            if (in_array($item_value, $values)) {
+                $child_selected = true;
+                $nb_selected++;
+                $html .= ' checked';
+            }
+            $html .= ' class="' . $field_name . '_check check_list_item_input check_list_group_input"/>';
+
+            $html .= '<div class="check_list_group_caption">';
+            $html .= '<span class="check_list_group_title">';
+            $html .= $item_label;
+            $html .= '</span>';
+            $html .= '</div>';
+
+            $html .= '<div class="check_list_group_items">';
+
+            $html .= $children_html;
+
+            $html .= '</div>';
+            $html .= '</div>';
+        } else {
+            $html .= '<div class="check_list_item">';
+            $html .= '<input type="checkbox" name="' . $field_name . '[]" value="' . $item_value . '" id="' . $input_id . '_' . $i . '_' . $rand . '"';
+            if (in_array($item_value, $values)) {
+                $child_selected = true;
+                $nb_selected++;
+                $html .= ' checked';
+            }
+            $html .= ' class="' . $field_name . '_check check_list_item_input"/>';
+            $html .= '<label for="' . $input_id . '_' . $i . '_' . $rand . '">';
+            $html .= $item_label;
+            $html .= '</label>';
+            $html .= '</div>';
+        }
 
         return $html;
     }

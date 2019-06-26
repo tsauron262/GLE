@@ -67,7 +67,7 @@ class Bimp_Product extends BimpObject
     }
 
     // Getters params: 
-    
+
     public function getDolObjectUpdateParams()
     {
         global $user;
@@ -110,6 +110,25 @@ class Bimp_Product extends BimpObject
         }
 
         return $buttons;
+    }
+
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array())
+    {
+        switch ($field_name) {
+            case 'categ1':
+            case 'categ2':
+            case 'categ3':
+                $alias = 'cat_prod';
+                $joins[$alias] = array(
+                    'alias' => $alias,
+                    'table' => 'categorie_product',
+                    'on'    => $alias . '.fk_product = a.rowid'
+                );
+                $filters['cat_prod.fk_categorie'] = array(
+                    'in' => $values
+                );
+                break;
+        }
     }
 
     // Getters données: 
@@ -533,8 +552,7 @@ class Bimp_Product extends BimpObject
             $htmlT .= '</tr>';
             if ($stocks['reel'] <= 0) {//stok > 0 au debut
                 $html2 .= $htmlT;
-            }
-            else{
+            } else {
                 $html1 .= $htmlT;
             }
         }

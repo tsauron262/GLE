@@ -2,11 +2,13 @@
 
 require_once DOL_DOCUMENT_ROOT . "/synopsistools/class/importExport/importCat.class.php";
 
-class importCommande extends import8sens {
+class importCommande extends import8sens
+{
 
     var $tabCommande = array();
 
-    public function __construct($db) {
+    public function __construct($db)
+    {
         $this->mode = 2;
         parent::__construct($db);
         $this->path .= "commEnCours/";
@@ -22,7 +24,8 @@ class importCommande extends import8sens {
 //        
 //    }
 
-    function traiteLn($ln) {
+    function traiteLn($ln)
+    {
         $this->tabResult["total"] ++;
 
         $ref = "";
@@ -46,7 +49,8 @@ class importCommande extends import8sens {
         }
     }
 
-    function go() {
+    function go()
+    {
         parent::go();
 
 
@@ -55,9 +59,9 @@ class importCommande extends import8sens {
 
         $tabFinal = array();
         foreach ($this->tabCommande as $ref => $tabLn) {
-                foreach ($tabLn["lignes"] as $dataLn) {
-                        $tabFinal[$ref][] = array("ref" => $dataLn['PlvGArtCode'], "qty" => $dataLn['PlvQteUS'], "qtyEnBl" => $dataLn['PlvQteTr'], "soc" => $dataLn["PlvGCliCode"], "pv" => $dataLn['PlvPUNet'], "pa" => $dataLn['PlvPA'], 'dep' => $dataLn['PlvDDepCode'], 'soc2' => $dataLn['CliFree3']);
-                }
+            foreach ($tabLn["lignes"] as $dataLn) {
+                $tabFinal[$ref][] = array("ref" => $dataLn['PlvGArtCode'], "qty" => $dataLn['PlvQteUS'], "qtyEnBl" => $dataLn['PlvQteTr'], "soc" => $dataLn["PlvGCliCode"], "pv" => $dataLn['PlvPUNet'], "pa" => $dataLn['PlvPA'], 'dep' => $dataLn['PlvDDepCode'], 'soc2' => $dataLn['CliFree3']);
+            }
         }
 
 
@@ -100,8 +104,8 @@ class importCommande extends import8sens {
                 }
             }
         }
-        
-        
+
+
         $prob = array();
 
         if (!defined('BIMP_LIB')) {
@@ -109,7 +113,7 @@ class importCommande extends import8sens {
         }
 
 
-        $prefixe = "dsddsssd";
+        $prefixe = "dsddsssdlllllll";
         $tabFinal2 = array();
         foreach ($tabFinal as $ref => $data) {
             $ref = $prefixe . $ref;
@@ -157,9 +161,11 @@ class importCommande extends import8sens {
         $commandes = $tabFinal2;
         $commandes = array($prefixe."CMEY-171380"=> $tabFinal2[$prefixe."CMEY-171380"]);
 //        echo "<pre>"; print_r($commandes);die;
-        
+
         global $db;
         $bdb = new BimpDb($db);
+
+        $errors = array();
 
         foreach ($commandes as $comm_ref => $lines) {
             $commande = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_Commande', array(
@@ -183,11 +189,13 @@ class importCommande extends import8sens {
 
                 if (!$entrepot_ref) {
                     echo BimpRender::renderAlerts('Entrepôt absent');
+                    $errors[] = 'Commande ' . $comm_ref . ': Entrepôt absent';
                     continue;
                 } else {
                     $id_entrepot = (int) $bdb->getValue('entrepot', 'rowid', '`ref` = \'' . $entrepot_ref . '\'');
                     if (!$id_entrepot) {
                         echo BimpRender::renderAlerts('Aucun entrepôt trouvé pour la réference "' . $entrepot_ref . '"');
+                        $errors[] = 'Commande ' . $comm_ref . ': Aucun entrepôt trouvé pour la réference "' . $entrepot_ref . '"';
                         continue;
                     }
                 }
@@ -218,6 +226,7 @@ class importCommande extends import8sens {
                         if (!$id_client) {
                             $prob[] = str_replace($prefixe, "", $comm_ref);
                             echo BimpRender::renderAlerts('Aucun client trouvé pour la réference "' . $client_ref . '"');
+                            $errors[] = 'Commande ' . $comm_ref . ': Aucun client trouvé pour la réference "' . $client_ref . '"';
                             continue;
 //                                $id_client = 340002;
                         }
@@ -225,35 +234,37 @@ class importCommande extends import8sens {
                 }
 //continue;//vire
                 $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande');
-                $errors = $commande->validateArray(array(
-                    'ref' => $comm_ref,
-                    'entrepot' => $id_entrepot,
-                    'fk_soc' => $id_client,
-                    'ef_type' => 'C',
-                    'validComm' => 1,
-                    'validFin' => 1,
-                    'date_commande' => date('Y-m-d'),
+                $comm_errors = $commande->validateArray(array(
+                    'ref'               => $comm_ref,
+                    'entrepot'          => $id_entrepot,
+                    'fk_soc'            => $id_client,
+                    'ef_type'           => 'C',
+                    'validComm'         => 1,
+                    'validFin'          => 1,
+                    'date_commande'     => date('Y-m-d'),
                     'fk_cond_reglement' => 1
                 ));
 
-                if (!count($errors)) {
+                if (!count($comm_errors)) {
                     $warnings = array();
-                    $errors = $commande->create($warnings, true);
+                    $comm_errors = $commande->create($warnings, true);
                 }
 
-                if (count($errors)) {
+                if (count($comm_errors)) {
                     echo '<span class="danger">[ECHEC]</span>';
-                    echo BimpRender::renderAlerts($errors);
+                    echo BimpRender::renderAlerts($comm_errors);
+                    $errors[] = BimpTools::getMsgFromArray($comm_errors, 'Commande ' . $comm_ref . ': [ECHEC CREATION]', 1);
                     continue;
                 } else {
                     echo '<span class="success">[OK]</span>';
                     if ($bdb->update('commande', array(
 //                                'ref'           => $comm_ref,
-                                'fk_statut' => 1,
-                                'date_valid' => date('Y-m-d'),
+                                'fk_statut'     => 1,
+                                'date_valid'    => date('Y-m-d'),
                                 'fk_user_valid' => 1
-                            )) <= 0) {
+                                    ), '`rowid` = ' . $commande->id) <= 0) {
                         echo ' <span class="danger">[ECHEC MAJ DES DONNEES] ' . $bdb->db->lasterror() . '</span>';
+                        $errors[] = 'Commande ' . $comm_ref . ': [ECHEC MAJ DES DONNEES] ' . $bdb->db->lasterror();
                         continue;
                     }
                 }
@@ -261,7 +272,7 @@ class importCommande extends import8sens {
                 echo '<br/>';
             }
 
-            
+
 //            continue;//vire
             if (BimpObject::objectLoaded($commande)) {
                 echo '*** Traitement commande "' . $comm_ref . '" ***<br/>';
@@ -277,21 +288,21 @@ class importCommande extends import8sens {
                     if (!(int) $commande->getData('id_user_resp')) {
                         $commande->updateField('id_user_resp', (int) $id_user_resp);
                     }
-                    if (!count($errors)) {
-                        $errors = $commande->updateField('logistique_status', 1);
-                    }
+                    $up_errors = $commande->updateField('logistique_status', 1);
 
-                    if (count($errors)) {
-                        echo BimpRender::renderAlerts($errors);
+                    if (count($up_errors)) {
+                        echo BimpRender::renderAlerts($up_errors);
                         echo '<br/>';
+                        $errors[] = BimpTools::getMsgFromArray($up_errors, 'Commande ' . $comm_ref . ': échec maj logistique status', 1);
                         continue;
                     }
 
-                    $errors = $commande->createReservations();
-                    if (count($errors)) {
+                    $res_errors = $commande->createReservations();
+                    if (count($res_errors)) {
                         echo '[ECHEC CREATION DES RESERVATIONS]';
-                        echo BimpRender::renderAlerts($errors);
+                        echo BimpRender::renderAlerts($res_errors);
                         echo '<br/>';
+                        $errors[] = BimpTools::getMsgFromArray($res_errors, 'Commande ' . $comm_ref . ': [ECHEC CREATION DES RESERVATIONS]', 1);
                         continue;
                     }
 
@@ -332,20 +343,22 @@ class importCommande extends import8sens {
                             $BimpLine = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeLine');
                             $BimpLine->validateArray(array(
                                 'id_obj' => (int) $commande->id,
-                                'type' => ObjectLine::LINE_PRODUCT
+                                'type'   => ObjectLine::LINE_PRODUCT
                             ));
 
                             $BimpLine->id_product = (int) $product->id;
                             $BimpLine->pu_ht = $line_data['pv'];
+                            $BimpLine->tva_tx = (float) $product->getData('tva_tx');
                             $BimpLine->pa_ht = $line_data['pa'];
                             $BimpLine->qty = $line_data['qty'];
 
                             $warnings = array();
-                            $errors = $BimpLine->create($warnings, true);
+                            $line_errors = $BimpLine->create($warnings, true);
 
-                            if (count($errors)) {
+                            if (count($line_errors)) {
                                 echo '<span class="danger">[ECHEC]</span><br/>';
-                                echo BimpRender::renderAlerts($errors);
+                                echo BimpRender::renderAlerts($line_errors);
+                                $errors[] = BimpTools::getMsgFromArray($line_errors, 'Commande ' . $comm_ref . ' - Ligne n° ' . $i . ' (' . $line_data['ref'] . '): [ECHEC CREATION]', 1);
                                 continue;
                             } else {
                                 echo '<span class="success">[OK]</span><br/>';
@@ -374,6 +387,7 @@ class importCommande extends import8sens {
 
                         if (!BimpObject::objectLoaded($BimpLine)) {
                             echo '<span class="danger">BIMP LINE CORRESPONDANTE NON TROUVEE</span><br/>';
+                            $errors[] = 'Commande ' . $comm_ref . ' - Ligne n° ' . $i . ' (' . $line_data['ref'] . '): BIMP LINE CORRESPONDANTE NON TROUVEE';
                         } else {
                             echo '<span class="success">LIGNE TROUVEE: ' . $BimpLine->id . '</span><br/>';
 
@@ -422,11 +436,13 @@ class importCommande extends import8sens {
                                         if (!(int) $id_shipment) {
                                             echo '<span class="danger">[ECHEC]</span> ';
                                             echo $bdb->db->lasterror();
+                                            $errors[] = 'Commande ' . $comm_ref . ' - Ligne n° ' . $i . ' (' . $line_data['ref'] . '): Echec création expédition "' . $bl_ref . '" - ' . $bdb->db->lasterror();
                                         } else {
                                             echo '<span class="success">[OK]</span>';
                                             $commShipment = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeShipment', (int) $id_shipment);
                                             if (!BimpObject::objectLoaded($commShipment)) {
                                                 echo '<br/><span class="danger">ERREUR: L\'expé #' . $id_shipment . ' n\'existe pas</span>';
+                                                $errors[] = 'Commande ' . $comm_ref . ' - Ligne n° ' . $i . ' (' . $line_data['ref'] . '): ERREUR: L\'expé #' . $id_shipment . ' n\'existe pas';
                                             }
                                         }
                                         echo '<br/>';
@@ -441,6 +457,7 @@ class importCommande extends import8sens {
                                         echo 'Ajout de ' . $diff . ' unité(s) expédiée(s): ';
                                         if (!BimpObject::objectLoaded($commShipment)) {
                                             echo BimpRender::renderAlerts('Expédition non trouvée');
+                                            $errors[] = 'Commande ' . $comm_ref . ': Expédition non trouvée: "' . $bl_ref . '"';
                                         } else {
                                             $shipment_data = $BimpLine->getShipmentData((int) $commShipment->id);
                                             $shipment_data['qty'] += $diff;
@@ -448,10 +465,12 @@ class importCommande extends import8sens {
 
                                             $line_shipments = $BimpLine->getData('shipments');
                                             $line_shipments[(int) $commShipment->id] = $shipment_data;
-                                            $errors = $BimpLine->updateField('shipments', $line_shipments);
-                                            if (count($errors)) {
+                                            $line_errors = $BimpLine->updateField('shipments', $line_shipments);
+                                            if (count($line_errors)) {
                                                 echo '<span class="danger">[ECHEC]</span>';
-                                                echo BimpRender::renderAlerts($errors);
+                                                echo BimpRender::renderAlerts($line_errors);
+                                                $err_title = 'Commande ' . $comm_ref . ' - Ligne n° ' . $i . ' (' . $line_data['ref'] . '): ECHEC MAJ QTE EXPEDITIONS (EXP "' . $bl_ref . '")';
+                                                $errors[] = BimpTools::getMsgFromArray($line_errors, $err_title, 1);
                                             } else {
                                                 if (BimpObject::objectLoaded($commShipment)) {
                                                     $commShipment->onLinesChange();
@@ -471,7 +490,6 @@ class importCommande extends import8sens {
                                         $line_reservations = $BimpLine->getReservations('status', 'asc', 0);
                                         $remain_qty = (int) $total_diff;
 
-                                        $errors = array();
                                         $ref_resrvations = '';
                                         foreach ($line_reservations as $res) {
                                             $ref_resrvations = $res->getData('ref');
@@ -485,36 +503,38 @@ class importCommande extends import8sens {
                                                 }
 
                                                 if ($new_qty > 0) {
-                                                    $errors = $res->updateField('qty', $new_qty);
-                                                    if (count($errors)) {
+                                                    $res_errors = $res->updateField('qty', $new_qty);
+                                                    if (count($res_errors)) {
                                                         echo '<span class="danger">[ECHEC MAJ RES #' . $res->id . ']</span>';
-                                                        echo BimpRender::renderAlerts($errors);
+                                                        echo BimpRender::renderAlerts($res_errors);
+                                                        $err_title = 'Commande ' . $comm_ref . ' - Ligne n° ' . $i . ' (' . $line_data['ref'] . '): [ECHEC MAJ RES #' . $res->id . ']';
+                                                        $errors[] = BimpTools::getMsgFromArray($res_errors, $err_title, 1);
                                                         break;
                                                     }
                                                 } else {
                                                     $del_warnings = array();
-                                                    $errors = $res->delete($del_warnings, true);
+                                                    $res->delete($del_warnings, true);
                                                 }
                                             }
                                         }
-                                        if (!count($errors)) {
-                                            if (!$remain_qty) {
-                                                echo '<span class="success">[OK]</span>';
-                                            } else {
-                                                echo '<span class="danger">[ERREUR] ' . $remain_qty . ' unité(s) n\'ont pas été traitée(s)</span>';
-                                            }
+                                        if (!$remain_qty) {
+                                            echo '<span class="success">[OK]</span>';
+                                        } else {
+                                            echo '<span class="danger">[ERREUR] ' . $remain_qty . ' unité(s) n\'ont pas été traitée(s)</span>';
+                                            $errors[] = 'Commande ' . $comm_ref . ' - Ligne n° ' . $i . ' (' . $line_data['ref'] . '): [ERREUR MAJ RESERVATIONS] ' . $remain_qty . ' unité(s) n\'ont pas été traitée(s)';
                                         }
                                         echo '<br/>';
 
                                         $line_reservations = $BimpLine->getReservations('status', 'asc', 300);
                                         if (!empty($line_reservations)) {
                                             echo 'Ajout de ' . $total_diff . ' qté aux réservations "expédiées": ';
-                                            $errors = array();
                                             foreach ($line_reservations as $res) {
-                                                $errors = $res->updateField('qty', (int) $res->getData('qty') + (int) $total_diff);
-                                                if (count($errors)) {
+                                                $res_errors = $res->updateField('qty', (int) $res->getData('qty') + (int) $total_diff);
+                                                if (count($res_errors)) {
                                                     echo '<span class="danger">[ECHEC MAJ RES #' . $res->id . ']</span>';
-                                                    echo BimpRender::renderAlerts($errors);
+                                                    echo BimpRender::renderAlerts($res_errors);
+                                                    $err_title = 'Commande ' . $comm_ref . ' - Ligne n° ' . $i . ' (' . $line_data['ref'] . '): [ECHEC MAJ RES #' . $res->id . ']';
+                                                    $errors[] = BimpTools::getMsgFromArray($res_errors, $err_title, 1);
                                                 } else {
                                                     echo '<span class="success">[OK]</span>';
                                                 }
@@ -536,6 +556,7 @@ class importCommande extends import8sens {
 
                                             if (!$id_res) {
                                                 echo '<span class="danger">[ECHEC] ' . $bdb->db->lasterror() . '</span>';
+                                                $errors[] = 'Commande ' . $comm_ref . ' - Ligne n° ' . $i . ' (' . $line_data['ref'] . ') : [ECHEC CREA RESERVATION] - ' . $bdb->db->lasterror();
                                             } else {
                                                 echo '<span class="success">[OK]</span>';
                                             }
@@ -556,10 +577,12 @@ class importCommande extends import8sens {
                                 $factures = $BimpLine->getData('factures');
                                 $factures[-1] = $fac_data;
 
-                                $errors = $BimpLine->updateField('factures', $factures);
-                                if (count($errors)) {
+                                $line_errors = $BimpLine->updateField('factures', $factures);
+                                if (count($line_errors)) {
                                     echo '[ECHEC]';
-                                    echo BimpRender::renderAlerts($errors);
+                                    echo BimpRender::renderAlerts($line_errors);
+                                    $err_title = 'Commande ' . $comm_ref . ' - Ligne n° ' . $i . ' (' . $line_data['ref'] . '): ECHEC MAJ QTE FACTUREE';
+                                    $errors[] = BimpTools::getMsgFromArray($line_errors, $err_title, 1);
                                 } else {
                                     echo '<span class="success">[OK]</span>';
                                 }
@@ -574,6 +597,7 @@ class importCommande extends import8sens {
                 }
 
                 // Check des status commande: 
+                $commande->fetch($commande->id);
                 $commande->checkLogistiqueStatus();
                 $commande->checkShipmentStatus();
                 $commande->checkInvoiceStatus();
@@ -581,12 +605,29 @@ class importCommande extends import8sens {
                 echo '<br/><br/>';
             }
         }
-        
-        echo "fin<br/>".implode("+", $prob);
-        
+
+        if (count($errors)) {
+            $str = count($errors) . ' erreurs' . "\n\n";
+
+            $i = 0;
+            foreach ($errors as $e) {
+                $i++;
+                $str .= $i . ' - ' . $e . "\n\n";
+            }
+
+            $dir = DOL_DATA_ROOT . '/bimpcore/imports_reports';
+            if (!file_exists($dir)) {
+                mkdir($dir);
+            }
+
+            file_put_contents($dir . '/commandes_' . date('Y-m-d_H-i-s') . '.txt', $str);
+        }
+
+        echo "fin<br/>" . implode("+", $prob);
     }
 
-    function getProdId($ref) {
+    function getProdId($ref)
+    {
         $sql = $this->db->query("SELECT `rowid` FROM `llx_product` WHERE `ref` LIKE '" . $ref . "'");
         if ($this->db->num_rows($sql) > 0) {
             $ln = $this->db->fetch_object($sql);
@@ -594,10 +635,10 @@ class importCommande extends import8sens {
         }
         return "";
     }
-
 }
 
-function traiteDate($date, $delim = "-") {
+function traiteDate($date, $delim = "-")
+{
     $tab = explode(" ", $date);
     $tab2 = explode($delim, $tab[0]);
     $date = $tab2[2] . $delim . $tab2[1] . $delim . $tab2[0] . " " . $tab[1];

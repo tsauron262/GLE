@@ -875,15 +875,16 @@ class Bimp_CommandeLine extends ObjectLine
             $qty = (float) $this->getData('qty_' . $qty_type);
             $class = '';
 
+            $full_qty = abs((float) $this->getFullQty());
             switch ($qty_type) {
                 case 'shipped':
                 case 'billed':
-                    if ($qty <= 0) {
-                        $class = 'danger';
-                    } elseif ($qty < abs((float) $this->getFullQty())) {
-                        $class = 'warning';
-                    } else {
+                    if ($qty === $full_qty) {
                         $class = 'success';
+                    } elseif ($qty <= 0) {
+                        $class = 'danger';
+                    } elseif ($qty < $full_qty) {
+                        $class = 'warning';
                     }
                     break;
 
@@ -891,7 +892,7 @@ class Bimp_CommandeLine extends ObjectLine
                 case 'to_bill':
                     if ($qty <= 0) {
                         $class = 'success';
-                    } elseif ($qty < abs((float) $this->getFullQty())) {
+                    } elseif ($qty < $full_qty) {
                         $class = 'warning';
                     } else {
                         $class = 'danger';
@@ -899,13 +900,11 @@ class Bimp_CommandeLine extends ObjectLine
                     break;
 
                 case 'total':
-                    if (!$qty) {
-                        $class = 'danger';
-                    } elseif ($qty < 0) {
+                    if ($qty < 0) {
                         $class = 'important';
                     }
             }
-
+            
             return '<span class="badge badge-' . ($class ? $class : 'default') . '">' . $qty . '</span>';
         }
 
@@ -3590,15 +3589,19 @@ class Bimp_CommandeLine extends ObjectLine
     public function checkQties()
     {
         if ($this->isLoaded()) {
+            $commande = $this->getParentInstance();
+
+            if (!BimpObject::objectLoaded($commande) || (int) $commande->getData('logistique_status') === 6) {
+                return;
+            }
+
             $fullQty = (float) $this->getFullQty();
             if ($fullQty !== (float) $this->getData('qty_total')) {
                 $this->updateField('qty_total', $fullQty, null, true);
             }
 
             if ((int) $this->getData('type') !== self::LINE_TEXT) {
-                $commande = $this->getParentInstance();
-                
-                if (BimpObject::objectLoaded($commande) && $commande->isLogistiqueActive()) {
+                if ($commande->isLogistiqueActive()) {
                     $status_forced = $commande->getData('status_forced');
 
                     $fullQty = abs($fullQty);
@@ -4316,7 +4319,7 @@ class Bimp_CommandeLine extends ObjectLine
         if ($context === 'updateField' && in_array($field, array('qty_total', 'qty_shipped', 'qty_to_ship', 'qty_billed', 'qty_to_bill'))) {
             return;
         }
-        
+
         if ((int) $this->id_remise_except && (float) $this->qty) {
             BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
             $discount = new DiscountAbsolute($this->db->db);

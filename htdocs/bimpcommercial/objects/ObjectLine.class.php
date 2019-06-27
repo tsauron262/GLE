@@ -28,7 +28,7 @@ class ObjectLine extends BimpObject
     public $id_remise_except = null;
     public static $product_line_data = array(
         'id_product'     => array('label' => 'Produit / Service', 'type' => 'int', 'required' => 1),
-        'id_fourn_price' => array('label' => 'Prix d\'achat fournisseur', 'type' => 'int'),
+        'id_fourn_price' => array('label' => 'Prix d\'achat fournisseur', 'type' => 'int', 'default' => null),
         'desc'           => array('label' => 'Description', 'type' => 'html', 'required' => 0, 'default' => null),
         'qty'            => array('label' => 'Quantité', 'type' => 'float', 'required' => 1, 'default' => 1),
         'pu_ht'          => array('label' => 'PU HT', 'type' => 'float', 'required' => 0, 'default' => null),
@@ -1849,6 +1849,7 @@ class ObjectLine extends BimpObject
 
             case self::LINE_TEXT:
                 $this->desc = (string) $line->desc;
+                $this->qty = 0;
                 break;
 
             default:

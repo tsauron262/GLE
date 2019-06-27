@@ -227,6 +227,10 @@ lists:
             commande_client:
                 
     general:
+        list_filters: 
+            - name: type
+              filter: 
+                  in: 1,3
         configurable: 1
         filters_panel: default
         filters_panel_open: 1

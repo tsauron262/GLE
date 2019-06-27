@@ -602,6 +602,7 @@ class indexController extends BimpController
     {
         $errors = array();
         $html = '';
+        $success_callback = '';
 
         global $user;
 
@@ -661,9 +662,9 @@ class indexController extends BimpController
 
                         if (!count($session_errors)) {
 
-                            $caisse->set('id_current_session', 0);
-                            $caisse->set('status', 0);
-                            $session_errors = $caisse->update();
+//                            $caisse->set('id_current_session', 0);
+//                            $caisse->set('status', 0);
+//                            $session_errors = $caisse->update();
                         }
 
                         if (count($session_errors)) {
@@ -672,6 +673,9 @@ class indexController extends BimpController
                             $errors = array_merge($errors, $caisse->disconnectAllUsers());
 
                             $html = BimpRender::renderAlerts('Fermeture de la caisse "' . $caisse->getData('name') . '" effectuée avec succès', 'success');
+
+                            $url = DOL_URL_ROOT . '/bimpcore/view.php?module=bimpcaisse&object_name=BC_CaisseSession&id_object=' . $session->id . '&view=recap';
+                            $success_callback = 'window.open(\'' . $url . '\', \'Récapitulatif session de caisse\', "menubar=no, status=no, width=' . BC_Caisse::$windowWidthByDpi[(int) $caisse->getData('printer_dpi')] . ', height=900")';
                         }
                     }
                 }
@@ -684,6 +688,7 @@ class indexController extends BimpController
             'need_confirm_fonds' => $need_confirm_fonds,
             'id_entrepot'        => $id_entrepot,
             'request_id'         => BimpTools::getValue('request_id', 0),
+            'success_callback'   => $success_callback
         )));
     }
 

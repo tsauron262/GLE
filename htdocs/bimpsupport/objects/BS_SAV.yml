@@ -800,7 +800,8 @@ lists:
     
 cards:
     default:
-        title: nom
+        title: 
+            field_value: ref
         status: status
         fields: 
             - label: Technicien

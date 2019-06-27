@@ -50,9 +50,36 @@ class BR_Reservation extends BimpObject
         return (int) $user->admin;
 //        return 0;
     }
+    
+    public function canEdit()
+    {
+        global $user;
+        return (int) $user->admin;
+//        return 0;
+    }
 
     // Getters booléens: 
 
+    public function isCommandeClient()
+    {
+        return (int) ((int) $this->getData('type') === self::BR_RESERVATION_COMMANDE);
+    }
+    
+    public function isTransfert()
+    {
+        return (int) ((int) $this->getData('type') === self::BR_RESERVATION_TRANSFERT);
+    }
+    
+    public function isTemporaire()
+    {
+        return (int) ((int) $this->getData('type') === self::BR_RESERVATION_TEMPORAIRE);
+    }
+    
+    public function isSav()
+    {
+        return (int) ((int) $this->getData('type') === self::BR_RESERVATION_SAV);
+    }
+    
     public function isEquipment()
     {
         if ($this->isLoaded()) {

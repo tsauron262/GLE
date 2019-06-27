@@ -9,6 +9,7 @@ dol_object:
 table: commande
 controller: commande
 icon: fas_dolly
+
 list_page_url: 
     controller: commandes
 
@@ -738,6 +739,20 @@ lists:
         cols: 
             client: unset
             
+cards: 
+    default: 
+        title: 
+            field_value: ref
+        status: fk_statut
+        view_btn: 1
+        fields: 
+            - field: total_ttc
+            - field: fk_soc
+              display: nom_url
+            - label: Fichier PDF
+              value: 
+                  callback: displayPDFButton
+                  
 searches:
     default: 
         fields_search: 

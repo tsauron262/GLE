@@ -319,7 +319,7 @@ class importCommandeFourn extends import8sens {
                                     continue;
                                 }
 
-                                // Recherche de l'expé:
+                                // Recherche de la réception:
                                 $commRec = BimpCache::findBimpObjectInstance('bimplogistique', 'BL_CommandeFournReception', array(
                                             'id_commande_fourn' => $commande->id,
                                             'ref'               => $br_ref
@@ -376,9 +376,11 @@ class importCommandeFourn extends import8sens {
                                         $rec_data = $BimpLine->getReceptionData((int) $commRec->id);
                                         $rec_data['qty'] += $diff;
                                         $rec_data['qties'] = array(
-                                            'qty'    => $rec_data['qty'],
-                                            'pu_ht'  => $BimpLine->pu_ht,
-                                            'tva_tx' => $BimpLine->tva_tx
+                                            array(
+                                                'qty'    => $rec_data['qty'],
+                                                'pu_ht'  => $BimpLine->pu_ht,
+                                                'tva_tx' => $BimpLine->tva_tx
+                                            )
                                         );
                                         $rec_data['received'] = 1;
 

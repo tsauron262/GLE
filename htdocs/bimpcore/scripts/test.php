@@ -11,7 +11,7 @@ echo '<body>';
 
 BimpCore::displayHeaderFiles();
 
-//BimpTools::processImport('TEST13_');
+BimpTools::processImport('TEST14_');
 
 echo '</body></html>';
 

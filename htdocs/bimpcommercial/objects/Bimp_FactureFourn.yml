@@ -223,11 +223,11 @@ fields_tables:
         
 views: 
     default: 
-        objects_change_reload: Bimp_FactureFournLine,ObjectLineRemise,BimpFile
+        objects_change_reload: Bimp_FactureFournLine,ObjectLineRemise,BimpFile,Bimp_PaiementFourn
     content_infos: 
-        objects_change_reload: Bimp_FactureFournLine,ObjectLineRemise,BimpFile
+        objects_change_reload: Bimp_FactureFournLine,ObjectLineRemise,BimpFile,Bimp_PaiementFourn
     full: 
-        objects_change_reload: Bimp_FactureFournLine,ObjectLineRemise,BimpFile
+        objects_change_reload: Bimp_FactureFournLine,ObjectLineRemise,BimpFile,Bimp_PaiementFourn
         
 filters_panels: 
     default: 

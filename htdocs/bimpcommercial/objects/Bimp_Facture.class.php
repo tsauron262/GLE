@@ -444,7 +444,7 @@ class Bimp_Facture extends BimpComm
                 if ($this->can("create") && $status == 1 && !$paye) {
                     switch ($type) {
                         case Facture::TYPE_STANDARD:
-                            if ($remainToPay < 0 && empty($discount->id)) {
+                            if ($status > 0 && $remainToPay < 0 && empty($discount->id)) {
                                 // Remboursement excédant payé: 
                                 $buttons[] = array(
                                     'label'   => $langs->trans('ConvertExcessReceivedToReduc'),
@@ -1169,6 +1169,22 @@ class Bimp_Facture extends BimpComm
                         $html .= '</tr>';
                     }
                 }
+                
+                 // Trop perçu converti en remise: 
+                BimpTools::loadDolClass('core', 'discount');
+                $discount = new DiscountAbsolute($this->db->db);
+                $discount->fetch(0, $this->id);
+                if (BimpObject::objectLoaded($discount)) {
+                    $remainToPay_final = 0;
+                    $html .= '<tr>';
+                    $html .= '<td style="text-align: right;">';
+                    $html .= '<strong>Trop perçu converti en </strong>' .$discount->getNomUrl(1, 'discount');
+                    $html .= '</td>';
+                    $html .= '<td>';
+                    $html .= BimpTools::displayMoneyValue($discount->amount_ttc);
+                    $html .= '</td>';
+                    $html .= '</tr>';
+                }
 
                 $html .= '<tr>';
                 $html .= '<td style="text-align: right;"><strong>Facturé</strong> : </td>';
@@ -1176,10 +1192,18 @@ class Bimp_Facture extends BimpComm
                 $html .= '<td></td>';
                 $html .= '</tr>';
 
+                // Reste à payer: 
+                if ((int) $this->getData('paye')) {
+                    $remainToPay_final = 0;
+                    $class = 'success';
+                } else {
+                    $class = ($remainToPay > 0 ? 'danger' : 'success');
+                }
+                
                 $html .= '<tr style="background-color: #F0F0F0; font-weight: bold">';
                 $html .= '<td style="text-align: right;"><strong>Reste à payer</strong> : </td>';
-                $html .= '<td>';
-                $html .= '<span class="' . ($remainToPay > 0 ? 'danger' : 'success') . '">';
+                $html .= '<td style="font-size: 18px;">';
+                $html .= '<span class="' . $class . '">';
                 $html .= BimpTools::displayMoneyValue($remainToPay_final, 'EUR');
                 $html .= '</span>';
                 $html .= '</td>';

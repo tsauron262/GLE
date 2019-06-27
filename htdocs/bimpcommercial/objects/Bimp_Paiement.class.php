@@ -13,7 +13,7 @@ class Bimp_Paiement extends BimpObject
     }
 
     // Getters: 
-    
+
     public function getAmountFromFacture()
     {
         $id_facture = (int) BimpTools::getValue('fields/id_facture', 0);
@@ -46,10 +46,7 @@ class Bimp_Paiement extends BimpObject
     public function DisplayAccount()
     {
         if ($this->isLoaded() && isset($this->dol_object->fk_account) && (int) $this->dol_object->fk_account) {
-            if (!class_exists('Account')) {
-                BimpTools::loadDolClass('compta/bank', 'account');
-            }
-
+            BimpTools::loadDolClass('compta/bank', 'account');
             $account = new Account($this->db->db);
             if ($account->fetch((int) $this->dol_object->fk_account) > 0) {
                 return $account->getNomUrl(1);
@@ -57,6 +54,8 @@ class Bimp_Paiement extends BimpObject
                 return BimpRender::renderAlerts('Le compte bancaire d\'ID ' . $this->dol_object->fk_account . ' n\'existe pas');
             }
         }
+
+        return '';
     }
 
     // Rendus: 

@@ -855,6 +855,11 @@ class Bimp_CommandeFourn extends BimpComm
         return $html;
     }
 
+    public function renderMarginsTable()
+    {
+        return '';
+    }
+    
     // Traitements:
 
     public function onCancelStatus()
@@ -897,7 +902,7 @@ class Bimp_CommandeFourn extends BimpComm
             return;
         }
 
-        $current_status = (int) $this->getInitData('fk_statut');
+        $current_status = (int) $this->getData('fk_statut');
 
         if (in_array($current_status, array(0, 1, 2, 6, 7, 9))) {
             return;
@@ -1493,7 +1498,10 @@ class Bimp_CommandeFourn extends BimpComm
 
     public function checkObject($context = '', $field = '')
     {
-        $this->checkInvoiceStatus();
+        if ($context === 'fetch') {
+//            $this->checkReceptionStatus();
+            $this->checkInvoiceStatus();
+        }
     }
 
     public function duplicate($new_data = array(), &$warnings = array(), $force_create = false)

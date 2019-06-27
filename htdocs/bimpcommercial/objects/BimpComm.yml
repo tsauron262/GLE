@@ -689,7 +689,7 @@ views:
                 
     content: 
         no_reload: 1
-        rows:          
+        rows:
             - cols: 
                 - type: view
                   view: 

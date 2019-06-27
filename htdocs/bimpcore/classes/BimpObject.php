@@ -5929,6 +5929,8 @@ class BimpObject extends BimpCache
         }
         if (isset($user->array_options["options_defaultentrepot"]))
             return $user->array_options["options_defaultentrepot"];
+        
+        return 0;
     }
 
     public function processRedirect($newVersion = true)

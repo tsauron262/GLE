@@ -113,7 +113,7 @@ class importCommande extends import8sens
         }
 
 
-        $prefixe = "dsddsssdlllllll";
+        $prefixe = "aaqq";
         $tabFinal2 = array();
         foreach ($tabFinal as $ref => $data) {
             $ref = $prefixe . $ref;
@@ -336,7 +336,7 @@ class importCommande extends import8sens
 
                         $rows = $bdb->getRows('commandedet', $where);
 
-                        if (is_null($rows) || empty($rows)) {
+//                        if (is_null($rows) || empty($rows)) {
                             // Si aucune ligne trouvée: 
                             echo 'Création de la ligne: ';
 
@@ -363,27 +363,27 @@ class importCommande extends import8sens
                             } else {
                                 echo '<span class="success">[OK]</span><br/>';
                             }
-                        } elseif (count($rows) > 1) {
-                            // Si plusieurs lignes trouvées: 
-                            foreach ($rows as $r) {
-                                $BimpLine = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', array(
-                                            'id_line' => (int) $r->rowid
-                                ));
-                                if (((float) $line_data['qtyEnBl'] && !(float) $BimpLine->getShippedQty(null, true)) ||
-                                        ($qty_fac && !(float) $BimpLine->getBilledQty())) {
-                                    // On considère que la ligne n'a pas été traité: 
-                                    break;
-                                }
-
-                                unset($BimpLine);
-                                $BimpLine = null;
-                            }
-                        } else {
-                            // Si une seule ligne trouvée: 
-                            $BimpLine = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', array(
-                                        'id_line' => (int) $rows[0]->rowid
-                            ));
-                        }
+//                        } elseif (count($rows) > 1) {
+//                            // Si plusieurs lignes trouvées: 
+//                            foreach ($rows as $r) {
+//                                $BimpLine = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', array(
+//                                            'id_line' => (int) $r->rowid
+//                                ));
+//                                if (((float) $line_data['qtyEnBl'] && !(float) $BimpLine->getShippedQty(null, true)) ||
+//                                        ($qty_fac && !(float) $BimpLine->getBilledQty())) {
+//                                    // On considère que la ligne n'a pas été traité: 
+//                                    break;
+//                                }
+//
+//                                unset($BimpLine);
+//                                $BimpLine = null;
+//                            }
+//                        } else {
+//                            // Si une seule ligne trouvée: 
+//                            $BimpLine = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', array(
+//                                        'id_line' => (int) $rows[0]->rowid
+//                            ));
+//                        }
 
                         if (!BimpObject::objectLoaded($BimpLine)) {
                             echo '<span class="danger">BIMP LINE CORRESPONDANTE NON TROUVEE</span><br/>';

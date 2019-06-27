@@ -44,7 +44,7 @@ if (!count($errors)) {
     echo '});';
     echo '</script>';
 } else {
-    echo '<link rel="stylesheet" type="text/css" href="' . DOL_URL_ROOT . '/bimpcore/views/css/bimpcore_bootstrap_new.css' . '"/>';
+    echo '<link rel="stylesheet" type="text/css" href="' . DOL_URL_ROOT . '/bimpcore/views/css/bimpcore.css' . '"/>';
     echo BimpRender::renderAlerts($errors);
 }
 

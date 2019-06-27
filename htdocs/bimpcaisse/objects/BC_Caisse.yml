@@ -44,6 +44,13 @@ fields:
             type: select_mysoc_account
     compte_comptable:
         label: Compte comptable de la caisse
+    printer_dpi: 
+        label: Résolution imprimante
+        type: int
+        values: 
+            array: printer_dpis
+        default_value: 200
+    
 
 forms: 
     default: 
@@ -53,10 +60,12 @@ forms:
             - field: status
             - field: fonds
             - field: id_account
+            - field: printer_dpi
     edit: 
         rows: 
             - field: name
             - field: id_account
+            - field: printer_dpi
             
     user_connect: 
         rows: 

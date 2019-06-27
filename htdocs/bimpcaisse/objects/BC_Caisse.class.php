@@ -7,6 +7,18 @@ class BC_Caisse extends BimpObject
         0 => array('label' => 'Fermée', 'icon' => 'times', 'classes' => array('danger')),
         1 => array('label' => 'Ouverte', 'icon' => 'check', 'classes' => array('success'))
     );
+    public static $printer_dpis = array(
+        72  => '72 dpi',
+        100 => '100 dpi',
+        200 => '200 dpi',
+        300 => '300dpi'
+    );
+    public static $windowWidthByDpi = array(
+        72  => 596,
+        100 => 827,
+        200 => 1654,
+        300 => 2480
+    );
 
     // Getters:
 
@@ -107,7 +119,7 @@ class BC_Caisse extends BimpObject
                 $id_entrepot = (int) BimpTools::getValue('param_values/fields/id_entrepot');
             }
         }
-        
+
         if ($id_entrepot) {
             $instance = BimpObject::getInstance('bimpcaisse', 'BC_Caisse');
             $list = $instance->getList(array(

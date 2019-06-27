@@ -38,6 +38,31 @@ class BC_CaisseSession extends BimpObject
         return $infos;
     }
 
+    public function getListExtraButtons()
+    {
+        $buttons = array();
+
+        if ($this->isLoaded()) {
+            $caisse = $this->getParentInstance();
+            if (BimpObject::objectLoaded($caisse)) {
+                $width = BC_Caisse::$windowWidthByDpi[(int) $caisse->getData('printer_dpi')];
+            } else {
+                $width = 200;
+            }
+
+            $url = DOL_URL_ROOT . '/bimpcore/view.php?module=bimpcaisse&object_name=BC_CaisseSession&id_object=' . $this->id . '&view=recap';
+            $onclick = 'window.open(\'' . $url . '\', \'Récapitulatif session de caisse\', \'menubar=no, status=no, width=' . $width . ', height=900\')';
+
+            $buttons[] = array(
+                'label'   => 'Impression',
+                'icon'    => 'fas_print',
+                'onclick' => $onclick
+            );
+        }
+
+        return $buttons;
+    }
+
     public function renderPaymentsInfos()
     {
         $html = '';
@@ -86,7 +111,7 @@ class BC_CaisseSession extends BimpObject
         return $html;
     }
 
-    public function renderPaymentsHistory()
+    public function renderPaymentsHistory($full_list = false)
     {
         if (!$this->isLoaded()) {
             return BimpRender::renderAlerts('ID de la session de caisse absent');
@@ -99,12 +124,13 @@ class BC_CaisseSession extends BimpObject
         }
 
         $bc_paiement = BimpObject::getInstance('bimpcaisse', 'BC_Paiement');
-        $list = new BC_ListTable($bc_paiement, 'session', 1, null, 'Liste des paiements', 'fas_hand-holding-usd');
+        $list_name = ($full_list ? 'full_session' : 'session');
+        $list = new BC_ListTable($bc_paiement, $list_name, 1, null, 'Liste des paiements', 'fas_hand-holding-usd');
         $list->addFieldFilterValue('id_caisse', (int) $caisse->id);
         $list->addFieldFilterValue('id_caisse_session', (int) $this->id);
         return $list->renderHtml();
     }
-    
+
     public function renderVentesList()
     {
         if (!$this->isLoaded()) {

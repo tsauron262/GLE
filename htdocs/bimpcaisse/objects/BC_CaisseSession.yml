@@ -76,6 +76,14 @@ fields_tables:
               display: nom_url
               show: 
                   field_value: id_user_closed
+                  
+    recap:
+        extends: default
+        rows: 
+            5: 
+                display: nom
+            6: 
+                display: nom
             
 views: 
     default: 
@@ -85,7 +93,8 @@ views:
         rows: 
             - cols: 
                 - type: fields_table
-                  fields_table: default
+                  fields_table: 
+                      name: default
                   col_md: 6
                   col_lg: 6
                   
@@ -113,6 +122,31 @@ views:
                 - type: custom
                   custom: 
                       callback: renderVentesList
+                      
+    recap: 
+        panel: 0
+        rows: 
+            - cols: 
+                - type: object_header
+            - cols: 
+                - type: fields_table
+                  fields_table: 
+                      name: recap
+                  col_md: 6
+                  col_lg: 6
+                  
+                - type: custom
+                  custom: 
+                      callback: renderPaymentsInfos
+                  col_lg: 6
+                  col_md: 6
+            - cols: 
+                - type: custom
+                  custom: 
+                      callback: 
+                          method: renderPaymentsHistory
+                          params: 
+                              - 1
                   
 lists: 
     default: 
@@ -122,6 +156,8 @@ lists:
         sort_way: desc
         n: 10
         modal_view: full
+        extra_btn: 
+            callback: getListExtraButtons
         cols:
             centre: 
                 field: id_caisse

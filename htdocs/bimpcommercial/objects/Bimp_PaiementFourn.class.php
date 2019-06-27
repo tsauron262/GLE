@@ -33,6 +33,23 @@ class Bimp_PaiementFourn extends Bimp_Paiement
         return 0;
     }
 
+    // Affichages: 
+
+    public function DisplayAccount()
+    {
+        if ($this->isLoaded() && isset($this->dol_object->bank_account) && (int) $this->dol_object->bank_account) {
+            BimpTools::loadDolClass('compta/bank', 'account');
+            $account = new Account($this->db->db);
+            if ($account->fetch((int) $this->dol_object->bank_account) > 0) {
+                return $account->getNomUrl(1);
+            } else {
+                return BimpRender::renderAlerts('Le compte bancaire d\'ID ' . $this->dol_object->bank_account . ' n\'existe pas');
+            }
+        }
+
+        return '';
+    }
+
     // Rendus HTML: 
 
     public function renderCaisseInput()
@@ -240,7 +257,7 @@ class Bimp_PaiementFourn extends Bimp_Paiement
         $type_paiement = $this->db->getValue('c_paiement', 'code', '`id` = ' . (int) $this->dol_object->paiementid);
         if (is_null($type_paiement) || !(string) $type_paiement) {
             $errors[] = 'Mode de paiement invalide';
-        }  elseif (($total_paid + $total_avoirs) > $total_to_pay && $type_paiement !== 'LIQ') {
+        } elseif (($total_paid + $total_avoirs) > $total_to_pay && $type_paiement !== 'LIQ') {
             $errors[] = 'Le versement d\'une somme supérieure au total des factures n\'est possible que pour un paiement en espèces';
         }
 
@@ -327,8 +344,6 @@ class Bimp_PaiementFourn extends Bimp_Paiement
                             BimpTools::resetDolObjectErrors($factures[$id_facture]->dol_object);
                             if ($factures[$id_facture]->dol_object->insert_discount((int) $avoir['id_discount']) <= 0) {
                                 $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($factures[$id_facture]->dol_object), 'Echec de l\'insertion de l\'avoir client d\'ID ' . $avoir['id_discount']);
-                            } else {
-                                $factures[$id_facture]->checkIsPaid();
                             }
                         }
                     }
@@ -347,6 +362,10 @@ class Bimp_PaiementFourn extends Bimp_Paiement
                         $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'ajout du paiement au compte bancaire "' . $account->bank . '"');
                     }
                 }
+            }
+            
+            foreach ($factures as $id_facture => $facture) {
+                $facture->checkIsPaid();
             }
         }
 

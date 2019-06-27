@@ -855,6 +855,11 @@ class Bimp_CommandeFourn extends BimpComm
         return $html;
     }
 
+    public function renderMarginsTable()
+    {
+        return '';
+    }
+    
     // Traitements:
 
     public function onCancelStatus()

@@ -123,6 +123,7 @@ class Bimp_FactureFourn extends BimpComm
                 break;
 
             case 'convertToReduc':
+                BimpTools::loadDolClass('core', 'discount');
                 $discountcheck = new DiscountAbsolute($this->db->db);
                 $discountcheck->fetch(0, 0, $this->id);
 
@@ -133,6 +134,9 @@ class Bimp_FactureFourn extends BimpComm
 
                 switch ($type) {
                     case FactureFournisseur::TYPE_STANDARD:
+                        if ($status === 0) {
+                            $errors[] = $objLabel . ' est au statut "brouillon"';
+                        }
                         if ((int) $this->getData('paye')) {
                             $errors[] = $objLabel . ' est au statut "payée"';
                         }
@@ -256,6 +260,7 @@ class Bimp_FactureFourn extends BimpComm
     {
         global $conf, $langs, $user;
 
+        $langs->load('bills');
         $type = $this->getData('type');
 
         $buttons = array();
@@ -357,10 +362,10 @@ class Bimp_FactureFourn extends BimpComm
                 $confirm_msg = 'Veuillez confirmer la conversion en remise';
 
                 if ($type === FactureFournisseur::TYPE_STANDARD) {
-                    $label = $langs->trans('ConvertToReduc');
+                    $label = 'Convertir en remise';
                     $confirm_msg .= ' du trop perçu ' . $this->getLabel('of_this');
                 } else {
-                    $label = $langs->trans('ConvertToReduc');
+                    $label = 'Convertir en remise';
                     $confirm_msg .= ' du montant restant à rembourser ' . $this->getLabel('of_this');
                 }
 
@@ -690,16 +695,41 @@ class Bimp_FactureFourn extends BimpComm
                     }
                 }
 
+                // Trop perçu converti en remise: 
+                BimpTools::loadDolClass('core', 'discount');
+                $discount = new DiscountAbsolute($this->db->db);
+                $discount->fetch(0, 0, $this->id);
+                if (BimpObject::objectLoaded($discount)) {
+                    $remainToPay_final = 0;
+                    $html .= '<tr>';
+                    $html .= '<td style="text-align: right;">';
+                    $html .= '<strong>Trop perçu converti en </strong>' . $discount->getNomUrl(1, 'discount');
+                    $html .= '</td>';
+                    $html .= '<td>';
+                    $html .= BimpTools::displayMoneyValue($discount->amount_ttc);
+                    $html .= '</td>';
+                    $html .= '</tr>';
+                }
+
+                // total facturé: 
                 $html .= '<tr>';
                 $html .= '<td style="text-align: right;"><strong>Facturé</strong> : </td>';
                 $html .= '<td>' . $this->displayData('total_ttc') . '</td>';
                 $html .= '<td></td>';
                 $html .= '</tr>';
 
+                // Reste à payer: 
+                if ((int) $this->getData('paye')) {
+                    $remainToPay_final = 0;
+                    $class = 'success';
+                } else {
+                    $class = ($remainToPay > 0 ? 'danger' : 'success');
+                }
+
                 $html .= '<tr style="background-color: #F0F0F0; font-weight: bold">';
                 $html .= '<td style="text-align: right;"><strong>Reste à payer</strong> : </td>';
-                $html .= '<td>';
-                $html .= '<span class="' . ($remainToPay > 0 ? 'danger' : 'success') . '">';
+                $html .= '<td style="font-size: 18px">';
+                $html .= '<span class="' . $class . '">';
                 $html .= BimpTools::displayMoneyValue($remainToPay_final, 'EUR');
                 $html .= '</span>';
                 $html .= '</td>';
@@ -736,6 +766,7 @@ class Bimp_FactureFourn extends BimpComm
                     $html .= $langs->trans('RemainderToPayBack');
                     $class = 'success';
                 }
+
                 $html .= '</strong> : </td>';
                 $html .= '<td><span class="' . $class . '">' . BimpTools::displayMoneyValue($remainToPay * $mult) . '</span></td>';
                 $html .= '<td></td>';
@@ -784,6 +815,7 @@ class Bimp_FactureFourn extends BimpComm
                 foreach ($rows as $r) {
                     $paiement = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_PaiementFourn', (int) $r['fk_paiementfourn']);
                     if ($paiement->isLoaded()) {
+
                         $html .= '<tr>';
                         $html .= '<td>' . $paiement->dol_object->getNomUrl(1) . '</td>';
                         $html .= '<td>' . $paiement->displayData('datep') . '</td>';
@@ -838,6 +870,11 @@ class Bimp_FactureFourn extends BimpComm
         return $return;
     }
 
+    public function renderMarginsTable()
+    {
+        return '';
+    }
+
     // Traitements: 
 
     public function onCreate()
@@ -874,7 +911,7 @@ class Bimp_FactureFourn extends BimpComm
             global $langs, $user;
             $db = $this->db->db;
             $object = $this->dol_object;
-            
+
             $db->begin();
 
             $amount_ht = $amount_tva = $amount_ttc = array();
@@ -965,11 +1002,21 @@ class Bimp_FactureFourn extends BimpComm
                 $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($discount));
                 $db->rollback();
             }
-            
+
             $this->fetch($this->id);
         }
 
         return $errors;
+    }
+
+    public function checkIsPaid()
+    {
+        if ($this->isLoaded() && (int) $this->getData('fk_statut') === 1) {
+            $remain_to_pay = (float) $this->getRemainToPay();
+            if ($remain_to_pay > -0.01 && $remain_to_pay < 0.01) {
+                $this->setObjectAction('classifyPaid');
+            }
+        }
     }
 
     // Actions: 

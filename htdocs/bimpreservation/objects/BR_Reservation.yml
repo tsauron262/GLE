@@ -1,6 +1,7 @@
 table: br_reservation
 
 common_fields: 1
+icon: fas_lock
 
 labels: 
     name: réservation
@@ -235,8 +236,6 @@ fields:
         label: SAV
         type: id_object
         object: sav
-        input: 
-            type: hidden
         display_if: 
             field_name: type
             show_values: 4
@@ -245,8 +244,6 @@ fields:
         label: Ligne produit SAV
         type: id_object
         object: sav_product
-        input: 
-            type: hidden
         display_if: 
             field_name: type
             show_values: 4
@@ -255,8 +252,6 @@ fields:
         label: Ligne devis SAV
         type: id_object
         object: sav_propal_line
-        input: 
-            type: hidden
         display_if: 
             field_name: type
             show_values: 4
@@ -421,12 +416,11 @@ forms:
             
 fields_tables: 
     default: 
+        panel_header: 0
         rows: 
             - field: ref
             - field: id_entrepot
             - field: type
-            - field: id_commande_client
-              display: nom_url
             - field: status
             - field: id_product
               display: card
@@ -437,21 +431,37 @@ fields_tables:
             - field: qty
               show: 
                   callback: isProduct
-            - field: date_from
-              edit: 1
-            - field: date_to
-              edit: 1
             - field: note
               edit: 1       
               
     commande: 
-        title: Commande Client
+        title: Infos Commande Client
         rows: 
             - field: id_client
               display: card
             - field: id_commande_client
               display: card
             - field: id_commande_client_line
+            
+    transfert: 
+        title: Infos Transfert
+        rows: 
+            - field: id_transfert
+              display: card
+            
+    temporaire: 
+        title: Infos Réservation temporaire
+        rows: 
+            - field: date_from
+              edit: 1
+            - field: date_to
+              edit: 1
+              
+    sav: 
+        title: Infos SAV
+        rows: 
+            - field: id_sav
+              display: card
               
 views: 
     default: 
@@ -461,19 +471,67 @@ views:
             - cols: 
                   - type: object_header
             - cols: 
-                  - type: fields_table
-                    fields_table:
-                        name: default
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  fields_table:
+                      name: default
+                      
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  fields_table:
+                      name: commande
+                  show: 
+                      callback: isCommandeClient
                
+#                - type: fields_table
+#                  col_lg: 6
+#                  col_md: 6
+#                  fields_table:
+#                      name: transfert
+#                  show: 
+#                      callback: isTransfert
+                        
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  fields_table:
+                      name: temporaire
+                  show: 
+                      callback: isTemporaire
+                          
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  fields_table:
+                      name: sav
+                  show: 
+                      callback: isSav
+
+filters_panels: 
+    default: 
+        filters: 
+            - field: type
+            - field: id_entrepot
+            - field: status
+            - field: id_product
+            - field: id_equipment
+            - field: id_commande_client
+    #        - field: id_transfert
+            - field: id_sav
+            - field: date_from
+            - field: date_to
+    
 lists: 
     default: 
-        checkboxes: 1
+        filters_panel: default
+        checkboxes: 
+            callback: canDelete
         bulk_actions: 
             - label: Supprimer les réservations sélectionnées
               icon: fas_trash-alt
               onclick: deleteSelectedObjects('list_id', $(this));
-              btn_class: deleteSelectedObjects
-        objects_change_reload: BR_ReservationCmdFourn
         add_form_name: default
         edit_btn: 1
         update_btn: 1

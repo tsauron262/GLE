@@ -20,7 +20,7 @@ class importBl extends import8sens {
         foreach($ln['lignes'] as $ln2){
             if($ln2['PlvPPlvCodePcv'] != "")
                 $ref = $ln2['PlvPPlvCodePcv'];
-            if($ln2['PlvQteUV'] > 0)
+            if($ln2['PlvQteUV'] > 0 || BimpTools::stringToFloat($ln2['PlvQteUV']) < 0)
                 $newLines[] = $ln2;
         }
         

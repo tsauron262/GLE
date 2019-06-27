@@ -77,7 +77,7 @@ class importCommande extends import8sens
                             $find2 = true;
                             $qteTotal = $tabFinal[$ref][$idT]['qty'];
                             $qteEnBl = $tabFinal[$ref][$idT]['qtyEnBl'];
-                            $qteEnBlNonFact = (isset($tabFinal[$ref][$idT]['qteBlNonFact']) ? $tabFinal[$ref][$idT]['qteBlNonFact'] : 0);
+                            $qteEnBlNonFact = (isset($tabFinal[$ref][$idT]['bl'][$ln['PlvCodePcv']]['qteBlNonFact']) ? $tabFinal[$ref][$idT]['bl'][$ln['PlvCodePcv']]['qteBlNonFact'] : 0);
 
                             $newqteEnBlNnFact = $ln['PlvQteATran'] + $qteEnBlNonFact;
                             if (($newqteEnBlNnFact <= $qteEnBl && $qteEnBl <= $qteTotal) ||
@@ -113,22 +113,44 @@ class importCommande extends import8sens
         }
 
 
-        $prefixe = "zzzbbbb";
+        $prefixe = "aaqq";
         $tabFinal2 = array();
         foreach ($tabFinal as $ref => $data) {
             $ref = $prefixe . $ref;
             foreach ($data as $idT => $line) {
 
-                $nbBlNonFact = 0;
+                $nbBlNonFact = $nbFact = 0;
                 foreach ($data[$idT]['bl'] as $dataT)
                     $nbBlNonFact += $dataT["qteBlNonFact"];
                 if ($data[$idT]["qty"] == "nc") {
                     $data[$idT]["qty"] = $data[$idT]["qtyEnBl"] = $data[$idT]["qteNonFact"] = $nbBlNonFact;
-                    $data[$idT]["qtyFact"] = 0;
-                } else {
+                }
+                else{
                     $nbFact = $data[$idT]["qtyEnBl"] - $nbBlNonFact;
-                    $data[$idT]["qtyFact"] = $nbFact;
                     $data[$idT]["qteNonFact"] = $data[$idT]["qty"] - $nbFact;
+                }
+                $data[$idT]["qtyFact"] = $nbFact;
+                
+                
+                
+                
+                
+                
+                if($data[$idT]["qty"]< 0){
+                    $data[$idT]["qty"] = -BimpTools::stringToFloat($data[$idT]["qty"]);
+                    $data[$idT]["qtyEnBl"] = -BimpTools::stringToFloat($data[$idT]["qtyEnBl"]);
+                    $data[$idT]["pv"] = -BimpTools::stringToFloat($data[$idT]["pv"]);
+                    $data[$idT]["pa"] = -BimpTools::stringToFloat($data[$idT]["pa"]);
+                    $data[$idT]["qtyFact"] = -BimpTools::stringToFloat($data[$idT]["qtyFact"]);
+                    $data[$idT]["qteNonFact"] = -BimpTools::stringToFloat($data[$idT]["qteNonFact"]);
+                    foreach ($data[$idT]['bl'] as $idT2 => $dataT)
+                        $data[$idT]['bl'][$idT2]['qteBlNonFact'] = -BimpTools::stringToFloat($data[$idT]['bl'][$idT2]['qteBlNonFact']);
+                }
+                
+                
+                
+                if($data[$idT]["qtyFact"] > 0){
+                    $data[$idT]['bl']['DEJAFACTURE']['qteBlNonFact'] = $data[$idT]["qtyFact"];
                 }
             }
 
@@ -137,7 +159,7 @@ class importCommande extends import8sens
         }
 
         $commandes = $tabFinal2;
-        $commandes = array($prefixe . "CO1904-8050" => $tabFinal2[$prefixe . "CO1904-8050"]);
+        $commandes = array($prefixe."CMEY-171380"=> $tabFinal2[$prefixe."CMEY-171380"]);
 //        echo "<pre>"; print_r($commandes);die;
 
         global $db;
@@ -210,7 +232,7 @@ class importCommande extends import8sens
                         }
                     }
                 }
-
+//continue;//vire
                 $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande');
                 $comm_errors = $commande->validateArray(array(
                     'ref'               => $comm_ref,
@@ -314,7 +336,7 @@ class importCommande extends import8sens
 
                         $rows = $bdb->getRows('commandedet', $where);
 
-                        if (is_null($rows) || empty($rows)) {
+//                        if (is_null($rows) || empty($rows)) {
                             // Si aucune ligne trouvée: 
                             echo 'Création de la ligne: ';
 
@@ -341,27 +363,27 @@ class importCommande extends import8sens
                             } else {
                                 echo '<span class="success">[OK]</span><br/>';
                             }
-                        } elseif (count($rows) > 1) {
-                            // Si plusieurs lignes trouvées: 
-                            foreach ($rows as $r) {
-                                $BimpLine = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', array(
-                                            'id_line' => (int) $r->rowid
-                                ));
-                                if (((float) $line_data['qtyEnBl'] && !(float) $BimpLine->getShippedQty(null, true)) ||
-                                        ($qty_fac && !(float) $BimpLine->getBilledQty())) {
-                                    // On considère que la ligne n'a pas été traité: 
-                                    break;
-                                }
-
-                                unset($BimpLine);
-                                $BimpLine = null;
-                            }
-                        } else {
-                            // Si une seule ligne trouvée: 
-                            $BimpLine = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', array(
-                                        'id_line' => (int) $rows[0]->rowid
-                            ));
-                        }
+//                        } elseif (count($rows) > 1) {
+//                            // Si plusieurs lignes trouvées: 
+//                            foreach ($rows as $r) {
+//                                $BimpLine = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', array(
+//                                            'id_line' => (int) $r->rowid
+//                                ));
+//                                if (((float) $line_data['qtyEnBl'] && !(float) $BimpLine->getShippedQty(null, true)) ||
+//                                        ($qty_fac && !(float) $BimpLine->getBilledQty())) {
+//                                    // On considère que la ligne n'a pas été traité: 
+//                                    break;
+//                                }
+//
+//                                unset($BimpLine);
+//                                $BimpLine = null;
+//                            }
+//                        } else {
+//                            // Si une seule ligne trouvée: 
+//                            $BimpLine = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', array(
+//                                        'id_line' => (int) $rows[0]->rowid
+//                            ));
+//                        }
 
                         if (!BimpObject::objectLoaded($BimpLine)) {
                             echo '<span class="danger">BIMP LINE CORRESPONDANTE NON TROUVEE</span><br/>';

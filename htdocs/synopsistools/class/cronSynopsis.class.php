@@ -72,6 +72,14 @@ class CronSynopsis {
         
         
         
+      
+        require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/importExport/importEquipment.class.php");
+        $import = new importEquiment($this->db);
+        $import->debug = $debug;
+        $import->go(); 
+        $this->output .= $import->output;
+        
+        
         
         require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/importExport/importStock.class.php");
         $import = new importStock($this->db);
@@ -100,13 +108,6 @@ class CronSynopsis {
         
         
         
-        
-      
-        require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/importExport/importEquipment.class.php");
-        $import = new importEquiment($this->db);
-        $import->debug = $debug;
-        $import->go(); 
-        $this->output .= $import->output;
         
         
         

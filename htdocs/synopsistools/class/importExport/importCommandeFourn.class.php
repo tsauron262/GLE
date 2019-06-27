@@ -106,7 +106,8 @@ class importCommandeFourn extends import8sens {
         }
 
 
-        $prefixe = "zzzaa";
+        $idFactureDef = 138;
+        $prefixe = "nzzzaaaauuuuud";
         $tabFinal2 = array();
         foreach ($tabFinal as $ref => $data) {
             $ref = $prefixe . $ref;
@@ -124,6 +125,28 @@ class importCommandeFourn extends import8sens {
                     $data[$idT]["qtyFact"] = $nbFact;
                     $data[$idT]["qteNonFact"] = $data[$idT]["qty"] - $nbFact;
                 }
+                
+                
+                
+                
+                
+                
+                if($data[$idT]["qty"]< 0){
+                    $data[$idT]["qty"] = -BimpTools::stringToFloat($data[$idT]["qty"]);
+                    $data[$idT]["qtyEnBl"] = -BimpTools::stringToFloat($data[$idT]["qtyEnBl"]);
+                    $data[$idT]["pv"] = -BimpTools::stringToFloat($data[$idT]["pv"]);
+                    $data[$idT]["pa"] = -BimpTools::stringToFloat($data[$idT]["pa"]);
+                    $data[$idT]["qtyFact"] = -BimpTools::stringToFloat($data[$idT]["qtyFact"]);
+                    $data[$idT]["qteNonFact"] = -BimpTools::stringToFloat($data[$idT]["qteNonFact"]);
+                    foreach ($data[$idT]['br'] as $idT2 => $dataT)
+                        $data[$idT]['br'][$idT2]['qteBlNonFact'] = -BimpTools::stringToFloat($data[$idT]['br'][$idT2]['qteBlNonFact']);
+                }
+                
+                
+                
+                if($data[$idT]["qtyFact"] > 0){
+                    $data[$idT]['br']['DEJAFACTURE'] = array('qteBlNonFact' => $data[$idT]["qtyFact"], 'facture' => 1);
+                }
                     
             }
 
@@ -132,8 +155,10 @@ class importCommandeFourn extends import8sens {
         }
 
         $commandes = $tabFinal2;
-//        $commandes = array($prefixe."CO1904-8050"=> $tabFinal2[$prefixe."CO1904-8050"]);
-        echo "<pre>"; print_r($commandes );die;
+        $commandes = array($prefixe."CF-1906446"=> $tabFinal2[$prefixe."CF-1906446"]);
+        echo "<pre>"; 
+        print_r($commandes);
+//        die;
           
         global $db;
         $bdb = new BimpDb($db);
@@ -141,9 +166,8 @@ class importCommandeFourn extends import8sens {
         $errors = array();
 
         foreach ($commandes as $comm_ref => $lines) {
-            $comm_ref = $prefixe . $comm_ref;
 
-            $commande = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_Commande', array(
+            $commande = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn', array(
                         'ref' => $comm_ref
             ));
 
@@ -338,7 +362,7 @@ class importCommandeFourn extends import8sens {
                                         $num = 1;
                                     }
 
-                                    $id_rec = $bdb->insert('bl_commande_fourn_reception', array(
+                                    $dataT = array(
                                         'id_commande_fourn' => (int) $commande->id,
                                         'id_entrepot'       => (int) $commande->getData('entrepot'),
                                         'num_reception'     => $num,
@@ -346,7 +370,10 @@ class importCommandeFourn extends import8sens {
                                         'status'            => 1,
                                         'date_received'     => date('Y-m-d'),
                                         'id_user_resp'      => 1
-                                            ), true);
+                                            );
+                                    if($br_data['facture'])
+                                        $dataT['id_facture'] = $idFactureDef;
+                                    $id_rec = $bdb->insert('bl_commande_fourn_reception', $dataT, true);
 
                                     if (!(int) $id_rec) {
                                         echo '<span class="danger">[ECHEC]</span> ';
@@ -409,7 +436,11 @@ class importCommandeFourn extends import8sens {
 //                        $diff = (float) $qty_fac - (float) $BimpLine->getBilledQty();
 //                        if ($diff > 0) {
 //                            echo 'Ajout de ' . $diff . ' unité(s) facturée(s): ';
-//                            $fac_data = $BimpLine->getFactureData(-1);
+////                            $fac_data = $BimpLine->getFactureData(-1);
+//                            $fac_data = array(
+//            'qty'        => 0,
+//            'equipments' => array()
+//        );
 //                            $fac_data['qty'] += $diff;
 //
 //                            $factures = $BimpLine->getData('factures');

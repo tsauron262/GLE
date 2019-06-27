@@ -182,6 +182,22 @@ class Bimp_CommandeFournLine extends FournObjectLine
 
         return (count($errors)) ? 0 : 1;
     }
+    
+    
+//    public function getBilledQty()
+//    {
+//        $qty = 0;
+//        
+//        
+//        if ($this->getData('linked_object_name') === 'commande_line') {
+//            $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $this->getData('linked_id_object'));
+//            
+//            if(BimpObject::objectLoaded($line))
+//                $qty = (float) $line->getBilledQty();
+//        }
+//
+//        return $qty;
+//    }
 
     public function isActionAllowed($action, &$errors = array())
     {

@@ -6,7 +6,7 @@ class commandesFournController extends BimpController
     public function renderProdsTab()
     {
         BimpObject::loadClass('bimpcommercial', 'Bimp_CommandeFournLine');
-        Bimp_CommandeFournLine::checkAllQties();
+//        Bimp_CommandeFournLine::checkAllQties();
         
         //        $id_entrepot = (int) BimpTools::getValue('id_entrepot', 0);
 

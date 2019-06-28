@@ -1007,15 +1007,15 @@ class Bimp_Facture extends BimpComm
                             'form_name' => 'use_remise'
                         ));
                         $html .= '<button class="btn btn-default" onclick="' . $onclick . '">';
-                        $html .= '<i class="' . BimpRender::renderIconClass('fas_file-import') . ' iconLeft"></i>Appliquer une remise disponible';
+                        $html .= BimpRender::renderIcon('fas_file-import', 'iconLeft'). 'Appliquer une remise disponible';
                         $html .= '</button>';
                     }
 
                     if ($can_view_discounts) {
-                        $onclick = 'window.location = \'' . DOL_URL_ROOT . '/comm/remx.php?id=' . $soc->id . '&backtopage=' . $back_url . '\';';
-                        $html .= '<button class="btn btn-default" onclick="' . $onclick . '">';
+                        $url = DOL_URL_ROOT . '/comm/remx.php?id=' . $soc->id . '&backtopage=' . $back_url;
+                        $html .= '<a class="btn btn-default" href="' . $url . '" target="_blank">';
                         $html .= '<i class="' . BimpRender::renderIconClass('percent') . ' iconLeft"></i>Remises client';
-                        $html .= '</button>';
+                        $html .= '</a>';
                     }
 
                     if ($can_add_credit_note) {
@@ -1030,9 +1030,8 @@ class Bimp_Facture extends BimpComm
                                 'ef_type'    => $this->getData('ef_type')
                             )
                         );
-                        $data = '{module: \'bimpcommercial\', object_name: \'Bimp_Facture\', ';
-                        $data .= 'param_values: ' . htmlentities(json_encode($values)) . '}';
-                        $onclick = 'loadModalForm($(this), ' . $data . ', \'' . $langs->trans("CreateCreditNote") . '\');';
+                        
+                        $onclick = $this->getJsLoadModalForm('default', 'Créer un avoir', $values, '', 'redirect');
                         $html .= '<button class="btn btn-default" onclick="' . $onclick . '">';
                         $html .= '<i class="' . BimpRender::renderIconClass('plus-circle') . ' iconLeft"></i>Créer un avoir';
                         $html .= '</button>';

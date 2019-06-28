@@ -4,7 +4,8 @@ header_btn:
     callback: getActionsButtons
     
 header_list_name: default
-    
+header_edit_form: default
+
 objects:
     lines: 
         relation: hasMany

@@ -114,12 +114,13 @@ function deleteObject($button, module, object_name, id_object, $resultContainer,
 
         BimpAjax('deleteObjects', data, $resultContainer, {
             $button: $button,
-            success: function (result) {
+            success: function (result, bimpAjax) {
+                console.log(result);
                 if (typeof (successCallBack) === 'function') {
                     successCallBack(result);
                 }
                 for (var i in result.objects_list) {
-                    $('body').trigger($.Event('objectDelete', {
+                    $('body').trigger($.Event('objectChange', {
                         module: result.module,
                         object_name: result.object_name,
                         id_object: result.objects_list[i]

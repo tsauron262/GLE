@@ -2008,6 +2008,8 @@ class BimpObject extends BimpCache
 
         if (BimpDebug::isActive('bimpcore/objects/print_list_sql') || BimpTools::isSubmit('list_sql')) {
             echo BimpRender::renderDebugInfo($sql, 'SQL Liste - Module: "' . $this->module . '" Objet: "' . $this->object_name . '"');
+            if(class_exists('synopsisHook'))
+                echo ' '.synopsisHook::getTime();
         }
 
         $rows = $this->db->executeS($sql, $return);

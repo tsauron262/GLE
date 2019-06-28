@@ -22,7 +22,7 @@ class Bimp_FactureLine extends ObjectLine
 
         return 0;
     }
-
+    
     // Traitements: 
 
     public function onFactureValidate()

@@ -4307,7 +4307,7 @@ class BimpObject extends BimpCache
 
             $onclick = $this->getJsTriggerObjectChangeOnClick();
             $html .= '<span class="headerIconButton bs-popover" onclick="' . $onclick . '" ';
-            $html .= BimpRender::renderPopoverData('Actualiser ' . $this->getLabel('this'), 'bottom');
+            $html .= BimpRender::renderPopoverData('Actualiser', 'bottom');
             $html .= '>';
             $html .= BimpRender::renderIcon('fas_redo');
             $html .= '</span>';
@@ -4376,21 +4376,25 @@ class BimpObject extends BimpCache
                     }
                 }
 
+                $html .= '<div style="display: inline-block">';
                 if ($this->params['header_edit_form'] && $this->isEditable() && $this->can('edit')) {
                     $html .= '<span class="btn btn-primary bs-popover" onclick="' . $this->getJsLoadModalForm($this->params['header_edit_form'], addslashes("Edition " . $this->getLabel('of_the') . ' #' . $this->id)) . '"';
-                    $html .= BimpRender::renderPopoverData('Editer ' . $this->getLabel('this'));
+                    $html .= BimpRender::renderPopoverData('Editer');
                     $html .= '>';
                     $html .= BimpRender::renderIcon('fas_edit');
                     $html .= '</span>';
                 }
 
                 if ((int) $this->params['header_delete_btn'] && $this->isDeletable() && $this->can('delete')) {
-                    $html .= '<span class="btn btn-danger bs-popover" onclick="' . $this->getJsDeleteOnClick() . '"';
-                    $html .= BimpRender::renderPopoverData('Supprimer ' . $this->getLabel('this'));
+                    $html .= '<span class="btn btn-danger bs-popover" onclick="' . $this->getJsDeleteOnClick(array(
+                                'on_success' => 'reload'
+                            )) . '"';
+                    $html .= BimpRender::renderPopoverData('Supprimer');
                     $html .= '>';
                     $html .= BimpRender::renderIcon('fas_trash-alt');
                     $html .= '</span>';
                 }
+                $html .= '</div>';
 
                 $html .= '</div>';
             }
@@ -4414,6 +4418,18 @@ class BimpObject extends BimpCache
             $html .= '<div class="row header_bottom"></div>';
 
             if (!$content_only) {
+                $html .= '</div>';
+            }
+        } else {
+            $html .= BimpRender::renderAlerts(BimpTools::ucfirst($this->getLabel('this')) . ' n\'existe plus');
+
+            $url = $this->getListPageUrl();
+
+            if ($url) {
+                $html .= '<div class="buttonsContainer align-center">';
+                $html .= '<button class="btn btn-large btn-primary" onclick="window.location = \'' . $url . '\'">';
+                $html .= BimpRender::renderIcon('fas_list', 'iconLeft') . 'Liste des ' . $this->getLabel('name_plur');
+                $html .= '</button>';
                 $html .= '</div>';
             }
         }
@@ -5055,7 +5071,41 @@ class BimpObject extends BimpCache
             return '';
         }
 
-        return 'deleteObject($(this), \'' . $this->module . '\', \'' . $this->object_name . '\', ' . $this->id . ')';
+        $js = 'deleteObject($(this), \'' . $this->module . '\', \'' . $this->object_name . '\', ' . $this->id;
+
+        if (isset($params['result_container'])) {
+            $js .= ', ' . $params['result_container'];
+        } else {
+            $js .= ', null';
+        }
+
+        if (isset($params['on_success'])) {
+            switch ($params['on_success']) {
+                case 'redirect':
+                    if ($this->params['list_page_url']) {
+                        $url = $this->getListPageUrl();
+                        if ($url) {
+                            $js .= ', function() {window.location = \'' . $url . '\';}';
+                            break;
+                        }
+                    }
+
+                case 'reload':
+                    $js .= ', function() {bimp_reloadPage();}';
+                    break;
+
+                default:
+                    $js .= ', null';
+            }
+        } elseif (isset($params['success_callback'])) {
+            $js .= ', ' . $params['success_callback'];
+        } else {
+            $js .= ', null';
+        }
+
+        $js .= ')';
+
+        return $js;
     }
 
     // Gestion des intitulés (labels):

@@ -11,6 +11,7 @@ class Bimp_Facture extends BimpComm
 {
 
     public $redirectMode = 4; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
+    public $acomptes_allowed = true;
     public static $dol_module = 'facture';
     public static $email_type = 'facture_send';
     public static $status_list = array(
@@ -147,7 +148,8 @@ class Bimp_Facture extends BimpComm
                     return 0;
                 }
 
-                if (!count($this->dol_object->lines)) {
+                $lines = $this->getLines('not_text');
+                if (!count($lines)) {
                     $errors[] = 'Aucune ligne ajoutée  ' . $this->getLabel('to');
                     return 0;
                 }
@@ -249,6 +251,13 @@ class Bimp_Facture extends BimpComm
                 }
 
                 return 1;
+                
+            case 'addAcompte':
+                if ($type !== Facture::TYPE_STANDARD) {
+                    $errors[] = 'Ajout d\'accompte possible uniquement pour les factures standards';
+                    return 0;
+                }
+                return (int) parent::isActionAllowed($action, $errors);
         }
 
         return (int) parent::isActionAllowed($action, $errors);
@@ -426,7 +435,7 @@ class Bimp_Facture extends BimpComm
                             if ($status > 0 && $remainToPay < 0 && empty($discount->id)) {
                                 // Remboursement excédant payé: 
                                 $buttons[] = array(
-                                    'label'   => $langs->trans('ConvertExcessReceivedToReduc'),
+                                    'label'   => 'Convertir le trop perçu en remise',
                                     'icon'    => 'percent',
                                     'onclick' => $this->getJsActionOnclick('convertToReduc', array(), array(
                                         'confirm_msg' => strip_tags($langs->trans('ConfirmConvertToReduc', strtolower($langs->transnoentities('ExcessReceived'))))
@@ -438,7 +447,7 @@ class Bimp_Facture extends BimpComm
                         case Facture::TYPE_CREDIT_NOTE:
                             if ($this->dol_object->getSommePaiement() == 0) {
                                 $buttons[] = array(
-                                    'label'   => $langs->trans('ConvertToReduc'),
+                                    'label'   => $langs->trans('Convertir en remise'),
                                     'icon'    => 'percent',
                                     'onclick' => $this->getJsActionOnclick('convertToReduc', array(), array(
                                         'confirm_msg' => strip_tags($langs->trans('ConfirmConvertToReduc', strtolower($langs->transnoentities('CreditNote'))))
@@ -450,7 +459,7 @@ class Bimp_Facture extends BimpComm
                         case Facture::TYPE_DEPOSIT:
                             if ($remainToPay == 0 && empty($discount->id)) {
                                 $buttons[] = array(
-                                    'label'   => $langs->trans('ConvertToReduc'),
+                                    'label'   => 'Convertir en remise',
                                     'icon'    => 'percent',
                                     'onclick' => $this->getJsActionOnclick('convertToReduc', array(), array(
                                         'confirm_msg' => strip_tags($langs->trans('ConfirmConvertToReduc', strtolower($langs->transnoentities('Deposit'))))
@@ -1007,7 +1016,7 @@ class Bimp_Facture extends BimpComm
                             'form_name' => 'use_remise'
                         ));
                         $html .= '<button class="btn btn-default" onclick="' . $onclick . '">';
-                        $html .= BimpRender::renderIcon('fas_file-import', 'iconLeft'). 'Appliquer une remise disponible';
+                        $html .= BimpRender::renderIcon('fas_file-import', 'iconLeft') . 'Appliquer une remise disponible';
                         $html .= '</button>';
                     }
 
@@ -1030,7 +1039,7 @@ class Bimp_Facture extends BimpComm
                                 'ef_type'    => $this->getData('ef_type')
                             )
                         );
-                        
+
                         $onclick = $this->getJsLoadModalForm('default', 'Créer un avoir', $values, '', 'redirect');
                         $html .= '<button class="btn btn-default" onclick="' . $onclick . '">';
                         $html .= '<i class="' . BimpRender::renderIconClass('plus-circle') . ' iconLeft"></i>Créer un avoir';
@@ -1092,7 +1101,7 @@ class Bimp_Facture extends BimpComm
                             if ((int) $facture->getData('type') === Facture::TYPE_STANDARD) {
                                 $html .= 'Trop perçu facture ';
                                 $total_credit_note += (float) $r['amount_ttc'];
-                            } 
+                            }
                             if ((int) $facture->getData('type') === Facture::TYPE_CREDIT_NOTE) {
                                 $html .= 'Avoir ';
                                 $total_credit_note += (float) $r['amount_ttc'];
@@ -1394,7 +1403,7 @@ class Bimp_Facture extends BimpComm
                 }
                 switch ($this->getData('type')) {
                     case Facture::TYPE_STANDARD:
-                        if (!$total_ttc && count($lines)) {
+                        if (!$total_ttc && $has_neg) {
                             $msg = 'Le montant total de la facture est de 0.<br/>';
                             $msg .= 'Les lignes négatives vont être automatiquement déplacées dans un avoir';
                             $validation_type = 1;
@@ -2566,44 +2575,13 @@ class Bimp_Facture extends BimpComm
                 }
 
                 if ($avoir_same_lines) {
-                    $fk_parent_line = 0;
-
-                    foreach ($facture->dol_object->lines as $line) {
-                        // Reset fk_parent_line for no child products and special product
-                        if (($line->product_type != 9 && empty($line->fk_parent_line)) || $line->product_type == 9) {
-                            $fk_parent_line = 0;
-                        }
-
-                        $line->fk_facture = $this->id;
-                        $line->fk_parent_line = $fk_parent_line;
-
-                        $line->subprice = -$line->subprice; // invert price for object
-                        $line->pa_ht = $line->pa_ht;       // we choosed to have buy/cost price always positive, so no revert of sign here
-                        $line->total_ht = -$line->total_ht;
-                        $line->total_tva = -$line->total_tva;
-                        $line->total_ttc = -$line->total_ttc;
-                        $line->total_localtax1 = -$line->total_localtax1;
-                        $line->total_localtax2 = -$line->total_localtax2;
-
-                        $line->multicurrency_subprice = -$line->multicurrency_subprice;
-                        $line->multicurrency_total_ht = -$line->multicurrency_total_ht;
-                        $line->multicurrency_total_tva = -$line->multicurrency_total_tva;
-                        $line->multicurrency_total_ttc = -$line->multicurrency_total_ttc;
-
-                        $result = $line->insert(0, 1);     // When creating credit note with same lines than source, we must ignore error if discount alreayd linked
-
-                        $this->dol_object->lines[] = $line; // insert new line in current object
-                        // Defined the new fk_parent_line
-                        if ($result > 0 && $line->product_type == 9) {
-                            $fk_parent_line = $result;
-                        }
+                    $line_errors = $this->createLinesFromOrigin($facture, true);
+                    if (count($line_errors)) {
+                        $warnings[] = BimpTools::getMsgFromArray($line_errors);
                     }
-
-                    $this->dol_object->update_price(1);
                 } elseif ($avoir_remain_to_pay) {
-                    $this->dol_object->addline($langs->trans('invoiceAvoirLineWithPaymentRestAmount'), (float) $facture->getRemainToPay(), 1, 0, 0, 0, 0, 0, '', '', 'TTC');
+                    $this->dol_object->addline($langs->trans('invoiceAvoirLineWithPaymentRestAmount'), (float) $facture->getRemainToPay() * -1, 1, 0, 0, 0, 0, 0, '', '', 'TTC');
                 }
-
                 break;
 
             case Facture::TYPE_STANDARD:
@@ -2616,7 +2594,25 @@ class Bimp_Facture extends BimpComm
                 $errors[] = 'Type de facture invalide';
                 break;
         }
+        
+        if (!count($errors)) {
+            $this->fetch($this->id);
+        }
 
         return $errors;
+    }
+    
+    public function update(&$warnings = array(), $force_update = false)
+    {
+        $init_fk_account = (int) $this->getInitData('fk_account');
+        $fk_account = (int) $this->getData('fk_account');
+        
+        $errors = parent::update($warnings, $force_update);
+        
+        if (!count($errors)) {
+            if ($fk_account !== $init_fk_account) {
+                $this->updateField('fk_account',  $fk_account);
+            }
+        }
     }
 }

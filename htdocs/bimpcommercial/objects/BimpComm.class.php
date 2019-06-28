@@ -88,7 +88,7 @@ class BimpComm extends BimpDolObject
                     return 0;
                 }
                 if (!$this->areLinesEditable()) {
-                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' ne peut plus être éditée';
+                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' ne peut plus être édité' . $this->e();
                     return 0;
                 }
                 return 1;
@@ -102,16 +102,14 @@ class BimpComm extends BimpDolObject
                     $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
                     return 0;
                 }
-                if ($this->getData('invoice_status') === null || $this->getData('invoice_status') > 0) {
-                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' est déja facturé';
+                if ((int) $this->getData('fk_statut') > 0) {
+                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' n\'est plus au statut "brouillon"';
                     return 0;
                 }
-
-
-//                if (!$this->areLinesEditable()) {
-//                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' ne peut plus être éditée';
-//                    return 0;
-//                }
+                if ($this->field_exists('invoice_status') && $this->getData('invoice_status') > 0) {
+                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' est déja facturé' . $this->e();
+                    return 0;
+                }
 
                 $client = $this->getChildObject('client');
 
@@ -1988,7 +1986,7 @@ class BimpComm extends BimpDolObject
         return $errors;
     }
 
-    public function createLinesFromOrigin($origin)
+    public function createLinesFromOrigin($origin, $inverse_prices = false)
     {
         $errors = array();
 
@@ -2026,6 +2024,7 @@ class BimpComm extends BimpDolObject
 
             if ($line->getData('linked_object_name')) {
                 $line_instance->set('deletable', 1);
+                $line_instance->set('editable', 1);
             }
 
             $line_instance->desc = $line->desc;
@@ -2039,6 +2038,11 @@ class BimpComm extends BimpDolObject
             $line_instance->date_to = $line->date_to;
             $line_instance->id_remise_except = $line->id_remise_except;
 
+            if ($inverse_prices) {
+                $line_instance->pu_ht *= -1;
+                $line_instance->pa_ht *= -1;
+            }
+
             if ($line->field_exists('remise_crt') &&
                     $line_instance->field_exists('remise_crt')) {
                 $line_instance->set('remise_crt', (int) $line->getData('remise_crt'));
@@ -2046,7 +2050,11 @@ class BimpComm extends BimpDolObject
 
             if ($line->field_exists('remise_pa') &&
                     $line_instance->field_exists('remise_pa')) {
-                $line_instance->set('remise_pa', (float) $line->getData('remise_pa'));
+                $remise_pa = (float) $line->getData('remise_pa');
+                if ($inverse_prices) {
+                    $remise_pa *= -1;
+                }
+                $line_instance->set('remise_pa', $remise_pa);
             }
 
             $line_errors = $line_instance->create($warnings, true);
@@ -2063,14 +2071,20 @@ class BimpComm extends BimpDolObject
 
                 foreach ($equipmentlines as $equipmentLine) {
                     $data = $equipmentLine->getDataArray();
-                    $line_instance->attributeEquipment($data['id_equipment'], $data['pu_ht'], $data['tva_tx'], $data['id_fourn_price']);
+
+                    if ($inverse_prices) {
+                        $data['pu_ht'] *= -1;
+                        $data['id_fourn_price'] = 0;
+                        $data['pa_ht'] *= -1;
+                    }
+
+                    $line_instance->attributeEquipment($data['id_equipment'], $data['pu_ht'], $data['tva_tx'], $data['id_fourn_price'], null, $data['pa_ht']);
                 }
             }
 
             // Création des remises pour la ligne en cours:
             $remises = $line->getRemises();
             if (!is_null($remises) && count($remises)) {
-
                 $j = 0;
                 foreach ($remises as $r) {
                     $j++;
@@ -2081,7 +2095,7 @@ class BimpComm extends BimpDolObject
                         'label'          => $r->getData('label'),
                         'type'           => (int) $r->getData('type'),
                         'percent'        => (float) $r->getData('percent'),
-                        'montant'        => (float) $r->getData('montant'),
+                        'montant'        => ($inverse_prices ? (float) $r->getData('montant') * -1 : (float) $r->getData('montant') ),
                         'per_unit'       => (int) $r->getData('per_unit')
                     ));
                     $remise_errors = $remise->create($warnings, true);
@@ -2265,7 +2279,7 @@ class BimpComm extends BimpDolObject
                     $line_errors = $line->validateArray(array(
                         'id_obj'             => (int) $this->id,
                         'type'               => ObjectLine::LINE_FREE,
-                        'deletable'          => 0,
+                        'deletable'          => 1,
                         'editable'           => 0,
                         'remisable'          => 0,
                         'linked_id_object'   => (int) $discount->id,

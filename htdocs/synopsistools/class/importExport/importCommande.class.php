@@ -113,7 +113,7 @@ class importCommande extends import8sens
         }
 
 
-        $prefixe = "aaqq";
+        $prefixe = "CO8-27-16H";
         $tabFinal2 = array();
         foreach ($tabFinal as $ref => $data) {
             $ref = $prefixe . $ref;
@@ -159,7 +159,7 @@ class importCommande extends import8sens
         }
 
         $commandes = $tabFinal2;
-        $commandes = array($prefixe."CMEY-171380"=> $tabFinal2[$prefixe."CMEY-171380"]);
+//        $commandes = array($prefixe."COLY-190273"=> $tabFinal2[$prefixe."COLY-190273"]);
 //        echo "<pre>"; print_r($commandes);die;
 
         global $db;

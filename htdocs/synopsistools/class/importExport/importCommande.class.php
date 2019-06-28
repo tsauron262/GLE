@@ -411,7 +411,7 @@ class importCommande extends import8sens
                                     if (!BimpObject::objectLoaded($commShipment)) {
                                         echo 'Insertion expé: "' . $bl_ref . '"';
 
-                                        $sql = 'SELECT MAX(num_livraison) as num FROM ' . MAIN_DB_PREFIX . 'br_commande_shipment ';
+                                        $sql = 'SELECT MAX(num_livraison) as num FROM ' . MAIN_DB_PREFIX . 'bl_commande_shipment ';
                                         $sql .= 'WHERE `id_commande_client` = ' . (int) $commande->id;
 
                                         $result = $bdb->executeS($sql);
@@ -421,7 +421,7 @@ class importCommande extends import8sens
                                             $num = 1;
                                         }
 
-                                        $id_shipment = $bdb->insert('br_commande_shipment', array(
+                                        $id_shipment = $bdb->insert('bl_commande_shipment', array(
                                             'id_commande_client' => (int) $commande->id,
                                             'id_entrepot'        => (int) $commande->getData('entrepot'),
                                             'num_livraison'      => $num,

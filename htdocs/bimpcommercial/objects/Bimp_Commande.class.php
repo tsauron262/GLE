@@ -24,6 +24,7 @@ class Bimp_Commande extends BimpComm
         3 => array('label' => 'Compléte', 'icon' => 'fas_check', 'classes' => array('success')),
         4 => array('label' => 'En attente', 'icon' => 'fas_hourglass-start', 'classes' => array('warning')),
         5 => array('label' => 'A supprimer', 'icon' => 'fas_exclamation-triangle', 'classes' => array('danger')),
+        6 => array('label' => 'Clôturée', 'icon' => 'fas_times', 'classes' => array('danger'))
     );
     public static $shipment_status = array(
         0 => array('label' => 'Non expédiée', 'icon' => 'fas_shipping-fast', 'classes' => array('danger')),
@@ -177,7 +178,7 @@ class Bimp_Commande extends BimpComm
 
     public function isLogistiqueActive()
     {
-        if (in_array((int) $this->getData('fk_statut'), self::$logistique_active_status) && (int) $this->getData('logistique_status') > 0) {
+        if (in_array((int) $this->getData('fk_statut'), self::$logistique_active_status) && !in_array((int) $this->getData('logistique_status'), array(0, 6))) {
             return 1;
         }
 

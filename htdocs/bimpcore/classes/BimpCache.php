@@ -573,6 +573,44 @@ class BimpCache
         return self::$cache[$cache_key];
     }
 
+    public static function getBimpObjectList($module, $object_name, $filters)
+    {
+        $instance = BimpObject::getInstance($module, $object_name);
+
+        if (!is_a($instance, $object_name)) {
+            return array();
+        }
+
+        $rows = $instance->getList($filters, null, null, 'id', 'asc', 'array', array($instance->getPrimary()));
+
+        $list = array();
+
+        foreach ($rows as $r) {
+            $list[] = (int) $r[$instance->getPrimary()];
+        }
+    }
+
+    public static function getBimpObjectObjects($module, $object_name, $filters)
+    {
+        $instance = BimpObject::getInstance($module, $object_name);
+
+        if (!is_a($instance, $object_name)) {
+            return array();
+        }
+
+        $rows = $instance->getList($filters, null, null, 'id', 'asc', 'array', array($instance->getPrimary()));
+        $items = array();
+
+        foreach ($rows as $r) {
+            $item = self::getBimpObjectInstance($module, $object_name, (int) $r[$instance->getPrimary()]);
+            if (BimpObject::objectLoaded($item)) {
+                $items[$item->id] = $item;
+            }
+        }
+
+        return $items;
+    }
+
     // Sociétés: 
 
     public static function getSocieteContactsArray($id_societe, $include_empty = false)
@@ -1043,17 +1081,17 @@ class BimpCache
             $categorie = new Categorie(self::getBdb()->db);
 
             $tree = $categorie->get_full_arbo($type);
-            
+
             self::$cache[$cache_key] = BimpTools::makeTreeFromArray($tree, 0, 'fk_parent');
         }
 
         return self::$cache[$cache_key];
     }
-    
+
     public static function getCategoriesArray($type = 'product', $full_label = true)
     {
         $cache_key = $type . '_categories_array';
-        
+
         if ($full_label) {
             $cache_key .= '_full_label';
         }
@@ -1064,7 +1102,7 @@ class BimpCache
             $categorie = new Categorie(self::getBdb()->db);
 
             $rows = $categorie->get_full_arbo($type);
-            
+
             foreach ($rows as $r) {
                 if ($full_label) {
                     self::$cache[$cache_key][(int) $r['id']] = $r['fulllabel'];
@@ -1072,7 +1110,6 @@ class BimpCache
                     self::$cache[$cache_key][(int) $r['id']] = $r['label'];
                 }
             }
-            
         }
 
         return self::$cache[$cache_key];

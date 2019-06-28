@@ -4302,6 +4302,12 @@ class BimpObject extends BimpCache
                 $html .= '</span>';
             }
 
+            $onclick = $this->getJsTriggerObjectChangeOnClick();
+            $html .= '<span class="headerIconButton bs-popover" onclick="' . $onclick . '" ';
+            $html .= BimpRender::renderPopoverData('Actualiser ' . $this->getLabel('this'), 'bottom');
+            $html .= '>';
+            $html .= BimpRender::renderIcon('fas_redo');
+            $html .= '</span>';
             $html .= '</div>';
 
             $this->params['header_btn'] = $this->config->getCompiledParams('header_btn');
@@ -5013,6 +5019,15 @@ class BimpObject extends BimpCache
         $js .= ');';
 
         return $js;
+    }
+
+    public function getJsTriggerObjectChangeOnClick()
+    {
+        if ($this->isLoaded()) {
+            return 'triggerObjectChange(\'' . $this->module . '\', \'' . $this->object_name . '\', ' . $this->id . ')';
+        }
+
+        return '';
     }
 
     // Gestion des intitulés (labels):
@@ -5931,7 +5946,7 @@ class BimpObject extends BimpCache
         }
         if (isset($user->array_options["options_defaultentrepot"]))
             return $user->array_options["options_defaultentrepot"];
-        
+
         return 0;
     }
 

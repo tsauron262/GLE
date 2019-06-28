@@ -54,9 +54,9 @@ class Bimp_Facture extends BimpComm
                 return 0;
 
             case 'modify':
-                if ($this->can("create")) {
-                    return 1;
-                }
+//                if ($this->can("create")) {
+//                    return 1;
+//                }
                 return 0;
 
             case 'reopen':
@@ -108,7 +108,7 @@ class Bimp_Facture extends BimpComm
         }
 
         // Si facture BL, on interdit la suppression s'il existe une facture hors expédition pour la commande:
-        $rows = (int) $this->db->getRows('br_commande_shipment', '`id_facture` = ' . (int) $this->id, null, 'object', array('id', 'id_commande_client'));
+        $rows = (int) $this->db->getRows('bl_commande_shipment', '`id_facture` = ' . (int) $this->id, null, 'object', array('id', 'id_commande_client'));
         if (!is_null($rows) && count($rows)) {
             foreach ($rows as $row) {
                 $id_facture = $this->db->getValue('commande', 'id_facture', '`rowid` = ' . (int) $row->id_commande_client);
@@ -254,6 +254,13 @@ class Bimp_Facture extends BimpComm
         return (int) parent::isActionAllowed($action, $errors);
     }
 
+    public function needEquipmentAttribution()
+    {
+        if ($this->isLoaded()) {
+            
+        }
+    }
+
     // Getters params: 
 
     public function getActionsButtons()
@@ -284,38 +291,17 @@ class Bimp_Facture extends BimpComm
 
         if ($this->isActionAllowed('validate', $errors)) {
             if ($this->canSetAction('validate')) {
-                if (substr($ref, 1, 4) == 'PROV') {
-                    $numref = $this->dol_object->getNextNumRef($soc->dol_object);
-
-                    if (!empty($conf->global->FAC_FORCE_DATE_VALIDATION)) {
-                        $this->dol_object->date = dol_now();
-                        $this->dol_object->date_lim_reglement = $this->dol_object->calculate_date_lim_reglement();
-                        $this->set('datef', BimpTools::getDateFromDolDate($this->dol_object->date));
-                    }
-                } else {
-                    $numref = $ref;
-                }
-
-                $text = $langs->trans('ConfirmValidateBill', $numref);
-                if (!empty($conf->notification->enabled)) {
-                    if (!class_exists('Notify')) {
-                        require_once DOL_DOCUMENT_ROOT . '/core/class/notify.class.php';
-                    }
-                    $notify = new Notify($this->db->db);
-                    $text .= "\n";
-                    $text .= $notify->confirmMessage('BILL_VALIDATE', (int) $this->getData('fk_soc'), $this->dol_object);
-                }
                 $buttons[] = array(
                     'label'   => 'Valider',
                     'icon'    => 'check',
                     'onclick' => $this->getJsActionOnclick('validate', array('new_ref' => $numref), array(
-                        'confirm_msg' => strip_tags($text)
+                        'form_name' => 'validate'
                     ))
                 );
             } else {
                 $error_msg = 'Vous n\'avez pas la permission de valider cette facture';
             }
-        } else {
+        } elseif ($status === 0) {
             $error_msg = BimpTools::getMsgFromArray($errors);
         }
 
@@ -1111,6 +1097,10 @@ class Bimp_Facture extends BimpComm
                         if ($facture->isLoaded()) {
                             $html .= '<tr>';
                             $html .= '<td style="text-align: right;">';
+                            if ((int) $facture->getData('type') === Facture::TYPE_STANDARD) {
+                                $html .= 'Trop perçu facture ';
+                                $total_credit_note += (float) $r['amount_ttc'];
+                            } 
                             if ((int) $facture->getData('type') === Facture::TYPE_CREDIT_NOTE) {
                                 $html .= 'Avoir ';
                                 $total_credit_note += (float) $r['amount_ttc'];
@@ -1124,7 +1114,7 @@ class Bimp_Facture extends BimpComm
                             $html .= '<td>' . BimpTools::displayMoneyValue((float) $r['amount_ttc'], 'EUR') . '</td>';
                             $html .= '<td class="buttons">';
                             $onclick = $this->getJsActionOnclick('removeDiscount', array('id_discount' => (int) $r['rowid']));
-                            $html .= BimpRender::renderRowButton('Retirer', 'trash', $onclick);
+                            $html .= BimpRender::renderRowButton('Retirer', 'fas_trash-alt', $onclick);
                             $html .= '</td>';
 
                             $html .= '</tr>';
@@ -1169,8 +1159,8 @@ class Bimp_Facture extends BimpComm
                         $html .= '</tr>';
                     }
                 }
-                
-                 // Trop perçu converti en remise: 
+
+                // Trop perçu converti en remise: 
                 BimpTools::loadDolClass('core', 'discount');
                 $discount = new DiscountAbsolute($this->db->db);
                 $discount->fetch(0, $this->id);
@@ -1178,7 +1168,7 @@ class Bimp_Facture extends BimpComm
                     $remainToPay_final = 0;
                     $html .= '<tr>';
                     $html .= '<td style="text-align: right;">';
-                    $html .= '<strong>Trop perçu converti en </strong>' .$discount->getNomUrl(1, 'discount');
+                    $html .= '<strong>Trop perçu converti en </strong>' . $discount->getNomUrl(1, 'discount');
                     $html .= '</td>';
                     $html .= '<td>';
                     $html .= BimpTools::displayMoneyValue($discount->amount_ttc);
@@ -1197,9 +1187,9 @@ class Bimp_Facture extends BimpComm
                     $remainToPay_final = 0;
                     $class = 'success';
                 } else {
-                    $class = ($remainToPay > 0 ? 'danger' : 'success');
+                    $class = ($remainToPay_final > 0 ? 'danger' : 'success');
                 }
-                
+
                 $html .= '<tr style="background-color: #F0F0F0; font-weight: bold">';
                 $html .= '<td style="text-align: right;"><strong>Reste à payer</strong> : </td>';
                 $html .= '<td style="font-size: 18px;">';
@@ -1374,7 +1364,180 @@ class Bimp_Facture extends BimpComm
         return $html;
     }
 
+    public function renderValidationFormInfos()
+    {
+        $validation_type = 0;
+
+        // 0: validation standard. 
+        // 1: avoir créé automatiquement avec lignes négatives si  facture/ ou facture avec lignes positives si avoir. 
+        // 2: Possibilité de déplacer les lignes négatives dans un avoir. 
+        // 3: Facture ou Avoir intégralement inversé (Facture -> avoir / Avoir -> facture). 
+
+        $html = '';
+
+        if (!$this->isLoaded()) {
+            $html .= BimpRender::renderAlerts('ID ' . $this->getLabel('of_the') . ' absent');
+        } else {
+            // Pour être sûr d\'être à jour:
+            $this->dol_object->fetch_lines();
+            $this->dol_object->update_price(1);
+            $this->dol_object->fetch((int) $this->id);
+            $this->hydrateFromDolObject();
+
+            $errors = array();
+            if (!$this->isActionAllowed('validate', $errors)) {
+                $html .= BimpRender::renderAlerts(BimpTools::getMsgFromArray($errors, 'Validation ' . $this->getLabel('of_the') . ' impossible'));
+            } elseif (!$this->canSetAction('validation')) {
+                $html .= BimpRender::renderAlerts('Vous n\'avez pas la permission de valider ' . $this->getLabel('this'));
+            } else {
+                $msg = '';
+                $total_ttc = (float) $this->getData('total_ttc');
+                $lines = $this->getLines('not_text');
+                $has_neg = 0;
+                foreach ($lines as $line) {
+                    if ((float) $line->getTotalTTC() < 0 && !(int) $line->id_remise_except) {
+                        $has_neg = 1;
+                        break;
+                    }
+                }
+                switch ($this->getData('type')) {
+                    case Facture::TYPE_STANDARD:
+                        if (!$total_ttc && count($lines)) {
+                            $msg = 'Le montant total de la facture est de 0.<br/>';
+                            $msg .= 'Les lignes négatives vont être automatiquement déplacées dans un avoir';
+                            $validation_type = 1;
+                        } elseif ($total_ttc < 0) {
+                            $msg = 'Le montant total de la facture est négatif.<br/>';
+                            $msg .= 'La facture va être intégralement convertie en avoir';
+                            $validation_type = 3;
+                        } elseif ($has_neg) {
+                            $msg = 'Une ou plusieurs lignes négatives sont présentes dans la facture.<br/>';
+                            $validation_type = 2;
+                        }
+                        break;
+
+                    case Facture::TYPE_CREDIT_NOTE:
+//                        if (!$total_ttc && count($lines)) {
+                        // todo..
+//                            $msg = 'Le montant total de l\'avoir est de 0.<br/>';
+//                            $msg .= 'Les lignes positives vont être automatiquement déplacées dans une facture';
+//                            $validation_type = 1;
+//                        } else
+                        if ($total_ttc > 0) {
+                            $msg = 'Le montant total de l\'avoir est positif.<br/>';
+                            $msg .= 'L\'avoir va être intégralement converti en facture';
+                            $validation_type = 3;
+                        }
+                        break;
+                }
+
+                if (!$validation_type) {
+                    $msg .= 'Veuillez confirmer la validation ' . $this->getLabel('of_this');
+                }
+
+                $html .= BimpRender::renderAlerts($msg, 'warning');
+            }
+        }
+
+        $html .= '<input type="hidden" name="validation_type" value="' . $validation_type . '">';
+
+        return $html;
+    }
+
+    public function renderForceValidationInput()
+    {
+        $html = '';
+        $errors = array();
+
+        if (!$this->checkEquipmentsAttribution($errors)) {
+            $html .= BimpRender::renderAlerts($errors, 'warning');
+            $html .= '<p>Valider quand même ?</p>';
+            $html .= BimpInput::renderInput('toggle', 'force_validate', 0);
+        }
+
+        return $html;
+    }
+
     // Traitements: 
+
+    public function beforeValidate()
+    {
+        $errors = array();
+
+        $type = (int) $this->getData('type');
+
+        if (in_array($type, array(Facture::TYPE_STANDARD, Facture::TYPE_CREDIT_NOTE))) {
+
+            // Pour être sûr d\'être à jour:
+            $this->dol_object->fetch_lines();
+            $this->dol_object->update_price(1);
+            $this->dol_object->fetch((int) $this->id);
+            $this->hydrateFromDolObject();
+
+            $lines = $this->getLines('not_text');
+            $total_ttc = (float) $this->getData('total_ttc');
+
+            if (!$total_ttc && !count($lines)) {
+                $errors[] = 'Aucune ligne ajoutée à cette facture';
+                return $errors;
+            }
+
+            switch ($type) {
+                case Facture::TYPE_STANDARD:
+                    if (!$total_ttc && count($lines)) {
+                        $convert_avoir = (int) BimpTools::getPostFieldValue('convert_avoir_to_reduc', 1);
+                        $use_remise = (int) BimpTools::getPostFieldValue('use_discount_in_facture', 1);
+                        $err = $this->createCreditNoteWithNegativesLines($lines, $convert_avoir, $use_remise);
+
+                        if (count($err)) {
+                            $errors[] = BimpTools::getMsgFromArray($err, 'Erreurs lors de la création d\'un avoir avec les lignes négatives');
+                        }
+                    } elseif ($total_ttc < 0) {
+                        $err = $this->updateField('type', Facture::TYPE_CREDIT_NOTE);
+
+                        if (count($err)) {
+                            $errors[] = BimpTools::getMsgFromArray($err, 'Echec de la conversion de la facture en avoir');
+                        } else {
+                            $this->dol_object->type = Facture::TYPE_CREDIT_NOTE;
+                        }
+                    } else {
+                        $has_neg = 0;
+                        foreach ($lines as $line) {
+                            if ((float) $line->getTotalTTC() < 0 && !(int) $line->id_remise_except) {
+                                $has_neg = 1;
+                                break;
+                            }
+                        }
+                        if ($has_neg && BimpTools::getPostFieldValue('create_avoir', 0)) {
+                            $convert_avoir = (int) BimpTools::getPostFieldValue('convert_avoir_to_reduc', 1);
+                            $use_remise = (int) BimpTools::getPostFieldValue('use_discount_in_facture', 1);
+                            $err = $this->createCreditNoteWithNegativesLines($lines, $convert_avoir, $use_remise);
+
+                            if (count($err)) {
+                                $errors[] = BimpTools::getMsgFromArray($err, 'Erreurs lors de la création d\'un avoir avec les lignes négatives');
+                            }
+                        }
+                    }
+                    break;
+
+                case Facture::TYPE_CREDIT_NOTE:
+                    if (!$total_ttc && count($lines)) {
+                        // todo...
+                    } elseif ($total_ttc > 0) {
+                        $err = $this->updateField('type', Facture::TYPE_STANDARD);
+
+                        if (count($err)) {
+                            $errors[] = BimpTools::getMsgFromArray($err, 'Echec de la conversion de l\'avoir en facture');
+                        } else {
+                            $this->dol_object->type = Facture::TYPE_STANDARD;
+                        }
+                    }
+                    break;
+            }
+        }
+
+        return $errors;
+    }
 
     public function onValidate()
     {
@@ -1386,6 +1549,8 @@ class Bimp_Facture extends BimpComm
             foreach ($lines as $line) {
                 $line->onFactureValidate();
             }
+
+            $this->checkIsPaid();
         }
     }
 
@@ -1524,10 +1689,190 @@ class Bimp_Facture extends BimpComm
             return -1;
     }
 
+    public function createCreditNoteWithNegativesLines($lines = null, $convertToReduc = false, $useConvertedReduc = false)
+    {
+        if (!$this->isLoaded()) {
+            return array('ID ' . $this->getLabel('of_the') . ' absent');
+        }
+
+        if ((int) $this->getData('type') !== Facture::TYPE_STANDARD) {
+            return array(BimpTools::ucfirst($this->getLabel('the')) . ' doit être de type "facture standard"');
+        }
+
+        if (is_null($lines)) {
+            $lines = $this->getLines('not_text');
+        }
+
+        if (!is_array($lines) || empty($lines)) {
+            return array();
+        }
+
+        $errors = array();
+
+        $neg_lines = array();
+
+        foreach ($lines as $line) {
+            if ((float) $line->getTotalTTC() < 0 && !(int) $line->id_remise_except) {
+                $neg_lines[] = $line;
+            }
+        }
+
+        if (!count($neg_lines)) {
+            return array();
+        }
+
+        // Création de l'avoir: 
+
+        $avoir = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
+
+        $avoir->validateArray(array(
+            'entrepot'          => (int) $this->getData('entrepot'),
+            'libelle'           => $this->getData('libelle'),
+            'ef_type'           => $this->getData('ef_type'),
+            'fk_soc'            => $this->getData('fk_soc'),
+            'ref_client'        => $this->getData('ref_client'),
+            'datef'             => $this->getData('datef'),
+            'fk_account'        => (int) $this->getData('fk_account'),
+            'fk_cond_reglement' => (int) $this->getData('fk_cond_reglement')
+        ));
+
+        $avoir->dol_object->fk_delivery_address = $this->dol_object->fk_delivery_address;
+
+        // objets liés
+        $avoir->dol_object->linked_objects = $this->dol_object->linked_objects;
+
+        $errors = $avoir->create();
+
+        if (count($errors)) {
+            return $errors;
+        }
+
+        // Ajout lignes
+        $this->db->db->begin();
+
+        foreach ($neg_lines as $line) {
+            $up_errors = $line->updateField('id_obj', (int) $avoir->id);
+            if (count($up_errors)) {
+                $errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec de la mise à jour de la ligne n°' . $line->getData('position'));
+                break;
+            } else {
+                if ($this->db->update('facturedet', array(
+                            'fk_facture' => (int) $avoir->id
+                                ), '`rowid` = ' . (int) $line->getData('id_line')) <= 0) {
+                    $errors[] = 'Echec de la mise à jour de la ligne n°' . $line->getData('position') . ' - ' . $this->db->db->lasterror();
+                    break;
+                }
+            }
+        }
+
+        if (!count($errors)) {
+            // Changement d'ID facture pour les lignes de commandes concernées.
+            foreach ($neg_lines as $line) {
+                if ($line->getData('linked_object_name') === 'commande_line') {
+                    $commLine = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $line->getData('linked_id_object'));
+                    if (BimpObject::objectLoaded($commLine)) {
+                        $line_errors = $commLine->changeIdFacture($this->id, $avoir->id);
+                        if (count($line_errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec de la mise à jour de la ligne de commande associée (ID ' . $commLine->id . ')');
+                            break;
+                        }
+                    } else {
+                        echo 'ici <br/>';
+                    }
+                }
+            }
+        }
+
+
+        if (count($errors)) {
+            $this->db->db->rollback();
+            $avoir->delete();
+            return $errors;
+        }
+
+        $this->db->db->commit();
+
+        $this->dol_object->fetch_lines();
+        $avoir->dol_object->fetch_lines();
+
+        // Recalcul des prix totaux.
+        $this->dol_object->update_price(1);
+        $avoir->dol_object->update_price(1);
+
+        // Pour être sûr d'être à jour dans les données: 
+        $this->fetch($this->id);
+        $avoir->fetch($avoir->id);
+
+        // Assos commande
+
+        $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande');
+        $asso = new BimpAssociation($commande, 'factures');
+
+        $list = $asso->getObjectsList((int) $this->id);
+
+        foreach ($list as $id_commande) {
+            $asso->addObjectAssociation((int) $avoir->id, (int) $id_commande);
+        }
+
+
+        // Ajout id_avoir pour les éventuelles expéditions liées: 
+        $shipments = BimpCache::getBimpObjectObjects('bimplogistique', 'BL_CommandeShipment', array(
+                    'id_facture' => (int) $this->id
+        ));
+
+        foreach ($shipments as $shipment) {
+            $ship_errors = $shipment->updateField('id_avoir', (int) $avoir->id);
+            if (count($ship_errors)) {
+                echo '<pre>';
+                print_r($ship_errors);
+                echo '</pre>';
+            }
+        }
+
+        // validation de l'avoir (sans trigger pour éviter les boucles infinies): 
+        global $user;
+        if ($avoir->dol_object->validate($user, 0, 0, 1) <= 0) {
+            $msg = 'Avoir créé avec succès mais échec de la validation';
+            if ($convertToReduc) {
+                $msg.= '. La conversion en remise n\'a pas été effectuée';
+            }
+            $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($avoir->dol_object), $msg);
+            return $errors;
+        } else {
+            global $langs;
+            $model = $avoir->getModelPdf();
+            $avoir->dol_object->generateDocument($model, $langs);
+        }
+
+        // Conversion en remise: 
+        if ($convertToReduc) {
+            $conv_errors = $avoir->convertToRemise();
+
+            if (count($conv_errors)) {
+                $errors[] = BimpTools::getMsgFromArray($conv_errors, 'Avoir créé et validé avec succès mais échec de la conversion en remise');
+                return $errors;
+            }
+
+            if ($useConvertedReduc) {
+                BimpTools::loadDolClass('core', 'discount');
+                $discount = new DiscountAbsolute($this->db->db);
+                $discount->fetch(0, $avoir->id);
+
+                if (BimpObject::objectLoaded($discount)) {
+                    if ($discount->link_to_invoice(0, $this->id) <= 0) {
+                        $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($discount), 'Avoir créé et converti en remise avec succès mais échec de l\'application de la remise');
+                    }
+                }
+            }
+        }
+
+        return $errors;
+    }
+
     public function convertToRemise()
     {
         if (!$this->isLoaded()) {
-            return array('ID de la facture absent');
+            return array('ID ' . $this->getLabel('of_the') . ' absent');
         }
         global $langs, $user;
 
@@ -1648,10 +1993,18 @@ class Bimp_Facture extends BimpComm
 
     public function checkIsPaid()
     {
-        if ($this->isLoaded() && (int) $this->getData('fk_statut') === 1) {
+        if ($this->isLoaded() && (int) $this->getData('fk_statut') > 0) {
             $remain_to_pay = (float) $this->getRemainToPay();
+            $paye = (int) $this->getData('paye');
+            
+            echo 'remain: '.$remain_to_pay.'<br/>';
+
             if ($remain_to_pay > -0.01 && $remain_to_pay < 0.01) {
-                $this->setObjectAction('classifyPaid');
+                if (!$paye) {
+                    $this->setObjectAction('classifyPaid');
+                }
+            } elseif ($paye) {
+                $this->setObjectAction('reopen');
             }
         }
     }
@@ -1669,19 +2022,11 @@ class Bimp_Facture extends BimpComm
         if (!isset($data['force_validate']) || !(int) $data['force_validate']) {
             $lines_errors = array();
             if (!$this->checkEquipmentsAttribution($lines_errors)) {
-                $modal_html = BimpRender::renderAlerts($lines_errors, 'warning');
-                $onclick = $this->getJsActionOnclick('validate', array(
-                    'force_validate' => 1
-                ));
-                $modal_html .= '<div style="text-align: center">';
-                $modal_html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
-                $modal_html .= BimpRender::renderIcon('fas_check', 'iconLeft') . 'Forcer la validation';
-                $modal_html .= '</span>';
-                $modal_html .= '</div>';
+                $errors[] = BimpTools::getMsgFromArray($lines_errors);
             }
         }
 
-        if (!$modal_html) {
+        if (!count($errors)) {
             $success = BimpTools::ucfirst($this->getLabel('')) . ' validé';
             if ($this->isLabelFemale()) {
                 $success .= 'e';
@@ -1895,18 +2240,10 @@ class Bimp_Facture extends BimpComm
         $warnings = array();
         $success = 'Réouverture effectuée avec succès';
 
-        if (!$this->isLoaded()) {
-            $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
-        } else if (!$this->isReopenable()) {
-            $errors[] = 'Il n\'est pas possible de réouvrir ' . $this->getLabel('this');
-        }
+        global $user;
 
-        if (!count($errors)) {
-            global $user;
-
-            if ($this->dol_object->set_unpaid($user) <= 0) {
-                $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de la réouverture ' . $this->getLabel('of_this'));
-            }
+        if ($this->dol_object->set_unpaid($user) <= 0) {
+            $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de la réouverture ' . $this->getLabel('of_this'));
         }
 
         return array(
@@ -2051,7 +2388,7 @@ class Bimp_Facture extends BimpComm
 
         $close_code = (isset($data['close_code']) ? $data['close_code'] : '');
         $close_note = (isset($data['close_note']) ? $data['close_note'] : '');
-        
+
         if ($this->isLoaded() && (int) $this->getData('fk_statut') == 1 && !(int) $this->dol_object->paye &&
                 (($remainToPay > 0 && $close_code) ||
                 (!in_array($type, array(Facture::TYPE_CREDIT_NOTE, Facture::TYPE_DEPOSIT) && $remainToPay <= 0)) ||
@@ -2213,9 +2550,9 @@ class Bimp_Facture extends BimpComm
             case Facture::TYPE_CREDIT_NOTE:
                 $facture = null;
 
-                $this->dol_object->fk_facture_source = (int) BimpTools::getValue('id_facture_to_correct', 0);
-                $avoir_same_lines = (int) BimpTools::getValue('avoir_same_lines', 0);
-                $avoir_remain_to_pay = (int) BimpTools::getValue('avoir_remain_to_pay', 0);
+                $this->dol_object->fk_facture_source = (int) BimpTools::getPostFieldValue('id_facture_to_correct', 0);
+                $avoir_same_lines = (int) BimpTools::getPostFieldValue('avoir_same_lines', 0);
+                $avoir_remain_to_pay = (int) BimpTools::getPostFieldValue('avoir_remain_to_pay', 0);
 
                 if ($avoir_same_lines && $avoir_remain_to_pay) {
                     $errors[] = 'Il n\'est pas possible de choisir l\'option "Créer l\'avoir avec les même lignes que la factures dont il est issu" et "Créer l\'avoir avec le montant restant à payer de la facture dont il est issu" en même temps. Veuillez choisir l\'une ou l\'autre';

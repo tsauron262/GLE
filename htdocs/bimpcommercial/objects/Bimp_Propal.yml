@@ -322,6 +322,7 @@ lists_cols:
 filters_panels: 
     default: 
         filters: 
+            type: unset
             date_propal: 
                 field: datep
             date_livraison: 

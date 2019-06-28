@@ -2,7 +2,6 @@
 
 class BimpLog
 {
-
     public static $h_file = null;
 
     public static function getHFile()

@@ -13,22 +13,22 @@ class commandeController extends BimpController
 //        $head = commande_prepare_head($commande->dol_object);
 //        dol_fiche_head($head, 'bimplogisitquecommande', $langs->trans("CustomerOrder"), -1, 'order');
 //    }
-   
-   
+
+
     public function getPageTitle()
     {
         $title = 'Logistique ';
         $commande = $this->config->getObject('', 'commande');
-        
+
         if (BimpObject::objectLoaded($commande)) {
             $title .= $commande->getRef();
         } else {
             $title .= 'commande';
         }
-        
+
         return $title;
     }
-    
+
     public function renderContentHtml()
     {
         if (!BimpTools::isSubmit('id')) {
@@ -41,7 +41,11 @@ class commandeController extends BimpController
         }
 
         if (!$commande->isLogistiqueActive()) {
-            return BimpRender::renderAlerts('Cette commande doit etre validée et prise en charge pour accéder à cet onglet');
+            if (!(int) $commande->getData('logistique_status')) {
+                return BimpRender::renderAlerts('Cette commande doit etre validée et prise en charge pour accéder à cet onglet');
+            } else {
+                return BimpRender::renderAlerts('Logistique clôturée pour cette commande');
+            }
         }
 
         $_GET['id_entrepot'] = (int) $commande->getData('entrepot');
@@ -82,7 +86,7 @@ class commandeController extends BimpController
                         'content' => $this->renderFacturesTab($commande)
                     ),
         ));
-        
+
         $html .= $commande->renderNotesList(true);
 
         return $html;

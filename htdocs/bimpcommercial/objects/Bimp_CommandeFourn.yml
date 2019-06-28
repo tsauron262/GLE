@@ -414,6 +414,7 @@ views:
 filters_panels: 
     default: 
         filters: 
+            type: unset
             date_create: 
                 field: date_creation
             total_ttc: 

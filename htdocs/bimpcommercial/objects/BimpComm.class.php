@@ -898,7 +898,7 @@ class BimpComm extends BimpDolObject
     }
 
     // Getters - Overrides BimpObject
-    
+
     public function getName($with_generic = true)
     {
         if ($this->isLoaded()) {
@@ -2525,6 +2525,8 @@ class BimpComm extends BimpDolObject
             } else {
                 if ($this->dol_object->insert_discount($discount->id) <= 0) {
                     $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'insertion de la remise');
+                } elseif (is_a($this, 'Bimp_Facture')) {
+                    $this->checkIsPaid();
                 }
             }
         }
@@ -2751,7 +2753,7 @@ class BimpComm extends BimpDolObject
             'success_callback' => 'bimp_reloadPage();'
         );
     }
-    
+
     public function actionRemoveDiscount($data, &$success)
     {
         $errors = array();
@@ -2771,6 +2773,8 @@ class BimpComm extends BimpDolObject
             } else {
                 if ($discount->unlink_invoice() <= 0) {
                     $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($discount), 'Echec du retrait de la remise');
+                } elseif (is_a($this, 'Bimp_Facture')) {
+                    $this->checkIsPaid();
                 }
             }
         }

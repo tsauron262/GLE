@@ -479,18 +479,20 @@ fields_tables:
 filters_panels: 
     default: 
         filters: 
-            ref: 
-                field: ref
-            ref_client: 
-                field: ref_client
+            type: 
+                field: type
             statut: 
                 field: fk_statut
-            soc: 
-                field: fk_soc
-            entrepot: 
-                field: entrepot
             secteur: 
                 field: ef_type
+            entrepot: 
+                field: entrepot
+            soc: 
+                field: fk_soc
+            ref_client: 
+                field: ref_client
+            ref: 
+                field: ref
             libelle: 
                 field: libelle
             line_product:

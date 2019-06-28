@@ -23,7 +23,7 @@ echo '<body>';
 global $db;
 $bdb = new BimpDb($db);
 
-$rows = $bdb->getRows('br_commande_shipment', 1, null, 'array', array('id'));
+$rows = $bdb->getRows('bl_commande_shipment', 1, null, 'array', array('id'));
 
 if (!is_null($rows) && count($rows)) {
     foreach ($rows as $r) {

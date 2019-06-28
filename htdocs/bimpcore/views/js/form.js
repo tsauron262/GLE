@@ -95,11 +95,9 @@ function saveObjectFromForm(form_id, $button, successCallback, on_save) {
                 bimpAjax.display_warnings_in_popup_only = false;
                 bimpAjax.$button.remove();
             }
-            $('body').trigger($.Event('objectChange', {
-                module: result.module,
-                object_name: result.object_name,
-                id_object: result.id_object
-            }));
+            
+            triggerObjectChange(result.module, result.object_name, result.id_object);
+            
             if (typeof (successCallback) === 'function') {
                 successCallback(result);
             }

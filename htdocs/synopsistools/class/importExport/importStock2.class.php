@@ -2,22 +2,22 @@
 
 require_once DOL_DOCUMENT_ROOT . "/synopsistools/class/importExport/import8sens.class.php";
 
-class importStock extends import8sens {
+class importStock2 extends import8sens {
 
     public function __construct($db) {
         parent::__construct($db);
-        $this->path = $this->path . "stock/";
+        $this->path = $this->path . "stock2/";
         $this->prod = new Product($this->db);
         $this->entrepot = new Entrepot($this->db);
     }
     
-    CONST CHAMP_REF = 'ArdGArtCode';
-    CONST CHAMP_ENTREPOT = 'ArdGDepCode';
-    CONST CHAMP_STOCK = 'ArdStk';
-//    CONST CHAMP_REF = 'ArtCode';
-//    CONST CHAMP_ENTREPOT = 'DepCode';
-//    CONST CHAMP_STOCK = 'OpeStkCumul';
-//    CONST CHAMP_PA = 'OpePA';
+//    CONST CHAMP_REF = 'ArdGArtCode';
+//    CONST CHAMP_ENTREPOT = 'ArdGDepCode';
+//    CONST CHAMP_STOCK = 'ArdStk';
+    CONST CHAMP_REF = 'ArtCode';
+    CONST CHAMP_ENTREPOT = 'DepCode';
+    CONST CHAMP_STOCK = 'OpeStkCumul';
+    CONST CHAMP_PA = 'OpePA';
     
     private $entrepotNottoye = array();
 
@@ -26,7 +26,7 @@ class importStock extends import8sens {
         parent::go();
         
         
-//        $this->db->query("UPDATE `llx_product` p SET stock = (SELECT SUM(`reel`) FROM `llx_product_stock` WHERE `fk_product` = p.rowid)");
+        $this->db->query("UPDATE `llx_product` p SET stock = (SELECT SUM(`reel`) FROM `llx_product_stock` WHERE `fk_product` = p.rowid)");
     }
 
     function traiteLn($ln) {
@@ -64,6 +64,16 @@ class importStock extends import8sens {
             elseif ($this->entrepotId < 1)
                 $this->error("entrepot introuvable " . $ln[self::CHAMP_ENTREPOT]);
             else {
+                //gestion des pa
+                if(isset($ln[self::CHAMP_PA])){
+                    if(!isset($_REQUEST['light']))
+                        $this->db->query("UPDATE `llx_product` SET pmp= '".str_replace(",", ".", $ln[self::CHAMP_PA])."' WHERE rowid = ".$this->prodId);
+                    //netoyage de l'entrepot si pas fait
+                    if(!isset($this->entrepotNottoye[$this->entrepotId])){
+                        $this->db->query("DELETE FROM `llx_product_stock` WHERE `fk_entrepot` = ".$this->entrepotId);
+                        $this->entrepotNottoye[$this->entrepotId] = true;
+                    }
+                }
                     
                 
                 

@@ -26,9 +26,13 @@ class controlStock{
         $this->getEntrepot();
         $this->getProductSerialisable();
         
+        echo "Debut : <br/>";
+        
+        $i = 0;
         foreach($this->entrepot as $idEn => $labEl){
             $debutText = "Entrepot : ".$labEl."<br/>";
             foreach($this->prodS as $idPr => $labPr){
+                $i++;
                 $nbE = $this->getNbEquip($idPr, $idEn);
                 $nbS = $this->getStockProd($idPr, $idEn);
                 
@@ -55,7 +59,7 @@ class controlStock{
                             $codemove = dol_print_date($now, '%y%m%d%H%M%S');
                             $product->correct_stock($user, $idEn, $nbCorrection, 0, "correction Auto Stock en fonction des equipments", 0, $codemove);
                         }
-                        else
+                        elseif(isset($_REQUEST['mail']))
                             mailSyn2("Probléme stock", "tommy@bimp.fr", '', $text);
                         echo $text;
                     }
@@ -77,13 +81,13 @@ class controlStock{
     
     
     private function getEntrepot(){
-        $sql = $this->db->query("SELECT `rowid`, `label` FROM `llx_entrepot`");
+        $sql = $this->db->query("SELECT `rowid`, `ref` FROM `llx_entrepot`");
         while($ligne = $this->db->fetch_object($sql))
-                $this->entrepot[$ligne->rowid] = $ligne->label;
+                $this->entrepot[$ligne->rowid] = $ligne->ref;
     }
     
     private function getProductSerialisable(){
-        $sql = $this->db->query("SELECT p.rowid, p.label FROM `llx_product` p, llx_product_extrafields pe WHERE p.rowid = pe.fk_object AND pe.serialisable = 1");
+        $sql = $this->db->query("SELECT p.rowid, p.label FROM `llx_product` p, llx_product_extrafields pe WHERE p.rowid = pe.fk_object AND pe.serialisable2 = 1");
         while($ligne = $this->db->fetch_object($sql))
                 $this->prodS[$ligne->rowid] = $ligne->label;
     }
@@ -91,7 +95,7 @@ class controlStock{
     
     private function getEquipmentNonSerialisable(){
         $this->equipNonS = array();
-        $sql = $this->db->query("SELECT serial FROM llx_product_extrafields pe, `llx_be_equipment` be WHERE be.id_product = pe.fk_object AND pe.serialisable = 0");
+        $sql = $this->db->query("SELECT serial FROM llx_product_extrafields pe, `llx_be_equipment` be WHERE be.id_product = pe.fk_object AND pe.serialisable2 = 0");
         while($ligne = $this->db->fetch_object($sql))
                 $this->equipNonS[] = $ligne->serial;
     }
@@ -99,7 +103,7 @@ class controlStock{
     
     
     private function getNbEquip($prod, $entrepot){
-        $sql = $this->db->query("SELECT COUNT(*) as nb FROM `llx_be_equipment` be, `llx_be_equipment_place` bep WHERE be.id = bep.`id_equipment` AND position = 1 AND `id_entrepot` = ".$entrepot." AND id_product = ".$prod);
+        $sql = $this->db->query("SELECT COUNT(*) as nb FROM `llx_be_equipment` be, `llx_be_equipment_place` bep WHERE be.id = bep.`id_equipment` AND bep.type = 2 AND position = 1 AND `id_entrepot` = ".$entrepot." AND id_product = ".$prod);
         while($ligne = $this->db->fetch_object($sql))
                 return $ligne->nb;
         return 0;

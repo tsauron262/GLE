@@ -517,8 +517,13 @@ else
 					print '<td align="right">'.price(price2num($objp->ppmp,'MU')).'</td>';
 
                     // Total PMP
-					print '<td align="right">'.price(price2num($objp->ppmp*$objp->value,'MT')).'</td>';
-					$totalvalue+=price2num($objp->ppmp*$objp->value,'MT');
+                                        /*moddrs*/
+                                        $totalPMP = $objp->ppmp*$objp->value;
+                                        if($objp->value < 0)
+                                            $totalPMP= 0;
+					print '<td align="right">'.price(price2num($totalPMP,'MT')).'</td>';
+					$totalvalue+=price2num($totalPMP,'MT');
+                                        /*fmoddrsi*/
 
                     // Price sell min
                     if (empty($conf->global->PRODUIT_MULTIPRICES))

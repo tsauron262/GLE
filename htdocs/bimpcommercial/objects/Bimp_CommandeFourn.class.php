@@ -859,7 +859,7 @@ class Bimp_CommandeFourn extends BimpComm
     {
         return '';
     }
-    
+
     // Traitements:
 
     public function onCancelStatus()
@@ -964,29 +964,32 @@ class Bimp_CommandeFourn extends BimpComm
                 'value'    => 0
             )
         ));
+        if (count($lines) && count($receptions)) {
+            $has_billed = 0;
+            $all_billed = 1;
 
-        $has_billed = 0;
-        $all_billed = 1;
+            foreach ($lines as $line) {
+                $line_qty = (float) $line->getFullQty();
+                $billed_qty = 0;
 
-        foreach ($lines as $line) {
-            $line_qty = (float) $line->getFullQty();
-            $billed_qty = 0;
+                foreach ($receptions as $id_reception) {
+                    $reception_data = $line->getReceptionData((int) $id_reception);
+                    $billed_qty += isset($reception_data['qty']) ? (float) $reception_data['qty'] : 0;
+                    $has_billed = 1;
+                }
 
-            foreach ($receptions as $id_reception) {
-                $reception_data = $line->getReceptionData((int) $id_reception);
-                $billed_qty += isset($reception_data['qty']) ? (float) $reception_data['qty'] : 0;
-                $has_billed = 1;
+                if (abs($line_qty) > abs($billed_qty)) {
+                    $all_billed = 0;
+                }
             }
 
-            if (abs($line_qty) > abs($billed_qty)) {
-                $all_billed = 0;
+            if ($all_billed) {
+                $invoice_status = 2;
+            } elseif ($has_billed) {
+                $invoice_status = 1;
+            } else {
+                $invoice_status = 0;
             }
-        }
-
-        if ($all_billed) {
-            $invoice_status = 2;
-        } elseif ($has_billed) {
-            $invoice_status = 1;
         } else {
             $invoice_status = 0;
         }

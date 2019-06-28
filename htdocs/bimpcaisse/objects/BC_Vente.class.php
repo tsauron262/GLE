@@ -566,7 +566,7 @@ class BC_Vente extends BimpObject
         $html .= BimpRender::renderIcon('pencil', 'iconLeft');
         $html .= 'Note: ';
         $html .= '</span>';
-        $html .= BimpInput::renderInput('text', 'note_plus');
+        $html .= BimpInput::renderInput('text', 'note_plus', $this->getData('note_plus'));
 
         // Bouton "Actualiser": 
         $html .= '<span class="btn btn-default" style="float: right; display: inline-block; margin-top: -2px" onclick="Vente.refresh();">';

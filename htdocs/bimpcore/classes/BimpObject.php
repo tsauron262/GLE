@@ -32,6 +32,8 @@ class BimpObject extends BimpCache
         'common_fields'            => array('data_type' => 'bool', 'default' => 1),
         'header_list_name'         => array('default' => ''),
         'header_btn'               => array('data_type' => 'array', 'default' => array()),
+        'header_edit_form'         => array('default' => ''),
+        'header_delete_btn'        => array('default' => 1),
         'list_page_url'            => array('data_type' => 'array'),
         'parent_object'            => array('default' => ''),
         'parent_id_property'       => array('defautl' => ''),
@@ -2008,10 +2010,9 @@ class BimpObject extends BimpCache
 
         if (BimpDebug::isActive('bimpcore/objects/print_list_sql') || BimpTools::isSubmit('list_sql')) {
             $plus = "";
-            if(class_exists('synopsisHook'))
-                $plus = ' '.synopsisHook::getTime();
-            echo BimpRender::renderDebugInfo($sql, 'SQL Liste - Module: "' . $this->module . '" Objet: "' . $this->object_name . '"'.$plus);
-
+            if (class_exists('synopsisHook'))
+                $plus = ' ' . synopsisHook::getTime();
+            echo BimpRender::renderDebugInfo($sql, 'SQL Liste - Module: "' . $this->module . '" Objet: "' . $this->object_name . '"' . $plus);
         }
 
         $rows = $this->db->executeS($sql, $return);
@@ -4364,7 +4365,6 @@ class BimpObject extends BimpCache
                 $html .= '<div class="header_buttons">';
                 if (count($header_buttons)) {
                     if (count($header_buttons) > 6) {
-
                         $html .= BimpRender::renderDropDownButton('Actions', $header_buttons, array(
                                     'icon'       => 'fas_cogs',
                                     'menu_right' => 1
@@ -4375,6 +4375,23 @@ class BimpObject extends BimpCache
                         }
                     }
                 }
+
+                if ($this->params['header_edit_form'] && $this->isEditable() && $this->can('edit')) {
+                    $html .= '<span class="btn btn-primary bs-popover" onclick="' . $this->getJsLoadModalForm($this->params['header_edit_form'], addslashes("Edition " . $this->getLabel('of_the') . ' #' . $this->id)) . '"';
+                    $html .= BimpRender::renderPopoverData('Editer ' . $this->getLabel('this'));
+                    $html .= '>';
+                    $html .= BimpRender::renderIcon('fas_edit');
+                    $html .= '</span>';
+                }
+
+                if ((int) $this->params['header_delete_btn'] && $this->isDeletable() && $this->can('delete')) {
+                    $html .= '<span class="btn btn-danger bs-popover" onclick="' . $this->getJsDeleteOnClick() . '"';
+                    $html .= BimpRender::renderPopoverData('Supprimer ' . $this->getLabel('this'));
+                    $html .= '>';
+                    $html .= BimpRender::renderIcon('fas_trash-alt');
+                    $html .= '</span>';
+                }
+
                 $html .= '</div>';
             }
 
@@ -5030,6 +5047,15 @@ class BimpObject extends BimpCache
         }
 
         return '';
+    }
+
+    public function getJsDeleteOnClick($params = array())
+    {
+        if (!$this->isLoaded()) {
+            return '';
+        }
+
+        return 'deleteObject($(this), \'' . $this->module . '\', \'' . $this->object_name . '\', ' . $this->id . ')';
     }
 
     // Gestion des intitulés (labels):

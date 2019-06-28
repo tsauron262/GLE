@@ -950,7 +950,7 @@ class indexController extends BimpController
 
         die(json_encode(array(
             'errors'     => $errors,
-            'success'    => 'Note la vente enregistré avec succès',
+            'success'    => 'Note de la vente enregistrée avec succès',
             'request_id' => BimpTools::getValue('request_id', 0),
         )));
     }

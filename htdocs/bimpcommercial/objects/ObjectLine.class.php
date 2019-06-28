@@ -419,12 +419,12 @@ class ObjectLine extends BimpObject
 
     // Getters array: 
 
-    public function getProductFournisseursPricesArray()
+    public function getProductFournisseursPricesArray($include_empty = true)
     {
         $id_product = (int) $this->getIdProductFromPost();
         if ($id_product) {
             BimpObject::loadClass('bimpcore', 'Bimp_Product');
-            return Bimp_Product::getFournisseursPriceArray($id_product);
+            return Bimp_Product::getFournisseursPriceArray($id_product, 0, 0, $include_empty);
         }
 
         return array();
@@ -644,7 +644,7 @@ class ObjectLine extends BimpObject
                 );
                 return;
         }
-        
+
         parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors);
     }
 
@@ -2564,18 +2564,12 @@ class ObjectLine extends BimpObject
                     }
                 }
 
-                $values = $this->getProductFournisseursPricesArray();
+                $values = $this->getProductFournisseursPricesArray(false);
 
-                $has_values = false;
-                foreach ($values as $value => $label) {
-                    if ((int) $value) {
-                        $has_values = true;
-                        break;
-                    }
-                }
+                $has_values = count($values);
 
                 if ($has_values && !$attribute_equipment && $this->canEditPrixAchat() && $this->isEditable($force_edit)) {
-                    $html = BimpInput::renderInput('select', $prefixe . 'id_fourn_price', (int) $value, array(
+                    $html .= BimpInput::renderInput('select', $prefixe . 'id_fourn_price', (int) $value, array(
                                 'options' => $values
                     ));
                 } else {
@@ -2585,12 +2579,10 @@ class ObjectLine extends BimpObject
                         }
                     }
                     $html .= '<input type="hidden" name="' . $prefixe . 'id_fourn_price" value="' . $value . '"/>';
-                    if ((int) $value) {
-                        if (isset($values[$value])) {
-                            $html .= $values[$value];
-                        } else {
-                            $html .= BimpRender::renderAlerts('Le prix fournisseur d\'ID ' . $value . ' n\'est pas enregistré pour ce produit');
-                        }
+                    if (!is_null($value) && isset($values[(int) $value]) && $values[(int) $value] !== '') {
+                        $html .= $values[(int) $value];
+                    } elseif ((int) $value) {
+                        $html .= BimpRender::renderAlerts('Le prix fournisseur d\'ID ' . $value . ' n\'est pas enregistré pour ce produit');
                     } else {
                         $pa_ht = $this->pa_ht;
                         $is_pa_prevu = false;

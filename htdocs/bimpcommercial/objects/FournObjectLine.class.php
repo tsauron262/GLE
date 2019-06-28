@@ -35,7 +35,11 @@ class FournObjectLine extends ObjectLine
             }
         }
 
-        $prices[0] = 'Prix d\'achat exceptionnel';
+        if ($this->isLoaded()) {
+            $prices[0] = 'Prix d\'achat';
+        } else {
+            $prices[0] = 'Prix d\'achat exceptionnel';
+        }
         return $prices;
     }
 
@@ -178,7 +182,7 @@ class FournObjectLine extends ObjectLine
                 case self::LINE_FREE:
                     $this->id_fourn_price = 0;
                     break;
-                
+
                 case self::LINE_TEXT:
                     $this->qty = 1;
                     break;

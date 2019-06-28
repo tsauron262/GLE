@@ -140,7 +140,7 @@ function checkNotifications() {
     }
 }
 
-//Modals:
+// Modales:
 
 function loadModalIFrame($button, url, title) {
     bimpModal.loadIframe($button, url, title);

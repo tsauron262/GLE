@@ -1,3 +1,11 @@
+function triggerObjectChange(module, object_name, id_object) {
+    $('body').trigger($.Event('objectChange', {
+        module: module,
+        object_name: object_name,
+        id_object: id_object
+    }));
+}
+
 function saveObject(module, object_name, id_object, fields, $resultContainer, successCallback, display_success) {
     var data = {
         module: module,

@@ -2196,6 +2196,20 @@ class Facture extends CommonInvoice
 			dol_syslog(get_class($this)."::validate ".$this->error.' MAIN_USE_ADVANCED_PERMS='.$conf->global->MAIN_USE_ADVANCED_PERMS, LOG_ERR);
 			return -1;
 		}
+                
+                /*moddrsi*/
+                if (!defined('BIMP_LIB')) {
+                    require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
+                }
+                $bimpFacture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $this->id);
+                $bimpFacture->dol_object = $this;
+                $bimpFacture->hydrateFromDolObject();
+                $bf_errors = $bimpFacture->beforeValidate();
+                if (!empty($bf_errors)) {
+                    $this->error = BimpTools::getMsgFromArray($bf_errors);
+                    return -1;
+                }
+                /*fmoddrsi*/
 
 		$this->db->begin();
 

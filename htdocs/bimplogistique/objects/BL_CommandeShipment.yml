@@ -1,4 +1,4 @@
-table: br_commande_shipment
+table: bl_commande_shipment
 common_fields: 1
 icon: fas_shipping-fast
 
@@ -23,6 +23,11 @@ objects:
             id_object: 
                 field_value: id_user_resp
                 
+    avoir: 
+        extends: facture
+        instance: 
+            id_object: 
+                field_value: id_avoir
 fields: 
     id_commande_client: 
         label: Commande client
@@ -83,6 +88,16 @@ fields:
         label: Facture
         type: id_object
         object: facture
+        default_value: 0
+        display: 
+            card_light: 
+                type: card
+                card: light
+                
+    id_avoir: 
+        label: Avoir
+        type: id_object
+        object: avoir
         default_value: 0
         display: 
             card_light: 
@@ -307,6 +322,10 @@ fields_tables:
               display: card
               show: 
                   field_value: id_facture
+            - field: id_avoir
+              display: card
+              show: 
+                  field_value: id_avoir
             - field: total_ht
             - field: total_ttc
             
@@ -381,6 +400,9 @@ lists_cols:
                     - 1
     facture: 
         field: id_facture
+        display: nom_url
+    avoir: 
+        field: id_avoir
         display: nom_url
     total_ht: 
         field: total_ht

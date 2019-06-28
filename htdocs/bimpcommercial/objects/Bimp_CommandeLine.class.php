@@ -3427,6 +3427,24 @@ class Bimp_CommandeLine extends ObjectLine
             $this->checkQties();
         }
     }
+    
+    public function changeIdFacture($old_id_facture, $new_id_facture)
+    {
+        if (!$this->isLoaded()) {
+            return array('ID de la ligne de commande absent');
+        }
+        
+        $factures = $this->getData('factures');
+        if (isset($factures[(int) $old_id_facture])) {
+            $facture_data = $factures[(int) $old_id_facture];
+            unset($factures[(int) $old_id_facture]);
+            $factures[(int) $new_id_facture] = $facture_data;
+            
+            return $this->updateField('factures', $factures);
+        }
+        
+        return array();
+    }
 
     // Traitements divers: 
 

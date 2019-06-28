@@ -567,7 +567,7 @@ class BR_CommandeShipment extends BimpObject
                     $shipments = array($this->id);
                     foreach ($shipments_list as $item) {
                         $shipments[] = (int) $item['id'];
-                        $this->db->update('br_commande_shipment', array(
+                        $this->db->update('bl_commande_shipment', array(
                             'id_facture' => 0
                                 ), '`id` = ' . (int) $item['id']);
                     }
@@ -937,7 +937,7 @@ class BR_CommandeShipment extends BimpObject
                 $errors[] = 'ID de l\'entrepot absent';
             }
 
-            $sql = 'SELECT MAX(num_livraison) as num FROM ' . MAIN_DB_PREFIX . 'br_commande_shipment ';
+            $sql = 'SELECT MAX(num_livraison) as num FROM ' . MAIN_DB_PREFIX . 'bl_commande_shipment ';
             $sql .= 'WHERE `id_commande_client` = ' . (int) $commande->id;
 
             $result = $this->db->execute($sql);

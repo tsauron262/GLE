@@ -1891,7 +1891,7 @@ class BR_Reservation extends BimpObject
                     if (!is_null($num_bl)) {
                         $filters['cs.num_livraison'] = (int) $num_bl;
                         $joins[] = array(
-                            'table' => 'br_commande_shipment',
+                            'table' => 'bl_commande_shipment',
                             'alias' => 'cs',
                             'on'    => 'cs.id = a.id_shipment'
                         );
@@ -1906,7 +1906,7 @@ class BR_Reservation extends BimpObject
                             )
                         );
                         $joins[] = array(
-                            'table' => 'br_commande_shipment',
+                            'table' => 'bl_commande_shipment',
                             'alias' => 'cs',
                             'on'    => 'cs.id = a.id_shipment'
                         );
@@ -1942,7 +1942,7 @@ class BR_Reservation extends BimpObject
                 if (!is_null($num_bl)) {
                     $filters['cs.num_livraison'] = (int) $num_bl;
                     $joins[] = array(
-                        'table' => 'br_commande_shipment',
+                        'table' => 'bl_commande_shipment',
                         'alias' => 'cs',
                         'on'    => 'cs.id = a.id_shipment'
                     );
@@ -1957,7 +1957,7 @@ class BR_Reservation extends BimpObject
                         )
                     );
                     $joins[] = array(
-                        'table' => 'br_commande_shipment',
+                        'table' => 'bl_commande_shipment',
                         'alias' => 'cs',
                         'on'    => 'cs.id = a.id_shipment'
                     );
@@ -1990,7 +1990,7 @@ class BR_Reservation extends BimpObject
 
         $joins = array(
             array(
-                'table' => 'br_commande_shipment',
+                'table' => 'bl_commande_shipment',
                 'alias' => 'cs',
                 'on'    => 'cs.id = a.id_shipment'
             ),

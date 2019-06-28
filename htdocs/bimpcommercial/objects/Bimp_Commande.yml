@@ -310,6 +310,9 @@ fields_tables:
                   
     totals: 
         rows: 
+            - label: Remises
+              value: 
+                  callback: displayTotalRemises
             - field: total_ht
             - field: tva
             - field: total_ttc
@@ -644,6 +647,7 @@ forms:
 filters_panels: 
     default: 
         filters: 
+            type: unset
             id_user_resp: 
                 field: id_user_resp
             total_ttc: 

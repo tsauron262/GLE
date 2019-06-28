@@ -313,7 +313,70 @@ forms:
                 field: datef
             6:
                 field: fk_account
-                      
+                
+    validate: 
+        title: Validation
+        rows: 
+            - custom: 1
+              label: Informations
+              input_name: validation_type
+              content: 
+                  callback: renderValidationFormInfos
+            - custom: 1
+              label: Déplacer les lignes négatives dans un avoir
+              input_name: create_avoir
+              data_type: bool
+              input: 
+                  type: toggle
+              value: 1
+              display_if: 
+                  field_name: validation_type
+                  show_values: 2
+            - custom: 1
+              label: Convertir l'avoir en remise
+              input_name: convert_avoir_to_reduc
+              data_type: bool
+              input: 
+                  type: toggle
+              value: 1
+              display_if: 
+                  fields_names: validation_type,create_avoir
+                  validation_type: 
+                      show_values: 1,2
+                  create_avoir: 
+                      hide_values: 0
+            - custom: 1
+              label: Appliquer la remise à la facture
+              input_name: use_discount_in_facture
+              data_type: bool
+              input: 
+                  type: toggle
+              value: 1
+              display_if: 
+                  fields_names: validation_type,convert_avoir_to_reduc,create_avoir
+                  validation_type: 
+                      show_values: 1,2
+                  convert_avoir_to_reduc: 
+                      hide_values: 0
+                  create_avoir: 
+                      hide_values: 0
+            - custom: 1
+              hidden: 1
+              input_name: hide_force_validation
+              data_type: bool
+              input: 
+                  type: hidden
+              value: 
+                  callback: checkEquipmentsAttribution
+            - custom: 1
+              label: Forcer la validation
+              input_name: force_validate
+              content: 
+                  callback: renderForceValidationInput
+              display_if: 
+                  field_name: hide_force_validation
+                  hide_values: 1
+              
 fields_tables: 
     infos: 
         rows: 
@@ -368,6 +431,9 @@ fields_tables:
                                                  
     totals: 
         rows: 
+            - label: Remises
+              value: 
+                  callback: displayTotalRemises
             - field: total
             - field: tva
             - field: total_ttc
@@ -385,8 +451,6 @@ filters_panels:
         filters: 
             ref: 
                 field: facnumber
-            type: 
-                field: type
             total_ht:
                 field: total
             total_ttc: 

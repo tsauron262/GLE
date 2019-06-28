@@ -538,6 +538,25 @@ class BL_CommandeShipment extends BimpObject
                     $html .= '</button>';
                 }
             }
+            
+            $avoir = null;
+            $label = 'Avoir';
+            if ((int) $this->getData('id_avoir') > 0) {
+                $avoir = $this->getChildObject('avoir');
+            }
+
+            if (BimpObject::objectLoaded($avoir)) {
+                $ref = dol_sanitizeFileName($avoir->dol_object->ref);
+                if (file_exists(DOL_DATA_ROOT . '/facture/' . $ref . '/' . $ref . '.pdf')) {
+                    $url = DOL_URL_ROOT . '/document.php?modulepart=facture&attachment=0';
+                    $url .= '&file=' . htmlentities($ref . '/' . $ref) . '.pdf';
+                    $onclick = 'window.open(\'' . $url . '\')';
+                    $html .= '<button type="button" class="btn btn-default" onclick="' . htmlentities($onclick) . '">';
+                    $html .= '<i class="' . BimpRender::renderIconClass('fas_file-pdf') . ' iconLeft"></i>';
+                    $html .= $label;
+                    $html .= '</button>';
+                }
+            }
         }
 
         return $html;
@@ -2015,7 +2034,7 @@ class BL_CommandeShipment extends BimpObject
                 $errors[] = 'ID de l\'entrepot absent';
             }
 
-            $sql = 'SELECT MAX(num_livraison) as num FROM ' . MAIN_DB_PREFIX . 'br_commande_shipment ';
+            $sql = 'SELECT MAX(num_livraison) as num FROM ' . MAIN_DB_PREFIX . 'bl_commande_shipment ';
             $sql .= 'WHERE `id_commande_client` = ' . (int) $commande->id;
 
             $result = $this->db->execute($sql);

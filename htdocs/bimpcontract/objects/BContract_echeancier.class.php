@@ -342,7 +342,6 @@ class BContract_echeancier extends BimpObject {
         $bimp = new BimpDb($db);
         $lines = $bimp->getRows('bcontract_prelevement', 'id_contrat = ' . $id_contrat);
         $linesContrat = $bimp->getRows('contratdet', 'fk_contrat = ' . $id_contrat);
-
         if ($parent->getData('statut') > 0 && $parent->getInitData('statut') > 0) {
             $updateDate = $this->calc_next_date();
         }
@@ -360,7 +359,7 @@ class BContract_echeancier extends BimpObject {
             $updateData = Array(
                 'next_facture_date' => $updateDate,
                 'next_facture_amount' => $this->calc_next_facture_amount_ht()
-            );
+            ); 
             $bimp->update('bcontract_prelevement', $updateData, 'id_contrat = ' . $parent->id);
         } else {
             if (!is_null($id_contrat)) {
@@ -451,15 +450,12 @@ class BContract_echeancier extends BimpObject {
             $nb_period_restante = $nb_period - $this->nb_facture;
             $rest = $this->get_total_facture();
             if (dol_print_date($facture->date) === dol_print_date($date_debut)) {
-                $facture->addline("Période de facturation : Du <b>" . dol_print_date($facture->date) . "</b> au <b>" . dol_print_date($this->calc_next_date(true)) . "</b>", price($this->get_total_contrat('ht') / $nb_period_restante), 1, 20);
+                $facture->addline("Période de facturation : Du <b>" . dol_print_date($facture->date) . "</b> au <b>" . dol_print_date($this->calc_next_date(true)) . "</b>", price($this->get_total_contrat('ht') / $nb_period_restante), 1, 20, 0, 0, 0, 0, $facture->date, $this->calc_next_date(true));
                 addElementElement('contrat', 'facture', $parent->id, $facture->id);
             } else {
-                $facture->addline("Période de facturation : Du <b>" . dol_print_date($facture->date) . "</b> au <b>" . dol_print_date($this->calc_next_date(true)) . "</b>", price($rest['info']['reste_a_payer_ht'] / $nb_period_restante), 1, 20);
+                $facture->addline("Période de facturation : Du <b>" . dol_print_date($facture->date) . "</b> au <b>" . dol_print_date($this->calc_next_date(true)) . "</b>", price($rest['info']['reste_a_payer_ht'] / $nb_period_restante), 1, 20, 0, 0, 0, 0, $facture->date, $this->calc_next_date(true));
                 addElementElement('contrat', 'facture', $parent->id, $facture->id);
             }
-
-//            $facture->addline("Période de facturation : Du <b>" . dol_print_date($facture->date) . "</b> au <b>" . dol_print_date($this->calc_next_date(true)) . "</b>", price($this->get_total_contrat('ht') / $nb_period_restante), 1, 20);
-//            addElementElement('contrat', 'facture', $parent->id, $facture->id);
         } else {
             return Array('errors' => 'error facture');
         }

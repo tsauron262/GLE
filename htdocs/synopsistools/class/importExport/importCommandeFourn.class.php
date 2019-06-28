@@ -92,9 +92,8 @@ class importCommandeFourn extends import8sens {
                     echo "ilogic " . $ref . "<br/>";
                 }
                 if (!$find) {
-
                     $qty = $ln['PlaQteUA'] - $ln['PlaQteTr'];
-                    $lnTemp = array("ref" => $ln['PlaGArtCode'], "soc" => $ln['PlaGFouCode'], 'dep' => $data['PcaADepCode'], "qty" => "nc", "qtyEnBl" => "nc", "pv" => $ln['PlaPUNet'], "pa" => $ln['PlvPA']);
+                    $lnTemp = array("ref" => ($ln['PlaGArtCode'] != ''? $ln['PlaGArtCode']: $ln['PlaGProCode']), "soc" => $ln['PlaGFouCode'], 'dep' => $data['PcaADepCode'], "qty" => "nc", "qtyEnBl" => "nc", "pv" => $ln['PlaPUNet'], "pa" => $ln['PlvPA']);
                     $lnTemp['br'][$ln['PlaCodePca']]['qteBlNonFact'] = $qty;
                     $tabFinal[$ref][] = $lnTemp;
                 }
@@ -107,7 +106,7 @@ class importCommandeFourn extends import8sens {
 
 
         $idFactureDef = 138;
-        $prefixe = "nzzzaaaauuuuud";
+        $prefixe = "ANCIEN8SENS38";
         $tabFinal2 = array();
         foreach ($tabFinal as $ref => $data) {
             $ref = $prefixe . $ref;
@@ -155,10 +154,10 @@ class importCommandeFourn extends import8sens {
         }
 
         $commandes = $tabFinal2;
-        $commandes = array($prefixe."CF-1906446"=> $tabFinal2[$prefixe."CF-1906446"]);
+        $commandes = array($prefixe."CF-1905752"=> $tabFinal2[$prefixe."CF-1905752"]);
         echo "<pre>"; 
         print_r($commandes);
-//        die;
+        die;
           
         global $db;
         $bdb = new BimpDb($db);

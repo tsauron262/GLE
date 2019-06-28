@@ -1,0 +1,34 @@
+title: Transferts
+bootstrap: 1
+
+#js:
+#    - /bimpequipment/views/js/equipment.js
+    
+objects: 
+    transfer:
+        instance: 
+            bimp_object: Transfer
+            
+#    user_account:
+#        instance: 
+#            bimp_object: BE_UserAccount
+#            
+#    reseau:
+#        instance: 
+#            bimp_object: BE_Reseau
+#            
+#    connection:
+#        instance: 
+#            bimp_object: BE_Connection
+            
+sections:
+    - type: tabs
+      tabs: 
+        default:
+            label: Transferts
+            sections:
+                - type: list
+                  list: 
+                      panel: 1
+                      object: transfer
+                      

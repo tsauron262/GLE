@@ -31,8 +31,8 @@ forms:
                     callback: isProductEditable
             fourn_price: 
                 custom: 1
-                show: 
-                    callback: isNotLoaded  
+#                show: 
+#                    callback: isNotLoaded  
                 label: Prix d'achat
                 input_name: id_fourn_price
                 data_type: id_object

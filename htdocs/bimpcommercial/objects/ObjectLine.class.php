@@ -644,7 +644,7 @@ class ObjectLine extends BimpObject
                 );
                 return;
         }
-        
+
         parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors);
     }
 
@@ -2566,16 +2566,10 @@ class ObjectLine extends BimpObject
 
                 $values = $this->getProductFournisseursPricesArray();
 
-                $has_values = false;
-                foreach ($values as $value => $label) {
-                    if ((int) $value) {
-                        $has_values = true;
-                        break;
-                    }
-                }
+                $has_values = count($values);
 
                 if ($has_values && !$attribute_equipment && $this->canEditPrixAchat() && $this->isEditable($force_edit)) {
-                    $html = BimpInput::renderInput('select', $prefixe . 'id_fourn_price', (int) $value, array(
+                    $html .= BimpInput::renderInput('select', $prefixe . 'id_fourn_price', (int) $value, array(
                                 'options' => $values
                     ));
                 } else {
@@ -2585,9 +2579,9 @@ class ObjectLine extends BimpObject
                         }
                     }
                     $html .= '<input type="hidden" name="' . $prefixe . 'id_fourn_price" value="' . $value . '"/>';
-                    if ((int) $value) {
-                        if (isset($values[$value])) {
-                            $html .= $values[$value];
+                    if (!is_null($value)) {
+                        if (isset($values[(int) $value])) {
+                            $html .= $values[(int) $value];
                         } else {
                             $html .= BimpRender::renderAlerts('Le prix fournisseur d\'ID ' . $value . ' n\'est pas enregistré pour ce produit');
                         }

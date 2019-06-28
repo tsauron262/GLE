@@ -254,13 +254,6 @@ class Bimp_Facture extends BimpComm
         return (int) parent::isActionAllowed($action, $errors);
     }
 
-    public function needEquipmentAttribution()
-    {
-        if ($this->isLoaded()) {
-            
-        }
-    }
-
     // Getters params: 
 
     public function getActionsButtons()
@@ -1996,8 +1989,6 @@ class Bimp_Facture extends BimpComm
         if ($this->isLoaded() && (int) $this->getData('fk_statut') > 0) {
             $remain_to_pay = (float) $this->getRemainToPay();
             $paye = (int) $this->getData('paye');
-            
-            echo 'remain: '.$remain_to_pay.'<br/>';
 
             if ($remain_to_pay > -0.01 && $remain_to_pay < 0.01) {
                 if (!$paye) {

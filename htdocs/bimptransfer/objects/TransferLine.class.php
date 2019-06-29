@@ -54,29 +54,55 @@ class TransferLine extends BimpObject {
         }
         return $errors;
     }
-
-    public function updateReservation() {
+    
+    public function canDelete() {
+        if($this->getData("quantity_transfered") == 0 && $this->getData("quantity_received") == 0)
+            return 1;
+        return 0;
+    }
+    
+    private function cancelReservation(){
+        $errors = array();
+        $tabReservations = $this->getReservations();
+        foreach ($tabReservations as $reservation)
+            $errors = array_merge($errors, $reservation->setNewStatus(303));
+        return $errors;
+    }
+    
+    private function getReservations(){
         $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
-        $r_lines = $reservation->getList(array(
-            'id_product' => $this->getData('id_product'),
-            'id_transfert' => $this->getData('id_transfer')
-                ), null, null, 'date_from', 'desc', 'array', array(
+        $filtre =array('id_transfert' => $this->getData('id_transfer'), 'status'=>array("operator"=>"!=", "value"=>303));
+        if($this->getData('id_equipment'))
+            $filtre['id_equipment'] = $this->getData('id_equipment');
+        else
+            $filtre['id_product'] = $this->getData('id_product');
+        $r_lines = $reservation->getList($filtre, null, null, 'date_from', 'desc', 'array', array(
             'id',
             'qty'
         ));
+        $tabs = array();
+        foreach ($r_lines as $r_line) {
+            $tabs[] = BimpCache::getBimpObjectInstance('bimpreservation', 'BR_Reservation', $r_line['id']);
+        }
+        return $tabs;
+    }
 
+    public function updateReservation() {
+        $errors = array();
+        $tabReservations = $this->getReservations();
         $i = 0;
         $nb_reservation = (int) $this->getData('quantity_sent') - $this->getData('quantity_received');
-        foreach ($r_lines as $r_line) {
-            $reservation->fetch($r_line['id']);
+        foreach ($tabReservations as $reservation) {
+            $new_status = ($nb_reservation == 0) ? '301' : '201';
             if ($i > 0) {
                 $nb_reservation = 0;
+                $new_status = "303";
             }
-            $reservation->updateField('qty', $nb_reservation);
+            
+            if($nb_reservation > 0)
+                $reservation->updateField('qty', $nb_reservation);
             $i++;
-            $new_status = ($nb_reservation == 0) ? '301' : '201';
-
-            if ($new_status != $reservation->getData('status')) {
+            if ($new_status != $reservation->getInitData('status')) {
                 $errors = array_merge($errors, $reservation->setNewStatus($new_status, $nb_reservation)); // $qty : faculatif, seulement pour les produits non sérialisés
                 $errors = array_merge($errors, $reservation->update());
             }
@@ -145,7 +171,7 @@ class TransferLine extends BimpObject {
         return false;
     }
 
-    public function lineExists($id_transfer, $id_product, $id_equipment, &$previous_quantity) {
+    public function lineExists($id_transfer, $id_product, $id_equipment) {
         $sql = 'SELECT id, quantity_sent';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . $this->getTable();
         $sql .= ' WHERE id_transfer=' . $id_transfer;
@@ -156,7 +182,6 @@ class TransferLine extends BimpObject {
         $result = $this->db->db->query($sql);
         if ($result and $this->db->db->num_rows($result) > 0) {
             while ($obj = $this->db->db->fetch_object($result)) {
-                $previous_quantity = $obj->quantity;
                 return $obj->id;
             }
         }
@@ -171,11 +196,14 @@ class TransferLine extends BimpObject {
 
     function checkStock(&$quantity, $id_product, $id_equipment, $id_warehouse_source, $id_transfer) {
         $errors = array();
+        $parent = BimpCache::getBimpObjectInstance('bimptransfer', 'Transfer', $id_transfer);
         if ($id_equipment > 0) {
             $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $id_equipment);
-            $is_reserved = $equipment->isAvailable($id_warehouse_source, $errors, array('id_transfer' => $id_transfer));
-            if ($is_reserved)
-                $errors[] = "Cet équipement est déjà réservé.";
+            $is_reserved = !$equipment->isAvailable($id_warehouse_source, $errors, array('id_transfer' => $id_transfer));
+            if ($is_reserved && $parent->getData('status') == Transfer::CONTRAT_STATUS_SENDING)
+                $errors[] = "Cet équipement est déjà réservé.".$parent->getData('status');
+            elseif (!$is_reserved && $parent->getData('status') == Transfer::CONTRAT_STATUS_RECEPTING)
+                $errors[] = "Cet équipement n'est pas réservé.";
             else
                 $quantity = 1;
         } else {
@@ -200,6 +228,16 @@ class TransferLine extends BimpObject {
             }
         }
         return 0;
+    }
+    
+    function delete(&$warnings = array(), $force_delete = false) {
+        $errors =array();
+        if(count($errors) == 0)
+            $errors = array_merge($errors, $this->cancelReservation ());
+        
+        if(count($errors) == 0)
+            $errors = array_merge($errors, parent::delete($warnings, $force_delete));
+        return $errors;
     }
 
     function checkStockProd($id_product, $id_warehouse_source) {
@@ -263,7 +301,7 @@ class TransferLine extends BimpObject {
                             'id_equipment' => $id_equipment,
                             'type' => 2,
                             'id_entrepot' => $transfer->getData('id_warehouse_source'),
-                            'infos' => 'Transfert de stock',
+                            'infos' => 'Annulation transfert de stock',
                             'code_mvt' => $codemove,
                             'date' => dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')
                 )));

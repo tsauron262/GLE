@@ -14,7 +14,6 @@ class transferController extends BimpController {
         $id_product = 0;
         $id_equipment = 0;
         $quantity_avaible = 0;
-        $previous_quantity = 0;
 
         $errors = $transfert_line->checkInput($input, $id_product, $id_equipment);
         $transfer = BimpObject::getInstance('bimptransfer', 'Transfer');
@@ -22,25 +21,50 @@ class transferController extends BimpController {
         $transfer->fetch((int) $id_transfer);
         $id_warehouse_source = $transfer->getData('id_warehouse_source');
 
-        $errors = array_merge($errors, $transfert_line->checkStock($quantity_avaible, $id_product, $id_equipment, $id_warehouse_source, $id_transfer));
+        if($transfer->getData('status') == Transfer::CONTRAT_STATUS_SENDING)
+            $errors = array_merge($errors, $transfert_line->checkStock($quantity_avaible, $id_product, $id_equipment, $id_warehouse_source, $id_transfer));
+        else
+            $quantity_avaible = 10000000;
 
         // There is enough product
-        $id_line = $transfert_line->lineExists($id_transfer, $id_product, $id_equipment, $previous_quantity);
+        $id_line = $transfert_line->lineExists($id_transfer, $id_product, $id_equipment);
 
-        if ($quantity_avaible < ($quantity_input + $previous_quantity)) {
-            $errors[] = "Il n'y a que " . $quantity_avaible . " fois ce produit dans cet entrepôt." .
-                    ($previous_quantity > 0) ? " Or il y a déjà " . $previous_quantity . " réservations pour ce transfert." : '';
-        }
-
+        
         if (sizeof($errors) == 0) {
-            if ($id_line > 0) {
-                $transfert_line->fetch($id_line);
-                $errors = array_merge($errors, $transfert_line->set('quantity_sent', (int) $transfert_line->getData('quantity_sent') + (int) $quantity_input));
-                $errors = array_merge($errors, $transfert_line->update());
-                $id_affected = $id_line;
-            } else
-                $errors = array_merge($errors, $transfert_line->create_2($id_transfer, $id_product, $id_equipment, $quantity_input, $id_affected, $id_warehouse_source));
+            if($transfer->getData('status') == Transfer::CONTRAT_STATUS_SENDING){//mode envoie
+                if ($id_line > 0) {
+                    $transfert_lineObj = BimpCache::getBimpObjectInstance('bimptransfer', 'TransferLine', $id_line);
+                    
+                    $new_qty_send = $transfert_lineObj->getData("quantity_sent") + $quantity_input;
+                    $qteAResa =  $new_qty_send - $transfert_lineObj->getData("quantity_received") ;
+
+                    if ($quantity_avaible < $qteAResa) {
+                        $errors[] = "Il n'y a que " . $quantity_avaible . " ce produit disponible dans cet entrepôt. "
+                                . "Or vous essayez d'en réserver " . $qteAResa . " pour ce transfert.";
+                    }
+                    else{
+                        $errors = array_merge($errors, $transfert_lineObj->set('quantity_sent', (int) $new_qty_send));
+                        $errors = array_merge($errors, $transfert_lineObj->update());
+                    }
+                }
+                else{
+                    $errors = array_merge($errors, $transfert_line->create_2($id_transfer, $id_product, $id_equipment, $quantity_input, $id_affected, $id_warehouse_source));
+                }
+
+            }
+            else{//reception
+                if ($id_line){
+                    $transfert_lineObj = BimpCache::getBimpObjectInstance('bimptransfer', 'TransferLine', $id_line);
+                    $errors = array_merge($errors, $transfert_lineObj->set('quantity_received', (int) $transfert_lineObj->getData('quantity_received') + (int) $quantity_input));
+                    $errors = array_merge($errors, $transfert_lineObj->update());
+                }
+                else
+                    $errors[] = "Produit non trouvé dans les envoie.";
+                
+                    
+            }
         }
+
 
         $data = array(
             'id_affected' => $id_affected, // new id or modified id

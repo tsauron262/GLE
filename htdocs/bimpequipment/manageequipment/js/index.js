@@ -107,17 +107,17 @@ function printTable(option_selected) {
 }
 
 function diplayLinks(right_caisse, right_caisse_admin) {
-    $('#ph_links').append('<input type="button" class="butAction" value="Créer transfert" onclick="location.href=\'' + DOL_URL_ROOT + '/bimpequipment/manageequipment/viewTransfer.php?entrepot=' + fk_warehouse + '\'">');
+//    $('#ph_links').append('<input type="button" class="butAction" value="Créer transfert" onclick="location.href=\'' + DOL_URL_ROOT + '/bimpequipment/manageequipment/viewTransfer.php?entrepot=' + fk_warehouse + '\'">');
     $('#ph_links').append('<input type="button" class="butAction" value="Accéder equipement" onclick="location.href=\'' + DOL_URL_ROOT + '/bimpequipment/?fc=entrepot&id=' + fk_warehouse + '\'"></td>');
     $('#ph_links').append('<input type="button" class="butAction" value="Accéder réservation" onclick="location.href=\'' + DOL_URL_ROOT + '/bimpreservation/index.php?fc=entrepot&id=' + fk_warehouse + '\'">');
-    $('#ph_links').append('<input type="button" class="butAction" value="Accéder inventaire" onclick="location.href=\'' + DOL_URL_ROOT + '/bimpequipment/manageequipment/viewInventoryMain.php?entrepot=' + fk_warehouse + '\'">');
+//    $('#ph_links').append('<input type="button" class="butAction" value="Accéder inventaire" onclick="location.href=\'' + DOL_URL_ROOT + '/bimpequipment/manageequipment/viewInventoryMain.php?entrepot=' + fk_warehouse + '\'">');
     if (right_caisse === 1)
         $('#ph_links').append('<input type="button" class="butAction" value="Accéder caisse" onclick="location.href=\'' + DOL_URL_ROOT + '/bimpcaisse/?id_entrepot=' + fk_warehouse + '\'"></td>');
     if (right_caisse_admin === 1)
         $('#ph_links').append('<input type="button" class="butAction" value="Accéder caisse admin" onclick="location.href=\'' + DOL_URL_ROOT + '/bimpcaisse/?fc=admin&id_entrepot=' + fk_warehouse + '\'">');
-    $('#ph_links').append('<input type="button" class="butAction" value="Tous les transferts" onclick="location.href=\'' + DOL_URL_ROOT + '/bimpequipment/manageequipment/viewReceptionMain.php?entrepot_id=' + fk_warehouse + '\'">');
-    $('#ph_links').append('<input type="button" class="butAction" value="BL Non envoyés" onclick="location.href=\'' + DOL_URL_ROOT + '/bimpreservation/index.php?fc=shipments&shipped=0&invoiced=0&id_entrepot=' + fk_warehouse + '\'">');
-    $('#ph_links').append('<input type="button" class="butAction" value="BL Non facturés" onclick="location.href=\'' + DOL_URL_ROOT + '/bimpreservation/index.php?fc=shipments&shipped=1&invoiced=0&id_entrepot=' + fk_warehouse + '\'">');
+    $('#ph_links').append('<input type="button" class="butAction" value="Tous les transferts" onclick="location.href=\'' + DOL_URL_ROOT + '/bimptransfer?entrepot_id=' + fk_warehouse + '\'">');
+//    $('#ph_links').append('<input type="button" class="butAction" value="BL Non envoyés" onclick="location.href=\'' + DOL_URL_ROOT + '/bimpreservation/index.php?fc=shipments&shipped=0&invoiced=0&id_entrepot=' + fk_warehouse + '\'">');
+//    $('#ph_links').append('<input type="button" class="butAction" value="BL Non facturés" onclick="location.href=\'' + DOL_URL_ROOT + '/bimpreservation/index.php?fc=shipments&shipped=1&invoiced=0&id_entrepot=' + fk_warehouse + '\'">');
 }
 
 

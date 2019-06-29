@@ -54,7 +54,7 @@ class BR_Reservation extends BimpObject
     public function canEdit()
     {
         global $user;
-        return (int) $user->admin;
+        return (int) 1;//$user->admin;
 //        return 0;
     }
 
@@ -1627,7 +1627,8 @@ class BR_Reservation extends BimpObject
         }
 
         if ($this->getData('id_equipment')) {
-            $this->checkEquipment($equipment, $errors);
+            if($this->getData("status") < 300)
+                $this->checkEquipment($equipment, $errors);
             $this->set('qty', 1);
         } else {
             if ($equipementOblige)

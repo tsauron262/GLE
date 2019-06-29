@@ -37,8 +37,8 @@ lists:
        objects_change_reload: Transfer
 #       after_list_content:
 #           callback: addInputs
-       delete_btn:
-           callback: userIsAdmin
+       delete_btn: 1
+       update_btn: 1
        cols:
            id_product: 
                field: id_product

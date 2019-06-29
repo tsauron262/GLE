@@ -74,20 +74,20 @@ class importEquiment extends import8sens {
     }
 
     function traiteLn($ln) {
-        if(!$this->netoyage){
-            $list = $this->equipment->getList(array('epl.type'=> (int) BE_Place::BE_PLACE_ENTREPOT,
-    //            'epl.id_entrepot' => (int) 66,
-                'epl.position' => 1
-
-                ), null, null, 'id', 'DESC', 'array', null, array(array('table'=>'be_equipment_place', 'alias' => 'epl', 'on' => 'a.id = epl.id_equipment')));
-
-            foreach($list as $elem){
-                    $obj = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $elem['id_equipment']);
-                    $obj->delete();
-                    $this->nSuppr++;
-            }
-            $this->netoyage = true;
-        }
+//        if(!$this->netoyage){
+//            $list = $this->equipment->getList(array('epl.type'=> (int) BE_Place::BE_PLACE_ENTREPOT,
+//    //            'epl.id_entrepot' => (int) 66,
+//                'epl.position' => 1
+//
+//                ), null, null, 'id', 'DESC', 'array', null, array(array('table'=>'be_equipment_place', 'alias' => 'epl', 'on' => 'a.id = epl.id_equipment')));
+//
+//            foreach($list as $elem){
+//                    $obj = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $elem['id_equipment']);
+//                    $obj->delete();
+//                    $this->nSuppr++;
+//            }
+//            $this->netoyage = true;
+//        }
         
         
         
@@ -121,13 +121,30 @@ class importEquiment extends import8sens {
                     $this->errors[] = 'LIGNE ' . $n . ' - le dépôt "' . $fields[$this->idx['dep']] . '" n\'existe pas';
                     return 0;
                 }
+                
+                $tabConvertRef = array("ST500M009"=>"SEA-ST500DM009",
+                    "MZ-76P256B/EU"=>"SAM-MZ-76P256B/EU",
+                    "HTS721010A9E630"=>"HIT-HTS721010A9E630",
+                    "ST500LMO21"=>"SEA-ST500LM021",
+                    "ST1000DM003"=>"SEA-ST1000DM003",
+                    "ADA 25/35"=>"ADA-25/35",
+                    "SEA-ST1000ML049"=>"SEA-ST1000LM049",
+                    "SEA-ST2000ML015"=>"SEA-ST2000LM015",
+                    "DDE-2U3-2T"=>"DDE-2U3-2T",
+                    "OWC-SSDAP12R480"=>"OWC-OWCSSDAP12R480");
+                if(isset($tabConvertRef[$fields[$this->idx['ref']]]))
+                    $fields[$this->idx['ref']] = $tabConvertRef[$fields[$this->idx['ref']]];
 
                 if (!$this->product->find(array(
                             'ref' => $fields[$this->idx['ref']]
                         ))) {
-                    echo 'LIGNE ' . $n . ' - REF: ' . $fields[$this->idx['ref']] . ' - SERIAL: ' . $fields[$this->idx['serial']] . '<br/>';
-                    $this->nNoRef++;
-                    return 0;
+                    if (!$this->product->find(array(
+                                'ref' => array('operator'=> 'LIKE', 'value' => "%".$fields[$this->idx['ref']]."%")
+                            ))) {
+                        $this->error('LIGNE ' . $n . ' - REF INTROUVABLE : ' . $fields[$this->idx['ref']] . ' - SERIAL: ' . $fields[$this->idx['serial']]);
+                        $this->nNoRef++;
+                        return 0;
+                    }
                 }
                 if ($this->equipment->equipmentExists($fields[$this->idx['serial']], (int) $this->product->id)) {
                     $this->nExists++;

@@ -1,0 +1,67 @@
+bootstrap: 1
+
+js:
+    - /bimptransfer/views/js/transfer_card.js
+
+objects:
+    transfer:
+        instance: 
+            bimp_object: Transfer
+            id_object:
+                request: id
+    transfer_line: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: TransferLine
+
+sections:
+    - type: object_header
+      object_header:
+          object: transfer
+    - type: nav_tabs
+      nav_tabs:
+          - id: infos
+            title: Fiche
+            struct: 
+                type: rows
+                rows: 
+                    - cols: 
+                        - type: view
+                          view:
+                            # TODO pas le must le callback
+                              panel:
+                                callback: userIsAdmin
+                              object: transfer
+                    - cols: 
+                        - type: custom
+                          col_lg: 12
+                          col_md: 6
+                          col_sm: 12
+                          custom: 
+                              callback:
+                                  method: renderAddInputs
+                                  object: transfer
+                    - cols:
+                        - type: list
+                          list: 
+                              name: default
+                              children: lines
+                              title: Ligne de transfert
+                              object: transfer
+                    - cols:
+                        - type: custom
+                          custom: 
+                              callback: 
+                                  method: renderNotesList
+                                  object: transfer
+                                  params:
+                                      - 1
+    - type: buttons
+      buttons:
+          - label: Liste des transferts
+            url:
+                controller: index
+            icon_before: chevron-left
+            classes: 
+                array: btn,btn-primary

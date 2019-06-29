@@ -1,0 +1,60 @@
+table: bt_transfer_det
+
+parent_module: bimptransfer
+parent_object: Transfer
+parent_id_property: id_transfer
+
+fields: 
+    quantity_sent:
+        label: Quantité envoyé
+        type: int
+                
+    quantity_received:
+        label: Quantité reçu
+        type: int
+        
+    quantity_transfered:
+        label: Quantité transféré
+        type: int
+
+    id_transfer:
+        label: Id transfert
+        type: id_object
+        object: transfer
+        
+    id_product:
+        label: Produit
+        type: id_object
+        object: product
+
+    id_equipment:
+        label: Équipement
+        type: id_object
+        object: equipment
+
+lists:
+    default:
+       objects_change_reload: Transfer
+#       after_list_content:
+#           callback: addInputs
+       delete_btn:
+           callback: userIsAdmin
+       cols:
+           id_product: 
+               field: id_product
+               display: nom_url
+           id_equipment: 
+               field: id_equipment
+               display: nom_url
+#           id_product: 
+#               field: id_product
+#               display: nom_url
+           quantity_sent: 
+               field: quantity_sent
+               edit: 1
+           quantity_received: 
+               field: quantity_received
+               label: Quantité reçu (brouillon)
+               edit: 1
+           quantity_transfered: 
+               field: quantity_transfered

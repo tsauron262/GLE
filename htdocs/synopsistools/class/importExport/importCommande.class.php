@@ -113,7 +113,7 @@ class importCommande extends import8sens
         }
 
 
-        $prefixe = "CO8-27-16H";
+        $prefixe = "CO8-28-14H";
         $tabFinal2 = array();
         foreach ($tabFinal as $ref => $data) {
             $ref = $prefixe . $ref;

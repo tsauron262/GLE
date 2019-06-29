@@ -155,9 +155,9 @@ class importCommandeFourn extends import8sens {
 
         $commandes = $tabFinal2;
         $commandes = array($prefixe."CF-1905752"=> $tabFinal2[$prefixe."CF-1905752"]);
-        echo "<pre>"; 
-        print_r($commandes);
-        die;
+//        echo "<pre>"; 
+//        print_r($commandes);
+//        die;
           
         global $db;
         $bdb = new BimpDb($db);

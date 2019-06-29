@@ -1020,7 +1020,7 @@ if (is_dir($dir)) {
                                     )
                                      VALUES (now(),
                                     '" . $prodId . "',
-                                    '" . $val['ArtDureeGar'] . ")'
+                                    '" . $val['ArtDureeGar'] . "')
                                     " /*. ($val['PlvPA'] > 0 ? $val['PlvPA'] : 0) . ") "*/;
 
                                     if ($sql) {

@@ -28,6 +28,7 @@ objects:
         instance: 
             id_object: 
                 field_value: id_avoir
+                
 fields: 
     id_commande_client: 
         label: Commande client

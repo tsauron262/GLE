@@ -120,6 +120,10 @@ class ObjectLine extends BimpObject
 
     public function isEditable($force_edit = false)
     {
+        if ((int) $this->id_remise_except) {
+            return 0;
+        }
+
         if (!$force_edit && !(int) $this->getData('editable') && (!$this->canEditPrixAchat() || !$this->canEditPrixVente())) {
             return 0;
         }
@@ -215,10 +219,6 @@ class ObjectLine extends BimpObject
             if (!(int) $product->getData('remisable')) {
                 return 0;
             }
-        }
-
-        if ((float) $this->getTotalHT() < 0) {
-            return 0;
         }
 
         return (int) $this->getData('remisable');
@@ -1237,57 +1237,68 @@ class ObjectLine extends BimpObject
                         }
                     }
 
-                    $product = $this->getProduct();
                     $desc = BimpTools::cleanString($this->desc);
                     $text = '';
 
+                    if ((int) $this->id_remise_except) {
+                        BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
+                        $discount = new DiscountAbsolute($this->db->db);
+                        $discount->fetch((int) $this->id_remise_except);
 
-                    if (BimpObject::objectLoaded($product)) {
-                        $text .= $this->displayLineData('id_product', 0, 'nom_url', $no_html);
-
-                        $product_label = BimpTools::cleanString($product->getData('label'));
-
-                        $desc = str_replace("  ", " ", $desc);
-                        $product_label = str_replace("  ", " ", $product_label);
-
-                        if ($product_label) {
-                            if (preg_match('/^' . preg_quote($product_label, '/') . '(.*)$/', $desc, $matches)) {
-                                $desc = $matches[1];
-                            }
-
-                            if (!(int) $this->getData('hide_product_label')) {
-                                $text .= ($text ? '<br/>' : '') . $product_label;
-                            }
+                        if (!BimpObject::objectLoaded($discount)) {
+                            $html .= BimpRender::renderAlerts('La remise d\'ID ' . $this->id_remise_except) . ' n\'existe plus';
+                        } else {
+                            $html .= 'Remise ' . $discount->getNomUrl(1);
+                            $html .= ' (' . $desc . ')';
                         }
+                    } else {
+                        $product = $this->getProduct();
+                        if (BimpObject::objectLoaded($product)) {
+                            $text .= $this->displayLineData('id_product', 0, 'nom_url', $no_html);
 
-                        if ((int) $product->getData('fk_product_type') == 1) {
-                            if ($this->date_from) {
-                                $dt_from = new DateTime($this->date_from);
-                                if ($text) {
-                                    $text .= '<br/>';
+                            $product_label = BimpTools::cleanString($product->getData('label'));
+
+                            $desc = str_replace("  ", " ", $desc);
+                            $product_label = str_replace("  ", " ", $product_label);
+
+                            if ($product_label) {
+                                if (preg_match('/^' . preg_quote($product_label, '/') . '(.*)$/', $desc, $matches)) {
+                                    $desc = $matches[1];
                                 }
+
+                                if (!(int) $this->getData('hide_product_label')) {
+                                    $text .= ($text ? '<br/>' : '') . $product_label;
+                                }
+                            }
+
+                            if ((int) $product->getData('fk_product_type') == 1) {
+                                if ($this->date_from) {
+                                    $dt_from = new DateTime($this->date_from);
+                                    if ($text) {
+                                        $text .= '<br/>';
+                                    }
+                                    if ($this->date_to) {
+                                        $text .= 'Du ';
+                                    } else {
+                                        $text .= 'A partir du ';
+                                    }
+                                    $text .= $dt_from->format('d/m/Y');
+                                }
+
                                 if ($this->date_to) {
-                                    $text .= 'Du ';
-                                } else {
-                                    $text .= 'A partir du ';
+                                    $dt_to = new DateTime($this->date_to);
+                                    if (!$this->date_from) {
+                                        $text .= ($text ? '<br/>' : '') . 'Jusqu\'au ';
+                                    } else {
+                                        $text .= ' au ';
+                                    }
+                                    $text .= $dt_to->format('d/m/Y');
                                 }
-                                $text .= $dt_from->format('d/m/Y');
-                            }
-
-                            if ($this->date_to) {
-                                $dt_to = new DateTime($this->date_to);
-                                if (!$this->date_from) {
-                                    $text .= ($text ? '<br/>' : '') . 'Jusqu\'au ';
-                                } else {
-                                    $text .= ' au ';
-                                }
-                                $text .= $dt_to->format('d/m/Y');
                             }
                         }
-                    }
-
-                    if ((!$text || $field !== 'desc_light') && $desc) {
-                        $text .= ($text ? '<br/>' : '') . (string) $desc;
+                        if ((!$text || $field !== 'desc_light') && $desc) {
+                            $text .= ($text ? '<br/>' : '') . (string) $desc;
+                        }
                     }
 
                     if ($no_html) {
@@ -2015,8 +2026,12 @@ class ObjectLine extends BimpObject
         return $warnings;
     }
 
-    public function attributeEquipment($id_equipment, $pu_ht = null, $tva_tx = null, $id_fourn_price = null, $id_equipment_line = 0)
+    public function attributeEquipment($id_equipment, $pu_ht = null, $tva_tx = null, $id_fourn_price = null, $id_equipment_line = 0, $pa_ht = null)
     {
+        // Si $pa_ht défini, il est prioritaire sur id_fourn_price et $equipment->getData('prix_achat')
+        // Sinon, si $equipment->getData('prix_achat') est défini (pas 0), il est prioritaire sur $id_fourn_price. 
+        // Si ni $id_fourn_price, ni $equipment->getData('prix_achat'), ni $pa_ht n'est défini, c'est le pa_ht de la ligne qui s'applique. 
+
         if (!$this->isLoaded()) {
             return array('ID ' . $this->getLabel('of_the') . ' absent');
         }
@@ -2087,11 +2102,12 @@ class ObjectLine extends BimpObject
                             $line->set('pu_ht', (float) $pu_ht);
                             $line->set('tva_tx', $tva_tx);
                         }
-                        if (!is_null($equipment) && (float) $equipment->getData('prix_achat')) {
-                            $line->set('pa_ht', (float) $equipment->getData('prix_achat'));
-                            $line->set('id_fourn_price', 0);
-                        } else {
-                            if (is_null($id_fourn_price)) {
+
+                        if (is_null($pa_ht)) {
+                            if (!is_null($equipment) && (float) $equipment->getData('prix_achat')) {
+                                $line->set('pa_ht', (float) $equipment->getData('prix_achat'));
+                                $line->set('id_fourn_price', 0);
+                            } elseif (is_null($id_fourn_price)) {
                                 if ($this->field_exists('def_id_fourn_price')) {
                                     $id_fourn_price = $this->getData('def_id_fourn_price');
                                 } else {
@@ -2103,21 +2119,24 @@ class ObjectLine extends BimpObject
                             } else {
                                 $pa_ht = (float) $this->pa_ht;
                             }
-                            $line->set('pa_ht', $pa_ht);
-                            $line->set('id_fourn_price', (int) $id_fourn_price);
+                        } else {
+                            $id_fourn_price = 0;
                         }
 
-                        $warnings = array();
-                        $update_errors = $line->update($warnings, true);
-                        if (count($update_errors)) {
-                            $errors[] = BimpTools::getMsgFromArray($update_errors, 'Des erreurs sont survenues lors de la mise à jour des données de la ligne d\'équipement');
+                        $line->set('pa_ht', (float) $pa_ht);
+                        $line->set('id_fourn_price', (int) $id_fourn_price);
+                    }
+
+                    $warnings = array();
+                    $update_errors = $line->update($warnings, true);
+                    if (count($update_errors)) {
+                        $errors[] = BimpTools::getMsgFromArray($update_errors, 'Des erreurs sont survenues lors de la mise à jour des données de la ligne d\'équipement');
+                    } else {
+                        if ($this->isEditable()) {
+                            $this->update();
                         } else {
-                            if ($this->isEditable()) {
-                                $this->update();
-                            } else {
-                                $this->calcValuesByEquipments();
-                                $this->forceUpdateLine();
-                            }
+                            $this->calcValuesByEquipments();
+                            $this->forceUpdateLine();
                         }
                     }
                 }
@@ -3521,7 +3540,7 @@ class ObjectLine extends BimpObject
                             }
 
                             if ((int) $this->getData('remisable')) {
-                                if (!(int) $product->getData('remisable') || (float) $this->getTotalHT() < 0) {
+                                if (!(int) $product->getData('remisable')) {
                                     $this->set('remisable', 0);
                                 }
                             }

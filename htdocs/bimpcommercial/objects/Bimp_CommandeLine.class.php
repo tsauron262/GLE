@@ -904,7 +904,7 @@ class Bimp_CommandeLine extends ObjectLine
                         $class = 'important';
                     }
             }
-            
+
             return '<span class="badge badge-' . ($class ? $class : 'default') . '">' . $qty . '</span>';
         }
 
@@ -3427,22 +3427,22 @@ class Bimp_CommandeLine extends ObjectLine
             $this->checkQties();
         }
     }
-    
+
     public function changeIdFacture($old_id_facture, $new_id_facture)
     {
         if (!$this->isLoaded()) {
             return array('ID de la ligne de commande absent');
         }
-        
+
         $factures = $this->getData('factures');
         if (isset($factures[(int) $old_id_facture])) {
             $facture_data = $factures[(int) $old_id_facture];
             unset($factures[(int) $old_id_facture]);
             $factures[(int) $new_id_facture] = $facture_data;
-            
+
             return $this->updateField('factures', $factures);
         }
-        
+
         return array();
     }
 
@@ -3656,6 +3656,33 @@ class Bimp_CommandeLine extends ObjectLine
 
                     if ($to_bill_qty !== (float) $this->getData('qty_to_bill')) {
                         $this->updateField('qty_to_bill', $to_bill_qty, null, true);
+                    }
+                }
+            } else {
+                if ((float) $this->qty && !(float) $this->pu_ht) {
+                    $this->qty = 0;
+                    $this->db->update('commandedet', array(
+                        'qty' => 0
+                            ), '`rowid` = ' . (int) $this->id);
+                    
+                    if ((float) $this->getData('qty_total')) {
+                        $this->updateField('qty_total', 0, null, true);
+                    }
+                    
+                    if ((float) $this->getData('qty_shipped')) {
+                        $this->updateField('qty_shipped', 0, null, true);
+                    }
+                    
+                    if ((float) $this->getData('qty_to_ship')) {
+                        $this->updateField('qty_to_ship', 0, null, true);
+                    }
+                    
+                    if ((float) $this->getData('qty_billed')) {
+                        $this->updateField('qty_billed', 0, null, true);
+                    }
+                    
+                    if ((float) $this->getData('qty_to_bill')) {
+                        $this->updateField('qty_to_bill', 0, null, true);
                     }
                 }
             }

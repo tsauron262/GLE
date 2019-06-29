@@ -57,10 +57,15 @@ class BimpDb
         return 0;
     }
 
-    public function update($table, $data, $where = '1')
+    public function update($table, $data, $where = '')
     {
         if (empty($data)) {
             return 1;
+        }
+
+        if (!$where) {
+            $this->db->lasterror = 'UPDATE ' . $table . ' Clause WHERE absente';
+            return -1;
         }
 
         $sql = 'UPDATE ' . MAIN_DB_PREFIX . $table . ' SET ';
@@ -78,11 +83,11 @@ class BimpDb
             $sql .= '"' . $this->db->escape($value) . '"';
         }
         $sql .= ' WHERE ' . $where;
-        
+
         if (BimpDebug::isActive('bimpcore/objects/print_update_sql')) {
             echo 'SQL: ' . $sql . '<br/>';
         }
-        
+
         return $this->execute($sql);
     }
 

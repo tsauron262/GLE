@@ -284,34 +284,9 @@ forms:
                       2: Facturée
                       
     invoice: 
-        title: Nouvelle facture fournisseur
+        title: Facturation de réceptions
         icon: fas_file-invoice-dollar
         rows: 
-            - custom: 1
-              label: Référence fournisseur
-              input_name: ref_supplier
-              data_type: string
-              input: 
-                  type: text
-            - custom: 1
-              label: Date facture
-              data_type: date
-              input_name: datef
-              input: 
-                  type: date
-                  display_now: 1
-            - custom: 1
-              label: Conditions de réglement
-              input_name: id_cond_reglement
-              data_type: id
-              input: 
-                  type: select_cond_reglement
-            - custom: 1
-              label: Mode de réglement
-              input_name: id_mode_reglement
-              data_type: id
-              input: 
-                  type: select_payment
             - custom: 1
               label: Réceptions de la commande à facturer
               input_name: receptions
@@ -319,7 +294,53 @@ forms:
               input: 
                   type: check_list
                   items: 
-                      callback: getFactureReceptionsArray
+                      array: factureReceptions
+            - custom: 1
+              label: Facture fournisseur
+              data_type: id
+              input_name: id_facture
+              input: 
+                 type: select
+                 options: 
+                     array: facturesFournisseur
+                 help: Liste des factures fournisseur brouillon pour ce fournisseur, ce secteur et cet entrepôt.
+            - custom: 1
+              label: Référence fournisseur
+              input_name: ref_supplier
+              data_type: string
+              input: 
+                  type: text
+              display_if: 
+                  field_name: id_facture
+                  show_values: 0
+            - custom: 1
+              label: Date facture
+              data_type: date
+              input_name: datef
+              input: 
+                  type: date
+                  display_now: 1
+              display_if: 
+                  field_name: id_facture
+                  show_values: 0
+            - custom: 1
+              label: Conditions de réglement
+              input_name: id_cond_reglement
+              data_type: id
+              input: 
+                  type: select_cond_reglement
+              display_if: 
+                  field_name: id_facture
+                  show_values: 0
+            - custom: 1
+              label: Mode de réglement
+              input_name: id_mode_reglement
+              data_type: id
+              input: 
+                  type: select_payment
+              display_if: 
+                  field_name: id_facture
+                  show_values: 0
             - custom: 1
               label: Note publique
               input_name: note_public
@@ -328,6 +349,9 @@ forms:
                   type: textarea
                   rows: 3
                   auto_expand: 1
+              display_if: 
+                  field_name: id_facture
+                  show_values: 0
             - custom: 1
               label: Note privée
               input_name: note_private
@@ -336,6 +360,9 @@ forms:
                   type: textarea
                   rows: 3
                   auto_expand: 1
+              display_if: 
+                  field_name: id_facture
+                  show_values: 0
          
 fields_tables: 
     infos: 

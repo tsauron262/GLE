@@ -69,6 +69,7 @@ fields:
             create_form: fournisseur_light
     ref_supplier: 
         label: Référence fournisseur
+        required: 1
     type: 
         label: Type
         type: int
@@ -305,3 +306,28 @@ lists:
             soc: 
             total_ttc:
     
+cards: 
+    default: 
+        title: 
+            field_value: ref
+        status: fk_statut
+        view_btn: 1
+        fields: 
+            - field: total_ttc
+            - label: Payé
+              value: 
+                  callback: displayPaid
+#            - label: Fichier PDF
+#              value: 
+#                  callback: displayPDFButton
+                  
+#    light: 
+#        title: 
+#            field_value: ref
+#        view_btn: 0
+#        fields: 
+#            - field: total_ttc
+#            - field: fk_statut
+#            - label: Payé
+#              value: 
+#                  callback: displayPaid

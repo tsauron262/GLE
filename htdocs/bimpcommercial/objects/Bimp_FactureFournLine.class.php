@@ -10,4 +10,10 @@ class Bimp_FactureFournLine extends FournObjectLine
     public static $dol_line_parent_field = 'fk_facture_fourn';
     public $equipment_required = true;
     public static $equipment_required_in_entrepot = false;
+    
+    public function isEquipmentAvailable(Equipment $equipment = null)
+    {
+        // Aucune vérif pour les factures fourn (L'équipement est attribué à titre indicatif)
+        return array();
+    }
 }

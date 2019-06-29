@@ -2708,8 +2708,13 @@ class Facture extends CommonInvoice
 			$this->line->label=$label;	// deprecated
 			$this->line->desc=$desc;
 
-			$this->line->qty=            ($this->type==self::TYPE_CREDIT_NOTE?abs($qty):$qty);	    // For credit note, quantity is always positive and unit price negative
-			$this->line->subprice=       ($this->type==self::TYPE_CREDIT_NOTE?-abs($pu_ht):$pu_ht); // For credit note, unit price always negative, always positive otherwise
+                        /*moddrsi*/
+                        // Pas chez nous...
+//			$this->line->qty=            ($this->type==self::TYPE_CREDIT_NOTE?abs($qty):$qty);	    // For credit note, quantity is always positive and unit price negative
+//			$this->line->subprice=       ($this->type==self::TYPE_CREDIT_NOTE?-abs($pu_ht):$pu_ht); // For credit note, unit price always negative, always positive otherwise
+                        $this->line->qty=            $qty;
+			$this->line->subprice=       $pu_ht;
+                        /*fmoddrsi*/
 
 			$this->line->vat_src_code=$vat_src_code;
 			$this->line->tva_tx=$txtva;
@@ -2718,11 +2723,19 @@ class Facture extends CommonInvoice
 			$this->line->localtax1_type = $localtaxes_type[0];
 			$this->line->localtax2_type = $localtaxes_type[2];
 
-			$this->line->total_ht=       (($this->type==self::TYPE_CREDIT_NOTE||$qty<0)?-abs($total_ht):$total_ht);    // For credit note and if qty is negative, total is negative
-			$this->line->total_ttc=      (($this->type==self::TYPE_CREDIT_NOTE||$qty<0)?-abs($total_ttc):$total_ttc);  // For credit note and if qty is negative, total is negative
-			$this->line->total_tva=      (($this->type==self::TYPE_CREDIT_NOTE||$qty<0)?-abs($total_tva):$total_tva);  // For credit note and if qty is negative, total is negative
-			$this->line->total_localtax1=(($this->type==self::TYPE_CREDIT_NOTE||$qty<0)?-abs($total_localtax1):$total_localtax1);  // For credit note and if qty is negative, total is negative
-			$this->line->total_localtax2=(($this->type==self::TYPE_CREDIT_NOTE||$qty<0)?-abs($total_localtax2):$total_localtax2);  // For credit note and if qty is negative, total is negative
+                        /*moddrsi*/
+                        // Pas chez nous non-plus...
+//			$this->line->total_ht=       (($this->type==self::TYPE_CREDIT_NOTE||$qty<0)?-abs($total_ht):$total_ht);    // For credit note and if qty is negative, total is negative
+//			$this->line->total_ttc=      (($this->type==self::TYPE_CREDIT_NOTE||$qty<0)?-abs($total_ttc):$total_ttc);  // For credit note and if qty is negative, total is negative
+//			$this->line->total_tva=      (($this->type==self::TYPE_CREDIT_NOTE||$qty<0)?-abs($total_tva):$total_tva);  // For credit note and if qty is negative, total is negative
+//			$this->line->total_localtax1=(($this->type==self::TYPE_CREDIT_NOTE||$qty<0)?-abs($total_localtax1):$total_localtax1);  // For credit note and if qty is negative, total is negative
+//			$this->line->total_localtax2=(($this->type==self::TYPE_CREDIT_NOTE||$qty<0)?-abs($total_localtax2):$total_localtax2);  // For credit note and if qty is negative, total is negative
+                        $this->line->total_ht= $total_ht;
+			$this->line->total_ttc= $total_ttc;
+			$this->line->total_tva= $total_tva;
+			$this->line->total_localtax1= $total_localtax1;
+			$this->line->total_localtax2=( $total_localtax2);
+                        /*fmoddrsi*/
 
 			$this->line->fk_product=$fk_product;
 			$this->line->product_type=$product_type;
@@ -2942,8 +2955,11 @@ class Facture extends CommonInvoice
 			$this->line->rowid				= $rowid;
 			$this->line->label				= $label;
 			$this->line->desc				= $desc;
-			$this->line->qty				= ($this->type==self::TYPE_CREDIT_NOTE?abs($qty):$qty);	// For credit note, quantity is always positive and unit price negative
-
+                        /*moddrsi*/
+//			$this->line->qty				= ($this->type==self::TYPE_CREDIT_NOTE?abs($qty):$qty);	// For credit note, quantity is always positive and unit price negative
+                        $this->line->qty				= $qty;
+                        /*fmoddrsi*/
+                        
 			$this->line->vat_src_code       = $vat_src_code;
 			$this->line->tva_tx				= $txtva;
 			$this->line->localtax1_tx		= $txlocaltax1;
@@ -2952,14 +2968,24 @@ class Facture extends CommonInvoice
 			$this->line->localtax2_type		= $localtaxes_type[2];
 
 			$this->line->remise_percent		= $remise_percent;
-			$this->line->subprice			= ($this->type==2?-abs($pu_ht):$pu_ht); // For credit note, unit price always negative, always positive otherwise
+                        /*moddrsi*/
+//			$this->line->subprice			= ($this->type==2?-abs($pu_ht):$pu_ht); // For credit note, unit price always negative, always positive otherwise
+                        $this->line->subprice			= $pu_ht;
+                        /*fmoddrsi*/
 			$this->line->date_start			= $date_start;
 			$this->line->date_end			= $date_end;
-			$this->line->total_ht			= (($this->type==self::TYPE_CREDIT_NOTE||$qty<0)?-abs($total_ht):$total_ht);  // For credit note and if qty is negative, total is negative
-			$this->line->total_tva			= (($this->type==self::TYPE_CREDIT_NOTE||$qty<0)?-abs($total_tva):$total_tva);
+                        /*moddrsi*/
+//			$this->line->total_ht			= (($this->type==self::TYPE_CREDIT_NOTE||$qty<0)?-abs($total_ht):$total_ht);  // For credit note and if qty is negative, total is negative
+//			$this->line->total_tva			= (($this->type==self::TYPE_CREDIT_NOTE||$qty<0)?-abs($total_tva):$total_tva);
+                        $this->line->total_ht			= $total_ht;
+			$this->line->total_tva			= $total_tva;
+                        /*fmoddrsi*/
 			$this->line->total_localtax1	= $total_localtax1;
 			$this->line->total_localtax2	= $total_localtax2;
-			$this->line->total_ttc			= (($this->type==self::TYPE_CREDIT_NOTE||$qty<0)?-abs($total_ttc):$total_ttc);
+                        /*moddrsi*/
+//			$this->line->total_ttc			= (($this->type==self::TYPE_CREDIT_NOTE||$qty<0)?-abs($total_ttc):$total_ttc);
+                        $this->line->total_ttc			= $total_ttc;
+                        /*fmoddrsi*/
 			$this->line->info_bits			= $info_bits;
 			$this->line->special_code		= $special_code;
 			$this->line->product_type		= $type;

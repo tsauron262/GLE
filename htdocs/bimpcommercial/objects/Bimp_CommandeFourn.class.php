@@ -374,9 +374,11 @@ class Bimp_CommandeFourn extends BimpComm
         $buttons = array();
 
         if ($this->isLoaded()) {
+            $status = (int) $this->getData('fk_statut');
 
             // Valider: 
-            if ($this->isActionAllowed('validate')) {
+            $errors = array();
+            if ($this->isActionAllowed('validate', $errors)) {
                 if ($this->canSetAction('validate')) {
                     $buttons[] = array(
                         'label'   => 'Valider',
@@ -396,14 +398,20 @@ class Bimp_CommandeFourn extends BimpComm
                         );
                     }
                 } else {
-                    $buttons[] = array(
-                        'label'    => 'Valider',
-                        'icon'     => 'fas_check',
-                        'onclick'  => '',
-                        'disabled' => 1,
-                        'popover'  => 'Vous n\'avez pas la permission de valider ' . $this->getLabel('this')
-                    );
+                    $msg = 'Vous n\'avez pas la permission de valider ' . $this->getLabel('this');
                 }
+            } elseif ($status === 0) {
+                $msg = BimpTools::getMsgFromArray($errors);
+            }
+
+            if ($msg) {
+                $buttons[] = array(
+                    'label'    => 'Valider',
+                    'icon'     => 'fas_check',
+                    'onclick'  => '',
+                    'disabled' => 1,
+                    'popover'  => $msg
+                );
             }
 
             // Approuver: 
@@ -573,20 +581,30 @@ class Bimp_CommandeFourn extends BimpComm
                     $values[] = $id_reception;
                 }
 
-                $onclick = $this->getJsActionOnclick('createInvoice', array(
-                    'ref_supplier'      => $this->getData('ref_supplier'),
-                    'id_cond_reglement' => (int) $this->getData('fk_cond_reglement'),
-                    'id_mode_reglement' => (int) $this->getData('fk_mode_reglement'),
-                    'receptions'        => json_encode($values)
-                        ), array(
-                    'form_name' => 'invoice'
-                ));
+                if (!empty($values)) {
+                    $onclick = $this->getJsActionOnclick('createInvoice', array(
+                        'ref_supplier'      => $this->getData('ref_supplier'),
+                        'id_cond_reglement' => (int) $this->getData('fk_cond_reglement'),
+                        'id_mode_reglement' => (int) $this->getData('fk_mode_reglement'),
+                        'receptions'        => json_encode($values)
+                            ), array(
+                        'form_name' => 'invoice'
+                    ));
 
-                $buttons[] = array(
-                    'label'   => 'Créer une facture fournisseur',
-                    'icon'    => 'fas_file-invoice-dollar',
-                    'onclick' => $onclick
-                );
+                    $buttons[] = array(
+                        'label'   => 'Facturer des réceptions',
+                        'icon'    => 'fas_file-invoice-dollar',
+                        'onclick' => $onclick,
+                    );
+                } else {
+                    $buttons[] = array(
+                        'label'    => 'Facturer des réceptions',
+                        'icon'     => 'fas_file-invoice-dollar',
+                        'onclick'  => '',
+                        'disabled' => 1,
+                        'popover'  => 'Aucune réception validée non facturée'
+                    );
+                }
             }
 
             // Classer facturée: 
@@ -726,6 +744,27 @@ class Bimp_CommandeFourn extends BimpComm
         }
 
         return array();
+    }
+
+    public function getFacturesFournisseurArray()
+    {
+        $return = array(
+            0 => 'Nouvelle facture'
+        );
+
+        $factures = BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_FactureFourn', array(
+                    'fk_statut' => 0,
+                    'fk_soc'    => (int) $this->getData('fk_soc'),
+                    'entrepot'  => (int) $this->getData('entrepot'),
+                    'ef_type'   => $this->getData('ef_type')
+        ));
+
+        foreach ($factures as $facture) {
+            $dt = new DateTime($facture->getData('datec'));
+            $return[(int) $facture->id] = $facture->getRef() . ' Créée le ' . $dt->format('d / m / Y');
+        }
+
+        return $return;
     }
 
     // Rendus HTML - overrides BimpObject:
@@ -1238,40 +1277,51 @@ class Bimp_CommandeFourn extends BimpComm
             }
 
             if (!count($errors)) {
-                $ref_supplier = (isset($data['ref_supplier']) ? $data['ref_supplier'] : '');
-                $datef = (isset($data['datef']) ? $data['datef'] : date('Y-m-d'));
-                $id_cond_reglement = (isset($data['id_cond_reglement']) ? $data['id_cond_reglement'] : (int) $this->getData('fk_cond_reglement'));
-                $id_mode_reglement = (isset($data['id_mode_reglement']) ? $data['id_mode_reglement'] : (int) $this->getData('fk_mode_reglement'));
-                $note_public = (isset($data['note_public']) ? $data['note_public'] : '');
-                $note_private = (isset($data['note_private']) ? $data['note_private'] : '');
+                $id_facture = (isset($data['id_facture']) ? (int) $data['id_facture'] : 0);
 
-                $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureFourn');
-
-                $errors = $facture->validateArray(array(
-                    'libelle'           => $this->getData('libelle'),
-                    'ef_type'           => $this->getData('ef_type'),
-                    'entrepot'          => (int) $this->getData('entrepot'),
-                    'fk_soc'            => (int) $this->getData('fk_soc'),
-                    'ref_supplier'      => (string) $ref_supplier,
-                    'datef'             => $datef,
-                    'fk_cond_reglement' => (int) $id_cond_reglement,
-                    'fk_mode_reglement' => (int) $id_mode_reglement,
-                    'note_public'       => (string) $note_public,
-                    'note_private'      => (string) $note_private
-                ));
-
-                $facture->dol_object->linked_objects['order_supplier'] = (int) $this->id;
-
-                if (!count($errors)) {
-                    $fac_warnings = array();
-                    $fac_errors = $facture->create($fac_warnings);
-
-                    if (count($fac_errors)) {
-                        $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Echec de la création de la facture');
+                if ($id_facture) {
+                    $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureFourn', $id_facture);
+                    if (!BimpObject::objectLoaded($facture)) {
+                        $errors[] = 'La facture fournisseur d\'ID ' . $id_facture . ' n\'existe pas';
+                    } elseif ((int) $facture->getData('fk_statut')) {
+                        $errors[] = 'La facture fournisseur "' . $facture->getRef() . '" n\'est plus au statut "brouillon"';
                     }
+                } else {
+                    $ref_supplier = (isset($data['ref_supplier']) ? $data['ref_supplier'] : '');
+                    $datef = (isset($data['datef']) ? $data['datef'] : date('Y-m-d'));
+                    $id_cond_reglement = (isset($data['id_cond_reglement']) ? $data['id_cond_reglement'] : (int) $this->getData('fk_cond_reglement'));
+                    $id_mode_reglement = (isset($data['id_mode_reglement']) ? $data['id_mode_reglement'] : (int) $this->getData('fk_mode_reglement'));
+                    $note_public = (isset($data['note_public']) ? $data['note_public'] : '');
+                    $note_private = (isset($data['note_private']) ? $data['note_private'] : '');
 
-                    if (count($fac_warnings)) {
-                        $warnings[] = BimpTools::getMsgFromArray($fac_warnings, 'Erreurs suite à la création de la facture');
+                    $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureFourn');
+
+                    $errors = $facture->validateArray(array(
+                        'libelle'           => $this->getData('libelle'),
+                        'ef_type'           => $this->getData('ef_type'),
+                        'entrepot'          => (int) $this->getData('entrepot'),
+                        'fk_soc'            => (int) $this->getData('fk_soc'),
+                        'ref_supplier'      => (string) $ref_supplier,
+                        'datef'             => $datef,
+                        'fk_cond_reglement' => (int) $id_cond_reglement,
+                        'fk_mode_reglement' => (int) $id_mode_reglement,
+                        'note_public'       => (string) $note_public,
+                        'note_private'      => (string) $note_private
+                    ));
+
+                    $facture->dol_object->linked_objects['order_supplier'] = (int) $this->id;
+
+                    if (!count($errors)) {
+                        $fac_warnings = array();
+                        $fac_errors = $facture->create($fac_warnings);
+
+                        if (count($fac_errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Echec de la création de la facture');
+                        }
+
+                        if (count($fac_warnings)) {
+                            $warnings[] = BimpTools::getMsgFromArray($fac_warnings, 'Erreurs suite à la création de la facture');
+                        }
                     }
                 }
 
@@ -1300,44 +1350,88 @@ class Bimp_CommandeFourn extends BimpComm
 
                                     $pu_ht = (float) $pu_ht;
                                     $tva_tx = (float) $tva_tx;
+                                    $fac_line = null;
 
-                                    $fac_line = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureFournLine');
-                                    $fac_line->validateArray(array(
-                                        'id_obj'             => (int) $facture->id,
-                                        'type'               => $line->getData('type'),
-                                        'deletable'          => 0,
-                                        'editable'           => 0,
-                                        'linked_object_name' => 'commande_fourn_line',
-                                        'linked_id_object'   => (int) $line->id,
-                                        'remisable'          => $line->getData('remisable')
+                                    // Recherche d'une ligne existante: 
+                                    $fac_instance = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureFournLine');
+
+                                    $rows = $fac_instance->getList(array(
+                                        'a.id_obj'             => (int) $facture->id,
+                                        'a.linked_object_name' => 'commande_fourn_line',
+                                        'a.linked_id_object'   => (int) $line->id,
+                                        'dl.fk_product'        => (int) $line->id_product,
+                                        'dl.pu_ht'             => $pu_ht,
+                                        'dl.tva_tx'            => $tva_tx
+                                            ), null, null, 'id', 'asc', 'array', array('id'), array(
+                                        'dl' => array(
+                                            'table' => 'facture_fourn_det',
+                                            'alias' => 'dl',
+                                            'on'    => 'dl.rowid = a.id_line'
+                                        )
                                     ));
 
-                                    $fac_line->desc = $line->desc;
-                                    $fac_line->tva_tx = $tva_tx;
-                                    $fac_line->id_product = $line->id_product;
-                                    $fac_line->qty = $qty;
-                                    $fac_line->pu_ht = $pu_ht;
-                                    $fac_line->pa_ht = $line->pa_ht;
-                                    $fac_line->id_fourn_price = $line->id_fourn_price;
-                                    $fac_line->date_from = $line->date_from;
-                                    $fac_line->date_to = $line->date_to;
-                                    $fac_line->id_remise_except = $line->id_remise_except;
-
-                                    $line_warnings = array();
-                                    $line_errors = $fac_line->create($line_warnings, true);
-                                    if (count($line_errors)) {
-                                        $warnings[] = BimpTools::getMsgFromArray($line_errors, 'Echec de la création de la ligne de facture n°' . $i);
-                                        continue;
+                                    if (!is_null($rows)) {
+                                        foreach ($rows as $r) {
+                                            $fac_line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureFournLine', (int) $r['id']);
+                                            if (BimpObject::objectLoaded($fac_line)) {
+                                                break;
+                                            }
+                                        }
                                     }
 
-                                    if (count($line_warnings)) {
-                                        $warnings[] = BimpTools::getMsgFromArray($line_warnings, 'Erreurs suite à la création de la ligne de facture n°' . $i);
+                                    // Si ligne trouvée, ajout des qtés: 
+                                    $line_errors = array();
+                                    $line_warnings = array();
+                                    if (BimpObject::objectLoaded($fac_line)) {
+                                        $fac_line->qty += (float) $qty;
+                                        $line_errors = $fac_line->update($line_warnings);
+
+                                        if (count($line_errors)) {
+                                            $warnings[] = BimpTools::getMsgFromArray($line_warnings, 'Echec de la mise à jour des quantités de la ligne de facture n°' . $fac_line->getData('position'));
+                                        }
+
+                                        if (count($line_warnings)) {
+                                            $warnings[] = BimpTools::getMsgFromArray($line_warnings, 'Erreurs suite à la mise à jour des quantités de la ligne de facture n°' . $fac_line->getData('position'));
+                                        }
+                                    } else {
+                                        // Création d'une nouvelle ligne: 
+                                        $fac_line = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureFournLine');
+                                        $fac_line->validateArray(array(
+                                            'id_obj'             => (int) $facture->id,
+                                            'type'               => $line->getData('type'),
+                                            'deletable'          => 0,
+                                            'editable'           => 0,
+                                            'linked_object_name' => 'commande_fourn_line',
+                                            'linked_id_object'   => (int) $line->id,
+                                            'remisable'          => $line->getData('remisable')
+                                        ));
+
+                                        $fac_line->desc = $line->desc;
+                                        $fac_line->tva_tx = $tva_tx;
+                                        $fac_line->id_product = $line->id_product;
+                                        $fac_line->qty = $qty;
+                                        $fac_line->pu_ht = $pu_ht;
+                                        $fac_line->pa_ht = $line->pa_ht;
+                                        $fac_line->id_fourn_price = $line->id_fourn_price;
+                                        $fac_line->date_from = $line->date_from;
+                                        $fac_line->date_to = $line->date_to;
+                                        $fac_line->id_remise_except = $line->id_remise_except;
+
+                                        $line_errors = $fac_line->create($line_warnings, true);
+                                        if (count($line_errors)) {
+                                            $warnings[] = BimpTools::getMsgFromArray($line_errors, 'Echec de la création de la ligne de facture n°' . $i);
+                                            continue;
+                                        }
+
+                                        if (count($line_warnings)) {
+                                            $warnings[] = BimpTools::getMsgFromArray($line_warnings, 'Erreurs suite à la création de la ligne de facture n°' . $i);
+                                        }
                                     }
 
                                     /* NOTE: on n'intègre pas les remises de la ligne de commande: celles-ci sont déjà déduites dans le pu_ht. */
 
                                     // Ajout des équipements: 
-                                    if ($isSerialisable) {
+                                    if (!count($line_errors) && $isSerialisable) {
                                         $equipments = (isset($line_data['equipments']) ? $line_data['equipments'] : array());
                                         foreach ($equipments as $id_equipment) {
                                             $eq_errors = $fac_line->attributeEquipment((int) $id_equipment);

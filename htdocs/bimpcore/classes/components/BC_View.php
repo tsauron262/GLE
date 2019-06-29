@@ -91,7 +91,10 @@ class BC_View extends BC_Panel
             }
             if ($this->params['delete_btn'] && $this->object->can("delete") && $this->object->isDeletable()) {
                 $html .= '<button type="button" class="btn btn-danger"';
-                $html .= ' onclick="deleteObject($(this), \'' . $this->object->module . '\', \'' . $this->object->object_name . '\', ' . $this->object->id . ', $(\'#' . $this->identifier . '_result\'));"';
+                $html .= ' onclick="' . $this->object->getJsDeleteOnClick(array(
+                            'result_container' => '$(\'#' . $this->identifier . '_result\')',
+                            'on_success'       => 'reload'
+                        )) . '"';
                 $html .= '><i class="fas fa5-trash-alt iconLeft"></i>Supprimer</button>';
             }
 

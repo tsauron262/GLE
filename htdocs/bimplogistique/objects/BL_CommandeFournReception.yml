@@ -253,7 +253,7 @@ lists:
         update_btn: 1
         edit_form: edit
         modal_view: default
-        objects_change_reload: BR_Reservation
+        objects_change_reload: Bimp_CommandeFourn,Bimp_FactureFourn,Bimp_CommandeFournLine,Bimp_FactureFournLine
         extra_btn: 
             callback: getListsExtraBtn
         cols:
@@ -282,7 +282,7 @@ lists:
         delete_btn: 1
         edit_form: default
         modal_view: default
-        objects_change_reload: BR_Reservation
+        objects_change_reload: Bimp_CommandeFourn,Bimp_FactureFourn,Bimp_CommandeFournLine,Bimp_FactureFournLine
         extra_btn: 
             callback: getListsExtraBtn
         cols:

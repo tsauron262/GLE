@@ -54,7 +54,7 @@ class BR_Reservation extends BimpObject
     public function canEdit()
     {
         global $user;
-        return (int) $user->admin;
+        return (int) 1;//$user->admin;
 //        return 0;
     }
 

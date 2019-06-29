@@ -2005,8 +2005,9 @@ class BimpObject extends BimpCache
         $sql .= BimpTools::getSqlWhere($filters);
         $sql .= BimpTools::getSqlOrderBy($order_by, $order_way, 'a', $extra_order_by, $extra_order_way);
         $sql .= BimpTools::getSqlLimit($n, $p);
-//
-//        echo $sql; exit;
+
+//        echo $sql . '<br/><br/>'; 
+//        exit;
 
         if (BimpDebug::isActive('bimpcore/objects/print_list_sql') || BimpTools::isSubmit('list_sql')) {
             $plus = "";
@@ -6077,9 +6078,7 @@ class BimpObject extends BimpCache
                 $url .= "&socid=" . BimpTools::getValue("socid");
             }
 
-
-
-            https://erp.bimp.fr/test11/bimpcommercial/index.php?search=1&object=propal&sall=PR1809-91794&fc=propals
+//            https://erp.bimp.fr/test11/bimpcommercial/index.php?search=1&object=propal&sall=PR1809-91794&fc=propals
         }
         else {
             $url = BimpTools::getDolObjectUrl($this->dol_object, $this->id);

@@ -57,7 +57,10 @@ class BimpComm extends BimpDolObject
 
     public function isDeletable($force_delete = false)
     {
-        return 1;
+        if ((int) $this->getData('fk_statut') === 0) {
+            return 1;
+        }
+        return 0;
     }
 
     public function isFieldEditable($field, $force_edit = false)

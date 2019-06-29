@@ -6,6 +6,7 @@ js:
     - /bimpreservation/views/js/reservation.js
     - /bimplogistique/views/js/logistique.js
     - /bimpcommercial/views/js/bimpcomm.js
+    - /bimpcommercial/views/js/mails.js
 
 objects: 
     commande: 

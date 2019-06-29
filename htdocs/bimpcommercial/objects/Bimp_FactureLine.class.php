@@ -23,7 +23,13 @@ class Bimp_FactureLine extends ObjectLine
         return 0;
     }
     
-    // Traitements: 
+    public function isEquipmentAvailable(Equipment $equipment = null)
+    {
+        // Aucune vérif pour les factures (L'équipement est attribué à titre indicatif)
+        return array();
+    }
+    
+    // Traitements:
 
     public function onFactureValidate()
     {

@@ -1627,7 +1627,7 @@ class BR_Reservation extends BimpObject
         }
 
         if ($this->getData('id_equipment')) {
-            if($this->getData("status") == 301)
+            if($this->getData("status") < 300)
                 $this->checkEquipment($equipment, $errors);
             $this->set('qty', 1);
         } else {

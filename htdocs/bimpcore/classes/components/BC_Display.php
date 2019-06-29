@@ -55,7 +55,7 @@ class BC_Display extends BimpComponent
         ),
         'callback'    => array(
             'method' => array('required' => true, 'default' => ''),
-            'params' => array('data_type' => 'array', 'default' => array())
+            'params' => array('data_type' => 'array', 'default' => array(), 'compile' => 1)
         ),
         'password'    => array(
             'hide' => array('data_type' => 'bool', 'default' => 1)
@@ -420,9 +420,15 @@ class BC_Display extends BimpComponent
                         $params = $this->params['params'];
 
                         if (method_exists($this->object, $method)) {
-                            return call_user_func_array(array(
-                                $this->object, $method
-                                    ), $params);
+                            if (empty($params)) {
+                                return $this->object->{$method}();
+                            } else {
+                                return call_user_func_array(array(
+                                    $this->object, $method
+                                        ), $params);
+                            }
+                        } else {
+                            return BimpRender::renderAlerts('Erreur de configuration: méthode "' . $method . '" absente de l\'objet "' . get_class($this->object) . '"');
                         }
 
                         break;

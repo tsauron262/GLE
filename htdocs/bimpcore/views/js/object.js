@@ -115,7 +115,6 @@ function deleteObject($button, module, object_name, id_object, $resultContainer,
         BimpAjax('deleteObjects', data, $resultContainer, {
             $button: $button,
             success: function (result, bimpAjax) {
-                console.log(result);
                 if (typeof (successCallBack) === 'function') {
                     successCallBack(result);
                 }

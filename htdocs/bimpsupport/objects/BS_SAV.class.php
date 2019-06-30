@@ -2768,8 +2768,13 @@ class BS_SAV extends BimpObject
                                     $propalLine->set('linked_object_name', '');
                                 }
                             }
-
-                            $line_errors = $propalLine->create();
+                            
+                            $line_warnings = array();
+                            $line_errors = $propalLine->create($line_warnings);
+                            if (count($line_warnings)) {
+                                $warnings[] = BimpTools::getMsgFromArray($line_errors, 'Erreurs suite à la la copie de la ligne du devis n°' . $i);
+                            }
+                            
                             if (count($line_errors)) {
                                 $warnings[] = BimpTools::getMsgFromArray($line_errors, 'Echec de la copie de la ligne du devis n°' . $i);
                             } else {
@@ -3566,7 +3571,7 @@ class BS_SAV extends BimpObject
 
         return $errors;
     }
-
+    
     public function create(&$warnings = array(), $force_create = false)
     {
         $errors = array();

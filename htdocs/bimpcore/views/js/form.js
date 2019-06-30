@@ -660,6 +660,31 @@ function reloadObjectInput(form_id, input_name, fields, keep_new_value) {
     });
 }
 
+function reloadParentInput($button, input_name) {
+    var $inputContainer = $button.findParentByClass('inputContainer');
+    
+    if (!$.isOk($inputContainer)) {
+        bimp_msg('Erreur technique (conteneur absent)');
+        return;
+    }
+    
+    var field_name = $inputContainer.data('field_name');
+    
+    if (field_name !== input_name) {
+        bimp_msg('Erreur technique (Nom de champ invalide)');
+        return;
+    }
+    
+    var $form = $inputContainer.findParentByClass('object_form');
+    
+    if (!$.isOk($form)) {
+        bimp_msg('Erreur technique (formulaire non trouvé)');
+        return;
+    }
+    
+    reloadObjectInput($form.attr('id'), input_name, []);
+}
+
 function searchObjectList($input) {
     if (!$.isOk($input)) {
         bimp_msg('Une erreur est survenue. Impossible d\'effectuer la recherche', 'danger');

@@ -661,10 +661,9 @@ class indexController extends BimpController
                         $session_errors = $session->update();
 
                         if (!count($session_errors)) {
-
-//                            $caisse->set('id_current_session', 0);
-//                            $caisse->set('status', 0);
-//                            $session_errors = $caisse->update();
+                            $caisse->set('id_current_session', 0);
+                            $caisse->set('status', 0);
+                            $session_errors = $caisse->update();
                         }
 
                         if (count($session_errors)) {

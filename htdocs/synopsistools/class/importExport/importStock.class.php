@@ -31,6 +31,9 @@ class importStock extends import8sens {
 
     function traiteLn($ln) {
         if ($ln[self::CHAMP_ENTREPOT] != "" && $ln[self::CHAMP_REF] != "") {
+            
+            
+            
             if (isset($this->tabCache['prod'][$ln[self::CHAMP_REF]])) {
                 $this->prodId = $this->tabCache['prod'][$ln[self::CHAMP_REF]];
             } else {
@@ -66,6 +69,9 @@ class importStock extends import8sens {
             else {
                     
                 
+                if($ln[self::CHAMP_ENTREPOT] == "PR" && $ln["ArdEmpl"] != ""){
+                    $this->db->query("UPDATE llx_product_extrafields SET zone_pr = '".$ln["ArdEmpl"]."' WHERE fk_object = ".$this->prodId);
+                }
                 
                 
                 

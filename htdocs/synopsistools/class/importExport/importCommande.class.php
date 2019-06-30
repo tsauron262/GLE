@@ -113,10 +113,10 @@ class importCommande extends import8sens
         }
 
 
-        $prefixe = "CO8-30-14H";
+        $prefixe = "COOLD8";
         $tabFinal2 = array();
         foreach ($tabFinal as $ref => $data) {
-            $ref = $prefixe . $ref;
+            $ref = $prefixe . str_replace("ERRORMAXNUMBERREACHFORT", "90001", $ref);
             foreach ($data as $idT => $line) {
 
                 $nbBlNonFact = $nbFact = 0;
@@ -232,7 +232,7 @@ class importCommande extends import8sens
                         }
                     }
                 }
-continue;//vire
+//continue;//vire
                 $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande');
                 $comm_errors = $commande->validateArray(array(
                     'ref'               => $comm_ref,
@@ -273,7 +273,7 @@ continue;//vire
             }
 
 
-            continue;//vire
+//            continue;//vire
             if (BimpObject::objectLoaded($commande)) {
                 echo '*** Traitement commande "' . $comm_ref . '" ***<br/>';
                 $commande->checkLines();

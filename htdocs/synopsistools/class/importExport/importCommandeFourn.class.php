@@ -106,7 +106,7 @@ class importCommandeFourn extends import8sens {
 
 
         $idFactureDef = 138;
-        $prefixe = "ANCIEN8SENS45";
+        $prefixe = "COOLD815H";
         $tabFinal2 = array();
         foreach ($tabFinal as $ref => $data) {
             $ref = $prefixe . $ref;

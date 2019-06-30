@@ -105,8 +105,8 @@ class importCommandeFourn extends import8sens {
         }
 
 
-        $idFactureDef = 138;
-        $prefixe = "COOLD815H";
+        $idFactureDef = 9;
+        $prefixe = "CFOLD8";
         $tabFinal2 = array();
         foreach ($tabFinal as $ref => $data) {
             $ref = $prefixe . $ref;
@@ -154,7 +154,7 @@ class importCommandeFourn extends import8sens {
         }
 
         $commandes = $tabFinal2;
-//        $commandes = array($prefixe."CF-1905752"=> $tabFinal2[$prefixe."CF-1905752"]);
+//        $commandes = array($prefixe."CF-1906498"=> $tabFinal2[$prefixe."CF-1906498"]);
 //        echo "<pre>"; 
 //        print_r($commandes);
 //        die;
@@ -295,11 +295,13 @@ continue;//Vire
                     // Pour les fourn, on peut pas gérer les qtés facturées...
 //                    $qty_fac = (float) $line_data['qtyEnBl'] - (float) $line_data['qteNonFact'];
 
+                    $desc = "";
                     if (!BimpObject::objectLoaded($product)) {
                         echo '<span class="danger">Ref par def utilisé  ' . $comm_ref . ' - ligne ' . $i . 'PRODUIT NON TROUVE: ' . $line_data['ref'].'</span><br/>';
                         $product = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Product', array(
                                     'ref' => 'ART_INC'
                         ));
+                        $desc = "Ref : ".$line_data['ref'];
                     }
                     if (!BimpObject::objectLoaded($product)) {
                         echo '<span class="danger">PRODUIT NON TROUVE: ' . $line_data['ref'] . '</span><br/>';
@@ -315,6 +317,8 @@ continue;//Vire
                         'type'   => ObjectLine::LINE_PRODUCT
                     ));
 
+                    if($desc != "")
+                        $BimpLine->desc = $desc;
                     $BimpLine->id_product = (int) $product->id;
                     $BimpLine->pu_ht = $line_data['pv'];
                     $BimpLine->tva_tx = (float) $product->getData('tva_tx');

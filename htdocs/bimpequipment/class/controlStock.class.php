@@ -83,7 +83,9 @@ class controlStock{
         else{
             echo "<br/><br/>".count($this->equipNonS)." equipment(s) correspondant a des produits non serialisable";
             foreach($this->equipNonS as $ref => $tabSn){
-                echo "<br/>Equipment non Serilisé ref : ".$ref. " SN : ". implode(" - ", $tabSn);
+                $prod = new Product($this->db);
+                $prod->fetch($ref);
+                echo "<br/>Equipment non Serilisé ref : ".$prod->getNomUrl(). " SN : ". implode(" - ", $tabSn);
             }
         }
         

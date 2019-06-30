@@ -5,6 +5,8 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/objects/Bimp_Paiement.class.ph
 class Bimp_PaiementFourn extends Bimp_Paiement
 {
 
+    public static $paiement_factures_types = array(FactureFournisseur::TYPE_STANDARD, FactureFournisseur::TYPE_DEPOSIT, FactureFournisseur::TYPE_REPLACEMENT, FactureFournisseur::TYPE_SITUATION);
+    public static $rbt_factures_type = array(FactureFournisseur::TYPE_CREDIT_NOTE);
     public $useCaisse = false;
 
     public function __construct($module, $object_name)
@@ -363,7 +365,7 @@ class Bimp_PaiementFourn extends Bimp_Paiement
                     }
                 }
             }
-            
+
             foreach ($factures as $id_facture => $facture) {
                 $facture->checkIsPaid();
             }

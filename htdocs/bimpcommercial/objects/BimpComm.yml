@@ -484,6 +484,8 @@ filters_panels:
                 field: type
             statut: 
                 field: fk_statut
+            paye: 
+                show: 0
             secteur: 
                 field: ef_type
             entrepot: 

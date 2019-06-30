@@ -3644,6 +3644,57 @@ class ObjectLine extends BimpObject
         return $errors;
     }
 
+    public function checkObject($context = '', $field = '')
+    {
+        if (in_array($context, array('create', 'fetch')) && (int) $this->id_remise_except && (float) $this->qty) {
+            $parent = $this->getParentInstance();
+            if (BimpObject::objectLoaded($parent) && (int) $parent->getData('fk_statut') === 0) {
+                BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
+                $discount = new DiscountAbsolute($this->db->db);
+                $discount->fetch((int) $this->id_remise_except);
+
+                $id_facture = 0;
+                if ((int) $discount->discount_type === 0) {
+                    // discount client:
+                    if ((int) $discount->fk_facture) {
+                        $id_facture = (int) $discount->fk_facture;
+                    } elseif ((int) $discount->fk_facture_line) {
+                        $id_facture = (int) $this->db->getValue('facturedet', 'fk_facture', '`rowid` = ' . (int) $discount->fk_facture_line);
+                    }
+                    if ($id_facture > 0) {
+                        $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_facture);
+                        if (BimpObject::objectLoaded($facture)) {
+                            if ($parent->object_name !== 'Bimp_Facture' || ($parent->object_name === 'Bimp_Facture' && (int) $id_facture !== (int) $parent->id)) {
+                                $this->qty = 0;
+                                $this->desc .= ($this->desc ? '<br/>' : '') . '<span class="danger">Remise déjà consommée dans la facture ' . $facture->getNomUrl(1, 1, 1, 'full') . '</span>';
+                                $warnings = array();
+                                $this->update($warnings, true);
+                            }
+                        }
+                    }
+                } else {
+                    // discount fournisseur: 
+                    if ((int) $discount->fk_invoice_supplier) {
+                        $id_facture = (int) $discount->fk_invoice_supplier;
+                    } elseif ((int) $discount->fk_invoice_supplier_line) {
+                        $id_facture = (int) $this->db->getValue('facture_fourn_det', 'fk_facture_fourn', '`rowid` = ' . (int) $discount->fk_invoice_supplier_line);
+                    }
+                    if ($id_facture > 0) {
+                        $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureFourn', (int) $id_facture);
+                        if (BimpObject::objectLoaded($facture)) {
+                            if ($parent->object_name !== 'Bimp_FactureFourn' || ($parent->object_name === 'Bimp_FactureFourn' && (int) $id_facture !== (int) $parent->id)) {
+                                $this->qty = 0;
+                                $this->desc .= ($this->desc ? '<br/>' : '') . '<span class="danger">Remise déjà consommée dans la facture fournisseur ' . $facture->getNomUrl(1, 1, 1, 'full') . '</span>';
+                                $warnings = array();
+                                $this->update($warnings, true);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     public function create(&$warnings = array(), $force_create = false)
     {
         if (!static::$parent_comm_type) {

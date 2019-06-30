@@ -41,6 +41,16 @@ forms:
     default: 
         # Attention: étendu par Bimp_PaiementFourn
         rows: 
+            rbt: 
+                custom: 1
+                label: Type d'opération
+                data_type: bool
+                input_name: is_rbt
+                input: 
+                    type: select
+                    options: 
+                        0: Paiement factures client
+                        1: Remboursement avoirs client
             soc: 
                 custom: 1
                 label: Client
@@ -52,6 +62,13 @@ forms:
                 required: 1
                 value: 
                     request_field: id_client
+            use_caisse: 
+                custom: 1
+                input_name: use_caisse
+                label: Paiement en caisse
+                data_type: bool
+                content: 
+                    callback: renderUseCaisseInput
             caisse: 
                 custom: 1
                 label: Caisse
@@ -60,15 +77,18 @@ forms:
                 content: 
                     callback: renderCaisseInput
                 required: 1
-                show: 
-                    prop: useCaisse
+                display_if: 
+                    field_name: use_caisse
+                    show_values: 1
             compte:
                 custom: 1
-                label: Compte
+                label: Compte bancaire
                 input_name: id_account
                 input: 
                     type: select_mysoc_account
-                show: 0
+                display_if: 
+                    field_name: use_caisse
+                    show_values: 0
             mode_paiement:
                 custom: 1
                 label: Mode de paiement
@@ -115,12 +135,15 @@ forms:
                         request_field: id_client
                     multiple: 1
                 display_if: 
-                    field_name: id_client
-                    hide_values: 0,
+                    fields_names: id_client,is_rbt
+                    is_rbt: 
+                        show_values: 0
+                    id_client: 
+                        hide_values: 0,
             factures: 
                 custom: 1
-                label: Factures à payer
-                depends_on: id_client
+                label: Factures à payer / Avoirs à rembourser
+                depends_on: id_client,is_rbt
                 input_name: factures
                 display_if: 
                     field_name: id_client

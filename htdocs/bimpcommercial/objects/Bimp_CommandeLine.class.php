@@ -4365,41 +4365,6 @@ class Bimp_CommandeLine extends ObjectLine
             return;
         }
 
-        if ((int) $this->id_remise_except && (float) $this->qty) {
-            BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
-            $discount = new DiscountAbsolute($this->db->db);
-            $discount->fetch((int) $this->id_remise_except);
-
-            $id_facture = 0;
-            if ((int) $discount->fk_facture) {
-                $id_facture = (int) $discount->fk_facture;
-            } elseif ((int) $discount->fk_facture_line) {
-                $id_facture = (int) $this->db->getValue('facturedet', 'fk_facture', '`rowid` = ' . (int) $discount->fk_facture_line);
-            }
-
-            if ($id_facture > 0) {
-                $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_facture);
-                if (BimpObject::objectLoaded($facture)) {
-                    $elements = BimpTools::getDolObjectLinkedObjectsList($facture->dol_object, $this->db);
-                    $id_commande = (int) $this->getParentId();
-
-                    $isOk = false;
-                    foreach ($elements as $element) {
-                        if ($element['type'] === 'commande' && (int) $element['id_object'] === $id_commande) {
-                            $isOk = true;
-                            break;
-                        }
-                    }
-                    if (!$isOk) {
-                        $this->qty = 0;
-                        $this->desc .= ($this->desc ? '<br/>' : '') . '<span class="danger">Remise déjà consommée dans la facture ' . $facture->getNomUrl() . '</span>';
-                        $warnings = array();
-                        $this->update($warnings, true);
-                    }
-                }
-            }
-        }
-
         $this->checkQties();
 
         $commande = $this->getParentInstance();
@@ -4409,6 +4374,8 @@ class Bimp_CommandeLine extends ObjectLine
             $this->checkReservations(); // les quantités des réservations sont vérifiées dans cette méthode.
             // Vérifications des quantités: 
         }
+        
+        parent::checkObject();
     }
 
     public function create(&$warnings = array(), $force_create = false)

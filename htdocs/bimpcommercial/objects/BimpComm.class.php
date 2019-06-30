@@ -456,9 +456,24 @@ class BimpComm extends BimpDolObject
         $total = 0;
 
         if ($this->isLoaded()) {
-            $lines = $this->getChildrenObjects('lines');
+            $lines = $this->getLines();
             foreach ($lines as $line) {
                 $total += $line->getTotalTtcWithoutRemises();
+            }
+        }
+        return $total;
+    }
+
+    public function getTotalTtcWithoutDiscountsAbsolutes()
+    {
+        $total = 0;
+
+        if ($this->isLoaded()) {
+            $lines = $this->getLines();
+            foreach ($lines as $line) {
+                if (!(int) $line->id_remise_except) {
+                    $total += $line->getTotalTTC();
+                }
             }
         }
         return $total;

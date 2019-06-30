@@ -114,4 +114,4 @@ lists:
         add_form_name: default
         edit_btn: 1
         edit_form: edit
-#        delete_btn: 1
+        delete_btn: 1

@@ -85,8 +85,9 @@ $warehouse=new Entrepot($db);
 
 $sql = "SELECT e.rowid, e.ref, e.statut, e.lieu, e.address, e.zip, e.town, e.fk_pays, e.fk_parent,";
 //$sql.= " SUM(p.pmp * ps.reel) as estimatedvalue, SUM(p.price * ps.reel) as sellvalue, SUM(ps.reel) as stockqty";
+$sql.= " SUM(p.pmp * ps.reel) as estimatedvalue, SUM(p.price * ps.reel) as sellvalue, SUM(ps.reel) as stockqty";
 /*moddrsi*/
-$sql.= " SUM(IF(ps.reel > 0, p.pmp * ps.reel, 0)) as estimatedvalue, SUM(p.price * ps.reel) as sellvalue, SUM(ps.reel) as stockqty";
+//$sql.= " SUM(IF(ps.reel > 0, p.pmp * ps.reel, 0)) as estimatedvalue, SUM(p.price * ps.reel) as sellvalue, SUM(ps.reel) as stockqty";
 /*fmoddrsi*/
 
 $sql.= " FROM ".MAIN_DB_PREFIX."entrepot as e";

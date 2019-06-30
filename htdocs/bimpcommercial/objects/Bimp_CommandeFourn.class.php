@@ -1384,7 +1384,7 @@ class Bimp_CommandeFourn extends BimpComm
                                     $line_warnings = array();
                                     if (BimpObject::objectLoaded($fac_line)) {
                                         $fac_line->qty += (float) $qty;
-                                        $line_errors = $fac_line->update($line_warnings);
+                                        $line_errors = $fac_line->update($line_warnings, true);
 
                                         if (count($line_errors)) {
                                             $warnings[] = BimpTools::getMsgFromArray($line_warnings, 'Echec de la mise à jour des quantités de la ligne de facture n°' . $fac_line->getData('position'));

@@ -89,6 +89,35 @@ function bimp_destroy_element_popover($element) {
     }
 }
 
+function bimp_notify(content) {
+    var html = '';
+
+    html += '<div class="notification_content">';
+    html += content;
+    html += '</div>';
+
+    var $modal = $('#notifications_modal');
+
+    if (!$modal.length) {
+        insertNotificationsModal();
+        $modal = $('#notifications_modal');
+    }
+
+    $modal.find('.modal-body').append(content);
+    $modal.modal('show');
+}
+
+function bimp_notify_error(content) {
+        var html = '<div class="danger" style="text-align: center; font-size: 18px; margin: 30px 0">';
+        html += '<i class="fas fa5-exclamation-triangle iconLeft"></i>Une erreur inattendue est survenue';
+        html += '</div>';
+        html += '<h3>Informations reçues: </h3>';
+        html += '<div>';
+        html += content;
+        html += '</div>';
+        bimp_notify(html);
+}
+
 // Notifications: 
 
 function setNotificationsEvents() {
@@ -137,6 +166,55 @@ function checkNotifications() {
 
     if (!$container.find('div.bimp_msg').length) {
         $container.hide();
+    }
+}
+
+// function Notifications modale: 
+
+function insertNotificationsModal() {
+    if ($('#notifications_modal').length) {
+        return;
+    }
+    var html = '';
+
+    html = '<div class="modal ajax-modal fade" tabindex="-1" role="dialog" id="notifications_modal">';
+    html += '<div class="modal-dialog modal-md" role="document">';
+    html += '<div class="modal-content">';
+
+    html += '<div class="modal-header">';
+    html += '<h4 class="modal-titles_container"><i class="fas fa5-comment iconLeft"></i>Message important</h4>';
+    html += '<button type="button" class="close" onclick="closeNotificationsModal(true);" aria-label="Close">';
+    html += '<span aria-hidden="true">&times;</span>';
+    html += '</button>';
+    html += '</div>';
+
+    html += '<div class="modal-body">';
+    html += '</div>';
+
+    html += '<div class="modal-footer">';
+    html += '<button type="button" class="btn btn-secondary" onclick="closeNotificationsModal(true);">';
+    html += '<i class="fa fa-times iconLeft"></i>Fermer</button>';
+    html += '</div>';
+
+    html += '</div>';
+    html += '</div>';
+    html += '</div>';
+
+    $('body').append(html);
+}
+
+function closeNotificationsModal(clear_content) {
+    if (typeof (clear_content) === 'undefined') {
+        clear_content = false;
+    }
+
+    var $modal = $('#notifications_modal');
+
+    if ($modal.length) {
+        $modal.modal('hide');
+        if (clear_content) {
+            $modal.find('.modal-body').html('');
+        }
     }
 }
 
@@ -906,6 +984,7 @@ $(document).ready(function () {
         $(this).find('.bs-popover').popover('hide');
     });
 
+    // Notifications: 
     var html = '<div id="page_notifications">';
     html += '<div id="notifications_tools">';
     html += '<span class="btn btn-danger removeAllBimpMsgButton" onclick="removeAllNotifications()"><i class="far fa5-times-circle iconLeft"></i>Masquer toutes les notifications</span>';
@@ -913,8 +992,10 @@ $(document).ready(function () {
     html += '</div>';
 
     $('body').append(html);
-
     setNotificationsEvents();
+
+    // Notifications importantes (modale): 
+    insertNotificationsModal();
 
     $('.object_header').each(function () {
         setCommonEvents($(this));

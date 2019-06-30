@@ -123,7 +123,7 @@ class Bimp_FactureFourn extends BimpComm
                 break;
 
             case 'convertToReduc':
-                BimpTools::loadDolClass('core', 'discount');
+                BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
                 $discountcheck = new DiscountAbsolute($this->db->db);
                 $discountcheck->fetch(0, 0, $this->id);
 
@@ -333,15 +333,19 @@ class Bimp_FactureFourn extends BimpComm
 
             // Réglement: 
             if ($this->isActionAllowed('makePayment') && $this->canSetAction('makePayment')) {
-                $pf = BimpObject::getInstance('bimpcommercial', 'Bimp_PaiementFourn');
+                $is_rbt = ((int) $this->getData('type') === FactureFournisseur::TYPE_CREDIT_NOTE);
+                
+                BimpObject::loadClass('bimpcommercial', 'Bimp_PaiementFourn');
+//                $pf = BimpObject::getInstance('bimpcommercial', 'Bimp_PaiementFourn');
                 $buttons[] = array(
-                    'label'   => 'Saisir réglement',
+                    'label'   => 'Saisir '.($is_rbt ? 'remboursement' : 'réglement'),
                     'icon'    => 'fas_euro-sign',
-                    'onclick' => $pf->getJsLoadModalForm('default', 'Paiement factures fournisseur', array(
-                        'fields' => array(
-                            'id_fourn' => (int) $this->getData('fk_soc')
-                        )
-                    )),
+                    'onclick' => 'window.location = \'' . DOL_URL_ROOT . '/fourn/facture/paiement.php?facid=' . $this->id . '&action=create\';'
+//                    'onclick' => $pf->getJsLoadModalForm('default', 'Paiement factures fournisseur', array(
+//                        'fields' => array(
+//                            'id_fourn' => (int) $this->getData('fk_soc')
+//                        )
+//                    )),
                 );
             }
 
@@ -696,7 +700,7 @@ class Bimp_FactureFourn extends BimpComm
                 }
 
                 // Trop perçu converti en remise: 
-                BimpTools::loadDolClass('core', 'discount');
+                BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
                 $discount = new DiscountAbsolute($this->db->db);
                 $discount->fetch(0, 0, $this->id);
                 if (BimpObject::objectLoaded($discount)) {

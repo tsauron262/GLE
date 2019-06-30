@@ -33,7 +33,7 @@ class BR_Reservation extends BimpObject
     public static $temp_status = array(202, 302, 303);
     public static $sav_status = array(203, 303, 304);
     public static $need_equipment_status = array(200, 201, 202, 250, 300, 301, 303, 304);
-    public static $unavailable_status = array(200, 201, 202, 203, 250, 300, 301, 304);
+    public static $unavailable_status = array(200, 201, 202, 203, 250);
     public static $types = array(
         1 => 'Commande',
         2 => 'Transfert',

@@ -306,10 +306,14 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
                 }
                 delete bimp_requests[bimpAjax.request_id];
             },
-            error: function () {
+            error: function (response, a, b) {
                 if (!bimp_is_unloaded) {
                     if (bimpAjax.display_errors) {
-                        bimpAjax.display_result_errors(bimpAjax.error_msg);
+                        if (typeof (response.responseText) === 'string' && response.responseText) {
+                            bimp_notify_error(response.responseText);
+                        } else {
+                            bimpAjax.display_result_errors(bimpAjax.error_msg);
+                        }
                     }
                     if (typeof (bimpAjax.error) === 'function') {
                         bimpAjax.error(null, bimpAjax);

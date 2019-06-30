@@ -1,9 +1,13 @@
 <?php
 
+BimpTools::loadDolClass('compta/facture', 'facture');
+
 class Bimp_Paiement extends BimpObject
 {
 
     public $useCaisse = false;
+    public static $paiement_factures_types = array(Facture::TYPE_STANDARD, Facture::TYPE_DEPOSIT, Facture::TYPE_REPLACEMENT, Facture::TYPE_SITUATION);
+    public static $rbt_factures_type = array(Facture::TYPE_CREDIT_NOTE);
 
     public function __construct($module, $object_name)
     {
@@ -60,6 +64,34 @@ class Bimp_Paiement extends BimpObject
 
     // Rendus: 
 
+    public function renderUseCaisseInput()
+    {
+        $html = '';
+        if ($this->useCaisse) {
+            $value = 0;
+            global $user;
+            $caisse = BimpObject::getInstance('bimpcaisse', 'BC_Caisse');
+            $id_caisse = (int) $caisse->getUserCaisse((int) $user->id);
+
+            if ($id_caisse) {
+                $caisse = BimpCache::getBimpObjectInstance('bimpcaisse', 'BC_Caisse', $id_caisse);
+                if (BimpObject::objectLoaded($caisse)) {
+                    $value = 1;
+                }
+            }
+
+            $html .= BimpInput::renderInput('toggle', 'use_caisse', $value);
+        } else {
+            $html .= '<span class="danger">';
+            $html .= 'NON';
+            $html .= '</span>';
+
+            $html .= '<input type="hidden" value="0" name="use_caisse"/>';
+        }
+
+        return $html;
+    }
+
     public function renderCaisseInput()
     {
         $html = '';
@@ -76,6 +108,11 @@ class Bimp_Paiement extends BimpObject
                     $id_caisse = 0;
                 } else {
                     $html .= $caisse->getData('name');
+                    $html .= '<div style="text-align: center; margin: 15px 0">';
+                    $url = DOL_URL_ROOT . '/bimpcaisse/index.php';
+                    $html .= '<a class="btn btn-default" href="' . $url . '" target="_blank"><i class="fa fa-external-link iconLeft"></i>Se connecter à une autre caisse</a>';
+                    $html .= '<span class="btn btn-default" onclick="reloadParentInput($(this), \'id_caisse\');"><i class="fas fa5-redo iconLeft"></i>Actualiser</span>';
+                    $html .= '</div>';
                 }
             }
 
@@ -84,6 +121,7 @@ class Bimp_Paiement extends BimpObject
                 $html .= '<div style="text-align: center; margin: 15px 0">';
                 $url = DOL_URL_ROOT . '/bimpcaisse/index.php';
                 $html .= '<a class="btn btn-default" href="' . $url . '" target="_blank"><i class="fa fa-external-link iconLeft"></i>Se connecter à une caisse</a>';
+                $html .= '<span class="btn btn-default" onclick="reloadParentInput($(this), \'id_caisse\');"><i class="fas fa5-redo iconLeft"></i>Actualiser</span>';
                 $html .= '</div>';
             }
         } else {
@@ -97,6 +135,8 @@ class Bimp_Paiement extends BimpObject
 
     public function renderFacturesAmountsInputs()
     {
+        $is_rbt = (int) BimpTools::getPostFieldValue('is_rbt', 0); // Cas d'un remboursement ou non.
+
         $id_client = (int) BimpTools::getPostFieldValue('id_client', 0);
 
         if (!$id_client) {
@@ -110,14 +150,22 @@ class Bimp_Paiement extends BimpObject
             $list = $facture->getList(array(
                 'fk_soc'    => $id_client,
                 'paye'      => 0,
-                'type'      => array('IN' => array(Facture::TYPE_STANDARD, Facture::TYPE_DEPOSIT)),
+                'type'      => array('IN' => (!$is_rbt ? self::$paiement_factures_types : self::$rbt_factures_type)),
 //                'type'      => Facture::TYPE_STANDARD,
-                'fk_statut' => 1
+                'fk_statut' => 1,
+                'total_ttc' => array(
+                    'operator' => ($is_rbt ? '<' : '>'),
+                    'value'    => 0
+                )
                     ), null, null, 'id', 'asc', 'array', array('rowid'));
         }
 
         if (!count($list)) {
-            return BimpRender::renderAlerts('Aucune facture à payer trouvée pour ce client', 'warning');
+            if ($is_rbt) {
+                return BimpRender::renderAlerts('Aucun avoir à rembourser trouvé pour ce client', 'warning');
+            } else {
+                return BimpRender::renderAlerts('Aucune facture à payer trouvée pour ce client', 'warning');
+            }
         }
 
         $rand = rand(111111, 999999);
@@ -135,7 +183,7 @@ class Bimp_Paiement extends BimpObject
         $html .= '<div id="factures_payments_' . $rand . '" class="factures_payment_container">';
 
         $html .= '<div style="margin: 15px 0; text-align: right">';
-        $html .= '<span style="font-weight: bold;">Somme totale versée:&nbsp;&nbsp;</span>';
+        $html .= '<span style="font-weight: bold;">Somme totale ' . ($is_rbt ? 'remboursée' : 'versée') . ':&nbsp;&nbsp;</span>';
         $html .= BimpInput::renderInput('text', 'total_paid_amount', 0, $options);
         $html .= '</div>';
 
@@ -144,15 +192,22 @@ class Bimp_Paiement extends BimpObject
 
         $html .= '<table class="bimp_list_table">';
         $html .= '<thead>';
-        $html .= '<th>Facture</th>';
+        $html .= '<th>' . ($is_rbt ? 'Avoir' : 'Facture') . '</th>';
         $html .= '<th>Date</th>';
         $html .= '<th style="text-align: center;">Montant TTC</th>';
-        $html .= '<th style="text-align: center;">Payé</th>';
-        $html .= '<th style="text-align: center;">Reste à régler</th>';
-        $html .= '<th style="text-align: center;">Avoirs utilisés</th>';
-        $html .= '<th style="text-align: center;">Montant règlement</th>';
+        $html .= '<th style="text-align: center;">' . ($is_rbt ? 'Remboursé' : 'Payé') . '</th>';
+        $html .= '<th style="text-align: center;">' . ($is_rbt ? 'Reste à rembourser' : 'Reste à régler') . '</th>';
+        if (!$is_rbt) {
+            $html .= '<th style="text-align: center;">Avoirs utilisés</th>';
+        }
+        $html .= '<th style="text-align: center;">Montant ' . ($is_rbt ? 'remboursement' : 'règlement') . '</th>';
         $html .= '</thead>';
 
+        if ($is_rbt) {
+            $colspan = 6;
+        } else {
+            $colspan = 7;
+        }
         $html .= '<tbody>';
 
         $i = 1;
@@ -175,6 +230,16 @@ class Bimp_Paiement extends BimpObject
                 if ($to_pay < 0.01 && $to_pay > -0.01) {
                     $facture->setObjectAction('classifyPaid');
                     continue;
+                } elseif ($is_rbt && $to_pay >= 0) {
+                    continue;
+                } elseif (!$is_rbt && $to_pay <= 0) {
+                    continue;
+                }
+
+                if ($is_rbt) {
+                    $montant_ttc *= -1;
+                    $paid *= -1;
+                    $to_pay *= -1;
                 }
 
                 $at_least_one = true;
@@ -196,12 +261,14 @@ class Bimp_Paiement extends BimpObject
                 $DT = new DateTime($this->db->db->iDate($facture->dol_object->date));
 
                 $html .= '<tr class="facture_payment_row">';
-                $html .= '<td>' . $facture->dol_object->getNomUrl(1) . '</td>';
+                $html .= '<td>' . $facture->getNomUrl(0, 1, 1) . '</td>';
                 $html .= '<td>' . $DT->format('d / m / Y') . '</td>';
                 $html .= '<td style="text-align: center;">' . BimpTools::displayMoneyValue($montant_ttc, 'EUR') . '</td>';
                 $html .= '<td style="text-align: center;">' . BimpTools::displayMoneyValue($paid, 'EUR') . '</td>';
                 $html .= '<td style="text-align: center; font-weight: bold">' . BimpTools::displayMoneyValue($to_pay, 'EUR') . '</td>';
-                $html .= '<td class="facture_avoirs" style="text-align: center; font-weight: bold"></td>';
+                if (!$is_rbt) {
+                    $html .= '<td class="facture_avoirs" style="text-align: center; font-weight: bold"></td>';
+                }
                 $html .= '<td style="text-align: right;">';
                 $html .= '<input type="hidden" name="amount_' . $i . '_id_facture" value="' . $facture->id . '"/>';
                 $html .= BimpInput::renderInput('text', 'amount_' . $i, '', $options);
@@ -214,7 +281,15 @@ class Bimp_Paiement extends BimpObject
         }
 
         if (!$at_least_one) {
-            return BimpRender::renderAlerts('Aucune facture à payer trouvée pour ce client', 'warning');
+            $html .= '<tr>';
+            $html .= '<td colspan="' . $colspan . '">';
+            if ($is_rbt) {
+                return BimpRender::renderAlerts('Aucun avoir à rembourser trouvé pour ce client', 'warning');
+            } else {
+                return BimpRender::renderAlerts('Aucune facture à payer trouvée pour ce client', 'warning');
+            }
+            $html .= '</td>';
+            $html .= '</tr>';
         }
 
         $html .= '</tbody>';
@@ -226,7 +301,9 @@ class Bimp_Paiement extends BimpObject
             $html .= '<td style="text-align: center;">' . BimpTools::displayMoneyValue($total_ttc, 'EUR') . '</td>';
             $html .= '<td style="text-align: center;">' . BimpTools::displayMoneyValue($total_paid, 'EUR') . '</td>';
             $html .= '<td style="text-align: center;">' . BimpTools::displayMoneyValue($total_to_pay, 'EUR') . '</td>';
-            $html .= '<td></td>';
+            if (!$is_rbt) {
+                $html .= '<td></td>';
+            }
             $html .= '<td></td>';
             $html .= '</tr>';
             $html .= '</tfoot>';
@@ -239,16 +316,18 @@ class Bimp_Paiement extends BimpObject
         $html .= '<input type="hidden" name="avoirs_amounts" value=""/>';
 
         $html .= '<div class="total_payments_container" style="font-weight: bold; margin: 20px 0 5px; padding: 8px 12px; color: #3C3C3C; font-size: 14px; text-align: center; background-color: #D8D8D8">';
-        $html .= 'Total paiements:&nbsp;<span class="total_payments">0,00 &euro;</span>';
+        $html .= 'Total ' . ($is_rbt ? 'remboursements' : 'paiements') . ':&nbsp;<span class="total_payments">0,00 &euro;</span>';
         $html .= '</div>';
-        $html .= '<div class="total_avoirs_container" style="display: none; font-weight: bold; margin: 5px 0; padding: 8px 12px; color: #fff; font-size: 14px; text-align: center; background-color: #D2AF00">';
-        $html .= 'Total avoirs utilisés:&nbsp;<span class="total_avoirs">0,00 &euro;</span>';
-        $html .= '</div>';
+        if (!$is_rbt) {
+            $html .= '<div class="total_avoirs_container" style="display: none; font-weight: bold; margin: 5px 0; padding: 8px 12px; color: #fff; font-size: 14px; text-align: center; background-color: #D2AF00">';
+            $html .= 'Total avoirs utilisés:&nbsp;<span class="total_avoirs">0,00 &euro;</span>';
+            $html .= '</div>';
+        }
         $html .= '<div class="rest_to_pay_container" style="font-weight: bold; margin: 5px 0; padding: 8px 12px; color: #fff; font-size: 14px; text-align: center; background-color: #A00000">';
-        $html .= 'Reste à régler:&nbsp;<span class="rest_to_pay">' . BimpTools::displayMoneyValue($total_to_pay, 'EUR') . '</span>';
+        $html .= 'Reste à ' . ($is_rbt ? 'rembourser' : 'régler') . ':&nbsp;<span class="rest_to_pay">' . BimpTools::displayMoneyValue($total_to_pay, 'EUR') . '</span>';
         $html .= '</div>';
         $html .= '<div class="to_return_container" style="font-weight: bold; margin: 5px 0 10px; padding: 8px 12px; color: #fff; font-size: 14px; text-align: center; background-color: #348B41">';
-        $html .= 'A rendre:&nbsp;<span class="to_return">0,00 &euro;</span>';
+        $html .= ($is_rbt ? 'Trop remboursé' : 'A rendre') . ':&nbsp;<span class="to_return">0,00 &euro;</span>';
         $html .= '</div>';
 
         $html .= '<script type="text/javascript">';
@@ -300,9 +379,17 @@ class Bimp_Paiement extends BimpObject
         $caisse = null;
         $id_caisse = 0;
         $account = null;
+        $use_caisse = false;
 
-        if ($this->useCaisse) {
-            $id_caisse = (int) BimpTools::getValue('id_caisse');
+        $is_rbt = BimpTools::getValue('is_rbt', null);
+
+        if (is_null($is_rbt)) {
+            return array('Type d\'opération absent');
+        }
+
+        if ($this->useCaisse && (int) BimpTools::getValue('use_caisse', 0)) {
+            $use_caisse = true;
+            $id_caisse = (int) BimpTools::getValue('id_caisse', 0);
             if (!$id_caisse) {
                 $errors[] = 'Caisse absente';
             } else {
@@ -316,15 +403,31 @@ class Bimp_Paiement extends BimpObject
                 }
             }
         } else {
-            BimpTools::loadDolClass('compta/bank', 'account');
-            $account = new Account($db);
-            $account->fetch((int) BimpCore::getConf('bimpcaisse_id_default_account'));
+            $id_account = (int) BimpTools::getValue('id_account', 0);
+
+            if (!$id_account) {
+                $errors[] = 'Veuillez sélectionner un compte bancaire';
+            } else {
+                BimpTools::loadDolClass('compta/bank', 'account');
+                $account = new Account($db);
+                $account->fetch($id_account);
+
+                if (!BimpObject::objectLoaded($account)) {
+                    $errors[] = 'Le compte bancaire d\'ID ' . $id_account . ' n\'existe pas';
+                }
+            }
+        }
+
+        if (count($errors)) {
+            return $errors;
         }
 
         if (!BimpObject::objectLoaded($account)) {
             $errors[] = 'Compte bancaire invalide';
+            return $errors;
         }
 
+        // Check montants: 
         $total_to_pay = (float) BimpTools::getValue('total_to_pay', 0);
         $total_avoirs = (float) BimpTools::getValue('total_avoirs', 0);
         $total_paid = (float) BimpTools::getValue('total_paid_amount');
@@ -336,11 +439,15 @@ class Bimp_Paiement extends BimpObject
             $errors[] = 'Montant total payé absent';
         }
 
+        // Check du mode de paiement: 
         $type_paiement = $this->db->getValue('c_paiement', 'code', '`id` = ' . (int) $this->dol_object->paiementid);
+
         if (is_null($type_paiement) || !(string) $type_paiement) {
             $errors[] = 'Mode paiement invalide';
         } elseif (($total_paid + $total_avoirs) > $total_to_pay && $type_paiement !== 'LIQ') {
             $errors[] = 'Le versement d\'une somme supérieure au total des factures n\'est possible que pour un paiement en espèces';
+        } elseif (!$use_caisse && $type_paiement === 'LIQ') {
+            $errors[] = 'Le réglement en espèce n\'est possible que pour un paiement en caisse';
         }
 
         if (count($errors)) {
@@ -373,34 +480,50 @@ class Bimp_Paiement extends BimpObject
             if ($id_facture <= 0) {
                 $errors[] = 'ID facture invalide (ligne ' . $i . ')';
             } elseif ($amount !== 0) {
-                $factures[$id_facture] = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
+                $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
 
-                if (!$factures[$id_facture]->isLoaded()) {
+                if (!$facture->isLoaded()) {
                     $errors[] = 'Facture d\'ID ' . $id_facture . ' inexistante';
-                    unset($factures[$id_facture]);
+                } elseif ($is_rbt && !in_array((int) $facture->getData('type'), self::$rbt_factures_type)) {
+                    $errors[] = 'La facture ' . $facture->getNomUrl(0, 1, 1) . ' est de type "' . $facture->displayData('type') . '" et ne peut donc pas faire l\'objet d\'un remboursement';
+                } elseif (!$is_rbt && !in_array((int) $facture->getData('type'), self::$paiement_factures_types)) {
+                    $errors[] = 'La facture ' . $facture->getNomUrl(0, 1, 1) . ' est de type "' . $facture->displayData('type') . '" et ne peut donc pas faire l\'objet d\'un règlement';
                 } else {
+                    $factures[$id_facture] = $facture;
+
                     $avoir_used = 0;
                     $paid = (float) $factures[$id_facture]->dol_object->getSommePaiement();
                     $paid += (float) $factures[$id_facture]->dol_object->getSumCreditNotesUsed();
                     $paid += (float) $factures[$id_facture]->dol_object->getSumDepositsUsed();
                     $paid = round($paid, 2);
 
-                    foreach ($avoirs as $avoir) {
-                        if ($avoir['input_name'] === 'amount_' . $i) {
-                            $avoir_used += (float) $avoir['amount'];
+                    if (!$is_rbt) {
+                        foreach ($avoirs as $avoir) {
+                            if ($avoir['input_name'] === 'amount_' . $i) {
+                                $avoir_used += (float) $avoir['amount'];
+                            }
                         }
                     }
 
-                    $diff = $factures[$id_facture]->dol_object->total_ttc - $paid - $avoir_used - $amount;
+                    $diff = abs($factures[$id_facture]->dol_object->total_ttc) - abs($paid) - $avoir_used - $amount;
                     if ($diff > -0.01 && $diff < 0.01) {
-                        $amount = ($factures[$id_facture]->dol_object->total_ttc - $paid - $avoir_used); // Eviter les problèmes d'arrondis
+                        $amount = (abs($factures[$id_facture]->dol_object->total_ttc) - abs($paid) - $avoir_used); // Eviter les problèmes d'arrondis
+                    }
+                    
+                    $total_factures_versements += $amount;
+                    
+                    if ($is_rbt) {
+                        $amount *= -1;
                     }
 
                     $this->dol_object->amounts[$id_facture] = $amount;
-                    $total_factures_versements += $amount;
                 }
             }
             $i++;
+        }
+        
+        if (count($errors)) {
+            return $errors;
         }
 
         $total_factures_versements = round($total_factures_versements, 2);
@@ -417,27 +540,42 @@ class Bimp_Paiement extends BimpObject
 
         if (!count($errors)) {
             // Insertion des avoirs éventuels: 
-            $i = 1;
-            while (BimpTools::isSubmit('amount_' . $i)) {
-                $id_facture = (int) BimpTools::getValue('amount_' . $i . '_id_facture', 0);
-                if (isset($factures[$id_facture]) && $factures[$id_facture]->isLoaded()) {
-                    foreach ($avoirs as $avoir) {
-                        if ($avoir['input_name'] === 'amount_' . $i) {
-                            BimpTools::resetDolObjectErrors($factures[$id_facture]->dol_object);
-                            if ($factures[$id_facture]->dol_object->insert_discount((int) $avoir['id_discount']) <= 0) {
-                                $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($factures[$id_facture]->dol_object), 'Echec de l\'insertion de l\'avoir client d\'ID ' . $avoir['id_discount']);
-                            } else {
-                                $factures[$id_facture]->checkIsPaid();
+            if (!empty($avoirs) && !$is_rbt) {
+                BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
+                $i = 1;
+                while (BimpTools::isSubmit('amount_' . $i)) {
+                    $id_facture = (int) BimpTools::getValue('amount_' . $i . '_id_facture', 0);
+                    if ($id_facture && isset($factures[$id_facture]) && BimpObject::objectLoaded($factures[$id_facture])) {
+                        $facture = $factures[$id_facture];
+                        foreach ($avoirs as $avoir) {
+                            if ($avoir['input_name'] === 'amount_' . $i) {
+                                $discount = new DiscountAbsolute($this->db->db);
+                                $discount->fetch((int) $avoir['id_discount']);
+
+                                if (!BimpObject::objectLoaded($discount)) {
+                                    $warnings[] = 'L\'avoir client d\'ID ' . $avoir['id_discount'] . ' n\'existe plus et n\'a donc pas pu être utilisé en paiement de la facture ' . $facture->getNomUrl(0, 1, 1, 'full');
+                                } elseif ((int) $discount->discount_type !== 0) {
+                                    $warnings[] = 'L\'avoir client d\'ID ' . $avoir['id_discount'] . ' n\'est pas valide (il s\'agit d\'un avoir fournisseur) et n\'a donc pas pu être utilisé en paiement de la facture ' . $facture->getNomUrl(0, 1, 1, 'full');
+                                } elseif ((int) $discount->fk_facture || (int) $discount->fk_facture_line) {
+                                    $warnings[] = 'L\'avoir client d\'ID ' . $avoir['id_discount'] . ' a déjà été consommé et n\'a donc pas pu être utilisé en paiement de la facture ' . $facture->getNomUrl(0, 1, 1, 'full');
+                                } else {
+                                    // Ajout de l'avoir à la facture: 
+                                    if ($discount->link_to_invoice(0, (int) $facture->id)) {
+                                        $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($discount), 'Echec de l\'utilisation de l\'avoir client #' . $discount->id . ' en paiement de la facture ' . $facture->getNomUrl(0, 1, 1, 'full'));
+                                    } else {
+                                        $facture->checkIsPaid();
+                                    }
+                                }
                             }
                         }
                     }
+                    $i++;
                 }
-                $i++;
             }
 
             // Enregistrement du paiement en caisse: 
             if ($this->isLoaded()) {
-                if ($this->useCaisse) {
+                if ($use_caisse) {
                     $bc_paiement = BimpObject::getInstance('bimpcaisse', 'BC_Paiement');
                     $paiement_errors = $bc_paiement->validateArray(array(
                         'id_caisse'         => (int) $caisse->id,
@@ -460,7 +598,7 @@ class Bimp_Paiement extends BimpObject
                     $this->dol_object->errors = array();
                     $label = 'Paiement facture client';
 
-                    if ($this->useCaisse) {
+                    if ($use_caisse) {
                         $centre = $this->db->getValue('entrepot', 'ref', '`rowid` = ' . (int) $caisse->getData('id_entrepot'));
                         if (is_null($centre)) {
                             $centre = 'inconnu';
@@ -468,13 +606,16 @@ class Bimp_Paiement extends BimpObject
                         $label .= '(Caisse "' . $caisse->getData('name') . '" - Centre "' . $centre . '")';
                     }
 
-                    if ($this->dol_object->addPaymentToBank($user, 'payment', $label, $this->dol_object->fk_account, $nom_emetteur, $banque_emetteur) <= 0) {
+                    if ($this->dol_object->addPaymentToBank($user, 'payment', $label, $account->id, $nom_emetteur, $banque_emetteur) <= 0) {
                         $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'ajout du paiement au compte bancaire "' . $account->bank . '"');
                     }
                 }
 
                 // Correction fonds de caisse:
                 if ($this->useCaisse && $total_factures_versements !== 0 && $type_paiement === 'LIQ') {
+                    if ($is_rbt) {
+                        $total_factures_versements *= -1;
+                    }
                     $fonds = (float) $caisse->getData('fonds');
                     $fonds += $total_factures_versements;
                     $caisse->set('fonds', $fonds);

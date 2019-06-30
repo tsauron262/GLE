@@ -531,6 +531,7 @@ class BimpRender
         $html .= '</div>';
 
         $html .= '</div>';
+        
         $html .= '<h4 class="modal-titles_container"></h4>';
         $html .= '<button type="button" class="close" onclick="bimpModal.clearCurrentContent();" aria-label="Close">';
         $html .= '<span aria-hidden="true">&times;</span>';

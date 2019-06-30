@@ -553,6 +553,7 @@ class BimpController
     protected function ajaxProcess()
     {
         ini_set('display_errors', 1);
+        error_reporting(E_ERROR);
 
         $errors = array();
         if (BimpTools::isSubmit('action')) {

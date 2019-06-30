@@ -93,7 +93,7 @@ function calcul_price_total($qty, $pu, $remise_percent_ligne, $txtva, $uselocalt
 	if (empty($txtva)) $txtva=0;
 	if (empty($seller) || ! is_object($seller))
 	{
-		dol_syslog("Price.lib::calcul_price_total Warning: function is called with parameter seller that is missing", LOG_WARNING);
+		//dol_syslog("Price.lib::calcul_price_total Warning: function is called with parameter seller that is missing", LOG_WARNING);
 		if (! is_object($mysoc))	// mysoc may be not defined (during migration process)
 		{
 			$mysoc=new Societe($db);

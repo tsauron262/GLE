@@ -100,7 +100,7 @@ class controlStock{
     }
     
     private function getProductSerialisable(){
-        $sql = $this->db->query("SELECT p.rowid, p.label FROM `llx_product` p, llx_product_extrafields pe WHERE p.rowid = pe.fk_object AND pe.serialisable2 = 1");
+        $sql = $this->db->query("SELECT p.rowid, p.label FROM `llx_product` p, llx_product_extrafields pe WHERE p.rowid = pe.fk_object AND pe.serialisable = 1");
         while($ligne = $this->db->fetch_object($sql))
                 $this->prodS[$ligne->rowid] = $ligne->label;
     }
@@ -109,7 +109,7 @@ class controlStock{
     private function getEquipmentNonSerialisable(){
         $this->equipNonS = array();
         $sql = $this->db->query("SELECT serial, id_product FROM `llx_be_equipment` be, `llx_be_equipment_place` bep WHERE bep.id_equipment = be.id AND bep.`type` = 2 AND bep.`position` = 1 AND be.id_product > 0 AND be.id_product NOT IN (SELECT pe.fk_object FROM llx_product_extrafields pe WHERE pe.serialisable = 1)");
-//        $sql = $this->db->query("SELECT serial FROM llx_product_extrafields pe, `llx_be_equipment` be WHERE be.id_product = pe.fk_object AND pe.serialisable2 = 0");
+//        $sql = $this->db->query("SELECT serial FROM llx_product_extrafields pe, `llx_be_equipment` be WHERE be.id_product = pe.fk_object AND pe.serialisable = 0");
         while($ligne = $this->db->fetch_object($sql))
                 $this->equipNonS[$ligne->id_product][] = $ligne->serial;
     }

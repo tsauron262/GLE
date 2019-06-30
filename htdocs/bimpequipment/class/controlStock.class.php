@@ -29,12 +29,22 @@ class controlStock{
         echo "Debut : <br/>";
         
         $i = 0;
+        
+        
+        $stocks = $this->getStocksProds();
+        $stocksEqui = $this->getNbEquips();
+//        echo "<pre>";print_r($stocks);die;
         foreach($this->entrepot as $idEn => $labEl){
             $debutText = "Entrepot : ".$labEl."<br/>";
             foreach($this->prodS as $idPr => $labPr){
                 $i++;
-                $nbE = $this->getNbEquip($idPr, $idEn);
-                $nbS = $this->getStockProd($idPr, $idEn);
+//                $nbE = $this->getNbEquip($idPr, $idEn);
+//                $nbS = $this->getStockProd($idPr, $idEn);
+                
+                $nbE = isset($stocksEqui[$idEn][$idPr])? $stocksEqui[$idEn][$idPr] : 0;
+                $nbS = isset($stocks[$idEn][$idPr])? $stocks[$idEn][$idPr] : 0;
+                
+                
                 
                 if($nbE != $nbS || $nbE != 0){
                     $millieuText = $debutText. "  -  Produit : ".$labPr;
@@ -102,19 +112,39 @@ class controlStock{
     
     
     
-    private function getNbEquip($prod, $entrepot){
-        $sql = $this->db->query("SELECT COUNT(*) as nb FROM `llx_be_equipment` be, `llx_be_equipment_place` bep WHERE be.id = bep.`id_equipment` AND bep.type = 2 AND position = 1 AND `id_entrepot` = ".$entrepot." AND id_product = ".$prod);
+//    private function getNbEquip($prod, $entrepot){
+//        $sql = $this->db->query("SELECT COUNT(*) as nb FROM `llx_be_equipment` be, `llx_be_equipment_place` bep WHERE be.id = bep.`id_equipment` AND bep.type = 2 AND position = 1 AND `id_entrepot` = ".$entrepot." AND id_product = ".$prod);
+//        while($ligne = $this->db->fetch_object($sql))
+//                return $ligne->nb;
+//        return 0;
+//    }
+//    
+//    
+//    
+//    private function getStockProd($prod, $entrepot){
+//        $sql = $this->db->query("SELECT reel as nb FROM `llx_product_stock` WHERE `fk_entrepot` = ".$entrepot." AND fk_product = ".$prod);
+//        while($ligne = $this->db->fetch_object($sql))
+//                return $ligne->nb;
+//        return 0;
+//    }
+    
+    
+    private function getStocksProds(){
+        $result = array();
+        $sql = $this->db->query("SELECT reel as nb, fk_entrepot, fk_product FROM `llx_product_stock`");
         while($ligne = $this->db->fetch_object($sql))
-                return $ligne->nb;
-        return 0;
+                $result[$ligne->fk_entrepot][$ligne->fk_product] = $ligne->nb;
+        return $result;
     }
     
     
     
-    private function getStockProd($prod, $entrepot){
-        $sql = $this->db->query("SELECT reel as nb FROM `llx_product_stock` WHERE `fk_entrepot` = ".$entrepot." AND fk_product = ".$prod);
+    private function getNbEquips(){
+        $result = array();
+        $sql = $this->db->query("SELECT COUNT(*) as nb, `id_entrepot`, id_product FROM `llx_be_equipment` be, `llx_be_equipment_place` bep WHERE be.id = bep.`id_equipment` AND bep.type = 2 AND position = 1 GROUP BY `id_entrepot`, id_product ");
+        
         while($ligne = $this->db->fetch_object($sql))
-                return $ligne->nb;
-        return 0;
+                $result[$ligne->id_entrepot][$ligne->id_product] = $ligne->nb;
+        return $result;
     }
 }

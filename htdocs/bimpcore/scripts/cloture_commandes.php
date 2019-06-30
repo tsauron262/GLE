@@ -41,9 +41,8 @@ echo 'Mise à 0 des lignes de type texte: ';
 
 $sql = 'UPDATE ' . MAIN_DB_PREFIX . 'bimp_commande_line a';
 $sql .= ' LEFT JOIN '.MAIN_DB_PREFIX.'commandedet cdet ON cdet.rowid = a.id_line';
-$sql .= ' LEFT JOIN '.MAIN_DB_PREFIX.'commande c ON c.rowid = a.id_obj';
 $sql .= ' SET a.qty_total = 0, a.qty_modif = 0, cdet.qty = 0';
-$sql .= ' WHERE a.type = 2 AND c.fk_statut > 0';
+$sql .= ' WHERE a.type = 2';
 
 if ($bdb->execute($sql) <= 0) {
     echo '<span class="danger">[ECHEC] - ' . $bdb->db->lasterror() . '</span>';

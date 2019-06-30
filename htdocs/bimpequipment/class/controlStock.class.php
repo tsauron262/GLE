@@ -91,7 +91,7 @@ class controlStock{
     
     
     private function getEntrepot(){
-        $sql = $this->db->query("SELECT `rowid`, `ref` FROM `llx_entrepot` WHERE ref LIKE 'SAV%'");
+        $sql = $this->db->query("SELECT `rowid`, `ref` FROM `llx_entrepot`");// WHERE ref LIKE 'SAV%'");
         while($ligne = $this->db->fetch_object($sql))
                 $this->entrepot[$ligne->rowid] = $ligne->ref;
     }

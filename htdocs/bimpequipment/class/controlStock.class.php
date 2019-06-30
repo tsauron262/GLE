@@ -105,7 +105,7 @@ class controlStock{
     
     private function getEquipmentNonSerialisable(){
         $this->equipNonS = array();
-        $sql = $this->db->query("SELECT serial FROM `llx_be_equipment` be WHERE be.id_product NOT IN (SELECT pe.fk_object FROM llx_product_extrafields pe WHERE pe.serialisable = 0)");
+        $sql = $this->db->query("SELECT serial FROM `llx_be_equipment` be WHERE be.id_product > AND be.id_product NOT IN (SELECT pe.fk_object FROM llx_product_extrafields pe WHERE pe.serialisable = 1)");
 //        $sql = $this->db->query("SELECT serial FROM llx_product_extrafields pe, `llx_be_equipment` be WHERE be.id_product = pe.fk_object AND pe.serialisable2 = 0");
         while($ligne = $this->db->fetch_object($sql))
                 $this->equipNonS[] = $ligne->serial;

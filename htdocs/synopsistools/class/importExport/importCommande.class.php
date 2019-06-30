@@ -159,7 +159,7 @@ class importCommande extends import8sens
         }
 
         $commandes = $tabFinal2;
-        $commandes = array($prefixe."CO1906-90073"=> $tabFinal2[$prefixe."CO1906-90073"]);
+//        $commandes = array($prefixe."CO1906-90073"=> $tabFinal2[$prefixe."CO1906-90073"]);
 //        echo "<pre>"; print_r($commandes);die;
 
         global $db;

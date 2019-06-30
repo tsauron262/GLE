@@ -64,6 +64,7 @@ forms:
     edit: 
         rows: 
             - field: name
+            - field: fonds
             - field: id_account
             - field: printer_dpi
             

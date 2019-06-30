@@ -230,7 +230,7 @@ class importCommandeFourn extends import8sens {
                         }
                     }
                 }
-continue;//vire
+//continue;//vire
                 $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFourn');
                 $comm_errors = $commande->validateArray(array(
                     'ref'               => $comm_ref,
@@ -270,7 +270,7 @@ continue;//vire
                 }
                 echo '<br/>';
             }
-continue;//Vire
+//continue;//Vire
             if (BimpObject::objectLoaded($commande)) {
                 echo '*** Traitement commande "' . $comm_ref . '" ***<br/>';
                 $commande->checkLines();

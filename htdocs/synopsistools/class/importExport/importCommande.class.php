@@ -113,7 +113,7 @@ class importCommande extends import8sens
         }
 
 
-        $prefixe = "CO8-28-14H";
+        $prefixe = "CO8-30-14H";
         $tabFinal2 = array();
         foreach ($tabFinal as $ref => $data) {
             $ref = $prefixe . $ref;
@@ -159,7 +159,7 @@ class importCommande extends import8sens
         }
 
         $commandes = $tabFinal2;
-//        $commandes = array($prefixe."COLY-190273"=> $tabFinal2[$prefixe."COLY-190273"]);
+        $commandes = array($prefixe."CO1906-90073"=> $tabFinal2[$prefixe."CO1906-90073"]);
 //        echo "<pre>"; print_r($commandes);die;
 
         global $db;
@@ -325,7 +325,7 @@ continue;//vire
 
                     // Recherche BimpLine correspondante: 
                     $product = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Product', array(
-                                'ref' => $line_data['ref']
+                                'ref' => array('operator'=> 'LIKE', 'value' => "".$line_data['ref']."")
                     ));
                     $qty_fac = (float) $line_data['qtyEnBl'] - (float) $line_data['qteNonFact'];
 
@@ -591,6 +591,8 @@ continue;//vire
                         }
                     } else {
                         echo '<span class="danger">PRODUIT NON TROUVE: ' . $line_data['ref'] . '</span><br/>';
+                        $err_title = 'Commande ' . $comm_ref . ' - PRODUIT NON TROUVE: ' . $line_data['ref'] . '): ';
+                        $errors[] = BimpTools::getMsgFromArray(array("oups"), $err_title, 1);
                     }
 
                     echo '<br/>';

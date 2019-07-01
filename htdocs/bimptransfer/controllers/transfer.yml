@@ -30,8 +30,8 @@ sections:
                         - type: view
                           view:
                             # TODO pas le must le callback
-                              panel:
-                                callback: userIsAdmin
+                              panel: 1
+#                                callback: userIsAdminOrStatusSending
                               object: transfer
                     - cols: 
                         - type: custom

@@ -17,13 +17,7 @@ objects:
         instance: 
             bimp_object: TransferLine
         delete: 1
-#    product:
-#        instance:
-#            bimp_object: unset
-#            dol_object: product
-#        cards: 
-#            default: 
-#                type: product_card
+
                 
 fields: 
     user_create: 
@@ -94,13 +88,6 @@ fields_tables:
         title: Informations
         icon: info-circle
         rows:
-#            - label: Auteur
-#              value: 
-#                  callback: 
-#                    method: displayAuthor
-##                    method: displayProduct
-#                    params: 
-#                          - card
             - field: id_warehouse_source
             - field: id_warehouse_dest
             - field: date_opening
@@ -157,7 +144,7 @@ list:
             method: getListFilters
     add_form_name: add
     edit_btn: 
-        callback: userIsAdmin
+        callback: userIsAdminOrStatusSending
     delete_btn:
         callback: userIsAdmin
     view_btn: 1

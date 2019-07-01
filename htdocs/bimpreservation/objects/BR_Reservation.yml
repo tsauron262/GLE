@@ -526,6 +526,7 @@ filters_panels:
 lists: 
     default: 
         filters_panel: default
+        configurable: 1
         checkboxes: 
             callback: canDelete
         bulk_actions: 
@@ -573,6 +574,7 @@ lists:
                 
     commandes: 
         checkboxes: 1
+        configurable: 1
         pagination: 0
         bulk_actions: 
             callback: getCommandesListBulkActions
@@ -612,6 +614,7 @@ lists:
                 
     entrepot: 
         checkboxes: 1
+        configurable: 1
         bulk_actions: 
 #            - label: Marquer comme livré au client
 #              icon: sign-out

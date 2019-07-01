@@ -34,7 +34,7 @@ class Actionsbimpsecurlogin {
 class securLogSms {
 
     var $max_tentative = 3;
-    var $debug = 1; //0 pas de auth mail sur ip //1 pas de sms code ecran //2 normal
+    var $debug = 2; //0 pas de auth mail sur ip //1 pas de sms code ecran //2 normal
     var $message = array();
 
     public function __construct($db) {

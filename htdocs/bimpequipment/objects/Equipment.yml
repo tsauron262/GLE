@@ -264,8 +264,9 @@ fields_tables:
                       params: 
                           - card
             - field: serial
-#            - field: available
-#              edit: 1
+            - label: Disponibilité
+              value: 
+                  callback: displayAvailability
 #            - field: return_available
 #              edit: 1
             - field: date_purchase

@@ -46,7 +46,7 @@ class Equipment extends BimpObject
         // id_commande_fourn_line (retour)
         // id_reception (retour)
         // id_vente_return (retour en caisse)
-        
+
         if (!$this->isLoaded()) {
             $errors[] = 'ID de l\'équipement absent';
             return 0;
@@ -114,25 +114,25 @@ class Equipment extends BimpObject
         }
 
         // Check des ajouts aux factures non validées. 
-        $sql = 'SELECT f.rowid  as id FROM ' . MAIN_DB_PREFIX . 'facture f';
-        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'bimp_facture_line l ON l.id_obj = f.rowid ';
-        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'object_line_equipment leq ON (leq.id_object_line = l.id AND leq.object_type = \'facture\') ';
-        $sql .= ' WHERE leq.id_equipment = ' . (int) $this->id;
-        $sql .= ' AND f.fk_statut = 0';
-
-        if (isset($allowed['id_facture']) && (int) $allowed['id_facture']) {
-            $sql .= ' AND f.rowid != ' . (int) $allowed['id_facture'];
-        }
-
-        $rows = $this->db->executeS($sql, 'array');
-        if (!is_null($rows) && !empty($rows)) {
-            foreach ($rows as $r) {
-                $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $r['id']);
-                if (BimpObject::objectLoaded($facture)) {
-                    $errors[] = 'L\'équipement ' . $this->getNomUrl(0, 1, 1, 'default') . ' a été ajouté à une facture non validée ' . $facture->getNomUrl(0, 1, 1, 'full');
-                }
-            }
-        }
+//        $sql = 'SELECT f.rowid  as id FROM ' . MAIN_DB_PREFIX . 'facture f';
+//        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'bimp_facture_line l ON l.id_obj = f.rowid ';
+//        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'object_line_equipment leq ON (leq.id_object_line = l.id AND leq.object_type = \'facture\') ';
+//        $sql .= ' WHERE leq.id_equipment = ' . (int) $this->id;
+//        $sql .= ' AND f.fk_statut = 0';
+//
+//        if (isset($allowed['id_facture']) && (int) $allowed['id_facture']) {
+//            $sql .= ' AND f.rowid != ' . (int) $allowed['id_facture'];
+//        }
+//
+//        $rows = $this->db->executeS($sql, 'array');
+//        if (!is_null($rows) && !empty($rows)) {
+//            foreach ($rows as $r) {
+//                $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $r['id']);
+//                if (BimpObject::objectLoaded($facture)) {
+//                    $errors[] = 'L\'équipement ' . $this->getNomUrl(0, 1, 1, 'default') . ' a été ajouté à une facture non validée ' . $facture->getNomUrl(0, 1, 1, 'full');
+//                }
+//            }
+//        }
 
         // Check retour en commande client: 
         if ((int) $this->getData('id_commande_line_return')) {
@@ -175,7 +175,7 @@ class Equipment extends BimpObject
             }
 
             $rows = $this->db->executeS($sql, 'array');
-            if (!is_null($rows) && !empty($rows)) {                
+            if (!is_null($rows) && !empty($rows)) {
                 foreach ($rows as $r) {
                     $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFournLine', (int) $r['id']);
                     if (BimpObject::objectLoaded($line)) {
@@ -714,6 +714,25 @@ class Equipment extends BimpObject
         }
 
         return 'ID de l\'équipement absent';
+    }
+
+    public function displayAvailability($id_entrepot = 0, $allowed = array())
+    {
+        $html = '';
+
+        $errors = array();
+
+        if ($this->isLoaded($errors)) {
+            $this->isAvailable($id_entrepot, $errors, $allowed);
+        }
+
+        if (count($errors)) {
+            $html .= BimpRender::renderAlerts($errors, 'warning');
+        } else {
+            $html .= BimpRender::renderAlerts('Equipement disponible', 'success');
+        }
+
+        return $html;
     }
 
     // Traitements: 

@@ -2635,7 +2635,7 @@ class ObjectLine extends BimpObject
                 break;
 
             case 'qty':
-                if (!$this->isFieldEditable('qty')) {
+                if (!$force_edit && !$this->isFieldEditable('qty')) {
                     return $value;
                 }
                 

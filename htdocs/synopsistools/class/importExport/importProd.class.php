@@ -100,8 +100,7 @@ class importProd extends importCat {
             $this->update = false;
 
 
-            $this->traiteChamp("options_serialisable2", ($ln['ArtStkNuf'] == "N° de série"));
-            $this->traiteChamp("options_serialisable", 0);
+            $this->traiteChamp("options_serialisable", ($ln['ArtStkNuf'] == "N° de série"));
             $this->traiteChamp("options_validate", 1);
             $this->traiteChamp("options_deee", ($ln['ArtFree1'] == '' ? 0 : $ln['ArtFree1']), true);
             $this->traiteChamp("options_rpcp", ($ln['ArtFree2'] == '' ? 0 : $ln['ArtFree2']), true);

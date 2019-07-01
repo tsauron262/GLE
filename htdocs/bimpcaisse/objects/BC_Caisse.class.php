@@ -21,6 +21,13 @@ class BC_Caisse extends BimpObject
     );
 
     // Getters:
+    
+    public function canDelete(){
+        global $user;
+        if ($user->admin)
+            return 1;
+        return 0;
+    }
 
     public function isValid(&$errors = array())
     {

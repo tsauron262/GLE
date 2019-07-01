@@ -64,6 +64,7 @@ forms:
     edit: 
         rows: 
             - field: name
+            - field: fonds
             - field: id_account
             - field: printer_dpi
             
@@ -114,4 +115,4 @@ lists:
         add_form_name: default
         edit_btn: 1
         edit_form: edit
-#        delete_btn: 1
+        delete_btn: 1

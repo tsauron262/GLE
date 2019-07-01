@@ -66,7 +66,7 @@ class importStock2 extends import8sens {
             else {
                 //gestion des pa
                 if(isset($ln[self::CHAMP_PA])){
-                    if(!isset($_REQUEST['light']))
+//                    if(!isset($_REQUEST['light']))
                         $this->db->query("UPDATE `llx_product` SET pmp= '".str_replace(",", ".", $ln[self::CHAMP_PA])."' WHERE rowid = ".$this->prodId);
                     //netoyage de l'entrepot si pas fait
                     if(!isset($this->entrepotNottoye[$this->entrepotId])){

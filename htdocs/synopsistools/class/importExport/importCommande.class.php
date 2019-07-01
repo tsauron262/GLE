@@ -113,10 +113,10 @@ class importCommande extends import8sens
         }
 
 
-        $prefixe = "CO8-28-14H";
+        $prefixe = "COOLD8";
         $tabFinal2 = array();
         foreach ($tabFinal as $ref => $data) {
-            $ref = $prefixe . $ref;
+            $ref = $prefixe . str_replace("ERRORMAXNUMBERREACHFORT", "90001", $ref);
             foreach ($data as $idT => $line) {
 
                 $nbBlNonFact = $nbFact = 0;
@@ -159,7 +159,7 @@ class importCommande extends import8sens
         }
 
         $commandes = $tabFinal2;
-//        $commandes = array($prefixe."COLY-190273"=> $tabFinal2[$prefixe."COLY-190273"]);
+//        $commandes = array($prefixe."CO1906-90073"=> $tabFinal2[$prefixe."CO1906-90073"]);
 //        echo "<pre>"; print_r($commandes);die;
 
         global $db;
@@ -232,7 +232,7 @@ class importCommande extends import8sens
                         }
                     }
                 }
-continue;//vire
+//continue;//vire
                 $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande');
                 $comm_errors = $commande->validateArray(array(
                     'ref'               => $comm_ref,
@@ -273,7 +273,7 @@ continue;//vire
             }
 
 
-            continue;//vire
+//            continue;//vire
             if (BimpObject::objectLoaded($commande)) {
                 echo '*** Traitement commande "' . $comm_ref . '" ***<br/>';
                 $commande->checkLines();
@@ -325,7 +325,7 @@ continue;//vire
 
                     // Recherche BimpLine correspondante: 
                     $product = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Product', array(
-                                'ref' => $line_data['ref']
+                                'ref' => array('operator'=> 'LIKE', 'value' => "".$line_data['ref']."")
                     ));
                     $qty_fac = (float) $line_data['qtyEnBl'] - (float) $line_data['qteNonFact'];
 
@@ -591,6 +591,8 @@ continue;//vire
                         }
                     } else {
                         echo '<span class="danger">PRODUIT NON TROUVE: ' . $line_data['ref'] . '</span><br/>';
+                        $err_title = 'Commande ' . $comm_ref . ' - PRODUIT NON TROUVE: ' . $line_data['ref'] . '): ';
+                        $errors[] = BimpTools::getMsgFromArray(array("oups"), $err_title, 1);
                     }
 
                     echo '<br/>';

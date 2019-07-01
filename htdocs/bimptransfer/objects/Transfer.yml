@@ -127,12 +127,10 @@ forms:
         rows: 
             - field: id_warehouse_source
             - field: id_warehouse_dest
-            - field: status
             
     default:
         rows: 
             - field: id_warehouse_dest
-            - field: status
             
 list:
     checkboxes: 1
@@ -142,7 +140,7 @@ list:
 #          icon: fas_trash-alt
 #          onclick: deleteSelectedObjects('list_id', $(this));
 #          btn_class: deleteSelectedObjects
-    sort_field: date_opening
+    sort_field: id
     sort_way: desc
     n: 10
     list_filters: 

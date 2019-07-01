@@ -1046,7 +1046,7 @@ class BL_CommandeFournReception extends BimpObject
             }
         } else {
             if (is_null($date_received) || !(string) $date_received) {
-                $date_received = date('Y-m-d H:i:s');
+                $date_received = date('Y-m-d');
             }
             $this->set('status', self::BLCFR_RECEPTIONNEE);
             $this->set('date_received', $date_received);
@@ -1196,7 +1196,7 @@ class BL_CommandeFournReception extends BimpObject
                     $errors = $this->saveLinesData($lines_data);
 
                     if (!count($errors)) {
-                        $date_received = isset($data['date_received']) ? $data['date_received'] : date('Y-m-d H:i:s');
+                        $date_received = isset($data['date_received']) ? $data['date_received'] : date('Y-m-d');
                         $errors = $this->validateReception($date_received, false);
                     }
                 }

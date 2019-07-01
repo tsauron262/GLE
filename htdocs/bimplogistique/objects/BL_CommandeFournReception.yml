@@ -71,7 +71,8 @@ fields:
     date_received: 
         label: Date de réception
         type: datetime
-        input: 
+        input:
+            type: date
             display_now: 1
         
     info: 
@@ -125,7 +126,7 @@ forms:
             - field: ref
             - field: assign_lines_to_commandes_client
             - field: info
-#            - field: date_received => à déco si besoin
+            - field: date_received
                 
 #            - custom: 1
 #              label: Lignes commande fournisseur

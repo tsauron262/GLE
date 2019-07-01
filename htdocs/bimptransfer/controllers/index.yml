@@ -8,6 +8,9 @@ objects:
     transfer:
         instance: 
             bimp_object: Transfer
+    transferline:
+        instance: 
+            bimp_object: TransferLine
             
 #    user_account:
 #        instance: 
@@ -31,4 +34,12 @@ sections:
                   list: 
                       panel: 1
                       object: transfer
+        prod:
+            label: Produits en Transferts
+            sections:
+                - type: list
+                  list: 
+                      panel: 1
+                      object: transferline
+                      name: prod
                       

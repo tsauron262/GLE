@@ -4,6 +4,9 @@ parent_module: bimptransfer
 parent_object: Transfer
 parent_id_property: id_transfer
 
+object:
+    
+
 fields: 
     quantity_sent:
         label: Quantité envoyé
@@ -56,5 +59,38 @@ lists:
                field: quantity_received
                label: Quantité reçu (brouillon)
                edit: 1
+           quantity_transfered: 
+               field: quantity_transfered
+
+    prod:
+       objects_change_reload: Transfer
+#       after_list_content:
+#           callback: addInputs
+       cols:
+           id_transfer:
+               field: id_transfer
+               display: nom_url
+           id_warehouse_source:
+               field: id_warehouse_source
+               display: nom_url
+               child: parent
+           id_warehouse_dest:
+               field: id_warehouse_dest
+               display: nom_url
+               child: parent
+           status:
+               field: status
+               child: parent
+           id_product: 
+               field: id_product
+               display: nom_url
+           id_equipment: 
+               field: id_equipment
+               display: nom_url
+#           id_product: 
+#               field: id_product
+#               display: nom_url
+           quantity_sent: 
+               field: quantity_sent
            quantity_transfered: 
                field: quantity_transfered

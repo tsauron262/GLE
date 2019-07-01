@@ -58,8 +58,9 @@ fields:
             search_list: 
                 table: entrepot e
                 field_return_value: e.rowid
-                field_return_label: e.lieu
-                fields_search: e.rowid,e.lieu
+                field_return_label: e.ref, e.lieu
+                label_syntaxe: <label_1> - <label_2>
+                fields_search: e.rowid,e.ref,e.lieu
         
     date_opening: 
         label: Date d'ouverture

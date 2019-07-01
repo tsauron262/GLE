@@ -70,7 +70,7 @@ fields:
         
     date_received: 
         label: Date de réception
-        type: datetime
+        type: date
         input:
             type: date
             display_now: 1

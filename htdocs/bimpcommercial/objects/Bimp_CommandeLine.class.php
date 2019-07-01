@@ -4412,7 +4412,6 @@ class Bimp_CommandeLine extends ObjectLine
             if (BimpObject::objectLoaded($commande) && $commande->isLogistiqueActive()) {
                 // Vérification des réservations: 
                 $this->checkReservations(); // les quantités des réservations sont vérifiées dans cette méthode.
-                // Vérifications des quantités: 
             }
         }
 

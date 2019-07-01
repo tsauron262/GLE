@@ -125,6 +125,8 @@ forms:
             - field: ref
             - field: assign_lines_to_commandes_client
             - field: info
+#            - field: date_received => à déco si besoin
+                
 #            - custom: 1
 #              label: Lignes commande fournisseur
 #              show: 

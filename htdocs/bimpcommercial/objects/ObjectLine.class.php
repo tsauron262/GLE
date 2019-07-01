@@ -1670,7 +1670,23 @@ class ObjectLine extends BimpObject
                     break;
 
                 case self::LINE_TEXT:
-                    $result = $object->addLine((string) $this->desc, 0, (float) $this->qty, 0);
+                    $class_name = get_class($object);
+                    switch ($class_name) {
+                        case 'Propal':
+                        case 'Commande':
+                        case 'Facture':
+                        case 'CommandeFournisseur':
+                            $result = $object->addLine((string) $this->desc, 0, (float) $this->qty, 0);
+                            break;
+
+                        case 'FactureFournisseur':
+                            $result = $object->addLine((string) $this->desc, 0, 0, 0, 0, 1, 0, 0, '', '', '', 0, '');
+                            break;
+
+                        default:
+                            $errors[] = 'Objet parent non défini';
+                            break;
+                    }
                     break;
 
                 default:
@@ -1679,6 +1695,9 @@ class ObjectLine extends BimpObject
             }
             if (is_null($result) || $result <= 0) {
                 $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($object), 'Des erreurs sont survenues lors de l\'ajout de la ligne ' . BimpObject::getInstanceLabel($instance, 'to'));
+                echo '<pre>';
+                print_r($errors);
+                echo '</pre>';
             } else {
                 if ($this->isLoaded()) {
                     $this->updateField('id_line', (int) $result);
@@ -1797,11 +1816,14 @@ class ObjectLine extends BimpObject
                         case 'Facture':
                         case 'Commande':
                         case 'CommandeFournisseur':
+                        case 'FactureFournisseur':
                             $result = $object->updateline($id_line, $this->desc);
                             break;
 
                         default:
                             $result = 0;
+                            $errors[] = 'Objet parent non défini';
+                            break;
                     }
                     break;
 
@@ -1847,7 +1869,7 @@ class ObjectLine extends BimpObject
             case self::LINE_FREE:
                 $this->id_product = (int) $line->fk_product;
                 $this->id_fourn_price = (int) $line->fk_fournprice;
-                $this->desc = (string) $line->desc;
+                $this->desc = (isset($line->desc) ? (string) $line->desc : (isset($line->description) ? (string) $line->description : ''));
                 $this->pu_ht = (float) $line->subprice;
                 $this->qty = isset($line->qty) ? $line->qty : 1;
                 $this->tva_tx = (float) $line->tva_tx;
@@ -1859,7 +1881,7 @@ class ObjectLine extends BimpObject
                 break;
 
             case self::LINE_TEXT:
-                $this->desc = (string) $line->desc;
+                $this->desc = (isset($line->desc) ? (string) $line->desc : (isset($line->description) ? (string) $line->description : ''));
                 $this->qty = 0;
                 break;
 
@@ -2638,7 +2660,7 @@ class ObjectLine extends BimpObject
                 if (!$force_edit && !$this->isFieldEditable('qty')) {
                     return $value;
                 }
-                
+
                 $product_type = null;
                 if ((int) $this->id_product) {
                     $product_type = (int) $this->db->getValue('product', 'fk_product_type', '`rowid` = ' . (int) $this->id_product);

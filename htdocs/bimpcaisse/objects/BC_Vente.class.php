@@ -1572,7 +1572,7 @@ class BC_Vente extends BimpObject
                         if (BimpObject::ObjectLoaded($place)) {
                             $msg .= "\t" . 'Emplacement de l\'équipement: ' . $place->getPlaceName();
                         }
-                        mailSyn2($subject, 'logistique@bimp.fr', '', $msg);
+                        mailSyn2($subject, 'Admin_stock@bimp.fr', '', $msg);
                     }
 
                     $html .= $this->renderCartEquipmentline($article, $product, $equipment);

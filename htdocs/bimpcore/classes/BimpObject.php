@@ -4458,7 +4458,7 @@ class BimpObject extends BimpCache
                     '<span class="dropdown-title">' . BimpRender::renderIcon('fas_list', 'iconLeft') . 'Liste des ' . $this->getLabel('name_plur') . '</span>'
                 );
                 $items[] = BimpRender::renderButton(array(
-                            'label'       => 'Vue rapide',
+                            'label'       => 'Vue rapide de la liste',
                             'icon_before' => 'far_eye',
                             'classes'     => array(
                                 'btn', 'btn-light-default'
@@ -4468,7 +4468,7 @@ class BimpObject extends BimpCache
                             )
                                 ), 'button');
                 $items[] = BimpRender::renderButton(array(
-                            'label'       => 'Afficher la page',
+                            'label'       => 'Afficher la liste',
                             'icon_before' => 'far_file-alt',
                             'classes'     => array(
                                 'btn', 'btn-light-default'
@@ -4478,7 +4478,7 @@ class BimpObject extends BimpCache
                             )
                                 ), 'button');
                 $items[] = BimpRender::renderButton(array(
-                            'label'       => 'Afficher la page dans un nouvel onglet',
+                            'label'       => 'Afficher la liste dans un nouvel onglet',
                             'icon_before' => 'fas_external-link-alt',
                             'classes'     => array(
                                 'btn', 'btn-light-default'

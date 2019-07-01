@@ -1834,17 +1834,17 @@ class Bimp_CommandeFournLine extends FournObjectLine
                 }
             } else {
                 if ((float) $this->qty && !(float) $this->pu_ht) {
-                    $this->qty = 0;
+                    $this->qty = 1;
                     $this->db->update('commandedet', array(
-                        'qty' => 0
+                        'qty' => 1
                             ), '`rowid` = ' . (int) $this->id);
 
                     if ((float) $this->getData('qty_total')) {
-                        $this->updateField('qty_total', 0, null, true);
+                        $this->updateField('qty_total', 1, null, true);
                     }
 
                     if ((float) $this->getData('qty_received')) {
-                        $this->updateField('qty_received', 0, null, true);
+                        $this->updateField('qty_received', 1, null, true);
                     }
 
                     if ((float) $this->getData('qty_to_receive')) {

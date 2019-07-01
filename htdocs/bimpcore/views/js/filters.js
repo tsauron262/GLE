@@ -13,7 +13,7 @@ function addFieldFilterValue($button) {
             if ($container.data('type') === 'value_part') {
                 var $input = $container.find('input[name="add_' + field_name + '_filter"]');
                 if ($input.val() === '') {
-                    bimp_msg('Veuillez saisir une valeur', 'danger');
+                    bimp_msg('Veuillez saisir une valeur', 'warning', null, true);
                     return;
                 }
             }
@@ -211,7 +211,7 @@ function removeAllListFilters(filters_id) {
             $filters: $filters
         }));
     } else {
-        bimp_msg('Une erreur est survenue. Opération abandonnée', 'danger');
+        bimp_msg('Une erreur est survenue. Opération abandonnée', 'danger', null, true);
     }
 }
 
@@ -233,7 +233,7 @@ function saveListFilters($button, filters_id) {
             return extra_data;
         });
     } else {
-        bimp_msg('Une erreur est survenue. Opération abandonnée', 'danger');
+        bimp_msg('Une erreur est survenue. Opération abandonnée', 'danger', null, true);
     }
 }
 
@@ -245,7 +245,7 @@ function hideAllFilters(filters_id) {
             $(this).addClass('closed').removeClass('open').find('.bimp_filter_content').stop().slideUp(250);
         });
     } else {
-        bimp_msg('Une erreur est survenue. Opération abandonnée', 'danger');
+        bimp_msg('Une erreur est survenue. Opération abandonnée', 'danger', null, true);
     }
 }
 
@@ -257,7 +257,7 @@ function showAllFilters(filters_id) {
             $(this).addClass('open').removeClass('closed').find('.bimp_filter_content').stop().slideDown(250);
         });
     } else {
-        bimp_msg('Une erreur est survenue. Opération abandonnée', 'danger');
+        bimp_msg('Une erreur est survenue. Opération abandonnée', 'danger', null, true);
     }
 }
 
@@ -275,7 +275,7 @@ function loadSavedFilters($button, filters_id) {
             if ($input.length) {
                 var id_list_filters = parseInt($input.val());
                 if (!id_list_filters || isNaN(id_list_filters)) {
-                    bimp_msg('Veuillez sélectionner un enregistrement de filtres à charger');
+                    bimp_msg('Veuillez sélectionner un enregistrement de filtres à charger', 'warning', null, true);
                     return;
                 }
 
@@ -308,7 +308,7 @@ function loadSavedFilters($button, filters_id) {
             }
         }
     }
-    bimp_msg('Une erreur est survenue. Opération abandonnée', 'danger');
+    bimp_msg('Une erreur est survenue. Opération abandonnée', 'danger', null, true);
 }
 
 function deleteSavedFilters($button, filters_id) {
@@ -327,7 +327,7 @@ function deleteSavedFilters($button, filters_id) {
         if ($input.length) {
             var id_list_filters = parseInt($input.val());
             if (!id_list_filters || isNaN(id_list_filters)) {
-                bimp_msg('Veuillez sélectionner un enregistrement de filtres à charger');
+                bimp_msg('Veuillez sélectionner un enregistrement de filtres à supprimer', 'warning', null, true);
                 return;
             }
 
@@ -357,7 +357,7 @@ function deleteSavedFilters($button, filters_id) {
         }
     }
 
-    bimp_msg('Une erreur est survenue. Opération abandonnée', 'danger');
+    bimp_msg('Une erreur est survenue. Opération abandonnée', 'danger', null, true);
 }
 
 // Gestion des événements: 

@@ -4,7 +4,7 @@ labels:
     name: Caisse
     is_female: 1
 
-objects:                 
+objects: 
     current_session: 
         extends: caisse_session
         instance: 

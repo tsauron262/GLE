@@ -289,7 +289,7 @@ function initEvents() {
     $('#enregistrer').click(function () {
         if (!entrepotId) {
 //            setMessage('alertEnregistrer', 'Veuillez sélectionner un entrepôt avant d\'enregistrer.', 'error');
-              bimp_msg('Veuillez sélectionner un entrepôt avant d\'enregistrer', 'danger');
+              bimp_msg('Veuillez sélectionner un entrepôt avant d\'enregistrer', 'danger', null, true);
         } else if (confirm('Etes-vous sur de vouloir mettre en stock ces produits ?')) {
             saveProducts();
         }

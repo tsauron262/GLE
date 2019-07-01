@@ -291,13 +291,13 @@ function openCaisse($button, confirm_fonds) {
 
     var id_caisse = parseInt($form.find('[name="id_caisse"]').val());
     if (!id_caisse) {
-        bimp_msg('Veuillez sélectionner une caisse', 'warning');
+        bimp_msg('Veuillez sélectionner une caisse', 'warning', null, true);
         return;
     }
 
     var fonds = parseFloat($form.find('[name="fonds"]').val());
     if (!fonds) {
-        bimp_msg('Veuillez indiquer le montant du fonds de caisse', 'warning');
+        bimp_msg('Veuillez indiquer le montant du fonds de caisse', 'warning', null, true);
         return;
     }
 
@@ -340,7 +340,7 @@ function closeCaisse($button, confirm_fonds) {
 
     var fonds = parseFloat($form.find('[name="fonds"]').val());
     if (!fonds) {
-        bimp_msg('Veuillez indiquer le montant du fonds de caisse', 'warning');
+        bimp_msg('Veuillez indiquer le montant du fonds de caisse', 'warning', null, true);
         return;
     }
 
@@ -357,6 +357,13 @@ function closeCaisse($button, confirm_fonds) {
                 bimpAjax.$button.html('<i class="fa fa-check iconLeft"></i>Confirmer');
                 bimpAjax.$button.attr('onclick', 'closeCaisse($(this), 1);');
             } else {
+                if (typeof (result.recap_url) !== 'undefined' && result.recap_url) {
+                    var recap_width = 827;
+                    if (typeof (result.recap_width) !== 'undefined') {
+                        recap_width = result.recap_width;
+                    }
+                    window.open(result.recap_url, 'Récapitulatif session de caisse', "menubar=no, status=no, width=" + recap_width + ", height=900");
+                }
                 window.location = document.location.href.replace(document.location.search, "") + '?id_entrepot=' + result.id_entrepot;
             }
         }
@@ -651,7 +658,7 @@ function loadNewClientForm($button) {
     }, 'Ajout d\'un nouveau client', function ($form) {
         var modal_idx = parseInt($form.data('modal_idx'));
         if (!modal_idx) {
-            bimp_msg('Erreur technique: index de la modale absent');
+            bimp_msg('Erreur technique: index de la modale absent', 'danger');
             return;
         }
         var $button = bimpModal.$footer.find('.save_object_button.modal_' + modal_idx);
@@ -680,7 +687,7 @@ function loadNewContactForm($button, id_client) {
     }, 'Ajout d\'un nouveau contact', function ($form) {
         var modal_idx = parseInt($form.data('modal_idx'));
         if (!modal_idx) {
-            bimp_msg('Erreur technique: index de la modale absent');
+            bimp_msg('Erreur technique: index de la modale absent', 'danger');
             return;
         }
         var $button = bimpModal.$footer.find('.save_object_button.modal_' + modal_idx);
@@ -715,7 +722,7 @@ function editClient($button, id_client, client_name) {
     }, title, function ($form) {
         var modal_idx = parseInt($form.data('modal_idx'));
         if (!modal_idx) {
-            bimp_msg('Erreur technique: index de la modale absent');
+            bimp_msg('Erreur technique: index de la modale absent', 'danger');
             return;
         }
         var $button = bimpModal.$footer.find('.save_object_button.modal_' + modal_idx);
@@ -744,7 +751,7 @@ function editContact($button, id_contact, contact_name) {
     }, title, function ($form) {
         var modal_idx = parseInt($form.data('modal_idx'));
         if (!modal_idx) {
-            bimp_msg('Erreur technique: index de la modale absent');
+            bimp_msg('Erreur technique: index de la modale absent', 'danger');
             return;
         }
         var $button = $('#page_modal').find('.modal-footer').find('.save_object_button');
@@ -823,14 +830,14 @@ function selectClientFromList($button) {
     var $row = $button.findParentByClass('Bimp_Client_row');
 
     if (!$row.length) {
-        bimp_msg('Erreur: ID client absent');
+        bimp_msg('Erreur: ID client absent', 'danger');
         return;
     }
 
     var id_client = parseInt($row.data('id_object'));
 
     if (!id_client) {
-        bimp_msg('Erreur: ID client absent');
+        bimp_msg('Erreur: ID client absent', 'danger');
         return;
     }
 
@@ -914,7 +921,7 @@ function findProduct($button) {
     var search = $input.val();
 
     if (typeof (search) === 'undefined' || !search) {
-        bimp_msg('Veuillez saisir un code-barres ou un numéro de série', 'warning');
+        bimp_msg('Veuillez saisir un code-barres ou un numéro de série', 'warning', null, true);
         return;
     }
 
@@ -1115,7 +1122,7 @@ function searchReturnedEquipment($button) {
     var serial = $inputContainer.find('[name="search_equipment"]').val();
 
     if (!serial) {
-        bimp_msg('Aucun numéro de série spécifié', 'danger');
+        bimp_msg('Aucun numéro de série spécifié', 'danger', null, true);
         return;
     }
 
@@ -1271,7 +1278,7 @@ function addVentePaiement($button) {
 
     var montant = parseFloat($('#ventePaiementMontant').val());
     if (!montant) {
-        bimp_msg('Veuillez saisir un montant');
+        bimp_msg('Veuillez saisir un montant', 'warning', null, true);
         $button.removeClass('disabled');
         return;
     }

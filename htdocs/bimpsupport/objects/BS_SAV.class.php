@@ -2768,13 +2768,13 @@ class BS_SAV extends BimpObject
                                     $propalLine->set('linked_object_name', '');
                                 }
                             }
-                            
+
                             $line_warnings = array();
                             $line_errors = $propalLine->create($line_warnings);
                             if (count($line_warnings)) {
                                 $warnings[] = BimpTools::getMsgFromArray($line_errors, 'Erreurs suite à la la copie de la ligne du devis n°' . $i);
                             }
-                            
+
                             if (count($line_errors)) {
                                 $warnings[] = BimpTools::getMsgFromArray($line_errors, 'Echec de la copie de la ligne du devis n°' . $i);
                             } else {
@@ -3180,7 +3180,7 @@ class BS_SAV extends BimpObject
                             $facture->modelpdf = self::$facture_model_pdf;
                             $facture->array_options['options_type'] = "S";
                             $facture->array_options['options_entrepot'] = (int) $this->getData('id_entrepot');
-                            
+
                             $facture->linked_objects[$facture->origin] = $facture->origin_id;
                             if (!empty($propal->dol_object->other_linked_objects) && is_array($propal->dol_object->other_linked_objects)) {
                                 $facture->linked_objects = array_merge($facture->linked_objects, $propal->dol_object->other_linked_objects);
@@ -3571,7 +3571,7 @@ class BS_SAV extends BimpObject
 
         return $errors;
     }
-    
+
     public function create(&$warnings = array(), $force_create = false)
     {
         $errors = array();
@@ -3772,6 +3772,33 @@ class BS_SAV extends BimpObject
         }
 
         return false;
+    }
+
+    public function delete(&$warnings = array(), $force_delete = false)
+    {
+        $id = $this->id;
+
+        $errors = parent::delete($warnings, $force_delete);
+
+        if (!count($errors)) {
+            $reservations = BimpCache::getBimpObjectObjects('bimpreservation', 'BR_Reservation', array(
+                        'type'   => BR_Reservation::BR_RESERVATION_SAV,
+                        'id_sav' => (int) $id
+            ));
+
+            foreach ($reservations as $id_reservation => $reservation) {
+                $res_warnings = array();
+                $res_errors = $reservation->delete($res_warnings, true);
+
+                if (count($res_warnings)) {
+                    $warnings[] = BimpTools::getMsgFromArray($res_warnings, 'Erreurs lors de la suppression ' . $reservation->getLabel('of_the') . ' #' . $id_reservation);
+                }
+
+                if (count($res_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($res_warnings, 'Echec de la suppression ' . $reservation->getLabel('of_the') . ' #' . $id_reservation);
+                }
+            }
+        }        
     }
 
     // Gestion des droits et autorisations: 

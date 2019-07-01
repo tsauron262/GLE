@@ -120,7 +120,7 @@ class ObjectLineRemise extends BimpObject
             return array('Erreur technique: type d\'élément commercial absent ou invalide');
         }
 
-        if (!$force_create && !$parent->isEditable()) {
+        if (!$parent->isEditable($force_create)) {
             $msg = BimpTools::ucfirst($parent->getLabel('the')) . ' ne peut pas être modifié';
             if ($parent->isLabelFemale()) {
                 $msg .= 'e';
@@ -146,7 +146,7 @@ class ObjectLineRemise extends BimpObject
             return array('Erreur technique: type d\'élément commercial absent ou invalide');
         }
 
-        if (!$parent->isEditable()) {
+        if (!$parent->isEditable($force_update)) {
             $msg = BimpTools::ucfirst($parent->getLabel('the')) . ' ne peut pas être modifié';
             if ($parent->isLabelFemale()) {
                 $msg .= 'e';

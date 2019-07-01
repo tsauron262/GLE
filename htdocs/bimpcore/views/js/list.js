@@ -248,7 +248,7 @@ function loadModalList(module, object_name, list_name, id_parent, $button, title
 function loadModalFormFromList(list_id, form_name, $button, id_object, id_parent, title, on_save) {
     var $list = $('#' + list_id);
     if (!$list.length) {
-        bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger');
+        bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger', null, true);
         return;
     }
 
@@ -285,7 +285,7 @@ function updateObjectFromRow(list_id, id_object, $button) {
     var $list = $('#' + list_id);
 
     if (!$list.length) {
-        bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger');
+        bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger', null, true);
         return;
     }
 
@@ -295,7 +295,7 @@ function updateObjectFromRow(list_id, id_object, $button) {
     var $row = $list.find('tbody.listRows').find('#' + object_name + '_row_' + id_object);
 
     if (!$row.length) {
-        bimp_msg('Erreur technique: liste non trouvée', 'danger');
+        bimp_msg('Erreur technique: liste non trouvée', 'danger', null, true);
         return;
     }
 
@@ -332,7 +332,7 @@ function saveAllRowsModifications(list_id, $button) {
     var $list = $('#' + list_id);
 
     if (!$list.length) {
-        bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger');
+        bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger', null, true);
         return;
     }
 
@@ -347,7 +347,7 @@ function addObjectFromList(list_id, $button) {
     var $list = $('#' + list_id);
 
     if (!$list.length) {
-        bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger');
+        bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger', null, true);
         return;
     }
 
@@ -356,7 +356,7 @@ function addObjectFromList(list_id, $button) {
 
     if (!$row.length) {
         if ($result.length) {
-            bimp_msg('Aucun formulaire trouvé', 'danger');
+            bimp_msg('Aucun formulaire trouvé', 'danger', null, true);
         }
         return;
     }
@@ -400,7 +400,7 @@ function deleteObjects(list_id, objects_list, $button) {
 
     var $list = $('#' + list_id);
     if (!$list.length) {
-        bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger');
+        bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger', null, true);
         return;
     }
 
@@ -447,7 +447,7 @@ function deleteSelectedObjects(list_id, $button) {
     var $list = $('#' + list_id);
 
     if (!$list.length) {
-        bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger');
+        bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger', null, true);
         return;
     }
 
@@ -462,7 +462,7 @@ function deleteSelectedObjects(list_id, $button) {
         } else {
             msg = 'Aucun ' + object_labels[object_name]['name'] + ' sélectionné';
         }
-        bimp_msg(msg, 'danger');
+        bimp_msg(msg, 'danger', null, true);
     } else {
         var objects_list = [];
         $selected.each(function () {
@@ -475,7 +475,7 @@ function deleteSelectedObjects(list_id, $button) {
 function saveObjectPosition(list_id, id_object, position) {
     var $list = $('#' + list_id);
     if (!$list.length) {
-        bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger');
+        bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger', null, true);
         return;
     }
 
@@ -503,7 +503,7 @@ function toggleSelectedItemsAssociation(list_id, operation, association, id_asso
     var $list = $('#' + list_id);
 
     if (!$list.length) {
-        bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger');
+        bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger', null, true);
         return;
     }
 
@@ -519,7 +519,7 @@ function toggleSelectedItemsAssociation(list_id, operation, association, id_asso
         } else {
             msg = 'Aucun ' + object_labels[object_name]['name'] + ' sélectionné';
         }
-        bimp_msg(msg, 'danger');
+        bimp_msg(msg, 'danger', null, true);
     } else {
         var associations = [];
 
@@ -545,7 +545,7 @@ function setSelectedObjectsNewStatus($button, list_id, new_status, extra_data, c
     var $list = $('#' + list_id);
 
     if (!$list.length) {
-        bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger');
+        bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger', null, true);
         return;
     }
 
@@ -563,7 +563,7 @@ function setSelectedObjectsNewStatus($button, list_id, new_status, extra_data, c
         } else {
             msg = 'Aucun ' + object_labels[object_name]['name'] + ' sélectionné';
         }
-        bimp_msg(msg, 'danger');
+        bimp_msg(msg, 'danger', null, true);
     } else {
         if (typeof (confirm_msg) === 'string') {
             if (!confirm(confirm_msg.replace(/&quote;/g, '"'))) {
@@ -583,7 +583,7 @@ function setSelectedObjectsNewStatus($button, list_id, new_status, extra_data, c
                 } else {
                     msg = 'ID ' + object_labels[object_name]['of_the'] + ' sélectionné n° ' + i + ' absent';
                 }
-                bimp_msg(msg, 'danger');
+                bimp_msg(msg, 'danger', null, true);
             }
         });
         if (ids.length) {
@@ -620,7 +620,7 @@ function setSelectedObjectsAction($button, list_id, action, extra_data, form_nam
     var $list = $('#' + list_id);
 
     if (!$list.length) {
-        bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger');
+        bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger', null, true);
         return;
     }
 
@@ -638,7 +638,7 @@ function setSelectedObjectsAction($button, list_id, action, extra_data, form_nam
         } else {
             msg = 'Aucun ' + object_labels[object_name]['name'] + ' sélectionné';
         }
-        bimp_msg(msg, 'danger');
+        bimp_msg(msg, 'danger', null, true);
     } else {
         if (typeof (form_name) === 'string' && form_name) {
             extra_data['id_objects'] = [];
@@ -663,7 +663,7 @@ function setSelectedObjectsAction($button, list_id, action, extra_data, form_nam
                 if ($.isOk($form)) {
                     var modal_idx = parseInt($form.data('modal_idx'));
                     if (!modal_idx) {
-                        bimp_msg('Erreur technique: index de la modale absent');
+                        bimp_msg('Erreur technique: index de la modale absent', null, true);
                         return;
                     }
                 }
@@ -737,7 +737,7 @@ function setSelectedObjectsAction($button, list_id, action, extra_data, form_nam
                         } else {
                             msg = 'ID ' + object_labels[object_name]['of_the'] + ' sélectionné n° ' + i + ' absent';
                         }
-                        bimp_msg(msg, 'danger');
+                        bimp_msg(msg, 'danger', null, true);
                     }
                     i++;
                 });
@@ -752,14 +752,14 @@ function setSelectedObjectsAction($button, list_id, action, extra_data, form_nam
 function cancelObjectRowModifications(list_id, id_object, $button) {
     var $list = $('#' + list_id);
     if (!$list.length) {
-        bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger');
+        bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger', null, true);
         return;
     }
     var object_name = $list.data('object_name');
 
     var $row = $list.find('tbody.listRows').find('tr#' + object_name + '_row_' + id_object);
     if (!$row.length) {
-        bimp_msg('Erreur technique: ligne correspondante non trouvée', 'danger');
+        bimp_msg('Erreur technique: ligne correspondante non trouvée', 'danger', null, true);
         return;
     }
 
@@ -789,7 +789,7 @@ function cancelAllRowsModifications(list_id, $button) {
     var $list = $('#' + list_id);
 
     if (!$list.length) {
-        bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger');
+        bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger', null, true);
         return;
     }
 
@@ -942,7 +942,7 @@ function sortListByPosition(list_id, first_page) {
 
 function loadPage($list, page) {
     if (!$list.length) {
-        bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger');
+        bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger', null, true);
         return;
     }
 

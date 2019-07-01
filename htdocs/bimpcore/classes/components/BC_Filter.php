@@ -25,7 +25,7 @@ class BC_Filter extends BimpComponent
         $this->params_def['type'] = array();
         $this->params_def['label'] = array();
         $this->params_def['open'] = array('data_type' => 'bool', 'default' => 0);
-
+        $this->params_def['show'] = array('data_type' => 'bool', 'default' => 1);
         $this->values = $values;
 
         parent::__construct($object, $params['name'], $path);
@@ -43,6 +43,10 @@ class BC_Filter extends BimpComponent
 
     public function getFilterValueLabel($value)
     {
+        if (!$this->params['show']) {
+            return '';
+        }
+        
         $label = '';
 
         switch ($this->params['type']) {
@@ -95,6 +99,10 @@ class BC_Filter extends BimpComponent
 
     public function renderHtml()
     {
+        if (!$this->params['show']) {
+            return '';
+        }
+        
         $html = '';
         $html = parent::renderHtml();
 
@@ -141,6 +149,10 @@ class BC_Filter extends BimpComponent
 
     public function renderFilterValue($value)
     {
+        if (!$this->params['show']) {
+            return '';
+        }
+        
         $html = '';
 
         $label = $this->getFilterValueLabel($value);

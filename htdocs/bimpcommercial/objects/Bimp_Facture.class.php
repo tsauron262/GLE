@@ -1555,23 +1555,17 @@ class Bimp_Facture extends BimpComm
                 $done = 0;
                 foreach ($lines as $line) {
                     if ((int) $line->id_remise_except) {
-                        echo 'ici: ' . $line->id_remise_except . '<br/>';
                         $discount = new DiscountAbsolute($this->db->db);
                         $discount->fetch((int) $line->id_remise_except);
                         if (BimpObject::objectLoaded($discount)) {
-                            echo 'la: ' . $discount->id . '<br/>';
                             if ((int) $discount->fk_facture_line === (int) $line->getData('id_line')) {
-                                echo 'here <br/>';
                                 if ($this->db->update('societe_remise_except', array(
                                             'fk_facture_line' => 0,
                                             'fk_facture'      => (int) $this->id
                                                 ), '`rowid` = ' . (int) $discount->id) > 0) {
-                                    echo 'ok <br/>';
                                     $this->db->delete('facturedet', '`rowid` = ' . (int) $line->getData('id_line'));
                                     $this->db->delete('bimp_facture_line', '`id` = ' . (int) $line->id);
                                     $done++;
-                                } else {
-                                    echo $this->db->db->lasterror();
                                 }
                             }
                         }

@@ -334,11 +334,11 @@ class Bimp_FactureFourn extends BimpComm
             // Réglement: 
             if ($this->isActionAllowed('makePayment') && $this->canSetAction('makePayment')) {
                 $is_rbt = ((int) $this->getData('type') === FactureFournisseur::TYPE_CREDIT_NOTE);
-                
+
                 BimpObject::loadClass('bimpcommercial', 'Bimp_PaiementFourn');
 //                $pf = BimpObject::getInstance('bimpcommercial', 'Bimp_PaiementFourn');
                 $buttons[] = array(
-                    'label'   => 'Saisir '.($is_rbt ? 'remboursement' : 'réglement'),
+                    'label'   => 'Saisir ' . ($is_rbt ? 'remboursement' : 'réglement'),
                     'icon'    => 'fas_euro-sign',
                     'onclick' => 'window.location = \'' . DOL_URL_ROOT . '/fourn/facture/paiement.php?facid=' . $this->id . '&action=create\';'
 //                    'onclick' => $pf->getJsLoadModalForm('default', 'Paiement factures fournisseur', array(
@@ -893,6 +893,16 @@ class Bimp_FactureFourn extends BimpComm
                 if (BimpObject::objectLoaded($commande_fourn)) {
                     $commande_fourn->checkInvoiceStatus();
                 }
+            }
+        }
+    }
+
+    public function onValidate()
+    {
+        if ($this->isLoaded()) {
+            $lines = $this->getLines('not_text');
+            foreach ($lines as $line) {
+                $line->onFactureValidate();
             }
         }
     }

@@ -7,6 +7,7 @@ class BC_CaisseMvt extends BimpObject
         1 => array('label' => 'Encaissement', 'icon' => 'plus-circle', 'classes' => array('success')),
         2 => array('label' => 'Décaissement', 'icon' => 'minus-circle', 'classes' => array('danger'))
     );
+
     public function getCaissesArray()
     {
         $caisses = array(0 => '');
@@ -28,39 +29,44 @@ class BC_CaisseMvt extends BimpObject
     }
 
     // Overrides: 
-    
-    public function create()
+
+    public function create(&$warnings = array(), $force_create = false)
     {
-        $errors = parent::create();
+        $msg = 'Echec de la mise à jour du fond de caisse';
+        $caisse = $this->getChildObject('caisse');
+
+        if (!BimpObject::objectLoaded($caisse)) {
+            $id_caisse = (int) $this->getData('id_caisse');
+            if ($id_caisse) {
+                $errors[] = $msg . ' - La caisse d\'ID ' . $id_caisse . ' n\'existe pas';
+            } else {
+                $errors[] = $msg .= ' - ID de la caisse absent';
+            }
+        } else {
+            $montant = (float) $this->getData('montant');
+            if (!$montant) {
+                $errors[] = $msg . ' - Aucun montant spécifié';
+            } else {
+                $this->set('id_caisse_session', (int) $caisse->getData('id_current_session'));
+            }
+        }
+
+        if (count($errors)) {
+            return $errors;
+        }
+
+        $errors = parent::create($warnings, $force_create);
 
         if ($this->isLoaded()) {
-            $caisse = $this->getChildObject('caisse');
-            $msg = 'Echec de la mise à jour du fond de caisse';
-
-            if (is_null($caisse) || !$caisse->isLoaded()) {
-                $id_caisse = (int) $this->getData('id_caisse');
-                if ($id_caisse) {
-                    $errors[] = $msg . ' - La caisse d\'ID ' . $id_caisse . ' n\'existe pas';
-                } else {
-                    $errors[] = $msg .= ' - ID de la caisse absent';
-                }
-            } else {
-                $type = (int) $this->getData('type');
-                $montant = (float) $this->getData('montant');
-                if (!$montant) {
-                    $errors[] = $msg . ' - Aucun montant spécifié';
-                } else {
-                    if ($type === 2) {
-                        $montant *= -1;
-                    }
-                    $current_montant = (float) $caisse->getData('fonds');
-                    $caisse->set('fonds', $current_montant + $montant);
-                    $caisse_errors = $caisse->update();
-                    if (count($caisse_errors)) {
-                        $errors[] = $msg;
-                        $errors = array_merge($errors, $caisse_errors);
-                    }
-                }
+            $type = (int) $this->getData('type');
+            if ($type === 2) {
+                $montant *= -1;
+            }
+            $current_montant = (float) $caisse->getData('fonds');
+            $caisse->set('fonds', $current_montant + $montant);
+            $caisse_errors = $caisse->update();
+            if (count($caisse_errors)) {
+                $errors[] = BimpTools::getMsgFromArray($caisse_errors, 'Echec de la mise à jour du montant du fonds de caisse');
             }
         } elseif (!count($errors)) {
             $errors[] = 'Le montant du fonds de caisse n\'a pas été mis à jour';

@@ -5,13 +5,17 @@ var bimp_decode_textarea = null;
 
 var notifications_remove_delay = 3000;
 
-function bimp_msg(msg, className, $container) {
+function bimp_msg(msg, className, $container, auto_hide) {
     if (!bimp_msg_enable) {
         return;
     }
-
+    
     if (typeof (className) === 'undefined') {
         className = 'info';
+    }
+    
+    if (typeof (auto_hide) === 'undefined') {
+        auto_hide = false;
     }
 
     var html = '<div class="bimp_msg alert alert-' + className + '">';
@@ -39,7 +43,7 @@ function bimp_msg(msg, className, $container) {
         }, {
             'duration': 250,
             complete: function () {
-                if ($div.hasClass('alert-success')) {
+                if ($div.hasClass('alert-success') || auto_hide) {
                     setTimeout(function () {
                         if (!$div.data('hold')) {
                             $div.fadeOut(500, function () {

@@ -102,6 +102,10 @@ class BC_FieldFilter extends BC_Filter
 
     public function getFilterValueLabel($value)
     {
+        if (!$this->params['show']) {
+            return '';
+        }
+        
         $label = '';
 
         switch ($this->params['type']) {
@@ -156,6 +160,10 @@ class BC_FieldFilter extends BC_Filter
 
     public function getSqlFilters(&$filters = array(), &$joins = array())
     {
+        if (!$this->params['show']) {
+            return array();
+        }
+
         $errors = array();
         $or_field = array();
 
@@ -262,6 +270,10 @@ class BC_FieldFilter extends BC_Filter
 
     public function renderAddInput()
     {
+        if (!$this->params['show']) {
+            return '';
+        }
+        
         $html = '';
 
         $input_name = 'add_' . $this->field->name . '_filter';

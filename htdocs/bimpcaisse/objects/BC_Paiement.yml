@@ -6,7 +6,7 @@ labels:
     name: Paiement en caisse
     name_plur: paiements en caisse
     
-objects:                                 
+objects: 
     facture:
         instance: 
             bimp_object: unset

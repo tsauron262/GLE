@@ -123,13 +123,6 @@ class Interfacevalidate extends DolibarrTriggers
                 $bimp_object->onUnValidate();
             }
         }
-
-        if ($action == 'BILL_SUPPLIER_CREATE') {
-            $bimp_object = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureFourn', $object->id);
-            if (BimpObject::objectLoaded($bimp_object)) {
-                $bimp_object->onCreate();
-            }
-        }
         
         //Classé facturé
         if ($action == "BILL_VALIDATE") {
@@ -162,6 +155,13 @@ class Interfacevalidate extends DolibarrTriggers
                 foreach ($object->linkedObjects['propal'] as $prop) {
                     $prop->classifybilled($user);
                 }
+            }
+        }
+        
+        if ($action == 'BILL_SUPPLIER_VALIDATE') {
+            $bimp_object = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureFourn', $object->id);
+            if (BimpObject::objectLoaded($bimp_object)) {
+                $bimp_object->onValidate();
             }
         }
         

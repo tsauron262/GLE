@@ -1214,7 +1214,10 @@ class Bimp_CommandeFournLine extends FournObjectLine
                 if ($id_r && (!$id_reception || $id_reception !== $id_r)) {
                     $errors[] = 'L\'équipement "' . $equipment->getData('serial') . '" a déjà été ajouté à la réception #' . $id_equipment;
                 } else {
-                    $eq_errors = $equipment->isAvailable($id_entrepot, $eq_errors);
+                    $eq_errors = array();
+                    $equipment->isAvailable($id_entrepot, $eq_errors, array(
+                        'id_reception' => (int) $id_reception
+                    ));
                     if (count($eq_errors)) {
                         $errors[] = BimpTools::getMsgFromArray($eq_errors);
                     }
@@ -1850,6 +1853,11 @@ class Bimp_CommandeFournLine extends FournObjectLine
                 }
             }
         }
+    }
+
+    public function checkCommandeClientLinePrixAchat($qty, $pa_ht)
+    {
+        
     }
 
     // Actions: 

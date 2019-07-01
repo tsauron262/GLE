@@ -29,7 +29,48 @@ class Bimp_FactureFournLine extends FournObjectLine
                 }
                 break;
         }
-        
+
         return parent::isFieldEditable($field, $force_edit);
+    }
+
+    public function onFactureValidate()
+    {
+        if ($this->isLoaded()) {
+            if ($this->isProductSerialisable()) {
+                // Enregistrements des données de l'achat dans les équipements: 
+                $eq_lines = $this->getEquipmentLines();
+
+                foreach ($eq_lines as $eq_line) {
+                    $equipment = $eq_line->getChildObject('equipment');
+
+                    if (BimpObject::ObjectLoaded($equipment)) {
+                        $pa_ht = $eq_line->getData('pu_ht');
+                        $tva_tx = $eq_line->getData('tva_tx');
+
+                        if (is_null($pa_ht)) {
+                            $pa_ht = (float) $this->pu_ht;
+                        }
+
+                        if (is_null($tva_tx)) {
+                            $tva_tx = (float) $this->tva_tx;
+                        }
+
+                        if (!is_null($this->remise) && (float) $this->remise > 0) {
+                            $pa_ht -= ($pa_ht * ((float) $this->remise / 100));
+                        }
+
+                        $equipment->set('prix_achat', $pa_ht);
+                        $equipment->set('achat_tva_tx', $tva_tx);
+
+                        $warnings = array();
+                        $equipment->update($warnings, true);
+                        
+                        // todo: checker correctif à faire côté commande / facture client. 
+                    }
+                }
+            } else {
+                // todo: faire remonter le prix d'achat vers les commandes / factures clients liées. 
+            }
+        }
     }
 }

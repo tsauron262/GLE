@@ -89,15 +89,13 @@ class BC_Field extends BimpComponent
             $this->value = $this->params['default_value'];
         }
 
-        $this->params['editable'] = 1;
-        $this->params['viewable'] = 1;
-
-        if ($this->isObjectValid()) {
-            if (!$this->force_edit) {
-                $this->params['editable'] = (int) ($this->object->canEditField($name) && $this->object->isFieldEditable($name, $force_edit));
-            }
-            $this->params['viewable'] = (int) $this->object->canViewField($name);
-        }
+        // Ces paramètres ne sont plus définis ici, car dans certains cas, la variable $this->force_edit peut être ajustée après le __construc(). 
+//        if ($this->isObjectValid()) {
+//            if (!$this->force_edit) {
+//                $this->params['editable'] = (int) ($this->object->canEditField($name) && $this->object->isFieldEditable($name, $this->force_edit));
+//            }
+//            $this->params['viewable'] = (int) $this->object->canViewField($name);
+//        }
 
         if (in_array($this->params['type'], array('qty', 'int', 'float', 'money', 'percent'))) {
             $this->params = array_merge($this->params, parent::fetchParams($this->config_path, self::$type_params_def['number']));
@@ -127,7 +125,7 @@ class BC_Field extends BimpComponent
         }
 
         if ($this->edit) {
-            if ($this->params['editable']) {
+            if ($this->params['editable'] && $this->object->canEditField($this->name) && $this->object->isFieldEditable($this->name, $this->force_edit)) {
                 $html .= $this->renderInput();
             } else {
                 $content = $this->displayValue();
@@ -181,7 +179,7 @@ class BC_Field extends BimpComponent
 
     public function displayValue()
     {
-        if (!$this->params['viewable']) {
+        if (!$this->params['viewable'] || !$this->object->canViewField($this->name)) {
             return BimpRender::renderAlerts('Vous n\'avez pas la permission de voir ce champ', 'warning');
         }
 

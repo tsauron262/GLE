@@ -326,7 +326,7 @@ function addSelectedElementsToFacture(list_id, id_demande, $button) {
     var $list = $('#' + list_id);
 
     if (!$.isOk($list)) {
-        bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger');
+        bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger', null, true);
         return;
     }
 
@@ -340,7 +340,7 @@ function addSelectedElementsToFacture(list_id, id_demande, $button) {
         } else {
             msg = 'Aucun ' + object_labels[object_name]['name'] + ' sélectionné';
         }
-        bimp_msg(msg, 'danger');
+        bimp_msg(msg, 'danger', null, true);
     } else {
         var elements = [];
 
@@ -750,7 +750,7 @@ function saveCommandesFournLinesModifs($button, view_id, id_demande) {
                 });
                 return;
             } else  {
-                bimp_msg('Aucune quantité à mettre à jour trouvée', 'warning');
+                bimp_msg('Aucune quantité à mettre à jour trouvée', 'warning', null, true);
 
             }
         }

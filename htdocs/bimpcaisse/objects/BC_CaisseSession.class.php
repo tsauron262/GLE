@@ -123,12 +123,23 @@ class BC_CaisseSession extends BimpObject
             return BimpRender::renderAlerts('ID de la caisse absent');
         }
 
+        $html = '';
+        
         $bc_paiement = BimpObject::getInstance('bimpcaisse', 'BC_Paiement');
         $list_name = ($full_list ? 'full_session' : 'session');
         $list = new BC_ListTable($bc_paiement, $list_name, 1, null, 'Liste des paiements', 'fas_hand-holding-usd');
         $list->addFieldFilterValue('id_caisse', (int) $caisse->id);
         $list->addFieldFilterValue('id_caisse_session', (int) $this->id);
-        return $list->renderHtml();
+        $html .= $list->renderHtml();
+
+        $bc_CaisseMvt = BimpObject::getInstance('bimpcaisse', 'BC_CaisseMvt');
+        $list_name = ($full_list ? 'full_session' : 'caisse');
+        $list = new BC_ListTable($bc_CaisseMvt, $list_name, 1, null, 'Liste des mouvements de fonds pour cette session', 'fas_exchange-alt');
+        $list->addFieldFilterValue('id_caisse', (int) $caisse->id);
+        $list->addFieldFilterValue('id_caisse_session', (int) $this->id);
+        $html .= $list->renderHtml();
+        
+        return $html;
     }
 
     public function renderVentesList()

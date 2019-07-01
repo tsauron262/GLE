@@ -57,7 +57,7 @@ function PartsManager(sufixe) {
     this.addKeywordFilter = function () {
         var kw = this.$container.find('.keywordFilter').val();
         if (!kw) {
-            bimp_msg('Veuillez entrer un mot-clé', 'danger');
+            bimp_msg('Veuillez entrer un mot-clé', 'warning', null, true);
             return;
         }
         if (/ +/.test(kw)) {
@@ -65,7 +65,7 @@ function PartsManager(sufixe) {
             return;
         }
         if (!/^[a-zA-Z0-9\.,\-]+$/.test(kw)) {
-            bimp_msg('Caractères interdits. Merci de n\'utiliser que des caractères aplha-numériques', 'danger');
+            bimp_msg('Caractères interdits. Merci de n\'utiliser que des caractères aplha-numériques', 'danger', null, true);
             return;
         }
         var kwType = this.$container.find('select.keywordFilterType').val();
@@ -90,11 +90,11 @@ function PartsManager(sufixe) {
         var $result = this.$container.find('.partsSearchResult');
         var search = this.$container.find('.searchPartInput').val();
         if (!search) {
-            bimp_msg('Veuillez entrer un code produit', 'danger');
+            bimp_msg('Veuillez entrer un code produit', 'danger', null, true);
             return;
         }
         if (!/^[a-zA-Z0-9\-\_ ]+$/.test(search)) {
-            bimp_msg('Caractères interdits. Merci de n\'utiliser que des caractères aplha-numériques ainsi que "-" ou "_"', 'danger');
+            bimp_msg('Caractères interdits. Merci de n\'utiliser que des caractères aplha-numériques ainsi que "-" ou "_"', 'danger', null, true);
             return;
         }
         this.unsetSearch();
@@ -250,7 +250,7 @@ function loadRepairForm($button, id_sav, serial) {
     var $createRepairForm = $('#createRepairForm');
 
     if (!$createRepairForm.length) {
-        bimp_msg('Une erreur est survenue. Opération impossible', 'danger');
+        bimp_msg('Une erreur est survenue. Opération impossible', 'danger', null, true);
         return;
     }
 
@@ -366,7 +366,7 @@ function addPartToCart($button, id_sav) {
             }
         });
     } else {
-        bimp_msg('Une errur est survenue. Opération impossible', 'danger');
+        bimp_msg('Une errur est survenue. Opération impossible', 'danger', null, true);
     }
 }
 
@@ -410,7 +410,7 @@ function sendGsxRequest($button, data, $resultContainer, successCallback) {
 function duplicateInput($button, inputName) {
     var $container = $button.findParentByClass('formRowInput');
     if (!$.isOk($container)) {
-        bimp_msg('Une erreur est survenue. opération impossible');
+        bimp_msg('Une erreur est survenue. opération impossible', null, true);
         return;
     }
 
@@ -436,7 +436,7 @@ function duplicateInput($button, inputName) {
 function duplicateDatasGroup($button, inputName) {
     var $container = $button.findParentByClass('formInputGroup');
     if (!$.isOk($container) || $container.attr('id') !== inputName) {
-        bimp_msg('Une erreur est survenue. opération impossible');
+        bimp_msg('Une erreur est survenue. opération impossible', null, true);
         return;
     }
 

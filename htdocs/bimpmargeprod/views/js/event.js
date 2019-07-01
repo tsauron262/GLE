@@ -8,7 +8,7 @@ function insertEventMontantDetailsListRow(id_montant, $button) {
     var $row = $button.parent('td').parent('tr');
 
     if (!$row.length) {
-        bimp_msg('Une erreur est survenue. impossible de charger la liste des détails', 'danger');
+        bimp_msg('Une erreur est survenue. impossible de charger la liste des détails', 'danger', null, true);
         $button.hide();
         return;
     }
@@ -64,7 +64,7 @@ function removeEventMontantDetailsListRow(id_montant, $button) {
             $button.parent('td').find('.showDetailsList').show();
         });
     } else {
-        bimp_msg('Une erreur est survenue', 'danger');
+        bimp_msg('Une erreur est survenue', 'danger', null, true);
         $button.hide();
     }
 }

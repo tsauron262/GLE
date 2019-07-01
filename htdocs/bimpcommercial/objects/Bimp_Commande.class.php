@@ -2347,6 +2347,15 @@ class Bimp_Commande extends BimpComm
     }
 
     // Overrides BimpComm:
+    
+    public function checkObject($context = '', $field = '')
+    {
+        if ($context === 'fetch') {
+            $this->checkLogistiqueStatus();
+            $this->checkShipmentStatus();
+            $this->checkInvoiceStatus();
+        }
+    }
 
     public function duplicate($new_data = array(), &$warnings = array(), $force_create = false)
     {

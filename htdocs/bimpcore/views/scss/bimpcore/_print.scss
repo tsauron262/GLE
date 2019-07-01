@@ -1,0 +1,30 @@
+@media print {
+    .no_print,
+    .btn,
+    .objectIcon,
+    .header_buttons,
+    .headerTools,
+    .rowButton,
+    .panel-footer,
+    .paginationContainer {
+        display: none;
+    }
+
+    table.bimp_list_table,
+    table.objectlistTable {
+        & > thead > tr > th,
+        & > tbody > tr > th {
+            background-color: #DCDCDC;
+            color: $gray-darker;
+        }
+    }
+
+    .bimp_fields_table,
+    .objectFieldsTable {
+        & > thead > tr.col_headers > th,
+        & > tbody > tr > th {
+            background-color: #DCDCDC;
+            color: $gray-darker;
+        }
+    }
+}

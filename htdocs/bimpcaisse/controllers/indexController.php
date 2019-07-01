@@ -454,7 +454,7 @@ class indexController extends BimpController
         }
 
         $caisseMvt = BimpObject::getInstance('bimpcaisse', 'BC_CaisseMvt');
-        $list = new BC_ListTable($caisseMvt, 'caisse', 1, null, 'Mouvements de fonds pour la caisse "' . $caisse->getData('name') . '"', 'exchange');
+        $list = new BC_ListTable($caisseMvt, 'caisse', 1, null, 'Mouvements de fonds pour la caisse "' . $caisse->getData('name') . '"', 'fas_exchange-alt');
         $list->addFieldFilterValue('id_entrepot', (int) $caisse->getData('id_entrepot'));
         $list->addFieldFilterValue('id_caisse', (int) $caisse->id);
         $html .= $list->renderHtml();
@@ -615,6 +615,8 @@ class indexController extends BimpController
         $confirm_fonds = (int) BimpTools::getValue('confirm_fonds', 0);
         $need_confirm_fonds = 0;
         $id_entrepot = 0;
+        $recap_url = '';
+        $recap_width = 827;
 
         if (!$id_caisse) {
             $errors[] = 'Aucune caisse sélectionnée';
@@ -659,13 +661,11 @@ class indexController extends BimpController
                         $session->set('id_user_closed', (int) $user->id);
                         $session->set('fonds_end', $fonds);
                         $session_errors = $session->update();
-
                         if (!count($session_errors)) {
                             $caisse->set('id_current_session', 0);
                             $caisse->set('status', 0);
                             $session_errors = $caisse->update();
                         }
-
                         if (count($session_errors)) {
                             $errors[] = BimpTools::getMsgFromArray($session_errors, 'Echec de la fermeture de la caisse');
                         } else {
@@ -673,8 +673,9 @@ class indexController extends BimpController
 
                             $html = BimpRender::renderAlerts('Fermeture de la caisse "' . $caisse->getData('name') . '" effectuée avec succès', 'success');
 
-                            $url = DOL_URL_ROOT . '/bimpcore/view.php?module=bimpcaisse&object_name=BC_CaisseSession&id_object=' . $session->id . '&view=recap';
-                            $success_callback = 'window.open(\'' . $url . '\', \'Récapitulatif session de caisse\', "menubar=no, status=no, width=' . BC_Caisse::$windowWidthByDpi[(int) $caisse->getData('printer_dpi')] . ', height=900")';
+                            $recap_url = DOL_URL_ROOT . '/bimpcore/view.php?module=bimpcaisse&object_name=BC_CaisseSession&id_object=' . $session->id . '&view=recap';
+                            $recap_width = BC_Caisse::$windowWidthByDpi[(int) $caisse->getData('printer_dpi')];
+//                            $recap_url = 'window.open(\'' . $url . '\', \'Récapitulatif session de caisse\', "menubar=no, status=no, width=' . BC_Caisse::$windowWidthByDpi[(int) $caisse->getData('printer_dpi')] . ', height=900");';
                         }
                     }
                 }
@@ -687,7 +688,8 @@ class indexController extends BimpController
             'need_confirm_fonds' => $need_confirm_fonds,
             'id_entrepot'        => $id_entrepot,
             'request_id'         => BimpTools::getValue('request_id', 0),
-            'success_callback'   => $success_callback
+            'recap_url'          => $recap_url,
+            'recap_width'        => $recap_width
         )));
     }
 

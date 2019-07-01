@@ -64,7 +64,8 @@ class BimpConfigDefinitions
         'field'  => array('default' => true),
         'child'  => array(),
         'name'   => array('default' => 'default'),
-        'open'   => array('data_type' => 'bool', 'default' => 0)
+        'open'   => array('data_type' => 'bool', 'default' => 0),
+        'show'   => array('data_type' => 'bool', 'default' => 1)
     );
     public static $icon_button = array(
         'label'   => array('default' => ''),

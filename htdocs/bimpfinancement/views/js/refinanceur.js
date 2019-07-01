@@ -12,7 +12,7 @@ function addNewCoefsPeriodRange($button) {
     var new_period = parseInt($input.val());
 
     if (isNaN(new_period) || !new_period) {
-        bimp_msg('veuillez entrer une valeur valide (entier positif)', 'danger');
+        bimp_msg('veuillez entrer une valeur valide (entier positif)', 'warning', null, true);
         return;
     }
 
@@ -39,7 +39,7 @@ function addNewCoefsPeriodRange($button) {
                 }
 
                 if (new_period === period) {
-                    bimp_msg('Cette tranche de durée existe déjà', 'danger');
+                    bimp_msg('Cette tranche de durée existe déjà', 'warning', null, true);
                     $button.removeClass('disbaled');
                     done = true;
                     error = true;
@@ -103,7 +103,7 @@ function addNewCoefsAmountRange($button) {
     var new_amount = parseFloat($input.val());
 
     if (isNaN(new_amount) || !new_amount) {
-        bimp_msg('veuillez entrer une valeur valide (nombre décimal positif)', 'danger');
+        bimp_msg('veuillez entrer une valeur valide (nombre décimal positif)', 'warning', null, true);
         return;
     }
 
@@ -131,7 +131,7 @@ function addNewCoefsAmountRange($button) {
                 }
 
                 if (new_amount === amount) {
-                    bimp_msg('Cette tranche de mountant existe déjà', 'danger');
+                    bimp_msg('Cette tranche de mountant existe déjà', 'warning', null, true);
                     $button.removeClass('disbaled');
                     done = true;
                     error = true;
@@ -237,7 +237,7 @@ function cancelCoefsModifs($button, id_refinanceur) {
     var $container = $('#coefs_ranges_content');
 
     if (!$.isOk($container)) {
-        bimp_msg('Une erreur est survenue. Veuillez actualiser la page');
+        bimp_msg('Une erreur est survenue. Veuillez actualiser la page', 'danger');
         return;
     }
 

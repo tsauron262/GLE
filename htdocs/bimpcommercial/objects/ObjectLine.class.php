@@ -124,7 +124,7 @@ class ObjectLine extends BimpObject
             return 0;
         }
 
-        if (!$force_edit && !(int) $this->getData('editable') && (!$this->canEditPrixAchat() || !$this->canEditPrixVente())) {
+        if (!$force_edit && !(int) $this->getData('editable')) {//  || !$this->canEditPrixAchat() || !$this->canEditPrixVente())) {
             return 0;
         }
 
@@ -2635,6 +2635,10 @@ class ObjectLine extends BimpObject
                 break;
 
             case 'qty':
+                if (!$this->isFieldEditable('qty')) {
+                    return $value;
+                }
+                
                 $product_type = null;
                 if ((int) $this->id_product) {
                     $product_type = (int) $this->db->getValue('product', 'fk_product_type', '`rowid` = ' . (int) $this->id_product);

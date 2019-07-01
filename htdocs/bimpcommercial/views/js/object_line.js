@@ -139,7 +139,7 @@ function quickAddObjectLine($button) {
     var $container = $button.findParentByClass('objectLineQuickAddForm');
 
     if (!$.isOk($container)) {
-        bimp_msg('Une erreur est survenue. Opération abandonnée');
+        bimp_msg('Une erreur est survenue. Opération abandonnée', 'danger', null, true);
         return;
     }
     

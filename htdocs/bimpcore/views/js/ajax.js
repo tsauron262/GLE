@@ -94,7 +94,7 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
             this.$resultContainer.html(process_html).find('.content-loading').show();
             this.$resultContainer.show();
         } else {
-            bimp_msg(this.processing_msg, 'info');
+            bimp_msg(this.processing_msg, 'info', null, true);
         }
     } else if (bimpAjax.remove_current_content &&
             ((bimpAjax.display_success && !bimpAjax.display_success_in_popup_only) ||
@@ -207,7 +207,7 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
                 if (typeof (result.request_id) !== 'undefined') {
                     bimpAjax = bimp_requests[parseInt(result.request_id)];
                 } else {
-                    bimp_msg('Erreur: ID de requête invalide', 'danger');
+                    bimp_msg('Erreur: ID de requête invalide', 'danger', null, true);
                     return;
                 }
 

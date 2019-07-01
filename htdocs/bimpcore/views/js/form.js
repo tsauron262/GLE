@@ -568,7 +568,7 @@ function validateForm($form) {
     var check = true;
     if (data_missing) {
         check = false;
-        bimp_msg('Certains champs obligatoires ne sont pas renseignés', 'danger');
+        bimp_msg('Certains champs obligatoires ne sont pas renseignés', 'danger', null, true);
     }
 
     return check;
@@ -603,7 +603,7 @@ function reloadObjectInput(form_id, input_name, fields, keep_new_value) {
         if ($container.length) {
             is_object = 1;
         } else {
-            bimp_msg('Erreur: champ "' + input_name + '" non trouvé', 'warning');
+            bimp_msg('Erreur: champ "' + input_name + '" non trouvé', 'warning', null, true);
         }
     }
 
@@ -664,21 +664,21 @@ function reloadParentInput($button, input_name) {
     var $inputContainer = $button.findParentByClass('inputContainer');
     
     if (!$.isOk($inputContainer)) {
-        bimp_msg('Erreur technique (conteneur absent)');
+        bimp_msg('Erreur technique (conteneur absent)', 'danger', null, true);
         return;
     }
     
     var field_name = $inputContainer.data('field_name');
     
     if (field_name !== input_name) {
-        bimp_msg('Erreur technique (Nom de champ invalide)');
+        bimp_msg('Erreur technique (Nom de champ invalide)', null, true);
         return;
     }
     
     var $form = $inputContainer.findParentByClass('object_form');
     
     if (!$.isOk($form)) {
-        bimp_msg('Erreur technique (formulaire non trouvé)');
+        bimp_msg('Erreur technique (formulaire non trouvé)', null, true);
         return;
     }
     
@@ -687,7 +687,7 @@ function reloadParentInput($button, input_name) {
 
 function searchObjectList($input) {
     if (!$.isOk($input)) {
-        bimp_msg('Une erreur est survenue. Impossible d\'effectuer la recherche', 'danger');
+        bimp_msg('Une erreur est survenue. Impossible d\'effectuer la recherche', 'danger', null, true);
         console.error('$input invalide');
         return;
     }
@@ -697,7 +697,7 @@ function searchObjectList($input) {
     if (!$.isOk($container)) {
         $container = $input.findParentByClass('searchInputContainer');
         if (!$.isOk($container)) {
-            bimp_msg('Une erreur est survenue. Impossible d\'effectuer la recherche', 'danger');
+            bimp_msg('Une erreur est survenue. Impossible d\'effectuer la recherche', 'danger', null, true);
             console.error('$container invalide');
             return;
         }
@@ -850,7 +850,7 @@ function getInputValue($inputContainer) {
             field_name = $inputContainer.data('values_field');
             var $valuesContainer = $inputContainer.parent().find('.inputMultipleValuesContainer');
             if (!$valuesContainer.length) {
-                bimp_msg('Erreur: liste de valeurs absente pour le champ "' + field_name + '"', 'danger');
+                bimp_msg('Erreur: liste de valeurs absente pour le champ "' + field_name + '"', 'danger', null, true);
                 return;
             } else {
                 $valuesContainer.find('[name="' + field_name + '[]"]').each(function () {
@@ -883,13 +883,13 @@ function addMultipleInputCurrentValue($button, value_input_name, label_input_nam
 
     var $inputContainer = $button.findParentByClass('inputContainer');
     if (!$inputContainer.length) {
-        bimp_msg('Une erreur technique est survenue ("inputContainer" absent). opération impossible', 'danger');
+        bimp_msg('Une erreur technique est survenue ("inputContainer" absent). opération impossible', 'danger', null, true);
         return;
     }
 
     var $container = $inputContainer.find('.inputMultipleValuesContainer');
     if (!$container.length) {
-        bimp_msg('Une erreur technique est survenue ("inputMultipleValuesContainer" absent). opération impossible', 'danger');
+        bimp_msg('Une erreur technique est survenue ("inputMultipleValuesContainer" absent). opération impossible', 'danger', null, true);
         return;
     }
 
@@ -906,7 +906,7 @@ function addMultipleInputCurrentValue($button, value_input_name, label_input_nam
             if (max_values > 1) {
                 msg += 's';
             }
-            bimp_msg(msg, 'danger');
+            bimp_msg(msg, 'danger', null, true);
             return;
         }
     }
@@ -931,7 +931,7 @@ function addMultipleInputCurrentValue($button, value_input_name, label_input_nam
         var check = true;
         $container.find('.multipleValuesList').find('input[name="' + values_field_name + '[]"]').each(function () {
             if ($(this).val() == value) {
-                bimp_msg('Cet élément a déjà été ajouté', 'warning');
+                bimp_msg('Cet élément a déjà été ajouté', 'warning', null, true);
                 check = false;
             }
         });
@@ -1001,7 +1001,7 @@ function addMultipleInputCurrentValue($button, value_input_name, label_input_nam
             }));
         }
     } else {
-        bimp_msg('Veuillez sélectionner une valeur', 'warning');
+        bimp_msg('Veuillez sélectionner une valeur', 'warning', null, true);
     }
 }
 
@@ -1288,18 +1288,18 @@ function displayInputMsg($input, msg, className) {
 function addSubObjectForm($button, object_name) {
     var $container = $button.findParentByClass('subObjects');
     if (!$.isOk($container)) {
-        bimp_msg('Erreur technique (container absent)', 'danger');
+        bimp_msg('Erreur technique (container absent)', 'danger', null, true);
         return;
     }
 
     if ($container.attr('id') !== object_name + '_subObjectsContainer') {
-        bimp_msg('Erreur technique (container invalide)', 'danger');
+        bimp_msg('Erreur technique (container invalide)', 'danger', null, true);
         return;
     }
 
     var $template = $container.find('.subObjectFormTemplate');
     if (!$.isOk($template)) {
-        bimp_msg('Erreur technique (template absent)', 'danger');
+        bimp_msg('Erreur technique (template absent)', 'danger', null, true);
         return;
     }
 
@@ -1340,7 +1340,7 @@ function removeSubObjectForm($button) {
             idx: idx
         }));
     } else {
-        bimp_msg('Une erreur est survenue, opération abandonnée (Conteneur absent ou invalide)', 'danger');
+        bimp_msg('Une erreur est survenue, opération abandonnée (Conteneur absent ou invalide)', 'danger', null, true);
     }
 }
 

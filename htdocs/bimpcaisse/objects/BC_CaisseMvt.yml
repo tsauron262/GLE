@@ -1,5 +1,7 @@
 table: bc_caisse_mvt
 
+icon: fas_exchange-alt
+    
 labels: 
     name: Mouvement de fonds
     name_plur: Mouvements de fonds
@@ -27,6 +29,10 @@ fields:
             hide_values: 0,
         depends_on: id_entrepot
         keep_new_value: 1
+    id_caisse_session:
+        label: Session de caisse
+        type: id_object
+        object: caisse_session
     type: 
         label: Type
         values: 
@@ -56,7 +62,7 @@ forms:
 lists: 
     default: 
         title: Mouvements de fonds
-        icon: exchange
+        icon: fas_exchange-alt
         sort_field: id
         sort_way: desc
         n: 10
@@ -103,4 +109,18 @@ lists:
                 field: montant
             note: 
                 field: note
-    
+        
+    full_session: 
+        extends: caisse
+        n: 0
+        pagination: 0
+        enable_search: 0
+        enable_sort: 0
+        enable_refresh: 0
+        enable_edit: 0
+        add_form_name: unset
+        add_btn: 0
+        cols: 
+            user:
+                display: nom
+                

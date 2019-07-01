@@ -57,6 +57,11 @@ fields:
             field_name: type
             hide_values: 1
             
+    is_remise_globale: 
+        label: Remise globale
+        type: bool
+        default_value: 0
+            
 forms: 
     default: 
         rows: 

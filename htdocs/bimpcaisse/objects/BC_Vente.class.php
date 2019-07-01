@@ -194,7 +194,7 @@ class BC_Vente extends BimpObject
 
             $ref = '';
             $serial = '';
-            
+
             $eq_warnings = array();
 
             if ((int) $return->getData('id_equipment')) {
@@ -561,7 +561,7 @@ class BC_Vente extends BimpObject
         $html .= 'Commercial: ';
         $html .= '</span>';
         $html .= BimpInput::renderInput('search_user', 'id_user_resp', $id_user_resp);
-        
+
         $html .= '<br/><span style="font-weight: bold; font-size: 14px;">';
         $html .= BimpRender::renderIcon('pencil', 'iconLeft');
         $html .= 'Note: ';
@@ -1978,9 +1978,6 @@ class BC_Vente extends BimpObject
             $id_client = (int) $this->getData('id_client');
             $id_entrepot = (int) $this->getData('id_entrepot');
 
-            
-            
-            
             // Création de la facture et de l'avoir éventuel:
             $facture_errors = array();
             $facture_warnings = array();
@@ -2000,15 +1997,8 @@ class BC_Vente extends BimpObject
             if (count($facture_warnings)) {
                 $errors[] = BimpTools::getMsgFromArray($facture_warnings);
             }
-            
-            
-            
-            
-            
-            
-            
-            
-            if(count($errors) == 0){
+
+            if (count($errors) == 0) {
                 // Gestion des stocks et emplacements des articles vendus: 
                 foreach ($articles as $article) {
                     $equipment = $article->getChildObject('equipment');
@@ -2069,7 +2059,7 @@ class BC_Vente extends BimpObject
                         $equipment->updateField('return_available', 1, null, true);
                     } else {
                         $product = $article->getChildObject('product');
-                        $result = $product->dol_object->correct_stock($user, $id_entrepot, (int) $article->getData('qty'), 1, 'Vente #' . $this->id, 0, $codemove . '_ART' . (int) $article->id,'facture',$id_facture);
+                        $result = $product->dol_object->correct_stock($user, $id_entrepot, (int) $article->getData('qty'), 1, 'Vente #' . $this->id, 0, $codemove . '_ART' . (int) $article->id, 'facture', $id_facture);
                         if ($result < 0) {
                             $msg = 'Echec de la mise à jour du stock pour le produit "' . $product->getRef() . ' - ' . $product->getName() . '" (ID: ' . $product->id . ')';
                             $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($product->dol_object), $msg);
@@ -2122,9 +2112,9 @@ class BC_Vente extends BimpObject
                             $product = $return->getChildObject('product');
 
                             if ((int) $return->getData('defective')) {
-                                $result = $product->dol_object->correct_stock($user, $id_defective_entrepot, (int) $return->getData('qty'), 0, 'Retour produit Vente #' . $this->id, 0, $codemove . '_RET' . (int) $return->id,'facture',$id_facture);
+                                $result = $product->dol_object->correct_stock($user, $id_defective_entrepot, (int) $return->getData('qty'), 0, 'Retour produit Vente #' . $this->id, 0, $codemove . '_RET' . (int) $return->id, 'facture', $id_facture);
                             } else {
-                                $result = $product->dol_object->correct_stock($user, $id_entrepot, (int) $return->getData('qty'), 0, 'Retour produit Vente #' . $this->id, 0, $codemove . '_RET' . (int) $return->id,'facture',$id_facture);
+                                $result = $product->dol_object->correct_stock($user, $id_entrepot, (int) $return->getData('qty'), 0, 'Retour produit Vente #' . $this->id, 0, $codemove . '_RET' . (int) $return->id, 'facture', $id_facture);
                             }
 
                             if ($result < 0) {
@@ -2180,9 +2170,9 @@ class BC_Vente extends BimpObject
         $note = 'Vente en caisse ' . $this->getNomUrl(1, 1, 0, 'default') . "\n";
         $note .= ' - Centre: "' . $entrepot->description . ' (' . $entrepot->libelle . ')"' . "\n";
         $note .= ' - Caisse: "' . $caisse->getData('name') . '"';
-        
-        if($this->getData('note_plus') != "")
-            $note .= "\n\n".$this->getData('note_plus');
+
+        if ($this->getData('note_plus') != "")
+            $note .= "\n\n" . $this->getData('note_plus');
 
         // Création de la facture
         $is_avoir = ((float) $this->getData('total_ttc') < 0);
@@ -2280,11 +2270,10 @@ class BC_Vente extends BimpObject
             ));
 
             $line->id_product = (int) $product->id;
-//            $line->desc = ' (RETOUR) ' . $product->getName() . ' - Réf. ' . $product->getRef() . ($serial ? ' - N° de série: ' . $serial : '');
+            $line->desc = ' (RETOUR) ' . $product->getRef() . ' - ' . $product->getName() . ($serial ? ' - N° de série: ' . $serial : '');
             $line->qty = ((int) $return->getData('qty') * -1);
             $line->tva_tx = (float) $return->getData('tva_tx');
             $line->pu_ht = (float) BimpTools::calculatePriceTaxEx((float) $return->getData('unit_price_tax_in'), $line->tva_tx);
-
 
             $line_errors = $line->create();
 
@@ -2301,7 +2290,7 @@ class BC_Vente extends BimpObject
             $total_articles_ttc += (int) $article->getData('qty') * (float) $article->getData('unit_price_tax_in');
         }
 
-        // Calcul du total des remise globale en pourcentage: 
+        // Calcul du total des remises globales en pourcentage: 
         $globale_remise_percent = 0;
         $remises = BimpObject::getInstance($this->module, 'BC_VenteRemise');
 
@@ -2411,8 +2400,8 @@ class BC_Vente extends BimpObject
                 $n++;
                 $montant = $paiement->getData('montant');
                 $code = $paiement->getData('code');
-                
-                if($code != "no"){
+
+                if ($code != "no") {
                     $total_paid += $montant;
 
                     $p = new Paiement($db);

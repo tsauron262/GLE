@@ -20,7 +20,7 @@ function setSelectedCommandeLinesReservationsStatus($button, id_commande, new_st
         });
 
         if (!reservations.length) {
-            bimp_msg('Aucun statut sélectionné', 'danger');
+            bimp_msg('Aucun statut sélectionné', 'warning', null, true);
             return;
         }
 
@@ -52,7 +52,7 @@ function setSelectedCommandeLinesReservationsStatus($button, id_commande, new_st
         return;
     }
 
-    bimp_msg('Une erreur est survenue. Opération abandonnée', 'danger');
+    bimp_msg('Une erreur est survenue. Opération abandonnée', 'danger', null, true);
 }
 
 function onCommandeLinesLogistiqueListLoaded($list) {
@@ -70,14 +70,14 @@ function onCommandeLinesLogistiqueListLoaded($list) {
 
 function saveReturnedEquipmentIdEntrepot($select) {
     if (!$.isOk($select)) {
-        bimp_msg('Une erreur est survenue. Entrepôt non enregistré', 'danger');
+        bimp_msg('Une erreur est survenue. Entrepôt non enregistré', 'danger', null, true);
         return;
     }
 
     var id_entrepot = parseInt($select.val());
 
     if (!id_entrepot) {
-        bimp_msg('Veuillez sélectionner un entrepôt', 'warning');
+        bimp_msg('Veuillez sélectionner un entrepôt', 'warning', null, true);
         return;
     }
 
@@ -148,14 +148,14 @@ function addSelectedCommandeLinesToShipment($button, list_id, id_commande) {
     var $list = $('#' + list_id);
 
     if (!$list.length) {
-        bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger');
+        bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger', null, true);
         return;
     }
 
     var $selected = $list.find('tbody').find('input.item_check:checked')
 
     if (!$selected.length) {
-        bimp_msg('Aucune ligne sélectionnée', 'danger');
+        bimp_msg('Aucune ligne sélectionnée', 'danger', null, true);
         return;
     }
 
@@ -240,7 +240,7 @@ function saveCommandeLineShipments($button, id_line) {
                 data.id_shipment = parseInt($row.data('id_shipment'));
                 data.qty = parseFloat($row.find('input.line_shipment_qty').val());
                 if (isNaN(data.qty)) {
-                    bimp_msg('Quantités invalides pour l\'expédition n°' + $row.data('num_livraison') + '<br/>Veuillez corriger', 'danger');
+                    bimp_msg('Quantités invalides pour l\'expédition n°' + $row.data('num_livraison') + '<br/>Veuillez corriger', 'danger', null, true);
                     return;
                 }
                 var $input = $row.find('input.line_shipment_group');
@@ -286,7 +286,7 @@ function setSelectedCommandeLinesReservationsEquipmentsToShipment($button, id_co
     var $list = $('#Bimp_CommandeLine_logistique_list_table_Bimp_Commande_' + id_commande);
 
     if (!$.isOk($list)) {
-        bimp_msg('Une erreur est survenue (liste non trouvée)', 'danger');
+        bimp_msg('Une erreur est survenue (liste non trouvée)', 'danger', null, true);
         return;
     }
 
@@ -300,7 +300,7 @@ function setSelectedCommandeLinesReservationsEquipmentsToShipment($button, id_co
     });
 
     if (!reservations.length) {
-        bimp_msg('Aucun statut sélectionné', 'danger');
+        bimp_msg('Aucun statut sélectionné', 'warning', null, true);
         return;
     }
 
@@ -338,7 +338,7 @@ function saveShipmentLines($button, id_shipment, modal_idx) {
     }
 
     if (!$.isOk($container)) {
-        bimp_msg('Une erreur est survenue (Conteneur absent). Opération abandonnée');
+        bimp_msg('Une erreur est survenue (Conteneur absent). Opération abandonnée', null, true);
         return;
     }
 
@@ -352,7 +352,7 @@ function saveShipmentLines($button, id_shipment, modal_idx) {
             data.id_line = parseInt($row.data('id_line'));
             data.qty = parseFloat($row.find('[name="line_' + data.id_line + '_qty"]').val());
             if (isNaN(data.qty)) {
-                bimp_msg('Quantités invalides pour la n°' + $row.data('num_line') + '<br/>Veuillez corriger', 'danger');
+                bimp_msg('Quantités invalides pour la ligne n°' + $row.data('num_line') + '<br/>Veuillez corriger', 'danger', null, true);
                 return;
             }
             var $groupInput = $row.find('[name="line_' + data.id_line + '_group_article"]');
@@ -387,7 +387,7 @@ function saveShipmentLines($button, id_shipment, modal_idx) {
             bimpModal.removeContent(modal_idx);
         });
     } else {
-        bimp_msg('Aucune ligne à enregistrer', 'warning');
+        bimp_msg('Aucune ligne à enregistrer', 'warning', null, true);
     }
 }
 
@@ -600,7 +600,7 @@ function saveCommandeLineFactures($button, id_line) {
                 data.id_facture = parseInt($row.data('id_facture'));
                 data.qty = parseFloat($row.find('input.line_facture_qty').val());
                 if (isNaN(data.qty)) {
-                    bimp_msg('Quantités invalides pour la facture "' + $row.data('facnumber') + '"<br/>Veuillez corriger', 'danger');
+                    bimp_msg('Quantités invalides pour la facture "' + $row.data('facnumber') + '"<br/>Veuillez corriger', 'danger', null, true);
                     return;
                 }
                 data.equipments = [];
@@ -641,14 +641,14 @@ function addSelectedCommandeLinesToFacture($button, list_id, id_commande, id_cli
     var $list = $('#' + list_id);
 
     if (!$list.length) {
-        bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger');
+        bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger', null, true);
         return;
     }
 
     var $selected = $list.find('tbody').find('input.item_check:checked')
 
     if (!$selected.length) {
-        bimp_msg('Aucune ligne sélectionnée', 'danger');
+        bimp_msg('Aucune ligne sélectionnée', 'warning', null, true);
         return;
     }
 
@@ -730,13 +730,13 @@ function onCommandeFournReceptionDetailsViewLoaded($view) {
 function addCommandeFournReceptionLineQtyRow($button, id_line) {
     var $container = $button.findParentByClass('line_' + id_line + '_qty_input_container');
     if (!$.isOk($container)) {
-        bimp_msg('Erreur (conteneur absent', 'danger');
+        bimp_msg('Erreur (conteneur absent', 'danger', null, true);
         return;
     }
 
     var tpl = $container.find('tr.line_' + id_line + '_qty_row_tpl').html();
     if (!tpl) {
-        bimp_msg('Erreur (template absent)', 'danger');
+        bimp_msg('Erreur (template absent)', 'danger', null, true);
         return;
     }
 
@@ -934,13 +934,13 @@ function saveCommandeFournReceptionLinesData($button, id_reception, modal_idx) {
 
     var $modal = $button.findParentByClass('modal');
     if (!$.isOk($modal)) {
-        bimp_msg('Erreur (Modale absente)', 'danger');
+        bimp_msg('Erreur (Modale absente)', 'danger', null, true);
         return;
     }
 
     var $content = $modal.find('#modal_content_' + modal_idx);
     if (!$.isOk($content)) {
-        bimp_msg('Erreur (Contenu non trouvé)', 'danger');
+        bimp_msg('Erreur (Contenu non trouvé)', 'danger', null, true);
         return;
     }
 
@@ -973,7 +973,7 @@ function addCommandeFournLineReceptions($button, id_line, modal_idx) {
     var $container = $('#modal_content_' + modal_idx).find('#commande_fourn_line_' + id_line + '_receptions_rows');
 
     if (!$.isOk($container)) {
-        bimp_msg('Une erreur est survenue (conteneur absent). Opération abandonnée', 'danger');
+        bimp_msg('Une erreur est survenue (conteneur absent). Opération abandonnée', 'danger', null, true);
         return;
     }
 
@@ -997,7 +997,7 @@ function addCommandeFournLineReceptions($button, id_line, modal_idx) {
             }
 
             if (!id_reception) {
-                bimp_msg('Aucune réception sélectionnée pour la réception n°' + i, 'danger');
+                bimp_msg('Aucune réception sélectionnée pour la réception n°' + i, 'warning', null, true);
                 check = false;
             }
 
@@ -1070,7 +1070,7 @@ function addCommandeFournLineReceptionRow($button, id_line) {
     var $container = $button.findParentByClass('line_reception_rows');
 
     if (!$.isOk($container) || parseInt($container.data('id_line')) !== id_line) {
-        bimp_msg('une erreur est survenue');
+        bimp_msg('une erreur est survenue', 'danger', null, true);
         return;
     }
 
@@ -1096,7 +1096,7 @@ function removeCommandeFournLineReceptionRow($button, id_line) {
     var $container = $button.findParentByClass('line_reception_rows');
 
     if (!$.isOk($container)) {
-        bimp_msg('une erreur est survenue');
+        bimp_msg('une erreur est survenue', 'danger', null, true);
         return;
     }
 
@@ -1118,7 +1118,7 @@ function setAllReceptionLinesToMax($button) {
     var $container = $button.findParentByClass('reception_details');
 
     if (!$.isOk($container)) {
-        bimp_msg('Erreur (conteneur absent)', 'danger');
+        bimp_msg('Erreur (conteneur absent)', 'danger', null, true);
         return;
     }
 

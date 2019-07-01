@@ -163,6 +163,7 @@ forms:
                   request_field: origin_id
               hidden: 1
               
+            - field: libelle
             - field: entrepot
             - field: fk_soc
             - field: ref_supplier

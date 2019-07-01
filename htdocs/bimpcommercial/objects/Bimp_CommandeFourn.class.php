@@ -1400,7 +1400,7 @@ class Bimp_CommandeFourn extends BimpComm
                                             'id_obj'             => (int) $facture->id,
                                             'type'               => $line->getData('type'),
                                             'deletable'          => 0,
-                                            'editable'           => 0,
+                                            'editable'           => 1,
                                             'linked_object_name' => 'commande_fourn_line',
                                             'linked_id_object'   => (int) $line->id,
                                             'remisable'          => $line->getData('remisable')
@@ -1596,7 +1596,7 @@ class Bimp_CommandeFourn extends BimpComm
     public function checkObject($context = '', $field = '')
     {
         if ($context === 'fetch') {
-//            $this->checkReceptionStatus();
+            $this->checkReceptionStatus();
             $this->checkInvoiceStatus();
         }
     }

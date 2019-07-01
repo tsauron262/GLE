@@ -224,7 +224,7 @@ function setObjectAction($button, object_data, action, extra_data, form_name, $r
             if ($.isOk($form)) {
                 var modal_idx = parseInt($form.data('modal_idx'));
                 if (!modal_idx) {
-                    bimp_msg('Erreur technique: index de la modale absent');
+                    bimp_msg('Erreur technique: index de la modale absent', 'danger', null, true);
                     return;
                 }
 

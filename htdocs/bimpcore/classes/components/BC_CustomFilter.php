@@ -26,6 +26,10 @@ class BC_CustomFilter extends BC_Filter
 
     public function getFilterValueLabel($value)
     {
+        if (!$this->params['show']) {
+            return '';
+        }
+
         $label = '';
 
         switch ($this->params['type']) {
@@ -83,6 +87,10 @@ class BC_CustomFilter extends BC_Filter
 
     public function getSqlFilters(&$filters = array(), &$joins = array())
     {
+        if (!$this->params['show']) {
+            return array();
+        }
+
         $errors = array();
 
         $this->object->getCustomFilterSqlFilters($this->field_name, $this->values, $filters, $joins, $errors);
@@ -92,6 +100,10 @@ class BC_CustomFilter extends BC_Filter
 
     public function renderAddInput()
     {
+        if (!$this->params['show']) {
+            return '';
+        }
+
         $html = '';
 
         $input_name = 'add_' . $this->field_name . '_filter';

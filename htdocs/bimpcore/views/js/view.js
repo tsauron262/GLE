@@ -167,7 +167,7 @@ function saveObjectfromFieldsTable(fields_table_id, $button) {
         $fieldsTable = $('#' + fields_table_id);
     }
     if (!$fieldsTable.length) {
-        bimp_msg('Erreur: liste des champs non trouvée', 'danger');
+        bimp_msg('Erreur: liste des champs non trouvée', 'danger', null, true);
         return;
     }
 
@@ -300,7 +300,7 @@ function cancelFieldsTableModifications(fields_table_id, $button) {
 
     var $fieldsTable = $('#' + fields_table_id);
     if (!$fieldsTable.length) {
-        bimp_msg('Erreur: liste des champs non trouvée', 'danger');
+        bimp_msg('Erreur: liste des champs non trouvée', 'danger', null, true);
         return;
     }
 

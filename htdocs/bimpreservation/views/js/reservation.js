@@ -57,7 +57,7 @@ function setSelectedReservationStatus($button, list_id, status) {
     var $list = $('#' + list_id);
 
     if (!$list.length) {
-        bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger');
+        bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger', null, true);
         return;
     }
 
@@ -65,7 +65,7 @@ function setSelectedReservationStatus($button, list_id, status) {
     var $selected = $list.find('tbody').find('input.item_check:checked');
 
     if (!$selected.length) {
-        bimp_msg('Aucune réservation sélectionnée', 'danger');
+        bimp_msg('Aucune réservation sélectionnée', 'warning', null, true);
         return;
     }
 
@@ -94,7 +94,7 @@ function findEquipmentToReceive($button, id_commande_client) {
 
     var serial = $('#findEquipmentSerial').val();
     if (!serial) {
-        bimp_msg('Veuillez saisir un numéro de série', 'danger');
+        bimp_msg('Veuillez saisir un numéro de série', 'warning', null, true);
         return;
     }
 
@@ -162,7 +162,7 @@ function openEquipmentsForm() {
 }
 
 function createSelectedShipmentsInvoice() {
-    bimp_msg('ici');
+//    bimp_msg('ici');
 }
 
 function onReserveEquipmentsFormLoaded($form) {
@@ -214,7 +214,7 @@ function onReserveEquipmentsFormLoaded($form) {
                                 }
                             });
                             if (!done) {
-                                bimp_msg('Le numéro de série saisi n\'a pas été trouvé parmi les équipements disponibles', 'warning');
+                                bimp_msg('Le numéro de série saisi n\'a pas été trouvé parmi les équipements disponibles', 'warning', null, true);
                                 return;
                             }
                         }

@@ -18869,3 +18869,33 @@ td.buttons .btn {
   border: 1px solid #B4B4B4;
   padding: 10px;
 }
+
+@media print {
+  /* line 2, ../scss/bimpcore/_print.scss */
+  .no_print,
+  .btn,
+  .objectIcon,
+  .header_buttons,
+  .headerTools,
+  .rowButton,
+  .panel-footer,
+  .paginationContainer {
+    display: none;
+  }
+
+  /* line 15, ../scss/bimpcore/_print.scss */
+  table.bimp_list_table > thead > tr > th, table.bimp_list_table > tbody > tr > th,
+  table.objectlistTable > thead > tr > th,
+  table.objectlistTable > tbody > tr > th {
+    background-color: #DCDCDC;
+    color: #282828;
+  }
+
+  /* line 24, ../scss/bimpcore/_print.scss */
+  .bimp_fields_table > thead > tr.col_headers > th, .bimp_fields_table > tbody > tr > th,
+  .objectFieldsTable > thead > tr.col_headers > th,
+  .objectFieldsTable > tbody > tr > th {
+    background-color: #DCDCDC;
+    color: #282828;
+  }
+}

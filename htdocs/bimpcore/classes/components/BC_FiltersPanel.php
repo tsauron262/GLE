@@ -93,6 +93,10 @@ class BC_FiltersPanel extends BC_Panel
         $errors = array();
 
         foreach ($this->params['filters'] as $key => $filter) {
+            if (isset($filter['show']) && !(int) $filter['show']) {
+                continue;
+            }
+            
             if (isset($filter['field']) && $filter['field']) {
                 $values = $this->getValues($filter['field'], isset($filter['child']) ? $filter['child'] : '');
                 if (!empty($values)) {
@@ -207,6 +211,10 @@ class BC_FiltersPanel extends BC_Panel
         }
 
         foreach ($this->params['filters'] as $key => $filter) {
+            if (isset($filter['show']) && !(int) $filter['show']) {
+                continue;
+            }
+            
             if (isset($filter['field']) && (string) $filter['field']) {
                 $values = $this->getValues($filter['field'], isset($filter['child']) ? $filter['child'] : '');
                 

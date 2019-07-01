@@ -61,7 +61,7 @@ class TransferLine extends BimpObject {
         return 0;
     }
     
-    private function cancelReservation(){
+    public function cancelReservation(){
         $errors = array();
         $tabReservations = $this->getReservations();
         foreach ($tabReservations as $reservation)
@@ -239,6 +239,10 @@ class TransferLine extends BimpObject {
         if(count($errors) == 0)
             $errors = array_merge($errors, parent::delete($warnings, $force_delete));
         return $errors;
+    }
+    
+    function isEditable($force_edit = false) {
+        return $this->getParentInstance()->isEditable($force_edit);
     }
 
     function checkStockProd($id_product, $id_warehouse_source) {

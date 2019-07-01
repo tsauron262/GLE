@@ -96,6 +96,9 @@ fields_tables:
             - field: date_opening
             - field: date_closing
             - field: user_create
+            - label: Terminée
+              value: 
+                  callback: displayIsGood
             
 views:
     default:

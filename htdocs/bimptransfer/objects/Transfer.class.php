@@ -18,7 +18,7 @@ class Transfer extends BimpDolObject {
     );
 
     public function canDelete() {
-        return 0;
+        return 1;
     }
 
 //fas_check fas_times fas_trash-alt
@@ -44,11 +44,29 @@ class Transfer extends BimpDolObject {
 
         return $errors;
     }
+    
+    public function actionClose($params){
+        $errors = array();
+        foreach($this->getLines() as $line){
+            if(((int) $line->getData('quantity_sent') - $line->getData('quantity_received'))>0)
+                $errors = array_merge($errors, $line->cancelReservation());
+        }
+        if(count($errors) == 0)
+            $errors = array_merge($errors, $this->updateField ("status", self::STATUS_CLOSED));
+        else {
+            print_r($errors);
+        
+        }
+        return $errors;
+    }
 
     public function renderAddInputs() {
         global $user;
         $html = '';
 
+        
+        if(!$this->isEditable())
+            return '';
         // status
 
         if ($this->isLoaded()) {
@@ -101,6 +119,17 @@ class Transfer extends BimpDolObject {
                         ))
                     );
                 }
+                if ($user->rights->bimptransfer->admin || $this->isGood()) {
+                    $buttons[] = array(
+                        'label' => 'Terminé le transfert',
+                        'icon' => 'fa-window-close',
+                        'onclick' => $this->getJsActionOnclick('close', array(), array(
+                            'success_callback' => 'function(result) {reloadTransfertLines();}',
+                        ))
+                    );
+                }
+                
+                
             } elseif ($this->getData('status') == Transfer::STATUS_SENDING) {
                 $buttons[] = array(
                     'label' => 'Valider envoie',
@@ -130,20 +159,8 @@ class Transfer extends BimpDolObject {
         }
 
         // TRANSFERT LINES
-        $transfer_lines_obj = BimpObject::getInstance('bimptransfer', 'TransferLine');
-        $transfer_lines = $transfer_lines_obj->getList(array(
-            'id_transfer' => $this->getData('id')
-                ), null, null, 'date_create', 'desc', 'array', array(
-            'id',
-            'id_product',
-            'id_equipment',
-            'quantity_sent',
-            'quantity_received',
-            'quantity_transfered'
-        ));
         // Update all reservation for this transfer
-        foreach ($transfer_lines as $t_line) {
-            $transfer_lines_obj = BimpCache::getBimpObjectInstance('bimptransfer', 'TransferLine', $t_line['id']);
+        foreach ($this->getLines() as $transfer_lines_obj) {
             if ($data['total']) {
                 $transfer_lines_obj->set('quantity_received', $transfer_lines_obj->getData('quantity_sent'));
                 $transfer_lines_obj->update();
@@ -162,6 +179,61 @@ class Transfer extends BimpDolObject {
             return 0;
 
         return parent::canEditField($field_name);
+    }
+    
+    public function isEditable($force_edit = false) {
+        if($this->getData('status') == Transfer::STATUS_CLOSED)
+            return 0;
+        
+        return parent::isEditable($force_edit);
+    }
+    
+    public function isDeletable($force_delete = false) {
+        foreach($this->getLines() as $line){
+            if($line->getData("quantity_transfered") > 0 || $line->getData("quantity_received") > 0)
+                return 0;
+        }
+        return 1;
+    }
+    
+    public function isGood(){
+        foreach($this->getLines() as $line){
+            if($line->getData("quantity_transfered") < $line->getData("quantity_sent"))
+                return 0;
+        }
+        return 1;
+    }
+    
+    
+    public function displayIsGood()
+    {
+        if ($this->isGood()) {
+            return '<span class="success">OUI</span>';
+        }
+
+        return '</span class="danger">NON</span>';
+    }
+    
+    public function getLines(){
+        // TRANSFERT LINES
+        $return = array();
+        $transfer_lines_obj = BimpObject::getInstance('bimptransfer', 'TransferLine');
+        $transfer_lines = $transfer_lines_obj->getList(array(
+            'id_transfer' => $this->getData('id')
+                ), null, null, 'date_create', 'desc', 'array', array(
+            'id',
+            'id_product',
+            'id_equipment',
+            'quantity_sent',
+            'quantity_received',
+            'quantity_transfered'
+        ));
+        // Update all reservation for this transfer
+        foreach ($transfer_lines as $t_line) {
+            $transfer_lines_obj = BimpCache::getBimpObjectInstance('bimptransfer', 'TransferLine', $t_line['id']);
+            $return[] = $transfer_lines_obj;
+        }
+        return $return;
     }
 
     public function userIsAdmin() {

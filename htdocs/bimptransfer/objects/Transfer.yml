@@ -38,6 +38,7 @@ fields:
         type: id_object
         object: entrepot
         default_value: 0
+        required: 1
         input:
             type: search_list
             search_list: 

@@ -18,7 +18,8 @@ class Transfer extends BimpDolObject {
     );
 
     public function canDelete() {
-        return 1;
+        global $user;
+        return ($user->rights->bimptransfer->admin || $this->getData("user_create") == $user->id);
     }
 
 //fas_check fas_times fas_trash-alt

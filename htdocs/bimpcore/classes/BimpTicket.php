@@ -51,6 +51,8 @@ class BimpTicket
 
     public function renderHtml()
     {
+        global $conf;
+        $conf->global->MAIN_MAX_DECIMALS_SHOWN = str_replace('...', '', $conf->global->MAIN_MAX_DECIMALS_SHOWN);
         $html = '';
 
         global $langs, $conf, $mysoc;

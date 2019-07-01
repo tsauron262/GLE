@@ -7,17 +7,16 @@ require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
 
 class Transfer extends BimpDolObject {
 
-    CONST CONTRAT_STATUS_SENDING = 0;
-    CONST CONTRAT_STATUS_RECEPTING = 1;
-    CONST CONTRAT_STATUS_CLOSED = 2;
+    CONST STATUS_SENDING = 0;
+    CONST STATUS_RECEPTING = 1;
+    CONST STATUS_CLOSED = 2;
 
     public static $status_list = Array(
-        self::CONTRAT_STATUS_SENDING => Array('label' => 'En cours d\'envoie', 'classes' => Array('success')/* , 'icon' => 'fas_check' */),
-        self::CONTRAT_STATUS_RECEPTING => Array('label' => 'En cours de réception', 'classes' => Array('warning')/* , 'icon' => 'fas_receipt' */),
-        self::CONTRAT_STATUS_CLOSED => Array('label' => 'Fermé', 'classes' => Array('danger')/* , 'icon' => 'fas_trash-alt' */),
+        self::STATUS_SENDING => Array('label' => 'En cours d\'envoie', 'classes' => Array('success')/* , 'icon' => 'fas_check' */),
+        self::STATUS_RECEPTING => Array('label' => 'En cours de réception', 'classes' => Array('warning')/* , 'icon' => 'fas_receipt' */),
+        self::STATUS_CLOSED => Array('label' => 'Fermé', 'classes' => Array('danger')/* , 'icon' => 'fas_trash-alt' */),
     );
-    
-    
+
     public function canDelete() {
         return 0;
     }
@@ -53,7 +52,7 @@ class Transfer extends BimpDolObject {
         // status
 
         if ($this->isLoaded()) {
-            if ($this->getData('status') == Transfer::CONTRAT_STATUS_CLOSED and ! $user->rights->bimptransfer->admin) {
+            if ($this->getData('status') == Transfer::STATUS_CLOSED and ! $user->rights->bimptransfer->admin) {
                 $html .= '<p>Le statut du transfert ne permet pas d\'ajouter des lignes</p>';
             } else {
                 $header_table = 'Lignes ';
@@ -77,8 +76,8 @@ class Transfer extends BimpDolObject {
     public function getActionsButtons() {
         global $user;
         $buttons = array();
-        if ($this->isLoaded()){
-            if($this->getData('status') == Transfer::CONTRAT_STATUS_RECEPTING ){
+        if ($this->isLoaded()) {
+            if ($this->getData('status') == Transfer::STATUS_RECEPTING) {
                 $buttons[] = array(
                     'label' => 'Transférer',
                     'icon' => 'fas_box',
@@ -86,7 +85,7 @@ class Transfer extends BimpDolObject {
                         'success_callback' => 'function(result) {reloadTransfertLines();}',
                     ))
                 );
-                if ($this->isLoaded() and $user->rights->bimptransfer->admin) {
+                if ($user->rights->bimptransfer->admin) {
                     $buttons[] = array(
                         'label' => 'Transférer tous les produits envoyés',
                         'icon' => 'fas_box',
@@ -97,17 +96,16 @@ class Transfer extends BimpDolObject {
                     $buttons[] = array(
                         'label' => 'Revenir en mode envoie',
                         'icon' => 'fas_box',
-                        'onclick' => $this->getJsActionOnclick('setSatut', array("status"=>Transfer::CONTRAT_STATUS_SENDING), array(
+                        'onclick' => $this->getJsActionOnclick('setSatut', array("status" => Transfer::STATUS_SENDING), array(
                             'success_callback' => 'function(result) {reloadTransfertLines();}',
                         ))
                     );
                 }
-            }
-            elseif($this->getData('status') == Transfer::CONTRAT_STATUS_SENDING){
+            } elseif ($this->getData('status') == Transfer::STATUS_SENDING) {
                 $buttons[] = array(
-                    'label' => 'Validé envoie',
+                    'label' => 'Valider envoie',
                     'icon' => 'fas_box',
-                    'onclick' => $this->getJsActionOnclick('setSatut', array("status"=>Transfer::CONTRAT_STATUS_RECEPTING), array(
+                    'onclick' => $this->getJsActionOnclick('setSatut', array("status" => Transfer::STATUS_RECEPTING), array(
                         'success_callback' => 'function(result) {reloadTransfertLines();}',
                     ))
                 );
@@ -116,8 +114,8 @@ class Transfer extends BimpDolObject {
 
         return $buttons;
     }
-    
-    public function actionSetSatut($data = array(), &$success = ''){
+
+    public function actionSetSatut($data = array(), &$success = '') {
         $this->updateField("status", $data['status']);
     }
 
@@ -158,7 +156,9 @@ class Transfer extends BimpDolObject {
 
     public function canEditField($field_name) {
         global $user;
-        if (($field_name == 'status' or ($field_name == 'id_warehouse_dest') && $this->getData('status') <  Transfer::CONTRAT_STATUS_RECEPTING) and ! $user->rights->bimptransfer->admin)
+        if ($field_name == 'status' and ! $user->rights->bimptransfer->admin)
+            return 0;
+        if (($field_name == 'id_warehouse_dest' && $this->getData('status') > Transfer::STATUS_SENDING) and ! $user->rights->bimptransfer->admin)
             return 0;
 
         return parent::canEditField($field_name);
@@ -167,6 +167,10 @@ class Transfer extends BimpDolObject {
     public function userIsAdmin() {
         global $user;
         return $user->rights->bimptransfer->admin;
+    }
+
+    public function userIsAdminOrStatusSending() {
+        return (int) ($this->userIsAdmin() or (int) $this->getData('status') == (int) Transfer::STATUS_SENDING);
     }
 
     // TODO enlever le bouton plutôt que le désactiver pour ceux qui n'ont pas le droit

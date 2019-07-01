@@ -21,7 +21,7 @@ class transferController extends BimpController {
         $transfer->fetch((int) $id_transfer);
         $id_warehouse_source = $transfer->getData('id_warehouse_source');
 
-        if($transfer->getData('status') == Transfer::CONTRAT_STATUS_SENDING)
+        if($transfer->getData('status') == Transfer::STATUS_SENDING)
             $errors = array_merge($errors, $transfert_line->checkStock($quantity_avaible, $id_product, $id_equipment, $id_warehouse_source, $id_transfer));
         else
             $quantity_avaible = 10000000;
@@ -31,7 +31,7 @@ class transferController extends BimpController {
 
         
         if (sizeof($errors) == 0) {
-            if($transfer->getData('status') == Transfer::CONTRAT_STATUS_SENDING){//mode envoie
+            if($transfer->getData('status') == Transfer::STATUS_SENDING){//mode envoie
                 if ($id_line > 0) {
                     $transfert_lineObj = BimpCache::getBimpObjectInstance('bimptransfer', 'TransferLine', $id_line);
                     

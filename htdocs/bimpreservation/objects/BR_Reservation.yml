@@ -82,6 +82,16 @@ objects:
             bimp_object: 
                 module: bimplogistique
                 name: BL_CommandeShipment
+                
+    transfer: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimptransfer
+                name: Transfer
+            id_object: 
+                field_value: id_transfert
         
 fields: 
     ref: 
@@ -225,7 +235,8 @@ fields:
     
     id_transfert: 
         label: Transfert
-        type: id
+        type: id_object
+        object: transfer
         input: 
             type: text
         display_if: 
@@ -485,13 +496,13 @@ views:
                   show: 
                       callback: isCommandeClient
                
-#                - type: fields_table
-#                  col_lg: 6
-#                  col_md: 6
-#                  fields_table:
-#                      name: transfert
-#                  show: 
-#                      callback: isTransfert
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  fields_table:
+                      name: transfert
+                  show: 
+                      callback: isTransfert
                         
                 - type: fields_table
                   col_lg: 6
@@ -518,11 +529,55 @@ filters_panels:
             - field: id_product
             - field: id_equipment
             - field: id_commande_client
-    #        - field: id_transfert
+            - field: id_transfert
             - field: id_sav
             - field: date_from
             - field: date_to
     
+lists_cols: 
+    ref: 
+        field: ref
+    type: 
+        field: type
+    date_from:
+        label: Date de début
+        field: date_from
+    date_to: 
+        label: Date de fin
+        field: date_to
+    product: 
+        field: id_product
+        display: nom_url
+    stocks: 
+        label: Qté dispo
+        value: 
+            callback: displayProductAvailableQty
+    equipment: 
+        field: id_equipment
+    commande: 
+        field: id_commande_client
+        display: nom_url
+    commercial: 
+        field: id_commercial
+        display: nom_url
+    qty: 
+        field: qty
+    status:
+        field: status
+    commande: 
+        field: id_commande_client
+        display: nom_url
+    commercial: 
+        field: id_commercial
+        display: nom_url
+    transfert: 
+        field: id_transfert
+        display: nom_url
+    linked_object: 
+        label: Objet lié
+        value: 
+            callback: displayLinkedObject
+        
 lists: 
     default: 
         filters_panel: default
@@ -544,33 +599,16 @@ lists:
         extra_btn: 
             callback: getListExtraBtn
         cols:
-            ref: 
-                field: ref
-            entrepot: 
-                field: id_entrepot
-                display: nom_url
-            sav: 
-                field: id_sav
-                display: nom_url
-            product: 
-                field: id_product
-                display: nom_url
-            stocks: 
-                label: Qté dispo
-                value: 
-                    callback: displayProductAvailableQty
-            equipment: 
-                field: id_equipment
-            date_from:
-                label: Du
-                field: date_from
-            date_to: 
-                label: Au
-                field: date_to
-            qty: 
-                field: qty
+            type: 
             status:
-                field: status
+            entrepot: 
+            product: 
+            equipment: 
+            linked_object:
+            date_from:
+            date_to: 
+            qty: 
+            stocks: 
                 
     commandes: 
         checkboxes: 1
@@ -587,30 +625,11 @@ lists:
             callback: getListExtraBtn
         cols:
             ref: 
-                label: Ref. logistique
-                field: ref
-#            date_from:
-#                label: Date de début
-#                field: date_from
             product: 
-                field: id_product
-                display: nom_url
             stocks: 
-                label: Qté dispo
-                value: 
-                    callback: displayProductAvailableQty
             equipment: 
-                field: id_equipment
-#            commande: 
-#                field: id_commande_client
-#                display: nom_url
-#            commercial: 
-#                field: id_commercial
-#                display: nom_url
             qty: 
-                field: qty
             status:
-                field: status
                 
     entrepot: 
         checkboxes: 1
@@ -631,26 +650,11 @@ lists:
             callback: getListExtraBtn
         cols:
             ref: 
-                field: ref
             date_from:
-                label: Date de début
-                field: date_from
             product: 
-                field: id_product
-                display: nom_url
             stocks: 
-                label: Qté dispo
-                value: 
-                    callback: displayProductAvailableQty
             equipment: 
-                field: id_equipment
             commande: 
-                field: id_commande_client
-                display: nom_url
             commercial: 
-                field: id_commercial
-                display: nom_url
             qty: 
-                field: qty
             status:
-                field: status

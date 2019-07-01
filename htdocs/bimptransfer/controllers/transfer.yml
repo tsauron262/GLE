@@ -31,7 +31,7 @@ sections:
                           view:
                             # TODO pas le must le callback
                               panel:
-                                callback: userIsAdmin
+                                  callback: userIsAdmin
                               object: transfer
                     - cols: 
                         - type: custom

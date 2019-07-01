@@ -1,8 +1,7 @@
 <?php
 
-require_once DOL_DOCUMENT_ROOT . '/bimpcore/objects/BimpDolObject.class.php';
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
-require_once DOL_DOCUMENT_ROOT . '/bimpcore/classes/BimpRender.php';
+require_once DOL_DOCUMENT_ROOT . '/bimpcore/objects/BimpDolObject.class.php';
 require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
 
 class Transfer extends BimpDolObject {
@@ -12,11 +11,10 @@ class Transfer extends BimpDolObject {
     CONST CONTRAT_STATUS_CLOSED = 2;
 
     public static $status_list = Array(
-        self::CONTRAT_STATUS_SENDING => Array('label' => 'En cours d\'envoie', 'classes' => Array('success')/* , 'icon' => 'fas_check' */),
-        self::CONTRAT_STATUS_RECEPTING => Array('label' => 'En cours de réception', 'classes' => Array('warning')/* , 'icon' => 'fas_receipt' */),
-        self::CONTRAT_STATUS_CLOSED => Array('label' => 'Fermé', 'classes' => Array('danger')/* , 'icon' => 'fas_trash-alt' */),
+        self::CONTRAT_STATUS_SENDING => Array('label' => 'En cours d\'envoi', 'classes' => Array('success'), 'icon' => 'fas_cogs'),
+        self::CONTRAT_STATUS_RECEPTING => Array('label' => 'En cours de réception', 'classes' => Array('warning'), 'icon' => 'fas_arrow-alt-circle-down'),
+        self::CONTRAT_STATUS_CLOSED => Array('label' => 'Fermé', 'classes' => Array('danger'), 'icon' => 'fas_times')
     );
-    
     
     public function canDelete() {
         return 0;
@@ -56,7 +54,7 @@ class Transfer extends BimpDolObject {
             if ($this->getData('status') == Transfer::CONTRAT_STATUS_CLOSED and ! $user->rights->bimptransfer->admin) {
                 $html .= '<p>Le statut du transfert ne permet pas d\'ajouter des lignes</p>';
             } else {
-                $header_table = 'Lignes ';
+//                $header_table = 'Lignes ';
                 $header_table .= '<span style="margin-left: 100px">Ajouter</span>';
                 $header_table .= '<input class="search_list_input"  name="insert_line" type="text" style="width: 400px; margin-left: 10px;" value="" >';
                 $header_table .= '<span style="margin-left: 100px">Quantité</span>';
@@ -65,7 +63,7 @@ class Transfer extends BimpDolObject {
                 $html = BimpRender::renderPanel($header_table, $html, '', array(
                             'foldable' => false,
                             'type' => 'secondary',
-                            'icon' => 'fas_link',
+                            'icon' => 'fas_plus-circle',
                 ));
 //                require_once DOL_DOCUMENT_ROOT . '/bimptransfer/scan/scan.php';
             }
@@ -80,23 +78,23 @@ class Transfer extends BimpDolObject {
         if ($this->isLoaded()){
             if($this->getData('status') == Transfer::CONTRAT_STATUS_RECEPTING ){
                 $buttons[] = array(
-                    'label' => 'Transférer',
-                    'icon' => 'fas_box',
+                    'label' => 'Réceptionner',
+                    'icon' => 'fas_arrow-alt-circle-down',
                     'onclick' => $this->getJsActionOnclick('doTransfer', array(), array(
                         'success_callback' => 'function(result) {reloadTransfertLines();}',
                     ))
                 );
                 if ($this->isLoaded() and $user->rights->bimptransfer->admin) {
                     $buttons[] = array(
-                        'label' => 'Transférer tous les produits envoyés',
-                        'icon' => 'fas_box',
+                        'label' => 'Réceptionner tous les produits envoyés',
+                        'icon' => 'fas_arrow-alt-circle-down',
                         'onclick' => $this->getJsActionOnclick('doTransfer', array('total' => true), array(
                             'success_callback' => 'function(result) {reloadTransfertLines();}',
                         ))
                     );
                     $buttons[] = array(
-                        'label' => 'Revenir en mode envoie',
-                        'icon' => 'fas_box',
+                        'label' => 'Revenir en mode envoi',
+                        'icon' => 'fas_undo',
                         'onclick' => $this->getJsActionOnclick('setSatut', array("status"=>Transfer::CONTRAT_STATUS_SENDING), array(
                             'success_callback' => 'function(result) {reloadTransfertLines();}',
                         ))
@@ -105,8 +103,8 @@ class Transfer extends BimpDolObject {
             }
             elseif($this->getData('status') == Transfer::CONTRAT_STATUS_SENDING){
                 $buttons[] = array(
-                    'label' => 'Validé envoie',
-                    'icon' => 'fas_box',
+                    'label' => 'Valider envoi',
+                    'icon' => 'fas_check-circle',
                     'onclick' => $this->getJsActionOnclick('setSatut', array("status"=>Transfer::CONTRAT_STATUS_RECEPTING), array(
                         'success_callback' => 'function(result) {reloadTransfertLines();}',
                     ))
@@ -170,6 +168,7 @@ class Transfer extends BimpDolObject {
     }
 
     // TODO enlever le bouton plutôt que le désactiver pour ceux qui n'ont pas le droit
+    
     public function create(&$warnings = array(), $force_create = false) {
 //        if (!$this->userIsAdmin()) {
 //            $warnings[] = "Vous n'avez pas les droits de créer un transfert.";

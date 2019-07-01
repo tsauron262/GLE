@@ -2684,7 +2684,7 @@ class Bimp_CommandeLine extends ObjectLine
 
         if (!count($errors)) {
             $this->set('shipments', $shipments);
-            $errors = $this->update($warnings, true);
+            $errors = $this->updateField('shipments', $shipments);
         }
 
         if (!count($errors)) {
@@ -2900,9 +2900,7 @@ class Bimp_CommandeLine extends ObjectLine
         if (!count($errors)) {
             $shipments = $this->getData('shipments');
             $shipments[(int) $shipment->id]['shipped'] = 1;
-            $this->set('shipments', $shipments);
-            $warnings = array();
-            $up_errors = $this->update($warnings, true);
+            $up_errors = $this->updateField('shipments', $shipments);
             if (count($up_errors)) {
                 $errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec de la mise à jour de la ligne de commande client');
             }
@@ -3078,9 +3076,7 @@ class Bimp_CommandeLine extends ObjectLine
             if (isset($shipments[(int) $shipment->id])) {
                 unset($shipments[(int) $shipment->id]);
             }
-            $this->set('shipments', $shipments);
-            $warnings = array();
-            $up_errors = $this->update($warnings, true);
+            $up_errors = $this->updateField('shipments', $shipments);
             if (count($up_errors)) {
                 $errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec de la mise à jour de la ligne de commande client');
             }
@@ -3173,10 +3169,7 @@ class Bimp_CommandeLine extends ObjectLine
 
             $shipments[(int) $id_shipment] = $shipment_data;
 
-            $this->set('shipments', $shipments);
-            $warnings = array();
-            $errors = $this->update($warnings, true);
-            $errors = array_merge($errors, $warnings);
+            $errors = $this->updateField('shipments', $shipments);
         }
 
         return $errors;
@@ -3408,8 +3401,7 @@ class Bimp_CommandeLine extends ObjectLine
             $factures[(int) $id_facture]['equipments'] = $equipments;
         }
 
-        $this->set('factures', $factures);
-        $errors = $this->update($warnings, true);
+        $errors = $this->updateField('factures', $factures);
 
         $this->checkQties();
 
@@ -4413,18 +4405,15 @@ class Bimp_CommandeLine extends ObjectLine
 
     public function checkObject($context = '', $field = '')
     {
-        if ($context === 'updateField' && in_array($field, array('qty_total', 'qty_shipped', 'qty_to_ship', 'qty_billed', 'qty_to_bill'))) {
-            return;
-        }
+        if ($context === 'fetch') {
+            $this->checkQties();
+            $commande = $this->getParentInstance();
 
-        $this->checkQties();
-
-        $commande = $this->getParentInstance();
-
-        if (BimpObject::objectLoaded($commande) && $commande->isLogistiqueActive()) {
-            // Vérification des réservations: 
-            $this->checkReservations(); // les quantités des réservations sont vérifiées dans cette méthode.
-            // Vérifications des quantités: 
+            if (BimpObject::objectLoaded($commande) && $commande->isLogistiqueActive()) {
+                // Vérification des réservations: 
+                $this->checkReservations(); // les quantités des réservations sont vérifiées dans cette méthode.
+                // Vérifications des quantités: 
+            }
         }
 
         parent::checkObject();
@@ -4548,17 +4537,17 @@ class Bimp_CommandeLine extends ObjectLine
 
     public static function checkAllQties()
     {
-        ignore_user_abort(0);
-        set_time_limit(60);
-        $instance = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeLine');
-        $rows = $instance->getList(array(), null, null, 'id', 'asc', 'array', array('id'));
-
-        foreach ($rows as $r) {
-            $line = BimpCache::getBimpObjectInstance($instance->module, $instance->object_name, (int) $r['id']);
-
-            if (BimpObject::objectLoaded($line)) {
-                $line->checkQties();
-            }
-        }
+//        ignore_user_abort(0);
+//        set_time_limit(60);
+//        $instance = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeLine');
+//        $rows = $instance->getList(array(), null, null, 'id', 'asc', 'array', array('id'));
+//
+//        foreach ($rows as $r) {
+//            $line = BimpCache::getBimpObjectInstance($instance->module, $instance->object_name, (int) $r['id']);
+//
+//            if (BimpObject::objectLoaded($line)) {
+//                $line->checkQties();
+//            }
+//        }
     }
 }

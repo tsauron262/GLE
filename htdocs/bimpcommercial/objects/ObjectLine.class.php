@@ -120,7 +120,7 @@ class ObjectLine extends BimpObject
 
     public function isEditable($force_edit = false)
     {
-        if ((int) $this->id_remise_except) {
+        if (!$force_edit && (int) $this->id_remise_except) {
             return 0;
         }
 

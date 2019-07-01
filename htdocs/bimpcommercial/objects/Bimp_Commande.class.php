@@ -1595,7 +1595,7 @@ class Bimp_Commande extends BimpComm
 
         foreach ($lines_qties as $id_line => $line_qty) {
             $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $id_line);
-
+            
             if (BimpObject::objectLoaded($line)) {
                 $product = $line->getProduct();
                 $fac_line_errors = array();
@@ -1636,7 +1636,9 @@ class Bimp_Commande extends BimpComm
                     $fac_line->id_remise_except = $line->id_remise_except;
 
                     $fac_line_warnings = array();
+                    
                     $fac_line_errors = $fac_line->create($fac_line_warnings);
+                    
                     $fac_line_errors = array_merge($fac_line_errors, $fac_line_warnings);
 
                     if (count($fac_line_errors)) {
@@ -1657,6 +1659,7 @@ class Bimp_Commande extends BimpComm
                             ));
 
                             $remise_warnings = array();
+                            
                             $remise_errors = $new_remise->create($remise_warnings);
 
                             $remise_errors = array_merge($remise_errors, $remise_warnings);
@@ -2016,6 +2019,7 @@ class Bimp_Commande extends BimpComm
 
     public function actionLinesFactureQties($data, &$success)
     {
+        
         $errors = array();
         $warnings = array();
         $success = '';
@@ -2039,7 +2043,7 @@ class Bimp_Commande extends BimpComm
             // Vérification des quantités: 
             $id_facture = (int) $data['id_facture'] ? (int) $data['id_facture'] : null;
             $errors = $this->checkFactureLinesData($lines_qties, $id_facture, $lines_equipments);
-
+            
             if (!count($errors)) {
                 if ($id_facture) {
                     $success = 'Ajout des unités à la facture effectué avec succès';
@@ -2055,7 +2059,7 @@ class Bimp_Commande extends BimpComm
                     $note_private = isset($data['note_private']) ? $data['note_private'] : '';
 
                     $id_facture = $this->createFacture($errors, $id_client, $id_contact, $id_cond_reglement, $id_account, $note_public, $note_private, $remises);
-
+                    
                     // Ajout des lignes à la facture: 
                     if ($id_facture && !count($errors)) {
                         $lines_errors = $this->addLinesToFacture($id_facture, $lines_qties, $lines_equipments, false);

@@ -81,6 +81,7 @@ class Bimp_FactureLine extends ObjectLine
 
     public function onSave(&$errors = array(), &$warnings = array())
     {
+
         if ($this->isLoaded()) {
             if ($this->getData('linked_object_name') === 'commande_line') {
                 $facture = $this->getParentInstance();
@@ -102,8 +103,10 @@ class Bimp_FactureLine extends ObjectLine
                 if (BimpObject::objectLoaded($commLine)) {
                     $new_rate = (float) $commLine->getFactureLineRemiseGlobaleRate((int) $this->getData('id_obj'));
 
-                    if (!$new_rate && BimpObject::objectLoaded($rg)) {
-                        $rg->delete();
+                    if (!$new_rate) {
+                        if (BimpObject::objectLoaded($rg)) {
+                            $rg->delete();
+                        }
                     } else {
                         if (!BimpObject::objectLoaded($rg)) {
                             $commande = $commLine->getParentInstance();

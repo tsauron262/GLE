@@ -6,11 +6,9 @@ if (!defined('BIMP_LIB')) {
     global $bimp_start_time;
     $bimp_start_time = microtime(1);
 
-//    if (defined('MOD_DEV')) {
-        ini_set('display_errors', 1);
-//    }
-
-//    set_time_limit(3);
+    ini_set('display_errors', 1);
+//    set_time_limit(30);
+    set_time_limit(3);
 
     $dir = __DIR__ . '/classes/';
 

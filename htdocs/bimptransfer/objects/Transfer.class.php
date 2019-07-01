@@ -175,7 +175,7 @@ class Transfer extends BimpDolObject {
         global $user;
         if ($field_name == 'status')
             return 0;
-        if (($field_name == 'id_warehouse_dest' && !$this->isDeletable) and ! $user->rights->bimptransfer->admin)
+        if ($field_name == 'id_warehouse_dest' && !$this->isDeletable)
             return 0;
 
         return parent::canEditField($field_name);

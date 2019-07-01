@@ -41,11 +41,12 @@ fields:
         input:
             type: search_list
             search_list: 
-                table: entrepot e
-                field_return_value: e.rowid
-                field_return_label: e.lieu
-                fields_search: e.rowid,e.lieu
-                
+                table: entrepot
+                field_return_value: rowid
+                field_return_label: ref,lieu
+                label_syntaxe: <label_1> - <label_2>
+                fields_search: rowid,ref,lieu
+
     id_warehouse_dest:
         label: Entrepôt d'arrivé
         type: id_object

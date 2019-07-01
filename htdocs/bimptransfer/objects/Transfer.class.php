@@ -158,7 +158,7 @@ class Transfer extends BimpDolObject {
 
     public function canEditField($field_name) {
         global $user;
-        if (($field_name == 'status' or $field_name == 'id_warehouse_dest') and ! $user->rights->bimptransfer->admin)
+        if (($field_name == 'status' or ($field_name == 'id_warehouse_dest') && $this->getData('status') <  Transfer::CONTRAT_STATUS_RECEPTING) and ! $user->rights->bimptransfer->admin)
             return 0;
 
         return parent::canEditField($field_name);

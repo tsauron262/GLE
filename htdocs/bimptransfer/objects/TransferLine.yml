@@ -63,9 +63,7 @@ lists:
                field: quantity_transfered
 
     prod:
-       objects_change_reload: Transfer
-#       after_list_content:
-#           callback: addInputs
+       filters_panel: default
        cols:
            id_transfer:
                field: id_transfer
@@ -87,10 +85,61 @@ lists:
            id_equipment: 
                field: id_equipment
                display: nom_url
-#           id_product: 
-#               field: id_product
-#               display: nom_url
            quantity_sent: 
                field: quantity_sent
            quantity_transfered: 
                field: quantity_transfered
+filters_panels: 
+    default: 
+        filters: 
+            id_warehouse_source:
+               field: id_warehouse_source
+               display: nom_url
+               child: parent
+            id_warehouse_dest:
+               field: id_warehouse_dest
+               display: nom_url
+               child: parent
+            status:
+               field: status
+               child: parent
+            id_product: 
+               field: id_product
+               display: nom_url
+            id_equipment: 
+               field: id_equipment
+               display: nom_url
+            quantity_sent: 
+               field: quantity_sent
+            quantity_transfered: 
+               field: quantity_transfered
+            date_opening: 
+                field: date_opening
+                child: parent
+            categ1:
+                custom: 1
+                label: Catégorie (1)
+                field: categ1
+                type: value
+                input:
+                    type: select
+                    options: 
+                        callback: getCategoriesArray
+            categ2:
+                custom: 1
+                label: Catégorie (2)
+                field: categ2
+                type: value
+                input:
+                    type: select
+                    options: 
+                        callback: getCategoriesArray
+            categ3:
+                custom: 1
+                label: Catégorie (3)
+                field: categ3
+                type: value
+                input:
+                    type: select
+                    options: 
+                        callback: getCategoriesArray

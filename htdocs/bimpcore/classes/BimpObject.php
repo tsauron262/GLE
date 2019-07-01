@@ -551,12 +551,21 @@ class BimpObject extends BimpCache
 
     // Getters boolééns: 
 
-    public function isLoaded()
+    public function isLoaded(&$errors = array())
     {
-        if ($this->isDolObject()) {
-            return (int) (isset($this->id) && (int) $this->id && isset($this->dol_object->id) && (int) $this->dol_object->id);
+        $check = 0;
+        if (isset($this->id) && (int) $this->id) {
+            $check = 1;
+            if ($this->isDolObject() && (!isset($this->dol_object->id) || !(int) $this->dol_object->id)) {
+                $check = 0;
+            }
         }
-        return (int) (isset($this->id) && (int) $this->id);
+        
+        if (!$check) {
+            $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
+        }
+
+        return $check;
     }
 
     public function isNotLoaded()

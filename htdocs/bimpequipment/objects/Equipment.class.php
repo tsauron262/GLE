@@ -46,7 +46,7 @@ class Equipment extends BimpObject
         // id_commande_fourn_line (retour)
         // id_reception (retour)
         // id_vente_return (retour en caisse)
-        
+
         if (!$this->isLoaded()) {
             $errors[] = 'ID de l\'équipement absent';
             return 0;
@@ -175,7 +175,7 @@ class Equipment extends BimpObject
             }
 
             $rows = $this->db->executeS($sql, 'array');
-            if (!is_null($rows) && !empty($rows)) {                
+            if (!is_null($rows) && !empty($rows)) {
                 foreach ($rows as $r) {
                     $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFournLine', (int) $r['id']);
                     if (BimpObject::objectLoaded($line)) {
@@ -714,6 +714,25 @@ class Equipment extends BimpObject
         }
 
         return 'ID de l\'équipement absent';
+    }
+
+    public function displayAvailability($id_entrepot = 0, $allowed = array())
+    {
+        $html = '';
+
+        $errors = array();
+
+        if ($this->isLoaded($errors)) {
+            $this->isAvailable($id_entrepot, $errors, $allowed);
+        }
+
+        if (count($errors)) {
+            $html .= BimpRender::renderAlerts($errors, 'warning');
+        } else {
+            $html .= BimpRender::renderAlerts('Equipement disponible', 'success');
+        }
+
+        return $html;
     }
 
     // Traitements: 

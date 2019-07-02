@@ -1045,10 +1045,46 @@ class Bimp_Facture extends BimpComm
         return $html;
     }
 
+    public function displayPaiementsFacturesPdfButtons($with_generate = true, $avoirs = true, $acomptes = true, $trop_percus = false)
+    {
+        $html = '';
+
+        $rows = $this->db->getRows('societe_remise_except', '`fk_facture` = ' . (int) $this->id, null, 'array');
+        if (!is_null($rows) && count($rows)) {
+            foreach ($rows as $r) {
+                $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $r['fk_facture_source']);
+                if ($facture->isLoaded()) {
+                    switch ((int) $facture->getData('type')) {
+                        case Facture::TYPE_CREDIT_NOTE:
+                            if ($avoirs) {
+                                $html .= $facture->displayPDFButton($with_generate, false, 'Avoir ' . $facture->getRef());
+                            }
+                            break;
+
+                        case Facture::TYPE_DEPOSIT:
+                            if ($acomptes) {
+                                $html .= $facture->displayPDFButton($with_generate, false, 'Facture acompte ' . $facture->getRef());
+                            }
+                            break;
+
+                        case Facture::TYPE_STANDARD:
+                            if ($trop_percus) {
+                                $html .= $facture->displayPDFButton($with_generate, false, 'Facture trop perçue ' . $facture->getRef());
+                            }
+                            break;
+                    }
+                }
+            }
+        }
+
+        return $html;
+    }
+
     //Rendus HTML: 
 
     public function renderContentExtraLeft()
     {
+        // Partie "Paiements": 
         $html = '';
 
         if ($this->isLoaded()) {

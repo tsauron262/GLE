@@ -1131,7 +1131,7 @@ class BimpComm extends BimpDolObject
         return $html;
     }
 
-    public function displayPDFButton($display_generate = true, $with_ref = true)
+    public function displayPDFButton($display_generate = true, $with_ref = true, $btn_label = '')
     {
         $html = '';
         $ref = dol_sanitizeFileName($this->getRef());
@@ -1141,9 +1141,11 @@ class BimpComm extends BimpDolObject
             if ($file_url) {
                 $onclick = 'window.open(\'' . $file_url . '\');';
                 $html .= '<button type="button" class="btn btn-default" onclick="' . $onclick . '">';
-                $html .= '<i class="fas fa5-file-pdf ' . ($with_ref ? 'iconLeft' : '') . '"></i>';
+                $html .= '<i class="fas fa5-file-pdf ' . (($with_ref || $btn_label) ? 'iconLeft' : '') . '"></i>';
                 if ($with_ref) {
                     $html .= $ref . '.pdf';
+                } elseif ($btn_label) {
+                    $html .= $btn_label;
                 }
                 $html .= '</button>';
 

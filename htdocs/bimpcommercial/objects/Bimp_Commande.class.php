@@ -188,7 +188,8 @@ class Bimp_Commande extends BimpComm
                 }
                 return 1;
         }
-        return 1;
+        
+        return parent::isFieldEditable($field, $force_edit);
     }
 
     // Getters booléens:

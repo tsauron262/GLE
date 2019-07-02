@@ -266,6 +266,7 @@ lists:
             date: 
             total_ht: 
             entrepot:
+            id_facture:
                     
     commandes_fourn: 
         checkboxes: 1

@@ -122,7 +122,7 @@ class Bimp_CommandeFourn extends BimpComm
                     $errors[] = 'Une ou plusieurs réceptions ont déjà été enregistrées pour cette commande fournisseur';
                     return 0;
                 }
-                if (!in_array($status, array(1, 2, 3, 6, 7, 9))) {
+                if (!in_array($status, array(1, 2, 6, 7, 9))) {
                     $errors[] = 'Statut actuel ' . $this->getLabel('of_the') . ' invalide';
                     return 0;
                 }

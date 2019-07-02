@@ -51,6 +51,8 @@ class BimpTicket
 
     public function renderHtml()
     {
+        global $conf;
+        $conf->global->MAIN_MAX_DECIMALS_SHOWN = str_replace('...', '', $conf->global->MAIN_MAX_DECIMALS_SHOWN);
         $html = '';
 
         global $langs, $conf, $mysoc;
@@ -227,7 +229,7 @@ class BimpTicket
             }
 
             $html .= '<span style="font-size: 13px;">Ticket imprimé le : ' . date('d / m / Y H:i:s') . '</span>';
-            $html .= '<span style="font-size: 13px;">Devise exprimée en Euro</span>';
+            $html .= '<span style="font-size: 13px;"><br/>Devise exprimée en Euro</span>';
             $html .= $this->renderFooter();
             $html .= '</div>';
         }

@@ -97,8 +97,8 @@ function getTabTypeObject($typeFiltre = null) {
             if (!is_file(DOL_DOCUMENT_ROOT . $data['path'])) {
                 if ($typeFiltre != null)
                     die("impossible de charger " . $data['path1'] . " ni " . $data['path']);
-                else
-                    dol_syslog("Impossible de charger " . DOL_DOCUMENT_ROOT . $data['path'], 3);
+//                else
+//                    dol_syslog("Impossible de charger " . DOL_DOCUMENT_ROOT . $data['path'], 3);
             }
             else {
 

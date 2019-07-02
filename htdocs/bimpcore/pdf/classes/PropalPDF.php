@@ -66,6 +66,8 @@ class PropalPDF extends BimpDocumentPDF
 
         if ($this->proforma) {
             $docName = 'Facture Proforma';
+        } elseif (isset($this->restitution_sav) && $this->restitution_sav) {
+            $docName = 'Bon de restitution';
         } else {
             $docName = $this->langs->transnoentities('CommercialProposal');
         }

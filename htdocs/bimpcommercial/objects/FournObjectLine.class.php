@@ -10,7 +10,7 @@ class FournObjectLine extends ObjectLine
         'id_product'     => array('label' => 'Produit / Service', 'type' => 'int', 'required' => 1),
         'id_fourn_price' => array('label' => 'Prix d\'achat fournisseur', 'type' => 'int', 'required' => 1),
         'desc'           => array('label' => 'Description', 'type' => 'html', 'required' => 0, 'default' => ''),
-        'qty'            => array('label' => 'Quantité', 'type' => 'float', 'required' => 1, 'default' => 0),
+        'qty'            => array('label' => 'Quantité', 'type' => 'float', 'required' => 1, 'default' => 1),
         'pu_ht'          => array('label' => 'PU HT', 'type' => 'float', 'required' => 0, 'default' => 0),
         'tva_tx'         => array('label' => 'Taux TVA', 'type' => 'float', 'required' => 0, 'default' => 0),
         'remise'         => array('label' => 'Remise', 'type' => 'float', 'required' => 0, 'default' => 0),

@@ -35,10 +35,10 @@ class BR_Reservation extends BimpObject
     public static $need_equipment_status = array(200, 201, 202, 250, 300, 301, 303, 304);
     public static $unavailable_status = array(200, 201, 202, 203, 250);
     public static $types = array(
-        1 => 'Commande',
-        2 => 'Transfert',
-        3 => 'Réservation temporaire',
-        4 => 'SAV'
+        1 => array('label' => 'Commande', 'icon' => 'fas_dolly'),
+        2 => array('label' => 'Transfert', 'icon' => 'far_arrow-alt-circle-right'),
+        3 => array('label' => 'Réservation temporaire', 'icon' => 'far_calendar-alt'),
+        4 => array('label' => 'SAV', 'icon' => 'fas_wrench')
     );
     protected $brOrderLine = null;
 
@@ -50,11 +50,11 @@ class BR_Reservation extends BimpObject
         return (int) $user->admin;
 //        return 0;
     }
-    
+
     public function canEdit()
     {
         global $user;
-        return (int) 1;//$user->admin;
+        return (int) 1; //$user->admin;
 //        return 0;
     }
 
@@ -64,22 +64,22 @@ class BR_Reservation extends BimpObject
     {
         return (int) ((int) $this->getData('type') === self::BR_RESERVATION_COMMANDE);
     }
-    
+
     public function isTransfert()
     {
         return (int) ((int) $this->getData('type') === self::BR_RESERVATION_TRANSFERT);
     }
-    
+
     public function isTemporaire()
     {
         return (int) ((int) $this->getData('type') === self::BR_RESERVATION_TEMPORAIRE);
     }
-    
+
     public function isSav()
     {
         return (int) ((int) $this->getData('type') === self::BR_RESERVATION_SAV);
     }
-    
+
     public function isEquipment()
     {
         if ($this->isLoaded()) {
@@ -823,6 +823,35 @@ class BR_Reservation extends BimpObject
             return '<span class="danger">inconnu</span>';
         }
         return '';
+    }
+
+    public function displayLinkedObject()
+    {
+        switch ((int) $this->getData('type')) {
+            case self::BR_RESERVATION_COMMANDE:
+                $obj = $this->getChildObject('commande_client');
+                if (BimpObject::objectLoaded($obj)) {
+                    return $obj->getNomUrl(1, 1, 1, 'full');
+                }
+                break;
+
+            case self::BR_RESERVATION_TRANSFERT:
+                $obj = $this->getChildObject('transfer');
+                if (BimpObject::objectLoaded($obj)) {
+                    return $obj->getNomUrl(1, 0, 1, 'default');
+                }
+                break;
+
+            case self::BR_RESERVATION_SAV:
+                $obj = $this->getChildObject('sav');
+                if (BimpObject::objectLoaded($obj)) {
+                    return $obj->getNomUrl(1, 1, 1, 'default');
+                }
+                break;
+
+//            case self::BR_RESERVATION_TEMPORAIRE:
+//                break;
+        }
     }
 
     // Rendus: 
@@ -1627,7 +1656,7 @@ class BR_Reservation extends BimpObject
         }
 
         if ($this->getData('id_equipment')) {
-            if($this->getData("status") < 300)
+            if ($this->getData("status") < 300)
                 $this->checkEquipment($equipment, $errors);
             $this->set('qty', 1);
         } else {

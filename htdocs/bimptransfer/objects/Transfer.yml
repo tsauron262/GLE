@@ -1,11 +1,13 @@
 table: bt_transfer
 controller: transfer
-icon: desktop
+icon: far_arrow-alt-circle-right
 
 header_btn:
     callback: getActionsButtons
 
 header_list_name: default
+header_edit_form: default
+
 list_page_url: 
     controller: index
             
@@ -17,22 +19,22 @@ objects:
         instance: 
             bimp_object: TransferLine
         delete: 1
-
                 
 fields: 
-    user_create: 
-        label: Auteur
-        type: id_object
-        object: user
-        input: 
-            type: search_user
-            include_empty: 1
-        default_value: 0
-    user_update: 
-        label: Utilisateur MAJ
-        type: id_object
-        object: user
-        default_value: 0        
+    # ces champs sont insérés de base par BimpObject (Ici, les paramètres suivants sont de toute manière écrasés à la création de l'objet) 
+#    user_create: 
+#        label: Auteur
+#        type: id_object
+#        object: user
+#        input: 
+#            type: search_user
+#            include_empty: 1
+#        default_value: 0
+#    user_update: 
+#        label: Utilisateur MAJ
+#        type: id_object
+#        object: user
+#        default_value: 0        
     id_warehouse_source:
         label: Entrepôt de départ
         type: id_object
@@ -40,26 +42,23 @@ fields:
         default_value: 0
         required: 1
         input:
-            type: search_list
-            search_list: 
-                table: entrepot
-                field_return_value: rowid
-                field_return_label: ref,lieu
-                label_syntaxe: <label_1> - <label_2>
-                fields_search: rowid,ref,lieu
-
+            # On utilise plutôt ce type d'input pour les entrepôts, c'est celui dont tout le monde a l'habitude... 
+            type: search_entrepot 
+#            type: search_list
+#            search_list: 
+#                table: entrepot
+#                field_return_value: rowid
+#                field_return_label: ref,lieu
+#                label_syntaxe: <label_1> - <label_2>
+#                fields_search: rowid,ref,lieu
+                
     id_warehouse_dest:
-        label: Entrepôt d'arrivé
+        label: Entrepôt d'arrivée
         type: id_object
         object: entrepot
         default_value: 0
         input:
-            type: search_list
-            search_list: 
-                table: entrepot e
-                field_return_value: e.rowid
-                field_return_label: e.lieu
-                fields_search: e.rowid,e.lieu
+            type: search_entrepot
         
     date_opening: 
         label: Date d'ouverture
@@ -91,10 +90,15 @@ fields_tables:
         icon: info-circle
         rows:
             - field: id_warehouse_source
+              display: nom_url
             - field: id_warehouse_dest
+              display: nom_url
             - field: date_opening
             - field: date_closing
             - field: user_create
+            - label: Terminée
+              value: 
+                  callback: displayIsGood
             
 views:
     default:
@@ -104,8 +108,8 @@ views:
         rows:
             - cols: 
                   - type: fields_table
-                    col_lg: 8
-                    col_md: 7
+                    col_lg: 7
+                    col_md: 8
                     col_sm: 12
                     fields_table:
                         name: default  
@@ -123,12 +127,10 @@ forms:
         rows: 
             - field: id_warehouse_source
             - field: id_warehouse_dest
-            - field: status
             
     default:
         rows: 
             - field: id_warehouse_dest
-            - field: status
             
 list:
     checkboxes: 1
@@ -138,7 +140,7 @@ list:
 #          icon: fas_trash-alt
 #          onclick: deleteSelectedObjects('list_id', $(this));
 #          btn_class: deleteSelectedObjects
-    sort_field: date_opening
+    sort_field: id
     sort_way: desc
     n: 10
     list_filters: 
@@ -151,7 +153,7 @@ list:
         callback: userIsAdmin
     view_btn: 1
     page_btn: 1
-    modal_view: full
+    modal_view: default
     cols:
         id:
             label: ID
@@ -161,9 +163,22 @@ list:
             field: status
         id_warehouse_source:
             field: id_warehouse_source
+            display: nom_url
         id_warehouse_dest: 
             field: id_warehouse_dest
+            display: nom_url
         date_opening:
             field: date_opening
         date_closing:
             field: date_closing
+            
+cards: 
+    default: 
+        title: nom
+        status: status
+        fields: 
+            - label: Ouvert le
+              field: date_opening
+            - label: Fermé le
+              field: date_closing
+        view_btn: 1

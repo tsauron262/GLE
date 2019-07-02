@@ -26,12 +26,12 @@ $(document).ready(function () {
  */
 
 function initEvents() {
-    var $inputs_selector = $("input[name^=insert_]");
+    var $inputs_selector = $("input[name=search_insert_line]");
 
     $inputs_selector.keypress(function (e) {
         var key = e.which;
         if (key == 13) {
-            insertProduct($('input[name=insert_line]').val(), $('input[name=insert_quantity]').val());
+            insertProduct($('input[name=search_insert_line]').val(), $('input[name=insert_quantity]').val());
             $('input[name=insert_line]').val('');
         }
     });

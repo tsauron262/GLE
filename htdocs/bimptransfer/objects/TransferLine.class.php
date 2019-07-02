@@ -61,7 +61,7 @@ class TransferLine extends BimpObject {
         return 0;
     }
     
-    private function cancelReservation(){
+    public function cancelReservation(){
         $errors = array();
         $tabReservations = $this->getReservations();
         foreach ($tabReservations as $reservation)
@@ -87,6 +87,7 @@ class TransferLine extends BimpObject {
         return $tabs;
     }
 
+    // TODO add force close -> fermeture dans tous les cas
     public function updateReservation() {
         $errors = array();
         $tabReservations = $this->getReservations();
@@ -200,9 +201,9 @@ class TransferLine extends BimpObject {
         if ($id_equipment > 0) {
             $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $id_equipment);
             $is_reserved = !$equipment->isAvailable($id_warehouse_source, $errors, array('id_transfer' => $id_transfer));
-            if ($is_reserved && $parent->getData('status') == Transfer::CONTRAT_STATUS_SENDING)
+            if ($is_reserved && $parent->getData('status') == Transfer::STATUS_SENDING)
                 $errors[] = "Cet équipement est déjà réservé.".$parent->getData('status');
-            elseif (!$is_reserved && $parent->getData('status') == Transfer::CONTRAT_STATUS_RECEPTING)
+            elseif (!$is_reserved && $parent->getData('status') == Transfer::STATUS_RECEPTING)
                 $errors[] = "Cet équipement n'est pas réservé.";
             else
                 $quantity = 1;
@@ -238,6 +239,10 @@ class TransferLine extends BimpObject {
         if(count($errors) == 0)
             $errors = array_merge($errors, parent::delete($warnings, $force_delete));
         return $errors;
+    }
+    
+    function isEditable($force_edit = false) {
+        return $this->getParentInstance()->isEditable($force_edit);
     }
 
     function checkStockProd($id_product, $id_warehouse_source) {
@@ -337,10 +342,10 @@ class TransferLine extends BimpObject {
     public function canEditField($field_name) {
         global $user;
         $transfer_status = $this->getParentStatus();
-        if ($field_name == 'quantity_received' and $transfer_status != Transfer::CONTRAT_STATUS_RECEPTING and ! $user->rights->bimptransfer->admin)
+        if ($field_name == 'quantity_received' and $transfer_status != Transfer::STATUS_RECEPTING and ! $user->rights->bimptransfer->admin)
             return false;
 
-        if ($field_name == 'quantity_sent' and $transfer_status != Transfer::CONTRAT_STATUS_SENDING and ! $user->rights->bimptransfer->admin)
+        if ($field_name == 'quantity_sent' and $transfer_status != Transfer::STATUS_SENDING and ! $user->rights->bimptransfer->admin)
             return false;
 
         return parent::canEditField($field_name);

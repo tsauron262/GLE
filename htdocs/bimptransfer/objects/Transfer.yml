@@ -19,13 +19,7 @@ objects:
         instance: 
             bimp_object: TransferLine
         delete: 1
-#    product:
-#        instance:
-#            bimp_object: unset
-#            dol_object: product
-#        cards: 
-#            default: 
-#                type: product_card
+
                 
 fields: 
     # ces champs sont insérés de base par BimpObject (Ici, les paramètres suivants sont de toute manière écrasés) 
@@ -47,7 +41,16 @@ fields:
         type: id_object
         object: entrepot
         default_value: 0
+        required: 1
         input:
+            type: search_list
+            search_list: 
+                table: entrepot
+                field_return_value: rowid
+                field_return_label: ref,lieu
+                label_syntaxe: <label_1> - <label_2>
+                fields_search: rowid,ref,lieu
+
             # On utilise ce type d'input partout ailleurs...
             type: search_entrepot 
 #            type: search_list
@@ -100,13 +103,6 @@ fields_tables:
         title: Informations
         icon: info-circle
         rows:
-#            - label: Auteur
-#              value: 
-#                  callback: 
-#                    method: displayAuthor
-##                    method: displayProduct
-#                    params: 
-#                          - card
             - field: id_warehouse_source
               display: nom_url
             - field: id_warehouse_dest
@@ -114,6 +110,9 @@ fields_tables:
             - field: date_opening
             - field: date_closing
             - field: user_create
+            - label: Terminée
+              value: 
+                  callback: displayIsGood
             
 views:
     default:
@@ -143,12 +142,10 @@ forms:
         rows: 
             - field: id_warehouse_source
             - field: id_warehouse_dest
-            - field: status
             
     default:
         rows: 
             - field: id_warehouse_dest
-            - field: status
             
 list:
     checkboxes: 1
@@ -166,7 +163,7 @@ list:
             method: getListFilters
     add_form_name: add
     edit_btn: 
-        callback: userIsAdmin
+        callback: userIsAdminOrStatusSending
     delete_btn:
         callback: userIsAdmin
     view_btn: 1

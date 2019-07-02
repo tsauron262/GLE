@@ -26,13 +26,14 @@ include_once DOL_DOCUMENT_ROOT . '/bimpvalidateorder/class/bimpvalidateorder.cla
  */
 class Interfacevalidate extends DolibarrTriggers
 {
+
     private $defaultCommEgalUser = true;
     public $errors = array();
 
     public function runTrigger($action, $object, User $user, Translate $langs, Conf $conf)
     {
         global $conf;
-        
+
 
         if ($action == 'PROPAL_VALIDATE') {
             $bimp_object = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $object->id);
@@ -43,8 +44,8 @@ class Interfacevalidate extends DolibarrTriggers
                 $bimp_object->dol_object->statut = $prev_statut;
             }
         }
-        
-        
+
+
         if ($action == "ORDER_CREATE") {
             $object->fetchObjectLinked();
             if (isset($object->linkedObjects['propal'])) {
@@ -56,7 +57,7 @@ class Interfacevalidate extends DolibarrTriggers
         if ($action == 'ORDER_VALIDATE' || $action == 'BILL_VALIDATE') {
             if ($action == 'ORDER_VALIDATE')
                 $bimp_object = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $object->id);
-            else{
+            else {
                 $bimp_object = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $object->id);
                 $bimp_object->onValidate();
             }
@@ -69,15 +70,35 @@ class Interfacevalidate extends DolibarrTriggers
                     return -1;
                 }
             }
+        }
 
-        }
-  
         if ($action == 'ORDER_UNVALIDATE' || ($action == 'ORDER_DELETE' && $object->statut == 1)) {
-            $this->errors[] = "Impossible de dévalider";
-            setEventMessages("Impossible de dévalider", null, 'errors');
-            return -2;
+            $bimp_object = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $object->id);
+
+            $isOk = false;
+            $errors = array();
+
+            if ($action == 'ORDER_UNVALIDATE') {
+                $bimp_object = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $object->id);
+                if (BimpObject::objectLoaded($bimp_object)) {
+                    if ($bimp_object->isLogistiqueActive()) {
+                        $errors[] = 'La logistique est en cours de traitement';
+                    } elseif (!$bimp_object->canSetAction('modify')) {
+                        $errors[] = 'Vous n\'avez pas la permission';
+                    } else {
+                        $isOk = true;
+                    }
+                }
+            }
+            if (!$isOk) {
+                if (count($errors)) {
+                    $this->errors[] = BimpTools::getMsgFromArray($errors);
+                }
+                setEventMessages("Impossible de dévalider", null, 'errors');
+                return -2;
+            }
         }
-        
+
         if ($action == "BILL_CREATE" && $object->type == TYPE_STANDARD) {
             $object->fetchObjectLinked();
             if (isset($object->linkedObjects['commande']) && count($object->linkedObjects['commande'])) {
@@ -115,7 +136,6 @@ class Interfacevalidate extends DolibarrTriggers
             if (BimpObject::objectLoaded($bimp_object)) {
                 $bimp_object->onDelete();
             }
-
         }
         if ($action == 'BILL_UNVALIDATE') {
             $bimp_object = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $object->id);
@@ -123,7 +143,7 @@ class Interfacevalidate extends DolibarrTriggers
                 $bimp_object->onUnValidate();
             }
         }
-        
+
         //Classé facturé
         if ($action == "BILL_VALIDATE") {
             $facturee = true;
@@ -157,23 +177,23 @@ class Interfacevalidate extends DolibarrTriggers
                 }
             }
         }
-        
+
         if ($action == 'BILL_SUPPLIER_VALIDATE') {
             $bimp_object = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureFourn', $object->id);
             if (BimpObject::objectLoaded($bimp_object)) {
                 $bimp_object->onValidate();
             }
         }
-        
-                
+
+
         if (!defined("NOT_VERIF") && !BimpDebug::isActive('bimpcommercial/no_validate')) {
             if ($action == 'ORDER_VALIDATE') {
                 $bvo = new BimpValidateOrder($user->db);
                 if ($bvo->checkValidateRights($user, $object) < 1)
                     return -2;
 
-    //            $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
-    //            $this->errors = array_merge($this->errors, $reservation->createReservationsFromCommandeClient($idEn, $object->id));
+                //            $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
+                //            $this->errors = array_merge($this->errors, $reservation->createReservationsFromCommandeClient($idEn, $object->id));
 
                 $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande', $object->id);
                 $res_errors = $commande->createReservations();
@@ -183,62 +203,50 @@ class Interfacevalidate extends DolibarrTriggers
                 if (count($this->errors) > 0)
                     return -2;
             }
-        
-        
-            if($action == 'PROPAL_VALIDATE' || $action == 'ORDER_VALIDATE'){
+
+
+            if ($action == 'PROPAL_VALIDATE' || $action == 'ORDER_VALIDATE') {
                 //attention pas de condition de regelment sur les facture acompte
-                if(in_array($object->cond_reglement_id, array(0, 39)) || $object->cond_reglement_code == "VIDE"){
-                        setEventMessages("Merci de séléctionné les condition de réglements", null, 'errors');
-                        return -2;
+                if (in_array($object->cond_reglement_id, array(0, 39)) || $object->cond_reglement_code == "VIDE") {
+                    setEventMessages("Merci de séléctionné les condition de réglements", null, 'errors');
+                    return -2;
                 }
             }
-            
         }
-            if($action == 'ORDER_VALIDATE' || $action == 'PROPAL_VALIDATE' || $action == 'BILL_VALIDATE'){
-                $tabConatact = $object->getIdContact('internal', 'SALESREPFOLL');
-                if (count($tabConatact) < 1) {
-                    if (!is_object($object->thirdparty)) {
-                        $object->thirdparty = new Societe($this->db);
-                        $object->thirdparty->fetch($object->socid);
-                    }
-                    $tabComm = $object->thirdparty->getSalesRepresentatives($user);
-                    if (count($tabComm) > 0) {
-                        $object->add_contact($tabComm[0]['id'], 'SALESREPFOLL', 'internal');
-                    } elseif ($this->defaultCommEgalUser)
-                        $object->add_contact($user->id, 'SALESREPFOLL', 'internal');
-                    else {
-                        setEventMessages("Impossible de valider, pas de Commercial Suivi", null, 'errors');
-                        return -2;
-                    }
+        if ($action == 'ORDER_VALIDATE' || $action == 'PROPAL_VALIDATE' || $action == 'BILL_VALIDATE') {
+            $tabConatact = $object->getIdContact('internal', 'SALESREPFOLL');
+            if (count($tabConatact) < 1) {
+                if (!is_object($object->thirdparty)) {
+                    $object->thirdparty = new Societe($this->db);
+                    $object->thirdparty->fetch($object->socid);
                 }
-
-
-                $tabConatact = $object->getIdContact('internal', 'SALESREPSIGN'); //signataire
-                if (count($tabConatact) < 1) {
-                    $object->add_contact($user->id, 'SALESREPSIGN', 'internal');
-                }
-
-                if(!BimpCore::getConf("NOT_USE_ENTREPOT")){
-                    $idEn = $object->array_options['options_entrepot'];
-                    if ($idEn < 1) {
-                        setEventMessages("Pas d'entrepôt associé", null, 'errors');
-                        return -2;
-                    }
+                $tabComm = $object->thirdparty->getSalesRepresentatives($user);
+                if (count($tabComm) > 0) {
+                    $object->add_contact($tabComm[0]['id'], 'SALESREPFOLL', 'internal');
+                } elseif ($this->defaultCommEgalUser)
+                    $object->add_contact($user->id, 'SALESREPFOLL', 'internal');
+                else {
+                    setEventMessages("Impossible de valider, pas de Commercial Suivi", null, 'errors');
+                    return -2;
                 }
             }
+
+
+            $tabConatact = $object->getIdContact('internal', 'SALESREPSIGN'); //signataire
+            if (count($tabConatact) < 1) {
+                $object->add_contact($user->id, 'SALESREPSIGN', 'internal');
+            }
+
+            if (!BimpCore::getConf("NOT_USE_ENTREPOT")) {
+                $idEn = $object->array_options['options_entrepot'];
+                if ($idEn < 1) {
+                    setEventMessages("Pas d'entrepôt associé", null, 'errors');
+                    return -2;
+                }
+            }
+        }
 
 
         return 0;
     }
-    
-    
-  
-
-            
-
-
-
-
-
-        
 }

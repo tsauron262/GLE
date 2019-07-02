@@ -266,7 +266,7 @@ lists:
             date: 
             total_ht: 
             entrepot:
-            id_facture:
+            facture:
                     
     commandes_fourn: 
         checkboxes: 1
@@ -297,7 +297,7 @@ lists:
             total_ht: 
             entrepot:
             info: 
-            id_facture:
+            facture:
                     
 cards: 
     default: 

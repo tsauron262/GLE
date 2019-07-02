@@ -184,7 +184,7 @@ class Bimp_Commande extends BimpComm
                 if (!$force_edit) {
                     global $user;
                     // A modifier rapidement...
-                    if ($this->isLogistiqueActive() && !in_array((int) $user->id, array(1, 33, 34, 224))) {
+                    if ($this->isLogistiqueActive() && !in_array((int) $user->id, array(1, 33, 34, 224, 1130))) {
                         return 0;
                     }
                 }

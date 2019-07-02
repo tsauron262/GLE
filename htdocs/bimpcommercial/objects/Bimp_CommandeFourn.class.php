@@ -329,7 +329,10 @@ class Bimp_CommandeFourn extends BimpComm
                 return 0;
 
             case 'forceStatus':
-                return 1;
+                if ((int) $user->admin) {
+                    return 1;
+                }
+                return 0;
         }
 
         return parent::canSetAction($action);
@@ -1012,9 +1015,15 @@ class Bimp_CommandeFourn extends BimpComm
                 $billed_qty = 0;
 
                 foreach ($receptions as $id_reception) {
-                    $reception_data = $line->getReceptionData((int) $id_reception);
-                    $billed_qty += isset($reception_data['qty']) ? (float) $reception_data['qty'] : 0;
-                    $has_billed = 1;
+                    $reception = BimpCache::getBimpObjectInstance('bimplogistique', 'Bimp_CommandeFournReception', (int) $id_reception);
+                    if (BimpObject::objectLoaded($reception)) {
+                        $fac = $reception->getChildObject('facture_fourn');
+                        if (BimpObject::objectLoaded($fac)) {
+                            $reception_data = $line->getReceptionData((int) $id_reception);
+                            $billed_qty += isset($reception_data['qty']) ? (float) $reception_data['qty'] : 0;
+                            $has_billed = 1;
+                        }
+                    }
                 }
 
                 if (abs($line_qty) > abs($billed_qty)) {

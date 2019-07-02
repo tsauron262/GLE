@@ -202,16 +202,11 @@ class Bimp_FactureFourn extends BimpComm
 
 
         switch ($action) {
+            case 'modify':
+            case 'reopen':
             case 'validate':
                 if ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && !empty($user->rights->fournisseur->facture->creer)) ||
                         (!empty($conf->global->MAIN_USE_ADVANCED_PERMS) && !empty($user->rights->fournisseur->supplier_invoice_advance->validate))) {
-                    return 1;
-                }
-                return 0;
-
-            case 'modify':
-            case 'reopen':
-                if ($user->rights->fournisseur->facture->creer) {
                     return 1;
                 }
                 return 0;

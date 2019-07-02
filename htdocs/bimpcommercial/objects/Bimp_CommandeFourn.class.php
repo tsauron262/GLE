@@ -289,7 +289,7 @@ class Bimp_CommandeFourn extends BimpComm
                             return 1;
                         }
                     }
-                } elseif (in_array((int) $this->getData('fk_statut'), array(3, 4, 5, 6, 7, 9))) {
+                } elseif (in_array((int) $this->getData('fk_statut'), array(6, 7, 9))) {
                     if ($user->rights->fournisseur->commande->commander) {
                         return 1;
                     }

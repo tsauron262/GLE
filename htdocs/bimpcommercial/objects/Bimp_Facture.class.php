@@ -182,32 +182,33 @@ class Bimp_Facture extends BimpComm
                 return 1;
 
             case 'modify':
-                if ($status !== Facture::STATUS_VALIDATED) {
-                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' n\'est pas au statut "Validé"';
-                    return 0;
-                }
-                // On verifie si les lignes de factures ont ete exportees en compta et/ou ventilees:
-                if ((float) $this->getRemainToPay() != $this->dol_object->total_ttc && empty($this->dol_object->paye)) {
-                    $errors[] = 'Un paiement a été effectué';
-                    return 0;
-                }
-
-                if ($this->dol_object->getVentilExportCompta() == 0) {
-                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' a été exporté' . ($this->isLabelFemale() ? 'e' : '') . ' en compta';
-                    return 0;
-                }
-
-                if (!$this->dol_object->is_last_in_cycle()) {
-                    $errors[] = $langs->trans("NotLastInCycle");
-                    return 0;
-                }
-
-                if ($this->dol_object->getIdReplacingInvoice()) {
-                    $errors[] = $langs->trans("DisabledBecauseReplacedInvoice");
-                    return 0;
-                }
-
-                return 1;
+                $errors[] = 'Interdiction totale de dévalider une facture';
+                return 0;
+//                if ($status !== Facture::STATUS_VALIDATED) {
+//                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' n\'est pas au statut "Validé"';
+//                    return 0;
+//                }
+//                // On verifie si les lignes de factures ont ete exportees en compta et/ou ventilees:
+//                if ((float) $this->getRemainToPay() != $this->dol_object->total_ttc && empty($this->dol_object->paye)) {
+//                    $errors[] = 'Un paiement a été effectué';
+//                    return 0;
+//                }
+//
+//                if ($this->dol_object->getVentilExportCompta() == 0) {
+//                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' a été exporté' . ($this->isLabelFemale() ? 'e' : '') . ' en compta';
+//                    return 0;
+//                }
+//
+//                if (!$this->dol_object->is_last_in_cycle()) {
+//                    $errors[] = $langs->trans("NotLastInCycle");
+//                    return 0;
+//                }
+//
+//                if ($this->dol_object->getIdReplacingInvoice()) {
+//                    $errors[] = $langs->trans("DisabledBecauseReplacedInvoice");
+//                    return 0;
+//                }
+//                return 1;
 
             case 'reopen':
                 $discount = new DiscountAbsolute($this->db->db);
@@ -320,7 +321,7 @@ class Bimp_Facture extends BimpComm
         // Editer une facture deja validee, sans paiement effectue et pas exportée en compta
         if ($status === Facture::STATUS_VALIDATED) {
             if ($this->canSetAction('modify')) {
-                $errors = array();
+//                $errors = array();
 
                 if ($this->isActionAllowed('modify', $errors)) {
                     $buttons[] = array(
@@ -329,16 +330,17 @@ class Bimp_Facture extends BimpComm
                         'onclick' => $this->getJsActionOnclick('modify', array(), array(
                             'confirm_msg' => strip_tags($langs->trans('ConfirmUnvalidateBill', $ref))
                     )));
-                } else {
-                    $msg = BimpTools::getMsgFromArray($errors);
-                    $buttons[] = array(
-                        'label'    => 'Modifier',
-                        'icon'     => 'undo',
-                        'onclick'  => '',
-                        'disabled' => 1,
-                        'popover'  => $msg
-                    );
-                }
+                } 
+//                else {
+//                    $msg = BimpTools::getMsgFromArray($errors);
+//                    $buttons[] = array(
+//                        'label'    => 'Modifier',
+//                        'icon'     => 'undo',
+//                        'onclick'  => '',
+//                        'disabled' => 1,
+//                        'popover'  => $msg
+//                    );
+//                }
             }
         }
 

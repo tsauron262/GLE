@@ -2449,6 +2449,13 @@ class Bimp_Commande extends BimpComm
 
         return parent::create($warnings, $force_create);
     }
+    
+    public function update(&$warnings = array(), $force_update = false)
+    {
+        $init_entrepot = (int) $this->getData('init_entrepot');
+        
+        parent::update($warnings, $force_update);
+    }
 
     public function delete(&$warnings = array(), $force_delete = false)
     {

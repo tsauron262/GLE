@@ -387,15 +387,24 @@ class Bimp_CommandeFournLine extends FournObjectLine
         $total_ht = 0;
 
         if ($this->isProductSerialisable()) {
-            if (isset($data['received']) && (int) $data['receive']) {
-                foreach ($data['equipments'] as $id_equiment => $equipment_data) {
-                    $pu_ht = (float) (isset($equipment_data['pu_ht']) ? (float) $equipment_data['pu_ht'] : (float) $this->getUnitPriceHTWithRemises());
-                    $total_ht += $pu_ht;
+            if ($this->getFullQty() < 0) {
+                if (isset($data['return_equipments'])) {
+                    foreach ($data['return_equipments'] as $id_equipment => $equipment_data) {
+                        $pu_ht = (isset($equipment_data['pu_ht']) ? (float) $equipment_data['pu_ht'] * -1: (float) $this->getUnitPriceHTWithRemises());
+                        $total_ht += $pu_ht;
+                    }
                 }
             } else {
-                foreach ($data['serials'] as $serial_data) {
-                    $pu_ht = (float) (isset($serial_data['pu_ht']) ? (float) $serial_data['pu_ht'] : (float) $this->getUnitPriceHTWithRemises());
-                    $total_ht += $pu_ht;
+                if (isset($data['received']) && (int) $data['receive']) {
+                    foreach ($data['equipments'] as $id_equiment => $equipment_data) {
+                        $pu_ht = (float) (isset($equipment_data['pu_ht']) ? (float) $equipment_data['pu_ht'] : (float) $this->getUnitPriceHTWithRemises());
+                        $total_ht += $pu_ht;
+                    }
+                } else {
+                    foreach ($data['serials'] as $serial_data) {
+                        $pu_ht = (float) (isset($serial_data['pu_ht']) ? (float) $serial_data['pu_ht'] : (float) $this->getUnitPriceHTWithRemises());
+                        $total_ht += $pu_ht;
+                    }
                 }
             }
         } else {
@@ -417,9 +426,28 @@ class Bimp_CommandeFournLine extends FournObjectLine
         $total_ttc = 0;
 
         if ($this->isProductSerialisable()) {
-            foreach ($data['equipments'] as $id_equiment => $equipment_data) {
-                $pu_ht = (float) (isset($equipment_data['pu_ht']) ? (float) $equipment_data['pu_ht'] : (float) $this->getUnitPriceHTWithRemises());
-                $total_ttc += $pu_ht;
+            if ($this->getFullQty() < 0) {
+                if (isset($data['return_equipments'])) {
+                    foreach ($data['return_equipments'] as $id_equipment => $equipment_data) {
+                        $pu_ht = (isset($equipment_data['pu_ht']) ? ((float) $equipment_data['pu_ht'] * -1): (float) $this->getUnitPriceHTWithRemises());
+                        $tva_tx = (isset($equipment_data['tva_tx']) ? (float) $equipment_data['tva_tx'] : (float) $this->tva_tx);
+                        $total_ttc += (BimpTools::calculatePriceTaxIn($pu_ht, $tva_tx));
+                    }
+                }
+            } else {
+                if (isset($data['received']) && (int) $data['receive']) {
+                    foreach ($data['equipments'] as $id_equiment => $equipment_data) {
+                        $pu_ht = (float) (isset($equipment_data['pu_ht']) ? (float) $equipment_data['pu_ht'] : (float) $this->getUnitPriceHTWithRemises());
+                        $tva_tx = (float) (isset($equipment_data['tva_tx']) ? (float) $equipment_data['tva_tx'] : (float) $this->tva_tx);
+                        $total_ttc += (BimpTools::calculatePriceTaxIn($pu_ht, $tva_tx));
+                    }
+                } else {
+                    foreach ($data['serials'] as $serial_data) {
+                        $pu_ht = (float) (isset($serial_data['pu_ht']) ? (float) $serial_data['pu_ht'] : (float) $this->getUnitPriceHTWithRemises());
+                        $tva_tx = (float) (isset($serial_data['tva_tx']) ? (float) $serial_data['tva_tx'] : (float) $this->tva_tx);
+                        $total_ttc += (BimpTools::calculatePriceTaxIn($pu_ht, $tva_tx));
+                    }
+                }
             }
         } else {
             foreach ($data['qties'] as $qty_data) {

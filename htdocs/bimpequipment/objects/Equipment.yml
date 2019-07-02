@@ -350,6 +350,8 @@ forms:
         rows: 
             - field: serial
             - field: id_product
+              show: 
+                  callback: isNotLoaded
             - field: product_label
             - field: type
 #            - field: available
@@ -371,6 +373,8 @@ forms:
         rows:
             - field: serial
             - field: id_product
+              show: 
+                  callback: isNotLoaded
             - field: product_label
             - field: type
 #            - field: available

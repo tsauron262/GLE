@@ -31,6 +31,12 @@ class BimpValidateOrder {
         "C" => array(
             "comm" => array(62 => 100, 201 => 100),
             "fi" => array(81 => array(0, 1000000000000), 68 => array(0000, 100000000000), 284 => array(0000, 100000000000), /*285 => array(0000, 100000000000)*/),
+        ),
+        "M" => array(
+            "comm_mini" => 30,
+            "fi_mini" => 10000000,
+            "comm" => array(89 => 100, 283 => 100),
+            "fi" => array(89 => array(0, 1000000000000), 283 => array(0000, 100000000000)),
         )
     );
 
@@ -248,14 +254,16 @@ class BimpValidateOrder {
         
         
         if (isset($this->tabValidation[$order->array_options['options_type']]["fi"]))
-            $tabValidation = $this->tabValidation[$order->array_options['options_type']]["fi"];
+            $tabValidation = $this->tabValidation[$order->array_options['options_type']];
         else
-            $tabValidation = $this->tabValidation["C"]["fi"];
-            
+            $tabValidation = $this->tabValidation["C"];
+         
+        if(isset($tabValidation['fi_mini']))
+            $max_price = $tabValidation['fi_mini'];
 
         $tabUserOk = array();
         if ($max_price <= $price) {
-            foreach ($tabValidation as $idUser => $tabMont){
+            foreach ($tabValidation["fi"] as $idUser => $tabMont){
                 if ($price > $tabMont[0] && $price <= $tabMont[1]) {
                     $tabUserOk[] = $idUser;
                     if ($idUser == $user->id)
@@ -272,12 +280,15 @@ class BimpValidateOrder {
         $okRemise = ($order->array_options['options_type'] != "P" ? $this->checkRemise($order, $user) : 1);
         if (!$okRemise) {
             if (isset($this->tabValidation[$order->array_options['options_type']]["comm"]))
-                $tabValidation = $this->tabValidation[$order->array_options['options_type']]["comm"];
+                $tabValidation = $this->tabValidation[$order->array_options['options_type']];
             else
-                $tabValidation = $this->tabValidation["C"]["comm"];
+                $tabValidation = $this->tabValidation["C"];
 
+            if(isset($tabValidation['comm_mini']))
+                if($price > $tabValidation['comm_mini'])
+                    return array();//on peut validé
 
-            foreach ($tabValidation as $idUser => $tabMont) {
+            foreach ($tabValidation["comm"] as $idUser => $tabMont) {
                 $tabUserOk[] = $idUser;
                 if ($idUser == $user->id)//on peut validé
                     return array();

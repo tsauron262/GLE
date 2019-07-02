@@ -102,7 +102,10 @@ class Bimp_Commande extends BimpComm
                 return 1;
 
             case 'forceStatus':
-                return 1;
+                if ((int) $user->admin) {
+                    return 1;
+                }
+                return 0;
         }
         return 1;
     }

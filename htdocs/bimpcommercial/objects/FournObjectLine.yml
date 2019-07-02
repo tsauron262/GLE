@@ -11,8 +11,8 @@ forms:
         rows: 
             type: 
                 field: type
-                hidden: 
-                    callback: isLoaded
+                show: 
+                    callback: isNotLoaded
             product: 
                 custom: 1
                 label: Produit

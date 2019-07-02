@@ -3497,7 +3497,7 @@ class ObjectLine extends BimpObject
     public function validate()
     {
         if (!(int) $this->getData('type') && (int) $this->id_product) {
-            $this->set('type', 1);
+//            $this->set('type', 1);
         }
 
         $errors = parent::validate();

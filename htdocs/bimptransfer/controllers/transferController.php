@@ -59,7 +59,7 @@ class transferController extends BimpController {
                     $errors = array_merge($errors, $transfert_lineObj->update());
                 }
                 else
-                    $errors[] = "Produit non trouvé dans les envoie.";
+                    $errors[] = "Produit non trouvé dans les envoies.";
                 
                     
             }

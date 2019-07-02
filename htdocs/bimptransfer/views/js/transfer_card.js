@@ -26,13 +26,13 @@ $(document).ready(function () {
  */
 
 function initEvents() {
-    var $inputs_selector = $("input[name=search_insert_line]");
+    var $inputs_selector = $("input[name*=insert_]");
 
     $inputs_selector.keypress(function (e) {
         var key = e.which;
         if (key == 13) {
             insertProduct($('input[name=search_insert_line]').val(), $('input[name=insert_quantity]').val());
-            $('input[name=insert_line]').val('');
+            $('input[name=search_insert_line]').val('');
         }
     });
 }
@@ -49,4 +49,8 @@ function reloadTransfertLine(id) {
         object_name: 'TransferLine',
         id_object: id
     }));
+}
+
+function removeInputs() {
+    $("input[name*=insert_]").parent().parent().parent().remove();
 }

@@ -74,7 +74,7 @@ class Transfer extends BimpDolObject {
 //                $header_table = 'Lignes ';
                 $header_table .= '<span style="margin-left: 100px">Ajouter</span>';
 //                $header_table .= '<input class="search_list_input"  name="insert_line" type="text" style="width: 400px; margin-left: 10px;" value="" >';
-                $header_table .= BimpInput::renderInput('search_product', 'insert_line', (int) 11, array('filter_type' => 'both'));
+                $header_table .= BimpInput::renderInput('search_product', 'insert_line', '', array('filter_type' => 'both'));
 
                 $header_table .= '<span style="margin-left: 100px">Quantité</span>';
                 $header_table .= '<input class="search_list_input"  name="insert_quantity" type="number" min=1 style="width: 80px; margin-left: 10px;" value="1" >';
@@ -100,6 +100,15 @@ class Transfer extends BimpDolObject {
             return $buttons;
 
         if ($this->getData('status') == Transfer::STATUS_RECEPTING) {
+            if ($user->rights->bimptransfer->admin || $this->isGood()) {
+                $buttons[] = array(
+                    'label' => 'Terminer le transfert',
+                    'icon' => 'fas_window-close',
+                    'onclick' => $this->getJsActionOnclick('close', array(), array(
+                        'success_callback' => 'function(result) {reloadTransfertLines(); removeInputs()}',
+                    ))
+                );
+            }
             $buttons[] = array(
                 'label' => 'Transférer',
                 'icon' => 'fas_box',
@@ -127,15 +136,6 @@ class Transfer extends BimpDolObject {
                         'label' => 'Revenir en mode envoi',
                         'icon' => 'fas_undo',
                         'onclick' => $this->getJsActionOnclick('setSatut', array("status" => Transfer::STATUS_SENDING), array(
-                            'success_callback' => 'function(result) {reloadTransfertLines();}',
-                        ))
-                    );
-                }
-                if ($user->rights->bimptransfer->admin || $this->isGood()) {
-                    $buttons[] = array(
-                        'label' => 'Terminer le transfert',
-                        'icon' => 'fas_window-close',
-                        'onclick' => $this->getJsActionOnclick('close', array(), array(
                             'success_callback' => 'function(result) {reloadTransfertLines();}',
                         ))
                     );

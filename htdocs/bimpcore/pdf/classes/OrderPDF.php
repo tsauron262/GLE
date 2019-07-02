@@ -129,6 +129,8 @@ class OrderPDF extends BimpDocumentPDF
         } else {
             $this->errors[] = 'Aucune commande spécifiée';
         }
+        
+        parent::initData();
     }
 
     protected function initHeader()

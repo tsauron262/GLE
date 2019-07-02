@@ -182,7 +182,9 @@ class Bimp_Commande extends BimpComm
         switch ($field) {
             case 'entrepot':
                 if (!$force_edit) {
-                    if ($this->isLogistiqueActive()) {
+                    global $user;
+                    // A modifier rapidement...
+                    if ($this->isLogistiqueActive() && !in_array((int) $user->id, array(1, 33, 34, 224))) {
                         return 0;
                     }
                 }

@@ -406,7 +406,7 @@ class Bimp_Facture extends BimpComm
                     'fields' => array(
                         'is_rbt'           => ($type === Facture::TYPE_CREDIT_NOTE ? 1 : 0),
                         'id_client'        => (int) $this->getData('fk_soc'),
-                        'id_mode_paiement' => (int) $this->getData('fk_mode_reglement')
+                        'id_mode_paiement' => ((int) $this->getData('fk_mode_reglement') ? (int) $this->getData('fk_mode_reglement') : (int) BimpCore::getConf('default_id_mode_paiement'))
                     )
                 ));
 
@@ -1297,7 +1297,7 @@ class Bimp_Facture extends BimpComm
             global $user;
             if (in_array($type, array(Facture::TYPE_STANDARD, Facture::TYPE_REPLACEMENT, Facture::TYPE_DEPOSIT)) && $user->rights->facture->paiement) {
                 $object_data = '{module: \'bimpcommercial\', object_name: \'Bimp_Paiement\', id_object: 0, ';
-                $object_data .= 'param_values: {fields: {id_client: ' . (int) $this->getData('fk_soc') . ', id_mode_paiement: ' . (int) $this->getData('fk_mode_reglement') . '}}}';
+                $object_data .= 'param_values: {fields: {id_client: ' . (int) $this->getData('fk_soc') . ', id_mode_paiement: ' . ((int) $this->getData('fk_mode_reglement') ? (int) $this->getData('fk_mode_reglement') : (int) BimpCore::getConf('default_id_mode_paiement')) . '}}}';
                 $buttons[] = array(
                     'label'       => 'Saisir réglement',
                     'icon_before' => 'plus-circle',

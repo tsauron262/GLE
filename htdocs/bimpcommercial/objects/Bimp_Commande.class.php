@@ -190,7 +190,7 @@ class Bimp_Commande extends BimpComm
                 }
                 return 1;
         }
-        
+
         return parent::isFieldEditable($field, $force_edit);
     }
 
@@ -2449,12 +2449,19 @@ class Bimp_Commande extends BimpComm
 
         return parent::create($warnings, $force_create);
     }
-    
+
     public function update(&$warnings = array(), $force_update = false)
     {
         $init_entrepot = (int) $this->getData('init_entrepot');
-        
-        parent::update($warnings, $force_update);
+
+        $errors = parent::update($warnings, $force_update);
+
+        if (!count($errors)) {
+            if ($init_entrepot !== (int) $this->getData('id_entrepot') && $this->isLogistiqueActive()) {
+                $sql = 'UPDATE `' . MAIN_DB_PREFIX . 'br_reservation` SET `id_entrepot` = ' . (int) $this->getData('id_entrepot');
+                $sql .= 'WHERE `id_commande_client` = ' . (int) $this->id . ' AND `id_entrepot` = ' . $init_entrepot . ' AND `status` < 200';
+            }
+        }
     }
 
     public function delete(&$warnings = array(), $force_delete = false)

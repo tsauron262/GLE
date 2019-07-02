@@ -874,14 +874,13 @@ class BimpComm extends BimpDolObject
                     return (int) $soc->dol_object->mode_reglement_id;
                 }
             }
-            return 0;
         }
 
-        if (isset($this->data['fk_mode_reglement'])) {
+        if (isset($this->data['fk_mode_reglement']) && (int) $this->data['fk_mode_reglement']) {
             return (int) $this->data['fk_mode_reglement']; // pas getData() sinon boucle infinie (getModeReglementBySociete() étant définie en tant que callback du param default_value pour ce champ). 
         }
 
-        return 0;
+        return BimpCore::getConf('default_id_mode_paiement');
     }
 
     public static function getZoneByCountry($id_country)

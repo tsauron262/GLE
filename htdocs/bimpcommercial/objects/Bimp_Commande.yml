@@ -347,8 +347,6 @@ forms:
         rows: 
             - field: libelle
             - field: entrepot
-              show: 
-                  callback: areLinesEditable
             - field: ef_type
             - field: fk_soc
               show: 

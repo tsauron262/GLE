@@ -154,7 +154,7 @@ class Bimp_CommandeFourn extends BimpComm
                 return 1;
 
             case 'createInvoice':
-                $this->checkInvoiceStatus();
+//                $this->checkInvoiceStatus();
                 if (empty($conf->facture->enabled)) {
                     $errors[] = 'Factures désactivées';
                     return 0;
@@ -1006,6 +1006,7 @@ class Bimp_CommandeFourn extends BimpComm
                 'value'    => 0
             )
         ));
+        
         if (count($lines) && count($receptions)) {
             $has_billed = 0;
             $all_billed = 1;
@@ -1015,7 +1016,7 @@ class Bimp_CommandeFourn extends BimpComm
                 $billed_qty = 0;
 
                 foreach ($receptions as $id_reception) {
-                    $reception = BimpCache::getBimpObjectInstance('bimplogistique', 'Bimp_CommandeFournReception', (int) $id_reception);
+                    $reception = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeFournReception', (int) $id_reception);
                     if (BimpObject::objectLoaded($reception)) {
                         $fac = $reception->getChildObject('facture_fourn');
                         if (BimpObject::objectLoaded($fac)) {
@@ -1023,7 +1024,7 @@ class Bimp_CommandeFourn extends BimpComm
                             $billed_qty += isset($reception_data['qty']) ? (float) $reception_data['qty'] : 0;
                             $has_billed = 1;
                         }
-                    }
+                    } 
                 }
 
                 if (abs($line_qty) > abs($billed_qty)) {

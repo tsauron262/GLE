@@ -1230,10 +1230,10 @@ class BimpCache
         if (!isset(self::$cache['entrepots'])) {
             self::$cache['entrepots'] = array();
 
-            $rows = self::getBdb()->getRows('entrepot', '1', null, 'object', array('rowid', 'ref', 'description'), 'ref', 'asc');
+            $rows = self::getBdb()->getRows('entrepot', '1', null, 'object', array('rowid', 'ref', 'lieu'), 'ref', 'asc');
             if (!is_null($rows)) {
                 foreach ($rows as $r) {
-                    self::$cache['entrepots'][(int) $r->rowid] = $r->ref;
+                    self::$cache['entrepots'][(int) $r->rowid] = $r->ref . ' - ' . $r->lieu;
                 }
             }
         }

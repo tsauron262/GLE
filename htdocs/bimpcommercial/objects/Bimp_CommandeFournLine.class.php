@@ -387,9 +387,16 @@ class Bimp_CommandeFournLine extends FournObjectLine
         $total_ht = 0;
 
         if ($this->isProductSerialisable()) {
-            foreach ($data['equipments'] as $id_equiment => $equipment_data) {
-                $pu_ht = (float) (isset($equipment_data['pu_ht']) ? (float) $equipment_data['pu_ht'] : (float) $this->getUnitPriceHTWithRemises());
-                $total_ht += $pu_ht;
+            if (isset($data['received']) && (int) $data['receive']) {
+                foreach ($data['equipments'] as $id_equiment => $equipment_data) {
+                    $pu_ht = (float) (isset($equipment_data['pu_ht']) ? (float) $equipment_data['pu_ht'] : (float) $this->getUnitPriceHTWithRemises());
+                    $total_ht += $pu_ht;
+                }
+            } else {
+                foreach ($data['serials'] as $serial_data) {
+                    $pu_ht = (float) (isset($serial_data['pu_ht']) ? (float) $serial_data['pu_ht'] : (float) $this->getUnitPriceHTWithRemises());
+                    $total_ht += $pu_ht;
+                }
             }
         } else {
             foreach ($data['qties'] as $qty_data) {

@@ -3527,6 +3527,7 @@ class ObjectLine extends BimpObject
 
                 case self::LINE_PRODUCT:
                     if (is_null($this->id_product) || !$this->id_product) {
+                        $this->printData();
                         $errors[] = 'Produit ou service obligatoire';
                     } else {
                         $product = $this->getProduct();

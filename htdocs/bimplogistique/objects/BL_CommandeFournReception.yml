@@ -297,6 +297,7 @@ lists:
             total_ht: 
             entrepot:
             info: 
+            id_facture:
                     
 cards: 
     default: 

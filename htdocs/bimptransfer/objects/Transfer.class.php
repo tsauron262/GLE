@@ -21,7 +21,6 @@ class Transfer extends BimpDolObject {
         return 0;
     }
 
-//fas_check fas_times fas_trash-alt
     public function update(&$warnings = array(), $force_update = false) {
         $status = (int) $this->getData('status');
 
@@ -29,7 +28,7 @@ class Transfer extends BimpDolObject {
         if ($status == 0) {
             $this->data['date_opening'] = '';
             $this->data['date_closing'] = '';
-            // Open
+        // Open
         } elseif ($status == 1) {
             $this->data['date_opening'] = date("Y-m-d H:i:s");
             $this->data['date_closing'] = '';
@@ -76,47 +75,87 @@ class Transfer extends BimpDolObject {
     public function getActionsButtons() {
         global $user;
         $buttons = array();
-        if ($this->isLoaded()) {
-            if ($this->getData('status') == Transfer::STATUS_RECEPTING) {
+        if (!$this->isLoaded())
+            return $buttons;
+
+        if ($this->getData('status') == Transfer::STATUS_RECEPTING) {
+            $buttons[] = array(
+                'label' => 'Transférer',
+                'icon' => 'fas_box',
+                'onclick' => $this->getJsActionOnclick('doTransfer', array(), array(
+                    'success_callback' => 'function(result) {reloadTransfertLines();}',
+                ))
+            );
+            if ($user->rights->bimptransfer->admin) {
                 $buttons[] = array(
-                    'label' => 'Transférer',
+                    'label' => 'Transférer tous les produits envoyés',
                     'icon' => 'fas_box',
-                    'onclick' => $this->getJsActionOnclick('doTransfer', array(), array(
+                    'onclick' => $this->getJsActionOnclick('doTransfer', array('total' => true), array(
                         'success_callback' => 'function(result) {reloadTransfertLines();}',
                     ))
                 );
-                if ($user->rights->bimptransfer->admin) {
-                    $buttons[] = array(
-                        'label' => 'Transférer tous les produits envoyés',
-                        'icon' => 'fas_box',
-                        'onclick' => $this->getJsActionOnclick('doTransfer', array('total' => true), array(
-                            'success_callback' => 'function(result) {reloadTransfertLines();}',
-                        ))
-                    );
-                    $buttons[] = array(
-                        'label' => 'Revenir en mode envoie',
-                        'icon' => 'fas_box',
-                        'onclick' => $this->getJsActionOnclick('setSatut', array("status" => Transfer::STATUS_SENDING), array(
-                            'success_callback' => 'function(result) {reloadTransfertLines();}',
-                        ))
-                    );
-                }
-            } elseif ($this->getData('status') == Transfer::STATUS_SENDING) {
                 $buttons[] = array(
-                    'label' => 'Valider envoie',
+                    'label' => 'Revenir en mode envoie',
                     'icon' => 'fas_box',
-                    'onclick' => $this->getJsActionOnclick('setSatut', array("status" => Transfer::STATUS_RECEPTING), array(
+                    'onclick' => $this->getJsActionOnclick('setSatut', array("status" => Transfer::STATUS_SENDING), array(
+                        'success_callback' => 'function(result) {reloadTransfertLines();}',
+                    ))
+                );
+                $buttons[] = array(
+                    'label' => 'Fermer',
+                    'icon' => 'fas_lock',
+                    'onclick' => $this->getJsActionOnclick('setSatut', array("status" => Transfer::STATUS_CLOSED), array(
                         'success_callback' => 'function(result) {reloadTransfertLines();}',
                     ))
                 );
             }
+        } elseif ($this->getData('status') == Transfer::STATUS_SENDING) {
+            $buttons[] = array(
+                'label' => 'Valider envoie',
+                'icon' => 'fas_box',
+                'onclick' => $this->getJsActionOnclick('setSatut', array("status" => Transfer::STATUS_RECEPTING), array(
+                    'success_callback' => 'function(result) {reloadTransfertLines();}',
+                ))
+            );
         }
 
         return $buttons;
     }
 
     public function actionSetSatut($data = array(), &$success = '') {
-        $this->updateField("status", $data['status']);
+        if ($data['status'] == Transfer::STATUS_CLOSED)
+            $errors = $this->prepareClose();
+
+        if (sizeof($errors) == 0)
+            $this->updateField("status", $data['status']);
+        
+        $this->update();
+    }
+
+    public function prepareClose() {
+        $errors = array();
+
+        // TODO transféré ceux en cours avant ?
+        $transfer_lines_obj = BimpObject::getInstance('bimptransfer', 'TransferLine');
+        $transfer_lines = $transfer_lines_obj->getList(array(
+            'id_transfer' => $this->getData('id')
+                ), null, null, 'date_create', 'desc', 'array', array(
+            'id'
+//            'id_product',
+//            'id_equipment',
+//            'quantity_sent',
+//            'quantity_received',
+//            'quantity_transfered'
+        ));
+
+        foreach ($transfer_lines as $line) {
+            $transfer_lines_obj->fetch($line['id']);
+            $transfer_lines_obj->updateReservation(true);
+        }
+        
+        // Date fermeture
+
+        return $errors;
     }
 
     public function actionDoTransfer($data = array(), &$success = '') {

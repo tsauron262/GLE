@@ -54,25 +54,25 @@ class TransferLine extends BimpObject {
         }
         return $errors;
     }
-    
+
     public function canDelete() {
-        if($this->getData("quantity_transfered") == 0 && $this->getData("quantity_received") == 0)
+        if ($this->getData("quantity_transfered") == 0 && $this->getData("quantity_received") == 0)
             return 1;
         return 0;
     }
-    
-    private function cancelReservation(){
+
+    private function cancelReservation() {
         $errors = array();
         $tabReservations = $this->getReservations();
         foreach ($tabReservations as $reservation)
             $errors = array_merge($errors, $reservation->setNewStatus(303));
         return $errors;
     }
-    
-    private function getReservations(){
+
+    private function getReservations() {
         $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
-        $filtre =array('id_transfert' => $this->getData('id_transfer'), 'status'=>array("operator"=>"!=", "value"=>303));
-        if($this->getData('id_equipment'))
+        $filtre = array('id_transfert' => $this->getData('id_transfer'), 'status' => array("operator" => "!=", "value" => 303));
+        if ($this->getData('id_equipment'))
             $filtre['id_equipment'] = $this->getData('id_equipment');
         else
             $filtre['id_product'] = $this->getData('id_product');
@@ -87,21 +87,27 @@ class TransferLine extends BimpObject {
         return $tabs;
     }
 
-    // TODO add force close -> fermeture dans tous les cas
-    public function updateReservation() {
+    public function updateReservation($force_close = false) {
         $errors = array();
         $tabReservations = $this->getReservations();
         $i = 0;
-        $nb_reservation = (int) $this->getData('quantity_sent') - $this->getData('quantity_received');
+        
+        if ($force_close)
+            $nb_reservation = 0;
+        else
+            $nb_reservation = (int) $this->getData('quantity_sent') - $this->getData('quantity_received');
+        
         foreach ($tabReservations as $reservation) {
             $new_status = ($nb_reservation == 0) ? '301' : '201';
             if ($i > 0) {
                 $nb_reservation = 0;
                 $new_status = "303";
             }
-            
-            if($nb_reservation > 0)
+
+            if ($nb_reservation > 0)
                 $reservation->updateField('qty', $nb_reservation);
+            elseif($force_close)
+                $reservation->updateField('qty', 0);
             $i++;
             if ($new_status != $reservation->getInitData('status')) {
                 $errors = array_merge($errors, $reservation->setNewStatus($new_status, $nb_reservation)); // $qty : faculatif, seulement pour les produits non sérialisés
@@ -202,7 +208,7 @@ class TransferLine extends BimpObject {
             $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $id_equipment);
             $is_reserved = !$equipment->isAvailable($id_warehouse_source, $errors, array('id_transfer' => $id_transfer));
             if ($is_reserved && $parent->getData('status') == Transfer::STATUS_SENDING)
-                $errors[] = "Cet équipement est déjà réservé.".$parent->getData('status');
+                $errors[] = "Cet équipement est déjà réservé." . $parent->getData('status');
             elseif (!$is_reserved && $parent->getData('status') == Transfer::STATUS_RECEPTING)
                 $errors[] = "Cet équipement n'est pas réservé.";
             else
@@ -230,13 +236,13 @@ class TransferLine extends BimpObject {
         }
         return 0;
     }
-    
+
     function delete(&$warnings = array(), $force_delete = false) {
-        $errors =array();
-        if(count($errors) == 0)
-            $errors = array_merge($errors, $this->cancelReservation ());
-        
-        if(count($errors) == 0)
+        $errors = array();
+        if (count($errors) == 0)
+            $errors = array_merge($errors, $this->cancelReservation());
+
+        if (count($errors) == 0)
             $errors = array_merge($errors, parent::delete($warnings, $force_delete));
         return $errors;
     }

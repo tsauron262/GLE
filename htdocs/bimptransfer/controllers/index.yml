@@ -5,21 +5,10 @@ objects:
     transfer:
         instance: 
             bimp_object: Transfer
+            
     transferline:
         instance: 
             bimp_object: TransferLine
-            
-#    user_account:
-#        instance: 
-#            bimp_object: BE_UserAccount
-#            
-#    reseau:
-#        instance: 
-#            bimp_object: BE_Reseau
-#            
-#    connection:
-#        instance: 
-#            bimp_object: BE_Connection
             
 sections:
     - type: tabs

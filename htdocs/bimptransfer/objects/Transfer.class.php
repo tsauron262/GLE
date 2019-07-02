@@ -11,9 +11,9 @@ class Transfer extends BimpDolObject {
     CONST STATUS_CLOSED = 2;
 
     public static $status_list = Array(
-        self::CONTRAT_STATUS_SENDING => Array('label' => 'En cours d\'envoi', 'classes' => Array('success'), 'icon' => 'fas_cogs'),
-        self::CONTRAT_STATUS_RECEPTING => Array('label' => 'En cours de réception', 'classes' => Array('warning'), 'icon' => 'fas_arrow-alt-circle-down'),
-        self::CONTRAT_STATUS_CLOSED => Array('label' => 'Fermé', 'classes' => Array('danger'), 'icon' => 'fas_times')
+        self::STATUS_SENDING => Array('label' => 'En cours d\'envoi', 'classes' => Array('success'), 'icon' => 'fas_cogs'),
+        self::STATUS_RECEPTING => Array('label' => 'En cours de réception', 'classes' => Array('warning'), 'icon' => 'fas_arrow-alt-circle-down'),
+        self::STATUS_CLOSED => Array('label' => 'Fermé', 'classes' => Array('danger'), 'icon' => 'fas_times')
     );
     
     public function canDelete() {
@@ -114,15 +114,15 @@ class Transfer extends BimpDolObject {
                     $buttons[] = array(
                         'label' => 'Revenir en mode envoi',
                         'icon' => 'fas_undo',
-                        'onclick' => $this->getJsActionOnclick('setSatut', array("status"=>Transfer::CONTRAT_STATUS_SENDING), array(
+                        'onclick' => $this->getJsActionOnclick('setSatut', array("status"=>Transfer::STATUS_SENDING), array(
                             'success_callback' => 'function(result) {reloadTransfertLines();}',
                         ))
                     );
                 }
                 if ($user->rights->bimptransfer->admin || $this->isGood()) {
                     $buttons[] = array(
-                        'label' => 'Terminé le transfert',
-                        'icon' => 'fa-window-close',
+                        'label' => 'Terminer le transfert',
+                        'icon' => 'fas_window-close',
                         'onclick' => $this->getJsActionOnclick('close', array(), array(
                             'success_callback' => 'function(result) {reloadTransfertLines();}',
                         ))
@@ -134,7 +134,7 @@ class Transfer extends BimpDolObject {
                 $buttons[] = array(
                     'label' => 'Valider envoi',
                     'icon' => 'fas_check-circle',
-                    'onclick' => $this->getJsActionOnclick('setSatut', array("status"=>Transfer::CONTRAT_STATUS_RECEPTING), array(
+                    'onclick' => $this->getJsActionOnclick('setSatut', array("status"=>Transfer::STATUS_RECEPTING), array(
                         'success_callback' => 'function(result) {reloadTransfertLines();}',
                     ))
                 );

@@ -99,3 +99,13 @@ class PropalSavPDF extends PropalPDF
         $this->writeContent($html);
     }
 }
+
+class SavRestitutePDF extends PropalSavPDF {
+    public $restitution_sav = 1;
+    public $after_totaux_label = '';
+    
+    public function getPaymentInfosHtml()
+    {
+        return '';
+    }
+}

@@ -3029,6 +3029,7 @@ class BS_SAV extends BimpObject
         }
 
         $success = 'SAV Fermé avec succès';
+        $url = '';
         $current_status = (int) $this->getInitData('status');
         $warnings = array();
 
@@ -3144,123 +3145,134 @@ class BS_SAV extends BimpObject
                         }
 
                         // Création de la facture:
-                        if ((int) $this->getData('id_facture')) {
-                            $warnings[] = 'Une facture a déjà été créée pour ce SAV';
+                        $total_ttc = (float) $propal->getTotalTtc();
+                        $lines = $propal->getLines('not_text');
+                        if (!$total_ttc && !count($lines)) {
+                            $url = DOL_URL_ROOT . '/bimpsupport/bon_restitution.php?id_sav=' . $this->id;
                         } else {
-                            require_once(DOL_DOCUMENT_ROOT . "/compta/facture/class/facture.class.php");
-                            global $db;
-                            $facture = new Facture($db);
-
-                            $facture->date = dol_now();
-                            $facture->source = 0;
-                            $facture->socid = (int) $this->getData('id_client');
-                            $facture->fk_project = $propal->dol_object->fk_project;
-                            $facture->cond_reglement_id = $propal->dol_object->cond_reglement_id;
-                            $facture->mode_reglement_id = (isset($data['mode_paiement']) ? (int) $data['mode_paiement'] : $propal->dol_object->mode_reglement_id);
-                            $facture->availability_id = $propal->dol_object->availability_id;
-                            $facture->demand_reason_id = $propal->dol_object->demand_reason_id;
-                            $facture->date_livraison = $propal->dol_object->date_livraison;
-                            $facture->fk_delivery_address = $propal->dol_object->fk_delivery_address;
-                            $facture->contact_id = $propal->dol_object->contact_id;
-                            $facture->ref_client = $propal->dol_object->ref_client;
-                            $facture->note_private = '';
-                            $facture->note_public = '';
-
-                            $facture->origin = $propal->dol_object->element;
-                            $facture->origin_id = $propal->id;
-
-                            $facture->fk_account = $propal->dol_object->fk_account;
-
-                            // get extrafields from original line
-                            $propal->dol_object->fetch_optionals($propal->id);
-
-                            foreach ($propal->dol_object->array_options as $options_key => $value)
-                                $facture->array_options[$options_key] = $value;
-
-                            $facture->modelpdf = self::$facture_model_pdf;
-                            $facture->array_options['options_type'] = "S";
-                            $facture->array_options['options_entrepot'] = (int) $this->getData('id_entrepot');
-
-                            $facture->linked_objects[$facture->origin] = $facture->origin_id;
-                            if (!empty($propal->dol_object->other_linked_objects) && is_array($propal->dol_object->other_linked_objects)) {
-                                $facture->linked_objects = array_merge($facture->linked_objects, $propal->dol_object->other_linked_objects);
-                            }
-
-                            global $user;
-
-                            $id_facture = $facture->create($user);
-                            if ($id_facture <= 0) {
-                                $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($facture), 'Echec de la création de la facture');
-                                return 0;
+                            if ((int) $this->getData('id_facture')) {
+                                $warnings[] = 'Une facture a déjà été créée pour ce SAV';
                             } else {
-                                $bimpFacture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $facture->id);
+                                require_once(DOL_DOCUMENT_ROOT . "/compta/facture/class/facture.class.php");
+                                global $db;
+                                $facture = new Facture($db);
 
-                                if (!BimpObject::objectLoaded($bimpFacture)) {
-                                    $errors[] = 'La facture semble ne pas avoir été créée correctement';
+                                $facture->date = dol_now();
+                                $facture->source = 0;
+                                $facture->socid = (int) $this->getData('id_client');
+                                $facture->fk_project = $propal->dol_object->fk_project;
+                                $facture->cond_reglement_id = $propal->dol_object->cond_reglement_id;
+                                $facture->mode_reglement_id = (isset($data['mode_paiement']) ? (int) $data['mode_paiement'] : $propal->dol_object->mode_reglement_id);
+                                $facture->availability_id = $propal->dol_object->availability_id;
+                                $facture->demand_reason_id = $propal->dol_object->demand_reason_id;
+                                $facture->date_livraison = $propal->dol_object->date_livraison;
+                                $facture->fk_delivery_address = $propal->dol_object->fk_delivery_address;
+                                $facture->contact_id = $propal->dol_object->contact_id;
+                                $facture->ref_client = $propal->dol_object->ref_client;
+                                $facture->note_private = '';
+                                $facture->note_public = '';
+
+                                $facture->origin = $propal->dol_object->element;
+                                $facture->origin_id = $propal->id;
+
+                                $facture->fk_account = $propal->dol_object->fk_account;
+
+                                // get extrafields from original line
+                                $propal->dol_object->fetch_optionals($propal->id);
+
+                                foreach ($propal->dol_object->array_options as $options_key => $value)
+                                    $facture->array_options[$options_key] = $value;
+
+                                $facture->modelpdf = self::$facture_model_pdf;
+                                $facture->array_options['options_type'] = "S";
+                                $facture->array_options['options_entrepot'] = (int) $this->getData('id_entrepot');
+
+                                $facture->linked_objects[$facture->origin] = $facture->origin_id;
+                                if (!empty($propal->dol_object->other_linked_objects) && is_array($propal->dol_object->other_linked_objects)) {
+                                    $facture->linked_objects = array_merge($facture->linked_objects, $propal->dol_object->other_linked_objects);
+                                }
+
+                                global $user;
+
+                                $id_facture = $facture->create($user);
+                                if ($id_facture <= 0) {
+                                    $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($facture), 'Echec de la création de la facture');
+                                    return 0;
                                 } else {
-                                    // Création des lignes: 
-                                    $lines_errors = $bimpFacture->createLinesFromOrigin($propal);
+                                    $bimpFacture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $facture->id);
 
-                                    if (count($lines_errors)) {
-                                        $errors[] = BimpTools::getMsgFromArray($lines_errors, 'Des erreurs sont survenues lors de l\'ajout des lignes à la facture');
+                                    if (!BimpObject::objectLoaded($bimpFacture)) {
+                                        $errors[] = 'La facture semble ne pas avoir été créée correctement';
                                     } else {
-                                        $bimpFacture->fetch($bimpFacture->id);
-                                        $bimpFacture->dol_object->addline("Résolution : " . $this->getData('resolution'), 0, 1, 0, 0, 0, 0, 0, null, null, null, null, null, 'HT', 0, 3);
+                                        // Création des lignes: 
+                                        $lines_errors = $bimpFacture->createLinesFromOrigin($propal);
 
-                                        // Intégration de la remise globale: 
-                                        if ((float) $propal->getData('remise_globale')) {
-                                            $bimpFacture->updateField('remise_globale_label', $propal->getData('remise_globale_label'));
-                                            $bimpFacture->setRemiseGlobalePercent((float) $propal->getData('remise_globale'));
-                                        }
-
-                                        if ($bimpFacture->dol_object->validate($user, '') <= 0) { //pas d'entrepot pour pas de destock
-                                            $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($bimpFacture->dol_object), 'Echec de la validation de la facture');
+                                        if (count($lines_errors)) {
+                                            $errors[] = BimpTools::getMsgFromArray($lines_errors, 'Des erreurs sont survenues lors de l\'ajout des lignes à la facture');
                                         } else {
-                                            $bimpFacture->fetch($facture->id);
+                                            $bimpFacture->fetch($bimpFacture->id);
+                                            $bimpFacture->dol_object->addline("Résolution : " . $this->getData('resolution'), 0, 1, 0, 0, 0, 0, 0, null, null, null, null, null, 'HT', 0, 3);
 
-                                            // Ajout du paiement: 
-                                            if ($payment_set) {
-                                                require_once(DOL_DOCUMENT_ROOT . "/compta/paiement/class/paiement.class.php");
-                                                $payement = new Paiement($this->db->db);
-                                                $payement->amounts = array($facture->id => (float) $data['paid']);
-                                                $payement->datepaye = dol_now();
-                                                $payement->paiementid = (int) $data['mode_paiement'];
-                                                if ($payement->create($user) <= 0) {
-                                                    $warnings[] = 'Echec de l\'ajout du paiement de la facture';
-                                                } else {
-                                                    // Ajout du paiement au compte bancaire: 
-                                                    if ($this->useCaisseForPayments) {
-                                                        $id_account = (int) $caisse->getData('id_account');
+                                            // Intégration de la remise globale: 
+                                            if ((float) $propal->getData('remise_globale')) {
+                                                $bimpFacture->updateField('remise_globale_label', $propal->getData('remise_globale_label'));
+                                                $bimpFacture->setRemiseGlobalePercent((float) $propal->getData('remise_globale'));
+                                            }
+
+                                            if ($bimpFacture->dol_object->validate($user, '') <= 0) { //pas d'entrepot pour pas de destock
+                                                $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($bimpFacture->dol_object), 'Echec de la validation de la facture');
+                                            } else {
+                                                $bimpFacture->fetch($facture->id);
+
+                                                // Ajout du paiement: 
+                                                if ($payment_set) {
+                                                    require_once(DOL_DOCUMENT_ROOT . "/compta/paiement/class/paiement.class.php");
+                                                    $payement = new Paiement($this->db->db);
+                                                    $payement->amounts = array($facture->id => (float) $data['paid']);
+                                                    $payement->datepaye = dol_now();
+                                                    $payement->paiementid = (int) $data['mode_paiement'];
+                                                    if ($payement->create($user) <= 0) {
+                                                        $warnings[] = 'Echec de l\'ajout du paiement de la facture';
                                                     } else {
-                                                        $id_account = (int) BimpCore::getConf('bimpcaisse_id_default_account');
-                                                    }
-                                                    if ($payement->addPaymentToBank($user, 'payment', '(CustomerInvoicePayment)', $id_account, '', '') < 0) {
-                                                        $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($payement), 'Echec de l\'ajout du paiement n°' . $payement->id . ' au compte bancaire d\'ID ' . $id_account);
-                                                    }
+                                                        // Ajout du paiement au compte bancaire: 
+                                                        if ($this->useCaisseForPayments) {
+                                                            $id_account = (int) $caisse->getData('id_account');
+                                                        } else {
+                                                            $id_account = (int) BimpCore::getConf('bimpcaisse_id_default_account');
+                                                        }
+                                                        if ($payement->addPaymentToBank($user, 'payment', '(CustomerInvoicePayment)', $id_account, '', '') < 0) {
+                                                            $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($payement), 'Echec de l\'ajout du paiement n°' . $payement->id . ' au compte bancaire d\'ID ' . $id_account);
+                                                        }
 
-                                                    if ($this->useCaisseForPayments) {
-                                                        $warnings = array_merge($warnings, $caisse->addPaiement($payement, $bimpFacture->id));
+                                                        if ($this->useCaisseForPayments) {
+                                                            $warnings = array_merge($warnings, $caisse->addPaiement($payement, $bimpFacture->id));
+                                                        }
                                                     }
                                                 }
-                                            }
 
-                                            $to_pay = (float) $bimpFacture->dol_object->total_ttc - ((float) $bimpFacture->dol_object->getSommePaiement() + (float) $bimpFacture->dol_object->getSumCreditNotesUsed() + (float) $bimpFacture->dol_object->getSumDepositsUsed());
-                                            if ($to_pay >= -0.01 && $to_pay <= 0.1) {
-                                                $bimpFacture->dol_object->set_paid($user);
-                                            }
+                                                $to_pay = (float) $bimpFacture->dol_object->total_ttc - ((float) $bimpFacture->dol_object->getSommePaiement() + (float) $bimpFacture->dol_object->getSumCreditNotesUsed() + (float) $bimpFacture->dol_object->getSumDepositsUsed());
+                                                if ($to_pay >= -0.01 && $to_pay <= 0.1) {
+                                                    $bimpFacture->dol_object->set_paid($user);
+                                                }
 
-                                            $propal->dol_object->cloture($user, 4, "Auto via SAV");
+                                                $propal->dol_object->cloture($user, 4, "Auto via SAV");
 
-                                            //Generation
-                                            $up_errors = $this->updateField('id_facture', (int) $bimpFacture->id);
-                                            if (count($up_errors)) {
-                                                $warnings[] = BimpTools::getMsgFromArray($up_errors, 'Echec de l\'enregistrement de l\'ID de la facture (' . $bimpFacture->id . ')');
-                                            } else {
+                                                //Generation
+                                                $up_errors = $this->updateField('id_facture', (int) $bimpFacture->id);
+                                                if (count($up_errors)) {
+                                                    $warnings[] = BimpTools::getMsgFromArray($up_errors, 'Echec de l\'enregistrement de l\'ID de la facture (' . $bimpFacture->id . ')');
+                                                }
+
                                                 $bimpFacture->dol_object->generateDocument(self::$facture_model_pdf, $langs);
-                                            }
 
-                                            if (isset($data['send_msg']) && $data['send_msg']) {
-                                                $warnings = array_merge($warnings, $this->sendMsg('Facture'));
+                                                $ref = $bimpFacture->getData('facnumber');
+                                                if (file_exists(DOL_DATA_ROOT . '/facture/' . $ref . '/' . $ref . '.pdf')) {
+                                                    $url = DOL_URL_ROOT . '/document.php?modulepart=facture&file=' . htmlentities('/' . $ref . '/' . $ref . '.pdf');
+                                                }
+
+                                                if (isset($data['send_msg']) && $data['send_msg']) {
+                                                    $warnings = array_merge($warnings, $this->sendMsg('Facture'));
+                                                }
                                             }
                                         }
                                     }
@@ -3312,8 +3324,9 @@ class BS_SAV extends BimpObject
         }
 
         return array(
-            'errors'   => $errors,
-            'warnings' => $warnings
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => ($url ? 'window.open("' . $url . '");' : '')
         );
     }
 
@@ -3798,7 +3811,7 @@ class BS_SAV extends BimpObject
                     $errors[] = BimpTools::getMsgFromArray($res_warnings, 'Echec de la suppression ' . $reservation->getLabel('of_the') . ' #' . $id_reservation);
                 }
             }
-        }        
+        }
     }
 
     // Gestion des droits et autorisations: 

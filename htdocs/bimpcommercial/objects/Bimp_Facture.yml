@@ -112,7 +112,9 @@ fields:
     fk_input_reason: unset
     total_ht: unset
         
+        
 forms: 
+    
     default: 
         msgs: 
             - content: 
@@ -139,8 +141,6 @@ forms:
               hidden: 1
               
             - field: fk_soc
-              show: 
-                  callback: isNotLoaded
                   
             - field: ref_client
             

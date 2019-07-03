@@ -133,8 +133,6 @@ forms:
             - field: entrepot
             - field: ef_type
             - field: fk_soc
-              show: 
-                  callback: isNotLoaded
             - field: ref_client
             - field: libelle
             - field: fk_input_reason

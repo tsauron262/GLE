@@ -23,6 +23,13 @@ objects:
 sections: 
     - type: tabs
       tabs: 
+        default:
+            label: Reception transfert
+            sections:
+                - type: custom
+                  custom: 
+                      callback: 
+                          method: renderReception
         send:
             label: Envoie transfert
             sections:
@@ -30,13 +37,6 @@ sections:
                   custom: 
                       callback: 
                           method: renderSend
-        receive:
-            label: Reception transfert
-            sections:
-                - type: custom
-                  custom: 
-                      callback: 
-                          method: renderReception
         order_fourn:
             label: Commande fournisseur
             sections:
@@ -44,11 +44,10 @@ sections:
                   custom: 
                       callback: 
                           method: renderOrderFourn
-        reservation:
-            label: Réservation
+        resa:
+            label: Réservations
             sections:
                 - type: custom
                   custom: 
                       callback: 
-                          method: renderReservation
-
+                          method: renderReservations

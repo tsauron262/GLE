@@ -28,6 +28,22 @@ class Bimp_FactureLine extends ObjectLine
         // Aucune vérif pour les factures (L'équipement est attribué à titre indicatif)
         return array();
     }
+    
+    public function isFieldEditable($field, $force_edit = false)
+    {
+        switch ($field) {
+            case 'qty':
+                if (!$force_edit) {
+                    if ($this->getData('linked_object_name') === 'commande_line') {
+                        return 0;
+                    }
+                    return 1;
+                }
+                break;
+        }
+
+        return parent::isFieldEditable($field, $force_edit);
+    }
 
     // Traitements:
 

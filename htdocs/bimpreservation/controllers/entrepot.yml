@@ -15,7 +15,7 @@ objects:
 sections: 
     - type: tabs
       tabs: 
-        to_reserve:
+        default:
             label: A réserver
             sections:
                 - type: custom

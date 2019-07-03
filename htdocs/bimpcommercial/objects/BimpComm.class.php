@@ -66,6 +66,9 @@ class BimpComm extends BimpDolObject
     public function isFieldEditable($field, $force_edit = false)
     {
         switch ($field) {
+            case 'fk_soc':
+                return (int) ((int) $this->getData('fk_statut') === 0);
+
             case 'zone_vente':
                 return (int) $this->areLinesEditable();
         }
@@ -2821,9 +2824,9 @@ class BimpComm extends BimpDolObject
             $zone = self::BC_ZONE_FR;
 
             if ((int) $this->getData('fk_soc') !== (int) $this->getInitData('fk_soc')) {
-                $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', (int) $this->getData('fk_soc'));
-                if (BimpObject::objectLoaded($client)) {
-                    $zone = $this->getZoneByCountry((int) $client->getData('fk_pays'));
+                $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', (int) $this->getData('fk_soc'));
+                if (BimpObject::objectLoaded($soc)) {
+                    $zone = $this->getZoneByCountry((int) $soc->getData('fk_pays'));
                     $this->set('zone_vente', $zone);
                 }
             }

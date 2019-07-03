@@ -266,10 +266,12 @@ class DoliDBMysqli extends DoliDB
                 $dbRead = new DoliDBMysqli('mysql', BDD_2_HOST,  $this->database_user, $this->database_pass, $this->database_name);
             }
             if($dbRead && BDD_2_HOST !=  $this->database_host){//n peut passer sur serveur 2
-                if(stripos($query, "SELECT") === 0){
+                if(stripos(trim($query), "SELECT") === 0){
                     $this->countReq2 ++;
-    //                return $dbRead->query($query);
+                    return $dbRead->query($query);
                 } 
+//                else
+//                    echo "|".$query;
             }
         }
 

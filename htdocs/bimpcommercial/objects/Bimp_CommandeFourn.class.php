@@ -289,7 +289,7 @@ class Bimp_CommandeFourn extends BimpComm
                             return 1;
                         }
                     }
-                } elseif (in_array((int) $this->getData('fk_statut'), array(3, 4, 5, 6, 7, 9))) {
+                } elseif (in_array((int) $this->getData('fk_statut'), array(6, 7, 9))) {
                     if ($user->rights->fournisseur->commande->commander) {
                         return 1;
                     }
@@ -1323,7 +1323,7 @@ class Bimp_CommandeFourn extends BimpComm
 
                     if (!count($errors)) {
                         $fac_warnings = array();
-                        $fac_errors = $facture->create($fac_warnings);
+                        $fac_errors = $facture->create($fac_warnings, true);
 
                         if (count($fac_errors)) {
                             $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Echec de la création de la facture');

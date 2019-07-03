@@ -28,6 +28,16 @@ class Bimp_Facture extends BimpComm
         4 => array('label' => 'Facture proforma'),
         5 => array('label' => 'Facture de situation')
     );
+    
+    
+    
+    
+    public function iAmAdminRedirect() {
+        global $user;
+        if(in_array($user->id, array(7)) ||$user->admin)
+            return true;
+        parent::iAmAdminRedirect();
+    }
 
     // Gestion des droits: 
 
@@ -182,32 +192,33 @@ class Bimp_Facture extends BimpComm
                 return 1;
 
             case 'modify':
-                if ($status !== Facture::STATUS_VALIDATED) {
-                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' n\'est pas au statut "Validé"';
-                    return 0;
-                }
-                // On verifie si les lignes de factures ont ete exportees en compta et/ou ventilees:
-                if ((float) $this->getRemainToPay() != $this->dol_object->total_ttc && empty($this->dol_object->paye)) {
-                    $errors[] = 'Un paiement a été effectué';
-                    return 0;
-                }
-
-                if ($this->dol_object->getVentilExportCompta() == 0) {
-                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' a été exporté' . ($this->isLabelFemale() ? 'e' : '') . ' en compta';
-                    return 0;
-                }
-
-                if (!$this->dol_object->is_last_in_cycle()) {
-                    $errors[] = $langs->trans("NotLastInCycle");
-                    return 0;
-                }
-
-                if ($this->dol_object->getIdReplacingInvoice()) {
-                    $errors[] = $langs->trans("DisabledBecauseReplacedInvoice");
-                    return 0;
-                }
-
-                return 1;
+                $errors[] = 'Interdiction totale de dévalider une facture';
+                return 0;
+//                if ($status !== Facture::STATUS_VALIDATED) {
+//                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' n\'est pas au statut "Validé"';
+//                    return 0;
+//                }
+//                // On verifie si les lignes de factures ont ete exportees en compta et/ou ventilees:
+//                if ((float) $this->getRemainToPay() != $this->dol_object->total_ttc && empty($this->dol_object->paye)) {
+//                    $errors[] = 'Un paiement a été effectué';
+//                    return 0;
+//                }
+//
+//                if ($this->dol_object->getVentilExportCompta() == 0) {
+//                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' a été exporté' . ($this->isLabelFemale() ? 'e' : '') . ' en compta';
+//                    return 0;
+//                }
+//
+//                if (!$this->dol_object->is_last_in_cycle()) {
+//                    $errors[] = $langs->trans("NotLastInCycle");
+//                    return 0;
+//                }
+//
+//                if ($this->dol_object->getIdReplacingInvoice()) {
+//                    $errors[] = $langs->trans("DisabledBecauseReplacedInvoice");
+//                    return 0;
+//                }
+//                return 1;
 
             case 'reopen':
                 $discount = new DiscountAbsolute($this->db->db);
@@ -320,7 +331,7 @@ class Bimp_Facture extends BimpComm
         // Editer une facture deja validee, sans paiement effectue et pas exportée en compta
         if ($status === Facture::STATUS_VALIDATED) {
             if ($this->canSetAction('modify')) {
-                $errors = array();
+//                $errors = array();
 
                 if ($this->isActionAllowed('modify', $errors)) {
                     $buttons[] = array(
@@ -329,16 +340,17 @@ class Bimp_Facture extends BimpComm
                         'onclick' => $this->getJsActionOnclick('modify', array(), array(
                             'confirm_msg' => strip_tags($langs->trans('ConfirmUnvalidateBill', $ref))
                     )));
-                } else {
-                    $msg = BimpTools::getMsgFromArray($errors);
-                    $buttons[] = array(
-                        'label'    => 'Modifier',
-                        'icon'     => 'undo',
-                        'onclick'  => '',
-                        'disabled' => 1,
-                        'popover'  => $msg
-                    );
                 }
+//                else {
+//                    $msg = BimpTools::getMsgFromArray($errors);
+//                    $buttons[] = array(
+//                        'label'    => 'Modifier',
+//                        'icon'     => 'undo',
+//                        'onclick'  => '',
+//                        'disabled' => 1,
+//                        'popover'  => $msg
+//                    );
+//                }
             }
         }
 
@@ -1045,10 +1057,46 @@ class Bimp_Facture extends BimpComm
         return $html;
     }
 
+    public function displayPaiementsFacturesPdfButtons($with_generate = true, $avoirs = true, $acomptes = true, $trop_percus = false)
+    {
+        $html = '';
+
+        $rows = $this->db->getRows('societe_remise_except', '`fk_facture` = ' . (int) $this->id, null, 'array');
+        if (!is_null($rows) && count($rows)) {
+            foreach ($rows as $r) {
+                $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $r['fk_facture_source']);
+                if ($facture->isLoaded()) {
+                    switch ((int) $facture->getData('type')) {
+                        case Facture::TYPE_CREDIT_NOTE:
+                            if ($avoirs) {
+                                $html .= $facture->displayPDFButton($with_generate, false, 'Avoir ' . $facture->getRef());
+                            }
+                            break;
+
+                        case Facture::TYPE_DEPOSIT:
+                            if ($acomptes) {
+                                $html .= $facture->displayPDFButton($with_generate, false, 'Facture acompte ' . $facture->getRef());
+                            }
+                            break;
+
+                        case Facture::TYPE_STANDARD:
+                            if ($trop_percus) {
+                                $html .= $facture->displayPDFButton($with_generate, false, 'Facture trop perçue ' . $facture->getRef());
+                            }
+                            break;
+                    }
+                }
+            }
+        }
+
+        return $html;
+    }
+
     //Rendus HTML: 
 
     public function renderContentExtraLeft()
     {
+        // Partie "Paiements": 
         $html = '';
 
         if ($this->isLoaded()) {
@@ -1448,6 +1496,20 @@ class Bimp_Facture extends BimpComm
             $html .= '<p>Valider quand même ?</p>';
             $html .= BimpInput::renderInput('toggle', 'force_validate', 0);
         }
+
+        return $html;
+    }
+
+    public function renderCreateWarning()
+    {
+        $html = '<p style="font-size: 16px">';
+        $html .= '<span style="font-size: 24px">';
+        $html .= BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
+        $html .= '</span>';
+        $html .= '<span class="bold">ATTENTION</span>, la création directe de facture est réservée à des cas exceptionnels et ne doit être utilisée qu\'en dernier recours.<br/>';
+        $html .= 'Pour les cas ordinaires, vous devez ';
+        $html .= '<span class="bold">impérativement passer par le processus de commande.</span>';
+        $html .= '</p>';
 
         return $html;
     }

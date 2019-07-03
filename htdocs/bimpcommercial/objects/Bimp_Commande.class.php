@@ -74,6 +74,7 @@ class Bimp_Commande extends BimpComm
         global $conf, $user;
 
         switch ($action) {
+            case 'modify':
             case 'validate':
                 if ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && !empty($user->rights->commande->creer)) ||
                         (!empty($conf->global->MAIN_USE_ADVANCED_PERMS) && !empty($user->rights->commande->order_advance->validate))) {
@@ -142,9 +143,25 @@ class Bimp_Commande extends BimpComm
                 }
                 return 1;
 
+            case 'modify':
+//                return 0; // blocage par trigger : à voir si on fait sauter. 
+                if ($status !== 1) {
+                    $errors[] = $invalide_error;
+                    return 0;
+                }
+                if ($this->isLogistiqueActive()) {
+                    $errors[] = 'La logistique est en cours de traitement';
+                    return 0;
+                }
+//                return 1;
+
             case 'reopen':
                 if (!in_array($status, array(Commande::STATUS_CLOSED, Commande::STATUS_CANCELED))) {
                     $errors[] = $invalide_error;
+                    return 0;
+                }
+                if ((int) $this->getData('logistique_status') === 6) {
+                    $errors[] = 'Cette commande a été définitivement clôturée (Commande réimportée depuis 8Sens)';
                     return 0;
                 }
                 return 1;
@@ -292,16 +309,16 @@ class Bimp_Commande extends BimpComm
                 }
             }
 
-            // Edit (désactivé)
-//            if ($status == Commande::STATUS_VALIDATED && $this->can("create")) {
-//                $buttons[] = array(
-//                    'label'   => 'Modifier',
-//                    'icon'    => 'undo',
-//                    'onclick' => $this->getJsActionOnclick('modify', array(), array(
-//                        'confirm_msg' => strip_tags($langs->trans('ConfirmUnvalidateOrder', $ref))
-//                    ))
-//                );
-//            }
+            // Edit
+            if ($status == Commande::STATUS_VALIDATED && $this->can("create")) {
+                $buttons[] = array(
+                    'label'   => 'Modifier',
+                    'icon'    => 'undo',
+                    'onclick' => $this->getJsActionOnclick('modify', array(), array(
+                        'confirm_msg' => strip_tags($langs->trans('ConfirmUnvalidateOrder', $ref))
+                    ))
+                );
+            }
 //            
             // Créer intervention
             if ($conf->ficheinter->enabled) {
@@ -1010,7 +1027,7 @@ class Bimp_Commande extends BimpComm
                             $fl = false;
                         }
 
-                        $html .= '<td>' . $line->displayLineData('desc') . '</td>';
+                        $html .= '<td>' . $line->displayLineData('desc_light') . '</td>';
                         $html .= '<td>' . $line->displayLineData('pu_ht') . '</td>';
                         $html .= '<td>' . $line->displayLineData('tva_tx') . '</td>';
                         $html .= '<td>' . $line->displayQties() . '</td>';
@@ -1298,13 +1315,23 @@ class Bimp_Commande extends BimpComm
         return $html;
     }
 
+    public function renderLogistiqueLink()
+    {
+        $html = '';
+        if ($this->isLogistiqueActive()) {
+            $url = DOL_URL_ROOT . '/bimplogistique/index.php?fc=commande&id=' . $this->id;
+            $html .= '<a href="' . $url . '" target="_blank">' . BimpRender::renderIcon('fas_truck-loading', 'iconLeft') . 'Logistique</a>';
+        }
+        return $html;
+    }
+
     // Traitements divers:
 
     public function createReservations()
     {
         $errors = array();
 
-        if ($this->isLoaded()) {
+        if ($this->isLoaded() /*&& $this->isLogistiqueActive()*/) {
             $lines = $this->getChildrenObjects('lines');
 
             foreach ($lines as $line) {
@@ -1689,7 +1716,7 @@ class Bimp_Commande extends BimpComm
                             }
                         }
 
-                        $fac_line->set('editable', 0);
+//                        $fac_line->set('editable', 0);
                         $fac_line->set('deletable', 0);
                         $fac_line_warnings = array();
                         $fac_line->update($fac_line_warnings, true);

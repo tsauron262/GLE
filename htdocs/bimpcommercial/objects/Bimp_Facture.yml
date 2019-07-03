@@ -116,6 +116,10 @@ fields:
 forms: 
     
     default: 
+        msgs: 
+            - content: 
+                callback: renderCreateWarning
+              type: warning
         rows:
             - custom: 1
               lable: Origine
@@ -137,8 +141,6 @@ forms:
               hidden: 1
               
             - field: fk_soc
-              show: 
-                  callback: isNotLoaded
                   
             - field: ref_client
             

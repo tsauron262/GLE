@@ -95,9 +95,9 @@ function saveObjectFromForm(form_id, $button, successCallback, on_save) {
                 bimpAjax.display_warnings_in_popup_only = false;
                 bimpAjax.$button.remove();
             }
-            
+
             triggerObjectChange(result.module, result.object_name, result.id_object);
-            
+
             if (typeof (successCallback) === 'function') {
                 successCallback(result);
             }
@@ -662,26 +662,26 @@ function reloadObjectInput(form_id, input_name, fields, keep_new_value) {
 
 function reloadParentInput($button, input_name) {
     var $inputContainer = $button.findParentByClass('inputContainer');
-    
+
     if (!$.isOk($inputContainer)) {
         bimp_msg('Erreur technique (conteneur absent)', 'danger', null, true);
         return;
     }
-    
+
     var field_name = $inputContainer.data('field_name');
-    
+
     if (field_name !== input_name) {
         bimp_msg('Erreur technique (Nom de champ invalide)', null, true);
         return;
     }
-    
+
     var $form = $inputContainer.findParentByClass('object_form');
-    
+
     if (!$.isOk($form)) {
         bimp_msg('Erreur technique (formulaire non trouvé)', null, true);
         return;
     }
-    
+
     reloadObjectInput($form.attr('id'), input_name, []);
 }
 
@@ -1640,6 +1640,22 @@ function onFormLoaded($form) {
         $('body').trigger($.Event('formLoaded', {
             $form: $form
         }));
+
+        $form.find('.fdsgsdkfgjsdlkj').each(function () {
+//            bimp_msg($(this).attr('name'));
+            $(this).focus(function (e) {
+                e.stopPropagation();
+            });
+            $(this).focus();
+        });
+
+        var $modal = $form.findParentByClass('modal');
+        if ($.isOk) {
+            $modal.focus(function (e) {
+                $form.find('.auto_focus').first().focus();
+                e.stopPropagation();
+            });
+        }
     }
 }
 

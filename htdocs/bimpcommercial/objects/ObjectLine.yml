@@ -528,6 +528,7 @@ lists_cols:
         min_width: 40px;
     desc:
         label: Description
+        info: Version longue
         value: 
             callback: 
                 method: displayLineData
@@ -535,6 +536,13 @@ lists_cols:
                     - desc
         max_width: 460px
 #        min_width: 280px
+    desc_light: 
+        extends: desc
+        info: Version courte
+        value: 
+            callback: 
+                params:
+                    - desc_light
     pu_ht: 
         label: PU HT
         value: 

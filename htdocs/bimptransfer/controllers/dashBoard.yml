@@ -1,0 +1,94 @@
+bootstrap: 1
+title: Accueil boutique
+
+js:
+#    - /includes/jquery/plugins/select2/select2.js
+    - /bimptransfer/views/js/index.js
+
+#css:
+#    - /includes/jquery/plugins/select2/select2.css
+
+objects: 
+    transfer:
+        instance: 
+            bimp_object: Transfer
+            id_object:
+                request: id
+    transfer_line: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: TransferLine
+                
+sections: 
+    - type: tabs
+      tabs: 
+        default:
+            label: Reception transfert
+            sections:
+                - type: custom
+                  custom: 
+                      callback: 
+                          method: renderReception
+        send:
+            label: Envoie transfert
+            sections:
+                - type: custom
+                  custom: 
+                      callback: 
+                          method: renderSend
+        order_fourn:
+            label: Commande fournisseur
+            sections:
+                - type: custom
+                  custom: 
+                      callback: 
+                          method: renderOrderFourn
+        resa:
+            label: Réservations
+            sections:
+                - type: custom
+                  custom: 
+                      callback: 
+                          method: renderReservations
+
+                              
+#        to_process:
+#            label: A traiter
+#            sections:
+#                - type: custom
+#                  custom: 
+#                      callback: 
+#                          method: renderReservationsTab
+#                          params: 
+#                              - to_process
+#                              
+#        to_deliver:
+#            label: A livrer
+#            sections:
+#                - type: custom
+#                  custom: 
+#                      callback: 
+#                          method: renderReservationsTab
+#                          params: 
+#                              - to_deliver
+#                              
+#        completed:
+#            label: Réservations terminées
+#            sections:
+#                - type: custom
+#                  custom: 
+#                      callback: 
+#                          method: renderReservationsTab
+#                          params: 
+#                              - to_deliver
+#                              
+#        all_res: 
+#            label: Toutes les Réservations
+#            sections:
+#                - type: custom
+#                  custom: 
+#                      callback: 
+#                          method: renderReservationsTab
+#                          params: 
+#                              - all_res

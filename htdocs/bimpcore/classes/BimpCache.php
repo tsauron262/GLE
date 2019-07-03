@@ -362,6 +362,11 @@ class BimpCache
                                             $label = $sub_object->getConf('fields/' . $col_params['field'] . '/label', $col_name);
                                             $label .= ' (objet: ' . BimpTools::ucfirst($sub_object->getLabel()) . ')';
                                         }
+
+//                                        $info = $object->getConf('lists_cols/' . $col_name . '/info', '');
+//                                        if ($info) {
+//                                            $label .= ' - ' . $info;
+//                                        }
                                     }
                                 } elseif ($object->config->isDefined('fields/' . $col_params['field'] . '/label')) {
                                     if ($label) {
@@ -377,6 +382,13 @@ class BimpCache
                             self::$cache[$cache_key][$col_name] = $label;
                         }
                     }
+                }
+            }
+
+            foreach (self::$cache[$cache_key] as $col_name => $col_label) {
+                $info = $object->getConf('lists_cols/' . $col_name . '/info', '');
+                if ($info) {
+                    self::$cache[$cache_key][$col_name] .= ' - ' . $info;
                 }
             }
 

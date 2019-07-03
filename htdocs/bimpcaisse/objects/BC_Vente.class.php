@@ -2196,7 +2196,7 @@ class BC_Vente extends BimpObject
             'note_private'      => $note
         ));
 
-        $errors = $facture->create($warnings);
+        $errors = $facture->create($warnings, true);
 
         if (count($errors)) {
             return $errors;

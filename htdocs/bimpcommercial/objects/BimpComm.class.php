@@ -66,6 +66,9 @@ class BimpComm extends BimpDolObject
     public function isFieldEditable($field, $force_edit = false)
     {
         switch ($field) {
+            case 'fk_soc':
+                return (int) ($this->getData('fk_statut') === 0);
+
             case 'zone_vente':
                 return (int) $this->areLinesEditable();
         }
@@ -1131,7 +1134,7 @@ class BimpComm extends BimpDolObject
         return $html;
     }
 
-    public function displayPDFButton($display_generate = true, $with_ref = true)
+    public function displayPDFButton($display_generate = true, $with_ref = true, $btn_label = '')
     {
         $html = '';
         $ref = dol_sanitizeFileName($this->getRef());
@@ -1141,9 +1144,11 @@ class BimpComm extends BimpDolObject
             if ($file_url) {
                 $onclick = 'window.open(\'' . $file_url . '\');';
                 $html .= '<button type="button" class="btn btn-default" onclick="' . $onclick . '">';
-                $html .= '<i class="fas fa5-file-pdf ' . ($with_ref ? 'iconLeft' : '') . '"></i>';
+                $html .= '<i class="fas fa5-file-pdf ' . (($with_ref || $btn_label) ? 'iconLeft' : '') . '"></i>';
                 if ($with_ref) {
                     $html .= $ref . '.pdf';
+                } elseif ($btn_label) {
+                    $html .= $btn_label;
                 }
                 $html .= '</button>';
 
@@ -2819,9 +2824,9 @@ class BimpComm extends BimpDolObject
             $zone = self::BC_ZONE_FR;
 
             if ((int) $this->getData('fk_soc') !== (int) $this->getInitData('fk_soc')) {
-                $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', (int) $this->getData('fk_soc'));
-                if (BimpObject::objectLoaded($client)) {
-                    $zone = $this->getZoneByCountry((int) $client->getData('fk_pays'));
+                $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', (int) $this->getData('fk_soc'));
+                if (BimpObject::objectLoaded($soc)) {
+                    $zone = $this->getZoneByCountry((int) $soc->getData('fk_pays'));
                     $this->set('zone_vente', $zone);
                 }
             }

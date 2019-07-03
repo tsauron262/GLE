@@ -1057,6 +1057,25 @@ class BS_SAV extends BimpObject
         return $html;
     }
 
+    public function renderHeaderExtraRight()
+    {
+        $html = '';
+        if ((int) $this->getData('status') === self::BS_SAV_FERME) {
+            $url = DOL_URL_ROOT . '/bimpsupport/bon_restitution.php?id_sav= ' . $this->id;
+            $html .= '<span class="btn btn-default" onclick="window.open(\'' . $url . '\')">';
+            $html .= BimpRender::renderIcon('fas_file-pdf', 'iconLeft') . 'Bon de restitution';
+            $html .= '</span>';
+
+            $facture = $this->getChildObject('facture');
+            if (BimpObject::objectLoaded($facture) && (int) $facture->getData('fk_statut')) {
+                $html .= $facture->displayPDFButton(0, 0, 'Facture');
+                $html .= $facture->displayPaiementsFacturesPdfButtons(0, 1);
+            }
+        }
+
+        return $html;
+    }
+
     // Traitements:
 
     public function checkObject($context = '', $field = '')

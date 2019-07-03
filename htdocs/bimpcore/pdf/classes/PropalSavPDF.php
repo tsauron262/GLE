@@ -24,8 +24,9 @@ class PropalSavPDF extends PropalPDF
 
         parent::init($object);
     }
-    
-    protected function initData(){
+
+    protected function initData()
+    {
         parent::initData();
         if (isset($this->object) && is_a($this->object, 'Propal'))
             $this->bimpCommObject = BimpObject::getInstance('bimpsupport', 'BS_SavPropal', (int) $this->object->id);
@@ -38,15 +39,15 @@ class PropalSavPDF extends PropalPDF
         $rows = '';
 
         if (!is_null($this->sav)) {
-            $rows .= '<span style="color: #'.BimpCore::getParam('pdf/primary', '000000').'">' . $this->sav->getData('ref') . '</span><br/>';
+            $rows .= '<span style="color: #' . BimpCore::getParam('pdf/primary', '000000') . '">' . $this->sav->getData('ref') . '</span><br/>';
             $equipment = $this->sav->getchildObject('equipment');
             if (!is_null($equipment) && $equipment->isLoaded()) {
-                if($equipment->getData('product_label') != ""){
-                    $rows .= '<span style="font-size: 9px;">' . $equipment->getData('product_label')."</span><br/>";
+                if ($equipment->getData('product_label') != "") {
+                    $rows .= '<span style="font-size: 9px;">' . $equipment->getData('product_label') . "</span><br/>";
                 }
                 $rows .= '<span style="font-size: 9px;">' . $equipment->getData('serial') . '</span>';
             }
-            
+
             $infoCentre = $this->sav->getCentreData();
             global $mysoc;
             $mysoc->email = $infoCentre['mail'];
@@ -60,19 +61,19 @@ class PropalSavPDF extends PropalPDF
     public function getCommercialInfosHtml()
     {
         $html = parent::getCommercialInfosHtml();
-        
+
         if (!is_null($this->sav)) {
             if ((int) $this->sav->getData('id_user_tech')) {
                 $tech = $this->sav->getChildObject('user_tech');
                 if (!is_null($tech) && $tech->isLoaded()) {
-                    $primary = BimpCore::getParam('pdf/primary', '000000') ;
-                    $html .= '<div class="row" style="border-top: solid 1px #' . $primary. '"><span style="font-weight: bold; color: #' . $primary . ';">';
+                    $primary = BimpCore::getParam('pdf/primary', '000000');
+                    $html .= '<div class="row" style="border-top: solid 1px #' . $primary . '"><span style="font-weight: bold; color: #' . $primary . ';">';
                     $html .= 'Technicien en charge :</span><br/>';
                     $html .= $tech->dol_object->getFullName($this->langs, 0, -1, 20) . '</div>';
                 }
             }
         }
-        
+
         return $html;
     }
 
@@ -100,10 +101,24 @@ class PropalSavPDF extends PropalPDF
     }
 }
 
-class SavRestitutePDF extends PropalSavPDF {
+class SavRestitutePDF extends PropalSavPDF
+{
+
     public $restitution_sav = 1;
     public $after_totaux_label = '';
-    
+
+    public function initData()
+    {
+        parent::initData();
+
+        if (BimpObject::objectLoaded($this->object) && BimpObject::objectLoaded($this->sav)) {
+            Propal::STATUS_BILLED;
+            $line = new PropaleLigne($this->db);
+            $line->desc = 'Résolution: ' . $this->sav->getData('resolution');
+            $this->object->lines[] = $line;
+        }
+    }
+
     public function getPaymentInfosHtml()
     {
         return '';

@@ -245,7 +245,7 @@ class BL_CommandeShipment extends BimpObject
                         'onclick' => $this->getJsActionOnclick('createFacture', array(
                             'id_client'      => (int) $this->getIdClient(),
                             'id_contact'     => (int) $this->getcontact(),
-                            'libelle'        => $commande->getData('libelle'),
+                            'libelle'        => addslashes($commande->getData('libelle')),
                             'cond_reglement' => (int) $commande->getData('fk_cond_reglement')
                                 ), array(
                             'form_name'        => 'facture',
@@ -364,9 +364,9 @@ class BL_CommandeShipment extends BimpObject
                         }
                     } elseif (in_array($id_shipment, $prev_shipments)) {
                         $line_qties['shipped_qty'] += (float) $shipment_data['qty'];
-                    } /*else {
-                        $line_qties['to_ship_qty'] += (float) $shipment_data['qty'];
-                    }*/
+                    } /* else {
+                      $line_qties['to_ship_qty'] += (float) $shipment_data['qty'];
+                      } */
                 }
                 $line_qties['to_ship_qty'] = $line->getData('qty_total') - $line_qties['shipped_qty'] - $line_qties['qty'];
                 $qties[(int) $line->getData('id_line')] = $line_qties;
@@ -538,7 +538,7 @@ class BL_CommandeShipment extends BimpObject
                     $html .= '</button>';
                 }
             }
-            
+
             $avoir = null;
             $label = 'Avoir';
             if ((int) $this->getData('id_avoir') > 0) {
@@ -2000,7 +2000,7 @@ class BL_CommandeShipment extends BimpObject
         if ($field === 'id_user_resp') {
             return;
         }
-        
+
         if (!(int) $this->getData('id_user_resp')) {
             $id_user = (int) $this->getData('user_create');
             if ($id_user) {

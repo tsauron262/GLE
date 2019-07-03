@@ -105,18 +105,17 @@ class BimpDocumentPDF extends BimpModelPDF
                         $entrepot = new Entrepot($this->db);
                         $entrepot->fetch($this->object->array_options['options_entrepot']);
                         if ($entrepot->address != "" && $entrepot->town != "") {
-                            global $mysoc;
-                            $mysoc->zip = $entrepot->zip;
-                            $mysoc->address = $entrepot->address;
-                            $mysoc->town = $entrepot->town;
+                            $this->fromCompany->zip = $entrepot->zip;
+                            $this->fromCompany->address = $entrepot->address;
+                            $this->fromCompany->town = $entrepot->town;
 
-                            if ($mysoc->name == "Bimp Groupe Olys")
-                                $mysoc->name = "Bimp Olys SAS";
+                            if ($this->fromCompany->name == "Bimp Groupe Olys")
+                                $this->fromCompany->name = "Bimp Olys SAS";
 
                             if ($entrepot->ref == "PR") {//patch new adresse
-                                $mysoc->zip = "69760";
-                                $mysoc->address = "2 rue des Erables CS 21055  ";
-                                $mysoc->town = "LIMONEST";
+                                $this->fromCompany->fromCompany->zip = "69760";
+                                $this->fromCompany->address = "2 rue des Erables CS 21055  ";
+                                $this->fromCompany->town = "LIMONEST";
                             }
                         }
                     }
@@ -214,78 +213,78 @@ class BimpDocumentPDF extends BimpModelPDF
 
         global $conf;
 
-        if ($this->fromCompany->name) {
-            $line1 .= $this->langs->convToOutputCharset($this->fromCompany->name);
+        if ($this->footerCompany->name) {
+            $line1 .= $this->langs->convToOutputCharset($this->footerCompany->name);
         }
 
-        if ($this->fromCompany->forme_juridique_code) {
-            $line1 .= " - " . $this->langs->convToOutputCharset(getFormeJuridiqueLabel($this->fromCompany->forme_juridique_code));
+        if ($this->footerCompany->forme_juridique_code) {
+            $line1 .= " - " . $this->langs->convToOutputCharset(getFormeJuridiqueLabel($this->footerCompany->forme_juridique_code));
         }
 
-        if ($this->fromCompany->capital) {
-            $captital = price2num($this->fromCompany->capital);
+        if ($this->footerCompany->capital) {
+            $captital = price2num($this->footerCompany->capital);
             if (is_numeric($captital) && $captital > 0) {
                 $line1 .= ($line1 ? " au " : "") . $this->langs->transnoentities("CapitalOf", price($captital, 0, $this->langs, 0, 0, 0, $conf->currency));
             } else {
-                $line1 .= ($line1 ? " au " : "") . $this->langs->transnoentities("CapitalOf", $this->fromCompany->capital, $this->langs);
+                $line1 .= ($line1 ? " au " : "") . $this->langs->transnoentities("CapitalOf", $this->footerCompany->capital, $this->langs);
             }
         }
 
-        if ($this->fromCompany->address) {
-            $line1 .= " - " . $this->fromCompany->address . " - " . $this->fromCompany->zip . " " . $this->fromCompany->town . " - Tél " . $this->fromCompany->phone;
+        if ($this->footerCompany->address) {
+            $line1 .= " - " . $this->footerCompany->address . " - " . $this->footerCompany->zip . " " . $this->footerCompany->town . " - Tél " . $this->footerCompany->phone;
         }
 
-        if ($this->fromCompany->idprof1 && ($this->fromCompany->country_code != 'FR' || !$this->fromCompany->idprof2)) {
-            $field = $this->langs->transcountrynoentities("ProfId1", $this->fromCompany->country_code);
+        if ($this->footerCompany->idprof1 && ($this->footerCompany->country_code != 'FR' || !$this->footerCompany->idprof2)) {
+            $field = $this->langs->transcountrynoentities("ProfId1", $this->footerCompany->country_code);
             if (preg_match('/\((.*)\)/i', $field, $reg)) {
                 $field = $reg[1];
             }
-            $line1 .= ($line1 ? " - " : "") . $field . " : " . $this->langs->convToOutputCharset($this->fromCompany->idprof1);
+            $line1 .= ($line1 ? " - " : "") . $field . " : " . $this->langs->convToOutputCharset($this->footerCompany->idprof1);
         }
 
-        if ($this->fromCompany->idprof2) {
-            $field = $this->langs->transcountrynoentities("ProfId2", $this->fromCompany->country_code);
+        if ($this->footerCompany->idprof2) {
+            $field = $this->langs->transcountrynoentities("ProfId2", $this->footerCompany->country_code);
             if (preg_match('/\((.*)\)/i', $field, $reg)) {
                 $field = $reg[1];
             }
-            $line1 .= ($line1 ? " - " : "") . $field . " : " . $this->langs->convToOutputCharset($this->fromCompany->idprof2);
+            $line1 .= ($line1 ? " - " : "") . $field . " : " . $this->langs->convToOutputCharset($this->footerCompany->idprof2);
         }
 
-        if ($this->fromCompany->idprof3) {
-//            $field = $this->langs->transcountrynoentities("ProfId3", $this->fromCompany->country_code);
+        if ($this->footerCompany->idprof3) {
+//            $field = $this->langs->transcountrynoentities("ProfId3", $this->footerCompany->country_code);
             $field = 'APE';
 //            if (preg_match('/\((.*)\)/i', $field, $reg)) {
 //                $field = $reg[1];
 //                
 //            }
-            $line2 .= ($line2 ? " - " : "") . $field . " : " . $this->langs->convToOutputCharset($this->fromCompany->idprof3);
+            $line2 .= ($line2 ? " - " : "") . $field . " : " . $this->langs->convToOutputCharset($this->footerCompany->idprof3);
         }
 
-        if ($this->fromCompany->idprof4) {
-            $field = $this->langs->transcountrynoentities("ProfId4", $this->fromCompany->country_code);
+        if ($this->footerCompany->idprof4) {
+            $field = $this->langs->transcountrynoentities("ProfId4", $this->footerCompany->country_code);
             if (preg_match('/\((.*)\)/i', $field, $reg)) {
                 $field = $reg[1];
             }
-            $line2 .= ($line2 ? " - " : "") . $field . " : " . $this->langs->convToOutputCharset($this->fromCompany->idprof4);
+            $line2 .= ($line2 ? " - " : "") . $field . " : " . $this->langs->convToOutputCharset($this->footerCompany->idprof4);
         }
 
-        if ($this->fromCompany->idprof5) {
-            $field = $this->langs->transcountrynoentities("ProfId5", $this->fromCompany->country_code);
+        if ($this->footerCompany->idprof5) {
+            $field = $this->langs->transcountrynoentities("ProfId5", $this->footerCompany->country_code);
             if (preg_match('/\((.*)\)/i', $field, $reg)) {
                 $field = $reg[1];
             }
-            $line2 .= ($line2 ? " - " : "") . $field . " : " . $this->langs->convToOutputCharset($this->fromCompany->idprof5);
+            $line2 .= ($line2 ? " - " : "") . $field . " : " . $this->langs->convToOutputCharset($this->footerCompany->idprof5);
         }
 
-        if ($this->fromCompany->idprof6) {
-            $field = $this->langs->transcountrynoentities("ProfId6", $this->fromCompany->country_code);
+        if ($this->footerCompany->idprof6) {
+            $field = $this->langs->transcountrynoentities("ProfId6", $this->footerCompany->country_code);
             if (preg_match('/\((.*)\)/i', $field, $reg))
                 $field = $reg[1];
-            $line2 .= ($line2 ? " - " : "") . $field . " : " . $this->langs->convToOutputCharset($this->fromCompany->idprof6);
+            $line2 .= ($line2 ? " - " : "") . $field . " : " . $this->langs->convToOutputCharset($this->footerCompany->idprof6);
         }
         // IntraCommunautary VAT
-        if ($this->fromCompany->tva_intra != '') {
-            $line2 .= ($line2 ? " - " : "") . $this->langs->transnoentities("VATIntraShort") . " : " . $this->langs->convToOutputCharset($this->fromCompany->tva_intra);
+        if ($this->footerCompany->tva_intra != '') {
+            $line2 .= ($line2 ? " - " : "") . $this->langs->transnoentities("VATIntraShort") . " : " . $this->langs->convToOutputCharset($this->footerCompany->tva_intra);
         }
 
         $this->footer_vars = array(
@@ -358,12 +357,11 @@ class BimpDocumentPDF extends BimpModelPDF
         }
         if (isset($usertmp)) {
             if ($usertmp->office_phone != "")
-                $mysoc->phone = $usertmp->office_phone;
+                $this->fromCompany->phone = $usertmp->office_phone;
             if ($usertmp->email != "")
-                $mysoc->email = $usertmp->email;
+                $this->fromCompany = $usertmp->email;
         }
-//        }
-
+        
         return $html;
     }
 
@@ -796,6 +794,9 @@ class BimpDocumentPDF extends BimpModelPDF
             $html .= "</span>";
             $html .= "</p>";
         }
+        
+        $html .= '<p style="font-size: 6px; font-style: italic">Pour tout règlement par virement ou par chèque, merci de noter systématiquement le n° de facture sur votre règlement.</p>';
+        
         $this->writeContent($html);
     }
 

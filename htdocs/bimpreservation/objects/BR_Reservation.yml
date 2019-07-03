@@ -611,6 +611,7 @@ lists:
             stocks: 
                 
     commandes: 
+        filters_panel: default
         checkboxes: 1
         configurable: 1
         pagination: 0
@@ -632,6 +633,7 @@ lists:
             status:
                 
     entrepot: 
+        filters_panel: default
         checkboxes: 1
         configurable: 1
         bulk_actions: 

@@ -1534,13 +1534,14 @@ class Bimp_Facture extends BimpComm
             $has_amounts_lines = false;
             
             foreach ($lines as $line) {
+                // suppr partie "pa_ht" dès que correctif pa facture en place
                 if (round((float) $line->getTotalTTC(), 2) || round((float) $line->pa_ht, 2))  {
                     $has_amounts_lines = true;
                     break;
                 }
             }
             
-            if (!round($total_ttc) && !$has_amounts_lines) {
+            if (!round($total_ttc, 2) && !$has_amounts_lines) {
                 $errors[] = 'Aucune ligne avec montant non nul ajoutée à cette facture';
                 return $errors;
             }
@@ -1555,7 +1556,7 @@ class Bimp_Facture extends BimpComm
 
             switch ($type) {
                 case Facture::TYPE_STANDARD:
-                    if (!$total_ttc_wo_discounts && $neg_lines > 0) {
+                    if (!round($total_ttc_wo_discounts, 2) && $neg_lines > 0) {
                         $convert_avoir = (int) BimpTools::getPostFieldValue('convert_avoir_to_reduc', 1);
                         $use_remise = (int) BimpTools::getPostFieldValue('use_discount_in_facture', 1);
                         $err = $this->createCreditNoteWithNegativesLines($lines, $convert_avoir, $use_remise);
@@ -1563,7 +1564,7 @@ class Bimp_Facture extends BimpComm
                         if (count($err)) {
                             $errors[] = BimpTools::getMsgFromArray($err, 'Erreurs lors de la création d\'un avoir avec les lignes négatives');
                         }
-                    } elseif ($total_ttc < -0.009) {
+                    } elseif ($total_ttc < 0) {
                         $err = $this->updateField('type', Facture::TYPE_CREDIT_NOTE);
                         if (count($err)) {
                             $errors[] = BimpTools::getMsgFromArray($err, 'Echec de la conversion de la facture en avoir');

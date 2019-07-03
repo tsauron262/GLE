@@ -28,6 +28,16 @@ class Bimp_Facture extends BimpComm
         4 => array('label' => 'Facture proforma'),
         5 => array('label' => 'Facture de situation')
     );
+    
+    
+    
+    
+    public function iAmAdminRedirect() {
+        global $user;
+        if(in_array($user->id, array(7)))
+            return true;
+        parent::iAmAdminRedirect();
+    }
 
     // Gestion des droits: 
 

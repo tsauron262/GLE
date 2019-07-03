@@ -189,9 +189,9 @@ class BimpPDF_Table
             }
 
 
-
+            
             if (is_object($row['object'])) {
-                $content .= $this->addDEEEandRPCP($key, $row['object'], $row['qte']);
+                $content .= $this->addDEEEandRPCP($key, $row['object'], $row['qte'], str_replace("%", "", $row['tva']));
             }
 
 
@@ -212,7 +212,7 @@ class BimpPDF_Table
         $pdf->writeHTML('<style>' . $this->styles . '</style>' . "\n" . $html . "", false, false, true, false, '');
     }
 
-    public function addDEEEandRPCP($key, $object, $qty)
+    public function addDEEEandRPCP($key, $object, $qty, $taxe)
     {
         $content = "";
         $htmlAv = '<br/><span style="text-align:right;font-style: italic; font-size: 5px; font-weight: bold;">';
@@ -228,7 +228,7 @@ class BimpPDF_Table
         if ($key == "total_ht" && $eco > 0)
             $content .= $htmlAv . price($eco * $qty) . $htmlAp;
         if ($key == "total_ttc" && $eco > 0)
-            $content .= $htmlAv . price($eco * $qty * 1.2) . $htmlAp;
+            $content .= $htmlAv . price($eco * $qty *(100+$taxe)/100) . $htmlAp;
 
 
 

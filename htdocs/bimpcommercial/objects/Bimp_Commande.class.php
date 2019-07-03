@@ -1331,7 +1331,7 @@ class Bimp_Commande extends BimpComm
     {
         $errors = array();
 
-        if ($this->isLoaded() && $this->isLogistiqueActive()) {
+        if ($this->isLoaded() /*&& $this->isLogistiqueActive()*/) {
             $lines = $this->getChildrenObjects('lines');
 
             foreach ($lines as $line) {

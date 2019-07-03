@@ -288,8 +288,8 @@ class DoliDBMysqli extends DoliDB
                 define('OFF_MULTI_SQL', 1);
             }
         }
-        if(stripos(trim($query), "SELECT") !== 0)
-                echo $query;
+//        if(stripos(trim($query), "SELECT") !== 0)
+//                echo $query;
 
         /*moddrsi*/
         $tabRemplacement = array(

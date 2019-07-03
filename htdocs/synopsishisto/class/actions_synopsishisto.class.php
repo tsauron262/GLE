@@ -191,10 +191,15 @@ class histoNavigation {
                     $sql = $db->query($requete);
                     if ($db->num_rows($sql) > 0) {
                         $res = $db->fetch_object($sql);
+                        $date = new DateTime($res->tms);
+                        $date->add(new DateInterval('PT3M'));
+                        $dateLimite = new DateTime();
+                        if($dateLimite > $date){
                         $requete = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_Histo_User
                            SET tms = now(),
                                ref = '" . addslashes($ref) . "'
                          WHERE id = " . $res->id;
+                        }
                     } else {
                         $requete = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_Histo_User
                                     (`user_refid`,`element_id`,`ref`,`element_type`)

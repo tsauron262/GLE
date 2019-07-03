@@ -132,46 +132,56 @@ forms:
         rows: 
             - field: id_warehouse_dest
             
-list:
-    checkboxes: 1
-    bulk_actions: 
-# TODO reset with right admin
-#        - label: Supprimer les transferts sélectionnés
-#          icon: fas_trash-alt
-#          onclick: deleteSelectedObjects('list_id', $(this));
-#          btn_class: deleteSelectedObjects
-    sort_field: id
-    sort_way: desc
-    n: 10
-    list_filters: 
-        callback:
-            method: getListFilters
-    add_form_name: add
-    edit_btn: 
-        callback: userIsAdminOrStatusSending
-    delete_btn:
-        callback: userIsAdmin
-    view_btn: 1
-    page_btn: 1
-    modal_view: default
-    cols:
-        id:
-            label: ID
-            field: id
-            min_width: 60px
-        status:
-            field: status
-        id_warehouse_source:
-            field: id_warehouse_source
-            display: nom_url
-        id_warehouse_dest: 
-            field: id_warehouse_dest
-            display: nom_url
-        date_opening:
-            field: date_opening
-        date_closing:
-            field: date_closing
-            
+lists:
+    default:
+        checkboxes: 1
+        bulk_actions: 
+    # TODO reset with right admin
+    #        - label: Supprimer les transferts sélectionnés
+    #          icon: fas_trash-alt
+    #          onclick: deleteSelectedObjects('list_id', $(this));
+    #          btn_class: deleteSelectedObjects
+        sort_field: id
+        sort_way: desc
+        n: 10
+        list_filters: 
+            callback:
+                method: getListFilters
+        add_form_name: add
+        edit_btn: 
+            callback: userIsAdminOrStatusSending
+        delete_btn:
+            callback: userIsAdmin
+        view_btn: 1
+        page_btn: 1
+        modal_view: default
+        cols:
+            id:
+                label: ID
+                field: id
+                min_width: 60px
+            status:
+                field: status
+            id_warehouse_source:
+                field: id_warehouse_source
+                display: nom_url
+            id_warehouse_dest: 
+                field: id_warehouse_dest
+                display: nom_url
+            date_opening:
+                field: date_opening
+            date_closing:
+                field: date_closing
+    dash_board_reception:
+       extends: default
+       cols:
+        status: unset
+        id_warehouse_dest: unset
+    dash_board_send:
+       extends: default
+       cols:
+        status: unset
+        id_warehouse_source: unset
 cards: 
     default: 
         title: nom

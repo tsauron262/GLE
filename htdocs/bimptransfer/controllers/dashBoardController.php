@@ -73,6 +73,32 @@ class dashBoardController extends BimpController {
 
         return $html;
     }
+    
+    
+        public function renderReservations()
+    {
+        $html = '<div class="row">';
+        $html .= '<div class="col-lg-12">';
+        
+        $status_filter = array(
+                            'operator' => '<',
+                            'value'    => 300
+                        );
+
+        $resa = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
+        $list = new BC_ListTable($resa, 'entrepot', 1, null, "Réservations");
+        $list->addFieldFilterValue('id_entrepot', (int) $this->getIdWarehouse());
+//        $list->addFieldFilterValue('type', BR_Reservation::BR_RESERVATION_COMMANDE);  // pas que les enstock aussi les pret et autres
+        if (count($status_filter)) {
+            $list->addFieldFilterValue('status', $status_filter);
+        }
+        $html .= $list->renderHtml();
+
+        $html .= '</div>';
+        $html .= '</div>';
+
+        return $html;
+    }
 
     public function renderReception() {
 

@@ -50,7 +50,9 @@ class BimpInput
                         $html .= ' style="' . $options['style'] . '"';
                     }
                     $html .= $data;
-                    $html .= ' class="' . $extra_class . '"';
+                    if ($extra_class) {
+                        $html .= ' class="'.$extra_class.'"';
+                    }
                     $html .= '/>';
 
                     if (isset($options['addon_right']) && $options['addon_right']) {
@@ -61,6 +63,9 @@ class BimpInput
                     $html .= '</div>';
                 } else {
                     $html .= '<input type="text" id="' . $input_id . '" name="' . $field_name . '" value="' . $value . '"';
+                    if ($extra_class) {
+                        $html .= ' class="'.$extra_class.'"';
+                    }
                     if (isset($options['placeholder'])) {
                         $html .= ' placeholder="' . $options['placeholder'] . '"';
                     }

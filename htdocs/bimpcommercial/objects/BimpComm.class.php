@@ -2356,6 +2356,10 @@ class BimpComm extends BimpDolObject
 
         return $errors;
     }
+    
+    public function checkPrice()
+    {
+    }
 
     // Actions:
 
@@ -2818,18 +2822,18 @@ class BimpComm extends BimpDolObject
 
     // Overrides BimpObject:
 
-    public function checkObject($context = '', $field = '')
-    {
-        if ($this->isLoaded() && $context === 'fetch') {
-            global $user;
+//    public function checkObject($context = '', $field = '')
+//    {
+//        if ($this->isLoaded() && $context === 'fetch') {
+//            global $user;
 
-            if (BimpObject::objectLoaded($user) && $user->admin) {
-                $this->dol_object->update_price();
-            }
-        }
-
-        parent::checkObject($context, $field);
-    }
+//            if (BimpObject::objectLoaded($user) && $user->admin) {
+//                $this->dol_object->update_price();
+//            }
+//        }
+//
+//        parent::checkObject($context, $field);
+//    }
 
     public function validate()
     {

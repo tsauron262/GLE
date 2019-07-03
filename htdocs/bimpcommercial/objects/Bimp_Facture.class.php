@@ -29,9 +29,6 @@ class Bimp_Facture extends BimpComm
         5 => array('label' => 'Facture de situation')
     );
     
-    
-    
-    
     public function iAmAdminRedirect() {
         global $user;
         if(in_array($user->id, array(7)) ||$user->admin)
@@ -1526,7 +1523,7 @@ class Bimp_Facture extends BimpComm
 
             // Pour être sûr d\'être à jour:
             $this->dol_object->fetch_lines();
-            $this->dol_object->update_price(1);
+            $this->dol_object->update_price();
             $this->dol_object->fetch((int) $this->id);
             $this->hydrateFromDolObject();
 
@@ -1534,8 +1531,17 @@ class Bimp_Facture extends BimpComm
             $total_ttc_wo_discounts = (float) $this->getTotalTtcWithoutDiscountsAbsolutes();
             $total_ttc = (float) $this->getTotalTtc();
 
-            if (!$total_ttc && !count($lines)) {
-                $errors[] = 'Aucune ligne ajoutée à cette facture';
+            $has_amounts_lines = false;
+            
+            foreach ($lines as $line) {
+                if (round((float) $line->getTotalTTC(), 2) || round((float) $line->pa_ht, 2))  {
+                    $has_amounts_lines = true;
+                    break;
+                }
+            }
+            
+            if (!round($total_ttc) && !$has_amounts_lines) {
+                $errors[] = 'Aucune ligne avec montant non nul ajoutée à cette facture';
                 return $errors;
             }
 
@@ -2095,6 +2101,15 @@ class Bimp_Facture extends BimpComm
             } elseif ($paye) {
                 $this->setObjectAction('reopen');
             }
+        }
+    }
+    
+    public function checkPrice()
+    {
+        if ($this->isLoaded() && static::$dol_module) {            
+            $sql = 'SELECT SUML(total_ttc) FROM '.MAIN_DB_PREFIX.'facturedet WHERE `fk_facture` = '.(int) $this->id;
+            
+            $total_ttc = '';
         }
     }
 

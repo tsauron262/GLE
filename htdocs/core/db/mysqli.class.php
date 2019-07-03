@@ -260,22 +260,36 @@ class DoliDBMysqli extends DoliDB
     	global $conf;
         
         
-        if(defined('BDD_2_HOST')){
-            global $dbRead;
-            if(!$dbRead){
-                $dbRead = new DoliDBMysqli('mysql', BDD_2_HOST,  $this->database_user, $this->database_pass, $this->database_name);
+        if(defined('BDD_2_HOST') && !defined('OFF_MULTI_SQL') && BDD_2_HOST !=  $this->database_host){
+            if(stripos(trim($query), "SELECT") === 0){
+                $testPlusPetitQueDix = rand(5,14);//rand(6,15);
+                if($testPlusPetitQueDix < 10){
+                    global $dbRead;
+                    if(!$dbRead){
+                        $dbRead = new DoliDBMysqli('mysql', BDD_2_HOST,  $this->database_user, $this->database_pass, $this->database_name);
+                    }
+
+                    if($dbRead){//on peut passer sur serveur 2
+                        $this->countReq2 ++;
+                        $ret = $dbRead->query($query);
+                        if($ret){
+                            $this->_results = $ret;
+                            return $ret;
+                        }
+                        else {
+                            define('OFF_MULTI_SQL', 1);
+                        }
+                    }
+                }
+                    
             }
-            $allet = rand(0,10);
-            
-            if($dbRead && BDD_2_HOST !=  $this->database_host && $allet > 5){//n peut passer sur serveur 2
-                if(stripos(trim($query), "SELECT") === 0){
-                    $this->countReq2 ++;
-                    return $dbRead->query($query);
-                } 
-//                else
-//                    echo "|".$query;
+            else{
+                //modifs on reste pour toujours sur le serveur princ
+                define('OFF_MULTI_SQL', 1);
             }
         }
+        if(stripos(trim($query), "SELECT") !== 0)
+                echo $query;
 
         /*moddrsi*/
         $tabRemplacement = array(

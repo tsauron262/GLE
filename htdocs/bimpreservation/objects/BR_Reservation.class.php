@@ -932,7 +932,7 @@ class BR_Reservation extends BimpObject
                     $content .= '<span class="small">Numéro de série: </span><br/>';
                     $content .= BimpInput::renderInput('text', 'search_serial', '', array(
                                 'style'       => 'border: 1px solid #DCDCDC',
-                                'extra_class' => 'auto_focus'
+//                                'extra_class' => 'auto_focus'
                     ));
                     $content .= '</div>';
 

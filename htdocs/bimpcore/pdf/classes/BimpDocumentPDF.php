@@ -357,12 +357,11 @@ class BimpDocumentPDF extends BimpModelPDF
         }
         if (isset($usertmp)) {
             if ($usertmp->office_phone != "")
-                $mysoc->phone = $usertmp->office_phone;
+                $this->fromCompany->phone = $usertmp->office_phone;
             if ($usertmp->email != "")
-                $mysoc->email = $usertmp->email;
+                $this->fromCompany = $usertmp->email;
         }
-//        }
-
+        
         return $html;
     }
 

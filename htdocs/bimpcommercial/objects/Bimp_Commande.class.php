@@ -1716,7 +1716,7 @@ class Bimp_Commande extends BimpComm
                             }
                         }
 
-                        $fac_line->set('editable', 0);
+//                        $fac_line->set('editable', 0);
                         $fac_line->set('deletable', 0);
                         $fac_line_warnings = array();
                         $fac_line->update($fac_line_warnings, true);

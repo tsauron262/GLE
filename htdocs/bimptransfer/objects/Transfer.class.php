@@ -290,4 +290,20 @@ class Transfer extends BimpDolObject {
         return parent::create($warnings, $force_create);
     }
 
+    // TODO est-ce que cette fonction existe quelque part ?
+    public function getAllWarehouses() {
+        $warehouses = array();
+
+        $sql = 'SELECT rowid, ref, lieu';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'entrepot';
+
+        $result = $this->db->db->query($sql);
+        if ($result and mysqli_num_rows($result) > 0) {
+            while ($obj = $this->db->db->fetch_object($result)) {
+                $warehouses[$obj->rowid] = $obj->ref . ' - ' . $obj->lieu;
+            }
+        }
+        return $warehouses;
+    }
+
 }

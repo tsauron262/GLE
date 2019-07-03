@@ -1323,7 +1323,7 @@ class Bimp_CommandeFourn extends BimpComm
 
                     if (!count($errors)) {
                         $fac_warnings = array();
-                        $fac_errors = $facture->create($fac_warnings);
+                        $fac_errors = $facture->create($fac_warnings, true);
 
                         if (count($fac_errors)) {
                             $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Echec de la création de la facture');

@@ -232,6 +232,11 @@ lists_cols:
         field: total_ht
     total_ttc: 
         field: total_ttc
+    fk_soc: 
+        label: Fournisseur
+        field: fk_soc
+        child: parent
+        display: nom_url
     commande_status: 
         label: Statut commande
         field: fk_statut
@@ -262,6 +267,7 @@ lists:
         cols:
             commande: 
             num_reception:
+            fk_soc:
             ref:
             date: 
             total_ht: 

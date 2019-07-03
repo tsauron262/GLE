@@ -362,6 +362,11 @@ class BimpCache
                                             $label = $sub_object->getConf('fields/' . $col_params['field'] . '/label', $col_name);
                                             $label .= ' (objet: ' . BimpTools::ucfirst($sub_object->getLabel()) . ')';
                                         }
+
+//                                        $info = $object->getConf('lists_cols/' . $col_name . '/info', '');
+//                                        if ($info) {
+//                                            $label .= ' - ' . $info;
+//                                        }
                                     }
                                 } elseif ($object->config->isDefined('fields/' . $col_params['field'] . '/label')) {
                                     if ($label) {
@@ -377,6 +382,13 @@ class BimpCache
                             self::$cache[$cache_key][$col_name] = $label;
                         }
                     }
+                }
+            }
+
+            foreach (self::$cache[$cache_key] as $col_name => $col_label) {
+                $info = $object->getConf('lists_cols/' . $col_name . '/info', '');
+                if ($info) {
+                    self::$cache[$cache_key][$col_name] .= ' - ' . $info;
                 }
             }
 
@@ -1230,10 +1242,10 @@ class BimpCache
         if (!isset(self::$cache['entrepots'])) {
             self::$cache['entrepots'] = array();
 
-            $rows = self::getBdb()->getRows('entrepot', '1', null, 'object', array('rowid', 'ref', 'description'), 'ref', 'asc');
+            $rows = self::getBdb()->getRows('entrepot', '1', null, 'object', array('rowid', 'ref', 'lieu'), 'ref', 'asc');
             if (!is_null($rows)) {
                 foreach ($rows as $r) {
-                    self::$cache['entrepots'][(int) $r->rowid] = $r->ref;
+                    self::$cache['entrepots'][(int) $r->rowid] = $r->ref . ' - ' . $r->lieu;
                 }
             }
         }

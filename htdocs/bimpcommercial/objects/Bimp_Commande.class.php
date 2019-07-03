@@ -74,6 +74,7 @@ class Bimp_Commande extends BimpComm
         global $conf, $user;
 
         switch ($action) {
+            case 'modify':
             case 'validate':
                 if ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && !empty($user->rights->commande->creer)) ||
                         (!empty($conf->global->MAIN_USE_ADVANCED_PERMS) && !empty($user->rights->commande->order_advance->validate))) {
@@ -102,7 +103,10 @@ class Bimp_Commande extends BimpComm
                 return 1;
 
             case 'forceStatus':
-                return 1;
+                if ((int) $user->admin) {
+                    return 1;
+                }
+                return 0;
         }
         return 1;
     }
@@ -139,9 +143,25 @@ class Bimp_Commande extends BimpComm
                 }
                 return 1;
 
+            case 'modify':
+//                return 0; // blocage par trigger : à voir si on fait sauter. 
+                if ($status !== 1) {
+                    $errors[] = $invalide_error;
+                    return 0;
+                }
+                if ($this->isLogistiqueActive()) {
+                    $errors[] = 'La logistique est en cours de traitement';
+                    return 0;
+                }
+//                return 1;
+
             case 'reopen':
                 if (!in_array($status, array(Commande::STATUS_CLOSED, Commande::STATUS_CANCELED))) {
                     $errors[] = $invalide_error;
+                    return 0;
+                }
+                if ((int) $this->getData('logistique_status') === 6) {
+                    $errors[] = 'Cette commande a été définitivement clôturée (Commande réimportée depuis 8Sens)';
                     return 0;
                 }
                 return 1;
@@ -172,6 +192,23 @@ class Bimp_Commande extends BimpComm
                 return 1;
         }
         return parent::isActionAllowed($action, $errors);
+    }
+
+    public function isFieldEditable($field, $force_edit = false)
+    {
+        switch ($field) {
+            case 'entrepot':
+                if (!$force_edit) {
+                    global $user;
+                    // A modifier rapidement...
+                    if ($this->isLogistiqueActive() && !in_array((int) $user->id, array(1, 33, 34, 224, 1130))) {
+                        return 0;
+                    }
+                }
+                return 1;
+        }
+
+        return parent::isFieldEditable($field, $force_edit);
     }
 
     // Getters booléens:
@@ -272,16 +309,16 @@ class Bimp_Commande extends BimpComm
                 }
             }
 
-            // Edit (désactivé)
-//            if ($status == Commande::STATUS_VALIDATED && $this->can("create")) {
-//                $buttons[] = array(
-//                    'label'   => 'Modifier',
-//                    'icon'    => 'undo',
-//                    'onclick' => $this->getJsActionOnclick('modify', array(), array(
-//                        'confirm_msg' => strip_tags($langs->trans('ConfirmUnvalidateOrder', $ref))
-//                    ))
-//                );
-//            }
+            // Edit
+            if ($status == Commande::STATUS_VALIDATED && $this->can("create")) {
+                $buttons[] = array(
+                    'label'   => 'Modifier',
+                    'icon'    => 'undo',
+                    'onclick' => $this->getJsActionOnclick('modify', array(), array(
+                        'confirm_msg' => strip_tags($langs->trans('ConfirmUnvalidateOrder', $ref))
+                    ))
+                );
+            }
 //            
             // Créer intervention
             if ($conf->ficheinter->enabled) {
@@ -990,7 +1027,7 @@ class Bimp_Commande extends BimpComm
                             $fl = false;
                         }
 
-                        $html .= '<td>' . $line->displayLineData('desc') . '</td>';
+                        $html .= '<td>' . $line->displayLineData('desc_light') . '</td>';
                         $html .= '<td>' . $line->displayLineData('pu_ht') . '</td>';
                         $html .= '<td>' . $line->displayLineData('tva_tx') . '</td>';
                         $html .= '<td>' . $line->displayQties() . '</td>';
@@ -1278,13 +1315,23 @@ class Bimp_Commande extends BimpComm
         return $html;
     }
 
+    public function renderLogistiqueLink()
+    {
+        $html = '';
+        if ($this->isLogistiqueActive()) {
+            $url = DOL_URL_ROOT . '/bimplogistique/index.php?fc=commande&id=' . $this->id;
+            $html .= '<a href="' . $url . '" target="_blank">' . BimpRender::renderIcon('fas_truck-loading', 'iconLeft') . 'Logistique</a>';
+        }
+        return $html;
+    }
+
     // Traitements divers:
 
     public function createReservations()
     {
         $errors = array();
 
-        if ($this->isLoaded()) {
+        if ($this->isLoaded() /*&& $this->isLogistiqueActive()*/) {
             $lines = $this->getChildrenObjects('lines');
 
             foreach ($lines as $line) {
@@ -1595,7 +1642,7 @@ class Bimp_Commande extends BimpComm
 
         foreach ($lines_qties as $id_line => $line_qty) {
             $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $id_line);
-            
+
             if (BimpObject::objectLoaded($line)) {
                 $product = $line->getProduct();
                 $fac_line_errors = array();
@@ -1636,9 +1683,9 @@ class Bimp_Commande extends BimpComm
                     $fac_line->id_remise_except = $line->id_remise_except;
 
                     $fac_line_warnings = array();
-                    
+
                     $fac_line_errors = $fac_line->create($fac_line_warnings);
-                    
+
                     $fac_line_errors = array_merge($fac_line_errors, $fac_line_warnings);
 
                     if (count($fac_line_errors)) {
@@ -1659,7 +1706,7 @@ class Bimp_Commande extends BimpComm
                             ));
 
                             $remise_warnings = array();
-                            
+
                             $remise_errors = $new_remise->create($remise_warnings);
 
                             $remise_errors = array_merge($remise_errors, $remise_warnings);
@@ -2019,7 +2066,7 @@ class Bimp_Commande extends BimpComm
 
     public function actionLinesFactureQties($data, &$success)
     {
-        
+
         $errors = array();
         $warnings = array();
         $success = '';
@@ -2043,7 +2090,7 @@ class Bimp_Commande extends BimpComm
             // Vérification des quantités: 
             $id_facture = (int) $data['id_facture'] ? (int) $data['id_facture'] : null;
             $errors = $this->checkFactureLinesData($lines_qties, $id_facture, $lines_equipments);
-            
+
             if (!count($errors)) {
                 if ($id_facture) {
                     $success = 'Ajout des unités à la facture effectué avec succès';
@@ -2059,7 +2106,7 @@ class Bimp_Commande extends BimpComm
                     $note_private = isset($data['note_private']) ? $data['note_private'] : '';
 
                     $id_facture = $this->createFacture($errors, $id_client, $id_contact, $id_cond_reglement, $id_account, $note_public, $note_private, $remises);
-                    
+
                     // Ajout des lignes à la facture: 
                     if ($id_facture && !count($errors)) {
                         $lines_errors = $this->addLinesToFacture($id_facture, $lines_qties, $lines_equipments, false);
@@ -2313,7 +2360,7 @@ class Bimp_Commande extends BimpComm
                     }
                     break;
             }
-            
+
             $lines = $this->getLines('not_text');
             foreach ($lines as $line) {
                 $line->checkQties();
@@ -2351,7 +2398,7 @@ class Bimp_Commande extends BimpComm
     }
 
     // Overrides BimpComm:
-    
+
     public function checkObject($context = '', $field = '')
     {
         if ($context === 'fetch') {
@@ -2428,6 +2475,20 @@ class Bimp_Commande extends BimpComm
         $this->set('date_creation', date('Y-m-d H:i:s'));
 
         return parent::create($warnings, $force_create);
+    }
+
+    public function update(&$warnings = array(), $force_update = false)
+    {
+        $init_entrepot = (int) $this->getData('init_entrepot');
+
+        $errors = parent::update($warnings, $force_update);
+
+        if (!count($errors)) {
+            if ($init_entrepot !== (int) $this->getData('id_entrepot') && $this->isLogistiqueActive()) {
+                $sql = 'UPDATE `' . MAIN_DB_PREFIX . 'br_reservation` SET `id_entrepot` = ' . (int) $this->getData('id_entrepot');
+                $sql .= 'WHERE `id_commande_client` = ' . (int) $this->id . ' AND `id_entrepot` = ' . $init_entrepot . ' AND `status` < 200';
+            }
+        }
     }
 
     public function delete(&$warnings = array(), $force_delete = false)

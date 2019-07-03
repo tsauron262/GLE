@@ -154,7 +154,7 @@ class Bimp_CommandeFourn extends BimpComm
                 return 1;
 
             case 'createInvoice':
-                $this->checkInvoiceStatus();
+//                $this->checkInvoiceStatus();
                 if (empty($conf->facture->enabled)) {
                     $errors[] = 'Factures désactivées';
                     return 0;
@@ -289,7 +289,7 @@ class Bimp_CommandeFourn extends BimpComm
                             return 1;
                         }
                     }
-                } elseif (in_array((int) $this->getData('fk_statut'), array(3, 4, 5, 6, 7, 9))) {
+                } elseif (in_array((int) $this->getData('fk_statut'), array(6, 7, 9))) {
                     if ($user->rights->fournisseur->commande->commander) {
                         return 1;
                     }
@@ -329,7 +329,10 @@ class Bimp_CommandeFourn extends BimpComm
                 return 0;
 
             case 'forceStatus':
-                return 1;
+                if ((int) $user->admin) {
+                    return 1;
+                }
+                return 0;
         }
 
         return parent::canSetAction($action);
@@ -1003,6 +1006,7 @@ class Bimp_CommandeFourn extends BimpComm
                 'value'    => 0
             )
         ));
+        
         if (count($lines) && count($receptions)) {
             $has_billed = 0;
             $all_billed = 1;
@@ -1012,9 +1016,15 @@ class Bimp_CommandeFourn extends BimpComm
                 $billed_qty = 0;
 
                 foreach ($receptions as $id_reception) {
-                    $reception_data = $line->getReceptionData((int) $id_reception);
-                    $billed_qty += isset($reception_data['qty']) ? (float) $reception_data['qty'] : 0;
-                    $has_billed = 1;
+                    $reception = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeFournReception', (int) $id_reception);
+                    if (BimpObject::objectLoaded($reception)) {
+                        $fac = $reception->getChildObject('facture_fourn');
+                        if (BimpObject::objectLoaded($fac)) {
+                            $reception_data = $line->getReceptionData((int) $id_reception);
+                            $billed_qty += isset($reception_data['qty']) ? (float) $reception_data['qty'] : 0;
+                            $has_billed = 1;
+                        }
+                    } 
                 }
 
                 if (abs($line_qty) > abs($billed_qty)) {
@@ -1313,7 +1323,7 @@ class Bimp_CommandeFourn extends BimpComm
 
                     if (!count($errors)) {
                         $fac_warnings = array();
-                        $fac_errors = $facture->create($fac_warnings);
+                        $fac_errors = $facture->create($fac_warnings, true);
 
                         if (count($fac_errors)) {
                             $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Echec de la création de la facture');

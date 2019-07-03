@@ -1225,15 +1225,14 @@ class BL_CommandeFournReception extends BimpObject
 
     public function checkObject($context = '', $field = '')
     {
-        if ($field === 'id_user_resp') {
-            return;
-        }
-        
-        if (!(int) $this->getData('id_user_resp')) {
-            $id_user = (int) $this->getData('user_create');
-            if ($id_user) {
-                $this->updateField('id_user_resp', $id_user);
+        if ($context === 'fetch') {
+            if (!(int) $this->getData('id_user_resp')) {
+                $id_user = (int) $this->getData('user_create');
+                if ($id_user) {
+                    $this->updateField('id_user_resp', $id_user);
+                }
             }
+            $this->onLinesChange();
         }
     }
 

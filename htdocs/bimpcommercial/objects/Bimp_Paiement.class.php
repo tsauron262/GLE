@@ -526,10 +526,10 @@ class Bimp_Paiement extends BimpObject
             return $errors;
         }
 
-        $total_factures_versements = round($total_factures_versements, 2);
-        $total_paid = round($total_paid, 2);
+//        $total_factures_versements = round($total_factures_versements, 2);
+//        $total_paid = round($total_paid, 2);
 
-        if ($total_factures_versements > $total_paid) {
+        if ($total_factures_versements > ($total_paid + 0.009999999)) {
             $errors[] = 'Le champ "Somme totale versée" (' . $total_paid . ') est inférieur au total des réglements des factures (' . $total_factures_versements . ')';
             return $errors;
         }

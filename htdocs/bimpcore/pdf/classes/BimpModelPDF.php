@@ -21,7 +21,8 @@ Abstract class BimpModelPDF
     public $prefName = "";
     public $object;
     public $text = '';
-    public $fromCompany = null;
+    public $fromCompany = null; // En-tête
+    public $footerCompany = null; // Pied de page
     private $isInit = false;
     public $errors = array();
     public $langs;
@@ -43,7 +44,9 @@ Abstract class BimpModelPDF
 
         $this->pdf = new BimpPDF($orientation, $format);
 
-        $this->fromCompany = $mysoc;
+        $this->fromCompany = clone $mysoc; // Sender (en-tête)
+        $this->footerCompany = clone $mysoc; // Pied de page. 
+        
         if (empty($this->fromCompany->country_code)) {
             $this->fromCompany->country_code = substr($langs->defaultlang, -2);
         }

@@ -291,6 +291,7 @@ forms:
                   show_values: 2 
                   
     duplicate:
+        force_edit: 1
         rows: 
             - field: entrepot
             - field: fk_soc

@@ -68,12 +68,6 @@ class BimpComm extends BimpDolObject
         switch ($field) {
             case 'zone_vente':
                 return (int) $this->areLinesEditable();
-
-            case 'entrepot':
-                if ((int) $this->getData('fk_statut') > 0) {
-                    return 0;
-                }
-                return 1;
         }
         return 1;
     }
@@ -880,14 +874,13 @@ class BimpComm extends BimpDolObject
                     return (int) $soc->dol_object->mode_reglement_id;
                 }
             }
-            return 0;
         }
 
-        if (isset($this->data['fk_mode_reglement'])) {
+        if (isset($this->data['fk_mode_reglement']) && (int) $this->data['fk_mode_reglement']) {
             return (int) $this->data['fk_mode_reglement']; // pas getData() sinon boucle infinie (getModeReglementBySociete() étant définie en tant que callback du param default_value pour ce champ). 
         }
 
-        return 0;
+        return BimpCore::getConf('default_id_mode_paiement');
     }
 
     public static function getZoneByCountry($id_country)
@@ -1138,7 +1131,7 @@ class BimpComm extends BimpDolObject
         return $html;
     }
 
-    public function displayPDFButton($display_generate = true, $with_ref = true)
+    public function displayPDFButton($display_generate = true, $with_ref = true, $btn_label = '')
     {
         $html = '';
         $ref = dol_sanitizeFileName($this->getRef());
@@ -1148,9 +1141,11 @@ class BimpComm extends BimpDolObject
             if ($file_url) {
                 $onclick = 'window.open(\'' . $file_url . '\');';
                 $html .= '<button type="button" class="btn btn-default" onclick="' . $onclick . '">';
-                $html .= '<i class="fas fa5-file-pdf ' . ($with_ref ? 'iconLeft' : '') . '"></i>';
+                $html .= '<i class="fas fa5-file-pdf ' . (($with_ref || $btn_label) ? 'iconLeft' : '') . '"></i>';
                 if ($with_ref) {
                     $html .= $ref . '.pdf';
+                } elseif ($btn_label) {
+                    $html .= $btn_label;
                 }
                 $html .= '</button>';
 

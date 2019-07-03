@@ -16,6 +16,8 @@ icon: fas_file-invoice-dollar
 list_page_url: 
     controller: facturesFourn
 
+force_extrafields_update: 1
+
 labels: 
     name: facture fournisseur
     name_plur: factures fournisseurs
@@ -136,7 +138,6 @@ fields:
     total: unset
     remise_globale: unset
     remise_globale_label: unset
-    zone_vente: unset
     
 forms:
     default: 
@@ -172,6 +173,9 @@ forms:
             - field: fk_cond_reglement
             - field: fk_mode_reglement
             - field: model_pdf
+            - field: zone_vente
+              show: 
+                  callback: isLoaded
             - field: note_public
             - field: note_private
             
@@ -190,6 +194,8 @@ fields_tables:
             - field: fk_facture_source
               show: 
                   field_value: fk_facture_source
+            - field: zone_vente
+              edit: 1
                   
     client: 
         title: Fournisseur

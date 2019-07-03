@@ -184,7 +184,6 @@ fields:
     fk_input_reason: unset
     remise_globale: unset
     remise_globale_label: unset
-    zone_vente: unset
     
 forms: 
     default: 
@@ -200,6 +199,9 @@ forms:
             - field: fk_mode_reglement
 #            - field: fk_account
             - field: model_pdf
+            - field: zone_vente
+              show: 
+                  callback: isLoaded
             - field: attente_info
             - field: note_private
             - field: note_public
@@ -380,6 +382,8 @@ fields_tables:
             - field: fk_input_method
               show: 
                   field_value: fk_input_method
+            - field: zone_vente
+              edit: 1
     
     fournisseur: 
         title: Fournisseur

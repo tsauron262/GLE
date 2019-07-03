@@ -349,8 +349,6 @@ forms:
             - field: entrepot
             - field: ef_type
             - field: fk_soc
-              show: 
-                  callback: isNotLoaded
             - field: id_client_facture
             - field: ref_client
             - field: fk_input_reason
@@ -660,8 +658,6 @@ filters_panels:
                 field: invoice_status
             date_livraison: 
                 field: date_livraison
-            zone_vente:
-                field: zone_vente
             reval:
                 field: revalorisation
             
@@ -709,8 +705,6 @@ lists_cols:
     client_facture:
         field: id_client_facture
         display: nom_url
-    zone_vente:
-        field: zone_vente
     revalorisation:
         field: revalorisation
         

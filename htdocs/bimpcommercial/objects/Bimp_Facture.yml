@@ -139,8 +139,6 @@ forms:
               hidden: 1
               
             - field: fk_soc
-              show: 
-                  callback: isNotLoaded
                   
             - field: ref_client
             

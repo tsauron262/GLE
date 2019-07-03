@@ -193,6 +193,14 @@ lists_cols:
     date: 
         field: date_commande
         child: parent
+    desc_light_url: 
+        extends: desc
+        info: Version courte avec lien commande client d'origine
+        value: 
+            callback: 
+                params:
+                    - desc_light_url
+            
             
 lists: 
     default:
@@ -215,16 +223,12 @@ lists:
         extra_btn: 
             callback: getLogistiqueExtraButtons
         cols: 
-            desc:
-            pu_ht: unset
-            tva: unset
-            pa_ht: unset
-            qty: unset
-            qties: 
-            remise: unset
-            total_ttc: unset
-            margin: unset
+            unextends: 1
+            desc_light:
             commande_client:
+            total_ttc:
+            qties: 
+            
                 
     general:
         list_filters: 
@@ -265,12 +269,7 @@ lists:
                 label: Commande
                 field: id_obj
                 display: nom_url
-            desc:
-                value: 
-                    callback: 
-                        method: displayLineData
-                        params:
-                           - desc_light
+            desc_light:
             dl_pu_ht: 
                 field: subprice
                 child: dol_line

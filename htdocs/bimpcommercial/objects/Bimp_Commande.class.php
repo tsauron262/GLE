@@ -142,8 +142,8 @@ class Bimp_Commande extends BimpComm
                     }
                 }
                 return 1;
-                
-            case 'modify': 
+
+            case 'modify':
 //                return 0; // blocage par trigger : à voir si on fait sauter. 
                 if ($status !== 1) {
                     $errors[] = $invalide_error;
@@ -1023,7 +1023,7 @@ class Bimp_Commande extends BimpComm
                             $fl = false;
                         }
 
-                        $html .= '<td>' . $line->displayLineData('desc') . '</td>';
+                        $html .= '<td>' . $line->displayLineData('desc_light') . '</td>';
                         $html .= '<td>' . $line->displayLineData('pu_ht') . '</td>';
                         $html .= '<td>' . $line->displayLineData('tva_tx') . '</td>';
                         $html .= '<td>' . $line->displayQties() . '</td>';
@@ -1308,6 +1308,16 @@ class Bimp_Commande extends BimpComm
                     'menu_right' => true
         ));
 
+        return $html;
+    }
+
+    public function renderLogistiqueLink()
+    {
+        $html = '';
+        if ($this->isLogistiqueActive()) {
+            $url = DOL_URL_ROOT . '/bimplogistique/index.php?fc=commande&id=' . $this->id;
+            $html .= '<a href="' . $url . '" target="_blank">' . BimpRender::renderIcon('fas_truck-loading', 'iconLeft') . 'Logistique</a>';
+        }
         return $html;
     }
 

@@ -221,6 +221,22 @@ class Bimp_CommandeFournLine extends FournObjectLine
         return parent::isActionAllowed($action, $errors);
     }
 
+    public function isFieldEditable($field, $force_edit = false)
+    {
+        switch ($field) {
+            case 'qty':
+                if (!$force_edit) {
+                    if ($this->getData('linked_object_name') === 'commande_line') {
+                        return 0;
+                    }
+                    return 1;
+                }
+                break;
+        }
+
+        return parent::isFieldEditable($field, $force_edit);
+    }
+
     // Getters données: 
 
     public function getMinQty()
@@ -390,7 +406,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
             if ($this->getFullQty() < 0) {
                 if (isset($data['return_equipments'])) {
                     foreach ($data['return_equipments'] as $id_equipment => $equipment_data) {
-                        $pu_ht = (isset($equipment_data['pu_ht']) ? (float) $equipment_data['pu_ht'] * -1: (float) $this->getUnitPriceHTWithRemises());
+                        $pu_ht = (isset($equipment_data['pu_ht']) ? (float) $equipment_data['pu_ht'] * -1 : (float) $this->getUnitPriceHTWithRemises());
                         $total_ht += $pu_ht;
                     }
                 }
@@ -429,7 +445,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
             if ($this->getFullQty() < 0) {
                 if (isset($data['return_equipments'])) {
                     foreach ($data['return_equipments'] as $id_equipment => $equipment_data) {
-                        $pu_ht = (isset($equipment_data['pu_ht']) ? ((float) $equipment_data['pu_ht'] * -1): (float) $this->getUnitPriceHTWithRemises());
+                        $pu_ht = (isset($equipment_data['pu_ht']) ? ((float) $equipment_data['pu_ht'] * -1) : (float) $this->getUnitPriceHTWithRemises());
                         $tva_tx = (isset($equipment_data['tva_tx']) ? (float) $equipment_data['tva_tx'] : (float) $this->tva_tx);
                         $total_ttc += (BimpTools::calculatePriceTaxIn($pu_ht, $tva_tx));
                     }
@@ -613,6 +629,44 @@ class Bimp_CommandeFournLine extends FournObjectLine
     }
 
     // Affichages: 
+
+    public function displayLineData($field, $edit = 0, $display_name = 'default', $no_html = false)
+    {
+        if ($edit && $this->isEditable() && $this->can("edit")) {
+            return parent::displayLineData($field, $edit, $display_name, $no_html);
+        }
+
+        $html = '';
+        switch ($field) {
+            case 'desc':
+            case 'desc_light_url':
+                if ($field === 'desc_light_url') {
+                    $field = 'desc_light';
+                }
+                $html .= parent::displayLineData($field, $edit, $display_name, $no_html);
+
+                if (!$no_html && (string) $this->getData('linked_object_name') === 'commande_line') {
+                    $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $this->getData('linked_id_object'));
+                    if (BimpObject::objectLoaded($line)) {
+                        $link = $line->renderOriginLink();
+
+                        if ($link) {
+                            $html .= ($html ? $html . '<br/><br/>' : '') . $link;
+                        }
+                    }
+                }
+                break;
+
+            case 'ref_supplier':
+                $html .= (string) $this->ref_supplier;
+                break;
+
+            default:
+                $html .= parent::displayLineData($field, $edit, $display_name, $no_html);
+                break;
+        }
+        return $html;
+    }
 
     public function displayCommandeClient()
     {

@@ -2269,6 +2269,26 @@ class Bimp_CommandeLine extends ObjectLine
         return $html;
     }
 
+    public function renderOriginLink()
+    {
+        $html = '';
+        if ($this->isLoaded()) {
+            $commande = $this->getParentInstance();
+
+            if (BimpObject::objectLoaded($commande)) {
+                $html .= '<span class="bold">Commande client d\'origine: </span>';
+                $html .= $commande->getNomUrl(1, 1, 1, 'full') . '<br/>Ligne n°' . $this->getData('position');
+                $link = $commande->renderLogistiqueLink();
+                
+                if ($link) {
+                    $html .= ' - ' . $link;
+                }
+            }
+        }
+
+        return $html;
+    }
+
     // Traitements réservations:
 
     public function checkReservations()
@@ -3833,7 +3853,7 @@ class Bimp_CommandeLine extends ObjectLine
                     $line->validateArray(array(
                         'type'               => ObjectLine::LINE_PRODUCT,
                         'deletable'          => 0,
-                        'editable'           => 0,
+                        'editable'           => 1,
                         'remisable'          => 1,
                         'linked_id_object'   => (int) $this->id,
                         'linked_object_name' => 'commande_line'

@@ -1563,7 +1563,7 @@ class Bimp_Facture extends BimpComm
                         if (count($err)) {
                             $errors[] = BimpTools::getMsgFromArray($err, 'Erreurs lors de la création d\'un avoir avec les lignes négatives');
                         }
-                    } elseif ($total_ttc < 0) {
+                    } elseif ($total_ttc < -0.009) {
                         $err = $this->updateField('type', Facture::TYPE_CREDIT_NOTE);
                         if (count($err)) {
                             $errors[] = BimpTools::getMsgFromArray($err, 'Echec de la conversion de la facture en avoir');

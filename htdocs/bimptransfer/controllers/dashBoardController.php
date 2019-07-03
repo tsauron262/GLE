@@ -153,7 +153,7 @@ class dashBoardController extends BimpController {
 
         // ORDER LINE
         $transfer_line = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFournLine');
-        $list = new BC_ListTable($transfer_line, 'default', 1, null, 'Ligne de commande fournisseur');
+        $list = new BC_ListTable($transfer_line, 'general', 1, null, 'Ligne de commande fournisseur');
         $list->addFieldFilterValue('e.entrepot', $id_warehouse);
         $list->addFieldFilterValue('c.fk_statut', array('IN' => implode(',', $status_accepted)));
         $list->addJoin('commande_fournisseur', 'a.id_obj=c.rowid', 'c');

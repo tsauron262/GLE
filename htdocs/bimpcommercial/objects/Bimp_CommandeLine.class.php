@@ -2307,6 +2307,9 @@ class Bimp_CommandeLine extends ObjectLine
             if (!BimpObject::objectLoaded($commande)) {
                 $errors[] = 'ID de la commande absent';
             } else {
+                if (!$commande->isLogistiqueActive()) {
+                    return;
+                }
                 if ((int) $this->getData('type') === self::LINE_PRODUCT) {
                     $product = $this->getProduct();
                     if (!BimpObject::objectLoaded($product)) {

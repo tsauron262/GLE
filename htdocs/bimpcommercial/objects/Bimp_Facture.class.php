@@ -34,7 +34,7 @@ class Bimp_Facture extends BimpComm
     
     public function iAmAdminRedirect() {
         global $user;
-        if(in_array($user->id, array(7, 1)))
+        if(in_array($user->id, array(7)) ||$user->admin)
             return true;
         parent::iAmAdminRedirect();
     }

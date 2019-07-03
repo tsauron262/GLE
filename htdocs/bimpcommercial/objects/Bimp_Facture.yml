@@ -114,6 +114,10 @@ fields:
         
 forms: 
     default: 
+        msgs: 
+            - content: 
+                callback: renderCreateWarning
+              type: warning
         rows:
             - custom: 1
               lable: Origine

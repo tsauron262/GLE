@@ -330,7 +330,7 @@ class Bimp_Facture extends BimpComm
                         'onclick' => $this->getJsActionOnclick('modify', array(), array(
                             'confirm_msg' => strip_tags($langs->trans('ConfirmUnvalidateBill', $ref))
                     )));
-                } 
+                }
 //                else {
 //                    $msg = BimpTools::getMsgFromArray($errors);
 //                    $buttons[] = array(
@@ -1486,6 +1486,20 @@ class Bimp_Facture extends BimpComm
             $html .= '<p>Valider quand même ?</p>';
             $html .= BimpInput::renderInput('toggle', 'force_validate', 0);
         }
+
+        return $html;
+    }
+
+    public function renderCreateWarning()
+    {
+        $html = '<p style="font-size: 16px">';
+        $html .= '<span style="font-size: 24px">';
+        $html .= BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
+        $html .= '</span>';
+        $html .= '<span class="bold">ATTENTION</span>, la création directe de facture est réservée à des cas exceptionnels et ne doit être utilisée qu\'en dernier recours.<br/>';
+        $html .= 'Pour les cas ordinaires, vous devez ';
+        $html .= '<span class="bold">impérativement passer par le processus de commande.</span>';
+        $html .= '</p>';
 
         return $html;
     }

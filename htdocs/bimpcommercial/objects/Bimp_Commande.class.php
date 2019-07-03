@@ -160,6 +160,10 @@ class Bimp_Commande extends BimpComm
                     $errors[] = $invalide_error;
                     return 0;
                 }
+                if ((int) $this->getData('logistique_status') === 6) {
+                    $errors[] = 'Cette commande a été définitivement clôturée (Commande réimportée depuis 8Sens)';
+                    return 0;
+                }
                 return 1;
 
             case 'cancel':

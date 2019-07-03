@@ -114,7 +114,7 @@ class dashBoardController extends BimpController {
         // ORDER
         $transfer = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFourn');
         $list = new BC_ListTable($transfer, 'default', 1, null, 'Commande fournisseur');
-        $list->addFieldFilterValue('entrepot', $id_warehouse);
+//        $list->addFieldFilterValue('cf.entrepot', $id_warehouse);
         $list->addFieldFilterValue('cf.fk_statut', (int) CommandeFournisseur::STATUS_ORDERSENT);
         $list->addFieldFilterValue('cf.fk_statut', (int)CommandeFournisseur::STATUS_RECEIVED_PARTIALLY);
         $list->setAddFormValues(array());

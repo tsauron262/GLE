@@ -6,105 +6,71 @@
 
 var fk_warehouse;
 
-function getLineTransferAndOrder() {
-    $.ajax({
-        type: "POST",
-        url: DOL_URL_ROOT + "/bimpequipment/manageequipment/interface.php",
-        data: {
-            fk_warehouse: fk_warehouse,
-            action: 'getLineTransferAndOrder'
-        },
-        error: function () {
-            setMessage('alertPlaceHolder', 'Erreur serveur 4354.', 'error');
-        },
-        success: function (rowOut) {
-            try {
-                var out = JSON.parse(rowOut);
-                if (out.errors.length !== 0) {
-                    printErrors(out.errors, 'alertPlaceHolder');
-                    return;
-                } else {
-                    right_caisse = out.right_caisse;
-                    right_caisse_admin = out.right_caisse_admin;
-                    out.transfers.forEach(function (transfer) {
-                        addLineTransfer(transfer);
-                    });
-                    out.orders.forEach(function (order) {
-                        addLineOrder(order);
-                    });
-                    diplayLinks(right_caisse, right_caisse_admin);
-                }
-            } catch (e) {
-                setMessage('alertPlaceHolder', e + 'Erreur serveur 4355.', 'error');
-            }
-        }
-    });
-}
+//function getLineTransferAndOrder() {
+//    $.ajax({
+//        type: "POST",
+//        url: DOL_URL_ROOT + "/bimpequipment/manageequipment/interface.php",
+//        data: {
+//            fk_warehouse: fk_warehouse,
+//            action: 'getLineTransferAndOrder'
+//        },
+//        error: function () {
+//            setMessage('alertPlaceHolder', 'Erreur serveur 4354.', 'error');
+//        },
+//        success: function (rowOut) {
+//            try {
+//                var out = JSON.parse(rowOut);
+//                if (out.errors.length !== 0) {
+//                    printErrors(out.errors, 'alertPlaceHolder');
+//                    return;
+//                } else {
+//                    right_caisse = out.right_caisse;
+//                    right_caisse_admin = out.right_caisse_admin;
+//                    out.transfers.forEach(function (transfer) {
+//                        addLineTransfer(transfer);
+//                    });
+//                    out.orders.forEach(function (order) {
+//                        addLineOrder(order);
+//                    });
+//                    diplayLinks(right_caisse, right_caisse_admin);
+//                }
+//            } catch (e) {
+//                setMessage('alertPlaceHolder', e + 'Erreur serveur 4355.', 'error');
+//            }
+//        }
+//    });
+//}
 
 /**
  * Ready
  */
 
 $(document).ready(function () {
+    fk_warehouse = getUrlParameter('boutique');
     $('#warehouseSelect').select2({placeholder: 'Rechercher ...'});
-    if ($('#warehouseSelect option:selected').length === 1 && $("#warehouseSelect option:selected").text() !== '') {
-        printTable($('#warehouseSelect option:selected'));
-    }
     $('#warehouseSelect').trigger('change');
+
+    if(fk_warehouse > 0)
+        diplayLinks(1, 1);
+
+    if ($('#warehouseSelect option:selected').length === 1 && $("#warehouseSelect option:selected").text() !== '') {
+        var option_selected = $('#warehouseSelect option:selected').val();
+
+    }
     initEvents();
+
 });
 
 function initEvents() {
     $('#warehouseSelect').change(function () {
-        printTable($(this));
+        fk_warehouse = $('#warehouseSelect option:selected').val();
+        var url = window.location.href;
+        var new_url = replaceUrlParam(url, 'boutique', fk_warehouse);
+        window.history.pushState('Object', 'Accueil Boutique', new_url);
+        window.location.reload();
     });
 }
 
-function addLineTransfer(transfer) {
-    var line = '<tr id=' + transfer.id + '>';
-    line += '<td>' + transfer.ref + '</td>';
-    line += '<td>' + transfer.url_user + '</td>';
-    line += '<td>' + transfer.name_status + '</td>';
-    line += '<td>' + transfer.date_opening + '</td>';
-    line += '<td>' + transfer.date_closing + '</td>';
-    line += '<td>' + transfer.nb_product_scanned + '</td>';
-    line += '<td>' + transfer.url_warehouse_source + '</td>';
-    line += '<td><input type="button" class="butAction" value="Voir" onclick="location.href=\'' + DOL_URL_ROOT + '/bimpequipment/manageequipment/viewReception.php?id=' + transfer.id + '\'" style="margin-top: 5px"></td>';
-    $(line).appendTo('#table_transfer tbody');
-}
-
-function addLineOrder(order) {
-
-    var id_tr = order.id;
-    var line = '<tr id=' + id_tr + '>';
-    line += '<td>' + order.url_fourn + '</td>';
-    line += '<td>' + order.name_status + '</td>';
-    line += '<td>' + order.date_opening + '</td>';
-    line += '<td>' + order.url_livraison + '</td>';
-    $(line).appendTo('#table_order tbody');
-}
-
-function printTable(option_selected) {
-    if (fk_warehouse === undefined) {
-        $('#allTheFiche').css('visibility', 'visible');
-        $('#allTheFiche').addClass('fade-in');
-        fk_warehouse = option_selected.val();
-        getLineTransferAndOrder();
-    } else {
-        fk_warehouse = option_selected.val();
-        $('#allTheFiche').removeClass('fade-in');
-        setTimeout(function () {
-            $('#ph_links').empty();
-            $('#table_transfer > tbody > tr').empty();
-            $('#table_order > tbody > tr').empty();
-            getLineTransferAndOrder();
-            $('#allTheFiche').addClass('fade-in');
-        }, 500);
-    }
-    url = window.location.href;
-    var new_url = replaceUrlParam(url, 'boutique', fk_warehouse);
-    window.history.pushState('Object', 'Accueil Boutique', new_url);
-}
 
 function diplayLinks(right_caisse, right_caisse_admin) {
 //    $('#ph_links').append('<input type="button" class="butAction" value="Créer transfert" onclick="location.href=\'' + DOL_URL_ROOT + '/bimpequipment/manageequipment/viewTransfer.php?entrepot=' + fk_warehouse + '\'">');
@@ -203,3 +169,46 @@ function replaceUrlParam(url, paramName, paramValue) {
     url = url.replace(/\?$/, '');
     return url + (url.indexOf('?') > 0 ? '&' : '?') + paramName + '=' + paramValue;
 }
+
+
+//        if (fk_warehouse === undefined) {
+//            $('#allTheFiche').css('visibility', 'visible');
+//            $('#allTheFiche').addClass('fade-in');
+//            fk_warehouse = option_selected.val();
+//            getLineTransferAndOrder();
+//        } else {
+//            fk_warehouse = option_selected.val();
+//            $('#allTheFiche').removeClass('fade-in');
+//            setTimeout(function () {
+//                $('#ph_links').empty();
+//                $('#table_transfer > tbody > tr').empty();
+//                $('#table_order > tbody > tr').empty();
+//                getLineTransferAndOrder();
+//                $('#allTheFiche').addClass('fade-in');
+//    }, 500);
+//}
+
+
+//function addLineTransfer(transfer) {
+//    var line = '<tr id=' + transfer.id + '>';
+//    line += '<td>' + transfer.ref + '</td>';
+//    line += '<td>' + transfer.url_user + '</td>';
+//    line += '<td>' + transfer.name_status + '</td>';
+//    line += '<td>' + transfer.date_opening + '</td>';
+//    line += '<td>' + transfer.date_closing + '</td>';
+//    line += '<td>' + transfer.nb_product_scanned + '</td>';
+//    line += '<td>' + transfer.url_warehouse_source + '</td>';
+//    line += '<td><input type="button" class="butAction" value="Voir" onclick="location.href=\'' + DOL_URL_ROOT + '/bimpequipment/manageequipment/viewReception.php?id=' + transfer.id + '\'" style="margin-top: 5px"></td>';
+//    $(line).appendTo('#table_transfer tbody');
+//}
+//
+//function addLineOrder(order) {
+//
+//    var id_tr = order.id;
+//    var line = '<tr id=' + id_tr + '>';
+//    line += '<td>' + order.url_fourn + '</td>';
+//    line += '<td>' + order.name_status + '</td>';
+//    line += '<td>' + order.date_opening + '</td>';
+//    line += '<td>' + order.url_livraison + '</td>';
+//    $(line).appendTo('#table_order tbody');
+//}

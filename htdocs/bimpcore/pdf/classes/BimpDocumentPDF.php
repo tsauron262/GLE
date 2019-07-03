@@ -795,6 +795,9 @@ class BimpDocumentPDF extends BimpModelPDF
             $html .= "</span>";
             $html .= "</p>";
         }
+        
+        $html .= '<p style="font-size: 6px; font-style: italic">Pour tout règlement par virement ou par chèque, merci de noter systématiquement le n° de facture sur votre règlement.</p>';
+        
         $this->writeContent($html);
     }
 

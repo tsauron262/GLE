@@ -21,7 +21,7 @@ class transferController extends BimpController {
         $transfer->fetch((int) $id_transfer);
         $id_warehouse_source = $transfer->getData('id_warehouse_source');
 
-        if($transfer->getData('status') == Transfer::STATUS_SENDING)
+        if ($transfer->getData('status') == Transfer::STATUS_SENDING)
             $errors = array_merge($errors, $transfert_line->checkStock($quantity_avaible, $id_product, $id_equipment, $id_warehouse_source, $id_transfer));
         else
             $quantity_avaible = 10000000;
@@ -29,39 +29,32 @@ class transferController extends BimpController {
         // There is enough product
         $id_line = $transfert_line->lineExists($id_transfer, $id_product, $id_equipment);
 
-        
+
         if (sizeof($errors) == 0) {
-            if($transfer->getData('status') == Transfer::STATUS_SENDING){//mode envoie
+            if ($transfer->getData('status') == Transfer::STATUS_SENDING) {//mode envoie
                 if ($id_line > 0) {
                     $transfert_lineObj = BimpCache::getBimpObjectInstance('bimptransfer', 'TransferLine', $id_line);
-                    
+
                     $new_qty_send = $transfert_lineObj->getData("quantity_sent") + $quantity_input;
-                    $qteAResa =  $new_qty_send - $transfert_lineObj->getData("quantity_received") ;
+                    $qteAResa = $new_qty_send - $transfert_lineObj->getData("quantity_received");
 
                     if ($quantity_avaible < $qteAResa) {
                         $errors[] = "Il n'y a que " . $quantity_avaible . " ce produit disponible dans cet entrepôt. "
                                 . "Or vous essayez d'en réserver " . $qteAResa . " pour ce transfert.";
-                    }
-                    else{
+                    } else {
                         $errors = array_merge($errors, $transfert_lineObj->set('quantity_sent', (int) $new_qty_send));
                         $errors = array_merge($errors, $transfert_lineObj->update());
                     }
-                }
-                else{
+                } else {
                     $errors = array_merge($errors, $transfert_line->create_2($id_transfer, $id_product, $id_equipment, $quantity_input, $id_affected, $id_warehouse_source));
                 }
-
-            }
-            else{//reception
-                if ($id_line){
+            } else {//reception
+                if ($id_line) {
                     $transfert_lineObj = BimpCache::getBimpObjectInstance('bimptransfer', 'TransferLine', $id_line);
                     $errors = array_merge($errors, $transfert_lineObj->set('quantity_received', (int) $transfert_lineObj->getData('quantity_received') + (int) $quantity_input));
                     $errors = array_merge($errors, $transfert_lineObj->update());
-                }
-                else
+                } else
                     $errors[] = "Produit non trouvé dans les envoies.";
-                
-                    
             }
         }
 
@@ -78,6 +71,22 @@ class transferController extends BimpController {
             'data' => $data,
             'request_id' => BimpTools::getValue('request_id', 0)
         )));
+    }
+
+    // TODO est-ce que cette fonction existe quelque part ?
+    function getAllWarehouses() {
+        $warehouses = array();
+
+        $sql = 'SELECT rowid, ref, lieu';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'entrepot';
+
+        $result = $this->db->db->query($sql);
+        if ($result and mysqli_num_rows($result) > 0) {
+            while ($obj = $this->db->db->fetch_object($result)) {
+                $warehouses[$obj->rowid] = $obj->ref . ' - ' . $obj->lieu;
+            }
+        }
+        return $warehouses;
     }
 
 }

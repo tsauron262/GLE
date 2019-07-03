@@ -89,6 +89,20 @@ lists:
                field: quantity_sent
            quantity_transfered: 
                field: quantity_transfered
+    dash_board_reception:
+       extends: prod
+       objects_change_reload: Transfer
+       cols:
+           id_warehouse_dest: unset
+           status: unset
+    dash_board_send:
+       extends: prod
+       objects_change_reload: Transfer
+       cols:
+           id_warehouse_source: unset
+           status: unset
+
+
 filters_panels: 
     default: 
         filters: 

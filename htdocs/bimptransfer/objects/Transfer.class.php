@@ -109,6 +109,8 @@ class Transfer extends BimpDolObject {
                     ))
                 );
             }
+        }
+        if ($user->rights->bimptransfer->admin || $this->getData('status') == Transfer::STATUS_RECEPTING) {
             $buttons[] = array(
                 'label' => 'Transférer',
                 'icon' => 'fas_box',
@@ -116,43 +118,28 @@ class Transfer extends BimpDolObject {
                     'success_callback' => 'function(result) {reloadTransfertLines();}',
                 ))
             );
-            if ($user->rights->bimptransfer->admin) {
-                $buttons[] = array(
-                    'label' => 'Réceptionner',
-                    'icon' => 'fas_arrow-alt-circle-down',
-                    'onclick' => $this->getJsActionOnclick('doTransfer', array(), array(
-                        'success_callback' => 'function(result) {reloadTransfertLines();}',
-                    ))
-                );
-                if ($user->rights->bimptransfer->admin) {
-                    $buttons[] = array(
-                        'label' => 'Réceptionner tous les produits envoyés',
-                        'icon' => 'fas_arrow-alt-circle-down',
-                        'onclick' => $this->getJsActionOnclick('doTransfer', array('total' => true), array(
-                            'success_callback' => 'function(result) {reloadTransfertLines();}',
-                        ))
-                    );
-                    $buttons[] = array(
-                        'label' => 'Revenir en mode envoi',
-                        'icon' => 'fas_undo',
-                        'onclick' => $this->getJsActionOnclick('setSatut', array("status" => Transfer::STATUS_SENDING), array(
-                            'success_callback' => 'function(result) {reloadTransfertLines();}',
-                        ))
-                    );
-                }
-            } elseif ($this->getData('status') == Transfer::STATUS_SENDING) {
-                $buttons[] = array(
-                    'label' => 'Valider envoi',
-                    'icon' => 'fas_check-circle',
-                    'onclick' => $this->getJsActionOnclick('setSatut', array("status" => Transfer::STATUS_RECEPTING), array(
-                        'success_callback' => 'function(result) {reloadTransfertLines();}',
-                    ))
-                );
-            }
-        } elseif ($this->getData('status') == Transfer::STATUS_SENDING) {
+        }
+        if ($user->rights->bimptransfer->admin) {
             $buttons[] = array(
-                'label' => 'Valider envoie',
-                'icon' => 'fas_box',
+                'label' => 'Réceptionner tous les produits envoyés',
+                'icon' => 'fas_arrow-alt-circle-down',
+                'onclick' => $this->getJsActionOnclick('doTransfer', array('total' => true), array(
+                    'success_callback' => 'function(result) {reloadTransfertLines();}',
+                ))
+            );
+            if ($this->getData('status') == Transfer::STATUS_RECEPTING)
+                $buttons[] = array(
+                    'label' => 'Revenir en mode envoi',
+                    'icon' => 'fas_undo',
+                    'onclick' => $this->getJsActionOnclick('setSatut', array("status" => Transfer::STATUS_SENDING), array(
+                        'success_callback' => 'function(result) {reloadTransfertLines();}',
+                    ))
+                );
+        }
+        if ($this->getData('status') == Transfer::STATUS_SENDING) {
+            $buttons[] = array(
+                'label' => 'Valider envoi',
+                'icon' => 'fas_check-circle',
                 'onclick' => $this->getJsActionOnclick('setSatut', array("status" => Transfer::STATUS_RECEPTING), array(
                     'success_callback' => 'function(result) {reloadTransfertLines();}',
                 ))
@@ -301,6 +288,22 @@ class Transfer extends BimpDolObject {
 //            return;
 //        }
         return parent::create($warnings, $force_create);
+    }
+
+    // TODO est-ce que cette fonction existe quelque part ?
+    public function getAllWarehouses() {
+        $warehouses = array();
+
+        $sql = 'SELECT rowid, ref, lieu';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'entrepot';
+
+        $result = $this->db->db->query($sql);
+        if ($result and mysqli_num_rows($result) > 0) {
+            while ($obj = $this->db->db->fetch_object($result)) {
+                $warehouses[$obj->rowid] = $obj->ref . ' - ' . $obj->lieu;
+            }
+        }
+        return $warehouses;
     }
 
 }

@@ -166,29 +166,6 @@ class dashBoardController extends BimpController {
 
         return $html;
     }
-    
-        public function renderReservation() {
-
-        $id_warehouse = $this->getIdWarehouse();
-        $html = '<div class = "row">';
-        $html .= '<div class = "col-lg-12">';
-
-        // RESERVATION
-        $transfer = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
-        $list = new BC_ListTable($transfer, 'default', 1, null, 'Réservation');
-        $list->addFieldFilterValue('id_entrepot', $id_warehouse);
-        $list->addFieldFilterValue('status', array(
-            'operator' => '<',
-            'value'    => 300
-        ));
-        $list->setAddFormValues(array());
-        $html .= $list->renderHtml();
-
-        $html .= '</div>';
-        $html .= '</div>';
-
-        return $html;
-    }
 
     public function renderTabsSection() {
         $id_warehouse = $this->getIdWarehouse();

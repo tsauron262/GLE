@@ -67,7 +67,7 @@ class BimpComm extends BimpDolObject
     {
         switch ($field) {
             case 'fk_soc':
-                return (int) ($this->getData('fk_statut') === 0);
+                return (int) ((int) $this->getData('fk_statut') === 0);
 
             case 'zone_vente':
                 return (int) $this->areLinesEditable();

@@ -249,7 +249,6 @@ class BS_SavPropalLine extends Bimp_PropalLine
             if (!(int) $this->getData('editable')) {
                 return 0;
             }
-            return 1;
         }
 
         return (int) parent::isFieldEditable($field, $force_edit);

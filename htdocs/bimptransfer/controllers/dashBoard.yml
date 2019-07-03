@@ -44,44 +44,11 @@ sections:
                   custom: 
                       callback: 
                           method: renderOrderFourn
+        reservation:
+            label: Réservation
+            sections:
+                - type: custom
+                  custom: 
+                      callback: 
+                          method: renderReservation
 
-                              
-#        to_process:
-#            label: A traiter
-#            sections:
-#                - type: custom
-#                  custom: 
-#                      callback: 
-#                          method: renderReservationsTab
-#                          params: 
-#                              - to_process
-#                              
-#        to_deliver:
-#            label: A livrer
-#            sections:
-#                - type: custom
-#                  custom: 
-#                      callback: 
-#                          method: renderReservationsTab
-#                          params: 
-#                              - to_deliver
-#                              
-#        completed:
-#            label: Réservations terminées
-#            sections:
-#                - type: custom
-#                  custom: 
-#                      callback: 
-#                          method: renderReservationsTab
-#                          params: 
-#                              - to_deliver
-#                              
-#        all_res: 
-#            label: Toutes les Réservations
-#            sections:
-#                - type: custom
-#                  custom: 
-#                      callback: 
-#                          method: renderReservationsTab
-#                          params: 
-#                              - all_res

@@ -46,6 +46,7 @@ class DoliDBMysqli extends DoliDB
         
         /*moddrsi*/
         public $countReq = 0;
+        public $countReq2 = 0;
         /*fmoddrsi*/
 
     /**
@@ -70,6 +71,7 @@ class DoliDBMysqli extends DoliDB
         $this->database_user=$user;
         $this->database_host=$host;
         $this->database_port=$port;
+        $this->database_pass=$pass;
 
         $this->transaction_opened=0;
 
@@ -257,6 +259,19 @@ class DoliDBMysqli extends DoliDB
     {
     	global $conf;
         
+        
+        if(defined('BDD_2_HOST')){
+            global $dbRead;
+            if(!$dbRead){
+                $dbRead = new DoliDBMysqli('mysql', BDD_2_HOST,  $this->database_user, $this->database_pass, $this->database_name);
+            }
+            if($dbRead && BDD_2_HOST !=  $this->database_host){//n peut passer sur serveur 2
+                if(stripos($query, "SELECT") === 0){
+                    $this->countReq2 ++;
+    //                return $dbRead->query($query);
+                } 
+            }
+        }
 
         /*moddrsi*/
         $tabRemplacement = array(
@@ -268,6 +283,8 @@ class DoliDBMysqli extends DoliDB
         foreach ($tabRemplacement as $old=> $new){
                 $query = str_replace($old, $new, $query);
         }
+        
+        
         
         $this->countReq ++;
         $debugTime = false;

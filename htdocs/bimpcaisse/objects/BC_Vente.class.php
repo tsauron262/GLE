@@ -1972,6 +1972,17 @@ class BC_Vente extends BimpObject
             $facture_errors = array();
             $facture_warnings = array();
 
+            $this->set('status', 2);
+            $update_errors = $this->update();
+            
+            // Mise à jour du statut de la vente: 
+
+            if (count($update_errors)) {
+                $errors[] = 'Echec de la mise à jour du statut de la vente';
+                $errors = array_merge($errors, $update_errors);
+                return false;
+            }
+            
             $id_facture = (int) $this->createFacture($facture_errors, $facture_warnings, true);
 
             if (count($facture_errors) || !$id_facture) {
@@ -1983,18 +1994,8 @@ class BC_Vente extends BimpObject
             }
 
             if (count($errors)) {
+                $this->updateField('status', 1);
                 $errors[] = 'A noter: la vente n\'a pas été validée';
-                return false;
-            }
-
-            // A partir de maintenant la facture est créée, la vente doit être validée, même en cas d'erreurs de stocks. 
-            // Mise à jour du statut de la vente: 
-            $this->set('status', 2);
-            $update_errors = $this->update();
-
-            if (count($update_errors)) {
-                $errors[] = 'Echec de la mise à jour du statut de la vente';
-                $errors = array_merge($errors, $update_errors);
                 return false;
             }
 
@@ -2435,11 +2436,10 @@ class BC_Vente extends BimpObject
                     }
                 }
             }
-
+            
             // Ajout du rendu monnaie:
             if ($total_paid > $total_facture_ttc) {
                 $returned = round($total_facture_ttc - $total_paid, 2);
-
                 if ($returned < 0) {
                     $p = new Paiement($db);
                     $p->datepaye = dol_now();

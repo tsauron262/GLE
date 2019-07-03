@@ -357,12 +357,11 @@ class BimpDocumentPDF extends BimpModelPDF
         }
         if (isset($usertmp)) {
             if ($usertmp->office_phone != "")
-                $mysoc->phone = $usertmp->office_phone;
+                $this->fromCompany->phone = $usertmp->office_phone;
             if ($usertmp->email != "")
-                $mysoc->email = $usertmp->email;
+                $this->fromCompany = $usertmp->email;
         }
-//        }
-
+        
         return $html;
     }
 
@@ -795,6 +794,9 @@ class BimpDocumentPDF extends BimpModelPDF
             $html .= "</span>";
             $html .= "</p>";
         }
+        
+        $html .= '<p style="font-size: 6px; font-style: italic">Pour tout règlement par virement ou par chèque, merci de noter systématiquement le n° de facture sur votre règlement.</p>';
+        
         $this->writeContent($html);
     }
 

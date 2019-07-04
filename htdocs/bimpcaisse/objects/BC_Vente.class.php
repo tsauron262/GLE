@@ -2474,8 +2474,9 @@ class BC_Vente extends BimpObject
             } else {
                 $diff = $total_facture_ttc - $total_paid;
                 if ($diff < 0.01 && $diff > -0.01) {
-                    if ($facture->dol_object->set_paid($user) <= 0) {
-                        $warnings[] = 'Echec de l\'enregistrement du statut "payé" pour cette facture';
+                    if ($facture->dol_object->set_paid($user) < 0) {
+                        $warnings = array_merge($warnings, $facture->dol_object->error);
+                        $warnings[] = 'Echec de l\'enregistrement du statut "payée" pour cette facture';
                     }
                 }
             }

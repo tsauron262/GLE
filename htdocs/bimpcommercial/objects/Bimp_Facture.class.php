@@ -1921,7 +1921,6 @@ class Bimp_Facture extends BimpComm
             $asso->addObjectAssociation((int) $avoir->id, (int) $id_commande);
         }
 
-
         // Ajout id_avoir pour les éventuelles expéditions liées: 
         $shipments = BimpCache::getBimpObjectObjects('bimplogistique', 'BL_CommandeShipment', array(
                     'id_facture' => (int) $this->id

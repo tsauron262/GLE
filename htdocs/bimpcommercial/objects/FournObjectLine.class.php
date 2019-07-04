@@ -130,7 +130,6 @@ class FournObjectLine extends ObjectLine
     public function validatePost()
     {
         $errors = parent::validatePost();
-
         if (!count($errors)) {
             switch ((int) $this->getData('type')) {
                 case self::LINE_PRODUCT:
@@ -150,7 +149,7 @@ class FournObjectLine extends ObjectLine
                     break;
 
                 case self::LINE_FREE:
-                    $this->pu_ht = (float) BimpTools::getValue('pa_except', 0);
+                    $this->pu_ht = (float) BimpTools::getValue('pa_except', (float) $this->pu_ht);
                     break;
             }
         }

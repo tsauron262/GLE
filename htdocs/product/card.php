@@ -150,6 +150,7 @@ if (empty($reshook))
     $permissioncreate = 1;//$usercancreate;
     include DOL_DOCUMENT_ROOT.'/core/actions_builddoc.inc.php';
 
+    $permissioncreate = $usercancreate;
     include DOL_DOCUMENT_ROOT.'/core/actions_printing.inc.php';
 
     // Barcode type

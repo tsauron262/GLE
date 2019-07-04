@@ -204,10 +204,6 @@ class BimpTicket
                 }
             }
             
-            
-            
-            
-            
             $html .= '</tbody>';
             $html .= '</table>';
 

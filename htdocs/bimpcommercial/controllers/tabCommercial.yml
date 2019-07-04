@@ -1,0 +1,12 @@
+bootstrap: 1
+
+title: Commercial
+        
+objects: 
+    client: 
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_Client
+            id_object: 
+                request: id

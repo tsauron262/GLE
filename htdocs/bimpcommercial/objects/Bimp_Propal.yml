@@ -358,7 +358,7 @@ lists:
     client: 
         extends: default
         cols: 
-            client: unset
+            soc: unset
                 
 cards: 
     default: 

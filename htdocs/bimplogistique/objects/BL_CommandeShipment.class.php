@@ -106,6 +106,11 @@ class BL_CommandeShipment extends BimpObject
         return (int) parent::isActionAllowed($action, $errors);
     }
 
+    public function isShipped()
+    {
+        return (int) ((int) $this->getData('status') === self::BLCS_EXPEDIEE);
+    }
+
     public function canSetAction($action)
     {
         switch ($action) {
@@ -364,11 +369,13 @@ class BL_CommandeShipment extends BimpObject
                         }
                     } elseif (in_array($id_shipment, $prev_shipments)) {
                         $line_qties['shipped_qty'] += (float) $shipment_data['qty'];
-                    } /* else {
+                    }
+
+                    /* else {
                       $line_qties['to_ship_qty'] += (float) $shipment_data['qty'];
                       } */
                 }
-                $line_qties['to_ship_qty'] = $line->getData('qty_total') - $line_qties['shipped_qty'] - $line_qties['qty'];
+                $line_qties['to_ship_qty'] = $line->getFullQty() - $line_qties['shipped_qty'] - $line_qties['qty'];
                 $qties[(int) $line->getData('id_line')] = $line_qties;
             }
         }
@@ -1437,9 +1444,13 @@ class BL_CommandeShipment extends BimpObject
 
     // Traitements: 
 
-    public function validateShipment(&$warnings = array())
+    public function validateShipment(&$warnings = array(), $date_shipped = null)
     {
         $errors = array();
+
+        if (is_null($date_shipped) || !$date_shipped) {
+            $date_shipped = date('Y-m-d H:i:s');
+        }
 
         if (!$this->isActionAllowed('validateShipment', $errors)) {
             return $errors;
@@ -1498,7 +1509,7 @@ class BL_CommandeShipment extends BimpObject
         }
 
         $this->set('status', self::BLCS_EXPEDIEE);
-        $this->set('date_shipped', date('Y-m-d H:i:s'));
+        $this->set('date_shipped', $date_shipped);
 
         $update_errors = $this->update($warnings);
         if (count($update_errors)) {
@@ -1689,7 +1700,8 @@ class BL_CommandeShipment extends BimpObject
         $warnings = array();
         $success = 'Expédition validée avec succès';
 
-        $errors = $this->validateShipment($warnings);
+        $date_shipped = (isset($data['date_shipped']) ? $data['date_shipped'] : '');
+        $errors = $this->validateShipment($warnings, $date_shipped);
 
         return array(
             'errors'   => $errors,
@@ -1791,6 +1803,7 @@ class BL_CommandeShipment extends BimpObject
         $errors = array();
         $warnings = array();
         $success = '';
+        $success_callback = '';
 
         $shipments_list = isset($data['id_objects']) ? $data['id_objects'] : array();
         $commandes_data = isset($data['commandes_data']) ? $data['commandes_data'] : array();
@@ -1798,6 +1811,8 @@ class BL_CommandeShipment extends BimpObject
 
         $id_client = isset($data['id_client']) ? (int) $data['id_client'] : null;
         $id_contact = isset($data['id_contact']) ? (int) $data['id_contact'] : null;
+        $id_entrepot = isset($data['id_entrepot']) ? (int) $data['id_entrepot'] : null;
+        $ef_type = isset($data['ef_type']) ? $data['ef_type'] : null;
         $libelle = isset($data['libelle']) ? $data['libelle'] : null;
         $id_cond_reglement = isset($data['cond_reglement']) ? (int) $data['cond_reglement'] : null;
         $id_account = isset($data['id_account']) ? (int) $data['id_account'] : null;
@@ -1811,6 +1826,23 @@ class BL_CommandeShipment extends BimpObject
 
         if (empty($commandes_data)) {
             $errors[] = 'Aucune ligne à ajouter à la nouvelle facture';
+        }
+
+        if (!(int) $id_client) {
+            $errors[] = 'Veuillez sélectionner un client';
+        } else {
+            $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $id_client);
+            if (!BimpObject::objectLoaded($client)) {
+                $errors[] = 'Le client d\'ID ' . $id_client . ' n\'existe pas';
+            }
+        }
+
+        if (!(int) $id_entrepot) {
+            $errors[] = 'Veuillez sélectionner un entrepôt';
+        }
+
+        if (!$ef_type) {
+            $errors[] = 'Veuillez sélectionner un secteur';
         }
 
         $base_commande = null;
@@ -1835,12 +1867,20 @@ class BL_CommandeShipment extends BimpObject
                     continue;
                 }
 
-                if (is_null($id_client)) {
-                    $id_client = (int) $commande->getData('fk_soc');
-                } elseif ((int) $commande->getData('fk_soc') !== (int) $id_client) {
-                    $errors[] = 'Veuillez sélectionner des expéditions assignées à un même client';
-                    continue;
-                }
+//                if (is_null($id_client)) {
+//                    $id_client = (int) $commande->getData('fk_soc');
+//                } 
+//                elseif ((int) $commande->getData('fk_soc') !== (int) $id_client) {
+//                    $errors[] = 'Veuillez sélectionner des expéditions assignées à un même client';
+//                    continue;
+//                }
+//                if (is_null($id_entrepot)) {
+//                    $id_entrepot = (int) $commande->getData('entrepot');
+//                } 
+//                elseif ((int) $commande->getData('entrepot') !== (int) $id_entrepot) {
+//                    $errors[] = 'Veuillez sélectionner des expéditions assignées à un même client';
+//                    continue;
+//                }
 
                 if (is_null($base_commande)) {
                     $base_commande = $commande;
@@ -1886,12 +1926,13 @@ class BL_CommandeShipment extends BimpObject
             } else {
                 // Création de la facture: 
                 $fac_errors = array();
-                $id_facture = (int) $base_commande->createFacture($fac_errors, $id_client, $id_contact, $id_cond_reglement, $id_account, $note_public, $note_private, $remises, $extra_commandes, $libelle);
+                $id_facture = (int) $base_commande->createFacture($fac_errors, $id_client, $id_contact, $id_cond_reglement, $id_account, $note_public, $note_private, $remises, $extra_commandes, $libelle, $id_entrepot, $ef_type);
 
                 if (!$id_facture || count($fac_errors)) {
                     $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Echec de la création de la facture');
                 } else {
                     $success = 'Création de la facture effectuée avec succès';
+                    $success_callback = 'window.open(\'' . DOL_URL_ROOT . '/bimpcommercial/index.php?fc=facture&id=' . $id_facture . '\');';
 
                     // Ajout des lignes: 
                     $lines_errors = $base_commande->addLinesToFacture($id_facture, $lines_qties, $lines_equipments, false);
@@ -1913,8 +1954,9 @@ class BL_CommandeShipment extends BimpObject
         }
 
         return array(
-            'errors'   => $errors,
-            'warnings' => $warnings
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $success_callback
         );
     }
 

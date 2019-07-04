@@ -1331,7 +1331,7 @@ class Bimp_Commande extends BimpComm
     {
         $errors = array();
 
-        if ($this->isLoaded() /*&& $this->isLogistiqueActive()*/) {
+        if ($this->isLoaded() /* && $this->isLogistiqueActive() */) {
             $lines = $this->getChildrenObjects('lines');
 
             foreach ($lines as $line) {
@@ -1482,7 +1482,7 @@ class Bimp_Commande extends BimpComm
 
     // Traitements factures: 
 
-    public function createFacture(&$errors = array(), $id_client = null, $id_contact = null, $cond_reglement = null, $id_account = null, $public_note = '', $private_note = '', $remises = array(), $other_commandes = array(), $libelle = null)
+    public function createFacture(&$errors = array(), $id_client = null, $id_contact = null, $cond_reglement = null, $id_account = null, $public_note = '', $private_note = '', $remises = array(), $other_commandes = array(), $libelle = null, $id_entrepot = null, $ef_type = null)
     {
         if (!$this->isLoaded()) {
             $errors[] = 'ID de la commande client absent ou invalide';
@@ -1502,12 +1502,16 @@ class Bimp_Commande extends BimpComm
             $cond_reglement = (int) $this->dol_object->cond_reglement_id;
         }
 
-        if ((is_null($id_client)) || !(int) $id_client) {
-            $id_client = (int) $this->dol_object->socid;
-        }
-
         if (is_null($id_contact) || !(int) $id_contact) {
             $id_contact = $this->dol_object->contactid;
+        }
+
+        if (is_null($id_entrepot) || !(int) $id_entrepot) {
+            $id_entrepot = $this->getData('entrepot');
+        }
+
+        if (is_null($ef_type) || !$ef_type) {
+            $ef_type = $this->getData('ef_type');
         }
 
         // Création de la facture: 
@@ -1542,6 +1546,9 @@ class Bimp_Commande extends BimpComm
         if (!is_null($libelle)) {
             $facture->dol_object->array_options['options_libelle'] = $libelle;
         }
+
+        $facture->dol_object->array_options['options_entrepot'] = $id_entrepot;
+        $facture->dol_object->array_options['options_type'] = $ef_type;
 
         // Possibility to add external linked objects with hooks
         $facture->dol_object->linked_objects[$facture->dol_object->origin] = array($facture->dol_object->origin_id);

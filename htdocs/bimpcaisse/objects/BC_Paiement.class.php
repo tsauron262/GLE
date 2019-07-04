@@ -43,7 +43,7 @@ class BC_Paiement extends BimpObject
         $p = $this->getChildObject('paiement');
 
         $init_id_facture = (int) $this->getData('id_facture');
-        
+
         if (BimpObject::objectLoaded($p)) {
             $rows = $this->db->getRows('paiement_facture', '`fk_paiement` = ' . (int) $p->id, null, 'array', array('fk_facture', 'amount'));
             if (!is_null($rows)) {
@@ -69,8 +69,50 @@ class BC_Paiement extends BimpObject
                 return $html;
             }
         }
-        
+
         $this->set('id_facture', $init_id_facture);
+
+        return '';
+    }
+
+    public function displayClient($display_name = 'nom_url')
+    {
+        if (!$this->isLoaded()) {
+            return '';
+        }
+        
+        $facture = null;
+
+        if ((int) $this->getData('id_facture')) {
+            $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture',(int) $this->getData('id_facture'));
+        }
+
+        if (!BimpObject::objectLoaded($facture)) {
+            $p = $this->getChildObject('paiement');
+
+            if (BimpObject::objectLoaded($p)) {
+                $rows = $this->db->getRows('paiement_facture', '`fk_paiement` = ' . (int) $p->id, null, 'array', array('fk_facture', 'amount'));
+                if (!is_null($rows)) {
+                    foreach ($rows as $r) {
+                        $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $r['fk_facture']);
+                        if ($facture->isLoaded()) {
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (BimpObject::objectLoaded($facture)) {
+            $client = $facture->getChildObject('client');
+            if (BimpObject::objectLoaded($client)) {
+                if ($display_name === 'nom_url') {
+                    return $client->getNomUrl(1, 1, 1, 'default');
+                } else {
+                    return BimpTools::ucfirst($client->getData('nom'));
+                }
+            }
+        }
 
         return '';
     }

@@ -11,7 +11,7 @@ echo '<body>';
 
 BimpCore::displayHeaderFiles();
 
-BimpTools::processImport('TEST14_');
+echo BimpRender::renderCompteurCaisse();
 
 echo '</body></html>';
 

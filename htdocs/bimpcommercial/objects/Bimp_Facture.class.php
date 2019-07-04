@@ -14,6 +14,7 @@ class Bimp_Facture extends BimpComm
     public $acomptes_allowed = true;
     public static $dol_module = 'facture';
     public static $email_type = 'facture_send';
+    public $avoir = null;
     public static $status_list = array(
         0 => array('label' => 'Brouillon', 'icon' => 'fas_file-alt', 'classes' => array('warning')),
         1 => array('label' => 'Validée', 'icon' => 'check', 'classes' => array('info')),
@@ -28,10 +29,11 @@ class Bimp_Facture extends BimpComm
         4 => array('label' => 'Facture proforma'),
         5 => array('label' => 'Facture de situation')
     );
-    
-    public function iAmAdminRedirect() {
+
+    public function iAmAdminRedirect()
+    {
         global $user;
-        if(in_array($user->id, array(7)) ||$user->admin)
+        if (in_array($user->id, array(7)) || $user->admin)
             return true;
         parent::iAmAdminRedirect();
     }
@@ -1499,16 +1501,20 @@ class Bimp_Facture extends BimpComm
 
     public function renderCreateWarning()
     {
-        $html = '<p style="font-size: 16px">';
-        $html .= '<span style="font-size: 24px">';
-        $html .= BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
-        $html .= '</span>';
-        $html .= '<span class="bold">ATTENTION</span>, la création directe de facture est réservée à des cas exceptionnels et ne doit être utilisée qu\'en dernier recours.<br/>';
-        $html .= 'Pour les cas ordinaires, vous devez ';
-        $html .= '<span class="bold">impérativement passer par le processus de commande.</span>';
-        $html .= '</p>';
+        if (!$this->isLoaded()) {
+            $html = '<p style="font-size: 16px">';
+            $html .= '<span style="font-size: 24px">';
+            $html .= BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
+            $html .= '</span>';
+            $html .= '<span class="bold">ATTENTION</span>, la création directe de facture est réservée à des cas exceptionnels et ne doit être utilisée qu\'en dernier recours.<br/>';
+            $html .= 'Pour les cas ordinaires, vous devez ';
+            $html .= '<span class="bold">impérativement passer par le processus de commande.</span>';
+            $html .= '</p>';
 
-        return $html;
+            return $html;
+        }
+
+        return '';
     }
 
     // Traitements: 
@@ -1900,6 +1906,9 @@ class Bimp_Facture extends BimpComm
         // Pour être sûr d'être à jour dans les données: 
         $this->fetch($this->id);
         $avoir->fetch($avoir->id);
+        
+        global $idAvoirFact;
+        $idAvoirFact = $avoir->id;
 
         // Assos commande
 
@@ -1911,7 +1920,6 @@ class Bimp_Facture extends BimpComm
         foreach ($list as $id_commande) {
             $asso->addObjectAssociation((int) $avoir->id, (int) $id_commande);
         }
-
 
         // Ajout id_avoir pour les éventuelles expéditions liées: 
         $shipments = BimpCache::getBimpObjectObjects('bimplogistique', 'BL_CommandeShipment', array(
@@ -1932,7 +1940,7 @@ class Bimp_Facture extends BimpComm
         if ($avoir->dol_object->validate($user, 0, 0, 1) <= 0) {
             $msg = 'Avoir créé avec succès mais échec de la validation';
             if ($convertToReduc) {
-                $msg.= '. La conversion en remise n\'a pas été effectuée';
+                $msg .= '. La conversion en remise n\'a pas été effectuée';
             }
             $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($avoir->dol_object), $msg);
             return $errors;

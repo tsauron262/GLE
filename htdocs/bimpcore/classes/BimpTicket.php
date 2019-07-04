@@ -12,7 +12,7 @@ class BimpTicket
     public $errors = array();
     public $vente_number = '';
 
-    public function __construct($db, $width, $facture, $id_entrepot = null, $vente_number = '')
+    public function __construct($db, $width, $facture, $avoir, $id_entrepot = null, $vente_number = '')
     {
         if (!defined('BIMP_LIB')) {
             require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
@@ -22,6 +22,7 @@ class BimpTicket
         $this->db = $db;
         $this->width = $width;
         $this->vente_number = $vente_number;
+        $this->avoir = $avoir;
 
         if (is_null($facture) || !isset($facture->id) || !$facture->id) {
             $this->errors[] = 'Facture invalide';
@@ -147,11 +148,72 @@ class BimpTicket
                 $tva[$vatrate] += $tva_line;
                 $i++;
             }
+            
+            $i = 0;
+            if($this->avoir){
+                foreach ($this->avoir->lines as $line) {
+                    $html .= '<tr class="article_desc">';
+                    if (is_null($line->desc) || !$line->desc) {
+                        if (!is_null($line->fk_product) && $line->fk_product) {
+                            $product = new Product($this->db);
+                            if ($product->fetch((int) $line->fk_product) > 0) {
+                                $desc = $product->label;
+                            }
+                        }
+                    } else {
+                        $desc = $line->desc;
+                    }
+
+    //                if (strlen($desc) > 40) {
+    //                    $desc = substr($desc, 0, 38)."...";
+    //                }
+
+                    $html .= '<td colspan="5">' . $desc . '</td>';
+                    $html .= '</tr>';
+
+                    $html .= '<tr class="article_amounts">';
+                    $html .= '<td>';
+                    if ((float) $line->remise_percent) {
+                        $html .= '<span style="font-style: italic">Remise: ' . str_replace('.', ',', (string) round($line->remise_percent, 4, PHP_ROUND_HALF_DOWN)) . ' %</span>';
+                    }
+                    $html .= '</td>';
+                    $html .= '<td>' . pdf_getlineqty($this->avoir, $i, $langs) . '</td>';
+                    $html .= '<td>' . pdf_getlineupexcltax($this->avoir, $i, $langs) . '</td>';
+                    $html .= '<td>' . pdf_getlinevatrate($this->avoir, $i, $langs) . '</td>';
+                    $html .= '<td>' . pdf_getlinetotalwithtax($this->avoir, $i, $langs) . '</td>';
+                    $html .= '</tr>';
+
+                    if ($conf->multicurrency->enabled && $this->avoir->multicurrency_tx != 1) {
+                        $tva_line = $line->multicurrency_total_tva;
+                    } else {
+                        $tva_line = $line->total_tva;
+                    }
+
+                    if ($this->avoir->remise_percent) {
+                        $tva_line -= ($tva_line * $this->avoir->remise_percent) / 100;
+                    }
+
+                    $vatrate = (string) $line->tva_tx;
+
+    //                if (!isset($this->tva[$vatrate])) {
+    //                    $tva_line = 0;
+    //                }
+
+                    $tva[$vatrate] += $tva_line;
+                    $i++;
+                }
+            }
+            
             $html .= '</tbody>';
             $html .= '</table>';
 
             $total_ht = ($conf->multicurrency->enabled && $this->facture->mylticurrency_tx != 1 ? $this->facture->multicurrency_total_ht : $this->facture->total_ht);
             $total_ttc = ($conf->multicurrency->enabled && $this->facture->multicurrency_tx != 1) ? $this->facture->multicurrency_total_ttc : $this->facture->total_ttc;
+
+            if($this->avoir){
+                $total_ht += ($conf->multicurrency->enabled && $this->avoir->mylticurrency_tx != 1 ? $this->avoir->multicurrency_total_ht : $this->avoir->total_ht);
+                $total_ttc += ($conf->multicurrency->enabled && $this->avoir->multicurrency_tx != 1) ? $this->avoir->multicurrency_total_ttc : $this->avoir->total_ttc;
+            }
 
             $html .= '<table id="ticket_totaux">';
             $html .= '<tbody>';

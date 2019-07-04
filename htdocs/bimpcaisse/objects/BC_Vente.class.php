@@ -1471,10 +1471,13 @@ class BC_Vente extends BimpObject
         } else {
             $facture = $this->getChildObject('facture');
             require_once DOL_DOCUMENT_ROOT . '/bimpcore/classes/BimpTicket.php';
+            $avoir = null;
+            if($this->getData('id_avoir') > 0)
+                $avoir = $this->getChildObject('avoir');
 
             global $db;
 
-            $ticket = new BimpTicket($db, 370, $facture, (int) $this->getData('id_entrepot'), $this->id);
+            $ticket = new BimpTicket($db, 370, $facture, $avoir, (int) $this->getData('id_entrepot'), $this->id);
             $html = $ticket->renderHtml();
 
             if (count($ticket->errors)) {
@@ -2386,6 +2389,13 @@ class BC_Vente extends BimpObject
             $msg = 'Echec de la validation de la facture';
             $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($facture->dol_object), $msg);
         }
+        
+        
+        global $idAvoirFact;
+        if(isset($idAvoirFact) && $idAvoirFact > 0){
+            $this->updateField("id_avoir", $idAvoirFact);
+            $idAvoirFact = 0;
+        }
 
         $facture->fetch((int) $facture->id);
 
@@ -2474,8 +2484,9 @@ class BC_Vente extends BimpObject
             } else {
                 $diff = $total_facture_ttc - $total_paid;
                 if ($diff < 0.01 && $diff > -0.01) {
-                    if ($facture->dol_object->set_paid($user) <= 0) {
-                        $warnings[] = 'Echec de l\'enregistrement du statut "payé" pour cette facture';
+                    if ($facture->dol_object->set_paid($user) < 0) {
+                        $warnings = array_merge($warnings, $facture->dol_object->error);
+                        $warnings[] = 'Echec de l\'enregistrement du statut "payée" pour cette facture';
                     }
                 }
             }

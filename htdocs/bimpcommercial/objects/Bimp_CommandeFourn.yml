@@ -387,6 +387,7 @@ fields_tables:
             - field: fk_input_method
               show: 
                   field_value: fk_input_method
+            - field: entrepot
             - field: zone_vente
               edit: 1
     

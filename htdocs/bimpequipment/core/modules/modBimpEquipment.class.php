@@ -142,7 +142,7 @@ class modBimpEquipment extends DolibarrModules {
                             'titre'=>'Logistique',
                             'mainmenu'=>'bimpequipment',
                             'leftmenu'=>'0',        // To say if we can overwrite leftmenu
-                            'url'=>'/bimpequipment/manageequipment',
+                            'url'=>'/bimptransfer/?fc=dashBoard',
                             'langs'=>'',
                             'position'=>1099,
                             'perms'=>'1',

@@ -702,6 +702,8 @@ class BimpRender
     
     public static function renderCompteurCaisse()
     {
+        // Essayes de gérer tes colonnes avec à gauche les billets, à droite les pièces. 
+        
         $html .= '<div>';
         
         $html .= '<table class="bimp_list_table">';

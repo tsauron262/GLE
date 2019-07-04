@@ -280,7 +280,7 @@ class BContract_echeancier extends BimpObject {
             }
         }
     }
-
+    
     public function match_key_with_dates($date1, $date2) {
         while ($list = current($this->tab_echeancier)) {
             if ($list['date_debut'] == $date1) {
@@ -359,7 +359,7 @@ class BContract_echeancier extends BimpObject {
             $updateData = Array(
                 'next_facture_date' => $updateDate,
                 'next_facture_amount' => $this->calc_next_facture_amount_ht()
-            ); 
+            );
             $bimp->update('bcontract_prelevement', $updateData, 'id_contrat = ' . $parent->id);
         } else {
             if (!is_null($id_contrat)) {
@@ -480,7 +480,7 @@ class BContract_echeancier extends BimpObject {
         $facture->array_options['options_libelle'] = "Facture N°" . $this->getNbFacture() . " du contrat " . $parent->getData('ref');
         if ($facture->create($user) > 0) {
             $nb_period = $parent->getData('duree_mois') / $parent->getData('periodicity');
-            $facture->addline("Période de facturation : Du <b>" . dol_print_date($select_debut) . "</b> au <b>" . dol_print_date($select_fin) . "</b>", number_format($this->get_total_contrat() / $nb_period, 2, '.', ''), 1, 20);
+            $facture->addline("Période de facturation : Du <b>" . dol_print_date($select_debut) . "</b> au <b>" . dol_print_date($select_fin) . "</b>", number_format($this->get_total_contrat() / $nb_period, 2, '.', ''), 1, 20, 0, 0, 0, 0, $select_debut, $select_fin);
             addElementElement('contrat', 'facture', $parent->id, $facture->id);
         } else {
             return Array('errors' => 'error facture');

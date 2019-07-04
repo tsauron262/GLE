@@ -1902,7 +1902,8 @@ class Bimp_Facture extends BimpComm
         $this->fetch($this->id);
         $avoir->fetch($avoir->id);
         
-        $this->avoir = $avoir;
+        global $idAvoirFact;
+        $idAvoirFact = $avoir->id;
 
         // Assos commande
 

@@ -14,6 +14,7 @@ class Bimp_Facture extends BimpComm
     public $acomptes_allowed = true;
     public static $dol_module = 'facture';
     public static $email_type = 'facture_send';
+    public $avoir = null;
     public static $status_list = array(
         0 => array('label' => 'Brouillon', 'icon' => 'fas_file-alt', 'classes' => array('warning')),
         1 => array('label' => 'Validée', 'icon' => 'check', 'classes' => array('info')),
@@ -1528,7 +1529,7 @@ class Bimp_Facture extends BimpComm
 
             // Pour être sûr d\'être à jour:
             $this->dol_object->fetch_lines();
-            $this->dol_object->update_price(1);
+            $this->dol_object->update_price();
             $this->dol_object->fetch((int) $this->id);
             $this->hydrateFromDolObject();
 
@@ -1536,8 +1537,18 @@ class Bimp_Facture extends BimpComm
             $total_ttc_wo_discounts = (float) $this->getTotalTtcWithoutDiscountsAbsolutes();
             $total_ttc = (float) $this->getTotalTtc();
 
-            if (!$total_ttc && !count($lines)) {
-                $errors[] = 'Aucune ligne ajoutée à cette facture';
+            $has_amounts_lines = false;
+            
+            foreach ($lines as $line) {
+                // suppr partie "pa_ht" dès que correctif pa facture en place
+                if (round((float) $line->getTotalTTC(), 2) || round((float) $line->pa_ht, 2))  {
+                    $has_amounts_lines = true;
+                    break;
+                }
+            }
+            
+            if (!round($total_ttc, 2) && !$has_amounts_lines) {
+                $errors[] = 'Aucune ligne avec montant non nul ajoutée à cette facture';
                 return $errors;
             }
 
@@ -1551,7 +1562,7 @@ class Bimp_Facture extends BimpComm
 
             switch ($type) {
                 case Facture::TYPE_STANDARD:
-                    if (!$total_ttc_wo_discounts && $neg_lines > 0) {
+                    if (!round($total_ttc_wo_discounts, 2) && $neg_lines > 0) {
                         $convert_avoir = (int) BimpTools::getPostFieldValue('convert_avoir_to_reduc', 1);
                         $use_remise = (int) BimpTools::getPostFieldValue('use_discount_in_facture', 1);
                         $err = $this->createCreditNoteWithNegativesLines($lines, $convert_avoir, $use_remise);
@@ -1895,6 +1906,9 @@ class Bimp_Facture extends BimpComm
         // Pour être sûr d'être à jour dans les données: 
         $this->fetch($this->id);
         $avoir->fetch($avoir->id);
+        
+        global $idAvoirFact;
+        $idAvoirFact = $avoir->id;
 
         // Assos commande
 
@@ -2097,6 +2111,15 @@ class Bimp_Facture extends BimpComm
             } elseif ($paye) {
                 $this->setObjectAction('reopen');
             }
+        }
+    }
+    
+    public function checkPrice()
+    {
+        if ($this->isLoaded() && static::$dol_module) {            
+            $sql = 'SELECT SUML(total_ttc) FROM '.MAIN_DB_PREFIX.'facturedet WHERE `fk_facture` = '.(int) $this->id;
+            
+            $total_ttc = '';
         }
     }
 

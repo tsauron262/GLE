@@ -25,7 +25,6 @@ class Bimp_FactureFournLine extends FournObjectLine
                     if ($this->getData('linked_object_name') === 'commande_fourn_line') {
                         return 0;
                     }
-                    return 1;
                 }
                 break;
         }

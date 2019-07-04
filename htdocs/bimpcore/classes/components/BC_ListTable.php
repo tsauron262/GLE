@@ -964,7 +964,7 @@ class BC_ListTable extends BC_List
 
             $content .= '<div style="margin-bottom: 15px">';
             $content .= BimpInput::renderSwitchOptionsInput('select_n', array(
-                        10  => '10', 25  => '25', 50  => '50', 100 => '100', 250 => '250', 500 => '500'), $this->params['n'], $this->identifier . '_n');
+                        10  => '10', 20  => '20', 30  => '30', 40 => '40', 50 => '50'), $this->params['n'], $this->identifier . '_n');
             $content .= '</div>';
         }
 

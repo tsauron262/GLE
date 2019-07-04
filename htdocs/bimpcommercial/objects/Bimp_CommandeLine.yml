@@ -356,6 +356,9 @@ filters_panels:
             invoice_status:
                 field: invoice_status
                 child: parent
+            logistique_status: 
+                field: logistique_status
+                child: parent
             qty_total: 
                 field: qty_total
             qty_to_ship:
@@ -468,6 +471,13 @@ lists:
                 display: icon
                 min_width: 45px
                 max_width: 45px
+            logistique_status:
+                label: Log Cmd
+                field: logistique_status
+                child: parent
+                display: icon
+                min_width: 45px
+                max_width: 45px
             shipment_status:
                 label: Exp Cmd
                 field: shipment_status
@@ -476,6 +486,7 @@ lists:
                 min_width: 45px
                 max_width: 45px
             invoice_status:
+                info: Statut facturation Commande
                 label: Fac Cmd
                 field: invoice_status
                 child: parent

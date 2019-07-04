@@ -78,6 +78,11 @@ objects:
        instance: 
            id_object: 
               field_value: fk_user_resp
+              
+    entrepot: 
+        instance: 
+            id_object: 
+                field_value: entrepot
       
 associations: 
     factures: 
@@ -382,6 +387,7 @@ fields_tables:
             - field: fk_input_method
               show: 
                   field_value: fk_input_method
+            - field: entrepot
             - field: zone_vente
               edit: 1
     

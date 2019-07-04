@@ -19,7 +19,7 @@ class TransferLine extends BimpObject {
                         'status' => 201, // Transfert en cours
                         'type' => 2, // 2 = transfert
                         'id_equipment' => $id_equipment,
-//                        'id_product' => $id_product,
+                        'id_product' => $id_product,
                         'id_transfert' => $id_transfer,
                         'date_from' => dol_print_date($now, '%Y-%m-%d %H:%M:%S'),
             )));
@@ -120,9 +120,11 @@ class TransferLine extends BimpObject {
 
     public function checkInput($input, &$id_product, &$id_equipment) {
         $errors = array();
-        if (!$this->isEquipment($input, $id_equipment) and ! $this->isProduct($input, $id_product))
+        $is_product = $this->isProduct($input, $id_product);
+        $is_equipment = $this->isEquipment($input, $id_equipment, $id_product);
+        if (!$is_equipment and ! $is_product)
             $errors[] = "Produit inconnu";
-        else if ($this->isSerialisable($id_product))
+        else if (/*rajout de ici*/!$is_equipment and /*a la */$this->isSerialisable($id_product))
             $errors[] = "Veuillez scanner le numéro de série au lieu de la référence.";
         return $errors;
     }
@@ -146,14 +148,15 @@ class TransferLine extends BimpObject {
         return false;
     }
 
-    public function isEquipment($input, &$id_equipment) {
-        $sql = 'SELECT id';
+    public function isEquipment($input, &$id_equipment, &$id_product) {
+        $sql = 'SELECT id, id_product';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_equipment';
         $sql .= ' WHERE serial="' . $input . '" || concat("S", serial)="' . $input . '"';
 
         $result = $this->db->db->query($sql);
         if ($result and $this->db->db->num_rows($result) > 0) {
             while ($obj = $this->db->db->fetch_object($result)) {
+                $id_product = $obj->id_product;
                 $id_equipment = $obj->id;
                 return true;
             }

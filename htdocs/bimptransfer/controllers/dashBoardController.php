@@ -133,26 +133,31 @@ class dashBoardController extends BimpController {
 
     public function renderOrderFourn() {
 
+
         $id_warehouse = $this->getIdWarehouse();
+        $status_accepted = array(
+            (int) CommandeFournisseur::STATUS_RECEIVED_PARTIALLY,
+            (int) CommandeFournisseur::STATUS_ORDERSENT);
+
         $html = '<div class = "row">';
         $html .= '<div class = "col-lg-12">';
 
         // ORDER
         $transfer = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFourn');
         $list = new BC_ListTable($transfer, 'default', 1, null, 'Commande fournisseur');
-//        $list->addFieldFilterValue('cf.entrepot', $id_warehouse);
-        $list->addFieldFilterValue('cf.fk_statut', (int) CommandeFournisseur::STATUS_ORDERSENT);
-        $list->addFieldFilterValue('cf.fk_statut', (int)CommandeFournisseur::STATUS_RECEIVED_PARTIALLY);
+        $list->addFieldFilterValue('e.entrepot', $id_warehouse);
+        $list->addFieldFilterValue('a.fk_statut', array('IN' => implode(',', $status_accepted)));
+        $list->addJoin('commande_fournisseur_extrafields', 'a.rowid=e.fk_object', 'e');
         $list->setAddFormValues(array());
         $html .= $list->renderHtml();
 
         // ORDER LINE
-        $transfer_line = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFourn');
-        $list = new BC_ListTable($transfer_line, 'default', 1, null, 'Ligne de commande fournisseur');
-//        $list->addFieldFilterValue('cf.entrepot', $id_warehouse);
-        $list->addFieldFilterValue('cf.fk_statut', (int) CommandeFournisseur::STATUS_ORDERSENT);
-        $list->addFieldFilterValue('cf.fk_statut', (int)CommandeFournisseur::STATUS_RECEIVED_PARTIALLY);
-        $list->addJoin('commande_fournisseur', 'a.id_obj = cf.rowid', 'cf');
+        $transfer_line = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFournLine');
+        $list = new BC_ListTable($transfer_line, 'general', 1, null, 'Ligne de commande fournisseur');
+        $list->addFieldFilterValue('e.entrepot', $id_warehouse);
+        $list->addFieldFilterValue('c.fk_statut', array('IN' => implode(',', $status_accepted)));
+        $list->addJoin('commande_fournisseur', 'a.id_obj=c.rowid', 'c');
+        $list->addJoin('commande_fournisseur_extrafields', 'c.rowid=e.fk_object', 'e');
         $list->setAddFormValues(array());
         $html .= $list->renderHtml();
 

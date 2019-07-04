@@ -229,7 +229,6 @@ class Bimp_CommandeFournLine extends FournObjectLine
                     if ($this->getData('linked_object_name') === 'commande_line') {
                         return 0;
                     }
-                    return 1;
                 }
                 break;
         }

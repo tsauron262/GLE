@@ -64,26 +64,44 @@ class commandeController extends BimpController
             mailSyn2($subject, 'f.martinez@bimp.fr', 'BIMP<admin@bimp.fr>', $mail_msg);
         }
 
+        $entrepôt = $commande->getChildObject('entrepot');
+
+        if (BimpObject::objectLoaded($entrepôt)) {
+            $tabs_header .= '<div style="margin: 10px 0; font-size: 14px; font-weight; bold">';
+            $tabs_header .= BimpRender::renderIcon('fas_warehouse', 'iconLeft') . 'Entrepôt: ';
+
+            $url = BimpTools::getDolObjectUrl($entrepôt);
+            if ($url) {
+                $tabs_header .= '<a href="' . $url . '" target="_blank">';
+                $tabs_header .= $entrepôt->ref . ' - ' . $entrepôt->lieu;
+                $tabs_header .= '</a>';
+            } else {
+                $tabs_header .= $entrepôt->ref . ' - ' . $entrepôt->lieu;
+            }
+            $tabs_header .= BimpRender::renderObjectIcons($entrepôt, true, null, $url);
+            $tabs_header .= '</div>';
+        }
+
         $html .= BimpRender::renderNavTabs(array(
                     array(
                         'id'      => 'reservations',
                         'title'   => 'Logistique produits / services',
-                        'content' => $this->renderCommandesLinesLogisticTab($commande)
+                        'content' => $tabs_header . $this->renderCommandesLinesLogisticTab($commande)
                     ),
                     array(
                         'id'      => 'shipments',
                         'title'   => 'Expéditions',
-                        'content' => $this->renderShipmentsTab($commande)
+                        'content' => $tabs_header . $this->renderShipmentsTab($commande)
                     ),
                     array(
                         'id'      => 'supplier_orders',
                         'title'   => 'Commandes fournisseurs',
-                        'content' => $this->renderSupplierOrdersTab($commande)
+                        'content' => $tabs_header . $this->renderSupplierOrdersTab($commande)
                     ),
                     array(
                         'id'      => 'invoices',
                         'title'   => 'Factures / Avoirs',
-                        'content' => $this->renderFacturesTab($commande)
+                        'content' => $tabs_header . $this->renderFacturesTab($commande)
                     ),
         ));
 

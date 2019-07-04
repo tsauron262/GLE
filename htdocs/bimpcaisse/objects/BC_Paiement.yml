@@ -93,6 +93,15 @@ lists:
             user: 
                 label: Caissier
                 field: user_create
+            client: 
+                label: Client
+                value: 
+#                    callback: displayClient
+                     callback: 
+                        method: displayClient
+                        params: 
+                            - nom_url
+            
                 
     full_session: 
         extends: session
@@ -113,5 +122,9 @@ lists:
                             - ref
             paiement: 
                 display: ref
-            user: 
-                display: nom
+            client: 
+                value: 
+                    callback: 
+                        method: displayClient
+                        params: 
+                            - nom

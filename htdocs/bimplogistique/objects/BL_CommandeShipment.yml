@@ -76,6 +76,8 @@ fields:
     date_shipped: 
         label: Date d'expédition
         type: datetime
+        input: 
+            display_now: 1
         
     id_contact:
         label: Destinataire
@@ -147,6 +149,9 @@ forms:
     default: 
         rows: 
             - field: ref
+            - field: date_shipped
+              show: 
+                  callback: isShipped
             - field: id_commande_client
             - field: id_user_resp
             - field: id_entrepot
@@ -163,6 +168,9 @@ forms:
     edit: 
         rows: 
             - field: ref
+            - field: date_shipped
+              show: 
+                  callback: isShipped
             - field: id_user_resp
             - field: id_contact
             - field: signed
@@ -176,6 +184,7 @@ forms:
               input:
                   type: hidden
               value: 1
+            - field: date_shipped
             - custom: 1
               label: Produits / Services inclus
               input_name: lines
@@ -213,6 +222,25 @@ forms:
                 input_name: libelle
                 input: 
                     type: text
+            id_entrepot: 
+                custom: 1
+                show: 0
+                label: Entrepôt
+                input_name: id_entrepot
+                data_type: id
+                input: 
+                    type: search_entrepot
+                value: 
+                    field_value: id_entrepot
+            ef_type: 
+                custom: 1
+                show: 0
+                label: Secteur
+                input_name: ef_type
+                input: 
+                    type: select
+                    options: 
+                        array: secteurs
             cond_reglement: 
                 custom: 1
                 label: Conditions de réglement
@@ -270,9 +298,16 @@ forms:
             client: 
                 value: 
                     callback: getBulkFactureIdClient
+                required: 1
             libelle: 
                 value: 
                     callback: getBulkFactureLibelle
+            id_entrepot: 
+                show: 1
+                required: 1
+            ef_type: 
+                show: 1
+                required: 1
             lines: 
                 content: 
                     callback: renderBulkFactureFormLinesInputs

@@ -2279,7 +2279,7 @@ class Bimp_CommandeLine extends ObjectLine
                 $html .= '<span class="bold">Commande client d\'origine: </span>';
                 $html .= $commande->getNomUrl(1, 1, 1, 'full') . '<br/>Ligne n°' . $this->getData('position');
                 $link = $commande->renderLogistiqueLink();
-                
+
                 if ($link) {
                     $html .= ' - ' . $link;
                 }
@@ -3861,6 +3861,8 @@ class Bimp_CommandeLine extends ObjectLine
                         'linked_id_object'   => (int) $this->id,
                         'linked_object_name' => 'commande_line'
                     ));
+
+                    $line->desc = $this->desc;
                     $line->id_product = (int) $product->id;
                     $line->qty = (int) $qty;
 

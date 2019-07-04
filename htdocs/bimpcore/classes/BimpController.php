@@ -1963,7 +1963,7 @@ class BimpController
         }
         else {
             session_write_close(); //Pour eviter les blockages navigateur
-            usleep(930000); //un tous petit peu moins d'une seconde + temps d'execution = 1s
+            usleep(930000*2); //un tous petit peu moins d'une seconde + temps d'execution = 1s
             return $this->ajaxProcessLoadFixeTabs($i);
         }
     }

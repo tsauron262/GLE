@@ -13,21 +13,20 @@ class commandeFournController extends BimpController
 //        $head = commande_prepare_head($commande->dol_object);
 //        dol_fiche_head($head, 'bimplogisitquecommande', $langs->trans("CustomerOrder"), -1, 'order');
 //    }
-    
+
     public function getPageTitle()
     {
         $title = 'Logistique ';
         $commande = $this->config->getObject('', 'commande_fourn');
-        
+
         if (BimpObject::objectLoaded($commande)) {
             $title .= $commande->getRef();
         } else {
             $title .= 'commande fournisseur';
         }
-        
+
         return $title;
     }
-    
 
     public function renderContentHtml()
     {
@@ -48,21 +47,39 @@ class commandeFournController extends BimpController
 
         $html = '';
 
+        $entrepôt = $commande->getChildObject('entrepot');
+
+        if (BimpObject::objectLoaded($entrepôt)) {
+            $tabs_header .= '<div style="margin: 10px 0; font-size: 14px; font-weight; bold">';
+            $tabs_header .= BimpRender::renderIcon('fas_warehouse', 'iconLeft') . 'Entrepôt: ';
+
+            $url = BimpTools::getDolObjectUrl($entrepôt);
+            if ($url) {
+                $tabs_header .= '<a href="' . $url . '" target="_blank">';
+                $tabs_header .= $entrepôt->ref . ' - ' . $entrepôt->lieu;
+                $tabs_header .= '</a>';
+            } else {
+                $tabs_header .= $entrepôt->ref . ' - ' . $entrepôt->lieu;
+            }
+            $tabs_header .= BimpRender::renderObjectIcons($entrepôt, true, null, $url);
+            $tabs_header .= '</div>';
+        }
+
         $html .= BimpRender::renderNavTabs(array(
                     array(
                         'id'      => 'receptions',
                         'title'   => 'Réceptions',
-                        'content' => $this->renderReceptionsTab($commande)
+                        'content' => $tabs_header . $this->renderReceptionsTab($commande)
                     ),
                     array(
                         'id'      => 'lines',
                         'title'   => 'Logistique produits / services',
-                        'content' => $this->renderCommandesFournLinesLogisticTab($commande)
+                        'content' => $tabs_header . $this->renderCommandesFournLinesLogisticTab($commande)
                     ),
                     array(
                         'id'      => 'invoices',
                         'title'   => 'Factures / Avoirs',
-                        'content' => $this->renderFacturesTab($commande)
+                        'content' => $tabs_header . $this->renderFacturesTab($commande)
                     ),
         ));
 

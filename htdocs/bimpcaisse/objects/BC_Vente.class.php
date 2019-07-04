@@ -2389,6 +2389,13 @@ class BC_Vente extends BimpObject
             $msg = 'Echec de la validation de la facture';
             $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($facture->dol_object), $msg);
         }
+        
+        
+        global $idAvoirFact;
+        if(isset($idAvoirFact) && $idAvoirFact > 0){
+            $this->updateField("id_avoir", $idAvoirFact);
+            $idAvoirFact = 0;
+        }
 
         $facture->fetch((int) $facture->id);
 

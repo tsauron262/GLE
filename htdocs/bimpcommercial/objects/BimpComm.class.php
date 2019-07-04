@@ -67,12 +67,20 @@ class BimpComm extends BimpDolObject
     {
         switch ($field) {
             case 'fk_soc':
-                return (int) ((int) $this->getData('fk_statut') === 0);
+                if (!$force_edit) {
+                    return (int) ((int) $this->getData('fk_statut') === 0);
+                }
+                break;
 
             case 'zone_vente':
                 return (int) $this->areLinesEditable();
         }
-        return 1;
+
+        if ($force_edit) {
+            return 1;
+        }
+
+        return parent::isFieldEditable($field);
     }
 
     public function isActionAllowed($action, &$errors = array())
@@ -2356,9 +2364,10 @@ class BimpComm extends BimpDolObject
 
         return $errors;
     }
-    
+
     public function checkPrice()
     {
+        
     }
 
     // Actions:
@@ -2821,12 +2830,10 @@ class BimpComm extends BimpDolObject
     }
 
     // Overrides BimpObject:
-
 //    public function checkObject($context = '', $field = '')
 //    {
 //        if ($this->isLoaded() && $context === 'fetch') {
 //            global $user;
-
 //            if (BimpObject::objectLoaded($user) && $user->admin) {
 //                $this->dol_object->update_price();
 //            }

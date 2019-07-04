@@ -699,4 +699,36 @@ class BimpRender
 
         return $html;
     }
+    
+    public static function renderCompteurCaisse()
+    {
+        // Essayes de gérer tes colonnes avec à gauche les billets, à droite les pièces. 
+        
+        $html .= '<div>';
+        
+        $html .= '<table class="bimp_list_table">';
+        $html .= '<tbody>';
+        $html .= '<tr>';
+        $html .= '<td style="font-weight: bold; font-style="15px">';
+        
+        $html .= '500 &euro;';
+        $html .= BimpInput::renderInput('text', 'compteur_caisse_500', 0, array(
+            'data' => array(
+                'data_type' => 'number',
+                'min' => 0,
+                'decimals' => 0
+            )
+        ));
+        
+        $html .= '</td>';
+        
+        $html .= '<td>';
+        // etc...
+        $html .= '</td>';
+        $html .= '</tr>';
+        $html .= '</tbody>';
+        $html .= '</table>';
+        
+        $html .= '</div>';
+    }
 }

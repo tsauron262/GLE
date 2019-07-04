@@ -28,6 +28,11 @@ fields:
     id_caisse: 
         label: Caisse
         type: id_parent
+        search:
+            input: 
+                type: select
+                options: 
+                    array: caisses
         
     fonds_begin: 
         label: Fonds à l'ouverture

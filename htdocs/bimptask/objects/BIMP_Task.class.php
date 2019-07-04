@@ -26,7 +26,7 @@ class BIMP_Task extends BimpObject
         $errors = parent::fetch($id, $parent);
 
         $test = $this->getData("test_ferme");
-        if ($test != "") {
+        if ($test != "" && $this->getData("status") != 4) {
             $tabTest = explode(":", $test);
             if (count($tabTest) == 2) {
                 $sql = $this->db->db->query("SELECT * FROM " . MAIN_DB_PREFIX . $tabTest[0] . " WHERE " . $tabTest[1]);

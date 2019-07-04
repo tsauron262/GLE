@@ -93,16 +93,21 @@ class BimpDb
 
     public function execute($sql)
     {
-        $this->db->begin();
+        $transac = (stripos(trim($sql), "SELECT") === 0)? 0 : 1;
+        if($transac)
+            $this->db->begin();
 
         $result = $this->db->query($sql);
 
-        if ($result > 0) {
-            $this->db->commit();
-        } else {
-            $this->db->rollback();
-            $this->logSqlError();
+        if($transac){
+            if ($result > 0) {
+                $this->db->commit();
+            } else {
+                $this->db->rollback();
+            }
         }
+        if(!$result)
+            $this->logSqlError();
 
         return $result;
     }

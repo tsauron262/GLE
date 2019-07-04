@@ -124,7 +124,7 @@ class TransferLine extends BimpObject {
         $is_equipment = $this->isEquipment($input, $id_equipment, $id_product);
         if (!$is_equipment and ! $is_product)
             $errors[] = "Produit inconnu";
-        else if ($this->isSerialisable($id_product))
+        else if (/*rajout de ici*/!$is_equipment and /*a la */$this->isSerialisable($id_product))
             $errors[] = "Veuillez scanner le numéro de série au lieu de la référence.";
         return $errors;
     }

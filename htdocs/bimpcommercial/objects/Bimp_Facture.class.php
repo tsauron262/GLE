@@ -14,6 +14,7 @@ class Bimp_Facture extends BimpComm
     public $acomptes_allowed = true;
     public static $dol_module = 'facture';
     public static $email_type = 'facture_send';
+    public $avoir = null;
     public static $status_list = array(
         0 => array('label' => 'Brouillon', 'icon' => 'fas_file-alt', 'classes' => array('warning')),
         1 => array('label' => 'Validée', 'icon' => 'check', 'classes' => array('info')),
@@ -1900,6 +1901,8 @@ class Bimp_Facture extends BimpComm
         // Pour être sûr d'être à jour dans les données: 
         $this->fetch($this->id);
         $avoir->fetch($avoir->id);
+        
+        $this->avoir = $avoir;
 
         // Assos commande
 

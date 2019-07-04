@@ -80,7 +80,7 @@ class BimpComm extends BimpDolObject
             return 1;
         }
 
-        return parent::isFieldEditable($field);
+        return parent::isFieldEditable($field, $force_edit);
     }
 
     public function isActionAllowed($action, &$errors = array())

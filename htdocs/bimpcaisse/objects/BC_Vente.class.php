@@ -1471,10 +1471,13 @@ class BC_Vente extends BimpObject
         } else {
             $facture = $this->getChildObject('facture');
             require_once DOL_DOCUMENT_ROOT . '/bimpcore/classes/BimpTicket.php';
+            $avoir = null;
+            if($this->getData('id_avoir') > 0)
+                $avoir = $this->getChildObject('avoir');
 
             global $db;
 
-            $ticket = new BimpTicket($db, 370, $facture, (int) $this->getData('id_entrepot'), $this->id);
+            $ticket = new BimpTicket($db, 370, $facture, $avoir, (int) $this->getData('id_entrepot'), $this->id);
             $html = $ticket->renderHtml();
 
             if (count($ticket->errors)) {

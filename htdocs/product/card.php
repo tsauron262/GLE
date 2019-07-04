@@ -147,7 +147,7 @@ if (empty($reshook))
 
     // Actions to build doc
     $upload_dir = $conf->produit->dir_output;
-    $permissioncreate = $usercancreate;
+    $permissioncreate = 1;//$usercancreate;
     include DOL_DOCUMENT_ROOT.'/core/actions_builddoc.inc.php';
 
     include DOL_DOCUMENT_ROOT.'/core/actions_printing.inc.php';

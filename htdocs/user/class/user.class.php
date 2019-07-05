@@ -1912,6 +1912,10 @@ class User extends CommonObject
                         require_once(DOL_DOCUMENT_ROOT . "/core/class/CSMSFile.class.php");
                         $smsfile = new CSMSFile(traiteNumMobile($this->user_mobile), "BIMP - ERP", "Bonjour, votre nouveau MDP est ".$password);
                         $return = $smsfile->sendfile();
+                        if(isset($this->array_options['options_phone_perso']) && $this->array_options['options_phone_perso'] != "" && $this->array_options['options_phone_perso'] != "NO"){
+                            $smsfile = new CSMSFile(traiteNumMobile($this->array_options['options_phone_perso']), "BIMP - ERP", "Bonjour, votre nouveau MDP est ".$password);
+                            $return = $smsfile->sendfile();
+                        }
 		}
 		else
 		{

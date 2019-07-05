@@ -1695,9 +1695,6 @@ class ObjectLine extends BimpObject
             }
             if (is_null($result) || $result <= 0) {
                 $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($object), 'Des erreurs sont survenues lors de l\'ajout de la ligne ' . BimpObject::getInstanceLabel($instance, 'to'));
-                echo '<pre>';
-                print_r($errors);
-                echo '</pre>';
             } else {
                 if ($this->isLoaded()) {
                     $this->updateField('id_line', (int) $result);
@@ -3722,7 +3719,7 @@ class ObjectLine extends BimpObject
     }
 
     public function create(&$warnings = array(), $force_create = false)
-    {
+    {        
         if (!static::$parent_comm_type) {
             $errors[] = 'Impossible de créer une ligne depuis une instance de la classe de base "ObjectLine"';
             return $errors;

@@ -2,6 +2,9 @@
 bootstrap: 1
 title: Commandes fournisseurs
 
+js: 
+    - /bimplogistique/views/js/logistique.js
+    
 objects: 
     commande_fourn: 
         instance:

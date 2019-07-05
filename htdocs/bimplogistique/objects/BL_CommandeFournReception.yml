@@ -190,6 +190,8 @@ views:
 filters_panel: 
     default: 
         filters: 
+            - field: fk_soc
+              child: parent
             - field: ref
             - field: num_reception
             - field: id_entrepot

@@ -153,7 +153,7 @@ class Bimp_Product extends BimpObject
             'dispo'          => 0, // Stock réel - réel réservés
             'virtuel'        => 0, // reel - total_reserves + commandes
             'total_reserves' => 0, // Réservations du statut 0 à - de 300
-            'reel_reserves'  => 0, // Réservations du statut 200 à - de 300
+            'reel_reserves'  => 0, // Réservations du statut 200 à - de 300 + statut 2 (A réserver)
         );
 
         if ($this->isLoaded()) {

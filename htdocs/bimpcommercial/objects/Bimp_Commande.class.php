@@ -424,11 +424,18 @@ class Bimp_Commande extends BimpComm
 
             // Annuler
             if ($this->isActionAllowed('cancel') && $this->canSetAction('cancel')) {
+                if ($this->isLogistiqueActive()) {
+                    $label = 'Abandonner';
+                    $confirm_label = 'abandon';
+                } else {
+                    $label = 'Annuler';
+                    $confirm_label = 'annulation';
+                }
                 $buttons[] = array(
-                    'label'   => 'Annuler',
+                    'label'   => $label,
                     'icon'    => 'times',
                     'onclick' => $this->getJsActionOnclick('cancel', array(), array(
-                        'confirm_msg' => $langs->trans('ConfirmCancelOrder', $ref)
+                        'confirm_msg' => 'Veuillez confirmer l\\\'' . $confirm_label . ' de la commande ' . $this->getRef()
                     ))
                 );
             }
@@ -1331,7 +1338,7 @@ class Bimp_Commande extends BimpComm
     {
         $errors = array();
 
-        if ($this->isLoaded() /* && $this->isLogistiqueActive() */) {
+        if ($this->isLoaded()) {
             $lines = $this->getChildrenObjects('lines');
 
             foreach ($lines as $line) {
@@ -1339,6 +1346,38 @@ class Bimp_Commande extends BimpComm
             }
         } else {
             $errors[] = 'ID de la commande absent';
+        }
+
+        return $errors;
+    }
+
+    public function deleteReservations()
+    {
+        $errors = array();
+
+        if (!$this->isLoaded($errors)) {
+            return $errors;
+        }
+
+        $reservations = BimpCache::getBimpObjectObjects('bimpreservation', 'BR_Reservation', array(
+                    'type'               => 1,
+                    'id_commande_client' => (int) $this->id,
+                    'status'             => array(
+                        'in' => array(0, 2)
+                    )
+        ));
+
+        foreach ($reservations as $id_reservation => $reservation) {
+            $res_warnings = array();
+            $res_errors = $reservation->delete($res_warnings, true);
+
+            if (count($res_warnings)) {
+                $errors[] = BimpTools::getMsgFromArray($res_warnings, 'Erreurs suite à la suppression ' . $reservation->getLabel('of_the') . ' #' . $id_reservation);
+            }
+
+            if (count($res_errors)) {
+                $errors[] = BimpTools::getMsgFromArray($res_warnings, 'Echec de la suppression ' . $reservation->getLabel('of_the') . ' #' . $id_reservation);
+            }
         }
 
         return $errors;
@@ -1988,6 +2027,8 @@ class Bimp_Commande extends BimpComm
 
         if ($this->dol_object->cancel() < 0) {
             $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object, null, null, $warnings), 'Echec de l\'annulation de la commande');
+        } else {
+            $warnings = array_merge($warnings, $this->deleteReservations());
         }
 
         return array(

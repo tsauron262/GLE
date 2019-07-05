@@ -2718,9 +2718,18 @@ class BimpComm extends BimpDolObject
             }
 
             if (!count($errors)) {
-                // todo: loguer l'envoi du mail
+                // todo: loguer l'échec de l'envoi du mail
+
+                $mail_object = '';
+//
+//                if ($this->isLoaded()) {
+//                    $mail_object = BimpTools::ucfirst($this->getLabel()) . ' ' . $this->getRef();
+//                }
+
+                $mail_object .= $data['mail_object'];
+
                 $deliveryreceipt = (isset($data['confirm_reception']) ? (int) $data['confirm_reception'] : 0);
-                mailSyn2($data['mail_object'], $to, $from, $data['msg_html'], $filename_list, $mimetype_list, $mimefilename_list, $cc, '', $deliveryreceipt);
+                mailSyn2($mail_object, $to, $from, $data['msg_html'], $filename_list, $mimetype_list, $mimefilename_list, $cc, '', $deliveryreceipt);
             }
         }
 

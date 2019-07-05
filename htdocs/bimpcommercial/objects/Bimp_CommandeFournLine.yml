@@ -113,6 +113,9 @@ views:
 filters_panels: 
     default: 
         filters: 
+            soc: 
+                field: fk_soc
+                child: parent
             product: 
                 field: fk_product
                 child: dol_line

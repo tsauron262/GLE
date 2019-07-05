@@ -2307,9 +2307,6 @@ class Bimp_CommandeLine extends ObjectLine
             if (!BimpObject::objectLoaded($commande)) {
                 $errors[] = 'ID de la commande absent';
             } else {
-                if (!$commande->isLogistiqueActive()) {
-                    return;
-                }
                 if ((int) $this->getData('type') === self::LINE_PRODUCT) {
                     $product = $this->getProduct();
                     if (!BimpObject::objectLoaded($product)) {
@@ -4434,7 +4431,7 @@ class Bimp_CommandeLine extends ObjectLine
             $this->checkQties();
             $commande = $this->getParentInstance();
 
-            if (BimpObject::objectLoaded($commande) && $commande->isLogistiqueActive()) {
+            if (BimpObject::objectLoaded($commande) && ((int) $commande->getData('fk_statut') === 1)) {
                 // Vérification des réservations: 
                 $this->checkReservations(); // les quantités des réservations sont vérifiées dans cette méthode.
             }
@@ -4518,7 +4515,7 @@ class Bimp_CommandeLine extends ObjectLine
             $commande->dol_object->brouillon = 0;
         }
 
-        if (BimpObject::objectLoaded($commande) && (int) $commande->getData('fk_statut') > 0) {
+        if (BimpObject::objectLoaded($commande) && (int) $commande->getData('fk_statut') === 1) {
             $res_errors = $this->checkReservations();
             if (count($res_errors)) {
                 $warnings[] = BimpTools::getMsgFromArray($res_errors);

@@ -18883,19 +18883,68 @@ td.buttons .btn {
     display: none;
   }
 
-  /* line 15, ../scss/bimpcore/_print.scss */
+  /* line 13, ../scss/bimpcore/_print.scss */
+  h1 {
+    font-size: 14px !important;
+  }
+
+  /* line 17, ../scss/bimpcore/_print.scss */
+  h2 {
+    font-size: 13px;
+  }
+
+  /* line 21, ../scss/bimpcore/_print.scss */
+  h3 {
+    font-size: 12px;
+  }
+
+  /* line 25, ../scss/bimpcore/_print.scss */
+  h4 {
+    font-size: 11px !important;
+  }
+
+  /* line 29, ../scss/bimpcore/_print.scss */
+  .panel-heading {
+    padding: 5px 10px !important;
+  }
+  /* line 32, ../scss/bimpcore/_print.scss */
+  .panel-heading .panel-title {
+    font-size: 10px !important;
+  }
+
+  /* line 40, ../scss/bimpcore/_print.scss */
   table.bimp_list_table > thead > tr > th, table.bimp_list_table > tbody > tr > th,
   table.objectlistTable > thead > tr > th,
   table.objectlistTable > tbody > tr > th {
-    background-color: #DCDCDC;
-    color: #282828;
+    background-color: #DCDCDC !important;
+    color: #282828 !important;
+  }
+  /* line 46, ../scss/bimpcore/_print.scss */
+  table.bimp_list_table > thead > tr > th, table.bimp_list_table > thead > tr > td, table.bimp_list_table > tbody > tr > th, table.bimp_list_table > tbody > tr > td, table.bimp_list_table > tfoot > tr > th, table.bimp_list_table > tfoot > tr > td,
+  table.objectlistTable > thead > tr > th,
+  table.objectlistTable > thead > tr > td,
+  table.objectlistTable > tbody > tr > th,
+  table.objectlistTable > tbody > tr > td,
+  table.objectlistTable > tfoot > tr > th,
+  table.objectlistTable > tfoot > tr > td {
+    font-size: 8px !important;
   }
 
-  /* line 24, ../scss/bimpcore/_print.scss */
+  /* line 58, ../scss/bimpcore/_print.scss */
   .bimp_fields_table > thead > tr.col_headers > th, .bimp_fields_table > tbody > tr > th,
   .objectFieldsTable > thead > tr.col_headers > th,
   .objectFieldsTable > tbody > tr > th {
-    background-color: #DCDCDC;
-    color: #282828;
+    background-color: #DCDCDC !important;
+    color: #282828 !important;
+  }
+  /* line 64, ../scss/bimpcore/_print.scss */
+  .bimp_fields_table > thead > tr > th, .bimp_fields_table > thead > tr > td, .bimp_fields_table > tbody > tr > th, .bimp_fields_table > tbody > tr > td, .bimp_fields_table > tfoot > tr > th, .bimp_fields_table > tfoot > tr > td,
+  .objectFieldsTable > thead > tr > th,
+  .objectFieldsTable > thead > tr > td,
+  .objectFieldsTable > tbody > tr > th,
+  .objectFieldsTable > tbody > tr > td,
+  .objectFieldsTable > tfoot > tr > th,
+  .objectFieldsTable > tfoot > tr > td {
+    font-size: 8px !important;
   }
 }

@@ -80,11 +80,11 @@ class BC_Paiement extends BimpObject
         if (!$this->isLoaded()) {
             return '';
         }
-        
+
         $facture = null;
 
         if ((int) $this->getData('id_facture')) {
-            $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture',(int) $this->getData('id_facture'));
+            $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $this->getData('id_facture'));
         }
 
         if (!BimpObject::objectLoaded($facture)) {
@@ -109,7 +109,7 @@ class BC_Paiement extends BimpObject
                 if ($display_name === 'nom_url') {
                     return $client->getNomUrl(1, 1, 1, 'default');
                 } else {
-                    return BimpTools::ucfirst($client->getData('nom'));
+                    return BimpTools::ucfirst($client->getRef() . ' - ' . $client->getData('nom'));
                 }
             }
         }

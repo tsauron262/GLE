@@ -50,7 +50,7 @@ class ObjectLineRemise extends BimpObject
 
         return 0;
     }
-    
+
     public function getListFilters()
     {
         if (BimpTools::isSubmit('extra_data/parent_object_type')) {

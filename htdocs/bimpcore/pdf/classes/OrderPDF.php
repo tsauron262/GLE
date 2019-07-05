@@ -129,7 +129,7 @@ class OrderPDF extends BimpDocumentPDF
         } else {
             $this->errors[] = 'Aucune commande spécifiée';
         }
-        
+
         parent::initData();
     }
 
@@ -304,7 +304,7 @@ class OrderPDF extends BimpDocumentPDF
         }
 
         if ($town) {
-            $html .= '<div style="text-align: right">';
+            $html .= '<div style="text-align: right; font-size: 9px;">';
             $html .= BimpTools::ucfirst($town) . ', le ' . dol_print_date(dol_now());
             $html .= '</div>';
         }
@@ -507,13 +507,17 @@ class BLPDF extends OrderPDF
 
         parent::__construct($db, $doc_type);
 
-        if (!is_null($id_contact_shipment) && $id_contact_shipment) {
-            BimpTools::loadDolClass('contact');
-            $this->contact_shipment = new Contact($this->db);
-            if ($this->contact_shipment->fetch((int) $shipment->getcontact()) <= 0) {
-                $this->errors[] = 'Contact pour la livraison non trouvé (ID ' . $shipment->getcontact() . ')';
-                unset($this->contact_shipment);
-                $this->contact_shipment = null;
+        if (BimpObject::objectLoaded($shipment)) {
+            $id_contact_shipment = $shipment->getcontact();
+
+            if (!is_null($id_contact_shipment) && $id_contact_shipment) {
+                BimpTools::loadDolClass('contact');
+                $this->contact_shipment = new Contact($this->db);
+                if ($this->contact_shipment->fetch((int) $shipment->getcontact()) <= 0) {
+                    $this->errors[] = 'Contact pour la livraison non trouvé (ID ' . $shipment->getcontact() . ')';
+                    unset($this->contact_shipment);
+                    $this->contact_shipment = null;
+                }
             }
         }
     }

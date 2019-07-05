@@ -78,6 +78,19 @@ class BC_CaisseSession extends BimpObject
 
         return $buttons;
     }
+    
+    public static function getUserLastClosedSession($id_user)
+    {
+        $sql = 'SELECT MAX(`id`) as id FROM '.MAIN_DB_PREFIX.'bc_caisse_session WHERE `id_user_closed` = '.(int) $id_user;
+        
+        $result = self::getBdb()->executeS($sql, 'array');
+        
+        if (isset($result[0]['id'])) {
+            return (int) $result[0]['id'];
+        }
+        
+        return 0;
+    }
 
     public function renderPaymentsInfos()
     {

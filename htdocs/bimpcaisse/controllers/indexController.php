@@ -190,6 +190,18 @@ class indexController extends BimpController
             $html .= '<button type="button" class="btn btn-default" onclick="' . $onclick . '">';
             $html .= '<i class="fas fa5-power-off iconLeft"></i>Se connecter à une caisse déjà ouverte';
             $html .= '</button>';
+
+            BimpObject::loadClass('bimpcaisse', 'BC_CaisseSession');
+
+            $id_session = (int) BC_CaisseSession::getUserLastClosedSession($user - id);
+
+            if ($id_session) {
+                $recap_url = DOL_URL_ROOT . '/bimpcore/view.php?module=bimpcaisse&object_name=BC_CaisseSession&id_object=' . $id_session . '&view=recap';
+                $html .= '<button class="btn btn-default" onclick="window.open(\'' . $recap_url . '\', \'Récapitulatif session de caisse\', \'menubar=no, status=no, width=827, height=900\');">';
+                $html .= BimpRender::renderIcon('fas_print', 'iconLeft') . ' Dernière session de caisse';
+                $html .= '</button>';
+            }
+
             $html .= '</div>';
 
             $html .= '<div id="openCaisseForm">';
@@ -602,7 +614,6 @@ class indexController extends BimpController
     {
         $errors = array();
         $html = '';
-        $success_callback = '';
 
         global $user;
 

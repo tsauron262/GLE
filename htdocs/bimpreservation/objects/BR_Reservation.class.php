@@ -1873,7 +1873,7 @@ class BR_Reservation extends BimpObject
             foreach ($rows as $r) {
                 $counts['total'] += (int) $r['qty'];
 
-                if ((int) $r['status'] >= 200) {
+                if ((int) $r['status'] >= 200 || (int) $r['status'] === 2) {
                     $counts['reel'] += (int) $r['qty'];
                 }
             }

@@ -338,3 +338,8 @@ cards:
 #            - label: Payé
 #              value: 
 #                  callback: displayPaid
+
+searches:
+    default: 
+        fields_search: 
+            - ref

@@ -468,8 +468,6 @@ filters_panels:
                 field: fk_user_resp
                 
             availability: unset
-            libelle: unset
-            secteur: unset
             ref_client: unset
             remise_globale: unset
             remise_globale_label: unset
@@ -531,8 +529,6 @@ lists_cols:
 #        field: fk_account
 #        display: nom_url
         
-    libelle: unset
-    secteur: unset
     ref_client: unset
     availability: unset
     input_reason: unset

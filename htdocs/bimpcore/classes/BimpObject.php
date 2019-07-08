@@ -6087,6 +6087,8 @@ class BimpObject extends BimpCache
                     $objName = $this->dol_object->element;
                 if ($objName == "order_supplier")
                     $objName = "commande_fourn";
+                if ($objName == "invoice_supplier")
+                    $objName = "facture_fourn";
                 $url .= "&search=1&object=" . $objName . "&sall=" . $search;
             }
             if (BimpTools::getValue("socid") != "") {

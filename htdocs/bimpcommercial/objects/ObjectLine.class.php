@@ -1583,7 +1583,7 @@ class ObjectLine extends BimpObject
         return $errors;
     }
 
-    protected function createLine($check_data = true)
+    protected function createLine($check_data = true, $force_create = false)
     {
         $errors = array();
 
@@ -1603,6 +1603,11 @@ class ObjectLine extends BimpObject
             $object->errors = array();
 
             $result = null;
+
+            if ($force_create) {
+                $initial_brouillon = isset($object->brouillon) ? $object->brouillon : null;
+                $object->brouillon = 1;
+            }
 
             switch ((int) $this->getData('type')) {
                 case self::LINE_PRODUCT:
@@ -1701,6 +1706,18 @@ class ObjectLine extends BimpObject
                     $this->resetPositions();
                 } else {
                     $this->set('id_line', (int) $result);
+                }
+
+                $object->fetch_lines();
+                $object->update_price();
+                $this->hydrateFromDolObject();
+            }
+
+            if ($force_create) {
+                if (is_null($initial_brouillon)) {
+                    unset($object->brouillon);
+                } else {
+                    $object->brouillon = $initial_brouillon;
                 }
             }
         }
@@ -1831,6 +1848,10 @@ class ObjectLine extends BimpObject
 
             if (!is_null($result) && $result <= 0) {
                 $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($object), 'Des erreurs sont survenues lors de la mise à jour de la ligne ' . BimpObject::getInstanceLabel($instance, 'of_the'));
+            } else {
+                $object->fetch_lines();
+                $object->update_price();
+                $this->hydrateFromDolObject();
             }
 
             if ($force_update) {
@@ -3719,7 +3740,7 @@ class ObjectLine extends BimpObject
     }
 
     public function create(&$warnings = array(), $force_create = false)
-    {        
+    {
         if (!static::$parent_comm_type) {
             $errors[] = 'Impossible de créer une ligne depuis une instance de la classe de base "ObjectLine"';
             return $errors;
@@ -3747,6 +3768,21 @@ class ObjectLine extends BimpObject
                 }
             }
         }
+
+        $parent = $this->getParentInstance();
+
+        // Forçage de la création: 
+        $prev_parent_status = null;
+        if ($force_create) {
+            if (BimpObject::objectLoaded($parent)) {
+                if ((int) $parent->getData('fk_statut') !== 0) {
+                    $prev_parent_status = (int) $parent->getData('fk_statut');
+                    $parent->dol_object->statut = 0;
+                    $parent->dol_object->brouillon = 1;
+                }
+            }
+        }
+
 
         if (!count($errors)) {
             $errors = parent::create($warnings, $force_create);
@@ -3791,6 +3827,11 @@ class ObjectLine extends BimpObject
                     }
                 }
             }
+        }
+
+        if (!is_null($prev_parent_status)) {
+            $parent->dol_object->statut = $prev_parent_status;
+            $parent->dol_object->brouillon = 0;
         }
 
         return $errors;
@@ -3952,8 +3993,25 @@ class ObjectLine extends BimpObject
         $initial_remise = (float) $this->getData('remise');
         $this->remise = $initial_remise;
 
+        // Forçage de la mise à jour: 
+        $prev_parent_status = null;
+        if ($force_update) {
+            if (BimpObject::objectLoaded($parent)) {
+                if ((int) $parent->getData('fk_statut') !== 0) {
+                    $prev_parent_status = (int) $parent->getData('fk_statut');
+                    $parent->dol_object->statut = 0;
+                    $parent->dol_object->brouillon = 1;
+                }
+            }
+        }
+
         $errors = parent::update($warnings, $force_update);
         $errors = array_merge($errors, $this->updateLine(false));
+
+        if (!is_null($prev_parent_status)) {
+            $parent->dol_object->statut = $prev_parent_status;
+            $parent->dol_object->brouillon = 0;
+        }
 
         if (!count($errors)) {
             $remises = $this->getRemiseTotalInfos(true);

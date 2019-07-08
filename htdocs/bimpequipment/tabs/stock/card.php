@@ -452,9 +452,10 @@ else
             print_liste_field_titre("Der date Achat","", "","&amp;id=".$id,"",'align="right"',$sortfield,$sortorder);
             print_liste_field_titre("Der date Vente","", "","&amp;id=".$id,"",'align="right"',$sortfield,$sortorder);
             print_liste_field_titre("Der prix Achat","", "","&amp;id=".$id,"",'align="right"',$sortfield,$sortorder);
+            print_liste_field_titre("Ventes Tot 1an","", "","&amp;id=".$id,"",'align="right"',$sortfield,$sortorder);
             print_liste_field_titre("Ventes 3 mois","", "","&amp;id=".$id,"",'align="right"',$sortfield,$sortorder);
             print_liste_field_titre("Ventes 6 mois","", "","&amp;id=".$id,"",'align="right"',$sortfield,$sortorder);
-            print_liste_field_titre("Ventes 1 an","", "","&amp;id=".$id,"",'align="right"',$sortfield,$sortorder);
+            print_liste_field_titre("Ventes 12 mois","", "","&amp;id=".$id,"",'align="right"',$sortfield,$sortorder);
 //			if ($user->rights->stock->mouvement->creer) print_liste_field_titre('');
 //			if ($user->rights->stock->creer)            print_liste_field_titre('');
 			print "</tr>\n";
@@ -599,7 +600,7 @@ else
                             $date = dol_print_date($ln->tms, "%d/%m/%Y");
                         }
                         
-                        $tabVente = array(3=>"",6=>"",12=>"");
+                        $tabVente = array(3=>"",6=>"",12=>"", 'tot1An'=> 0);
                         foreach(array(3=>array(1,2,3), 6=>array(4,5,6), 12=>array(7,8,9,10,11,12)) as $id => $tab){
                             $req = "SELECT SUM(facturedet_prodqty) as nb FROM `llx_mat_view_facturedet_months` WHERE  prod_ref = '".$productstatic->ref."' AND ( 0 ";
                             foreach($tab as $nb){
@@ -613,6 +614,7 @@ else
                             if($db->num_rows($sql) > 0){
                                 $ln = $db->fetch_object($sql);
                                 $tabVente[$id] = $ln->nb;
+                                $tabVente['tot1An'] += $ln->nb;
                             }
                         }
                         
@@ -625,6 +627,9 @@ else
                         print '</td>';
                         print '<td align="right">';
                         print $prix;
+                        print '</td>';
+                        print '<td align="right">';
+                        print price($tabVente['tot1An']);
                         print '</td>';
                         print '<td align="right">';
                         print price($tabVente[3]);

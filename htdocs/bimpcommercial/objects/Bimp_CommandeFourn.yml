@@ -311,7 +311,7 @@ forms:
                  type: select
                  options: 
                      array: facturesFournisseur
-                 help: Liste des factures fournisseur brouillon pour ce fournisseur, ce secteur et cet entrepôt.
+                 help: Liste des factures fournisseur brouillon pour ce fournisseur et ce secteur.
             - custom: 1
               label: Référence fournisseur
               input_name: ref_supplier
@@ -552,6 +552,12 @@ lists:
             user_resp:
             soc: 
             total_ttc:
+                
+    fourn:
+        extends: default
+        extends: default
+        cols: 
+            soc: unset
                 
 cards:
     default: 

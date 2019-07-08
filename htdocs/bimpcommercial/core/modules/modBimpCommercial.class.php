@@ -143,7 +143,7 @@ class modBimpCommercial extends DolibarrModules
 		// 'stock'            to add a tab in stock view
 		// 'thirdparty'       to add a tab in third party view
 		// 'user'             to add a tab in user view
-        $this->tabs = array();
+//        $this->tabs = array();
 
 		if (! isset($conf->mymodule) || ! isset($conf->mymodule->enabled))
         {
@@ -331,7 +331,7 @@ class modBimpCommercial extends DolibarrModules
                 $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimpcommande', 1, 'order', 'Commande', NULL);";
                 
                 // Dash board commercial
-                $sql[] = "UPDATE " . MAIN_DB_PREFIX . "menu SET `url`='/bimpcommercial/index.php?fc=tabCommercial' WHERE `type` LIKE 'top' AND `mainmenu` LIKE 'commercial'";
+                $sql[] = "UPDATE " . MAIN_DB_PREFIX . "menu SET `url`='/bimpcommercial/index.php?fc=tabCommercial&amp;mainmenu=commercial&amp;leftmenu=' WHERE `type` LIKE 'top' AND `mainmenu` LIKE 'commercial'";
 
 		//$this->_load_tables('/bimpcommercial/sql/');
                 

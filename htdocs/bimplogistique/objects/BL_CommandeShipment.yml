@@ -519,7 +519,8 @@ lists:
         filters_panel: default
         sort_field: id
         sort_way: desc
-        n: 25
+        pagination: 1
+        n: 20
         edit_btn: 1
         update_btn: 1
         edit_form: edit

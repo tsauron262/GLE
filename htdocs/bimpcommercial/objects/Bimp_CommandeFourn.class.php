@@ -758,7 +758,7 @@ class Bimp_CommandeFourn extends BimpComm
         $factures = BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_FactureFourn', array(
                     'fk_statut' => 0,
                     'fk_soc'    => (int) $this->getData('fk_soc'),
-                    'entrepot'  => (int) $this->getData('entrepot'),
+                    /*'entrepot'  => (int) $this->getData('entrepot'),*/
                     'ef_type'   => $this->getData('ef_type')
         ));
 

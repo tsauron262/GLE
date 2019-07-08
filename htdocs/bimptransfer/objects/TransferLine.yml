@@ -38,8 +38,6 @@ fields:
 lists:
     default:
        objects_change_reload: Transfer
-#       after_list_content:
-#           callback: addInputs
        delete_btn: 1
        update_btn: 1
        cols:
@@ -49,9 +47,6 @@ lists:
            id_equipment: 
                field: id_equipment
                display: nom_url
-#           id_product: 
-#               field: id_product
-#               display: nom_url
            quantity_sent: 
                field: quantity_sent
                edit: 1

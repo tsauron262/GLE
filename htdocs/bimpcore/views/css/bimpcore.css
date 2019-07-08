@@ -18385,6 +18385,11 @@ td.buttons .btn {
   display: none;
 }
 /* line 629, ../scss/bimpcore/_list.scss */
+.listPagination .results_count {
+  font-weight: bold;
+  text-align: left;
+}
+/* line 634, ../scss/bimpcore/_list.scss */
 .listPagination span.navButton {
   font-size: 13px;
   margin: 0 5px;
@@ -18398,59 +18403,59 @@ td.buttons .btn {
   line-height: 16px;
   vertical-align: middle;
 }
-/* line 642, ../scss/bimpcore/_list.scss */
+/* line 647, ../scss/bimpcore/_list.scss */
 .listPagination span.navButton:hover {
   color: #EF7D00;
 }
-/* line 645, ../scss/bimpcore/_list.scss */
+/* line 650, ../scss/bimpcore/_list.scss */
 .listPagination span.navButton:before, .listPagination span.navButton:after {
   font-family: 'FontAwesome';
   font-size: 12px;
   transition: all 0.3s ease;
   -webkit-transition: all 0.3s ease;
 }
-/* line 652, ../scss/bimpcore/_list.scss */
+/* line 657, ../scss/bimpcore/_list.scss */
 .listPagination span.navButton.disabled, .listPagination span.navButton.disabled:hover {
   color: #C8C8C8;
   cursor: default;
 }
-/* line 658, ../scss/bimpcore/_list.scss */
+/* line 663, ../scss/bimpcore/_list.scss */
 .listPagination span.prevButton:before {
   content: '\f053';
   margin-right: 8px;
 }
-/* line 662, ../scss/bimpcore/_list.scss */
+/* line 667, ../scss/bimpcore/_list.scss */
 .listPagination span.nextButton:after {
   content: '\f054';
   margin-left: 8px;
 }
-/* line 666, ../scss/bimpcore/_list.scss */
+/* line 671, ../scss/bimpcore/_list.scss */
 .listPagination .pages {
   display: inline-block;
   margin: 0 50px;
   color: #A0A0A0;
 }
-/* line 671, ../scss/bimpcore/_list.scss */
+/* line 676, ../scss/bimpcore/_list.scss */
 .listPagination .pages .pageBtn {
   font-weight: bold;
   cursor: pointer;
 }
-/* line 674, ../scss/bimpcore/_list.scss */
+/* line 679, ../scss/bimpcore/_list.scss */
 .listPagination .pages .pageBtn:hover {
   color: #505050;
 }
-/* line 677, ../scss/bimpcore/_list.scss */
+/* line 682, ../scss/bimpcore/_list.scss */
 .listPagination .pages .pageBtn.active, .listPagination .pages .pageBtn.active:hover {
   color: #EF7D00;
   cursor: default;
 }
 
 /*Panel Filtres*/
-/* line 688, ../scss/bimpcore/_list.scss */
+/* line 693, ../scss/bimpcore/_list.scss */
 .bimp_filter_container {
   margin-bottom: 5px;
 }
-/* line 691, ../scss/bimpcore/_list.scss */
+/* line 696, ../scss/bimpcore/_list.scss */
 .bimp_filter_container .bimp_filter_caption {
   font-weight: bold;
   color: #282828;
@@ -18458,11 +18463,11 @@ td.buttons .btn {
   margin-bottom: 5px;
   background-color: #DCDCDC;
 }
-/* line 699, ../scss/bimpcore/_list.scss */
+/* line 704, ../scss/bimpcore/_list.scss */
 .bimp_filter_container .bimp_filter_values_container {
   margin-top: 5px;
 }
-/* line 703, ../scss/bimpcore/_list.scss */
+/* line 708, ../scss/bimpcore/_list.scss */
 .bimp_filter_container .bimp_filter_value {
   -webkit-transition: all 0.3s ease;
   -o-transition: all 0.3s ease;
@@ -18475,31 +18480,31 @@ td.buttons .btn {
   color: #fff;
   cursor: pointer;
 }
-/* line 713, ../scss/bimpcore/_list.scss */
+/* line 718, ../scss/bimpcore/_list.scss */
 .bimp_filter_container .bimp_filter_value:hover {
   background-color: #489FF5;
 }
-/* line 717, ../scss/bimpcore/_list.scss */
+/* line 722, ../scss/bimpcore/_list.scss */
 .bimp_filter_container .bimp_filter_value .bimp_filter_value_remove_btn {
   margin-left: 10px;
   color: #9EC5E6;
   cursor: pointer;
   float: right;
 }
-/* line 724, ../scss/bimpcore/_list.scss */
+/* line 729, ../scss/bimpcore/_list.scss */
 .bimp_filter_container .bimp_filter_value .bimp_filter_value_remove_btn:hover {
   color: #fff;
 }
-/* line 730, ../scss/bimpcore/_list.scss */
+/* line 735, ../scss/bimpcore/_list.scss */
 .bimp_filter_container input[type=text] {
   width: 100%;
 }
-/* line 734, ../scss/bimpcore/_list.scss */
+/* line 739, ../scss/bimpcore/_list.scss */
 .bimp_filter_container i.loading {
   display: none;
 }
 
-/* line 739, ../scss/bimpcore/_list.scss */
+/* line 744, ../scss/bimpcore/_list.scss */
 .load_saved_filters_container {
   padding: 5px 0;
   margin: 5px 0;

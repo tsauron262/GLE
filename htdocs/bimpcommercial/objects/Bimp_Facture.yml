@@ -112,7 +112,6 @@ fields:
     fk_input_reason: unset
     total_ht: unset
         
-        
 forms: 
     
     default: 

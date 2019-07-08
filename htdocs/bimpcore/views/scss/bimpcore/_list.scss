@@ -626,6 +626,11 @@ td.buttons {
     margin: 10px 0;
     border-top: 1px solid $gray-light;
 
+    .results_count {
+        font-weight: bold;
+        text-align: left;
+    }
+    
     span.navButton {
         font-size: 13px;
         margin: 0 5px;

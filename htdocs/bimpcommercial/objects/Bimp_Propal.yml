@@ -201,6 +201,7 @@ forms:
                   field_value: note_private
                   
     duplicate_propal:
+        force_edit: 1
         rows: 
             - field: entrepot
             - field: fk_soc

@@ -352,9 +352,8 @@ class BL_CommandeShipment extends BimpObject
                     'to_ship_qty' => 0,
                     'serials'     => array()
                 );
-                $line_shipments = $line->getData('shipments');
                 
-//                $to_ship_qty = $line->getFullQty();
+                $line_shipments = $line->getData('shipments');
                 
                 foreach ($line_shipments as $id_shipment => $shipment_data) {
                     if ((int) $id_shipment === $this->id) {
@@ -373,8 +372,8 @@ class BL_CommandeShipment extends BimpObject
                     } elseif (in_array($id_shipment, $prev_shipments)) {
                         $line_qties['shipped_qty'] += (float) $shipment_data['qty'];
                     }
-
                 }
+                
                 $line_qties['to_ship_qty'] = $line->getFullQty() - $line_qties['shipped_qty'] - $line_qties['qty'];
                 $qties[(int) $line->getData('id_line')] = $line_qties;
             }

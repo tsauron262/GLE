@@ -520,7 +520,7 @@ lists:
         sort_field: id
         sort_way: desc
         pagination: 1
-        n: 20
+        n: 10
         edit_btn: 1
         update_btn: 1
         edit_form: edit

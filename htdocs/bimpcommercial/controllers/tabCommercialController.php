@@ -84,6 +84,14 @@ class tabCommercialController extends BimpController {
                 $list_reception->addJoin('commande_fournisseur', 'a.id_commande_fourn = cf.rowid', 'cf');
             }
             $html .= $list_reception->renderHtml();
+            
+            
+            // factures fournisseur
+            $commande_fourn = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureFourn');
+            $list_commande = new BC_ListTable($commande_fourn, $is_submit_id ? 'fourn' : 'default', 1, null, "Facture fournisseur");
+            if ($is_submit_id)
+                $list_commande->addFieldFilterValue('fk_soc', $id_soc);
+            $html .= $list_commande->renderHtml();
         }
 
         return $html;
@@ -102,36 +110,45 @@ class tabCommercialController extends BimpController {
         if ($societe->client > 0 or ! $is_submit_id) {
             // Propal
             $propale = BimpObject::getInstance('bimpcommercial', 'Bimp_PropalLine');
-            $list_propale = new BC_ListTable($propale, $is_submit_id ? 'dashBoardCommercial' : 'dashBoardCommercial', 1, null, "Lignes de propositions commerciales");
+            $list_propale = new BC_ListTable($propale, $is_submit_id ? 'global' : 'global', 1, null, "Lignes de propositions commerciales");
             if ($is_submit_id) {
                 $list_propale->addFieldFilterValue('p.fk_soc', $id_soc);
                 $list_propale->addJoin('propal', 'a.id_obj=p.rowid', 'p');
             }
             $html .= $list_propale->renderHtml();
 
-            // Facture
-            $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureLine');
-            $list_facture = new BC_ListTable($facture, $is_submit_id ? 'dashBoardCommercial' : 'dashBoardCommercial', 1, null, "Lignes de factures");
-            if ($is_submit_id) {
-                $list_facture->addFieldFilterValue('f.fk_soc', $id_soc);
-                $list_facture->addJoin('facture', 'a.id_obj=cf.rowid', 'f');
-            }
-            $html .= $list_facture->renderHtml();
-
             // Commande client
             $commande_client = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeLine');
-            $list_commande_client = new BC_ListTable($commande_client, $is_submit_id ? 'dashBoardCommercial' : 'dashBoardCommercial', 1, null, "Lignes de commandes client");
+            $list_commande_client = new BC_ListTable($commande_client, $is_submit_id ? 'global' : 'global', 1, null, "Lignes de commandes client");
             if ($is_submit_id) {
                 $list_commande_client->addFieldFilterValue('c.fk_soc', $id_soc);
                 $list_commande_client->addJoin('commande', 'a.id_obj=c.rowid', 'c');
             }
             $html .= $list_commande_client->renderHtml();
+
+            // Facture
+            $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureLine');
+            $list_facture = new BC_ListTable($facture, $is_submit_id ? 'global' : 'global', 1, null, "Lignes de factures");
+            if ($is_submit_id) {
+                $list_facture->addFieldFilterValue('f.fk_soc', $id_soc);
+                $list_facture->addJoin('facture', 'a.id_obj=cf.rowid', 'f');
+            }
+            $html .= $list_facture->renderHtml();
         }
 
         if ($societe->fournisseur > 0 or ! $is_submit_id) {
             // Commande fournisseur
             $commande_fourn = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFournLine');
-            $list_commande = new BC_ListTable($commande_fourn, $is_submit_id ? 'dashBoardCommercial' : 'dashBoardCommercial', 1, null, "Lignes de commandes fournisseur");
+            $list_commande = new BC_ListTable($commande_fourn, $is_submit_id ? 'global' : 'global', 1, null, "Lignes de commandes fournisseur");
+            if ($is_submit_id) {
+                $list_commande->addFieldFilterValue('cf.fk_soc', $id_soc);
+                $list_commande->addJoin('commande_fournisseur', 'a.id_obj=cf.rowid', 'cf');
+            }
+            $html .= $list_commande->renderHtml();
+            
+            // Commande fournisseur
+            $commande_fourn = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureFournLine');
+            $list_commande = new BC_ListTable($commande_fourn, $is_submit_id ? 'global' : 'global', 1, null, "Lignes de factures fournisseur");
             if ($is_submit_id) {
                 $list_commande->addFieldFilterValue('cf.fk_soc', $id_soc);
                 $list_commande->addJoin('commande_fournisseur', 'a.id_obj=cf.rowid', 'cf');

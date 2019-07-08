@@ -526,6 +526,9 @@ lists_cols:
         field: position
         max_width: 40px
         min_width: 40px;
+    parent:
+        field: id_obj
+        display: nom_url
     desc:
         label: Description
         info: Version longue
@@ -633,7 +636,26 @@ lists_cols:
         child: product
     
 lists: 
+    global:
+        extends: default
+        sort_field: id
+        sort_way: desc
+        pagination: 1
+        n: 10
+        cols:
+            position: 
+            parent:
+            desc:
+            pu_ht: 
+            tva:
+            remise_crt:
+            pa_ht: 
+            qty: 
+            remise: 
+            total_ttc: 
+            margin:
     default: 
+        extends: global
         configurable: 1
         checkboxes: 1
         positions: 1
@@ -675,16 +697,7 @@ lists:
                 object: 
                     callback: getParentInstance
         cols:
-            position: 
-            desc:
-            pu_ht: 
-            tva:
-            remise_crt:
-            pa_ht: 
-            qty: 
-            remise: 
-            total_ttc: 
-            margin:
+            parent: unset
                 
     full: 
         cols: 
@@ -711,13 +724,3 @@ lists:
                 field: total_ttc
                 child: dol_line
                 
-    dashBoardCommercial:
-        extends: default
-        sort_field: id
-        sort_way: desc
-        pagination: 1
-        n: 10
-        cols:
-            parent:
-                field: id_obj
-                display: nom_url

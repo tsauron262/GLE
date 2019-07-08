@@ -710,3 +710,14 @@ lists:
             dolline_total_ttc: 
                 field: total_ttc
                 child: dol_line
+                
+    dashBoardCommercial:
+        extends: default
+        sort_field: id
+        sort_way: desc
+        pagination: 1
+        n: 10
+        cols:
+            parent:
+                field: id_obj
+                display: nom_url

@@ -594,12 +594,14 @@ class BimpCache
         }
 
         $rows = $instance->getList($filters, null, null, 'id', 'asc', 'array', array($instance->getPrimary()));
-
+        
         $list = array();
 
         foreach ($rows as $r) {
             $list[] = (int) $r[$instance->getPrimary()];
         }
+        
+        return $list;
     }
 
     public static function getBimpObjectObjects($module, $object_name, $filters)

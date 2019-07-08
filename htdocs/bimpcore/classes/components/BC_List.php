@@ -574,6 +574,19 @@ class BC_List extends BC_Panel
                 $last = $this->nbTotalPages;
             }
 
+            $nFirst = (((int) $this->params['p'] - 1) * (int) $this->params['n']) + 1;
+            $nLast = $nFirst + (int) $this->params['n'] - 1;
+
+            if ($nLast > (int) $this->nbItems) {
+                $nLast = $this->nbItems;
+            }
+
+            $html .= '<div class="results_count">';
+            $html .= 'Résultat' . ($this->nbItems > 1 && $nFirst !== $nLast ? 's' : '');
+            $html .= ' <span>' . $nFirst . '</span>' . ($nFirst !== $nLast ? ' à <span>' . $nLast . '</span>' : '');
+            $html .= ' sur <span>' . $this->nbItems . '</span>';
+            $html .= '</div>';
+
             $html .= '<span class="navButton prevButton' . (((int) $this->params['p'] === 1) ? ' disabled' : '') . '">Précédent</span>';
             $html .= '<div class="pages">';
 

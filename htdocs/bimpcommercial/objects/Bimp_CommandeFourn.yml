@@ -241,6 +241,7 @@ forms:
                   
     duplicate_commande_fourn: 
         title: Cloner
+        force_edit: 1
         rows: 
             - field: libelle
             - field: entrepot

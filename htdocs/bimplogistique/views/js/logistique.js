@@ -860,7 +860,7 @@ function getReceptionLinesDataFromForm($content, id_reception) {
                     if ($inputContainer.length) {
                         new_return_equipments = getInputValue($inputContainer);
                     }
-                    
+
                     var new_return_equipments_pu_ht = 0;
                     var $input = $row.find('[name="line_' + id_line + '_reception_' + id_reception + '_new_return_equipments_pu_ht"]');
                     if ($input.length) {
@@ -1137,6 +1137,40 @@ function setAllReceptionLinesToMax($button) {
             }
         });
     });
+}
+
+function selectedReceptionsFactureFourn($button, list_id) {
+    if ($button.hasClass('disabled')) {
+        return;
+    }
+
+    var $list = $('#' + list_id);
+
+    if (!$list.length) {
+        bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger', null, true);
+        return;
+    }
+
+    var extra_data = {
+        'receptions': []
+    };
+
+    var $selected = $list.find('tbody').find('input.item_check:checked');
+
+    if (!$selected.length) {
+        bimp_msg('Aucune réception sélectionnée', 'warning', null, true);
+        return;
+    }
+
+    $selected.each(function () {
+        var $input = $(this);
+        extra_data['receptions'].push($input.data('id_object'));
+    });
+
+    setObjectAction($button, {
+        module: 'bimpcommercial',
+        object_name: 'Bimp_CommandeFourn'
+    }, 'createInvoice', extra_data, 'bulk_invoice');
 }
 
 $(document).ready(function () {

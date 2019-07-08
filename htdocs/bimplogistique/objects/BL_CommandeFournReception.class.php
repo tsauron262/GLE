@@ -105,6 +105,18 @@ class BL_CommandeFournReception extends BimpObject
         return 0;
     }
 
+    public function isFacturable()
+    {
+        if ($this->isLoaded()) {
+            if ((int) $this->getData('status') === self::BLCFR_RECEPTIONNEE && !(int) $this->getData('id_facture')) {
+                return 1;
+            }
+        }
+
+
+        return 0;
+    }
+
     // Getters valeurs: 
 
     public function getName($with_generic = true)
@@ -199,6 +211,8 @@ class BL_CommandeFournReception extends BimpObject
                 $commande_fourn->isActionAllowed('createInvoice') && $commande_fourn->canSetAction('createInvoice')) {
             $onclick = $commande_fourn->getJsActionOnclick('createInvoice', array(
                 'ref_supplier'      => $commande_fourn->getData('ref_supplier'),
+                'libelle'           => $commande_fourn->getData('libelle'),
+                'ef_type'           => $commande_fourn->getData('ef_type'),
                 'id_cond_reglement' => (int) $commande_fourn->getData('fk_cond_reglement'),
                 'id_mode_reglement' => (int) $commande_fourn->getData('fk_mode_reglement'),
                 'receptions'        => json_encode(array($this->id))
@@ -213,11 +227,6 @@ class BL_CommandeFournReception extends BimpObject
         }
 
         return $buttons;
-    }
-
-    public function getCommandesFournListbulkActions()
-    {
-        return array();
     }
 
     // Rendus HTML: 

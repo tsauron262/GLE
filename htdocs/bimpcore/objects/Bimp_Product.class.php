@@ -27,7 +27,9 @@ class Bimp_Product extends BimpObject
     public function isSerialisable()
     {
         if ($this->isLoaded()) {
-            return (int) $this->getData('serialisable');
+            if ($this->isTypeProduct()) {
+                return (int) $this->getData('serialisable');
+            }
         }
 
         return 0;

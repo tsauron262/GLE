@@ -378,6 +378,7 @@ fields_tables:
             - field: entrepot
               display: nom_url
               edit: 1
+            - field: ef_type    
             - field: fk_statut
             - field: invoice_status
             - field: attente_info

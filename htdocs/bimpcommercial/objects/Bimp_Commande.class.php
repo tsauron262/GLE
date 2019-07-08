@@ -2527,14 +2527,15 @@ class Bimp_Commande extends BimpComm
 
     public function update(&$warnings = array(), $force_update = false)
     {
-        $init_entrepot = (int) $this->getData('init_entrepot');
-
+        $init_entrepot = (int) $this->getInitData('entrepot');
+        
         $errors = parent::update($warnings, $force_update);
 
         if (!count($errors)) {
-            if ($init_entrepot !== (int) $this->getData('id_entrepot') && $this->isLogistiqueActive()) {
-                $sql = 'UPDATE `' . MAIN_DB_PREFIX . 'br_reservation` SET `id_entrepot` = ' . (int) $this->getData('id_entrepot');
-                $sql .= 'WHERE `id_commande_client` = ' . (int) $this->id . ' AND `id_entrepot` = ' . $init_entrepot . ' AND `status` < 200';
+            if ($init_entrepot !== (int) $this->getData('entrepot') && $this->isLogistiqueActive()) {
+                $sql = 'UPDATE `' . MAIN_DB_PREFIX . 'br_reservation` SET `id_entrepot` = ' . (int) $this->getData('entrepot');
+                $sql .= ' WHERE `id_commande_client` = ' . (int) $this->id . ' AND `id_entrepot` = ' . $init_entrepot . ' AND `status` < 200';
+                $this->db->db->query($sql);
             }
         }
     }

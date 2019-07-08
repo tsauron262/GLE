@@ -260,7 +260,6 @@ forms:
                   callback: isLoaded
             - field: label
             - field: description  
-            - field: ref_constructeur
             - field: fk_product_type
             - field: type2
             - field: price

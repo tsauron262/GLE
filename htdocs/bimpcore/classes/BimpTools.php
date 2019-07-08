@@ -1060,7 +1060,7 @@ class BimpTools
                     $sql .= '\'';
                 } elseif (isset($filter['in'])) {
                     if (is_array($filter['in'])) {
-                        $sql .= ' IN (' . implode(',', $filter['in']) . ')';
+                        $sql .= ' IN ("' . implode('","', $filter['in']) . '")';
                     } elseif ($filter['in'] == "") {
                         $sql .= ' = 0 AND 0';
                     } else {

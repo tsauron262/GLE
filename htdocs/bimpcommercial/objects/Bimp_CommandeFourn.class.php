@@ -122,10 +122,15 @@ class Bimp_CommandeFourn extends BimpComm
                     $errors[] = 'Une ou plusieurs réceptions ont déjà été enregistrées pour cette commande fournisseur';
                     return 0;
                 }
-                if (!in_array($status, array(1, 2, 6, 7, 9))) {
+                if (!in_array($status, array(1, 2, 3, 6, 7, 9))) {
                     $errors[] = 'Statut actuel ' . $this->getLabel('of_the') . ' invalide';
                     return 0;
                 }
+                if ($this->hasReceptions()) {
+                    $errors[] = 'Une ou plusieurs réceptions ont déjà été enregistrées pour cette commande fournisseur';
+                    return 0;
+                }
+                
                 return 1;
 
             case 'makeOrder':
@@ -216,6 +221,19 @@ class Bimp_CommandeFourn extends BimpComm
         return 0;
     }
 
+    public function hasReceptions()
+    {
+        if ($this->isLoaded()) {
+            $receptions = BimpCache::getBimpObjectList('bimplogistique', 'BL_CommandeFournReception', array(
+                        'id_commande_fourn' => (int) $this->id
+            ));
+            
+            return (int) (count($receptions) ? 1 : 0);
+        }
+
+        return 0;
+    }
+
     // Gestion des droits user - overrides BimpObject: 
 
     public function canCreate()
@@ -276,7 +294,7 @@ class Bimp_CommandeFourn extends BimpComm
                     if (!empty($user->rights->fournisseur->commande->commander)) {
                         return 1;
                     }
-                } elseif ((int) $this->getData('fk_statut') === 2) {
+                } elseif (in_array((int) $this->getData('fk_statut'), array(2, 3))) {
                     if (!empty($user->rights->fournisseur->commande->approuver)) {
                         if (empty($conf->global->SUPPLIER_ORDER_REOPEN_BY_APPROVER_ONLY) ||
                                 (!empty($conf->global->SUPPLIER_ORDER_REOPEN_BY_APPROVER_ONLY) && (int) $user->id === (int) $this->getData('fk_user_approve'))) {
@@ -522,7 +540,7 @@ class Bimp_CommandeFourn extends BimpComm
                         'icon'     => 'fas_undo',
                         'onclick'  => '',
                         'disabled' => 1,
-                        'popover'  => 'Vous n\'avez pas la permission de ' . $perm_label
+                        'popover'  => 'Vous n\\\'avez pas la permission de ' . $perm_label
                     );
                 }
             }
@@ -758,7 +776,7 @@ class Bimp_CommandeFourn extends BimpComm
         $factures = BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_FactureFourn', array(
                     'fk_statut' => 0,
                     'fk_soc'    => (int) $this->getData('fk_soc'),
-                    /*'entrepot'  => (int) $this->getData('entrepot'),*/
+                    /* 'entrepot'  => (int) $this->getData('entrepot'), */
                     'ef_type'   => $this->getData('ef_type')
         ));
 
@@ -1006,7 +1024,7 @@ class Bimp_CommandeFourn extends BimpComm
                 'value'    => 0
             )
         ));
-        
+
         if (count($lines) && count($receptions)) {
             $has_billed = 0;
             $all_billed = 1;
@@ -1024,7 +1042,7 @@ class Bimp_CommandeFourn extends BimpComm
                             $billed_qty += isset($reception_data['qty']) ? (float) $reception_data['qty'] : 0;
                             $has_billed = 1;
                         }
-                    } 
+                    }
                 }
 
                 if (abs($line_qty) > abs($billed_qty)) {
@@ -1153,6 +1171,7 @@ class Bimp_CommandeFourn extends BimpComm
 
     public function actionReopen($data, &$success)
     {
+        echo 'ici'; exit;
         $errors = array();
         $warnings = array();
         $success = '';

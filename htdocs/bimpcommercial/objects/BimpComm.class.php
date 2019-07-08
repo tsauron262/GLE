@@ -110,7 +110,7 @@ class BimpComm extends BimpDolObject
                     $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
                     return 0;
                 }
-                if ((int) $this->getData('fk_statut') > 0) {
+                if ($this->object_name === 'Bimp_Facture' && (int) $this->getData('fk_statut') > 0) {
                     $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' n\'est plus au statut "brouillon"';
                     return 0;
                 }

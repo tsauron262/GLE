@@ -1276,11 +1276,13 @@ class BimpObject extends BimpCache
                 $errors[] = BimpTools::getMsgFromArray($errors, 'Action impossible');
             }
 
-            $method = 'action' . ucfirst($action);
-            if (method_exists($this, $method)) {
-                $errors = $this->{$method}($extra_data, $success);
-            } else {
-                $errors[] = 'Action invalide: "' . $action . '"';
+            if (!count($errors)) {
+                $method = 'action' . ucfirst($action);
+                if (method_exists($this, $method)) {
+                    $errors = $this->{$method}($extra_data, $success);
+                } else {
+                    $errors[] = 'Action invalide: "' . $action . '"';
+                }
             }
         }
 

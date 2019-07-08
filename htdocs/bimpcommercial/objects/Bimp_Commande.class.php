@@ -145,7 +145,7 @@ class Bimp_Commande extends BimpComm
 
             case 'modify':
 //                return 0; // blocage par trigger : à voir si on fait sauter. 
-                if ($status !== 1) {
+                if (!in_array($status, array(1, 2, 3))) {
                     $errors[] = $invalide_error;
                     return 0;
                 }
@@ -153,7 +153,7 @@ class Bimp_Commande extends BimpComm
                     $errors[] = 'La logistique est en cours de traitement';
                     return 0;
                 }
-//                return 1;
+                return 1;
 
             case 'reopen':
                 if (!in_array($status, array(Commande::STATUS_CLOSED, Commande::STATUS_CANCELED))) {
@@ -2528,7 +2528,7 @@ class Bimp_Commande extends BimpComm
     public function update(&$warnings = array(), $force_update = false)
     {
         $init_entrepot = (int) $this->getInitData('entrepot');
-        
+
         $errors = parent::update($warnings, $force_update);
 
         if (!count($errors)) {

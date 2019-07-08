@@ -485,8 +485,6 @@ filters_panels:
                 field: type
             statut: 
                 field: fk_statut
-            ef_type: 
-                field: ef_type
             paye: 
                 show: 0
             secteur: 

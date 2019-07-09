@@ -32,7 +32,7 @@ $db = $bdb->db;
 $nomChamp = "type";
 
 
-foreach(array("HIED" => "E","ENS" => "E", "EBTS" => "E","F" => "C","R" => "ME","HIED" => "X") as $oldType => $newtype)
+foreach(array("HIED" => "E","ENS" => "E", "EBTS" => "E","F" => "C","ME" => "C","R" => "C","HIED" => "X") as $oldType => $newtype)
     foreach(array("propal_extrafields", "commande_extrafields", "facture_extrafields", "facture_fourn_extrafields", "commande_fournisseur_extrafields") as $table){
         $query = "UPDATE llx_".$table." SET ".$nomChamp." = '".$newtype."' WHERE ".$nomChamp." = '".$oldType."';";
         $db->query($query);

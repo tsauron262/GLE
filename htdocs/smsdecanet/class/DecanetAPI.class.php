@@ -15,7 +15,7 @@ class DecanetApi {
 		if($_root)$this->ROOT = $_root;
 
         // Compute time drift
-        $srvTime = json_decode(file_get_contents($this->ROOT . '/auth/time'));
+        $srvTime = json_decode(@file_get_contents($this->ROOT . '/auth/time'));
         if($srvTime !== FALSE)
         {
             $this->timeDrift = time() - (int)$srvTime;

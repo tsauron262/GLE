@@ -529,6 +529,7 @@ lists:
         extra_btn: 
             callback: getExtraBtn
         cols:
+            ref:
             commande: 
             num_livraison:
             entrepot:

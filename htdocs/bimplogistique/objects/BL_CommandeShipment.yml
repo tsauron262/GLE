@@ -562,6 +562,7 @@ lists:
         extra_btn: 
             callback: getExtraBtn
         cols:
+            ref:
             num_livraison:
             entrepot:
             status: 

@@ -633,13 +633,13 @@ class ObjectLine extends BimpObject
                     'on'    => $line_alias . '.rowid = a.id_line'
                 );
 
-                $alias = 'cat_prod';
+                $alias = 'cat_prod'.$field_name;
                 $joins[$alias] = array(
                     'alias' => $alias,
                     'table' => 'categorie_product',
                     'on'    => $alias . '.fk_product = ' . $line_alias . '.fk_product'
                 );
-                $filters['cat_prod.fk_categorie'] = array(
+                $filters[$alias.'.fk_categorie'] = array(
                     'in' => $values
                 );
                 return;

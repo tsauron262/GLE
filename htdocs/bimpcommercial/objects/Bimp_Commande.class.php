@@ -113,6 +113,12 @@ class Bimp_Commande extends BimpComm
 
     public function isActionAllowed($action, &$errors = array())
     {
+        switch($action){
+            case 'setListConfig':
+                return 1;
+        }
+        
+        
         if (!$this->isLoaded()) {
             $errors[] = 'ID de la commande absent';
             return 0;

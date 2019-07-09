@@ -428,7 +428,7 @@ class BimpComm extends BimpDolObject
                 }
             }
 
-            return $this->getChildrenObjects('lines', $filters);
+            return $this->getChildrenObjects('lines', $filters, 'position', 'asc');
         }
 
         return array();

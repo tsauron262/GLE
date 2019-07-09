@@ -117,9 +117,54 @@ class Bimp_Vente extends BimpObject
 
         return '';
     }
-    
+
     public function updateExtraField($field_name, $value, $id_object)
     {
         return array();
+    }
+
+    // Traitements : 
+
+    public function generateAppleCSV($dateFrom, $dateTo)
+    {
+        $errors = array();
+
+        $rows = $this->getList(array(
+            'a.fk_product' => array(
+                'operator' => '!=',
+                'value'    => 0
+            ),
+            'facture.datef' => array(
+                'between' => array('min' => $dateFrom, 'max' => $dateTo)
+            ),
+            'facture.type' => array(
+                'in' => array(Facture::TYPE_STANDARD, Facture::TYPE_CREDIT_NOTE)
+            )
+                ), null, null, 'rowid', 'asc', 'array', array('rowid'), array());
+        
+        
+
+        $lines = array();
+
+        foreach ($lines as $line) {
+            
+        }
+        
+        return $errors;
+    }
+
+    // Actions : 
+
+    public function actionGenerateAppleCSV($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
     }
 }

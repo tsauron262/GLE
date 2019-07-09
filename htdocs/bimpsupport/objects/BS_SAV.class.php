@@ -765,7 +765,7 @@ class BS_SAV extends BimpObject
             $buttons[] = array(
                 'label'   => 'Fiche Propale ' . $propal->id,
                 'icon'    => 'fas_file',
-                'onclick' => 'window.open(\'' . BimpObject::getInstanceUrl($propal->dol_object) . '\')'
+                'onclick' => 'window.open(\'' . BimpObject::getInstanceUrl($propal->dol_object) ."&redirectForce_oldVersion=1". '\')'
             );
             $propal->module = 'bimpsupport';
         }

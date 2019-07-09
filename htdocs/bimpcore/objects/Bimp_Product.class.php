@@ -24,6 +24,7 @@ class Bimp_Product extends BimpObject
     
     private static $stockDate =  array();
     private static $stockShowRoom =  array();
+    private static $ventes =  array();
 
     // Getters booléens
 
@@ -499,7 +500,6 @@ class Bimp_Product extends BimpObject
     {
         $html = '';
 
-        echo "ii".$this->getStockShoowRoom(66);
         
         
         if ($this->isLoaded()) {
@@ -659,12 +659,6 @@ class Bimp_Product extends BimpObject
         return self::$stockDate[$date][$this->id][$entrepot]['stock'];
     }
     
-    public function getStockShoowRoom($entrepot = null){
-        if(!isset(self::$stockShowRoom[$this->id]))
-            self::initStockShowRoom ();
-        return self::$stockShowRoom[$this->id][$entrepot];
-    }
-    
     private static function initStockDate($date){
         global $db;
         self::$stockDate = array();
@@ -688,6 +682,12 @@ class Bimp_Product extends BimpObject
         }
     }
     
+    public function getStockShoowRoom($entrepot = null){
+        if(!isset(self::$stockShowRoom[$this->id]))
+            self::initStockShowRoom ();
+        return self::$stockShowRoom[$this->id][$entrepot];
+    }
+    
     private static function initStockShowRoom(){
         global $db;
         self::$stockShowRoom = array();
@@ -695,6 +695,34 @@ class Bimp_Product extends BimpObject
         while($ln = $db->fetch_object($sql)){
             self::$stockShowRoom[$ln->id_product][$ln->id_entrepot] = $ln->nb;
             self::$stockShowRoom[$ln->id_product][null] += $ln->nb;
+        }
+    }
+    
+    public function getVentes($dateMin, $dateMax = null, $entrepot = null){
+        if(!isset(self::$ventes[$this->id]))
+            self::initVentes ($dateMin, $dateMax);
+        return self::$ventes[$datesMin."-".$datesMax][$this->id][$entrepot];
+    }
+    
+    private static function initVentes($dateMin, $dateMax){
+        global $db;
+        self::$ventes = array();
+        $query = "SELECT `fk_product`, entrepot, sum(qty) as qty, sum(l.total_ht) as total_ht, sum(l.total_ttc) as total_ttc FROM `llx_facturedet` l, llx_facture f, llx_facture_extrafields e WHERE `fk_facture` = f.rowid AND e.fk_object = f.rowid AND fk_product > 0 ";
+        if($dateMin)
+            $query .= " AND date_valid > STR_TO_DATE('".$dateMin."', '%Y-%m-%d')";
+        if($dateMax)
+            $query .= " AND date_valid > STR_TO_DATE('".$dateMax."', '%Y-%m-%d')";
+        $query .= " GROUP BY `fk_product`, entrepot";
+        $sql = $db->query($query);
+        while($ln = $db->fetch_object($sql)){
+            self::$ventes[$datesMin."-".$datesMax][$ln->fk_product][$ln->entrepot]['qty'] = $ln->qty;
+            self::$ventes[$datesMin."-".$datesMax][$ln->fk_product][$ln->entrepot]['total_ht'] = $ln->total_ht;
+            self::$ventes[$datesMin."-".$datesMax][$ln->fk_product][$ln->entrepot]['total_ttc'] = $ln->total_ttc;
+//            if(!isset(self::$ventes[$datesMin."-".$datesMax][$ln->fk_product][null]))
+//                    self::$ventes[$datesMin."-".$datesMax][$ln->fk_product][null] = array();
+            self::$ventes[$datesMin."-".$datesMax][$ln->fk_product][null]['qty'] += $ln->qty;
+            self::$ventes[$datesMin."-".$datesMax][$ln->fk_product][null]['total_ht'] += $ln->total_ht;
+            self::$ventes[$datesMin."-".$datesMax][$ln->fk_product][null]['total_ttc'] += $ln->total_ttc;
         }
     }
 }

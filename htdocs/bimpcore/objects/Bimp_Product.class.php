@@ -21,6 +21,9 @@ class Bimp_Product extends BimpObject
         'HT'  => 'HT',
         'TTC' => 'TTC'
     );
+    
+    private static $stockDate =  array();
+    private static $stockShowRoom =  array();
 
     // Getters booléens
 
@@ -496,6 +499,9 @@ class Bimp_Product extends BimpObject
     {
         $html = '';
 
+        echo "ii".$this->getStockShoowRoom(66);
+        
+        
         if ($this->isLoaded()) {
             if ((int) $this->getData('validate')) {
                 $html .= '<span class="success">';
@@ -644,5 +650,51 @@ class Bimp_Product extends BimpObject
         }
 
         return parent::validatePost();
+    }
+    
+    
+    public function getStockDate($date, $entrepot = null){
+        if(!isset(self::$stockDate[$date]))
+            self::initStockDate ($date);
+        return self::$stockDate[$date][$this->id][$entrepot]['stock'];
+    }
+    
+    public function getStockShoowRoom($entrepot = null){
+        if(!isset(self::$stockShowRoom[$this->id]))
+            self::initStockShowRoom ();
+        return self::$stockShowRoom[$this->id][$entrepot];
+    }
+    
+    private static function initStockDate($date){
+        global $db;
+        self::$stockDate = array();
+        $sql = $db->query("SELECT `fk_product`,`fk_entrepot`,reel FROM `llx_product_stock`");
+        while($ln = $db->fetch_object($sql)){
+            self::$stockDate[$date][$ln->fk_product][$ln->fk_entrepot]['now'] = $ln->reel;
+            self::$stockDate[$date][$ln->fk_product][$ln->fk_entrepot]['stock'] = $ln->reel;
+            self::$stockDate[$date][$ln->fk_product][null]['now'] += $ln->reel;
+            self::$stockDate[$date][$ln->fk_product][null]['stock'] += $ln->reel;
+        }
+        
+        $sql = $db->query("SELECT `fk_product`, `fk_entrepot`, SUM(`value`) as nb FROM `llx_stock_mouvement` WHERE `tms` > STR_TO_DATE('".$date."', '%Y-%m-%d') GROUP BY `fk_product`, `fk_entrepot`");
+        while($ln = $db->fetch_object($sql)){
+            if(!isset(self::$stockDate[$date][$ln->fk_product][$ln->fk_entrepot]['stock'] ))
+                self::$stockDate[$date][$ln->fk_product][$ln->fk_entrepot]['stock'] = 0;
+            if(!isset(self::$stockDate[$date][$ln->fk_product][null]['stock'] ))
+                self::$stockDate[$date][$ln->fk_product][null]['stock'] = 0;
+            
+            self::$stockDate[$date][$ln->fk_product][$ln->fk_entrepot]['stock'] -= $ln->nb;
+            self::$stockDate[$date][$ln->fk_product][null]['stock'] -= $ln->nb;
+        }
+    }
+    
+    private static function initStockShowRoom(){
+        global $db;
+        self::$stockShowRoom = array();
+        $sql = $db->query("SELECT `id_product`, `id_entrepot`, COUNT(*)as nb FROM `llx_be_equipment_place` p, llx_be_equipment e WHERE position = 1 AND p.id_equipment = e.id AND p.`type` = 5 GROUP BY `id_entrepot`, `id_product`");
+        while($ln = $db->fetch_object($sql)){
+            self::$stockShowRoom[$ln->id_product][$ln->id_entrepot] = $ln->nb;
+            self::$stockShowRoom[$ln->id_product][null] += $ln->nb;
+        }
     }
 }

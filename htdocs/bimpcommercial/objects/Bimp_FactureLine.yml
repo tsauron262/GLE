@@ -32,9 +32,3 @@ objects:
 lists: 
     default: 
         objects_change_reload: ObjectLineRemise,Bimp_Facture
-    dashBoardCommercial:
-        extends: default
-        sort_field: id
-        sort_way: desc
-        pagination: 1
-        n: 10

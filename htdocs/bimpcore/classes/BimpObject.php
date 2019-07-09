@@ -6054,8 +6054,10 @@ class BimpObject extends BimpCache
         $redirect = ((BimpTools::getValue("redirectForce") == 1) ? 1 : 0);
         $redirectMode = $this->redirectMode;
         $texteBtn = "";
+        if(BimpTools::getValue("redirectForce_oldVersion"))
+            $_SESSION['oldVersion'] = true;
         if ($this->iAmAdminRedirect()) {
-            if ($redirectMode == 4) {
+            if ($redirectMode == 4 && (isset($_SESSION['oldVersion']) || !$newVersion)) {//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
                 $redirectMode = 1;
                 $texteBtn = "ADMIN (N) : ";
             } elseif ($redirectMode == 5) {
@@ -6065,6 +6067,8 @@ class BimpObject extends BimpCache
         }
         $btn = false;
         if ($newVersion) {
+            if($redirect)
+                unset($_SESSION['oldVersion']);
             if ($this->id > 0)
                 $url = $this->getUrl();
             else
@@ -6103,6 +6107,9 @@ class BimpObject extends BimpCache
 //            https://erp.bimp.fr/test11/bimpcommercial/index.php?search=1&object=propal&sall=PR1809-91794&fc=propals
         }
         else {
+            if($redirect)
+                $_SESSION['oldVersion'] = true;
+            
             $url = BimpTools::getDolObjectUrl($this->dol_object, $this->id);
             $texteBtn .= "Ancienne version";
             if ($redirectMode == 5)

@@ -2203,8 +2203,10 @@ class ObjectLine extends BimpObject
                 if ($this->isEditable()) {
                     $this->pu_ht = (float) $total_ht / $this->qty;
                 }
-                $this->pa_ht = (float) $total_achat / $this->qty;
-                $this->id_fourn_price = 0;
+                if(((float) $total_achat / $this->qty)> 0){
+                    $this->pa_ht = (float) $total_achat / $this->qty;
+                    $this->id_fourn_price = 0;
+                }
             }
         }
     }

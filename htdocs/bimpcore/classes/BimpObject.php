@@ -6054,6 +6054,8 @@ class BimpObject extends BimpCache
         $redirect = ((BimpTools::getValue("redirectForce") == 1) ? 1 : 0);
         $redirectMode = $this->redirectMode;
         $texteBtn = "";
+        if(BimpTools::getValue("redirectForce_oldVersion"))
+            $_SESSION['oldVersion'] = true;
         if ($this->iAmAdminRedirect()) {
             if ($redirectMode == 4 && (isset($_SESSION['oldVersion']) || !$newVersion)) {//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
                 $redirectMode = 1;

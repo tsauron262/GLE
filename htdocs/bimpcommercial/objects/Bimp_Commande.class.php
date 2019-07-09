@@ -113,17 +113,16 @@ class Bimp_Commande extends BimpComm
 
     public function isActionAllowed($action, &$errors = array())
     {
-        if (!$this->isLoaded()) {
-            $errors[] = 'ID de la commande absent';
-            return 0;
-        }
-
         global $conf;
         $status = (int) $this->getData('fk_statut');
         $invalide_error = 'Le statut actuel de la commande ne permet pas cette opération';
 
         switch ($action) {
             case 'sendMail':
+                if (!$this->isLoaded()) {
+                    $errors[] = 'ID de la commande absent';
+                    return 0;
+                }
                 if ($status <= Commande::STATUS_DRAFT) {
                     $errors[] = $invalide_error;
                     return 0;
@@ -131,6 +130,10 @@ class Bimp_Commande extends BimpComm
                 return 1;
 
             case 'validate':
+                if (!$this->isLoaded()) {
+                    $errors[] = 'ID de la commande absent';
+                    return 0;
+                }
                 if ($status !== Commande::STATUS_DRAFT) {
                     $errors[] = $invalide_error;
                     return 0;
@@ -144,6 +147,10 @@ class Bimp_Commande extends BimpComm
                 return 1;
 
             case 'modify':
+                if (!$this->isLoaded()) {
+                    $errors[] = 'ID de la commande absent';
+                    return 0;
+                }
 //                return 0; // blocage par trigger : à voir si on fait sauter. 
                 if (!in_array($status, array(1, 2, 3))) {
                     $errors[] = $invalide_error;
@@ -156,6 +163,10 @@ class Bimp_Commande extends BimpComm
                 return 1;
 
             case 'reopen':
+                if (!$this->isLoaded()) {
+                    $errors[] = 'ID de la commande absent';
+                    return 0;
+                }
                 if (!in_array($status, array(Commande::STATUS_CLOSED, Commande::STATUS_CANCELED))) {
                     $errors[] = $invalide_error;
                     return 0;
@@ -167,6 +178,10 @@ class Bimp_Commande extends BimpComm
                 return 1;
 
             case 'cancel':
+                if (!$this->isLoaded()) {
+                    $errors[] = 'ID de la commande absent';
+                    return 0;
+                }
                 if ($status !== Commande::STATUS_VALIDATED) {
                     $errors[] = $invalide_error;
                     return 0;
@@ -174,6 +189,10 @@ class Bimp_Commande extends BimpComm
                 return 1;
 
             case 'processLogitique':
+                if (!$this->isLoaded()) {
+                    $errors[] = 'ID de la commande absent';
+                    return 0;
+                }
                 if (!in_array($status, self::$logistique_active_status)) {
                     $errors[] = 'La logistique n\'est pas active pour cette commande';
                     return 0;
@@ -185,6 +204,10 @@ class Bimp_Commande extends BimpComm
                 return 1;
 
             case 'forceStatus':
+                if (!$this->isLoaded()) {
+                    $errors[] = 'ID de la commande absent';
+                    return 0;
+                }
                 if (!$this->isLogistiqueActive()) {
                     $errors[] = 'La logistique n\'est pas active';
                     return 0;

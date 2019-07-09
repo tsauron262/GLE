@@ -24,11 +24,14 @@ class BL_CommandeFournReception extends BimpObject
         return parent::isFieldEditable($field, $force_edit);
     }
 
-    public function isActionAllowed($action, &$errors)
+    public function isActionAllowed($action, &$errors = array())
     {
         switch ($action) {
             case 'saveLinesData':
             case 'validateReception':
+                if (!$this->isLoaded($errors)) {
+                    return 0;
+                }
                 if ((int) $this->getData('status') !== self::BLCFR_BROUILLON) {
                     $errors[] = 'La réception n\'a pas le statut "brouillon"';
                     return 0;
@@ -36,6 +39,9 @@ class BL_CommandeFournReception extends BimpObject
                 return 1;
 
             case 'cancelReception':
+                if (!$this->isLoaded($errors)) {
+                    return 0;
+                }
                 if ((int) $this->getData('status') !== self::BLCFR_RECEPTIONNEE) {
                     $errors[] = 'La réception n\'a pas le statut "réceptionnée"';
                     return 0;

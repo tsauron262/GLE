@@ -180,7 +180,7 @@ class BimpController
     }
 
     public function display()
-    {
+    {        
         global $user;
         if ($user->id < 1) {
             die("Pas de User <a href='" . DOL_URL_ROOT . "'> Allez à la page de login</a>");

@@ -135,7 +135,19 @@ forms:
 #              input_name: lines
 #              content: 
 #                  callback: renderCommandeFournLinesForm
-                  
+    split: 
+        title: Scinder en deux réceptions
+        icon: fas_object-ungroup
+        rows: 
+            - field: ref
+            - field: date_received
+            - field: info
+            - custom: 1
+              label: Quantités et équipements à déplacer dans la nouvelle réception
+              input_name: lines
+              content: 
+                  callback: renderSplitDetailForm
+            
     validate: 
         rows: 
             - field: date_received

@@ -1146,6 +1146,59 @@ function onReceptionValidationFormSubmit($form, extra_data) {
     return extra_data;
 }
 
+function onSplitReceptionFormSubmit($form, extra_data) {
+    if ($.isOk($form)) {
+        var id_reception = parseInt($form.data('id_object'));
+        if (id_reception) {
+            var lines = [];
+
+            $form.find('tr.line_row').each(function () {
+                var $row = $(this);
+                var id_line = parseInt($row.data('id_line'));
+                var serialisable = parseInt($row.data('serialisable'));
+
+                if (serialisable) {
+                    var items = [];
+
+                    $(this).find('.line_' + id_line + '_items_check:checked').each(function () {
+                        items.push($(this).val());
+                    });
+
+                    lines.push({
+                        id_line: id_line,
+                        items: items
+                    });
+                } else {
+                    var qties = [];
+                    $row.find('tr.line_' + id_line + '_qty_row').each(function () {
+                        var idx = parseInt($(this).data('qty_idx'));
+                        var qty = 0;
+
+                        var $input = $(this).find('[name="line_' + id_line + '_reception_' + id_reception + '_qty_' + idx + '_qty"]');
+                        if ($.isOk($input)) {
+                            qty = parseFloat($input.val());
+                        }
+
+                        qties.push({
+                            idx: idx,
+                            qty: qty
+                        });
+                    });
+
+                    lines.push({
+                        id_line: id_line,
+                        qties: qties
+                    });
+                }
+            });
+
+            extra_data['lines'] = lines;
+        }
+    }
+
+    return extra_data;
+}
+
 function setAllReceptionLinesToMax($button) {
     var $container = $button.findParentByClass('reception_details');
 

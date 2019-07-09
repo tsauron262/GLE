@@ -195,7 +195,7 @@ class ObjectLine extends BimpObject
 
     public function isActionAllowed($action, &$errors = array())
     {
-        if (!$this->isLoaded()) {
+        if (in_array($action, array('attributeEquipment')) && !$this->isLoaded()) {
             $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
             return 0;
         }

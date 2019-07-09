@@ -27,7 +27,9 @@ class Bimp_Product extends BimpObject
     public function isSerialisable()
     {
         if ($this->isLoaded()) {
-            return (int) $this->getData('serialisable');
+            if ($this->isTypeProduct()) {
+                return (int) $this->getData('serialisable');
+            }
         }
 
         return 0;
@@ -323,16 +325,38 @@ class Bimp_Product extends BimpObject
 
     public function getProductFournisseursPricesArray()
     {
-        $sql = 'SELECT MAX(fp.rowid) as id FROM ' . MAIN_DB_PREFIX . 'product_fournisseur_price fp WHERE fp.fk_product = ' . (int) $id_product;
+        $sql = 'SELECT MAX(fp.rowid) as id FROM ' . MAIN_DB_PREFIX . 'product_fournisseur_price fp WHERE fp.fk_product = ' . (int) $this->id;
         $result = $this->db->executeS($sql);
         if (isset($result[0]->id)) {
             return (int) $result[0]->id;
         }
     }
 
+    public function getCurrentPaHt()
+    {
+        if ($this->isLoaded()) {
+            $pa_ht = (float) $this->getData('pmp');
+            if (!$pa_ht) {
+                $pa_ht = (float) $this->getCurrentFournPriceAmount();
+
+                if (!$pa_ht) {
+                    $pa_ht = (float) $this->getData('pa_prevu');
+                }
+            }
+
+            return $pa_ht;
+        }
+
+        return 0;
+    }
+
     public function getCurrentFournPriceId($id_fourn = null)
     {
         if ($this->isLoaded()) {
+            if ((int) $this->getData('id_cur_fp')) {
+                return (int) $this->getData('id_cur_fp');
+            }
+
             $sql = 'SELECT MAX(fp.rowid) as id FROM ' . MAIN_DB_PREFIX . 'product_fournisseur_price fp WHERE fp.fk_product = ' . $this->id;
 
             if (!is_null($id_fourn) && (int) $id_fourn) {

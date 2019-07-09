@@ -253,6 +253,9 @@ lists_cols:
                     
 lists: 
     default: 
+        checkboxes: 1
+        item_checkbox: 
+            callback: isFacturable
         configurable: 1
         filters_panel: default
         sort_field: id
@@ -267,6 +270,10 @@ lists:
         objects_change_reload: Bimp_CommandeFourn,Bimp_FactureFourn,Bimp_CommandeFournLine,Bimp_FactureFournLine
         extra_btn: 
             callback: getListsExtraBtn
+        bulk_actions: 
+            - label: Créer une facture unique
+              icon: fas_file-invoice-dollar
+              onclick: selectedReceptionsFactureFourn($(this), 'list_id') 
         cols:
             commande: 
             num_reception:
@@ -278,10 +285,7 @@ lists:
             facture:
                     
     commandes_fourn: 
-        checkboxes: 1
         configurable: 1
-        bulk_actions: 
-            callback: getCommandesFournListbulkActions
         enable_search: 0
         pagination: 0
         sort_field: id

@@ -405,11 +405,6 @@ class BS_SAV extends BimpObject
 
     public function isActionAllowed($action, &$errors = array())
     {
-        if (!$this->isLoaded()) {
-            $errors[] = 'ID du SAV absent';
-            return 0;
-        }
-
         $status = (int) $this->getData('status');
         $propal = null;
         $propal_status = null;
@@ -428,6 +423,9 @@ class BS_SAV extends BimpObject
 
         switch ($action) {
             case 'start':
+                if (!$this->isLoaded($errors)) {
+                    return 0;
+                }
                 if (!in_array($status, array(self::BS_SAV_NEW, self::BS_SAV_ATT_CLIENT_ACTION))) {
                     $errors[] = $status_error;
                     return 0;
@@ -436,6 +434,9 @@ class BS_SAV extends BimpObject
 
             case 'propalAccepted':
             case 'propalRefused':
+                if (!$this->isLoaded($errors)) {
+                    return 0;
+                }
                 if (is_null($propal)) {
                     $errors[] = 'Devis absent ou invalide';
                     return 0;
@@ -451,6 +452,9 @@ class BS_SAV extends BimpObject
                 return 1;
 
             case 'validate_propal':
+                if (!$this->isLoaded($errors)) {
+                    return 0;
+                }
                 if (is_null($propal)) {
                     $errors[] = 'Devis absent';
                     return 0;
@@ -466,6 +470,9 @@ class BS_SAV extends BimpObject
                 return 1;
 
             case 'reviewPropal':
+                if (!$this->isLoaded($errors)) {
+                    return 0;
+                }
                 if (is_null($propal)) {
                     $errors[] = 'Devis absent';
                     return 0;
@@ -481,6 +488,9 @@ class BS_SAV extends BimpObject
                 return 1;
 
             case 'waitClient':
+                if (!$this->isLoaded($errors)) {
+                    return 0;
+                }
                 if (!is_null($propal) && $propal_status > 0) {
                     $errors[] = 'Le devis est validé';
                     return 0;
@@ -493,6 +503,9 @@ class BS_SAV extends BimpObject
                 return 1;
 
             case 'toRestitute':
+                if (!$this->isLoaded($errors)) {
+                    return 0;
+                }
                 if (!in_array($status, array(self::BS_SAV_REP_EN_COURS, self::BS_SAV_DEVIS_REFUSE))) {
                     $errors[] = $status_error;
                     return 0;
@@ -510,6 +523,9 @@ class BS_SAV extends BimpObject
                 return 1;
 
             case 'close':
+                if (!$this->isLoaded($errors)) {
+                    return 0;
+                }
                 if (is_null($propal) && $status === self::BS_SAV_FERME) {
                     $errors[] = 'Ce SAV est déjà fermé';
                     return 0;

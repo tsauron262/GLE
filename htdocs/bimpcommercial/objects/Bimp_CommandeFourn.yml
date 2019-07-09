@@ -295,82 +295,151 @@ forms:
         title: Facturation de réceptions
         icon: fas_file-invoice-dollar
         rows: 
-            - custom: 1
-              label: Réceptions de la commande à facturer
-              input_name: receptions
-              data_type: id
-              input: 
-                  type: check_list
-                  items: 
-                      array: factureReceptions
-            - custom: 1
-              label: Facture fournisseur
-              data_type: id
-              input_name: id_facture
-              input: 
-                 type: select
-                 options: 
-                     array: facturesFournisseur
-                 help: Liste des factures fournisseur brouillon pour ce fournisseur et ce secteur.
-            - custom: 1
-              label: Référence fournisseur
-              input_name: ref_supplier
-              data_type: string
-              input: 
-                  type: text
-              display_if: 
-                  field_name: id_facture
-                  show_values: 0
-            - custom: 1
-              label: Date facture
-              data_type: date
-              input_name: datef
-              input: 
-                  type: date
-                  display_now: 1
-              display_if: 
-                  field_name: id_facture
-                  show_values: 0
-            - custom: 1
-              label: Conditions de réglement
-              input_name: id_cond_reglement
-              data_type: id
-              input: 
-                  type: select_cond_reglement
-              display_if: 
-                  field_name: id_facture
-                  show_values: 0
-            - custom: 1
-              label: Mode de réglement
-              input_name: id_mode_reglement
-              data_type: id
-              input: 
-                  type: select_payment
-              display_if: 
-                  field_name: id_facture
-                  show_values: 0
-            - custom: 1
-              label: Note publique
-              input_name: note_public
-              data_type: text
-              input: 
-                  type: textarea
-                  rows: 3
-                  auto_expand: 1
-              display_if: 
-                  field_name: id_facture
-                  show_values: 0
-            - custom: 1
-              label: Note privée
-              input_name: note_private
-              data_type: text
-              input: 
-                  type: textarea
-                  rows: 3
-                  auto_expand: 1
-              display_if: 
-                  field_name: id_facture
-                  show_values: 0
+            receptions: 
+                custom: 1
+                label: Réceptions de la commande à facturer
+                input_name: receptions
+                data_type: id
+                input: 
+                    type: check_list
+                    items: 
+                        array: factureReceptions
+            add_origin_line: 
+                custom: 1
+                label: Inclure des lignes de texte indiquant la ou les commandes fournisseur d'origine
+                input_name: add_origin_line
+                data_type: bool
+                input: 
+                    type: toggle
+                value: 1
+            id_facture: 
+                custom: 1
+                label: Facture fournisseur
+                data_type: id
+                input_name: id_facture
+                input: 
+                   type: select
+                   options: 
+                       array: facturesFournisseur
+                   help: Liste des factures fournisseur brouillon pour ce fournisseur et ce secteur.
+            id_entrepot: 
+                custom: 1
+                show: 0
+                label: Entrepôt
+                input_name: id_entrepot
+                input: 
+                    type: search_entrepot
+                display_if: 
+                    field_name: id_facture
+                    show_values: 0
+            libelle: 
+                custom: 1
+                label: Libelle
+                input_name: libelle
+                input: 
+                    type: text
+                display_if: 
+                    field_name: id_facture
+                    show_values: 0
+            ef_type: 
+                custom: 1
+                show: 0
+                label: Secteur
+                input_name: ef_type
+                input: 
+                    type: select
+                    options: 
+                        array: secteurs
+                display_if: 
+                    field_name: id_facture
+                    show_values: 0
+            ref_supplier:
+                custom: 1
+                label: Référence fournisseur
+                input_name: ref_supplier
+                data_type: string
+                input: 
+                    type: text
+                display_if: 
+                    field_name: id_facture
+                    show_values: 0
+            datef: 
+                custom: 1
+                label: Date facture
+                data_type: date
+                input_name: datef
+                input: 
+                    type: date
+                    display_now: 1
+                display_if: 
+                    field_name: id_facture
+                    show_values: 0
+            cond_reglement: 
+                custom: 1
+                label: Conditions de réglement
+                input_name: id_cond_reglement
+                data_type: id
+                input: 
+                    type: select_cond_reglement
+                display_if: 
+                    field_name: id_facture
+                    show_values: 0
+            mode_reglement: 
+                custom: 1
+                label: Mode de réglement
+                input_name: id_mode_reglement
+                data_type: id
+                input: 
+                    type: select_payment
+                display_if: 
+                    field_name: id_facture
+                    show_values: 0
+            note_publique: 
+                custom: 1
+                label: Note publique
+                input_name: note_public
+                data_type: text
+                input: 
+                    type: textarea
+                    rows: 3
+                    auto_expand: 1
+                display_if: 
+                    field_name: id_facture
+                    show_values: 0
+            note_privee: 
+                custom: 1
+                label: Note privée
+                input_name: note_private
+                data_type: text
+                input: 
+                    type: textarea
+                    rows: 3
+                    auto_expand: 1
+                display_if: 
+                    field_name: id_facture
+                    show_values: 0
+                  
+    bulk_invoice: 
+        extends: invoice
+        title: Nouvelle facture fournisseur
+        rows: 
+            receptions: 
+                label: Réceptions à facturer
+                input: 
+                    items: 
+                        array: postReceptions
+                    help: Attention, toutes les réceptions doivent être du même fournisseur
+                value: 
+                    request_field: receptions                    
+            id_facture: 
+                hidden: 1
+                input: 
+                    type: hidden
+                value: 0
+            id_entrepot: 
+                show: 1
+            ef_type: 
+                show: 1
          
 fields_tables: 
     infos: 

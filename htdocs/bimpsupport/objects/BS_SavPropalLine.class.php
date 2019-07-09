@@ -32,13 +32,11 @@ class BS_SavPropalLine extends Bimp_PropalLine
 
     public function isActionAllowed($action, &$errors = array())
     {
-        if (!$this->isLoaded()) {
-            $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
-            return 0;
-        }
-
         switch ($action) {
             case 'attributeEquipment':
+                if (!$this->isLoaded($errors)) {
+                    return 0;
+                }
                 $propal = $this->getParentInstance();
                 if (!BimpObject::objectLoaded($propal)) {
                     $errors[] = 'ID du devis absent';

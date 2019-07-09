@@ -28,11 +28,11 @@ class importVente extends import8sens {
         $this->dateDepart = "31/03/2019";
         
         
-//        $this->dateAchatDef = "05/10/2014";
-//        $this->path .= "../inventaire/olys/exportVente/";
+        $this->dateAchatDef = "05/10/2014";
+        $this->path .= "../inventaire/olys/exportVente/";
         
-        $this->dateAchatDef = "01/01/2016";
-        $this->path .= "../inventaire/comp/exportVente/";
+//        $this->dateAchatDef = "01/01/2016";
+//        $this->path .= "../inventaire/comp/exportVente/";
         
         
         

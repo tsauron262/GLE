@@ -693,7 +693,7 @@ class BL_CommandeShipment extends BimpObject
     public function renderCommandeLinesForm()
     {
         $html = '';
-
+        
         $commande = $this->getParentInstance();
 
         if (!BimpObject::objectLoaded($commande)) {

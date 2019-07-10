@@ -297,6 +297,13 @@ lists:
             facture:
                     
     commandes_fourn: 
+        checkboxes: 1
+        item_checkbox: 
+            callback: isFacturable
+        bulk_actions: 
+            - label: Créer une facture unique
+              icon: fas_file-invoice-dollar
+              onclick: selectedReceptionsFactureFourn($(this), 'list_id') 
         configurable: 1
         enable_search: 0
         pagination: 0

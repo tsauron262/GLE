@@ -1,0 +1,123 @@
+table: product_stock
+primary: rowid
+
+
+labels: 
+    name: Stock par Entrepot
+    is_female: 0
+    
+objects:
+                
+    product: 
+        instance: 
+            id_object: fk_product
+            
+    category: 
+        relation: none
+        delete: 0
+        instance: 
+            dol_object: 
+                module: categories
+                file: categorie
+                
+fields: 
+#    Champs facturedet: 
+    fk_entrepot: 
+        label: Entrepot
+        type: id_object
+        object: entrepot
+        values: 
+            array: entrepots
+        
+    fk_product: 
+        label: Produit
+        type: id_object
+        object: product
+        
+    reel: 
+        label: Stock
+        type: int
+    stockShowRoom: 
+        label: Stock ShowRoom
+        extra: 1
+        type: int
+        
+    ventes_qty:
+        label: Nb Ventes
+        extra: 1
+        type: int
+    ventes_ht:
+        label: Ventes Ht
+        extra: 1
+        type: money
+   
+    product_categories: 
+        label: Catégories produit
+        extra: 1
+        type: items_list
+        items_data_type: id_object
+        object: category
+
+            
+                                    
+lists: 
+    default: 
+        title: Produits/Entrepots
+        icon: fas_box
+        configurable: 1
+        filters_panel: default
+        sort_field: id
+        sort_way: desc
+        n: 50
+        cols: 
+            fk_entrepot: 
+                field: fk_entrepot
+            fk_product: 
+                field: fk_product
+            reel: 
+                field: reel
+            stockShowRoom:
+                field: stockShowRoom
+            ventes_qty:
+                field: ventes_qty
+            ventes_ht:
+                field: ventes_ht
+        
+filters_panels: 
+    default: 
+        filters: 
+            dates: 
+                field: date
+            entrepot: 
+                field: fk_entrepot
+            product: 
+                field: fk_product
+            stock: 
+                field: reel
+            categ1:
+                custom: 1
+                label: Catégorie (1)
+                field: categ1
+                type: value
+                input:
+                    type: select
+                    options: 
+                        callback: getCategoriesArray
+            categ2:
+                custom: 1
+                label: Catégorie (2)
+                field: categ2
+                type: value
+                input:
+                    type: select
+                    options: 
+                        callback: getCategoriesArray
+            categ3:
+                custom: 1
+                label: Catégorie (3)
+                field: categ3
+                type: value
+                input:
+                    type: select
+                    options: 
+                        callback: getCategoriesArray

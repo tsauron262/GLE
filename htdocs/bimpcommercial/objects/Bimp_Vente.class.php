@@ -181,13 +181,15 @@ class Bimp_Vente extends BimpObject
             66 => 'test'
         );
         foreach ($products_list as $id_product) {
-            $entrepots_data = $product->getAppleCsvData($dateFrom, $dateTo, $entrepots, $id_product);
+            $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $id_product);
+            $entrepots_data = $product->getAppleCsvData($dateFrom, $dateTo, $entrepots);
 
             foreach ($entrepots_data as $id_entrepot => $data) {
                 if ((int) $data['ventes']['qty'] || (int) $data['stock'] || (int) $data['stock_showroom']) {
                     $file_str .= implode(';', array(
                                 $id_entrepot, // A remplacer par ship_to
                                 preg_replace('/^APP\-(.*)$/', '$1', $product->getRef()),
+                                $product->getRef(),
                                 $data['ventes']['qty'],
                                 0,
                                 $data['stock'],

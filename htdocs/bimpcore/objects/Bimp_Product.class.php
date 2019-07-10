@@ -147,15 +147,21 @@ class Bimp_Product extends BimpObject
         return 0;
     }
 
-    public function getVentes($dateMin, $dateMax = null, $id_entrepot = null)
+    public function getVentes($dateMin, $dateMax = null, $id_entrepot = null, $id_product = null)
     {
-        if (!isset(self::$ventes[$this->id]))
-            self::initVentes($dateMin, $dateMax);
-
-        if (isset(self::$ventes[$dateMin . "-" . $dateMax][$this->id][$id_entrepot])) {
-            return self::$ventes[$dateMin . "-" . $dateMax][$this->id][$id_entrepot];
+        if (is_null($id_product) && $this->isLoaded()) {
+            $id_product = $this->id;
         }
-        
+
+        if ((int) $id_product) {
+            if (!isset(self::$ventes[$id_product]))
+                self::initVentes($dateMin, $dateMax);
+
+            if (isset(self::$ventes[$dateMin . "-" . $dateMax][$id_product][$id_entrepot])) {
+                return self::$ventes[$dateMin . "-" . $dateMax][$id_product][$id_entrepot];
+            }
+        }
+
         return array(
             'qty'       => 0,
             'total_ht'  => 0,
@@ -163,16 +169,20 @@ class Bimp_Product extends BimpObject
         );
     }
 
-    public function getAppleCsvData($dateMin, $dateMax, $entrepot_array)
+    public function getAppleCsvData($dateMin, $dateMax, $entrepot_array, $id_product = null)
     {
         $data = array();
 
-        if ($this->isLoaded()) {
+        if (is_null($id_product) && $this->isLoaded()) {
+            $id_product = $this->id;
+        }
+
+        if ((int) $id_product) {
             foreach ($entrepot_array as $id_entrepot => $entrepot_label) {
                 $data[$id_entrepot] = array(
-                    'ventes'         => $this->getVentes($dateMin, $dateMax, $id_entrepot),
-                    'stock'          => $this->getStockDate($dateMax, $id_entrepot),
-                    'stock_showroom' => $this->getStockShoowRoom($id_entrepot)
+                    'ventes'         => $this->getVentes($dateMin, $dateMax, $id_entrepot, $id_product),
+                    'stock'          => $this->getStockDate($dateMax, $id_entrepot, $id_product),
+                    'stock_showroom' => $this->getStockShoowRoom($id_entrepot, $id_product)
                 );
             }
         }
@@ -244,25 +254,37 @@ class Bimp_Product extends BimpObject
         return $stocks;
     }
 
-    public function getStockDate($date, $id_entrepot = null)
+    public function getStockDate($date, $id_entrepot = null, $id_product = null)
     {
-        if (!isset(self::$stockDate[$date]))
-            self::initStockDate($date);
+        if (is_null($id_product) && $this->isLoaded()) {
+            $id_product = $this->id;
+        }
 
-        if (isset(self::$stockDate[$date][$this->id][$id_entrepot]['stock'])) {
-            return self::$stockDate[$date][$this->id][$id_entrepot]['stock'];
+        if ((int) $id_product) {
+            if (!isset(self::$stockDate[$date]))
+                self::initStockDate($date);
+
+            if (isset(self::$stockDate[$date][$id_product][$id_entrepot]['stock'])) {
+                return self::$stockDate[$date][$id_product][$id_entrepot]['stock'];
+            }
         }
 
         return 0;
     }
 
-    public function getStockShoowRoom($id_entrepot = null)
+    public function getStockShoowRoom($id_entrepot = null, $id_product = null)
     {
-        if (!isset(self::$stockShowRoom[$this->id]))
-            self::initStockShowRoom();
+        if (is_null($id_product) && $this->isLoaded()) {
+            $id_product = $this->id;
+        }
 
-        if (isset(self::$stockShowRoom[$this->id][$id_entrepot])) {
-            return self::$stockShowRoom[$this->id][$id_entrepot];
+        if ((int) $id_product) {
+            if (!isset(self::$stockShowRoom[$id_product]))
+                self::initStockShowRoom();
+
+            if (isset(self::$stockShowRoom[$id_product][$id_entrepot])) {
+                return self::$stockShowRoom[$id_product][$id_entrepot];
+            }
         }
 
         return 0;

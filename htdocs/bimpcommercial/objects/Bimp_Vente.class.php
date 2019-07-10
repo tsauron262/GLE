@@ -172,30 +172,30 @@ class Bimp_Vente extends BimpObject
                     )
         ));
 
-        $lines = array();
         $product = BimpObject::getInstance('bimpcore', 'Bimp_Product');
 
+        $file_str = '';
+
+        $entrepots = BimpCache::getEntrepotsArray();
         foreach ($products_list as $id_product) {
-            $product->fetch((int) $id_product);
+            $entrepots_data = $product->getAppleCsvData($dateFrom, $dateTo, $entrepots, $id_product);
 
-            $entrepots_data = $product->getAppleCsvData($dateFrom, $dateTo, BimpCache::getEntrepotsArray());
-
-            $file_str = '';
-            
             foreach ($entrepots_data as $id_entrepot => $data) {
-                $file_str .= implode(';', array(
-                    $id_entrepot, // A remplacer par ship_to
-                    preg_replace('/^APP\-(.*)$/', '$1', $product->getRef()),
-                    $data['ventes']['qty'],
-                    0,
-                    $data['stock'],
-                    $data['stock_showroom'],
-                    0,
-                    0,
-                    0,
-                    0,
-                    0
-                )) . "\n";
+                if ((int) $data['ventes']['qty'] || (int) $data['stock'] || (int) $data['stock_showroom']) {
+                    $file_str .= implode(';', array(
+                                $id_entrepot, // A remplacer par ship_to
+                                preg_replace('/^APP\-(.*)$/', '$1', $product->getRef()),
+                                $data['ventes']['qty'],
+                                0,
+                                $data['stock'],
+                                $data['stock_showroom'],
+                                0,
+                                0,
+                                0,
+                                0,
+                                0
+                            )) . "\n";
+                }
             }
         }
 

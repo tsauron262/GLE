@@ -290,7 +290,7 @@ class Bimp_Product extends BimpObject
             if(!count(self::$lienShowRoomEntrepot))
                 self::initLienShowRoomEntrepot ();
             if(isset(self::$lienShowRoomEntrepot[$id_entrepot]))
-                $this->getStockDate($date, self::$lienShowRoomEntrepot[$id_entrepot]);
+                return $this->getStockDate($date, self::$lienShowRoomEntrepot[$id_entrepot], $id_product);
         }
 
         return 0;

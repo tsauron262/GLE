@@ -162,34 +162,58 @@ class Bimp_Vente extends BimpObject
 
     public function generateAppleCSV($dateFrom, $dateTo, &$errors = array())
     {
-        set_time_limit(3600);
-
-        BimpTools::$currencies;
-        $products_list = BimpCache::getBimpObjectList('bimpcore', 'Bimp_Product', array(
-                    'ref' => array(
-                        'part_type' => 'beginning',
-                        'part'      => 'APP-'
-                    )
-        ));
+        set_time_limit(0);
 
         $product = BimpObject::getInstance('bimpcore', 'Bimp_Product');
+        $products_list = $product->getList(array(
+            'ref' => array(
+                'part_type' => 'beginning',
+                'part'      => 'APP-'
+            )
+                ), null, null, 'id', 'asc', 'array', array('rowid', 'ref'));
 
         $file_str = '';
 
-        $entrepots = BimpCache::getEntrepotsArray();
-        $entrepots = array(
-            66 => 'test'
-        );
-        foreach ($products_list as $id_product) {
-            $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $id_product);
-            $entrepots_data = $product->getAppleCsvData($dateFrom, $dateTo, $entrepots);
+        $file_str .= implode(';', array(
+            'ID d’emplacement pour le(s) entrepôt(s), le(s) magasin(s) et tout autre point de vente (peut être un ID attribué par le client ou par Apple)',
+            'Référence commerciale du produit (MPN) / Code JAN',
+            'Unités vendues et expédiées depuis les entrepôts ou les points de vente au client final (quantité brute en cas de « Quantité vendue renvoyée », sinon quantité nette).',
+            'Unités retournées par le client final.',
+            'Unités en stock prêtes à la vente dans les entrepôts et les points de vente (sans paiement ni dépôt du client) ',
+            'Unités de démonstration faisant partie des stocks dans les points de vente et les entrepôts',
+            'Unités en transit : entre les entrepôts et les points de vente ou inversement',
+            'Stocks invendables (par exemple, unités endommagées, hors d’usage à l’arrivée ou ouvertes avant d’être renvoyées)',
+            'Unités (avec paiement/versement d’arrhes du client) en attente d’expédition dans les entrepôts et les points de vente)',
+            'Unités commandées (avec paiement/versement d’arrhes du client) non expédiées pour cause de stocks insuffisants.',
+            'Stocks envoyés par Apple ou ses distributeurs et réservés dans les entrepôts ou les points de vente',
+            '1R - Université, Établissement d’enseignement supérieur ou école
+21 - Petite entreprise
+2L - Entreprise(ventes à une personne morale)
+BB - Partenaire commercial
+CQ - Siège social(achats destinés à la revente)
+E4 - Autre personne ou entité associée à l’étudiant
+EN - Utilisateur final
+HS - Établissement d’enseignement secondaire
+M8 - Établissement d’enseignement
+VO - École élémentaire
+VQ - Collège
+ QW - Gouvernement',
+            'Erreurs de validation de base'
+        )) . "\n";
 
-            foreach ($entrepots_data as $id_entrepot => $data) {
-                if ((int) $data['ventes']['qty'] || (int) $data['stock'] || (int) $data['stock_showroom']) {
+        $entrepots = BimpCache::getEntrepotsShipTos();
+        $entrepots = array(
+            66 => 'ship_to_test'
+        );
+
+        foreach ($products_list as $p) {
+            $entrepots_data = $product->getAppleCsvData($dateFrom, $dateTo, $entrepots, $p['rowid']);
+
+            foreach ($entrepots_data as $ship_to => $data) {
+                if ((int) $data['ventes'] || (int) $data['stock'] || (int) $data['stock_showroom']) {
                     $file_str .= implode(';', array(
-                                $id_entrepot, // A remplacer par ship_to
-                                preg_replace('/^APP\-(.*)$/', '$1', $product->getRef()),
-                                $product->getRef(),
+                                $ship_to,
+                                preg_replace('/^APP\-(.*)$/', '$1', $p['ref']),
                                 $data['ventes']['qty'],
                                 0,
                                 $data['stock'],
@@ -198,7 +222,9 @@ class Bimp_Vente extends BimpObject
                                 0,
                                 0,
                                 0,
-                                0
+                                0,
+                                '',
+                                ''
                             )) . "\n";
                 }
             }

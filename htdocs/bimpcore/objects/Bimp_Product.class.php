@@ -178,12 +178,18 @@ class Bimp_Product extends BimpObject
         }
 
         if ((int) $id_product) {
-            foreach ($entrepot_array as $id_entrepot => $entrepot_label) {
-                $data[$id_entrepot] = array(
-                    'ventes'         => $this->getVentes($dateMin, $dateMax, $id_entrepot, $id_product),
-                    'stock'          => $this->getStockDate($dateMax, $id_entrepot, $id_product),
-                    'stock_showroom' => $this->getStockShoowRoom($id_entrepot, $id_product)
-                );
+            foreach ($entrepot_array as $id_entrepot => $ship_to) {
+                if (!isset($data[$ship_to])) {
+                    $data[$ship_to] = array(
+                        'ventes'         => 0,
+                        'stock'          => 0,
+                        'stock_showroom' => 0
+                    );
+                }
+                $ventes = $this->getVentes($dateMin, $dateMax, $id_entrepot, $id_product);
+                $data[$ship_to]['ventes'] += $ventes['qty'];
+                $data[$ship_to]['stock'] += $this->getStockDate($dateMax, $id_entrepot, $id_product);
+                $data[$ship_to]['stock_showroom'] += $this->getStockShoowRoom($id_entrepot, $id_product);
             }
         }
 

@@ -3,7 +3,8 @@
 require_once("../../main.inc.php");
 
 ini_set('display_errors', 1);
-require_once __DIR__ . '/../Bimp_Lib.php';
+//require_once __DIR__ . '/../Bimp_Lib.php';
+require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 
 top_htmlhead('', 'BIMPCORE TEST', 0, 0, array(), array());
 

@@ -250,17 +250,19 @@ VO - École élémentaire
 VQ - Collège
  QW - Gouvernement
 
-";Erreurs de validation de base';
+";Erreurs de validation de base
+';
 
         $entrepots = BimpCache::getEntrepotsShipTos();
-        $entrepots = array(
-            66 => $entrepots[66]
-        );
 
         foreach ($products_list as $p) {
             $entrepots_data = $product->getAppleCsvData($dateFrom, $dateTo, $entrepots, $p['rowid']);
 
             foreach ($entrepots_data as $ship_to => $data) {
+                if($data['stock'] < 0)
+                    $data['stock'] = 0;
+                if($data['stock_showroom'] < 0)
+                    $data['stock_showroom'] = 0;
                 if ((int) $data['ventes'] || (int) $data['stock'] || (int) $data['stock_showroom']) {
                     $file_str .= implode(';', array(
                                 $ship_to,

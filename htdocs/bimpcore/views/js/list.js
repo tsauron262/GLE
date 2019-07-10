@@ -61,6 +61,19 @@ function reloadObjectList(list_id, callback) {
                         }
                         break;
 
+                    case 'values_range':
+                        search_data = {};
+                        var $min = $(this).find('[name=' + field_name + '_min]');
+                        var $max = $(this).find('[name=' + field_name + '_max]');
+                        data['search_fields'][field] = {};
+                        if ($min.length) {
+                            search_data['min'] = $min.val();
+                        }
+                        if ($max.length) {
+                            search_data['max'] = $max.val();
+                        }
+                        break;
+
                     default:
                         var $input = $(this).find('[name=' + field_name + ']');
                         if ($input.length) {
@@ -608,7 +621,7 @@ function setSelectedObjectsAction($button, list_id, action, extra_data, form_nam
             return;
         }
     }
-    
+
     if (typeof ($resultContainer) === 'undefined') {
         $resultContainer = null;
     }
@@ -1038,8 +1051,14 @@ function resetListSearchInputs(list_id) {
     if ($row.length) {
         $row.find('.searchInputContainer').each(function () {
             var field_name = $(this).data('field_name');
+            var search_type = $(this).data('search_type');
             if (field_name) {
-                $(this).find('[name=' + field_name + ']').val('');
+                if (search_type === 'values_range') {
+                    $(this).find('[name=' + field_name + '_min]').val('');
+                    $(this).find('[name=' + field_name + '_max]').val('');
+                } else {
+                    $(this).find('[name=' + field_name + ']').val('');
+                }
             }
         });
         $row.find('.ui-autocomplete-input').val('');
@@ -1334,6 +1353,15 @@ function setSearchInputsEvents($list) {
                                         reloadObjectList($list.attr('id'));
                                     });
                                 }
+                            }
+                            break;
+
+                        case 'values_range':
+                            var $inputs = $(this).find('[name=' + field_name + '_min]').add('[name=' + field_name + '_max]');
+                            if ($inputs.length) {
+                                $inputs.change(function () {
+                                    reloadObjectList($list.attr('id'));
+                                });
                             }
                             break;
 

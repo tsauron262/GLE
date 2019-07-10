@@ -43,6 +43,7 @@ class Bimp_Vente extends BimpObject
                 $fields['id_client'] = $facture->getData('fk_soc');
                 $fields['id_entrepot'] = $facture->getData('entrepot');
                 $fields['id_user'] = $facture->getData('fk_user_author');
+                $fields['secteur'] = $facture->getData('ef_type');
             }
 
             if ((int) $this->getData('fk_product')) {
@@ -123,34 +124,101 @@ class Bimp_Vente extends BimpObject
         return array();
     }
 
+    // Rendus HTML: 
+
+    public function getListHeaderButtons()
+    {
+        $buttons = array();
+
+        $dt = new DateTime();
+        $dow = (int) $dt->format('w');
+        if ($dow > 0) {
+            $dt->sub(new DateInterval('P' . $dow . 'D')); // Premier dimanche précédent. 
+        }
+        $date_to = $dt->format('Y-m-d');
+
+        $dt->sub(new DateInterval('P7D'));
+        $date_from = $dt->format('Y-m-d');
+
+        $buttons[] = array(
+            'classes'     => array('btn', 'btn-default'),
+            'label'       => 'Générer rapport Apple',
+            'icon_before' => 'fas_file-excel',
+            'attr'        => array(
+                'type'    => 'button',
+                'onclick' => $this->getJsActionOnclick('generateAppleCSV', array(
+                    'date_from' => $date_from,
+                    'date_to'   => $date_to
+                        ), array(
+                    'form_name' => 'generate_apple_cvs'
+                ))
+            )
+        );
+
+        return $buttons;
+    }
+
     // Traitements : 
 
-    public function generateAppleCSV($dateFrom, $dateTo)
+    public function generateAppleCSV($dateFrom, $dateTo, &$errors = array())
     {
-        $errors = array();
+        set_time_limit(3600);
 
-        $rows = $this->getList(array(
-            'a.fk_product' => array(
-                'operator' => '!=',
-                'value'    => 0
-            ),
-            'facture.datef' => array(
-                'between' => array('min' => $dateFrom, 'max' => $dateTo)
-            ),
-            'facture.type' => array(
-                'in' => array(Facture::TYPE_STANDARD, Facture::TYPE_CREDIT_NOTE)
-            )
-                ), null, null, 'rowid', 'asc', 'array', array('rowid'), array());
-        
-        
+        BimpTools::$currencies;
+        $products_list = BimpCache::getBimpObjectList('bimpcore', 'Bimp_Product', array(
+                    'ref' => array(
+                        'part_type' => 'beginning',
+                        'part'      => 'APP-'
+                    )
+        ));
 
         $lines = array();
+        $product = BimpObject::getInstance('bimpcore', 'Bimp_Product');
 
-        foreach ($lines as $line) {
-            
+        foreach ($products_list as $id_product) {
+            $product->fetch((int) $id_product);
+
+            $entrepots_data = $product->getAppleCsvData($dateFrom, $dateTo, BimpCache::getEntrepotsArray());
+
+            foreach ($entrepots_data as $id_entrepot => $data) {
+                $lines[] = implode(';', array(
+                    $id_entrepot, // A remplacer par ship_to
+                    preg_replace('/^APP\-(.*)$/', '$1', $product->getRef()),
+                    $data['ventes']['qty'],
+                    0,
+                    $data['stock'],
+                    $data['stock_showroom'],
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                ));
+            }
         }
-        
-        return $errors;
+
+        $file_str = '';
+        foreach ($lines as $line) {
+            $file_str .= $line . "\n";
+        }
+
+        $dir = DOL_DATA_ROOT . '/bimpcore/apple_csv/' . date('Y');
+        $fileName = $dateFrom . '_' . $dateTo . '.csv';
+
+        if (!file_exists(DOL_DATA_ROOT . '/bimpcore/apple_csv')) {
+            mkdir(DOL_DATA_ROOT . '/bimpcore/apple_csv');
+        }
+
+        if (!file_exists($dir)) {
+            mkdir($dir);
+        }
+
+        if (!file_put_contents($dir . '/' . $fileName, $file_str)) {
+            $errors[] = 'Echec de la création du fichier CSV';
+            return '';
+        }
+
+        return $fileName;
     }
 
     // Actions : 
@@ -160,11 +228,29 @@ class Bimp_Vente extends BimpObject
         $errors = array();
         $warnings = array();
         $success = '';
+        $success_callback = '';
 
+        $date_from = isset($data['date_from']) ? $data['date_from'] : date('Y-m-d');
+        $date_to = isset($data['date_to']) ? $data['date_to'] : '';
+
+        if (!$date_to) {
+            $dt = new DateTime($date_from);
+            $dt->sub(new DateInterval('P7D'));
+            $date_to = $dt->format('Y-m-d');
+        }
+
+        $file_name = $this->generateAppleCSV($date_from, $date_to, $errors);
+
+        if ($file_name && file_exists(DOL_DATA_ROOT . '/bimpcore/apple_csv/' . date('Y') . '/' . $file_name)) {
+            $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . htmlentities('apple_csv/' . date('Y') . '/' . $file_name);
+
+            $success_callback = 'window.open(\'' . $url . '\')';
+        }
 
         return array(
-            'errors'   => $errors,
-            'warnings' => $warnings
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $success_callback
         );
     }
 }

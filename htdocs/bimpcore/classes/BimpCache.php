@@ -1071,7 +1071,7 @@ class BimpCache
                         'a.fk_product' => (int) $id_product
             ));
 
-            $rows = self::getBdb()->executeS($sql);
+            $rows = self::getBdb()->executeS($sql, 'array');
 
             if (!is_null($rows) && count($rows)) {
                 foreach ($rows as $r) {

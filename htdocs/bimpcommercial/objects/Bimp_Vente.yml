@@ -10,6 +10,11 @@ labels:
     is_female: 1
     
 objects:
+    facture: 
+        instance: 
+            id_object: 
+                field_value: fk_facture
+                
     facture_line: 
         relation: hasOne
         delete: 0
@@ -35,6 +40,7 @@ fields:
     fk_facture: 
         label: Facture
         type: id_parent
+        object: facture
         
     fk_product: 
         label: Produit
@@ -112,6 +118,72 @@ fields:
         items_data_type: id_object
         object: category
      
+forms: 
+    generate_apple_cvs:
+        title: Générer Rapport CSV apple
+        force_edit: 1
+        rows: 
+            - custom: 1
+              label: Du
+              data_type: date
+              input_name: date_from
+              input: 
+                  type: date
+            - custom: 1
+              label: Au
+              data_type: date
+              input_name: date_to
+              input: 
+                  type: date    
+        
+fields_tables: 
+    infos: 
+        title: Infos
+        icon: fas_info-circle
+        rows: 
+            - field: date
+            - field: fk_product
+              display: nom_url
+            - field: id_entrepot
+              display: nom_url
+            - field: secteur
+            - field: id_user
+              display: nom_url
+            - field: id_client
+              display: card
+            - field: fk_facture
+              display: card
+              
+    montants: 
+        title: Montants
+        icon: fas_euro-sign
+        rows: 
+            - field: qty
+            - field: subprice
+            - field: tva_tx
+            - field: remise_percent
+            - field: total_ht
+            - field: total_tva
+            - field: total_ttc
+            
+views: 
+    default: 
+        rows: 
+            - cols: 
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  fields_table: 
+                      name: infos
+                
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  fields_table: 
+                      name: montants
+            
 filters_panels: 
     default: 
         filters: 
@@ -127,6 +199,69 @@ filters_panels:
                 field: id_client
             product: 
                 field: fk_product
+        
+
+lists_cols: 
+    facture: 
+        field: fk_facture
+        display: nom_url
+    product: 
+        field: fk_product
+        display: nom_url
+    subprice: 
+        field: subprice
+    tva_tx: 
+        field: tva_tx
+    qty: 
+        field: qty
+    remise_percent: 
+        field: remise_percent
+    total_ht: 
+        field: total_ht
+    total_tva: 
+        field: total_tva
+    total_ttc: 
+        field: total_ttc
+    date: 
+        field: date
+    entrepot: 
+        field: id_entrepot
+        display: nom_url
+    client: 
+        field: id_client
+        display: nom_url
+    user: 
+        field: id_user
+        display: nom_url
+    secteur: 
+        field: secteur
+    
+lists: 
+    default: 
+        title: Ventes de produits
+        configurable: 1
+        n: 10
+        sort_field: date
+        sort_way: desc
+        filters_panel: default
+        modal_view: default
+        list_filters: 
+            - name: fk_product
+              filter: 
+                  operator: '>' 
+                  value: 0
+        header_buttons:
+            callback: getListHeaderButtons
+        cols: 
+            product:
+            qty: 
+            total_ttc:
+            facture: 
+            date: 
+            secteur: 
+            entrepot:
+            user:
+        
         
 stats_lists: 
     default: 

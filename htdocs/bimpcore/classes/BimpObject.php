@@ -1536,6 +1536,42 @@ class BimpObject extends BimpCache
                     $seach_data = $bc_field->getSearchData();
 
                     switch ($seach_data['search_type']) {
+                        case 'search_object':
+                            $instance = null;
+                            if ($bc_field->params['type'] === 'id_parent') {
+                                $instance = BimpObject::getInstance($this->getParentModule(), $this->getParentObjectName());
+                            } elseif (isset($bc_field->params['object']) && $bc_field->params['object']) {
+                                $instance_params = $this->config->getObjectInstanceParams('', $bc_field->params['object']);
+                                if ($instance_params['object_type'] === 'bimp_object') {
+                                    $instance = BimpObject::getInstance($instance_params['module'], $instance_params['object_name']);
+                                }
+                            }
+                            if (is_a($instance, 'BimpObject')) {
+                                $id_prop = $instance->getPrimary();
+                                $ref_prop = $instance->getRefProperty();
+
+                                if ($id_prop) {
+                                    $table = $instance->getTable();
+                                    $joins[$table] = array(
+                                        'alias' => $table,
+                                        'table' => $table,
+                                        'on'    => $table . '.' . $id_prop . ' = ' . $alias . '.' . $field_name
+                                    );
+                                    $filters['or_' . $field_name] = array(
+                                        'or' => array(
+                                            $table . '.' . $id_prop => $value
+                                        )
+                                    );
+                                    if ($ref_prop) {
+                                        $filters['or_' . $field_name]['or'][$table . '.' . $ref_prop] = array(
+                                            'part_type' => 'middle',
+                                            'part'      => $value
+                                        );
+                                    }
+                                }
+                            }
+                            break;
+
                         case 'time_range':
                         case 'date_range':
                         case 'datetime_range':
@@ -6054,7 +6090,7 @@ class BimpObject extends BimpCache
         $redirect = ((BimpTools::getValue("redirectForce") == 1) ? 1 : 0);
         $redirectMode = $this->redirectMode;
         $texteBtn = "";
-        if(BimpTools::getValue("redirectForce_oldVersion"))
+        if (BimpTools::getValue("redirectForce_oldVersion"))
             $_SESSION['oldVersion'] = true;
         if ($this->iAmAdminRedirect()) {
             if ($redirectMode == 4 && (isset($_SESSION['oldVersion']) || !$newVersion)) {//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
@@ -6067,7 +6103,7 @@ class BimpObject extends BimpCache
         }
         $btn = false;
         if ($newVersion) {
-            if($redirect)
+            if ($redirect)
                 unset($_SESSION['oldVersion']);
             if ($this->id > 0)
                 $url = $this->getUrl();
@@ -6107,9 +6143,9 @@ class BimpObject extends BimpCache
 //            https://erp.bimp.fr/test11/bimpcommercial/index.php?search=1&object=propal&sall=PR1809-91794&fc=propals
         }
         else {
-            if($redirect)
+            if ($redirect)
                 $_SESSION['oldVersion'] = true;
-            
+
             $url = BimpTools::getDolObjectUrl($this->dol_object, $this->id);
             $texteBtn .= "Ancienne version";
             if ($redirectMode == 5)

@@ -282,7 +282,8 @@ function setObjectAction($button, object_data, action, extra_data, form_name, $r
             module: object_data.module,
             object_name: object_data.object_name,
             id_object: object_data.id_object,
-            processing_padding: 20,
+            display_processing: true,
+            processing_padding: 10,
             success: function (result, bimpAjax) {
                 if (typeof (successCallback) === 'function') {
                     successCallback(result);

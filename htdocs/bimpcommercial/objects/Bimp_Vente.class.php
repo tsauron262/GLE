@@ -180,8 +180,10 @@ class Bimp_Vente extends BimpObject
 
             $entrepots_data = $product->getAppleCsvData($dateFrom, $dateTo, BimpCache::getEntrepotsArray());
 
+            $file_str = '';
+            
             foreach ($entrepots_data as $id_entrepot => $data) {
-                $lines[] = implode(';', array(
+                $file_str .= implode(';', array(
                     $id_entrepot, // A remplacer par ship_to
                     preg_replace('/^APP\-(.*)$/', '$1', $product->getRef()),
                     $data['ventes']['qty'],
@@ -193,13 +195,8 @@ class Bimp_Vente extends BimpObject
                     0,
                     0,
                     0
-                ));
+                )) . "\n";
             }
-        }
-
-        $file_str = '';
-        foreach ($lines as $line) {
-            $file_str .= $line . "\n";
         }
 
         $dir = DOL_DATA_ROOT . '/bimpcore/apple_csv/' . date('Y');

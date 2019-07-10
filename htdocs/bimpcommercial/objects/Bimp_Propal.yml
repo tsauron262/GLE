@@ -300,13 +300,6 @@ views:
         objects_change_reload: Bimp_PropalLine,ObjectLineRemise,BimpFile
      
 lists_cols: 
-    commercial: 
-        label: Commercial
-        value: 
-            callback: displayCommercial
-        search: 
-            input: 
-                type: search_user
     date_create: 
         field: datec
     date: 

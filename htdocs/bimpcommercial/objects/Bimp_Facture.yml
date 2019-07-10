@@ -520,6 +520,7 @@ lists:
             statut: 
             paid: 
             soc: 
+            commercial:
             total_ttc: 
             pdf:
         

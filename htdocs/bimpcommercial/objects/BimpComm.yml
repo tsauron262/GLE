@@ -533,6 +533,13 @@ filters_panels:
                 field: note_public
                     
 lists_cols: 
+    commercial: 
+        label: Commercial
+        value: 
+            callback: displayCommercial
+        search: 
+            input: 
+                type: search_user
     libelle: 
         field: libelle
     secteur:

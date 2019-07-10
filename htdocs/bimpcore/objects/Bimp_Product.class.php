@@ -24,6 +24,7 @@ class Bimp_Product extends BimpObject
     private static $stockDate = array();
     private static $stockShowRoom = array();
     private static $ventes = array();
+    private static $lienShowRoomEntrepot = array();
 
     // Getters booléens
 
@@ -278,19 +279,24 @@ class Bimp_Product extends BimpObject
         return 0;
     }
 
-    public function getStockShoowRoom($id_entrepot = null, $id_product = null)
+    public function getStockShoowRoom($date, $id_entrepot = null, $id_product = null)
     {
         if (is_null($id_product) && $this->isLoaded()) {
             $id_product = $this->id;
         }
 
         if ((int) $id_product) {
-            if (!isset(self::$stockShowRoom[$id_product]))
-                self::initStockShowRoom();
-
-            if (isset(self::$stockShowRoom[$id_product][$id_entrepot])) {
-                return self::$stockShowRoom[$id_product][$id_entrepot];
-            }
+//            if (!isset(self::$stockShowRoom[$id_product]))
+//                self::initStockShowRoom();
+//
+//            if (isset(self::$stockShowRoom[$id_product][$id_entrepot])) {
+//                return self::$stockShowRoom[$id_product][$id_entrepot];
+//            }
+            
+            if(!count(self::$lienShowRoomEntrepot))
+                self::initLienShowRoomEntrepot ();
+            if(isset(self::$lienShowRoomEntrepot[$id_entrepot]))
+                return $this->getStockDate($date, self::$lienShowRoomEntrepot[$id_entrepot], $id_product);
         }
 
         return 0;
@@ -768,11 +774,25 @@ class Bimp_Product extends BimpObject
     {
         global $db;
         self::$stockShowRoom = array();
-        $sql = $db->query("SELECT `id_product`, `id_entrepot`, COUNT(*)as nb FROM `llx_be_equipment_place` p, llx_be_equipment e WHERE position = 1 AND p.id_equipment = e.id AND p.`type` = 5 GROUP BY `id_entrepot`, `id_product`");
+//        $sql = $db->query("SELECT `id_product`, `id_entrepot`, COUNT(*)as nb FROM `llx_be_equipment_place` p, llx_be_equipment e WHERE position = 1 AND p.id_equipment = e.id AND p.`type` = 5 GROUP BY `id_entrepot`, `id_product`");
+//        while ($ln = $db->fetch_object($sql)) {
+//            self::$stockShowRoom[$ln->id_product][$ln->id_entrepot] = $ln->nb;
+//            self::$stockShowRoom[$ln->id_product][null] += $ln->nb;
+//        }
+        
+        
+        
+    }
+    
+    private static function initLienShowRoomEntrepot(){
+        global $db;
+        self::$lienShowRoomEntrepot = array();
+        $sql = $db->query("SELECT e.rowid as id1, e2.rowid as id2 FROM `llx_entrepot` e,`llx_entrepot` e2 WHERE e2.ref = CONCAT('D',e.ref)");
         while ($ln = $db->fetch_object($sql)) {
-            self::$stockShowRoom[$ln->id_product][$ln->id_entrepot] = $ln->nb;
-            self::$stockShowRoom[$ln->id_product][null] += $ln->nb;
+            self::$lienShowRoomEntrepot[$ln->id1] = $ln->id2;
         }
+        
+        //
     }
 
     private static function initVentes($dateMin, $dateMax)

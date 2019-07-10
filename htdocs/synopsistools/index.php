@@ -64,6 +64,7 @@ if (isset($user->rights->SynopsisPrepaCom->import->Admin)){
     print" <br/><br/><a href='../synopsistools/class/testSav.class.php?actionTest=mailNonFerme&nbJ=15'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>Mail SAV non Fermé</span></a>";
     print" <br/><br/><a href='../synopsistools/class/testSav.class.php?actionTest=fermetureAuto'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>Fermeture SAV Auto</span></a>";
     print" <br/><br/><a href='../synopsistools/class/testSav.class.php?actionTest=rfpuAuto'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>Mail RFPU SAV Auto</span></a>";
+    print" <br/><br/><a href='../bimpcore/scripts/edit_signature.php'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>MAJ signatures utilisateurs</span></a>";
 }
 
 

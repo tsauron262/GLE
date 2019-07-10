@@ -73,7 +73,22 @@ class InterfaceDolObjects extends DolibarrTriggers
      */
     public function runTrigger($action, $object, User $user, Translate $langs, Conf $conf)
     {
-
+        // Edit signature
+        if($action == 'USER_CREATE' or $action == 'USER_MODIFY') {
+            global $db;
+            // tab card and signature unset
+                require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
+                if ((int) $object->id > 0)
+                    define('ID_SELECTED_FOR_SIGNATURE', (int) $object->id); // used in next script
+                if(ID_SELECTED_FOR_SIGNATURE > 0) {
+                    $user = new User($db);
+                    $user->fetch(ID_SELECTED_FOR_SIGNATURE);
+//                    if($user->signature == '')
+                    require_once DOL_DOCUMENT_ROOT . '/bimpcore/scripts/edit_signature.php';
+                }
+        }
+        
+        
         if ((BimpObject::objectLoaded($object))) {
             if (preg_match('/^([A-Z]+)_([A-Z]+)$/', $action, $matches)) {
                 $objKey = $matches[1];
@@ -96,7 +111,7 @@ class InterfaceDolObjects extends DolibarrTriggers
                 }
             }
         }
-
+        
         return 0;
     }
 }

@@ -150,26 +150,26 @@ class CronSynopsis {
   
         
         
-        if(!isset($_REQUEST['light'])){
-    //        require_once(DOL_DOCUMENT_ROOT . "/synopsistools/class/synopsisexport.class.php");
-    //        $export = new synopsisexport($this->db, 'file');
-    //        $export->exportFactureSav(false);
-            require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/importExport/exportfacture.class.php");
-            $export = new exportfacture($this->db);
-            $export->debug = $debug;
-            $export->exportTout(); 
-            $this->output = $export->output;
-
-
-
-            require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/importExport/exportCommande.class.php");
-            $export = new exportCommande($this->db);
-            $export->debug = $debug;
-            $export->exportTout(); 
-            $this->output .= $export->output;
-            
-        }
-        
+//        if(!isset($_REQUEST['light'])){
+//    //        require_once(DOL_DOCUMENT_ROOT . "/synopsistools/class/synopsisexport.class.php");
+//    //        $export = new synopsisexport($this->db, 'file');
+//    //        $export->exportFactureSav(false);
+//            require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/importExport/exportfacture.class.php");
+//            $export = new exportfacture($this->db);
+//            $export->debug = $debug;
+//            $export->exportTout(); 
+//            $this->output = $export->output;
+//
+//
+//
+//            require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/importExport/exportCommande.class.php");
+//            $export = new exportCommande($this->db);
+//            $export->debug = $debug;
+//            $export->exportTout(); 
+//            $this->output .= $export->output;
+//            
+//        }
+//        
 
 
         echo "fin";

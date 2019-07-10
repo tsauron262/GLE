@@ -186,7 +186,7 @@ class Bimp_Vente extends BimpObject
             'Unités (avec paiement/versement d’arrhes du client) en attente d’expédition dans les entrepôts et les points de vente)',
             'Unités commandées (avec paiement/versement d’arrhes du client) non expédiées pour cause de stocks insuffisants.',
             'Stocks envoyés par Apple ou ses distributeurs et réservés dans les entrepôts ou les points de vente',
-            '1R - Université, Établissement d’enseignement supérieur ou école
+            "1R - Université, Établissement d’enseignement supérieur ou école
 21 - Petite entreprise
 2L - Entreprise(ventes à une personne morale)
 BB - Partenaire commercial
@@ -197,7 +197,7 @@ HS - Établissement d’enseignement secondaire
 M8 - Établissement d’enseignement
 VO - École élémentaire
 VQ - Collège
- QW - Gouvernement',
+ QW - Gouvernement",
             'Erreurs de validation de base'
         )) . "\n";
 

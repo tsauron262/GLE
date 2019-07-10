@@ -594,12 +594,14 @@ class BimpCache
         }
 
         $rows = $instance->getList($filters, null, null, 'id', 'asc', 'array', array($instance->getPrimary()));
-
+        
         $list = array();
 
         foreach ($rows as $r) {
             $list[] = (int) $r[$instance->getPrimary()];
         }
+        
+        return $list;
     }
 
     public static function getBimpObjectObjects($module, $object_name, $filters)
@@ -1069,7 +1071,7 @@ class BimpCache
                         'a.fk_product' => (int) $id_product
             ));
 
-            $rows = self::getBdb()->executeS($sql);
+            $rows = self::getBdb()->executeS($sql, 'array');
 
             if (!is_null($rows) && count($rows)) {
                 foreach ($rows as $r) {

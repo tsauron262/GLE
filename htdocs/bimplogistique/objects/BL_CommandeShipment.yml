@@ -86,6 +86,13 @@ fields:
         default_value: 0
         values: 
             array: contacts
+        create_form: default
+        create_form_values: 
+            fields: 
+                fk_soc: 
+                    field_value: 
+                        field_name: fk_soc
+                        object: commande_client
             
     id_facture: 
         label: Facture
@@ -512,7 +519,8 @@ lists:
         filters_panel: default
         sort_field: id
         sort_way: desc
-        n: 25
+        pagination: 1
+        n: 10
         edit_btn: 1
         update_btn: 1
         edit_form: edit
@@ -521,6 +529,7 @@ lists:
         extra_btn: 
             callback: getExtraBtn
         cols:
+            ref:
             commande: 
             num_livraison:
             entrepot:
@@ -553,6 +562,7 @@ lists:
         extra_btn: 
             callback: getExtraBtn
         cols:
+            ref:
             num_livraison:
             entrepot:
             status: 

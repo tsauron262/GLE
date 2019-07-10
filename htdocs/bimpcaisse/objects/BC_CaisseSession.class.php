@@ -3,6 +3,22 @@
 class BC_CaisseSession extends BimpObject
 {
 
+    public function getCaissesArray()
+    {
+        $caisses = array(0 => '');
+
+        $instance = BimpObject::getInstance($this->module, 'BC_Caisse');
+        $list = $instance->getList(array(), null, null, 'id', 'asc', 'array', array(
+            'id', 'name'
+        ));
+
+        foreach ($list as $item) {
+            $caisses[(int) $item['id']] = $item['name'];
+        }
+
+        return $caisses;
+    }
+
     public function getPaymentsInfos()
     {
         if (!$this->isLoaded()) {
@@ -61,6 +77,19 @@ class BC_CaisseSession extends BimpObject
         }
 
         return $buttons;
+    }
+    
+    public static function getUserLastClosedSession($id_user)
+    {
+        $sql = 'SELECT MAX(`id`) as id FROM '.MAIN_DB_PREFIX.'bc_caisse_session WHERE `id_user_closed` = '.(int) $id_user;
+        
+        $result = self::getBdb()->executeS($sql, 'array');
+        
+        if (isset($result[0]['id'])) {
+            return (int) $result[0]['id'];
+        }
+        
+        return 0;
     }
 
     public function renderPaymentsInfos()
@@ -124,7 +153,7 @@ class BC_CaisseSession extends BimpObject
         }
 
         $html = '';
-        
+
         $bc_paiement = BimpObject::getInstance('bimpcaisse', 'BC_Paiement');
         $list_name = ($full_list ? 'full_session' : 'session');
         $list = new BC_ListTable($bc_paiement, $list_name, 1, null, 'Liste des paiements', 'fas_hand-holding-usd');
@@ -138,7 +167,7 @@ class BC_CaisseSession extends BimpObject
         $list->addFieldFilterValue('id_caisse', (int) $caisse->id);
         $list->addFieldFilterValue('id_caisse_session', (int) $this->id);
         $html .= $list->renderHtml();
-        
+
         return $html;
     }
 

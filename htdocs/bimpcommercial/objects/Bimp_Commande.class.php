@@ -113,6 +113,12 @@ class Bimp_Commande extends BimpComm
 
     public function isActionAllowed($action, &$errors = array())
     {
+        switch($action){
+            case 'setListConfig':
+                return 1;
+        }
+        
+        
         if (!$this->isLoaded()) {
             $errors[] = 'ID de la commande absent';
             return 0;
@@ -124,6 +130,10 @@ class Bimp_Commande extends BimpComm
 
         switch ($action) {
             case 'sendMail':
+                if (!$this->isLoaded()) {
+                    $errors[] = 'ID de la commande absent';
+                    return 0;
+                }
                 if ($status <= Commande::STATUS_DRAFT) {
                     $errors[] = $invalide_error;
                     return 0;
@@ -131,6 +141,10 @@ class Bimp_Commande extends BimpComm
                 return 1;
 
             case 'validate':
+                if (!$this->isLoaded()) {
+                    $errors[] = 'ID de la commande absent';
+                    return 0;
+                }
                 if ($status !== Commande::STATUS_DRAFT) {
                     $errors[] = $invalide_error;
                     return 0;
@@ -144,8 +158,12 @@ class Bimp_Commande extends BimpComm
                 return 1;
 
             case 'modify':
+                if (!$this->isLoaded()) {
+                    $errors[] = 'ID de la commande absent';
+                    return 0;
+                }
 //                return 0; // blocage par trigger : à voir si on fait sauter. 
-                if ($status !== 1) {
+                if (!in_array($status, array(1, 2, 3))) {
                     $errors[] = $invalide_error;
                     return 0;
                 }
@@ -153,9 +171,13 @@ class Bimp_Commande extends BimpComm
                     $errors[] = 'La logistique est en cours de traitement';
                     return 0;
                 }
-//                return 1;
+                return 1;
 
             case 'reopen':
+                if (!$this->isLoaded()) {
+                    $errors[] = 'ID de la commande absent';
+                    return 0;
+                }
                 if (!in_array($status, array(Commande::STATUS_CLOSED, Commande::STATUS_CANCELED))) {
                     $errors[] = $invalide_error;
                     return 0;
@@ -167,6 +189,10 @@ class Bimp_Commande extends BimpComm
                 return 1;
 
             case 'cancel':
+                if (!$this->isLoaded()) {
+                    $errors[] = 'ID de la commande absent';
+                    return 0;
+                }
                 if ($status !== Commande::STATUS_VALIDATED) {
                     $errors[] = $invalide_error;
                     return 0;
@@ -174,6 +200,10 @@ class Bimp_Commande extends BimpComm
                 return 1;
 
             case 'processLogitique':
+                if (!$this->isLoaded()) {
+                    $errors[] = 'ID de la commande absent';
+                    return 0;
+                }
                 if (!in_array($status, self::$logistique_active_status)) {
                     $errors[] = 'La logistique n\'est pas active pour cette commande';
                     return 0;
@@ -185,6 +215,10 @@ class Bimp_Commande extends BimpComm
                 return 1;
 
             case 'forceStatus':
+                if (!$this->isLoaded()) {
+                    $errors[] = 'ID de la commande absent';
+                    return 0;
+                }
                 if (!$this->isLogistiqueActive()) {
                     $errors[] = 'La logistique n\'est pas active';
                     return 0;
@@ -424,11 +458,18 @@ class Bimp_Commande extends BimpComm
 
             // Annuler
             if ($this->isActionAllowed('cancel') && $this->canSetAction('cancel')) {
+                if ($this->isLogistiqueActive()) {
+                    $label = 'Abandonner';
+                    $confirm_label = 'abandon';
+                } else {
+                    $label = 'Annuler';
+                    $confirm_label = 'annulation';
+                }
                 $buttons[] = array(
-                    'label'   => 'Annuler',
+                    'label'   => $label,
                     'icon'    => 'times',
                     'onclick' => $this->getJsActionOnclick('cancel', array(), array(
-                        'confirm_msg' => $langs->trans('ConfirmCancelOrder', $ref)
+                        'confirm_msg' => 'Veuillez confirmer l\\\'' . $confirm_label . ' de la commande ' . $this->getRef()
                     ))
                 );
             }
@@ -818,12 +859,7 @@ class Bimp_Commande extends BimpComm
 
         if (empty($lines)) {
             $lines = array();
-            foreach ($this->getChildrenObjects('lines', array(
-                'type' => array(
-                    'operator' => '<>',
-                    'value'    => ObjectLine::LINE_TEXT
-                )
-            )) as $line) {
+            foreach ($this->getLines() as $line) {
                 $lines[] = $line->id;
             }
         }
@@ -861,10 +897,30 @@ class Bimp_Commande extends BimpComm
 
         $has_lines = false;
 
+        $body_html = '';
+
         foreach ($lines as $id_line) {
             $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $id_line);
 
             if ($line->isLoaded()) {
+
+                if ($line->getData('type') === ObjectLine::LINE_TEXT) {
+                    $body_html .= '<tr class="facture_line text_line" data-id_line="' . $line->id . '">';
+                    $body_html .= '<td>';
+                    $body_html .= $line->getData('position');
+                    $body_html .= '</td>';
+                    $body_html .= '<td colspan="3">';
+                    $body_html .= $line->displayLineData('desc');
+                    $body_html .= '</td>';
+                    $body_html .= '<td>';
+                    $body_html .= BimpInput::renderInput('toggle', 'line_' . $line->id . '_facture_' . $id_facture . '_include', 1, array(
+                                'extra_class' => 'include_line'
+                    ));
+                    $body_html .= '</td>';
+                    $body_html .= '</tr>';
+                    continue;
+                }
+
                 $max_qty = (float) $line->getFullQty() - (float) $line->getBilledQty();
                 if ($id_facture) {
                     $facture_data = $line->getFactureData($id_facture);
@@ -885,33 +941,33 @@ class Bimp_Commande extends BimpComm
 
                 $has_lines = true;
 
-                $html .= '<tr>';
-                $html .= '<td>';
-                $html .= $line->getData('position');
-                $html .= '</td>';
-                $html .= '<td>';
-                $html .= $line->displayLineData('desc_light');
-                $html .= '</td>';
-                $html .= '<td>';
-                $html .= $line->displayLineData('pu_ht');
-                $html .= '</td>';
-                $html .= '<td>';
-                $html .= $line->displayLineData('tva_tx');
-                $html .= '</td>';
-                $html .= '<td>';
-                $html .= $line->renderFactureQtyInput($id_facture);
-                $html .= '</td>';
-                $html .= '</tr>';
+                $body_html .= '<tr class="facture_line product_line" data-id_line="' . $line->id . '">';
+                $body_html .= '<td>';
+                $body_html .= $line->getData('position');
+                $body_html .= '</td>';
+                $body_html .= '<td>';
+                $body_html .= $line->displayLineData('desc_light');
+                $body_html .= '</td>';
+                $body_html .= '<td>';
+                $body_html .= $line->displayLineData('pu_ht');
+                $body_html .= '</td>';
+                $body_html .= '<td>';
+                $body_html .= $line->displayLineData('tva_tx');
+                $body_html .= '</td>';
+                $body_html .= '<td>';
+                $body_html .= $line->renderFactureQtyInput($id_facture);
+                $body_html .= '</td>';
+                $body_html .= '</tr>';
 
                 if (BimpObject::objectLoaded($product)) {
                     if ($product->isSerialisable()) {
-                        $html .= '<tr id="facture_line_' . $line->id . '_equipments" class="facture_line_equipments">';
-                        $html .= '<td colspan="5">';
-                        $html .= '<div style="padding-left: 45px;">';
-                        $html .= $line->renderFactureEquipmentsInput($id_facture, null, 'line_' . $line->id . '_facture_' . $id_facture . '_qty');
-                        $html .= '</div>';
-                        $html .= '</td>';
-                        $html .= '</tr>';
+                        $body_html .= '<tr id="facture_line_' . $line->id . '_equipments" class="facture_line_equipments">';
+                        $body_html .= '<td colspan="5">';
+                        $body_html .= '<div style="padding-left: 45px;">';
+                        $body_html .= $line->renderFactureEquipmentsInput($id_facture, null, 'line_' . $line->id . '_facture_' . $id_facture . '_qty');
+                        $body_html .= '</div>';
+                        $body_html .= '</td>';
+                        $body_html .= '</tr>';
                     }
                 }
             }
@@ -923,6 +979,8 @@ class Bimp_Commande extends BimpComm
             $html .= BimpRender::renderAlerts('Aucune ligne de commande disponible pour l\'ajout à une facture', 'warning');
             $html .= '</td>';
             $html .= '</tr>';
+        } else {
+            $html .= $body_html;
         }
 
         $html .= '</tbody>';
@@ -1331,7 +1389,7 @@ class Bimp_Commande extends BimpComm
     {
         $errors = array();
 
-        if ($this->isLoaded() /* && $this->isLogistiqueActive() */) {
+        if ($this->isLoaded()) {
             $lines = $this->getChildrenObjects('lines');
 
             foreach ($lines as $line) {
@@ -1339,6 +1397,38 @@ class Bimp_Commande extends BimpComm
             }
         } else {
             $errors[] = 'ID de la commande absent';
+        }
+
+        return $errors;
+    }
+
+    public function deleteReservations()
+    {
+        $errors = array();
+
+        if (!$this->isLoaded($errors)) {
+            return $errors;
+        }
+
+        $reservations = BimpCache::getBimpObjectObjects('bimpreservation', 'BR_Reservation', array(
+                    'type'               => 1,
+                    'id_commande_client' => (int) $this->id,
+                    'status'             => array(
+                        'in' => array(0, 2)
+                    )
+        ));
+
+        foreach ($reservations as $id_reservation => $reservation) {
+            $res_warnings = array();
+            $res_errors = $reservation->delete($res_warnings, true);
+
+            if (count($res_warnings)) {
+                $errors[] = BimpTools::getMsgFromArray($res_warnings, 'Erreurs suite à la suppression ' . $reservation->getLabel('of_the') . ' #' . $id_reservation);
+            }
+
+            if (count($res_errors)) {
+                $errors[] = BimpTools::getMsgFromArray($res_warnings, 'Echec de la suppression ' . $reservation->getLabel('of_the') . ' #' . $id_reservation);
+            }
         }
 
         return $errors;
@@ -1612,6 +1702,9 @@ class Bimp_Commande extends BimpComm
             if (!BimpObject::objectLoaded($line)) {
                 $errors[] = 'La ligne d\'ID ' . $id_line . ' n\'existe pas';
             } else {
+                if ((int) $line->getData('type') === ObjectLine::LINE_TEXT) {
+                    continue;
+                }
                 $line_equipments = isset($lines_equipments[(int) $id_line]) ? $lines_equipments[(int) $id_line] : array();
                 $line_errors = $line->checkFactureData($qty, $line_equipments, $id_facture);
                 if (count($line_errors)) {
@@ -1640,6 +1733,11 @@ class Bimp_Commande extends BimpComm
             return $errors;
         }
 
+        if ((int) $facture->getData('fk_statut') > 0) {
+            $errors[] = 'La facture ' . $facture->getRef() . ' n\'est plus au statut brouillon';
+            return $errors;
+        }
+
         if ($check_data) {
             $errors = $this->checkFactureLinesData($lines_qties, $id_facture, $lines_equipments);
             if (count($errors)) {
@@ -1665,8 +1763,31 @@ class Bimp_Commande extends BimpComm
                         continue;
                     }
 
-                    // Création de la ligne de facture: 
                     $fac_line = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureLine');
+                    if ((int) $line->getData('type') === ObjectLine::LINE_TEXT) {
+                        // Création d'une ligne de texte: 
+                        $fac_line->validateArray(array(
+                            'id_obj'             => (int) $facture->id,
+                            'type'               => $line->getData('type'),
+                            'linked_id_object'   => (int) $line->id,
+                            'linked_object_name' => 'commande_line',
+                        ));
+                        $fac_line->qty = 1;
+                        $fac_line->desc = $line->desc;
+                        $fac_line_warnings = array();
+
+                        $fac_line_errors = $fac_line->create($fac_line_warnings);
+
+                        $fac_line_errors = array_merge($fac_line_errors, $fac_line_warnings);
+
+                        if (count($fac_line_errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($fac_line_errors, 'Echec de la création de la ligne de texte depuis la ligne de commande n°' . $line->getData('position') . ' (ID ' . $line->id . ')');
+                        }
+
+                        continue;
+                    }
+
+                    // Création de la ligne de facture: 
                     $fac_line->validateArray(array(
                         'id_obj'             => (int) $facture->id,
                         'type'               => $line->getData('type'),
@@ -1729,6 +1850,13 @@ class Bimp_Commande extends BimpComm
                         $fac_line->update($fac_line_warnings, true);
                     }
                 } else {
+                    if ((int) $line->getData('type') === ObjectLine::LINE_TEXT) {
+                        if (!(float) $line_qty) {
+                            $line->delete();
+                        }
+                        continue;
+                    }
+
                     $fac_line->qty = (float) $line_qty;
                     $fac_line_errors = $fac_line->setEquipments(array());
 
@@ -1988,6 +2116,8 @@ class Bimp_Commande extends BimpComm
 
         if ($this->dol_object->cancel() < 0) {
             $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object, null, null, $warnings), 'Echec de l\'annulation de la commande');
+        } else {
+            $warnings = array_merge($warnings, $this->deleteReservations());
         }
 
         return array(
@@ -2073,7 +2203,6 @@ class Bimp_Commande extends BimpComm
 
     public function actionLinesFactureQties($data, &$success)
     {
-
         $errors = array();
         $warnings = array();
         $success = '';
@@ -2486,14 +2615,15 @@ class Bimp_Commande extends BimpComm
 
     public function update(&$warnings = array(), $force_update = false)
     {
-        $init_entrepot = (int) $this->getData('init_entrepot');
+        $init_entrepot = (int) $this->getInitData('entrepot');
 
         $errors = parent::update($warnings, $force_update);
 
         if (!count($errors)) {
-            if ($init_entrepot !== (int) $this->getData('id_entrepot') && $this->isLogistiqueActive()) {
-                $sql = 'UPDATE `' . MAIN_DB_PREFIX . 'br_reservation` SET `id_entrepot` = ' . (int) $this->getData('id_entrepot');
-                $sql .= 'WHERE `id_commande_client` = ' . (int) $this->id . ' AND `id_entrepot` = ' . $init_entrepot . ' AND `status` < 200';
+            if ($init_entrepot !== (int) $this->getData('entrepot')) {
+                $sql = 'UPDATE `' . MAIN_DB_PREFIX . 'br_reservation` SET `id_entrepot` = ' . (int) $this->getData('entrepot');
+                $sql .= ' WHERE `id_commande_client` = ' . (int) $this->id . ' AND `id_entrepot` = ' . $init_entrepot . ' AND `status` < 200';
+                $this->db->db->query($sql);
             }
         }
     }

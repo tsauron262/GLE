@@ -1,0 +1,29 @@
+title: Ventes de produits
+bootstrap: 1
+
+objects: 
+    vente: 
+        instance: 
+            bimp_object: 
+                module: bimpcommercial
+                name: Bimp_Vente
+                
+sections: 
+    - type: tabs
+      tabs: 
+          default: 
+              label: Liste des ventes de produits
+              sections: 
+                  - type: list
+                    list: 
+                        name: default
+                        object: vente
+          
+          stats: 
+              label: Statistiques
+              sections: 
+                  - type: stats_list
+                    stats_list: 
+                        object: vente
+                        name: default
+                

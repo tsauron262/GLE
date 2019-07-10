@@ -13,6 +13,17 @@ list_page_url: list
 labels: 
     name: produit
 
+objects: 
+    fourn_price: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_ProductFournisseurPrice
+            id_object: 
+                field_value: id_cur_fp
+                
 fields: 
     ref: 
         label: Réf.
@@ -77,6 +88,16 @@ fields:
     cost_price: 
         label: Prix de revient
         type: money
+        
+    pmp: 
+        label: Prix d'achat moyen pondéré
+        type: money
+        
+    id_cur_fp: 
+        label: Prix d'achat fournisseur en cours
+        type: id_object
+        object: fourn_price
+        default_value: 0
         
     pa_prevu: 
         label: Prix d'achat prévu
@@ -260,7 +281,6 @@ forms:
                   callback: isLoaded
             - field: label
             - field: description  
-            - field: ref_constructeur
             - field: fk_product_type
             - field: type2
             - field: price

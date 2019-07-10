@@ -76,7 +76,6 @@ forms:
                 input_name: id_caisse
                 content: 
                     callback: renderCaisseInput
-                required: 1
                 display_if: 
                     field_name: use_caisse
                     show_values: 1

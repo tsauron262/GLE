@@ -48,7 +48,7 @@ class Bimp_FactureFourn extends BimpComm
         $errors = array();
         $status = $this->getData('fk_statut');
 
-        if (in_array($action, array('validate', 'modify', 'reopen', 'sendEMail', 'makePayment', 'classifyPaid', 'duplicate', 'create_credit_note'))) {
+        if (in_array($action, array('validate', 'modify', 'reopen', 'sendEMail', 'makePayment', 'classifyPaid', 'convertToReduc', 'duplicate', 'create_credit_note'))) {
             if (!$this->isLoaded()) {
                 $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
                 return 0;

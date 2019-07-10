@@ -21,13 +21,18 @@ class Bimp_Product extends BimpObject
         'HT'  => 'HT',
         'TTC' => 'TTC'
     );
+    private static $stockDate = array();
+    private static $stockShowRoom = array();
+    private static $ventes = array();
 
     // Getters booléens
 
     public function isSerialisable()
     {
         if ($this->isLoaded()) {
-            return (int) $this->getData('serialisable');
+            if ($this->isTypeProduct()) {
+                return (int) $this->getData('serialisable');
+            }
         }
 
         return 0;
@@ -142,6 +147,49 @@ class Bimp_Product extends BimpObject
         return 0;
     }
 
+    public function getVentes($dateMin, $dateMax = null, $id_entrepot = null, $id_product = null)
+    {
+        if (is_null($id_product) && $this->isLoaded()) {
+            $id_product = $this->id;
+        }
+
+        if ((int) $id_product) {
+            if (!isset(self::$ventes[$id_product]))
+                self::initVentes($dateMin, $dateMax);
+
+            if (isset(self::$ventes[$dateMin . "-" . $dateMax][$id_product][$id_entrepot])) {
+                return self::$ventes[$dateMin . "-" . $dateMax][$id_product][$id_entrepot];
+            }
+        }
+
+        return array(
+            'qty'       => 0,
+            'total_ht'  => 0,
+            'total_ttc' => 0
+        );
+    }
+
+    public function getAppleCsvData($dateMin, $dateMax, $entrepot_array, $id_product = null)
+    {
+        $data = array();
+
+        if (is_null($id_product) && $this->isLoaded()) {
+            $id_product = $this->id;
+        }
+
+        if ((int) $id_product) {
+            foreach ($entrepot_array as $id_entrepot => $entrepot_label) {
+                $data[$id_entrepot] = array(
+                    'ventes'         => $this->getVentes($dateMin, $dateMax, $id_entrepot, $id_product),
+                    'stock'          => $this->getStockDate($dateMax, $id_entrepot, $id_product),
+                    'stock_showroom' => $this->getStockShoowRoom($id_entrepot, $id_product)
+                );
+            }
+        }
+
+        return $data;
+    }
+
     // Getters stocks: 
 
     public function getStocksForEntrepot($id_entrepot)
@@ -153,7 +201,7 @@ class Bimp_Product extends BimpObject
             'dispo'          => 0, // Stock réel - réel réservés
             'virtuel'        => 0, // reel - total_reserves + commandes
             'total_reserves' => 0, // Réservations du statut 0 à - de 300
-            'reel_reserves'  => 0, // Réservations du statut 200 à - de 300
+            'reel_reserves'  => 0, // Réservations du statut 200 à - de 300 + statut 2 (A réserver)
         );
 
         if ($this->isLoaded()) {
@@ -204,6 +252,42 @@ class Bimp_Product extends BimpObject
         }
 
         return $stocks;
+    }
+
+    public function getStockDate($date, $id_entrepot = null, $id_product = null)
+    {
+        if (is_null($id_product) && $this->isLoaded()) {
+            $id_product = $this->id;
+        }
+
+        if ((int) $id_product) {
+            if (!isset(self::$stockDate[$date]))
+                self::initStockDate($date);
+
+            if (isset(self::$stockDate[$date][$id_product][$id_entrepot]['stock'])) {
+                return self::$stockDate[$date][$id_product][$id_entrepot]['stock'];
+            }
+        }
+
+        return 0;
+    }
+
+    public function getStockShoowRoom($id_entrepot = null, $id_product = null)
+    {
+        if (is_null($id_product) && $this->isLoaded()) {
+            $id_product = $this->id;
+        }
+
+        if ((int) $id_product) {
+            if (!isset(self::$stockShowRoom[$id_product]))
+                self::initStockShowRoom();
+
+            if (isset(self::$stockShowRoom[$id_product][$id_entrepot])) {
+                return self::$stockShowRoom[$id_product][$id_entrepot];
+            }
+        }
+
+        return 0;
     }
 
     public static function getStockIconStatic($id_product, $id_entrepot = null)
@@ -323,16 +407,38 @@ class Bimp_Product extends BimpObject
 
     public function getProductFournisseursPricesArray()
     {
-        $sql = 'SELECT MAX(fp.rowid) as id FROM ' . MAIN_DB_PREFIX . 'product_fournisseur_price fp WHERE fp.fk_product = ' . (int) $id_product;
+        $sql = 'SELECT MAX(fp.rowid) as id FROM ' . MAIN_DB_PREFIX . 'product_fournisseur_price fp WHERE fp.fk_product = ' . (int) $this->id;
         $result = $this->db->executeS($sql);
         if (isset($result[0]->id)) {
             return (int) $result[0]->id;
         }
     }
 
+    public function getCurrentPaHt()
+    {
+        if ($this->isLoaded()) {
+            $pa_ht = (float) $this->getData('pmp');
+            if (!$pa_ht) {
+                $pa_ht = (float) $this->getCurrentFournPriceAmount();
+
+                if (!$pa_ht) {
+                    $pa_ht = (float) $this->getData('pa_prevu');
+                }
+            }
+
+            return $pa_ht;
+        }
+
+        return 0;
+    }
+
     public function getCurrentFournPriceId($id_fourn = null)
     {
         if ($this->isLoaded()) {
+            if ((int) $this->getData('id_cur_fp')) {
+                return (int) $this->getData('id_cur_fp');
+            }
+
             $sql = 'SELECT MAX(fp.rowid) as id FROM ' . MAIN_DB_PREFIX . 'product_fournisseur_price fp WHERE fp.fk_product = ' . $this->id;
 
             if (!is_null($id_fourn) && (int) $id_fourn) {
@@ -472,6 +578,8 @@ class Bimp_Product extends BimpObject
     {
         $html = '';
 
+
+
         if ($this->isLoaded()) {
             if ((int) $this->getData('validate')) {
                 $html .= '<span class="success">';
@@ -575,6 +683,7 @@ class Bimp_Product extends BimpObject
     }
 
     // Actions: 
+
     public function actionGenerateEtiquettes($data, &$success)
     {
         $errors = array();
@@ -620,5 +729,85 @@ class Bimp_Product extends BimpObject
         }
 
         return parent::validatePost();
+    }
+
+    // Méthodes statiques : 
+
+    private static function initStockDate($date)
+    {
+        global $db;
+        self::$stockDate = array();
+        $sql = $db->query("SELECT `fk_product`,`fk_entrepot`,reel FROM `llx_product_stock`");
+        while ($ln = $db->fetch_object($sql)) {
+            self::$stockDate[$date][$ln->fk_product][$ln->fk_entrepot]['now'] = $ln->reel;
+            self::$stockDate[$date][$ln->fk_product][$ln->fk_entrepot]['stock'] = $ln->reel;
+            self::$stockDate[$date][$ln->fk_product][null]['now'] += $ln->reel;
+            self::$stockDate[$date][$ln->fk_product][null]['stock'] += $ln->reel;
+        }
+
+//        $sql = $db->query("SELECT `fk_product`, `fk_entrepot`, SUM(`value`) as nb FROM `llx_stock_mouvement` WHERE `tms` > STR_TO_DATE('" . $date . "', '%Y-%m-%d') GROUP BY `fk_product`, `fk_entrepot`");
+        $sql = $db->query("SELECT `fk_product`, `fk_entrepot`, SUM(`value`) as nb FROM `llx_stock_mouvement` WHERE `tms` > '" . $date . "' GROUP BY `fk_product`, `fk_entrepot`");
+        while ($ln = $db->fetch_object($sql)) {
+            if (!isset(self::$stockDate[$date][$ln->fk_product][$ln->fk_entrepot]['stock']))
+                self::$stockDate[$date][$ln->fk_product][$ln->fk_entrepot]['stock'] = 0;
+            if (!isset(self::$stockDate[$date][$ln->fk_product][null]['stock']))
+                self::$stockDate[$date][$ln->fk_product][null]['stock'] = 0;
+
+            self::$stockDate[$date][$ln->fk_product][$ln->fk_entrepot]['stock'] -= $ln->nb;
+            self::$stockDate[$date][$ln->fk_product][null]['stock'] -= $ln->nb;
+        }
+    }
+
+    private static function initStockShowRoom()
+    {
+        global $db;
+        self::$stockShowRoom = array();
+        $sql = $db->query("SELECT `id_product`, `id_entrepot`, COUNT(*)as nb FROM `llx_be_equipment_place` p, llx_be_equipment e WHERE position = 1 AND p.id_equipment = e.id AND p.`type` = 5 GROUP BY `id_entrepot`, `id_product`");
+        while ($ln = $db->fetch_object($sql)) {
+            self::$stockShowRoom[$ln->id_product][$ln->id_entrepot] = $ln->nb;
+            self::$stockShowRoom[$ln->id_product][null] += $ln->nb;
+        }
+    }
+
+    private static function initVentes($dateMin, $dateMax)
+    {
+        global $db;
+        self::$ventes = array();
+        $query = "SELECT `fk_product`, entrepot, sum(qty) as qty, sum(l.total_ht) as total_ht, sum(l.total_ttc) as total_ttc ";
+        $query .= " FROM `llx_facturedet` l, llx_facture f, llx_facture_extrafields e";
+        $query .= " WHERE `fk_facture` = f.rowid AND e.fk_object = f.rowid AND fk_product > 0";
+        if ($dateMin)
+//            $query .= " AND date_valid > STR_TO_DATE('" . $dateMin . "', '%Y-%m-%d')";
+            $query .= " AND date_valid >= '" . $dateMin . "'";
+        if ($dateMax)
+            $query .= " AND date_valid <= '" . $dateMax . "'";
+//            $query .= " AND date_valid > STR_TO_DATE('" . $dateMax . "', '%Y-%m-%d')";
+
+        $group_by .= " GROUP BY `fk_product`, entrepot";
+
+        $sql = $db->query($query . " AND `subprice` >= 0" . $group_by);
+
+        while ($ln = $db->fetch_object($sql)) {
+            self::$ventes[$dateMin . "-" . $dateMax][$ln->fk_product][$ln->entrepot]['qty'] = $ln->qty;
+            self::$ventes[$dateMin . "-" . $dateMax][$ln->fk_product][$ln->entrepot]['total_ht'] = $ln->total_ht;
+            self::$ventes[$dateMin . "-" . $dateMax][$ln->fk_product][$ln->entrepot]['total_ttc'] = $ln->total_ttc;
+//            if(!isset(self::$ventes[$dateMin."-".$dateMax][$ln->fk_product][null]))
+//                    self::$ventes[$dateMin."-".$dateMax][$ln->fk_product][null] = array();
+            self::$ventes[$dateMin . "-" . $dateMax][$ln->fk_product][null]['qty'] += $ln->qty;
+            self::$ventes[$dateMin . "-" . $dateMax][$ln->fk_product][null]['total_ht'] += $ln->total_ht;
+            self::$ventes[$dateMin . "-" . $dateMax][$ln->fk_product][null]['total_ttc'] += $ln->total_ttc;
+        }
+
+        $sql2 = $db->query($query . " AND `subprice` < 0" . $group_by);
+
+        while ($ln = $db->fetch_object($sql2)) {
+            self::$ventes[$dateMin . "-" . $dateMax][$ln->fk_product][$ln->entrepot]['qty'] = ($ln->qty * -1);
+            self::$ventes[$dateMin . "-" . $dateMax][$ln->fk_product][$ln->entrepot]['total_ht'] = $ln->total_ht;
+            self::$ventes[$dateMin . "-" . $dateMax][$ln->fk_product][$ln->entrepot]['total_ttc'] = $ln->total_ttc;
+
+            self::$ventes[$dateMin . "-" . $dateMax][$ln->fk_product][null]['qty'] += ($ln->qty * -1);
+            self::$ventes[$dateMin . "-" . $dateMax][$ln->fk_product][null]['total_ht'] += $ln->total_ht;
+            self::$ventes[$dateMin . "-" . $dateMax][$ln->fk_product][null]['total_ttc'] += $ln->total_ttc;
+        }
     }
 }

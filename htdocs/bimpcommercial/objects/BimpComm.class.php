@@ -110,7 +110,7 @@ class BimpComm extends BimpDolObject
                     $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
                     return 0;
                 }
-                if ((int) $this->getData('fk_statut') > 0) {
+                if ($this->object_name === 'Bimp_Facture' && (int) $this->getData('fk_statut') > 0) {
                     $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' n\'est plus au statut "brouillon"';
                     return 0;
                 }
@@ -428,7 +428,7 @@ class BimpComm extends BimpDolObject
                 }
             }
 
-            return $this->getChildrenObjects('lines', $filters);
+            return $this->getChildrenObjects('lines', $filters, 'position', 'asc');
         }
 
         return array();
@@ -2718,9 +2718,18 @@ class BimpComm extends BimpDolObject
             }
 
             if (!count($errors)) {
-                // todo: loguer l'envoi du mail
+                // todo: loguer l'échec de l'envoi du mail
+
+                $mail_object = '';
+//
+//                if ($this->isLoaded()) {
+//                    $mail_object = BimpTools::ucfirst($this->getLabel()) . ' ' . $this->getRef();
+//                }
+
+                $mail_object .= $data['mail_object'];
+
                 $deliveryreceipt = (isset($data['confirm_reception']) ? (int) $data['confirm_reception'] : 0);
-                mailSyn2($data['mail_object'], $to, $from, $data['msg_html'], $filename_list, $mimetype_list, $mimefilename_list, $cc, '', $deliveryreceipt);
+                mailSyn2($mail_object, $to, $from, $data['msg_html'], $filename_list, $mimetype_list, $mimefilename_list, $cc, '', $deliveryreceipt);
             }
         }
 

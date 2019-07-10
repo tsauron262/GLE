@@ -135,7 +135,19 @@ forms:
 #              input_name: lines
 #              content: 
 #                  callback: renderCommandeFournLinesForm
-                  
+    split: 
+        title: Scinder en deux réceptions
+        icon: fas_object-ungroup
+        rows: 
+            - field: ref
+            - field: date_received
+            - field: info
+            - custom: 1
+              label: Quantités et équipements à déplacer dans la nouvelle réception
+              input_name: lines
+              content: 
+                  callback: renderSplitDetailForm
+            
     validate: 
         rows: 
             - field: date_received
@@ -190,6 +202,8 @@ views:
 filters_panel: 
     default: 
         filters: 
+            - field: fk_soc
+              child: parent
             - field: ref
             - field: num_reception
             - field: id_entrepot
@@ -251,11 +265,15 @@ lists_cols:
                     
 lists: 
     default: 
+        checkboxes: 1
+        item_checkbox: 
+            callback: isFacturable
         configurable: 1
         filters_panel: default
         sort_field: id
         sort_way: desc
-        n: 25
+        pagination: 1
+        n: 20
         edit_btn: 1
         delete_btn: 1
         update_btn: 1
@@ -264,6 +282,10 @@ lists:
         objects_change_reload: Bimp_CommandeFourn,Bimp_FactureFourn,Bimp_CommandeFournLine,Bimp_FactureFournLine
         extra_btn: 
             callback: getListsExtraBtn
+        bulk_actions: 
+            - label: Créer une facture unique
+              icon: fas_file-invoice-dollar
+              onclick: selectedReceptionsFactureFourn($(this), 'list_id') 
         cols:
             commande: 
             num_reception:
@@ -275,10 +297,7 @@ lists:
             facture:
                     
     commandes_fourn: 
-        checkboxes: 1
         configurable: 1
-        bulk_actions: 
-            callback: getCommandesFournListbulkActions
         enable_search: 0
         pagination: 0
         sort_field: id

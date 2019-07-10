@@ -224,10 +224,11 @@ class BS_Inter extends BimpObject
     {
         switch ($action) {
             case 'close':
-                if (!$this->isLoaded()) {
+                if (!$this->isLoaded($errors)) {
                     return 0;
                 }
                 if ($this->getData('status') === self::BS_INTER_CLOSED) {
+                    $errors[] = 'Intervention déjà fermée';
                     return 0;
                 }
                 return 1;

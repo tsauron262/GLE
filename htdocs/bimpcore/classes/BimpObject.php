@@ -560,7 +560,7 @@ class BimpObject extends BimpCache
                 $check = 0;
             }
         }
-        
+
         if (!$check) {
             $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
         }
@@ -1276,11 +1276,13 @@ class BimpObject extends BimpCache
                 $errors[] = BimpTools::getMsgFromArray($errors, 'Action impossible');
             }
 
-            $method = 'action' . ucfirst($action);
-            if (method_exists($this, $method)) {
-                $errors = $this->{$method}($extra_data, $success);
-            } else {
-                $errors[] = 'Action invalide: "' . $action . '"';
+            if (!count($errors)) {
+                $method = 'action' . ucfirst($action);
+                if (method_exists($this, $method)) {
+                    $errors = $this->{$method}($extra_data, $success);
+                } else {
+                    $errors[] = 'Action invalide: "' . $action . '"';
+                }
             }
         }
 
@@ -1534,6 +1536,42 @@ class BimpObject extends BimpCache
                     $seach_data = $bc_field->getSearchData();
 
                     switch ($seach_data['search_type']) {
+                        case 'search_object':
+                            $instance = null;
+                            if ($bc_field->params['type'] === 'id_parent') {
+                                $instance = BimpObject::getInstance($this->getParentModule(), $this->getParentObjectName());
+                            } elseif (isset($bc_field->params['object']) && $bc_field->params['object']) {
+                                $instance_params = $this->config->getObjectInstanceParams('', $bc_field->params['object']);
+                                if ($instance_params['object_type'] === 'bimp_object') {
+                                    $instance = BimpObject::getInstance($instance_params['module'], $instance_params['object_name']);
+                                }
+                            }
+                            if (is_a($instance, 'BimpObject')) {
+                                $id_prop = $instance->getPrimary();
+                                $ref_prop = $instance->getRefProperty();
+
+                                if ($id_prop) {
+                                    $table = $instance->getTable();
+                                    $joins[$table] = array(
+                                        'alias' => $table,
+                                        'table' => $table,
+                                        'on'    => $table . '.' . $id_prop . ' = ' . $alias . '.' . $field_name
+                                    );
+                                    $filters['or_' . $field_name] = array(
+                                        'or' => array(
+                                            $table . '.' . $id_prop => $value
+                                        )
+                                    );
+                                    if ($ref_prop) {
+                                        $filters['or_' . $field_name]['or'][$table . '.' . $ref_prop] = array(
+                                            'part_type' => 'middle',
+                                            'part'      => $value
+                                        );
+                                    }
+                                }
+                            }
+                            break;
+
                         case 'time_range':
                         case 'date_range':
                         case 'datetime_range':
@@ -2593,9 +2631,9 @@ class BimpObject extends BimpCache
         $success_callback = '';
 
         $errors = $this->validatePost();
+        $force_edit = (int) BimpTools::getPostFieldValue('force_edit', 0);
 
         if (!count($errors)) {
-            $force_edit = (int) BimpTools::getPostFieldValue('force_edit', 0);
             if ($this->isLoaded()) {
                 $errors = $this->update($warnings, $force_edit);
                 if (!count($errors)) {
@@ -2617,7 +2655,7 @@ class BimpObject extends BimpCache
 
         if (!count($errors)) {
             $warnings = array_merge($warnings, $this->saveAssociationsFromPost());
-            $sub_result = $this->checkSubObjectsPost();
+            $sub_result = $this->checkSubObjectsPost($force_edit);
             if (count($sub_result['errors'])) {
                 $warnings = array_merge($warnings, $sub_result['errors']);
             }
@@ -2630,6 +2668,97 @@ class BimpObject extends BimpCache
             'errors'           => $errors,
             'warnings'         => $warnings,
             'success'          => $success,
+            'success_callback' => $success_callback
+        );
+    }
+
+    public function checkSubObjectsPost($force_edit = false)
+    {
+        $errors = array();
+        $success_callback = '';
+        if ($this->isLoaded()) {
+            $objects = explode(',', BimpTools::getValue('sub_objects', ''));
+            foreach ($objects as $object_name) {
+                $object = $this->getChildObject($object_name);
+                if (is_a($object, 'BimpObject')) {
+                    $parent_id_property = '';
+                    if ($this->isChild($object)) {
+                        $parent_id_property = $object->getParentIdProperty();
+                    }
+                    $multiple = BimpTools::getValue($object_name . '_multiple', 0);
+                    $post_temp = $_POST;
+                    $files_temp = $_FILES;
+                    if ($multiple) {
+                        $count = BimpTools::getValue($object_name . '_count', 0);
+                        for ($i = 1; $i <= $count; $i++) {
+                            $_POST = array();
+                            $_FILES = array();
+
+                            foreach ($post_temp as $key => $value) {
+                                if (preg_match('/^' . $object_name . '_' . $i . '_(.*)$/', $key, $matches)) {
+                                    $_POST[$matches[1]] = $value;
+                                }
+                            }
+                            foreach ($files_temp as $key => $value) {
+                                if (preg_match('/^' . $object_name . '_' . $i . '_(.*)$/', $key, $matches)) {
+                                    $_FILES[$matches[1]] = $value;
+                                }
+                            }
+                            if (count($_POST)) {
+                                if ($parent_id_property) {
+                                    $_POST[$parent_id_property] = $this->id;
+                                }
+
+                                if ($force_edit) {
+                                    $_POST['force_edit'] = 1;
+                                }
+
+                                $new_object = BimpObject::getInstance($object->module, $object->object_name);
+                                $result = $new_object->saveFromPost();
+                                $sub_errors = array_merge($result['errors'], $result['warnings']);
+                                if ($sub_errors) {
+                                    $errors[] = BimpTools::getMsgFromArray($sub_errors, 'Des erreurs sont survenues lors de la création ' . $object->getLabel('of_the') . ' n° ' . $i);
+                                }
+                                if ($result['success_callback']) {
+                                    $success_callback .= $result['success_callback'];
+                                }
+                            }
+                        }
+                    } else {
+                        $_POST = array();
+                        if ($force_edit) {
+                            $_POST['force_edit'] = 1;
+                        }
+                        foreach ($post_temp as $key => $value) {
+                            if (preg_match('/^' . $object_name . '_(.*)$/', $key, $matches)) {
+                                $_POST[$matches[1]] = $value;
+                            }
+                        }
+                        if (count($_POST)) {
+                            if ($parent_id_property) {
+                                $_POST[$parent_id_property] = $this->id;
+                            }
+                            $new_object = BimpObject::getInstance($object->module, $object->object_name);
+                            $result = $new_object->saveFromPost();
+                            $sub_errors = array_merge($result['errors'], $result['warnings']);
+                            if ($sub_errors) {
+                                $errors[] = BimpTools::getMsgFromArray($sub_errors, 'Des erreurs sont survenues lors de la création ' . $object->getLabel('of_the'));
+                            }
+                            if (count($result['warnings'])) {
+                                $errors = array_merge($errors, $result['warnings']);
+                            }
+                            if ($result['success_callback']) {
+                                $success_callback = $result['success_callback'];
+                            }
+                        }
+                    }
+                    $_POST = $post_temp;
+                    $_FILES = $files_temp;
+                }
+            }
+        }
+        return array(
+            'errors'           => $errors,
             'success_callback' => $success_callback
         );
     }
@@ -3298,88 +3427,6 @@ class BimpObject extends BimpCache
             }
         }
         return $check;
-    }
-
-    public function checkSubObjectsPost()
-    {
-        $errors = array();
-        $success_callback = '';
-        if ($this->isLoaded()) {
-            $objects = explode(',', BimpTools::getValue('sub_objects', ''));
-            foreach ($objects as $object_name) {
-                $object = $this->getChildObject($object_name);
-                if (is_a($object, 'BimpObject')) {
-                    $parent_id_property = '';
-                    if ($this->isChild($object)) {
-                        $parent_id_property = $object->getParentIdProperty();
-                    }
-                    $multiple = BimpTools::getValue($object_name . '_multiple', 0);
-                    $post_temp = $_POST;
-                    $files_temp = $_FILES;
-                    if ($multiple) {
-                        $count = BimpTools::getValue($object_name . '_count', 0);
-                        for ($i = 1; $i <= $count; $i++) {
-                            $_POST = array();
-                            $_FILES = array();
-                            foreach ($post_temp as $key => $value) {
-                                if (preg_match('/^' . $object_name . '_' . $i . '_(.*)$/', $key, $matches)) {
-                                    $_POST[$matches[1]] = $value;
-                                }
-                            }
-                            foreach ($files_temp as $key => $value) {
-                                if (preg_match('/^' . $object_name . '_' . $i . '_(.*)$/', $key, $matches)) {
-                                    $_FILES[$matches[1]] = $value;
-                                }
-                            }
-                            if (count($_POST)) {
-                                if ($parent_id_property) {
-                                    $_POST[$parent_id_property] = $this->id;
-                                }
-                                $object->reset();
-                                $result = $object->saveFromPost();
-                                $sub_errors = array_merge($result['errors'], $result['warnings']);
-                                if ($sub_errors) {
-                                    $errors[] = BimpTools::getMsgFromArray($sub_errors, 'Des erreurs sont survenues lors de la création ' . $object->getLabel('of_the') . ' n° ' . $i);
-                                }
-                                if ($result['success_callback']) {
-                                    $success_callback .= $result['success_callback'];
-                                }
-                            }
-                        }
-                    } else {
-                        $_POST = array();
-                        foreach ($post_temp as $key => $value) {
-                            if (preg_match('/^' . $object_name . '_(.*)$/', $key, $matches)) {
-                                $_POST[$matches[1]] = $value;
-                            }
-                        }
-                        if (count($_POST)) {
-                            if ($parent_id_property) {
-                                $_POST[$parent_id_property] = $this->id;
-                            }
-                            $object->reset();
-                            $result = $object->saveFromPost();
-                            $sub_errors = array_merge($result['errors'], $result['warnings']);
-                            if ($sub_errors) {
-                                $errors[] = BimpTools::getMsgFromArray($sub_errors, 'Des erreurs sont survenues lors de la création ' . $object->getLabel('of_the'));
-                            }
-                            if (count($result['warnings'])) {
-                                $errors = array_merge($errors, $result['warnings']);
-                            }
-                            if ($result['success_callback']) {
-                                $success_callback = $result['success_callback'];
-                            }
-                        }
-                    }
-                    $_POST = $post_temp;
-                    $_FILES = $files_temp;
-                }
-            }
-        }
-        return array(
-            'errors'           => $errors,
-            'success_callback' => $success_callback
-        );
     }
 
     // Gestion DolObjects: 
@@ -6043,8 +6090,10 @@ class BimpObject extends BimpCache
         $redirect = ((BimpTools::getValue("redirectForce") == 1) ? 1 : 0);
         $redirectMode = $this->redirectMode;
         $texteBtn = "";
+        if (BimpTools::getValue("redirectForce_oldVersion"))
+            $_SESSION['oldVersion'] = true;
         if ($this->iAmAdminRedirect()) {
-            if ($redirectMode == 4) {
+            if ($redirectMode == 4 && (isset($_SESSION['oldVersion']) || !$newVersion)) {//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
                 $redirectMode = 1;
                 $texteBtn = "ADMIN (N) : ";
             } elseif ($redirectMode == 5) {
@@ -6054,6 +6103,8 @@ class BimpObject extends BimpCache
         }
         $btn = false;
         if ($newVersion) {
+            if ($redirect)
+                unset($_SESSION['oldVersion']);
             if ($this->id > 0)
                 $url = $this->getUrl();
             else
@@ -6078,6 +6129,8 @@ class BimpObject extends BimpCache
                     $objName = $this->dol_object->element;
                 if ($objName == "order_supplier")
                     $objName = "commande_fourn";
+                if ($objName == "invoice_supplier")
+                    $objName = "facture_fourn";
                 $url .= "&search=1&object=" . $objName . "&sall=" . $search;
             }
             if (BimpTools::getValue("socid") != "") {
@@ -6090,6 +6143,9 @@ class BimpObject extends BimpCache
 //            https://erp.bimp.fr/test11/bimpcommercial/index.php?search=1&object=propal&sall=PR1809-91794&fc=propals
         }
         else {
+            if ($redirect)
+                $_SESSION['oldVersion'] = true;
+
             $url = BimpTools::getDolObjectUrl($this->dol_object, $this->id);
             $texteBtn .= "Ancienne version";
             if ($redirectMode == 5)

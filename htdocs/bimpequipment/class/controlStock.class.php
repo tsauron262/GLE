@@ -54,10 +54,16 @@ class controlStock{
                     }
                     else{
                         $text = "";
+                        $tabSerials = array();
+                        if($nbE > 0){
+                            $tabSerials = $this->getTabSerials($idEn, $idPr);
+                        }
+                        
+                        
                         if($nbE > $nbS)
-                            $text =  $millieuText." ATTENTION PLUS d'equipement (".$nbE.") que de prod (".$nbS.")<br/>";
+                            $text =  $millieuText." ATTENTION PLUS d'equipement (".$nbE." | ".implode(" ", $tabSerials).") que de prod (".$nbS.")<br/>";
                         elseif($nbE < $nbS)
-                            $text =  $millieuText." ATTENTION MOINS d'equipement (".$nbE.") que de prod (".$nbS.")<br/>";
+                            $text =  $millieuText." ATTENTION MOINS d'equipement (".$nbE." | ".implode(" ", $tabSerials).") que de prod (".$nbS.")<br/>";
                         else
                             $text =  $millieuText."ATTENTION BIZZARRE<br/>";
                         $nbCorrection = $nbE - $nbS;
@@ -100,9 +106,9 @@ class controlStock{
     }
     
     private function getProductSerialisable(){
-        $sql = $this->db->query("SELECT p.rowid, p.label FROM `llx_product` p, llx_product_extrafields pe WHERE p.rowid = pe.fk_object AND pe.serialisable = 1");
+        $sql = $this->db->query("SELECT p.rowid, p.label as label, ref FROM `llx_product` p, llx_product_extrafields pe WHERE p.rowid = pe.fk_object AND pe.serialisable = 1");
         while($ligne = $this->db->fetch_object($sql))
-                $this->prodS[$ligne->rowid] = $ligne->label;
+                $this->prodS[$ligne->rowid] = $ligne->ref." ".$ligne->label;
     }
     
     
@@ -150,5 +156,13 @@ class controlStock{
         while($ligne = $this->db->fetch_object($sql))
                 $result[$ligne->id_entrepot][$ligne->id_product] = $ligne->nb;
         return $result;
+    }
+    
+    private function getTabSerials($idEn, $idPr){
+        $return = array();
+        $sql = $this->db->query("SELECT `serial` FROM `llx_be_equipment` be, `llx_be_equipment_place` bp WHERE bp.`id_equipment` = be.id AND `position` = 1 AND id_product = ".$idPr." AND `type` = 2 AND `id_entrepot` = ".$idEn);
+        while($ln = $this->db->fetch_object($sql))
+            $return[] = $ln->serial;
+        return $return;
     }
 }

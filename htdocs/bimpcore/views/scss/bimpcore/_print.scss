@@ -10,12 +10,46 @@
         display: none;
     }
 
+    h1 {
+        font-size: 14px!important;
+    }
+    
+    h2 {
+        font-size: 13px;
+    }
+    
+    h3 {
+        font-size: 12px
+    }
+    
+    h4 {
+        font-size: 11px!important;
+    }
+    
+    .panel-heading {
+        padding: 5px 10px!important;
+        
+        .panel-title {
+            font-size: 10px!important;
+        }    
+    }
+
+
     table.bimp_list_table,
     table.objectlistTable {
         & > thead > tr > th,
         & > tbody > tr > th {
-            background-color: #DCDCDC;
-            color: $gray-darker;
+            background-color: #DCDCDC!important;
+            color: $gray-darker!important;
+        }
+
+        & > thead > tr > th,
+        & > thead > tr > td,
+        & > tbody > tr > th,
+        & > tbody > tr > td,
+        & > tfoot > tr > th,
+        & > tfoot > tr > td {
+            font-size: 8px!important;
         }
     }
 
@@ -23,8 +57,17 @@
     .objectFieldsTable {
         & > thead > tr.col_headers > th,
         & > tbody > tr > th {
-            background-color: #DCDCDC;
-            color: $gray-darker;
+            background-color: #DCDCDC!important;
+            color: $gray-darker!important;
+        }
+
+        & > thead > tr > th,
+        & > thead > tr > td,
+        & > tbody > tr > th,
+        & > tbody > tr > td,
+        & > tfoot > tr > th,
+        & > tfoot > tr > td {
+            font-size: 8px!important;
         }
     }
 }

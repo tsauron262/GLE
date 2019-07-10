@@ -112,7 +112,10 @@ class modBimpCommercial extends DolibarrModules
                 
                 
                 
-                $this->tabs = array('thirdparty:+bimpcommercial:bimpcommercial:bimpcommercial@bimpcommercial:$user->rights->bimpcommercial->read:/bimpcommercial/tabs/bimpcommercial.php?socid=__ID__');
+        $this->tabs = array(
+//                    'thirdparty:+bimpcommercial:bimpcommercial:bimpcommercial@bimpcommercial:$user->rights->bimpcommercial->read:/bimpcommercial/tabs/bimpcommercial.php?socid=__ID__',
+            'thirdparty:+commercial:Commercial:bimpcommercial:$user->rights->bimpcommercial->read:/bimpcommercial/index.php?fc=tabCommercial&id=__ID__'
+        );
 
 		// Array to add new pages in new tabs
 		// Example: $this->tabs = array('objecttype:+tabname1:Title1:mylangfile@mymodule:$user->rights->mymodule->read:/mymodule/mynewtab1.php?id=__ID__',  					// To add a new tab identified by code tabname1
@@ -140,7 +143,7 @@ class modBimpCommercial extends DolibarrModules
 		// 'stock'            to add a tab in stock view
 		// 'thirdparty'       to add a tab in third party view
 		// 'user'             to add a tab in user view
-        $this->tabs = array();
+//        $this->tabs = array();
 
 		if (! isset($conf->mymodule) || ! isset($conf->mymodule->enabled))
         {
@@ -327,6 +330,9 @@ class modBimpCommercial extends DolibarrModules
                 $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'einstein';";
                 $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimpcommande', 1, 'order', 'Commande', NULL);";
                 
+                // Dash board commercial
+                $sql[] = "UPDATE " . MAIN_DB_PREFIX . "menu SET `url`='/bimpcommercial/index.php?fc=tabCommercial&amp;mainmenu=commercial&amp;leftmenu=' WHERE `type` LIKE 'top' AND `mainmenu` LIKE 'commercial'";
+
 		//$this->_load_tables('/bimpcommercial/sql/');
                 
                 $extrafields = new ExtraFields($this->db);
@@ -379,6 +385,9 @@ class modBimpCommercial extends DolibarrModules
                 $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'bimpfact';";
                 $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'crabe', 1, 'invoice', 'crabe', NULL);";
                 
+                // Dash board commercial
+                $sql[] = "UPDATE " . MAIN_DB_PREFIX . "menu SET `url`='/comm/index.php?mainmenu=commercial&amp;leftmenu=' WHERE `type` LIKE 'top' AND `mainmenu` LIKE 'commercial'";
+
 		return $this->_remove($sql, $options);
 	}
 

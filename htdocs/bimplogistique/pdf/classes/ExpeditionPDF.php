@@ -89,7 +89,7 @@ class ExpeditionPDF extends BimpEtiquettePDF
                     $html .= '</tr>';
 
                     $html .= '<tr>';
-                    $html .= '<td style="text-align: center;font-size: 18px;font-weight: bold;color: #' . BimpCore::getParam('pdf/primary', '000000') . '">' . $commande->getRef() . '</td>';
+                    $html .= '<td style="text-align: center;font-size: 18px;font-weight: bold;color: #000000">' . $commande->getRef() . '</td>';
                     $html .= '</tr>';
 
 
@@ -102,9 +102,11 @@ class ExpeditionPDF extends BimpEtiquettePDF
                     $html .= '</td></tr>';
 
 
-                    $html .= '<tr>';
-                    $html .= '<td style="text-align: right; color: #000000; font-weight: bold;font-size: 18px;">Colis etiquette_number/' . $this->qty_etiquettes . '</td>';
-                    $html .= '</tr>';
+                    if ($this->qty_etiquettes > 1) {
+                        $html .= '<tr>';
+                        $html .= '<td style="text-align: right; color: #000000; font-weight: bold;font-size: 18px;">Colis etiquette_number/' . $this->qty_etiquettes . '</td>';
+                        $html .= '</tr>';
+                    }
 
                     $html .= '</table>';
                 }

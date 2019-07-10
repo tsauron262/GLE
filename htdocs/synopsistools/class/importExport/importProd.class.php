@@ -13,26 +13,28 @@ class importProd extends importCat {
     function traiteLn($ln) {
         $this->tabResult["total"] ++;
         if ($ln['ArtCode'] != "" && $ln['ArtCode'] != "0") {
-            if ($ln['ArtLib'] == "") //{
+            if ($ln['ArtLib'] == "")
                 $ln['ArtLib'] = "*";
-            $sql = $this->db->query("SELECT rowid as id, ref FROM llx_product WHERE import_key = '" . $ln['ArtID'] . "'");
-            if ($this->db->num_rows($sql) == 1) {
-                $result = $this->db->fetch_object($sql);
-                $sql2 = $this->db->query("SELECT rowid as id FROM llx_product WHERE ref = '" . $ln['ArtCode'] . "' AND (import_key != '" . $ln['ArtID'] . "' || import_key IS NULL)");
-                if ($this->db->num_rows($sql2) > 0) {
-                    $result2 = $this->db->fetch_object($sql2);
-                    $this->tabResult["error"] ++;
-                    $this->error("Prod avec ref identique et autre avec id8sens identique");
-                    $this->alert("IdIdentique id :" . $result->id . " ref : " . $result->ref . " |  UPDATE llx_commandedet SET fk_product = '" . $result->id . "' WHERE fk_product = '" . $result2->id . "'");
-                    $this->alert("RefIdentique id:" . $result2->id . " ref: " . $ln['ArtCode'] . "  |  UPDATE llx_commandedet SET fk_product = '" . $result2->id . "' WHERE fk_product = '" . $result->id . "'");
-                } else {
-                    $this->tabResult["connue"] ++;
-                    $this->updateProd($result->id, $ln);
-                }
-            } elseif ($this->db->num_rows($sql) > 1) {
-                $this->tabResult["double"] ++;
-                $this->error("ID " . $ln['ArtID'] . " avec plusieur pord : " . $result->nb);
-            } else {
+            if ($ln['ArtID'] == "")
+                $ln['ArtID'] = "N/C";
+            $sql = $this->db->query("SELECT rowid as id, ref FROM llx_product WHERE import_key = '" . $ln['ArtID'] . "' || ref = '".$ln['ArtCode']."'");
+//            if ($this->db->num_rows($sql) == 1) {
+//                $result = $this->db->fetch_object($sql);
+////                $sql2 = $this->db->query("SELECT rowid as id FROM llx_product WHERE ref = '" . $ln['ArtCode'] . "' AND (import_key != '" . $ln['ArtID'] . "' || import_key IS NULL)");
+////                if ($this->db->num_rows($sql2) > 0) {
+////                    $result2 = $this->db->fetch_object($sql2);
+////                    $this->tabResult["error"] ++;
+////                    $this->error("Prod avec ref identique et autre avec id8sens identique");
+////                    $this->alert("IdIdentique id :" . $result->id . " ref : " . $result->ref . " |  UPDATE llx_commandedet SET fk_product = '" . $result->id . "' WHERE fk_product = '" . $result2->id . "'");
+////                    $this->alert("RefIdentique id:" . $result2->id . " ref: " . $ln['ArtCode'] . "  |  UPDATE llx_commandedet SET fk_product = '" . $result2->id . "' WHERE fk_product = '" . $result->id . "'");
+////                } else {
+//                    $this->tabResult["connue"] ++;
+//                    $this->updateProd($result->id, $ln);
+////                }
+//            } elseif ($this->db->num_rows($sql) > 1) {
+//                $this->tabResult["double"] ++;
+//                $this->error("ref " . $ln['ArtCode'] . " avec plusieur pord : " . $this->db->num_rows($sql));
+//            } else {
                 $sql = $this->db->query("SELECT rowid as id FROM llx_product WHERE ref = '" . $ln['ArtCode'] . "'");
                 if ($this->db->num_rows($sql) == 0) {
                     if (/*$this->isProdActif($ln)*/1) {
@@ -47,7 +49,7 @@ class importProd extends importCat {
                     $this->tabResult["double"] ++;
                     $this->error("Ref " . $ln['ArtCode'] . " avec plusieur pord : " . $result->nb);
                 }
-            }
+//            }
 //            } else {
 //                $this->tabResult["error"] ++;
 //                $this->alert("Prod sans label ref : ".$ln['ArtCode']);
@@ -100,7 +102,7 @@ class importProd extends importCat {
             $this->update = false;
 
 
-            $this->traiteChamp("options_serialisable", ($ln['ArtStkNuf'] == "N° de série"));
+            $this->traiteChamp("options_serialisable", ($ln['ArtStkNuf'] == "N° de série" || $ln['ArtStkNuf'] == "NUFARTSTKSERIE"));
             $this->traiteChamp("options_validate", 1);
             $this->traiteChamp("options_deee", ($ln['ArtFree1'] == '' ? 0 : $ln['ArtFree1']), true);
             $this->traiteChamp("options_rpcp", ($ln['ArtFree2'] == '' ? 0 : $ln['ArtFree2']), true);

@@ -505,19 +505,27 @@ function onShipmentFactureFormSubmit($form, extra_data) {
                         qty: 0,
                         equipments: []
                     };
-                    var $input = $(this).find('input.line_facture_qty');
-                    if ($input.length) {
-                        line.qty = parseFloat($input.val());
-                    }
-                    var $equipments_row = $container.find('#facture_line_' + id_line + '_equipments');
-                    if ($equipments_row.length) {
-                        $equipments_row.find('[name="line_' + id_line + '_facture_' + id_facture + '_equipments[]"]:checked').each(function () {
-                            line.equipments.push(parseInt($(this).val()));
-                        });
-                    }
-                }
 
-                lines.push(line);
+                    if ($(this).hasClass('text_line')) {
+                        var $input = $(this).find('input.include_line');
+                        if ($input.length) {
+                            line.qty = parseInt($input.val());
+                        }
+                    } else {
+                        var $input = $(this).find('input.line_facture_qty');
+                        if ($input.length) {
+                            line.qty = parseFloat($input.val());
+                        }
+                        var $equipments_row = $container.find('#facture_line_' + id_line + '_equipments');
+                        if ($equipments_row.length) {
+                            $equipments_row.find('[name="line_' + id_line + '_facture_' + id_facture + '_equipments[]"]:checked').each(function () {
+                                line.equipments.push(parseInt($(this).val()));
+                            });
+                        }
+                    }
+
+                    lines.push(line);
+                }
             });
         }
     }
@@ -547,19 +555,28 @@ function onShipmentsBulkFactureFormSubmit($form, extra_data) {
                         qty: 0,
                         equipments: []
                     };
-                    var $input = $(this).find('input.line_facture_qty');
-                    if ($input.length) {
-                        line.qty = parseFloat($input.val());
-                    }
-                    var $equipments_row = $container.find('#facture_line_' + id_line + '_equipments');
-                    if ($equipments_row.length) {
-                        $equipments_row.find('[name="line_' + id_line + '_facture_0_equipments[]"]:checked').each(function () {
-                            line.equipments.push(parseInt($(this).val()));
-                        });
-                    }
-                }
 
-                data[id_commande].push(line);
+                    if ($(this).hasClass('line_text')) {
+                        var $input = $(this).find('input.include_line');
+                        if ($input.length) {
+                            line.qty = parseInt($input.val());
+                        }
+                    } else {
+                        var $input = $(this).find('input.line_facture_qty');
+                        if ($input.length) {
+                            line.qty = parseFloat($input.val());
+                        }
+                        var $equipments_row = $container.find('#facture_line_' + id_line + '_equipments');
+                        if ($equipments_row.length) {
+                            $equipments_row.find('[name="line_' + id_line + '_facture_0_equipments[]"]:checked').each(function () {
+                                line.equipments.push(parseInt($(this).val()));
+                            });
+                        }
+                    }
+
+
+                    data[id_commande].push(line);
+                }
             });
         }
     }
@@ -675,25 +692,38 @@ function addSelectedCommandeLinesToFacture($button, list_id, id_commande, id_cli
 function onFactureFormSubmit($form, extra_data) {
     var lines = [];
 
-    var $inputs = $form.find('.facture_lines_inputContainer').find('input.line_facture_qty');
+    var $rows = $form.find('.facture_lines_inputContainer').find('tr.facture_line');
 
-    $inputs.each(function () {
+    $rows.each(function () {
         var id_line = parseInt($(this).data('id_line'));
-        var qty = parseFloat($(this).val());
-        var equipments = [];
+        if ($(this).hasClass('text_line')) {
+            var include = parseInt($(this).find('.include_line').val());
+            lines.push({
+                id_line: id_line,
+                qty: include,
+                equipments: []
+            });
+        } else {
+            var $qty_input = $(this).find('input.line_facture_qty');
+            var qty = 0;
+            if ($qty_input.length) {
+                qty = parseFloat($qty_input.val());
+            }
 
-        var $row = $form.find('#facture_line_' + id_line + '_equipments');
-        if ($row.length) {
-            $row.find('.check_list_item_input:checked').each(function () {
-                equipments.push(parseInt($(this).val()));
+            var equipments = [];
+            var $row = $form.find('#facture_line_' + id_line + '_equipments');
+            if ($row.length) {
+                $row.find('.check_list_item_input:checked').each(function () {
+                    equipments.push(parseInt($(this).val()));
+                });
+            }
+
+            lines.push({
+                id_line: id_line,
+                qty: qty,
+                equipments: equipments
             });
         }
-
-        lines.push({
-            id_line: id_line,
-            qty: qty,
-            equipments: equipments
-        });
     });
 
     extra_data['lines'] = lines;
@@ -860,7 +890,7 @@ function getReceptionLinesDataFromForm($content, id_reception) {
                     if ($inputContainer.length) {
                         new_return_equipments = getInputValue($inputContainer);
                     }
-                    
+
                     var new_return_equipments_pu_ht = 0;
                     var $input = $row.find('[name="line_' + id_line + '_reception_' + id_reception + '_new_return_equipments_pu_ht"]');
                     if ($input.length) {
@@ -1092,6 +1122,7 @@ function addCommandeFournLineReceptionRow($button, id_line) {
 
     checkTotalMaxQtyInput($container.find('input[name="line_' + id_line + '_reception_' + idx + '_qty"]'));
 }
+
 function removeCommandeFournLineReceptionRow($button, id_line) {
     var $container = $button.findParentByClass('line_reception_rows');
 
@@ -1103,11 +1134,65 @@ function removeCommandeFournLineReceptionRow($button, id_line) {
     $button.parent('td').parent('tr').remove();
     checkTotalMaxQtyInput($container.find('input[name="line_' + id_line + '_reception_1_qty"]'));
 }
+
 function onReceptionValidationFormSubmit($form, extra_data) {
     if ($.isOk($form)) {
         var id_reception = parseInt($form.data('id_object'));
         if (id_reception) {
             extra_data['lines'] = getReceptionLinesDataFromForm($form, id_reception);
+        }
+    }
+
+    return extra_data;
+}
+
+function onSplitReceptionFormSubmit($form, extra_data) {
+    if ($.isOk($form)) {
+        var id_reception = parseInt($form.data('id_object'));
+        if (id_reception) {
+            var lines = [];
+
+            $form.find('tr.line_row').each(function () {
+                var $row = $(this);
+                var id_line = parseInt($row.data('id_line'));
+                var serialisable = parseInt($row.data('serialisable'));
+
+                if (serialisable) {
+                    var items = [];
+
+                    $(this).find('.line_' + id_line + '_items_check:checked').each(function () {
+                        items.push($(this).val());
+                    });
+
+                    lines.push({
+                        id_line: id_line,
+                        items: items
+                    });
+                } else {
+                    var qties = [];
+                    $row.find('tr.line_' + id_line + '_qty_row').each(function () {
+                        var idx = parseInt($(this).data('qty_idx'));
+                        var qty = 0;
+
+                        var $input = $(this).find('[name="line_' + id_line + '_reception_' + id_reception + '_qty_' + idx + '_qty"]');
+                        if ($.isOk($input)) {
+                            qty = parseFloat($input.val());
+                        }
+
+                        qties.push({
+                            idx: idx,
+                            qty: qty
+                        });
+                    });
+
+                    lines.push({
+                        id_line: id_line,
+                        qties: qties
+                    });
+                }
+            });
+
+            extra_data['lines'] = lines;
         }
     }
 
@@ -1137,6 +1222,40 @@ function setAllReceptionLinesToMax($button) {
             }
         });
     });
+}
+
+function selectedReceptionsFactureFourn($button, list_id) {
+    if ($button.hasClass('disabled')) {
+        return;
+    }
+
+    var $list = $('#' + list_id);
+
+    if (!$list.length) {
+        bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger', null, true);
+        return;
+    }
+
+    var extra_data = {
+        'receptions': []
+    };
+
+    var $selected = $list.find('tbody').find('input.item_check:checked');
+
+    if (!$selected.length) {
+        bimp_msg('Aucune réception sélectionnée', 'warning', null, true);
+        return;
+    }
+
+    $selected.each(function () {
+        var $input = $(this);
+        extra_data['receptions'].push($input.data('id_object'));
+    });
+
+    setObjectAction($button, {
+        module: 'bimpcommercial',
+        object_name: 'Bimp_CommandeFourn'
+    }, 'createInvoice', extra_data, 'bulk_invoice');
 }
 
 $(document).ready(function () {

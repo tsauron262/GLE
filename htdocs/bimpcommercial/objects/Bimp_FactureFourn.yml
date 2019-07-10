@@ -166,6 +166,7 @@ forms:
               
             - field: libelle
             - field: entrepot
+            - field: ef_type
             - field: fk_soc
             - field: ref_supplier
             - field: datef
@@ -249,8 +250,6 @@ filters_panels:
             paye: 
                 field: paye
                 
-            entrepot: unset
-            secteur: unset
             availability: unset
             remise_globale: unset
             ref_client: unset
@@ -291,8 +290,6 @@ lists_cols:
         field: fk_account
         display: nom_url
         
-    entrepot: unset
-    secteur: unset
     ref_client: unset
     availability: unset
     input_reason: unset
@@ -338,3 +335,8 @@ cards:
 #            - label: Payé
 #              value: 
 #                  callback: displayPaid
+
+searches:
+    default: 
+        fields_search: 
+            - ref

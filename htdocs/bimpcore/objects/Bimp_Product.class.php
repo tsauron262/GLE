@@ -190,7 +190,7 @@ class Bimp_Product extends BimpObject
                 $ventes = $this->getVentes($dateMin, $dateMax, $id_entrepot, $id_product);
                 $data[$ship_to]['ventes'] += $ventes['qty'];
                 $data[$ship_to]['stock'] += $this->getStockDate($dateMax, $id_entrepot, $id_product);
-                $data[$ship_to]['stock_showroom'] += $this->getStockShoowRoom($id_entrepot, $id_product);
+                $data[$ship_to]['stock_showroom'] += $this->getStockShoowRoom($dateMax, $id_entrepot, $id_product);
             }
         }
 
@@ -284,6 +284,7 @@ class Bimp_Product extends BimpObject
         if (is_null($id_product) && $this->isLoaded()) {
             $id_product = $this->id;
         }
+        $stock = 0;
 
         if ((int) $id_product) {
 //            if (!isset(self::$stockShowRoom[$id_product]))
@@ -295,11 +296,13 @@ class Bimp_Product extends BimpObject
             
             if(!count(self::$lienShowRoomEntrepot))
                 self::initLienShowRoomEntrepot ();
+            
+            
             if(isset(self::$lienShowRoomEntrepot[$id_entrepot]))
-                return $this->getStockDate($date, self::$lienShowRoomEntrepot[$id_entrepot], $id_product);
+                $stock = $this->getStockDate($date, self::$lienShowRoomEntrepot[$id_entrepot], $id_product);
         }
 
-        return 0;
+        return $stock;;
     }
 
     public static function getStockIconStatic($id_product, $id_entrepot = null)
@@ -589,8 +592,6 @@ class Bimp_Product extends BimpObject
     public function renderHeaderStatusExtra()
     {
         $html = '';
-
-
 
         if ($this->isLoaded()) {
             if ((int) $this->getData('validate')) {

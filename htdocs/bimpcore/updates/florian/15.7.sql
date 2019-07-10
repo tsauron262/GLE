@@ -1,0 +1,1 @@
+ALTER TABLE `llx_entrepot` ADD `ship_to` VARCHAR(255) DEFAULT '';

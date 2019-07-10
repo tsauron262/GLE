@@ -37,6 +37,10 @@ fields:
     reel: 
         label: Stock
         type: int
+    stockShowRoom: 
+        label: Stock ShowRoom
+        extra: 1
+        type: int
         
     ventes_qty:
         label: Nb Ventes
@@ -72,6 +76,8 @@ lists:
                 field: fk_product
             reel: 
                 field: reel
+            stockShowRoom:
+                field: stockShowRoom
             ventes_qty:
                 field: ventes_qty
             ventes_ht:

@@ -188,6 +188,7 @@ class Bimp_Vente extends BimpObject
                     $file_str .= implode(';', array(
                                 $id_entrepot, // A remplacer par ship_to
                                 preg_replace('/^APP\-(.*)$/', '$1', $product->getRef()),
+                                $product->getRef(),
                                 $data['ventes']['qty'],
                                 0,
                                 $data['stock'],

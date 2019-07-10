@@ -13,8 +13,9 @@ class Bimp_Product_Entrepot extends BimpObject
     public function fetchExtraFields()
     {
         $fields = array(
-            'ventes_qty'          => 0,
-            'ventes_ht'        => 0
+            'ventes_qty'        => 0,
+            'ventes_ht'         => 0,
+            'stockShowRoom'     => 0
         );
         
 //        $prod = $this->getChildObject('product');
@@ -25,6 +26,9 @@ class Bimp_Product_Entrepot extends BimpObject
             $fields['ventes_qty'] = $tabVentes['qty'];
         if($tabVentes['total_ht'] > 0)
             $fields['ventes_ht'] = $tabVentes['total_ht'];
+        $stockShowRoom = $prod->getStockShoowRoom($this->getData('fk_entrepot'));
+        if($stockShowRoom > 0)
+            $fields['stockShowRoom'] = $stockShowRoom;
 
         return $fields;
     }

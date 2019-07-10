@@ -10,6 +10,12 @@ objects:
         instance: 
             bimp_object: Bimp_Client
             
+    productentrepot: 
+        instance: 
+            bimp_object: 
+                module: bimpcommercial
+                name: Bimp_Product_Entrepot
+            
     fournisseurs: 
         instance: 
             bimp_object: Bimp_Fournisseur
@@ -69,6 +75,14 @@ sections:
                   list: 
                       panel: 1
                       object: correctifs
+                      name: default
+        productentrepot: 
+            label: Stock par Entrepot
+            sections: 
+                - type: list
+                  list: 
+                      panel: 1
+                      object: productentrepot
                       name: default
         stats: 
             label: Test stats

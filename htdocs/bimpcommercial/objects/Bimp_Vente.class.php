@@ -177,6 +177,9 @@ class Bimp_Vente extends BimpObject
         $file_str = '';
 
         $entrepots = BimpCache::getEntrepotsArray();
+        $entrepots = array(
+            66 => 'test'
+        );
         foreach ($products_list as $id_product) {
             $entrepots_data = $product->getAppleCsvData($dateFrom, $dateTo, $entrepots, $id_product);
 

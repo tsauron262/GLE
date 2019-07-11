@@ -386,7 +386,7 @@ class ObjectLine extends BimpObject
                         global $user;
                         $errors[] = 'Le produit "' . $product->getRef() . ' - ' . $product->getData('label') . '" n\'est pas validé';
                         if (mailSyn2("Validation produit", "XX_Achats@bimp.fr", null, "Bonjour " . $user->getNomUrl(1) . "souhaite que vous validiez " . $product->getNomUrl(1) . "<br/>Cordialement"))
-                            $errors[] = "Un mai a été envoyé pour validation du produit.";
+                            $errors[] = "Un e-mail a été envoyé pour validation du produit.";
                         return 0;
                     }
                 }

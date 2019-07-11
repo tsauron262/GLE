@@ -460,9 +460,10 @@ class Bimp_Product extends BimpObject
 
             if ($with_default) {
 //            $sql = 'SELECT MAX(fp.rowid) as id FROM ' . MAIN_DB_PREFIX . 'product_fournisseur_price fp WHERE fp.fk_product = ' . $this->id;
+//            
                 // On retourne le dernier PA fournisseur modifié ou enregistré: 
                 $sql = 'SELECT rowid as id, price FROM ' . MAIN_DB_PREFIX . 'product_fournisseur_price WHERE fk_product = ' . (int) $this->id;
-                $sql .= ' AND tms = (SELECT MAX(tms) FROM ' . MAIN_DB_PREFIX . 'product_fournisseur_price)';
+                $sql .= ' AND tms = (SELECT MAX(tms) FROM ' . MAIN_DB_PREFIX . 'product_fournisseur_price WHERE fk_product = ' . (int) $this->id . ')';
 
                 if (!is_null($id_fourn) && (int) $id_fourn) {
                     $sql .= ' AND `fk_soc` = ' . (int) $id_fourn;

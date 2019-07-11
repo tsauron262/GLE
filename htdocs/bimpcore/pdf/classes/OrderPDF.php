@@ -178,7 +178,7 @@ class OrderPDF extends BimpDocumentPDF
         }
 
         $this->header_vars['doc_name'] = $docName;
-        $this->header_vars['doc_ref'] = $docRef . 'AAaaaaaaaaaaaaaaaaaaaaa';
+        $this->header_vars['doc_ref'] = $docRef;
     }
 
     public function getDocInfosHtml()

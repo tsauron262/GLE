@@ -575,6 +575,7 @@ class BLPDF extends OrderPDF
                     if (isset($qties[(int) $line->id]['serials']) && count($qties[(int) $line->id]['serials'])) {
                         $desc .= '<br/>';
                         $desc .= '<strong>N° de série</strong>: ';
+                        $desc .= '<span style="fiont-size: ' . (count($qties[(int) $line->id]['serials']) > 10 ? '6' : '8') . 'px">';
                         $first = true;
                         foreach ($qties[(int) $line->id]['serials'] as $serial) {
                             if (!$first) {
@@ -584,6 +585,7 @@ class BLPDF extends OrderPDF
                             }
                             $desc .= $serial;
                         }
+                        $desc .= '</span>';
                     }
                 }
                 $row = array(

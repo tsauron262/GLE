@@ -100,8 +100,8 @@ class BimpStatsFacture {
         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'facture_extrafields as e ON f.rowid = e.fk_object';
         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'bs_sav as fs ON f.rowid = fs.id_facture';
         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'bs_sav as fs2 ON f.rowid = fs2.id_facture_acompte';
-        $sql .= ' WHERE f.datef >= "' . $this->db->idate($dateStart).'"';
-        $sql .= ' AND   f.datef <= "' . $this->db->idate($dateEnd).'"';
+        $sql .= ' WHERE f.date_valid >= "' . $this->db->idate($dateStart).'"';
+        $sql .= ' AND   f.date_valid <= "' . $this->db->idate($dateEnd).'"';
 
         if (!empty($types) and in_array('NRS', $types)) {   // Non renseigné inclut selected
             $sql .= ' AND (e.type IN (\'' . implode("','", $types) . '\', "0", "1")';
@@ -171,7 +171,7 @@ class BimpStatsFacture {
             $sql .= ' p.rowid as pai_id, p.ref as pai_ref,';
             $sql .= ' e.centre as centre2, e.type as type, e.entrepot as fk_entrepot2,';
             $sql .= ' pf.amount as pai_paye_ttc,';
-            $sql .= ' f.datef as fact_date, ';
+            $sql .= ' f.date_valid as fact_date, ';
 
             if ($taxes == 'ttc')
                 $sql .= ' f.total_ttc as fac_total,  SUM(prop.total) as prop_total';

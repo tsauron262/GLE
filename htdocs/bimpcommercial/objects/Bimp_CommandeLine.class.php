@@ -3987,6 +3987,9 @@ class Bimp_CommandeLine extends ObjectLine
                                 $reservations = $this->getReservations('status', 'asc', 0);
 
                                 foreach ($reservations as $reservation) {
+                                    if ($remain_qty <= 0) {
+                                        break;
+                                    }
                                     $res_qty = (int) $reservation->getData('qty');
                                     if ($remain_qty > $res_qty) {
                                         $remain_qty -= $res_qty;

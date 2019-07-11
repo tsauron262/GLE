@@ -1570,16 +1570,14 @@ class Bimp_Facture extends BimpComm
                         if (count($err)) {
                             $errors[] = BimpTools::getMsgFromArray($err, 'Erreurs lors de la création d\'un avoir avec les lignes négatives');
                         }
-                    } 
-//                    elseif (round($total_ttc_wo_discounts, 2) < 0) {
-//                        $err = $this->updateField('type', Facture::TYPE_CREDIT_NOTE);
-//                        if (count($err)) {
-//                            $errors[] = BimpTools::getMsgFromArray($err, 'Echec de la conversion de la facture en avoir');
-//                        } else {
-//                            $this->dol_object->type = Facture::TYPE_CREDIT_NOTE;
-//                        }
-//                    } 
-                    else {
+                    } elseif (round($total_ttc, 2) < 0) {
+                        $err = $this->updateField('type', Facture::TYPE_CREDIT_NOTE);
+                        if (count($err)) {
+                            $errors[] = BimpTools::getMsgFromArray($err, 'Echec de la conversion de la facture en avoir');
+                        } else {
+                            $this->dol_object->type = Facture::TYPE_CREDIT_NOTE;
+                        }
+                    } else {
                         if ($neg_lines > 0 && BimpTools::getPostFieldValue('create_avoir', 0)) {
                             $convert_avoir = (int) BimpTools::getPostFieldValue('convert_avoir_to_reduc', 1);
                             $use_remise = (int) BimpTools::getPostFieldValue('use_discount_in_facture', 1);
@@ -1624,7 +1622,7 @@ class Bimp_Facture extends BimpComm
 
             // transformation des lignes de remise excepts en paiements: 
 
-            if ((int) $this->getData('type') === Facture::TYPE_STANDARD) {
+            if (in_array((int) $this->getData('type'), array(Facture::TYPE_STANDARD, Facture::TYPE_CREDIT_NOTE))) {
                 $lines = $this->getLines();
 
                 BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');

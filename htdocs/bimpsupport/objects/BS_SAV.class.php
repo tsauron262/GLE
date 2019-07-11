@@ -3305,9 +3305,20 @@ class BS_SAV extends BimpObject
 
                                                 //Generation
                                                 $up_errors = $this->updateField('id_facture', (int) $bimpFacture->id);
+                                                
                                                 if (count($up_errors)) {
                                                     $warnings[] = BimpTools::getMsgFromArray($up_errors, 'Echec de l\'enregistrement de l\'ID de la facture (' . $bimpFacture->id . ')');
                                                 }
+                                                
+                                                global $idAvoirFact;
+                                                if(isset($idAvoirFact) && $idAvoirFact > 0){
+                                                    $up_errors = $this->updateField("id_facture_avoir", $idAvoirFact);
+                                                    $idAvoirFact = 0;
+                                                    if (count($up_errors)) {
+                                                        $warnings[] = BimpTools::getMsgFromArray($up_errors, 'Echec de l\'enregistrement de l\'ID de la facture (' . $bimpFacture->id . ')');
+                                                    }
+                                                }
+                                                
 
                                                 $bimpFacture->dol_object->generateDocument(self::$facture_model_pdf, $langs);
 

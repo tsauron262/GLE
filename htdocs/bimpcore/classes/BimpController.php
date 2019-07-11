@@ -180,7 +180,7 @@ class BimpController
     }
 
     public function display()
-    {        
+    {
         global $user;
         if ($user->id < 1) {
             die("Pas de User <a href='" . DOL_URL_ROOT . "'> Allez à la page de login</a>");
@@ -560,7 +560,28 @@ class BimpController
             $action = BimpTools::getvalue('action');
             $method = 'ajaxProcess' . ucfirst($action);
             if (method_exists($this, $method)) {
-                $this->{$method}();
+                $result = $this->{$method}();
+
+                if (!is_array($result)) {
+                    dol_syslog('Erreur de retour pour AjaxProcess "' . $action . '" - controller: ' . $this->module . ' ' . $this->controller, LOG_ERR);
+                    $result = array();
+                }
+                if (!isset($result['request_id'])) {
+                    $result['request_id'] = BimpTools::getValue('request_id', 0);
+                }
+                
+                $json = json_encode($result);
+                
+                if ($json === false) {
+                    $msg = 'Echec de l\'encodage JSON - '.  json_last_error_msg();
+                    dol_syslog('AjaxProcess "' . $action . '" - controller: ' . $this->module . ' ' . $this->controller.' - '.$msg, LOG_ERR);
+                    die(json_encode(array(
+                        'errors' => array($msg),
+                        'request_id' => BimpTools::getValue('request_id', 0)
+                    )));
+                }
+                
+                die($json);
             } else {
                 $errors[] = 'Requête inconnue: "' . $action . '"';
             }
@@ -596,11 +617,11 @@ class BimpController
             }
         }
 
-        die(json_encode(array(
+        return array(
             'errors'     => $errors,
             'html'       => $html,
             'request_id' => BimpTools::getValue('request_id', 0)
-        )));
+        );
     }
 
     protected function ajaxProcessSaveObject()
@@ -633,7 +654,7 @@ class BimpController
             }
         }
 
-        die(json_encode(array(
+        return array(
             'errors'           => $errors,
             'warnings'         => $result['warnings'],
             'object_view_url'  => $url,
@@ -643,7 +664,7 @@ class BimpController
             'id_object'        => $id_object,
             'success_callback' => $result['success_callback'],
             'request_id'       => BimpTools::getValue('request_id', 0)
-        )));
+        );
     }
 
     protected function ajaxProcessSaveObjectField()
@@ -690,7 +711,7 @@ class BimpController
             }
         }
 
-        die(json_encode(array(
+        return array(
             'errors'      => $errors,
             'success'     => $success,
             'module'      => $module,
@@ -698,7 +719,7 @@ class BimpController
             'id_object'   => $id_object,
             'field'       => $field,
             'request_id'  => BimpTools::getValue('request_id', 0)
-        )));
+        );
     }
 
     protected function ajaxProcessSaveObjectAssociations()
@@ -749,11 +770,11 @@ class BimpController
             }
         }
 
-        die(json_encode(array(
+        return array(
             'errors'     => $errors,
             'success'    => $success,
             'request_id' => BimpTools::getValue('request_id', 0)
-        )));
+        );
     }
 
     protected function ajaxProcessSaveObjectPosition()
@@ -790,12 +811,12 @@ class BimpController
             }
         }
 
-        die(json_encode(array(
+        return array(
             'errors'     => $errors,
             'success'    => $success,
             'list_id'    => $list_id,
             'request_id' => BimpTools::getValue('request_id', 0)
-        )));
+        );
     }
 
     protected function ajaxProcessAddObjectMultipleValuesItem()
@@ -839,14 +860,14 @@ class BimpController
             }
         }
 
-        die(json_encode(array(
+        return array(
             'errors'      => $errors,
             'success'     => $success,
             'module'      => $module,
             'object_name' => $object_name,
             'id_object'   => $id_object,
             'request_id'  => BimpTools::getValue('request_id', 0)
-        )));
+        );
     }
 
     protected function ajaxProcessDeleteObjectMultipleValuesItem()
@@ -890,14 +911,14 @@ class BimpController
             }
         }
 
-        die(json_encode(array(
+        return array(
             'errors'      => $errors,
             'success'     => $success,
             'module'      => $module,
             'object_name' => $object_name,
             'id_object'   => $id_object,
             'request_id'  => BimpTools::getValue('request_id', 0)
-        )));
+        );
     }
 
     protected function ajaxProcessDeleteObjects()
@@ -952,7 +973,7 @@ class BimpController
                 }
             }
         }
-        die(json_encode(array(
+        return array(
             'errors'       => $errors,
             'warnings'     => $warnings,
             'success'      => $success,
@@ -960,7 +981,7 @@ class BimpController
             'object_name'  => $object_name,
             'objects_list' => $objects,
             'request_id'   => BimpTools::getValue('request_id', 0)
-        )));
+        );
     }
 
     protected function ajaxProcessLoadObjectFieldValue()
@@ -997,11 +1018,11 @@ class BimpController
             }
         }
 
-        die(json_encode(array(
+        return array(
             'errors'     => $errors,
             'value'      => $value,
             'request_id' => BimpTools::getValue('request_id', 0)
-        )));
+        );
     }
 
     protected function ajaxProcessLoadObjectForm()
@@ -1055,7 +1076,7 @@ class BimpController
             }
         }
 
-        die(json_encode(array(
+        return array(
             'errors'       => $errors,
             'html'         => $html,
             'module'       => $module,
@@ -1066,7 +1087,7 @@ class BimpController
             'form_id'      => $form_id,
             'modal_format' => $modal_format,
             'request_id'   => BimpTools::getValue('request_id', 0)
-        )));
+        );
     }
 
     protected function ajaxProcessLoadObjectInput()
@@ -1183,7 +1204,7 @@ class BimpController
             }
         }
 
-        die(json_encode(array(
+        return array(
             'errors'      => $errors,
             'html'        => $html,
             'form_id'     => $form_id,
@@ -1192,7 +1213,7 @@ class BimpController
             'id_object'   => $id_object,
             'field_name'  => $field_name,
             'request_id'  => BimpTools::getValue('request_id', 0)
-        )));
+        );
     }
 
     protected function ajaxProcessLoadObjectListFullPanel()
@@ -1220,12 +1241,12 @@ class BimpController
             $list_id = $list->identifier;
         }
 
-        die(json_encode(array(
+        return array(
             'errors'     => $errors,
             'html'       => $html,
             'list_id'    => $list_id,
             'request_id' => BimpTools::getValue('request_id', 0)
-        )));
+        );
     }
 
     protected function ajaxProcessLoadObjectList()
@@ -1267,14 +1288,14 @@ class BimpController
             $filters_panel_html = $list->renderFiltersPanel();
         }
 
-        die(json_encode(array(
+        return array(
             'errors'             => $errors,
             'rows_html'          => $rows_html,
             'pagination_html'    => $pagination_html,
             'filters_panel_html' => $filters_panel_html,
             'list_id'            => $list_id,
             'request_id'         => BimpTools::getValue('request_id', 0)
-        )));
+        );
     }
 
     protected function ajaxProcessLoadObjectNotes()
@@ -1308,11 +1329,11 @@ class BimpController
             $html .= $object->renderNotesList($filter_by_user, $list_model);
         }
 
-        die(json_encode(array(
+        return array(
             'errors'     => $errors,
             'html'       => $html,
             'request_id' => BimpTools::getValue('request_id', 0)
-        )));
+        );
     }
 
     protected function ajaxProcessLoadObjectView()
@@ -1373,14 +1394,14 @@ class BimpController
             $view_id = $view->identifier;
         }
 
-        die(json_encode(array(
+        return array(
             'errors'       => $errors,
             'html'         => $html,
             'header_html'  => $header_html,
             'view_id'      => $view_id,
             'modal_format' => $modal_format,
             'request_id'   => BimpTools::getValue('request_id', 0)
-        )));
+        );
     }
 
     protected function ajaxProcessLoadObjectViewsList()
@@ -1411,14 +1432,14 @@ class BimpController
             $views_list_id = $bimpViewsList->identifier;
         }
 
-        die(json_encode(array(
+        return array(
             'errors'        => $errors,
             'html'          => $html,
             'pagination'    => $pagination,
             'views_list_id' => $views_list_id,
             'modal_format'  => $modal_format,
             'request_id'    => BimpTools::getValue('request_id', 0)
-        )));
+        );
     }
 
     protected function ajaxProcessLoadObjectListCustom()
@@ -1453,14 +1474,14 @@ class BimpController
             $filters_panel_html = $list->renderFiltersPanel();
         }
 
-        die(json_encode(array(
+        return array(
             'errors'             => $errors,
             'html'               => $html,
             'filters_panel_html' => $filters_panel_html,
             'list_id'            => $list_id,
             'modal_format'       => $modal_format,
             'request_id'         => BimpTools::getValue('request_id', 0)
-        )));
+        );
     }
 
     protected function ajaxProcessLoadObjectStatsList()
@@ -1495,14 +1516,14 @@ class BimpController
             $filters_panel_html = $list->renderFiltersPanel();
         }
 
-        die(json_encode(array(
+        return array(
             'errors'             => $errors,
             'html'               => $html,
             'filters_panel_html' => $filters_panel_html,
             'list_id'            => $list_id,
             'modal_format'       => $modal_format,
             'request_id'         => BimpTools::getValue('request_id', 0)
-        )));
+        );
     }
 
     protected function ajaxProcessLoadObjectCard()
@@ -1535,11 +1556,11 @@ class BimpController
             }
         }
 
-        die(json_encode(array(
+        return array(
             'errors'     => $errors,
             'html'       => $html,
             'request_id' => BimpTools::getValue('request_id', 0)
-        )));
+        );
     }
 
     protected function ajaxProcessSearchObjectlist()
@@ -1658,11 +1679,11 @@ class BimpController
             }
         }
 
-        die(json_encode(array(
+        return array(
             'errors'     => array(),
             'list'       => $list,
             'request_id' => BimpTools::getValue('request_id', 0)
-        )));
+        );
     }
 
     protected function ajaxProcessSaveAssociations()
@@ -1733,12 +1754,12 @@ class BimpController
             }
         }
 
-        die(json_encode(array(
+        return array(
             'errors'     => $errors,
             'success'    => 'Associations correctement enregistrées',
             'done'       => $done,
             'request_id' => BimpTools::getValue('request_id', 0)
-        )));
+        );
     }
 
     protected function ajaxProcessSetObjectNewStatus()
@@ -1801,12 +1822,12 @@ class BimpController
             }
         }
 
-        die(json_encode(array(
+        return array(
             'errors'     => $errors,
             'warnings'   => $warnings,
             'success'    => $success,
             'request_id' => BimpTools::getValue('request_id', 0)
-        )));
+        );
     }
 
     protected function ajaxProcessSetObjectAction()
@@ -1853,7 +1874,7 @@ class BimpController
             $return['errors'] = $errors;
         }
 
-        die(json_encode($return));
+        return $return;
     }
 
     protected function ajaxProcessLoadProductStocks()
@@ -1876,11 +1897,11 @@ class BimpController
         }
 
 
-        die(json_encode(array(
+        return array(
             'errors'     => $errors,
             'html'       => $html,
             'request_id' => BimpTools::getValue('request_id', 0)
-        )));
+        );
     }
 
     protected function ajaxProcessSearchZipTown()
@@ -1925,11 +1946,11 @@ class BimpController
             }
         }
 
-        die(json_encode(array(
+        return array(
             'errors'     => $errors,
             'html'       => $html,
             'request_id' => BimpTools::getValue('request_id', 0)
-        )));
+        );
     }
 
     protected function ajaxProcessLoadFixeTabs($i = 0)
@@ -1955,15 +1976,15 @@ class BimpController
             $_SESSION[$hashCash]['nbBouclePush'] = $_SESSION[$hashCash]['nbBouclePush'] * 1.1; //Pour ne pas surchargé quand navigateur resté ouvert, mais ne pas avoir des boucle morte quand navigation rapide
 
 
-            die(json_encode(array(
+            return array(
                 'errors'     => $errors,
                 'html'       => $returnHtml,
                 'request_id' => BimpTools::getValue('request_id', 0)
-            )));
+            );
         }
         else {
             session_write_close(); //Pour eviter les blockages navigateur
-            usleep(930000*2); //un tous petit peu moins d'une seconde + temps d'execution = 1s
+            usleep(930000 * 2); //un tous petit peu moins d'une seconde + temps d'execution = 1s
             return $this->ajaxProcessLoadFixeTabs($i);
         }
     }
@@ -1993,11 +2014,11 @@ class BimpController
             $errors[] = 'Echec du chargement des filtres enregistrés. Certains paramètres obligatoires sont absents';
         }
 
-        die(json_encode(array(
+        return array(
             'errors'     => $errors,
             'html'       => $html,
             'request_id' => BimpTools::getValue('request_id', 0)
-        )));
+        );
     }
 
     protected function ajaxProcessReloadObjectHeader()
@@ -2033,12 +2054,12 @@ class BimpController
             }
         }
 
-        die(json_encode(array(
+        return array(
             'errors'     => $errors,
             'success'    => $sucess,
             'html'       => $html,
             'request_id' => BimpTools::getValue('request_id', 0)
-        )));
+        );
     }
 
     // Callbacks:

@@ -93,6 +93,11 @@ fields:
         label: Prix d'achat moyen pondéré
         type: money
         
+    cur_pa_ht: 
+        label: Prix d'achat actuel
+        type: money
+        default_value: 0
+        
     id_cur_fp: 
         label: Prix d'achat fournisseur en cours
         type: id_object

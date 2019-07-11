@@ -292,7 +292,7 @@ forms:
               input: 
                   type: hidden
             - custom: 1
-              label: Nombre d'items par pages par défaut
+              label: Nombre d'items par page par défaut
               input_name: nb_items
               show: 
                   callback: showListConfigNbItems
@@ -306,7 +306,7 @@ forms:
                       250: 250
                       500: 500
             - custom: 1
-              label: Trie par défaut
+              label: Tri par défaut
               input_name: sort_field
               show: 
                   callback: showListConfigSort
@@ -315,7 +315,7 @@ forms:
                   options: 
                       array: sortableFields
             - custom: 1
-              label: Option de trie
+              label: Option de tri
               show: 
                   callback: showListConfigSort
               input_name: sort_option

@@ -49,6 +49,12 @@ objects:
             id_object: 
                 field_value: id_facture_acompte
                 
+    facture_avoir: 
+        extends: facture
+        instance: 
+            id_object: 
+                field_value: id_facture_avoir
+                
     propal_lines: 
         relation: hasMany
         delete: 0
@@ -206,6 +212,10 @@ fields:
         label: Facture d'acompte
         type: id_object
         object: facture_acompte
+    id_facture_avoir:
+        label: Facture d'avoir
+        type: id_object
+        object: facture_avoir
     id_discount:
         label: Id reduction
         type: int
@@ -560,6 +570,10 @@ fields_tables:
               display: card
               show: 
                   field_value: id_facture_acompte
+            - field: id_facture_avoir
+              display: card
+              show: 
+                  field_value: id_facture_avoir
             - field: id_facture
               display: card
               show: 
@@ -739,6 +753,15 @@ lists_cols:
     propal:
         field: id_propal
         display: nom_url
+    id_facture_acompte:
+        field: id_facture_acompte
+        display: nom_url
+    id_facture_avoir:
+        field: id_facture_avoir
+        display: nom_url
+    id_facture:
+        field: id_facture
+        display: nom_url
                         
 filters_panels: 
     default: 
@@ -751,6 +774,7 @@ filters_panels:
             - field: id_user_tech
             - field: id_client
             - field: id_facture_acompte
+            - field: id_facture_avoir
             - field: id_facture
             - field: prestataire_number
             - field: sav_pro

@@ -78,7 +78,6 @@ class ObjectLine extends BimpObject
 
     public function canEditPrixAchat()
     {
-        return 0;
         global $user;
         if (isset($user->rights->bimpcommercial->priceAchat) && (int) $user->rights->bimpcommercial->priceAchat) {
             return 1;

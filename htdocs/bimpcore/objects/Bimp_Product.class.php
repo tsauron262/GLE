@@ -293,16 +293,17 @@ class Bimp_Product extends BimpObject
 //            if (isset(self::$stockShowRoom[$id_product][$id_entrepot])) {
 //                return self::$stockShowRoom[$id_product][$id_entrepot];
 //            }
-            
-            if(!count(self::$lienShowRoomEntrepot))
-                self::initLienShowRoomEntrepot ();
-            
-            
-            if(isset(self::$lienShowRoomEntrepot[$id_entrepot]))
+
+            if (!count(self::$lienShowRoomEntrepot))
+                self::initLienShowRoomEntrepot();
+
+
+            if (isset(self::$lienShowRoomEntrepot[$id_entrepot]))
                 $stock = $this->getStockDate($date, self::$lienShowRoomEntrepot[$id_entrepot], $id_product);
         }
 
-        return $stock;;
+        return $stock;
+        ;
     }
 
     public static function getStockIconStatic($id_product, $id_entrepot = null)
@@ -349,7 +350,7 @@ class Bimp_Product extends BimpObject
 
     // Getters FournPrice: 
 
-    public static function getFournisseursPriceArray($id_product, $id_fournisseur = 0, $id_price = 0, $include_empty = true)
+    public static function getFournisseursPriceArray($id_product, $id_fournisseur = 0, $id_price = 0, $include_empty = true, $empty_label = '')
     {
         if (!(int) $id_product) {
             return array();
@@ -358,7 +359,7 @@ class Bimp_Product extends BimpObject
         $prices = array();
 
         if ($include_empty) {
-            $prices[0] = '';
+            $prices[0] = $empty_label;
         }
 
         $filters = array(
@@ -429,15 +430,18 @@ class Bimp_Product extends BimpObject
         }
     }
 
-    public function getCurrentPaHt()
+    public function getCurrentPaHt($id_fourn = null, $with_default = false)
     {
-        if ($this->isLoaded()) {
-            $pa_ht = (float) $this->getData('pmp');
-            if (!$pa_ht) {
-                $pa_ht = (float) $this->getCurrentFournPriceAmount();
+        $pa_ht = 0;
 
-                if (!$pa_ht) {
-                    $pa_ht = (float) $this->getData('pa_prevu');
+        if ($this->isLoaded()) {
+            $pa_ht = (float) $this->getCurrentFournPriceAmount($id_fourn, $with_default);
+
+            if (!$pa_ht) {
+                if ((float) $this->getData('cur_pa_ht')) {
+                    $pa_ht = (float) $this->getData('cur_pa_ht');
+                } elseif ((float) $this->getData('pmp')) {
+                    $pa_ht = (float) $this->getData('pmp');
                 }
             }
 
@@ -447,31 +451,36 @@ class Bimp_Product extends BimpObject
         return 0;
     }
 
-    public function getCurrentFournPriceId($id_fourn = null)
+    public function getCurrentFournPriceId($id_fourn = null, $with_default = false)
     {
         if ($this->isLoaded()) {
             if ((int) $this->getData('id_cur_fp')) {
                 return (int) $this->getData('id_cur_fp');
             }
 
-            $sql = 'SELECT MAX(fp.rowid) as id FROM ' . MAIN_DB_PREFIX . 'product_fournisseur_price fp WHERE fp.fk_product = ' . $this->id;
+            if ($with_default) {
+//            $sql = 'SELECT MAX(fp.rowid) as id FROM ' . MAIN_DB_PREFIX . 'product_fournisseur_price fp WHERE fp.fk_product = ' . $this->id;
+                // On retourne le dernier PA fournisseur modifié ou enregistré: 
+                $sql = 'SELECT rowid as id, price FROM ' . MAIN_DB_PREFIX . 'product_fournisseur_price WHERE fk_product = ' . (int) $this->id;
+                $sql .= ' AND tms = (SELECT MAX(tms) FROM ' . MAIN_DB_PREFIX . 'product_fournisseur_price)';
 
-            if (!is_null($id_fourn) && (int) $id_fourn) {
-                $sql .= ' AND `fk_soc` = ' . (int) $id_fourn;
-            }
+                if (!is_null($id_fourn) && (int) $id_fourn) {
+                    $sql .= ' AND `fk_soc` = ' . (int) $id_fourn;
+                }
 
-            $result = $this->db->executeS($sql);
-            if (isset($result[0]->id)) {
-                return (int) $result[0]->id;
+                $result = $this->db->executeS($sql);
+                if (isset($result[0]->id)) {
+                    return (int) $result[0]->id;
+                }
             }
         }
 
         return null;
     }
 
-    public function getCurrentFournPriceObject($id_fourn = null)
+    public function getCurrentFournPriceObject($id_fourn = null, $with_default = false)
     {
-        $id_pfp = (int) $this->getCurrentFournPriceId($id_fourn);
+        $id_pfp = (int) $this->getCurrentFournPriceId($id_fourn, $with_default);
 
         if ($id_pfp) {
             $pfp = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ProductFournisseurPrice', $id_pfp);
@@ -483,9 +492,9 @@ class Bimp_Product extends BimpObject
         return null;
     }
 
-    public function getCurrentFournPriceAmount($id_fourn = null)
+    public function getCurrentFournPriceAmount($id_fourn = null, $with_default = false)
     {
-        $pfp = $this->getCurrentFournPriceObject($id_fourn);
+        $pfp = $this->getCurrentFournPriceObject($id_fourn, $with_default);
 
         if (BimpObject::objectLoaded($pfp)) {
             return (float) $pfp->getData('price');
@@ -780,19 +789,17 @@ class Bimp_Product extends BimpObject
 //            self::$stockShowRoom[$ln->id_product][$ln->id_entrepot] = $ln->nb;
 //            self::$stockShowRoom[$ln->id_product][null] += $ln->nb;
 //        }
-        
-        
-        
     }
-    
-    private static function initLienShowRoomEntrepot(){
+
+    private static function initLienShowRoomEntrepot()
+    {
         global $db;
         self::$lienShowRoomEntrepot = array();
         $sql = $db->query("SELECT e.rowid as id1, e2.rowid as id2 FROM `llx_entrepot` e,`llx_entrepot` e2 WHERE e2.ref = CONCAT('D',e.ref)");
         while ($ln = $db->fetch_object($sql)) {
             self::$lienShowRoomEntrepot[$ln->id1] = $ln->id2;
         }
-        
+
         //
     }
 

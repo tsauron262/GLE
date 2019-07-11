@@ -289,6 +289,26 @@ class Bimp_CommandeLine extends ObjectLine
         return array();
     }
 
+    public function getCommandeFournIdPrice()
+    {
+        if ((int) $this->id_fourn_price) {
+            return $this->id_fourn_price;
+        }
+
+        if ((float) $this->pa_ht && (int) $this->id_product) {
+            $where1 = '`fk_product` = ' . (int) $this->id_product . ' AND `price` = ' . (float) $this->pa_ht;
+            $where = $where1 . ' AND tms = (SELECT MAX(tms) FROM ' . MAIN_DB_PREFIX . 'product_fournisseur_price WHERE ' . $where1 . ')';
+            return (int) $this->db->getValue('product_fournisseur_price', 'rowid', $where);
+        }
+
+        return 0;
+    }
+
+    public function getCommandeFournTypePrice()
+    {
+        return ((int) $this->getCommandeFournIdPrice() ? 1 : 2);
+    }
+
     // Getters valeurs:
 
     public function getFullQty()

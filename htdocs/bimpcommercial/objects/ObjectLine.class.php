@@ -78,6 +78,7 @@ class ObjectLine extends BimpObject
 
     public function canEditPrixAchat()
     {
+        return 0;
         global $user;
         if (isset($user->rights->bimpcommercial->priceAchat) && (int) $user->rights->bimpcommercial->priceAchat) {
             return 1;
@@ -419,12 +420,18 @@ class ObjectLine extends BimpObject
 
     // Getters array: 
 
-    public function getProductFournisseursPricesArray($include_empty = true)
+    public function getProductFournisseursPricesArray($include_empty = true, $empty_label = '')
     {
         $id_product = (int) $this->getIdProductFromPost();
         if ($id_product) {
             BimpObject::loadClass('bimpcore', 'Bimp_Product');
-            return Bimp_Product::getFournisseursPriceArray($id_product, 0, 0, $include_empty);
+            return Bimp_Product::getFournisseursPriceArray($id_product, 0, 0, $include_empty, $empty_label);
+        }
+
+        if ($include_empty) {
+            return array(
+                0 => $empty_label
+            );
         }
 
         return array();
@@ -633,13 +640,13 @@ class ObjectLine extends BimpObject
                     'on'    => $line_alias . '.rowid = a.id_line'
                 );
 
-                $alias = 'cat_prod'.$field_name;
+                $alias = 'cat_prod' . $field_name;
                 $joins[$alias] = array(
                     'alias' => $alias,
                     'table' => 'categorie_product',
                     'on'    => $alias . '.fk_product = ' . $line_alias . '.fk_product'
                 );
-                $filters[$alias.'.fk_categorie'] = array(
+                $filters[$alias . '.fk_categorie'] = array(
                     'in' => $values
                 );
                 return;
@@ -854,9 +861,9 @@ class ObjectLine extends BimpObject
                         }
                     }
                     $pu_ht = $this->pu_ht;
-                    if ($this->isLoaded() && $this->field_exists('def_pu_ht')) {
-                        $pu_ht = $this->getData('def_pu_ht');
-                    }
+//                    if ($this->isLoaded() && $this->field_exists('def_pu_ht')) {
+//                        $pu_ht = $this->getData('def_pu_ht');
+//                    }
                     if ($id_product && (is_null($pu_ht) || (int) $this->id_product !== $id_product)) {
                         return $product->getData('price');
                     }
@@ -864,9 +871,9 @@ class ObjectLine extends BimpObject
 
                 case 'tva_tx':
                     $tva_tx = $this->tva_tx;
-                    if ($this->isLoaded() && $this->field_exists('def_tva_tx')) {
-                        $tva_tx = $this->getData('def_tva_tx');
-                    }
+//                    if ($this->isLoaded() && $this->field_exists('def_tva_tx')) {
+//                        $tva_tx = $this->getData('def_tva_tx');
+//                    }
                     if ($id_product && (is_null($tva_tx) || (int) $this->id_product !== $id_product)) {
                         return (float) $product->getData('tva_tx');
                     }
@@ -877,9 +884,9 @@ class ObjectLine extends BimpObject
 
                 case 'id_fourn_price':
                     $id_fourn_price = $this->id_fourn_price;
-                    if ($this->isLoaded() && $this->field_exists('def_id_fourn_price')) {
-                        $id_fourn_price = $this->getData('def_id_fourn_price');
-                    }
+//                    if ($this->isLoaded() && $this->field_exists('def_id_fourn_price')) {
+//                        $id_fourn_price = $this->getData('def_id_fourn_price');
+//                    }
                     if ($id_product && (is_null($id_fourn_price) || (int) $this->id_product !== $id_product)) {
                         if ((int) $this->id_fourn_price) {
                             $pfp = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ProductFournisseurPrice', (int) $this->id_fourn_price);
@@ -890,10 +897,19 @@ class ObjectLine extends BimpObject
                             }
                         }
 
-                        // Récupération du dernier prix d'achat enregistré: 
+                        // Récupération du prix d'achat fournisseur courant: 
                         return (int) $product->getCurrentFournPriceId();
                     }
                     return (int) $id_fourn_price;
+
+                case 'pa_ht':
+                    $pa_ht = $this->pa_ht;
+
+                    if ($id_product && (is_null($pa_ht) || (int) $this->id_product !== $id_product)) {
+                        $pa_ht = (float) $product->getCurrentPaHt();
+                    }
+
+                    return (float) $pa_ht;
 
                 case 'remisable':
                     if ($id_product && (int) $this->id_product !== $id_product) {
@@ -2026,21 +2042,21 @@ class ObjectLine extends BimpObject
                         while ($qty > 0) {
                             $instance->reset();
                             $pu_ht = (float) $this->pu_ht;
-                            if ($this->field_exists('def_pu_ht')) {
-                                $pu_ht = (float) $this->getData('def_pu_ht');
-                            }
+//                            if ($this->field_exists('def_pu_ht')) {
+//                                $pu_ht = (float) $this->getData('def_pu_ht');
+//                            }
                             $tva_tx = (float) $this->tva_tx;
-                            if ($this->field_exists('def_tva_tx')) {
-                                $tva_tx = (float) $this->getData('def_tva_tx');
-                            }
+//                            if ($this->field_exists('def_tva_tx')) {
+//                                $tva_tx = (float) $this->getData('def_tva_tx');
+//                            }
                             $pa_ht = (float) $this->pa_ht;
-                            if ($this->field_exists('def_pa_ht')) {
-                                $pa_ht = (float) $this->getData('def_pa_ht');
-                            }
+//                            if ($this->field_exists('def_pa_ht')) {
+//                                $pa_ht = (float) $this->getData('def_pa_ht');
+//                            }
                             $id_fourn_price = (int) $this->id_fourn_price;
-                            if ($this->field_exists('def_id_fourn_price')) {
-                                $id_fourn_price = (float) $this->getData('def_id_fourn_price');
-                            }
+//                            if ($this->field_exists('def_id_fourn_price')) {
+//                                $id_fourn_price = (float) $this->getData('def_id_fourn_price');
+//                            }
 
                             $instance->validateArray(array(
                                 'id_object_line' => (int) $this->id,
@@ -2124,20 +2140,20 @@ class ObjectLine extends BimpObject
                     if (!count($errors)) {
                         if ($this->isParentEditable()) {
                             if (is_null($tva_tx)) {
-                                if ($this->field_exists('def_tva_tx')) {
-                                    $tva_tx = (float) $this->getData('def_tva_tx');
-                                } else {
-                                    $tva_tx = (float) $this->tva_tx;
-                                }
+//                                if ($this->field_exists('def_tva_tx')) {
+//                                    $tva_tx = (float) $this->getData('def_tva_tx');
+//                                } else {
+                                $tva_tx = (float) $this->tva_tx;
+//                                }
                             }
                             if (!is_null($equipment) && (float) $equipment->getData('prix_vente_except')) {
                                 $pu_ht = BimpTools::calculatePriceTaxEx((float) $equipment->getData('prix_vente_except'), $tva_tx);
                             } elseif (is_null($pu_ht)) {
-                                if ($this->field_exists('def_pu_ht')) {
-                                    $pu_ht = (float) $this->getData('def_pu_ht');
-                                } else {
-                                    $pu_ht = (float) $this->pu_ht;
-                                }
+//                                if ($this->field_exists('def_pu_ht')) {
+//                                    $pu_ht = (float) $this->getData('def_pu_ht');
+//                                } else {
+                                $pu_ht = (float) $this->pu_ht;
+//                                }
                             }
                             $line->set('pu_ht', (float) $pu_ht);
                             $line->set('tva_tx', $tva_tx);
@@ -2148,11 +2164,11 @@ class ObjectLine extends BimpObject
                                 $line->set('pa_ht', (float) $equipment->getData('prix_achat'));
                                 $line->set('id_fourn_price', 0);
                             } elseif (is_null($id_fourn_price)) {
-                                if ($this->field_exists('def_id_fourn_price')) {
-                                    $id_fourn_price = $this->getData('def_id_fourn_price');
-                                } else {
-                                    $id_fourn_price = $this->id_fourn_price;
-                                }
+//                                if ($this->field_exists('def_id_fourn_price')) {
+//                                    $id_fourn_price = $this->getData('def_id_fourn_price');
+//                                } else {
+                                $id_fourn_price = $this->id_fourn_price;
+//                                }
                             }
                             if ((int) $id_fourn_price) {
                                 $pa_ht = (float) $this->db->getValue('product_fournisseur_price', 'price', '`rowid` = ' . (int) $id_fourn_price);
@@ -2188,27 +2204,27 @@ class ObjectLine extends BimpObject
 
     public function calcValuesByEquipments()
     {
-        if ($this->isLoaded() && (int) $this->qty > 0) {
-            $lines = $this->getEquipmentLines();
-
-            if (count($lines)) {
-                $total_ht = 0;
-                $total_achat = 0;
-
-                foreach ($lines as $line) {
-                    $total_ht += (float) $line->getData('pu_ht');
-                    $total_achat += (float) $line->getData('pa_ht');
-                }
-
-                if ($this->isEditable()) {
-                    $this->pu_ht = (float) $total_ht / $this->qty;
-                }
-                if(((float) $total_achat / $this->qty)> 0){
-                    $this->pa_ht = (float) $total_achat / $this->qty;
-                    $this->id_fourn_price = 0;
-                }
-            }
-        }
+//        if ($this->isLoaded() && (int) $this->qty > 0) {
+//            $lines = $this->getEquipmentLines();
+//
+//            if (count($lines)) {
+//                $total_ht = 0;
+//                $total_achat = 0;
+//
+//                foreach ($lines as $line) {
+//                    $total_ht += (float) $line->getData('pu_ht');
+//                    $total_achat += (float) $line->getData('pa_ht');
+//                }
+//
+//                if ($this->isEditable()) {
+//                    $this->pu_ht = (float) $total_ht / $this->qty;
+//                }
+//                if (((float) $total_achat / $this->qty) > 0) {
+//                    $this->pa_ht = (float) $total_achat / $this->qty;
+//                    $this->id_fourn_price = 0;
+//                }
+//            }
+//        }
     }
 
     public function setEquipments($equipments, &$equipments_set = array())
@@ -2588,7 +2604,7 @@ class ObjectLine extends BimpObject
 
         if ($field === 'id_product') {
             $value = (int) $this->id_product;
-        } elseif (in_array($field, array('pu_ht', 'tva_tx', 'id_fourn_price', 'remisable', 'desc'))) {
+        } elseif (in_array($field, array('pu_ht', 'tva_tx', 'id_fourn_price', 'pa_ht', 'remisable', 'desc'))) {
             $value = $this->getValueByProduct($field);
         } else {
             if (BimpTools::isSubmit($field)) {
@@ -2617,57 +2633,79 @@ class ObjectLine extends BimpObject
             case 'id_fourn_price':
                 if (BimpObject::objectLoaded($this->post_equipment)) {
                     if ((float) $this->post_equipment->getData('prix_achat') > 0) {
+                        $html .= 'Prix d\'achat équipement';
                         $html .= '<input type="hidden" name="' . $prefixe . 'id_fourn_price" value="0"/>';
+                        break;
+                    }
+                }
+
+                $values = $this->getProductFournisseursPricesArray(true, 'Prix d\'achat exceptionnel');
+
+                if (!$attribute_equipment && $this->canEditPrixAchat() && $this->isEditable($force_edit)) {
+                    $html .= BimpInput::renderInput('select', $prefixe . 'id_fourn_price', (int) $value, array(
+                                'options' => $values
+                    ));
+                } else {
+//                    if ($attribute_equipment) {
+//                        if ($this->field_exists('def_id_fourn_price')) {
+//                            $value = (int) $this->getData('def_id_fourn_price');
+//                        }
+//                    }
+                    if ((int) $value && isset($values[(int) $value])) {
+                        $html .= $values[(int) $value];
+                    } elseif ((int) $value) {
+                        $html .= BimpRender::renderAlerts('Le prix fournisseur d\'ID ' . $value . ' n\'est pas enregistré pour ce produit');
+                        $value = 0;
+                    } else {
+                        $html .= 'Prix d\'achat actuel';
+                    }
+                    $html .= '<input type="hidden" name="' . $prefixe . 'id_fourn_price" value="' . $value . '"/>';
+                }
+                break;
+
+            case 'pa_ht':
+                if (BimpObject::objectLoaded($this->post_equipment)) {
+                    if ((float) $this->post_equipment->getData('prix_achat') > 0) {
                         $html .= '<input type="hidden" name="' . $prefixe . 'pa_ht" value="' . (float) $this->post_equipment->getData('prix_achat') . '"/>';
-                        $html .= 'Prix d\'achat équipement: <strong>';
                         $html .= BimpTools::displayMoneyValue((float) $this->post_equipment->getData('prix_achat'), 'EUR') . '</strong>';
                         break;
                     }
                 }
 
-                $values = $this->getProductFournisseursPricesArray(false);
+                // On prend en priorité lé PA fournisseur: 
+                $id_fourn_price = (int) BimpTools::getPostFieldValue('id_fourn_price', $this->id_fourn_price);
+                if ($id_fourn_price) {
+                    $value = (float) $this->db->getValue('product_fournisseur_price', 'price', '`rowid` = ' . $id_fourn_price);
+                }
 
-                $has_values = count($values);
+                $is_pa_prevu = false;
 
-                if ($has_values && !$attribute_equipment && $this->canEditPrixAchat() && $this->isEditable($force_edit)) {
-                    $html .= BimpInput::renderInput('select', $prefixe . 'id_fourn_price', (int) $value, array(
-                                'options' => $values
-                    ));
-                } else {
-                    if ($attribute_equipment) {
-                        if ($this->field_exists('def_id_fourn_price')) {
-                            $value = (int) $this->getData('def_id_fourn_price');
+                if (!(float) $value) {
+                    $product = $this->getProduct();
+                    if (BimpObject::objectLoaded($product) && !(int) $product->getData('validate')) {
+                        $pa_prevu = (float) $product->getData('pa_prevu');
+                        if ($pa_prevu) {
+                            $value = $pa_prevu;
+                            $is_pa_prevu = true;
                         }
                     }
-                    $html .= '<input type="hidden" name="' . $prefixe . 'id_fourn_price" value="' . $value . '"/>';
-                    if (!is_null($value) && isset($values[(int) $value]) && $values[(int) $value] !== '') {
-                        $html .= $values[(int) $value];
-                    } elseif ((int) $value) {
-                        $html .= BimpRender::renderAlerts('Le prix fournisseur d\'ID ' . $value . ' n\'est pas enregistré pour ce produit');
-                    } else {
-                        $pa_ht = $this->pa_ht;
-                        $is_pa_prevu = false;
+                }
 
-                        $product = $this->getProduct();
-                        if (BimpObject::objectLoaded($product)) {
-                            $pa_prevu = (float) $product->getData('pa_prevu');
-
-                            if (is_null($pa_ht && $pa_prevu)) {
-                                $pa_ht = $pa_prevu;
-                            }
-
-                            if ($pa_ht === $pa_prevu) {
-                                $is_pa_prevu = true;
-                            }
-                        }
-
-                        if (!is_null($pa_ht)) {
-                            $html .= '<input type="hidden" name="' . $prefixe . 'pa_ht" value="' . $pa_ht . '"/>';
-                            $html .= BimpTools::displayMoneyValue($pa_ht);
-                            if ($is_pa_prevu) {
-                                $html .= ' (prévisionnel)';
-                            }
-                        }
+                if (!$attribute_equipment && $this->canEditPrixAchat() && $this->isEditable($force_edit)) {
+                    $html .= BimpInput::renderInput('text', $prefixe . 'pa_ht', (float) $value, array(
+                                'data'        => array(
+                                    'data_type' => 'number',
+                                    'decimals'  => 4,
+                                    'min'       => 'none',
+                                    'max'       => 'none'
+                                ),
+                                'addon_right' => '<i class="fa fa-' . BimpTools::getCurrencyIcon('EUR') . '"></i>'
+                    ));
+                } else {
+                    $html .= '<input type="hidden" name="' . $prefixe . 'pa_ht" value="' . (float) $value . '"/>';
+                    $html .= BimpTools::displayMoneyValue((float) $value);
+                    if ($is_pa_prevu) {
+                        $html .= ' (prévisionnel)';
                     }
                 }
                 break;
@@ -3190,16 +3228,16 @@ class ObjectLine extends BimpObject
                 if ($this->isParentEditable()) {
                     if (isset($data['pu_ht'])) {
                         $pu_ht = (float) $data['pu_ht'];
-                    } elseif ($this->field_exists('def_pu_ht')) {
-                        $pu_ht = (float) $this->getData('def_pu_ht');
+//                    } elseif ($this->field_exists('def_pu_ht')) {
+//                        $pu_ht = (float) $this->getData('def_pu_ht');
                     } else {
                         $pu_ht = (float) $this->pu_ht;
                     }
 
                     if (isset($data['tva_tx'])) {
                         $tva_tx = (float) $data['tva_tx'];
-                    } elseif ($this->field_exists('def_tva_tx')) {
-                        $tva_tx = (float) $this->getData('def_tva_tx');
+//                    } elseif ($this->field_exists('def_tva_tx')) {
+//                        $tva_tx = (float) $this->getData('def_tva_tx');
                     } else {
                         $tva_tx = (float) $this->tva_tx;
                     }
@@ -3207,8 +3245,8 @@ class ObjectLine extends BimpObject
 
                 if (isset($data['id_fourn_price']) && (int) $data['id_fourn_price']) {
                     $id_fourn_price = (float) $data['id_fourn_price'];
-                } elseif ($this->field_exists('def_id_fourn_price')) {
-                    $id_fourn_price = (float) $this->getData('def_id_fourn_price');
+//                } elseif ($this->field_exists('def_id_fourn_price')) {
+//                    $id_fourn_price = (float) $this->getData('def_id_fourn_price');
                 } else {
                     $id_fourn_price = (float) $this->id_fourn_price;
                 }
@@ -3580,9 +3618,13 @@ class ObjectLine extends BimpObject
                             $product = $this->getProduct();
 
                             if (!(int) $this->id_fourn_price && !(float) $this->pa_ht) {
-                                if (!(int) $product->getData('validate') && (float) $product->getData('pa_prevu')) {
+                                $this->pa_ht = (float) $this->getValueByProduct('pa_ht');
+
+                                if (!$this->pa_ht && !(int) $product->getData('validate') && (float) $product->getData('pa_prevu')) {
                                     $this->pa_ht = (float) $product->getData('pa_prevu');
                                 }
+                            } elseif ((int) $this->id_fourn_price) {
+                                $this->pa_ht = (float) $this->db->getValue('product_fournisseur_price', 'price', '`rowid` = ' . (int) $this->id_fourn_price);
                             }
 
                             if ((int) $this->getData('remisable')) {
@@ -3910,75 +3952,75 @@ class ObjectLine extends BimpObject
                 }
 
                 // Valeurs par défaut pour les lignes d'équipement: 
-                $pu_ht = (float) $this->pu_ht;
-                if ($this->field_exists('def_pu_ht')) {
-                    $pu_ht = (float) $this->getData('def_pu_ht');
-                }
-                $tva_tx = (float) $this->tva_tx;
-                if ($this->field_exists('def_tva_tx')) {
-                    $tva_tx = (float) $this->getData('def_tva_tx');
-                }
-                $id_fourn_price = (int) $this->id_fourn_price;
-                if ($this->field_exists('def_id_fourn_price')) {
-                    $id_fourn_price = (float) $this->getData('def_id_fourn_price');
-                }
-                $pa_ht = (float) $this->db->getValue('product_fournisseur_price', 'price', '`rowid` = ' . (int) $id_fourn_price);
-
-                // Vérification des valeurs des lignes d'équipement et mise à jour si nécessaire: 
-                $eq_lines = $this->getEquipmentLines();
-                foreach ($eq_lines as $eq_line) {
-                    $update_line = false;
-                    $equipment = null;
-
-                    if ((int) $eq_line->getData('id_equipment')) {
-                        $equipment = $eq_line->getChildObject('equipment');
-                        if (!BimpObject::objectLoaded($equipment)) {
-                            $eq_line->set('id_equipment', 0);
-                            $update_line = true;
-                            unset($equipment);
-                            $equipment = null;
-                        }
-                    }
-
-                    if (is_null($equipment) || (!is_null($equipment) && !(float) $equipment->getData('prix_vente_except'))) {
-                        if ($pu_ht !== (float) $eq_line->getData('pu_ht')) {
-                            $eq_line->set('pu_ht', $pu_ht);
-                            $update_line = true;
-                        }
-                    }
-
-                    if ($tva_tx !== (float) $eq_line->getData('tva_tx')) {
-                        $eq_line->set('tva_tx', $tva_tx);
-                        $update_line = true;
-                    }
-
-                    if (is_null($equipment) || (!is_null($equipment) && !(float) $equipment->getData('prix_achat'))) {
-                        if ($pa_ht !== (float) $eq_line->getData('pa_ht')) {
-                            $eq_line->set('pa_ht', $pa_ht);
-                            $update_line = true;
-                        }
-                        if ($id_fourn_price !== (int) $eq_line->getData('id_fourn_price')) {
-                            $eq_line->set('id_fourn_price', $id_fourn_price);
-                            $update_line = true;
-                        }
-                    }
-
-                    if ($update_line) {
-                        $update_warnings = array();
-                        $update_errors = $eq_line->update($update_warnings, true);
-                        $update_errors = array_merge($update_errors, $update_warnings);
-                        if (count($update_errors)) {
-                            $warnings[] = BimpTools::getMsgFromArray($update_errors, 'Des erreurs sont survenues lors de la mise à jour de la ligne d\'équipement d\'ID ' . $eq_line->id);
-                        }
-                    }
-                }
+//                $pu_ht = (float) $this->pu_ht;
+//                if ($this->field_exists('def_pu_ht')) {
+//                    $pu_ht = (float) $this->getData('def_pu_ht');
+//                }
+//                $tva_tx = (float) $this->tva_tx;
+//                if ($this->field_exists('def_tva_tx')) {
+//                    $tva_tx = (float) $this->getData('def_tva_tx');
+//                }
+//                $id_fourn_price = (int) $this->id_fourn_price;
+//                if ($this->field_exists('def_id_fourn_price')) {
+//                    $id_fourn_price = (float) $this->getData('def_id_fourn_price');
+//                }
+//                $pa_ht = (float) $this->db->getValue('product_fournisseur_price', 'price', '`rowid` = ' . (int) $id_fourn_price);
+//
+////                 Vérification des valeurs des lignes d'équipement et mise à jour si nécessaire: 
+//                $eq_lines = $this->getEquipmentLines();
+//                foreach ($eq_lines as $eq_line) {
+//                    $update_line = false;
+//                    $equipment = null;
+//
+//                    if ((int) $eq_line->getData('id_equipment')) {
+//                        $equipment = $eq_line->getChildObject('equipment');
+//                        if (!BimpObject::objectLoaded($equipment)) {
+//                            $eq_line->set('id_equipment', 0);
+//                            $update_line = true;
+//                            unset($equipment);
+//                            $equipment = null;
+//                        }
+//                    }
+//
+//                    if (is_null($equipment) || (!is_null($equipment) && !(float) $equipment->getData('prix_vente_except'))) {
+//                        if ($pu_ht !== (float) $eq_line->getData('pu_ht')) {
+//                            $eq_line->set('pu_ht', $pu_ht);
+//                            $update_line = true;
+//                        }
+//                    }
+//
+//                    if ($tva_tx !== (float) $eq_line->getData('tva_tx')) {
+//                        $eq_line->set('tva_tx', $tva_tx);
+//                        $update_line = true;
+//                    }
+//
+//                    if (is_null($equipment) || (!is_null($equipment) && !(float) $equipment->getData('prix_achat'))) {
+//                        if ($pa_ht !== (float) $eq_line->getData('pa_ht')) {
+//                            $eq_line->set('pa_ht', $pa_ht);
+//                            $update_line = true;
+//                        }
+//                        if ($id_fourn_price !== (int) $eq_line->getData('id_fourn_price')) {
+//                            $eq_line->set('id_fourn_price', $id_fourn_price);
+//                            $update_line = true;
+//                        }
+//                    }
+//
+//                    if ($update_line) {
+//                        $update_warnings = array();
+//                        $update_errors = $eq_line->update($update_warnings, true);
+//                        $update_errors = array_merge($update_errors, $update_warnings);
+//                        if (count($update_errors)) {
+//                            $warnings[] = BimpTools::getMsgFromArray($update_errors, 'Des erreurs sont survenues lors de la mise à jour de la ligne d\'équipement d\'ID ' . $eq_line->id);
+//                        }
+//                    }
+//                }
 
                 if (count($errors)) {
                     return $errors;
                 }
 
                 // Calcul des valeurs poyennes selon les équipements: 
-                $this->calcValuesByEquipments();
+//                $this->calcValuesByEquipments();
             }
         }
 

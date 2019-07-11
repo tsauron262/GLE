@@ -1570,14 +1570,16 @@ class Bimp_Facture extends BimpComm
                         if (count($err)) {
                             $errors[] = BimpTools::getMsgFromArray($err, 'Erreurs lors de la création d\'un avoir avec les lignes négatives');
                         }
-                    } elseif ($total_ttc < 0) {
-                        $err = $this->updateField('type', Facture::TYPE_CREDIT_NOTE);
-                        if (count($err)) {
-                            $errors[] = BimpTools::getMsgFromArray($err, 'Echec de la conversion de la facture en avoir');
-                        } else {
-                            $this->dol_object->type = Facture::TYPE_CREDIT_NOTE;
-                        }
-                    } else {
+                    } 
+//                    elseif (round($total_ttc_wo_discounts, 2) < 0) {
+//                        $err = $this->updateField('type', Facture::TYPE_CREDIT_NOTE);
+//                        if (count($err)) {
+//                            $errors[] = BimpTools::getMsgFromArray($err, 'Echec de la conversion de la facture en avoir');
+//                        } else {
+//                            $this->dol_object->type = Facture::TYPE_CREDIT_NOTE;
+//                        }
+//                    } 
+                    else {
                         if ($neg_lines > 0 && BimpTools::getPostFieldValue('create_avoir', 0)) {
                             $convert_avoir = (int) BimpTools::getPostFieldValue('convert_avoir_to_reduc', 1);
                             $use_remise = (int) BimpTools::getPostFieldValue('use_discount_in_facture', 1);
@@ -1591,9 +1593,9 @@ class Bimp_Facture extends BimpComm
                     break;
 
                 case Facture::TYPE_CREDIT_NOTE:
-                    if (!$total_ttc && count($lines)) {
+                    if (!round($total_ttc, 2) && count($lines)) {
                         // todo...
-                    } elseif ($total_ttc > 0) {
+                    } elseif (round($total_ttc) > 0) {
                         $err = $this->updateField('type', Facture::TYPE_STANDARD);
 
                         if (count($err)) {

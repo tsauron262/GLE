@@ -268,11 +268,13 @@ class BimpStatsFacture {
                 while ($obj = $this->db->fetch_object($result)) {
                     $pa = $obj->buy_price_ht * $obj->qty;
                     $pv = $obj->total_ht;
-                    if ($pa < 0)
-                        $pa = -$pa;
-                    if ($pv < 0) {
-                        $pa = -$pa;
-                    }
+                    
+                    //todo pas compros pourquoi
+//                    if ($pa < 0)
+//                        $pa = -$pa;
+//                    if ($pv < 0) {
+//                        $pa = -$pa;
+//                    }
                     $hash[$id]['marge'] += $pv - $pa;
                 }
             }

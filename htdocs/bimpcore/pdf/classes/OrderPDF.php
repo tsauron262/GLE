@@ -172,9 +172,13 @@ class OrderPDF extends BimpDocumentPDF
         }
 
 //        $this->pdf->topMargin = 40;
+        
+        if (strlen($docRef) > 20) {
+            $this->pdf->topMargin = 57;
+        }
 
         $this->header_vars['doc_name'] = $docName;
-        $this->header_vars['doc_ref'] = $docRef;
+        $this->header_vars['doc_ref'] = $docRef . 'AAaaaaaaaaaaaaaaaaaaaaa';
     }
 
     public function getDocInfosHtml()

@@ -677,6 +677,7 @@ lists:
             remise: 
             total_ttc: 
             margin:
+                
     default: 
         extends: global
         configurable: 1

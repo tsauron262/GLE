@@ -22,10 +22,6 @@ $sql .= ' WHERE f.type = 2 AND ((l.subprice < 0 AND l.buy_price_ht > 0) OR (l.su
 
 $rows = $bdb->executeS($sql, 'array');
 
-echo '<pre>';
-print_r($rows);
-exit;
-
 foreach ($rows as $r) {
     if ($bdb->update('facturedet', array(
                 'buy_price_ht' => (float) ($r['buy_price_ht'] * -1)
@@ -33,6 +29,14 @@ foreach ($rows as $r) {
         echo $bdb->db->lasterror() . '<br/>';
     }
 }
+
+$rows = $bdb->executeS($sql, 'array');
+
+echo '<pre>';
+print_r($rows);
+echo '</pre>';
+
+echo 'FIN';
 
 echo '</body></html>';
 

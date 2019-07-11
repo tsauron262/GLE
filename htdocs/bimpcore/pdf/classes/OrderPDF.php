@@ -548,8 +548,18 @@ class BLPDF extends OrderPDF
         $qties = $this->shipment->getPDFQtiesAndSerials();
 
         $i = 0;
+        
+        $bimpLines = array();
+        
+        if (BimpObject::objectLoaded($this->bimpCommObject) && is_a($this->bimpCommObject, 'BimpComm')) {
+            foreach ($this->bimpCommObject->getLines() as $bimpLine) {
+                $bimpLines[(int) $bimpLine->getData('id_line')] = $bimpLine;
+            }
+        }
 
         foreach ($this->object->lines as &$line) {
+            $bimpLine = isset($bimpLines[(int) $line->id]) ? $bimpLines[(int) $line->id] : null;
+            
             $product = null;
             if (!is_null($line->fk_product) && $line->fk_product) {
                 $product = new Product($this->db);
@@ -561,7 +571,9 @@ class BLPDF extends OrderPDF
 
             $desc = $this->getLineDesc($line, $product);
 
-            if ($line->total_ht == 0) {
+            
+            if ((BimpObject::objectLoaded($bimpLine) && (int) $bimpLine->getData('type') === ObjectLine::LINE_TEXT) ||
+                    (!BimpObject::objectLoaded($bimpLine) && $line->subprice == 0 && !(int) $line->fk_product)) {
                 if (!$desc) {
                     $i++;
                     unset($product);

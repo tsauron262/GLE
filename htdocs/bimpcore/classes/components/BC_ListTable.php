@@ -993,15 +993,15 @@ class BC_ListTable extends BC_List
                 $sortable_fields = $this->object->getSortableFieldsArray();
 
                 if (array_key_exists($values['sort_field'], $sortable_fields)) {
-                    $content .= 'Trie par défaut: <span class="bold">' . $sortable_fields[$values['sort_field']] . '</span><br/>';
+                    $content .= 'Tri par défaut: <span class="bold">' . $sortable_fields[$values['sort_field']] . '</span><br/>';
                     if ((string) $values['sort_option']) {
                         $sort_options = $this->object->getSortOptionsArray($values['sort_field']);
                         if (array_key_exists($values['sort_option'], $sort_options)) {
-                            $content .= 'Option de trie: <span class="bold">' . $sort_options[$values['sort_option']] . '</span><br/>';
+                            $content .= 'Option de tri: <span class="bold">' . $sort_options[$values['sort_option']] . '</span><br/>';
                         }
                     }
                 }
-                $content .= 'Ordre de trie: <span class="bold">' . $this->userConfig->displayData('sort_way') . '</span><br/>';
+                $content .= 'Ordre de tri: <span class="bold">' . $this->userConfig->displayData('sort_way') . '</span><br/>';
                 $content .= '</div>';
             } else {
                 $values['sort_field'] = $this->params['sort_field'];

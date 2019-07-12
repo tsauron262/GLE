@@ -285,21 +285,21 @@ fields:
         type: text
         dol_extra_field: 1
         
-    best_buy_price:
-        label: Meilleur prix d'achat
-        type: money
-        
-    price_sell:
-        label: Prix de vente
-        type: money
-        
-    price_sell_min:
-        label: Prix de vente min.
-        type: money
-        
-    e:
-        label: Limite stock pour alerte
-        type: int
+#    best_buy_price:
+#        label: Meilleur prix d'achat
+#        type: money
+#        
+#    price_sell:
+#        label: Prix de vente
+#        type: money
+#        
+#    price_sell_min:
+#        label: Prix de vente min.
+#        type: money
+#        
+#    e:
+#        label: Limite stock pour alerte
+#        type: int
         
 #    Champs non gérés
 #    ref_ext

@@ -2181,7 +2181,11 @@ class Bimp_Facture extends BimpComm
                     $errors[] = $langs->trans('ErrorFieldRequired', $langs->transnoentitiesnoconv("Warehouse"));
                 }
             }
-
+            
+            $today = date('Y-m-d');
+            if($this->getData('datef') != $today)
+                $errors[] = $this->updateField('datef', $today);
+            
             if (!count($errors)) {
                 $result = $this->dol_object->validate($user, '', $id_entrepot);
                 if ($result >= 0) {

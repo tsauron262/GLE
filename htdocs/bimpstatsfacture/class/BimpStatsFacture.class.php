@@ -61,10 +61,10 @@ class BimpStatsFacture {
 
     /* Main function, triggered when the user click on "Valider" button */
 
-    public function getFactures($user, $dateStart, $dateEnd, $types, $centres, $statut, $sortBy, $taxes, $etats, $format, $nomFichier, $placeType) {
+    public function getFactures($user, $dateStart, $dateEnd, $types, $centres, $statut, $sortBy, $taxes, $etats, $type, $format, $nomFichier, $placeType) {
         // TODO MAJ BDD
         $this->mode = $format;
-        $facids = $this->getFactureIds($dateStart, $dateEnd, $types, $centres, $statut, $etats, $user, $placeType);    // apply filter
+        $facids = $this->getFactureIds($dateStart, $dateEnd, $types, $centres, $statut, $etats, $type, $user, $placeType);    // apply filter
         $hash = $this->getFields($facids, $taxes);      // get all information about filtered factures
 
         $hash = $this->addMargin($hash);
@@ -93,7 +93,7 @@ class BimpStatsFacture {
 
     /* Filter facture */
 
-    private function getFactureIds($dateStart, $dateEnd, $types, $centres, $statut, $etats, $user, $placeType) {
+    private function getFactureIds($dateStart, $dateEnd, $types, $centres, $statut, $etats, $type, $user, $placeType) {
         $ids = array();
         $sql = 'SELECT f.rowid as facid, fs.id as idSav1';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'facture as f';
@@ -137,6 +137,9 @@ class BimpStatsFacture {
 
         if (!empty($etats)) {
             $sql .= ' AND f.fk_statut IN (\'' . implode("','", $etats) . '\')';
+        }
+        if (!empty($type)) {
+            $sql .= ' AND f.type IN (\'' . implode("','", $type) . '\')';
         }
 
         if ($statut == 'p') // payed

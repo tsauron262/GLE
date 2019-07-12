@@ -15,7 +15,7 @@ var name_place;
  * Ajax functions
  */
 
-function getAllFactures(dateStart, dateEnd, types, centres, statut, sortBy, taxes, etats, format, nomFichier, typePlace) {
+function getAllFactures(dateStart, dateEnd, types, centres, statut, sortBy, taxes, etats, type, format, nomFichier, typePlace) {
 
     $.ajax({
         type: "POST",
@@ -29,6 +29,7 @@ function getAllFactures(dateStart, dateEnd, types, centres, statut, sortBy, taxe
             sortBy: sortBy,
             taxes: taxes,
             etats: etats,
+            type: type,
             format: format,
             nomFichier: nomFichier,
             is_customer: is_customer,
@@ -111,6 +112,7 @@ function valider() {
         var nomFichier = $('#nomFichier').val();
         var typePlace = $("input[type='radio'][name='place']:checked").val();
         var etats = [];
+        var type = [];
         var sortBy = [];
         $("input[type='checkbox'][name='sortBy']:checked").each(function () {
             sortBy.push($(this).val());
@@ -118,7 +120,10 @@ function valider() {
         $("input[type='checkbox'][name='etat']:checked").each(function () {
             etats.push($(this).val());
         });
-        getAllFactures(dateStart, dateEnd, types, centres, statut, sortBy, taxes, etats, format, nomFichier, typePlace);
+        $("input[type='checkbox'][name='type']:checked").each(function () {
+            type.push($(this).val());
+        });
+        getAllFactures(dateStart, dateEnd, types, centres, statut, sortBy, taxes, etats, type, format, nomFichier, typePlace);
     }
 }
 

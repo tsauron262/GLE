@@ -947,6 +947,22 @@ class BimpComm extends BimpDolObject
         return '';
     }
 
+    public function displayCommercial()
+    {
+        if ($this->isLoaded()) {
+            $contacts = $this->dol_object->getIdContact('internal', 'SALESREPFOLL');
+            if (isset($contacts[0]) && $contacts[0]) {
+                BimpTools::loadDolClass('contact');
+                $user = new User($this->db->db);
+                if ($user->fetch((int) $contacts[0]) > 0) {
+                    return $user->getNomUrl(1) . BimpRender::renderObjectIcons($user);
+                }
+            }
+        }
+
+        return '';
+    }
+    
     public function getFileUrl($file_name)
     {
         $dir = $this->getFilesDir();
@@ -2996,5 +3012,29 @@ class BimpComm extends BimpDolObject
         }
 
         return $errors;
+    }
+    
+    
+    
+    
+    public function getCommercialSearchFilters(&$filters, $value, &$joins = array(), $main_alias = 'a')
+    {
+        if ((int) $value) {
+            $filters['typecont.element'] = static::$dol_module;
+            $filters['typecont.source'] = 'internal';
+            $filters['typecont.code'] = 'SALESREPFOLL';
+            $filters['elemcont.fk_socpeople'] = (int) $value;
+
+            $joins['elemcont'] = array(
+                'table' => 'element_contact',
+                'on'    => 'elemcont.element_id = ' . $main_alias . '.rowid',
+                'alias' => 'elemcont'
+            );
+            $joins['typecont'] = array(
+                'table' => 'c_type_contact',
+                'on'    => 'elemcont.fk_c_type_contact = typecont.rowid',
+                'alias' => 'typecont'
+            );
+        }
     }
 }

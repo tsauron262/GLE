@@ -95,13 +95,13 @@ class BimpStatsFacture {
 
     private function getFactureIds($dateStart, $dateEnd, $types, $centres, $statut, $etats, $user, $placeType) {
         $ids = array();
-        $sql = 'SELECT f.rowid as facid, fs.id as idSav1, fs2.id as idSav2';
+        $sql = 'SELECT f.rowid as facid, fs.id as idSav1';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'facture as f';
         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'facture_extrafields as e ON f.rowid = e.fk_object';
-        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'bs_sav as fs ON f.rowid = fs.id_facture';
-        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'bs_sav as fs2 ON f.rowid = fs2.id_facture_acompte';
-        $sql .= ' WHERE f.datef >= "' . $this->db->idate($dateStart).'"';
-        $sql .= ' AND   f.datef <= "' . $this->db->idate($dateEnd).'"';
+        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'bs_sav as fs ON f.rowid = fs.id_facture || f.rowid = fs.id_facture_avoir || f.rowid = fs.id_facture_acompte';
+//        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'bs_sav as fs2 ON f.rowid = fs2.id_facture_acompte';
+        $sql .= ' WHERE f.date_valid >= "' . $this->db->idate($dateStart).'"';
+        $sql .= ' AND   f.date_valid <= "' . $this->db->idate($dateEnd).'"';
 
         if (!empty($types) and in_array('NRS', $types)) {   // Non renseigné inclut selected
             $sql .= ' AND (e.type IN (\'' . implode("','", $types) . '\', "0", "1")';
@@ -114,16 +114,13 @@ class BimpStatsFacture {
         if (!empty($centres) and $placeType == 'c') {
             $sql .= ' (e.centre IN (\'' . implode("','", $centres) . '\')';
             $sql .= ' OR fs.code_centre IN (\'' . implode("','", $centres) . '\')';
-            $sql .= ' OR fs2.code_centre IN (\'' . implode("','", $centres) . '\'))';
             if (in_array('NRS', $centres)) {
                 $sql .= " OR ((e.centre IS NULL OR e.centre = '1')";
                 $sql .= " AND (fs.code_centre IS NULL OR fs.code_centre = '1')";
-                $sql .= " AND (fs2.code_centre IS NULL OR fs.code_centre = '1'))";
             }
         } elseif (!empty($centres) and $placeType == 'e') {
             $sql .= '(e.entrepot IN (\'' . implode("','", $centres) . '\')';
             $sql .= ' OR fs.id_entrepot IN (\'' . implode("','", $centres) . '\')';
-            $sql .= ' OR fs2.id_entrepot IN (\'' . implode("','", $centres) . '\'))';
             if (in_array('NRS', $centres)) {
                 $sql .= " OR e.entrepot IS NULL OR e.entrepot = '1'";
             }
@@ -135,7 +132,6 @@ class BimpStatsFacture {
         if ($user->rights->bimpstatsfacture->factureCentre->read and ! $user->rights->bimpstatsfacture->facture->read) {
             $tab_center = explode(' ', $user->array_options['options_apple_centre']);
             $sql .= ' AND (fs.code_centre IN ("' . implode('","', $tab_center) . '")';
-            $sql .= ' OR fs2.code_centre IN ("' . implode('","', $tab_center) . '")';
             $sql .= ' OR e.centre IN ("' . implode('","', $tab_center) . '"))';
         }
 
@@ -171,7 +167,7 @@ class BimpStatsFacture {
             $sql .= ' p.rowid as pai_id, p.ref as pai_ref,';
             $sql .= ' e.centre as centre2, e.type as type, e.entrepot as fk_entrepot2,';
             $sql .= ' pf.amount as pai_paye_ttc,';
-            $sql .= ' f.datef as fact_date, ';
+            $sql .= ' f.date_valid as fact_date, ';
 
             if ($taxes == 'ttc')
                 $sql .= ' f.total_ttc as fac_total,  SUM(prop.total) as prop_total';
@@ -268,11 +264,13 @@ class BimpStatsFacture {
                 while ($obj = $this->db->fetch_object($result)) {
                     $pa = $obj->buy_price_ht * $obj->qty;
                     $pv = $obj->total_ht;
-                    if ($pa < 0)
-                        $pa = -$pa;
-                    if ($pv < 0) {
-                        $pa = -$pa;
-                    }
+                    
+                    //todo pas compros pourquoi
+//                    if ($pa < 0)
+//                        $pa = -$pa;
+//                    if ($pv < 0) {
+//                        $pa = -$pa;
+//                    }
                     $hash[$id]['marge'] += $pv - $pa;
                 }
             }

@@ -64,10 +64,10 @@ lists:
                 label: Equipement
                 value: 
                     callback: displayEquipment
-            pu: 
-                field: pu_ht
-            tva: 
-                field: tva_tx
-            pa:
-                field: pa_ht
+#            pu: 
+#                field: pu_ht
+#            tva: 
+#                field: tva_tx
+#            pa:
+#                field: pa_ht
             

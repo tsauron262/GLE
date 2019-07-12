@@ -35,11 +35,11 @@ fields:
         type: list
         
     sort_field: 
-        label: Trie
+        label: Tri
         default_value: id
         
     sort_option:
-        label: Option de trie
+        label: Option de tri
         default_value: 
         
     sort_way:

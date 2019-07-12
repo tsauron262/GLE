@@ -167,7 +167,7 @@ forms:
                   options: 
                       array: productFournisseursPrices
               value: 
-                  prop: id_fourn_price
+                  callback: getCommandeFournIdPrice
               display_if: 
                   field_name: type_price
                   show_values: 1

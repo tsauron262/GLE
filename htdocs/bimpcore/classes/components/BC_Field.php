@@ -421,11 +421,12 @@ class BC_Field extends BimpComponent
                 case 'field_input':
                 case 'value_part':
                     switch ($this->params['type']) {
-                        case 'id_object':
-                        case 'id_parent':
-                            $search_type = 'search_object';
-                            $input_type = 'text';
-                            break;
+//                        case 'id_object':
+//                        case 'id_parent':
+//                            
+//                            $search_type = 'search_object';
+//                            $input_type = 'text';
+//                            break;
 
                         case 'html':
                         case 'text':

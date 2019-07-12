@@ -1570,7 +1570,7 @@ class Bimp_Facture extends BimpComm
                         if (count($err)) {
                             $errors[] = BimpTools::getMsgFromArray($err, 'Erreurs lors de la création d\'un avoir avec les lignes négatives');
                         }
-                    } elseif ($total_ttc < 0) {
+                    } elseif (round($total_ttc, 2) < 0) {
                         $err = $this->updateField('type', Facture::TYPE_CREDIT_NOTE);
                         if (count($err)) {
                             $errors[] = BimpTools::getMsgFromArray($err, 'Echec de la conversion de la facture en avoir');
@@ -1591,9 +1591,9 @@ class Bimp_Facture extends BimpComm
                     break;
 
                 case Facture::TYPE_CREDIT_NOTE:
-                    if (!$total_ttc && count($lines)) {
+                    if (!round($total_ttc, 2) && count($lines)) {
                         // todo...
-                    } elseif ($total_ttc > 0) {
+                    } elseif (round($total_ttc) > 0) {
                         $err = $this->updateField('type', Facture::TYPE_STANDARD);
 
                         if (count($err)) {
@@ -1622,7 +1622,7 @@ class Bimp_Facture extends BimpComm
 
             // transformation des lignes de remise excepts en paiements: 
 
-            if ((int) $this->getData('type') === Facture::TYPE_STANDARD) {
+            if (in_array((int) $this->getData('type'), array(Facture::TYPE_STANDARD, Facture::TYPE_CREDIT_NOTE))) {
                 $lines = $this->getLines();
 
                 BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
@@ -1834,6 +1834,7 @@ class Bimp_Facture extends BimpComm
             'libelle'           => $this->getData('libelle'),
             'ef_type'           => $this->getData('ef_type'),
             'fk_soc'            => $this->getData('fk_soc'),
+            'centre'            => $this->getData('centre'),
             'ref_client'        => $this->getData('ref_client'),
             'datef'             => $this->getData('datef'),
             'fk_account'        => (int) $this->getData('fk_account'),
@@ -1846,6 +1847,14 @@ class Bimp_Facture extends BimpComm
         $avoir->dol_object->linked_objects = $this->dol_object->linked_objects;
 
         $errors = $avoir->create();
+        
+        
+        if ($avoir->dol_object->copy_linked_contact($this->dol_object, 'internal') < 0) {
+            $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($avoir->dol_object), 'Echec de la copie des contacts internes');
+        }
+        if ($avoir->dol_object->copy_linked_contact($this->dol_object, 'external') < 0) {
+            $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($avoir->dol_object), 'Echec de la copie des contacts externes');
+        }
 
         if (count($errors)) {
             return $errors;

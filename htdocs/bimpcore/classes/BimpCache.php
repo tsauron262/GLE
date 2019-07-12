@@ -1254,6 +1254,22 @@ class BimpCache
 
         return self::getCacheArray('entrepots', $include_empty);
     }
+    
+    public static function getEntrepotsShipTos($include_empty = false)
+    {
+        if (!isset(self::$cache['entrepots_ship_tos'])) {
+            self::$cache['entrepots_ship_tos'] = array();
+
+            $rows = self::getBdb()->getRows('entrepot', '`ship_to` != \'\' AND `ship_to` IS NOT NULL', null, 'object', array('rowid', 'ship_to'), 'ref', 'asc');
+            if (!is_null($rows)) {
+                foreach ($rows as $r) {
+                    self::$cache['entrepots_ship_tos'][(int) $r->rowid] = $r->ship_to;
+                }
+            }
+        }
+
+        return self::getCacheArray('entrepots_ship_tos', $include_empty);
+    }
 
     public static function getCondReglementsArray()
     {

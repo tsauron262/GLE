@@ -225,29 +225,43 @@ forms:
                     field_name: type
                     show_values: 1,3
                 depends_on: id_product
-            fourn_price:
+#            fourn_price:
+#                custom: 1
+#                label: Prix d'achat fournisseur
+#                input_name: id_fourn_price
+#                data_type: id_object
+#                object: fournisseur_price
+#                content: 
+#                    callback: 
+#                        method: renderLineInput
+#                        params: 
+#                            - id_fourn_price
+#                display_if: 
+#                    field_name: type
+#                    show_values: 1,3
+#                depends_on: id_product
+#                create_form: 
+#                    callback: getFournisseurPriceCreateForm
+#                create_form_values: 
+#                    fields: 
+#                        fk_product: 
+#                            callback: getIdProductFromPost
+#                value: 
+#                    callback: getIdFournPriceFromPost
+            pa_ht: 
                 custom: 1
                 label: Prix d'achat
-                input_name: id_fourn_price
-                data_type: id_object
-                object: fournisseur_price
+                input_name: pa_ht
+                data_type: money
                 content: 
                     callback: 
                         method: renderLineInput
                         params: 
-                            - id_fourn_price
+                            - pa_ht
                 display_if: 
                     field_name: type
                     show_values: 1,3
                 depends_on: id_product
-                create_form: 
-                    callback: getFournisseurPriceCreateForm
-                create_form_values: 
-                    fields: 
-                        fk_product: 
-                            callback: getIdProductFromPost
-                value: 
-                    callback: getIdFournPriceFromPost
             limited: 
                 custom: 1
                 label: Service à durée limitée
@@ -403,45 +417,45 @@ forms:
                       field_return_label: e.serial
                       fields_search: e.serial,e.id,e.product_label
                   help: Numéro de série ou ID d'un équipement
-            - custom: 1
-              label: Prix unitaire HT
-              value: 
-                  prop: pu_ht
-              input_name: pu_ht
-              content: 
-                  callback: 
-                      method: renderLineInput
-                      params: 
-                          0: pu_ht
-                          1:
-                              callback: isParentEditable
-              depends_on: id_equipment
-            - custom: 1
-              label: Taux de TVA
-              value: 
-                  prop: tva_tx
-              input_name: tva_tx
-              content: 
-                  callback: 
-                      method: renderLineInput
-                      params: 
-                          0: tva_tx
-                          1: 
-                              callback: isParentEditable
-                              
-              depends_on: id_equipment
-            - custom: 1
-              label: Prix d'achat
-              input_name: id_fourn_price
-              data_type: id_object
-              content: 
-                  callback: 
-                      method: renderLineInput
-                      params: 
-                          0: id_fourn_price
-                          1:
-                              callback: isParentEditable
-              depends_on: id_equipment
+#            - custom: 1
+#              label: Prix unitaire HT
+#              value: 
+#                  prop: pu_ht
+#              input_name: pu_ht
+#              content: 
+#                  callback: 
+#                      method: renderLineInput
+#                      params: 
+#                          0: pu_ht
+#                          1:
+#                              callback: isParentEditable
+#              depends_on: id_equipment
+#            - custom: 1
+#              label: Taux de TVA
+#              value: 
+#                  prop: tva_tx
+#              input_name: tva_tx
+#              content: 
+#                  callback: 
+#                      method: renderLineInput
+#                      params: 
+#                          0: tva_tx
+#                          1: 
+#                              callback: isParentEditable
+#                              
+#              depends_on: id_equipment
+#            - custom: 1
+#              label: Prix d'achat
+#              input_name: id_fourn_price
+#              data_type: id_object
+#              content: 
+#                  callback: 
+#                      method: renderLineInput
+#                      params: 
+#                          0: id_fourn_price
+#                          1:
+#                              callback: isParentEditable
+#              depends_on: id_equipment
                   
     line_forced: 
         extends: default
@@ -483,21 +497,30 @@ forms:
                             - 0
                             - ''
                             - 1
-            fourn_price:
-                content: 
-                    callback: 
-                        method: renderLineInput
-                        params: 
-                            - id_fourn_price
-                            - 0
-                            - ''
-                            - 1
+#            fourn_price:
+#                content: 
+#                    callback: 
+#                        method: renderLineInput
+#                        params: 
+#                            - id_fourn_price
+#                            - 0
+#                            - ''
+#                            - 1
             desc:
                 content: 
                     callback: 
                         method: renderLineInput
                         params: 
                             - desc
+                            - 0
+                            - ''
+                            - 1
+            pa_ht: 
+                content: 
+                    callback: 
+                        method: renderLineInput
+                        params: 
+                            - pa_ht
                             - 0
                             - ''
                             - 1
@@ -654,6 +677,7 @@ lists:
             remise: 
             total_ttc: 
             margin:
+                
     default: 
         extends: global
         configurable: 1

@@ -113,17 +113,6 @@ class Bimp_Commande extends BimpComm
 
     public function isActionAllowed($action, &$errors = array())
     {
-        switch($action){
-            case 'setListConfig':
-                return 1;
-        }
-        
-        
-        if (!$this->isLoaded()) {
-            $errors[] = 'ID de la commande absent';
-            return 0;
-        }
-
         global $conf;
         $status = (int) $this->getData('fk_statut');
         $invalide_error = 'Le statut actuel de la commande ne permet pas cette opération';
@@ -1980,18 +1969,21 @@ class Bimp_Commande extends BimpComm
             $lines = $this->getLines('not_text');
 
             $hasShipment = 0;
-            $isFullyShipped = 1;
+            $isFullyShipped = 0;
 
             $current_status = (int) $this->getInitData('shipment_status');
 
-            foreach ($lines as $line) {
-                $shipped_qty = (float) $line->getShippedQty(null, true);
-                if ($shipped_qty) {
-                    $hasShipment = 1;
-                }
+            if (!empty($lines)) {
+                $isFullyShipped = 1;
+                foreach ($lines as $line) {
+                    $shipped_qty = (float) $line->getShippedQty(null, true);
+                    if ($shipped_qty) {
+                        $hasShipment = 1;
+                    }
 
-                if (abs($shipped_qty) < abs((float) $line->getShipmentsQty())) {
-                    $isFullyShipped = 0;
+                    if (abs($shipped_qty) < abs((float) $line->getShipmentsQty())) {
+                        $isFullyShipped = 0;
+                    }
                 }
             }
 
@@ -2021,18 +2013,21 @@ class Bimp_Commande extends BimpComm
             $lines = $this->getLines('not_text');
 
             $hasInvoice = 0;
-            $isFullyInvoiced = 1;
+            $isFullyInvoiced = 0;
 
             $current_status = (int) $this->getInitData('invoice_status');
 
-            foreach ($lines as $line) {
-                $billed_qty = (float) $line->getBilledQty(null, false);
-                if ($billed_qty) {
-                    $hasInvoice = 1;
-                }
+            if (!empty($lines)) {
+                $isFullyInvoiced = 1;
+                foreach ($lines as $line) {
+                    $billed_qty = (float) $line->getBilledQty(null, false);
+                    if ($billed_qty) {
+                        $hasInvoice = 1;
+                    }
 
-                if (abs($billed_qty) < abs((float) $line->getFullQty())) {
-                    $isFullyInvoiced = 0;
+                    if (abs($billed_qty) < abs((float) $line->getFullQty())) {
+                        $isFullyInvoiced = 0;
+                    }
                 }
             }
 

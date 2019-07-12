@@ -1221,7 +1221,8 @@ class Bimp_CommandeFourn extends BimpComm
 
         return array(
             'errors'   => $errors,
-            'warnings' => $warnings
+            'warnings' => $warnings,
+            'success_callback' => 'bimp_reloadPage();'
         );
     }
 

@@ -160,7 +160,7 @@ class controlStock{
     
     private function getTabSerials($idEn, $idPr){
         $return = array();
-        $sql = $this->db->query("SELECT `serial` FROM `llx_be_equipment` be, `llx_be_equipment_place` bp WHERE bp.`id_equipment` = be.id AND `position` = 1 AND id_product = ".$idPr." AND `type` = 2 AND `id_entrepot` = ".$idEn);
+        $sql = $this->db->query("SELECT `serial` FROM `llx_be_equipment` be, `llx_be_equipment_place` bp WHERE bp.`id_equipment` = be.id AND `position` = 1 AND id_product = ".$idPr." AND bp.`type` = 2 AND `id_entrepot` = ".$idEn);
         while($ln = $this->db->fetch_object($sql))
             $return[] = $ln->serial;
         return $return;

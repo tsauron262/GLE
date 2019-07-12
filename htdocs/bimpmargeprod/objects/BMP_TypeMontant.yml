@@ -23,7 +23,7 @@ fields:
         type: id_object
         object: category
         values: 
-            array: categories
+            array: categoriesBMP
         display: 
             default: 
                 type: nom

@@ -140,7 +140,7 @@ class BMP_EventMontant extends Abstract_margeprod
 
     // Getters array
 
-    public function getCategoriesArray()
+    public function getCategoriesBMPArray()
     {
         $instance = BimpObject::getInstance('bimpmargeprod', 'BMP_CategorieMontant');
         $rows = $instance->getList();

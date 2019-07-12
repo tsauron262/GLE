@@ -180,7 +180,7 @@ function onAvoirsChange($container) {
                         if (!check) {
                             var toPay = parseFloat($(this).data('to_pay'));
                             var avoirs = parseFloat($(this).data('avoirs'));
-                            if ((toPay - avoirs) >= amount) {
+                             if (Math.round10((toPay - avoirs), -2) >= amount) {
                                 var $input = $(this);
                                 check = true;
                                 total_avoirs += amount;

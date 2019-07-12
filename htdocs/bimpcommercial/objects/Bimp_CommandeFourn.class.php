@@ -5,7 +5,6 @@ require_once DOL_DOCUMENT_ROOT . '/fourn/class/fournisseur.product.class.php';
 
 class Bimp_CommandeFourn extends BimpComm
 {
-
     public $redirectMode = 4; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
     public static $dol_module = 'commande_fournisseur';
     public static $email_type = 'order_supplier_send';
@@ -1083,6 +1082,33 @@ class Bimp_CommandeFourn extends BimpComm
 
         if ((int) $all_billed !== (int) $this->getInitData('billed')) {
             $this->updateField('billed', (int) $all_billed);
+        }
+    }
+    
+    public function onValidate()
+    {
+        if ($this->isLoaded()) {
+            $products = array();
+            
+            $lines = $this->getLines('product');
+            foreach ($lines as $line) {
+                if (!isset($products[(int) $line->id_product])) {
+                    $products[(int) $line->id_product] = 0;
+                }
+                
+                if ((float) $line->pu_ht > $products[(int) $line->id_product]) {
+                    $products[(int) $line->id_product] = (float) $line->pu_ht;
+                }
+            }
+            
+            $fk_soc = (int) $this->getData('fk_soc');
+            
+            foreach ($products as $id_product => $pa_ht) {
+                $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $id_product);
+                if (BimpObject::objectLoaded($product)) {
+                    $id_fp = '';
+                }
+            }
         }
     }
 

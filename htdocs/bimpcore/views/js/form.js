@@ -660,7 +660,7 @@ function reloadObjectInput(form_id, input_name, fields, keep_new_value) {
     });
 }
 
-function reloadParentInput($button, input_name) {
+function reloadParentInput($button, input_name, depends_on_fields) {
     var $inputContainer = $button.findParentByClass('inputContainer');
 
     if (!$.isOk($inputContainer)) {
@@ -682,7 +682,14 @@ function reloadParentInput($button, input_name) {
         return;
     }
 
-    reloadObjectInput($form.attr('id'), input_name, []);
+    var fields = {};
+    if (typeof (depends_on_fields) !== 'undefined') {
+        for (var i in depends_on_fields) {
+            fields[depends_on_fields[i]] = getFieldValue($form, depends_on_fields[i]);
+        }
+    }
+
+    reloadObjectInput($form.attr('id'), input_name, fields);
 }
 
 function searchObjectList($input) {
@@ -798,9 +805,8 @@ function getFieldValue($form, field_name) {
     }
 
     var $inputContainer = $form.find('.' + field_name + '_inputContainer');
-    var $input = $inputContainer.find('[name=' + field_name + ']');
-    if ($input.length) {
-        return $input.val();
+    if ($.isOk($inputContainer)) {
+        return getInputValue($inputContainer);
     }
 
     return '';

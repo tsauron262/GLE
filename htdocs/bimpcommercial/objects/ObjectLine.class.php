@@ -386,7 +386,7 @@ class ObjectLine extends BimpObject
                         global $user;
                         $errors[] = 'Le produit "' . $product->getRef() . ' - ' . $product->getData('label') . '" n\'est pas validé';
                         if (mailSyn2("Validation produit", "XX_Achats@bimp.fr", null, "Bonjour " . $user->getNomUrl(1) . "souhaite que vous validiez " . $product->getNomUrl(1) . "<br/>Cordialement"))
-                            $errors[] = "Un mai a été envoyé pour validation du produit.";
+                            $errors[] = "Un e-mail a été envoyé pour validation du produit.";
                         return 0;
                     }
                 }
@@ -887,18 +887,9 @@ class ObjectLine extends BimpObject
 //                        $id_fourn_price = $this->getData('def_id_fourn_price');
 //                    }
                     if ($id_product && (is_null($id_fourn_price) || (int) $this->id_product !== $id_product)) {
-                        if ((int) $this->id_fourn_price) {
-                            $pfp = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ProductFournisseurPrice', (int) $this->id_fourn_price);
-                            if (BimpObject::objectLoaded($pfp)) {
-                                if ((int) $pfp->getData('fk_product') === $id_product) {
-                                    return $this->id_fourn_price;
-                                }
-                            }
-                        }
-
-                        // Récupération du prix d'achat fournisseur courant: 
-                        return (int) $product->getCurrentFournPriceId();
+                        $id_fourn_price = (int) $product->getCurrentFournPriceId();
                     }
+                    
                     return (int) $id_fourn_price;
 
                 case 'pa_ht':
@@ -2160,26 +2151,14 @@ class ObjectLine extends BimpObject
 
                         if (is_null($pa_ht)) {
                             if (!is_null($equipment) && (float) $equipment->getData('prix_achat')) {
-                                $line->set('pa_ht', (float) $equipment->getData('prix_achat'));
-                                $line->set('id_fourn_price', 0);
-                            } elseif (is_null($id_fourn_price)) {
-//                                if ($this->field_exists('def_id_fourn_price')) {
-//                                    $id_fourn_price = $this->getData('def_id_fourn_price');
-//                                } else {
-                                $id_fourn_price = $this->id_fourn_price;
-//                                }
-                            }
-                            if ((int) $id_fourn_price) {
-                                $pa_ht = (float) $this->db->getValue('product_fournisseur_price', 'price', '`rowid` = ' . (int) $id_fourn_price);
+                                $pa_ht = $equipment->getData('prix_achat');
                             } else {
                                 $pa_ht = (float) $this->pa_ht;
                             }
-                        } else {
-                            $id_fourn_price = 0;
                         }
 
                         $line->set('pa_ht', (float) $pa_ht);
-                        $line->set('id_fourn_price', (int) $id_fourn_price);
+                        $line->set('id_fourn_price', 0);
                     }
 
                     $warnings = array();
@@ -2611,9 +2590,10 @@ class ObjectLine extends BimpObject
             } elseif (BimpTools::isSubmit('fields/' . $field)) {
                 $value = BimpTools::getValue('fields/' . $field);
             } else {
-                if ($this->isLoaded() && $this->field_exists('def_' . $field)) {
-                    $value = $this->getData('def_' . $field);
-                } elseif (isset($this->{$field})) {
+//                if ($this->isLoaded() && $this->field_exists('def_' . $field)) {
+//                    $value = $this->getData('def_' . $field);
+//                } else
+                if (isset($this->{$field})) {
                     $value = $this->{$field};
                 } elseif ($this->field_exists($field)) {
                     $value = $this->getData($field);
@@ -2630,51 +2610,18 @@ class ObjectLine extends BimpObject
                 break;
 
             case 'id_fourn_price':
-                if (BimpObject::objectLoaded($this->post_equipment)) {
-                    if ((float) $this->post_equipment->getData('prix_achat') > 0) {
-                        $html .= 'Prix d\'achat équipement';
-                        $html .= '<input type="hidden" name="' . $prefixe . 'id_fourn_price" value="0"/>';
-                        break;
-                    }
-                }
-
-                $values = $this->getProductFournisseursPricesArray(true, 'Prix d\'achat exceptionnel');
-
-                if (!$attribute_equipment && $this->canEditPrixAchat() && $this->isEditable($force_edit)) {
-                    $html .= BimpInput::renderInput('select', $prefixe . 'id_fourn_price', (int) $value, array(
-                                'options' => $values
-                    ));
-                } else {
-//                    if ($attribute_equipment) {
-//                        if ($this->field_exists('def_id_fourn_price')) {
-//                            $value = (int) $this->getData('def_id_fourn_price');
-//                        }
-//                    }
-                    if ((int) $value && isset($values[(int) $value])) {
-                        $html .= $values[(int) $value];
-                    } elseif ((int) $value) {
-                        $html .= BimpRender::renderAlerts('Le prix fournisseur d\'ID ' . $value . ' n\'est pas enregistré pour ce produit');
-                        $value = 0;
-                    } else {
-                        $html .= 'Prix d\'achat actuel';
-                    }
-                    $html .= '<input type="hidden" name="' . $prefixe . 'id_fourn_price" value="' . $value . '"/>';
-                }
+                $html .= '<span class="warning">Non sélectionnable</span>';
                 break;
 
             case 'pa_ht':
                 if (BimpObject::objectLoaded($this->post_equipment)) {
                     if ((float) $this->post_equipment->getData('prix_achat') > 0) {
-                        $html .= '<input type="hidden" name="' . $prefixe . 'pa_ht" value="' . (float) $this->post_equipment->getData('prix_achat') . '"/>';
+                        $html .= 'Prix d\'achat équipement: ';
                         $html .= BimpTools::displayMoneyValue((float) $this->post_equipment->getData('prix_achat'), 'EUR') . '</strong>';
+                        $html .= '<input type="hidden" name="' . $prefixe . 'pa_ht" value="' . (float) $this->post_equipment->getData('prix_achat') . '"/>';
+
                         break;
                     }
-                }
-
-                // On prend en priorité lé PA fournisseur: 
-                $id_fourn_price = (int) BimpTools::getPostFieldValue('id_fourn_price', $this->id_fourn_price);
-                if ($id_fourn_price) {
-                    $value = (float) $this->db->getValue('product_fournisseur_price', 'price', '`rowid` = ' . $id_fourn_price);
                 }
 
                 $is_pa_prevu = false;
@@ -2701,11 +2648,12 @@ class ObjectLine extends BimpObject
                                 'addon_right' => '<i class="fa fa-' . BimpTools::getCurrencyIcon('EUR') . '"></i>'
                     ));
                 } else {
-                    $html .= '<input type="hidden" name="' . $prefixe . 'pa_ht" value="' . (float) $value . '"/>';
+                    $html .= 'Prix d\'achat actuel: ';
                     $html .= BimpTools::displayMoneyValue((float) $value);
                     if ($is_pa_prevu) {
                         $html .= ' (prévisionnel)';
                     }
+                    $html .= '<input type="hidden" name="' . $prefixe . 'pa_ht" value="' . (float) $value . '"/>';
                 }
                 break;
 
@@ -3607,24 +3555,23 @@ class ObjectLine extends BimpObject
                             if (is_null($this->tva_tx)) {
                                 $this->tva_tx = (float) $this->getValueByProduct('tva_tx');
                             }
-                            if (is_null($this->id_fourn_price) && is_null($this->pa_ht)) {
-                                $this->id_fourn_price = (int) $this->getValueByProduct('id_fourn_price');
-                            }
-                            if (is_null($this->desc) || !(string) $this->desc) {
-                                $this->desc = $this->getValueByProduct('desc');
-                            }
 
-                            $product = $this->getProduct();
+                            // On ne se base plus sur le id_fourn_price pour le pa_ht
+                            $this->id_fourn_price = 0;
 
-                            if (!(int) $this->id_fourn_price && !(float) $this->pa_ht) {
+                            if (is_null($this->pa_ht)) {
                                 $this->pa_ht = (float) $this->getValueByProduct('pa_ht');
 
                                 if (!$this->pa_ht && !(int) $product->getData('validate') && (float) $product->getData('pa_prevu')) {
                                     $this->pa_ht = (float) $product->getData('pa_prevu');
                                 }
-                            } elseif ((int) $this->id_fourn_price) {
-                                $this->pa_ht = (float) $this->db->getValue('product_fournisseur_price', 'price', '`rowid` = ' . (int) $this->id_fourn_price);
                             }
+
+                            if (is_null($this->desc) || !(string) $this->desc) {
+                                $this->desc = $this->getValueByProduct('desc');
+                            }
+
+                            $product = $this->getProduct();
 
                             if ((int) $this->getData('remisable')) {
                                 if (!(int) $product->getData('remisable')) {

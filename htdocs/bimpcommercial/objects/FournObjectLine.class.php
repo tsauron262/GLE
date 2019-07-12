@@ -7,12 +7,12 @@ class FournObjectLine extends ObjectLine
 
     public $ref_supplier = '';
     public static $product_line_data = array(
-        'id_product'     => array('label' => 'Produit / Service', 'type' => 'int', 'required' => 1),
-        'id_fourn_price' => array('label' => 'Prix d\'achat fournisseur', 'type' => 'int', 'required' => 1),
+        'id_product'     => array('label' => 'Produit / Service', 'type' => 'int', 'required' => 1, 'default' => null),
+        'id_fourn_price' => array('label' => 'Prix d\'achat fournisseur', 'type' => 'int', 'required' => 0, 'default' => null),
         'desc'           => array('label' => 'Description', 'type' => 'html', 'required' => 0, 'default' => ''),
         'qty'            => array('label' => 'Quantité', 'type' => 'float', 'required' => 1, 'default' => 1),
-        'pu_ht'          => array('label' => 'PU HT', 'type' => 'float', 'required' => 0, 'default' => 0),
-        'tva_tx'         => array('label' => 'Taux TVA', 'type' => 'float', 'required' => 0, 'default' => 0),
+        'pu_ht'          => array('label' => 'PU HT', 'type' => 'float', 'required' => 0, 'default' => null),
+        'tva_tx'         => array('label' => 'Taux TVA', 'type' => 'float', 'required' => 0, 'default' => null),
         'remise'         => array('label' => 'Remise', 'type' => 'float', 'required' => 0, 'default' => 0),
         'date_from'      => array('label' => 'Date début', 'type' => 'date', 'required' => 0, 'default' => null),
         'date_to'        => array('label' => 'Date fin', 'type' => 'date', 'required' => 0, 'default' => null),
@@ -102,6 +102,39 @@ class FournObjectLine extends ObjectLine
         $html = '';
 
         switch ($field) {
+            case 'id_fourn_price':
+                $value = $this->getValueByProduct('id_fourn_price');
+                $values = $this->getProductFournisseursPricesArray(true, 'Prix d\'achat exceptionnel');
+
+                if (!$attribute_equipment && $this->canEditPrixAchat() && $this->isEditable($force_edit)) {
+                    $html .= BimpInput::renderInput('select', $prefixe . 'id_fourn_price', (int) $value, array(
+                                'options' => $values
+                    ));
+                } else {
+                    if ((int) $value && isset($values[(int) $value])) {
+                        $html .= $values[(int) $value];
+                    } elseif ((int) $value) {
+                        $html .= BimpRender::renderAlerts('Le prix fournisseur d\'ID ' . $value . ' n\'est pas enregistré pour ce produit');
+                        $value = 0;
+                    } else {
+                        $html .= 'Prix d\'achat exceptionnel';
+                    }
+                    $html .= '<input type="hidden" name="' . $prefixe . 'id_fourn_price" value="' . $value . '"/>';
+                }
+                $id_product = (int) $this->getIdProductFromPost();
+                if ($id_product) {
+                    $html .= '<div class="buttonsContainer" style="margin: 15px 15px 5px 15px; text-align: right">';
+                    $url = DOL_URL_ROOT . '/bimpcore/index.php?fc=product&id=' . $id_product . '&navtab=prix';
+                    $html .= '<span class="btn btn-default" onclick="window.open(\'' . $url . '\')">';
+                    $html .= BimpRender::renderIcon('fas_pencil-alt', 'iconLeft') . 'Editer les prix d\'achat';
+                    $html .= '</span>';
+                    $html .= '<span class="btn btn-default" onclick="reloadParentInput($(this), \'id_fourn_price\', [\'id_product\']);">';
+                    $html .= BimpRender::renderIcon('fas_redo', 'iconLeft') . 'Actualiser';
+                    $html .= '</span>';
+                    $html .= '</div>';
+                }
+                break;
+
             case 'ref_supplier':
                 $value = $this->getValueByProduct('ref_supplier');
                 $html .= BimpInput::renderInput('text', 'ref_supplier', $value);
@@ -140,11 +173,12 @@ class FournObjectLine extends ObjectLine
                             $this->id_fourn_price = 0;
                         } else {
                             $this->pu_ht = (float) $pfp->getData('price');
+                            $this->tva_tx = (float) $pfp->getData('tva_tx');
                         }
                     }
 
                     if (!(int) $this->id_fourn_price) {
-                        $this->pu_ht = (float) BimpTools::getValue('pa_except', (float) $this->pu_ht);
+                        $this->pu_ht = BimpTools::getValue('pa_except', $this->pu_ht);
                     }
                     break;
 
@@ -159,35 +193,115 @@ class FournObjectLine extends ObjectLine
 
     public function validate()
     {
-        $errors = parent::validate();
-
-        $this->pa_ht = 0;
-
-        if (!count($errors)) {
-            switch ((int) $this->getData('type')) {
-                case self::LINE_PRODUCT:
-                    if ((int) $this->id_fourn_price) {
-                        $pfp = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ProductFournisseurPrice', (int) $this->id_fourn_price);
-                        if (!$pfp->isLoaded()) {
-                            $errors[] = 'Le prix d\'achat fournisseur d\'ID ' . $this->id_fourn_price . ' n\'existe pas';
-                            $this->id_fourn_price = 0;
-                        } else {
-                            $this->pu_ht = (float) $pfp->getData('price');
-                            $this->tva_tx = (float) $pfp->getData('tva_tx');
-                        }
-                    }
-                    break;
-
-                case self::LINE_FREE:
-                    $this->id_fourn_price = 0;
-                    break;
-
-                case self::LINE_TEXT:
-                    $this->qty = 1;
-                    break;
-            }
+        if (!(int) $this->getData('type') && (int) $this->id_product) {
+            $this->set('type', 1);
         }
 
+        $errors = BimpObject::validate();
+
+        if (!count($errors)) {
+            switch ($this->getData('type')) {
+                case self::LINE_TEXT:
+                    $this->id_product = null;
+                    $this->id_fourn_price = null;
+                    $this->tva_tx = null;
+                    $this->qty = null;
+                    $this->pa_ht = null;
+                    $this->remise = null;
+                    $this->date_to = null;
+                    $this->date_from = null;
+                    if (BimpObject::objectLoaded($this->post_equipment)) {
+                        unset($this->post_equipment);
+                        $this->post_equipment = null;
+                    }
+                    $this->set('remisable', 0);
+                    break;
+
+                case self::LINE_PRODUCT:
+                    if (is_null($this->id_product) || !$this->id_product) {
+                        $errors[] = 'Produit ou service obligatoire';
+                    } else {
+                        $product = $this->getProduct();
+
+                        if (!BimpObject::objectLoaded($product)) {
+                            $errors[] = 'Le produit d\'ID ' . $this->id_product . ' n\'existe pas';
+                        } else {
+                            if ((int) $product->getData('fk_product_type') === 0) {
+                                $qty_str = (string) $this->qty;
+
+                                if (preg_match('/.*\..*/', $qty_str)) {
+                                    $errors[] = 'Les quantités décimales ne sont autorisées que pour les produits de type "Service". Veuillez corriger';
+                                }
+                            }
+                        }
+
+                        if (!count($errors)) {
+                            if (is_null($this->pu_ht) || is_null($this->tva_tx)) {
+                                $parent = $this->getParentInstance();
+                                if (!BimpObject::objectLoaded($parent)) {
+                                    $errors[] = 'ID de l\'objet parent absent';
+                                } else {
+                                    $pfp = $product->getCurrentFournPriceObject((int) $parent->getData('fk_soc'), true);
+                                    if (BimpObject::objectLoaded($pfp)) {
+                                        if (is_null($this->pu_ht)) {
+                                            $this->pu_ht = $pfp->getData('price');
+                                            $this->tva_tx = $pfp->getData('tva_tx');
+                                        } elseif (is_null($this->tva_tx)) {
+                                            $this->tva_tx = $pfp->getData('tva_tx');
+                                        }
+                                    } else {
+                                        if (!$this->canEditPrixAchat()) {
+                                            $errors[] = 'Aucun prix d\'achat fournisseur enregistré pour ce produit et ce fournisseur';
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (is_null($this->desc) || !(string) $this->desc) {
+                                $this->desc = $this->getValueByProduct('desc');
+                            }
+
+
+                            $product = $this->getProduct();
+
+                            if ((int) $this->getData('remisable')) {
+                                if (!(int) $product->getData('remisable')) {
+                                    $this->set('remisable', 0);
+                                }
+                            }
+                        }
+                    }
+
+                case self::LINE_FREE:
+                    if (is_null($this->pu_ht)) {
+                        $this->pu_ht = 0;
+                    }
+                    if (is_null($this->tva_tx)) {
+                        $this->tva_tx = 0;
+                    }
+
+                    $this->id_fourn_price = 0;
+                    $this->pa_ht = 0;
+
+                    if (BimpObject::objectLoaded($this->post_equipment)) {
+                        $errors = $this->checkEquipment($this->post_equipment);
+                        if (count($errors)) {
+                            return $errors;
+                        }
+                    }
+
+                    // Pas de TVA si vente hors UE: 
+                    $parent = $this->getParentInstance();
+                    if (BimpObject::objectLoaded($parent) && !$parent->isTvaActive()) {
+                        $this->tva_tx = 0;
+                    }
+
+                    break;
+            }
+
+            if ($this->force_pa_ht > 0)
+                $this->pa_ht = $this->force_pa_ht;
+        }
         return $errors;
     }
 }

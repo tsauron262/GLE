@@ -225,29 +225,29 @@ forms:
                     field_name: type
                     show_values: 1,3
                 depends_on: id_product
-            fourn_price:
-                custom: 1
-                label: Prix d'achat fournisseur
-                input_name: id_fourn_price
-                data_type: id_object
-                object: fournisseur_price
-                content: 
-                    callback: 
-                        method: renderLineInput
-                        params: 
-                            - id_fourn_price
-                display_if: 
-                    field_name: type
-                    show_values: 1,3
-                depends_on: id_product
-                create_form: 
-                    callback: getFournisseurPriceCreateForm
-                create_form_values: 
-                    fields: 
-                        fk_product: 
-                            callback: getIdProductFromPost
-                value: 
-                    callback: getIdFournPriceFromPost
+#            fourn_price:
+#                custom: 1
+#                label: Prix d'achat fournisseur
+#                input_name: id_fourn_price
+#                data_type: id_object
+#                object: fournisseur_price
+#                content: 
+#                    callback: 
+#                        method: renderLineInput
+#                        params: 
+#                            - id_fourn_price
+#                display_if: 
+#                    field_name: type
+#                    show_values: 1,3
+#                depends_on: id_product
+#                create_form: 
+#                    callback: getFournisseurPriceCreateForm
+#                create_form_values: 
+#                    fields: 
+#                        fk_product: 
+#                            callback: getIdProductFromPost
+#                value: 
+#                    callback: getIdFournPriceFromPost
             pa_ht: 
                 custom: 1
                 label: Prix d'achat
@@ -261,7 +261,7 @@ forms:
                 display_if: 
                     field_name: type
                     show_values: 1,3
-                depends_on: id_product,id_fourn_price
+                depends_on: id_product
             limited: 
                 custom: 1
                 label: Service à durée limitée
@@ -497,15 +497,15 @@ forms:
                             - 0
                             - ''
                             - 1
-            fourn_price:
-                content: 
-                    callback: 
-                        method: renderLineInput
-                        params: 
-                            - id_fourn_price
-                            - 0
-                            - ''
-                            - 1
+#            fourn_price:
+#                content: 
+#                    callback: 
+#                        method: renderLineInput
+#                        params: 
+#                            - id_fourn_price
+#                            - 0
+#                            - ''
+#                            - 1
             desc:
                 content: 
                     callback: 
@@ -677,6 +677,7 @@ lists:
             remise: 
             total_ttc: 
             margin:
+                
     default: 
         extends: global
         configurable: 1

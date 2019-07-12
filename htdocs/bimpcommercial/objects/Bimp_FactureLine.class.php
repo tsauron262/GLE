@@ -28,7 +28,7 @@ class Bimp_FactureLine extends ObjectLine
         // Aucune vérif pour les factures (L'équipement est attribué à titre indicatif)
         return array();
     }
-    
+
     public function isFieldEditable($field, $force_edit = false)
     {
         switch ($field) {
@@ -165,5 +165,32 @@ class Bimp_FactureLine extends ObjectLine
         }
 
         parent::onSave($errors, $warnings);
+    }
+
+    // Overrides: 
+
+    public function create(&$warnings = array(), $force_create = false)
+    {
+        $errors = array();
+
+        if ((int) $this->getData('type') === self::LINE_PRODUCT) {
+            $product = $this->getProduct();
+            if (!BimpObject::objectLoaded($product)) {
+                $errors[] = 'Produit absent';
+            } else {
+                $new_pa = (float) $product->getCurrentPaHt();
+
+                if ($new_pa) {
+                    $this->pa_ht = $new_pa;
+                    $this->id_fourn_price = 0;
+                }
+            }
+        }
+
+        if (count($errors)) {
+            return $errors;
+        }
+
+        $errors = parent::create($warnings, $force_create);
     }
 }

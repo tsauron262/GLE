@@ -435,13 +435,13 @@ class Bimp_Product extends BimpObject
         $pa_ht = 0;
 
         if ($this->isLoaded()) {
-            $pa_ht = (float) $this->getCurrentFournPriceAmount($id_fourn, $with_default);
-
             if (!$pa_ht) {
                 if ((float) $this->getData('cur_pa_ht')) {
                     $pa_ht = (float) $this->getData('cur_pa_ht');
                 } elseif ((float) $this->getData('pmp')) {
                     $pa_ht = (float) $this->getData('pmp');
+                } else {
+                    $pa_ht = (float) $this->getCurrentFournPriceAmount($id_fourn, $with_default);
                 }
             }
 
@@ -453,30 +453,45 @@ class Bimp_Product extends BimpObject
 
     public function getCurrentFournPriceId($id_fourn = null, $with_default = false)
     {
+        if ((int) $this->getData('id_cur_fp')) {
+            return (int) $this->getData('id_cur_fp');
+        }
+
+        $id_fp = 0;
+
         if ($this->isLoaded()) {
-            if ((int) $this->getData('id_cur_fp')) {
-                return (int) $this->getData('id_cur_fp');
+            $pa_ht = 0;
+            if ((float) $this->getData('cur_pa_ht')) {
+                $pa_ht = (float) $this->getData('cur_pa_ht');
+            } elseif ((float) $this->getData('pmp')) {
+                $pa_ht = (float) $this->getData('pmp');
             }
 
-            if ($with_default) {
+            if ($pa_ht) {
+                $id_fp = (int) $this->findFournPriceIdForPaHt($pa_ht, $id_fourn);
+            }
+
+            if (!$id_fp && $with_default) {
 //            $sql = 'SELECT MAX(fp.rowid) as id FROM ' . MAIN_DB_PREFIX . 'product_fournisseur_price fp WHERE fp.fk_product = ' . $this->id;
 //            
                 // On retourne le dernier PA fournisseur modifié ou enregistré: 
-                $sql = 'SELECT rowid as id, price FROM ' . MAIN_DB_PREFIX . 'product_fournisseur_price WHERE fk_product = ' . (int) $this->id;
-                $sql .= ' AND tms = (SELECT MAX(tms) FROM ' . MAIN_DB_PREFIX . 'product_fournisseur_price WHERE fk_product = ' . (int) $this->id . ')';
-
+                $where1 = 'fk_product = ' . (int) $this->id;
+                
                 if (!is_null($id_fourn) && (int) $id_fourn) {
-                    $sql .= ' AND `fk_soc` = ' . (int) $id_fourn;
+                    $where1 .= ' AND `fk_soc` = ' . (int) $id_fourn;
                 }
+                $where = $where1 . ' AND tms = (SELECT MAX(tms) FROM ' . MAIN_DB_PREFIX . 'product_fournisseur_price WHERE ' . $where1 . ')';
+
+                $sql = 'SELECT rowid as id, price FROM ' . MAIN_DB_PREFIX . 'product_fournisseur_price WHERE ' . $where;
 
                 $result = $this->db->executeS($sql);
                 if (isset($result[0]->id)) {
-                    return (int) $result[0]->id;
+                    $id_fp = (int) $result[0]->id;
                 }
             }
         }
 
-        return null;
+        return $id_fp;
     }
 
     public function getCurrentFournPriceObject($id_fourn = null, $with_default = false)
@@ -499,6 +514,22 @@ class Bimp_Product extends BimpObject
 
         if (BimpObject::objectLoaded($pfp)) {
             return (float) $pfp->getData('price');
+        }
+
+        return 0;
+    }
+
+    public function findFournPriceIdForPaHt($pa_ht, $id_fourn = null)
+    {
+        if ($this->isLoaded()) {
+            $where1 = '`fk_product` = ' . (int) $this->id . ' AND `price` = ' . (float) $pa_ht;
+
+            if (!is_null($id_fourn)) {
+                $where1 .= ' AND `fk_soc` = ' . (int) $id_fourn;
+            }
+
+            $where = $where1 . ' AND tms = (SELECT MAX(tms) FROM ' . MAIN_DB_PREFIX . 'product_fournisseur_price WHERE ' . $where1 . ')';
+            return (int) $this->db->getValue('product_fournisseur_price', 'rowid', $where);
         }
 
         return 0;

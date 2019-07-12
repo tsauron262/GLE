@@ -172,6 +172,10 @@ class OrderPDF extends BimpDocumentPDF
         }
 
 //        $this->pdf->topMargin = 40;
+        
+        if (strlen($docRef) > 20) {
+            $this->pdf->topMargin = 57;
+        }
 
         $this->header_vars['doc_name'] = $docName;
         $this->header_vars['doc_ref'] = $docRef;
@@ -544,8 +548,18 @@ class BLPDF extends OrderPDF
         $qties = $this->shipment->getPDFQtiesAndSerials();
 
         $i = 0;
+        
+        $bimpLines = array();
+        
+        if (BimpObject::objectLoaded($this->bimpCommObject) && is_a($this->bimpCommObject, 'BimpComm')) {
+            foreach ($this->bimpCommObject->getLines() as $bimpLine) {
+                $bimpLines[(int) $bimpLine->getData('id_line')] = $bimpLine;
+            }
+        }
 
         foreach ($this->object->lines as &$line) {
+            $bimpLine = isset($bimpLines[(int) $line->id]) ? $bimpLines[(int) $line->id] : null;
+            
             $product = null;
             if (!is_null($line->fk_product) && $line->fk_product) {
                 $product = new Product($this->db);
@@ -557,7 +571,9 @@ class BLPDF extends OrderPDF
 
             $desc = $this->getLineDesc($line, $product);
 
-            if ($line->total_ht == 0) {
+            
+            if ((BimpObject::objectLoaded($bimpLine) && (int) $bimpLine->getData('type') === ObjectLine::LINE_TEXT) ||
+                    (!BimpObject::objectLoaded($bimpLine) && $line->subprice == 0 && !(int) $line->fk_product)) {
                 if (!$desc) {
                     $i++;
                     unset($product);
@@ -575,6 +591,7 @@ class BLPDF extends OrderPDF
                     if (isset($qties[(int) $line->id]['serials']) && count($qties[(int) $line->id]['serials'])) {
                         $desc .= '<br/>';
                         $desc .= '<strong>N° de série</strong>: ';
+                        $desc .= '<span style="font-size: ' . (count($qties[(int) $line->id]['serials']) > 10 ? (count($qties[(int) $line->id]['serials']) > 100 ? '5' : '6') : '8') . 'px">';
                         $first = true;
                         foreach ($qties[(int) $line->id]['serials'] as $serial) {
                             if (!$first) {
@@ -584,6 +601,7 @@ class BLPDF extends OrderPDF
                             }
                             $desc .= $serial;
                         }
+                        $desc .= '</span>';
                     }
                 }
                 $row = array(

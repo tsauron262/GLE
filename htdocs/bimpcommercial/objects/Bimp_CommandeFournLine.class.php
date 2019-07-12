@@ -650,7 +650,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
                         $link = $line->renderOriginLink();
 
                         if ($link) {
-                            $html .= ($html ? $html . '<br/><br/>' : '') . $link;
+                            $html .= ($html ? '<br/><br/>' : '') . $link;
                         }
                     }
                 }

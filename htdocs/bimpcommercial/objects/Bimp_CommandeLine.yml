@@ -150,8 +150,7 @@ forms:
                   options: 
                       1: Prix fournisseur
                       2: Prix d'achat exceptionnel
-              value: 
-                  callback: getCommandeFournTypePrice
+              value: 1
               
             - custom: 1
               label: Prix d'achat fournisseur
@@ -191,8 +190,7 @@ forms:
               label: Prix d'achat exceptionnel (HT)
               input_name: pa_ht
               data_type: money
-              value: 
-                  prop: pa_ht
+              value: 0
               input: 
                   type: text
               display_if: 

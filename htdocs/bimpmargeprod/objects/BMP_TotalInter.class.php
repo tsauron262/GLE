@@ -30,7 +30,7 @@ class BMP_TotalInter extends Abstract_margeprod
         return 0;
     }
 
-    public function getCategoriesArray()
+    public function getCategoriesBMPArray()
     {
         return $this->getBimpObjectFullListArray($this->module, 'BMP_CategorieMontant');
     }

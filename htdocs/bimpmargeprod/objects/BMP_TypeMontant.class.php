@@ -25,7 +25,7 @@ class BMP_TypeMontant extends Abstract_margeprod
         return 0;
     }
 
-    public function getCategoriesArray()
+    public function getCategoriesBMPArray()
     {
         return BimpCache::getBimpObjectFullListArray($this->module, 'BMP_CategorieMontant');
     }

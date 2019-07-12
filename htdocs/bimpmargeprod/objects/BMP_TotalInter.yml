@@ -28,7 +28,7 @@ associations:
         input: 
             type: select
             options: 
-                array: categories
+                array: categoriesBMP
                 
     categories_recettes_in:
         object: categorie
@@ -39,7 +39,7 @@ associations:
         input: 
             type: select
             options: 
-                array: categories
+                array: categoriesBMP
                 
     categories_frais_ex:
         object: categorie
@@ -50,7 +50,7 @@ associations:
         input: 
             type: select
             options: 
-                array: categories
+                array: categoriesBMP
                 
     categories_recettes_ex:
         object: categorie
@@ -61,7 +61,7 @@ associations:
         input: 
             type: select
             options: 
-                array: categories
+                array: categoriesBMP
                 
     montants_in:
         object: type_montant

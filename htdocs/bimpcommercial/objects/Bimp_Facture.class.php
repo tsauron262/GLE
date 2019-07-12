@@ -1834,6 +1834,7 @@ class Bimp_Facture extends BimpComm
             'libelle'           => $this->getData('libelle'),
             'ef_type'           => $this->getData('ef_type'),
             'fk_soc'            => $this->getData('fk_soc'),
+            'centre'            => $this->getData('centre'),
             'ref_client'        => $this->getData('ref_client'),
             'datef'             => $this->getData('datef'),
             'fk_account'        => (int) $this->getData('fk_account'),
@@ -1846,6 +1847,14 @@ class Bimp_Facture extends BimpComm
         $avoir->dol_object->linked_objects = $this->dol_object->linked_objects;
 
         $errors = $avoir->create();
+        
+        
+        if ($avoir->dol_object->copy_linked_contact($this->dol_object, 'internal') < 0) {
+            $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($avoir->dol_object), 'Echec de la copie des contacts internes');
+        }
+        if ($avoir->dol_object->copy_linked_contact($this->dol_object, 'external') < 0) {
+            $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($avoir->dol_object), 'Echec de la copie des contacts externes');
+        }
 
         if (count($errors)) {
             return $errors;

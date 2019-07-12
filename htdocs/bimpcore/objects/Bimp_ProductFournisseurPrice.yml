@@ -23,6 +23,7 @@ fields:
         type: id
         input: 
             type: hidden
+        required: 1
             
     fk_soc: 
         label: Fournisseur
@@ -36,6 +37,7 @@ fields:
         
     ref_fourn:
         label: Référence produit fournisseur
+        required: 1
     
     quantity:
         label: Quantité minimum

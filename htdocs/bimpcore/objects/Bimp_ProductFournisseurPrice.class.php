@@ -33,6 +33,24 @@ class Bimp_ProductFournisseurPrice extends BimpObject
         return $html;
     }
 
+    public function validate()
+    {
+        $errors = parent::validate();
+
+        $ref_fourn = (string) $this->getData('ref_fourn');
+
+        if (!$ref_fourn) {
+            $errors[] = 'Référence fournisseur absente';
+        } else {
+            $id_fp = (int) $this->db->getValue('product_fournisseur_price', 'rowid', 'fk_soc = ' . (int) $this->getData('fk_soc') . ' AND ref_fourn = \'' . $ref_fourn . '\' AND fk_product != ' . (int) $this->getData('fk_product'));
+            if ($id_fp) {
+                $errors[] = 'La référence "' . $ref_fourn . '" existe déjà pour un prix d\'achat du même fournisseur mais d\'un autre produit';
+            }
+        }
+
+        return $errors;
+    }
+
     public function createOrUpdate()
     {
         $errors = $this->validate();
@@ -121,73 +139,73 @@ class Bimp_ProductFournisseurPrice extends BimpObject
 
     public function onCreate()
     {
-        if ($this->isLoaded()) {
-            $product = $this->getChildObject('product');
-
-            if (BimpObject::objectLoaded($product)) {
-                // Propales: 
-                $sql = 'SELECT det.rowid as id FROM ' . MAIN_DB_PREFIX . 'propaldet det LEFT JOIN ' . MAIN_DB_PREFIX . 'propal p ';
-                $sql .= 'ON det.fk_propal = p.rowid WHERE det.fk_product = ' . (int) $product->id . ' ';
-                $sql .= 'AND (det.fk_product_fournisseur_price IS NULL OR det.fk_product_fournisseur_price = 0) AND p.fk_statut = 0';
-
-                $rows = $this->db->executeS($sql, 'array');
-
-                if (!is_null($rows)) {
-                    foreach ($rows as $r) {
-                        $line = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_PropalLine', array(
-                                    'id_line' => (int) $r['id']
-                                        ), true);
-
-                        if (BimpObject::objectLoaded($line)) {
-                            $line->id_fourn_price = $this->id;
-                            $line->pa_ht = 0;
-                            $line->update();
-                        }
-                    }
-                }
-
-                // Commandes: 
-                $sql = 'SELECT det.rowid as id FROM ' . MAIN_DB_PREFIX . 'commandedet det LEFT JOIN ' . MAIN_DB_PREFIX . 'commande c ';
-                $sql .= 'ON det.fk_commande = c.rowid WHERE det.fk_product = ' . (int) $product->id . ' ';
-                $sql .= 'AND (det.fk_product_fournisseur_price IS NULL OR det.fk_product_fournisseur_price = 0) AND c.fk_statut = 0';
-
-                $rows = $this->db->executeS($sql, 'array');
-
-                if (!is_null($rows)) {
-                    foreach ($rows as $r) {
-                        $line = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', array(
-                                    'id_line' => (int) $r['id']
-                                        ), true);
-
-                        if (BimpObject::objectLoaded($line)) {
-                            $line->id_fourn_price = $this->id;
-                            $line->pa_ht = 0;
-                            $line->update();
-                        }
-                    }
-                }
-
-                //  Factures: 
-                $sql = 'SELECT det.rowid as id FROM ' . MAIN_DB_PREFIX . 'facturedet det LEFT JOIN ' . MAIN_DB_PREFIX . 'facture f ';
-                $sql .= 'ON det.fk_facture = f.rowid WHERE det.fk_product = ' . (int) $product->id . ' ';
-                $sql .= 'AND (det.fk_product_fournisseur_price IS NULL OR det.fk_product_fournisseur_price = 0) AND f.fk_statut = 0';
-
-                $rows = $this->db->executeS($sql, 'array');
-
-                if (!is_null($rows)) {
-                    foreach ($rows as $r) {
-                        $line = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_FactureLine', array(
-                                    'id_line' => (int) $r['id']
-                                        ), true);
-
-                        if (BimpObject::objectLoaded($line)) {
-                            $line->id_fourn_price = $this->id;
-                            $line->pa_ht = 0;
-                            $line->update();
-                        }
-                    }
-                }
-            }
-        }
+//        if ($this->isLoaded()) {
+//            $product = $this->getChildObject('product');
+//
+//            if (BimpObject::objectLoaded($product)) {
+//                // Propales: 
+//                $sql = 'SELECT det.rowid as id FROM ' . MAIN_DB_PREFIX . 'propaldet det LEFT JOIN ' . MAIN_DB_PREFIX . 'propal p ';
+//                $sql .= 'ON det.fk_propal = p.rowid WHERE det.fk_product = ' . (int) $product->id . ' ';
+//                $sql .= 'AND (det.fk_product_fournisseur_price IS NULL OR det.fk_product_fournisseur_price = 0) AND p.fk_statut = 0';
+//
+//                $rows = $this->db->executeS($sql, 'array');
+//
+//                if (!is_null($rows)) {
+//                    foreach ($rows as $r) {
+//                        $line = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_PropalLine', array(
+//                                    'id_line' => (int) $r['id']
+//                                        ), true);
+//
+//                        if (BimpObject::objectLoaded($line)) {
+//                            $line->id_fourn_price = $this->id;
+//                            $line->pa_ht = 0;
+//                            $line->update();
+//                        }
+//                    }
+//                }
+//
+//                // Commandes: 
+//                $sql = 'SELECT det.rowid as id FROM ' . MAIN_DB_PREFIX . 'commandedet det LEFT JOIN ' . MAIN_DB_PREFIX . 'commande c ';
+//                $sql .= 'ON det.fk_commande = c.rowid WHERE det.fk_product = ' . (int) $product->id . ' ';
+//                $sql .= 'AND (det.fk_product_fournisseur_price IS NULL OR det.fk_product_fournisseur_price = 0) AND c.fk_statut = 0';
+//
+//                $rows = $this->db->executeS($sql, 'array');
+//
+//                if (!is_null($rows)) {
+//                    foreach ($rows as $r) {
+//                        $line = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', array(
+//                                    'id_line' => (int) $r['id']
+//                                        ), true);
+//
+//                        if (BimpObject::objectLoaded($line)) {
+//                            $line->id_fourn_price = $this->id;
+//                            $line->pa_ht = 0;
+//                            $line->update();
+//                        }
+//                    }
+//                }
+//
+//                //  Factures: 
+//                $sql = 'SELECT det.rowid as id FROM ' . MAIN_DB_PREFIX . 'facturedet det LEFT JOIN ' . MAIN_DB_PREFIX . 'facture f ';
+//                $sql .= 'ON det.fk_facture = f.rowid WHERE det.fk_product = ' . (int) $product->id . ' ';
+//                $sql .= 'AND (det.fk_product_fournisseur_price IS NULL OR det.fk_product_fournisseur_price = 0) AND f.fk_statut = 0';
+//
+//                $rows = $this->db->executeS($sql, 'array');
+//
+//                if (!is_null($rows)) {
+//                    foreach ($rows as $r) {
+//                        $line = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_FactureLine', array(
+//                                    'id_line' => (int) $r['id']
+//                                        ), true);
+//
+//                        if (BimpObject::objectLoaded($line)) {
+//                            $line->id_fourn_price = $this->id;
+//                            $line->pa_ht = 0;
+//                            $line->update();
+//                        }
+//                    }
+//                }
+//            }
+//        }
     }
 }

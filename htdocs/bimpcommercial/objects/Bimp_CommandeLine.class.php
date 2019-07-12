@@ -296,17 +296,13 @@ class Bimp_CommandeLine extends ObjectLine
         }
 
         if ((float) $this->pa_ht && (int) $this->id_product) {
-            $where1 = '`fk_product` = ' . (int) $this->id_product . ' AND `price` = ' . (float) $this->pa_ht;
-            $where = $where1 . ' AND tms = (SELECT MAX(tms) FROM ' . MAIN_DB_PREFIX . 'product_fournisseur_price WHERE ' . $where1 . ')';
-            return (int) $this->db->getValue('product_fournisseur_price', 'rowid', $where);
+            $product = $this->getProduct();
+            if (BimpObject::objectLoaded($product)) {
+                return (int) $product->getCurrentFournPriceId();
+            }
         }
 
         return 0;
-    }
-
-    public function getCommandeFournTypePrice()
-    {
-        return ((int) $this->getCommandeFournIdPrice() ? 1 : 2);
     }
 
     // Getters valeurs:
@@ -3536,62 +3532,62 @@ class Bimp_CommandeLine extends ObjectLine
     {
         $errors = array();
 
-        if ($this->isLoaded()) {
-            if ((float) $this->pa_ht !== (float) $pa_ht) {
-                $this->pa_ht = $pa_ht;
-                $this->id_fourn_price = 0;
-
-                $errors = $this->forceUpdateLine();
-
-                $facture_line = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureLine');
-                $factures_lines_list = $facture_line->getList(array(
-                    'linked_object_name' => 'commande_line',
-                    'linked_id_object'   => (int) $this->id
-                        ), null, null, 'id', 'asc', 'array', array('id'));
-
-                if (!is_null($factures_lines_list)) {
-                    foreach ($factures_lines_list as $item) {
-                        $facture_line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureLine', (int) $item['id']);
-                        if (BimpObject::objectLoaded($facture_line)) {
-                            if ($facture_line->isParentEditable()) {
-                                // Màj de la ligne de facture: 
-                                $facture_line->pa_ht = $pa_ht;
-                                $facture_line->id_fourn_price = 0;
-                                $w = array();
-                                $fac_errors = $facture_line->update($w, true);
-                                $fac_errors = array_merge($fac_errors, $w);
-
-                                if (count($fac_errors)) {
-                                    $facture = $facture_line->getParentInstance();
-                                    $fac_label = '';
-                                    if (BimpObject::objectLoaded($facture)) {
-                                        $fac_label = ' (facture "' . $facture->getData('facnumber') . '")';
-                                    }
-                                    $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Echec de la mise à jour du prix d\'achat pour la ligne de facture n°' . $facture_line->getData('position') . $fac_label);
-                                }
-                            } else {
-                                // Ajout d'un correctif:     
-                                BimpObject::loadClass('bimpcore', 'BimpCorrectif');
-
-                                $diff = (float) $pa_ht - (float) $facture_line->pa_ht;
-                                $fac_errors = BimpCorrectif::setValue($facture_line, 'pa_ht', $diff);
-
-                                if (count($fac_errors)) {
-                                    $facture = $facture_line->getParentInstance();
-                                    $fac_label = '';
-                                    if (BimpObject::objectLoaded($facture)) {
-                                        $fac_label = ' (facture "' . $facture->getData('facnumber') . '")';
-                                    }
-                                    $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Echec de l\'ajout d\'un correctif du prix d\'achat pour la ligne de facture n°' . $facture_line->getData('position') . $fac_label);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        } else {
-            $errors[] = 'ID de la ligne de commande client absent. Mise à jour du prix d\'achat impossible';
-        }
+//        if ($this->isLoaded()) {
+//            if ((float) $this->pa_ht !== (float) $pa_ht) {
+//                $this->pa_ht = $pa_ht;
+//                $this->id_fourn_price = 0;
+//
+//                $errors = $this->forceUpdateLine();
+//
+//                $facture_line = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureLine');
+//                $factures_lines_list = $facture_line->getList(array(
+//                    'linked_object_name' => 'commande_line',
+//                    'linked_id_object'   => (int) $this->id
+//                        ), null, null, 'id', 'asc', 'array', array('id'));
+//
+//                if (!is_null($factures_lines_list)) {
+//                    foreach ($factures_lines_list as $item) {
+//                        $facture_line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureLine', (int) $item['id']);
+//                        if (BimpObject::objectLoaded($facture_line)) {
+//                            if ($facture_line->isParentEditable()) {
+//                                // Màj de la ligne de facture: 
+//                                $facture_line->pa_ht = $pa_ht;
+//                                $facture_line->id_fourn_price = 0;
+//                                $w = array();
+//                                $fac_errors = $facture_line->update($w, true);
+//                                $fac_errors = array_merge($fac_errors, $w);
+//
+//                                if (count($fac_errors)) {
+//                                    $facture = $facture_line->getParentInstance();
+//                                    $fac_label = '';
+//                                    if (BimpObject::objectLoaded($facture)) {
+//                                        $fac_label = ' (facture "' . $facture->getData('facnumber') . '")';
+//                                    }
+//                                    $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Echec de la mise à jour du prix d\'achat pour la ligne de facture n°' . $facture_line->getData('position') . $fac_label);
+//                                }
+//                            } else {
+//                                // Ajout d'un correctif:     
+//                                BimpObject::loadClass('bimpcore', 'BimpCorrectif');
+//
+//                                $diff = (float) $pa_ht - (float) $facture_line->pa_ht;
+//                                $fac_errors = BimpCorrectif::setValue($facture_line, 'pa_ht', $diff);
+//
+//                                if (count($fac_errors)) {
+//                                    $facture = $facture_line->getParentInstance();
+//                                    $fac_label = '';
+//                                    if (BimpObject::objectLoaded($facture)) {
+//                                        $fac_label = ' (facture "' . $facture->getData('facnumber') . '")';
+//                                    }
+//                                    $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Echec de l\'ajout d\'un correctif du prix d\'achat pour la ligne de facture n°' . $facture_line->getData('position') . $fac_label);
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        } else {
+//            $errors[] = 'ID de la ligne de commande client absent. Mise à jour du prix d\'achat impossible';
+//        }
 
         return $errors;
     }
@@ -3860,7 +3856,7 @@ class Bimp_CommandeLine extends ObjectLine
                     }
                 }
 
-                if (!count($errors) && !BimpObject::objectLoaded($line)) {
+                if (!count($errors)) {
                     $id_entrepot = isset($data['id_entrepot']) ? (int) $data['id_entrepot'] : (int) $commande->getData('entrepot');
 
                     $type_price = isset($data['type_price']) ? (int) $data['type_price'] : 1;
@@ -3878,7 +3874,7 @@ class Bimp_CommandeLine extends ObjectLine
                         'linked_id_object'   => (int) $this->id,
                         'linked_object_name' => 'commande_line'
                     ));
-
+                    
                     $line->desc = $this->desc;
                     $line->id_product = (int) $product->id;
                     $line->qty = (int) $qty;
@@ -3898,7 +3894,8 @@ class Bimp_CommandeLine extends ObjectLine
                                     if (!$id_fourn) {
                                         $errors[] = 'Aucun fournisseur associé au prix d\'achat sélectionné';
                                     } else {
-                                        $line->id_fourn_price = $id_fourn_price;
+                                        $line->pu_ht = (float) $fourn_price->getData('price');
+                                        $line->tva_tx = (float) $fourn_price->getData('tva_tx');
                                     }
                                 }
                             }
@@ -3919,9 +3916,8 @@ class Bimp_CommandeLine extends ObjectLine
                                     $errors[] = 'Veuillez saisir un taux de TVA supérieur à 0';
                                 }
 
-                                $line->id_fourn_price = 0;
+                                $line->pu_ht = $pa_ht;
                                 $line->tva_tx = $tva_tx;
-                                $line->pa_ht = $pa_ht;
                             }
                             break;
                     }
@@ -3943,7 +3939,7 @@ class Bimp_CommandeLine extends ObjectLine
                                 $errors[] = BimpTools::getMsgFromArray($comm_errors, 'Des erreurs sont survenues lors de la création de la commande fournisseur');
                             }
                         } else {
-                            $commande_fourn = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFourn', $id_commande_fourn);
+                            $commande_fourn = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn', $id_commande_fourn);
                             if (!$commande_fourn->isLoaded()) {
                                 $errors[] = 'La commande fournisseur sélectionnée n\'existe plus (ID ' . $id_commande_fourn . ')';
                             }

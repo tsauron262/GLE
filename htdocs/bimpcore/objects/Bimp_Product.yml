@@ -12,7 +12,7 @@ list_page_url: list
     
 labels: 
     name: produit
-
+    
 objects: 
     fourn_price: 
         relation: hasOne
@@ -23,7 +23,7 @@ objects:
                 name: Bimp_ProductFournisseurPrice
             id_object: 
                 field_value: id_cur_fp
-                
+
 fields: 
     ref: 
         label: Réf.
@@ -93,15 +93,23 @@ fields:
         label: Prix d'achat moyen pondéré
         type: money
         
+    id_cur_fp: 
+        label: Prix d'achat fournisseur courant
+        type: id_object
+        object: fourn_price
+        default_value: 0
+        
     cur_pa_ht: 
         label: Prix d'achat actuel
         type: money
         default_value: 0
         
-    id_cur_fp: 
-        label: Prix d'achat fournisseur en cours
-        type: id_object
-        object: fourn_price
+    cur_pa_origin: 
+        label: Type origine pa
+        
+    cur_pa_id_origin: 
+        label: ID origine pa
+        type: id
         default_value: 0
         
     pa_prevu: 

@@ -38,16 +38,43 @@ sections:
           - id: object_referent
             title: Objets référents
             show: 0
-          - id: stock
+          - id: product_stock
             title: Stock
-            show: 0
+            struct:
+                type: view
+                view:
+                    object: produit
+                    name: stock
+#            show: 0
           - id: Categoriser
             title: Catégoriser
+            struct:
+                type: view
+                view:
+                    object: produit
+                    name: product_categorize
             show: 0
           - id: notes
             title: Notes
-          - id: fichier
+            struct:
+                type: view
+                view:
+                    object: produit
+                    name: product_note
+          - id: files
             title: Fichiers joints
+            struct: 
+                type: rows
+                rows:                                                   
+                    - cols: 
+                        - type: list
+                          list: 
+                              title: Fichier joints
+                              name: default
+                              panel: 1
+                              object: produit
+                              children: files
+                              
     - type: buttons
       buttons:
           - label: Retour à la liste des produits

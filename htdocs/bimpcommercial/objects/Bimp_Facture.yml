@@ -111,6 +111,9 @@ fields:
     fk_availability: unset
     fk_input_reason: unset
     total_ht: unset
+    marge: 
+        label: Marge
+        type: money
         
 forms: 
     
@@ -498,6 +501,8 @@ lists_cols:
         field: datec
     availability: unset
     input_reason: unset
+    marge:
+        field: marge
     
 lists: 
     default: 

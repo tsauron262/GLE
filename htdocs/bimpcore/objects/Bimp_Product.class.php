@@ -3,6 +3,7 @@
 class Bimp_Product extends BimpObject
 {
 
+    
     public $stocks = null;
     public static $sousTypes = array(
         0 => '',
@@ -21,10 +22,63 @@ class Bimp_Product extends BimpObject
         'HT'  => 'HT',
         'TTC' => 'TTC'
     );
+    
+    public static $units_weight;
+    public static $units_length;
+    public static $units_surface;
+    public static $units_volume;
+    
+        
     private static $stockDate = array();
     private static $stockShowRoom = array();
     private static $ventes = array();
     private static $lienShowRoomEntrepot = array();
+    
+    public function __construct($module, $object_name) {
+        global $langs;
+        $langs->load('other');
+
+        self::$units_weight = array(
+            3 => array('label' => $langs->transnoentitiesnoconv('WeightUnitton')),
+            0 => array('label' => $langs->transnoentitiesnoconv('WeightUnitkg')),
+           -3 => array('label' => $langs->transnoentitiesnoconv('WeightUnitg')),
+           -6 => array('label' => $langs->transnoentitiesnoconv('WeightUnitmg')),
+           98 => array('label' => $langs->transnoentitiesnoconv('WeightUnitounce')),
+           99 => array('label' => $langs->transnoentitiesnoconv('WeightUnitpound'))
+	);
+        
+        self::$units_length = array(
+            0 => array('label' => $langs->transnoentitiesnoconv('SizeUnitm')),
+           -1 => array('label' => $langs->transnoentitiesnoconv('SizeUnitdm')),
+           -2 => array('label' => $langs->transnoentitiesnoconv('SizeUnitcm')),
+           -3 => array('label' => $langs->transnoentitiesnoconv('SizeUnitmm')),
+          -98 => array('label' => $langs->transnoentitiesnoconv('SizeUnitfoot')),
+          -99 => array('label' => $langs->transnoentitiesnoconv('SizeUnitinch'))
+        );
+        
+        self::$units_surface = array(
+            0 => array('label' => $langs->transnoentitiesnoconv('SurfaceUnitm2')),
+           -2 => array('label' => $langs->transnoentitiesnoconv('SurfaceUnitdm2')),
+           -4 => array('label' => $langs->transnoentitiesnoconv('SurfaceUnitcm2')),
+           -6 => array('label' => $langs->transnoentitiesnoconv('SurfaceUnitmm2')),
+           98 => array('label' => $langs->transnoentitiesnoconv('SurfaceUnitfoot2')),
+           99 => array('label' => $langs->transnoentitiesnoconv('SurfaceUnitinch2'))
+        );
+        
+        self::$units_volume = array(
+            0 => array('label' => $langs->transnoentitiesnoconv('VolumeUnitm3')),
+           -3 => array('label' => $langs->transnoentitiesnoconv('VolumeUnitdm3')),
+           -6 => array('label' => $langs->transnoentitiesnoconv('VolumeUnitcm3')),
+           -9 => array('label' => $langs->transnoentitiesnoconv('VolumeUnitmm3')),
+           88 => array('label' => $langs->transnoentitiesnoconv('VolumeUnitfoot3')),
+           89 => array('label' => $langs->transnoentitiesnoconv('VolumeUnitinch3')),
+           97 => array('label' => $langs->transnoentitiesnoconv('VolumeUnitounce')),
+           98 => array('label' => $langs->transnoentitiesnoconv('VolumeUnitlitre')),
+           99 => array('label' => $langs->transnoentitiesnoconv('VolumeUnitgallon'))
+        );
+        
+        parent::__construct($module, $object_name);
+    }
 
     // Getters booléens
 
@@ -876,4 +930,19 @@ class Bimp_Product extends BimpObject
             self::$ventes[$dateMin . "-" . $dateMax][$ln->fk_product][null]['total_ttc'] += $ln->total_ttc;
         }
     }
+    
+    public function renderCategorize() {
+        $html = '';
+
+        if ($this->isLoaded()) {
+
+                $html = BimpRender::renderPanel('Catégories', $html, '', array(
+                            'foldable' => false,
+                            'type' => 'secondary',
+                            'panel_id' => 'test',
+                ));
+        }
+        return $html;
+    }
+    
 }

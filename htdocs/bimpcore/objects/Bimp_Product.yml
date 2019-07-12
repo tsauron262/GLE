@@ -24,6 +24,18 @@ objects:
             id_object: 
                 field_value: id_cur_fp
 
+    files:
+        relation: hasMany
+        delete: 1
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: BimpFile
+        list: 
+            filters:
+                parent_module: bimpcore
+                parent_object_name: Bimp_Product
+                
 fields: 
     ref: 
         label: Réf.
@@ -92,6 +104,8 @@ fields:
     pmp: 
         label: Prix d'achat moyen pondéré
         type: money
+        value:
+            callback: getPMP
         
     id_cur_fp: 
         label: Prix d'achat fournisseur courant
@@ -162,6 +176,8 @@ fields:
     weight_units: 
         label: Unité de poids
         type: int
+        values:
+            array: units_weight
         
     length: 
         label: Longueur
@@ -170,6 +186,8 @@ fields:
     length_units: 
         label: Unité de longueur
         type: int
+        values:
+            array: units_length
         
     width: 
         label: Largeur
@@ -178,7 +196,9 @@ fields:
     width_units: 
         label: Unité de largeur
         type: int
-        
+        values:
+            array: units_length
+            
     height: 
         label: Hauteur
         type: float
@@ -186,6 +206,8 @@ fields:
     height_units: 
         label: Unité de hauteur
         type: int
+        values:
+            array: units_length
         
     surface: 
         label: Surface
@@ -194,6 +216,8 @@ fields:
     surface_units: 
         label: Unité de surface
         type: int
+        values:
+            array: units_surface
         
     volume: 
         label: Volume
@@ -202,6 +226,8 @@ fields:
     volume_units:
         label: Unité de volume
         type: int
+        values:
+            array: units_volume
         
     validate: 
         label: Validé
@@ -258,6 +284,22 @@ fields:
         label: Emplacement LYON
         type: text
         dol_extra_field: 1
+        
+    best_buy_price:
+        label: Meilleur prix d'achat
+        type: money
+        
+    price_sell:
+        label: Prix de vente
+        type: money
+        
+    price_sell_min:
+        label: Prix de vente min.
+        type: money
+        
+    e:
+        label: Limite stock pour alerte
+        type: int
         
 #    Champs non gérés
 #    ref_ext
@@ -404,6 +446,16 @@ fields_tables:
         
     measures: 
         title: Mesures
+        
+    stock:
+        title: Vue globale
+        icon: fas_check-square
+        rows:
+            - field: pmp
+#            - field: ref
+#            - field: label
+#            - field: description
+#            - field: fk_product_type
 
 views: 
     default: 
@@ -471,7 +523,31 @@ views:
                   col_md: 12
                   custom:
                       callback: renderListeFournisseur
-            
+                      
+    product_note:
+        rows:
+            - cols:
+                - type: custom
+                  custom:
+                      callback: renderNotesList
+                      
+    product_categorize:
+        rows:
+            - cols:
+                - type: custom
+                  custom:
+                      callback: renderCategorize
+                      
+    stock:
+        rows:
+            - cols:
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  fields_table: 
+                      name: stock
+                      
 filters_panels: 
     default: 
         filters: 

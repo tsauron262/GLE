@@ -88,9 +88,10 @@ class InterfaceDolObjects extends DolibarrTriggers
                 }
         }
         
-        
+        // On re-fetch() le BimpObject lié au DolObject afin d'être sûr que l'objet soit à jour dans le cache. 
+        // (ou on le supprime du cache si l'action est de type DELETE. 
         if ((BimpObject::objectLoaded($object))) {
-            if (preg_match('/^([A-Z]+)_([A-Z]+)$/', $action, $matches)) {
+            if (preg_match('/^([A-Z_]+)_([A-Z]+)$/', $action, $matches)) {
                 $objKey = $matches[1];
                 $actionCode = $matches[2];
 
@@ -100,9 +101,10 @@ class InterfaceDolObjects extends DolibarrTriggers
                     if (BimpCache::cacheExists($cache_key)) {
                         if ($actionCode === 'DELETE') {
                             BimpCache::unsetBimpObjectInstance($data[0], $data[1], $object->id);
-                        } else {
+                        } elseif ($actionCode !== 'CREATE') {
                             $bimp_object = BimpCache::getBimpObjectInstance($data[0], $data[1], $object->id);
-                            if (BimpObject::objectLoaded($bimp_object)) {
+                            // noFetchOnTrigger: On est dans le cas d'un create() ou update() via le BimpObject, donc pas de fetch(). 
+                            if (BimpObject::objectLoaded($bimp_object) && !$bimp_object->noFetchOnTrigger) { 
                                 $bimp_object->fetch((int) $object->id);
                                 return 0;
                             }

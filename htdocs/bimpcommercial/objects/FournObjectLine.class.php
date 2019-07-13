@@ -122,7 +122,7 @@ class FournObjectLine extends ObjectLine
                     $html .= '<input type="hidden" name="' . $prefixe . 'id_fourn_price" value="' . $value . '"/>';
                 }
                 $id_product = (int) $this->getIdProductFromPost();
-                if ($id_product) {
+                if ($this->canEditPrixAchat() && $id_product) {
                     $html .= '<div class="buttonsContainer" style="margin: 15px 15px 5px 15px; text-align: right">';
                     $url = DOL_URL_ROOT . '/bimpcore/index.php?fc=product&id=' . $id_product . '&navtab=prix';
                     $html .= '<span class="btn btn-default" onclick="window.open(\'' . $url . '\')">';

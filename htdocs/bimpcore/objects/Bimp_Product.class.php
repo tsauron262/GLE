@@ -3,7 +3,6 @@
 class Bimp_Product extends BimpObject
 {
 
-    
     public $stocks = null;
     public static $sousTypes = array(
         0 => '',
@@ -22,61 +21,59 @@ class Bimp_Product extends BimpObject
         'HT'  => 'HT',
         'TTC' => 'TTC'
     );
-    
     public static $units_weight;
     public static $units_length;
     public static $units_surface;
     public static $units_volume;
-    
-        
     private static $stockDate = array();
     private static $stockShowRoom = array();
     private static $ventes = array();
     private static $lienShowRoomEntrepot = array();
-    
-    public function __construct($module, $object_name) {
+
+    public function __construct($module, $object_name)
+    {
         global $langs;
         $langs->load('other');
 
         self::$units_weight = array(
-            3 => array('label' => $langs->transnoentitiesnoconv('WeightUnitton')),
-            0 => array('label' => $langs->transnoentitiesnoconv('WeightUnitkg')),
-           -3 => array('label' => $langs->transnoentitiesnoconv('WeightUnitg')),
-           -6 => array('label' => $langs->transnoentitiesnoconv('WeightUnitmg')),
-           98 => array('label' => $langs->transnoentitiesnoconv('WeightUnitounce')),
-           99 => array('label' => $langs->transnoentitiesnoconv('WeightUnitpound'))
-	);
-        
+            3  => array('label' => $langs->transnoentitiesnoconv('WeightUnitton')),
+            0  => array('label' => $langs->transnoentitiesnoconv('WeightUnitkg')),
+            -3 => array('label' => $langs->transnoentitiesnoconv('WeightUnitg')),
+            -6 => array('label' => $langs->transnoentitiesnoconv('WeightUnitmg')),
+            98 => array('label' => $langs->transnoentitiesnoconv('WeightUnitounce')),
+            99 => array('label' => $langs->transnoentitiesnoconv('WeightUnitpound'))
+        );
+
         self::$units_length = array(
-            0 => array('label' => $langs->transnoentitiesnoconv('SizeUnitm')),
-           -1 => array('label' => $langs->transnoentitiesnoconv('SizeUnitdm')),
-           -2 => array('label' => $langs->transnoentitiesnoconv('SizeUnitcm')),
-           -3 => array('label' => $langs->transnoentitiesnoconv('SizeUnitmm')),
-          -98 => array('label' => $langs->transnoentitiesnoconv('SizeUnitfoot')),
-          -99 => array('label' => $langs->transnoentitiesnoconv('SizeUnitinch'))
+            0   => array('label' => $langs->transnoentitiesnoconv('SizeUnitm')),
+            -1  => array('label' => $langs->transnoentitiesnoconv('SizeUnitdm')),
+            -2  => array('label' => $langs->transnoentitiesnoconv('SizeUnitcm')),
+            -3  => array('label' => $langs->transnoentitiesnoconv('SizeUnitmm')),
+            -98 => array('label' => $langs->transnoentitiesnoconv('SizeUnitfoot')),
+            -99 => array('label' => $langs->transnoentitiesnoconv('SizeUnitinch'))
         );
-        
+
         self::$units_surface = array(
-            0 => array('label' => $langs->transnoentitiesnoconv('SurfaceUnitm2')),
-           -2 => array('label' => $langs->transnoentitiesnoconv('SurfaceUnitdm2')),
-           -4 => array('label' => $langs->transnoentitiesnoconv('SurfaceUnitcm2')),
-           -6 => array('label' => $langs->transnoentitiesnoconv('SurfaceUnitmm2')),
-           98 => array('label' => $langs->transnoentitiesnoconv('SurfaceUnitfoot2')),
-           99 => array('label' => $langs->transnoentitiesnoconv('SurfaceUnitinch2'))
+            0  => array('label' => $langs->transnoentitiesnoconv('SurfaceUnitm2')),
+            -2 => array('label' => $langs->transnoentitiesnoconv('SurfaceUnitdm2')),
+            -4 => array('label' => $langs->transnoentitiesnoconv('SurfaceUnitcm2')),
+            -6 => array('label' => $langs->transnoentitiesnoconv('SurfaceUnitmm2')),
+            98 => array('label' => $langs->transnoentitiesnoconv('SurfaceUnitfoot2')),
+            99 => array('label' => $langs->transnoentitiesnoconv('SurfaceUnitinch2'))
         );
-        
+
         self::$units_volume = array(
-            0 => array('label' => $langs->transnoentitiesnoconv('VolumeUnitm3')),
-           -3 => array('label' => $langs->transnoentitiesnoconv('VolumeUnitdm3')),
-           -6 => array('label' => $langs->transnoentitiesnoconv('VolumeUnitcm3')),
-           -9 => array('label' => $langs->transnoentitiesnoconv('VolumeUnitmm3')),
-           88 => array('label' => $langs->transnoentitiesnoconv('VolumeUnitfoot3')),
-           89 => array('label' => $langs->transnoentitiesnoconv('VolumeUnitinch3')),
-           97 => array('label' => $langs->transnoentitiesnoconv('VolumeUnitounce')),
-           98 => array('label' => $langs->transnoentitiesnoconv('VolumeUnitlitre')),
-           99 => array('label' => $langs->transnoentitiesnoconv('VolumeUnitgallon'))
+            0  => array('label' => $langs->transnoentitiesnoconv('VolumeUnitm3')),
+            -3 => array('label' => $langs->transnoentitiesnoconv('VolumeUnitdm3')),
+            -6 => array('label' => $langs->transnoentitiesnoconv('VolumeUnitcm3')),
+            -9 => array('label' => $langs->transnoentitiesnoconv('VolumeUnitmm3')),
+            88 => array('label' => $langs->transnoentitiesnoconv('VolumeUnitfoot3')),
+            89 => array('label' => $langs->transnoentitiesnoconv('VolumeUnitinch3')),
+            97 => array('label' => $langs->transnoentitiesnoconv('VolumeUnitounce')),
+            98 => array('label' => $langs->transnoentitiesnoconv('VolumeUnitlitre')),
+            99 => array('label' => $langs->transnoentitiesnoconv('VolumeUnitgallon'))
         );
-        
+
         parent::__construct($module, $object_name);
     }
 
@@ -402,7 +399,7 @@ class Bimp_Product extends BimpObject
         return $categories;
     }
 
-    // Getters FournPrice: 
+    // Gestion FournPrice: 
 
     public static function getFournisseursPriceArray($id_product, $id_fournisseur = 0, $id_price = 0, $include_empty = true, $empty_label = '')
     {
@@ -530,7 +527,7 @@ class Bimp_Product extends BimpObject
 //            
                 // On retourne le dernier PA fournisseur modifié ou enregistré: 
                 $where1 = 'fk_product = ' . (int) $this->id;
-                
+
                 if (!is_null($id_fourn) && (int) $id_fourn) {
                     $where1 .= ' AND `fk_soc` = ' . (int) $id_fourn;
                 }
@@ -587,6 +584,23 @@ class Bimp_Product extends BimpObject
         }
 
         return 0;
+    }
+
+    public function setCurrentPaHt($pa_ht, $id_fourn_price = 0, $origin = '', $id_origin = 0)
+    {
+        $errors = array();
+
+        if ($this->isLoaded($errors)) {
+            if ((float) $this->getData('cur_pa_ht') !== (float) $pa_ht) {
+                $this->set('cur_pa_ht', (float) $pa_ht);
+                $this->set('id_cur_fp', (int) $id_fourn_price);
+                $this->set('cur_pa_origin', $origin);
+                $this->set('cur_pa_id_origin', (int) $id_origin);
+                $errors = $this->update($w, true);
+            }
+        }
+
+        return $errors;
     }
 
     // Affichages: 
@@ -930,19 +944,19 @@ class Bimp_Product extends BimpObject
             self::$ventes[$dateMin . "-" . $dateMax][$ln->fk_product][null]['total_ttc'] += $ln->total_ttc;
         }
     }
-    
-    public function renderCategorize() {
+
+    public function renderCategorize()
+    {
         $html = '';
 
         if ($this->isLoaded()) {
 
-                $html = BimpRender::renderPanel('Catégories', $html, '', array(
-                            'foldable' => false,
-                            'type' => 'secondary',
-                            'panel_id' => 'test',
-                ));
+            $html = BimpRender::renderPanel('Catégories', $html, '', array(
+                        'foldable' => false,
+                        'type'     => 'secondary',
+                        'panel_id' => 'test',
+            ));
         }
         return $html;
     }
-    
 }

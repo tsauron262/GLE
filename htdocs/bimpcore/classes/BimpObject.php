@@ -2593,7 +2593,7 @@ class BimpObject extends BimpCache
         }
 
         if (!$validate) {
-            $msg = '"' . $label . '": valeur invalide';
+            $msg = '"' . $label . '": valeur invalide : '.$value;
             if (!is_null($invalid_msg)) {
                 $msg .= ' (' . $invalid_msg . ')';
             }

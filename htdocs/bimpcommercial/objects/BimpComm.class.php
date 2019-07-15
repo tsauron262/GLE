@@ -3037,4 +3037,15 @@ class BimpComm extends BimpDolObject
             );
         }
     }
+    
+    
+//    public function displayData($field) {
+//        if($field == "marge"){
+//            $marge = parent::getData($field);
+//            $pourcent = $marge / $this->getData('total') * 100;
+//            return price($marge). "€ (".price($pourcent)."%)";
+//        }
+//        
+//        return parent::displayData($field);
+//    }
 }

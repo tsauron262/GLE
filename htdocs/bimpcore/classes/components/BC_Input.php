@@ -130,6 +130,7 @@ class BC_Input extends BimpComponent
         $this->params_def['help'] = array('default' => '');
         $this->params_def['card'] = array('default' => '');
         $this->params_def['auto_save'] = array('data_type' => 'bool', 'default' => 0);
+        $this->params_def['extra_content'] = array('default' => '');
 
         parent::__construct($object, '', $path);
 
@@ -560,6 +561,10 @@ class BC_Input extends BimpComponent
                 $extra_data['card'] = $this->params['card'];
                 $extra_data['display_card_mode'] = $this->display_card_mode;
             }
+        }
+        
+        if (isset($this->params['extra_content'])) {
+            $content .= $this->params['extra_content'];
         }
 
         $html .= BimpInput::renderInputContainer($this->input_name, $this->value, $content, $this->name_prefix, $required, (int) $this->params['multiple'], implode(' ', $this->extraClasses), $extra_data);

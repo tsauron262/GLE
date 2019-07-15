@@ -1,5 +1,9 @@
 bootstrap: 1
 
+
+js: 
+    - /bimplogistique/views/js/logistique.js
+    
 title: Commercial
         
 objects: 

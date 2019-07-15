@@ -178,6 +178,13 @@ class Interfacevalidate extends DolibarrTriggers
             }
         }
 
+        if ($action == 'ORDER_SUPPLIER_VALIDATE') {
+            $bimp_object = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn', $object->id);
+            if (BimpObject::objectLoaded($bimp_object)) {
+                $bimp_object->onValidate();
+            }
+        }
+        
         if ($action == 'BILL_SUPPLIER_VALIDATE') {
             $bimp_object = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureFourn', $object->id);
             if (BimpObject::objectLoaded($bimp_object)) {
@@ -245,7 +252,6 @@ class Interfacevalidate extends DolibarrTriggers
                 }
             }
         }
-
 
         return 0;
     }

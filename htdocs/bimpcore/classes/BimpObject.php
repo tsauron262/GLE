@@ -69,6 +69,7 @@ class BimpObject extends BimpCache
     public $dol_object = null;
     public $extends = array();
     public $redirectMode = 5; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
+    public $noFetchOnTrigger = false;
 
     // Gestion instance:
 
@@ -2592,7 +2593,7 @@ class BimpObject extends BimpCache
         }
 
         if (!$validate) {
-            $msg = '"' . $label . '": valeur invalide';
+            $msg = '"' . $label . '": valeur invalide : '.$value;
             if (!is_null($invalid_msg)) {
                 $msg .= ' (' . $invalid_msg . ')';
             }
@@ -2765,6 +2766,7 @@ class BimpObject extends BimpCache
 
     public function create(&$warnings = array(), $force_create = false)
     {
+        $this->noFetchOnTrigger = true;
         BimpLog::actionStart('bimpobject_create', 'Création', $this);
 
         $errors = array();
@@ -2800,7 +2802,7 @@ class BimpObject extends BimpCache
                 }
 
                 if (!is_null($this->dol_object)) {
-                    $result = $this->createDolObject($errors);
+                    $result = $this->createDolObject($errors, $warnings);
                 } else {
                     $table = $this->getTable('');
 
@@ -2866,11 +2868,15 @@ class BimpObject extends BimpCache
 
         BimpLog::actionData($this->getDataArray());
         BimpLog::actionEnd('bimpobject_create', $errors, $warnings);
+
+        $this->noFetchOnTrigger = false;
         return $errors;
     }
 
     public function update(&$warnings = array(), $force_update = false)
     {
+        $this->noFetchOnTrigger = true;
+
         BimpLog::actionStart('bimpobject_update', 'Mise à jour', $this);
 
         $errors = array();
@@ -2901,7 +2907,7 @@ class BimpObject extends BimpCache
                     }
 
                     if ($this->isDolObject()) {
-                        $result = $this->updateDolObject($errors);
+                        $result = $this->updateDolObject($errors, $warnings);
                     } else {
                         $table = $this->getTable();
                         $primary = $this->getPrimary();
@@ -2952,6 +2958,8 @@ class BimpObject extends BimpCache
 
         BimpLog::actionData($this->getDataArray());
         BimpLog::actionEnd('bimpobject_update', $errors, $warnings);
+
+        $this->noFetchOnTrigger = false;
 
         return $errors;
     }
@@ -3503,8 +3511,10 @@ class BimpObject extends BimpCache
         return $errors;
     }
 
-    protected function createDolObject(&$errors)
+    protected function createDolObject(&$errors = array(), &$warnings = array())
     {
+        $this->noFetchOnTrigger = true;
+
         if (!is_null($this->dol_object) && isset($this->dol_object->id) && $this->dol_object->id) {
             unset($this->dol_object);
             $this->dol_object = $this->config->getObject('dol_object');
@@ -3512,6 +3522,7 @@ class BimpObject extends BimpCache
 
         if (is_null($this->dol_object)) {
             $errors[] = 'Objet Dolibarr invalide';
+            $this->noFetchOnTrigger = false;
             return 0;
         }
 
@@ -3560,30 +3571,36 @@ class BimpObject extends BimpCache
                                 $msg .= ' - Erreur SQL: ' . $sql_errors;
                             }
 
-                            $errors[] = $msg;
+                            $warnings[] = $msg;
                         }
                     }
                 }
             }
 
+            $this->noFetchOnTrigger = false;
             return $result;
         }
 
+        $this->noFetchOnTrigger = false;
         return 0;
     }
 
-    protected function updateDolObject(&$errors)
+    protected function updateDolObject(&$errors = array(), &$warnings = array())
     {
+        $this->noFetchOnTrigger = true;
         if (!$this->isLoaded()) {
+            $this->noFetchOnTrigger = false;
             return 0;
         }
         if (is_null($this->dol_object)) {
             $errors[] = 'Objet Dolibarr invalide';
+            $this->noFetchOnTrigger = false;
             return 0;
         }
 
         if (!isset($this->dol_object->id) || !$this->dol_object->id) {
             $errors[] = 'Objet Dolibarr invalide';
+            $this->noFetchOnTrigger = false;
             return 0;
         }
 
@@ -3607,7 +3624,7 @@ class BimpObject extends BimpCache
             if ((int) $this->params['force_extrafields_update']) {
                 foreach ($this->dol_object->array_options as $key => $value) {
                     if ($this->dol_object->updateExtraField(str_replace('options_', '', $key)) <= 0) {
-                        $errors[] = 'Echec de l\'enregistrement de l\'attribut supplémentaire "' . str_replace('options_', '', $key) . '"';
+                        $warnings[] = 'Echec de l\'enregistrement de l\'attribut supplémentaire "' . str_replace('options_', '', $key) . '"';
                     }
                 }
             }
@@ -3622,6 +3639,7 @@ class BimpObject extends BimpCache
                         $errors[] = 'Erreur: ' . $langs->trans($error);
                     }
                 }
+                $this->noFetchOnTrigger = false;
                 return 0;
             } else {
                 if (!empty($bimpObjectFields)) {
@@ -3642,14 +3660,16 @@ class BimpObject extends BimpCache
                                 $msg .= ' - Erreur SQL: ' . $sql_errors;
                             }
 
-                            $errors[] = $msg;
+                            $warnings[] = $msg;
                         }
                     }
                 }
             }
+            $this->noFetchOnTrigger = false;
             return 1;
         }
 
+        $this->noFetchOnTrigger = false;
         return 0;
     }
 

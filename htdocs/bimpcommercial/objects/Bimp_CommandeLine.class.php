@@ -2305,6 +2305,25 @@ class Bimp_CommandeLine extends ObjectLine
         return $html;
     }
 
+    public function renderFournPriceButtons()
+    {
+        $html = '';
+
+        if ($this->canEditPrixAchat() && (int) $this->id_product) {
+            $html .= '<div class="buttonsContainer" style="margin: 15px 15px 5px 15px; text-align: right">';
+            $url = DOL_URL_ROOT . '/bimpcore/index.php?fc=product&id=' . $this->id_product . '&navtab=prix';
+            $html .= '<span class="btn btn-default" onclick="window.open(\'' . $url . '\')">';
+            $html .= BimpRender::renderIcon('fas_pencil-alt', 'iconLeft') . 'Editer les prix d\'achat';
+            $html .= '</span>';
+            $html .= '<span class="btn btn-default" onclick="reloadParentInput($(this), \'id_fourn_price\');">';
+            $html .= BimpRender::renderIcon('fas_redo', 'iconLeft') . 'Actualiser';
+            $html .= '</span>';
+            $html .= '</div>';
+        }
+
+        return $html;
+    }
+
     // Traitements réservations:
 
     public function checkReservations()
@@ -3874,7 +3893,7 @@ class Bimp_CommandeLine extends ObjectLine
                         'linked_id_object'   => (int) $this->id,
                         'linked_object_name' => 'commande_line'
                     ));
-                    
+
                     $line->desc = $this->desc;
                     $line->id_product = (int) $product->id;
                     $line->qty = (int) $qty;

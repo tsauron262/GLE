@@ -889,7 +889,7 @@ class ObjectLine extends BimpObject
                     if ($id_product && (is_null($id_fourn_price) || (int) $this->id_product !== $id_product)) {
                         $id_fourn_price = (int) $product->getCurrentFournPriceId();
                     }
-                    
+
                     return (int) $id_fourn_price;
 
                 case 'pa_ht':

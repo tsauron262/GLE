@@ -18,6 +18,7 @@ class BimpDocumentPDF extends BimpModelPDF
     public $acompteTtc = 0;
     public $acompteTva20 = 0;
     public $tva = array();
+    public $ht = array();
     public $hideReduc = false;
     public $hideTtc = false;
     public $hideTotal = false;
@@ -1014,6 +1015,7 @@ class BimpDocumentPDF extends BimpModelPDF
             }
 
             $this->tva[$vatrate] += $tva_line;
+            $this->ht[$vatrate] += $line->total_ht;
             $i++;
         }
         $this->tva["20.000"] += $this->acompteTva20;
@@ -1157,8 +1159,8 @@ class BimpDocumentPDF extends BimpModelPDF
 
                 // TVA
                 foreach ($this->tva as $tvakey => $tvaval) {
-                    if ($tvakey != 0) {
-                        if ((float) $tvaval != 0) {
+                    if (1) {
+                        if (1) {
                             $tvacompl = '';
                             if (preg_match('/\*/', $tvakey)) {
                                 $tvakey = str_replace('*', '', $tvakey);
@@ -1172,7 +1174,7 @@ class BimpDocumentPDF extends BimpModelPDF
                             }
 
                             $html .= '<tr>';
-                            $html .= '<td style="background-color: #F0F0F0;">' . $totalvat . '</td>';
+                            $html .= '<td style="background-color: #F0F0F0;">' . $totalvat . ' ('.price($this->ht[$tvakey]).' €)</td>';
                             $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . price($tvaval, 0, $this->langs);
                             if ((int) $this->periodicity) {
                                 $html .= ' / ' . BimpComm::$pdf_periodicity_label_masc[(int) $this->periodicity];

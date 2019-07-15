@@ -119,6 +119,9 @@ filters_panels:
             product: 
                 field: fk_product
                 child: dol_line
+            user_resp:
+                field: user_resp
+                child: parent
             date: 
                 field: date_commande
                 child: parent

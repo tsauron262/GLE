@@ -119,8 +119,8 @@ filters_panels:
             product: 
                 field: fk_product
                 child: dol_line
-            user_resp:
-                field: user_resp
+            fk_user_resp:
+                field: fk_user_resp
                 child: parent
             date: 
                 field: date_commande
@@ -206,6 +206,9 @@ lists_cols:
             callback: 
                 params:
                     - desc_light_url
+    fk_user_resp:
+        field: fk_user_resp
+        child: parent
             
             
 lists: 

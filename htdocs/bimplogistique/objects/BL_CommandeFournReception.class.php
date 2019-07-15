@@ -566,14 +566,14 @@ class BL_CommandeFournReception extends BimpObject
             // Desc: 
             $html .= '<td>';
             $html .= $line->displayLineData('desc');
-            if (BimpObject::objectLoaded($commande_client_line)) {
-                $commandeClient = $commande_client_line->getParentInstance();
-                if (BimpObject::objectLoaded($commandeClient)) {
-                    $html .= '<br/><br/>';
-                    $html .= '<strong>Commande client d\'origine: </strong>';
-                    $html .= $commandeClient->getNomUrl(1, 1, 1, 'full') . '&nbsp;&nbsp;(Ligne n°' . $commande_client_line->getData('position') . ')';
-                }
-            }
+//            if (BimpObject::objectLoaded($commande_client_line)) {
+//                $commandeClient = $commande_client_line->getParentInstance();
+//                if (BimpObject::objectLoaded($commandeClient)) {
+//                    $html .= '<br/><br/>';
+//                    $html .= '<strong>Commande client d\'origine: </strong>';
+//                    $html .= $commandeClient->getNomUrl(1, 1, 1, 'full') . '&nbsp;&nbsp;(Ligne n°' . $commande_client_line->getData('position') . ')';
+//                }
+//            }
             $html .= '</td>';
 
             if ($edit) {

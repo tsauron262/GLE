@@ -1936,12 +1936,7 @@ class Bimp_Facture extends BimpComm
         ));
 
         foreach ($shipments as $shipment) {
-            $ship_errors = $shipment->updateField('id_avoir', (int) $avoir->id);
-            if (count($ship_errors)) {
-                echo '<pre>';
-                print_r($ship_errors);
-                echo '</pre>';
-            }
+            $shipment->updateField('id_avoir', (int) $avoir->id);
         }
 
         // validation de l'avoir (sans trigger pour éviter les boucles infinies): 

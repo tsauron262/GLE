@@ -1086,6 +1086,46 @@ class Bimp_CommandeFourn extends BimpComm
         }
     }
 
+    public function onValidate()
+    {
+        if ($this->isLoaded()) {
+            $products = array();
+
+            $lines = $this->getLines('not_text');
+            foreach ($lines as $line) {
+                if (!(int) $line->id_product) {
+                    continue;
+                }
+
+                if (!isset($products[(int) $line->id_product])) {
+                    $products[(int) $line->id_product] = 0;
+                }
+
+                if ((float) $line->pu_ht > $products[(int) $line->id_product]) {
+                    $products[(int) $line->id_product] = (float) $line->pu_ht;
+                }
+            }
+
+            $fk_soc = (int) $this->getData('fk_soc');
+
+            foreach ($products as $id_product => $pa_ht) {
+                if (!$pa_ht) {
+                    continue;
+                }
+
+                $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $id_product);
+
+                $id_fp = 0;
+
+                if (BimpObject::objectLoaded($product)) {
+                    $id_fp = (int) $product->findFournPriceIdForPaHt($pa_ht, $fk_soc);
+                }
+
+                $errors = $product->setCurrentPaHt($pa_ht, $id_fp, 'commande_fourn', (int) $this->id);
+            }
+        }
+    }
+
     // Actions:
 
     public function actionValidate($data, &$success)
@@ -1220,8 +1260,8 @@ class Bimp_CommandeFourn extends BimpComm
         }
 
         return array(
-            'errors'   => $errors,
-            'warnings' => $warnings,
+            'errors'           => $errors,
+            'warnings'         => $warnings,
             'success_callback' => 'bimp_reloadPage();'
         );
     }

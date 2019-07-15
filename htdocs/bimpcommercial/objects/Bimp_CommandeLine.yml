@@ -157,7 +157,8 @@ forms:
               input_name: id_fourn_price
               data_type: id_object
               object: fourn_price
-              create_form: default
+              create_form: 
+                  callback: getFournisseurPriceCreateForm
               create_form_values: 
                   fields: 
                       fk_product: 
@@ -166,6 +167,8 @@ forms:
                   type: select
                   options: 
                       array: productFournisseursPrices
+                  extra_content: 
+                      callback: renderFournPriceButtons
               value: 
                   callback: getCommandeFournIdPrice
               display_if: 

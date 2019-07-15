@@ -168,7 +168,8 @@ function onAvoirsChange($container) {
                 label = label.replace('  <span class="danger">Cet avoir ne peut pas être pris en compte car il dépasse le montant à payer de toutes les factures</span>', '');
                 $row.removeAttr('style');
                 $td.html(label);
-                var amount = parseFloat(label.replace(/^.* \- ([0-9]+),([0-9]{2}) TTC\)/, '$1.$2'));
+                label = label.replace(/ /g, '');
+                var amount = parseFloat(label.replace(/^.*\-([0-9]+),([0-9]{2})TTC\)/, '$1.$2'));
                 if (isNaN(amount)) {
                     var text = label + '  <span class="danger">Erreur: Montant invalide - cet avoir n\'est pas pris en compte</span>';
                     $row.css('background-color', '#FFEBEB');
@@ -179,7 +180,7 @@ function onAvoirsChange($container) {
                         if (!check) {
                             var toPay = parseFloat($(this).data('to_pay'));
                             var avoirs = parseFloat($(this).data('avoirs'));
-                            if ((toPay - avoirs) >= amount) {
+                             if (Math.round10((toPay - avoirs), -2) >= amount) {
                                 var $input = $(this);
                                 check = true;
                                 total_avoirs += amount;

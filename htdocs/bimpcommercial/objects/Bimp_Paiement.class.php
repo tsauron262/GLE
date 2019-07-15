@@ -17,7 +17,6 @@ class Bimp_Paiement extends BimpObject
     }
 
     // Getters: 
-
     public function getAmountFromFacture()
     {
         $id_facture = (int) BimpTools::getValue('fields/id_facture', 0);
@@ -444,7 +443,7 @@ class Bimp_Paiement extends BimpObject
 
         if (is_null($type_paiement) || !(string) $type_paiement) {
             $errors[] = 'Mode paiement invalide';
-        } elseif (($total_paid + $total_avoirs) > $total_to_pay && $type_paiement !== 'LIQ') {
+        } elseif (round(($total_paid + $total_avoirs), 2) > $total_to_pay && $type_paiement !== 'LIQ') {
             $errors[] = 'Le versement d\'une somme supérieure au total des factures n\'est possible que pour un paiement en espèces';
         } elseif (!$use_caisse && $type_paiement === 'LIQ') {
             $errors[] = 'Le réglement en espèce n\'est possible que pour un paiement en caisse';
@@ -529,6 +528,8 @@ class Bimp_Paiement extends BimpObject
 //        $total_factures_versements = round($total_factures_versements, 2);
 //        $total_paid = round($total_paid, 2);
 
+        $total_factures_versements = round($total_factures_versements, 2);
+        
         if ($total_factures_versements > ($total_paid + 0.009999999)) {
             $errors[] = 'Le champ "Somme totale versée" (' . $total_paid . ') est inférieur au total des réglements des factures (' . $total_factures_versements . ')';
             return $errors;

@@ -114,6 +114,7 @@ fields:
     marge: 
         label: Marge
         type: money
+        default_value: 0
         
 forms: 
     

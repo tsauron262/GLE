@@ -339,6 +339,9 @@ lists_cols:
 filters_panels: 
     default: 
         filters: 
+            fk_soc:
+                field: fk_soc
+                child: parent
             product: 
                 field: fk_product
                 child: dol_line

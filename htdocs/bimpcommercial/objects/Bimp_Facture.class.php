@@ -1528,6 +1528,7 @@ class Bimp_Facture extends BimpComm
         if (in_array($type, array(Facture::TYPE_STANDARD, Facture::TYPE_CREDIT_NOTE))) {
 
             // Pour être sûr d\'être à jour:
+            $this->checkLines();
             $this->dol_object->fetch_lines();
             $this->dol_object->update_price();
             $this->dol_object->fetch((int) $this->id);
@@ -1628,6 +1629,7 @@ class Bimp_Facture extends BimpComm
                 BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
 
                 $done = 0;
+                
                 foreach ($lines as $line) {
                     if ((int) $line->id_remise_except) {
                         $discount = new DiscountAbsolute($this->db->db);

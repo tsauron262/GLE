@@ -2228,6 +2228,12 @@ function setInputsEvents($container) {
             $(this).data('tab_key_as_enter_event_init', 1);
         }
     });
+    $container.find('.compteur_caisse').each(function () {
+        if (!parseInt($(this).data('compteur_event_init'))) {
+
+            $(this).data('compteur_event_init', 1);
+        }
+    });
 }
 
 function setInputEvents($form, $input) {
@@ -2485,6 +2491,26 @@ function setSortableMultipleValuesHandlesEvents($container) {
             }
         });
     }
+}
+
+function calcTotalCompteurCaisse($container) {
+    if (!$.isOk($container)) {
+        return;
+    }
+
+    var total = 0;
+    var $inputs = $container.find('input.compteur_caisse_input');
+    $inputs.each(function () {
+        var val = parseInt($(this).val());
+        if (isNaN(val)) {
+            bimp_msg($(this).data('label') + ': nombre invalide');
+        } else {
+            total += val * parseFloat($(this).data('value'));
+        }
+    });
+    
+    $container.find('.compteur_caisse_total').text(total);
+    $container.find('.compteur_caisse_total_input').val(total);
 }
 
 $(document).ready(function () {

@@ -1296,7 +1296,7 @@ class BL_CommandeFournReception extends BimpObject
             $total_ttc = $this->getTotalTTC();
 
             if ((int) $user->id === 1) {
-                echo $this->id . ': ' . $total_ht . ' , ' . $total_ttc . '<br/>';
+                echo $this->getData('num_reception') . ': ' . $total_ht . ' , ' . $total_ttc . '<br/>';
             }
 
             $update = false;
@@ -1320,6 +1320,16 @@ class BL_CommandeFournReception extends BimpObject
             if ($update) {
                 $warnings = array();
                 $errors = $this->update($warnings, true);
+                if (count($errors)) {
+                    echo 'errors: <pre>';
+                    print_r($errors);
+                    echo '</pre>';
+                }
+                if (count($warnings)) {
+                    echo 'warnings: <pre>';
+                    print_r($warnings);
+                    echo '</pre>';
+                }
             }
         } else {
             $errors[] = 'ID de l\'expédition absent';

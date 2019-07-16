@@ -109,6 +109,7 @@ class importProd extends importCat {
             
             
             $this->traiteChamp("options_cto", $ln['ArtFree3']);
+            $this->traiteChamp("options_crt", 3);
 
 
 
@@ -116,7 +117,7 @@ class importProd extends importCat {
             $this->traiteChamp("status_buy", ($this->isProdActif($ln)) ? "1" : "0");
 
 
-//            $this->traiteChamp("label", $ln['ArtLib']);
+            $this->traiteChamp("label", $ln['ArtLib']);
             
             $this->traiteChamp("pmp", $ln['ArtLastPA'], true);
             

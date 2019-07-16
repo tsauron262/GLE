@@ -702,44 +702,45 @@ class BimpRender
 
     public static function renderCompteurCaisse($input_name)
     {
-        $html = '<script type="text/javascript" src="' . DOL_URL_ROOT . '/bimpcore/views/js/compteurCaisse.js"></script>';
-
         $rows = array(
             array(
-                500 => '500 €',
-                2   => '2 €'
+                '500' => '500 €',
+                '2'   => '2 €',
             ),
             array(
-                200 => '200 €',
-                1   => '1 €'
+                '200' => '200 €',
+                '1'   => '1 €'
             ),
             array(
-                100 => '100 €',
-                0.5 => '50 cts'
+                '100' => '100 €',
+                '0.5' => '50 cts'
             ),
             array(
-                50  => '50 €',
-                0.2 => '20 cts'
+                '50'  => '50 €',
+                '0.2' => '20 cts'
             ),
             array(
-                20  => '20 €',
-                0.1 => '10 cts'
+                '20'  => '20 €',
+                '0.1' => '10 cts'
             ),
             array(
-                10   => '10 €',
-                0.05 => '5 cts'
+                '10'   => '10 €',
+                '0.05' => '5 cts'
             ),
             array(
-                5    => '5 €',
-                0.02 => '2 cts'
+                '5'    => '5 €',
+                '0.02' => '2 cts'
             ),
             array(
-                0    => '',
-                0.01 => '1 ct'
+                '0'    => '',
+                '0.01' => '1 ct'
             )
         );
 
         $html .= '<div class="compteur_caisse">';
+        $html .= '<p class="small">';
+        $html .= 'Appuyez sur "Entrée" pour passer au champ suivant';
+        $html .= '</p>';
         $html .= '<table class="bimp_list_table">';
         $html .= '<thead>';
         $html .= '<tr>';
@@ -750,32 +751,40 @@ class BimpRender
 
         $html .= '<tbody>';
 
+        $i = 0;
         foreach ($rows as $r) {
             $html .= '<tr>';
             foreach ($r as $value => $label) {
-                $html .= '<th>';
-                $html .= $label;
-                $html .= '</th>';
-                $html .= '<td>';
-                $html .= BimpInput::renderInput('text', 'compteur_caisse_' . $value, 0, array(
-                            'data'        => array(
-                                'data_type' => 'number',
-                                'min'       => 0,
-                                'decimals'  => 0,
-                                'value'     => $value,
-                                'label'     => $label
-                            ),
-                            'extra_class' => 'compteur_caisse_input'
-                ));
-                $html .= '</td>';
+                if (!(float) $value) {
+                    $html .= '<td colspan="2"></td>';
+                } else {
+                    $html .= '<th>';
+                    $html .= $label;
+                    $html .= '</th>';
+                    $html .= '<td>';
+                    $html .= BimpInput::renderInput('text', 'compteur_caisse_' . $value, 0, array(
+                                'data'        => array(
+                                    'data_type' => 'number',
+                                    'min'       => 0,
+                                    'decimals'  => 0,
+                                    'value'     => $value,
+                                    'label'     => $label,
+                                    'idx'       => $i
+                                ),
+                                'extra_class' => 'compteur_caisse_input idx_' . $i
+                    ));
+                    $html .= '</td>';
+                }
+                $i += 7;
             }
             $html .= '</tr>';
+            $i -= 13;
         }
         $html .= '</tbody>';
         $html .= '</table>';
         $html .= '<input class="compteur_caisse_total_input" type="hidden" name="' . $input_name . '" value="0"/>';
 
-        $html .= '<div style="padding: 5px 0;font-size: 16px;background-color: #DCDCDC;text-align: center">';
+        $html .= '<div style="margin-top: 10px; padding: 5px 0;font-size: 16px;background-color: #DCDCDC;text-align: center">';
         $html .= 'Total: ';
         $html .= '<span class="compteur_caisse_total">0</span> &euro;';
         $html .= '</div>';

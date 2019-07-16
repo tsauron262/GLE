@@ -108,7 +108,7 @@ class importProd extends importCat {
             $this->traiteChamp("options_rpcp", ($ln['ArtFree2'] == '' ? 0 : $ln['ArtFree2']), true);
             
             
-            $this->traiteChamp("options_cto", $ln['ArtGArtCode']);
+            $this->traiteChamp("options_cto", $ln['ArtFree3']);
 
 
 

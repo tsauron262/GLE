@@ -108,7 +108,7 @@ class Bimp_Commande extends BimpComm
                 }
                 return 0;
         }
-        return 1;
+        return parent::canSetAction($action);
     }
 
     public function isActionAllowed($action, &$errors = array())

@@ -112,15 +112,6 @@ class BL_CommandeShipment extends BimpObject
 
     public function canSetAction($action)
     {
-        switch ($action) {
-            case 'createFacture':
-                $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
-                return $facture->canCreate();
-
-            case 'editFacture':
-                $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
-                return $facture->canEdit();
-        }
 
         return (int) parent::canSetAction($action);
     }

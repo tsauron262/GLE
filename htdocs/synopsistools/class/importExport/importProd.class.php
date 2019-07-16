@@ -106,6 +106,9 @@ class importProd extends importCat {
             $this->traiteChamp("options_validate", 1);
             $this->traiteChamp("options_deee", ($ln['ArtFree1'] == '' ? 0 : $ln['ArtFree1']), true);
             $this->traiteChamp("options_rpcp", ($ln['ArtFree2'] == '' ? 0 : $ln['ArtFree2']), true);
+            
+            
+            $this->traiteChamp("options_cto", $ln['ArtGArtCode'], true);
 
 
 
@@ -113,7 +116,7 @@ class importProd extends importCat {
             $this->traiteChamp("status_buy", ($this->isProdActif($ln)) ? "1" : "0");
 
 
-            $this->traiteChamp("label", $ln['ArtLib']);
+//            $this->traiteChamp("label", $ln['ArtLib']);
             
             $this->traiteChamp("pmp", $ln['ArtLastPA'], true);
             
@@ -124,7 +127,7 @@ class importProd extends importCat {
             $this->traiteChamp("import_key", $ln['ArtID']);
             $this->traiteChamp("barcode", $ln['ArtCodeBarre']);
             
-            if(!isset($_REQUEST['light'])){
+//            if(!isset($_REQUEST['light'])){
                 $this->getAllCat();
 
                 $this->traiteCat1("Gamme", $ln["ArtGammeEnu"]);
@@ -132,7 +135,7 @@ class importProd extends importCat {
                 $this->traiteCat1("Nature", $ln["ArtNatureEnu"]);
                 $this->traiteCat1("Collection", $ln["ArtCollectEnu"]);
                 $this->traiteCat1("Famille", $ln["ArtFamilleEnu"]);
-            }
+//            }
 
 
             if ($this->updatePrice) {

@@ -1366,9 +1366,12 @@ class Bimp_Commande extends BimpComm
             'on_form_submit' => 'function ($form, extra_data) { return onFactureFormSubmit($form, extra_data); }'
         ));
 
-        $html .= '<button class="btn btn-default" onclick="' . $onclick . '">';
-        $html .= BimpRender::renderIcon('fas_file-invoice-dollar', 'iconLeft') . 'Nouvelle facture anticipée';
-        $html .= '</button>';
+        
+        if ($this->isActionAllowed('createFacture') && $this->canSetAction('createFacture')) {
+            $html .= '<button class="btn btn-default" onclick="' . $onclick . '">';
+            $html .= BimpRender::renderIcon('fas_file-invoice-dollar', 'iconLeft') . 'Nouvelle facture anticipée';
+            $html .= '</button>';
+        }
 
         // Ajout ligne: 
         $line = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeLine');

@@ -336,6 +336,7 @@ class indexController extends BimpController
                         ),
                         'addon_right' => '<i class="fa fa-euro"></i>'
                     ))
+//                    'input' => BimpRender::renderCompteurCaisse()
                 );
 
                 $button = '<button id="cancelCloseCaisseButton" type="button" class="btn btn-danger btn-large buttonLeft">';

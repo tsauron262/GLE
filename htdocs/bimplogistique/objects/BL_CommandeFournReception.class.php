@@ -1558,8 +1558,11 @@ class BL_CommandeFournReception extends BimpObject
                     $line->set('receptions', $receptions);
                     $line->updateField('receptions', $receptions);
                 }
+                
+                $new_reception->onLinesChange();
+                $this->onLinesChange();
             }
-        }
+        }       
 
         return array(
             'errors'   => $errors,

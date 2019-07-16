@@ -7,9 +7,12 @@ primary: rowid
 icon: fas_box
 controller: product
 
+header_btn:
+    callback: getActionsButtons
+    
 header_list_name: default
 list_page_url: list
-    
+
 labels: 
     name: produit
     
@@ -285,21 +288,20 @@ fields:
         type: text
         dol_extra_field: 1
         
-#    best_buy_price:
-#        label: Meilleur prix d'achat
-#        type: money
-#        
-#    price_sell:
-#        label: Prix de vente
-#        type: money
-#        
-#    price_sell_min:
-#        label: Prix de vente min.
-#        type: money
-#        
-#    e:
-#        label: Limite stock pour alerte
-#        type: int
+    best_buy_price:
+        label: Meilleur prix d'achat
+        type: money
+        extra: 1
+        
+    seuil_stock_alerte:
+        label: Limite stock pour alerte
+        type: int
+        edit: 1
+
+    desiredstock:
+        label: Stock désiré optimal
+        type: int
+        edit: 1
         
 #    Champs non gérés
 #    ref_ext
@@ -406,6 +408,8 @@ fields_tables:
             - field: price_ttc
             - field: price_min_ttc
             - field: cost_price
+            - field: cur_pa_ht
+
        
     status: 
         title: Statuts
@@ -452,10 +456,12 @@ fields_tables:
         icon: fas_check-square
         rows:
             - field: pmp
-#            - field: ref
-#            - field: label
-#            - field: description
-#            - field: fk_product_type
+            - field: best_buy_price
+            - field: price
+            - field: price_min
+            - field: seuil_stock_alerte
+            - field: desiredstock
+
 
 views: 
     default: 

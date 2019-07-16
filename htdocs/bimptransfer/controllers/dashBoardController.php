@@ -32,7 +32,7 @@ class dashBoardController extends BimpController {
 //    $html .=$this->getButtonLink(Accéder inventaire" onclick="location.href=\'' . DOL_URL_ROOT . '/bimpequipment/manageequipment/viewInventoryMain.php?entrepot=' . fk_warehouse );';
         if ((int) $user->rights->bimpequipment->caisse->read === 1){
             $html .= $this->getButtonLink('Accéder caisse', '/bimpcaisse/?id_entrepot=' . $id_warehouse);
-            $html .= $this->getButtonLink('Mes Session de caisse', '//bimpcaisse/?fc=vendeur&id_entrepot=' . $id_warehouse);
+            $html .= $this->getButtonLink('Mes Sessions de caisse', '//bimpcaisse/?fc=vendeur&id_entrepot=' . $id_warehouse);
         }
         if ((int) $user->rights->bimpequipment->caisse_admin->read === 1)
             $html .= $this->getButtonLink('Accéder caisse admin', '/bimpcaisse/?fc=admin&id_entrepot=' . $id_warehouse);

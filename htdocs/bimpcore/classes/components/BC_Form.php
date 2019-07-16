@@ -26,7 +26,7 @@ class BC_Form extends BC_Panel
         'hidden'             => array('data_type' => 'bool', 'default' => 0),
         'required'           => array('data_type' => 'bool', 'default' => null),
         'edit'               => array('data_type' => 'bool', 'default' => 1),
-        'display_if'         => array('data_type' => 'array', 'compile' => 1, 'default' => null)
+        'display_if'         => array('data_type' => 'array', 'compile' => 1, 'default' => null),
     );
     public static $association_params = array(
         'display_if' => array('data_type' => 'array'),

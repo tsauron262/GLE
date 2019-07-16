@@ -63,12 +63,8 @@ class Bimp_FactureFournLine extends FournObjectLine
 
                         $warnings = array();
                         $equipment->update($warnings, true);
-                        
-                        // todo: checker correctif à faire côté commande / facture client. 
                     }
                 }
-            } else {
-                // todo: faire remonter le prix d'achat vers les commandes / factures clients liées. 
             }
         }
     }

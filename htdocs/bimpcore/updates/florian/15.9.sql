@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bs_sav` ADD `id_facture_avoir` int(11) NOT NULL DEFAULT 0 AFTER `id_facture_acompte`;

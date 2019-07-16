@@ -507,6 +507,14 @@ filters_panels:
                 type: value
                 input: 
                     type: search_product
+            commercial: 
+                custom: 1
+                field: id_commercial
+                label: Commercial
+                data_type: id_object
+                type: value
+                input: 
+                    type: search_user
             user_create: 
                 field: fk_user_author
             user_valid: 

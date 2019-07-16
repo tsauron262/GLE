@@ -33,7 +33,7 @@ if ($object == 'facture_fournisseur') {
     $nb_row_filter = 4; // remove type place and sector
 } else {
     $is_customer = true;
-    $nb_row_filter = 6;
+    $nb_row_filter = 7;
 }
 
 $arrayofcss = array('/includes/jquery/plugins/select2/select2.css', '/bimpstatsfacture/css/styles.css');
@@ -137,6 +137,20 @@ print '<tr><td>Etat (multiple)</td><td>
 
 <input id="etatAbandonner" name="etat" type="checkbox" value="' . $facstatic::STATUS_ABANDONED . '" >
 <label for="etatAbandonner">Abandonnées</label>
+
+</td></tr>
+
+<tr><td>Type (multiple)</td><td>
+
+<input id="typeFacture" name="type" type="checkbox" value="' . $facstatic::TYPE_STANDARD . '" checked>
+<label for="typeFacture">Facture</label>
+
+<input id="typeAvoir" name="type" type="checkbox" value="' . $facstatic::TYPE_CREDIT_NOTE . '" checked>
+<label for="typeAvoir">Avoir</label>
+
+<input id="typeAcompte" name="type" type="checkbox" value="' . $facstatic::TYPE_DEPOSIT . '">
+<label for="typeAcompte">Acompte</label>
+
 
 </td></tr>';
 //}

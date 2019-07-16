@@ -108,7 +108,7 @@ class Bimp_Commande extends BimpComm
                 }
                 return 0;
         }
-        return 1;
+        return parent::canSetAction($action);
     }
 
     public function isActionAllowed($action, &$errors = array())
@@ -186,6 +186,10 @@ class Bimp_Commande extends BimpComm
                     $errors[] = $invalide_error;
                     return 0;
                 }
+                if (!$this->isCancellable($errors)) {
+                    return 0;
+                }
+
                 return 1;
 
             case 'processLogitique':
@@ -243,6 +247,44 @@ class Bimp_Commande extends BimpComm
         }
 
         return 0;
+    }
+
+    public function isCancellable(&$errors = array())
+    {
+        if (!$this->isLoaded($errors)) {
+            return 0;
+        }
+
+        if ($this->isLogistiqueActive()) {
+            $hasShipped = false;
+            $hasInvoiced = false;
+
+            $lines = $this->getLines('not_text');
+
+            if (!empty($lines)) {
+                foreach ($lines as $line) {
+                    if ((float) $line->getShippedQty(null, false) > 0) {
+                        $hasShipped = true;
+                        break;
+                    }
+                }
+                foreach ($lines as $line) {
+                    if ((float) $line->getBilledQty(null, false) > 0) {
+                        $hasInvoiced = true;
+                        break;
+                    }
+                }
+            }
+
+            if ($hasShipped) {
+                $errors[] = 'Cette commande a été partiellement ou entièrement expédiée.';
+            }
+            if ($hasInvoiced) {
+                $errors[] = 'Cette commande a été partiellement ou entièrement facturée.';
+            }
+        }
+
+        return (count($errors) ? 0 : 1);
     }
 
     // Getters: 
@@ -1324,9 +1366,12 @@ class Bimp_Commande extends BimpComm
             'on_form_submit' => 'function ($form, extra_data) { return onFactureFormSubmit($form, extra_data); }'
         ));
 
-        $html .= '<button class="btn btn-default" onclick="' . $onclick . '">';
-        $html .= BimpRender::renderIcon('fas_file-invoice-dollar', 'iconLeft') . 'Nouvelle facture anticipée';
-        $html .= '</button>';
+        
+        if ($this->isActionAllowed('createFacture') && $this->canSetAction('createFacture')) {
+            $html .= '<button class="btn btn-default" onclick="' . $onclick . '">';
+            $html .= BimpRender::renderIcon('fas_file-invoice-dollar', 'iconLeft') . 'Nouvelle facture anticipée';
+            $html .= '</button>';
+        }
 
         // Ajout ligne: 
         $line = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeLine');
@@ -1403,7 +1448,8 @@ class Bimp_Commande extends BimpComm
                     'type'               => 1,
                     'id_commande_client' => (int) $this->id,
                     'status'             => array(
-                        'in' => array(0, 2)
+                        'operator' => '<',
+                        'value'    => 300
                     )
         ));
 
@@ -1554,6 +1600,39 @@ class Bimp_Commande extends BimpComm
                     $warnings[] = BimpTools::getMsgFromArray($line_errors, $msg);
                 }
             }
+        }
+
+        return $errors;
+    }
+
+    public function cancel(&$warnings = array())
+    {
+        $errors = array();
+
+        if ($this->isCancellable($errors)) {
+            if ($this->getData('fk_statut') === Commande::STATUS_VALIDATED) {
+                if ($this->dol_object->cancel() < 0) {
+                    $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object, null, null, $warnings), 'Echec de l\'annulation de la commande');
+                }
+            }
+
+            if (!count($errors)) {
+                $warnings = array_merge($warnings, $this->deleteReservations());
+
+                $lines = $this->getLines('not_text');
+                foreach ($lines as $line) {
+                    $line_warnings = $line->updateField('qty_modif', (float) ($line->qty * -1), null, true);
+                    if (count($line_warnings)) {
+                        $warnings[] = BimpTools::getMsgFromArray($line_warnings, 'Ligne n°' . $line->getData('position'));
+                    }
+                    $line->checkQties();
+                }
+            }
+
+            $this->updateField('status_forced', array(), null, true);
+            $this->checkLogistiqueStatus();
+            $this->checkShipmentStatus();
+            $this->checkInvoiceStatus();
         }
 
         return $errors;
@@ -2109,11 +2188,7 @@ class Bimp_Commande extends BimpComm
         $success = 'Commande annulée avec succès';
         $success_callback = 'bimp_reloadPage();';
 
-        if ($this->dol_object->cancel() < 0) {
-            $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object, null, null, $warnings), 'Echec de l\'annulation de la commande');
-        } else {
-            $warnings = array_merge($warnings, $this->deleteReservations());
-        }
+        $errors = $this->cancel($warnings);
 
         return array(
             'errors'           => $errors,

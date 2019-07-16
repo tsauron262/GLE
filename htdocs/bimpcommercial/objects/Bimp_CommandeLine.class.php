@@ -2305,6 +2305,25 @@ class Bimp_CommandeLine extends ObjectLine
         return $html;
     }
 
+    public function renderFournPriceButtons()
+    {
+        $html = '';
+
+        if ($this->canEditPrixAchat() && (int) $this->id_product) {
+            $html .= '<div class="buttonsContainer" style="margin: 15px 15px 5px 15px; text-align: right">';
+            $url = DOL_URL_ROOT . '/bimpcore/index.php?fc=product&id=' . $this->id_product . '&navtab=prix';
+            $html .= '<span class="btn btn-default" onclick="window.open(\'' . $url . '\')">';
+            $html .= BimpRender::renderIcon('fas_pencil-alt', 'iconLeft') . 'Editer les prix d\'achat';
+            $html .= '</span>';
+            $html .= '<span class="btn btn-default" onclick="reloadParentInput($(this), \'id_fourn_price\');">';
+            $html .= BimpRender::renderIcon('fas_redo', 'iconLeft') . 'Actualiser';
+            $html .= '</span>';
+            $html .= '</div>';
+        }
+
+        return $html;
+    }
+
     // Traitements réservations:
 
     public function checkReservations()
@@ -2327,101 +2346,72 @@ class Bimp_CommandeLine extends ObjectLine
                     $product = $this->getProduct();
                     if (!BimpObject::objectLoaded($product)) {
                         $errors[] = 'ID du produit absent';
-                    } elseif ((int) $product->getData('fk_product_type') === 0) {
-
+                    } else {
                         $reserved_qties = $this->getReservedQties();
-
-                        $qty = (int) ceil($this->getFullQty() - (float) $reserved_qties['total']);
-
-                        if ($qty > 0) {
-                            // On Vérifie l'existence d'une réservation au statut "à traiter" pour cette ligne de commande: 
-                            $reservation = BimpCache::findBimpObjectInstance('bimpreservation', 'BR_Reservation', array(
-                                        'type'                    => BR_Reservation::BR_RESERVATION_COMMANDE,
-                                        'id_commande_client'      => (int) $commande->id,
-                                        'id_commande_client_line' => (int) $this->id,
-                                        'status'                  => 0
-                                            ), true);
-
-                            if (BimpObject::objectLoaded($reservation)) {
-                                // Mise à jour des quantités de la réservation: 
-                                $qty += (int) $reservation->getData('qty');
-                                $reservation->set('qty', $qty);
-                                $res_warnings = array();
-                                $res_errors = $reservation->update($res_warnings, true);
-                                $res_errors = array_merge($res_errors, $res_warnings);
-
-                                if (count($res_errors)) {
-                                    $errors[] = BimpTools::getMsgFromArray($res_errors, 'Des erreurs sont survenues lors de la mise des quantités de la réservation pour la ligne n° ' . $this->getData('position'));
-                                }
-                            } else {
-                                // Création de la réservation
-                                $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
-
-                                $ref = (string) $this->getData('ref_reservations');
-
-                                $res_errors = $reservation->validateArray(array(
-                                    'ref'                     => $ref,
-                                    'type'                    => BR_Reservation::BR_RESERVATION_COMMANDE,
-                                    'id_commande_client'      => (int) $commande->id,
-                                    'id_commande_client_line' => (int) $this->id,
-                                    'id_entrepot'             => (int) $commande->getData('entrepot'),
-                                    'id_client'               => (int) $commande->getData('fk_soc'),
-                                    'id_commercial'           => (int) $commande->getData('fk_user_author'),
-                                    'id_product'              => (int) $product->id,
-                                    'id_equipment'            => 0,
-                                    'status'                  => 0,
-                                    'qty'                     => $qty,
-                                    'date_from'               => date('Y-m-d H:i:s')
-                                ));
-
-                                $res_warnings = array();
-                                if (!count($res_errors)) {
-                                    $res_errors = $reservation->create($res_warnings, true);
-                                    $res_errors = array_merge($res_errors, $res_warnings);
-                                }
-
-                                if (count($res_errors)) {
-                                    $errors[] = BimpTools::getMsgFromArray($res_errors, 'Des erreurs sont survenues lors de la création de la réservation pour la ligne n° ' . $this->getData('position'));
-                                } else {
-                                    if (!$ref) {
-                                        $this->updateField('ref_reservations', $reservation->getData('ref'));
-                                    }
-                                }
-                            }
-                        } elseif ($qty < 0) {
-                            $remain_qty = abs($qty);
-                            $reservation = BimpCache::findBimpObjectInstance('bimpreservation', 'BR_Reservation', array(
-                                        'type'                    => BR_Reservation::BR_RESERVATION_COMMANDE,
-                                        'id_commande_client'      => (int) $commande->id,
-                                        'id_commande_client_line' => (int) $this->id,
-                                        'status'                  => 0
-                                            ), true);
-
-                            if (BimpObject::objectLoaded($reservation)) {
-                                $new_qty = $reservation->getData('qty') - (int) $remain_qty;
-                                if ($new_qty < 0) {
-                                    $remain_qty = abs($new_qty);
-                                    $new_qty = 0;
-                                }
-
-                                $res_warnings = array();
-                                if ($new_qty > 0) {
-                                    // mise à jour de la réservation: 
-                                    $qty += (int) $reservation->getData('qty');
-                                    $reservation->set('qty', $qty);
-                                    $res_errors = $reservation->update($res_warnings, true);
-                                } else {
-                                    // Suppression de la réservation: 
-                                    $res_errors = $reservation->delete($res_warnings, true);
-                                }
-                            }
-
-                            if ($remain_qty > 0) {
+                        if ((int) $product->getData('fk_product_type') === 0) {
+                            $qty = (int) ceil($this->getFullQty() - (float) $reserved_qties['total']);
+                            if ($qty > 0) {
+                                // On Vérifie l'existence d'une réservation au statut "à traiter" pour cette ligne de commande: 
                                 $reservation = BimpCache::findBimpObjectInstance('bimpreservation', 'BR_Reservation', array(
                                             'type'                    => BR_Reservation::BR_RESERVATION_COMMANDE,
                                             'id_commande_client'      => (int) $commande->id,
                                             'id_commande_client_line' => (int) $this->id,
-                                            'status'                  => 2
+                                            'status'                  => 0
+                                                ), true);
+
+                                if (BimpObject::objectLoaded($reservation)) {
+                                    // Mise à jour des quantités de la réservation: 
+                                    $qty += (int) $reservation->getData('qty');
+                                    $reservation->set('qty', $qty);
+                                    $res_warnings = array();
+                                    $res_errors = $reservation->update($res_warnings, true);
+                                    $res_errors = array_merge($res_errors, $res_warnings);
+
+                                    if (count($res_errors)) {
+                                        $errors[] = BimpTools::getMsgFromArray($res_errors, 'Des erreurs sont survenues lors de la mise des quantités de la réservation pour la ligne n° ' . $this->getData('position'));
+                                    }
+                                } else {
+                                    // Création de la réservation
+                                    $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
+
+                                    $ref = (string) $this->getData('ref_reservations');
+
+                                    $res_errors = $reservation->validateArray(array(
+                                        'ref'                     => $ref,
+                                        'type'                    => BR_Reservation::BR_RESERVATION_COMMANDE,
+                                        'id_commande_client'      => (int) $commande->id,
+                                        'id_commande_client_line' => (int) $this->id,
+                                        'id_entrepot'             => (int) $commande->getData('entrepot'),
+                                        'id_client'               => (int) $commande->getData('fk_soc'),
+                                        'id_commercial'           => (int) $commande->getData('fk_user_author'),
+                                        'id_product'              => (int) $product->id,
+                                        'id_equipment'            => 0,
+                                        'status'                  => 0,
+                                        'qty'                     => $qty,
+                                        'date_from'               => date('Y-m-d H:i:s')
+                                    ));
+
+                                    $res_warnings = array();
+                                    if (!count($res_errors)) {
+                                        $res_errors = $reservation->create($res_warnings, true);
+                                        $res_errors = array_merge($res_errors, $res_warnings);
+                                    }
+
+                                    if (count($res_errors)) {
+                                        $errors[] = BimpTools::getMsgFromArray($res_errors, 'Des erreurs sont survenues lors de la création de la réservation pour la ligne n° ' . $this->getData('position'));
+                                    } else {
+                                        if (!$ref) {
+                                            $this->updateField('ref_reservations', $reservation->getData('ref'));
+                                        }
+                                    }
+                                }
+                            } elseif ($qty < 0) {
+                                $remain_qty = abs($qty);
+                                $reservation = BimpCache::findBimpObjectInstance('bimpreservation', 'BR_Reservation', array(
+                                            'type'                    => BR_Reservation::BR_RESERVATION_COMMANDE,
+                                            'id_commande_client'      => (int) $commande->id,
+                                            'id_commande_client_line' => (int) $this->id,
+                                            'status'                  => 0
                                                 ), true);
 
                                 if (BimpObject::objectLoaded($reservation)) {
@@ -2436,11 +2426,50 @@ class Bimp_CommandeLine extends ObjectLine
                                         // mise à jour de la réservation: 
                                         $qty += (int) $reservation->getData('qty');
                                         $reservation->set('qty', $qty);
-                                        $reservation->update($res_warnings, true);
+                                        $res_errors = $reservation->update($res_warnings, true);
                                     } else {
                                         // Suppression de la réservation: 
-                                        $reservation->delete($res_warnings, true);
+                                        $res_errors = $reservation->delete($res_warnings, true);
                                     }
+                                }
+
+                                if ($remain_qty > 0) {
+                                    $reservation = BimpCache::findBimpObjectInstance('bimpreservation', 'BR_Reservation', array(
+                                                'type'                    => BR_Reservation::BR_RESERVATION_COMMANDE,
+                                                'id_commande_client'      => (int) $commande->id,
+                                                'id_commande_client_line' => (int) $this->id,
+                                                'status'                  => 2
+                                                    ), true);
+
+                                    if (BimpObject::objectLoaded($reservation)) {
+                                        $new_qty = $reservation->getData('qty') - (int) $remain_qty;
+                                        if ($new_qty < 0) {
+                                            $remain_qty = abs($new_qty);
+                                            $new_qty = 0;
+                                        }
+
+                                        $res_warnings = array();
+                                        if ($new_qty > 0) {
+                                            // mise à jour de la réservation: 
+                                            $qty += (int) $reservation->getData('qty');
+                                            $reservation->set('qty', $qty);
+                                            $reservation->update($res_warnings, true);
+                                        } else {
+                                            // Suppression de la réservation: 
+                                            $reservation->delete($res_warnings, true);
+                                        }
+                                    }
+                                }
+                            }
+                        } else {
+                            // Service : on supprime toutes les réservations éventuelles: 
+                            if ((float) $reserved_qties['total'] > 0) {
+                                foreach (BimpCache::getBimpObjectObjects('bimpreservation', 'BR_Reservation', array(
+                                    'type'                    => BR_Reservation::BR_RESERVATION_COMMANDE,
+                                    'id_commande_client'      => (int) $commande->id,
+                                    'id_commande_client_line' => (int) $this->id,
+                                )) as $res) {
+                                    $res->delete($res_warnings, true);
                                 }
                             }
                         }
@@ -3874,7 +3903,7 @@ class Bimp_CommandeLine extends ObjectLine
                         'linked_id_object'   => (int) $this->id,
                         'linked_object_name' => 'commande_line'
                     ));
-                    
+
                     $line->desc = $this->desc;
                     $line->id_product = (int) $product->id;
                     $line->qty = (int) $qty;

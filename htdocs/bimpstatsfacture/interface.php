@@ -19,7 +19,7 @@ $staticSFF = new BimpStatsFactureFournisseur($db);
 switch (GETPOST('action')) {
     case 'getFactures': {
             if (GETPOST('is_customer') == 'true') {
-                $factures = $staticSF->getFactures($user, GETPOST('dateStart'), GETPOST('dateEnd'), GETPOST('types'), GETPOST('centres'), GETPOST('statut'), GETPOST('sortBy'), GETPOST('taxes'), GETPOST('etats'), GETPOST('format'), GETPOST('nomFichier'), GETPOST('typePlace'));
+                $factures = $staticSF->getFactures($user, GETPOST('dateStart'), GETPOST('dateEnd'), GETPOST('types'), GETPOST('centres'), GETPOST('statut'), GETPOST('sortBy'), GETPOST('taxes'), GETPOST('etats'), GETPOST('type'), GETPOST('format'), GETPOST('nomFichier'), GETPOST('typePlace'));
                 echo json_encode($factures);
             } else {    // facture fournisseur
                 echo json_encode($staticSFF->getFactures(GETPOST('dateStart'), GETPOST('dateEnd'), GETPOST('centres'), GETPOST('statut'), GETPOST('sortBy'), GETPOST('taxes'), GETPOST('etats'), GETPOST('format'), GETPOST('nomFichier')));

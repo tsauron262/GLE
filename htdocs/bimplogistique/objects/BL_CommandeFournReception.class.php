@@ -1288,19 +1288,31 @@ class BL_CommandeFournReception extends BimpObject
 
     public function onLinesChange()
     {
+        global $user;
+
         $errors = array();
         if ($this->isLoaded()) {
             $total_ht = $this->getTotalHT();
             $total_ttc = $this->getTotalTTC();
 
+            if ($user->id === 1) {
+                echo $this->id . ': ' . $total_ht . ' , ' . $total_ttc . '<br/>';
+            }
+
             $update = false;
 
             if ((float) $this->getInitData('total_ht') !== $total_ht) {
+                if ($user->id === 1) {
+                    echo 'up <br/>';
+                }
                 $this->set('total_ht', $total_ht);
                 $update = true;
             }
 
             if ((float) $this->getInitData('total_ttc') !== $total_ttc) {
+                if ($user->id === 1) {
+                    echo 'up <br/>';
+                }
                 $this->set('total_ttc', $total_ttc);
                 $update = true;
             }
@@ -1558,11 +1570,11 @@ class BL_CommandeFournReception extends BimpObject
                     $line->set('receptions', $receptions);
                     $line->updateField('receptions', $receptions);
                 }
-                
+
                 $new_reception->onLinesChange();
                 $this->onLinesChange();
             }
-        }       
+        }
 
         return array(
             'errors'   => $errors,

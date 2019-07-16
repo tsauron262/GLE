@@ -4033,6 +4033,15 @@ class BimpObject extends BimpCache
 
     public function canSetAction($action)
     {
+        switch ($action) {
+            case 'createFacture':
+                $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
+                return $facture->canCreate();
+
+            case 'editFacture':
+                $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
+                return $facture->canEdit();
+        }
         return 1;
     }
 

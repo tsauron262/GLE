@@ -120,9 +120,7 @@ forms:
     
     default: 
         msgs: 
-            - content: 
-                callback: renderCreateWarning
-              type: warning
+            callback: renderCreateWarning
         rows:
             - custom: 1
               lable: Origine

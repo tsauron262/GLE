@@ -364,6 +364,13 @@ class BimpComm extends BimpDolObject
                     return $product->getRef();
                 }
                 break;
+                
+            case 'id_commercial':
+                $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $value);
+                if (BimpObject::ObjectLoaded($user)) {
+                    return $user->dol_object->getFullName();
+                }
+                break;
         }
 
         return parent::getCustomFilterValueLabel($field_name, $value);
@@ -384,7 +391,28 @@ class BimpComm extends BimpDolObject
                     'in' => $values
                 );
                 break;
+
+            case 'id_commercial':
+                $joins['elemcont'] = array(
+                    'table' => 'element_contact',
+                    'on'    => 'elemcont.element_id = a.rowid',
+                    'alias' => 'elemcont'
+                );
+                $joins['typecont'] = array(
+                    'table' => 'c_type_contact',
+                    'on'    => 'elemcont.fk_c_type_contact = typecont.rowid',
+                    'alias' => 'typecont'
+                );
+                $filters['typecont.element'] = static::$dol_module;
+                $filters['typecont.source'] = 'internal';
+                $filters['typecont.code'] = 'SALESREPFOLL';
+                $filters['elemcont.fk_socpeople'] = array(
+                    'in' => $values
+                );
+                break;
         }
+
+        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors);
     }
 
     // Getters données: 
@@ -962,7 +990,7 @@ class BimpComm extends BimpDolObject
 
         return '';
     }
-    
+
     public function getFileUrl($file_name)
     {
         $dir = $this->getFilesDir();
@@ -3013,10 +3041,7 @@ class BimpComm extends BimpDolObject
 
         return $errors;
     }
-    
-    
-    
-    
+
     public function getCommercialSearchFilters(&$filters, $value, &$joins = array(), $main_alias = 'a')
     {
         if ((int) $value) {
@@ -3037,8 +3062,6 @@ class BimpComm extends BimpDolObject
             );
         }
     }
-    
-    
 //    public function displayData($field) {
 //        if($field == "marge"){
 //            $marge = parent::getData($field);

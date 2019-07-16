@@ -944,5 +944,261 @@ class Bimp_Product extends BimpObject
         }
         return $html;
     }
+
+
+
+     public function insertExtraFields()
+    {
+            return array();
+    }
+
+    public function updateExtraFields()
+    {
+            return array();
+    }    
     
+        public function fetchExtraFields()
+    {
+            return array('best_buy_price' => $this->getBestBuyPrice());
+    }
+    
+    public function getBestBuyPrice() {
+
+        $sql  = 'SELECT price FROM `' . MAIN_DB_PREFIX . 'product_fournisseur_price`';
+        $sql .= ' WHERE fk_product=' . $this->getData('id');
+        $sql .= ' GROUP BY fk_product';
+        $sql .= ' HAVING(MIN(PRICE))';
+        $rows = $this->db->executeS($sql);
+
+        if (!empty($rows)) {
+            return $rows[0]->price;
+        }
+        return 00.00;
+    }
+    
+    public function getActionsButtons() {
+        global $user;
+        $buttons = array();
+        if (!$this->isLoaded() or (int) $user->admin != 1)
+            return $buttons;
+
+        if($this->getData('validate') == 0) {
+            $buttons[] = array(
+                'label' => 'Valider',
+                'icon' => 'fas_check-circle',
+                'onclick' => $this->getJsActionOnclick('validate', array(), array(
+    //                'success_callback' => 'function(result) {}',
+                ))
+            );
+        }
+            $buttons[] = array(
+                'label' => 'Fusionner',
+                'icon' => 'link',
+                'onclick' => $this->getJsActionOnclick('merge', array(), array(
+    //                'success_callback' => 'function(result) {}',
+                ))
+            );
+//        }
+        return $buttons;
+    }
+    
+    public function canEditField($field_name) {
+        global $user;
+        if ($field_name == 'validate' and (int) $user->admin != 1)
+            return 0;
+
+        return parent::canEditField($field_name);
+    }
+    
+    public function actionValidate($data = array(), &$success = '') {
+        $errors = $this->validateProduct();
+        return $errors;
+    }
+    
+    public function validateProduct() {
+        
+        $errors = array();
+        if(!((float) $this->getData('price') > 0))
+            $errors[] = "Merci de renseigner le champs \"Prix d'achat\".";
+        
+        if((int) $this->getData('fk_product_type') == 1 and
+           (int) $this->getData('serialisable') == 1)
+            $errors[] = "Un service ne peut pas être sérialisé.";
+        
+        if(sizeof($errors) > 0)
+            return $errors;
+        
+        $cur_pa_ht = $this->getCurrentPaHt(null, true);
+        $this->updateField('cur_pa_ht', $cur_pa_ht);
+
+        if(sizeof($errors) == 0)
+            $this->updateField('validate', 1);
+                
+        require_once DOL_DOCUMENT_ROOT . '/synopsistools/SynDiversFunction.php';
+
+        // COMMAND
+        $commandes_c = $this->getCommandes();
+        foreach($commandes_c as $commande) {
+            $email_sent = false;
+            $list_contact = $commande->liste_contact(-1, 'internal');
+            
+            // Search responsible
+            foreach ($list_contact as $contact) {
+                if($contact['code'] == 'SALESREPFOLL' and ! $email_sent) {
+                    $errors = array_merge($errors, $this->sendEmailCommande($commande, $contact['email']));
+                    $email_sent = true;
+                    break;
+                }
+            }
+            
+            // Search signatory
+            if (! $email_sent) {
+                foreach ($list_contact as $contact) {
+                    $errors = array_merge($errors, $this->sendEmailCommande($commande, $contact['email']));
+                    $email_sent = true;
+                    break;
+                }
+            }
+
+            // Use main commercial Franck PINERI
+            if (! $email_sent) {
+                require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
+                $user = new User($this->db->db);
+                $user->fetch((int) 62);
+                $errors = array_merge($errors, $this->sendEmailCommande($commande, $user->email));
+                $email_sent = true;
+                continue;
+            }
+        }
+
+        // PROPALS
+        $propals = $this->getPropals();
+        foreach($propals as $propal) {
+            $email_sent = false;
+            $list_contact = $propal->liste_contact(-1, 'internal');
+           
+            // Search responsible
+            foreach ($list_contact as $contact) {
+                if($contact['code'] == 'SALESREPFOLL' and ! $email_sent) {
+                    $errors = array_merge($errors, $this->sendEmailPropal($propal, $contact['email']));
+                    $email_sent = true;
+                    break;
+                }
+            }
+            
+            // Search signatory
+            if (! $email_sent) {
+                foreach ($list_contact as $contact) {
+                    $errors = array_merge($errors, $this->sendEmailPropal($propal, $contact['email']));
+                    $email_sent = true;
+                    break;
+                }
+            }
+            
+            // Use main commercial Franck PINERI
+            if (! $email_sent) {
+                require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
+                $user = new User($this->db->db);
+                $user->fetch((int) 62);
+                $errors = array_merge($errors, $this->sendEmailCommande($commande, $user->email));
+                $email_sent = true;
+                continue;
+            }
+        }
+        
+        return $errors;
+    }
+    
+    private function sendEmailCommande($commande, $to) {
+        $errors = array();
+        $subject = 'Produit validé pour la commande ' . $commande->ref;
+        $from = 'gle@bimp.fr';
+        $msg = 'Bonjour,<br/>Le produit ' . $this->getData('ref') . ' a été validé, la commande ' . $commande->getNomUrl();
+        $msg .= ' est peut-être validable.';
+        if (!mailSyn2($subject, $to, $from, $msg))
+            $errors[] = "Envoi email vers " . $to . "impossible.";
+        return $errors;
+    }
+    
+    private function sendEmailPropal($propal, $to) {
+        $errors = array();
+        $subject = 'Produit validé pour la propale ' . $propal->ref;
+        $from = 'gle@bimp.fr';
+        $msg = 'Bonjour,<br/>Le produit ' . $this->getData('ref') . ' a été validé, la propale ' . $propal->getNomUrl();
+        $msg .= ' est peut-être validable.';
+        if (!mailSyn2($subject, $to, $from, $msg))
+            $errors[] = "Envoi email vers " . $to . "impossible.";
+        return $errors;
+    }
+    
+    public function getCommandes(){
+        require_once DOL_DOCUMENT_ROOT . '/commande/class/commande.class.php';
+        $commandes = array();
+        
+        $sql = 'SELECT DISTINCT(c.rowid) as id';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'commande as c';
+        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commandedet as cd ON c.rowid=cd.fk_commande';
+        $sql .= ' WHERE cd.fk_product=' . $this->getData('id');
+        
+        $result = $this->db->db->query($sql);
+        if ($result and $this->db->db->num_rows($result) > 0) {
+            while ($result and $obj =  $this->db->db->fetch_object($result)) {
+                $commande = new Commande($this->db->db);
+                $commande->fetch($obj->id);
+                $commandes[] = $commande;
+            }
+        }
+        return $commandes;
+    }
+    
+//    public function getPropals(){
+//        require_once DOL_DOCUMENT_ROOT . '/comm/propal/class/propal.class.php';
+//        $propals = array();
+//        
+//        $sql = 'SELECT DISTINCT(p.rowid) as id';
+//        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'propal as p';
+//        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'propaldet as pd ON p.rowid=pd.fk_propal';
+//        $sql .= ' WHERE pd.fk_product=' . $this->getData('id');
+//        
+//        $result = $this->db->db->query($sql);
+//        if ($result and $this->db->db->num_rows($result) > 0) {
+//            while ($result and $obj =  $this->db->db->fetch_object($result)) {
+//                $propal = new Propal($this->db->db);
+//                $propal->fetch($obj->id);
+//                $propals[] = $propal;
+//            }
+//        }
+//        return $propals;
+//    }
+//
+//    
+//    
+//    public function actionMerge($data = array(), &$success = '') {
+//        $errors = $this->merge($data);
+//        return $errors;
+//    }
+//    
+//    private function merge($data) {
+//        // TODO extraction de l'id product avec lequel merge
+//        
+//        $id_prod_ext = 0;
+//        
+//        // Commande
+//        $commandedet = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeLine');
+//        $filtre = array('fk_product' => $id_prod_ext);
+//        $com_lines = $commandedet->getList($filtre, null, null, 'id', 'desc', 'array', array('id'));
+//        
+//        foreach($com_lines as $id_line) {
+//            
+//        }
+//        
+//        // Propal
+//        $propaldet = BimpObject::getInstance('bimpcommercial', 'Bimp_PropalLine');
+//        $filtre = array('fk_product' => $id_prod_ext);
+//        $prop_lines = $propaldet->getList($filtre, null, null, 'id', 'desc', 'array', array('id'));
+//        
+//        foreach($prop_lines as $id_line) {
+//            
+//        }
+//    }
 }

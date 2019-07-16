@@ -986,9 +986,9 @@ class Bimp_Facture extends BimpComm
                 if ($absolute_creditnote > 0) {
                     $can_view_discounts = true;
                     $html .= '<br/>';
-                    if ($type === Facture::TYPE_CREDIT_NOTE) {
-//                        $html .= '<i class="' . BimpRender::renderIconClass('question-circle') . ' iconLeft objectIcon bs-popover" ';
-//                        $html .= BimpRender::renderPopoverData($langs->trans("CreditNoteDepositUse"), 'top', 'true') . ' style="margin-left: 0"></i>';
+                    if ($status !== Facture::STATUS_VALIDATED || $type === Facture::TYPE_CREDIT_NOTE) {
+                        $html .= '<i class="' . BimpRender::renderIconClass('question-circle') . ' iconLeft objectIcon bs-popover" ';
+                        $html .= BimpRender::renderPopoverData($langs->trans("CreditNoteDepositUse"), 'top', 'true') . ' style="margin-left: 0"></i>';
                         $html .= $langs->trans("CompanyHasCreditNote", price($absolute_creditnote), $langs->transnoentities("Currency" . $conf->currency));
                     } else {
                         $html .= $langs->trans("CompanyHasCreditNote", price($absolute_creditnote), $langs->transnoentities("Currency" . $conf->currency));
@@ -1001,7 +1001,7 @@ class Bimp_Facture extends BimpComm
                     $html .= '<br/>';
                     $html .= $langs->trans("CompanyHasNoAbsoluteDiscount");
 
-                    if (!in_array($type, array(Facture::TYPE_CREDIT_NOTE, Facture::TYPE_DEPOSIT))) {
+                    if ($status === Facture::STATUS_DRAFT && !in_array($type, array(Facture::TYPE_CREDIT_NOTE, Facture::TYPE_DEPOSIT))) {
                         $can_add_credit_note = true;
                     }
                 }

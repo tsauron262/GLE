@@ -1254,8 +1254,9 @@ class ObjectLine extends BimpObject
                         if (!BimpObject::objectLoaded($discount)) {
                             $html .= BimpRender::renderAlerts('La remise d\'ID ' . $this->id_remise_except) . ' n\'existe plus';
                         } else {
+                            $desc = str_replace('Acompte Acompte', 'Acompte', $desc);
                             $html .= 'Remise ' . $discount->getNomUrl(1);
-                            $html .= ' (' . $desc . ')';
+                            $html .= ' ' . $desc;
                         }
                     } else {
                         $product = $this->getProduct();
@@ -3662,6 +3663,10 @@ class ObjectLine extends BimpObject
                                 $errors[] = 'La date de début doit être inférieure à la date de fin';
                             }
                         }
+                    }
+                    
+                    if ((float) $this->pu_ht < 0 && $this->pa_ht > 0) {
+                        $this->pa_ht *= -1;
                     }
 
                     foreach (static::$product_line_data as $field => $params) {

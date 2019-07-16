@@ -1295,24 +1295,24 @@ class BL_CommandeFournReception extends BimpObject
             $total_ht = $this->getTotalHT();
             $total_ttc = $this->getTotalTTC();
 
-            if ((int) $user->id === 1) {
-                echo $this->getData('num_reception') . ': ' . $total_ht . ' , ' . $total_ttc . '<br/>';
-            }
+//            if ((int) $user->id === 1) {
+//                echo $this->getData('num_reception') . ': ' . $total_ht . ' , ' . $total_ttc . '<br/>';
+//            }
 
             $update = false;
 
             if ((float) $this->getInitData('total_ht') !== $total_ht) {
-                if ((int) $user->id === 1) {
-                    echo 'up <br/>';
-                }
+//                if ((int) $user->id === 1) {
+//                    echo 'up <br/>';
+//                }
                 $this->set('total_ht', $total_ht);
                 $update = true;
             }
 
             if ((float) $this->getInitData('total_ttc') !== $total_ttc) {
-                if ((int) $user->id === 1) {
-                    echo 'up <br/>';
-                }
+//                if ((int) $user->id === 1) {
+//                    echo 'up <br/>';
+//                }
                 $this->set('total_ttc', $total_ttc);
                 $update = true;
             }
@@ -1320,16 +1320,16 @@ class BL_CommandeFournReception extends BimpObject
             if ($update) {
                 $warnings = array();
                 $errors = $this->update($warnings, true);
-                if (count($errors)) {
-                    echo 'errors: <pre>';
-                    print_r($errors);
-                    echo '</pre>';
-                }
-                if (count($warnings)) {
-                    echo 'warnings: <pre>';
-                    print_r($warnings);
-                    echo '</pre>';
-                }
+//                if (count($errors)) {
+//                    echo 'errors: <pre>';
+//                    print_r($errors);
+//                    echo '</pre>';
+//                }
+//                if (count($warnings)) {
+//                    echo 'warnings: <pre>';
+//                    print_r($warnings);
+//                    echo '</pre>';
+//                }
             }
         } else {
             $errors[] = 'ID de l\'expédition absent';

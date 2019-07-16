@@ -1295,14 +1295,14 @@ class BL_CommandeFournReception extends BimpObject
             $total_ht = $this->getTotalHT();
             $total_ttc = $this->getTotalTTC();
 
-            if ($user->id === 1) {
+            if ((int) $user->id === 1) {
                 echo $this->id . ': ' . $total_ht . ' , ' . $total_ttc . '<br/>';
             }
 
             $update = false;
 
             if ((float) $this->getInitData('total_ht') !== $total_ht) {
-                if ($user->id === 1) {
+                if ((int) $user->id === 1) {
                     echo 'up <br/>';
                 }
                 $this->set('total_ht', $total_ht);
@@ -1310,7 +1310,7 @@ class BL_CommandeFournReception extends BimpObject
             }
 
             if ((float) $this->getInitData('total_ttc') !== $total_ttc) {
-                if ($user->id === 1) {
+                if ((int) $user->id === 1) {
                     echo 'up <br/>';
                 }
                 $this->set('total_ttc', $total_ttc);

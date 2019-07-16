@@ -1029,24 +1029,24 @@ class Bimp_Facture extends BimpComm
                         $html .= '</a>';
                     }
 
-                    if ($can_add_credit_note) {
-                        $values = array(
-                            'fields' => array(
-                                'fk_soc'     => (int) $this->getData('fk_soc'),
-                                'ref_client' => $this->getData('ref_client'),
-                                'type'       => Facture::TYPE_CREDIT_NOTE,
-                                'fk_account' => (int) $this->getData('fk_account'),
-                                'entrepot'   => (int) $this->getData('entrepot'),
-                                'centre'     => $this->getData('centre'),
-                                'ef_type'    => $this->getData('ef_type')
-                            )
-                        );
-
-                        $onclick = $this->getJsLoadModalForm('default', 'Créer un avoir', $values, '', 'redirect');
-                        $html .= '<button class="btn btn-default" onclick="' . $onclick . '">';
-                        $html .= '<i class="' . BimpRender::renderIconClass('plus-circle') . ' iconLeft"></i>Créer un avoir';
-                        $html .= '</button>';
-                    }
+//                    if ($can_add_credit_note) {
+//                        $values = array(
+//                            'fields' => array(
+//                                'fk_soc'     => (int) $this->getData('fk_soc'),
+//                                'ref_client' => $this->getData('ref_client'),
+//                                'type'       => Facture::TYPE_CREDIT_NOTE,
+//                                'fk_account' => (int) $this->getData('fk_account'),
+//                                'entrepot'   => (int) $this->getData('entrepot'),
+//                                'centre'     => $this->getData('centre'),
+//                                'ef_type'    => $this->getData('ef_type')
+//                            )
+//                        );
+//
+//                        $onclick = $this->getJsLoadModalForm('default', 'Créer un avoir', $values, '', 'redirect');
+//                        $html .= '<button class="btn btn-default" onclick="' . $onclick . '">';
+//                        $html .= '<i class="' . BimpRender::renderIconClass('plus-circle') . ' iconLeft"></i>Créer un avoir';
+//                        $html .= '</button>';
+//                    }
 
                     $html .= '</div>';
                 }
@@ -1245,6 +1245,22 @@ class Bimp_Facture extends BimpComm
                 $html .= '<td>' . BimpTools::displayMoneyValue(-$total_paid, 'EUR') . '</td>';
                 $html .= '<td></td>';
                 $html .= '</tr>';
+                
+                // Converti en remise: 
+                BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
+                $discount = new DiscountAbsolute($this->db->db);
+                $discount->fetch(0, $this->id);
+                if (BimpObject::objectLoaded($discount)) {
+                    $remainToPay_final = 0;
+                    $html .= '<tr>';
+                    $html .= '<td style="text-align: right;">';
+                    $html .= '<strong>Converti en </strong>' . $discount->getNomUrl(1, 'discount');
+                    $html .= '</td>';
+                    $html .= '<td>';
+                    $html .= BimpTools::displayMoneyValue($discount->amount_ttc);
+                    $html .= '</td>';
+                    $html .= '</tr>';
+                }
 
                 $html .= '<tr>';
                 $html .= '<td style="text-align: right;"><strong>' . $langs->trans("Billed") . '</strong> : </td>';
@@ -1511,10 +1527,15 @@ class Bimp_Facture extends BimpComm
             $html .= '<span class="bold">impérativement passer par le processus de commande.</span>';
             $html .= '</p>';
 
-            return $html;
+            return array(
+                array(
+                    'content' => $html,
+                    'type' => 'warning'
+                )
+            );
         }
 
-        return '';
+        return array();
     }
 
     // Traitements: 
@@ -1528,6 +1549,7 @@ class Bimp_Facture extends BimpComm
         if (in_array($type, array(Facture::TYPE_STANDARD, Facture::TYPE_CREDIT_NOTE))) {
 
             // Pour être sûr d\'être à jour:
+            $this->checkLines();
             $this->dol_object->fetch_lines();
             $this->dol_object->update_price();
             $this->dol_object->fetch((int) $this->id);
@@ -1538,15 +1560,15 @@ class Bimp_Facture extends BimpComm
             $total_ttc = (float) $this->getTotalTtc();
 
             $has_amounts_lines = false;
-            
+
             foreach ($lines as $line) {
                 // suppr partie "pa_ht" dès que correctif pa facture en place
-                if (round((float) $line->getTotalTTC(), 2) || round((float) $line->pa_ht, 2))  {
+                if (round((float) $line->getTotalTTC(), 2) || round((float) $line->pa_ht, 2)) {
                     $has_amounts_lines = true;
                     break;
                 }
             }
-            
+
             if (!round($total_ttc, 2) && !$has_amounts_lines) {
                 $errors[] = 'Aucune ligne avec montant non nul ajoutée à cette facture';
                 return $errors;
@@ -1622,12 +1644,13 @@ class Bimp_Facture extends BimpComm
 
             // transformation des lignes de remise excepts en paiements: 
 
-            if (in_array((int) $this->getData('type'), array(Facture::TYPE_STANDARD, Facture::TYPE_CREDIT_NOTE))) {
+            if (in_array((int) $this->getData('type'), array(Facture::TYPE_STANDARD))) { //, Facture::TYPE_CREDIT_NOTE))) {
                 $lines = $this->getLines();
 
                 BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
 
                 $done = 0;
+
                 foreach ($lines as $line) {
                     if ((int) $line->id_remise_except) {
                         $discount = new DiscountAbsolute($this->db->db);
@@ -1847,8 +1870,8 @@ class Bimp_Facture extends BimpComm
         $avoir->dol_object->linked_objects = $this->dol_object->linked_objects;
 
         $errors = $avoir->create();
-        
-        
+
+
         if ($avoir->dol_object->copy_linked_contact($this->dol_object, 'internal') < 0) {
             $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($avoir->dol_object), 'Echec de la copie des contacts internes');
         }
@@ -1915,7 +1938,7 @@ class Bimp_Facture extends BimpComm
         // Pour être sûr d'être à jour dans les données: 
         $this->fetch($this->id);
         $avoir->fetch($avoir->id);
-        
+
         global $idAvoirFact;
         $idAvoirFact = $avoir->id;
 
@@ -1996,19 +2019,77 @@ class Bimp_Facture extends BimpComm
         $db = $this->db->db;
 
         $this->dol_object->fetch_thirdparty();
+        $remain_to_pay = (float) $this->getRemainToPay();
 
-        // Check if there is already a discount (protection to avoid duplicate creation when resubmit post)
-        $discountcheck = new DiscountAbsolute($db);
-        $result = $discountcheck->fetch(0, $this->dol_object->id);
+        if (!in_array($this->dol_object->type, array(Facture::TYPE_DEPOSIT, Facture::TYPE_CREDIT_NOTE, Facture::TYPE_STANDARD))) {
+            $errors[] = 'Les ' . $this->getLabel('name_plur') . ' ne peuvent pas être converti' . $this->e() . 's en remise';
+        } else {
+            // On vérifie si une remise n'a pas déjà été créée: 
+            $discountcheck = new DiscountAbsolute($db);
+            $result = $discountcheck->fetch(0, $this->dol_object->id);
+            if (!empty($discountcheck->id)) {
+                $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' a déjà été converti' . $this->e() . ' en remise';
+            } else {
+                if ($this->dol_object->type == Facture::TYPE_DEPOSIT && $this->dol_object->paye != 1) {
+                    $errors[] = 'Cet acompte ne peut pas être converti en remise car il n\'a pas été entièrement payé';
+                }
 
-        $canconvert = 0;
-        if ($this->dol_object->type == Facture::TYPE_DEPOSIT && $this->dol_object->paye == 1 && empty($discountcheck->id))
-            $canconvert = 1; // we can convert deposit into discount if deposit is payed completely and not already converted (see real condition into condition used to show button converttoreduc)
-        if (($this->dol_object->type == Facture::TYPE_CREDIT_NOTE || $this->dol_object->type == Facture::TYPE_STANDARD) && $this->dol_object->paye == 0 && empty($discountcheck->id))
-            $canconvert = 1; // we can convert credit note into discount if credit note is not payed back and not already converted and amount of payment is 0 (see real condition into condition used to show button converttoreduc)
-        if ($canconvert) {
-            $db->begin();
+                if (in_array($this->dol_object->type, array(Facture::TYPE_CREDIT_NOTE, Facture::TYPE_STANDARD))) {
+                    if ($this->dol_object->paye != 0) {
+                        $msg = BimpTools::ucfirst($this->getLabel('this')) . ' ne peut pas être converti' . $this->e() . ' en remise car ';
+                        if ($this->isLabelFemale()) {
+                            $msg .= ' elle a été entièrement payée';
+                        } else {
+                            $msg .= ' il a été entièrement payé';
+                        }
+                        $errors[] = $msg;
+                    }
+                    if ($remain_to_pay >= 0) {
+                        $errors[] = 'Aucun montant disponible pour conversion en remise';
+                    }
+                }
+            }
+        }
 
+
+        if (count($errors)) {
+            return $errors;
+        }
+
+        $db->begin();
+
+        $discount = new DiscountAbsolute($db);
+        if ($this->dol_object->type == Facture::TYPE_CREDIT_NOTE)
+            $discount->description = '(CREDIT_NOTE)';
+        elseif ($this->dol_object->type == Facture::TYPE_DEPOSIT)
+            $discount->description = '(DEPOSIT)';
+        elseif ($this->dol_object->type == Facture::TYPE_STANDARD || $this->dol_object->type == Facture::TYPE_REPLACEMENT || $this->dol_object->type == Facture::TYPE_SITUATION)
+            $discount->description = '(EXCESS RECEIVED)';
+        
+        $discount->fk_soc = $this->dol_object->socid;
+        $discount->fk_facture_source = $this->dol_object->id;
+
+        if ($this->dol_object->type == Facture::TYPE_STANDARD || $this->dol_object->type == Facture::TYPE_CREDIT_NOTE) {
+            echo '$montant : ' . $remain_to_pay.'<br/>';
+            $discount->amount_ht = $discount->amount_ttc = abs($remain_to_pay);
+            $discount->amount_tva = 0;
+            $discount->tva_tx = 0;
+
+            $result = $discount->create($user);
+            if ($result < 0) {
+                $msg = 'Echec de la création de la remise client';
+                $sqlError = $db->lasterror();
+                if ($sqlError) {
+                    $msg .= ' - ' . $sqlError;
+                }
+                $errors[] = $msg;
+            }
+        } else {
+            echo 'ka';
+        }
+        
+        if ($this->dol_object->type == Facture::TYPE_DEPOSIT) {
+            // Insert one discount by VAT rate category
             $amount_ht = $amount_tva = $amount_ttc = array();
 
             // Loop on each vat rate
@@ -2022,38 +2103,11 @@ class Bimp_Facture extends BimpComm
                 }
             }
 
-            // Insert one discount by VAT rate category
-            $discount = new DiscountAbsolute($db);
-            if ($this->dol_object->type == Facture::TYPE_CREDIT_NOTE)
-                $discount->description = '(CREDIT_NOTE)';
-            elseif ($this->dol_object->type == Facture::TYPE_DEPOSIT)
-                $discount->description = '(DEPOSIT)';
-            elseif ($this->dol_object->type == Facture::TYPE_STANDARD || $this->dol_object->type == Facture::TYPE_REPLACEMENT || $this->dol_object->type == Facture::TYPE_SITUATION)
-                $discount->description = '(EXCESS RECEIVED)';
-            else {
-                return array($langs->trans('CantConvertToReducAnInvoiceOfThisType'));
-            }
-
-            $discount->fk_soc = $this->dol_object->socid;
-            $discount->fk_facture_source = $this->dol_object->id;
-
-            if ($this->dol_object->type == Facture::TYPE_STANDARD || $this->dol_object->type == Facture::TYPE_REPLACEMENT || $this->dol_object->type == Facture::TYPE_SITUATION) {
-                // If we're on a standard invoice, we have to get excess received to create a discount in TTC without VAT
-                $sql = 'SELECT SUM(pf.amount) as total_paiements
-						FROM llx_c_paiement as c, llx_paiement_facture as pf, llx_paiement as p
-						WHERE pf.fk_facture = ' . $this->dol_object->id . ' AND p.fk_paiement = c.id AND pf.fk_paiement = p.rowid';
-
-                $resql = $db->query($sql);
-                if (!$resql) {
-                    return array($db->lasterror());
-                }
-
-                $res = $db->fetch_object($resql);
-                $total_paiements = $res->total_paiements;
-
-                $discount->amount_ht = $discount->amount_ttc = $total_paiements - $this->dol_object->total_ttc;
-                $discount->amount_tva = 0;
-                $discount->tva_tx = 0;
+            foreach ($amount_ht as $tva_tx => $xxx) {
+                $discount->amount_ht = abs($amount_ht[$tva_tx]);
+                $discount->amount_tva = abs($amount_tva[$tva_tx]);
+                $discount->amount_ttc = abs($amount_ttc[$tva_tx]);
+                $discount->tva_tx = abs($tva_tx);
 
                 $result = $discount->create($user);
                 if ($result < 0) {
@@ -2063,39 +2117,21 @@ class Bimp_Facture extends BimpComm
                         $msg .= ' - ' . $sqlError;
                     }
                     $errors[] = $msg;
+                    break;
                 }
             }
-            if ($this->dol_object->type == Facture::TYPE_CREDIT_NOTE || $this->dol_object->type == Facture::TYPE_DEPOSIT) {
-                foreach ($amount_ht as $tva_tx => $xxx) {
-                    $discount->amount_ht = abs($amount_ht[$tva_tx]);
-                    $discount->amount_tva = abs($amount_tva[$tva_tx]);
-                    $discount->amount_ttc = abs($amount_ttc[$tva_tx]);
-                    $discount->tva_tx = abs($tva_tx);
+        }
 
-                    $result = $discount->create($user);
-                    if ($result < 0) {
-                        $msg = 'Echec de la création de la remise client';
-                        $sqlError = $db->lasterror();
-                        if ($sqlError) {
-                            $msg .= ' - ' . $sqlError;
-                        }
-                        $errors[] = $msg;
-                        break;
-                    }
-                }
-            }
+        if (count($errors)) {
+            $db->rollback();
+            return $errors;
+        }
 
-            if (count($errors)) {
-                $db->rollback();
-                return $errors;
-            }
-
-            if ($this->dol_object->set_paid($user) >= 0) {
-                $db->commit();
-            } else {
-                $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'enregistrement du statut "payé" pour cette facture');
-                $db->rollback();
-            }
+        if ($this->dol_object->set_paid($user) >= 0) {
+            $db->commit();
+        } else {
+            $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'enregistrement du statut "payé" pour cette facture');
+            $db->rollback();
         }
 
         return $errors;
@@ -2116,12 +2152,12 @@ class Bimp_Facture extends BimpComm
             }
         }
     }
-    
+
     public function checkPrice()
     {
-        if ($this->isLoaded() && static::$dol_module) {            
-            $sql = 'SELECT SUML(total_ttc) FROM '.MAIN_DB_PREFIX.'facturedet WHERE `fk_facture` = '.(int) $this->id;
-            
+        if ($this->isLoaded() && static::$dol_module) {
+            $sql = 'SELECT SUML(total_ttc) FROM ' . MAIN_DB_PREFIX . 'facturedet WHERE `fk_facture` = ' . (int) $this->id;
+
             $total_ttc = '';
         }
     }
@@ -2185,11 +2221,11 @@ class Bimp_Facture extends BimpComm
                     $errors[] = $langs->trans('ErrorFieldRequired', $langs->transnoentitiesnoconv("Warehouse"));
                 }
             }
-            
+
             $today = date('Y-m-d');
-            if($this->getData('datef') != $today)
+            if ($this->getData('datef') != $today)
                 $errors[] = $this->updateField('datef', $today);
-            
+
             if (!count($errors)) {
                 $result = $this->dol_object->validate($user, '', $id_entrepot);
                 if ($result >= 0) {
@@ -2330,7 +2366,7 @@ class Bimp_Facture extends BimpComm
                     if (in_array((int) $this->getData('type'), array(Facture::TYPE_CREDIT_NOTE, Facture::TYPE_DEPOSIT))) {
                         $errors[] = $error_label . ' - ' . 'Cette facture n\'est pas de type "standard"';
                     } elseif ((int) $this->getData('fk_statut') > 0) {
-                        $errors[] = $error_label . ' - ' . $this->getData('the') . ' doit avoir le statut "Brouillon';
+                        $errors[] = $error_label . ' - ' . $this->getData('the') . ' doit avoir le statut "Brouillon"';
                     } else {
                         if ($this->dol_object->insert_discount($discount->id) <= 0) {
                             $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'insertion de la remise');

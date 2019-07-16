@@ -205,7 +205,7 @@ class FournObjectLine extends ObjectLine
                     $this->id_product = null;
                     $this->id_fourn_price = null;
                     $this->tva_tx = null;
-                    $this->qty = null;
+                    $this->qty = 1;
                     $this->pa_ht = null;
                     $this->remise = null;
                     $this->date_to = null;

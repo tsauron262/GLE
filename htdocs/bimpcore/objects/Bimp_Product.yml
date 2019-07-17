@@ -379,8 +379,26 @@ forms:
               min: 1
               
     merge: 
+        msgs: 
+            - content: Attention, cette opération est irreversible
+              type: warning
+        title: Fusionner
+        icon: fas_object-group
         rows: 
-            - field: doli_search_prod
+            - custom: 1
+              label: Fusionner avec
+              input_name: id_merged_product
+              required: 1
+              input: 
+                  type: search_product
+            - custom: 1
+              label: Produit à conserver
+              input_name: id_kept_product
+              data_type: int
+              required: 1
+              content: 
+                  callback: renderMergeKeptProductInput
+              depends_on: id_merged_product                  
 
 fields_tables: 
     infos: 
@@ -474,7 +492,6 @@ fields_tables:
             - field: price_min
             - field: seuil_stock_alerte
             - field: desiredstock
-
 
 views: 
     default: 
@@ -604,9 +621,7 @@ filters_panels:
                   type: select
                   options: 
                       callback: getCategoriesArray
-                  
-                          
- 
+      
 lists_cols: 
     zone_pr: 
         field: zone_pr

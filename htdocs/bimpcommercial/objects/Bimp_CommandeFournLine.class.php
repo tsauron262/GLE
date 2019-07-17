@@ -410,7 +410,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
                     }
                 }
             } else {
-                if (isset($data['received']) && (int) $data['receive']) {
+                if (isset($data['received']) && (int) $data['received']) {
                     foreach ($data['equipments'] as $id_equiment => $equipment_data) {
                         $pu_ht = (float) (isset($equipment_data['pu_ht']) ? (float) $equipment_data['pu_ht'] : (float) $this->getUnitPriceHTWithRemises());
                         $total_ht += $pu_ht;
@@ -450,7 +450,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
                     }
                 }
             } else {
-                if (isset($data['received']) && (int) $data['receive']) {
+                if (isset($data['received']) && (int) $data['received']) {
                     foreach ($data['equipments'] as $id_equiment => $equipment_data) {
                         $pu_ht = (float) (isset($equipment_data['pu_ht']) ? (float) $equipment_data['pu_ht'] : (float) $this->getUnitPriceHTWithRemises());
                         $tva_tx = (float) (isset($equipment_data['tva_tx']) ? (float) $equipment_data['tva_tx'] : (float) $this->tva_tx);

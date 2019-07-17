@@ -1002,18 +1002,16 @@ class Bimp_Product extends BimpObject
                 'label' => 'Valider',
                 'icon' => 'fas_check-circle',
                 'onclick' => $this->getJsActionOnclick('validate', array(), array(
-    //                'success_callback' => 'function(result) {}',
                 ))
             );
         }
-            $buttons[] = array(
-                'label' => 'Fusionner',
-                'icon' => 'link',
-                'onclick' => $this->getJsActionOnclick('merge', array(), array(
-    //                'success_callback' => 'function(result) {}',
-                ))
-            );
-//        }
+        $buttons[] = array(
+            'label' => 'Fusionner',
+            'icon' => 'link',
+            'onclick' => $this->getJsActionOnclick('merge', array(), array(
+                'form_name' => 'merge'
+            ))
+        );
         return $buttons;
     }
     
@@ -1033,7 +1031,7 @@ class Bimp_Product extends BimpObject
     public function validateProduct() {
         
         $errors = array();
-        if(!((float) $this->getData('price') > 0))
+        if(!((float) $this->getData('price') != 0))
             $errors[] = "Merci de renseigner le champs \"Prix d'achat\".";
         
         if((int) $this->getData('fk_product_type') == 1 and
@@ -1128,8 +1126,7 @@ class Bimp_Product extends BimpObject
         $errors = array();
         $subject = 'Produit validé pour la commande ' . $commande->ref;
         $from = 'gle@bimp.fr';
-        $msg = 'Bonjour,<br/>Le produit ' . $this->getData('ref') . ' a été validé, la commande ' . $commande->getNomUrl();
-        $msg .= ' est peut-être validable.';
+        $msg = 'Bonjour,<br/>Le produit ' . $this->getData('ref') . ' a été validé, il est présent dans votre commande ' . $commande->getNomUrl();
         if (!mailSyn2($subject, $to, $from, $msg))
             $errors[] = "Envoi email vers " . $to . "impossible.";
         return $errors;
@@ -1139,7 +1136,7 @@ class Bimp_Product extends BimpObject
         $errors = array();
         $subject = 'Produit validé pour la propale ' . $propal->ref;
         $from = 'gle@bimp.fr';
-        $msg = 'Bonjour,<br/>Le produit ' . $this->getData('ref') . ' a été validé, la propale ' . $propal->getNomUrl();
+        $msg = 'Bonjour,<br/>Le produit ' . $this->getData('ref') . ' a été validé, il est présent dans votre propale ' . $propal->getNomUrl();
         $msg .= ' est peut-être validable.';
         if (!mailSyn2($subject, $to, $from, $msg))
             $errors[] = "Envoi email vers " . $to . "impossible.";
@@ -1186,34 +1183,127 @@ class Bimp_Product extends BimpObject
         return $propals;
     }
 
+    public function actionMerge($data = array(), &$success = '') {
+        $warnings = array();
+        $errors = $this->merge($data);
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => 'bimp_reloadPage();'
+        );
+        }
     
-//    
-//    public function actionMerge($data = array(), &$success = '') {
-//        $errors = $this->merge($data);
-//        return $errors;
+    private function merge($data) {
+        
+        if (isset($data['doli_search_prod']) and (int) $data['doli_search_prod'] > 0)
+            $id_prod_ext = (int) $data['doli_search_prod'];
+        else {
+            $errors[] = "Produit non renseigné";
+            return $errors;
+        }
+        if($id_prod_ext == (int) $this->getData('id')) {
+            $errors[] = "Vous essayez de fusionner un produit avec lui même.";
+            return $errors;
+        }
+        
+        $product_ext = BimpObject::getInstance('bimpcore', 'Bimp_Product');
+        $product_ext->fetch($id_prod_ext);
+
+        // COMMAND LINES
+        $commands = $product_ext->getCommandes();
+        foreach($commands as $command) {
+            if((int) $command->statut > Commande::STATUS_DRAFT) {
+                $errors[] = "La commande " . $command->getNomUrl() . " contient le produit à fusionner. "
+                        . "Or le statut de cette commande ne permet pas de fusionner un de ses produits.";
+            }
+            
+            if(!count($errors)) {
+                $command->fetch_lines();
+                foreach ($command->lines as $key => $line) {
+                    $command->lines[$key]->fk_product = $this->getData('id');
+                    $command->lines[$key]->update();
+                }
+
+            }
+        }
+        
+        // PROPAL LINES
+        $propals = $product_ext->getPropals();
+        foreach($propals as $propal) {
+            if((int) $propal->statut > Propal::STATUS_DRAFT) {
+                $errors[] = "La propal " . $propal->getNomUrl() . " contient le produit à fusionner. "
+                        . "Or le statut de cette propal ne permet pas de fusionner un de ses produits.";
+            }
+            
+            if(!count($errors)) {
+                $propal->fetch_lines();
+                foreach ($propal->lines as $key => $line) {
+                    $propal->lines[$key]->fk_product = $this->getData('id');
+                    $propal->lines[$key]->update();
+                }
+
+            }
+        }
+
+        return $errors;
+    }
+    
+//    public function getCommandeLines(){
+//        require_once DOL_DOCUMENT_ROOT . '/commande/class/commande.class.php';
+//        $commande_lines = array();
+//        
+//        
+//        $sql = 'SELECT rowid';
+//        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'commandedet';
+//        $sql .= ' WHERE fk_product=' . $this->getData('id');
+//
+//        $result = $this->db->db->query($sql);
+//        if ($result and $this->db->db->num_rows($result) > 0) {
+//            while ($result and $obj =  $this->db->db->fetch_object($result)) {
+//                $commande_line = new OrderLine($this->db->db);
+//                $commande_line->fetch($obj->rowid);
+//                $commande_lines[] = $commande_line;
+//            }
+//        }
+//        return $commande_lines;
 //    }
 //    
-//    private function merge($data) {
-//        // TODO extraction de l'id product avec lequel merge
+//    public function getPropalLines(){
+//        require_once DOL_DOCUMENT_ROOT . '/comm/propal/class/propal.class.php';
+//        $propal_lines = array();
 //        
-//        $id_prod_ext = 0;
+//        $sql = 'SELECT rowid';
+//        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'propaldet';
+//        $sql .= ' WHERE fk_product=' . $this->getData('id');
 //        
-//        // Commande
-//        $commandedet = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeLine');
-//        $filtre = array('fk_product' => $id_prod_ext);
-//        $com_lines = $commandedet->getList($filtre, null, null, 'id', 'desc', 'array', array('id'));
-//        
-//        foreach($com_lines as $id_line) {
-//            
+//        $result = $this->db->db->query($sql);
+//        if ($result and $this->db->db->num_rows($result) > 0) {
+//            while ($result and $obj =  $this->db->db->fetch_object($result)) {
+//                $propal_line = new PropaleLigne($this->db->db);
+//                $propal_line->fetch($obj->rowid);
+//                $propal_lines[] = $propal_line;
+//            }
 //        }
-//        
-//        // Propal
-//        $propaldet = BimpObject::getInstance('bimpcommercial', 'Bimp_PropalLine');
-//        $filtre = array('fk_product' => $id_prod_ext);
-//        $prop_lines = $propaldet->getList($filtre, null, null, 'id', 'desc', 'array', array('id'));
-//        
-//        foreach($prop_lines as $id_line) {
-//            
-//        }
+//        return $propal_lines;
 //    }
+    
+    public function isDeletable($force_delete = false) {
+        
+        // Check if all commands containing the product disallow to delete this product
+        $commands = $this->getCommandes();
+        foreach($commands as $command) {
+            if((int) $command->statut > (int) Commande::STATUS_DRAFT)
+                return 0;
+        }
+        
+        // Check if all propals containing the product disallow to delete this product
+        $propals = $this->getPropals();
+        foreach($propals as $propal) {
+            if((int) $propal->statut > Propal::STATUS_DRAFT)
+                return 0;
+        }
+        
+        return parent::isDeletable($force_delete);
+    }
+
 }

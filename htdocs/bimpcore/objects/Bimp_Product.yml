@@ -303,6 +303,15 @@ fields:
         type: int
         edit: 1
         
+    doli_search_prod:
+        label: Produit
+        input: 
+            type: search_product
+            filter_type: product
+            help: Entrez la référence ou l'id du produit à faire fusionner dans celui-ci. (celui que vous voulez supprimer)
+        extra: 1
+
+        
 #    Champs non gérés
 #    ref_ext
 #    localtax1_tx
@@ -368,6 +377,10 @@ forms:
                   type: qty
               decimals: 0
               min: 1
+              
+    merge: 
+        rows: 
+            - field: doli_search_prod
 
 fields_tables: 
     infos: 

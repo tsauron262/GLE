@@ -579,7 +579,7 @@ class BimpTools
                                                 $table .= '_extrafields';
                                             }
                                         }
-                                        // echo $instance->object_name . ': ' . $field . '<br/>';
+                                         echo $instance->object_name . ': ' . $field . '<br/>';
                                         $result = $bdb->update($table, array(
                                             $field => $new_id
                                                 ), '`' . $field . '` = ' . (int) $old_id);
@@ -677,7 +677,7 @@ class BimpTools
                             if (isset($params['id_object']['field_value'])) {
                                 $field = $params['id_object']['field_value'];
                                 if ($instance->field_exists($field)) {
-//                                    echo $instance->object_name . ': ' . $field . '<br/>';
+                                    echo $instance->object_name . ': ' . $field . '<br/>';
                                     $result = $bdb->update($table, array(
                                         $field => $new_id
                                             ), '`' . $field . '` = ' . (int) $old_id);

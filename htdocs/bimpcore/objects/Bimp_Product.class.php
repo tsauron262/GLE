@@ -131,7 +131,7 @@ class Bimp_Product extends BimpObject
             case 'generateEtiquettes':
                 return 1;
 
-            case 'validate': 
+            case 'validate':
                 if (!$this->isLoaded($errors)) {
                     return 0;
                 }
@@ -217,16 +217,16 @@ class Bimp_Product extends BimpObject
             $errors[] = 'Ce produit est présent dans au moins une commande client validée';
         }
 
-        // Check factures validées: 
+        // Check factures: 
 
         $sql = 'SELECT f.rowid FROM ' . MAIN_DB_PREFIX . 'facture f';
         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'facturedet l ON f.rowid = l.fk_facture';
-        $sql .= ' WHERE f.fk_statut > 0 AND l.fk_product = ' . (int) $this->id;
+        $sql .= ' WHERE l.fk_product = ' . (int) $this->id;
 
         $rows = $this->db->executeS($sql, 'array');
 
         if (is_array($rows) && count($rows)) {
-            $errors[] = 'Ce produit est présent dans au moins une facture client validée';
+            $errors[] = 'Ce produit est présent dans au moins une facture client';
         }
 
         // Check commandes fourn validées: 
@@ -241,16 +241,16 @@ class Bimp_Product extends BimpObject
             $errors[] = 'Ce produit est présent dans au moins une commande fournisseur validée';
         }
 
-        // Check factures fourn validées: 
+        // Check factures fourn: 
 
         $sql = 'SELECT f.rowid FROM ' . MAIN_DB_PREFIX . 'facture_fourn f';
         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'facture_fourn_det l ON f.rowid = l.fk_facture_fourn';
-        $sql .= ' WHERE f.fk_statut > 0 AND l.fk_product = ' . (int) $this->id;
+        $sql .= ' WHERE l.fk_product = ' . (int) $this->id;
 
         $rows = $this->db->executeS($sql, 'array');
 
         if (is_array($rows) && count($rows)) {
-            $errors[] = 'Ce produit est présent dans au moins une facture fournisseur validée';
+            $errors[] = 'Ce produit est présent dans au moins une facture fournisseur';
         }
 
         return (count($errors) ? 0 : 1);
@@ -346,14 +346,15 @@ class Bimp_Product extends BimpObject
                 ))
             );
         }
+
 //        $buttons[] = array(
 //            'label'   => 'Fusionner',
 //            'icon'    => 'fas_object-group',
 //            'onclick' => $this->getJsActionOnclick('merge', array(), array(
 //                'form_name' => 'merge'
-//                    //                'success_callback' => 'function(result) {}',
 //            ))
 //        );
+
         return $buttons;
     }
 
@@ -1084,8 +1085,9 @@ class Bimp_Product extends BimpObject
     {
 
         $errors = array();
-        if (!((float) $this->getData('price') > 0))
-            $errors[] = "Merci de renseigner le champs \"Prix d'achat\".";
+        if (!(int) $this->getCurrentFournPriceId(null, true)) {
+            $errors[] = "Veuillez enregistrer au moins un prix d'achat fournisseur";
+        }
 
         if ((int) $this->getData('fk_product_type') == 1 and
                 (int) $this->getData('serialisable') == 1)
@@ -1223,17 +1225,10 @@ class Bimp_Product extends BimpObject
 
         // Suppression du produit: 
 
-        $prod_warnings = array();
-        $prod_errors = $merged_product->delete($prod_warnings, true);
-
-        if (count($prod_warnings)) {
-            $warnings[] = BimpTools::getMsgFromArray($prod_warnings, 'Erreurs lors de la suppression ' . $merged_product->getLabel('of_the'));
+        if ($this->db->delete('product', 'rowid = ' . $id_merged_product) <= 0) {
+            $errors[] = 'Echec de la suppression du produit - ' . $this->db->db->lasterror();
         }
-
-        if (count($prod_errors)) {
-            $errors[] = BimpTools::getMsgFromArray($prod_warnings, 'Echec de la suppression ' . $merged_product->getLabel('of_the'));
-        }
-
+        
         if (count($errors)) {
             return $errors;
         }
@@ -1293,14 +1288,69 @@ class Bimp_Product extends BimpObject
                 }
             }
         }
-        
+
         // Màj des commandes non validées:
-        
-        // Mà des factures non validées: 
-        
+        $sql = 'SELECT l.rowid as id FROM ' . MAIN_DB_PREFIX . 'commandedet l';
+        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commande c ON c.rowid = l.fk_commande';
+        $sql .= ' WHERE l.fk_product = ' . (int) $id_merged_product . ' AND c.fk_statut = 0';
+
+        $rows = $this->db->executeS($sql, 'array');
+
+        if (is_array($rows) && count($rows)) {
+            foreach ($rows as $r) {
+                $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $r['id']);
+                if (!BimpObject::objectLoaded($line)) {
+                    continue;
+                }
+
+                $line->id_product = $this->id;
+                $line->pu_ht = $pu_ht;
+                $line->tva_tx = $tva_tx;
+                $line->pa_ht = $pa_ht;
+
+                $line_warnings = array();
+                $line_errors = $line->update($line_warnings, true);
+
+                if (count($line_warnings)) {
+                    $warnings[] = BimpTools::getMsgFromArray($line_warnings, 'Erreurs lors de la mise à jour ' . $line->getLabel('of_the'));
+                }
+
+                if (count($line_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($line_warnings, 'Echec de la mise à jour ' . $line->getLabel('of_the'));
+                }
+            }
+        }
+
         // Màj des commandes fourn non validées: 
-        
-        // Màj des factures fourn non validées: 
+        $sql = 'SELECT l.rowid as id FROM ' . MAIN_DB_PREFIX . 'commande_fournisseurdet l';
+        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commande_fournisseur c ON c.rowid = l.fk_commande';
+        $sql .= ' WHERE l.fk_product = ' . (int) $id_merged_product . ' AND c.fk_statut = 0';
+
+        $rows = $this->db->executeS($sql, 'array');
+
+        if (is_array($rows) && count($rows)) {
+            foreach ($rows as $r) {
+                $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFournLine', (int) $r['id']);
+                if (!BimpObject::objectLoaded($line)) {
+                    continue;
+                }
+
+                $line->id_product = $this->id;
+                $line->pu_ht = $pa_ht;
+                $line->tva_tx = $tva_tx;
+
+                $line_warnings = array();
+                $line_errors = $line->update($line_warnings, true);
+
+                if (count($line_warnings)) {
+                    $warnings[] = BimpTools::getMsgFromArray($line_warnings, 'Erreurs lors de la mise à jour ' . $line->getLabel('of_the'));
+                }
+
+                if (count($line_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($line_warnings, 'Echec de la mise à jour ' . $line->getLabel('of_the'));
+                }
+            }
+        }
 
         // remplacements supplémentaires: 
         // Tables: contratdet ? 
@@ -1356,20 +1406,22 @@ class Bimp_Product extends BimpObject
         $warnings = array();
         $success = 'Fusion effectuée avec succès';
         $success_callback = '';
-
-        $errors = array(
-            'Opération en cours de développement'
-        );
-
-//        $id_merged_product = (int) isset($data['id_merged_product']) ? $data['id_merged_product'] : 0;
-//        $id_kept_product = (int) isset($data['id_kept_product']) ? $data['id_kept_product'] : 0;
+        
+        $errors[] = 'En cours de développement';
+        
+//        
+//
+//        $id_merged_product = (int) (isset($data['id_merged_product']) ? $data['id_merged_product'] : 0);
+//        $id_kept_product = (int) (isset($data['id_kept_product']) ? $data['id_kept_product'] : 0);
 //
 //        if (!$id_merged_product) {
 //            $errors[] = 'Aucun produit à fusionner sélectionné';
 //        } elseif (!$id_kept_product) {
 //            $errors[] = 'Information manquante: produit à conserver';
+//        } elseif ($id_merged_product === (int) $this->id) {
+//            $errors[] = 'Un produit ne peut pas être fusionné avec lui-même';
 //        } elseif ($id_kept_product !== (int) $this->id && $id_kept_product !== (int) $id_merged_product) {
-//            $errors[] = 'Erreur: produit à conserver invalide';
+//            $errors[] = 'Erreur: produit à conserver invalide, ' . $id_kept_product . ', ' . $this->id;
 //        }
 //
 //        if (!count($errors)) {
@@ -1522,5 +1574,4 @@ class Bimp_Product extends BimpObject
             self::$ventes[$dateMin . "-" . $dateMax][$ln->fk_product][null]['total_ttc'] += $ln->total_ttc;
         }
     }
-    
 }

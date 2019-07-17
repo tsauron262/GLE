@@ -1522,6 +1522,7 @@ class Bimp_Product extends BimpObject
             self::$ventes[$dateMin . "-" . $dateMax][$ln->fk_product][null]['total_ttc'] += $ln->total_ttc;
         }
     }
+    
 //    public function actionMerge($data = array(), &$success = '') {
 //        $errors = $this->merge($data);
 //        return $errors;

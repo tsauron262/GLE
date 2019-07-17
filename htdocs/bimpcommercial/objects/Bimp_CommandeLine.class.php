@@ -1119,6 +1119,12 @@ class Bimp_CommandeLine extends ObjectLine
                 $html .= '<tbody>';
                 foreach ($reservations as $reservation) {
                     $buttons = $reservation->getListExtraBtn();
+                    $buttons[] = array(
+                        'label' => 'Vue rapide',
+                        'icon' => 'fas_eye',
+                        'onclick' => $reservation->getJsLoadModalView('default')
+                    );
+                    
                     $html .= '<tr class="Bimp_CommandeLine_reservation_row">';
                     $html .= '<td style="text-align: center; width: 45px">';
                     $html .= '<input type="checkbox" name="reservation_check[]" value="' . $reservation->id . '" class="reservation_check"';

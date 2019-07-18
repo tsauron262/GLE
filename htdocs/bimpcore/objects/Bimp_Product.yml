@@ -310,7 +310,10 @@ fields:
             filter_type: product
             help: Entrez la référence ou l'id du produit à faire fusionner dans celui-ci. (celui que vous voulez supprimer)
         extra: 1
-
+        
+    product_categories: 
+        label: Tags/catégories
+        extra: 1
         
 #    Champs non gérés
 #    ref_ext
@@ -463,6 +466,7 @@ fields_tables:
     infos_complementaires:
         title: Informations complémentaires
         icon: plus
+        edit: 1
         rows:
             - field: url
             - field: stock
@@ -477,6 +481,7 @@ fields_tables:
             - field: surface
             - field: volume_units
             - field: volume
+            - field: product_categories
             
         
     measures: 
@@ -518,6 +523,8 @@ views:
                       name: status
     
     fiche:
+        edit_form: light
+        delete_btn: 1
         rows:
             - cols: 
                 - type: fields_table

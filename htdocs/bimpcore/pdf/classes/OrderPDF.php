@@ -189,6 +189,18 @@ class OrderPDF extends BimpDocumentPDF
         $html .= '<tr>';
         $html .= '<td>';
         $html .= '<table cellpadding="2px">';
+        
+        // Réf client: 
+        if ($this->commande->ref_client) {
+            $html .= '<tr>';
+            $html .= '<td colspan="2" style="font-size: 7px">';
+            $html .= '<span style="font-weight: bold; color: #EF7D00">' . $this->langs->transnoentities('RefCustomer') . ' : </span>';
+            $html .= $this->langs->convToOutputCharset($this->commande->ref_client);
+            $html .= 'fff</td>';
+            $html .= '</tr>';
+        }
+        
+        
         if (!is_null($this->user_suivi)) {
             $html .= '<tr>';
             $html .= '<td colspan="2" style="font-size: 7px">';

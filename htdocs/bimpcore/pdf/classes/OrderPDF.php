@@ -609,6 +609,7 @@ class BLPDF extends OrderPDF
                     'desc'         => $desc,
                     'pu_ht'        => pdf_getlineupexcltax($this->object, $i, $this->langs),
                 );
+                
 
                 if ($this->hideReduc && $line->remise_percent) {
                     $pu_ht = (float) ($line->subprice - ($line->subprice * ($line->remise_percent / 100)));
@@ -628,6 +629,9 @@ class BLPDF extends OrderPDF
                 $row['dl'] = isset($qties[(int) $line->id]['shipped_qty']) ? $qties[(int) $line->id]['shipped_qty'] : 0;
                 $row['ral'] = isset($qties[(int) $line->id]['to_ship_qty']) ? $qties[(int) $line->id]['to_ship_qty'] : 0;
 
+                if($qty > 0)
+                $row['row_style'] = "font-weight: bold;";
+                
                 $total_ht = (float) $qty * (float) $pu_ht;
 
                 $row['total_ht'] = price($total_ht);

@@ -528,12 +528,12 @@ class Bimp_Paiement extends BimpObject
 //        $total_factures_versements = round($total_factures_versements, 2);
 //        $total_paid = round($total_paid, 2);
 
-        $total_factures_versements = round($total_factures_versements, 2);
+//        $total_factures_versements = round($total_factures_versements, 2);
         
-        if ($total_factures_versements > ($total_paid + 0.009999999)) {
-            $errors[] = 'Le champ "Somme totale versée" (' . $total_paid . ') est inférieur au total des réglements des factures (' . $total_factures_versements . ')';
-            return $errors;
-        }
+//        if ($total_factures_versements > ($total_paid + 0.009999999)) {
+//            $errors[] = 'Le champ "Somme totale versée" (' . $total_paid . ') est inférieur au total des réglements des factures (' . $total_factures_versements . ')';
+//            return $errors;
+//        }
 
         if ($total_factures_versements > 0) {
             $errors = parent::create($warnings);
@@ -618,7 +618,7 @@ class Bimp_Paiement extends BimpObject
                         $total_factures_versements *= -1;
                     }
                     $fonds = (float) $caisse->getData('fonds');
-                    $fonds += $total_factures_versements;
+                    $fonds += round($total_factures_versements, 2);
                     $caisse->set('fonds', $fonds);
                     $update_errors = $caisse->update();
                     if (count($update_errors)) {

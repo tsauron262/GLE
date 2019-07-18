@@ -77,6 +77,36 @@ class Bimp_Product extends BimpObject
         parent::__construct($module, $object_name);
     }
 
+    // Droits user: 
+
+    public function canEditField($field_name)
+    {
+        global $user;
+
+        switch ($field_name) {
+            case 'validate':
+                if ((int) $user->admin != 1) {
+                    return 0;
+                }
+                return 1;
+        }
+
+        return parent::canEditField($field_name);
+    }
+
+    public function canSetAction($action)
+    {
+        global $user;
+
+        switch ($action) {
+            case 'validate':
+                // todo: définir droit pour valider. 
+                return 1;
+        }
+
+        return parent::canSetAction($field_name);
+    }
+
     // Getters booléens
 
     public function isSerialisable()
@@ -100,6 +130,21 @@ class Bimp_Product extends BimpObject
         switch ($action) {
             case 'generateEtiquettes':
                 return 1;
+
+            case 'validate':
+                if (!$this->isLoaded($errors)) {
+                    return 0;
+                }
+                if ((int) $this->getData('validate')) {
+                    $errors[] = 'Ce produit est déjà validé';
+                    return 0;
+                }
+                return 1;
+            case 'merge':
+                if (!$this->isLoaded($errors)) {
+                    return 0;
+                }
+                return 1;
         }
 
         return (int) parent::isActionAllowed($action, $errors);
@@ -121,6 +166,103 @@ class Bimp_Product extends BimpObject
         }
 
         return 0;
+    }
+
+    public function isDeletable($force_delete = false, &$errors = array())
+    {
+        if (!$this->isLoaded($errors)) {
+            return 0;
+        }
+
+        if ($this->isTypeProduct()) {
+            // Check réservations: 
+            $list = BimpCache::getBimpObjectList('bimpreservation', 'BR_Reservation', array(
+                        'id_product' => (int) $this->id
+            ));
+
+            if (count($list)) {
+                $errors[] = 'Des réservations ont été créées pour ce produit';
+            }
+
+            // Check stock: 
+
+            $sql = 'SELECT `rowid` FROM ' . MAIN_DB_PREFIX . 'product_stock WHERE `fk_product` = ' . $this->id . ' AND `reel` != 0';
+            $list = $this->db->executeS($sql, 'array');
+
+            if (is_array($list) && count($list)) {
+                $errors[] = 'Un stock a été enregistré pour ce produit';
+            }
+
+            // Check equipements: 
+            if ($this->isSerialisable()) {
+                $list = BimpCache::getBimpObjectList('bimpequipment', 'Equipment', array(
+                            'id_product' => (int) $this->id
+                ));
+
+                if (count($list)) {
+                    $errors[] = 'Des équipements ont été créés pour ce produit';
+                }
+            }
+        }
+
+        // Check commandes validées: 
+
+        $sql = 'SELECT c.rowid FROM ' . MAIN_DB_PREFIX . 'commande c';
+        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commandedet l ON c.rowid = l.fk_commande';
+        $sql .= ' WHERE c.fk_statut > 0 AND l.fk_product = ' . (int) $this->id;
+
+        $rows = $this->db->executeS($sql, 'array');
+
+        if (is_array($rows) && count($rows)) {
+            $errors[] = 'Ce produit est présent dans au moins une commande client validée';
+        }
+
+        // Check factures: 
+
+        $sql = 'SELECT f.rowid FROM ' . MAIN_DB_PREFIX . 'facture f';
+        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'facturedet l ON f.rowid = l.fk_facture';
+        $sql .= ' WHERE l.fk_product = ' . (int) $this->id;
+
+        $rows = $this->db->executeS($sql, 'array');
+
+        if (is_array($rows) && count($rows)) {
+            $errors[] = 'Ce produit est présent dans au moins une facture client';
+        }
+
+        // Check commandes fourn validées: 
+
+        $sql = 'SELECT c.rowid FROM ' . MAIN_DB_PREFIX . 'commande_fournisseur c';
+        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commande_fournisseurdet l ON c.rowid = l.fk_commande';
+        $sql .= ' WHERE c.fk_statut > 0 AND l.fk_product = ' . (int) $this->id;
+
+        $rows = $this->db->executeS($sql, 'array');
+
+        if (is_array($rows) && count($rows)) {
+            $errors[] = 'Ce produit est présent dans au moins une commande fournisseur validée';
+        }
+
+        // Check factures fourn: 
+
+        $sql = 'SELECT f.rowid FROM ' . MAIN_DB_PREFIX . 'facture_fourn f';
+        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'facture_fourn_det l ON f.rowid = l.fk_facture_fourn';
+        $sql .= ' WHERE l.fk_product = ' . (int) $this->id;
+
+        $rows = $this->db->executeS($sql, 'array');
+
+        if (is_array($rows) && count($rows)) {
+            $errors[] = 'Ce produit est présent dans au moins une facture fournisseur';
+        }
+
+        return (count($errors) ? 0 : 1);
+    }
+
+    public function isProductMergeable($product, &$errors = array())
+    {
+        if ((int) $product->getData('fk_product_type') !== (int) $product->getData('fk_product_type')) {
+            $errors[] = 'Les deux produits à fusionner ne sont pas du même type';
+        }
+
+        return (count($errors) ? 0 : 1);
     }
 
     // Getters params: 
@@ -188,6 +330,34 @@ class Bimp_Product extends BimpObject
         }
     }
 
+    public function getActionsButtons()
+    {
+        global $user;
+        $buttons = array();
+        if (!$this->isLoaded() or (int) $user->admin != 1)
+            return $buttons;
+
+        if ($this->isActionAllowed('validate') && $this->canSetAction('validate')) {
+            $buttons[] = array(
+                'label'   => 'Valider',
+                'icon'    => 'fas_check-circle',
+                'onclick' => $this->getJsActionOnclick('validate', array(), array(
+                        //                'success_callback' => 'function(result) {}',
+                ))
+            );
+        }
+
+//        $buttons[] = array(
+//            'label'   => 'Fusionner',
+//            'icon'    => 'fas_object-group',
+//            'onclick' => $this->getJsActionOnclick('merge', array(), array(
+//                'form_name' => 'merge'
+//            ))
+//        );
+
+        return $buttons;
+    }
+
     // Getters données: 
 
     public function getRemiseCrt()
@@ -246,6 +416,49 @@ class Bimp_Product extends BimpObject
         }
 
         return $data;
+    }
+
+    public function getCommandes()
+    {
+        require_once DOL_DOCUMENT_ROOT . '/commande/class/commande.class.php';
+        $commandes = array();
+
+        $sql = 'SELECT DISTINCT(c.rowid) as id';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'commande as c';
+        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commandedet as cd ON c.rowid=cd.fk_commande';
+        $sql .= ' WHERE cd.fk_product=' . $this->getData('id');
+
+        $result = $this->db->db->query($sql);
+        if ($result and $this->db->db->num_rows($result) > 0) {
+            while ($result and $obj = $this->db->db->fetch_object($result)) {
+                $commande = new Commande($this->db->db);
+                $commande->fetch($obj->id);
+                $commandes[] = $commande;
+            }
+        }
+        return $commandes;
+    }
+
+    public function getPropals()
+    {
+        // 
+        require_once DOL_DOCUMENT_ROOT . '/comm/propal/class/propal.class.php';
+        $propals = array();
+
+        $sql = 'SELECT DISTINCT(p.rowid) as id';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'propal as p';
+        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'propaldet as pd ON p.rowid=pd.fk_propal';
+        $sql .= ' WHERE pd.fk_product=' . $this->getData('id');
+
+        $result = $this->db->db->query($sql);
+        if ($result and $this->db->db->num_rows($result) > 0) {
+            while ($result and $obj = $this->db->db->fetch_object($result)) {
+                $propal = new Propal($this->db->db);
+                $propal->fetch($obj->id);
+                $propals[] = $propal;
+            }
+        }
+        return $propals;
     }
 
     // Getters stocks: 
@@ -603,6 +816,21 @@ class Bimp_Product extends BimpObject
         return $errors;
     }
 
+    public function getBestBuyPrice()
+    {
+
+        $sql = 'SELECT price FROM `' . MAIN_DB_PREFIX . 'product_fournisseur_price`';
+        $sql .= ' WHERE fk_product=' . $this->getData('id');
+        $sql .= ' GROUP BY fk_product';
+        $sql .= ' HAVING(MIN(PRICE))';
+        $rows = $this->db->executeS($sql);
+
+        if (!empty($rows)) {
+            return $rows[0]->price;
+        }
+        return 00.00;
+    }
+
     // Affichages: 
 
     public function displayEntrepotStock($id_entrepot)
@@ -643,57 +871,6 @@ class Bimp_Product extends BimpObject
         }
 
         return $html;
-    }
-
-    // Traitements: 
-
-    public function addConfigExtraParams()
-    {
-        $entrepots = BimpCache::getEntrepotsArray();
-
-        $cols = array();
-
-        foreach ($entrepots as $id_entrepot => $label) {
-            $cols['stock_' . $id_entrepot] = array(
-                'label' => 'Stock ' . $label,
-                'value' => array(
-                    'callback' => array(
-                        'method' => 'displayEntrepotStock',
-                        'params' => array(
-                            $id_entrepot
-                        )
-                    )
-                )
-            );
-        }
-
-        $this->config->addParams('lists_cols', $cols);
-    }
-
-    public function fetchStocks()
-    {
-        $this->stocks = array();
-
-        $where = '`statut` > 0';
-        $rows = $this->db->getRows('entrepot', $where, null, 'array', array(
-            'rowid', 'ref'
-        ));
-
-
-        if (!is_null($rows)) {
-            foreach ($rows as $r) {
-                $stocks = $this->getStocksForEntrepot((int) $r['rowid']);
-                $this->stocks[(int) $r['rowid']] = array(
-                    'entrepot_label' => $r['ref'],
-                    'reel'           => $stocks['reel'],
-                    'dispo'          => $stocks['dispo'],
-                    'virtuel'        => $stocks['virtuel'],
-                    'commandes'      => $stocks['commandes'],
-                    'total_reserves' => $stocks['total_reserves'],
-                    'reel_reserves'  => $stocks['reel_reserves']
-                );
-            }
-        }
     }
 
     // Rendus HTML: 
@@ -804,6 +981,386 @@ class Bimp_Product extends BimpObject
         return $html;
     }
 
+    public function renderCategorize()
+    {
+        $html = '';
+
+        if ($this->isLoaded()) {
+
+            $html = BimpRender::renderPanel('Catégories', $html, '', array(
+                        'foldable' => false,
+                        'type'     => 'secondary',
+                        'panel_id' => 'test',
+            ));
+        }
+        return $html;
+    }
+
+    public function renderMergeKeptProductInput()
+    {
+        $errors = array();
+
+        if (!$this->isLoaded($errors)) {
+            return BimpRender::renderAlerts($errors);
+        }
+
+        $options = array(
+            $this->id => $this->getRef()
+        );
+
+        $id_merged_product = (int) BimpTools::getPostFieldValue('id_merged_product', 0);
+
+        if ($id_merged_product) {
+            $product = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $id_merged_product);
+            if (!BimpObject::objectLoaded($product)) {
+                $errors[] = 'Le produit d\'ID ' . $id_merged_product . ' n\'existe pas';
+            } else {
+                $this->isProductMergeable($product, $errors);
+            }
+
+            if (count($errors)) {
+                return BimpRender::renderAlerts($errors);
+            }
+
+            $options[(int) $id_merged_product] = $product->getRef();
+        }
+
+        return BimpInput::renderInput('select', 'id_kept_product', BimpTools::getPostFieldValue('id_kept_product', $this->id), array(
+                    'options' => $options
+        ));
+    }
+
+    // Traitements: 
+
+    public function addConfigExtraParams()
+    {
+        $entrepots = BimpCache::getEntrepotsArray();
+
+        $cols = array();
+
+        foreach ($entrepots as $id_entrepot => $label) {
+            $cols['stock_' . $id_entrepot] = array(
+                'label' => 'Stock ' . $label,
+                'value' => array(
+                    'callback' => array(
+                        'method' => 'displayEntrepotStock',
+                        'params' => array(
+                            $id_entrepot
+                        )
+                    )
+                )
+            );
+        }
+
+        $this->config->addParams('lists_cols', $cols);
+    }
+
+    public function fetchStocks()
+    {
+        $this->stocks = array();
+
+        $where = '`statut` > 0';
+        $rows = $this->db->getRows('entrepot', $where, null, 'array', array(
+            'rowid', 'ref'
+        ));
+
+
+        if (!is_null($rows)) {
+            foreach ($rows as $r) {
+                $stocks = $this->getStocksForEntrepot((int) $r['rowid']);
+                $this->stocks[(int) $r['rowid']] = array(
+                    'entrepot_label' => $r['ref'],
+                    'reel'           => $stocks['reel'],
+                    'dispo'          => $stocks['dispo'],
+                    'virtuel'        => $stocks['virtuel'],
+                    'commandes'      => $stocks['commandes'],
+                    'total_reserves' => $stocks['total_reserves'],
+                    'reel_reserves'  => $stocks['reel_reserves']
+                );
+            }
+        }
+    }
+
+    public function validateProduct()
+    {
+
+        $errors = array();
+        if (!(int) $this->getCurrentFournPriceId(null, true)) {
+            $errors[] = "Veuillez enregistrer au moins un prix d'achat fournisseur";
+        }
+
+        if ((int) $this->getData('fk_product_type') == 1 and
+                (int) $this->getData('serialisable') == 1)
+            $errors[] = "Un service ne peut pas être sérialisé.";
+
+        if (sizeof($errors) > 0)
+            return $errors;
+
+        $cur_pa_ht = $this->getCurrentPaHt(null, true);
+
+        $this->updateField('cur_pa_ht', $cur_pa_ht);
+        $this->updateField('validate', 1);
+
+        require_once DOL_DOCUMENT_ROOT . '/synopsistools/SynDiversFunction.php';
+
+        // COMMAND
+        $commandes_c = $this->getCommandes();
+        foreach ($commandes_c as $commande) {
+            $email_sent = false;
+            $list_contact = $commande->liste_contact(-1, 'internal');
+
+            // Search responsible
+            foreach ($list_contact as $contact) {
+                if ($contact['code'] == 'SALESREPFOLL' and ! $email_sent) {
+                    $errors = array_merge($errors, $this->sendEmailCommande($commande, $contact['email']));
+                    $email_sent = true;
+                    break;
+                }
+            }
+
+            // Search signatory
+            if (!$email_sent) {
+                foreach ($list_contact as $contact) {
+                    $errors = array_merge($errors, $this->sendEmailCommande($commande, $contact['email']));
+                    $email_sent = true;
+                    break;
+                }
+            }
+
+            // Use main commercial Franck PINERI
+            if (!$email_sent) {
+                require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
+                $user = new User($this->db->db);
+                $user->fetch((int) 62);
+                $errors = array_merge($errors, $this->sendEmailCommande($commande, $user->email));
+                $email_sent = true;
+                continue;
+            }
+        }
+
+        // PROPALS
+        $propals = $this->getPropals();
+        foreach ($propals as $propal) {
+            $email_sent = false;
+            $list_contact = $propal->liste_contact(-1, 'internal');
+
+            // Search responsible
+            foreach ($list_contact as $contact) {
+                if ($contact['code'] == 'SALESREPFOLL' and ! $email_sent) {
+                    $errors = array_merge($errors, $this->sendEmailPropal($propal, $contact['email']));
+                    $email_sent = true;
+                    break;
+                }
+            }
+
+            // Search signatory
+            if (!$email_sent) {
+                foreach ($list_contact as $contact) {
+                    $errors = array_merge($errors, $this->sendEmailPropal($propal, $contact['email']));
+                    $email_sent = true;
+                    break;
+                }
+            }
+
+            // Use main commercial Franck PINERI
+            if (!$email_sent) {
+                require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
+                $user = new User($this->db->db);
+                $user->fetch((int) 62);
+                $errors = array_merge($errors, $this->sendEmailCommande($commande, $user->email));
+                $email_sent = true;
+                continue;
+            }
+        }
+
+        return $errors;
+    }
+
+    private function sendEmailCommande($commande, $to)
+    {
+        $errors = array();
+        $subject = 'Produit validé pour la commande ' . $commande->ref;
+        $from = 'gle@bimp.fr';
+        $msg = 'Bonjour,<br/>Le produit ' . $this->getData('ref') . ' a été validé, la commande ' . $commande->getNomUrl();
+        $msg .= ' est peut-être validable.';
+        if (!mailSyn2($subject, $to, $from, $msg))
+            $errors[] = "Envoi email vers " . $to . "impossible.";
+        return $errors;
+    }
+
+    private function sendEmailPropal($propal, $to)
+    {
+        $errors = array();
+        $subject = 'Produit validé pour la propale ' . $propal->ref;
+        $from = 'gle@bimp.fr';
+        $msg = 'Bonjour,<br/>Le produit ' . $this->getData('ref') . ' a été validé, la propale ' . $propal->getNomUrl();
+        $msg .= ' est peut-être validable.';
+        if (!mailSyn2($subject, $to, $from, $msg))
+            $errors[] = "Envoi email vers " . $to . "impossible.";
+        return $errors;
+    }
+
+    public function mergeProduct(Bimp_Product $merged_product, &$warnings = array())
+    {
+        $errors = array();
+
+        if (!$this->isLoaded($errors)) {
+            return $errors;
+        }
+
+        if (!BimpObject::objectLoaded($merged_product) || !is_a($merged_product, 'Bimp_Product')) {
+            $errors[] = 'Produit à fusionner invalide';
+            return $errors;
+        }
+
+        if (!$merged_product->isDeletable(false, $errors)) {
+            return $errors;
+        }
+
+        if (!$this->isProductMergeable($merged_product, $errors)) {
+            return $errors;
+        }
+
+        $id_merged_product = (int) $merged_product->id;
+
+        // Suppression du produit: 
+
+        if ($this->db->delete('product', 'rowid = ' . $id_merged_product) <= 0) {
+            $errors[] = 'Echec de la suppression du produit - ' . $this->db->db->lasterror();
+        }
+        
+        if (count($errors)) {
+            return $errors;
+        }
+
+        // Remplacement des ID: 
+
+        $pu_ht = (float) $this->getData('price');
+        $tva_tx = (float) $this->getData('tva_tx');
+        $price_base = $this->getdata('price_base_type');
+
+        if ($price_base === 'TTC') {
+            $pu_ht = (float) BimpTools::calculatePriceTaxEx($pu_ht, $tva_tx);
+        }
+
+        $pa_ht = $this->getCurrentPaHt(null, true);
+
+        // Màj des propales validées: 
+        $sql = 'UPDATE ' . MAIN_DB_PREFIX . 'propaldet l';
+        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'propal p';
+        $sql .= ' SET l.fk_product = ' . (int) $this->id;
+        $sql .= ' WHERE l.fk_product = ' . (int) $id_merged_product;
+        $sql .= ' AND p.fk_statut > 0';
+
+        if ($this->db->execute($sql) <= 0) {
+            $warnings[] = 'Erreurs lors du changement d\'ID pour les propales validées - ' . $this->db->db->lasterror();
+        }
+
+        // Pour la suite, on passe par les objets pour que les prix et les totaux soient mis à jour: 
+        // Màj des propales non validées: 
+        $sql = 'SELECT l.rowid as id FROM ' . MAIN_DB_PREFIX . 'propaldet l';
+        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'propal p ON p.rowid = l.fk_propal';
+        $sql .= ' WHERE l.fk_product = ' . (int) $id_merged_product . ' AND p.fk_statut = 0';
+
+        $rows = $this->db->executeS($sql, 'array');
+
+        if (is_array($rows) && count($rows)) {
+            foreach ($rows as $r) {
+                $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_PropalLine', (int) $r['id']);
+                if (!BimpObject::objectLoaded($line)) {
+                    continue;
+                }
+
+                $line->id_product = $this->id;
+                $line->pu_ht = $pu_ht;
+                $line->tva_tx = $tva_tx;
+                $line->pa_ht = $pa_ht;
+
+                $line_warnings = array();
+                $line_errors = $line->update($line_warnings, true);
+
+                if (count($line_warnings)) {
+                    $warnings[] = BimpTools::getMsgFromArray($line_warnings, 'Erreurs lors de la mise à jour ' . $line->getLabel('of_the'));
+                }
+
+                if (count($line_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($line_warnings, 'Echec de la mise à jour ' . $line->getLabel('of_the'));
+                }
+            }
+        }
+
+        // Màj des commandes non validées:
+        $sql = 'SELECT l.rowid as id FROM ' . MAIN_DB_PREFIX . 'commandedet l';
+        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commande c ON c.rowid = l.fk_commande';
+        $sql .= ' WHERE l.fk_product = ' . (int) $id_merged_product . ' AND c.fk_statut = 0';
+
+        $rows = $this->db->executeS($sql, 'array');
+
+        if (is_array($rows) && count($rows)) {
+            foreach ($rows as $r) {
+                $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $r['id']);
+                if (!BimpObject::objectLoaded($line)) {
+                    continue;
+                }
+
+                $line->id_product = $this->id;
+                $line->pu_ht = $pu_ht;
+                $line->tva_tx = $tva_tx;
+                $line->pa_ht = $pa_ht;
+
+                $line_warnings = array();
+                $line_errors = $line->update($line_warnings, true);
+
+                if (count($line_warnings)) {
+                    $warnings[] = BimpTools::getMsgFromArray($line_warnings, 'Erreurs lors de la mise à jour ' . $line->getLabel('of_the'));
+                }
+
+                if (count($line_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($line_warnings, 'Echec de la mise à jour ' . $line->getLabel('of_the'));
+                }
+            }
+        }
+
+        // Màj des commandes fourn non validées: 
+        $sql = 'SELECT l.rowid as id FROM ' . MAIN_DB_PREFIX . 'commande_fournisseurdet l';
+        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commande_fournisseur c ON c.rowid = l.fk_commande';
+        $sql .= ' WHERE l.fk_product = ' . (int) $id_merged_product . ' AND c.fk_statut = 0';
+
+        $rows = $this->db->executeS($sql, 'array');
+
+        if (is_array($rows) && count($rows)) {
+            foreach ($rows as $r) {
+                $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFournLine', (int) $r['id']);
+                if (!BimpObject::objectLoaded($line)) {
+                    continue;
+                }
+
+                $line->id_product = $this->id;
+                $line->pu_ht = $pa_ht;
+                $line->tva_tx = $tva_tx;
+
+                $line_warnings = array();
+                $line_errors = $line->update($line_warnings, true);
+
+                if (count($line_warnings)) {
+                    $warnings[] = BimpTools::getMsgFromArray($line_warnings, 'Erreurs lors de la mise à jour ' . $line->getLabel('of_the'));
+                }
+
+                if (count($line_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($line_warnings, 'Echec de la mise à jour ' . $line->getLabel('of_the'));
+                }
+            }
+        }
+
+        // remplacements supplémentaires: 
+        // Tables: contratdet ? 
+
+        BimpTools::changeBimpObjectId($id_merged_product, $this->id, 'bimpcore', 'Bimp_Product');
+        BimpTools::changeDolObjectId($id_merged_product, $this->id, 'product');
+
+        return $errors;
+    }
+
     // Actions: 
 
     public function actionGenerateEtiquettes($data, &$success)
@@ -837,6 +1394,64 @@ class Bimp_Product extends BimpObject
         );
     }
 
+    public function actionValidate($data = array(), &$success = '')
+    {
+        $errors = $this->validateProduct();
+        return $errors;
+    }
+
+    public function actionMerge($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Fusion effectuée avec succès';
+        $success_callback = '';
+        
+        $errors[] = 'En cours de développement';
+        
+//        
+//
+//        $id_merged_product = (int) (isset($data['id_merged_product']) ? $data['id_merged_product'] : 0);
+//        $id_kept_product = (int) (isset($data['id_kept_product']) ? $data['id_kept_product'] : 0);
+//
+//        if (!$id_merged_product) {
+//            $errors[] = 'Aucun produit à fusionner sélectionné';
+//        } elseif (!$id_kept_product) {
+//            $errors[] = 'Information manquante: produit à conserver';
+//        } elseif ($id_merged_product === (int) $this->id) {
+//            $errors[] = 'Un produit ne peut pas être fusionné avec lui-même';
+//        } elseif ($id_kept_product !== (int) $this->id && $id_kept_product !== (int) $id_merged_product) {
+//            $errors[] = 'Erreur: produit à conserver invalide, ' . $id_kept_product . ', ' . $this->id;
+//        }
+//
+//        if (!count($errors)) {
+//            if ($id_kept_product !== (int) $this->id) {
+//                $merged_product = $this;
+//                $product = BimpCache::getBimpObjectInstance($this->module, $this->object_name, (int) $id_merged_product);
+//                if (!BimpObject::objectLoaded($product)) {
+//                    $errors[] = 'Le produit d\'ID ' . $id_merged_product . ' n\'existe pas';
+//                }
+//                $success_callback = 'window.location = \'' . DOL_URL_ROOT . '/bimpcore/index.php?fc=product&id=' . $id_merged_product . '\';';
+//            } else {
+//                $merged_product = BimpCache::getBimpObjectInstance($this->module, $this->object_name, (int) $id_merged_product);
+//                if (!BimpObject::objectLoaded($merged_product)) {
+//                    $errors[] = 'Le produit d\'ID ' . $id_merged_product . ' n\'existe pas';
+//                }
+//                $product = $this;
+//            }
+//
+//            if (!count($errors)) {
+//                $errors = $product->mergeProduct($merged_product, $warnings);
+//            }
+//        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $success_callback
+        );
+    }
+
     // Overrides:
 
     public function validatePost()
@@ -851,6 +1466,21 @@ class Bimp_Product extends BimpObject
         }
 
         return parent::validatePost();
+    }
+
+    public function insertExtraFields()
+    {
+        return array();
+    }
+
+    public function updateExtraFields()
+    {
+        return array();
+    }
+
+    public function fetchExtraFields()
+    {
+        return array('best_buy_price' => $this->getBestBuyPrice());
     }
 
     // Méthodes statiques : 
@@ -944,276 +1574,4 @@ class Bimp_Product extends BimpObject
             self::$ventes[$dateMin . "-" . $dateMax][$ln->fk_product][null]['total_ttc'] += $ln->total_ttc;
         }
     }
-
-    public function renderCategorize()
-    {
-        $html = '';
-
-        if ($this->isLoaded()) {
-
-            $html = BimpRender::renderPanel('Catégories', $html, '', array(
-                        'foldable' => false,
-                        'type'     => 'secondary',
-                        'panel_id' => 'test',
-            ));
-        }
-        return $html;
-    }
-
-
-
-     public function insertExtraFields()
-    {
-            return array();
-    }
-
-    public function updateExtraFields()
-    {
-            return array();
-    }    
-    
-        public function fetchExtraFields()
-    {
-            return array('best_buy_price' => $this->getBestBuyPrice());
-    }
-    
-    public function getBestBuyPrice() {
-
-        $sql  = 'SELECT price FROM `' . MAIN_DB_PREFIX . 'product_fournisseur_price`';
-        $sql .= ' WHERE fk_product=' . $this->getData('id');
-        $sql .= ' GROUP BY fk_product';
-        $sql .= ' HAVING(MIN(PRICE))';
-        $rows = $this->db->executeS($sql);
-
-        if (!empty($rows)) {
-            return $rows[0]->price;
-        }
-        return 00.00;
-    }
-    
-    public function getActionsButtons() {
-        global $user;
-        $buttons = array();
-        if (!$this->isLoaded() or (int) $user->admin != 1)
-            return $buttons;
-
-        if($this->getData('validate') == 0) {
-            $buttons[] = array(
-                'label' => 'Valider',
-                'icon' => 'fas_check-circle',
-                'onclick' => $this->getJsActionOnclick('validate', array(), array(
-    //                'success_callback' => 'function(result) {}',
-                ))
-            );
-        }
-            $buttons[] = array(
-                'label' => 'Fusionner',
-                'icon' => 'link',
-                'onclick' => $this->getJsActionOnclick('merge', array(), array(
-    //                'success_callback' => 'function(result) {}',
-                ))
-            );
-//        }
-        return $buttons;
-    }
-    
-    public function canEditField($field_name) {
-        global $user;
-        if ($field_name == 'validate' and (int) $user->admin != 1)
-            return 0;
-
-        return parent::canEditField($field_name);
-    }
-    
-    public function actionValidate($data = array(), &$success = '') {
-        $errors = $this->validateProduct();
-        return $errors;
-    }
-    
-    public function validateProduct() {
-        
-        $errors = array();
-        if(!((float) $this->getData('price') > 0))
-            $errors[] = "Merci de renseigner le champs \"Prix d'achat\".";
-        
-        if((int) $this->getData('fk_product_type') == 1 and
-           (int) $this->getData('serialisable') == 1)
-            $errors[] = "Un service ne peut pas être sérialisé.";
-        
-        if(sizeof($errors) > 0)
-            return $errors;
-        
-        $cur_pa_ht = $this->getCurrentPaHt(null, true);
-        $this->updateField('cur_pa_ht', $cur_pa_ht);
-
-        if(sizeof($errors) == 0)
-            $this->updateField('validate', 1);
-                
-        require_once DOL_DOCUMENT_ROOT . '/synopsistools/SynDiversFunction.php';
-
-        // COMMAND
-        $commandes_c = $this->getCommandes();
-        foreach($commandes_c as $commande) {
-            $email_sent = false;
-            $list_contact = $commande->liste_contact(-1, 'internal');
-            
-            // Search responsible
-            foreach ($list_contact as $contact) {
-                if($contact['code'] == 'SALESREPFOLL' and ! $email_sent) {
-                    $errors = array_merge($errors, $this->sendEmailCommande($commande, $contact['email']));
-                    $email_sent = true;
-                    break;
-                }
-            }
-            
-            // Search signatory
-            if (! $email_sent) {
-                foreach ($list_contact as $contact) {
-                    $errors = array_merge($errors, $this->sendEmailCommande($commande, $contact['email']));
-                    $email_sent = true;
-                    break;
-                }
-            }
-
-            // Use main commercial Franck PINERI
-            if (! $email_sent) {
-                require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
-                $user = new User($this->db->db);
-                $user->fetch((int) 62);
-                $errors = array_merge($errors, $this->sendEmailCommande($commande, $user->email));
-                $email_sent = true;
-                continue;
-            }
-        }
-
-        // PROPALS
-        $propals = $this->getPropals();
-        foreach($propals as $propal) {
-            $email_sent = false;
-            $list_contact = $propal->liste_contact(-1, 'internal');
-           
-            // Search responsible
-            foreach ($list_contact as $contact) {
-                if($contact['code'] == 'SALESREPFOLL' and ! $email_sent) {
-                    $errors = array_merge($errors, $this->sendEmailPropal($propal, $contact['email']));
-                    $email_sent = true;
-                    break;
-                }
-            }
-            
-            // Search signatory
-            if (! $email_sent) {
-                foreach ($list_contact as $contact) {
-                    $errors = array_merge($errors, $this->sendEmailPropal($propal, $contact['email']));
-                    $email_sent = true;
-                    break;
-                }
-            }
-            
-            // Use main commercial Franck PINERI
-            if (! $email_sent) {
-                require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
-                $user = new User($this->db->db);
-                $user->fetch((int) 62);
-                $errors = array_merge($errors, $this->sendEmailCommande($commande, $user->email));
-                $email_sent = true;
-                continue;
-            }
-        }
-        
-        return $errors;
-    }
-    
-    private function sendEmailCommande($commande, $to) {
-        $errors = array();
-        $subject = 'Produit validé pour la commande ' . $commande->ref;
-        $from = 'gle@bimp.fr';
-        $msg = 'Bonjour,<br/>Le produit ' . $this->getData('ref') . ' a été validé, la commande ' . $commande->getNomUrl();
-        $msg .= ' est peut-être validable.';
-        if (!mailSyn2($subject, $to, $from, $msg))
-            $errors[] = "Envoi email vers " . $to . "impossible.";
-        return $errors;
-    }
-    
-    private function sendEmailPropal($propal, $to) {
-        $errors = array();
-        $subject = 'Produit validé pour la propale ' . $propal->ref;
-        $from = 'gle@bimp.fr';
-        $msg = 'Bonjour,<br/>Le produit ' . $this->getData('ref') . ' a été validé, la propale ' . $propal->getNomUrl();
-        $msg .= ' est peut-être validable.';
-        if (!mailSyn2($subject, $to, $from, $msg))
-            $errors[] = "Envoi email vers " . $to . "impossible.";
-        return $errors;
-    }
-    
-    public function getCommandes(){
-        require_once DOL_DOCUMENT_ROOT . '/commande/class/commande.class.php';
-        $commandes = array();
-        
-        $sql = 'SELECT DISTINCT(c.rowid) as id';
-        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'commande as c';
-        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commandedet as cd ON c.rowid=cd.fk_commande';
-        $sql .= ' WHERE cd.fk_product=' . $this->getData('id');
-        
-        $result = $this->db->db->query($sql);
-        if ($result and $this->db->db->num_rows($result) > 0) {
-            while ($result and $obj =  $this->db->db->fetch_object($result)) {
-                $commande = new Commande($this->db->db);
-                $commande->fetch($obj->id);
-                $commandes[] = $commande;
-            }
-        }
-        return $commandes;
-    }
-    
-    public function getPropals(){
-        require_once DOL_DOCUMENT_ROOT . '/comm/propal/class/propal.class.php';
-        $propals = array();
-        
-        $sql = 'SELECT DISTINCT(p.rowid) as id';
-        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'propal as p';
-        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'propaldet as pd ON p.rowid=pd.fk_propal';
-        $sql .= ' WHERE pd.fk_product=' . $this->getData('id');
-        
-        $result = $this->db->db->query($sql);
-        if ($result and $this->db->db->num_rows($result) > 0) {
-            while ($result and $obj =  $this->db->db->fetch_object($result)) {
-                $propal = new Propal($this->db->db);
-                $propal->fetch($obj->id);
-                $propals[] = $propal;
-            }
-        }
-        return $propals;
-    }
-
-    
-//    
-//    public function actionMerge($data = array(), &$success = '') {
-//        $errors = $this->merge($data);
-//        return $errors;
-//    }
-//    
-//    private function merge($data) {
-//        // TODO extraction de l'id product avec lequel merge
-//        
-//        $id_prod_ext = 0;
-//        
-//        // Commande
-//        $commandedet = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeLine');
-//        $filtre = array('fk_product' => $id_prod_ext);
-//        $com_lines = $commandedet->getList($filtre, null, null, 'id', 'desc', 'array', array('id'));
-//        
-//        foreach($com_lines as $id_line) {
-//            
-//        }
-//        
-//        // Propal
-//        $propaldet = BimpObject::getInstance('bimpcommercial', 'Bimp_PropalLine');
-//        $filtre = array('fk_product' => $id_prod_ext);
-//        $prop_lines = $propaldet->getList($filtre, null, null, 'id', 'desc', 'array', array('id'));
-//        
-//        foreach($prop_lines as $id_line) {
-//            
-//        }
-//    }
 }

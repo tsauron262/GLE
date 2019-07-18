@@ -19,7 +19,7 @@ $(document).ready(function () {
             var key = e.which;
             if (key == 13) {
                 e.preventDefault();
-                var nextIndex = $inp.index(this) + 1;
+                var nextIndex = $inp.index(this) + 2;
                 $(":input:text:eq(" + nextIndex + ")").focus().select();
                 $("#total2").html(getTotalCaisse());
             }

@@ -510,6 +510,8 @@ class BLPDF extends OrderPDF
         $this->typeObject = "commande";
 
         parent::__construct($db, $doc_type);
+        
+        $this->pdf->addCgvPages = false;
 
         if (BimpObject::objectLoaded($shipment)) {
             $id_contact_shipment = $shipment->getcontact();

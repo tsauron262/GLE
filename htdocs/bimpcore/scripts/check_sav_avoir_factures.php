@@ -19,6 +19,9 @@ while($ln = $db->fetch_object($sql)){
         echo $i." Fact : ".$ln->rowid." | ".$ln2->fk_socpeople."<br/>";
 //        $db->query("INSERT INTO `llx_element_contact`(`statut`, `element_id`, `fk_c_type_contact`, `fk_socpeople`) VALUES (4,".$ln->rowid.",50,".$ln2->fk_socpeople.")");
     }
+    else{
+        echo "Pas de contact Avoir : ".$ln->rowid."<br/>;";
+    }
     
 }
         

@@ -3187,7 +3187,7 @@ class BS_SAV extends BimpObject
 
                         foreach ($lines as $line) {
                             // suppr partie "pa_ht" dès que correctif pa facture en place
-                            if (round((float) $line->getTotalTTC(), 2) || round((float) $line->pa_ht, 2)) {
+                            if (round((float) $line->getTotalTTC(), 2)) {
                                 $has_amounts_lines = true;
                                 break;
                             }
@@ -3748,13 +3748,17 @@ class BS_SAV extends BimpObject
     public function updateClient(&$warnings = array(), $id)
     {
         $errors = array();
+        
+        if (!$this->isLoaded($errors)) {
+            return $errors;
+        }
+        
         if ($this->getData("id_facture_acompte") > 0) {
             $fact = $this->getChildObject("facture_acompte");
             $fact->set("fk_soc", $id);
             $errors = $fact->update($warnings, true);
         }
-
-
+        
         if ($this->getData("id_discount") > 0 && !count($errors)) {
             $this->db->db->query("UPDATE " . MAIN_DB_PREFIX . "societe_remise_except SET `fk_soc` = " . $id . " WHERE rowid = " . $this->getData("id_discount"));
         }
@@ -3773,7 +3777,9 @@ class BS_SAV extends BimpObject
         }
 
         // Changement du client pour les prêts:
-        $prets = $this->getChildrenObjects('prets');
+        $prets = BimpCache::getBimpObjectObjects('bimpsupport', 'BS_Pret', array(
+            'id_sav' => (int) $this->id
+        ));
         foreach ($prets as $pret) {
             $pret->set('id_client', (int) $id);
             $pret_errors = $pret->update();

@@ -1428,8 +1428,11 @@ class Bimp_Product extends BimpObject
 
     public function fetchExtraFields()
     {
-        return array('best_buy_price' => $this->getBestBuyPrice(),
-                     'product_categories' => $this->getCategories());
+        $extras = array();
+        $extras['best_buy_price'] = $this->getBestBuyPrice();
+        $extras['product_categories'] = $this->getCategories();
+//        $extras['fk_country'] = $this->getOriginCountry();
+        return $extras;
     }
 
     // Méthodes statiques : 
@@ -1555,6 +1558,20 @@ class Bimp_Product extends BimpObject
         }
     }
     
+    public function setOriginCountry() {
+        $form = new Form($this->db->db);
+        return $form->select_country($this->getData('fk_country '),'country_id');
+    }
+    
+    public function getOriginCountry() {
+        global $langs;
+        echo $this->getData('fk_county');
+        $return = getCountry($this->getData('fk_county'), 0, $this->db->db);
+        echo 'après la fonction' . $return.'<br/>';
+        die();
+        return 'test'.$return.'fin';
+    }
+    
     public function renderHeaderExtraLeft() {
         $html = '';
         $barcode = $this->getData('barcode');
@@ -1564,6 +1581,15 @@ class Bimp_Product extends BimpObject
             $html .= 'code=' . $barcode . '&amp;encoding=EAN13">';
         }
         return $html;
+    }
+    
+    public function displayCountry() {
+        global $langs;
+        $id = $this->getData('fk_country');
+        if (!is_null($id) && $id) {
+            return $langs->trans('Country' . $this->db->getValue('c_country', 'code', '`rowid` = ' . (int) $id));
+        }
+        return '';
     }
     
 }

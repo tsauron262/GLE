@@ -2219,4 +2219,67 @@ class BL_CommandeShipment extends BimpObject
 
         return $errors;
     }
+    
+    
+    
+    public function getCustomFilterValueLabel($field_name, $value)
+    {
+        switch ($field_name) {
+            case 'id_product':
+                $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $value);
+                if (BimpObject::ObjectLoaded($product)) {
+                    return $product->getRef();
+                }
+                break;
+                
+            case 'id_commercial':
+                $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $value);
+                if (BimpObject::ObjectLoaded($user)) {
+                    return $user->dol_object->getFullName();
+                }
+                break;
+        }
+
+        return parent::getCustomFilterValueLabel($field_name, $value);
+    }
+
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array())
+    {
+        switch ($field_name) {
+            case 'id_product':
+                $alias = "cd";
+                $table = "commande" . 'det';
+                $joins[$alias] = array(
+                    'alias' => $alias,
+                    'table' => $table,
+                    'on'    => $alias . '.fk_commande = a.id_commande_client'
+                );
+                $filters[$alias . '.fk_product'] = array(
+                    'in' => $values
+                );
+                break;
+
+            case 'id_commercial':
+                $joins['elemcont'] = array(
+                    'table' => 'element_contact',
+                    'on'    => 'elemcont.element_id = a.id_commande_client',
+                    'alias' => 'elemcont'
+                );
+                $joins['typecont'] = array(
+                    'table' => 'c_type_contact',
+                    'on'    => 'elemcont.fk_c_type_contact = typecont.rowid',
+                    'alias' => 'typecont'
+                );
+                $filters['typecont.element'] = "commande";
+                $filters['typecont.source'] = 'internal';
+                $filters['typecont.code'] = 'SALESREPFOLL';
+                $filters['elemcont.fk_socpeople'] = array(
+                    'in' => $values
+                );
+                break;
+        }
+
+        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors);
+    }
+
 }

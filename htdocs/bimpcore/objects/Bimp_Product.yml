@@ -702,6 +702,8 @@ filters_panels:
 lists_cols: 
     zone_pr: 
         field: zone_pr
+    validate: 
+        field: validate
                 
 lists: 
     default: 

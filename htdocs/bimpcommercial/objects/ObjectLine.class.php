@@ -1734,6 +1734,7 @@ class ObjectLine extends BimpObject
 
     protected function updateLine($check_data = true, $force_update = false)
     {
+//        echo 'upline - ' . $this->object_name . ': ' . $this->pu_ht . ', ' . $this->tva_tx . ', ' . $this->pa_ht . '<br/>';
         $errors = array();
 
         $instance = $this->getParentInstance();
@@ -3664,7 +3665,7 @@ class ObjectLine extends BimpObject
                             }
                         }
                     }
-                    
+
                     if ((float) $this->pu_ht < 0 && $this->pa_ht > 0) {
                         $this->pa_ht *= -1;
                     }
@@ -3834,6 +3835,7 @@ class ObjectLine extends BimpObject
 
     public function update(&$warnings = array(), $force_update = false)
     {
+//        echo 'update - ' . $this->object_name . ': ' . $this->pu_ht . ', ' . $this->tva_tx . ', ' . $this->pa_ht . '<br/>';
         if (!static::$parent_comm_type) {
             $errors[] = 'Impossible de mettre à jour une ligne depuis une instance de la classe de base "ObjectLine"';
             return $errors;

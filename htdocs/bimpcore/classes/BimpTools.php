@@ -505,6 +505,9 @@ class BimpTools
 
     public static function changeBimpObjectId($old_id, $new_id, $module, $object_name)
     {
+        if (!$old_id || !$new_id) {
+            return;
+        }
         set_time_limit(120);
         ignore_user_abort(true);
 
@@ -579,7 +582,7 @@ class BimpTools
                                                 $table .= '_extrafields';
                                             }
                                         }
-                                        // echo $instance->object_name . ': ' . $field . '<br/>';
+//                                         echo $instance->object_name . ': ' . $field . '<br/>';
                                         $result = $bdb->update($table, array(
                                             $field => $new_id
                                                 ), '`' . $field . '` = ' . (int) $old_id);
@@ -617,6 +620,10 @@ class BimpTools
 
     public static function changeDolObjectId($old_id, $new_id, $module, $file = '', $class = '')
     {
+        if (!$old_id || !$new_id) {
+            return;
+        } 
+        
         set_time_limit(120);
         ignore_user_abort(true);
 

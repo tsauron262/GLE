@@ -223,12 +223,12 @@ class Bimp_Commande extends BimpComm
 
     public function isFieldEditable($field, $force_edit = false)
     {
+        global $user;
         switch ($field) {
             case 'entrepot':
                 if (!$force_edit) {
-                    global $user;
                     // A modifier rapidement...
-                    if ($this->isLogistiqueActive() && !in_array((int) $user->id, array(1, 33, 34, 224, 1130))) {
+                    if ($this->isLogistiqueActive() && !$user->rights->bimpcommercial->changeEntrepot) {
                         return 0;
                     }
                 }

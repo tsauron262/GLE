@@ -488,6 +488,22 @@ filters_panels:
             - field: id_entrepot
             - field: ef_type
               child: parent
+            - field: id_commercial
+              custom: 1
+              field: id_commercial
+              label: Commercial
+              data_type: id_object
+              type: value
+              input: 
+                type: search_user
+            - field: line_product
+              custom: 1
+              field: id_product
+              label: Produit
+              data_type: id_object
+              type: value
+              input: 
+                    type: search_product
             - field: num_livraison
             - field: ref
             - field: id_commande_client

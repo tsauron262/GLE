@@ -124,6 +124,7 @@ class BimpStatsFacture {
             if (in_array('NRS', $centres)) {
                 $sql .= " OR e.entrepot IS NULL OR e.entrepot = '1'";
             }
+            $sql .= ")";
         } else {
             $sql .= "1";
         }

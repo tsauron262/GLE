@@ -1161,6 +1161,10 @@ class ObjectLine extends BimpObject
     }
 
     // Affichages: 
+    
+    public function displaySerials(){
+        return '';
+    }
 
     public function displayLineData($field, $edit = 0, $display_name = 'default', $no_html = false)
     {

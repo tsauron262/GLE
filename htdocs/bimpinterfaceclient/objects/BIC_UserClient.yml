@@ -12,6 +12,7 @@ objects:
     
     societe:
         instance:
+            bimp_object: unset
             dol_object:
                 module: societe
                 file: societe
@@ -20,7 +21,8 @@ objects:
                     
     tickets:
         instance:
-            bimp_object: BIC_UserTickets
+            bimp_object: 
+                name: BIC_UserTickets
 
 header_btn: 
     callback: getActionsButtons

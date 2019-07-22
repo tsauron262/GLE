@@ -347,13 +347,13 @@ class Bimp_Product extends BimpObject
             );
         }
 
-//        $buttons[] = array(
-//            'label'   => 'Fusionner',
-//            'icon'    => 'fas_object-group',
-//            'onclick' => $this->getJsActionOnclick('merge', array(), array(
-//                'form_name' => 'merge'
-//            ))
-//        );
+        $buttons[] = array(
+            'label'   => 'Fusionner',
+            'icon'    => 'fas_object-group',
+            'onclick' => $this->getJsActionOnclick('merge', array(), array(
+                'form_name' => 'merge'
+            ))
+        );
 
         return $buttons;
     }
@@ -1255,34 +1255,22 @@ class Bimp_Product extends BimpObject
 
         $rows = $this->db->executeS($sql, 'array');
 
-//        echo '<pre>';
-//        print_r($rows);
-//        echo '</pre>';
-
         if (is_array($rows) && count($rows)) {
             foreach ($rows as $r) {
-                $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_PropalLine', (int) $r['id']);
-                if (!BimpObject::objectLoaded($line)) {
-//                    echo 'fail <br/>'; 
-                    continue;
-                }
+                $line = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_PropalLine', array(
+                            'id_line' => (int) $r['id']
+                                ), true);
 
                 $line->id_product = $this->id;
+                $line->pu_ht = $pu_ht;
+                $line->tva_tx = $tva_tx;
+                $line->pa_ht = $pa_ht;
 
                 $line_warnings = array();
                 $line_errors = $line->update($line_warnings, true);
 
                 if (count($line_errors)) {
                     $warnings[] = BimpTools::getMsgFromArray($line_warnings, 'Echec de la mise à jour ' . $line->getLabel('of_the'));
-                } else {
-                    $line->pu_ht = $pu_ht;
-                    $line->tva_tx = $tva_tx;
-                    $line->pa_ht = $pa_ht;
-
-                    $line_errors = $line->update($line_warnings, true);
-                    if (count($line_errors)) {
-                        $warnings[] = BimpTools::getMsgFromArray($line_warnings, 'Echec de la mise à jour ' . $line->getLabel('of_the'));
-                    }
                 }
 
                 if (count($line_warnings)) {
@@ -1300,7 +1288,9 @@ class Bimp_Product extends BimpObject
 
         if (is_array($rows) && count($rows)) {
             foreach ($rows as $r) {
-                $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $r['id']);
+                $line = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', array(
+                            'id_line' => (int) $r['id']
+                                ), true);
                 if (!BimpObject::objectLoaded($line)) {
                     continue;
                 }
@@ -1310,17 +1300,16 @@ class Bimp_Product extends BimpObject
                 $line_warnings = array();
                 $line_errors = $line->update($line_warnings, true);
 
-                if (count($line_errors)) {
-                    $warnings[] = BimpTools::getMsgFromArray($line_warnings, 'Echec de la mise à jour ' . $line->getLabel('of_the'));
-                } else {
+                if (!count($line_errors)) {
                     $line->pu_ht = $pu_ht;
                     $line->tva_tx = $tva_tx;
                     $line->pa_ht = $pa_ht;
 
                     $line_errors = $line->update($line_warnings, true);
-                    if (count($line_errors)) {
-                        $warnings[] = BimpTools::getMsgFromArray($line_warnings, 'Echec de la mise à jour ' . $line->getLabel('of_the'));
-                    }
+                }
+
+                if (count($line_errors)) {
+                    $warnings[] = BimpTools::getMsgFromArray($line_warnings, 'Echec de la mise à jour ' . $line->getLabel('of_the'));
                 }
 
                 if (count($line_warnings)) {
@@ -1338,7 +1327,9 @@ class Bimp_Product extends BimpObject
 
         if (is_array($rows) && count($rows)) {
             foreach ($rows as $r) {
-                $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFournLine', (int) $r['id']);
+                $line = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFournLine', array(
+                            'id_line' => (int) $r['id']
+                                ), true);
                 if (!BimpObject::objectLoaded($line)) {
                     continue;
                 }
@@ -1379,11 +1370,11 @@ class Bimp_Product extends BimpObject
         $del_warnings = array();
         $del_errors = $merged_product->delete($del_warnings, true);
 
-        if (count($del_warnings)) {
+        if (count($del_errors)) {
             $errors[] = BimpTools::getMsgFromArray($del_errors, 'Echec de la suppression du produit "' . $prod_ref . '"');
         }
         if (count($del_warnings)) {
-            $errors[] = BimpTools::getMsgFromArray($del_errors, 'Erreurs lors de la suppression du produit "' . $prod_ref . '"');
+            $errors[] = BimpTools::getMsgFromArray($del_warnings, 'Erreurs lors de la suppression du produit "' . $prod_ref . '"');
         }
 
         return $errors;
@@ -1435,7 +1426,6 @@ class Bimp_Product extends BimpObject
         $success = 'Fusion effectuée avec succès';
         $success_callback = '';
 
-        $errors[] = 'En développemnt';
         $id_merged_product = (int) (isset($data['id_merged_product']) ? $data['id_merged_product'] : 0);
         $id_kept_product = (int) (isset($data['id_kept_product']) ? $data['id_kept_product'] : 0);
 
@@ -1510,6 +1500,11 @@ class Bimp_Product extends BimpObject
         $extras['product_categories'] = $this->getCategories();
 //        $extras['fk_country'] = $this->getOriginCountry();
         return $extras;
+    }
+
+    public function deleteExtraFields()
+    {
+        return array();
     }
 
     // Méthodes statiques : 

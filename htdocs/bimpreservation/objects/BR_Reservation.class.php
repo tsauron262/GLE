@@ -278,14 +278,6 @@ class BR_Reservation extends BimpObject
 
             $lines[(int) $line->id] = 'Ligne ' . $n . ' - Produit: ' . $line->displayLineData('id_product', 0, 'ref_nom', true);
         }
-        
-        global $user;
-        
-        if ($user->admin) {
-            echo '<pre>';
-            print_r($lines);
-            echo '</pre>';
-        }
 
         return $lines;
     }

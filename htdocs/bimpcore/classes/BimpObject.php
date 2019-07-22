@@ -2169,6 +2169,83 @@ class BimpObject extends BimpCache
         return $objects;
     }
 
+    public function getListTotals($fields = array(), $filters = array(), $joins = array())
+    {
+        $table = $this->getTable();
+        $primary = $this->getPrimary();
+
+        if (is_null($table)) {
+            return array();
+        }
+
+        $is_dol_object = $this->isDolObject();
+        $has_extrafields = false;
+
+        // Vérification des champs à retourner: 
+        foreach ($fields as $key => $field) {
+            if ($this->field_exists($field)) {
+                if ($is_dol_object && $this->isDolExtraField($field)) {
+                    if (preg_match('/^ef_(.*)$/', $field, $matches)) {
+                        $field = $matches[1];
+                    }
+                    $fields[$key] = 'ef.' . $field;
+                    $has_extrafields = true;
+                } elseif ($this->isExtraField($field)) {
+                    $field_key = $this->getExtraFieldFilterKey($field, $joins);
+                    if ($field_key) {
+                        $fields[$key] = $field_key;
+                    } else {
+                        unset($fields[$key]);
+                    }
+                }
+            }
+        }
+
+        // Vérification des filtres: 
+        $filters = $this->checkSqlFilters($filters, $has_extrafields, $joins);
+
+        if ($has_extrafields && !isset($joins['ef'])) {
+            $joins['ef'] = array(
+                'alias' => 'ef',
+                'table' => $table . '_extrafields',
+                'on'    => 'a.' . $primary . ' = ef.fk_object'
+            );
+        }
+
+        $sql = 'SELECT ';
+        $fl = true;
+        foreach ($fields as $key => $name) {
+            if (!$fl) {
+                $sql .= ', ';
+            } else {
+                $fl = false;
+            }
+
+            $sql .= 'SUM(' . $key . ') as ' . $name;
+        }
+
+        $sql .= BimpTools::getSqlFrom($table, $joins);
+        $sql .= BimpTools::getSqlWhere($filters);
+
+//        echo $sql . '<br/><br/>'; 
+//        exit;
+
+        if (BimpDebug::isActive('bimpcore/objects/print_list_sql') || BimpTools::isSubmit('list_sql')) {
+            $plus = "";
+            if (class_exists('synopsisHook'))
+                $plus = ' ' . synopsisHook::getTime();
+            echo BimpRender::renderDebugInfo($sql, 'SQL Liste Total - Module: "' . $this->module . '" Objet: "' . $this->object_name . '"' . $plus);
+        }
+
+        $rows = $this->db->executeS($sql, 'array');
+
+        if (is_null($rows)) {
+            $rows = array();
+        }
+
+        return $rows;
+    }
+
     // Affichage des données:
 
     public function display($display_name = 'nom', $options = array())

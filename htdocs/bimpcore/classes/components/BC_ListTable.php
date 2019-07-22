@@ -307,6 +307,7 @@ class BC_ListTable extends BC_List
                         if (!isset($this->totals[$col_name])) {
                             $this->totals[$col_name] = array(
                                 'data_type' => '',
+                                'sql_key' => '',
                                 'value'     => 0
                             );
                             if (is_a($field, 'BC_Field')) {
@@ -315,7 +316,6 @@ class BC_ListTable extends BC_List
                                 $this->totals[$col_name]['data_type'] = $col_params['total_type'];
                             }
                         }
-                        $this->totals[$col_name]['value'] += (float) $current_value;
                     }
                 }
                 $rows[$item[$primary]] = $row;
@@ -334,6 +334,27 @@ class BC_ListTable extends BC_List
         if (method_exists($this->object, 'listRowsOverride')) {
             $this->object->listRowsOverride($this->name, $this->rows);
         }
+        
+        if ((int) $this->params['total_row']) {
+            $this->fetchTotals();
+        }
+    }
+    
+    protected function fetchTotals()
+    {        
+        $fields = array();
+        
+        foreach ($this->totals as $col_name => $params) {
+            $col_params = $this->getColParams($col_name);
+            if (isset($col_params['field']) && $col_params['fields']) {
+                if (isset($col_params['child']) && $col_params['child']) {
+                    $this->object = '';
+                    $instance = '';
+                }
+            }
+        }
+        
+        $this->object->getListTotals($fields, $this->final_filters, $this->final_joins);
     }
 
     public function setSelectedRows($selected_rows)
@@ -964,7 +985,7 @@ class BC_ListTable extends BC_List
 
             $content .= '<div style="margin-bottom: 15px">';
             $content .= BimpInput::renderSwitchOptionsInput('select_n', array(
-                        10  => '10', 20  => '20', 30  => '30', 40 => '40', 50 => '50'), $this->params['n'], $this->identifier . '_n');
+                        10 => '10', 20 => '20', 30 => '30', 40 => '40', 50 => '50'), $this->params['n'], $this->identifier . '_n');
             $content .= '</div>';
         }
 

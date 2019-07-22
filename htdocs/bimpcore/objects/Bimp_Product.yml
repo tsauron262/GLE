@@ -39,6 +39,11 @@ objects:
                 parent_module: bimpcore
                 parent_object_name: Bimp_Product
                 
+    entrepot: 
+        instance: 
+            id_object:
+                field_value: entrepot
+                
 fields: 
     ref: 
         label: Réf.
@@ -171,7 +176,14 @@ fields:
     fk_country: 
         label: Pays d'origine
         dol_prop: country_id
-        
+        type: int
+        default_value: 1
+        input: 
+            type: search_country
+        display: 
+            default: 
+                type: callback
+                method: displayCountry        
     weight: 
         label: Poids 
         type: float
@@ -310,8 +322,52 @@ fields:
             filter_type: product
             help: Entrez la référence ou l'id du produit à faire fusionner dans celui-ci. (celui que vous voulez supprimer)
         extra: 1
+        
+    product_categories: 
+        label: Tags/catégories
+        extra: 1
+        
+    localtax1_tx:
+        label: Taxe locale 1
+        type: money
+        dol_extra_field: 1
 
         
+    localtax1_type:
+        label: Type de taxe locale 1
+        type: int
+        dol_extra_field: 1
+
+        
+    localtax2_tx:
+        label: Taxe locale 2
+        type: money
+        dol_extra_field: 1
+
+        
+    localtax2_type:
+        label: Type de taxe locale 2
+        type: int
+        dol_extra_field: 1
+
+
+#    ref_constructeur:
+#        label: Réf. constructeur
+#        type: string
+#        dol_extra_field: 1
+
+        
+    fk_default_warehouse:
+        label: Entrepôt par défaut
+        type: id_object
+        object: entrepot
+        default_value: 0
+        input:
+            type: search_entrepot 
+        dol_extra_field: 1
+
+
+
 #    Champs non gérés
 #    ref_ext
 #    localtax1_tx
@@ -321,9 +377,7 @@ fields:
 #    tobatch
 #    duration
 #    finished
-#    seuil_stock_alerte
 #    canvas
-#    pmp
 
 forms: 
     light: 
@@ -415,6 +469,9 @@ fields_tables:
             - field: accountancy_code_buy
             - field: accountancy_code_sell
             - field: note
+            - field: fk_default_warehouse
+              display: nom_url
+
             
     prices: 
         title: Prix de vente
@@ -463,24 +520,36 @@ fields_tables:
     infos_complementaires:
         title: Informations complémentaires
         icon: plus
+        edit: 1
         rows:
             - field: url
             - field: stock
             - field: fk_country
-            - field: weight_units
-            - field: weight
-            - field: length_units
-            - field: length
-            - field: width_units
-            - field: width
-            - field: surface_units
-            - field: surface
-            - field: volume_units
-            - field: volume
-            
-        
+            - field: product_categories
+            - field: localtax1_tx
+            - field: localtax1_type
+            - field: localtax2_tx
+            - field: localtax2_type
+#            - field: ref_constructeur
+            - field: crt
+
     measures: 
+        edit: 1
+        rows:
         title: Mesures
+        rows:
+            - field: weight
+            - field: weight_units
+            - field: length
+            - field: length_units
+            - field: width
+            - field: width_units
+            - field: height
+            - field: height_units
+            - field: surface
+            - field: surface_units
+            - field: volume
+            - field: volume_units
         
     stock:
         title: Vue globale
@@ -518,6 +587,8 @@ views:
                       name: status
     
     fiche:
+        edit_form: light
+        delete_btn: 1
         rows:
             - cols: 
                 - type: fields_table
@@ -536,6 +607,12 @@ views:
                   col_sm: 12
                   fields_table: 
                       name: infos_complementaires
+                      
+                - type: fields_table
+                  col_lg: 5
+                  col_md: 5
+                  fields_table:
+                      name: measures
             
     
     product_price:

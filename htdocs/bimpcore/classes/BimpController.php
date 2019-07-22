@@ -574,7 +574,7 @@ class BimpController
                 
                 if ($json === false) {
                     $msg = 'Echec de l\'encodage JSON - '.  json_last_error_msg();
-                    dol_syslog('AjaxProcess "' . $action . '" - controller: ' . $this->module . ' ' . $this->controller.' - '.$msg, LOG_ERR);
+                    dol_syslog('AjaxProcess "' . $action . '" - controller: ' . $this->module . ' ' . $this->controller.' - '.$msg. " text : ".print_r($result,1), LOG_ERR);
                     die(json_encode(array(
                         'errors' => array($msg),
                         'request_id' => BimpTools::getValue('request_id', 0)

@@ -164,23 +164,34 @@ class Bimp_Vente extends BimpObject
     {
         set_time_limit(0);
 
-        $id_category = (int) BimpCore::getConf('id_categorie_apple');
-
-        if (!$id_category) {
-            $errors[] = 'ID de la catgorie "APPLE" non configurée';
-            return '';
-        }
-
+//        $id_category = (int) BimpCore::getConf('id_categorie_apple');
+//
+//        if (!$id_category) {
+//            $errors[] = 'ID de la catgorie "APPLE" non configurée';
+//            return '';
+//        }
+//
+//        $product = BimpObject::getInstance('bimpcore', 'Bimp_Product');
+//        $products_list = $product->getList(array(
+//            'cp.fk_categorie' => (int) $id_category
+//                ), null, null, 'id', 'asc', 'array', array('rowid', 'ref'), array(
+//            'cp' => array(
+//                'alias' => 'cp',
+//                'table' => 'categorie_product',
+//                'on'    => 'a.rowid = cp.fk_product'
+//            )
+//        ));
+        
+        
+        
         $product = BimpObject::getInstance('bimpcore', 'Bimp_Product');
         $products_list = $product->getList(array(
-            'cp.fk_categorie' => (int) $id_category
-                ), null, null, 'id', 'asc', 'array', array('rowid', 'ref'), array(
-            'cp' => array(
-                'alias' => 'cp',
-                'table' => 'categorie_product',
-                'on'    => 'a.rowid = cp.fk_product'
+            'ref' => array(
+                'part_type' => 'beginning',
+                'part'      => 'APP-'
             )
-        ));
+                ), null, null, 'id', 'asc', 'array', array('rowid', 'ref'));
+
 
 //        $file_str = '';
 //
@@ -288,7 +299,7 @@ VQ - Collège
                                 '',
                                 ''
                             )) . "\n";
-                    break 2;
+//                    break 2;
                 }
             }
             

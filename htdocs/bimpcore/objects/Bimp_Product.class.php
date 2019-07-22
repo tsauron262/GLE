@@ -329,7 +329,7 @@ class Bimp_Product extends BimpObject
                 break;
         }
     }
-
+    
     public function getActionsButtons()
     {
         global $user;
@@ -1505,7 +1505,11 @@ class Bimp_Product extends BimpObject
 
     public function fetchExtraFields()
     {
-        return array('best_buy_price' => $this->getBestBuyPrice());
+        $extras = array();
+        $extras['best_buy_price'] = $this->getBestBuyPrice();
+        $extras['product_categories'] = $this->getCategories();
+//        $extras['fk_country'] = $this->getOriginCountry();
+        return $extras;
     }
 
     // Méthodes statiques : 
@@ -1599,4 +1603,70 @@ class Bimp_Product extends BimpObject
             self::$ventes[$dateMin . "-" . $dateMax][$ln->fk_product][null]['total_ttc'] += $ln->total_ttc;
         }
     }
+    
+//    public function setCategories() {
+//        global $conf;
+////        if ($conf->categorie->enabled) {
+//            require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
+//            $form = new Form($this->db->db);
+//            $cate_arbo = $form->select_all_categories(Categorie::TYPE_PRODUCT, '', 'parent', 64, 0, 1);
+//            return $form->multiselectarray('categories', $cate_arbo, GETPOST('categories', 'array'), '', 0, '', 0, '100%');
+//            
+////				$cate_arbo = $form->select_all_categories(Categorie::TYPE_PRODUCT, '', 'parent', 64, 0, 1);
+////				$c = new Categorie($this->db->db);
+////				$cats = $c->containing($this->getData('id'),Categorie::TYPE_PRODUCT);
+////				$arrayselected=array();
+////				foreach($cats as $cat) {
+////					$arrayselected[] = $cat->id;
+////				}
+////				$html .= $form->multiselectarray('categories', $cate_arbo, $arrayselected, '', 0, '', 0, '100%');
+//
+////        } TODO set a else
+//    }
+    
+    public function getCategories() {
+        global $conf;
+        if ($conf->categorie->enabled) {
+            require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
+            $form = new Form($this->db->db);
+            return $form->showCategories($this->getData('id'),'product',1);
+        } else {
+            return "L'utilisation de catégorie est inactive";
+        }
+    }
+    
+    public function setOriginCountry() {
+        $form = new Form($this->db->db);
+        return $form->select_country($this->getData('fk_country '),'country_id');
+    }
+    
+    public function getOriginCountry() {
+        global $langs;
+        echo $this->getData('fk_county');
+        $return = getCountry($this->getData('fk_county'), 0, $this->db->db);
+        echo 'après la fonction' . $return.'<br/>';
+        die();
+        return 'test'.$return.'fin';
+    }
+    
+    public function renderHeaderExtraLeft() {
+        $html = '';
+        $barcode = $this->getData('barcode');
+        if(isset($barcode) and (strlen($barcode) == 12 or strlen($barcode) == 13)) {
+            $html .= '<img src="';
+            $html .= DOL_URL_ROOT . '/viewimage.php?modulepart=barcode&amp;generator=phpbarcode&amp;';
+            $html .= 'code=' . $barcode . '&amp;encoding=EAN13">';
+        }
+        return $html;
+    }
+    
+    public function displayCountry() {
+        global $langs;
+        $id = $this->getData('fk_country');
+        if (!is_null($id) && $id) {
+            return $langs->trans('Country' . $this->db->getValue('c_country', 'code', '`rowid` = ' . (int) $id));
+        }
+        return '';
+    }
+    
 }

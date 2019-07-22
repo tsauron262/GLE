@@ -983,11 +983,10 @@ class ObjectLine extends BimpObject
     public function getEquipmentLines()
     {
         if ($this->isLoaded() && static::$parent_comm_type) {
-            $lines = $this->getChildrenObjects('equipment_lines', array(
+            return BimpCache::getBimpObjectObjects('bimpcommercial', 'ObjectLineEquipment', array(
                 'id_object_line' => (int) $this->id,
                 'object_type'    => static::$parent_comm_type
             ));
-            return $lines;
         }
 
         return array();
@@ -997,7 +996,7 @@ class ObjectLine extends BimpObject
     {
         if ($this->isLoaded() && static::$parent_comm_type) {
             if (is_null($this->remises)) {
-                $this->remises = $this->getChildrenObjects('remises', array(
+                $this->remises = BimpCache::getBimpObjectObjects('bimpcommercial', 'ObjectLineRemise', array(
                     'id_object_line' => (int) $this->id,
                     'object_type'    => static::$parent_comm_type
                 ));
@@ -1734,7 +1733,6 @@ class ObjectLine extends BimpObject
 
     protected function updateLine($check_data = true, $force_update = false)
     {
-//        echo 'upline - ' . $this->object_name . ': ' . $this->pu_ht . ', ' . $this->tva_tx . ', ' . $this->pa_ht . '<br/>';
         $errors = array();
 
         $instance = $this->getParentInstance();
@@ -3835,7 +3833,6 @@ class ObjectLine extends BimpObject
 
     public function update(&$warnings = array(), $force_update = false)
     {
-//        echo 'update - ' . $this->object_name . ': ' . $this->pu_ht . ', ' . $this->tva_tx . ', ' . $this->pa_ht . '<br/>';
         if (!static::$parent_comm_type) {
             $errors[] = 'Impossible de mettre à jour une ligne depuis une instance de la classe de base "ObjectLine"';
             return $errors;

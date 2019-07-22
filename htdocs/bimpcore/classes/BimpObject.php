@@ -1895,6 +1895,14 @@ class BimpObject extends BimpCache
                         }
                         if ($this->isChild($instance)) {
                             $filters[$instance->getParentIdProperty()] = $this->id;
+                        } else {
+                            $msg = 'Appel à getChildrenList() invalide' . "\n";
+                            $msg .= 'Obj: ' . $this->object_name . ' - instance: ' . $instance->object_name . "\n";
+                            $msg .= 'ERP: ' . DOL_URL_ROOT;
+
+                            mailSyn2('ERREUR getChildren', 'f.martinez@bimp.fr', 'no-replay@bimp.fr', $msg);
+
+                            return array();
                         }
                         $primary = $instance->getPrimary();
                         $list = $instance->getList($filters, null, null, $order_by, $order_way, 'array', array($primary));
@@ -1931,6 +1939,14 @@ class BimpObject extends BimpCache
                                         self::$cache[$cache_key][(int) $item[$primary]] = $item[$name_prop];
                                     }
                                 }
+                            } else {
+                                $msg = 'Appel à getChildrenListArray() invalide' . "\n";
+                                $msg .= 'Obj: ' . $this->object_name . ' - instance: ' . $instance->object_name . "\n";
+                                $msg .= 'ERP: ' . DOL_URL_ROOT;
+
+                                mailSyn2('ERREUR getChildren', 'f.martinez@bimp.fr', 'no-replay@bimp.fr', $msg);
+
+                                return array();
                             }
                         }
                     }
@@ -1964,6 +1980,14 @@ class BimpObject extends BimpCache
                         }
                         if ($this->isChild($instance)) {
                             $filters = BimpTools::mergeSqlFilter($filters, $instance->getParentIdProperty(), $this->id);
+                        } else {
+                            $msg = 'Appel à getChildrenObjects() invalide' . "\n";
+                            $msg .= 'Obj: ' . $this->object_name . ' - instance: ' . $instance->object_name . "\n";
+                            $msg .= 'ERP: ' . DOL_URL_ROOT;
+
+                            mailSyn2('ERREUR getChildren', 'f.martinez@bimp.fr', 'no-replay@bimp.fr', $msg);
+
+                            return array();
                         }
                         $primary = $instance->getPrimary();
                         $list = $instance->getList($filters, null, null, $order_by, $order_way, 'array', array($primary));
@@ -2593,7 +2617,7 @@ class BimpObject extends BimpCache
         }
 
         if (!$validate) {
-            $msg = '"' . $label . '": valeur invalide : '.$value;
+            $msg = '"' . $label . '": valeur invalide : ' . $value;
             if (!is_null($invalid_msg)) {
                 $msg .= ' (' . $invalid_msg . ')';
             }

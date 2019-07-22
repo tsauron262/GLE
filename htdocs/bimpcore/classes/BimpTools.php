@@ -557,10 +557,9 @@ class BimpTools
 
                         if ($obj_module === $module && $obj_name === $object_name) {
                             $params = $instance->config->getParams('objects/' . $obj_conf_name . '/instance');
-
                             if (isset($params['id_object']['field_value'])) {
                                 $field = $params['id_object']['field_value'];
-                                if ($instance->field_exists($field)) {
+                                if ($field && $instance->field_exists($field)) {
                                     if ($instance->isExtraField($field)) {
                                         $primary = $instance->getPrimary();
                                         $nFails = 0;
@@ -582,7 +581,6 @@ class BimpTools
                                                 $table .= '_extrafields';
                                             }
                                         }
-//                                         echo $instance->object_name . ': ' . $field . '<br/>';
                                         $result = $bdb->update($table, array(
                                             $field => $new_id
                                                 ), '`' . $field . '` = ' . (int) $old_id);
@@ -622,8 +620,8 @@ class BimpTools
     {
         if (!$old_id || !$new_id) {
             return;
-        } 
-        
+        }
+
         set_time_limit(120);
         ignore_user_abort(true);
 
@@ -668,8 +666,8 @@ class BimpTools
                             } else {
                                 if (isset($obj_params['instance']['bimp_object']['module'])) {
                                     $obj_module = $obj_params['instance']['bimp_object']['module'];
-                                    $obj_file = isset($obj_params['instance']['bimp_object']['file']) ? $obj_params['instance']['bimp_object']['file'] : $module;
-                                    $obj_class = isset($obj_params['instance']['bimp_object']['class']) ? $obj_params['instance']['bimp_object']['class'] : ucfirst($file);
+                                    $obj_file = isset($obj_params['instance']['bimp_object']['file']) ? $obj_params['instance']['bimp_object']['file'] : $obj_module;
+                                    $obj_class = isset($obj_params['instance']['bimp_object']['class']) ? $obj_params['instance']['bimp_object']['class'] : ucfirst($obj_file);
                                 }
                             }
                         }
@@ -680,11 +678,9 @@ class BimpTools
 
                         if ($obj_class === $class) {
                             $params = $instance->config->getParams('objects/' . $obj_conf_name . '/instance');
-
                             if (isset($params['id_object']['field_value'])) {
                                 $field = $params['id_object']['field_value'];
-                                if ($instance->field_exists($field)) {
-//                                    echo $instance->object_name . ': ' . $field . '<br/>';
+                                if ($field && $instance->field_exists($field)) {
                                     $result = $bdb->update($table, array(
                                         $field => $new_id
                                             ), '`' . $field . '` = ' . (int) $old_id);

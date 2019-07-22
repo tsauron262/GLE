@@ -660,10 +660,12 @@ lists_cols:
     
 lists: 
     global:
-        extends: default
         sort_field: id
+        configurable: 1
+        positions: 0
         filters_panel: default
         filters_panel_open: 1
+        enable_sort: 1
         sort_way: desc
         pagination: 1
         n: 10
@@ -679,10 +681,14 @@ lists:
             remise: 
             total_ttc: 
             margin:
+            sn:
+                label: S/N
+                value:
+                    callback: displaySerials
                 
     default: 
         extends: global
-        configurable: 1
+        filters_panel_open: 0
         checkboxes: 1
         positions: 1
         positions_open: 1

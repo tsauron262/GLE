@@ -487,7 +487,9 @@ lists_cols:
                     - 1
     total_ht: 
         field: total
+#        has_total: 1
     total_ttc: 
+#        has_total: 1
         field: total_ttc
     pdf: 
         label: Fichier PDF
@@ -505,6 +507,7 @@ lists_cols:
     
 lists: 
     default: 
+        total_row: 1
         title: Factures
         icon: fas_file-invoice-dollar
         bulk_actions: unset

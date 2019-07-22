@@ -57,11 +57,11 @@ class facturesController extends BimpController
         $line = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureLine');
 
         $bc_list = new BC_ListTable($line, 'global', 1, null, 'Liste des produits en factures', 'fas_bars');
-        $bc_list->addJoin('commande', 'a.id_obj = parent.rowid', 'parent');
-        $bc_list->addFieldFilterValue('parent.fk_statut', array(
-            'operator' => '>',
-            'value'    => 0
-        ));
+//        $bc_list->addJoin('facture', 'a.id_obj = parent.rowid', 'parent');
+//        $bc_list->addFieldFilterValue('parent.fk_statut', array(
+//            'operator' => '>',
+//            'value'    => 0
+//        ));
         
 //        if ($id_entrepot) {
 //            $bc_list->addJoin('commande_extrafields', 'a.id_obj = cef.fk_object', 'cef');

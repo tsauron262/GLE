@@ -132,16 +132,18 @@ class Bimp_CommandeLine extends ObjectLine
                 'onclick' => 'addSelectedCommandeLinesToShipment($(this), \'list_id\', ' . $commande->id . ')'
             );
 
-            $onclick = 'addSelectedCommandeLinesToFacture($(this), \'list_id\', ';
-            $onclick .= $commande->id . ', ' . (int) $id_client_facture . ', ';
-            $onclick .= (($id_client_facture === (int) $commande->getData('fk_soc')) ? (int) $commande->dol_object->contactid : 0) . ', ';
-            $onclick .= (int) $commande->getData('fk_cond_reglement') . ')';
+            if ($commande->isActionAllowed('linesFactureQties') && $commande->canSetAction('linesFactureQties')) {
+                $onclick = 'addSelectedCommandeLinesToFacture($(this), \'list_id\', ';
+                $onclick .= $commande->id . ', ' . (int) $id_client_facture . ', ';
+                $onclick .= (($id_client_facture === (int) $commande->getData('fk_soc')) ? (int) $commande->dol_object->contactid : 0) . ', ';
+                $onclick .= (int) $commande->getData('fk_cond_reglement') . ')';
 
-            $actions[] = array(
-                'label'   => 'Quantités facture',
-                'icon'    => 'fas_file-invoice-dollar',
-                'onclick' => $onclick
-            );
+                $actions[] = array(
+                    'label'   => 'Quantités facture',
+                    'icon'    => 'fas_file-invoice-dollar',
+                    'onclick' => $onclick
+                );
+            }
 
             $onclick = 'setSelectedObjectsAction($(this), \'list_id\', \'addReturnsFromLines\', {}, ';
             $onclick .= '\'returns_from_lines\', null, true, ';
@@ -1120,11 +1122,11 @@ class Bimp_CommandeLine extends ObjectLine
                 foreach ($reservations as $reservation) {
                     $buttons = $reservation->getListExtraBtn();
                     $buttons[] = array(
-                        'label' => 'Vue rapide',
-                        'icon' => 'fas_eye',
+                        'label'   => 'Vue rapide',
+                        'icon'    => 'fas_eye',
                         'onclick' => $reservation->getJsLoadModalView('default')
                     );
-                    
+
                     $html .= '<tr class="Bimp_CommandeLine_reservation_row">';
                     $html .= '<td style="text-align: center; width: 45px">';
                     $html .= '<input type="checkbox" name="reservation_check[]" value="' . $reservation->id . '" class="reservation_check"';
@@ -1418,7 +1420,7 @@ class Bimp_CommandeLine extends ObjectLine
         return $html;
     }
 
-    public function renderFactureQtyInput($id_facture = 0, $with_total_max = false, $value = null, $max = null)
+    public function renderFactureQtyInput($id_facture = 0, $with_total_max = false, $value = null, $max = null, $canEdit = true)
     {
         $html = '';
 
@@ -1435,9 +1437,11 @@ class Bimp_CommandeLine extends ObjectLine
         }
 
         if ((int) $id_facture === -1) {
-            $html = '<input type="hidden" name="line_' . $this->id . '_facture_' . $id_facture . '_qty" value="' . $facture_qty . '"/>';
-            $html .= $facture_qty . ' ';
-            $html .= '<span class="warning">(Non modifiable)</span>';
+            $html = '<input type="hidden" class="line_facture_qty" name="line_' . $this->id . '_facture_' . $id_facture . '_qty" value="' . $facture_qty . '"/>';
+            $html .= $facture_qty;
+            if ($id_facture === -1) {
+                $html .= ' <span class="warning">(Non modifiable)</span>';
+            }
             return $html;
         }
 
@@ -1464,6 +1468,10 @@ class Bimp_CommandeLine extends ObjectLine
             if (is_null($value)) {
                 $value = (!$with_total_max && !(float) $facture_qty && !(int) $id_facture ? $min : $facture_qty);
             }
+        }
+
+        if (!$canEdit) {
+            return '<input type="hidden" class="line_facture_qty" name="line_' . $this->id . '_facture_' . $id_facture . '_qty" value="' . $value . '"/>' . $value;
         }
 
         if (!$decimals) {

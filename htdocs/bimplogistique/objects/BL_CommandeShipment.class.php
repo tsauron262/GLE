@@ -113,6 +113,12 @@ class BL_CommandeShipment extends BimpObject
     public function canSetAction($action)
     {
 
+        switch($action) {
+            case 'editFacture':
+                $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
+                return $facture->can('create');
+            
+        }
         return (int) parent::canSetAction($action);
     }
 
@@ -1089,6 +1095,8 @@ class BL_CommandeShipment extends BimpObject
 
         $has_lines = false;
         $body_html = '';
+        $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
+        $canEdit = $facture->can('create');
 
         foreach ($lines as $line) {
             if (!isset($qties[(int) $line->id]) || !(float) $qties[(int) $line->id]) {
@@ -1135,7 +1143,7 @@ class BL_CommandeShipment extends BimpObject
             $body_html .= $line->displayLineData('tva_tx');
             $body_html .= '</td>';
             $body_html .= '<td>';
-            $body_html .= $line->renderFactureQtyInput($id_facture, false, (float) $qties[(int) $line->id]);
+            $body_html .= $line->renderFactureQtyInput($id_facture, false, (float) $qties[(int) $line->id], null, $canEdit);
             $body_html .= '</td>';
             $body_html .= '</tr>';
 
@@ -1360,6 +1368,9 @@ class BL_CommandeShipment extends BimpObject
         $body_html = '';
         $has_lines = false;
         $colspan = 5;
+        
+        $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
+        $canEdit = $facture->can('create');
 
         foreach ($data as $id_commande => $lines_qties) {
             $commande = self::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $id_commande);
@@ -1418,7 +1429,7 @@ class BL_CommandeShipment extends BimpObject
                 $body_html .= $line->displayLineData('tva_tx');
                 $body_html .= '</td>';
                 $body_html .= '<td>';
-                $body_html .= $line->renderFactureQtyInput(0, false, (float) $line_qty);
+                $body_html .= $line->renderFactureQtyInput(0, false, (float) $line_qty, null, $canEdit);
                 $body_html .= '</td>';
                 $body_html .= '</tr>';
 
@@ -1803,7 +1814,7 @@ class BL_CommandeShipment extends BimpObject
 
                     // Création de la facture: 
                     $fac_errors = array();
-                    $id_facture = (int) $commande->createFacture($fac_errors, $id_client, $id_contact, $id_cond_reglement, $id_account, $note_public, $note_private, $remises);
+                    $id_facture = (int) $commande->createFacture($fac_errors, $id_client, $id_contact, $id_cond_reglement, $id_account, $note_public, $note_private, $remises, array(), null, null, null, true);
 
                     if (!$id_facture || count($fac_errors)) {
                         $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Echec de la création de la facture');
@@ -1963,7 +1974,7 @@ class BL_CommandeShipment extends BimpObject
             } else {
                 // Création de la facture: 
                 $fac_errors = array();
-                $id_facture = (int) $base_commande->createFacture($fac_errors, $id_client, $id_contact, $id_cond_reglement, $id_account, $note_public, $note_private, $remises, $extra_commandes, $libelle, $id_entrepot, $ef_type);
+                $id_facture = (int) $base_commande->createFacture($fac_errors, $id_client, $id_contact, $id_cond_reglement, $id_account, $note_public, $note_private, $remises, $extra_commandes, $libelle, $id_entrepot, $ef_type, true);
 
                 if (!$id_facture || count($fac_errors)) {
                     $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Echec de la création de la facture');

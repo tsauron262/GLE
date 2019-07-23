@@ -769,6 +769,8 @@ class BimpCache
                 );
             }
         }
+        foreach(self::$cache[$cache_key] as $idT  => $valT)
+            self::$cache[$cache_key][$idT] = str_replace ("<", "(", str_replace (">", ")", $valT));
 
         return self::$cache[$cache_key];
     }
@@ -1079,7 +1081,9 @@ class BimpCache
                 }
             }
         }
+        
 
+        
         return self::getCacheArray($cache_key, $include_empty, 0, $empty_label);
     }
 

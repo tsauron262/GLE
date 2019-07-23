@@ -204,37 +204,37 @@ class BC_FieldFilter extends BC_Filter
                     }
                 } elseif ($relation === 'hasMany') {
                     if ($this->base_object->isChild($this->object)) {
-                        if (!isset($joins[$this->child_name])) {
-                            $joins[$this->child_name] = array(
-                                'table' => $this->object->getTable(),
-                                'alias' => $this->child_name,
-                                'on'    => 'a.' . $this->base_object->getPrimary() . ' = ' . $this->child_name . '.' . $this->object->getParentIdProperty()
-                            );
-                        }
-
-                        if ($this->object->isDolExtraField($field_name)) {
-                            $alias = $this->child_name . '_ef';
-                            if (!isset($joins[$alias])) {
-                                $joins[$alias] = array(
-                                    'table' => $this->object->getTable() . '_extrafields',
-                                    'alias' => $alias,
-                                    'on'    => $alias . '.fk_object = ' . $this->child_name . '.' . $this->object->getPrimary()
+                        $parent_id_prop = $this->object->getParentIdProperty();
+                        if (!$parent_id_prop) {
+                            $errors[] = 'Propriété de l\'ID parent absent pour l\'objet "' . $this->object->getLabel() . '"';
+                        } else {
+                            if (!isset($joins[$this->child_name])) {
+                                $joins[$this->child_name] = array(
+                                    'table' => $this->object->getTable(),
+                                    'alias' => $this->child_name,
+                                    'on'    => 'a.' . $this->base_object->getPrimary() . ' = ' . $this->child_name . '.' . $parent_id_prop
                                 );
                             }
-                            $filter_key = $alias . '.' . $field_name;
-                        } elseif ($this->object->isExtraField($field_name)) {
-                            $filter_key = $this->object->getExtraFieldFilterKey($field_name, $joins, $this->child_name);
-                        } else {
-                            $filter_key = $this->child_name . '.' . $field_name;
+                            
+                            if ($this->object->isDolExtraField($field_name)) {
+                                $alias = $this->child_name . '_ef';
+                                if (!isset($joins[$alias])) {
+                                    $joins[$alias] = array(
+                                        'table' => $this->object->getTable() . '_extrafields',
+                                        'alias' => $alias,
+                                        'on'    => $alias . '.fk_object = ' . $this->child_name . '.' . $this->object->getPrimary()
+                                    );
+                                }
+                                $filter_key = $alias . '.' . $field_name;
+                            } elseif ($this->object->isExtraField($field_name)) {
+                                $filter_key = $this->object->getExtraFieldFilterKey($field_name, $joins, $this->child_name);
+                            } else {
+                                $filter_key = $this->child_name . '.' . $field_name;
+                            }
                         }
                     } else {
                         $errors[] = 'Erreur: l\'objet "' . $this->object->getLabel() . '" doit être enfant de "' . $this->base_object->getLabel() . '"';
                     }
-                    $joins = array(
-                        'table' => $this->object->getTable(),
-                        'alias' => $this->child_name,
-                        ''
-                    );
                 } else {
                     $errors[] = 'Type de relation invalide pour l\'objet "' . $this->object->getLabel() . '"';
                 }

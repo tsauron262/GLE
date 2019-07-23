@@ -23,13 +23,10 @@ objects:
             id_object: unset
             
     places: 
+        relation: hasMany
+        delete: 1
         instance: 
             bimp_object: BE_Place
-            
-    place: 
-        extends: places
-        list_filters: 
-            position: 1
             
     logiciels: 
         relation: hasMany
@@ -403,7 +400,9 @@ forms:
 filters_panel: 
     default: 
         filters: 
-            - field: 
+            - field: type
+              child: places
+            
 list:
     filters_panel: default
     checkboxes: 1

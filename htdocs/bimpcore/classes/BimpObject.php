@@ -358,6 +358,12 @@ class BimpObject extends BimpCache
     public function getParentIdProperty()
     {
         $property = $this->params['parent_id_property'];
+//        if ($this->object_name === 'BE_Place') {
+////            echo $this->object_name . ': ' . $property . '<br/>';
+////            echo '<pre>';
+////            print_r($this->params);
+////            echo '</pre>';
+////        }
         if (is_null($property)) {
             if ($this->field_exists('id_parent')) {
                 $property = 'id_parent';

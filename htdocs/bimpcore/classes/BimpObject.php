@@ -1847,42 +1847,46 @@ class BimpObject extends BimpCache
                     if ($child_object->isExtraField($field)) {
                         return $child_object->getExtraFieldFilterKey($field, $joins, $alias);
                     } else {
-                        $filter_key = $this->child_name . '.' . $field_name;
-                    }
-                }
-            } elseif ($relation === 'hasMany') {
-                
-            } else {
-                
-            }
-
-            $id_prop = $this->getParams('objects/' . $child_name . '/instance/id_object/field_value');
-            if (is_a($instance, 'BimpObject') && is_string($id_prop) && $id_prop) {
-                if ($instance->isDolObject() && $instance->isDolExtraField($field)) {
-                    $alias = $child_name . '_ef';
-                    if (!isset($joins[$alias])) {
-                        $joins[$alias] = array(
-                            'table' => $instance->getTable() . '_extrafields',
-                            'on'    => $main_alias . '.' . $id_prop . ' = ' . $alias . '.fk_object',
-                            'alias' => $alias
-                        );
-                    }
-                    return $alias . '.' . $field;
-                } else {
-                    $alias = $child_name;
-                    if (!isset($joins[$alias])) {
-                        $joins[$alias] = array(
-                            'table' => $instance->getTable(),
-                            'on'    => $main_alias . '.' . $id_prop . ' = ' . $alias . '.' . $instance->getPrimary(),
-                            'alias' => $alias
-                        );
-                    }
-                    if ($instance->isExtraField($field)) {
-                        return $instance->getExtraFieldFilterKey($field, $joins, $alias);
-                    } else {
                         return $alias . '.' . $field;
                     }
                 }
+            } elseif ($relation === 'hasMany') {
+                if ($this->isChild($child_object)) {
+                    $parent_id_prop = $child_object->getParentIdProperty();
+                    if (!$parent_id_prop) {
+                        $errors[] = 'Propriété de l\'ID parent absent pour l\'objet "' . $child_object->getLabel() . '"';
+                    } else {
+                        $alias = $child_name;
+                        if (!isset($joins[$alias])) {
+                            $joins[$alias] = array(
+                                'table' => $child_object->getTable(),
+                                'alias' => $alias,
+                                'on'    => $main_alias . '.' . $this->getPrimary() . ' = ' . $alias . '.' . $parent_id_prop
+                            );
+                        }
+
+                        if ($child_object->isDolExtraField($field)) {
+                            $sub_alias = $child_name . '_ef';
+                            if (!isset($joins[$sub_alias])) {
+                                $joins[$sub_alias] = array(
+                                    'table' => $child_object->getTable() . '_extrafields',
+                                    'alias' => $sub_alias,
+                                    'on'    => $sub_alias . '.fk_object = ' . $alias . '.' . $child_object->getPrimary()
+                                );
+                            }
+                            return $alias . '.' . $field;
+                        } elseif ($child_object->isExtraField($field)) {
+                            return $child_object->getExtraFieldFilterKey($field, $joins, $child_name);
+                        } else {
+                            return $alias . '.' . $field;
+                        }
+                    }
+                } else {
+                    $errors[] = 'Erreur: l\'objet "' . $child_object->getLabel() . '" doit être enfant de "' . $this->getLabel() . '"';
+                }
+            } else {
+                $errors[] = 'Type de relation invalide pour l\'objet "' . $child_object->getLabel() . '"';
+                return '';
             }
         } elseif ($this->field_exists($field)) {
             if ($this->isDolExtraField($field)) {
@@ -1899,6 +1903,8 @@ class BimpObject extends BimpCache
             } else {
                 return $main_alias . '.' . $field;
             }
+        } else {
+            $errors[] = 'Le champ "' . $field . '" n\'existe pas pour les ' . $this->getLabel('name_plur');
         }
 
         return '';

@@ -26,6 +26,11 @@ objects:
         instance: 
             bimp_object: BE_Place
             
+    place: 
+        extends: places
+        list_filters: 
+            position: 1
+            
     logiciels: 
         relation: hasMany
         delete: 1
@@ -396,6 +401,7 @@ forms:
             - object: places
             
 list:
+    filters_panel: default
     checkboxes: 1
     bulk_actions: 
         - label: Supprimer les équipements sélectionnés
@@ -486,3 +492,23 @@ cards:
                           - nom_url
             - icon: barcode
               field: serial
+              
+              
+filters_panels: 
+    default: 
+        filters: 
+            type: 
+                field: type
+            product: 
+                field: id_product
+            serial: 
+                field: serial
+            placetype: 
+                field: type
+                child: place
+            placeentrepot: 
+                field: id_entrepot
+                child: places
+            placeentrepot: 
+                field: id_entrepot
+                child: places

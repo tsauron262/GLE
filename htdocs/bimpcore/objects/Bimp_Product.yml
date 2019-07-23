@@ -537,17 +537,17 @@ fields_tables:
             - field: price_min_ttc
             - field: cost_price
     
-    prices_buy: 
-        title: Prix d'achat
-        icon: fas_euro-sign
-        rows:  
-            - field: price
-              label: Prix HT
-            - field: tva_tx
-            - field: price_ttc
-            - field: price_min_ttc
-            - field: cost_price
-            - field: cur_pa_ht
+#    prices_buy: 
+#        title: Prix d'achat
+#        icon: fas_euro-sign
+#        rows:  
+#            - field: price
+#              label: Prix HT
+#            - field: tva_tx
+#            - field: price_ttc
+#            - field: price_min_ttc
+#            - field: cost_price
+#            - field: cur_pa_ht
 
        
     status: 

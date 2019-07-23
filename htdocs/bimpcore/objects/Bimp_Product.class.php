@@ -1698,7 +1698,7 @@ class Bimp_Product extends BimpObject
    
     public function canEdit() {
         global $user;
-        if($user->rights->admin or $user->rights->produit->creer)
+//        if($user->rights->admin or $user->rights->produit->creer)
             return 1;
         return 0;
     }

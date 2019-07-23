@@ -181,55 +181,37 @@ class BContract_echeancier extends BimpObject {
 
         $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}';
 
-        $html .= '<br /><form action="" method="post">'
-                . 'Du <input class="datePicker" name="date_debut_select" placeholder="Date de début" /input> au '
-                . '<input class="datePicker" name="date_fin_select" placeholder="Date de fin" /input><br />'
-//                . '<input type="submit" name="submit" class="btn btn-primary saveButton" value="Créer facture perso" onclick="' .
-//                $this->getJsActionOnclick("create_facture_perso", array(), array(
-//                    "success_callback" => $callback
-//                )) . '">';
-                . '<input class="btn btn-primary saveButton" type="submit" name="submit" value="Créee facture personnalisé" /></form>';
+        $html .= '<br /><form action="" method="post">';
+        $html .= '<div style="  display: inline-flex" >';
+        $html .= BimpInput::renderDatePickerInput('date_debut_select', 0, 0, 0, 'date') . BimpInput::renderDatePickerInput('date_fin_select', 0, 0, 0, 'date');
+        $html .= '</div><br>';
+        $html .= '<input class="btn btn-primary saveButton" type="submit" name="submit" value="Créee facture personnalisé" /></form>';
 
         if (isset($_POST['submit'])) {
-            $select_debut = $_POST['date_debut_select'];
-            $select_fin = $_POST['date_fin_select'];
-
-            if (preg_match("/^[0-9]{1,2}\/[0-9]{1,2}\/[0-9]{4}$/", $select_debut) && preg_match("/^[0-9]{1,2}\/[0-9]{1,2}\/[0-9]{4}$/", $select_fin)) {
-                $converted_date_debut = $this->formatDate($select_debut);
-                $converted_date_fin = $this->formatDate($select_fin);
-
-                $value = $this->match_key_with_dates($converted_date_debut, $converted_date_fin);
-                $nb_period = $parent->getData('duree_mois') / $parent->getData('periodicity');
-                $tmp = $nb_period - $value;
-                $calc_period = $nb_period - $tmp;
-
-                $this->actionCreate_facture_perso($converted_date_debut, $converted_date_fin);
-                $nextdate = new DateTime("$converted_date_debut");
-                $nextdate->getTimestamp();
-                $nextdate->add(new DateInterval("P" . $calc_period . "M"));
-                //$nextdate->sub(new DateInterval("P1D"));
-                $newdate = $nextdate->format('Y-m-d');
-                $udpadeArray = Array('next_facture_date' => $newdate);
-                $bimp->update('bcontract_prelevement', $udpadeArray, 'id_contrat = ' . $parent->id);
-            } elseif ($select_debut == null || $select_fin == null) {
-                $html .= BimpRender::renderAlerts('Dates sélectionnées invalides ou nulles (dd/mm/yyyy)', 'danger', false);
-            } else {
-                $html .= BimpRender::renderAlerts('Dates sélectionnées invalides ou nulles (dd/mm/yyyy)', 'danger', false);
-            }
+            //$select_debut = $_POST['date_debut_select'];
+            //$select_fin = $_POST['date_fin_select'];
+//            echo 'datedebut ' . $select_debut;
+//            echo 'datefin ' . $select_fin;
+            $select_debut = BimpTools::getPostFieldValue('date_debut_select');
+            $select_fin = BimpTools::getPostFieldValue('date_fin_select');
+            
+            //$value = $this->match_key_with_dates($this->calcul_new_date($select_debut), $this->calcul_new_date($select_fin));
+            $nb_period = $parent->getData('duree_mois') / $parent->getData('periodicity');
+            $tmp = $nb_period - $value;
+            $calc_period = $nb_period - $tmp;
+            //echo 'test' . $calc_period;
+            
+            //$this->actionCreate_facture_perso($converted_date_debut, $converted_date_fin);
+     
+            //UPDATE NEXT DATE
+            //$nextdate = new DateTime("$converted_date_debut");
+            //$nextdate->getTimestamp();
+            $nextdate->add(new DateInterval("P" . $calc_period . "M"));
+            $newdate = $nextdate->format('Y-m-d');
+            $udpadeArray = Array('next_facture_date' => $newdate);
+            $bimp->update('bcontract_prelevement', $udpadeArray, 'id_contrat = ' . $parent->id);
         }
         return $html;
-    }
-
-    public function formatDate($date) { {
-            if (strpos($date, '/') !== false) :
-                $date = str_replace('/', '-', $date);
-                $date = date('Y-m-d', strtotime($date));
-            else :
-                $date = date('d-m-Y', strtotime($date));
-                $date = str_replace('-', '/', $date);
-            endif;
-            return $date;
-        }
     }
 
     public function display_info() {
@@ -280,7 +262,7 @@ class BContract_echeancier extends BimpObject {
             }
         }
     }
-    
+
     public function match_key_with_dates($date1, $date2) {
         while ($list = current($this->tab_echeancier)) {
             if ($list['date_debut'] == $date1) {
@@ -486,7 +468,7 @@ class BContract_echeancier extends BimpObject {
             return Array('errors' => 'error facture');
         }
         //$this->updateLine($parent->id);
-
+        
         $success = 'Facture personnalisé ' . $facture->id . ' créer avec succès d\'un montant de ' . price($this->getData('next_facture_amount')) . ' €';
     }
 

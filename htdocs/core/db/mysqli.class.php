@@ -298,8 +298,12 @@ class DoliDBMysqli extends DoliDB
                 define('OFF_MULTI_SQL', 1);
             }
         }
-//        if(stripos(trim($query), "SELECT") !== 0)
-//                echo $query;
+        $debugTime = false;
+        if(class_exists("BimpDebug") &&  BimpDebug::isActive('bimpcore/objects/print_admin_sql')){
+            global $user;
+            if($user->admin)
+                $debugTime = true;
+        }
 
         /*moddrsi*/
         $tabRemplacement = array(
@@ -315,7 +319,6 @@ class DoliDBMysqli extends DoliDB
         
         
         $this->countReq ++;
-        $debugTime = false;
         if($debugTime){
             $timestamp_debut = microtime(true);
             if(!isset($this->timestamp_debut)){

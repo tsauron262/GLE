@@ -364,6 +364,12 @@ class DoliDBMysqli extends DoliDB
         
         /*mod drsi*/
         if($debugTime){
+            global $tabReq;
+            
+            if(!isset($tabReq[$query]))
+                $tabReq[$query] = 0;
+            $tabReq[$query]++;
+            
             $timestamp_fin = microtime(true);
             $difference_ms = $timestamp_fin - $timestamp_debut;
             $difference_ms2 = $timestamp_fin - $this->timestamp_debut;
@@ -374,6 +380,9 @@ class DoliDBMysqli extends DoliDB
                 echo $query." <br/>";
                 echo "||".$this->num_rows($ret)." en ".$difference_ms."s depuis deb ".$difference_ms2." <br/><br/>";
             }
+            if($tabReq[$query] > 2)
+                echo 'attention req identique '.$tabReq[$query]." foix.";
+            
             $this->timestamp_derfin = $timestamp_fin;
         }
 

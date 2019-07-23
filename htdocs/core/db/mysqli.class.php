@@ -262,9 +262,9 @@ class DoliDBMysqli extends DoliDB
         
         if(defined('BDD_2_HOST') && !defined('OFF_MULTI_SQL') && BDD_2_HOST !=  $this->database_host){
             if(stripos(trim($query), "SELECT") === 0){
-                if(stripos(trim($query), "MAXnnnnn") !== false){
-                    $testPlusPetitQueDix = rand(2,12);//rand(6,15);
-                    if(1){
+                if(stripos(trim($query), "MAX") === false){
+                    $testPlusPetitQueDix = rand(5,12);//rand(6,15);
+                    if($testPlusPetitQueDix < 10){
                         global $dbRead;
                         if(!$dbRead){
                             $servRead = BDD_2_HOST;

@@ -4,7 +4,7 @@ debug: 1
 bimpcore: 
     controller: 
 #        Affiche les temps de chargement objets:
-        display_times: 0
+        display_times: 1
         display_errors: 1
     objects: 
 #        Affiche les requêtes sql pour les listes objets: 

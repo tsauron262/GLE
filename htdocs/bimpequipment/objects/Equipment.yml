@@ -400,6 +400,10 @@ forms:
             - field: date_warranty_end
             - object: places
             
+filters_panel: 
+    default: 
+        filters: 
+            - field: 
 list:
     filters_panel: default
     checkboxes: 1

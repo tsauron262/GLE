@@ -199,6 +199,8 @@ filters_panels:
                 field: id_client
             product: 
                 field: fk_product
+            qty: 
+                field: qty
             categ1:
                 custom: 1
                 label: Catégorie (1)

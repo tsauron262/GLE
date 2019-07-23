@@ -34,6 +34,8 @@ class BL_CommandeShipment extends BimpObject
 
         return (int) parent::isEditable($force_edit);
     }
+    
+    //getShipmentQty de commmande line
 
     public function isActionAllowed($action, &$errors = array())
     {

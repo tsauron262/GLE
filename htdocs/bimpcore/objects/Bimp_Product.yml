@@ -7,10 +7,13 @@ primary: rowid
 icon: fas_box
 controller: product
 
-header_btn:
+
+header_btn: 
     callback: getActionsButtons
     
 header_list_name: default
+header_edit_form: card
+
 list_page_url: list
 
 labels: 
@@ -44,6 +47,17 @@ objects:
             id_object:
                 field_value: entrepot
                 
+    category: 
+        relation: none
+        delete: 0
+        instance: 
+            dol_object: 
+                module: categories
+                file: categorie
+                
+    default_entrepot:
+        extends: entrepot
+        
 fields: 
     ref: 
         label: Réf.
@@ -300,10 +314,10 @@ fields:
         type: text
         dol_extra_field: 1
         
-    best_buy_price:
-        label: Meilleur prix d'achat
-        type: money
-        extra: 1
+#    best_buy_price:
+#        label: Meilleur prix d'achat
+#        type: money
+#        extra: 1
         
     seuil_stock_alerte:
         label: Limite stock pour alerte
@@ -324,8 +338,12 @@ fields:
         extra: 1
         
     product_categories: 
-        label: Tags/catégories
+        label: Catégories produit
         extra: 1
+        type: items_list
+        items_data_type: id_object
+        object: category
+
         
     localtax1_tx:
         label: Taxe locale 1
@@ -351,33 +369,25 @@ fields:
         dol_extra_field: 1
 
 
-#    ref_constructeur:
-#        label: Réf. constructeur
-#        type: string
-#        dol_extra_field: 1
+    ref_constructeur:
+        label: Réf. constructeur
+        type: string
+        dol_extra_field: 1
 
         
     fk_default_warehouse:
         label: Entrepôt par défaut
         type: id_object
-        object: entrepot
+        object: default_entrepot
         default_value: 0
         input:
             type: search_entrepot 
         dol_extra_field: 1
-
-
-
-#    Champs non gérés
-#    ref_ext
-#    localtax1_tx
-#    localtax2_tx
-#    localtax1_type
-#    localtax2_type
-#    tobatch
-#    duration
-#    finished
-#    canvas
+        
+    duration:
+        label: Durée
+        type: string
+        
 
 forms: 
     light: 
@@ -453,6 +463,47 @@ forms:
               content: 
                   callback: renderMergeKeptProductInput
               depends_on: id_merged_product                  
+              
+    card:
+        rows:
+            # Infos
+            - field: ref
+            - field: label
+            - field: description
+            - field: fk_product_type
+            - field: type2
+            - field: barcode
+            - field: customcode
+            - field: accountancy_code_buy
+            - field: accountancy_code_sell
+            - field: note
+            - field: fk_default_warehouse
+              display: nom_url
+            # Infos +
+            - field: url
+            - field: stock
+            - field: fk_country
+            - field: product_categories
+            - field: localtax1_tx
+            - field: localtax1_type
+            - field: localtax2_tx
+            - field: localtax2_type
+            - field: ref_constructeur
+            - field: crt
+            # Measure
+            - field: weight
+            - field: weight_units
+            - field: length
+            - field: length_units
+            - field: width
+            - field: width_units
+            - field: height
+            - field: height_units
+            - field: surface
+            - field: surface_units
+            - field: volume
+            - field: volume_units
+        
 
 fields_tables: 
     infos: 
@@ -525,12 +576,14 @@ fields_tables:
             - field: url
             - field: stock
             - field: fk_country
-            - field: product_categories
+            - label: Cétégories
+              value: 
+                  callback: displayCategories
             - field: localtax1_tx
             - field: localtax1_type
             - field: localtax2_tx
             - field: localtax2_type
-#            - field: ref_constructeur
+            - field: ref_constructeur
             - field: crt
 
     measures: 
@@ -556,7 +609,7 @@ fields_tables:
         icon: fas_check-square
         rows:
             - field: pmp
-            - field: best_buy_price
+#            - field: best_buy_price
             - field: price
             - field: price_min
             - field: seuil_stock_alerte
@@ -564,6 +617,7 @@ fields_tables:
 
 views: 
     default: 
+        edit_btn: 1
         rows: 
             - cols: 
                 - type: fields_table
@@ -587,6 +641,7 @@ views:
                       name: status
     
     fiche:
+        edit_btn: 1
         edit_form: light
         delete_btn: 1
         rows:

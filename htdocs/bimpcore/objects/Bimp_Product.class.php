@@ -1496,8 +1496,8 @@ class Bimp_Product extends BimpObject
     public function fetchExtraFields()
     {
         $extras = array();
-        $extras['best_buy_price'] = $this->getBestBuyPrice();
-        $extras['product_categories'] = $this->getCategories();
+        $extras['best_buy_price'] = "N/C";//$this->getBestBuyPrice();
+        $extras['product_categories'] = "N/C";//$this->getCategories();
 //        $extras['fk_country'] = $this->getOriginCountry();
         return $extras;
     }

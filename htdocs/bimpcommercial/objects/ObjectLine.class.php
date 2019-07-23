@@ -57,7 +57,7 @@ class ObjectLine extends BimpObject
     public function __construct($module, $object_name)
     {
         if(!isset($_SESSION['use_freeline']))
-            $_SESSION['use_freeline'] = BimpCore::getConf("use_freeline");
+            $_SESSION['use_freeline'] = 1;//BimpCore::getConf("use_freeline");
             
         if($_SESSION['use_freeline'])
             self::$types[self::LINE_FREE] = 'Ligne libre';

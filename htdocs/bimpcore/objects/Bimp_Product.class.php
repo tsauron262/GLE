@@ -105,7 +105,8 @@ class Bimp_Product extends BimpObject
                 return 1;
 
             case 'merge':
-                return (int) $this->can('create');
+//                return (int) $this->can('create');
+                return 1;
         }
 
         return parent::canSetAction($action);

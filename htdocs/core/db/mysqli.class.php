@@ -266,13 +266,13 @@ class DoliDBMysqli extends DoliDB
                     $testPlusPetitQueDix = rand(3,12);//rand(6,15);
                     if($testPlusPetitQueDix < 10){
                         global $dbRead;
-                        $servRead = BDD_2_HOST;
-                        if(defined('BDD_3_HOST')){
-                            $testPlusPetitQueDix = rand(5,14);//rand(6,15);
-                            if($testPlusPetitQueDix < 10)
-                                $servRead = BDD_3_HOST;
-                        }
                         if(!$dbRead){
+                            $servRead = BDD_2_HOST;
+                            if(defined('BDD_3_HOST')){
+                                $testPlusPetitQueDix = rand(5,14);//rand(6,15);
+                                if($testPlusPetitQueDix < 10)
+                                    $servRead = BDD_3_HOST;
+                            }
                             $dbRead = new DoliDBMysqli('mysql', $servRead,  $this->database_user, $this->database_pass, $this->database_name);
                         }
 

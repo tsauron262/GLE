@@ -57,8 +57,11 @@ class ObjectLine extends BimpObject
     public function __construct($module, $object_name)
     {
         global $use_freeline;
-        if(!isset($use_freeline))
+        global $use_freelineOK;
+        if(!isset($use_freelineOK) || $use_freelineOK != true){
             $use_freeline = BimpCore::getConf("use_freeline");
+            $use_freelineOK = true;
+        }
             
         if($use_freeline)
             self::$types[self::LINE_FREE] = 'Ligne libre';

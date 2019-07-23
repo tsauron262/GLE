@@ -1493,7 +1493,7 @@ class BimpTools
         return '&euro;';
     }
 
-    public static function displayMoneyValue($value, $currency = 'EUR', $with_styles = false)
+    public static function displayMoneyValue($value, $currency = 'EUR', $with_styles = false, $truncate = false)
     {
         if (is_numeric($value)) {
             $value = (float) $value;
@@ -1507,9 +1507,21 @@ class BimpTools
             $value = 0;
         }
 
-//        $value = round($value, 2);
-
-        $price = price($value, 1, '', 1, -1, -1, $currency);
+        if ($truncate) {
+            $code = '';
+            if ($value > 1000000000) {
+                $code = 'G';
+                $value = $value / 1000000000;
+            } elseif ($value > 1000000) {
+                $code = 'M';
+                $value = $value / 1000000;
+            } elseif ($value > 100000) {
+                $value = $value / 1000;
+            }
+            $price = price($value, 1, '', 1, -1, -1) . ' ' . $code . self::getCurrencyHtml($currency);
+        } else {
+            $price = price($value, 1, '', 1, -1, -1, $currency);
+        }
 
         $html = '';
 

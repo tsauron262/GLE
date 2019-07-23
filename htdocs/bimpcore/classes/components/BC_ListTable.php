@@ -768,7 +768,7 @@ class BC_ListTable extends BC_List
                 if (isset($this->totals[$col_name])) {
                     switch ($this->totals[$col_name]['data_type']) {
                         case 'money':
-                            $html .= BimpTools::displayMoneyValue($this->totals[$col_name]['value'], 'EUR');
+                            $html .= BimpTools::displayMoneyValue($this->totals[$col_name]['value'], 'EUR', false, true);
                             break;
 
                         case 'percent':

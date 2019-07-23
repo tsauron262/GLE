@@ -369,10 +369,10 @@ fields:
         dol_extra_field: 1
 
 
-    ref_constructeur:
-        label: Réf. constructeur
-        type: string
-        dol_extra_field: 1
+#    ref_constructeur:
+#        label: Réf. constructeur
+#        type: string
+#        dol_extra_field: 1
 
         
     fk_default_warehouse:

@@ -400,8 +400,28 @@ forms:
 filters_panel: 
     default: 
         filters: 
-            - field: type
-              child: places
+            product: 
+                field: id_product
+            serial: 
+                field: serial
+            date_purchase: 
+                field: date_purchase
+            date_vente:
+                field: date_vente
+            type: 
+                field: type
+            place_position: 
+                field: position
+                child: places
+            place_type: 
+                field: type
+                child: places
+            place_entrepot: 
+                field: id_entrepot
+                child: places
+            place_infos: 
+                field: infos
+                child: places
             
 list:
     filters_panel: default
@@ -496,23 +516,3 @@ cards:
                           - nom_url
             - icon: barcode
               field: serial
-              
-              
-filters_panels: 
-    default: 
-        filters: 
-            type: 
-                field: type
-            product: 
-                field: id_product
-            serial: 
-                field: serial
-            placetype: 
-                field: type
-                child: place
-            placeentrepot: 
-                field: id_entrepot
-                child: places
-            placeentrepot: 
-                field: id_entrepot
-                child: places

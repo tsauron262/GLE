@@ -1804,11 +1804,58 @@ class BimpObject extends BimpCache
         
     }
 
-    public function getFieldSqlKey($field, $main_alias = 'a', $child_name = null, &$joins = array())
+    public function getFieldSqlKey($field, $main_alias = 'a', $child_name = null, &$joins = array(), &$errors = array(), $child_object = null)
     {
-        $instance = null;
         if (!is_null($child_name) && $child_name) {
-            $instance = $this->getChildObject($child_name);
+            if (is_null($child_object)) {
+                $child_object = $this->config->getObject('', $child_name);
+            }
+
+            if (!is_a($child_object, 'BimpObject')) {
+                $errors[] = 'Instance enfant invalide';
+                return '';
+            }
+
+            $relation = $this->getConf('objects/' . $child_name . '/relation', 'none');
+
+            if ($relation === 'hasOne') {
+                $id_prop = $this->getChildIdProperty($child_name);
+                if (!is_string($id_prop) || !$id_prop) {
+                    $errors[] = 'Propriété contenant l\'ID de l\'objet "' . $child_object->getLabel() . '" absente ou invalide';
+                    return '';
+                }
+
+                if ($child_object->isDolExtraField($field)) {
+                    $alias = $child_name . '_ef';
+                    if (!isset($joins[$alias])) {
+                        $joins[$alias] = array(
+                            'table' => $child_object->getTable() . '_extrafields',
+                            'on'    => $alias . '.fk_object = ' . $main_alias . '.' . $id_prop,
+                            'alias' => $alias
+                        );
+                    }
+                    return $alias . '.' . $field;
+                } else {
+                    $alias = $child_name;
+                    if (!isset($joins[$alias])) {
+                        $joins[$alias] = array(
+                            'table' => $child_object->getTable(),
+                            'on'    => $alias . '.' . $child_object->getPrimary() . ' = ' . $main_alias . '.' . $id_prop,
+                            'alias' => $alias
+                        );
+                    }
+                    if ($child_object->isExtraField($field)) {
+                        return $child_object->getExtraFieldFilterKey($field, $joins, $alias);
+                    } else {
+                        $filter_key = $this->child_name . '.' . $field_name;
+                    }
+                }
+            } elseif ($relation === 'hasMany') {
+                
+            } else {
+                
+            }
+
             $id_prop = $this->getParams('objects/' . $child_name . '/instance/id_object/field_value');
             if (is_a($instance, 'BimpObject') && is_string($id_prop) && $id_prop) {
                 if ($instance->isDolObject() && $instance->isDolExtraField($field)) {

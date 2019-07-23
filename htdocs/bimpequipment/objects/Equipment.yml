@@ -395,6 +395,10 @@ forms:
             - field: date_warranty_end
             - object: places
             
+filters_panel: 
+    default: 
+        filters: 
+            - field: 
 list:
     checkboxes: 1
     bulk_actions: 

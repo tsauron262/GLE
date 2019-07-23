@@ -276,7 +276,7 @@ class OrderPDF extends BimpDocumentPDF
         $html .= '<tr>';
         $html .= '<td colspan="2" style="font-size: 7px">';
         $html .= '<span style="font-weight: bold; color: #EF7D00">Code client : </span>';
-        $html .= isset($this->thirdparty->code_client) ? $this->thirdparty->code_client : '';
+        $html .= isset($this->commande->thirdparty->code_client) ? $this->commande->thirdparty->code_client : '';
         $html .= '</td>';
         $html .= '</tr>';
 

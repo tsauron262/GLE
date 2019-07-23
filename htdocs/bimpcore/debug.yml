@@ -4,12 +4,12 @@ debug: 0
 bimpcore: 
     controller: 
 #        Affiche les temps de chargement objets:
-        display_times: 0
+        display_times: 1
         display_errors: 1
     objects: 
 #        Affiche les requêtes sql pour les listes objets: 
         print_list_sql: 1
         print_insert_sql: 0
-        print_update_sql: 1
+        print_update_sql: 0
 bimpcommercial: 
     no_validate: 0

@@ -55,6 +55,9 @@ objects:
                 module: categories
                 file: categorie
                 
+    default_entrepot:
+        extends: entrepot
+        
 fields: 
     ref: 
         label: Réf.
@@ -311,10 +314,10 @@ fields:
         type: text
         dol_extra_field: 1
         
-    best_buy_price:
-        label: Meilleur prix d'achat
-        type: money
-        extra: 1
+#    best_buy_price:
+#        label: Meilleur prix d'achat
+#        type: money
+#        extra: 1
         
     seuil_stock_alerte:
         label: Limite stock pour alerte
@@ -366,16 +369,16 @@ fields:
         dol_extra_field: 1
 
 
-    ref_constructeur:
-        label: Réf. constructeur
-        type: string
-        dol_extra_field: 1
+#    ref_constructeur:
+#        label: Réf. constructeur
+#        type: string
+#        dol_extra_field: 1
 
         
     fk_default_warehouse:
         label: Entrepôt par défaut
         type: id_object
-        object: entrepot
+        object: default_entrepot
         default_value: 0
         input:
             type: search_entrepot 
@@ -573,12 +576,14 @@ fields_tables:
             - field: url
             - field: stock
             - field: fk_country
-            - field: product_categories
+            - label: Cétégories
+              value: 
+                  callback: displayCategories
             - field: localtax1_tx
             - field: localtax1_type
             - field: localtax2_tx
             - field: localtax2_type
-            - field: ref_constructeur
+#            - field: ref_constructeur
             - field: crt
 
     measures: 
@@ -604,7 +609,7 @@ fields_tables:
         icon: fas_check-square
         rows:
             - field: pmp
-            - field: best_buy_price
+#            - field: best_buy_price
             - field: price
             - field: price_min
             - field: seuil_stock_alerte

@@ -29,7 +29,8 @@ class Bimp_Product extends BimpObject
     private static $stockShowRoom = array();
     private static $ventes = array();
     private static $lienShowRoomEntrepot = array();
-
+    public $redirectMode = 0;
+    
     public function __construct($module, $object_name)
     {
         global $langs;
@@ -100,13 +101,17 @@ class Bimp_Product extends BimpObject
 
         switch ($action) {
             case 'validate':
-                // todo: définir droit pour valider. 
+                // todo: définir droit pour valider.
+                return 1;
+
+            case 'merge':
+//                return (int) $this->can('create');
                 return 1;
         }
 
-        return parent::canSetAction($field_name);
+        return parent::canSetAction($action);
     }
-
+    
     // Getters booléens
 
     public function isSerialisable()
@@ -329,15 +334,12 @@ class Bimp_Product extends BimpObject
                 break;
         }
     }
-    
+
     public function getActionsButtons()
     {
-        global $user;
         $buttons = array();
-        if (!$this->isLoaded())
-            return $buttons;
-
-        if ((int) $user->admin and $this->isActionAllowed('validate') && $this->canSetAction('validate')) {
+        
+        if ($this->isActionAllowed('validate') && $this->canSetAction('validate')) {
             $buttons[] = array(
                 'label'   => 'Valider',
                 'icon'    => 'fas_check-circle',
@@ -348,11 +350,11 @@ class Bimp_Product extends BimpObject
         }
 
         $buttons[] = array(
-            'label'   => 'Ne pas cliquer',
+            'label'   => 'Fusionner',
             'icon'    => 'fas_object-group',
-//            'onclick' => $this->getJsActionOnclick('merge', array(), array(
-//                'form_name' => 'merge'
-//            ))
+            'onclick' => $this->getJsActionOnclick('merge', array(), array(
+                'form_name' => 'merge'
+            ))
         );
 
         return $buttons;
@@ -463,7 +465,7 @@ class Bimp_Product extends BimpObject
 
     // Getters stocks: 
 
-    public function getStocksForEntrepot($id_entrepot)
+    public function getStocksForEntrepot($id_entrepot, $types = array())
     {
         $stocks = array(
             'id_stock'       => 0,
@@ -483,7 +485,6 @@ class Bimp_Product extends BimpObject
                 $stocks['id_stock'] = $product->stock_warehouse[(int) $id_entrepot]->id;
                 $stocks['reel'] = $product->stock_warehouse[(int) $id_entrepot]->real;
             }
-
 
             $sql = 'SELECT line.rowid as id_line, c.rowid as id_commande FROM ' . MAIN_DB_PREFIX . 'commande_fournisseurdet line';
             $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commande_fournisseur c ON c.rowid = line.fk_commande';
@@ -870,6 +871,12 @@ class Bimp_Product extends BimpObject
 
         return $html;
     }
+    
+    public function displayCategories()
+    {
+        // todo
+        return '';
+    }
 
     // Rendus HTML: 
 
@@ -1255,34 +1262,22 @@ class Bimp_Product extends BimpObject
 
         $rows = $this->db->executeS($sql, 'array');
 
-//        echo '<pre>';
-//        print_r($rows);
-//        echo '</pre>';
-
         if (is_array($rows) && count($rows)) {
             foreach ($rows as $r) {
-                $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_PropalLine', (int) $r['id']);
-                if (!BimpObject::objectLoaded($line)) {
-//                    echo 'fail <br/>'; 
-                    continue;
-                }
+                $line = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_PropalLine', array(
+                            'id_line' => (int) $r['id']
+                                ), true);
 
                 $line->id_product = $this->id;
+                $line->pu_ht = $pu_ht;
+                $line->tva_tx = $tva_tx;
+                $line->pa_ht = $pa_ht;
 
                 $line_warnings = array();
                 $line_errors = $line->update($line_warnings, true);
 
                 if (count($line_errors)) {
                     $warnings[] = BimpTools::getMsgFromArray($line_warnings, 'Echec de la mise à jour ' . $line->getLabel('of_the'));
-                } else {
-                    $line->pu_ht = $pu_ht;
-                    $line->tva_tx = $tva_tx;
-                    $line->pa_ht = $pa_ht;
-
-                    $line_errors = $line->update($line_warnings, true);
-                    if (count($line_errors)) {
-                        $warnings[] = BimpTools::getMsgFromArray($line_warnings, 'Echec de la mise à jour ' . $line->getLabel('of_the'));
-                    }
                 }
 
                 if (count($line_warnings)) {
@@ -1300,7 +1295,9 @@ class Bimp_Product extends BimpObject
 
         if (is_array($rows) && count($rows)) {
             foreach ($rows as $r) {
-                $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $r['id']);
+                $line = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', array(
+                            'id_line' => (int) $r['id']
+                                ), true);
                 if (!BimpObject::objectLoaded($line)) {
                     continue;
                 }
@@ -1310,17 +1307,16 @@ class Bimp_Product extends BimpObject
                 $line_warnings = array();
                 $line_errors = $line->update($line_warnings, true);
 
-                if (count($line_errors)) {
-                    $warnings[] = BimpTools::getMsgFromArray($line_warnings, 'Echec de la mise à jour ' . $line->getLabel('of_the'));
-                } else {
+                if (!count($line_errors)) {
                     $line->pu_ht = $pu_ht;
                     $line->tva_tx = $tva_tx;
                     $line->pa_ht = $pa_ht;
 
                     $line_errors = $line->update($line_warnings, true);
-                    if (count($line_errors)) {
-                        $warnings[] = BimpTools::getMsgFromArray($line_warnings, 'Echec de la mise à jour ' . $line->getLabel('of_the'));
-                    }
+                }
+
+                if (count($line_errors)) {
+                    $warnings[] = BimpTools::getMsgFromArray($line_warnings, 'Echec de la mise à jour ' . $line->getLabel('of_the'));
                 }
 
                 if (count($line_warnings)) {
@@ -1338,7 +1334,9 @@ class Bimp_Product extends BimpObject
 
         if (is_array($rows) && count($rows)) {
             foreach ($rows as $r) {
-                $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFournLine', (int) $r['id']);
+                $line = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFournLine', array(
+                            'id_line' => (int) $r['id']
+                                ), true);
                 if (!BimpObject::objectLoaded($line)) {
                     continue;
                 }
@@ -1379,11 +1377,11 @@ class Bimp_Product extends BimpObject
         $del_warnings = array();
         $del_errors = $merged_product->delete($del_warnings, true);
 
-        if (count($del_warnings)) {
+        if (count($del_errors)) {
             $errors[] = BimpTools::getMsgFromArray($del_errors, 'Echec de la suppression du produit "' . $prod_ref . '"');
         }
         if (count($del_warnings)) {
-            $errors[] = BimpTools::getMsgFromArray($del_errors, 'Erreurs lors de la suppression du produit "' . $prod_ref . '"');
+            $errors[] = BimpTools::getMsgFromArray($del_warnings, 'Erreurs lors de la suppression du produit "' . $prod_ref . '"');
         }
 
         return $errors;
@@ -1435,7 +1433,6 @@ class Bimp_Product extends BimpObject
         $success = 'Fusion effectuée avec succès';
         $success_callback = '';
 
-        $errors[] = 'En développemnt';
         $id_merged_product = (int) (isset($data['id_merged_product']) ? $data['id_merged_product'] : 0);
         $id_kept_product = (int) (isset($data['id_kept_product']) ? $data['id_kept_product'] : 0);
 
@@ -1653,14 +1650,15 @@ class Bimp_Product extends BimpObject
 
 //        } TODO set a else
     }
-    
-    public function getOriginCountry() {
+
+    public function getOriginCountry()
+    {
         global $langs;
         echo $this->getData('fk_county');
         $return = getCountry($this->getData('fk_county'), 0, $this->db->db);
-        echo 'après la fonction' . $return.'<br/>';
+        echo 'après la fonction' . $return . '<br/>';
         die();
-        return 'test'.$return.'fin';
+        return 'test' . $return . 'fin';
     }
     
     
@@ -1673,15 +1671,16 @@ class Bimp_Product extends BimpObject
     public function renderHeaderExtraLeft() {
         $html = '';
         $barcode = $this->getData('barcode');
-        if(isset($barcode) and (strlen($barcode) == 12 or strlen($barcode) == 13)) {
+        if (isset($barcode) and ( strlen($barcode) == 12 or strlen($barcode) == 13)) {
             $html .= '<img src="';
             $html .= DOL_URL_ROOT . '/viewimage.php?modulepart=barcode&amp;generator=phpbarcode&amp;';
             $html .= 'code=' . $barcode . '&amp;encoding=EAN13">';
         }
         return $html;
     }
-    
-    public function displayCountry() {
+
+    public function displayCountry()
+    {
         global $langs;
         $id = $this->getData('fk_country');
         if (!is_null($id) && $id) {

@@ -29,7 +29,6 @@ class Bimp_Product extends BimpObject
     private static $stockShowRoom = array();
     private static $ventes = array();
     private static $lienShowRoomEntrepot = array();
-    public $redirectMode = 0;
     
     public function __construct($module, $object_name)
     {
@@ -1611,6 +1610,13 @@ class Bimp_Product extends BimpObject
             self::$ventes[$dateMin . "-" . $dateMax][$ln->fk_product][null]['total_ht'] += $ln->total_ht;
             self::$ventes[$dateMin . "-" . $dateMax][$ln->fk_product][null]['total_ttc'] += $ln->total_ttc;
         }
+    }
+    
+    public function iAmAdminRedirect() {
+        global $user;
+        if($user->rights->bimpcommercial->validProd)
+            return 1;
+        parent::iAmAdminRedirect();
     }
     
     public function getCategories($edit = 0) {

@@ -30,7 +30,7 @@ class Bimp_Product extends BimpObject
     private static $ventes = array();
     private static $lienShowRoomEntrepot = array();
     public $redirectMode = 0;
-    
+
     public function __construct($module, $object_name)
     {
         global $langs;
@@ -111,7 +111,7 @@ class Bimp_Product extends BimpObject
 
         return parent::canSetAction($action);
     }
-    
+
     // Getters booléens
 
     public function isSerialisable()
@@ -337,8 +337,9 @@ class Bimp_Product extends BimpObject
 
     public function getActionsButtons()
     {
+        global $user;
         $buttons = array();
-        
+
         if ($this->isActionAllowed('validate') && $this->canSetAction('validate')) {
             $buttons[] = array(
                 'label'   => 'Valider',
@@ -349,13 +350,15 @@ class Bimp_Product extends BimpObject
             );
         }
 
-        $buttons[] = array(
-            'label'   => 'Fusionner',
-            'icon'    => 'fas_object-group',
-            'onclick' => $this->getJsActionOnclick('merge', array(), array(
-                'form_name' => 'merge'
-            ))
-        );
+        if ($this->isActionAllowed('merge') && $this->canSetAction('merge')) {
+            $buttons[] = array(
+                'label'   => 'Fusionner',
+                'icon'    => 'fas_object-group',
+                'onclick' => $this->getJsActionOnclick('merge', array(), array(
+                    'form_name' => 'merge'
+                ))
+            );
+        }
 
         return $buttons;
     }
@@ -871,7 +874,7 @@ class Bimp_Product extends BimpObject
 
         return $html;
     }
-    
+
     public function displayCategories()
     {
         // todo

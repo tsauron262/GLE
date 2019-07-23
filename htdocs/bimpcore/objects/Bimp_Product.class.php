@@ -1506,12 +1506,12 @@ class Bimp_Product extends BimpObject
             'product_categories' => array()
         );
 
-        if ($this->isLoaded()) {
-            $fields['best_buy_price'] = $this->getBestBuyPrice();
-
-            $categories = self::getProductCategoriesArray((int) $this->id);
-            $fields['product_categories'] = $categories;
-        }
+//        if ($this->isLoaded()) {
+//            $fields['best_buy_price'] = $this->getBestBuyPrice();
+//
+//            $categories = self::getProductCategoriesArray((int) $this->id);
+//            $fields['product_categories'] = $categories;
+//        }
         
 //        $extras = array();
 //        $extras['best_buy_price'] = $this->getBestBuyPrice();

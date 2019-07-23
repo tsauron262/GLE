@@ -337,11 +337,8 @@ class Bimp_Product extends BimpObject
 
     public function getActionsButtons()
     {
-        global $user;
         $buttons = array();
-        if (!$this->isLoaded() or (int) $user->admin != 1)
-            return $buttons;
-
+        
         if ($this->isActionAllowed('validate') && $this->canSetAction('validate')) {
             $buttons[] = array(
                 'label'   => 'Valider',

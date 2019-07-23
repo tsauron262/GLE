@@ -227,7 +227,6 @@ filters_panels:
                     options: 
                         callback: getCategoriesArray
         
-
 lists_cols: 
     facture: 
         field: fk_facture
@@ -241,14 +240,18 @@ lists_cols:
         field: tva_tx
     qty: 
         field: qty
+        has_total: 1
     remise_percent: 
         field: remise_percent
     total_ht: 
         field: total_ht
+        has_total: 1
     total_tva: 
         field: total_tva
+        has_total: 1
     total_ttc: 
         field: total_ttc
+        has_total: 1
     date: 
         field: date
     entrepot: 
@@ -266,6 +269,7 @@ lists_cols:
 lists: 
     default: 
         title: Ventes de produits
+        total_row: 1
         configurable: 1
         n: 10
         sort_field: date
@@ -288,13 +292,10 @@ lists:
             secteur: 
             entrepot:
             user:
-        
-        
+                
 stats_lists: 
     default: 
         filters_panel: default
         group_by_options: 
             - id_entrepot
             - secteur
-        
-        

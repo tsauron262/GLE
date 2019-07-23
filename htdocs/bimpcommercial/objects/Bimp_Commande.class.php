@@ -107,6 +107,10 @@ class Bimp_Commande extends BimpComm
                     return 1;
                 }
                 return 0;
+
+            case 'linesFactureQties':
+                $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
+                return $facture->can('create');
         }
         return parent::canSetAction($action);
     }
@@ -1355,20 +1359,20 @@ class Bimp_Commande extends BimpComm
         $html .= '</button>';
 
         // Nouvelle facture: 
-        $client_facture = $this->getClientFacture();
-        $onclick = $this->getJsActionOnclick('linesFactureQties', array(
-            'new_facture'       => 1,
-            'id_client_facture' => (int) (!is_null($client_facture) ? $client_facture->id : 0),
-            'id_contact'        => (int) ($client_facture->id === (int) $this->getData('fk_soc') ? $this->dol_object->contactid : 0),
-            'id_cond_reglement' => (int) $this->getData('fk_cond_reglement')
-                ), array(
-            'form_name'      => 'invoice',
-            'on_form_submit' => 'function ($form, extra_data) { return onFactureFormSubmit($form, extra_data); }'
-        ));
 
-        
-        if ($this->isActionAllowed('createFacture') && $this->canSetAction('createFacture')) {
-            $html .= '<button class="btn btn-default" onclick="' . $onclick . '">';
+        if ($this->isActionAllowed('linesFactureQties') && $this->canSetAction('linesFactureQties')) {
+            $client_facture = $this->getClientFacture();
+            $onclick = $this->getJsActionOnclick('linesFactureQties', array(
+                'new_facture'       => 1,
+                'id_client_facture' => (int) (!is_null($client_facture) ? $client_facture->id : 0),
+                'id_contact'        => (int) ($client_facture->id === (int) $this->getData('fk_soc') ? $this->dol_object->contactid : 0),
+                'id_cond_reglement' => (int) $this->getData('fk_cond_reglement')
+                    ), array(
+                'form_name'      => 'invoice',
+                'on_form_submit' => 'function ($form, extra_data) { return onFactureFormSubmit($form, extra_data); }'
+            ));
+
+            $html .= '<button class="btn btn-default" onc·ick="' . $onclick . '">';
             $html .= BimpRender::renderIcon('fas_file-invoice-dollar', 'iconLeft') . 'Nouvelle facture anticipée';
             $html .= '</button>';
         }
@@ -1640,11 +1644,17 @@ class Bimp_Commande extends BimpComm
 
     // Traitements factures: 
 
-    public function createFacture(&$errors = array(), $id_client = null, $id_contact = null, $cond_reglement = null, $id_account = null, $public_note = '', $private_note = '', $remises = array(), $other_commandes = array(), $libelle = null, $id_entrepot = null, $ef_type = null)
+    public function createFacture(&$errors = array(), $id_client = null, $id_contact = null, $cond_reglement = null, $id_account = null, $public_note = '', $private_note = '', $remises = array(), $other_commandes = array(), $libelle = null, $id_entrepot = null, $ef_type = null, $force_create = false)
     {
         if (!$this->isLoaded()) {
             $errors[] = 'ID de la commande client absent ou invalide';
             return 0;
+        }
+
+        $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
+
+        if (!$force_create && !$facture->can('create')) {
+            $errors[] = 'Vous n\'avez pas la permission de créer des factures';
         }
 
         if (is_null($id_client)) {
@@ -1673,7 +1683,6 @@ class Bimp_Commande extends BimpComm
         }
 
         // Création de la facture: 
-        $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
 
         $facture->dol_object->date = dol_now();
         $facture->dol_object->source = 0;

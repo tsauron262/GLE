@@ -262,26 +262,36 @@ class DoliDBMysqli extends DoliDB
         
         if(defined('BDD_2_HOST') && !defined('OFF_MULTI_SQL') && BDD_2_HOST !=  $this->database_host){
             if(stripos(trim($query), "SELECT") === 0){
-                $testPlusPetitQueDix = rand(5,14);//rand(6,15);
-                if($testPlusPetitQueDix < 10){
-                    global $dbRead;
-                    if(!$dbRead){
-                        $dbRead = new DoliDBMysqli('mysql', BDD_2_HOST,  $this->database_user, $this->database_pass, $this->database_name);
-                    }
-
-                    if($dbRead){//on peut passer sur serveur 2
-                        $this->countReq2 ++;
-                        $ret = $dbRead->query($query);
-                        if($ret){
-                            $this->_results = $ret;
-                            return $ret;
+                if(stripos(trim($query), "MAX") !== false){
+                    $testPlusPetitQueDix = rand(5,14);//rand(6,15);
+                    if($testPlusPetitQueDix < 10){
+                        global $dbRead;
+                        $servRead = BDD_2_HOST;
+                        if(defined('BDD_3_HOST')){
+                            $testPlusPetitQueDix = rand(5,14);//rand(6,15);
+                            if($testPlusPetitQueDix < 10)
+                                $servRead = BDD_3_HOST;
                         }
-                        else {
-                            define('OFF_MULTI_SQL', 1);
+                        if(!$dbRead){
+                            $dbRead = new DoliDBMysqli('mysql', $servRead,  $this->database_user, $this->database_pass, $this->database_name);
+                        }
+
+                        if($dbRead){//on peut passer sur serveur 2
+                            $this->countReq2 ++;
+                            $ret = $dbRead->query($query);
+                            if($ret){
+                                $this->_results = $ret;
+                                return $ret;
+                            }
+                            else {
+                                define('OFF_MULTI_SQL', 1);
+                            }
                         }
                     }
                 }
-                    
+                else{
+                    //req de recherche de dernier ref on reste pour cette requete sur le princ
+                }
             }
             else{
                 //modifs on reste pour toujours sur le serveur princ

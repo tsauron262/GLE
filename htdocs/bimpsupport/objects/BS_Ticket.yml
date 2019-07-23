@@ -26,7 +26,7 @@ objects:
 #            bimp_object:
 #                module: bimpcontract
 #                name: BContract_contrat
-                
+            
     user_resp: 
         extends: user
         instance: 
@@ -114,9 +114,17 @@ fields:
                         join_on: a.fk_soc = s.rowid
                         join_return_label: s.nom
                         help: Entrez la référence ou l'ID d'un contrat
+                    by_obj:
+                        label: Recherche l'objet du contrat
+                        fields_search: e.objet_contrat, a.rowid
+                        join: contrat_extrafields e
+                        join_on: e.fk_object = a.rowid
+                        join_return_value: a.fk_soc
+                        join_return_label: e.objet_contrat
+                        help: Entrez l'objet du contrat
         display_if: 
             field_name: no_contrat
-            hide_values: 1      
+            hide_values: 1
     id_client:
         label: Client
         type: id_object

@@ -300,11 +300,10 @@ forms:
                   type: switch_options
                   options: 
                       10: 10
-                      25: 25
+                      20: 20
+                      30: 30
+                      40: 40
                       50: 50
-                      100: 100
-                      250: 250
-                      500: 500
             - custom: 1
               label: Tri par défaut
               input_name: sort_field
@@ -418,4 +417,42 @@ forms:
                   field_name: keep_copy
                   show_values: 0
              
+    list_csv: 
+        title: Générer CSV
+        icon: fas_file-excel
+        rows: 
+            - custom: 1
+              hidden: 1
+              label: Nom de la liste
+              input_name: list_name
+              input: 
+                  type: hidden
+            - custom: 1
+              label: Nom du fichier
+              input_name: file_name
+              input: 
+                  type: text
+                  help: Caractères aplhanumériques et tirets seulement
+            - custom: 1
+              label: Séparateur
+              input_name: separator
+              input: 
+                  type: text
+              value: ';'
+            - custom: 1
+              label: En-têtes
+              input_name: headers
+              data_type: bool
+              input: 
+                  type: toggle
+              value: 1
+            - custom: 1
+              label: Options des colonnes
+              input_name: cols_options
+              content: 
+                  callback: renderListCsvColsOptions
+            
+              
+                
+                  
         

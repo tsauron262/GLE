@@ -260,36 +260,50 @@ class DoliDBMysqli extends DoliDB
     	global $conf;
         
         
-        if(defined('BDD_2_HOST') && !defined('OFF_MULTI_SQL') && BDD_2_HOST !=  $this->database_host){
+        if(defined('BDD_2_HOST') && !defined('OFF_MULTI_SQL') && BDD_2_HOST !=  $this->database_host && (!defined('BDD_3_HOST') ||BDD_3_HOST !=  $this->database_host)){
             if(stripos(trim($query), "SELECT") === 0){
-                $testPlusPetitQueDix = rand(5,14);//rand(6,15);
-                if($testPlusPetitQueDix < 10){
-                    global $dbRead;
-                    if(!$dbRead){
-                        $dbRead = new DoliDBMysqli('mysql', BDD_2_HOST,  $this->database_user, $this->database_pass, $this->database_name);
-                    }
-
-                    if($dbRead){//on peut passer sur serveur 2
-                        $this->countReq2 ++;
-                        $ret = $dbRead->query($query);
-                        if($ret){
-                            $this->_results = $ret;
-                            return $ret;
+                if(stripos(trim($query), "MAX") === false){
+                    $testPlusPetitQueDix = rand(3,12);//rand(6,15);
+                    if(1){
+                        global $dbRead;
+                        if(!$dbRead){
+                            $servRead = BDD_2_HOST;
+                            if(defined('BDD_3_HOST')){
+                                $testPlusPetitQueDix = rand(3,14);//rand(6,15);
+                                if($testPlusPetitQueDix < 10)
+                                    $servRead = BDD_3_HOST;
+                            }
+                            $dbRead = new DoliDBMysqli('mysql', $servRead,  $this->database_user, $this->database_pass, $this->database_name);
                         }
-                        else {
-                            define('OFF_MULTI_SQL', 1);
+
+                        if($dbRead){//on peut passer sur serveur 2
+                            $this->countReq2 ++;
+                            $ret = $dbRead->query($query);
+                            if($ret){
+                                $this->_results = $ret;
+                                return $ret;
+                            }
+                            else {
+                                define('OFF_MULTI_SQL', 1);
+                            }
                         }
                     }
                 }
-                    
+                else{
+                    //req de recherche de dernier ref on reste pour cette requete sur le princ
+                }
             }
             else{
                 //modifs on reste pour toujours sur le serveur princ
                 define('OFF_MULTI_SQL', 1);
             }
         }
-//        if(stripos(trim($query), "SELECT") !== 0)
-//                echo $query;
+        $debugTime = false;
+        if(class_exists("BimpDebug") &&  BimpDebug::isActive('bimpcore/objects/print_admin_sql')){
+            global $user;
+            if($user->admin)
+                $debugTime = true;
+        }
 
         /*moddrsi*/
         $tabRemplacement = array(
@@ -305,7 +319,6 @@ class DoliDBMysqli extends DoliDB
         
         
         $this->countReq ++;
-        $debugTime = false;
         if($debugTime){
             $timestamp_debut = microtime(true);
             if(!isset($this->timestamp_debut)){
@@ -351,16 +364,27 @@ class DoliDBMysqli extends DoliDB
         
         /*mod drsi*/
         if($debugTime){
+            global $tabReq;
+            
+            if(!isset($tabReq[$query]))
+                $tabReq[$query] = 0;
+            $tabReq[$query]++;
+            
             $timestamp_fin = microtime(true);
             $difference_ms = $timestamp_fin - $timestamp_debut;
             $difference_ms2 = $timestamp_fin - $this->timestamp_debut;
             $difference_ms3 = $timestamp_debut - $this->timestamp_derfin;
+            
+            
+            if($tabReq[$query] > 2)
+                echo 'attention req identique '.$tabReq[$query]." foix.";
             
             if($difference_ms > 0.00 || $difference_ms3 > 0.1){
                 echo $this->countReq." ";
                 echo $query." <br/>";
                 echo "||".$this->num_rows($ret)." en ".$difference_ms."s depuis deb ".$difference_ms2." <br/><br/>";
             }
+            
             $this->timestamp_derfin = $timestamp_fin;
         }
 

@@ -1,5 +1,5 @@
 <?php
-
+ini_set('max_execution_time', 600);
 class Bimp_Product extends BimpObject
 {
 
@@ -29,7 +29,7 @@ class Bimp_Product extends BimpObject
     private static $stockShowRoom = array();
     private static $ventes = array();
     private static $lienShowRoomEntrepot = array();
-
+    
     public function __construct($module, $object_name)
     {
         global $langs;
@@ -100,13 +100,17 @@ class Bimp_Product extends BimpObject
 
         switch ($action) {
             case 'validate':
-                // todo: définir droit pour valider. 
+                // todo: définir droit pour valider.
+                return 1;
+
+            case 'merge':
+//                return (int) $this->can('create');
                 return 1;
         }
 
-        return parent::canSetAction($field_name);
+        return parent::canSetAction($action);
     }
-
+    
     // Getters booléens
 
     public function isSerialisable()
@@ -329,14 +333,11 @@ class Bimp_Product extends BimpObject
                 break;
         }
     }
-    
+
     public function getActionsButtons()
     {
-        global $user;
         $buttons = array();
-        if (!$this->isLoaded() or (int) $user->admin != 1)
-            return $buttons;
-
+        
         if ($this->isActionAllowed('validate') && $this->canSetAction('validate')) {
             $buttons[] = array(
                 'label'   => 'Valider',
@@ -463,7 +464,7 @@ class Bimp_Product extends BimpObject
 
     // Getters stocks: 
 
-    public function getStocksForEntrepot($id_entrepot)
+    public function getStocksForEntrepot($id_entrepot, $types = array())
     {
         $stocks = array(
             'id_stock'       => 0,
@@ -483,7 +484,6 @@ class Bimp_Product extends BimpObject
                 $stocks['id_stock'] = $product->stock_warehouse[(int) $id_entrepot]->id;
                 $stocks['reel'] = $product->stock_warehouse[(int) $id_entrepot]->real;
             }
-
 
             $sql = 'SELECT line.rowid as id_line, c.rowid as id_commande FROM ' . MAIN_DB_PREFIX . 'commande_fournisseurdet line';
             $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commande_fournisseur c ON c.rowid = line.fk_commande';
@@ -869,6 +869,12 @@ class Bimp_Product extends BimpObject
         }
 
         return $html;
+    }
+    
+    public function displayCategories()
+    {
+        // todo
+        return '';
     }
 
     // Rendus HTML: 
@@ -1495,16 +1501,23 @@ class Bimp_Product extends BimpObject
 
     public function fetchExtraFields()
     {
-        $extras = array();
-        $extras['best_buy_price'] = $this->getBestBuyPrice();
-        $extras['product_categories'] = $this->getCategories();
-//        $extras['fk_country'] = $this->getOriginCountry();
-        return $extras;
-    }
+        $fields = array(
+            'best_buy_price'     => 0,
+            'product_categories' => array()
+        );
 
-    public function deleteExtraFields()
-    {
-        return array();
+//        if ($this->isLoaded()) {
+//            $fields['best_buy_price'] = $this->getBestBuyPrice();
+//
+//            $categories = self::getProductCategoriesArray((int) $this->id);
+//            $fields['product_categories'] = $categories;
+//        }
+        
+//        $extras = array();
+//        $extras['best_buy_price'] = $this->getBestBuyPrice();
+//        $extras['product_categories'] = $this->getCategories(1);
+//        $extras['fk_country'] = $this->getOriginCountry();
+        return $fields;
     }
 
     // Méthodes statiques : 
@@ -1599,63 +1612,81 @@ class Bimp_Product extends BimpObject
         }
     }
     
-//    public function setCategories() {
-//        global $conf;
-////        if ($conf->categorie->enabled) {
-//            require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
-//            $form = new Form($this->db->db);
-//            $cate_arbo = $form->select_all_categories(Categorie::TYPE_PRODUCT, '', 'parent', 64, 0, 1);
-//            return $form->multiselectarray('categories', $cate_arbo, GETPOST('categories', 'array'), '', 0, '', 0, '100%');
-//            
-////				$cate_arbo = $form->select_all_categories(Categorie::TYPE_PRODUCT, '', 'parent', 64, 0, 1);
-////				$c = new Categorie($this->db->db);
-////				$cats = $c->containing($this->getData('id'),Categorie::TYPE_PRODUCT);
-////				$arrayselected=array();
-////				foreach($cats as $cat) {
-////					$arrayselected[] = $cat->id;
-////				}
-////				$html .= $form->multiselectarray('categories', $cate_arbo, $arrayselected, '', 0, '', 0, '100%');
-//
-////        } TODO set a else
-//    }
+    public function iAmAdminRedirect() {
+        global $user;
+        if($user->rights->bimpcommercial->validProd)
+            return 1;
+        parent::iAmAdminRedirect();
+    }
     
-    public function getCategories() {
+    public function getCategories($edit = 0) {
+
         global $conf;
         if ($conf->categorie->enabled) {
             require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
-            $form = new Form($this->db->db);
-            return $form->showCategories($this->getData('id'),'product',1);
+            if($edit == 1) {
+                $form = new Form($this->db->db);
+                $cate_arbo = $form->select_all_categories(Categorie::TYPE_PRODUCT, '', 'parent', 64, 0, 1);
+                return $form->multiselectarray('categories', $cate_arbo, GETPOST('categories', 'array'), '', 0, '', 0, '100%');
+            } else {
+                $form = new Form($this->db->db);
+                return $form->showCategories($this->getData('id'),'product',1);
+            }
+            
         } else {
             return "L'utilisation de catégorie est inactive";
         }
     }
+    
+    public function setCategories() {
+//        if ($conf->categorie->enabled) {
+            require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
+            $form = new Form($this->db->db);
+            $cate_arbo = $form->select_all_categories(Categorie::TYPE_PRODUCT, '', 'parent', 64, 0, 1);
+            return $form->multiselectarray('categories', $cate_arbo, GETPOST('categories', 'array'), '', 0, '', 0, '100%');
+            
+//				$cate_arbo = $form->select_all_categories(Categorie::TYPE_PRODUCT, '', 'parent', 64, 0, 1);
+//				$c = new Categorie($this->db->db);
+//				$cats = $c->containing($this->getData('id'),Categorie::TYPE_PRODUCT);
+//				$arrayselected=array();
+//				foreach($cats as $cat) {
+//					$arrayselected[] = $cat->id;
+//				}
+//				$html .= $form->multiselectarray('categories', $cate_arbo, $arrayselected, '', 0, '', 0, '100%');
+
+//        } TODO set a else
+    }
+
+    public function getOriginCountry()
+    {
+        global $langs;
+        echo $this->getData('fk_county');
+        $return = getCountry($this->getData('fk_county'), 0, $this->db->db);
+        echo 'après la fonction' . $return . '<br/>';
+        die();
+        return 'test' . $return . 'fin';
+    }
+    
     
     public function setOriginCountry() {
         $form = new Form($this->db->db);
         return $form->select_country($this->getData('fk_country '),'country_id');
     }
     
-    public function getOriginCountry() {
-        global $langs;
-        echo $this->getData('fk_county');
-        $return = getCountry($this->getData('fk_county'), 0, $this->db->db);
-        echo 'après la fonction' . $return.'<br/>';
-        die();
-        return 'test'.$return.'fin';
-    }
-    
+
     public function renderHeaderExtraLeft() {
         $html = '';
         $barcode = $this->getData('barcode');
-        if(isset($barcode) and (strlen($barcode) == 12 or strlen($barcode) == 13)) {
+        if (isset($barcode) and ( strlen($barcode) == 12 or strlen($barcode) == 13)) {
             $html .= '<img src="';
             $html .= DOL_URL_ROOT . '/viewimage.php?modulepart=barcode&amp;generator=phpbarcode&amp;';
             $html .= 'code=' . $barcode . '&amp;encoding=EAN13">';
         }
         return $html;
     }
-    
-    public function displayCountry() {
+
+    public function displayCountry()
+    {
         global $langs;
         $id = $this->getData('fk_country');
         if (!is_null($id) && $id) {
@@ -1663,5 +1694,14 @@ class Bimp_Product extends BimpObject
         }
         return '';
     }
+    
+   
+    public function canEdit() {
+        global $user;
+//        if($user->rights->admin or $user->rights->produit->creer)
+            return 1;
+        return 0;
+    }
+    
     
 }

@@ -1798,6 +1798,59 @@ class BimpObject extends BimpCache
         
     }
 
+    public function getFieldSqlKey($field, $main_alias = 'a', $child_name = null, &$joins = array())
+    {
+        $instance = null;
+        if (!is_null($child_name) && $child_name) {
+            $instance = $this->getChildObject($child_name);
+            $id_prop = $this->getParams('objects/' . $child_name . '/instance/id_object/field_value');
+            if (is_a($instance, 'BimpObject') && is_string($id_prop) && $id_prop) {
+                if ($instance->isDolObject() && $instance->isDolExtraField($field)) {
+                    $alias = $child_name . '_ef';
+                    if (!isset($joins[$alias])) {
+                        $joins[$alias] = array(
+                            'table' => $instance->getTable() . '_extrafields',
+                            'on'    => $main_alias . '.' . $id_prop . ' = ' . $alias . '.fk_object',
+                            'alias' => $alias
+                        );
+                    }
+                    return $alias . '.' . $field;
+                } else {
+                    $alias = $child_name;
+                    if (!isset($joins[$alias])) {
+                        $joins[$alias] = array(
+                            'table' => $instance->getTable(),
+                            'on'    => $main_alias . '.' . $id_prop . ' = ' . $alias . '.' . $instance->getPrimary(),
+                            'alias' => $alias
+                        );
+                    }
+                    if ($instance->isExtraField($field)) {
+                        return $instance->getExtraFieldFilterKey($field, $joins, $alias);
+                    } else {
+                        return $alias . '.' . $field;
+                    }
+                }
+            }
+        } elseif ($this->field_exists($field)) {
+            if ($this->isDolExtraField($field)) {
+                if (!isset($joins['ef'])) {
+                    $joins['ef'] = array(
+                        'table' => $this->getTable() . '_extrafields',
+                        'on'    => $main_alias . '.' . $this->getPrimary() . ' = ef.fk_object',
+                        'alias' => 'ef'
+                    );
+                }
+                return 'ef.' . $field;
+            } elseif ($this->isExtraField($field)) {
+                return $this->getExtraFieldFilterKey($field, $joins, $main_alias);
+            } else {
+                return $main_alias . '.' . $field;
+            }
+        }
+
+        return '';
+    }
+
     // Gestion des filtres custom: 
 
     public function getCustomFilterValueLabel($field_name, $value)

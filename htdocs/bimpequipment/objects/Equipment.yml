@@ -398,7 +398,11 @@ forms:
 filters_panel: 
     default: 
         filters: 
-            - field: 
+            - custom: 1
+              label: Note emplacement
+              field: place_note
+              type: value_part
+              
 list:
     checkboxes: 1
     bulk_actions: 
@@ -406,6 +410,7 @@ list:
           icon: fas_trash-alt
           onclick: deleteSelectedObjects('list_id', $(this));
           btn_class: deleteSelectedObjects
+    filters_panel: default
     sort_field: date_create
     sort_way: desc
     n: 10

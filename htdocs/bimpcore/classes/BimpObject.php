@@ -5119,6 +5119,145 @@ class BimpObject extends BimpCache
         return $this->processRedirect(false);
     }
 
+    public function renderListCsvColsOptions()
+    {
+        $list_name = BimpTools::getPostFieldValue('list_name', 'default');
+
+        $bc_list = new BC_ListTable($this, $list_name);
+
+        if (count($bc_list->errors)) {
+            return BimpRender::renderAlerts($bc_list->errors);
+        }
+
+        $cols = $bc_list->cols;
+
+        $html = '';
+
+        $html .= '<table class="bimp_list_table">';
+        $html .= '<tbody>';
+
+        foreach ($cols as $col_name) {
+            $label = '';
+            $content = '';
+
+            $col_params = $bc_list->getColParams($col_name);
+
+            if (!(int) $col_params['show'] || (int) $col_params['hidden']) {
+                continue;
+            }
+
+            if (isset($col_params['field']) && $col_params['field']) {
+                $bc_field = null;
+                $instance = null;
+                if (isset($col_params['child']) && $col_params['child']) {
+                    if ($col_params['child'] === 'parent') {
+                        $instance = $this->getParentInstance();
+                    } else {
+                        $instance = $this->config->getObject('', $col_params['child']);
+                    }
+                } else {
+                    $instance = $this;
+                }
+
+                if (is_a($instance, 'BimpObject')) {
+                    if ($this->field_exists($col_params['field'])) {
+                        $bc_field = new BC_Field($instance, $col_params['field']);
+                        if (count($bc_field->errors)) {
+                            $content = BimpRender::renderAlerts($bc_field->errors);
+                        } else {
+                            $label = $bc_field->params['label'];
+                            $value = '';
+                            $options = array();
+
+                            if (isset($bc_field->params['values']) && !empty($bc_field->params['values'])) {
+                                $value = 'label';
+                                $options = array(
+                                    'key'   => 'Identifiant',
+                                    'label' => 'Valeur affichée'
+                                );
+                            } else {
+                                switch ($bc_field->params['type']) {
+                                    case 'date':
+                                        $value = 'Y-m-d';
+                                        $options = array(
+                                            'Y-m-d'     => 'AAAA-MM-JJ',
+                                            'd / m / Y' => 'JJ / MM / AAAA'
+                                        );
+                                        break;
+
+                                    case 'time':
+                                        $value = 'H:i:s';
+                                        $options = array(
+                                            'H:i:s' => 'H:min:sec',
+                                            'H:i'   => 'H:min'
+                                        );
+                                        break;
+
+                                    case 'datetime':
+                                        $value = 'Y-m-d H:i:s';
+                                        $options = array(
+                                            'Y-m-d H:i:s'     => 'AAAA-MM-JJ H:min:sec',
+                                            'Y-m-d H:i'       => 'AAAA-MM-JJ H:min',
+                                            'd / m / Y H:i:s' => 'JJ / MM / AAAA H:min:sec',
+                                            'd / m / Y H:i'   => 'JJ / MM / AAAA H:min'
+                                        );
+                                        break;
+
+                                    case 'bool':
+                                        $value = 'int';
+                                        $options = array(
+                                            'int'    => '1/0',
+                                            'string' => 'OUI/NON'
+                                        );
+                                        break;
+
+                                    case 'id_object':
+                                    case 'id_parent':
+                                        $value = 'id';
+                                        $options = array(
+                                            'id' => 'ID'
+                                        );
+                                        break;
+
+                                    case 'money':
+                                    case 'percent':
+                                    case 'float':
+                                    case 'qty':
+                                        $options = array(
+                                            'number'  => 'Valeur numérique',
+                                            'display' => 'Valeur affichée'
+                                        );
+                                        break;
+                                }
+                            }
+
+                            $content = BimpInput::renderInput('select', 'col_' . $col_name . '_options', $value, array(
+                                        'options' => $options
+                            ));
+                        }
+                    } else {
+                        $content = BimpRender::renderAlerts('Le champ "' . $col_params['field'] . '" n\'existe pas dans l\'objet "' . $instance->getLabel() . '"');
+                    }
+                } else {
+                    $content = BimpRender::renderAlerts('Instance invalide');
+                }
+            } else {
+                $label = ((string) $col_params['label'] ? $col_params['label'] : $col_name);
+                $content = 'Valeur affichée';
+            }
+
+            $html .= '<tr>';
+            $html .= '<th>' . $label . '</th>';
+            $html .= '<td>' . $content . '</td>';
+            $html .= '</tr>';
+        }
+
+        $html .= '</tbody>';
+        $html .= '</table>';
+
+        return $html;
+    }
+
     // Générations javascript: 
 
     public function getJsObjectData()
@@ -6249,6 +6388,22 @@ class BimpObject extends BimpCache
             'warnings' => $warnings
         );
     }
+
+    public function actionGenerateListCsv($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+
+        $errors[] = 'En cours de développement';
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    // Divers: 
 
     public static function testMail($mail)
     {

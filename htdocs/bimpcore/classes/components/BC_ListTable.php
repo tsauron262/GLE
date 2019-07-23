@@ -64,6 +64,7 @@ class BC_ListTable extends BC_List
         $this->params_def['single_cell'] = array('type' => 'definitions', 'defs_type' => 'single_cell', 'default' => null);
         $this->params_def['inline_view_item'] = array('data_type' => 'int', 'default' => 0);
         $this->params_def['after_list_content'] = array('default' => '');
+        $this->params_def['enable_csv'] = array('data_type' => 'bool', 'default' => 1);
 
         $path = null;
 
@@ -1034,7 +1035,7 @@ class BC_ListTable extends BC_List
                 $values['sort_option'] = $this->userConfig->getData('sort_option');
                 $values['nb_items'] = $this->userConfig->getData('nb_items');
 
-                $content .= '<div style="margin: 10px; font-weight: normal; font-size: 11px">';
+                $content .= '<div style="font-weight: normal; font-size: 11px">';
 
                 $content .= 'Nombre d\'éléments par page: <span class="bold">' . ((int) $values['nb_items'] ? $values['nb_items'] : BimpRender::renderIcon('fas_infinity')) . '</span><br/>';
 
@@ -1066,6 +1067,28 @@ class BC_ListTable extends BC_List
                         'attr'        => array(
                             'onclick' => $this->object->getJsActionOnclick('setListConfig', $values, array(
                                 'form_name' => 'list_config'
+                            ))
+                        )
+            ));
+            $content .= '</div>';
+        }
+
+        if ($this->params['enable_csv']) {
+            $content .= '<div class="title">';
+            $content .= 'Outils';
+            $content .= '</div>';
+            
+            $content .= '<div style="text-align: center">';
+            $content .= BimpRender::renderButton(array(
+                        'classes'     => array('btn', 'btn-default'),
+                        'label'       => 'Générer fichier CSV',
+                        'icon_before' => 'fas_file-excel',
+                        'attr'        => array(
+                            'onclick' => $this->object->getJsActionOnclick('generateListCsv', array(
+                                'list_name' => $this->name,
+                                'file_name' => BimpTools::cleanStringForUrl($this->object->getLabel() . '_' . date('d-m-Y')),
+                                    ), array(
+                                'form_name' => 'list_csv'
                             ))
                         )
             ));

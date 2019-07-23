@@ -29,7 +29,8 @@ class Bimp_Product extends BimpObject
     private static $stockShowRoom = array();
     private static $ventes = array();
     private static $lienShowRoomEntrepot = array();
-
+    public $redirectMode = 0;
+    
     public function __construct($module, $object_name)
     {
         global $langs;
@@ -100,16 +101,16 @@ class Bimp_Product extends BimpObject
 
         switch ($action) {
             case 'validate':
-                // todo: définir droit pour valider. 
+                // todo: définir droit pour valider.
                 return 1;
 
             case 'merge':
                 return (int) $this->can('create');
         }
 
-        return parent::canSetAction($field_name);
+        return parent::canSetAction($action);
     }
-
+    
     // Getters booléens
 
     public function isSerialisable()
@@ -466,7 +467,7 @@ class Bimp_Product extends BimpObject
 
     // Getters stocks: 
 
-    public function getStocksForEntrepot($id_entrepot)
+    public function getStocksForEntrepot($id_entrepot, $types = array())
     {
         $stocks = array(
             'id_stock'       => 0,
@@ -486,7 +487,6 @@ class Bimp_Product extends BimpObject
                 $stocks['id_stock'] = $product->stock_warehouse[(int) $id_entrepot]->id;
                 $stocks['reel'] = $product->stock_warehouse[(int) $id_entrepot]->real;
             }
-
 
             $sql = 'SELECT line.rowid as id_line, c.rowid as id_commande FROM ' . MAIN_DB_PREFIX . 'commande_fournisseurdet line';
             $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commande_fournisseur c ON c.rowid = line.fk_commande';
@@ -872,6 +872,12 @@ class Bimp_Product extends BimpObject
         }
 
         return $html;
+    }
+    
+    public function displayCategories()
+    {
+        // todo
+        return '';
     }
 
     // Rendus HTML: 
@@ -1484,30 +1490,6 @@ class Bimp_Product extends BimpObject
         }
 
         return parent::validatePost();
-    }
-
-    public function insertExtraFields()
-    {
-        return array();
-    }
-
-    public function updateExtraFields()
-    {
-        return array();
-    }
-
-    public function fetchExtraFields()
-    {
-        $extras = array();
-        $extras['best_buy_price'] = "N/C"; //$this->getBestBuyPrice();
-        $extras['product_categories'] = "N/C"; //$this->getCategories();
-//        $extras['fk_country'] = $this->getOriginCountry();
-        return $extras;
-    }
-
-    public function deleteExtraFields()
-    {
-        return array();
     }
 
     // Méthodes statiques : 

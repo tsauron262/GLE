@@ -1075,7 +1075,7 @@ class BimpCache
 
             if (!is_null($rows) && count($rows)) {
                 foreach ($rows as $r) {
-                    $cache[$cache_key][(int) $r['fk_categorie']] = $r['label'];
+                    self::$cache[$cache_key][(int) $r['fk_categorie']] = $r['label'];
                 }
             }
         }

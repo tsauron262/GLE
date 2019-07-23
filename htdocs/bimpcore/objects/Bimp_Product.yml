@@ -44,6 +44,9 @@ objects:
             id_object:
                 field_value: entrepot
                 
+    default_entrepot:
+        extends: entrepot
+        
 fields: 
     ref: 
         label: Réf.
@@ -300,10 +303,10 @@ fields:
         type: text
         dol_extra_field: 1
         
-    best_buy_price:
-        label: Meilleur prix d'achat
-        type: money
-        extra: 1
+#    best_buy_price:
+#        label: Meilleur prix d'achat
+#        type: money
+#        extra: 1
         
     seuil_stock_alerte:
         label: Limite stock pour alerte
@@ -314,18 +317,10 @@ fields:
         label: Stock désiré optimal
         type: int
         edit: 1
-        
-    doli_search_prod:
-        label: Produit
-        input: 
-            type: search_product
-            filter_type: product
-            help: Entrez la référence ou l'id du produit à faire fusionner dans celui-ci. (celui que vous voulez supprimer)
-        extra: 1
-        
-    product_categories: 
-        label: Tags/catégories
-        extra: 1
+#        
+#    product_categories: 
+#        label: Tags/catégories
+#        extra: 1
         
     localtax1_tx:
         label: Taxe locale 1
@@ -360,7 +355,7 @@ fields:
     fk_default_warehouse:
         label: Entrepôt par défaut
         type: id_object
-        object: entrepot
+        object: default_entrepot
         default_value: 0
         input:
             type: search_entrepot 
@@ -525,7 +520,9 @@ fields_tables:
             - field: url
             - field: stock
             - field: fk_country
-            - field: product_categories
+            - label: Cétégories
+              value: 
+                  callback: displayCategories
             - field: localtax1_tx
             - field: localtax1_type
             - field: localtax2_tx
@@ -556,7 +553,7 @@ fields_tables:
         icon: fas_check-square
         rows:
             - field: pmp
-            - field: best_buy_price
+#            - field: best_buy_price
             - field: price
             - field: price_min
             - field: seuil_stock_alerte

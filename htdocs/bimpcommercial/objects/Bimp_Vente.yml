@@ -240,6 +240,10 @@ lists_cols:
         value: 
             callback: displayShortRef
         label: Ref courte
+    pays2:
+        value: 
+            callback: displayCountry
+        label: Pays
     label:
         field: label
         child: product
@@ -268,9 +272,6 @@ lists_cols:
         field: date
     entrepot: 
         field: id_entrepot
-        display: nom_url
-    client: 
-        field: id_client
         display: nom_url
     user: 
         field: id_user

@@ -356,4 +356,18 @@ VQ - Collège
             'success_callback' => $success_callback
         );
     }
+    
+    public function displayShortRef(){
+        $prod = BimpCache::getBimpObjectInstance('bimpcore', "Bimp_Product", $this->getData('fk_product'));
+        $ref = $prod->getData('ref');
+        if(substr($ref, 3, 1) === "-")
+                $ref = substr($ref, 4);
+        return $ref;
+    }
+    public function displayCountry(){
+        $cli = BimpCache::getBimpObjectInstance('bimpcore', "Bimp_Client", $this->getData('id_client'));
+        return $cli->displayCountry();
+    }
+    
+    
 }

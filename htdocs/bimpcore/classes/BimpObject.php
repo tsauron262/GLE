@@ -20,7 +20,7 @@ class BimpObject extends BimpCache
     );
     public static $numeric_types = array('id', 'id_parent', 'id_object', 'int', 'float', 'money', 'percent', 'bool', 'qty');
     public static $name_properties = array('public_name', 'name', 'nom', 'label', 'libelle', 'title', 'titre', 'description');
-    public static $ref_properties = array('ref', 'reference', 'code');
+    public static $ref_properties = array('ref', 'reference', 'code', 'facnumber');
     public static $status_properties = array('status', 'fk_statut', 'statut');
     public $use_commom_fields = false;
     public $use_positions = false;
@@ -33,7 +33,7 @@ class BimpObject extends BimpCache
         'header_list_name'         => array('default' => ''),
         'header_btn'               => array('data_type' => 'array', 'default' => array()),
         'header_edit_form'         => array('default' => ''),
-        'header_delete_btn'        => array('default' => 1),
+        'header_delete_btn'        => array('data_type' => 'bool', 'default' => 1),
         'list_page_url'            => array('data_type' => 'array'),
         'parent_object'            => array('default' => ''),
         'parent_id_property'       => array('defautl' => ''),
@@ -358,6 +358,12 @@ class BimpObject extends BimpCache
     public function getParentIdProperty()
     {
         $property = $this->params['parent_id_property'];
+//        if ($this->object_name === 'BE_Place') {
+////            echo $this->object_name . ': ' . $property . '<br/>';
+////            echo '<pre>';
+////            print_r($this->params);
+////            echo '</pre>';
+////        }
         if (is_null($property)) {
             if ($this->field_exists('id_parent')) {
                 $property = 'id_parent';
@@ -1798,19 +1804,33 @@ class BimpObject extends BimpCache
         
     }
 
-    public function getFieldSqlKey($field, $main_alias = 'a', $child_name = null, &$joins = array())
+    public function getFieldSqlKey($field, $main_alias = 'a', $child_name = null, &$joins = array(), &$errors = array(), $child_object = null)
     {
-        $instance = null;
         if (!is_null($child_name) && $child_name) {
-            $instance = $this->getChildObject($child_name);
-            $id_prop = $this->getParams('objects/' . $child_name . '/instance/id_object/field_value');
-            if (is_a($instance, 'BimpObject') && is_string($id_prop) && $id_prop) {
-                if ($instance->isDolObject() && $instance->isDolExtraField($field)) {
+            if (is_null($child_object)) {
+                $child_object = $this->config->getObject('', $child_name);
+            }
+
+            if (!is_a($child_object, 'BimpObject')) {
+                $errors[] = 'Instance enfant invalide';
+                return '';
+            }
+
+            $relation = $this->getConf('objects/' . $child_name . '/relation', 'none');
+
+            if ($relation === 'hasOne') {
+                $id_prop = $this->getChildIdProperty($child_name);
+                if (!is_string($id_prop) || !$id_prop) {
+                    $errors[] = 'Propriété contenant l\'ID de l\'objet "' . $child_object->getLabel() . '" absente ou invalide';
+                    return '';
+                }
+
+                if ($child_object->isDolExtraField($field)) {
                     $alias = $child_name . '_ef';
                     if (!isset($joins[$alias])) {
                         $joins[$alias] = array(
-                            'table' => $instance->getTable() . '_extrafields',
-                            'on'    => $main_alias . '.' . $id_prop . ' = ' . $alias . '.fk_object',
+                            'table' => $child_object->getTable() . '_extrafields',
+                            'on'    => $alias . '.fk_object = ' . $main_alias . '.' . $id_prop,
                             'alias' => $alias
                         );
                     }
@@ -1819,17 +1839,54 @@ class BimpObject extends BimpCache
                     $alias = $child_name;
                     if (!isset($joins[$alias])) {
                         $joins[$alias] = array(
-                            'table' => $instance->getTable(),
-                            'on'    => $main_alias . '.' . $id_prop . ' = ' . $alias . '.' . $instance->getPrimary(),
+                            'table' => $child_object->getTable(),
+                            'on'    => $alias . '.' . $child_object->getPrimary() . ' = ' . $main_alias . '.' . $id_prop,
                             'alias' => $alias
                         );
                     }
-                    if ($instance->isExtraField($field)) {
-                        return $instance->getExtraFieldFilterKey($field, $joins, $alias);
+                    if ($child_object->isExtraField($field)) {
+                        return $child_object->getExtraFieldFilterKey($field, $joins, $alias);
                     } else {
                         return $alias . '.' . $field;
                     }
                 }
+            } elseif ($relation === 'hasMany') {
+                if ($this->isChild($child_object)) {
+                    $parent_id_prop = $child_object->getParentIdProperty();
+                    if (!$parent_id_prop) {
+                        $errors[] = 'Propriété de l\'ID parent absent pour l\'objet "' . $child_object->getLabel() . '"';
+                    } else {
+                        $alias = $child_name;
+                        if (!isset($joins[$alias])) {
+                            $joins[$alias] = array(
+                                'table' => $child_object->getTable(),
+                                'alias' => $alias,
+                                'on'    => $main_alias . '.' . $this->getPrimary() . ' = ' . $alias . '.' . $parent_id_prop
+                            );
+                        }
+
+                        if ($child_object->isDolExtraField($field)) {
+                            $sub_alias = $child_name . '_ef';
+                            if (!isset($joins[$sub_alias])) {
+                                $joins[$sub_alias] = array(
+                                    'table' => $child_object->getTable() . '_extrafields',
+                                    'alias' => $sub_alias,
+                                    'on'    => $sub_alias . '.fk_object = ' . $alias . '.' . $child_object->getPrimary()
+                                );
+                            }
+                            return $alias . '.' . $field;
+                        } elseif ($child_object->isExtraField($field)) {
+                            return $child_object->getExtraFieldFilterKey($field, $joins, $child_name);
+                        } else {
+                            return $alias . '.' . $field;
+                        }
+                    }
+                } else {
+                    $errors[] = 'Erreur: l\'objet "' . $child_object->getLabel() . '" doit être enfant de "' . $this->getLabel() . '"';
+                }
+            } else {
+                $errors[] = 'Type de relation invalide pour l\'objet "' . $child_object->getLabel() . '"';
+                return '';
             }
         } elseif ($this->field_exists($field)) {
             if ($this->isDolExtraField($field)) {
@@ -1846,6 +1903,8 @@ class BimpObject extends BimpCache
             } else {
                 return $main_alias . '.' . $field;
             }
+        } else {
+            $errors[] = 'Le champ "' . $field . '" n\'existe pas pour les ' . $this->getLabel('name_plur');
         }
 
         return '';
@@ -5167,73 +5226,16 @@ class BimpObject extends BimpCache
                         } else {
                             $label = $bc_field->params['label'];
                             $value = '';
-                            $options = array();
+                            $options = $bc_field->getNoHtmlOptions($value);
 
-                            if (isset($bc_field->params['values']) && !empty($bc_field->params['values'])) {
-                                $value = 'label';
-                                $options = array(
-                                    'key'   => 'Identifiant',
-                                    'label' => 'Valeur affichée'
-                                );
+                            if (!empty($options)) {
+                                $content = BimpInput::renderInput('select', 'col_' . $col_name . '_option', $value, array(
+                                            'options'     => $options,
+                                            'extra_class' => 'col_option'
+                                ));
                             } else {
-                                switch ($bc_field->params['type']) {
-                                    case 'date':
-                                        $value = 'Y-m-d';
-                                        $options = array(
-                                            'Y-m-d'     => 'AAAA-MM-JJ',
-                                            'd / m / Y' => 'JJ / MM / AAAA'
-                                        );
-                                        break;
-
-                                    case 'time':
-                                        $value = 'H:i:s';
-                                        $options = array(
-                                            'H:i:s' => 'H:min:sec',
-                                            'H:i'   => 'H:min'
-                                        );
-                                        break;
-
-                                    case 'datetime':
-                                        $value = 'Y-m-d H:i:s';
-                                        $options = array(
-                                            'Y-m-d H:i:s'     => 'AAAA-MM-JJ H:min:sec',
-                                            'Y-m-d H:i'       => 'AAAA-MM-JJ H:min',
-                                            'd / m / Y H:i:s' => 'JJ / MM / AAAA H:min:sec',
-                                            'd / m / Y H:i'   => 'JJ / MM / AAAA H:min'
-                                        );
-                                        break;
-
-                                    case 'bool':
-                                        $value = 'int';
-                                        $options = array(
-                                            'int'    => '1/0',
-                                            'string' => 'OUI/NON'
-                                        );
-                                        break;
-
-                                    case 'id_object':
-                                    case 'id_parent':
-                                        $value = 'id';
-                                        $options = array(
-                                            'id' => 'ID'
-                                        );
-                                        break;
-
-                                    case 'money':
-                                    case 'percent':
-                                    case 'float':
-                                    case 'qty':
-                                        $options = array(
-                                            'number'  => 'Valeur numérique',
-                                            'display' => 'Valeur affichée'
-                                        );
-                                        break;
-                                }
+                                $content .= 'Valeur';
                             }
-
-                            $content = BimpInput::renderInput('select', 'col_' . $col_name . '_options', $value, array(
-                                        'options' => $options
-                            ));
                         }
                     } else {
                         $content = BimpRender::renderAlerts('Le champ "' . $col_params['field'] . '" n\'existe pas dans l\'objet "' . $instance->getLabel() . '"');
@@ -6393,9 +6395,44 @@ class BimpObject extends BimpCache
     {
         $errors = array();
         $warnings = array();
-        $success = '';
+        $success = 'Fichier généré avec succès';
 
         $errors[] = 'En cours de développement';
+//        
+//        $list_name = (isset($data['list_name']) ? $data['list_name'] : '');
+//        $file_name = (isset($data['file_name']) ? $data['file_name'] : $this->getLabel() . '_' . data('Y-m-d'));
+//        $separator = (isset($data['separator']) ? $data['separator'] : ';');
+//        $headers = (isset($data['headers']) ? (int) $data['headers'] : 1);
+//        $col_options = (isset($data['cols_options']) ? $data['cols_options'] : array());
+//        $list_data = (isset($data['list_data']) ? $data['list_data'] : array());
+//
+//        if (!$list_name) {
+//            $errors[] = 'Type de liste absent';
+//        }
+//        if (empty($list_data)) {
+//            $errors[] = 'Paramètres de la liste absent';
+//        }
+//
+//        if (!count($errors)) {
+//            $post_temp = $_POST;
+//            $_POST = $list_data;
+//
+//            $list = new BC_ListTable($this, $list_name);
+//
+//            if (count($list->errors)) {
+//                $errors = $list->errors;
+//            } else {
+//                $content = $list->renderCsvContent($separator, $col_options, $headers, $errors);
+//
+//                if ($content && !count($errors)) {
+//                    
+//                } elseif (!count($errors)) {
+//                    $warnings[] = 'Aucun contenu à générer trouvé';
+//                }
+//            }
+//
+//            $_POST = $post_temp;
+//        }
 
         return array(
             'errors'   => $errors,

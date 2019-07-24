@@ -545,4 +545,104 @@ class BC_Field extends BimpComponent
 
         return BimpInput::renderSearchInputContainer($input_name, $search_data['search_type'], $search_data['search_on_key_up'], 1, $content, $extra_data);
     }
+
+    // Options No-HTML: 
+
+    public function getNoHtmlOptions(&$default_value = '')
+    {
+        $options = array();
+
+        if (isset($this->params['values']) && !empty($this->params['values'])) {
+            $default_value = 'label';
+            $options = array(
+                'key'   => 'Identifiant',
+                'label' => 'Valeur affichée'
+            );
+        } else {
+            switch ($this->params['type']) {
+                case 'date':
+                    $default_value = 'd / m / Y';
+                    $options = array(
+                        'Y-m-d'     => 'AAAA-MM-JJ',
+                        'd / m / Y' => 'JJ / MM / AAAA'
+                    );
+                    break;
+
+                case 'time':
+                    $default_value = 'H:i';
+                    $options = array(
+                        'H:i:s' => 'H:min:sec',
+                        'H:i'   => 'H:min'
+                    );
+                    break;
+
+                case 'datetime':
+                    $default_value = 'd / m / Y H:i';
+                    $options = array(
+                        'Y-m-d H:i:s'     => 'AAAA-MM-JJ H:min:sec',
+                        'Y-m-d H:i'       => 'AAAA-MM-JJ H:min',
+                        'd / m / Y H:i:s' => 'JJ / MM / AAAA H:min:sec',
+                        'd / m / Y H:i'   => 'JJ / MM / AAAA H:min'
+                    );
+                    break;
+
+                case 'bool':
+                    $default_value = 'string';
+                    $options = array(
+                        'number'    => '1/0',
+                        'string' => 'OUI/NON'
+                    );
+                    break;
+
+                case 'id_object':
+                case 'id_parent':
+                    $default_value = '';
+                    $options = array(
+                        'id'       => 'ID',
+                        'fullname' => 'Nom complet'
+                    );
+                    $instance = null;
+                    if ($this->params['type'] === 'id_parent') {
+                        $instance = $this->object->getParentInstance();
+                    } elseif (isset($this->params['object']) && (string) $this->params['object']) {
+                        $instance = $this->object->config->getObject('', $this->params['object']);
+                    }
+                    if (is_a($instance, 'BimpObject')) {
+                        foreach ($instance->params['fields'] as $field_name) {
+                            $options[$field_name] = $instance->getConf('fields/' . $field_name . '/label', $field_name);
+                        }
+                    }
+                    foreach (BimpObject::$ref_properties as $ref_prop) {
+                        if (isset($options[$ref_prop])) {
+                            $default_value = $ref_prop;
+                            break;
+                        }
+                    }
+                    if (!$default_value) {
+                        foreach (BimpObject::$name_properties as $name_prop) {
+                            if (isset($options[$name_prop])) {
+                                $default_value = $name_prop;
+                            }
+                        }
+                    }
+                    if (!$default_value) {
+                        $default_value = 'fullname';
+                    }
+                    break;
+
+                case 'money':
+                case 'percent':
+                case 'float':
+                case 'qty':
+                    $default_value = 'number';
+                    $options = array(
+                        'number'  => 'Valeur numérique',
+                        'string' => 'Valeur affichée'
+                    );
+                    break;
+            }
+        }
+
+        return $options;
+    }
 }

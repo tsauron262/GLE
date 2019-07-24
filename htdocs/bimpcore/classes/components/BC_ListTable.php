@@ -1357,8 +1357,8 @@ class BC_ListTable extends BC_List
         if (is_null($this->items)) {
             $this->fetchItems();
         }
-        
-         $rows = array();
+
+        $rows = array();
 
         if (is_null($this->items) || !count($this->items)) {
             $this->rows = array();
@@ -1374,7 +1374,7 @@ class BC_ListTable extends BC_List
             $object = BimpCache::getBimpObjectInstance($this->object->module, $this->object->object_name, (int) $item[$primary], $this->parent);
             if (BimpObject::objectLoaded($object)) {
                 $this->object = $object;
-                
+
                 foreach ($this->cols as $col_name) {
                     $col_params = $this->getColParams($col_name);
 
@@ -1382,12 +1382,16 @@ class BC_ListTable extends BC_List
                         continue;
                     }
 
-                    $current_value = null;
-                    $field = null;
+                    $content = '';
 
                     if ($col_params['field']) {
                         if ($col_params['child']) {
-                            $obj = $object->getChildObject($col_params['child']);
+                            if ($col_params['child'] === 'parent') {
+                                $obj = $object->getParentInstance();
+                            } else {
+                                $obj = $object->getChildObject($col_params['child']);
+                            }
+
                             if (is_null($obj) || !is_a($obj, 'BimpObject')) {
                                 continue;
                             }
@@ -1397,14 +1401,9 @@ class BC_ListTable extends BC_List
                         } else {
                             $obj = $object;
                         }
-                        
-                        $field = new BC_Field($obj, $col_params['field'], ($this->params['enable_edit'] && (int) $col_params['edit']));
-//                        $field->display_name = $col_params['display'];
 
-                        $current_value = $field->value;
-
-                        $row['cols'][$col_name]['content'] = $field->renderHtml();
-                        
+                        $field = new BC_Field($obj, $col_params['field']);
+//                        $content = $field->get
                     } elseif (isset($col_params['value'])) {
                         $row['cols'][$col_name]['content'] .= $col_params['value'];
                         if (!is_null($col_params['true_value'])) {
@@ -1413,7 +1412,6 @@ class BC_ListTable extends BC_List
                             $current_value = $col_params['value'];
                         }
                     }
-
                 }
             }
         }

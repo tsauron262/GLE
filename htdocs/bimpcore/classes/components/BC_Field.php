@@ -546,7 +546,7 @@ class BC_Field extends BimpComponent
         return BimpInput::renderSearchInputContainer($input_name, $search_data['search_type'], $search_data['search_on_key_up'], 1, $content, $extra_data);
     }
 
-    // Options No-HTML: 
+    //No-HTML: 
 
     public function getNoHtmlOptions(&$default_value = '')
     {
@@ -589,7 +589,7 @@ class BC_Field extends BimpComponent
                 case 'bool':
                     $default_value = 'string';
                     $options = array(
-                        'number'    => '1/0',
+                        'number' => '1/0',
                         'string' => 'OUI/NON'
                     );
                     break;
@@ -636,7 +636,7 @@ class BC_Field extends BimpComponent
                 case 'qty':
                     $default_value = 'number';
                     $options = array(
-                        'number'  => 'Valeur numérique',
+                        'number' => 'Valeur numérique',
                         'string' => 'Valeur affichée'
                     );
                     break;
@@ -644,5 +644,109 @@ class BC_Field extends BimpComponent
         }
 
         return $options;
+    }
+
+    public function getNoHtmlValue($option)
+    {
+        $options = array();
+
+        if (isset($this->params['values']) && !empty($this->params['values'])) {
+            if ($option === 'label') {
+                if (isset($this->params['values'][$this->value])) {
+                    return $this->params['values'][$this->value];
+                } else {
+                    return 'Non défini (' . $this->value . ')';
+                }
+            }
+            return $this->value;
+        } else {
+            switch ($this->params['type']) {
+                case 'date':
+                case 'time':
+                case 'datetime':
+                    if (!(string) $this->value) {
+                        return '';
+                    }
+                    $dt = new DateTime($this->value);
+                    if (!(string) $option) {
+                        switch ($this->params['type']) {
+                            case 'date':
+                                $option = 'd / m / Y';
+                                break;
+                            case 'time':
+                                $option = 'H:i';
+                                break;
+                            case 'datetime':
+                                $option = 'd / m / Y H:i';
+                                break;
+                        }
+                    }
+                    return $dt->format($option);
+
+                case 'bool':
+                    if ($option === 'number') {
+                        return (int) $this->value;
+                    }
+                    return ((int) $this->value ? 'OUI' : 'NON');
+
+                case 'id_object':
+                case 'id_parent':
+                    if (!$option) {
+                        $option = 'id';
+                    }
+                    switch ($option) {
+                        case 'id':
+                            return $this->value;
+
+                        case 'fullname';
+                        default:
+                            switch ($this->params['type']) {
+                                case 'id_parent':
+                                    $obj = $this->object->getParentInstance();
+                                    break;
+
+                                case 'id_object':
+                                    $obj = $this->object->getChildObject($this->params['object']);
+                                    break;
+                            }
+
+                            if (!BimpObject::objectLoaded($obj)) {
+                                return $this->value;
+                            }
+
+                            if ($option === 'fullname') {
+                                return $obj->getName();
+                            }
+
+                            if ($obj->field_exists($option)) {
+                                return $obj->getData($option);
+                            }
+
+                            return $this->value;
+                    }
+
+                case 'money':
+                case 'percent':
+                case 'float':
+                case 'qty':
+                    if ($option === 'string') {
+                        switch ($this->params['type']) {
+                            case 'money':
+                                return BimpTools::displayMoneyValue($this->value);
+
+                            case 'percent':
+                                return BimpTools::displayFloatValue($this->value) . ' %';
+
+                            case 'float':
+                            case 'qty':
+                                return BimpTools::displayFloatValue($this->value);
+                        }
+                    }
+                    return $this->value;
+
+                default:
+                    return $this->Value;
+            }
+        }
     }
 }

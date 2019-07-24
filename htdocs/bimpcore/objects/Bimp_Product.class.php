@@ -1,5 +1,7 @@
 <?php
+
 ini_set('max_execution_time', 600);
+
 class Bimp_Product extends BimpObject
 {
 
@@ -21,63 +23,77 @@ class Bimp_Product extends BimpObject
         'HT'  => 'HT',
         'TTC' => 'TTC'
     );
-    public static $units_weight;
-    public static $units_length;
-    public static $units_surface;
-    public static $units_volume;
+    public static $units_weight = array();
+    public static $units_length = array();
+    public static $units_surface = array();
+    public static $units_volume = array();
     private static $stockDate = array();
     private static $stockShowRoom = array();
     private static $ventes = array();
     private static $lienShowRoomEntrepot = array();
-    
+
     public function __construct($module, $object_name)
     {
-        global $langs;
-        $langs->load('other');
-
-        self::$units_weight = array(
-            3  => array('label' => $langs->transnoentitiesnoconv('WeightUnitton')),
-            0  => array('label' => $langs->transnoentitiesnoconv('WeightUnitkg')),
-            -3 => array('label' => $langs->transnoentitiesnoconv('WeightUnitg')),
-            -6 => array('label' => $langs->transnoentitiesnoconv('WeightUnitmg')),
-            98 => array('label' => $langs->transnoentitiesnoconv('WeightUnitounce')),
-            99 => array('label' => $langs->transnoentitiesnoconv('WeightUnitpound'))
-        );
-
-        self::$units_length = array(
-            0   => array('label' => $langs->transnoentitiesnoconv('SizeUnitm')),
-            -1  => array('label' => $langs->transnoentitiesnoconv('SizeUnitdm')),
-            -2  => array('label' => $langs->transnoentitiesnoconv('SizeUnitcm')),
-            -3  => array('label' => $langs->transnoentitiesnoconv('SizeUnitmm')),
-            -98 => array('label' => $langs->transnoentitiesnoconv('SizeUnitfoot')),
-            -99 => array('label' => $langs->transnoentitiesnoconv('SizeUnitinch'))
-        );
-
-        self::$units_surface = array(
-            0  => array('label' => $langs->transnoentitiesnoconv('SurfaceUnitm2')),
-            -2 => array('label' => $langs->transnoentitiesnoconv('SurfaceUnitdm2')),
-            -4 => array('label' => $langs->transnoentitiesnoconv('SurfaceUnitcm2')),
-            -6 => array('label' => $langs->transnoentitiesnoconv('SurfaceUnitmm2')),
-            98 => array('label' => $langs->transnoentitiesnoconv('SurfaceUnitfoot2')),
-            99 => array('label' => $langs->transnoentitiesnoconv('SurfaceUnitinch2'))
-        );
-
-        self::$units_volume = array(
-            0  => array('label' => $langs->transnoentitiesnoconv('VolumeUnitm3')),
-            -3 => array('label' => $langs->transnoentitiesnoconv('VolumeUnitdm3')),
-            -6 => array('label' => $langs->transnoentitiesnoconv('VolumeUnitcm3')),
-            -9 => array('label' => $langs->transnoentitiesnoconv('VolumeUnitmm3')),
-            88 => array('label' => $langs->transnoentitiesnoconv('VolumeUnitfoot3')),
-            89 => array('label' => $langs->transnoentitiesnoconv('VolumeUnitinch3')),
-            97 => array('label' => $langs->transnoentitiesnoconv('VolumeUnitounce')),
-            98 => array('label' => $langs->transnoentitiesnoconv('VolumeUnitlitre')),
-            99 => array('label' => $langs->transnoentitiesnoconv('VolumeUnitgallon'))
-        );
+        self::initUnits();
 
         parent::__construct($module, $object_name);
     }
 
+    public static function initUnits()
+    {
+        if (empty(self::$units_weight)) {
+            global $langs;
+            $langs->load('other');
+
+            self::$units_weight = array(
+                3  => array('label' => $langs->transnoentitiesnoconv('WeightUnitton')),
+                0  => array('label' => $langs->transnoentitiesnoconv('WeightUnitkg')),
+                -3 => array('label' => $langs->transnoentitiesnoconv('WeightUnitg')),
+                -6 => array('label' => $langs->transnoentitiesnoconv('WeightUnitmg')),
+                98 => array('label' => $langs->transnoentitiesnoconv('WeightUnitounce')),
+                99 => array('label' => $langs->transnoentitiesnoconv('WeightUnitpound'))
+            );
+
+            self::$units_length = array(
+                0   => array('label' => $langs->transnoentitiesnoconv('SizeUnitm')),
+                -1  => array('label' => $langs->transnoentitiesnoconv('SizeUnitdm')),
+                -2  => array('label' => $langs->transnoentitiesnoconv('SizeUnitcm')),
+                -3  => array('label' => $langs->transnoentitiesnoconv('SizeUnitmm')),
+                -98 => array('label' => $langs->transnoentitiesnoconv('SizeUnitfoot')),
+                -99 => array('label' => $langs->transnoentitiesnoconv('SizeUnitinch'))
+            );
+
+            self::$units_surface = array(
+                0  => array('label' => $langs->transnoentitiesnoconv('SurfaceUnitm2')),
+                -2 => array('label' => $langs->transnoentitiesnoconv('SurfaceUnitdm2')),
+                -4 => array('label' => $langs->transnoentitiesnoconv('SurfaceUnitcm2')),
+                -6 => array('label' => $langs->transnoentitiesnoconv('SurfaceUnitmm2')),
+                98 => array('label' => $langs->transnoentitiesnoconv('SurfaceUnitfoot2')),
+                99 => array('label' => $langs->transnoentitiesnoconv('SurfaceUnitinch2'))
+            );
+
+            self::$units_volume = array(
+                0  => array('label' => $langs->transnoentitiesnoconv('VolumeUnitm3')),
+                -3 => array('label' => $langs->transnoentitiesnoconv('VolumeUnitdm3')),
+                -6 => array('label' => $langs->transnoentitiesnoconv('VolumeUnitcm3')),
+                -9 => array('label' => $langs->transnoentitiesnoconv('VolumeUnitmm3')),
+                88 => array('label' => $langs->transnoentitiesnoconv('VolumeUnitfoot3')),
+                89 => array('label' => $langs->transnoentitiesnoconv('VolumeUnitinch3')),
+                97 => array('label' => $langs->transnoentitiesnoconv('VolumeUnitounce')),
+                98 => array('label' => $langs->transnoentitiesnoconv('VolumeUnitlitre')),
+                99 => array('label' => $langs->transnoentitiesnoconv('VolumeUnitgallon'))
+            );
+        }
+    }
+
     // Droits user: 
+
+    public function canEdit()
+    {
+        global $user;
+//        if($user->rights->admin or $user->rights->produit->creer)
+        return 1;
+    }
 
     public function canEditField($field_name)
     {
@@ -100,15 +116,29 @@ class Bimp_Product extends BimpObject
 
         switch ($action) {
             case 'validate':
-                // todo: définir droit pour valider.
-                return 1;
-
             case 'merge':
-//                return (int) $this->can('create');
-                return 1;
+                return $this->canValidate();
         }
 
         return parent::canSetAction($action);
+    }
+
+    public function canValidate()
+    {
+        global $user;
+        if ($user->admin || $user->rights->bimpcommercial->validProd) {
+            return 1;
+        }
+        return 0;
+    }
+    
+    public function iAmAdminRedirect()
+    {
+        global $user;
+        if ($user->rights->bimpcommercial->validProd)
+            return 1;
+        
+        return parent::iAmAdminRedirect();
     }
 
     // Getters booléens
@@ -817,9 +847,8 @@ class Bimp_Product extends BimpObject
         return $errors;
     }
 
-    public function getBestBuyPrice()
+    public function renderBestBuyPrice()
     {
-
         $sql = 'SELECT price FROM `' . MAIN_DB_PREFIX . 'product_fournisseur_price`';
         $sql .= ' WHERE fk_product=' . $this->getData('id');
         $sql .= ' GROUP BY fk_product';
@@ -827,9 +856,9 @@ class Bimp_Product extends BimpObject
         $rows = $this->db->executeS($sql);
 
         if (!empty($rows)) {
-            return $rows[0]->price;
+            return number_format($rows[0]->price, 2) . ' €';
         }
-        return 00.00;
+        return 00.00. ' €';
     }
 
     // Affichages: 
@@ -881,6 +910,18 @@ class Bimp_Product extends BimpObject
     }
 
     // Rendus HTML: 
+    
+    public function renderHeaderExtraLeft()
+    {
+        $html = '';
+        $barcode = $this->getData('barcode');
+        if (isset($barcode) and ( strlen($barcode) == 12 or strlen($barcode) == 13)) {
+            $html .= '<img src="';
+            $html .= DOL_URL_ROOT . '/viewimage.php?modulepart=barcode&amp;generator=phpbarcode&amp;';
+            $html .= 'code=' . $barcode . '&amp;encoding=EAN13">';
+        }
+        return $html;
+    }
 
     public function renderHeaderStatusExtra()
     {
@@ -1515,7 +1556,6 @@ class Bimp_Product extends BimpObject
 //            $categories = self::getProductCategoriesArray((int) $this->id);
 //            $fields['product_categories'] = $categories;
 //        }
-        
 //        $extras = array();
 //        $extras['best_buy_price'] = $this->getBestBuyPrice();
 //        $extras['product_categories'] = $this->getCategories(1);
@@ -1614,40 +1654,36 @@ class Bimp_Product extends BimpObject
             self::$ventes[$dateMin . "-" . $dateMax][$ln->fk_product][null]['total_ttc'] += $ln->total_ttc;
         }
     }
-    
-    public function iAmAdminRedirect() {
-        global $user;
-        if($user->rights->bimpcommercial->validProd)
-            return 1;
-        parent::iAmAdminRedirect();
-    }
-    
-    public function getCategories($edit = 0) {
+
+    // A classer. 
+
+    public function getCategories($edit = 0)
+    {
 
         global $conf;
         if ($conf->categorie->enabled) {
             require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
-            if($edit == 1) {
+            if ($edit == 1) {
                 $form = new Form($this->db->db);
                 $cate_arbo = $form->select_all_categories(Categorie::TYPE_PRODUCT, '', 'parent', 64, 0, 1);
                 return $form->multiselectarray('categories', $cate_arbo, GETPOST('categories', 'array'), '', 0, '', 0, '100%');
             } else {
                 $form = new Form($this->db->db);
-                return $form->showCategories($this->getData('id'),'product',1);
+                return $form->showCategories($this->getData('id'), 'product', 1);
             }
-            
         } else {
             return "L'utilisation de catégorie est inactive";
         }
     }
-    
-    public function setCategories() {
+
+    public function setCategories()
+    {
 //        if ($conf->categorie->enabled) {
-            require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
-            $form = new Form($this->db->db);
-            $cate_arbo = $form->select_all_categories(Categorie::TYPE_PRODUCT, '', 'parent', 64, 0, 1);
-            return $form->multiselectarray('categories', $cate_arbo, GETPOST('categories', 'array'), '', 0, '', 0, '100%');
-            
+        require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
+        $form = new Form($this->db->db);
+        $cate_arbo = $form->select_all_categories(Categorie::TYPE_PRODUCT, '', 'parent', 64, 0, 1);
+        return $form->multiselectarray('categories', $cate_arbo, GETPOST('categories', 'array'), '', 0, '', 0, '100%');
+
 //				$cate_arbo = $form->select_all_categories(Categorie::TYPE_PRODUCT, '', 'parent', 64, 0, 1);
 //				$c = new Categorie($this->db->db);
 //				$cats = $c->containing($this->getData('id'),Categorie::TYPE_PRODUCT);
@@ -1656,7 +1692,6 @@ class Bimp_Product extends BimpObject
 //					$arrayselected[] = $cat->id;
 //				}
 //				$html .= $form->multiselectarray('categories', $cate_arbo, $arrayselected, '', 0, '', 0, '100%');
-
 //        } TODO set a else
     }
 
@@ -1669,23 +1704,11 @@ class Bimp_Product extends BimpObject
         die();
         return 'test' . $return . 'fin';
     }
-    
-    
-    public function setOriginCountry() {
-        $form = new Form($this->db->db);
-        return $form->select_country($this->getData('fk_country '),'country_id');
-    }
-    
 
-    public function renderHeaderExtraLeft() {
-        $html = '';
-        $barcode = $this->getData('barcode');
-        if (isset($barcode) and ( strlen($barcode) == 12 or strlen($barcode) == 13)) {
-            $html .= '<img src="';
-            $html .= DOL_URL_ROOT . '/viewimage.php?modulepart=barcode&amp;generator=phpbarcode&amp;';
-            $html .= 'code=' . $barcode . '&amp;encoding=EAN13">';
-        }
-        return $html;
+    public function setOriginCountry()
+    {
+        $form = new Form($this->db->db);
+        return $form->select_country($this->getData('fk_country '), 'country_id');
     }
 
     public function displayCountry()
@@ -1697,14 +1720,4 @@ class Bimp_Product extends BimpObject
         }
         return '';
     }
-    
-   
-    public function canEdit() {
-        global $user;
-//        if($user->rights->admin or $user->rights->produit->creer)
-            return 1;
-        return 0;
-    }
-    
-    
 }

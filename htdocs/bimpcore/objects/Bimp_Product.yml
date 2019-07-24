@@ -7,12 +7,12 @@ primary: rowid
 icon: fas_box
 controller: product
 
-
 header_btn: 
     callback: getActionsButtons
     
 header_list_name: default
 header_edit_form: card
+header_delete_btn: 1
 
 list_page_url: list
 
@@ -59,6 +59,14 @@ objects:
         extends: entrepot
         
 fields: 
+    fk_user_modif:
+        label: Utilisateur
+        type: id_object
+        object: user
+        label: User modif
+    datec:
+        type: date
+        label: Date Création
     ref: 
         label: Réf.
         
@@ -119,9 +127,9 @@ fields:
         values: 
             array: price_base_types
         
-    cost_price: 
-        label: Prix de revient
-        type: money
+#    cost_price: 
+#        label: Prix de revient
+#        type: money
         
     pmp: 
         label: Prix d'achat moyen pondéré
@@ -198,6 +206,7 @@ fields:
             default: 
                 type: callback
                 method: displayCountry        
+                
     weight: 
         label: Poids 
         type: float
@@ -388,7 +397,6 @@ fields:
         label: Durée
         type: string
         
-
 forms: 
     light: 
         rows: 
@@ -479,9 +487,10 @@ forms:
             - field: note
             - field: fk_default_warehouse
               display: nom_url
+            - field: deee
             # Infos +
             - field: url
-            - field: stock
+#            - field: stock
             - field: fk_country
             - field: product_categories
             - field: localtax1_tx
@@ -490,6 +499,8 @@ forms:
             - field: localtax2_type
             - field: ref_constructeur
             - field: crt
+            - field: rpcp
+            - field: price
             # Measure
             - field: weight
             - field: weight_units
@@ -504,7 +515,6 @@ forms:
             - field: volume
             - field: volume_units
         
-
 fields_tables: 
     infos: 
         title: Informations
@@ -522,7 +532,6 @@ fields_tables:
             - field: note
             - field: fk_default_warehouse
               display: nom_url
-
             
     prices: 
         title: Prix de vente
@@ -535,7 +544,6 @@ fields_tables:
             - field: rpcp
             - field: price_ttc
             - field: price_min_ttc
-            - field: cost_price
     
     prices_buy: 
         title: Prix d'achat
@@ -548,7 +556,6 @@ fields_tables:
 #            - field: price_min_ttc
 #            - field: cost_price
             - field: cur_pa_ht
-
        
     status: 
         title: Statuts
@@ -587,9 +594,8 @@ fields_tables:
             - field: crt
 
     measures: 
-        edit: 1
-        rows:
         title: Mesures
+        icon: fas_ruler
         rows:
             - field: weight
             - field: weight_units
@@ -608,8 +614,16 @@ fields_tables:
         title: Vue globale
         icon: fas_check-square
         rows:
-            - field: pmp
-#            - field: best_buy_price
+            - custom: 1
+              label: Prix d'achat moyen pondéré
+              type: money
+              value:
+                 callback: renderBestBuyPrice
+            - custom: 1
+              label: Meilleur prix d'achat
+              type: money
+              value:
+                 callback: renderBestBuyPrice
             - field: price
             - field: price_min
             - field: seuil_stock_alerte
@@ -729,6 +743,14 @@ filters_panels:
             - field: remisable
             - field: tosell
             - field: tobuy
+#            - custom: 1
+#              field: fk_user_modif
+#              label: User modif
+#              data_type: id_object
+#              type: value
+#              input: 
+#                    type: search_user
+            - field: datec
             - custom: 1
               label: Catégorie (1)
               field: categ1
@@ -759,6 +781,10 @@ lists_cols:
         field: zone_pr
     validate: 
         field: validate
+    fk_user_modif:
+        field: fk_user_modif
+    datec:
+        field: datec
                 
 lists: 
     default: 

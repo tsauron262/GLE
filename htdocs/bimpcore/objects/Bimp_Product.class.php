@@ -847,9 +847,8 @@ class Bimp_Product extends BimpObject
         return $errors;
     }
 
-    public function getBestBuyPrice()
+    public function renderBestBuyPrice()
     {
-
         $sql = 'SELECT price FROM `' . MAIN_DB_PREFIX . 'product_fournisseur_price`';
         $sql .= ' WHERE fk_product=' . $this->getData('id');
         $sql .= ' GROUP BY fk_product';
@@ -857,9 +856,9 @@ class Bimp_Product extends BimpObject
         $rows = $this->db->executeS($sql);
 
         if (!empty($rows)) {
-            return $rows[0]->price;
+            return number_format($rows[0]->price, 2) . ' €';
         }
-        return 00.00;
+        return 00.00. ' €';
     }
 
     // Affichages: 

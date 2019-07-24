@@ -479,9 +479,10 @@ forms:
             - field: note
             - field: fk_default_warehouse
               display: nom_url
+            - field: deee
             # Infos +
             - field: url
-            - field: stock
+#            - field: stock
             - field: fk_country
             - field: product_categories
             - field: localtax1_tx
@@ -490,6 +491,8 @@ forms:
             - field: localtax2_type
             - field: ref_constructeur
             - field: crt
+            - field: rpcp
+            - field: price
             # Measure
             - field: weight
             - field: weight_units
@@ -603,8 +606,16 @@ fields_tables:
         title: Vue globale
         icon: fas_check-square
         rows:
-            - field: pmp
-#            - field: best_buy_price
+            - custom: 1
+              label: Prix d'achat moyen pondéré
+              type: money
+              value:
+                 callback: renderBestBuyPrice
+            - custom: 1
+              label: Meilleur prix d'achat
+              type: money
+              value:
+                 callback: renderBestBuyPrice
             - field: price
             - field: price_min
             - field: seuil_stock_alerte

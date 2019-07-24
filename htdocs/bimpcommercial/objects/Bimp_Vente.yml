@@ -236,6 +236,16 @@ lists_cols:
     product: 
         field: fk_product
         display: nom_url
+    shortRef: 
+        value: 
+            callback: displayShortRef
+        label: Ref courte
+    label:
+        field: label
+        child: product
+    pays:
+        field: state
+        child: client
     subprice: 
         field: subprice
     tva_tx: 

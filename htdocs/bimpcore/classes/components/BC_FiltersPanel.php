@@ -106,7 +106,10 @@ class BC_FiltersPanel extends BC_Panel
                     } else {
                         $bc_filter = new BC_FieldFilter($this->object, $filter, $values);
                     }
-                    $errors = array_merge($bc_filter->getSqlFilters($filters, $joins), $errors);
+                    $filter_errors = $bc_filter->getSqlFilters($filters, $joins);
+                    if (count($filter_errors)) {
+                        $errors[] = BimpTools::getMsgFromArray($filter_errors, 'Filtre "' . $bc_filter->params['label'] . '"');
+                    }
                 }
             }
         }

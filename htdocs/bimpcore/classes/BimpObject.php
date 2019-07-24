@@ -1807,16 +1807,22 @@ class BimpObject extends BimpCache
     public function getFieldSqlKey($field, $main_alias = 'a', $child_name = null, &$joins = array(), &$errors = array(), $child_object = null)
     {
         if (!is_null($child_name) && $child_name) {
-            if (is_null($child_object)) {
-                $child_object = $this->config->getObject('', $child_name);
+            if ($child_name === 'parent') {
+                if (is_null($child_object)) {
+                    $child_object = $this->getParentInstance();
+                }
+                $relation = 'hasOne';
+            } else {
+                if (is_null($child_object)) {
+                    $child_object = $this->config->getObject('', $child_name);
+                }
+                $relation = $this->getConf('objects/' . $child_name . '/relation', 'none');
             }
 
             if (!is_a($child_object, 'BimpObject')) {
                 $errors[] = 'Instance enfant invalide';
                 return '';
             }
-
-            $relation = $this->getConf('objects/' . $child_name . '/relation', 'none');
 
             if ($relation === 'hasOne') {
                 $id_prop = $this->getChildIdProperty($child_name);

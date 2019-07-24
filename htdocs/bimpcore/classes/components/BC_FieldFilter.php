@@ -161,7 +161,7 @@ class BC_FieldFilter extends BC_Filter
 
     public function getSqlFilters(&$filters = array(), &$joins = array())
     {
-        if (!$this->params['show']) {
+        if (!(int) $this->params['show']) {
             return array();
         }
 
@@ -169,9 +169,9 @@ class BC_FieldFilter extends BC_Filter
         $or_field = array();
 
         $filter_key = '';
-        $field_name = $this->field->name;        
+        $field_name = $this->field->name;
         $filter_key = $this->base_object->getFieldSqlKey($field_name, 'a', $this->child_name, $joins, $errors, $this->object);
-        
+
         if (!$filter_key) {
             return $errors;
         }

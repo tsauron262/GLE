@@ -380,7 +380,12 @@ class BC_List extends BC_Panel
 
         if (!is_null($this->bc_filtersPanel)) {
             $panelFilters = array();
-            $this->bc_filtersPanel->getSqlFilters($panelFilters, $joins);
+            $filters_errors = $this->bc_filtersPanel->getSqlFilters($panelFilters, $joins);
+            
+            if (count($filters_errors)) {
+                $this->errors[] = BimpTools::getMsgFromArray($filters_errors, 'Erreurs sur les filtres');
+            }
+            
             foreach ($panelFilters as $name => $filter) {
                 $this->mergeFilter($name, $filter);
             }

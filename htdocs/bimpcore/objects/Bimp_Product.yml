@@ -66,7 +66,7 @@ fields:
         label: User modif
     datec:
         type: date
-        label: Date Creation
+        label: Date Création
     ref: 
         label: Réf.
         

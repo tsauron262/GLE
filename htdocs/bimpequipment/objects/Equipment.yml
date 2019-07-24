@@ -423,7 +423,7 @@ filters_panel:
                 field: infos
                 child: places
             place_date:
-                filed: date
+                field: date
                 child: places
             
 list:

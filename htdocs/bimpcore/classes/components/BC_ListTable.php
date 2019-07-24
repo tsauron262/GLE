@@ -690,11 +690,11 @@ class BC_ListTable extends BC_List
         $html .= '<td style="text-align: center"><i class="fa fa-search"></i></td>';
 
         if ($this->params['total_row']) {
-            $html .= '<th style="width: 45px; min-width: 45px"></th>';
+            $html .= '<td style="width: 45px; min-width: 45px"></td>';
         }
 
         if ($this->params['positions']) {
-            $html .= '<th class="positionHandle"' . (!$this->params['positions_open'] ? ' style="display: none"' : '') . '></th>';
+            $html .= '<td class="positionHandle"' . (!$this->params['positions_open'] ? ' style="display: none"' : '') . '></td>';
         }
 
         foreach ($this->cols as $col_name) {
@@ -813,7 +813,7 @@ class BC_ListTable extends BC_List
             $html .= '<td><i class="fa fa-plus-circle"></i></td>';
 
             if ($this->params['total_row']) {
-                $html .= '<th style="width: 45px; min-width: 45px"></th>';
+                $html .= '<td style="width: 45px; min-width: 45px"></td>';
             }
 
             if ($this->params['positions']) {
@@ -1077,7 +1077,7 @@ class BC_ListTable extends BC_List
             $content .= '<div class="title">';
             $content .= 'Outils';
             $content .= '</div>';
-            
+
             $content .= '<div style="text-align: center">';
             $content .= BimpRender::renderButton(array(
                         'classes'     => array('btn', 'btn-default'),
@@ -1085,10 +1085,12 @@ class BC_ListTable extends BC_List
                         'icon_before' => 'fas_file-excel',
                         'attr'        => array(
                             'onclick' => $this->object->getJsActionOnclick('generateListCsv', array(
+                                'list_id'   => $this->identifier,
                                 'list_name' => $this->name,
                                 'file_name' => BimpTools::cleanStringForUrl($this->object->getLabel() . '_' . date('d-m-Y')),
                                     ), array(
-                                'form_name' => 'list_csv'
+                                'form_name'      => 'list_csv',
+                                'on_form_submit' => 'function($form, extra_data) {return onGenerateCsvFormSubmit($form, extra_data);}'
                             ))
                         )
             ));
@@ -1350,8 +1352,78 @@ class BC_ListTable extends BC_List
         return $html;
     }
 
-    public function renderCsv($params)
+    public function renderCsvContent($separator, $col_options, $headers = true, &$errors = array())
     {
+        if (is_null($this->items)) {
+            $this->fetchItems();
+        }
         
+         $rows = array();
+
+        if (is_null($this->items) || !count($this->items)) {
+            $this->rows = array();
+        }
+
+        $primary = $this->object->getPrimary();
+
+        $this->setConfPath();
+
+        $object_instance = $this->object;
+
+        foreach ($this->items as $item) {
+            $object = BimpCache::getBimpObjectInstance($this->object->module, $this->object->object_name, (int) $item[$primary], $this->parent);
+            if (BimpObject::objectLoaded($object)) {
+                $this->object = $object;
+                
+                foreach ($this->cols as $col_name) {
+                    $col_params = $this->getColParams($col_name);
+
+                    if (!(int) $col_params['show'] || (int) $col_params['hidden']) {
+                        continue;
+                    }
+
+                    $current_value = null;
+                    $field = null;
+
+                    if ($col_params['field']) {
+                        if ($col_params['child']) {
+                            $obj = $object->getChildObject($col_params['child']);
+                            if (is_null($obj) || !is_a($obj, 'BimpObject')) {
+                                continue;
+                            }
+                            if (!$obj->isLoaded()) {
+                                continue;
+                            }
+                        } else {
+                            $obj = $object;
+                        }
+                        
+                        $field = new BC_Field($obj, $col_params['field'], ($this->params['enable_edit'] && (int) $col_params['edit']));
+//                        $field->display_name = $col_params['display'];
+
+                        $current_value = $field->value;
+
+                        $row['cols'][$col_name]['content'] = $field->renderHtml();
+                        
+                    } elseif (isset($col_params['value'])) {
+                        $row['cols'][$col_name]['content'] .= $col_params['value'];
+                        if (!is_null($col_params['true_value'])) {
+                            $current_value = $col_params['true_value'];
+                        } else {
+                            $current_value = $col_params['value'];
+                        }
+                    }
+
+                }
+            }
+        }
+
+        $this->object = $object_instance;
+
+        if (!is_null($this->parent)) {
+            $this->object->parent = $this->parent;
+        }
+
+        $this->setConfPath();
     }
 }

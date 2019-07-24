@@ -59,6 +59,14 @@ objects:
         extends: entrepot
         
 fields: 
+    fk_user_modif:
+        label: Utilisateur
+        type: id_object
+        object: user
+        label: User modif
+    tms:
+        type: date
+        label: Date Modif
     ref: 
         label: Réf.
         
@@ -735,6 +743,14 @@ filters_panels:
             - field: remisable
             - field: tosell
             - field: tobuy
+#            - custom: 1
+#              field: fk_user_modif
+#              label: User modif
+#              data_type: id_object
+#              type: value
+#              input: 
+#                    type: search_user
+            - field: tms
             - custom: 1
               label: Catégorie (1)
               field: categ1
@@ -765,6 +781,10 @@ lists_cols:
         field: zone_pr
     validate: 
         field: validate
+    fk_user_modif:
+        field: fk_user_modif
+    tms:
+        field: tms
                 
 lists: 
     default: 

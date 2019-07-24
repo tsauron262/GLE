@@ -253,6 +253,8 @@ forms:
               show: 
                   callback: isEditable
                   
+            - field: date_lim_reglement
+                  
             - field: fk_account
               show: 
                   callback: isEditable
@@ -427,6 +429,7 @@ fields_tables:
             - field: fk_mode_reglement
               edit: 
                   callback: isEditable
+            - field: date_lim_reglement
                 
     pdf: 
         rows: 

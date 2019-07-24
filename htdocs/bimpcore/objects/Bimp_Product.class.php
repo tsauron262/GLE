@@ -467,7 +467,7 @@ class Bimp_Product extends BimpObject
 
     // Getters stocks: 
 
-    public function getStocksForEntrepot($id_entrepot, $types = array())
+    public function getStocksForEntrepot($id_entrepot, $type = '')
     {
         $stocks = array(
             'id_stock'       => 0,

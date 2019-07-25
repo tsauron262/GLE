@@ -720,7 +720,7 @@ class BimpTools
     public static function makeDirectories($dir_tree, $root_dir = null)
     {
         if (is_null($root_dir)) {
-            $root_dir = DOL_DATA_ROOT . '/bimpdatasync';
+            $root_dir = DOL_DATA_ROOT;
         }
 
         if (!file_exists($root_dir)) {

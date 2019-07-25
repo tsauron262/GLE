@@ -1358,23 +1358,51 @@ class BC_ListTable extends BC_List
             $this->fetchItems();
         }
 
-        $rows = array();
-
-        if (is_null($this->items) || !count($this->items)) {
-            $this->rows = array();
-        }
-
-        $primary = $this->object->getPrimary();
-
         $this->setConfPath();
 
         $object_instance = $this->object;
+        $primary = $this->object->getPrimary();
+
+        $rows = '';
+
+        if ($headers) {
+            $line = '';
+            $fl = true;
+            foreach ($this->cols as $col_name) {
+                $col_params = $this->getColParams($col_name);
+                $label = $col_params['label'];
+                if (!$label && $col_params['field']) {
+                    $field_object = $this->object;
+                    if ($col_params['child']) {
+                        $field_object = $this->object->getChildObject($col_params['child']);
+                        if (!is_a($field_object, 'BimpObject')) {
+                            $field_object = null;
+                        }
+                    }
+                    if (!is_null($field_object)) {
+                        $label = $field_object->config->get('fields/' . $col_params['field'] . '/label', ucfirst($col_name));
+                    }
+                }
+                if (!$label) {
+                    $label = $col_name;
+                }
+                $line .= (!$fl ? $separator : '') . $label;
+                $fl = false;
+            }
+            $rows .= $line . "\n";
+        }
+
+        if (is_null($this->items) || !count($this->items)) {
+            return $rows;
+        }
 
         foreach ($this->items as $item) {
+            $line = '';
             $object = BimpCache::getBimpObjectInstance($this->object->module, $this->object->object_name, (int) $item[$primary], $this->parent);
             if (BimpObject::objectLoaded($object)) {
                 $this->object = $object;
 
+                $fl = true;
                 foreach ($this->cols as $col_name) {
                     $col_params = $this->getColParams($col_name);
 
@@ -1391,28 +1419,29 @@ class BC_ListTable extends BC_List
                             } else {
                                 $obj = $object->getChildObject($col_params['child']);
                             }
-
-                            if (is_null($obj) || !is_a($obj, 'BimpObject')) {
-                                continue;
-                            }
-                            if (!$obj->isLoaded()) {
-                                continue;
-                            }
                         } else {
                             $obj = $object;
                         }
 
-                        $field = new BC_Field($obj, $col_params['field']);
-//                        $content = $field->get
-                    } elseif (isset($col_params['value'])) {
-                        $row['cols'][$col_name]['content'] .= $col_params['value'];
-                        if (!is_null($col_params['true_value'])) {
-                            $current_value = $col_params['true_value'];
-                        } else {
-                            $current_value = $col_params['value'];
+                        if (is_a($obj, 'BimpObject') && BimpObject::objectLoaded($obj)) {
+                            $field = new BC_Field($obj, $col_params['field']);
+                            $content = $field->getNoHtmlValue(isset($col_options[$col_name]) ? $col_options[$col_name] : '');
                         }
+                    } elseif (isset($col_params['true_value']) && !is_null($col_params['true_value'])) {
+                        $content = $col_params['true_value'];
+                    } elseif (isset($col_params['value'])) {
+                        $content = $col_params['value'];
                     }
+
+                    $content = str_replace($separator, '', $content);
+                    $content = str_replace("\n", ' ', $content);
+
+                    $line .= (!$fl ? $separator : '' ) . $content;
+
+                    $fl = false;
                 }
+
+                $rows .= $line . "\n";
             }
         }
 
@@ -1423,5 +1452,7 @@ class BC_ListTable extends BC_List
         }
 
         $this->setConfPath();
+
+        return $rows;
     }
 }

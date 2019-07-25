@@ -6402,47 +6402,74 @@ class BimpObject extends BimpCache
         $errors = array();
         $warnings = array();
         $success = 'Fichier généré avec succès';
+        $success_callback = '';
 
-        $errors[] = 'En cours de développement';
-//        
-//        $list_name = (isset($data['list_name']) ? $data['list_name'] : '');
-//        $file_name = (isset($data['file_name']) ? $data['file_name'] : $this->getLabel() . '_' . data('Y-m-d'));
-//        $separator = (isset($data['separator']) ? $data['separator'] : ';');
-//        $headers = (isset($data['headers']) ? (int) $data['headers'] : 1);
-//        $col_options = (isset($data['cols_options']) ? $data['cols_options'] : array());
-//        $list_data = (isset($data['list_data']) ? $data['list_data'] : array());
-//
-//        if (!$list_name) {
-//            $errors[] = 'Type de liste absent';
-//        }
-//        if (empty($list_data)) {
-//            $errors[] = 'Paramètres de la liste absent';
-//        }
-//
-//        if (!count($errors)) {
-//            $post_temp = $_POST;
-//            $_POST = $list_data;
-//
-//            $list = new BC_ListTable($this, $list_name);
-//
-//            if (count($list->errors)) {
-//                $errors = $list->errors;
-//            } else {
-//                $content = $list->renderCsvContent($separator, $col_options, $headers, $errors);
-//
-//                if ($content && !count($errors)) {
-//                    
-//                } elseif (!count($errors)) {
-//                    $warnings[] = 'Aucun contenu à générer trouvé';
-//                }
-//            }
-//
-//            $_POST = $post_temp;
-//        }
+//        $errors[] = 'En cours de développement';
+
+        $list_name = (isset($data['list_name']) ? $data['list_name'] : '');
+        $file_name = (isset($data['file_name']) ? $data['file_name'] : $this->getLabel() . '_' . data('Y-m-d'));
+        $separator = (isset($data['separator']) ? $data['separator'] : ';');
+        $headers = (isset($data['headers']) ? (int) $data['headers'] : 1);
+        $col_options = (isset($data['cols_options']) ? $data['cols_options'] : array());
+        $list_data = (isset($data['list_data']) ? $data['list_data'] : array());
+
+        $list_data['param_n'] = 0;
+        $list_data['param_p'] = 1;
+
+        if (!$list_name) {
+            $errors[] = 'Type de liste absent';
+        }
+        if (empty($list_data)) {
+            $errors[] = 'Paramètres de la liste absent';
+        }
+
+        if (!count($errors)) {
+            $post_temp = $_POST;
+            $_POST = $list_data;
+
+            $list = new BC_ListTable($this, $list_name);
+
+            if (count($list->errors)) {
+                $errors = $list->errors;
+            } else {
+                set_time_limit(0);
+
+                $content = $list->renderCsvContent($separator, $col_options, $headers, $errors);
+
+                if ($content && !count($errors)) {
+                    $dir = DOL_DATA_ROOT . '/bimpcore';
+                    BimpTools::makeDirectories(array(
+                        'lists_csv' => array(
+                            $this->module => array(
+                                $this->object_name => $list_name
+                            )
+                        )
+                            ), $dir);
+
+                    $dir .= '/lists_csv/' . $this->module . '/' . $this->object_name . '/' . $list_name;
+
+                    if (!file_exists($dir)) {
+                        $errors[] = 'Echec de la création du dossier "' . $dir . '"';
+                    } else {
+                        if (!file_put_contents($dir . '/' . $file_name . '.csv', $content)) {
+                            $errors[] = 'Echec de la création du fichier "' . $file_name . '"';
+                        } else {
+                            $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . htmlentities('lists_csv/' . $this->module . '/' . $this->object_name . '/' . $list_name . '/' . $file_name . '.csv');
+                            $success_callback = 'window.open(\'' . $url . '\')';
+                        }
+                    }
+                } elseif (!count($errors)) {
+                    $warnings[] = 'Aucun contenu à générer trouvé';
+                }
+            }
+
+            $_POST = $post_temp;
+        }
 
         return array(
-            'errors'   => $errors,
-            'warnings' => $warnings
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $success_callback
         );
     }
 

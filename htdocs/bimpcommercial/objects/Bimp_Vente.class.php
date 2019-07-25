@@ -366,12 +366,11 @@ VQ - Collège
             return $ref;
         }
     }
+    
     public function displayCountry(){
         if ($this->isLoaded()){
             $cli = BimpCache::getBimpObjectInstance('bimpcore', "Bimp_Client", $this->getData('id_client'));
             return $cli->displayCountry();
         }
     }
-    
-    
 }

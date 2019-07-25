@@ -25,7 +25,8 @@ objects:
                 
     product: 
         instance: 
-            id_object: fk_product
+            id_object: 
+                field_value: fk_product
             
     category: 
         relation: none

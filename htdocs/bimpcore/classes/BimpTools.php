@@ -981,53 +981,73 @@ class BimpTools
         $sql = '';
 
         if (is_array($filter) && isset($filter['or'])) {
-            $sql .= ' (';
             $fl = true;
+            $or_clause = '';
             foreach ($filter['or'] as $or_field => $or_filter) {
-                if (!$fl) {
-                    $sql .= ' OR ';
-                } else {
-                    $fl = false;
+                $sql_filter = self::getSqlFilter($or_field, $or_filter, $default_alias);
+                if ($sql_filter) {
+                    if (!$fl) {
+                        $or_clause .= ' OR ';
+                    } else {
+                        $fl = false;
+                    }
+                    $or_clause .= $sql_filter;
                 }
-                $sql .= self::getSqlFilter($or_field, $or_filter, $default_alias);
             }
-            $sql .= ')';
+            if ($or_clause) {
+                $sql .= '(' . $or_clause . ')';
+            }
         } elseif (is_array($filter) && isset($filter['and'])) {
-            $sql .= ' (';
             $fl = true;
+            $and_clause = '';
             foreach ($filter['and'] as $and_filter) {
-                if (!$fl) {
-                    $sql .= ' AND ';
-                } else {
-                    $fl = false;
+                $sql_filter = self::getSqlFilter($field, $and_filter, $default_alias);
+                if ($sql_filter) {
+                    if (!$fl) {
+                        $and_clause .= ' AND ';
+                    } else {
+                        $fl = false;
+                    }
+                    $and_clause .= $sql_filter;
                 }
-                $sql .= self::getSqlFilter($field, $and_filter, $default_alias);
             }
-            $sql .= ')';
+            if ($and_clause) {
+                $sql .= '(' . $and_clause . ')';
+            }
         } elseif (is_array($filter) && isset($filter['and_fields'])) {
-            $sql .= ' (';
             $fl = true;
+            $and_clause = '';
             foreach ($filter['and_fields'] as $and_field => $and_filter) {
-                if (!$fl) {
-                    $sql .= ' AND ';
-                } else {
-                    $fl = false;
+                $sql_filter = self::getSqlFilter($and_field, $and_filter, $default_alias);
+                if ($sql_filter) {
+                    if (!$fl) {
+                        $and_clause .= ' AND ';
+                    } else {
+                        $fl = false;
+                    }
+                    $and_clause .= $sql_filter;
                 }
-                $sql .= self::getSqlFilter($and_field, $and_filter, $default_alias);
             }
-            $sql .= ')';
+            if ($and_clause) {
+                $sql .= '(' . $and_clause . ')';
+            }
         } elseif (is_array($filter) && isset($filter['or_field'])) {
-            $sql .= ' (';
             $fl = true;
+            $or_clause = '';
             foreach ($filter['or_field'] as $or_filter) {
-                if (!$fl) {
-                    $sql .= ' OR ';
-                } else {
-                    $fl = false;
+                $sql_filter = self::getSqlFilter($field, $or_filter, $default_alias);
+                if ($sql_filter) {
+                    if (!$fl) {
+                        $or_clause .= ' OR ';
+                    } else {
+                        $fl = false;
+                    }
+                    $or_clause .= $sql_filter;
                 }
-                $sql .= self::getSqlFilter($field, $or_filter, $default_alias);
             }
-            $sql .= ')';
+            if ($or_clause) {
+                $sql .= '(' . $or_clause . ')';
+            }
         } else {
             if (preg_match('/\./', $field)) {
                 $sql .= $field;

@@ -16,6 +16,8 @@ class BC_List extends BC_Panel
     protected $nbItems = null;
     public $userConfig = null;
     public $default_modal_format = 'large';
+    public $final_filters = array();
+    public $final_joins = array();
 
     public function __construct(BimpObject $object, $path, $list_name = 'default', $level = 1, $id_parent = null, $title = null, $icon = null)
     {
@@ -355,7 +357,7 @@ class BC_List extends BC_Panel
     }
 
     protected function fetchItems()
-    {
+    {        
         $this->fetchFiltersPanelValues();
 
         if (!$this->isOk()) {
@@ -378,7 +380,12 @@ class BC_List extends BC_Panel
 
         if (!is_null($this->bc_filtersPanel)) {
             $panelFilters = array();
-            $this->bc_filtersPanel->getSqlFilters($panelFilters, $joins);
+            $filters_errors = $this->bc_filtersPanel->getSqlFilters($panelFilters, $joins);
+            
+            if (count($filters_errors)) {
+                $this->errors[] = BimpTools::getMsgFromArray($filters_errors, 'Erreurs sur les filtres');
+            }
+            
             foreach ($panelFilters as $name => $filter) {
                 $this->mergeFilter($name, $filter);
             }
@@ -503,6 +510,9 @@ class BC_List extends BC_Panel
             $this->nbTotalPages = 1;
             $this->params['p'] = 1;
         }
+
+        $this->final_filters = $filters;
+        $this->final_joins = $joins;
 
         $this->items = $this->object->getList($filters, $this->params['n'], $this->params['p'], $order_by, $this->params['sort_way'], 'array', array(
             'DISTINCT (a.' . $primary . ')'

@@ -2070,7 +2070,7 @@ class Bimp_Facture extends BimpComm
         $discount->fk_facture_source = $this->dol_object->id;
 
         if ($this->dol_object->type == Facture::TYPE_STANDARD || $this->dol_object->type == Facture::TYPE_CREDIT_NOTE) {
-            echo '$montant : ' . $remain_to_pay.'<br/>';
+//            echo '$montant : ' . $remain_to_pay.'<br/>';
             $discount->amount_ht = $discount->amount_ttc = abs($remain_to_pay);
             $discount->amount_tva = 0;
             $discount->tva_tx = 0;

@@ -23,6 +23,8 @@ objects:
             id_object: unset
             
     places: 
+        relation: hasMany
+        delete: 1
         instance: 
             bimp_object: BE_Place
             
@@ -395,13 +397,44 @@ forms:
             - field: date_warranty_end
             - object: places
             
+filters_panel: 
+    default: 
+        filters: 
+            product: 
+                field: id_product
+            serial: 
+                field: serial
+            date_purchase: 
+                field: date_purchase
+            date_vente:
+                field: date_vente
+            type: 
+                field: type
+            place_position: 
+                field: position
+                child: places
+            place_type: 
+                field: type
+                child: places
+            place_entrepot: 
+                field: id_entrepot
+                child: places
+            place_infos: 
+                field: infos
+                child: places
+            place_date:
+                field: date
+                child: places
+            
 list:
+    filters_panel: default
     checkboxes: 1
     bulk_actions: 
         - label: Supprimer les équipements sélectionnés
           icon: fas_trash-alt
           onclick: deleteSelectedObjects('list_id', $(this));
           btn_class: deleteSelectedObjects
+    filters_panel: default
     sort_field: date_create
     sort_way: desc
     n: 10

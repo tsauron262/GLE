@@ -118,11 +118,12 @@ if (! $result && ! empty($_SERVER["GATEWAY_INTERFACE"]))    // If install not do
 // Force PHP error_reporting setup (Dolibarr may report warning without this)
 if (! empty($dolibarr_strict_mode))
 {
+    die;
 	error_reporting(E_ALL | E_STRICT);
 }
 else
 {
-	error_reporting(E_ALL & ~(E_STRICT|E_NOTICE|E_DEPRECATED));
+	error_reporting(E_ALL & ~(E_STRICT|E_NOTICE|E_DEPRECATED|E_WARNING));
 }
 
 // Disable php display errors

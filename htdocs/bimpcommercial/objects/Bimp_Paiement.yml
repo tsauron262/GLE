@@ -100,6 +100,7 @@ forms:
                 input: 
                     type: select_payment
                     value_type: code
+                    include_empty: 1
                 value: 
                     request_field: id_mode_paiement
                 required: 1

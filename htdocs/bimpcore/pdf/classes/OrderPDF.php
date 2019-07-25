@@ -189,6 +189,18 @@ class OrderPDF extends BimpDocumentPDF
         $html .= '<tr>';
         $html .= '<td>';
         $html .= '<table cellpadding="2px">';
+        
+        // Réf client: 
+        if ($this->commande->ref_client) {
+            $html .= '<tr>';
+            $html .= '<td colspan="2" style="font-size: 7px">';
+            $html .= '<span style="font-weight: bold; color: #EF7D00">' . $this->langs->transnoentities('RefCustomer') . ' : </span>';
+            $html .= $this->langs->convToOutputCharset($this->commande->ref_client);
+            $html .= '</td>';
+            $html .= '</tr>';
+        }
+        
+        
         if (!is_null($this->user_suivi)) {
             $html .= '<tr>';
             $html .= '<td colspan="2" style="font-size: 7px">';
@@ -264,7 +276,7 @@ class OrderPDF extends BimpDocumentPDF
         $html .= '<tr>';
         $html .= '<td colspan="2" style="font-size: 7px">';
         $html .= '<span style="font-weight: bold; color: #EF7D00">Code client : </span>';
-        $html .= isset($this->thirdparty->code_client) ? $this->thirdparty->code_client : '';
+        $html .= isset($this->commande->thirdparty->code_client) ? $this->commande->thirdparty->code_client : '';
         $html .= '</td>';
         $html .= '</tr>';
 
@@ -510,6 +522,8 @@ class BLPDF extends OrderPDF
         $this->typeObject = "commande";
 
         parent::__construct($db, $doc_type);
+        
+        $this->pdf->addCgvPages = false;
 
         if (BimpObject::objectLoaded($shipment)) {
             $id_contact_shipment = $shipment->getcontact();
@@ -609,6 +623,7 @@ class BLPDF extends OrderPDF
                     'desc'         => $desc,
                     'pu_ht'        => pdf_getlineupexcltax($this->object, $i, $this->langs),
                 );
+                
 
                 if ($this->hideReduc && $line->remise_percent) {
                     $pu_ht = (float) ($line->subprice - ($line->subprice * ($line->remise_percent / 100)));
@@ -628,6 +643,9 @@ class BLPDF extends OrderPDF
                 $row['dl'] = isset($qties[(int) $line->id]['shipped_qty']) ? $qties[(int) $line->id]['shipped_qty'] : 0;
                 $row['ral'] = isset($qties[(int) $line->id]['to_ship_qty']) ? $qties[(int) $line->id]['to_ship_qty'] : 0;
 
+                if($qty > 0)
+                $row['row_style'] = "font-weight: bold;";
+                
                 $total_ht = (float) $qty * (float) $pu_ht;
 
                 $row['total_ht'] = price($total_ht);

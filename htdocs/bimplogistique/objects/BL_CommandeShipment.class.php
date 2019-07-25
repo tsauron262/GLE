@@ -34,6 +34,8 @@ class BL_CommandeShipment extends BimpObject
 
         return (int) parent::isEditable($force_edit);
     }
+    
+    //getShipmentQty de commmande line
 
     public function isActionAllowed($action, &$errors = array())
     {
@@ -113,6 +115,12 @@ class BL_CommandeShipment extends BimpObject
     public function canSetAction($action)
     {
 
+        switch($action) {
+            case 'editFacture':
+                $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
+                return $facture->can('create');
+            
+        }
         return (int) parent::canSetAction($action);
     }
 
@@ -1089,6 +1097,8 @@ class BL_CommandeShipment extends BimpObject
 
         $has_lines = false;
         $body_html = '';
+        $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
+        $canEdit = $facture->can('create');
 
         foreach ($lines as $line) {
             if (!isset($qties[(int) $line->id]) || !(float) $qties[(int) $line->id]) {
@@ -1135,7 +1145,7 @@ class BL_CommandeShipment extends BimpObject
             $body_html .= $line->displayLineData('tva_tx');
             $body_html .= '</td>';
             $body_html .= '<td>';
-            $body_html .= $line->renderFactureQtyInput($id_facture, false, (float) $qties[(int) $line->id]);
+            $body_html .= $line->renderFactureQtyInput($id_facture, false, (float) $qties[(int) $line->id], null, $canEdit);
             $body_html .= '</td>';
             $body_html .= '</tr>';
 
@@ -1360,6 +1370,9 @@ class BL_CommandeShipment extends BimpObject
         $body_html = '';
         $has_lines = false;
         $colspan = 5;
+        
+        $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
+        $canEdit = $facture->can('create');
 
         foreach ($data as $id_commande => $lines_qties) {
             $commande = self::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $id_commande);
@@ -1418,7 +1431,7 @@ class BL_CommandeShipment extends BimpObject
                 $body_html .= $line->displayLineData('tva_tx');
                 $body_html .= '</td>';
                 $body_html .= '<td>';
-                $body_html .= $line->renderFactureQtyInput(0, false, (float) $line_qty);
+                $body_html .= $line->renderFactureQtyInput(0, false, (float) $line_qty, null, $canEdit);
                 $body_html .= '</td>';
                 $body_html .= '</tr>';
 
@@ -1803,7 +1816,7 @@ class BL_CommandeShipment extends BimpObject
 
                     // Création de la facture: 
                     $fac_errors = array();
-                    $id_facture = (int) $commande->createFacture($fac_errors, $id_client, $id_contact, $id_cond_reglement, $id_account, $note_public, $note_private, $remises);
+                    $id_facture = (int) $commande->createFacture($fac_errors, $id_client, $id_contact, $id_cond_reglement, $id_account, $note_public, $note_private, $remises, array(), null, null, null, true);
 
                     if (!$id_facture || count($fac_errors)) {
                         $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Echec de la création de la facture');
@@ -1963,7 +1976,7 @@ class BL_CommandeShipment extends BimpObject
             } else {
                 // Création de la facture: 
                 $fac_errors = array();
-                $id_facture = (int) $base_commande->createFacture($fac_errors, $id_client, $id_contact, $id_cond_reglement, $id_account, $note_public, $note_private, $remises, $extra_commandes, $libelle, $id_entrepot, $ef_type);
+                $id_facture = (int) $base_commande->createFacture($fac_errors, $id_client, $id_contact, $id_cond_reglement, $id_account, $note_public, $note_private, $remises, $extra_commandes, $libelle, $id_entrepot, $ef_type, true);
 
                 if (!$id_facture || count($fac_errors)) {
                     $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Echec de la création de la facture');
@@ -2219,4 +2232,67 @@ class BL_CommandeShipment extends BimpObject
 
         return $errors;
     }
+    
+    
+    
+    public function getCustomFilterValueLabel($field_name, $value)
+    {
+        switch ($field_name) {
+            case 'id_product':
+                $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $value);
+                if (BimpObject::ObjectLoaded($product)) {
+                    return $product->getRef();
+                }
+                break;
+                
+            case 'id_commercial':
+                $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $value);
+                if (BimpObject::ObjectLoaded($user)) {
+                    return $user->dol_object->getFullName();
+                }
+                break;
+        }
+
+        return parent::getCustomFilterValueLabel($field_name, $value);
+    }
+
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array())
+    {
+        switch ($field_name) {
+            case 'id_product':
+                $alias = "cd";
+                $table = "commande" . 'det';
+                $joins[$alias] = array(
+                    'alias' => $alias,
+                    'table' => $table,
+                    'on'    => $alias . '.fk_commande = a.id_commande_client'
+                );
+                $filters[$alias . '.fk_product'] = array(
+                    'in' => $values
+                );
+                break;
+
+            case 'id_commercial':
+                $joins['elemcont'] = array(
+                    'table' => 'element_contact',
+                    'on'    => 'elemcont.element_id = a.id_commande_client',
+                    'alias' => 'elemcont'
+                );
+                $joins['typecont'] = array(
+                    'table' => 'c_type_contact',
+                    'on'    => 'elemcont.fk_c_type_contact = typecont.rowid',
+                    'alias' => 'typecont'
+                );
+                $filters['typecont.element'] = "commande";
+                $filters['typecont.source'] = 'internal';
+                $filters['typecont.code'] = 'SALESREPFOLL';
+                $filters['elemcont.fk_socpeople'] = array(
+                    'in' => $values
+                );
+                break;
+        }
+
+        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors);
+    }
+
 }

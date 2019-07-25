@@ -2,17 +2,7 @@
 
 var object_labels = {};
 
-function reloadObjectList(list_id, callback) {
-    var $list = $('#' + list_id);
-
-    if (!$list.length) {
-//        console.error('Erreur technique: identifiant de la liste invalide (' + list_id + '). Echec du rechargement de la liste');
-        return;
-    }
-
-    $list.find('.headerTools').find('.loadingIcon').css('opacity', 1);
-
-    var $resultContainer = $('#' + list_id + '_result');
+function getListData($list) {
     var object_name = $list.data('object_name');
     var id_parent_object = parseInt($list.find('#' + object_name + '_id_parent').val());
 
@@ -21,6 +11,8 @@ function reloadObjectList(list_id, callback) {
     }
 
     // Données de base:
+    var list_id = $list.attr('id');
+
     var data = {
         'list_name': $list.data('name'),
         'list_id': list_id,
@@ -160,6 +152,24 @@ function reloadObjectList(list_id, callback) {
             data['filters_panel_values'] = getAllListFieldsFilters($listFilters);
         }
     }
+
+    return data;
+}
+
+function reloadObjectList(list_id, callback) {
+    var $list = $('#' + list_id);
+
+    if (!$list.length) {
+//        console.error('Erreur technique: identifiant de la liste invalide (' + list_id + '). Echec du rechargement de la liste');
+        return;
+    }
+
+    $list.find('.headerTools').find('.loadingIcon').css('opacity', 1);
+
+    var $resultContainer = $('#' + list_id + '_result');
+    var object_name = $list.data('object_name');
+
+    var data = getListData($list);
 
     // Envoi requête:
     var error_msg = 'Une erreur est sruvenue. La liste des ';
@@ -1518,6 +1528,30 @@ function setPositionsHandlesEvents($list) {
             }
         });
     }
+}
+
+function onGenerateCsvFormSubmit($form, extra_data) {
+    if ($.isOk($form)) {
+        var cols_options = {};
+        var $container = $form.find('.cols_options_inputContainer');
+        if ($.isOk($container)) {
+            $container.find('select.col_option').each(function () {
+                var col_name = $(this).attr('name').replace(/^col_(.+)_option$/, '$1');
+                cols_options[col_name] = $(this).val();
+            });
+            extra_data['cols_options'] = cols_options;
+        }
+    }
+
+    var $list = null;
+    if (typeof (extra_data['list_id']) !== 'undefined' && extra_data['list_id']) {
+        var $list = $('#' + extra_data['list_id']);
+        if ($.isOk($list)) {
+            extra_data['list_data'] = getListData($list);
+        }
+    }
+
+    return extra_data;
 }
 
 $(document).ready(function () {

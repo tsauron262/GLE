@@ -1165,7 +1165,7 @@ function dol_get_fiche_head($links=array(), $active='', $title='', $notab=0, $pi
 		if (count($keys)) $maxkey=max($keys);
 	}
 
-	if (! empty($conf->dol_optimize_smallscreen)) $conf->global->MAIN_MAXTABS_IN_CARD=2;
+	if (! empty($conf->dol_optimize_smallscreen)) $conf->global->MAIN_MAXTABS_IN_CARD=5;
 
 	// Show tabs
 	$bactive=false;

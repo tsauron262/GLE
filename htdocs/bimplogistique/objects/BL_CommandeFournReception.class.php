@@ -337,11 +337,13 @@ class BL_CommandeFournReception extends BimpObject
         $html = '';
 
         $html .= '<td style="width: 220px;">';
+        
+        $decimals = $line->getQtyDecimals();
 
         $options = array(
             'data' => array(
                 'data_type' => 'number',
-                'decimals'  => 0,
+                'decimals'  => $decimals,
                 'min'       => 0,
                 'max'       => 0
             )
@@ -773,7 +775,7 @@ class BL_CommandeFournReception extends BimpObject
                         $html .= '<tr class="line_' . $line->id . '_qty_row line_qty_row" data-qty_idx="' . $i . '">';
                         $pu_ht = (isset($qty_data['pu_ht']) ? (float) $qty_data['pu_ht'] : $line_pu_ht);
                         $tva_tx = (isset($qty_data['tva_tx']) ? (float) $qty_data['tva_tx'] : (float) $line->tva_tx);
-                        $html .= $this->renderLineQtyInputs($line, $i, $qty_data['qty'], $max + (int) $qty_data['qty'], $total_max, $pu_ht, $tva_tx);
+                        $html .= $this->renderLineQtyInputs($line, $i, $qty_data['qty'], $max + (float) $qty_data['qty'], $total_max, $pu_ht, $tva_tx);
                         $html .= '</tr>';
                     }
 
@@ -1288,6 +1290,8 @@ class BL_CommandeFournReception extends BimpObject
 
     public function onLinesChange()
     {
+        global $user;
+
         $errors = array();
         if ($this->isLoaded()) {
             $total_ht = $this->getTotalHT();
@@ -1558,6 +1562,9 @@ class BL_CommandeFournReception extends BimpObject
                     $line->set('receptions', $receptions);
                     $line->updateField('receptions', $receptions);
                 }
+
+                $new_reception->onLinesChange();
+                $this->onLinesChange();
             }
         }
 

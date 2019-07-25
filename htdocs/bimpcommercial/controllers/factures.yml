@@ -6,7 +6,25 @@ objects:
         instance:
             bimp_object: Bimp_Facture
             
+    factures_lines:
+        instance: 
+            bimp_object: 
+                module: bimpcommercial
+                name: Bimp_FactureLine
+            
 sections: 
-    - type: list
-      list: 
-          object: facture
+    - type: tabs
+      tabs: 
+        default:
+            label: Factures
+            sections:
+                - type: custom
+                  custom: 
+                      callback: renderFacturesTab
+        prods: 
+            label: Produits en factures
+            sections: 
+                - type: custom
+                  custom: 
+                      callback: renderProdsTabs
+            

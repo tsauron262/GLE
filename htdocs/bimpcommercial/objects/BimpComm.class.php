@@ -2209,7 +2209,7 @@ class BimpComm extends BimpDolObject
         }
     }
 
-    public function checkEquipmentsAttribution(&$errors)
+    public function checkEquipmentsAttribution(&$errors = array())
     {
         $errors = array();
 

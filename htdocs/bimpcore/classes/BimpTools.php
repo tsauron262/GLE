@@ -505,6 +505,9 @@ class BimpTools
 
     public static function changeBimpObjectId($old_id, $new_id, $module, $object_name)
     {
+        if (!$old_id || !$new_id) {
+            return;
+        }
         set_time_limit(120);
         ignore_user_abort(true);
 
@@ -554,10 +557,9 @@ class BimpTools
 
                         if ($obj_module === $module && $obj_name === $object_name) {
                             $params = $instance->config->getParams('objects/' . $obj_conf_name . '/instance');
-
                             if (isset($params['id_object']['field_value'])) {
                                 $field = $params['id_object']['field_value'];
-                                if ($instance->field_exists($field)) {
+                                if ($field && $instance->field_exists($field)) {
                                     if ($instance->isExtraField($field)) {
                                         $primary = $instance->getPrimary();
                                         $nFails = 0;
@@ -579,7 +581,6 @@ class BimpTools
                                                 $table .= '_extrafields';
                                             }
                                         }
-                                        // echo $instance->object_name . ': ' . $field . '<br/>';
                                         $result = $bdb->update($table, array(
                                             $field => $new_id
                                                 ), '`' . $field . '` = ' . (int) $old_id);
@@ -617,6 +618,10 @@ class BimpTools
 
     public static function changeDolObjectId($old_id, $new_id, $module, $file = '', $class = '')
     {
+        if (!$old_id || !$new_id) {
+            return;
+        }
+
         set_time_limit(120);
         ignore_user_abort(true);
 
@@ -661,8 +666,8 @@ class BimpTools
                             } else {
                                 if (isset($obj_params['instance']['bimp_object']['module'])) {
                                     $obj_module = $obj_params['instance']['bimp_object']['module'];
-                                    $obj_file = isset($obj_params['instance']['bimp_object']['file']) ? $obj_params['instance']['bimp_object']['file'] : $module;
-                                    $obj_class = isset($obj_params['instance']['bimp_object']['class']) ? $obj_params['instance']['bimp_object']['class'] : ucfirst($file);
+                                    $obj_file = isset($obj_params['instance']['bimp_object']['file']) ? $obj_params['instance']['bimp_object']['file'] : $obj_module;
+                                    $obj_class = isset($obj_params['instance']['bimp_object']['class']) ? $obj_params['instance']['bimp_object']['class'] : ucfirst($obj_file);
                                 }
                             }
                         }
@@ -673,11 +678,9 @@ class BimpTools
 
                         if ($obj_class === $class) {
                             $params = $instance->config->getParams('objects/' . $obj_conf_name . '/instance');
-
                             if (isset($params['id_object']['field_value'])) {
                                 $field = $params['id_object']['field_value'];
-                                if ($instance->field_exists($field)) {
-//                                    echo $instance->object_name . ': ' . $field . '<br/>';
+                                if ($field && $instance->field_exists($field)) {
                                     $result = $bdb->update($table, array(
                                         $field => $new_id
                                             ), '`' . $field . '` = ' . (int) $old_id);
@@ -717,7 +720,7 @@ class BimpTools
     public static function makeDirectories($dir_tree, $root_dir = null)
     {
         if (is_null($root_dir)) {
-            $root_dir = DOL_DATA_ROOT . '/bimpdatasync';
+            $root_dir = DOL_DATA_ROOT;
         }
 
         if (!file_exists($root_dir)) {
@@ -978,53 +981,73 @@ class BimpTools
         $sql = '';
 
         if (is_array($filter) && isset($filter['or'])) {
-            $sql .= ' (';
             $fl = true;
+            $or_clause = '';
             foreach ($filter['or'] as $or_field => $or_filter) {
-                if (!$fl) {
-                    $sql .= ' OR ';
-                } else {
-                    $fl = false;
+                $sql_filter = self::getSqlFilter($or_field, $or_filter, $default_alias);
+                if ($sql_filter) {
+                    if (!$fl) {
+                        $or_clause .= ' OR ';
+                    } else {
+                        $fl = false;
+                    }
+                    $or_clause .= $sql_filter;
                 }
-                $sql .= self::getSqlFilter($or_field, $or_filter, $default_alias);
             }
-            $sql .= ')';
+            if ($or_clause) {
+                $sql .= '(' . $or_clause . ')';
+            }
         } elseif (is_array($filter) && isset($filter['and'])) {
-            $sql .= ' (';
             $fl = true;
+            $and_clause = '';
             foreach ($filter['and'] as $and_filter) {
-                if (!$fl) {
-                    $sql .= ' AND ';
-                } else {
-                    $fl = false;
+                $sql_filter = self::getSqlFilter($field, $and_filter, $default_alias);
+                if ($sql_filter) {
+                    if (!$fl) {
+                        $and_clause .= ' AND ';
+                    } else {
+                        $fl = false;
+                    }
+                    $and_clause .= $sql_filter;
                 }
-                $sql .= self::getSqlFilter($field, $and_filter, $default_alias);
             }
-            $sql .= ')';
+            if ($and_clause) {
+                $sql .= '(' . $and_clause . ')';
+            }
         } elseif (is_array($filter) && isset($filter['and_fields'])) {
-            $sql .= ' (';
             $fl = true;
+            $and_clause = '';
             foreach ($filter['and_fields'] as $and_field => $and_filter) {
-                if (!$fl) {
-                    $sql .= ' AND ';
-                } else {
-                    $fl = false;
+                $sql_filter = self::getSqlFilter($and_field, $and_filter, $default_alias);
+                if ($sql_filter) {
+                    if (!$fl) {
+                        $and_clause .= ' AND ';
+                    } else {
+                        $fl = false;
+                    }
+                    $and_clause .= $sql_filter;
                 }
-                $sql .= self::getSqlFilter($and_field, $and_filter, $default_alias);
             }
-            $sql .= ')';
+            if ($and_clause) {
+                $sql .= '(' . $and_clause . ')';
+            }
         } elseif (is_array($filter) && isset($filter['or_field'])) {
-            $sql .= ' (';
             $fl = true;
+            $or_clause = '';
             foreach ($filter['or_field'] as $or_filter) {
-                if (!$fl) {
-                    $sql .= ' OR ';
-                } else {
-                    $fl = false;
+                $sql_filter = self::getSqlFilter($field, $or_filter, $default_alias);
+                if ($sql_filter) {
+                    if (!$fl) {
+                        $or_clause .= ' OR ';
+                    } else {
+                        $fl = false;
+                    }
+                    $or_clause .= $sql_filter;
                 }
-                $sql .= self::getSqlFilter($field, $or_filter, $default_alias);
             }
-            $sql .= ')';
+            if ($or_clause) {
+                $sql .= '(' . $or_clause . ')';
+            }
         } else {
             if (preg_match('/\./', $field)) {
                 $sql .= $field;
@@ -1490,7 +1513,7 @@ class BimpTools
         return '&euro;';
     }
 
-    public static function displayMoneyValue($value, $currency = 'EUR', $with_styles = false)
+    public static function displayMoneyValue($value, $currency = 'EUR', $with_styles = false, $truncate = false)
     {
         if (is_numeric($value)) {
             $value = (float) $value;
@@ -1504,9 +1527,21 @@ class BimpTools
             $value = 0;
         }
 
-//        $value = round($value, 2);
-
-        $price = price($value, 1, '', 1, -1, -1, $currency);
+        if ($truncate) {
+            $code = '';
+            if ($value > 1000000000) {
+                $code = 'G';
+                $value = $value / 1000000000;
+            } elseif ($value > 1000000) {
+                $code = 'M';
+                $value = $value / 1000000;
+            } elseif ($value > 100000) {
+                $value = $value / 1000;
+            }
+            $price = price($value, 1, '', 1, -1, -1) . ' ' . $code . self::getCurrencyHtml($currency);
+        } else {
+            $price = price($value, 1, '', 1, -1, -1, $currency);
+        }
 
         $html = '';
 

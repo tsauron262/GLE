@@ -56,7 +56,14 @@ class ObjectLine extends BimpObject
 
     public function __construct($module, $object_name)
     {
-        if (BimpCore::getConf("use_freeline"))
+        global $use_freeline;
+        global $use_freelineOK;
+        if(!isset($use_freelineOK) || $use_freelineOK != true){
+            $use_freeline = BimpCore::getConf("use_freeline");
+            $use_freelineOK = true;
+        }
+            
+        if($use_freeline)
             self::$types[self::LINE_FREE] = 'Ligne libre';
         return parent::__construct($module, $object_name);
     }
@@ -983,11 +990,10 @@ class ObjectLine extends BimpObject
     public function getEquipmentLines()
     {
         if ($this->isLoaded() && static::$parent_comm_type) {
-            $lines = $this->getChildrenObjects('equipment_lines', array(
+            return BimpCache::getBimpObjectObjects('bimpcommercial', 'ObjectLineEquipment', array(
                 'id_object_line' => (int) $this->id,
                 'object_type'    => static::$parent_comm_type
             ));
-            return $lines;
         }
 
         return array();
@@ -997,7 +1003,7 @@ class ObjectLine extends BimpObject
     {
         if ($this->isLoaded() && static::$parent_comm_type) {
             if (is_null($this->remises)) {
-                $this->remises = $this->getChildrenObjects('remises', array(
+                $this->remises = BimpCache::getBimpObjectObjects('bimpcommercial', 'ObjectLineRemise', array(
                     'id_object_line' => (int) $this->id,
                     'object_type'    => static::$parent_comm_type
                 ));
@@ -1161,6 +1167,10 @@ class ObjectLine extends BimpObject
     }
 
     // Affichages: 
+    
+    public function displaySerials(){
+        return '';
+    }
 
     public function displayLineData($field, $edit = 0, $display_name = 'default', $no_html = false)
     {
@@ -3664,7 +3674,7 @@ class ObjectLine extends BimpObject
                             }
                         }
                     }
-                    
+
                     if ((float) $this->pu_ht < 0 && $this->pa_ht > 0) {
                         $this->pa_ht *= -1;
                     }

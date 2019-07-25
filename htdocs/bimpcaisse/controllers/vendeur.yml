@@ -1,0 +1,56 @@
+bootstrap: 1
+title: Caisses Admin
+
+objects:
+#    caisses: 
+#        instance: 
+#            bimp_object: BC_Caisse
+            
+#    mvts:
+#        instance: 
+#            bimp_object: BC_CaisseMvt
+#            
+#    ventes: 
+#        instance: 
+#            bimp_object: BC_Vente
+            
+    session_caisse:
+        instance: 
+            bimp_object: BC_CaisseSession
+sections:
+    - type: tabs
+      tabs: 
+        default:
+#            label: Caisses
+#            sections:
+#                - type: list
+#                  list: 
+#                      panel: 1
+#                      object: caisses
+                      
+#        sessions: 
+            label: Mes sessions de caisse
+            sections: 
+                - type: custom
+                  custom: 
+                      callback: 
+                          method: renderSession
+                      
+#        ventes: 
+#            label: Ventes
+#            sections: 
+#                - type: list
+#                  list: 
+#                      panel: 1
+#                      name: full
+#                      object: ventes
+#                      
+#        fonds:
+#            label: Mouvements de fonds
+#            sections: 
+#                - type: list
+#                  list: 
+#                      panel: 1
+#                      object: mvts
+                      
+        

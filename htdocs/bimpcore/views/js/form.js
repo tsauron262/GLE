@@ -2228,6 +2228,30 @@ function setInputsEvents($container) {
             $(this).data('tab_key_as_enter_event_init', 1);
         }
     });
+    $container.find('.compteur_caisse').each(function () {
+        if (!parseInt($(this).data('compteur_event_init'))) {
+            var $compteurContainer = $(this);
+            var $inputs = $(this).find('input.compteur_caisse_input');
+            $inputs.each(function () {
+                $(this).focus(function () {
+                    $(this).select();
+                }).keydown(function (e) {
+                    if (e.key === 'Tab' || e.key === 'Enter') {
+                        var idx = parseInt($(this).data('idx')) + 1;
+                        var $nextInput = $compteurContainer.find('input.compteur_caisse_input.idx_' + idx);
+                        if (!$nextInput.length) {
+                            $nextInput = $compteurContainer.find('input.compteur_caisse_input.idx_0');
+                        }
+                        $nextInput.focus();
+                    }
+                }).change(function () {
+                    calcTotalCompteurCaisse($compteurContainer);
+                });
+            });
+
+            $(this).data('compteur_event_init', 1);
+        }
+    });
 }
 
 function setInputEvents($form, $input) {
@@ -2485,6 +2509,26 @@ function setSortableMultipleValuesHandlesEvents($container) {
             }
         });
     }
+}
+
+function calcTotalCompteurCaisse($container) {
+    if (!$.isOk($container)) {
+        return;
+    }
+
+    var total = 0;
+    var $inputs = $container.find('input.compteur_caisse_input');
+    $inputs.each(function () {
+        var val = parseInt($(this).val());
+        if (!isNaN(val)) {
+            total += val * parseFloat($(this).data('value'));
+        }
+    });
+    
+    total = Math.round10(total, -2);
+
+    $container.find('.compteur_caisse_total').text(total);
+    $container.find('.compteur_caisse_total_input').val(total).change();
 }
 
 $(document).ready(function () {

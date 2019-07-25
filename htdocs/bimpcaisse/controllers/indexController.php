@@ -327,15 +327,16 @@ class indexController extends BimpController
 
                 $rows[] = array(
                     'label' => 'Montant du fonds de caisse',
-                    'input' => BimpInput::renderInput('text', 'fonds', '', array(
-                        'data'        => array(
-                            'data_type' => 'number',
-                            'decimals'  => 2,
-                            'min'       => 0,
-                            'unsigned'  => 1
-                        ),
-                        'addon_right' => '<i class="fa fa-euro"></i>'
-                    ))
+//                    'input' => BimpInput::renderInput('text', 'fonds', '', array(
+//                        'data'        => array(
+//                            'data_type' => 'number',
+//                            'decimals'  => 2,
+//                            'min'       => 0,
+//                            'unsigned'  => 1
+//                        ),
+//                        'addon_right' => '<i class="fa fa-euro"></i>'
+//                    ))
+                    'input' => BimpRender::renderCompteurCaisse('fonds')
                 );
 
                 $button = '<button id="cancelCloseCaisseButton" type="button" class="btn btn-danger btn-large buttonLeft">';

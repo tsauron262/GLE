@@ -138,11 +138,11 @@ class Equipment extends BimpObject
         if ((int) $this->getData('id_commande_line_return')) {
             if (!isset($allowed['id_commande_line_return']) || ((int) $allowed['id_commande_line_return'] !== (int) $this->getData('id_commande_line_return'))) {
                 $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $this->getData('id_commande_line_return'));
-                if (BimpObject::objectLoaded($line)) {
+                if (BimpObject::objectLoaded($line) && $line->getFullQty() < 0) {
                     $commande = $line->getParentInstance();
                     if (BimpObject::objectLoaded($commande)) {
                         $msg = 'Un retour est en cours pour l\'équipement ' . $this->getNomUrl(0, 1, 1, 'default');
-                        $msg .= ' dans la commande client ' . $commande->getNomUrl(0, 1, 1, 'full');
+                        $msg .= ' dans la commande client ' . $commande->getNomUrl(0, 1, 1, 'full') . " a la ligne ".$this->getData('id_commande_line_return');
                         $errors[] = $msg;
                     }
                 }

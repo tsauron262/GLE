@@ -769,6 +769,8 @@ class BimpCache
                 );
             }
         }
+        foreach(self::$cache[$cache_key] as $idT  => $valT)
+            self::$cache[$cache_key][$idT] = str_replace ("<", "(", str_replace (">", ")", $valT));
 
         return self::$cache[$cache_key];
     }
@@ -1075,11 +1077,13 @@ class BimpCache
 
             if (!is_null($rows) && count($rows)) {
                 foreach ($rows as $r) {
-                    $cache[$cache_key][(int) $r['fk_categorie']] = $r['label'];
+                    self::$cache[$cache_key][(int) $r['fk_categorie']] = $r['label'];
                 }
             }
         }
+        
 
+        
         return self::getCacheArray($cache_key, $include_empty, 0, $empty_label);
     }
 

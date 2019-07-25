@@ -7,10 +7,13 @@ primary: rowid
 icon: fas_box
 controller: product
 
-header_btn:
+header_btn: 
     callback: getActionsButtons
     
 header_list_name: default
+header_edit_form: card
+header_delete_btn: 1
+
 list_page_url: list
 
 labels: 
@@ -39,7 +42,31 @@ objects:
                 parent_module: bimpcore
                 parent_object_name: Bimp_Product
                 
+    entrepot: 
+        instance: 
+            id_object:
+                field_value: entrepot
+                
+    category: 
+        relation: none
+        delete: 0
+        instance: 
+            dol_object: 
+                module: categories
+                file: categorie
+                
+    default_entrepot:
+        extends: entrepot
+        
 fields: 
+    fk_user_modif:
+        label: Utilisateur
+        type: id_object
+        object: user
+        label: User modif
+    datec:
+        type: date
+        label: Date Création
     ref: 
         label: Réf.
         
@@ -100,9 +127,9 @@ fields:
         values: 
             array: price_base_types
         
-    cost_price: 
-        label: Prix de revient
-        type: money
+#    cost_price: 
+#        label: Prix de revient
+#        type: money
         
     pmp: 
         label: Prix d'achat moyen pondéré
@@ -171,7 +198,15 @@ fields:
     fk_country: 
         label: Pays d'origine
         dol_prop: country_id
-        
+        type: int
+        default_value: 1
+        input: 
+            type: search_country
+        display: 
+            default: 
+                type: callback
+                method: displayCountry        
+                
     weight: 
         label: Poids 
         type: float
@@ -288,10 +323,10 @@ fields:
         type: text
         dol_extra_field: 1
         
-    best_buy_price:
-        label: Meilleur prix d'achat
-        type: money
-        extra: 1
+#    best_buy_price:
+#        label: Meilleur prix d'achat
+#        type: money
+#        extra: 1
         
     seuil_stock_alerte:
         label: Limite stock pour alerte
@@ -303,19 +338,65 @@ fields:
         type: int
         edit: 1
         
-#    Champs non gérés
-#    ref_ext
-#    localtax1_tx
-#    localtax2_tx
-#    localtax1_type
-#    localtax2_type
-#    tobatch
-#    duration
-#    finished
-#    seuil_stock_alerte
-#    canvas
-#    pmp
+    doli_search_prod:
+        label: Produit
+        input: 
+            type: search_product
+            filter_type: product
+            help: Entrez la référence ou l'id du produit à faire fusionner dans celui-ci. (celui que vous voulez supprimer)
+        extra: 1
+        
+    product_categories: 
+        label: Catégories produit
+        extra: 1
+        type: items_list
+        items_data_type: id_object
+        object: category
 
+        
+    localtax1_tx:
+        label: Taxe locale 1
+        type: money
+        dol_extra_field: 1
+
+        
+    localtax1_type:
+        label: Type de taxe locale 1
+        type: int
+        dol_extra_field: 1
+
+        
+    localtax2_tx:
+        label: Taxe locale 2
+        type: money
+        dol_extra_field: 1
+
+        
+    localtax2_type:
+        label: Type de taxe locale 2
+        type: int
+        dol_extra_field: 1
+
+
+#    ref_constructeur:
+#        label: Réf. constructeur
+#        type: string
+#        dol_extra_field: 1
+
+        
+    fk_default_warehouse:
+        label: Entrepôt par défaut
+        type: id_object
+        object: default_entrepot
+        default_value: 0
+        input:
+            type: search_entrepot 
+        dol_extra_field: 1
+        
+    duration:
+        label: Durée
+        type: string
+        
 forms: 
     light: 
         rows: 
@@ -368,7 +449,72 @@ forms:
                   type: qty
               decimals: 0
               min: 1
-
+              
+    merge: 
+        msgs: 
+            - content: Attention, cette opération est irreversible
+              type: warning
+        title: Fusionner
+        icon: fas_object-group
+        rows: 
+            - custom: 1
+              label: Fusionner avec
+              input_name: id_merged_product
+              required: 1
+              input: 
+                  type: search_product
+            - custom: 1
+              label: Produit à conserver
+              input_name: id_kept_product
+              data_type: int
+              required: 1
+              content: 
+                  callback: renderMergeKeptProductInput
+              depends_on: id_merged_product                  
+              
+    card:
+        rows:
+            # Infos
+            - field: ref
+            - field: label
+            - field: description
+            - field: fk_product_type
+            - field: type2
+            - field: barcode
+            - field: customcode
+            - field: accountancy_code_buy
+            - field: accountancy_code_sell
+            - field: note
+            - field: fk_default_warehouse
+              display: nom_url
+            - field: deee
+            # Infos +
+            - field: url
+#            - field: stock
+            - field: fk_country
+            - field: product_categories
+            - field: localtax1_tx
+            - field: localtax1_type
+            - field: localtax2_tx
+            - field: localtax2_type
+            - field: ref_constructeur
+            - field: crt
+            - field: rpcp
+            - field: price
+            # Measure
+            - field: weight
+            - field: weight_units
+            - field: length
+            - field: length_units
+            - field: width
+            - field: width_units
+            - field: height
+            - field: height_units
+            - field: surface
+            - field: surface_units
+            - field: volume
+            - field: volume_units
+        
 fields_tables: 
     infos: 
         title: Informations
@@ -384,6 +530,8 @@ fields_tables:
             - field: accountancy_code_buy
             - field: accountancy_code_sell
             - field: note
+            - field: fk_default_warehouse
+              display: nom_url
             
     prices: 
         title: Prix de vente
@@ -396,20 +544,18 @@ fields_tables:
             - field: rpcp
             - field: price_ttc
             - field: price_min_ttc
-            - field: cost_price
     
     prices_buy: 
         title: Prix d'achat
         icon: fas_euro-sign
         rows:  
-            - field: price
-              label: Prix HT
-            - field: tva_tx
-            - field: price_ttc
-            - field: price_min_ttc
-            - field: cost_price
+#            - field: price
+#              label: Prix HT
+#            - field: tva_tx
+#            - field: price_ttc
+#            - field: price_min_ttc
+#            - field: cost_price
             - field: cur_pa_ht
-
        
     status: 
         title: Statuts
@@ -432,39 +578,60 @@ fields_tables:
     infos_complementaires:
         title: Informations complémentaires
         icon: plus
+        edit: 1
         rows:
             - field: url
             - field: stock
             - field: fk_country
-            - field: weight_units
-            - field: weight
-            - field: length_units
-            - field: length
-            - field: width_units
-            - field: width
-            - field: surface_units
-            - field: surface
-            - field: volume_units
-            - field: volume
-            
-        
+            - label: Cétégories
+              value: 
+                  callback: displayCategories
+            - field: localtax1_tx
+            - field: localtax1_type
+            - field: localtax2_tx
+            - field: localtax2_type
+            - field: ref_constructeur
+            - field: crt
+
     measures: 
         title: Mesures
+        icon: fas_ruler
+        rows:
+            - field: weight
+            - field: weight_units
+            - field: length
+            - field: length_units
+            - field: width
+            - field: width_units
+            - field: height
+            - field: height_units
+            - field: surface
+            - field: surface_units
+            - field: volume
+            - field: volume_units
         
     stock:
         title: Vue globale
         icon: fas_check-square
         rows:
-            - field: pmp
-            - field: best_buy_price
+            - custom: 1
+              label: Prix d'achat moyen pondéré
+              type: money
+              value:
+                 callback: renderBestBuyPrice
+            - custom: 1
+              label: Meilleur prix d'achat
+              type: money
+              value:
+                 callback: renderBestBuyPrice
             - field: price
             - field: price_min
             - field: seuil_stock_alerte
             - field: desiredstock
 
-
 views: 
     default: 
+        edit_btn: 1
         rows: 
             - cols: 
                 - type: fields_table
@@ -488,6 +655,9 @@ views:
                       name: status
     
     fiche:
+        edit_btn: 1
+        edit_form: light
+        delete_btn: 1
         rows:
             - cols: 
                 - type: fields_table
@@ -506,6 +676,12 @@ views:
                   col_sm: 12
                   fields_table: 
                       name: infos_complementaires
+                      
+                - type: fields_table
+                  col_lg: 5
+                  col_md: 5
+                  fields_table:
+                      name: measures
             
     
     product_price:
@@ -567,6 +743,14 @@ filters_panels:
             - field: remisable
             - field: tosell
             - field: tobuy
+#            - custom: 1
+#              field: fk_user_modif
+#              label: User modif
+#              data_type: id_object
+#              type: value
+#              input: 
+#                    type: search_user
+            - field: datec
             - custom: 1
               label: Catégorie (1)
               field: categ1
@@ -591,12 +775,16 @@ filters_panels:
                   type: select
                   options: 
                       callback: getCategoriesArray
-                  
-                          
- 
+      
 lists_cols: 
     zone_pr: 
         field: zone_pr
+    validate: 
+        field: validate
+    fk_user_modif:
+        field: fk_user_modif
+    datec:
+        field: datec
                 
 lists: 
     default: 

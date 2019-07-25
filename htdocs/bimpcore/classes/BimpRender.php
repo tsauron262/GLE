@@ -1,19 +1,23 @@
 <?php
 
-class BimpRender {
+class BimpRender
+{
 
-    public static function displayTagData($data) {
+    public static function displayTagData($data)
+    {
         $html = '';
         foreach ($data as $name => $value) {
             $html .= ' data-' . $name . '="' . $value . '"';
         }
     }
 
-    public static function renderIcon($icon, $class = '') {
+    public static function renderIcon($icon, $class = '')
+    {
         return '<i class="' . self::renderIconClass($icon) . ($class ? ' ' . $class : '') . '"></i>';
     }
 
-    public static function displayTagAttrs($params) {
+    public static function displayTagAttrs($params)
+    {
         $html = '';
 
         if (isset($params['id'])) {
@@ -57,7 +61,8 @@ class BimpRender {
         return $html;
     }
 
-    public static function renderButton($params, $tag = 'span') {
+    public static function renderButton($params, $tag = 'span')
+    {
         $html = '<' . $tag . self::displayTagAttrs($params) . '>';
         $html .= (isset($params['icon_before']) ? self::renderIcon($params['icon_before'], isset($params['label']) ? 'iconLeft' : '') : '');
         $html .= (isset($params['label']) ? $params['label'] : '');
@@ -66,7 +71,8 @@ class BimpRender {
         return $html;
     }
 
-    public static function renderButtonFromConfig(BimpConfig $config, $path, $extra_params, $tag = 'span') {
+    public static function renderButtonFromConfig(BimpConfig $config, $path, $extra_params, $tag = 'span')
+    {
         $label = $config->get($path . '/label', '');
         $icon_before = $config->get($path . '/icon_before', '');
         $icon_after = $config->get($path . '/icon_after', '');
@@ -126,7 +132,8 @@ class BimpRender {
         return self::renderButton($params, $tag);
     }
 
-    public static function renderRowButton($label, $icon, $onclick, $class = '', $attrs = array(), $tag = 'span') {
+    public static function renderRowButton($label, $icon, $onclick, $class = '', $attrs = array(), $tag = 'span')
+    {
         $html = '';
         $html .= '<' . $tag . ' class="rowButton' . ((string) $class ? ' ' . $class : '');
 
@@ -150,7 +157,8 @@ class BimpRender {
         return $html;
     }
 
-    public static function renderDropDownButton($label, $items, $params) {
+    public static function renderDropDownButton($label, $items, $params)
+    {
         if (!isset($params['type'])) {
             $params['type'] = 'default';
         }
@@ -187,7 +195,8 @@ class BimpRender {
         return $html;
     }
 
-    public static function renderPanel($title, $body_content, $footer_content = '', $params = array()) {
+    public static function renderPanel($title, $body_content, $footer_content = '', $params = array())
+    {
         $html = '';
 
         if (!isset($params['type']) || !$params['type']) {
@@ -277,7 +286,8 @@ class BimpRender {
         return $html;
     }
 
-    public static function renderFreeForm($rows, $buttons = array(), $title = '', $icon = '', $infos = array()) {
+    public static function renderFreeForm($rows, $buttons = array(), $title = '', $icon = '', $infos = array())
+    {
         $html = '<div class="freeForm">';
         if ($title) {
             $html .= '<div class="freeFormTitle">';
@@ -327,7 +337,8 @@ class BimpRender {
         return $html;
     }
 
-    public static function renderNavTabs($tabs, $tabs_id = 'maintabs', $params = array()) {
+    public static function renderNavTabs($tabs, $tabs_id = 'maintabs', $params = array())
+    {
         $html = '';
 
         if (is_array($tabs) && count($tabs)) {
@@ -364,7 +375,8 @@ class BimpRender {
         return $html;
     }
 
-    public static function renderObjectCard($object, BimpConfig $config) {
+    public static function renderObjectCard($object, BimpConfig $config)
+    {
         if (!isset($object->id) || !$object->id) {
             if (is_a($object, 'BimpObject')) {
                 $msg = 'Aucun' . ($object->isLabelFemale() ? 'e' : '') . ' ' . $object->getLabel();
@@ -498,7 +510,8 @@ class BimpRender {
         return $html;
     }
 
-    public static function renderAjaxModal($modal_id) {
+    public static function renderAjaxModal($modal_id)
+    {
         $html = '';
         $html .= '<div class="modal ajax-modal fade" tabindex="-1" role="dialog" id="' . $modal_id . '">';
         $html .= '<div class="modal-dialog modal-lg" role="document">';
@@ -550,7 +563,8 @@ class BimpRender {
         return $html;
     }
 
-    public static function renderObjectFieldHistoryPopoverButton(BimpObject $object, $field) {
+    public static function renderObjectFieldHistoryPopoverButton(BimpObject $object, $field)
+    {
         $bimpHistory = BimpObject::getInstance('bimpcore', 'BimpHistory');
 
         $html = '<span class="historyPopoverButton bs-popover"';
@@ -566,7 +580,8 @@ class BimpRender {
         return $html;
     }
 
-    public static function renderAlerts($msgs, $alert_type = 'danger', $closable = true) {
+    public static function renderAlerts($msgs, $alert_type = 'danger', $closable = true)
+    {
         $html = '<div class="alert alert-' . $alert_type . ($closable ? ' alert-dismissible' : '') . '">';
         if ($closable) {
             $html .= '<button type="button" class="close" data-dismiss="alert" aria-label="Fermer"><span aria-hidden="true">&times;</span></button>';
@@ -585,7 +600,8 @@ class BimpRender {
         return $html;
     }
 
-    public static function renderPopoverData($content, $placement = 'top', $html = 'false', $container = 'body', $toggle = 'popover', $trigger = 'hover') {
+    public static function renderPopoverData($content, $placement = 'top', $html = 'false', $container = 'body', $toggle = 'popover', $trigger = 'hover')
+    {
         $return = ' data-toggle="' . $toggle . '"';
         $return .= ' data-trigger="' . $trigger . '"';
         $return .= ' data-container="' . $container . '"';
@@ -596,7 +612,8 @@ class BimpRender {
         return $return;
     }
 
-    public static function rendercontentLoading($loading_text = '') {
+    public static function rendercontentLoading($loading_text = '')
+    {
         $html = '<div class="content-loading">';
         $html .= '<div class="loading-spin"><i class="fa fa-spinner fa-spin"></i></div>';
         $html .= '<p class="loading-text">' . $loading_text . '</p>';
@@ -604,7 +621,8 @@ class BimpRender {
         return $html;
     }
 
-    public static function renderIconClass($icon) {
+    public static function renderIconClass($icon)
+    {
         if (preg_match('/^(.+)_(.+)$/', $icon, $matches)) {
             return $matches[1] . ' fa5-' . $matches[2];
         } else {
@@ -612,7 +630,8 @@ class BimpRender {
         }
     }
 
-    public static function renderObjectIcons($object, $page_link = true, $modal_view = null, $url = null) {
+    public static function renderObjectIcons($object, $page_link = true, $modal_view = null, $url = null)
+    {
         if (is_null($modal_view)) {
             $modal_view = '';
         }
@@ -650,7 +669,8 @@ class BimpRender {
         return $html;
     }
 
-    public static function renderDebugInfo($info, $title = '', $icon = 'fas_info-circle') {
+    public static function renderDebugInfo($info, $title = '', $icon = 'fas_info-circle')
+    {
         $html = '';
 
         if (!empty($info) && $title) {
@@ -680,193 +700,96 @@ class BimpRender {
         return $html;
     }
 
-    public static function renderCompteurCaisse() {
-        $html = '<script type="text/javascript" src="' . DOL_URL_ROOT . '/bimpcore/views/js/compteurCaisse.js"></script>';
-        $html .= '<style>
-                  .table {
-                    display: table;
-                    width: auto;
-                    background-color: #ed7c1c;
-                  }
-                  
-                  .cell {   
-                    width: auto;
-                    height:32px;
-                    float: left;
-                    display: table-column;
-                    width: 190px;
-                    background-color: #ed7c1c;
-                    color:white;
-                    text-align:center;
-                    font-weight: bold;
-                    font-style="15px";
-                    margin: 0px 0px 20px;
-                  }
-                  
-                  </style>';
-        $html .= '<div style=""></div>';
-        $html .= '<div id="divCompteur" >';
-        $html .= '<div class="table">';
-        $html .= '<div class="body">';
-        $html .= '<div class="cell">500 &euro;<br>';
-        $html .= '<div>';
-        $html .= BimpInput::renderInput('text', 'compteur_caisse_500', 0, array(
-                    'data' => array(
-                        'data_type' => 'number',
-                        'min' => 0,
-                        'decimals' => 0
-                    )
-        ));
+    public static function renderCompteurCaisse($input_name)
+    {
+        $rows = array(
+            array(
+                '500' => '500 €',
+                '2'   => '2 €',
+            ),
+            array(
+                '200' => '200 €',
+                '1'   => '1 €'
+            ),
+            array(
+                '100' => '100 €',
+                '0.5' => '50 cts'
+            ),
+            array(
+                '50'  => '50 €',
+                '0.2' => '20 cts'
+            ),
+            array(
+                '20'  => '20 €',
+                '0.1' => '10 cts'
+            ),
+            array(
+                '10'   => '10 €',
+                '0.05' => '5 cts'
+            ),
+            array(
+                '5'    => '5 €',
+                '0.02' => '2 cts'
+            ),
+            array(
+                '0'    => '',
+                '0.01' => '1 ct'
+            )
+        );
 
-        $html .= '</div></div>';
-        $html .= '<div class="cell">200 &euro;<br>';
-        $html .= '<div>';
-        $html .= BimpInput::renderInput('text', 'compteur_caisse_200', 0, array(
-                    'data' => array(
-                        'data_type' => 'number',
-                        'min' => 0,
-                        'decimals' => 0
-                    )
-        ));
-        $html .= '</div></div>';
-        $html .= '<div class="cell">100 &euro;<br>';
-        $html .= '<div>';
-        $html .= BimpInput::renderInput('text', 'compteur_caisse_100', 0, array(
-                    'data' => array(
-                        'data_type' => 'number',
-                        'min' => 0,
-                        'decimals' => 0
-                    )
-        ));
-        $html .= '</div></div>';
-        $html .= '<div class="cell">50 &euro;<br>';
-        $html .= '<div>';
-        $html .= BimpInput::renderInput('text', 'compteur_caisse_50', 0, array(
-                    'data' => array(
-                        'data_type' => 'number',
-                        'min' => 0,
-                        'decimals' => 0
-                    )
-        ));
-        $html .= '</div></div>';
-        $html .= '<div class="cell">20 &euro;<br>';
-        $html .= '<div >';
-        $html .= BimpInput::renderInput('text', 'compteur_caisse_20', 0, array(
-                    'data' => array(
-                        'data_type' => 'number',
-                        'min' => 0,
-                        'decimals' => 0
-                    )
-        ));
-        $html .= '</div></div>';
-        $html .= '<div class="cell">10 &euro;<br>';
-        $html .= '<div>';
-        $html .= BimpInput::renderInput('text', 'compteur_caisse_10', 0, array(
-                    'data' => array(
-                        'data_type' => 'number',
-                        'min' => 0,
-                        'decimals' => 0
-                    )
-        ));
-        $html .= '</div></div>';
-        $html .= '<div class="cell">5 &euro;<br>';
-        $html .= '<div>';
-        $html .= BimpInput::renderInput('text', 'compteur_caisse_5', 0, array(
-                    'data' => array(
-                        'data_type' => 'number',
-                        'min' => 0,
-                        'decimals' => 0
-                    )
-        ));
-        $html .= '</div></div>';
-        $html .= '<div class="cell">2 &euro;<br>';
-        $html .= '<div >';
-        $html .= BimpInput::renderInput('text', 'compteur_caisse_2', 0, array(
-                    'data' => array(
-                        'data_type' => 'number',
-                        'min' => 0,
-                        'decimals' => 0
-                    )
-        ));
-        $html .= '</div></div>';
-        $html .= '<div class="cell">1 &euro;<br>';
-        $html .= '<div>';
-        $html .= BimpInput::renderInput('text', 'compteur_caisse_1', 0, array(
-                    'data' => array(
-                        'data_type' => 'number',
-                        'min' => 0,
-                        'decimals' => 0
-                    )
-        ));
-        $html .= '</div></div>';
-        $html .= '<div class="cell">0,50 &euro;<br>';
-        $html .= '<div>';
-        $html .= BimpInput::renderInput('text', 'compteur_caisse_50c', 0, array(
-                    'data' => array(
-                        'data_type' => 'number',
-                        'min' => 0,
-                        'decimals' => 0
-                    )
-        ));
-        $html .= '</div></div>';
-        $html .= '<div class="cell">0,20 &euro;<br>';
-        $html .= '<div>';
-        $html .= BimpInput::renderInput('text', 'compteur_caisse_20c', 0, array(
-                    'data' => array(
-                        'data_type' => 'number',
-                        'min' => 0,
-                        'decimals' => 0
-                    )
-        ));
-        $html .= '</div></div>';
-        $html .= '<div class="cell">0,10 &euro;<br>';
-        $html .= '<div >';
-        $html .= BimpInput::renderInput('text', 'compteur_caisse_10c', 0, array(
-                    'data' => array(
-                        'data_type' => 'number',
-                        'min' => 0,
-                        'decimals' => 0
-                    )
-        ));
-        $html .= '</div></div>';
-        $html .= '<div class="cell">0,05 &euro;<br>';
-        $html .= '<div >';
-        $html .= BimpInput::renderInput('text', 'compteur_caisse_5c', 0, array(
-                    'data' => array(
-                        'data_type' => 'number',
-                        'min' => 0,
-                        'decimals' => 0
-                    )
-        ));
-        $html .= '</div></div>';
-        $html .= '<div class="cell">0,02 &euro;<br>';
-        $html .= '<div>';
-        $html .= BimpInput::renderInput('text', 'compteur_caisse_2c', 0, array(
-                    'data' => array(
-                        'data_type' => 'number',
-                        'min' => 0,
-                        'decimals' => 0
-                    )
-        ));
-        $html .= '</div></div>';
-        $html .= '<div class="cell">0,01 &euro;<br>';
-        $html .= '<div >';
-        $html .= BimpInput::renderInput('text', 'compteur_caisse_1c', 0, array(
-                    'data' => array(
-                        'data_type' => 'number',
-                        'min' => 0,
-                        'decimals' => 0
-                    )
-        ));
-        $html .= '</div></div>';
-        $html .= '<div class="cell">Total'
-                . '<br><span id="total2" style="font-size:16px">0 &euro;</span>'
-                . '</div>';
-        $html .= '</div>';
+        $html .= '<div class="compteur_caisse">';
+        $html .= '<p class="small">';
+        $html .= 'Appuyez sur "Entrée" pour passer au champ suivant';
+        $html .= '</p>';
+        $html .= '<table class="bimp_list_table">';
+        $html .= '<thead>';
+        $html .= '<tr>';
+        $html .= '<th colspan="2" style="text-align: center">Billets</th>';
+        $html .= '<th colspan="2" style="text-align: center">Pièces</th>';
+        $html .= '</tr>';
+        $html .= '</thead>';
+
+        $html .= '<tbody>';
+
+        $i = 0;
+        foreach ($rows as $r) {
+            $html .= '<tr>';
+            foreach ($r as $value => $label) {
+                if (!(float) $value) {
+                    $html .= '<td colspan="2"></td>';
+                } else {
+                    $html .= '<th>';
+                    $html .= $label;
+                    $html .= '</th>';
+                    $html .= '<td>';
+                    $html .= BimpInput::renderInput('text', 'compteur_caisse_' . $value, 0, array(
+                                'data'        => array(
+                                    'data_type' => 'number',
+                                    'min'       => 0,
+                                    'decimals'  => 0,
+                                    'value'     => $value,
+                                    'label'     => $label,
+                                    'idx'       => $i
+                                ),
+                                'extra_class' => 'compteur_caisse_input idx_' . $i
+                    ));
+                    $html .= '</td>';
+                }
+                $i += 7;
+            }
+            $html .= '</tr>';
+            $i -= 13;
+        }
+        $html .= '</tbody>';
+        $html .= '</table>';
+        $html .= '<input class="compteur_caisse_total_input" type="hidden" name="' . $input_name . '" value="0"/>';
+
+        $html .= '<div style="margin-top: 10px; padding: 5px 0;font-size: 16px;background-color: #DCDCDC;text-align: center">';
+        $html .= 'Total: ';
+        $html .= '<span class="compteur_caisse_total">0</span> &euro;';
         $html .= '</div>';
         $html .= '</div>';
 
         return $html;
     }
-
 }

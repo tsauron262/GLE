@@ -64,6 +64,7 @@ class BC_ListTable extends BC_List
         $this->params_def['single_cell'] = array('type' => 'definitions', 'defs_type' => 'single_cell', 'default' => null);
         $this->params_def['inline_view_item'] = array('data_type' => 'int', 'default' => 0);
         $this->params_def['after_list_content'] = array('default' => '');
+        $this->params_def['enable_csv'] = array('data_type' => 'bool', 'default' => 1);
 
         $path = null;
 
@@ -117,6 +118,10 @@ class BC_ListTable extends BC_List
             if ($this->params['positions_open']) {
                 $this->params['sort_field'] = 'position';
                 $this->params['sort_way'] = 'asc';
+                $this->colspan++;
+            }
+
+            if ($this->params['total_row']) {
                 $this->colspan++;
             }
         }
@@ -307,6 +312,7 @@ class BC_ListTable extends BC_List
                         if (!isset($this->totals[$col_name])) {
                             $this->totals[$col_name] = array(
                                 'data_type' => '',
+                                'sql_key'   => '',
                                 'value'     => 0
                             );
                             if (is_a($field, 'BC_Field')) {
@@ -315,7 +321,6 @@ class BC_ListTable extends BC_List
                                 $this->totals[$col_name]['data_type'] = $col_params['total_type'];
                             }
                         }
-                        $this->totals[$col_name]['value'] += (float) $current_value;
                     }
                 }
                 $rows[$item[$primary]] = $row;
@@ -333,6 +338,41 @@ class BC_ListTable extends BC_List
         $this->rows = $rows;
         if (method_exists($this->object, 'listRowsOverride')) {
             $this->object->listRowsOverride($this->name, $this->rows);
+        }
+
+        if ((int) $this->params['total_row']) {
+            $this->fetchTotals();
+        }
+    }
+
+    protected function fetchTotals()
+    {
+        $fields = array();
+
+        foreach ($this->totals as $col_name => $params) {
+            $col_params = $this->getColParams($col_name);
+            if (isset($col_params['field']) && $col_params['field']) {
+                $child_name = ((isset($col_params['child']) && $col_params['child']) ? $col_params['child'] : null);
+                $sqlKey = $this->object->getFieldSqlKey($col_params['field'], 'a', $child_name, $this->final_joins);
+                if ($sqlKey) {
+                    $fields[$sqlKey] = $col_name;
+                }
+            } elseif (method_exists($this->object, 'get' . ucfirst($col_name) . 'SqlKey')) {
+                $sqlKey = $this->object->{'get' . ucfirst($col_name) . 'SqlKey'}($this->final_joins);
+                if ($sqlKey) {
+                    $fields[$sqlKey] = $col_name;
+                }
+            }
+        }
+
+        $result = $this->object->getListTotals($fields, $this->final_filters, $this->final_joins);
+
+        if (!empty($result)) {
+            foreach ($fields as $key => $col_name) {
+                if (isset($result[0][$col_name])) {
+                    $this->totals[$col_name]['value'] = $result[0][$col_name];
+                }
+            }
         }
     }
 
@@ -497,6 +537,10 @@ class BC_ListTable extends BC_List
             }
             $html .= '</th>';
 
+            if ($this->params['total_row']) {
+                $html .= '<th style="width: 45px; min-width: 45px"></th>';
+            }
+
             if ($this->params['positions']) {
                 $html .= '<th class="positionHandle"' . (!$this->params['positions_open'] ? ' style="display: none"' : '') . '></th>';
             }
@@ -645,6 +689,10 @@ class BC_ListTable extends BC_List
 
         $html .= '<td style="text-align: center"><i class="fa fa-search"></i></td>';
 
+        if ($this->params['total_row']) {
+            $html .= '<td style="width: 45px; min-width: 45px"></td>';
+        }
+
         if ($this->params['positions']) {
             $html .= '<td class="positionHandle"' . (!$this->params['positions_open'] ? ' style="display: none"' : '') . '></td>';
         }
@@ -704,42 +752,39 @@ class BC_ListTable extends BC_List
             $html .= '<td colspan="' . $this->colspan . '"></td>';
             $html .= '</tr>';
 
-
-            $fl = true;
             $html .= '<tr class="total_row">';
 
-            if ((int) $this->params['checkboxes']) {
-                $html .= '<th></th>';
+            // Checkboxes: 
+            $html .= '<th></th>';
+            $html .= '<th>Total</th>';
+
+            // Positions: 
+            if ($this->params['positions']) {
+                $html .= '<td class="positionHandle"' . (!$this->params['positions_open'] ? ' style="display: none"' : '') . '></td>';
             }
 
             foreach ($this->cols as $col_name) {
-                if (!isset($this->totals[$col_name]) && $fl) {
-                    $html .= '<th>Total: </th>';
-                } else {
-                    $html .= '<td>';
-                    if (isset($this->totals[$col_name])) {
-                        switch ($this->totals[$col_name]['data_type']) {
-                            case 'money':
-                                $html .= BimpTools::displayMoneyValue($this->totals[$col_name]['value'], 'EUR');
-                                break;
+                $html .= '<td>';
+                if (isset($this->totals[$col_name])) {
+                    switch ($this->totals[$col_name]['data_type']) {
+                        case 'money':
+                            $html .= BimpTools::displayMoneyValue($this->totals[$col_name]['value'], 'EUR', false, true);
+                            break;
 
-                            case 'percent':
-                                $html .= BimpTools::displayFloatValue($this->totals[$col_name]['value']) . '%';
-                                break;
+                        case 'percent':
+                            $html .= BimpTools::displayFloatValue($this->totals[$col_name]['value'], 4) . '%';
+                            break;
 
-                            case 'float':
-                                $html .= BimpTools::displayFloatValue($this->totals[$col_name]['value']);
-                                break;
+                        case 'float':
+                            $html .= BimpTools::displayFloatValue($this->totals[$col_name]['value'], 4);
+                            break;
 
-                            default:
-                                $html .= $this->totals[$col_name]['value'];
-                                break;
-                        }
+                        default:
+                            $html .= round($this->totals[$col_name]['value'], 4);
+                            break;
                     }
-                    $html .= '</td>';
                 }
-
-                $fl = false;
+                $html .= '</td>';
             }
             $html .= '<td></td>';
             $html .= '</tr>';
@@ -766,6 +811,10 @@ class BC_ListTable extends BC_List
         if ((int) $this->params['add_object_row'] && !is_null($this->config_path)) {
             $html .= '<tr id="' . $this->identifier . '_addObjectRow" class="addObjectRow inputsRow" style="' . ($this->params['add_object_row_open'] ? '' : 'display: none;') . '">';
             $html .= '<td><i class="fa fa-plus-circle"></i></td>';
+
+            if ($this->params['total_row']) {
+                $html .= '<td style="width: 45px; min-width: 45px"></td>';
+            }
 
             if ($this->params['positions']) {
                 $html .= '<td class="positionHandle"' . (!$this->params['positions_open'] ? ' style="display: none"' : '') . '></td>';
@@ -964,7 +1013,7 @@ class BC_ListTable extends BC_List
 
             $content .= '<div style="margin-bottom: 15px">';
             $content .= BimpInput::renderSwitchOptionsInput('select_n', array(
-                        10  => '10', 20  => '20', 30  => '30', 40 => '40', 50 => '50'), $this->params['n'], $this->identifier . '_n');
+                        10 => '10', 20 => '20', 30 => '30', 40 => '40', 50 => '50'), $this->params['n'], $this->identifier . '_n');
             $content .= '</div>';
         }
 
@@ -986,7 +1035,7 @@ class BC_ListTable extends BC_List
                 $values['sort_option'] = $this->userConfig->getData('sort_option');
                 $values['nb_items'] = $this->userConfig->getData('nb_items');
 
-                $content .= '<div style="margin: 10px; font-weight: normal; font-size: 11px">';
+                $content .= '<div style="font-weight: normal; font-size: 11px">';
 
                 $content .= 'Nombre d\'éléments par page: <span class="bold">' . ((int) $values['nb_items'] ? $values['nb_items'] : BimpRender::renderIcon('fas_infinity')) . '</span><br/>';
 
@@ -1018,6 +1067,30 @@ class BC_ListTable extends BC_List
                         'attr'        => array(
                             'onclick' => $this->object->getJsActionOnclick('setListConfig', $values, array(
                                 'form_name' => 'list_config'
+                            ))
+                        )
+            ));
+            $content .= '</div>';
+        }
+
+        if ($this->params['enable_csv']) {
+            $content .= '<div class="title">';
+            $content .= 'Outils';
+            $content .= '</div>';
+
+            $content .= '<div style="text-align: center">';
+            $content .= BimpRender::renderButton(array(
+                        'classes'     => array('btn', 'btn-default'),
+                        'label'       => 'Générer fichier CSV',
+                        'icon_before' => 'fas_file-excel',
+                        'attr'        => array(
+                            'onclick' => $this->object->getJsActionOnclick('generateListCsv', array(
+                                'list_id'   => $this->identifier,
+                                'list_name' => $this->name,
+                                'file_name' => BimpTools::cleanStringForUrl($this->object->getLabel() . '_' . date('d-m-Y')),
+                                    ), array(
+                                'form_name'      => 'list_csv',
+                                'on_form_submit' => 'function($form, extra_data) {return onGenerateCsvFormSubmit($form, extra_data);}'
                             ))
                         )
             ));
@@ -1117,6 +1190,10 @@ class BC_ListTable extends BC_List
                     }
                 }
                 $html .= '</td>';
+
+                if ($this->params['total_row']) {
+                    $html .= '<td style="width: 45px; min-width: 45px"></td>';
+                }
 
                 if ($this->params['positions']) {
                     $html .= '<td class="positionHandle" style="' . (!$this->params['position'] ? 'display: none;' : '') . $item_params['td_style'] . '"><span></span></td>';
@@ -1273,5 +1350,109 @@ class BC_ListTable extends BC_List
         }
 
         return $html;
+    }
+
+    public function renderCsvContent($separator, $col_options, $headers = true, &$errors = array())
+    {
+        if (is_null($this->items)) {
+            $this->fetchItems();
+        }
+
+        $this->setConfPath();
+
+        $object_instance = $this->object;
+        $primary = $this->object->getPrimary();
+
+        $rows = '';
+
+        if ($headers) {
+            $line = '';
+            $fl = true;
+            foreach ($this->cols as $col_name) {
+                $col_params = $this->getColParams($col_name);
+                $label = $col_params['label'];
+                if (!$label && $col_params['field']) {
+                    $field_object = $this->object;
+                    if ($col_params['child']) {
+                        $field_object = $this->object->getChildObject($col_params['child']);
+                        if (!is_a($field_object, 'BimpObject')) {
+                            $field_object = null;
+                        }
+                    }
+                    if (!is_null($field_object)) {
+                        $label = $field_object->config->get('fields/' . $col_params['field'] . '/label', ucfirst($col_name));
+                    }
+                }
+                if (!$label) {
+                    $label = $col_name;
+                }
+                $line .= (!$fl ? $separator : '') . $label;
+                $fl = false;
+            }
+            $rows .= $line . "\n";
+        }
+
+        if (is_null($this->items) || !count($this->items)) {
+            return $rows;
+        }
+
+        foreach ($this->items as $item) {
+            $line = '';
+            $object = BimpCache::getBimpObjectInstance($this->object->module, $this->object->object_name, (int) $item[$primary], $this->parent);
+            if (BimpObject::objectLoaded($object)) {
+                $this->object = $object;
+
+                $fl = true;
+                foreach ($this->cols as $col_name) {
+                    $col_params = $this->getColParams($col_name);
+
+                    if (!(int) $col_params['show'] || (int) $col_params['hidden']) {
+                        continue;
+                    }
+
+                    $content = '';
+
+                    if ($col_params['field']) {
+                        if ($col_params['child']) {
+                            if ($col_params['child'] === 'parent') {
+                                $obj = $object->getParentInstance();
+                            } else {
+                                $obj = $object->getChildObject($col_params['child']);
+                            }
+                        } else {
+                            $obj = $object;
+                        }
+
+                        if (is_a($obj, 'BimpObject') && BimpObject::objectLoaded($obj)) {
+                            $field = new BC_Field($obj, $col_params['field']);
+                            $content = $field->getNoHtmlValue(isset($col_options[$col_name]) ? $col_options[$col_name] : '');
+                        }
+                    } elseif (isset($col_params['true_value']) && !is_null($col_params['true_value'])) {
+                        $content = $col_params['true_value'];
+                    } elseif (isset($col_params['value'])) {
+                        $content = $col_params['value'];
+                    }
+
+                    $content = str_replace($separator, '', $content);
+                    $content = str_replace("\n", ' ', $content);
+
+                    $line .= (!$fl ? $separator : '' ) . $content;
+
+                    $fl = false;
+                }
+
+                $rows .= $line . "\n";
+            }
+        }
+
+        $this->object = $object_instance;
+
+        if (!is_null($this->parent)) {
+            $this->object->parent = $this->parent;
+        }
+
+        $this->setConfPath();
+
+        return $rows;
     }
 }

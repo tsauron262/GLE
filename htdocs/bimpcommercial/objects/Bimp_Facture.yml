@@ -324,6 +324,8 @@ forms:
                 field: datef
             6:
                 field: fk_account
+            7:
+                field: fk_cond_reglement
                 
     validate: 
         title: Validation

@@ -1824,8 +1824,8 @@ class BimpObject extends BimpCache
                 return '';
             }
 
-            if ($relation === 'hasOne') {
-                $id_prop = $this->getChildIdProperty($child_name);
+            $id_prop = $this->getChildIdProperty($child_name);
+            if ($relation === 'hasOne' || $id_prop) {
                 if (!is_string($id_prop) || !$id_prop) {
                     $errors[] = 'Propriété contenant l\'ID de l\'objet "' . $child_object->getLabel() . '" absente ou invalide';
                     return '';

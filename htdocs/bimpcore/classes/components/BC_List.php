@@ -357,7 +357,7 @@ class BC_List extends BC_Panel
     }
 
     protected function fetchItems()
-    {
+    {        
         $this->fetchFiltersPanelValues();
 
         if (!$this->isOk()) {

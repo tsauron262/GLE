@@ -715,7 +715,12 @@ class BC_Field extends BimpComponent
                             }
 
                             if ($option === 'fullname') {
-                                return $obj->getName();
+                                if(method_exists($obj, 'getName'))
+                                    return $obj->getName();
+                                elseif(isset($obj->ref))
+                                    return $obj->ref;
+                                else
+                                    return "N/C";
                             }
 
                             if ($obj->field_exists($option)) {

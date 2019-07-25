@@ -117,6 +117,7 @@ class BimpDocumentPDF extends BimpModelPDF
                                 $this->fromCompany->fromCompany->zip = "69760";
                                 $this->fromCompany->address = "2 rue des Erables CS 21055  ";
                                 $this->fromCompany->town = "LIMONEST";
+                                $this->fromCompany->zip = "69760";
                             }
                         }
                     }

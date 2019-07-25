@@ -1131,7 +1131,8 @@ class Bimp_Product extends BimpObject
 
     public function validateProduct()
     {
-
+        global $user;
+        
         $errors = array();
         if (!(int) $this->getCurrentFournPriceId(null, true)) {
             $errors[] = "Veuillez enregistrer au moins un prix d'achat fournisseur";
@@ -1145,11 +1146,13 @@ class Bimp_Product extends BimpObject
             return $errors;
 
         $cur_pa_ht = $this->getCurrentPaHt(null, true);
+        $datetime = new DateTime();
 
+        $this->updateField('fk_user_valid', (int) $user->id);
+        $this->updateField('date_valid', $datetime->format('Y-m-d H:i:s'));
         $this->updateField('cur_pa_ht', $cur_pa_ht);
         $this->updateField('validate', 1);
 
-        require_once DOL_DOCUMENT_ROOT . '/synopsistools/SynDiversFunction.php';
 
         // COMMAND
         $commandes_c = $this->getCommandes();
@@ -1543,26 +1546,6 @@ class Bimp_Product extends BimpObject
         return array();
     }
 
-    public function fetchExtraFields()
-    {
-        $fields = array(
-            'best_buy_price'     => 0,
-            'product_categories' => array()
-        );
-
-//        if ($this->isLoaded()) {
-//            $fields['best_buy_price'] = $this->getBestBuyPrice();
-//
-//            $categories = self::getProductCategoriesArray((int) $this->id);
-//            $fields['product_categories'] = $categories;
-//        }
-//        $extras = array();
-//        $extras['best_buy_price'] = $this->getBestBuyPrice();
-//        $extras['product_categories'] = $this->getCategories(1);
-//        $extras['fk_country'] = $this->getOriginCountry();
-        return $fields;
-    }
-
     // Méthodes statiques : 
 
     private static function initStockDate($date)
@@ -1676,42 +1659,7 @@ class Bimp_Product extends BimpObject
         }
     }
 
-    public function setCategories()
-    {
-//        if ($conf->categorie->enabled) {
-        require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
-        $form = new Form($this->db->db);
-        $cate_arbo = $form->select_all_categories(Categorie::TYPE_PRODUCT, '', 'parent', 64, 0, 1);
-        return $form->multiselectarray('categories', $cate_arbo, GETPOST('categories', 'array'), '', 0, '', 0, '100%');
-
-//				$cate_arbo = $form->select_all_categories(Categorie::TYPE_PRODUCT, '', 'parent', 64, 0, 1);
-//				$c = new Categorie($this->db->db);
-//				$cats = $c->containing($this->getData('id'),Categorie::TYPE_PRODUCT);
-//				$arrayselected=array();
-//				foreach($cats as $cat) {
-//					$arrayselected[] = $cat->id;
-//				}
-//				$html .= $form->multiselectarray('categories', $cate_arbo, $arrayselected, '', 0, '', 0, '100%');
-//        } TODO set a else
-    }
-
-    public function getOriginCountry()
-    {
-        global $langs;
-        echo $this->getData('fk_county');
-        $return = getCountry($this->getData('fk_county'), 0, $this->db->db);
-        echo 'après la fonction' . $return . '<br/>';
-        die();
-        return 'test' . $return . 'fin';
-    }
-
-    public function setOriginCountry()
-    {
-        $form = new Form($this->db->db);
-        return $form->select_country($this->getData('fk_country '), 'country_id');
-    }
-
-    public function displayCountry()
+    public function renderCountry()
     {
         global $langs;
         $id = $this->getData('fk_country');

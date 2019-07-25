@@ -255,7 +255,7 @@ lists:
         add_form_name: add_contrat
         add_btn_label: Créer un nouveau contrat
         edit_btn: 1
-        edit_form: default
+        edit_form: edit_contrat
         delete_btn: 0
         modal_view: fiche_contrat
         page_btn: 1

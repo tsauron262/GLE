@@ -543,6 +543,46 @@ forms:
 #                            - ''
 #                            - 1
 
+filters_panels: 
+    default: 
+        filters: 
+            parent: 
+                label: Objet parent
+                field: id_obj
+            fk_soc:
+                field: fk_soc
+                child: parent
+            product: 
+                field: fk_product
+                child: dol_line
+            categ1:
+                custom: 1
+                label: Catégorie (1)
+                field: categ1
+                type: value
+                input:
+                    type: select
+                    options: 
+                        callback: getCategoriesArray
+            categ2:
+                custom: 1
+                label: Catégorie (2)
+                field: categ2
+                type: value
+                input:
+                    type: select
+                    options: 
+                        callback: getCategoriesArray
+            categ3:
+                custom: 1
+                label: Catégorie (3)
+                field: categ3
+                type: value
+                input:
+                    type: select
+                    options: 
+                        callback: getCategoriesArray
+                
 lists_cols: 
     position: 
         label: N°
@@ -657,38 +697,34 @@ lists_cols:
         label: Emplacement Lyon
         field: zone_pr
         child: product
-    
-lists: 
+    sn:
+        label: S/N
+        value:
+            callback: displaySerials
+                        
+lists:      
     global:
-        sort_field: id
         configurable: 1
         positions: 0
         filters_panel: default
         filters_panel_open: 1
-        enable_sort: 1
+        sort_field: id
         sort_way: desc
         pagination: 1
         n: 10
         cols:
-            position: 
             parent:
             desc:
             pu_ht: 
             tva:
-            remise_crt:
-            pa_ht: 
-            qty: 
-            remise: 
+            qty:
+            remise:
             total_ttc: 
+            pa_ht: 
+            remise_crt:
             margin:
-            sn:
-                label: S/N
-                value:
-                    callback: displaySerials
                 
     default: 
-        extends: global
-        filters_panel_open: 0
         checkboxes: 1
         positions: 1
         positions_open: 1
@@ -728,9 +764,18 @@ lists:
                 method: getLinesListHeaderExtraBtn
                 object: 
                     callback: getParentInstance
-        cols:
-            parent: unset
-                
+        cols:    
+            desc:
+            pu_ht: 
+            tva:
+            qty:
+            remise:
+            total_ttc: 
+            pa_ht: 
+            remise_crt:
+            margin:    
+               
+    # Liste à ne pas utiliser, ici juste à titre d'exemple
     full: 
         cols: 
 #            Colonnes à utiliser si besoin de filtrer / trier. 
@@ -755,72 +800,4 @@ lists:
             dolline_total_ttc: 
                 field: total_ttc
                 child: dol_line
-                
-                
-                
-filters_panels: 
-    default: 
-        filters: 
-            fk_soc:
-                field: fk_soc
-                child: parent
-            product: 
-                field: fk_product
-                child: dol_line
-            date: 
-                field: date_commande
-                child: parent
-            entrepot: 
-                field: entrepot
-                child: parent
-            commande: 
-                field: id_obj
-            commande_status:
-                field: fk_statut
-                child: parent
-            shipment_status:
-                field: shipment_status
-                child: parent
-            invoice_status:
-                field: invoice_status
-                child: parent
-            logistique_status: 
-                field: logistique_status
-                child: parent
-            qty_total: 
-                field: qty_total
-            qty_to_ship:
-                field: qty_to_ship
-            qty_to_bill: 
-                field: qty_to_bill
-            qty_shipped:
-                field: qty_shipped
-            qty_billed: 
-                field: qty_billed
-            categ1:
-                custom: 1
-                label: Catégorie (1)
-                field: categ1
-                type: value
-                input:
-                    type: select
-                    options: 
-                        callback: getCategoriesArray
-            categ2:
-                custom: 1
-                label: Catégorie (2)
-                field: categ2
-                type: value
-                input:
-                    type: select
-                    options: 
-                        callback: getCategoriesArray
-            categ3:
-                custom: 1
-                label: Catégorie (3)
-                field: categ3
-                type: value
-                input:
-                    type: select
-                    options: 
-                        callback: getCategoriesArray
+               

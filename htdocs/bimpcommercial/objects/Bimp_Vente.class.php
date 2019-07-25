@@ -124,7 +124,26 @@ class Bimp_Vente extends BimpObject
         return array();
     }
 
-    // Rendus HTML: 
+    // Getters: 
+    
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array())
+    {
+        switch ($field_name) {
+            case 'categ1':
+            case 'categ2':
+            case 'categ3':
+                $alias = 'cat_prod';
+                $joins[$alias] = array(
+                    'alias' => $alias,
+                    'table' => 'categorie_product',
+                    'on'    => $alias . '.fk_product = a.fk_product'
+                );
+                $filters['cat_prod.fk_categorie'] = array(
+                    'in' => $values
+                );
+                break;
+        }
+    }
 
     public function getListHeaderButtons()
     {

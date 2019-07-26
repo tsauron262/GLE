@@ -12,12 +12,6 @@ labels:
     name_plur: lignes de facture
     is_female: 1
 
-fields:
-    date_start:
-        type: date
-    date_end:
-        type: date
-
 objects: 
     line: 
         relation: hasOne
@@ -29,6 +23,14 @@ objects:
                 class: FactureLigne
             id_object: 
                 field_value: id_line
+        
+        fields:
+            date_start:
+                label: Date de début
+                type: date
+            date_end:
+                label: Date de fin
+                type: date
                 
     dol_line: 
         instance: 

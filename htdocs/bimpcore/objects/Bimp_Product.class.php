@@ -404,14 +404,14 @@ class Bimp_Product extends BimpObject
             );
         }
 
-        if ($this->isActionAllowed('refuse') && $this->canSetAction('refuse')) {
-            $buttons[] = array(
-                'label'   => 'Refuser',
-                'icon'    => 'close',
-                'onclick' => $this->getJsActionOnclick('refuse', array(), array(
-                ))
-            );
-        }
+//        if ($this->isActionAllowed('refuse') && $this->canSetAction('refuse')) {
+//            $buttons[] = array(
+//                'label'   => 'Refuser',
+//                'icon'    => 'close',
+//                'onclick' => $this->getJsActionOnclick('refuse', array(), array(
+//                ))
+//            );
+//        }
         return $buttons;
     }
 

@@ -126,6 +126,10 @@ class BContract_contrat extends BimpDolObject {
     public function displayRef() {
         return $this->getData('ref') . ' - ' . $this->getData('objet_contrat');
     }
+    
+    public function getTitleEcheancier() {
+        return '&Eacute;ch&eacute;ancier du contrat N°' . $this->displayRef();
+    }
 
     public function displayEndDate() {
         $fin = $this->getEndDate();
@@ -643,21 +647,92 @@ class BContract_contrat extends BimpDolObject {
         return $html;
     }
     
-    public function renderEcheancier() {
-        
-        // TODO a viré (voir pour objet)
+    public function renderEcheancier() {        
         $instance = $this->getInstance('bimpcontract', 'BContract_echeancier');
-        if($instance->find(Array('id_contrat' => $this->id))) {
-            return $instance->display();
-        } elseif($this->getData('statut') < self::CONTRAT_STATUS_VALIDE) {
-            return $instance->display("Le contrat doit être valider pour générer l'échéancier");
-        } elseif(!$this->getData('date_start') || !$this->getData('periodicity') || !$this->getData('duree_mois')) {
-            return $instance->display("Un des champs : Durée en mois, Date de début, Périodicitée est obligatoire pour la génération de l'échéancier");
-        } else {
-            $instance->updateLine($this->id);
-            return $instance->display();
-        } 
         
+        if($this->getData('statut') < self::CONTRAT_STATUS_VALIDE) {
+            return BimpRender::renderAlerts('Le contrat n\'est pas validé', 'danger', false);
+        }
+        if(!$this->getData('date_start') || !$this->getData('periodicity') || !$this->getData('duree_mois')) {
+            return BimpRender::renderAlerts("Un des champs : Durée en mois, Date de début, Périodicitée est obligatoire pour la génération de l'échéancier", 'warning', false);
+        }
+        
+        $create = false;
+        
+        if(!$instance->find(Array('id_contrat' => $this->id))) {
+            $create = true;
+        }
+
+        return $instance->displayEcheancier($this->action_line_echeancier($create));
+    }
+    
+    public function action_line_echeancier($create = false, $update = false) {
+        if($create) {
+            $date = new DateTime($this->getData('date_start'));
+            $instance = $this->getInstance('bimpcontract', 'BContract_echeancier');
+            $instance->set('id_contrat', $this->id);
+            $instance->set('next_facture_date', $date->format('Y-m-d H:i:s'));
+            $instance->set('next_facture_amount', $this->reste_a_payer());
+            $instance->set('validate', 0);
+            $instance->create();
+        }
+        
+        if($update) {
+            
+        }
+        
+        $returnedArray = Array(
+            'factures_send' => getElementElement('contrat', 'facture', $this->id),
+            'reste_a_payer' => $this->reste_a_payer(),
+            'reste_periode' => $this->reste_periode(),
+            'periodicity' => $this->getData('periodicity')
+        );
+        
+        return (object) $returnedArray;
+        
+    }
+    
+    public function reste_a_payer() {
+        $duree_mois = $this->getData('duree_mois');
+        $periodicity = $this->getData('periodicity');
+        $nombre_periode = $duree_mois / $periodicity;
+        $facture_delivred = getElementElement('contrat', 'facture', $this->id);
+        if($facture_delivred) {
+            foreach($facture_delivred as $link) {
+                $instance = $this->getInstance('bimpcommercial', 'Bimp_Facture', $link['d']);
+                $montant += $instance->getData('total');
+            }
+            $return = $this->getTotalContrat() - $montant;
+        } else {
+                $return = $this->getTotalContrat();  
+        }
+        return $return; 
+    }
+    
+    public function reste_periode() {
+        $instance = $this->getInstance('bimpcontract', 'BContract_echeancier');
+        $instance->find(array('id_contrat' => $this->id));
+        $date_1 = new DateTime($instance->getData('next_facture_date'));
+        $date_2 = $this->getEndDate();
+        if($date_1->format('Y-m-d') == $this->getData('date_start')) {
+            $return = 12;
+        } else {
+            $date_1->sub(new DateInterval('P1D'));
+            $interval = $date_1->diff($date_2);
+            $return = $interval->m;
+        }
+        return $return;
+        
+    }
+    
+    public function getTotalContrat() {
+        foreach ($this->dol_object->lines as $line){
+            if($line->total_ttc > 0){
+                $montant += $line->total_ht;
+            }
+        }
+        
+        return $montant;
     }
     
     public function renderContacts()

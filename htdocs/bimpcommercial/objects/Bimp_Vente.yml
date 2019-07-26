@@ -36,6 +36,20 @@ objects:
                 module: categories
                 file: categorie
                 
+    marque: 
+        extends: category
+        relation: hasOne
+        instance: 
+            id_object: 
+                field_value: marque
+                
+    gamme: 
+        extends: category
+        relation: hasOne
+        instance: 
+            id_object: 
+                field_value: gamme
+                
 fields: 
 #    Champs facturedet: 
     fk_facture: 
@@ -112,6 +126,22 @@ fields:
         values: 
             array: secteurs
         
+    marque: 
+        label: Marque
+        extra: 1
+        type: id_object
+        object: marque
+        values: 
+            array: marques
+            
+    gamme: 
+        label: Gamme matériel
+        extra: 1
+        type: id_object
+        object: gamme
+        values: 
+            array: gammesMateriel
+            
     product_categories: 
         label: Catégories produit
         extra: 1
@@ -196,12 +226,21 @@ filters_panels:
                 field: secteur
             user: 
                 field: id_user
-            client: 
-                field: id_client
+#            client: 
+#                field: id_client
             product: 
                 field: fk_product
+            priceProd:
+                field: price
+                child: product
             qty: 
                 field: qty
+            total_ht: 
+                field: total_ht
+            marque: 
+                field: marque
+            gamme: 
+                field: gamme
             categ1:
                 custom: 1
                 label: Catégorie (1)
@@ -248,9 +287,9 @@ lists_cols:
     label:
         field: label
         child: product
-    pays:
-        field: state
-        child: client
+#    pays:
+#        field: state
+#        child: client
     subprice: 
         field: subprice
     tva_tx: 
@@ -279,6 +318,14 @@ lists_cols:
         display: nom_url
     secteur: 
         field: secteur
+    marque: 
+        field: marque
+    gamme: 
+        field: gamme
+    type_materiel: 
+        label: Type matériel
+        value: 
+            callback: displayTypeMateriel
     
 lists: 
     default: 
@@ -298,14 +345,13 @@ lists:
         header_buttons:
             callback: getListHeaderButtons
         cols: 
+            pays: 
+            marque: 
+            shortRef: 
             product:
-            qty: 
-            total_ttc:
-            facture: 
-            date: 
-            secteur: 
-            entrepot:
-            user:
+            qty:             
+            gamme: 
+            type_materiel: 
                 
 stats_lists: 
     default: 

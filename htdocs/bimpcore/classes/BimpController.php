@@ -569,18 +569,18 @@ class BimpController
                 if (!isset($result['request_id'])) {
                     $result['request_id'] = BimpTools::getValue('request_id', 0);
                 }
-                
+
                 $json = json_encode($result);
-                
+
                 if ($json === false) {
-                    $msg = 'Echec de l\'encodage JSON - '.  json_last_error_msg();
-                    dol_syslog('AjaxProcess "' . $action . '" - controller: ' . $this->module . ' ' . $this->controller.' - '.$msg, LOG_ERR);
+                    $msg = 'Echec de l\'encodage JSON - ' . json_last_error_msg();
+                    dol_syslog('AjaxProcess "' . $action . '" - controller: ' . $this->module . ' ' . $this->controller . ' - ' . $msg, LOG_ERR);
                     die(json_encode(array(
-                        'errors' => array($msg),
+                        'errors'     => array($msg),
                         'request_id' => BimpTools::getValue('request_id', 0)
                     )));
                 }
-                
+
                 die($json);
             } else {
                 $errors[] = 'Requête inconnue: "' . $action . '"';
@@ -1286,6 +1286,15 @@ class BimpController
             $rows_html = $list->renderRows();
             $pagination_html = $list->renderPagination();
             $filters_panel_html = $list->renderFiltersPanel();
+
+            if (count($list->errors)) {
+                $msg = 'Erreurs lors de la génération d\'une liste' . "\n";
+                $msg .= 'Module: ' . $module . "\n";
+                $msg .= 'Objet: ' . $object_name . "\n";
+                $msg .= 'Liste: ' . $list_name . "\n\n";
+                $msg .= 'Erreurs: ' . BimpRender::renderAlerts($list->errors);
+                mailSyn2('ERREUR LIST', 'dev@bimp.fr', '', $msg);
+            }
         }
 
         return array(

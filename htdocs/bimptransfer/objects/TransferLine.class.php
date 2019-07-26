@@ -4,9 +4,11 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/objects/BimpDolObject.class.php';
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
 
-class TransferLine extends BimpObject {
+class TransferLine extends BimpObject
+{
 
-    public function create_2($id_transfer, $id_product, $id_equipment, $quantity_input, &$id_affected, $id_warehouse_source) {
+    public function create_2($id_transfer, $id_product, $id_equipment, $quantity_input, &$id_affected, $id_warehouse_source)
+    {
         global $user;
         $now = dol_now();
 
@@ -15,36 +17,36 @@ class TransferLine extends BimpObject {
         // Is equipment
         if ($id_equipment > 0) {
             $errors = array_merge($errors, $reservation->validateArray(array(
-                        'id_entrepot' => $id_warehouse_source,
-                        'status' => 201, // Transfert en cours
-                        'type' => 2, // 2 = transfert
+                        'id_entrepot'  => $id_warehouse_source,
+                        'status'       => 201, // Transfert en cours
+                        'type'         => 2, // 2 = transfert
                         'id_equipment' => $id_equipment,
-                        'id_product' => $id_product,
+                        'id_product'   => $id_product,
                         'id_transfert' => $id_transfer,
-                        'date_from' => dol_print_date($now, '%Y-%m-%d %H:%M:%S'),
+                        'date_from'    => dol_print_date($now, '%Y-%m-%d %H:%M:%S'),
             )));
             // Is product
         } else {
             $errors = array_merge($errors, $reservation->validateArray(array(
-                        'id_entrepot' => $id_warehouse_source,
-                        'status' => 201, // Transfert en cours
-                        'type' => 2, // 2 = transfert
-                        'id_product' => $id_product,
+                        'id_entrepot'  => $id_warehouse_source,
+                        'status'       => 201, // Transfert en cours
+                        'type'         => 2, // 2 = transfert
+                        'id_product'   => $id_product,
                         'id_transfert' => $id_transfer,
-                        'qty' => $quantity_input,
-                        'date_from' => dol_print_date($now, '%Y-%m-%d %H:%M:%S'),
+                        'qty'          => $quantity_input,
+                        'date_from'    => dol_print_date($now, '%Y-%m-%d %H:%M:%S'),
             )));
         }
         $errors = array_merge($errors, $reservation->create());
 
         // Create transfer line
         $errors = array_merge($errors, $this->validateArray(array(
-                    'user_create' => $user->id,
-                    'user_update' => $user->id,
-                    'id_product' => $id_product,
-                    'id_equipment' => $id_equipment,
-                    'id_transfer' => $id_transfer,
-                    'quantity_sent' => $quantity_input,
+                    'user_create'       => $user->id,
+                    'user_update'       => $user->id,
+                    'id_product'        => $id_product,
+                    'id_equipment'      => $id_equipment,
+                    'id_transfer'       => $id_transfer,
+                    'quantity_sent'     => $quantity_input,
                     'quantity_received' => 0
         )));
 
@@ -55,13 +57,15 @@ class TransferLine extends BimpObject {
         return $errors;
     }
 
-    public function canDelete() {
+    public function canDelete()
+    {
         if ($this->getData("quantity_transfered") == 0 && $this->getData("quantity_received") == 0)
             return 1;
         return 0;
     }
-    
-    public function cancelReservation(){
+
+    public function cancelReservation()
+    {
         $errors = array();
         $tabReservations = $this->getReservations();
         foreach ($tabReservations as $reservation)
@@ -69,7 +73,8 @@ class TransferLine extends BimpObject {
         return $errors;
     }
 
-    private function getReservations() {
+    private function getReservations()
+    {
         $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
         $filtre = array('id_transfert' => $this->getData('id_transfer'), 'status' => array("operator" => "!=", "value" => 303));
         if ($this->getData('id_equipment'))
@@ -87,16 +92,17 @@ class TransferLine extends BimpObject {
         return $tabs;
     }
 
-    public function updateReservation($force_close = false) {
+    public function updateReservation($force_close = false)
+    {
         $errors = array();
         $tabReservations = $this->getReservations();
         $i = 0;
-        
+
         if ($force_close)
             $nb_reservation = 0;
         else
             $nb_reservation = (int) $this->getData('quantity_sent') - $this->getData('quantity_received');
-        
+
         foreach ($tabReservations as $reservation) {
             $new_status = ($nb_reservation == 0) ? '301' : '201';
             if ($i > 0) {
@@ -106,7 +112,7 @@ class TransferLine extends BimpObject {
 
             if ($nb_reservation > 0)
                 $reservation->updateField('qty', $nb_reservation);
-            elseif($force_close)
+            elseif ($force_close)
                 $reservation->updateField('qty', 0);
             $i++;
             if ($new_status != $reservation->getInitData('status')) {
@@ -118,18 +124,20 @@ class TransferLine extends BimpObject {
         }
     }
 
-    public function checkInput($input, &$id_product, &$id_equipment) {
+    public function checkInput($input, &$id_product, &$id_equipment)
+    {
         $errors = array();
         $is_product = $this->isProduct($input, $id_product);
         $is_equipment = $this->isEquipment($input, $id_equipment, $id_product);
         if (!$is_equipment and ! $is_product)
             $errors[] = "Produit inconnu";
-        else if (/*rajout de ici*/!$is_equipment and /*a la */$this->isSerialisable($id_product))
+        else if (/* rajout de ici */!$is_equipment and /* a la */$this->isSerialisable($id_product))
             $errors[] = "Veuillez scanner le numéro de série au lieu de la référence.";
         return $errors;
     }
 
-    public function isProduct($search, &$id_product) {
+    public function isProduct($search, &$id_product)
+    {
         $sql = 'SELECT rowid';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'product';
         $sql .= ' WHERE ref="' . $search . '"';
@@ -148,7 +156,8 @@ class TransferLine extends BimpObject {
         return false;
     }
 
-    public function isEquipment($input, &$id_equipment, &$id_product) {
+    public function isEquipment($input, &$id_equipment, &$id_product)
+    {
         $sql = 'SELECT id, id_product';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_equipment';
         $sql .= ' WHERE serial="' . $input . '" || concat("S", serial)="' . $input . '"';
@@ -164,7 +173,8 @@ class TransferLine extends BimpObject {
         return false;
     }
 
-    public function isSerialisable($id_product) {
+    public function isSerialisable($id_product)
+    {
         $sql = 'SELECT serialisable';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'product_extrafields';
         $sql .= ' WHERE fk_object=' . $id_product;
@@ -181,7 +191,8 @@ class TransferLine extends BimpObject {
         return false;
     }
 
-    public function lineExists($id_transfer, $id_product, $id_equipment) {
+    public function lineExists($id_transfer, $id_product, $id_equipment)
+    {
         $sql = 'SELECT id, quantity_sent';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . $this->getTable();
         $sql .= ' WHERE id_transfer=' . $id_transfer;
@@ -198,13 +209,15 @@ class TransferLine extends BimpObject {
         return false;
     }
 
-    public function updateQuantity($id_transfer_line, $quantity) {
+    public function updateQuantity($id_transfer_line, $quantity)
+    {
         parent::fetch($id_transfer_line);
         $this->data['quantity_sent'] += $quantity;
         parent::update();
     }
 
-    function checkStock(&$quantity, $id_product, $id_equipment, $id_warehouse_source, $id_transfer) {
+    function checkStock(&$quantity, $id_product, $id_equipment, $id_warehouse_source, $id_transfer)
+    {
         $errors = array();
         $parent = BimpCache::getBimpObjectInstance('bimptransfer', 'Transfer', $id_transfer);
         if ($id_equipment > 0) {
@@ -222,7 +235,8 @@ class TransferLine extends BimpObject {
         return $errors;
     }
 
-    function checkStockEquipment($id_equipment, $id_warehouse_source) {
+    function checkStockEquipment($id_equipment, $id_warehouse_source)
+    {
 
         $sql = 'SELECT id';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_equipment_place';
@@ -240,7 +254,8 @@ class TransferLine extends BimpObject {
         return 0;
     }
 
-    function delete(&$warnings = array(), $force_delete = false) {
+    function delete(&$warnings = array(), $force_delete = false)
+    {
         $errors = array();
         if (count($errors) == 0)
             $errors = array_merge($errors, $this->cancelReservation());
@@ -249,12 +264,14 @@ class TransferLine extends BimpObject {
             $errors = array_merge($errors, parent::delete($warnings, $force_delete));
         return $errors;
     }
-    
-    function isEditable($force_edit = false) {
+
+    function isEditable($force_edit = false)
+    {
         return $this->getParentInstance()->isEditable($force_edit);
     }
 
-    function checkStockProd($id_product, $id_warehouse_source) {
+    function checkStockProd($id_product, $id_warehouse_source)
+    {
 
         $sql = 'SELECT reel';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'product_stock';
@@ -270,7 +287,8 @@ class TransferLine extends BimpObject {
         return 0;
     }
 
-    function update(&$warnings = array(), $force_update = false) {
+    function update(&$warnings = array(), $force_update = false)
+    {
         if ($this->getData('quantity_received') > $this->getData('quantity_sent'))
             return array("Une ligne a une quantité reçu supérieure à une quantité envoyée.");
 
@@ -281,16 +299,24 @@ class TransferLine extends BimpObject {
         return parent::update($warnings, $force_update);
     }
 
-    private function getParentStatus() {
+    private function getParentStatus()
+    {
         $transfer = $this->getParentInstance();
         return $transfer->getData('status');
     }
 
-    public function transfer() {
+    public function transfer()
+    {
         global $user;
         $errors = array();
         $transfer = $this->getParentInstance();
-        $codemove = 'TR-' . $transfer->getData('id');
+
+        if (!BimpObject::objectLoaded($transfer)) {
+            $errors[] = 'ID du transfert absent';
+            return $errors;
+        }
+
+        $codemove = 'TR-' . $transfer->id;
 
         $new_qty = $this->getData('quantity_received') - $this->getData('quantity_transfered');
         if ($new_qty == 0) {
@@ -304,51 +330,54 @@ class TransferLine extends BimpObject {
             if ($new_qty > 0) {
                 $errors = array_merge($errors, $emplacement->validateArray(array(
                             'id_equipment' => $id_equipment,
-                            'type' => 2,
-                            'id_entrepot' => $transfer->getData('id_warehouse_dest'),
-                            'infos' => 'Transfert de stock',
-                            'code_mvt' => $codemove,
-                            'date' => dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')
+                            'type'         => 2,
+                            'id_entrepot'  => $transfer->getData('id_warehouse_dest'),
+                            'infos'        => 'Transfert de stock',
+                            'code_mvt'     => $codemove,
+                            'date'         => dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')
                 )));
             } else {
                 $errors = array_merge($errors, $emplacement->validateArray(array(
                             'id_equipment' => $id_equipment,
-                            'type' => 2,
-                            'id_entrepot' => $transfer->getData('id_warehouse_source'),
-                            'infos' => 'Annulation transfert de stock',
-                            'code_mvt' => $codemove,
-                            'date' => dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')
+                            'type'         => 2,
+                            'id_entrepot'  => $transfer->getData('id_warehouse_source'),
+                            'infos'        => 'Annulation transfert de stock',
+                            'code_mvt'     => $codemove,
+                            'date'         => dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')
                 )));
             }
             $errors = array_merge($errors, $emplacement->create());
             // Product
         } else {
-            $doli_prod = new Product($this->db->db);
-            $doli_prod->fetch($this->getData('id_product'));
-            $label_move = $codemove . '-qty:' . $new_qty . '-ref:' . $doli_prod->ref;
-            $result1 = $doli_prod->correct_stock($user, $transfer->getData('id_warehouse_source'), $new_qty, 1, $label_move, 0, $codemove, 'entrepot', $transfer->getData('id_warehouse_dest'));
-            if ($result1 == -1)
-                $errors = array_merge($errors, $doli_prod->errors);
-            $result2 = $doli_prod->correct_stock($user, $transfer->getData('id_warehouse_dest'), $new_qty, 0, $label_move, 0, $codemove, 'entrepot', $transfer->getData('id_warehouse_source'));
-            if ($result2 == -1)
-                $errors = array_merge($errors, $doli_prod->errors);
+            // Toujours passer par le cache pour les objets!
+            $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $this->getData('id_product'));
+
+            $label_move = $codemove . '-qty:' . $new_qty . '-ref:' . $product->getRef();
+            if ($product->dol_object->correct_stock($user, $transfer->getData('id_warehouse_source'), $new_qty, 1, $label_move, 0, $codemove, 'entrepot', $transfer->getData('id_warehouse_dest')) <= 0) {
+                $msg = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($product->dol_object), 'Echec du retrait des quantités du stock de départ');
+                $errors[] = $msg;
+                dol_syslog('[ERREUR STOCK] ' . $msg . ' - Transfert #' . $transfer->id . ' - Ligne #' . $this->id . ' - Qté: ' . $new_qty, LOG_ERR);
+            }
+            if ($product->dol_object->correct_stock($user, $transfer->getData('id_warehouse_dest'), $new_qty, 0, $label_move, 0, $codemove, 'entrepot', $transfer->getData('id_warehouse_source')) <= 0) {
+                $msg = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($product->dol_object), 'Echec de l\'ajout des quantités dans le stock d\'arrivée');
+                $errors[] = $msg;
+                dol_syslog('[ERREUR STOCK] ' . $msg . ' - Transfert #' . $transfer->id . ' - Ligne #' . $this->id . ' - Qté: ' . $new_qty, LOG_ERR);
+            }
         }
 
-        if (sizeof($errors) > 0) {
-            print_r($errors);
-            return $errors;
+        if (!count($errors)) {
+            $this->set('quantity_transfered', $this->getData('quantity_received'));
+            $up_errors = $this->update();
+            if (count($up_errors)) {
+                $errors = BimpTools::getMsgFromArray($up_errors, 'Echec de l\'enregistrement des quantités transférées');
+            }
         }
-        // Common
-        $errors = array_merge($errors, $this->set('quantity_transfered', $this->getData('quantity_received')));
-        $errors = array_merge($errors, $this->update());
-        if (sizeof($errors) > 0) {
-            print_r($errors);
-            return $errors;
-        }
+
         return $errors;
     }
 
-    public function canEditField($field_name) {
+    public function canEditField($field_name)
+    {
         global $user;
         $transfer_status = $this->getParentStatus();
         if ($field_name == 'quantity_received' and $transfer_status != Transfer::STATUS_RECEPTING and ! $user->rights->bimptransfer->admin)
@@ -359,5 +388,4 @@ class TransferLine extends BimpObject {
 
         return parent::canEditField($field_name);
     }
-
 }

@@ -1824,8 +1824,8 @@ class BimpObject extends BimpCache
                 return '';
             }
 
-            if ($relation === 'hasOne') {
-                $id_prop = $this->getChildIdProperty($child_name);
+            $id_prop = $this->getChildIdProperty($child_name);
+            if ($relation === 'hasOne' || $id_prop) {
                 if (!is_string($id_prop) || !$id_prop) {
                     $errors[] = 'Propriété contenant l\'ID de l\'objet "' . $child_object->getLabel() . '" absente ou invalide';
                     return '';
@@ -5225,7 +5225,7 @@ class BimpObject extends BimpCache
                 }
 
                 if (is_a($instance, 'BimpObject')) {
-                    if ($this->field_exists($col_params['field'])) {
+                    if ($instance->field_exists($col_params['field'])) {
                         $bc_field = new BC_Field($instance, $col_params['field']);
                         if (count($bc_field->errors)) {
                             $content = BimpRender::renderAlerts($bc_field->errors);

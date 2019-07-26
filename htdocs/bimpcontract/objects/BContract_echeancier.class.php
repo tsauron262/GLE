@@ -10,6 +10,150 @@ class BContract_echeancier extends BimpObject {
             return true;
         return false;
     }
+    
+    
+    public function actionValidateFacture($data, &$success = Array()) {
+        global $db, $user;
+        
+        BimpTools::loadDolClass('compta/facture', 'facture');
+        $facture = new Facture($db);
+        $facture->fetch($data['id_facture']);
+        
+        if($facture->validate($user) > 0) {
+            $success = 'Facture <b>'.$facture->ref.'</b> validée avec succès'; 
+        } else {
+            $errors = 'La facture <b>'.$facture->ref.'</b> n\'à pas été validé, merci de vérifier les champs obligatoire de la facture'; 
+        }
+        
+        return Array(
+            'success' => $success,
+            'warnings' => $warnings,
+            'errors' => $errors,
+        );
+    }
+    
+    public function actionCreateFacture($data, &$success = Array()) {
+        
+        $parent = $this->getParentInstance();
+        $client = $this->getInstance('bimpcore', 'Bimp_Societe', $parent->getData('fk_soc'));
+        
+        $instance = $this->getInstance('bimpcommercial', 'Bimp_Facture');
+        $instance->set('libelle', 'Facture périodique du contrat N°' . $parent->getData('ref'));
+        $instance->set('type', 0);
+        $instance->set('entrepot', 50);
+        $instance->set('fk_soc', $parent->getData('fk_soc'));
+        $instance->set('fk_cond_reglement', ($client->getData('cond_reglement')) ? $client->getData('cond_reglement') : 2);
+        $instance->set('datef', $data['date_start']);
+        $instance->set('ef_type', 'C');
+        $errors = $instance->create();
+        if(!count($errors)) {
+                        
+            $dateStart = new DateTime($data['date_start']);
+            $dateEnd = new DateTime($data['date_end']);
+            if($instance->dol_object->addline("Facturation pour la période du <b>".$dateStart->format('d / m / Y')."</b> au <b>".$dateEnd->format('d / m / Y')."</b>", (double) $data['total_ht'], 1, 20, 0, 0, 0, 0, $data['date_start'], $data['date_end']) > 0) {
+                $success = 'hcuoehujds';
+            } else {
+                $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($instance->dol_object));
+            }
+            
+            
+        }
+        
+        
+        return Array(
+            'success' => $success,
+            'warnings' => $warnings,
+            'errors' => $errors,
+        );
+    }
+    
+    public function displayEcheancier($data) {
+        $instance_facture = $this->getInstance('bimpcommercial', 'Bimp_Facture');
+        
+        $html = '';
+        $html .= '<table class="noborder objectlistTable" style="border: none; min-width: 480px">';
+        $html .= '<thead>';
+        $html .= '<tr class="headerRow">';
+        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Période de facturation<br />Début - Fin</th>';
+        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Montant HT</th>';
+        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Montant TVA</th>';
+        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Montant TTC</th>';
+        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Facture</th>';
+        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">&Eacute;tat de paiement</th>';
+        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Action facture</th>';
+        $html .= '</tr>';
+        $html .= '</thead>';
+        
+        $html .= '<tbody class="listRows">';
+        $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}';
+        if($data->factures_send) {
+            foreach($data->factures_send as $element_element) {
+                $facture = $this->getInstance('bimpcommercial', 'Bimp_Facture', $element_element['d']);
+                $parent = $this->getParentInstance();
+                
+                $paye = ($facture->getData('paye') == 1) ? '<b class="success" >Payer</b>' : '<b class="danger" >Impayer</b>';
+                $html .= '<tr class="objectListItemRow" >';
+                $dateDebut = New DateTime();
+                $dateFin = New DateTime();
+                $dateDebut->setTimestamp($facture->dol_object->lines[0]->date_start);
+                $dateFin->setTimestamp($facture->dol_object->lines[0]->date_end);
+                $html .= '<td style="text-align:center" >Du <b>'.$dateDebut->format("d / m / Y").'</b> au <b>'.$dateFin->format('d / m / Y').'</b></td>';
+                $html .=  '<td style="text-align:center"><b>' . $facture->getData('total') . ' €</b> </td>'
+                        . '<td style="text-align:center"><b>' . $facture->getData('tva') . ' € </b></td>'
+                    . '<td style="text-align:center"><b>' . $facture->getData('total_ttc') . ' €</b> </td>'
+                    . '<td style="text-align:center">' . $facture->getNomUrl(1) . '</td>'
+                    . '<td style="text-align:center">'.$paye.'</td>'
+                    . '<td style="text-align:center; margin-right:10%">';
+                
+                if($facture->getData('fk_statut') == 0) {
+                    $html .= '<span class="rowButton bs-popover" data-trigger="hover" data-placement="top"  data-content="Valider la facture" onclick="' . $this->getJsActionOnclick("validateFacture", array('id_facture' => $facture->id), array("success_callback" => $callback)) . '")"><i class="fa fa-check" ></i></span>';
+                } else {
+                    $html .= '<span class="rowButton bs-popover" data-toggle="popover" data-trigger="hover" data-container="body" data-placement="top" data-content="Afficher la page dans un nouvel onglet" data-html="false" onclick="window.open(\'/pour_contrat/htdocs/bimpcommercial/index.php?fc=facture&amp;id='.$facture->id.'\');" data-original-title="" title=""><i class="fas fa5-external-link-alt"></i></span>';
+                }
+                
+                $html .= '</td>';
+                $html .= '</tr>';
+                
+                
+            }
+        }
+        $startedDate = new DateTime($this->getData('next_facture_date'));
+        $enderDate = new DateTime($this->getData('next_facture_date'));
+        $enderDate->add(new DateInterval("P" . $data->periodicity . "M"))->sub(new DateInterval("P1D"));
+        $firstPassage = true;
+        $firstDinamycLine = true;
+        
+        for($i = 1; $i <= $data->reste_periode; $i++) {
+            if(!$firstPassage){
+                $startedDate->add(new DateInterval("P" . $data->periodicity . "M"));
+            }
+            $firstPassage = false;
+            $amount  = $data->reste_a_payer / $data->reste_periode;
+            $tva = $amount * 0.2;
+            $html .= '<tr class="objectListItemRow" >';
+            $html .= '<td style="text-align:center" >Du <b>'.$startedDate->format('d / m / Y').'</b> au <b>'.$enderDate->format('d / m / Y').'</b></td>';
+                $html .=  '<td style="text-align:center">' . price($amount) . ' € </td>'
+                        . '<td style="text-align:center">' . price($tva) . ' € </td>'
+                    . '<td style="text-align:center">' . price($amount + $tva) . ' € </td>'
+                    . '<td style="text-align:center"><b style="color:grey">Période non facturée</b></td>'
+                    . '<td style="text-align:center"><b class="important" >Période non facturée</b></td>'
+                    . '<td style="text-align:center; margin-right:10%">';
+                if($firstDinamycLine){
+                    $html .= '<span class="rowButton bs-popover" data-trigger="hover" data-placement="top"  data-content="Facturer la période" onclick="' . $this->getJsActionOnclick("createFacture", array('date_start' => $startedDate->format('Y-m-d'), 'date_end' => $enderDate->format('Y-m-d'), 'total_ht' => $amount), array("success_callback" => $callback)) . '")"><i class="fa fa-plus" ></i></span>';
+                    $firstDinamycLine = false;
+                }
+            $html .= '</tr>';
+            $enderDate = $enderDate->add(new DateInterval("P" . $data->periodicity . "M"));
+        }
+        
+        
+        
+        $html .= '</tbody>';
+        $html .= '</table>';
+        
+        return $html;
+        
+    }
 
     public function display($display_error = '') {
         global $db;
@@ -263,114 +407,6 @@ class BContract_echeancier extends BimpObject {
         }
     }
 
-    public function match_key_with_dates($date1, $date2) {
-        while ($list = current($this->tab_echeancier)) {
-            if ($list['date_debut'] == $date1) {
-                $result1 = key($this->tab_echeancier);
-                //echo 'r1 = ' . $result1;
-            } elseif ($list['date_fin'] == $date2) {
-                $result2 = key($this->tab_echeancier);
-                //echo 'r2 = ' . $result2;
-            } else {
-                
-            }
-
-            next($this->tab_echeancier);
-        }
-        $result = $result2 - $result1;
-        $result = $result + 1;
-        //$result = $result1 + $result2;
-        //echo $result . '<br />';
-        return $result;
-    }
-
-    public function calc_next_facture_amount_ht() {
-        $parent = $this->getParentInstance();
-        $instance = $this->getInstance('bimpcontract', 'BContract_contrat', $parent->id);
-        $nb_period = $instance->getData('duree_mois') / $instance->getData('periodicity');
-        $montantFacture = number_format($this->get_total_contrat('ht') / $nb_period, 2, '.', '');
-
-        return $montantFacture;
-    }
-
-    public function calc_next_facture_amount_ttc() {
-        $parent = $this->getParentInstance();
-        $instance = $this->getInstance('bimpcontract', 'BContract_contrat', $parent->id);
-        $nb_period = $instance->getData('duree_mois') / $instance->getData('periodicity');
-        $montantFacture = number_format($this->get_total_contrat('ttc') / $nb_period, 2, '.', '');
-
-        return $montantFacture;
-    }
-
-    public function calc_next_date($sub = false) {
-        $parent = $this->getParentInstance();
-        $date = $this->getData('next_facture_date');
-        $periodicity = $parent->getData('periodicity');
-        $nextdate = new DateTime("$date");
-        $nextdate->getTimestamp();
-        $nextdate->add(new DateInterval("P" . $periodicity . "M"));
-
-        if ($sub) {
-            $nextdate->sub(new DateInterval("P1D"));
-        }
-
-        $newdate = $nextdate->format('Y-m-d');
-        return $newdate;
-    }
-
-    public function updateLine($id_contrat = null, $new_date = null) {
-        global $db;
-        $parent = $this->getParentInstance();
-        $bimp = new BimpDb($db);
-        $lines = $bimp->getRows('bcontract_prelevement', 'id_contrat = ' . $id_contrat);
-        $linesContrat = $bimp->getRows('contratdet', 'fk_contrat = ' . $id_contrat);
-        if ($parent->getData('statut') > 0 && $parent->getInitData('statut') > 0) {
-            $updateDate = $this->calc_next_date();
-        }
-
-
-        if (!is_null($new_date)) {
-            $updateDate = $new_date;
-        }
-
-        foreach ($linesContrat as $line) {
-            $ttc += $line->total_ttc;
-        }
-        if ($lines) {
-            $parent = $this->getParentInstance();
-            $updateData = Array(
-                'next_facture_date' => $updateDate,
-                'next_facture_amount' => $this->calc_next_facture_amount_ht()
-            );
-            $bimp->update('bcontract_prelevement', $updateData, 'id_contrat = ' . $parent->id);
-        } else {
-            if (!is_null($id_contrat)) {
-                $instance = $this->getInstance('bimpcontract', 'BContract_contrat', $id_contrat);
-                $insertData = Array(
-                    'id_contrat' => $instance->id,
-                    'next_facture_date' => $instance->getData('date_start'),
-                    'next_facture_amount' => $this->calc_next_facture_amount_ht(),
-                    'validate' => 0
-                );
-                $bimp->insert('bcontract_prelevement', $insertData);
-                return true;
-            }
-        }
-    }
-
-    public function getNbFacture() {
-        $return = 0;
-        if (!$this->tab_echeancier) {
-            $this->calc_period_echeancier();
-        }
-        foreach ($this->tab_echeancier as $periode) {
-            if ($periode['facture'] > 0) {
-                $return++;
-            }
-        }
-        return $return + 1;
-    }
-
     public function actionDelete_facture($data, &$success) {
         global $user, $db;
         $bimp = new BimpDb($db);
@@ -383,20 +419,6 @@ class BContract_echeancier extends BimpObject {
         $facture->delete($user, 0);
 
         $success = 'Facture ' . $data['id_facture'] . ' supprimer avec succès';
-    }
-
-    public function actionValidate_facture($data, &$success) {
-        global $user, $db;
-        $bimp = new BimpDb($db);
-
-        BimpTools::loadDolClass('compta/facture', 'facture');
-        $facture = new Facture($db);
-        $facture->fetch($data['id_facture']);
-        $success = '';
-
-        $facture->validate($user, 0);
-
-        $success = 'Facture ' . $data['id_facture'] . ' valider avec succès';
     }
 
     public function actionCreate_facture($data, &$success) {
@@ -480,55 +502,4 @@ class BContract_echeancier extends BimpObject {
             $echeancier->create_facture(true);
         }
     }
-
-    public function get_total_contrat($ttc_or_ht = 'ht') {
-        $parent = $this->getParentInstance();
-        //print('<pre>');
-        //print_r($parent->dol_object->lines); //TODO a changer
-        //$lines = $parent->getChildrenListArray('lines');
-        $lines = $parent->dol_object->lines;
-
-        foreach ($lines as $line) {
-            if ($ttc_or_ht == 'ht') {
-                $return += $line->total_ht;
-            } else {
-                $return += $line->total_ttc;
-            }
-        }
-        return $return;
-    }
-
-    public function get_total_facture() {
-        global $db;
-
-        $this->deja_payer_ttc = $this->deja_payer_ht = $this->nb_facture = 0;
-        $parent = $this->getParentInstance();
-        $bimp = new BimpDb($db);
-        $lines = $bimp->getRows('element_element', 'sourcetype = "contrat" AND targettype="facture" AND fk_source=' . $parent->id . ' ORDER BY rowid ASC');
-        $tab_facture = Array();
-        foreach ($lines as $line) {
-            $facture = new Facture($db);
-            $facture->fetch($line->fk_target);
-            $this->deja_payer_ht += $facture->total_ht;
-            $this->deja_payer_ttc += $facture->total_ttc;
-            $this->nb_facture++;
-            $tab_facture[]['id_facture'] = $line->fk_target;
-            $tab_facture['info']['deja_payer_ht'] = $this->deja_payer_ht;
-            $tab_facture['info']['deja_payer_ttc'] = $this->deja_payer_ttc;
-            $tab_facture['info']['reste_a_payer_ht'] = $this->get_total_contrat('ht') - $tab_facture['info']['deja_payer_ht'];
-            $tab_facture['info']['reste_a_payer_ttc'] = $this->get_total_contrat('ttc') - $tab_facture['info']['deja_payer_ttc'];
-        }
-        return $tab_facture;
-    }
-
-    //get last line on tab_echeancier
-    public function get_last_facture() {
-        return(end($this->tab_echeancier));
-    }
-
-    //get last facture id
-    public function get_last() {
-        return(end($this->get_total_facture()));
-    }
-
 }

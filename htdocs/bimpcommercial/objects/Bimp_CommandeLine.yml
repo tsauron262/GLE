@@ -288,6 +288,40 @@ views:
                   custom: 
                       callback: renderInvoicesView
                       
+filters_panels: 
+    default: 
+        filters: 
+            date: 
+                field: date_commande
+                child: parent
+            entrepot: 
+                field: entrepot
+                child: parent
+            commande: 
+                field: id_obj
+            commande_status:
+                field: fk_statut
+                child: parent
+            shipment_status:
+                field: shipment_status
+                child: parent
+            invoice_status:
+                field: invoice_status
+                child: parent
+            logistique_status: 
+                field: logistique_status
+                child: parent
+            qty_total: 
+                field: qty_total
+            qty_to_ship:
+                field: qty_to_ship
+            qty_to_bill: 
+                field: qty_to_bill
+            qty_shipped:
+                field: qty_shipped
+            qty_billed: 
+                field: qty_billed
+                        
 lists_cols:
     commande: 
         label: Commande
@@ -335,7 +369,6 @@ lists_cols:
     date: 
         field: date_commande
         child: parent
-
                 
 lists: 
     default: 
@@ -346,10 +379,23 @@ lists:
             callback: isParentEditable
             
     logistique:
-        extends: default
+        checkboxes: 1
         title: Logistique produits / services
         icon: fas_truck-loading
         configurable: 1
+        position: 1
+        position_open: 1
+        enable_search: 0
+        enable_sort: 0Œ
+        pagination: 0
+        sort_field: position
+        sort_way: asc
+        n: 0
+        add_btn: 0
+        edit_btn: 0
+        update_btn: 0
+        delete_btn: 0
+        objects_change_reload: Bimp_Commande,ObjectLineRemise,BR_Reservation,BL_CommandeShipment
         list_filters: 
             - name: type
               filter: 
@@ -357,9 +403,6 @@ lists:
                   value: 2
         item_checkbox: 
             callback: isNotTypeText
-        after_list_content: unset
-        header_buttons: unset
-        objects_change_reload: Bimp_Commande,ObjectLineRemise,BR_Reservation,BL_CommandeShipment
         bulk_actions: 
             callback: getLogistiqueBulkActions
         extra_btn: 
@@ -373,14 +416,7 @@ lists:
                         method: displayLineData
                         params:
                            - desc_light
-            pu_ht: unset
-            tva: unset
-            pa_ht: unset
-            qty: unset
             qties: 
-            remise: unset
-            total_ttc: unset
-            margin: unset
             reservations:
                 
     general:

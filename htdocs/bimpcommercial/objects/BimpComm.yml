@@ -439,6 +439,13 @@ forms:
                   type: select_payment
                   include_empty: 1
             - custom: 1
+              label: Date de paiement de l'acompte
+              data_type: date
+              input_name: date
+              input:
+                  type: date
+                  display_now: 1
+            - custom: 1
               label: Montant
               input_name: amount
               data_type: money

@@ -2225,7 +2225,7 @@ class BimpComm extends BimpDolObject
         return count($errors) ? 0 : 1;
     }
 
-    public function createAcompte($amount, $id_mode_paiement, &$warnings = array())
+    public function createAcompte($amount, $id_mode_paiement, $date_paiement = null, &$warnings = array())
     {
         global $user, $langs;
         $errors = array();
@@ -2271,7 +2271,7 @@ class BimpComm extends BimpDolObject
             BimpTools::loadDolClass('compta/facture', 'facture');
             $factureA = new Facture($this->db->db);
             $factureA->type = 3;
-            $factureA->date = dol_now();
+            $factureA->date = ($date_paiement) ? $date_paiement : dol_now();
             $factureA->socid = $id_client;
             $factureA->cond_reglement_id = 1;
             $factureA->modelpdf = 'bimpfact';
@@ -2292,7 +2292,7 @@ class BimpComm extends BimpDolObject
                 BimpTools::loadDolClass('compta/paiement', 'paiement');
                 $payement = new Paiement($this->db->db);
                 $payement->amounts = array($factureA->id => $amount);
-                $payement->datepaye = dol_now();
+                $payement->datepaye = ($date_paiement ? BimpTools::getDateForDolDate($date_paiement) : dol_now());
                 $payement->paiementid = (int) $id_mode_paiement;
                 if ($payement->create($user) <= 0) {
                     $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($payement), 'Des erreurs sont survenues lors de la création du paiement de la facture d\'acompte');
@@ -2828,10 +2828,14 @@ class BimpComm extends BimpDolObject
         $errors = array();
         $warnings = array();
         $success = 'Acompte créé avec succès';
-
+        
         $id_mode_paiement = isset($data['id_mode_paiement']) ? (int) $data['id_mode_paiement'] : 0;
         $amount = isset($data['amount']) ? (float) $data['amount'] : 0;
-
+        
+        if(!$data['date']) {
+            $errors[] = 'Date de paiement absent';
+        }
+        
         if (!$id_mode_paiement) {
             $errors[] = 'Mode de paiement absent';
         }
@@ -2840,7 +2844,7 @@ class BimpComm extends BimpDolObject
         }
 
         if (!count($errors)) {
-            $errors = $this->createAcompte($amount, $id_mode_paiement, $warnings);
+            $errors = $this->createAcompte($amount, $id_mode_paiement, $data['date'], $warnings);
         }
 
         return array(

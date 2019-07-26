@@ -230,6 +230,9 @@ filters_panels:
 #                field: id_client
             product: 
                 field: fk_product
+            priceProd:
+                field: price
+                child: product
             qty: 
                 field: qty
             total_ht: 

@@ -11,7 +11,13 @@ labels:
     name: ligne de facture
     name_plur: lignes de facture
     is_female: 1
-    
+
+fields:
+    date_start:
+        type: date
+    date_end:
+        type: date
+
 objects: 
     line: 
         relation: hasOne

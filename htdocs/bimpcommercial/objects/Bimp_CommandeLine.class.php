@@ -968,43 +968,43 @@ class Bimp_CommandeLine extends ObjectLine
         $html .= '</span>';
 
         // Qté dispo
-        if ($total_qty > 0) {
-            $commande = $this->getParentInstance();
-            if (BimpObject::objectLoaded($commande)) {
-                if ((int) $this->id_product) {
-                    $product = $this->getProduct();
-                    if (BimpObject::objectLoaded($product)) {
-                        if ($product->getData('fk_product_type') === 0) {
-                            $qties_reserved = $this->getReservedQties();
-                            $qty_wanted = ($qties_reserved['not_reserved'] - $qties_reserved['ordered']);
-                            $qty_available = 0;
-                            $stocks = $product->getStocksForEntrepot((int) $commande->getData('entrepot'));
-                            if (isset($stocks['dispo'])) {
-                                $qty_available = $stocks['dispo'];
-                            }
-                            if ($qty_wanted > 0 && $qty_available < $qty_wanted) {
-                                $class = 'danger';
-                            } elseif ($qty_wanted > 0 && $qty_available === $qty_wanted) {
-                                $class = 'warning';
-                            } else {
-                                $class = 'success';
-                            }
-
-                            $popover = '<span style="font-weight: bold">Qtés disponibles / nécessaires</span><br/>';
-                            $popover .= 'Déjà traitées: ' . $qties_reserved['reserved'] . '<br/>';
-                            $popover .= 'Commandées au fournisseur: ' . $qties_reserved['ordered'] . '<br/>';
-                            $popover .= 'A traiter: ' . $qty_wanted . '<br/>';
-
-                            $html .= '<span style="display: inline-block; margin-right: 15px; padding: 3px 0;"';
-                            $html .= BimpRender::renderPopoverData($popover, 'top', 'true');
-                            $html .= ' class="bs-popover ' . $class . '">';
-                            $html .= BimpRender::renderIcon('fas_box-open', 'iconLeft');
-                            $html .= $qty_available . ' / ' . $qty_wanted . '</span>';
-                        }
-                    }
-                }
-            }
-        }
+//        if ($total_qty > 0) {
+//            $commande = $this->getParentInstance();
+//            if (BimpObject::objectLoaded($commande)) {
+//                if ((int) $this->id_product) {
+//                    $product = $this->getProduct();
+//                    if (BimpObject::objectLoaded($product)) {
+//                        if ($product->getData('fk_product_type') === 0) {
+//                            $qties_reserved = $this->getReservedQties();
+//                            $qty_wanted = ($qties_reserved['not_reserved'] - $qties_reserved['ordered']);
+//                            $qty_available = 0;
+//                            $stocks = $product->getStocksForEntrepot((int) $commande->getData('entrepot'));
+//                            if (isset($stocks['dispo'])) {
+//                                $qty_available = $stocks['dispo'];
+//                            }
+//                            if ($qty_wanted > 0 && $qty_available < $qty_wanted) {
+//                                $class = 'danger';
+//                            } elseif ($qty_wanted > 0 && $qty_available === $qty_wanted) {
+//                                $class = 'warning';
+//                            } else {
+//                                $class = 'success';
+//                            }
+//
+//                            $popover = '<span style="font-weight: bold">Qtés disponibles / nécessaires</span><br/>';
+//                            $popover .= 'Déjà traitées: ' . $qties_reserved['reserved'] . '<br/>';
+//                            $popover .= 'Commandées au fournisseur: ' . $qties_reserved['ordered'] . '<br/>';
+//                            $popover .= 'A traiter: ' . $qty_wanted . '<br/>';
+//
+//                            $html .= '<span style="display: inline-block; margin-right: 15px; padding: 3px 0;"';
+//                            $html .= BimpRender::renderPopoverData($popover, 'top', 'true');
+//                            $html .= ' class="bs-popover ' . $class . '">';
+//                            $html .= BimpRender::renderIcon('fas_box-open', 'iconLeft');
+//                            $html .= $qty_available . ' / ' . $qty_wanted . '</span>';
+//                        }
+//                    }
+//                }
+//            }
+//        }
         $html .= '</div>';
 
         $html .= '<div style="display: inline-block;">';

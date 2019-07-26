@@ -1,0 +1,8 @@
+table: categorie
+primary: rowid
+
+labels: 
+    name: catégorie
+    is_female: 1
+    
+    

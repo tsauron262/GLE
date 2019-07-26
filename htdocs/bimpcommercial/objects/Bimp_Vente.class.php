@@ -164,7 +164,7 @@ class Bimp_Vente extends BimpObject
         } elseif ($field === 'marque' || $field === 'gamme') {
             $join_alias = ($main_alias ? $main_alias . '_' : '') . 'prodcat';
             $joins[$join_alias] = array(
-                'table' => 'product_categorie',
+                'table' => 'categorie_product',
                 'alias' => $join_alias,
                 'on'    => $join_alias . '.fk_product = ' . ($main_alias ? $main_alias : 'a') . '.fk_product'
             );

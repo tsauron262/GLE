@@ -234,6 +234,8 @@ filters_panels:
                 field: qty
             marque: 
                 field: marque
+            gamme: 
+                field: gamme
             categ1:
                 custom: 1
                 label: Catégorie (1)
@@ -338,14 +340,13 @@ lists:
         header_buttons:
             callback: getListHeaderButtons
         cols: 
-            product:
+            label:
+            shortRef: 
             qty: 
-            total_ttc:
-            facture: 
-            date: 
-            secteur: 
-            entrepot:
-            user:
+            pays: 
+            marque: 
+            gamme: 
+            type_materiel: 
                 
 stats_lists: 
     default: 

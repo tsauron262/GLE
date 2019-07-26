@@ -34,7 +34,31 @@ class BContract_echeancier extends BimpObject {
     
     public function actionCreateFacture($data, &$success = Array()) {
         
+        $parent = $this->getParentInstance();
+        $client = $this->getInstance('bimpcore', 'Bimp_Societe', $parent->getData('fk_soc'));
+        
         $instance = $this->getInstance('bimpcommercial', 'Bimp_Facture');
+        $instance->set('libelle', 'Facture périodique du contrat N°' . $parent->getData('ref'));
+        $instance->set('type', 0);
+        $instance->set('entrepot', 50);
+        $instance->set('fk_soc', $parent->getData('fk_soc'));
+        $instance->set('fk_cond_reglement', ($client->getData('cond_reglement')) ? $client->getData('cond_reglement') : 2);
+        $instance->set('datef', $data['date_start']);
+        $instance->set('ef_type', 'C');
+        $errors = $instance->create();
+        if(!count($errors)) {
+                        
+            $dateStart = new DateTime($data['date_start']);
+            $dateEnd = new DateTime($data['date_end']);
+            if($instance->dol_object->addline("Facturation pour la période du <b>".$dateStart->format('d / m / Y')."</b> au <b>".$dateEnd->format('d / m / Y')."</b>", (double) $data['total_ht'], 1, 20, 0, 0, 0, 0, $data['date_start'], $data['date_end']) > 0) {
+                $success = 'hcuoehujds';
+            } else {
+                $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($instance->dol_object));
+            }
+            
+            
+        }
+        
         
         return Array(
             'success' => $success,

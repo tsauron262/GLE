@@ -36,6 +36,20 @@ objects:
                 module: categories
                 file: categorie
                 
+    marque: 
+        extends: category
+        relation: hasOne
+        instance: 
+            id_object: 
+                field_value: marque
+                
+    gamme: 
+        extends: category
+        relation: hasOne
+        instance: 
+            id_object: 
+                field_value: gamme
+                
 fields: 
 #    Champs facturedet: 
     fk_facture: 
@@ -112,6 +126,22 @@ fields:
         values: 
             array: secteurs
         
+    marque: 
+        label: Marque
+        extra: 1
+        type: id_object
+        object: marque
+        values: 
+            array: marques
+            
+    gamme: 
+        label: Gamme matériel
+        extra: 1
+        type: id_object
+        object: gamme
+        values: 
+            array: gammesMateriel
+            
     product_categories: 
         label: Catégories produit
         extra: 1
@@ -202,6 +232,8 @@ filters_panels:
                 field: fk_product
             qty: 
                 field: qty
+            marque: 
+                field: marque
             categ1:
                 custom: 1
                 label: Catégorie (1)
@@ -279,6 +311,14 @@ lists_cols:
         display: nom_url
     secteur: 
         field: secteur
+    marque: 
+        field: marque
+    gamme: 
+        field: gamme
+    type_materiel: 
+        label: Type matériel
+        value: 
+            callback: displayTypeMateriel
     
 lists: 
     default: 

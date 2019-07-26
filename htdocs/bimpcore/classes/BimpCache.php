@@ -594,13 +594,13 @@ class BimpCache
         }
 
         $rows = $instance->getList($filters, null, null, 'id', 'asc', 'array', array($instance->getPrimary()));
-        
+
         $list = array();
 
         foreach ($rows as $r) {
             $list[] = (int) $r[$instance->getPrimary()];
         }
-        
+
         return $list;
     }
 
@@ -769,8 +769,8 @@ class BimpCache
                 );
             }
         }
-        foreach(self::$cache[$cache_key] as $idT  => $valT)
-            self::$cache[$cache_key][$idT] = str_replace ("<", "(", str_replace (">", ")", $valT));
+        foreach (self::$cache[$cache_key] as $idT => $valT)
+            self::$cache[$cache_key][$idT] = str_replace("<", "(", str_replace(">", ")", $valT));
 
         return self::$cache[$cache_key];
     }
@@ -1081,13 +1081,87 @@ class BimpCache
                 }
             }
         }
-        
 
-        
+
+
         return self::getCacheArray($cache_key, $include_empty, 0, $empty_label);
     }
 
     // Catégories: 
+
+    public static function getMarquesArray($include_empty = true, $empty_label = '')
+    {
+        $cache_key = 'marques_array';
+
+        if (!isset(self::$cache[$cache_key])) {
+            self::$cache[$cache_key] = array();
+
+            $where = 'fk_parent IN (' . BimpCore::getConf('marques_parent_categories') . ')';
+            $rows = self::getBdb()->getRows('categorie', $where, null, 'array', array('rowid', 'label'));
+            foreach ($rows as $r) {
+                self::$cache[$cache_key][(int) $r['rowid']] = $r['label'];
+            }
+        }
+
+        return self::getCacheArray($cache_key, $include_empty, 0, $empty_label);
+    }
+
+    public static function getMarquesList()
+    {
+        $cache_key = 'marques_list';
+
+        if (!isset(self::$cache[$cache_key])) {
+            self::$cache[$cache_key] = array();
+
+            $where = 'fk_parent IN (' . BimpCore::getConf('marques_parent_categories') . ')';
+            $rows = self::getBdb()->getRows('categorie', $where, null, 'array', array('rowid'));
+            foreach ($rows as $r) {
+                self::$cache[$cache_key][] = (int) $r['rowid'];
+            }
+        }
+
+        return self::$cache[$cache_key];
+    }
+
+    public static function getGammesMaterielArray($include_empty = true, $empty_label = '')
+    {
+        $cache_key = 'gamme_materiel_array';
+
+        if (!isset(self::$cache[$cache_key])) {
+            self::$cache[$cache_key] = array();
+            BimpObject::loadClass('bimpcore', 'Bimp_Categorie');
+            $parent_categories = explode(',', BimpCore::getConf('gamme_materiel_parent_categories'));
+
+            if (!empty($parent_categories)) {
+                foreach ($parent_categories as $id_parent) {
+                    foreach (Bimp_Categorie::getCategoriesArrayByParent($id_parent) as $id_cat => $label) {
+                        self::$cache[$cache_key][(int) $id_cat] = $label;
+                    }
+                }
+            }
+        }
+
+        return self::getCacheArray($cache_key, $include_empty, 0, $empty_label);
+    }
+
+    public static function getGammesMaterielList()
+    {
+        $cache_key = 'gamme_materiel_list';
+
+        if (!isset(self::$cache[$cache_key])) {
+            self::$cache[$cache_key] = array();
+            BimpObject::loadClass('bimpcore', 'Bimp_Categorie');
+            $parent_categories = explode(',', BimpCore::getConf('gamme_materiel_parent_categories'));
+
+            if (!empty($parent_categories)) {
+                foreach ($parent_categories as $id_parent) {
+                    self::$cache[$cache_key] = array_merge(self::$cache[$cache_key], Bimp_Categorie::getCategoriesListByParent($id_parent));
+                }
+            }
+        }
+
+        return self::$cache[$cache_key];
+    }
 
     public static function getCategoriesFullTree($type = 'product')
     {
@@ -1258,7 +1332,7 @@ class BimpCache
 
         return self::getCacheArray('entrepots', $include_empty);
     }
-    
+
     public static function getEntrepotsShipTos($include_empty = false)
     {
         if (!isset(self::$cache['entrepots_ship_tos'])) {

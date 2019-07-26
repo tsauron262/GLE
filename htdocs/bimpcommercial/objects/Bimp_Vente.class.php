@@ -33,6 +33,8 @@ class Bimp_Vente extends BimpObject
             'id_entrepot'        => 0,
             'id_user'            => 0,
             'secteur'            => '',
+            'marque'             => 0,
+            'gamme'              => 0,
             'product_categories' => array()
         );
 
@@ -47,9 +49,26 @@ class Bimp_Vente extends BimpObject
             }
 
             if ((int) $this->getData('fk_product')) {
+
                 $categories = BimpCache::getProductCategoriesArray((int) $this->getData('fk_product'));
                 foreach ($categories as $id_category => $label) {
                     $fields['product_categories'][] = (int) $id_category;
+                }
+
+                $marques_categories = BimpCache::getMarquesList();
+                foreach ($fields['product_categories'] as $id_category) {
+                    if (in_array((int) $id_category, $marques_categories)) {
+                        $fields['marque'] = $id_category;
+                        break;
+                    }
+                }
+
+                $gammes_materiel_categories = BimpCache::getGammesMaterielList();
+                foreach ($fields['product_categories'] as $id_category) {
+                    if (in_array((int) $id_category, $gammes_materiel_categories)) {
+                        $fields['gamme'] = $id_category;
+                        break;
+                    }
                 }
             }
         }
@@ -86,6 +105,34 @@ class Bimp_Vente extends BimpObject
                 }
 
                 return array();
+            } elseif ($field === 'marque') {
+                $id_product = (int) $instance->getData('fk_product');
+                if ($id_product) {
+                    $sql = 'SELECT cp.`fk_categorie` FROM ' . MAIN_DB_PREFIX . 'categorie_product cp';
+                    $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'categorie c ON c.rowid = cp.fk_categorie';
+                    $sql .= ' WHERE cp.fk_product = ' . $id_product . ' AND c.fk_parent IN (' . BimpCore::getConf('marques_parent_categories') . ')';
+                    $sql .= ' LIMIT 1';
+
+                    $result = $this->db->executeS($sql, 'array');
+                    if (isset($result[0]['fk_categorie'])) {
+                        return (int) $result[0]['fk_categorie'];
+                    }
+                }
+                return 0;
+            } elseif ($field === 'gamme') {
+                $id_product = (int) $instance->getData('fk_product');
+                if ($id_product) {
+                    $cats = BimpCache::getGammesMaterielList();
+                    $sql = 'SELECT `fk_categorie` FROM ' . MAIN_DB_PREFIX . 'categorie_product';
+                    $sql .= ' WHERE `fk_product` = ' . $id_product . ' AND fk_categorie IN (' . implode(',', $cats) . ')';
+                    $sql .= ' LIMIT 1';
+
+                    $result = $this->db->executeS($sql, 'array');
+                    if (isset($result[0]['fk_categorie'])) {
+                        return (int) $result[0]['fk_categorie'];
+                    }
+                }
+                return 0;
             }
         }
 
@@ -114,6 +161,14 @@ class Bimp_Vente extends BimpObject
             return $join_alias . '.' . self::$facture_extrafields[$field];
         } elseif ($field === 'categories') {
             // todo...
+        } elseif ($field === 'marque' || $field === 'gamme') {
+            $join_alias = ($main_alias ? $main_alias . '_' : '') . 'prodcat';
+            $joins[$join_alias] = array(
+                'table' => 'product_categorie',
+                'alias' => $join_alias,
+                'on'    => $join_alias . '.fk_product = ' . ($main_alias ? $main_alias : 'a') . '.fk_product'
+            );
+            return $join_alias . '.fk_categorie';
         }
 
         return '';
@@ -125,7 +180,7 @@ class Bimp_Vente extends BimpObject
     }
 
     // Getters: 
-    
+
     public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array())
     {
         switch ($field_name) {
@@ -177,6 +232,45 @@ class Bimp_Vente extends BimpObject
         return $buttons;
     }
 
+    // Affichage: 
+
+    public function displayShortRef()
+    {
+        if ($this->isLoaded()) {
+            $prod = BimpCache::getBimpObjectInstance('bimpcore', "Bimp_Product", $this->getData('fk_product'));
+            $ref = $prod->getData('ref');
+            if (substr($ref, 3, 1) === "-")
+                $ref = substr($ref, 4);
+            return $ref;
+        }
+    }
+
+    public function displayCountry()
+    {
+        if ($this->isLoaded()) {
+            $cli = BimpCache::getBimpObjectInstance('bimpcore', "Bimp_Client", $this->getData('id_client'));
+            return $cli->displayCountry();
+        }
+    }
+
+    public function displayTypeMateriel()
+    {
+        if ($this->isLoaded()) {
+            $cats = $this->getData('product_categories');
+            if (!is_array($cats)) {
+                $cats = array();
+            }
+
+            if (in_array((int) BimpCore::getConf('desktop_id_categorie'), $cats)) {
+                return 'desktop';
+            } elseif (in_array((int) BimpCore::getConf('notebook_id_categorie'), $cats)) {
+                return 'notebook';
+            }
+        }
+
+        return '';
+    }
+
     // Traitements : 
 
     public function generateAppleCSV($dateFrom, $dateTo, &$errors = array())
@@ -200,9 +294,9 @@ class Bimp_Vente extends BimpObject
 //                'on'    => 'a.rowid = cp.fk_product'
 //            )
 //        ));
-        
-        
-        
+
+
+
         $product = BimpObject::getInstance('bimpcore', 'Bimp_Product');
         $products_list = $product->getList(array(
             'ref' => array(
@@ -321,7 +415,6 @@ VQ - Collège
 //                    break 2;
                 }
             }
-            
         }
 
         $dir = DOL_DATA_ROOT . '/bimpcore/apple_csv/' . date('Y');
@@ -374,22 +467,5 @@ VQ - Collège
             'warnings'         => $warnings,
             'success_callback' => $success_callback
         );
-    }
-    
-    public function displayShortRef(){
-        if ($this->isLoaded()){
-            $prod = BimpCache::getBimpObjectInstance('bimpcore', "Bimp_Product", $this->getData('fk_product'));
-            $ref = $prod->getData('ref');
-            if(substr($ref, 3, 1) === "-")
-                    $ref = substr($ref, 4);
-            return $ref;
-        }
-    }
-    
-    public function displayCountry(){
-        if ($this->isLoaded()){
-            $cli = BimpCache::getBimpObjectInstance('bimpcore', "Bimp_Client", $this->getData('id_client'));
-            return $cli->displayCountry();
-        }
     }
 }

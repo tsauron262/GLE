@@ -591,6 +591,14 @@ fields_tables:
               edit: 1
             - field: tobuy
               edit: 1
+            - custom: 1
+              label: Refusé
+              value:
+                callback: renderStatusRefuse
+            - custom: 1
+              label: Durée validation
+              value:
+                callback: renderValidationDuration
             - field: stock
             - field: zone_pr
               edit: 1

@@ -340,11 +340,11 @@ lists:
         header_buttons:
             callback: getListHeaderButtons
         cols: 
-            label:
-            shortRef: 
-            qty: 
             pays: 
             marque: 
+            shortRef: 
+            product:
+            qty:             
             gamme: 
             type_materiel: 
                 

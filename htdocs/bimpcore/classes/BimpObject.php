@@ -5225,7 +5225,7 @@ class BimpObject extends BimpCache
                 }
 
                 if (is_a($instance, 'BimpObject')) {
-                    if ($this->field_exists($col_params['field'])) {
+                    if ($instance->field_exists($col_params['field'])) {
                         $bc_field = new BC_Field($instance, $col_params['field']);
                         if (count($bc_field->errors)) {
                             $content = BimpRender::renderAlerts($bc_field->errors);

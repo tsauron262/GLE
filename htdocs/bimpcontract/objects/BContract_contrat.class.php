@@ -126,6 +126,10 @@ class BContract_contrat extends BimpDolObject {
     public function displayRef() {
         return $this->getData('ref') . ' - ' . $this->getData('objet_contrat');
     }
+    
+    public function getTitleEcheancier() {
+        return '&Eacute;ch&eacute;ancier du contrat N°' . $this->displayRef();
+    }
 
     public function displayEndDate() {
         $fin = $this->getEndDate();
@@ -643,9 +647,7 @@ class BContract_contrat extends BimpDolObject {
         return $html;
     }
     
-    public function renderEcheancier() {
-        
-        // TODO a viré (voir pour objet)
+    public function renderEcheancier() {        
         $instance = $this->getInstance('bimpcontract', 'BContract_echeancier');
         
         if($this->getData('statut') < self::CONTRAT_STATUS_VALIDE) {
@@ -658,16 +660,13 @@ class BContract_contrat extends BimpDolObject {
         $create = false;
         
         if(!$instance->find(Array('id_contrat' => $this->id))) {
-            // On crée la ligne dans la base de données
             $create = true;
         }
-        
-        $this->action_line_echeancier($create);
-        
-        return $instance->displayEcheancier();
+
+        return $instance->displayEcheancier($this->action_line_echeancier($create));
     }
     
-    public function action_line_echeancier($create = false) {
+    public function action_line_echeancier($create = false, $update = false) {
         if($create) {
             $date = new DateTime($this->getData('date_start'));
             $instance = $this->getInstance('bimpcontract', 'BContract_echeancier');
@@ -676,11 +675,21 @@ class BContract_contrat extends BimpDolObject {
             $instance->set('next_facture_amount', $this->reste_a_payer());
             $instance->set('validate', 0);
             $instance->create();
+        }
+        
+        if($update) {
             
         }
         
-        //$this->reste_periode();
-        echo 'jviodfhvuifdhqujv h dufh udhuv dfym';
+        $returnedArray = Array(
+            'factures_send' => getElementElement('contrat', 'facture', $this->id),
+            'reste_a_payer' => $this->reste_a_payer(),
+            'reste_periode' => $this->reste_periode(),
+            'periodicity' => $this->getData('periodicity')
+        );
+        
+        return (object) $returnedArray;
+        
     }
     
     public function reste_a_payer() {
@@ -691,25 +700,39 @@ class BContract_contrat extends BimpDolObject {
         if($facture_delivred) {
             foreach($facture_delivred as $link) {
                 $instance = $this->getInstance('bimpcommercial', 'Bimp_Facture', $link['d']);
-                $montant += $instance->getData('total_ht');
+                $montant += $instance->getData('total');
             }
+            $return = $this->getTotalContrat() - $montant;
         } else {
-            foreach ($this->dol_object->lines as $line){
-                if($line->total_ttc > 0){
-                    $montant += $line->total_ht;
-                }
-            }
+                $return = $this->getTotalContrat();  
         }
-        return price($montant); 
+        return $return; 
     }
     
     public function reste_periode() {
-        //$instance = $this->getInstance('bimpcontract', 'BContract_echeancier');
-        //$instance->find(array('id_contrat' => $this->id));
-        echo('bonjour');
-        //$date_1 = new DateTime($instance->getData('next_facture_date'));
+        $instance = $this->getInstance('bimpcontract', 'BContract_echeancier');
+        $instance->find(array('id_contrat' => $this->id));
+        $date_1 = new DateTime($instance->getData('next_facture_date'));
+        $date_2 = $this->getEndDate();
+        if($date_1->format('Y-m-d') == $this->getData('date_start')) {
+            $return = 12;
+        } else {
+            $date_1->sub(new DateInterval('P1D'));
+            $interval = $date_1->diff($date_2);
+            $return = $interval->m;
+        }
+        return $return;
         
+    }
+    
+    public function getTotalContrat() {
+        foreach ($this->dol_object->lines as $line){
+            if($line->total_ttc > 0){
+                $montant += $line->total_ht;
+            }
+        }
         
+        return $montant;
     }
     
     public function renderContacts()

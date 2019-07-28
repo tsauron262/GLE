@@ -474,7 +474,8 @@ views:
                                
     echeancier:
         objects_change_reload: BContract_echeancier, BContract_contrat
-        title: Echéancier prévisionnel
+        title:
+            callback: getTitleEcheancier
         panel: 1
         rows:
             - cols:
@@ -484,7 +485,6 @@ views:
                   custom:
                       callback: renderEcheancier
                       
-    
     lines:
         objects_change_reload: BContract_echeancier, BContract_contrat
         title: Contenu du contrat

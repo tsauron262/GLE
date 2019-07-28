@@ -275,7 +275,7 @@ class Bimp_Vente extends BimpObject
 
     public function generateAppleCSV($dateFrom, $dateTo, &$errors = array())
     {
-        set_time_limit(0);
+        set_time_limit(600000);
 
 //        $id_category = (int) BimpCore::getConf('id_categorie_apple');
 //

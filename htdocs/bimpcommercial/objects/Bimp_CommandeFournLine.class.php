@@ -2228,7 +2228,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
     public static function checkAllQties()
     {
 
-        set_time_limit(600);
+        set_time_limit(6000);
         $instance = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFournLine');
         $rows = $instance->getList(array(), null, null, 'id', 'asc', 'array', array('id'));
 

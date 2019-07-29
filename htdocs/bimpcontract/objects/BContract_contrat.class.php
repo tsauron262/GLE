@@ -276,11 +276,7 @@ class BContract_contrat extends BimpDolObject {
             return 0;
         }
         $this->dol_object->activateAll($user);
-        $instance = $this->getInstance('bimpcontract', 'BContract_echeancier');
-        $instance->find(Array('id_contrat' => $this->id));
-        if($instance->updateLine($this->id, $this->getData('date_start') )) {
-            $success .= 'Contrat et échéancier créer avec succes';
-        }
+        
     }
     
     public function actionAddContact($data, &$success)
@@ -385,7 +381,18 @@ class BContract_contrat extends BimpDolObject {
         if(BimpTools::getValue('use_syntec') && !BimpTools::getValue('syntec')) {
             return 'Vous devez rensseigner un indice syntec';
         }
-        return parent::create($warnings, $force_create);
+        
+        
+        
+        parent::create($warnings, $force_create);
+            $date = new DateTime($this->getData('date_start'));
+            $instance = $this->getInstance('bimpcontract', 'BContract_echeancier');
+            $instance->set('id_contrat', $this->id);
+            $instance->set('next_facture_date', $date->format('Y-m-d H:i:s'));
+            $instance->set('next_facture_amount', $this->reste_a_payer());
+            $instance->set('validate', 0);
+            $instance->create();
+        
     }
     
     public function fetch($id, $parent = null) {
@@ -661,25 +668,25 @@ class BContract_contrat extends BimpDolObject {
         
         if(!$instance->find(Array('id_contrat' => $this->id))) {
             $create = true;
-        }
-
-        return $instance->displayEcheancier($this->action_line_echeancier($create));
-    }
-    
-    public function action_line_echeancier($create = false, $update = false) {
-        if($create) {
-            $date = new DateTime($this->getData('date_start'));
-            $instance = $this->getInstance('bimpcontract', 'BContract_echeancier');
-            $instance->set('id_contrat', $this->id);
-            $instance->set('next_facture_date', $date->format('Y-m-d H:i:s'));
-            $instance->set('next_facture_amount', $this->reste_a_payer());
-            $instance->set('validate', 0);
-            $instance->create();
+            echo 'cccc';
         }
         
-        if($update) {
-            
+        $data = $this->action_line_echeancier($create);
+        
+            return $instance->displayEcheancier($data);
+        
+        
+        
+    }
+    
+    public function is_not_finish() {
+        if($this->reste_periode() == 0) {
+            return 0;
         }
+        return 1;
+    }
+    
+    public function action_line_echeancier() {
         
         $returnedArray = Array(
             'factures_send' => getElementElement('contrat', 'facture', $this->id),
@@ -689,7 +696,6 @@ class BContract_contrat extends BimpDolObject {
         );
         
         return (object) $returnedArray;
-        
     }
     
     public function reste_a_payer() {
@@ -704,7 +710,7 @@ class BContract_contrat extends BimpDolObject {
             }
             $return = $this->getTotalContrat() - $montant;
         } else {
-                $return = $this->getTotalContrat();  
+            $return = $this->getTotalContrat();  
         }
         return $return; 
     }
@@ -715,14 +721,13 @@ class BContract_contrat extends BimpDolObject {
         $date_1 = new DateTime($instance->getData('next_facture_date'));
         $date_2 = $this->getEndDate();
         if($date_1->format('Y-m-d') == $this->getData('date_start')) {
-            $return = 12;
+            $return = 12 / $this->getData('periodicity');
         } else {
             $date_1->sub(new DateInterval('P1D'));
             $interval = $date_1->diff($date_2);
-            $return = $interval->m;
+            $return = $interval->m / $this->getData('periodicity');
         }
         return $return;
-        
     }
     
     public function getTotalContrat() {
@@ -732,6 +737,27 @@ class BContract_contrat extends BimpDolObject {
             }
         }
         
+        return $montant;
+    }
+    
+    public function getTotalDejaPayer($paye_distinct = false) {
+        $element_factures = getElementElement('contrat', 'facture', $this->id);
+        if(!count($element_factures)) {
+            $montant = 0;
+        } else {
+            foreach($element_factures as $element) {
+                $instance = $this->getInstance('bimpcommercial', 'Bimp_Facture', $element['d']);
+                if($paye_distinct){
+                    if($instance->getData('paye')) {
+                        $montant += $instance->getData('total');
+                    }
+                } else {
+                    $montant += $instance->getData('total');
+                }
+                
+            }
+            
+        }
         return $montant;
     }
     

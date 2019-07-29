@@ -57,28 +57,26 @@ lists:
 forms:
     create_perso:
         rows:
+            - field: validate
             - field: next_facture_date
               edit: 0
             - custom: 1
               label: Fin de la periode de facturation
-              input_name: nombre_periode
-              data_type: int
-              required: 1
-              value: 1
+              input_name: fin_periode
+              data_type: text
               input:
-                  type: qty
-              options:
-                  data:
-                      min: 1
+                  type: select
+                  options:
+                      array:
+                        callback: renderlistEndPeriod
             - custom: 1
               label: Montant HT
               data_type: money
               input_name: montant_ht
-              required: 1
               input:
                   type: text
-              value:
-                  callback: renderMontantInput
+                  help: Laisser vide pour la facturation normale des périodes
+                  
 
 views:
     fiche_contrat:

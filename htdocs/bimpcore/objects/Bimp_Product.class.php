@@ -1,6 +1,6 @@
 <?php
 
-ini_set('max_execution_time', 600);
+ini_set('max_execution_time', 6000);
 
 class Bimp_Product extends BimpObject
 {

@@ -1,0 +1,119 @@
+table: Bimp_PaiementInc
+primary: id
+list_page_url:
+    controller: index
+header_list_name: default
+icon: fas_ambulance
+
+labels: 
+    name: Paiement Inconnue
+    is_female: 0
+    
+   
+     
+objects:  
+    client:
+        instance:
+            id_object:
+                field_value: fk_soc
+            
+    
+                
+fields: 
+    description:
+        label: Description
+        type: text
+    fk_soc:
+        label: Client
+        type: id_object
+        object: client
+        create_form: client_light
+        input: 
+            type: search_societe
+            societe_type: customer
+            help: Entrez le nom ou la référence d'un client pour effectuer une recherche
+        search:
+            input: 
+                type: search_societe
+                societe_type: customer 
+        dol_prop: socid
+    total:
+        label: Total Ht
+        type: money
+    
+
+        
+forms:
+    default: 
+        rows:
+            - field: fk_soc
+            - field: total
+            - field: description
+    
+        
+filters_panels: 
+    default: 
+        filters: 
+            1:
+                field: fk_soc
+            2: 
+                field: total
+            3: 
+                field: description
+            
+lists_cols: 
+    fk_soc: 
+        field: fk_soc
+        display: nom_url
+    total:
+        field: total
+    description:
+        field: description
+                
+lists:
+    default: 
+        checkboxes: 1
+        configurable: 1
+        sort_field: id
+        sort_way: desc
+        n: 25
+        delete_btn: 0
+        modal_view: default
+        add_form_name: default
+        filters_panel: default
+        page_btn: 1
+        edit_btn: 1
+        cols:
+            fk_soc: 
+                field: fk_soc
+                display: nom_url
+            total:
+                field: total
+            description:
+                field: description
+    
+
+        
+views: 
+    default: 
+        rows: 
+            - cols: 
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  fields_table: 
+                      name: infos
+
+
+fields_tables: 
+    infos: 
+        rows: 
+            - field: fk_soc
+            - field: total
+            - field: description
+                      
+                     
+        
+        
+

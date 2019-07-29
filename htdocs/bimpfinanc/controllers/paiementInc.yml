@@ -1,0 +1,19 @@
+bootstrap: 1
+
+
+objects: 
+    PaiementInc: 
+        instance: 
+            bimp_object: Bimp_PaiementInc
+            id_object: 
+                request: id
+                
+                
+sections:
+    - type: object_header
+      object_header: 
+          object: demandinter
+      
+    - type: view
+      view: 
+          object: demandinter

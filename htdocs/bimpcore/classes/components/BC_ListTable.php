@@ -365,12 +365,14 @@ class BC_ListTable extends BC_List
             }
         }
 
-        $result = $this->object->getListTotals($fields, $this->final_filters, $this->final_joins);
+        if (!empty($fields)) {
+            $result = $this->object->getListTotals($fields, $this->final_filters, $this->final_joins);
 
-        if (!empty($result)) {
-            foreach ($fields as $key => $col_name) {
-                if (isset($result[0][$col_name])) {
-                    $this->totals[$col_name]['value'] = $result[0][$col_name];
+            if (!empty($result)) {
+                foreach ($fields as $key => $col_name) {
+                    if (isset($result[0][$col_name])) {
+                        $this->totals[$col_name]['value'] = $result[0][$col_name];
+                    }
                 }
             }
         }

@@ -2273,7 +2273,7 @@ class BimpComm extends BimpDolObject
             BimpTools::loadDolClass('compta/facture', 'facture');
             $factureA = new Facture($this->db->db);
             $factureA->type = 3;
-            $factureA->date = ($date_paiement) ? $date_paiement : dol_now();
+            $factureA->date = ($date_paiement) ? strtotime($date_paiement) : dol_now();
             $factureA->socid = $id_client;
             $factureA->cond_reglement_id = 1;
             $factureA->modelpdf = 'bimpfact';

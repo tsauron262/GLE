@@ -574,6 +574,21 @@ class BLPDF extends OrderPDF
         foreach ($this->object->lines as &$line) {
             $bimpLine = isset($bimpLines[(int) $line->id]) ? $bimpLines[(int) $line->id] : null;
             
+            
+            
+            if ($this->object->type != 3 && ($line->desc == "(DEPOSIT)" || stripos($line->desc, 'Acompte') === 0)) {
+//                $acompteHt = $line->subprice * (float) $line->qty;
+//                $acompteTtc = BimpTools::calculatePriceTaxIn($acompteHt, (float) $line->tva_tx);
+
+                $total_ht_without_remises += $line->total_ht;
+                $total_ttc_without_remises += $line->total_ttc;
+
+                $this->acompteHt -= $line->total_ht;
+                $this->acompteTtc -= $line->total_ttc;
+                $this->acompteTva20 -= $line->total_tva;
+                continue;
+            }
+            
             $product = null;
             if (!is_null($line->fk_product) && $line->fk_product) {
                 $product = new Product($this->db);

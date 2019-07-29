@@ -1838,12 +1838,14 @@ class BimpComm extends BimpDolObject
 
     public function renderMailToInputs($input_name)
     {
+        global $user, $langs;
         $html = '';
 
         $client = $this->getChildObject('client');
 
         $emails = array(
-            '' => ''
+            "" => "",
+             $user->email => $user->getFullName($langs)." (".$user->email.")"
         );
 
         if (BimpObject::objectLoaded($client)) {

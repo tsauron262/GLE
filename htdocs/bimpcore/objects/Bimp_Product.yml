@@ -60,10 +60,9 @@ objects:
         
 fields: 
     fk_user_modif:
-        label: Utilisateur
+        label: Utilisateur modification
         type: id_object
         object: user
-        label: User modif
     datec:
         type: date
         label: Date Création
@@ -134,8 +133,6 @@ fields:
     pmp: 
         label: Prix d'achat moyen pondéré
         type: money
-        value:
-            callback: getPMP
         
     id_cur_fp: 
         label: Prix d'achat fournisseur courant
@@ -205,7 +202,7 @@ fields:
         display: 
             default: 
                 type: callback
-                method: displayCountry        
+                method: renderCountry        
                 
     weight: 
         label: Poids 
@@ -397,6 +394,22 @@ fields:
         label: Durée
         type: string
         
+    fk_user_valid:
+        label: Valideur
+        type: id_object
+        object: user
+        dol_extra_field: 1
+        
+    date_valid:
+        type: datetime
+        label: Date validation       
+        dol_extra_field: 1
+        
+    date_ask_valid:
+        type: datetime
+        label: Date demande validation
+        dol_extra_field: 1
+
 forms: 
     light: 
         rows: 
@@ -488,6 +501,7 @@ forms:
             - field: fk_default_warehouse
               display: nom_url
             - field: deee
+            - field: cur_pa_ht
             # Infos +
             - field: url
 #            - field: stock
@@ -501,6 +515,7 @@ forms:
             - field: crt
             - field: rpcp
             - field: price
+            - field: seuil_stock_alerte
             # Measure
             - field: weight
             - field: weight_units
@@ -556,6 +571,11 @@ fields_tables:
 #            - field: price_min_ttc
 #            - field: cost_price
             - field: cur_pa_ht
+            - custom: 1
+              label: Meilleur prix d'achat
+              value:
+                  callback: renderBestBuyPrice
+                
        
     status: 
         title: Statuts
@@ -571,6 +591,14 @@ fields_tables:
               edit: 1
             - field: tobuy
               edit: 1
+            - custom: 1
+              label: Refusé
+              value:
+                callback: renderStatusRefuse
+            - custom: 1
+              label: Durée validation
+              value:
+                callback: renderValidationDuration
             - field: stock
             - field: zone_pr
               edit: 1

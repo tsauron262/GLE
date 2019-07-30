@@ -89,7 +89,6 @@ class BContract_contrat extends BimpDolObject {
     );
     
     public static $dol_module = 'contract';
-
     
     function __construct($module, $object_name) {
         if(BimpTools::getContext() == 'public') {
@@ -194,28 +193,48 @@ class BContract_contrat extends BimpDolObject {
                 );
             }
             
-            if (!is_null($status)) {
-                $status = (int) $status;
-                $soc = $this->getChildObject('client');
-                // Cloner: 
-                if ($this->can("create")) {
-                    $buttons[] = array(
-                        'label'   => 'Cloner',
-                        'icon'    => 'copy',
-                        'onclick' => $this->getJsActionOnclick('duplicate', array(), array(
-                            'form_name' => 'duplicate_contrat'
-                        ))
-                    );
-                }
-            }
+//            if (!is_null($status)) {
+//                $status = (int) $status;
+//                $soc = $this->getChildObject('client');
+//                // Cloner: 
+//                if ($this->can("create")) {
+//                    $buttons[] = array(
+//                        'label'   => 'Cloner',
+//                        'icon'    => 'copy',
+//                        'onclick' => $this->getJsActionOnclick('duplicate', array(), array(
+//                            'form_name' => 'clone_contrat'
+//                        ))
+//                    );
+//                }
+//            }
         }
 
         return $buttons;
     }
     
+    
+    
     public function actionDuplicate($data, &$success = Array()) {
         
-        $new_object = clone($this);
+        $new_contrat = clone $this;
+        $new_contrat->id = null;
+        $new_contrat->id = 0;
+        $new_contrat->set('id', 0);
+        $new_contrat->set('fk_statut', 1);
+        $new_contrat->set('ref', '');
+        $new_contrat->set('date_contrat', null);
+        
+        if($new_contrat->create()) {
+            $success = "Contrat cloner avec succès";
+            
+        }
+        return $errors[] = $new_contrat->getData('ref');
+        $errors = Array();
+        
+        if(!$this->isLoaded()) {
+            return array('ID ' . $this->getLabel('of_the') . ' absent');
+        }
+        
         
         
         return Array(
@@ -224,7 +243,6 @@ class BContract_contrat extends BimpDolObject {
             'warnings' => $warnings
         );
         
-        //return $this->dol_object->createFromClone($this->getData('fk_soc'));
     }
     
     public function getSyntecSite() {
@@ -254,7 +272,7 @@ class BContract_contrat extends BimpDolObject {
     /* RIGHTS */
     public function canEdit(){
         if($this->getData("statut") == self::CONTRAT_STATUS_CLOS || $this->getData('statut') == self::CONTRAT_STATUS_VALIDE)
-            return 0;
+            return 0;   
         return 1;
     }
 

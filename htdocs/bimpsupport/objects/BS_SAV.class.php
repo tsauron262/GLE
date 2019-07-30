@@ -1120,8 +1120,7 @@ class BS_SAV extends BimpObject
                 // Vérif de la propale: 
                 if (BimpObject::objectLoaded($propal)) {
                     $update = false;
-
-                    if (!(int) $propal->getData('entrepot')) {
+                    if (!(int) $propal->dol_object->array_options['options_entrepot']) {
                         if (!(int) $this->getData('id_entrepot')) {
                             $this->msgs['errors'][] = 'Aucun entrepôt défini pour ce SAV';
                             dol_syslog('Aucun entrepôt défini pour le SAV "' . $this->getRef() . '"', LOG_ERR);

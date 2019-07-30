@@ -352,8 +352,8 @@ class DoliDBMysqli extends DoliDB
                 $this->lasterrno = $this->errno();
 
                 $debug = "";
-                if(function_exists("synGetDebug"))
-                    $debug = synGetDebug();
+//                if(function_exists("synGetDebug"))
+//                    $debug = synGetDebug();
 				if ($conf->global->SYSLOG_LEVEL < LOG_DEBUG) dol_syslog(get_class($this)."::query SQL Error query: ".$query." |".$debug, LOG_ERR);	// Log of request was not yet done previously
                 dol_syslog(get_class($this)."::query SQL Error message: ".$this->lasterrno." ".$this->lasterror, LOG_ERR);
             }

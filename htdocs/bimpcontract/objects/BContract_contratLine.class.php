@@ -13,7 +13,7 @@ class BContract_contratLine extends BimpObject {
         }
         
         $instance = $this->getParentInstance();
-        
+                
         if ($data['nb_materiel'] > 0) {
             if (!empty($data['serials'])) {
                 
@@ -28,7 +28,13 @@ class BContract_contratLine extends BimpObject {
             }
         }
         
-        if ($contrat->dol_object->addLine($data['description'], $produit->getData('price'), $data['qty'], $produit->getData('tva_tx'), 0, 0, $produit->id, $data['remise_percent'], $instance->getData('date_start'), $instance->getEndDate()->format('Y-m-d'), 'HT', 0.0, 0, null, 0, Array('serials' => $data['serials'], 'nb_materiel' => $data['nb_materiel'], 'fk_contrat' => $contrat->id)) <= 0) {
+        if(is_null($data['desc'])) {
+            $description = $produit->getData('label');
+        } else {
+            $description = $data['description'];
+        }
+        
+        if ($contrat->dol_object->addLine($description, $produit->getData('price'), $data['qty'], $produit->getData('tva_tx'), 0, 0, $produit->id, $data['remise_percent'], $instance->getData('date_start'), $instance->getEndDate()->format('Y-m-d'), 'HT', 0.0, 0, null, 0, Array('serials' => $data['serials'], 'nb_materiel' => $data['nb_materiel'], 'fk_contrat' => $contrat->id)) <= 0) {
             $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($contrat));
             return 0;
         }
@@ -55,10 +61,5 @@ class BContract_contratLine extends BimpObject {
 
     public function canEdit() {
         return $this->canCreate();
-    }
-    
-    public function getNbMateriel() {
-        $list_extrafields = $this->getExtraFields();
-        return 2;
     }
 }

@@ -58,12 +58,12 @@ class ObjectLine extends BimpObject
     {
         global $use_freeline;
         global $use_freelineOK;
-        if(!isset($use_freelineOK) || $use_freelineOK != true){
+        if (!isset($use_freelineOK) || $use_freelineOK != true) {
             $use_freeline = BimpCore::getConf("use_freeline");
             $use_freelineOK = true;
         }
-            
-        if($use_freeline)
+
+        if ($use_freeline)
             self::$types[self::LINE_FREE] = 'Ligne libre';
         return parent::__construct($module, $object_name);
     }
@@ -394,7 +394,7 @@ class ObjectLine extends BimpObject
                         $errors[] = 'Le produit "' . $product->getRef() . ' - ' . $product->getData('label') . '" n\'est pas validé';
                         if (mailSyn2("Validation produit", "XX_Achats@bimp.fr", null, "Bonjour " . $user->getNomUrl(1) . "souhaite que vous validiez " . $product->getNomUrl(1) . "<br/>Cordialement")) {
                             $errors[] = "Un e-mail a été envoyé pour validation du produit.";
-                            if($product->getData('date_ask_valid') == null or $product->getData('date_ask_valid') == '') {
+                            if ($product->getData('date_ask_valid') == null or $product->getData('date_ask_valid') == '') {
                                 $datetime = new DateTime();
                                 $product->updateField('date_ask_valid', $datetime->format('Y-m-d H:i:s'));
                             }
@@ -965,8 +965,10 @@ class ObjectLine extends BimpObject
 
     public function getProduct()
     {
-        if(!$this->isLoaded())
+        if (!$this->isLoaded()) {
             $this->getIdProductFromPost();
+        }
+        
         if ((int) $this->id_product) {
             if (is_null($this->product)) {
                 $this->product = BimpObject::getInstance('bimpcore', 'Bimp_Product', (int) $this->id_product);
@@ -997,8 +999,8 @@ class ObjectLine extends BimpObject
     {
         if ($this->isLoaded() && static::$parent_comm_type) {
             return BimpCache::getBimpObjectObjects('bimpcommercial', 'ObjectLineEquipment', array(
-                'id_object_line' => (int) $this->id,
-                'object_type'    => static::$parent_comm_type
+                        'id_object_line' => (int) $this->id,
+                        'object_type'    => static::$parent_comm_type
             ));
         }
 
@@ -1010,8 +1012,8 @@ class ObjectLine extends BimpObject
         if ($this->isLoaded() && static::$parent_comm_type) {
             if (is_null($this->remises)) {
                 $this->remises = BimpCache::getBimpObjectObjects('bimpcommercial', 'ObjectLineRemise', array(
-                    'id_object_line' => (int) $this->id,
-                    'object_type'    => static::$parent_comm_type
+                            'id_object_line' => (int) $this->id,
+                            'object_type'    => static::$parent_comm_type
                 ));
             }
             if (!$this->isRemisable() && count($this->remises)) {
@@ -1173,8 +1175,9 @@ class ObjectLine extends BimpObject
     }
 
     // Affichages: 
-    
-    public function displaySerials(){
+
+    public function displaySerials()
+    {
         return '';
     }
 

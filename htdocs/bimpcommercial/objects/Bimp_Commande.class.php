@@ -110,7 +110,7 @@ class Bimp_Commande extends BimpComm
 
             case 'linesFactureQties':
                 $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
-                return $facture->can('create');
+                return (int) $facture->can('create');
         }
         return parent::canSetAction($action);
     }
@@ -1889,7 +1889,7 @@ class Bimp_Commande extends BimpComm
 
                     $fac_line_warnings = array();
 
-                    $fac_line_errors = $fac_line->create($fac_line_warnings);
+                    $fac_line_errors = $fac_line->create($fac_line_warnings, true);
 
                     $fac_line_errors = array_merge($fac_line_errors, $fac_line_warnings);
 
@@ -1912,7 +1912,7 @@ class Bimp_Commande extends BimpComm
 
                             $remise_warnings = array();
 
-                            $remise_errors = $new_remise->create($remise_warnings);
+                            $remise_errors = $new_remise->create($remise_warnings, true);
 
                             $remise_errors = array_merge($remise_errors, $remise_warnings);
 
@@ -1929,7 +1929,8 @@ class Bimp_Commande extends BimpComm
                 } else {
                     if ((int) $line->getData('type') === ObjectLine::LINE_TEXT) {
                         if (!(float) $line_qty) {
-                            $line->delete();
+                            $fac_line_warnings = array();
+                            $line->delete($fac_line_warnings, true);
                         }
                         continue;
                     }

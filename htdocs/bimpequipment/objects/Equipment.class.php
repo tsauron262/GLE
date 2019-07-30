@@ -1090,4 +1090,14 @@ class Equipment extends BimpObject
         global $user;
         return (int) $user->admin;
     }
+    public function canEdit()
+    {
+        global $user;
+        if($user->rights->admin or $user->rights->produit->creer)
+            return 1;
+    }
+    public function canCreate()
+    {
+        return $this->canEdit();
+    }
 }

@@ -213,6 +213,20 @@ class BContract_contrat extends BimpDolObject {
         return $buttons;
     }
     
+    public function actionDuplicate($data, &$success = Array()) {
+        
+        $new_object = clone($this);
+        
+        
+        return Array(
+            'success' => $success,
+            'errors' => $errors,
+            'warnings' => $warnings
+        );
+        
+        //return $this->dol_object->createFromClone($this->getData('fk_soc'));
+    }
+    
     public function getSyntecSite() {
        return "Pour connaitre l'indice syntec en vigueur, veuillez vous rendre sur le site internet <a href='https://www.syntec.fr' target='_blank'>https://www.syntec.fr</a>";
     }

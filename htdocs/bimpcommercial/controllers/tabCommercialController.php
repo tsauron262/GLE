@@ -131,7 +131,7 @@ class tabCommercialController extends BimpController {
             $list_facture = new BC_ListTable($facture, $is_submit_id ? 'global' : 'global', 1, null, "Lignes de factures");
             if ($is_submit_id) {
                 $list_facture->addFieldFilterValue('f.fk_soc', $id_soc);
-                $list_facture->addJoin('facture', 'a.id_obj=cf.rowid', 'f');
+                $list_facture->addJoin('facture', 'a.id_obj=f.rowid', 'f');
             }
             $html .= $list_facture->renderHtml();
         }
@@ -150,8 +150,8 @@ class tabCommercialController extends BimpController {
             $commande_fourn = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureFournLine');
             $list_commande = new BC_ListTable($commande_fourn, $is_submit_id ? 'global' : 'global', 1, null, "Lignes de factures fournisseur");
             if ($is_submit_id) {
-                $list_commande->addFieldFilterValue('cf.fk_soc', $id_soc);
-                $list_commande->addJoin('commande_fournisseur', 'a.id_obj=cf.rowid', 'cf');
+                $list_commande->addFieldFilterValue('ff.fk_soc', $id_soc);
+                $list_commande->addJoin('facture_fourn', 'a.id_obj=ff.rowid', 'ff');
             }
             $html .= $list_commande->renderHtml();
         }

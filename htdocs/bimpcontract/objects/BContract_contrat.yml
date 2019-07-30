@@ -314,7 +314,11 @@ forms:
             - field: fk_commercial_signature
             - field: fk_commercial_suivi
             
-            
+    clone_contrat:
+        edit: 1
+        msgs:
+            - content: <h4>Merci de confirmer le clone du contrat</h4>
+              type: warning
     contact:
         title: Ajouter un contact
         rows: 

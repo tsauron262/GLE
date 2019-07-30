@@ -452,7 +452,16 @@ forms:
               required: 1
               input: 
                   type: text
-                  
+            - custom: 1
+              label: Compte bancaire
+              input_name: bank_account
+              data_type: int
+              input: 
+                    type: select_mysoc_account
+              display_if:
+                  field_name: id_mode_paiement
+                  show_values: 2
+
 fields_tables: 
     infos: 
         title: Informations

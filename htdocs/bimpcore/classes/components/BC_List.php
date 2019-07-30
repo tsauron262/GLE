@@ -69,7 +69,7 @@ class BC_List extends BC_Panel
 
         if ($this->isOk()) {
             if (is_null($this->params['title']) || !$this->params['title']) {
-                $this->params['title'] = 'Listes des ' . $this->object->getLabel('name_plur');
+                $this->params['title'] = 'Liste des ' . $this->object->getLabel('name_plur');
             }
             if (is_null($this->params['icon']) || !$this->params['icon']) {
                 $this->params['icon'] = 'fas_list';

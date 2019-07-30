@@ -1,0 +1,59 @@
+bootstrap: 1
+title: Produits
+
+objects:
+    productentrepot: 
+        instance: 
+            bimp_object: 
+                module: bimpcommercial
+                name: Bimp_Product_Entrepot
+            
+    products: 
+        instance: 
+            bimp_object: Bimp_Product
+            
+    equipment: 
+        instance: 
+            bimp_object: 
+                module: bimpequipment
+                name: Equipment
+            
+    vente:
+        instance: 
+            bimp_object: 
+                module: bimpcommercial
+                name: Bimp_Vente
+            
+sections:
+    - type: tabs
+      tabs: 
+        default: 
+            label: Produits
+            sections: 
+                - type: list
+                  list: 
+                      panel: 1
+                      object: products
+                      name: default
+        equipments: 
+            label: Equipements
+            sections:
+                - type: list
+                  list: 
+                      panel: 1
+                      object: equipment
+        productentrepot: 
+            label: Stock par Entrepot
+            sections: 
+                - type: list
+                  list: 
+                      panel: 1
+                      object: productentrepot
+                      name: default
+        ventes: 
+              label: Liste des ventes de produits
+              sections: 
+                  - type: list
+                    list: 
+                        name: default
+                        object: vente

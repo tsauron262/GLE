@@ -412,6 +412,7 @@ fields:
 
 forms: 
     light: 
+        force_edit: 1
         rows: 
             - custom: 1
               label: Marque
@@ -825,8 +826,8 @@ lists:
         n: 50
         page_btn: 1
         edit_btn: 1
-        edit_form: light
-        add_form_name: light
+        edit_form: card
+        add_form_name: card
         modal_view: default
         cols: 
             ref: 

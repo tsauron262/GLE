@@ -87,12 +87,36 @@ class Bimp_Product extends BimpObject
     }
 
     // Droits user: 
+    
+    
+/*
+ * Exeptionnelement les droit dans les isCre.. et isEdi... pour la creation des prod par les commerciaux
+ */
+    public function canCreate()
+    {
+//        global $user;
+//        if($user->rights->admin or $user->rights->produit->creer)
+            return 1;
+    }
 
     public function canEdit()
     {
-        global $user;
-//        if($user->rights->admin or $user->rights->produit->creer)
+//        return $this->isEditable();
         return 1;
+    }
+    
+    public function isCreatable($force_create = false, &$errors = array()) {
+        
+        global $user;
+        if($force_create || $user->rights->admin or $user->rights->produit->creer)
+            return 1;
+        return 0;
+    }
+    
+    public function isEditable($force_edit = false, &$errors = array()) {
+        global $user;
+        if($force_edit || $user->rights->admin or $user->rights->produit->creer)
+            return 1;
     }
 
     public function canEditField($field_name)

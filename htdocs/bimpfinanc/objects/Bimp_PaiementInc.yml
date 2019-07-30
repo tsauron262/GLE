@@ -77,7 +77,7 @@ lists:
         sort_field: id
         sort_way: desc
         n: 25
-        delete_btn: 0
+        delete_btn: 1
         modal_view: default
         add_form_name: default
         filters_panel: default
@@ -91,6 +91,8 @@ lists:
                 field: total
             description:
                 field: description
+            user_create:
+                field: user_create
     
 
         

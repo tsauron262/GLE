@@ -2647,7 +2647,7 @@ class Bimp_CommandeLine extends ObjectLine
         return $errors;
     }
 
-    // Traitements expéditions: 
+    // Traitements expéditions:
 
     public function checkShipmentEquipments($id_shipment, $equipments)
     {
@@ -3342,7 +3342,7 @@ class Bimp_CommandeLine extends ObjectLine
         return $errors;
     }
 
-    // Traitements factures: 
+    // Traitements factures:
 
     public function checkFactureData($qty, $equipments, $id_facture = 0)
     {

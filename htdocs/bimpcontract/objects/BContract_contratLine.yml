@@ -35,7 +35,8 @@ fields:
     description:
         label: Description de la ligne
         type: string
-        required: 1
+        input:
+            help: Laisse vide pour mettre la description du service
     fk_contrat:
         label: Contrat
         type: int
@@ -83,10 +84,8 @@ fields:
     nb_materiel:
         label: Qté matériel
         dol_extra_field: 1
-        value:
-            callback: getNbMateriel
+        default_value: 0
         type: qty
-        required: 1
 
 lists: 
     default: 
@@ -133,6 +132,7 @@ forms:
               edit: 0
               show: 0
             - field: description
+              input_name: desc
             - field: fk_product
               edit: 0
             - field: tva_tx
@@ -148,8 +148,7 @@ forms:
               input:
                   type: qty
               label: Nb matériel
-              default_value: 0
-              required: 1
+              value: 0
               input_name: nb_materiel
             - field: serials
             - field: remise_percent
@@ -161,7 +160,13 @@ fields_tables:
         rows:
             - field: fk_product
               display: nom
-    
+            - field: price_ht
+              label: Prix unitaire hors-taxe
+            - field: qty
+              label: Quantitée dans le contrat
+            - field: nb_materiel
+              label: Nombre de matériels couverts par ce service
+            
 
 views:
     default: 

@@ -6,7 +6,7 @@ header_list_name: default
 icon: fas_ambulance
 
 labels: 
-    name: Paiement Inconnue
+    name: Paiement non identifié
     is_female: 0
     
    

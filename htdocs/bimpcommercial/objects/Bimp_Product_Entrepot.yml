@@ -72,8 +72,10 @@ lists:
         cols: 
             fk_entrepot: 
                 field: fk_entrepot
+                display: nom_url
             fk_product: 
                 field: fk_product
+                display: nom_url
             reel: 
                 field: reel
             stockShowRoom:

@@ -38,7 +38,7 @@ fields:
                 societe_type: customer 
         dol_prop: socid
     total:
-        label: Total Ht
+        label: Total
         type: money
     
 

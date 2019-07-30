@@ -313,8 +313,8 @@ forms:
             - field: moderegl
             - field: fk_commercial_signature
             - field: fk_commercial_suivi
-            
-            
+
+
     contact:
         title: Ajouter un contact
         rows: 

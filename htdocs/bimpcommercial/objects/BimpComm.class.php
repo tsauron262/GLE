@@ -2227,8 +2227,9 @@ class BimpComm extends BimpDolObject
         return count($errors) ? 0 : 1;
     }
 
-    public function createAcompte($amount, $id_mode_paiement, $date_paiement = null, &$warnings = array())
+    public function createAcompte($amount, $id_mode_paiement, $bank_account = 1, $date_paiement = null, &$warnings = array())
     {
+        
         global $user, $langs;
         $errors = array();
 
@@ -2277,7 +2278,8 @@ class BimpComm extends BimpDolObject
             $factureA->socid = $id_client;
             $factureA->cond_reglement_id = 1;
             $factureA->modelpdf = 'bimpfact';
-
+            $factureA->fk_account = $bank_account;
+                      
             if ($this->field_exists('ef_type') && $this->dol_field_exists('ef_type')) {
                 $factureA->array_options['options_type'] = $this->getData('ef_type');
             }
@@ -2838,6 +2840,10 @@ class BimpComm extends BimpDolObject
             $errors[] = 'Date de paiement absent';
         }
         
+        if($data['id_mode_paiement'] == 2 && is_null($data['bank_account'])) {
+            $errors[] = "Le compte banqaire est obligatoire pour un virement bancaire";
+        }
+        
         if (!$id_mode_paiement) {
             $errors[] = 'Mode de paiement absent';
         }
@@ -2846,7 +2852,7 @@ class BimpComm extends BimpDolObject
         }
 
         if (!count($errors)) {
-            $errors = $this->createAcompte($amount, $id_mode_paiement, $data['date'], $warnings);
+            $errors = $this->createAcompte($amount, $id_mode_paiement, $data['bank_account'], $data['date'], $warnings);
         }
 
         return array(

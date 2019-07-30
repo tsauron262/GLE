@@ -965,7 +965,8 @@ class ObjectLine extends BimpObject
 
     public function getProduct()
     {
-        $this->getIdProductFromPost();
+        if(!$this->isLoaded())
+            $this->getIdProductFromPost();
         if ((int) $this->id_product) {
             if (is_null($this->product)) {
                 $this->product = BimpObject::getInstance('bimpcore', 'Bimp_Product', (int) $this->id_product);

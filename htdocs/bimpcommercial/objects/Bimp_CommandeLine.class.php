@@ -2542,6 +2542,7 @@ class Bimp_CommandeLine extends ObjectLine
                         } else {
                             // Service : on supprime toutes les réservations éventuelles: 
                             if ((float) $reserved_qties['total'] > 0) {
+                                mailSyn2("Suppression reservations", 'dev@bimp.fr', "admin@bimp.fr", "Atgtention une reservation a été supprimé ".$product->getData('ref'). " comm: ".$this->getData("id_obj"));
                                 foreach (BimpCache::getBimpObjectObjects('bimpreservation', 'BR_Reservation', array(
                                     'type'                    => BR_Reservation::BR_RESERVATION_COMMANDE,
                                     'id_commande_client'      => (int) $commande->id,

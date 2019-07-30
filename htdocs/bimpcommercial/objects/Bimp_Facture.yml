@@ -478,6 +478,7 @@ filters_panels:
 lists_cols: 
     ref: 
         field: facnumber
+        has_total: 1
     type: 
         field: type
     centre: 
@@ -492,9 +493,9 @@ lists_cols:
                     - 1
     total_ht: 
         field: total
-#        has_total: 1
+        has_total: 1
     total_ttc: 
-#        has_total: 1
+        has_total: 1
         field: total_ttc
     pdf: 
         label: Fichier PDF
@@ -509,6 +510,7 @@ lists_cols:
     input_reason: unset
     marge:
         field: marge
+        has_total: 1
     
 lists: 
     default: 

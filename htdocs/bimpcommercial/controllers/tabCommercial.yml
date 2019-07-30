@@ -19,16 +19,23 @@ sections:
     - type: tabs
       tabs: 
         default:
-            label: Objets
+            label: Accueil
             sections:
                 - type: custom
                   custom: 
                       callback: 
-                          method: renderObjects
-        objects_lines:
-            label: Lignes d'object
-            sections:
-                - type: custom
-                  custom: 
-                      callback: 
-                          method: renderObjectsLines
+                          method: renderAccueil
+#        objects:
+#            label: Objets
+#            sections:
+#                - type: custom
+#                  custom: 
+#                      callback: 
+#                          method: renderObjects
+#        objects_lines:
+#            label: Lignes d'object
+#            sections:
+#                - type: custom
+#                  custom: 
+#                      callback: 
+#                          method: renderObjectsLines

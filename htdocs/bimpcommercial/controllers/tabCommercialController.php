@@ -158,4 +158,21 @@ class tabCommercialController extends BimpController {
 
         return $html;
     }
+    
+    function renderAccueil(){
+        $html = '';
+        $html .= '<a href="'.DOL_URL_ROOT.'/bimpcommercial/index.php?fc=propals" class="btn btn-default">Devis</a>';
+        $html .= '<br/><br/>';
+        $html .= '<a href="'.DOL_URL_ROOT.'/bimpcommercial/index.php?fc=commandes" class="btn btn-default">Commandes</a>';
+        $html .= '<br/><br/>';
+        $html .= '<a href="'.DOL_URL_ROOT.'/bimpcommercial/index.php?fc=factures" class="btn btn-default">Factures</a>';
+        $html .= '<br/><br/>';
+        $html .= '<a href="'.DOL_URL_ROOT.'/bimpcommercial/index.php?fc=commandesFourn" class="btn btn-default">Commandes Fournisseurs</a>';
+        $html .= '<br/><br/>';
+        $html .= '<a href="'.DOL_URL_ROOT.'/bimpcommercial/index.php?fc=facturesFourn" class="btn btn-default">Factures Fournisseurs</a>';
+        $html .= '<br/><br/>';
+        
+        
+        return $html;
+    }
 }

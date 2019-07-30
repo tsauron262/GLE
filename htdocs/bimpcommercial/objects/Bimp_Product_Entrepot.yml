@@ -88,8 +88,6 @@ lists:
 filters_panels: 
     default: 
         filters: 
-            dates: 
-                field: date
             entrepot: 
                 field: fk_entrepot
             product: 

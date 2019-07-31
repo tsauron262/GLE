@@ -323,6 +323,7 @@ forms:
         rows: 
             - custom: 1
               label: Facture
+              input_name: text
               content: 
                   callback: 
                       method: displayData

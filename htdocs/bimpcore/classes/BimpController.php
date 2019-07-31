@@ -2077,4 +2077,19 @@ class BimpController
     {
         return BimpTools::getValue('id_' . $object_name, null);
     }
+    
+    
+    public function renderTabs($fonction, $nomTabs){//pour patch le chargement auto des onglet
+        if(!BimpTools::isSubmit('ajax')){
+            if($nomTabs == '' || $nomTabs == "default"){
+                if(BimpTools::isSubmit('tab') && BimpTools::getValue('tab') != 'default')
+                return 'ne devrais jamais etre visible';
+            }
+            elseif(BimpTools::getValue('tab') != $nomTabs)
+                return 'ne devrais jamais etre visible2';
+        }
+        if(method_exists($this, $fonction))
+                return $this->$fonction();
+        return 'fonction : '.$fonction." inexistante";
+    }
 }

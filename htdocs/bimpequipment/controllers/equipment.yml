@@ -37,16 +37,16 @@ sections:
                               panel: 1
                               object: equipment
                               children: places
-          - id: logiciels
-            title: Logiciels / Réseaux
-            struct: 
-                type: rows
-                rows: 
-                    - cols: 
-                        - type: list
-                          list: 
-                              object: equipment
-                              children: logiciels
+#          - id: logiciels
+#            title: Logiciels / Réseaux
+#            struct: 
+#                type: rows
+#                rows: 
+#                    - cols: 
+#                        - type: list
+#                          list: 
+#                              object: equipment
+#                              children: logiciels
                         
           - id: reservations
             title: Réservations

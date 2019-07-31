@@ -55,17 +55,20 @@ class controlStock{
                     else{
                         $text = "";
                         $tabSerials = array();
-                        if($nbE > 0){
-                            $tabSerials = $this->getTabSerials($idEn, $idPr);
-                        }
                         
                         
                         if($nbE > $nbS)
-                            $text =  $millieuText." ATTENTION PLUS d'equipement (".$nbE." | ".implode(" ", $tabSerials).") que de prod (".$nbS.")<br/>";
-                        elseif($nbE < $nbS)
-                            $text =  $millieuText." ATTENTION MOINS d'equipement (".$nbE." | ".implode(" ", $tabSerials).") que de prod (".$nbS.")<br/>";
+                            $ope = "+";
                         else
-                            $text =  $millieuText."ATTENTION BIZZARRE<br/>";
+                            $ope = "-";
+    
+                        if($nbE > 0){
+                            $tabSerials = $this->getTabSerials($idEn, $idPr, $ope);
+                        }
+                        
+                        $text =  $millieuText." ATTENTION ".$ope." d'equipement (".$nbE." | ".implode(" ", $tabSerials).") que de prod (".$nbS.")<br/>";
+                            
+                            
                         $nbCorrection = $nbE - $nbS;
                         if($nbCorrection != 0 && $_REQUEST['action'] == "corriger"){
                             echo "  correction de  ".$nbCorrection."<br/>";
@@ -158,17 +161,28 @@ class controlStock{
         return $result;
     }
     
-    private function getTabSerials($idEn, $idPr){
+    private function getTabSerials($idEn, $idPr, $ope){
         $return = array();
         $sql = $this->db->query("SELECT `serial` FROM `llx_be_equipment` be, `llx_be_equipment_place` bp WHERE bp.`id_equipment` = be.id AND `position` = 1 AND id_product = ".$idPr." AND bp.`type` = 2 AND `id_entrepot` = ".$idEn);
         while($ln = $this->db->fetch_object($sql)){
             $html = "<span style='color:";
-            $sql2 = $this->db->query("SELECT count(*) as nb FROM `llx_stock_mouvement` WHERE `label` LIKE '%".$ln->serial."%'");
-            $ln2 = $this->db->fetch_object($sql2);
-            if($ln2->nb == 1)
-                $html .= 'red';
-            elseif($ln2->nb == 2)
-                $html .= 'green';
+            
+            if($ope == "+"){
+                $sql2 = $this->db->query("SELECT count(*) as nb FROM `llx_stock_mouvement` WHERE `label` LIKE '%".$ln->serial."%' AND label NOT LIKE '%Transfert%' AND value = -1");
+                $ln2 = $this->db->fetch_object($sql2);
+                if($ln2->nb == 1)
+                    $html .= 'red';
+                elseif($ln2->nb == 0)
+                    $html .= 'green';
+            }
+            else{
+                $sql2 = $this->db->query("SELECT count(*) as nb FROM `llx_stock_mouvement` WHERE `label` LIKE '%".$ln->serial."%' AND label NOT LIKE '%Transfert%' AND value = 1");
+                $ln2 = $this->db->fetch_object($sql2);
+                if($ln2->nb == 1)
+                    $html .= 'red';
+                elseif($ln2->nb == 0)
+                    $html .= 'green';
+            }
             $html .= "'>".$ln->serial."</span>";
             $return[] = $html;
         }

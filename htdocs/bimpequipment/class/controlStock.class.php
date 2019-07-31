@@ -184,7 +184,7 @@ class controlStock{
                 $return[] = $html;
             }
         }
-        else{
+//        else{
             $sql2 = $this->db->query("SELECT count(*) as nb, sum(value) as value, serial 
 
 FROM llx_be_equipment_place ep, `llx_be_equipment` e 
@@ -206,7 +206,7 @@ GROUP BY serial
             }
             
             
-        }
+//        }
         return $return;
     }
 }

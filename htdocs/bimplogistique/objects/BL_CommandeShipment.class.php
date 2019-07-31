@@ -328,16 +328,17 @@ class BL_CommandeShipment extends BimpObject
         if (BimpObject::objectLoaded($commande)) {
             $lines = $commande->getChildrenObjects('lines');
             $prev_shipments = array();
-            $list = $this->getList(array(
-                'id'           => array(
+            $filtre = array();
+            $filtre['id'] = array(
                     'operator' => '<>',
                     'value'    => $this->id
-                ),
-                'date_shipped' => array(
-                    'operator' => '<',
-                    'value'    => $this->getData('date_shipped')
-                )
-                    ), null, null, 'num_livraison', 'asc', 'array', array('id'));
+                );
+            if($this->getData('date_shipped'))
+                $filtre['date_shipped'] = array(
+                        'operator' => '<',
+                        'value'    => $this->getData('date_shipped')
+                    );
+            $list = $this->getList($filtre, null, null, 'num_livraison', 'asc', 'array', array('id'));
 
             foreach ($list as $item) {
                 $prev_shipments[] = $item['id'];

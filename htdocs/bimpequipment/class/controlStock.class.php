@@ -63,14 +63,18 @@ class controlStock{
                             $ope = "-";
     
                         if($nbE > 0){
-                            $tabSerials = $this->getTabSerials($idEn, $idPr, $ope);
+                            $tabSerials = $this->getTabSerials($idEn, $idPr);
                         }
                         
-                        $text =  $millieuText." ATTENTION ".$ope." d'equipement (".$nbE." | ".implode(" ", $tabSerials).") que de prod (".$nbS.")<br/>";
+                        
+                        $sql2 = $this->db->query("SELECT count(*) as nb, sum(value) as value FROM `llx_stock_mouvement` WHERE fk_entrepot = ".$idEn." AND fk_product = ".$idPr);
+                        $ln2 = $this->db->fetch_object($sql2);
+                        
+                        $text =  $millieuText." ATTENTION ".$ope." d'equipement (".$nbE." | ".implode(" ", $tabSerials).") que de prod (".$nbS.") total des mouvement (".$ln2->value.")<br/>";
                             
                             
                         $nbCorrection = $nbE - $nbS;
-                        if($nbCorrection != 0 && $_REQUEST['action'] == "corriger"){
+                        if($nbCorrection != 0 && $_REQUEST['action'] == "corriger" && $nbE == $ln2->value){
                             echo "  correction de  ".$nbCorrection."<br/>";
                             $product = new Product($this->db);
                             $product->fetch($idPr);
@@ -161,7 +165,7 @@ class controlStock{
         return $result;
     }
     
-    private function getTabSerials($idEn, $idPr, $ope){
+    private function getTabSerials($idEn, $idPr){
         $return = array();
         $sql = $this->db->query("SELECT `serial` FROM `llx_be_equipment` be, `llx_be_equipment_place` bp WHERE bp.`id_equipment` = be.id AND `position` = 1 AND id_product = ".$idPr." AND bp.`type` = 2 AND `id_entrepot` = ".$idEn);
         while($ln = $this->db->fetch_object($sql)){

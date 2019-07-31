@@ -14,7 +14,7 @@ class ActionsBimpcore
 
         if ((is_a($object, "product") && $object->type == 0) || is_a($object, 'Bimp_Product')) {
             BimpObject::loadClass('bimpcore', 'Bimp_Product');
-            if(!isset($object->array_options) || count($object->array_options) == 0)
+//            if(!isset($object->array_options) || count($object->array_options) == 0)
                 $object->fetch_optionals();    
             $serialisable = $object->array_options['options_serialisable'];
             $hookmanager->resPrint = Bimp_Product::getStockIconStatic($object->id, null, $serialisable); // $id_entrepôt facultatif, peut être null.

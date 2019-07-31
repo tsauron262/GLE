@@ -4180,7 +4180,7 @@ class BimpObject extends BimpCache
                 return (int) $parent->canEditChild($this->object_name);
             }
         }
-        return $this->canView();
+        return $this->canCreate();
     }
 
     public function canClientEdit()

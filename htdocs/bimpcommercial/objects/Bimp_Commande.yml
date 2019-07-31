@@ -242,6 +242,43 @@ fields:
             array: revalorisations
         default_value: 0
         
+    pdf_hide_reduc: 
+        label: Masquer les remises dans le PDF
+        dol_extra_field: 1
+        type: bool
+        default_value: 0
+        sortable: 0
+        
+    pdf_hide_total: 
+        label: Masquer les totaux dans le PDF
+        dol_extra_field: 1
+        type: bool
+        default_value: 0 
+        sortable: 0
+        
+    pdf_hide_ttc:
+        label: Masquer le TTC dans le PDF
+        dol_extra_field: 1
+        type: bool
+        default_value: 0
+        sortable: 0
+        
+    pdf_periodicity: 
+        label: Périodicité
+        dol_extra_field: 1
+        type: int
+        values: 
+            array: pdf_periodicities
+        default_value: 0
+        
+    pdf_periods_number: 
+        label: Nombre de périodes
+        dol_extra_field: 1
+        type: qty
+        min: 0
+        decimals: 0
+        default_value: 0
+        
 fields_tables: 
     infos: 
         rows: 
@@ -300,6 +337,16 @@ fields_tables:
                   
     pdf: 
         rows: 
+            - field: pdf_hide_reduc
+              edit: 1
+            - field: pdf_hide_total
+              edit: 1
+            - field: pdf_hide_ttc
+              edit: 1
+            - field: pdf_periodicity
+              edit: 1
+            - field: pdf_periods_number
+              edit: 1
             - field: remise_globale_label
               edit: 1
               show: 
@@ -359,6 +406,11 @@ forms:
             - field: date_commande
             - field: date_livraison
             - field: fk_availability
+            - field: pdf_hide_reduc
+            - field: pdf_hide_total
+            - field: pdf_hide_ttc
+            - field: pdf_periodicity
+            - field: pdf_periods_number
             - field: model_pdf
               show: 
                   callback: isNotLoaded

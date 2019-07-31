@@ -106,6 +106,24 @@ fields:
         label: Paye
         type: bool
         default_value: 0
+    pdf_hide_reduc: 
+        label: Masquer les remises dans le PDF
+        dol_extra_field: 1
+        type: bool
+        default_value: 0
+        sortable: 0
+    pdf_hide_total: 
+        label: Masquer les totaux dans le PDF
+        dol_extra_field: 1
+        type: bool
+        default_value: 0 
+        sortable: 0
+    pdf_hide_ttc:
+        label: Masquer le TTC dans le PDF
+        dol_extra_field: 1
+        type: bool
+        default_value: 0
+        sortable: 0
         
     ref: unset
     fk_availability: unset
@@ -259,6 +277,9 @@ forms:
               show: 
                   callback: isEditable
                   
+            - field: pdf_hide_reduc
+            - field: pdf_hide_total
+            - field: pdf_hide_ttc
             - field: model_pdf
               show: 
                   callback: isNotLoaded
@@ -435,6 +456,12 @@ fields_tables:
                 
     pdf: 
         rows: 
+            - field: pdf_hide_reduc
+              edit: 1
+            - field: pdf_hide_total
+              edit: 1
+            - field: pdf_hide_ttc
+              edit: 1
             - field: remise_globale_label
               edit: 1
               show: 

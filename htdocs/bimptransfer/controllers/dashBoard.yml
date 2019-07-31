@@ -29,25 +29,37 @@ sections:
                 - type: custom
                   custom: 
                       callback: 
-                          method: renderReception
+                          method: renderTabs
+                          params: 
+                            - renderReception
+                            - default
         send:
             label: Envoie transfert
             sections:
                 - type: custom
                   custom: 
                       callback: 
-                          method: renderSend
+                          method: renderTabs
+                          params: 
+                            - renderSend
+                            - send
         order_fourn:
             label: Commande fournisseur
             sections:
                 - type: custom
                   custom: 
                       callback: 
-                          method: renderOrderFourn
+                          method: renderTabs
+                          params: 
+                            - renderOrderFourn
+                            - order_fourn
         resa:
             label: Réservations
             sections:
                 - type: custom
                   custom: 
                       callback: 
-                          method: renderReservations
+                          method: renderTabs
+                          params: 
+                            - renderReservations
+                            - resa

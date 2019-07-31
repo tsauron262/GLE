@@ -71,10 +71,11 @@ class controlStock{
                         $ln2 = $this->db->fetch_object($sql2);
                         
                         $text =  $millieuText." ATTENTION ".$ope." d'equipement (".$nbE." | ".implode(" ", $tabSerials).") que de prod (".$nbS.") total des mouvement (".$ln2->value.")<br/>";
-                            
+                        
+                        $corigable = $nbE == $ln2->value;
                             
                         $nbCorrection = $nbE - $nbS;
-                        if($nbCorrection != 0 && $_REQUEST['action'] == "corriger" && $nbE == $ln2->value){
+                        if($nbCorrection != 0 && $_REQUEST['action'] == "corriger" && $corigable){
                             echo "  correction de  ".$nbCorrection."<br/>";
                             $product = new Product($this->db);
                             $product->fetch($idPr);
@@ -84,6 +85,8 @@ class controlStock{
                         }
                         elseif(isset($_REQUEST['mail']))
                             mailSyn2("Probléme stock", "tommy@bimp.fr", '', $text);
+                        elseif($corigable)
+                            echo "<span style='color:green'>Corigeable</span>";
                         echo $text;
                     }
                 }

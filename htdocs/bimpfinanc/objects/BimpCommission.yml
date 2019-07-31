@@ -1,0 +1,62 @@
+table: bimp_commission
+common_fields: 0
+
+parent_module: bimpcore
+parent_object: Bimp_User
+parent_id_property: id_user
+
+list_page_url:
+    controller: commissions
+    
+header_list_name: default
+icon: fas_comment-dollar
+
+labels: 
+    name: Commission
+    is_female: 1
+
+objects: 
+    
+fields: 
+    id_user: 
+        label: Utilisateur
+        type: id_parent
+        required: 1
+        
+    date_from: 
+        label: Du
+        type: date
+        required: 1
+        
+    date_to: 
+        label: Au
+        type: date
+        
+    total_marges: 
+        label: Total marges
+        type: money
+        default_value: 0
+        
+    rate: 
+        label: Pourcentage
+        type: percent
+        default_value: 
+            conf: default_comm_rate
+        
+    status: 
+        label: Statut
+        type: int
+        values: 
+            array: status_list
+            
+    applied: 
+        label: Appliquée
+        type: bool
+        default_value: 0
+        
+        
+        
+    
+        
+        
+    

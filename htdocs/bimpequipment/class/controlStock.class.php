@@ -63,7 +63,7 @@ class controlStock{
                             $ope = "-";
     
                         if($nbE > 0){
-                            $tabSerials = $this->getTabSerials($idEn, $idPr);
+                            $tabSerials = $this->getTabSerials($idEn, $idPr, $ope);
                         }
                         
                         
@@ -165,22 +165,46 @@ class controlStock{
         return $result;
     }
     
-    private function getTabSerials($idEn, $idPr){
+    private function getTabSerials($idEn, $idPr, $ope){
         $return = array();
-        $sql = $this->db->query("SELECT `serial` FROM `llx_be_equipment` be, `llx_be_equipment_place` bp WHERE bp.`id_equipment` = be.id AND `position` = 1 AND id_product = ".$idPr." AND bp.`type` = 2 AND `id_entrepot` = ".$idEn);
-        while($ln = $this->db->fetch_object($sql)){
-            $html = "<span style='color:";
+        if($ope == "+"){
+            $sql = $this->db->query("SELECT `serial` FROM `llx_be_equipment` be, `llx_be_equipment_place` bp WHERE bp.`id_equipment` = be.id AND `position` = 1 AND id_product = ".$idPr." AND bp.`type` = 2 AND `id_entrepot` = ".$idEn);
+            while($ln = $this->db->fetch_object($sql)){
+                $html = "<span style='color:";
+
+                //Toute les sortie
+                    $sql2 = $this->db->query("SELECT count(*) as nb, sum(value) as value FROM `llx_stock_mouvement` WHERE `label` LIKE '%".$ln->serial."%' AND fk_entrepot = ".$idEn." AND fk_product = ".$idPr."");
+                    $ln2 = $this->db->fetch_object($sql2);
+    //            if($ope == "+"){
+                    if($ln2->value == 1)
+                        $html .= 'green';
+                    else
+                        $html .= 'red';
+                $html .= "'>".$ln->serial."</span>";
+                $return[] = $html;
+            }
+        }
+        else{
+            $sql2 = $this->db->query("SELECT count(*) as nb, sum(value) as value, serial 
+
+FROM llx_be_equipment_place ep, `llx_be_equipment` e 
+
+LEFT JOIN `llx_stock_mouvement` sm 
+ON sm.`label` LIKE concat('%', concat(serial, '%')) AND sm.`fk_product` = e.`id_product`
+
+WHERE e.id = `id_equipment` AND `position` > 1 AND ep.`type` = 2 AND `id_entrepot` = ".$idEn." AND id_product = ".$idPr." AND sm.`fk_entrepot` = ep.`id_entrepot`
+
+GROUP BY serial
+
+
+
+");
+            if($this->db->num_rows($sql2) > 0)
+                die($idEn." .".$idPr);
             
-            //Toute les sortie
-                $sql2 = $this->db->query("SELECT count(*) as nb, sum(value) as value FROM `llx_stock_mouvement` WHERE `label` LIKE '%".$ln->serial."%' AND fk_entrepot = ".$idEn." AND fk_product = ".$idPr."");
-                $ln2 = $this->db->fetch_object($sql2);
-//            if($ope == "+"){
-                if($ln2->value == 1)
-                    $html .= 'green';
-                else
-                    $html .= 'red';
-            $html .= "'>".$ln->serial."</span>";
-            $return[] = $html;
+            
+//            die("SELECT count(*) as nb, sum(value) as value, serial FROM `llx_stock_mouvement` LEFT JOIN `llx_be_equipment` e, llx_be_equipment_place ep ON `label` LIKE '%serial%'e.id = `id_equipment` AND `position` > 1 AND ep.`type` = 2 AND `id_entrepot` = ".$idEn." AND id_product = ".$idPr." WHERE fk_entrepot = ".$idEn." AND fk_product = ".$idPr." GROUP BY serial");
+//            $ln2 = $this->db->fetch_object($sql2);
         }
         return $return;
     }

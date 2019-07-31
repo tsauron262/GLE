@@ -496,6 +496,8 @@ list:
                     options: 
                         options: 
                             array: hasReservations
+        user_create:
+            field: user_create
 #        available: 
 #            field: available
 #            edit: 1

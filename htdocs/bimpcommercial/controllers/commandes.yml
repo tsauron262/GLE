@@ -28,16 +28,29 @@ sections:
             sections:
                 - type: custom
                   custom: 
-                      callback: renderCommandesTab
+                      callback: 
+                          method: renderTabs
+                          params: 
+                            - renderCommandesTab
+                            - default
         receptions: 
             label: Expéditions
             sections: 
                 - type: custom
                   custom: 
-                      callback: renderShipmentsTab
+                      callback: 
+                          method: renderTabs
+                          params: 
+                            - renderShipmentsTab
+                            - receptions
+
         prods: 
             label: Produits en commande
             sections: 
                 - type: custom
                   custom: 
-                      callback: renderProdsTabs
+                      callback: 
+                          method: renderTabs
+                          params: 
+                            - renderProdsTabs
+                            - prods

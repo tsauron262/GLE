@@ -54,8 +54,6 @@ class commandesController extends BimpController
 
     public function renderShipmentsTab()
     {
-        if(!BimpTools::isSubmit('ajax') && BimpTools::getValue('tab') != "receptions")
-            return '';
         $shipment = BimpObject::getInstance('bimplogistique', 'BL_CommandeShipment');
         $list = new BC_ListTable($shipment, 'default', 1, null, 'Liste des expéditions', 'fas_shipping-fast');
         return $list->renderHtml();
@@ -63,8 +61,6 @@ class commandesController extends BimpController
 
     public function renderProdsTabs()
     {
-        if(!BimpTools::isSubmit('ajax') && BimpTools::getValue('tab') != "prods")
-            return '';
 //        $id_entrepot = (int) BimpTools::getValue('id_entrepot', 0);
 
         $line = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeLine');

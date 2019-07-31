@@ -161,8 +161,17 @@ class controlStock{
     private function getTabSerials($idEn, $idPr){
         $return = array();
         $sql = $this->db->query("SELECT `serial` FROM `llx_be_equipment` be, `llx_be_equipment_place` bp WHERE bp.`id_equipment` = be.id AND `position` = 1 AND id_product = ".$idPr." AND bp.`type` = 2 AND `id_entrepot` = ".$idEn);
-        while($ln = $this->db->fetch_object($sql))
-            $return[] = $ln->serial;
+        while($ln = $this->db->fetch_object($sql)){
+            $html = "<span style='color:";
+            $sql2 = $this->db->query("SELECT count(*) as nb FROM `llx_stock_mouvement` WHERE `label` LIKE '%".$ln->serial."%'");
+            $ln2 = $this->db->fetch_object($sql2);
+            if($ln2->nb == 1)
+                $html .= 'red';
+            elseif($ln2->nb == 2)
+                $html .= 'green';
+            $html .= "'>".$ln->serial."</span>";
+            $return[] = $html;
+        }
         return $return;
     }
 }

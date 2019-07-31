@@ -72,7 +72,7 @@ class controlStock{
                         
                         $text =  $millieuText." ATTENTION ".$ope." d'equipement (".$nbE." | ".implode(" ", $tabSerials).") que de prod (".$nbS.") total des mouvement (".$ln2->value.")<br/>";
                         
-                        $corigable = $nbE == $ln2->value;
+                        $corigable = ($nbE == $ln2->value);
                             
                         $nbCorrection = $nbE - $nbS;
                         if($nbCorrection != 0 && $_REQUEST['action'] == "corriger" && $corigable){

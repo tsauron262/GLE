@@ -200,8 +200,9 @@ GROUP BY serial
 
 ");
             if($this->db->num_rows($sql2) > 0){
-                $ln2 = $this->db->fetch_object($sql2);
-                $return[] = $ln2->serial;
+                while($ln2 = $this->db->fetch_object($sql2))
+                    if($ln2->value != 0)
+                        $return[] = "<span style='color:red'>".$ln2->serial."</span>";
             }
             
             

@@ -168,7 +168,7 @@ class controlStock{
             $html = "<span style='color:";
             
             //Toute les sortie
-                $sql2 = $this->db->query("SELECT count(*) as nb, sum(value) as value FROM `llx_stock_mouvement` WHERE `label` LIKE '%".$ln->serial."%' AND label NOT LIKE '%Transfert%'");
+                $sql2 = $this->db->query("SELECT count(*) as nb, sum(value) as value FROM `llx_stock_mouvement` WHERE `label` LIKE '%".$ln->serial."%' AND fk_entrepot = ".$idEn);
                 $ln2 = $this->db->fetch_object($sql2);
 //            if($ope == "+"){
                 if($ln2->value == 1)

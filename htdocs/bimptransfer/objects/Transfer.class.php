@@ -226,9 +226,11 @@ class Transfer extends BimpDolObject {
     }
 
     public function isDeletable($force_delete = false) {
-        foreach ($this->getLines() as $line) {
-            if ($line->getData("quantity_transfered") > 0 || $line->getData("quantity_received") > 0)
-                return 0;
+        if($this->isLoaded()){
+            foreach ($this->getLines() as $line) {
+                if ($line->getData("quantity_transfered") > 0 || $line->getData("quantity_received") > 0)
+                    return 0;
+            }
         }
         return 1;
     }

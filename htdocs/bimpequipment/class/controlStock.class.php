@@ -199,12 +199,12 @@ GROUP BY serial
 
 
 ");
-            if($this->db->num_rows($sql2) > 0)
-                die($idEn." .".$idPr);
+            if($this->db->num_rows($sql2) > 0){
+                $ln2 = $this->db->fetch_object($sql2);
+                $return[] = $ln2->serial;
+            }
             
             
-//            die("SELECT count(*) as nb, sum(value) as value, serial FROM `llx_stock_mouvement` LEFT JOIN `llx_be_equipment` e, llx_be_equipment_place ep ON `label` LIKE '%serial%'e.id = `id_equipment` AND `position` > 1 AND ep.`type` = 2 AND `id_entrepot` = ".$idEn." AND id_product = ".$idPr." WHERE fk_entrepot = ".$idEn." AND fk_product = ".$idPr." GROUP BY serial");
-//            $ln2 = $this->db->fetch_object($sql2);
         }
         return $return;
     }

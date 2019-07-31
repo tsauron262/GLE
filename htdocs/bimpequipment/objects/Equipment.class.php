@@ -1090,14 +1090,43 @@ class Equipment extends BimpObject
         global $user;
         return (int) $user->admin;
     }
-    public function canEdit()
-    {
-        global $user;
-//        if($user->rights->admin or $user->rights->produit->creer)
-            return 1;
-    }
+     
+/*
+ * Exeptionnelement les droit dans les isCre.. et isEdi... pour la creation des prod par les commerciaux
+ */
     public function canCreate()
     {
-        return $this->canEdit();
+            return 1;
     }
+
+    public function canEdit()
+    {
+        return 1;
+    }
+    
+    public function isCreatable($force_create = false, &$errors = array()) {
+        return $this->isEditable($force_create, $errors);
+    }
+    
+    public function isEditable($force_edit = false, &$errors = array()) {
+        global $user;
+        if($force_edit || $user->rights->admin or $user->rights->produit->creer)
+            return 1;
+    }
+
+    public function canEditField($field_name)
+    {
+        global $user;
+
+        switch ($field_name) {
+            case 'validate':
+                if ((int) $user->admin != 1) {
+                    return 0;
+                }
+                return 1;
+        }
+
+        return parent::canEditField($field_name);
+    }
+
 }

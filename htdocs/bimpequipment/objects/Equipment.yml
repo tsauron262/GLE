@@ -372,6 +372,7 @@ forms:
             - object: places
             
     light:
+        force_edit: 1
         rows:
             - field: serial
             - field: id_product

@@ -237,6 +237,8 @@ filters_panels:
                 field: qty
             total_ht: 
                 field: total_ht
+            tva_tx:
+                field: tva_tx
             marque: 
                 field: marque
             gamme: 

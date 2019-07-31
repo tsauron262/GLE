@@ -26,16 +26,22 @@ sections:
                       callback: 
                           method: renderAccueil
 #        objects:
+#            show: 
+#                callback: 
+#                    method: getIdSoc
 #            label: Objets
 #            sections:
 #                - type: custom
 #                  custom: 
 #                      callback: 
 #                          method: renderObjects
-#        objects_lines:
-#            label: Lignes d'object
-#            sections:
-#                - type: custom
-#                  custom: 
-#                      callback: 
-#                          method: renderObjectsLines
+        objects_lines:
+            show: 
+                callback: 
+                    method: getIdSoc
+            label: Lignes d'object
+            sections:
+                - type: custom
+                  custom: 
+                      callback: 
+                          method: renderObjectsLines

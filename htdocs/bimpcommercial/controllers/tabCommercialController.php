@@ -96,8 +96,18 @@ class tabCommercialController extends BimpController {
 
         return $html;
     }
+    
+    public function getIdSoc(){
+        if (BimpTools::isSubmit('id'))
+            return (int) GETPOST('id');
+        return 0;
+    }
 
     public function renderObjectsLines() {
+        if(!$this->getIdSoc())
+            return '';
+        
+        
         global $db;
         $html = '';
         $id_soc = (int) GETPOST('id');
@@ -160,6 +170,13 @@ class tabCommercialController extends BimpController {
     }
     
     function renderAccueil(){
+        if($this->getIdSoc())
+            return $this->renderObjects();
+        else
+            return $this->renderMenu ();
+    }
+    
+    function renderMenu(){
         $html = '';
         $html .= '<a href="'.DOL_URL_ROOT.'/bimpcommercial/index.php?fc=propals" class="btn btn-default">Devis</a>';
         $html .= '<br/><br/>';

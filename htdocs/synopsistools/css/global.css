@@ -526,3 +526,7 @@ input[name='options_libelle']{
 span.select2-container{
         min-width: 100px;
 }
+
+.objectIcon.green{
+    color:green;
+}

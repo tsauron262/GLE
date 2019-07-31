@@ -643,7 +643,7 @@ class Bimp_Product extends BimpObject
         ;
     }
 
-    public static function getStockIconStatic($id_product, $id_entrepot = null)
+    public static function getStockIconStatic($id_product, $id_entrepot = null, $serialisable = false)
     {
         if (is_null($id_entrepot)) {
             if (BimpTools::isSubmit('id_entrepot')) {
@@ -662,7 +662,7 @@ class Bimp_Product extends BimpObject
             }
         }
 
-        $html = '<span class="objectIcon displayProductStocksBtn" title="Stocks" data-id_product="' . $id_product . '" data-id_entrepot="' . (int) $id_entrepot . '">';
+        $html = '<span class="objectIcon displayProductStocksBtn'.($serialisable? ' green' : '') .'" title="Stocks" data-id_product="' . $id_product . '" data-id_entrepot="' . (int) $id_entrepot . '">';
         $html .= BimpRender::renderIcon('fas_box-open');
         $html .= '</span>';
         $html .= '<div class="productStocksContainer hideOnClickOut" id="product_' . $id_product . '_stocks_popover_container"></div>';

@@ -86,7 +86,7 @@ class controlStock{
                         elseif(isset($_REQUEST['mail']))
                             mailSyn2("Probléme stock", "tommy@bimp.fr", '', $text);
                         elseif($corigable)
-                            $text .= "<span style='color:green'>Corigeable</span>";
+                            $text .= "<span style='color:green'>Corigeable</span><br/><br/>";
                         echo $text;
                     }
                 }

@@ -167,21 +167,20 @@ class controlStock{
         while($ln = $this->db->fetch_object($sql)){
             $html = "<span style='color:";
             
-            if($ope == "+"){
+            //Toute les sortie
                 $sql2 = $this->db->query("SELECT count(*) as nb FROM `llx_stock_mouvement` WHERE `label` LIKE '%".$ln->serial."%' AND label NOT LIKE '%Transfert%' AND value = -1");
                 $ln2 = $this->db->fetch_object($sql2);
+            if($ope == "+"){
                 if($ln2->nb == 1)
                     $html .= 'red';
                 elseif($ln2->nb == 0)
                     $html .= 'green';
             }
             else{
-                $sql2 = $this->db->query("SELECT count(*) as nb FROM `llx_stock_mouvement` WHERE `label` LIKE '%".$ln->serial."%' AND label NOT LIKE '%Transfert%' AND value = 1");
-                $ln2 = $this->db->fetch_object($sql2);
                 if($ln2->nb == 1)
-                    $html .= 'red';
-                elseif($ln2->nb == 0)
                     $html .= 'green';
+                elseif($ln2->nb == 0)
+                    $html .= 'red';
             }
             $html .= "'>".$ln->serial."</span>";
             $return[] = $html;

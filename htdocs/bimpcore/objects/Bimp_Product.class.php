@@ -94,23 +94,16 @@ class Bimp_Product extends BimpObject
  */
     public function canCreate()
     {
-//        global $user;
-//        if($user->rights->admin or $user->rights->produit->creer)
             return 1;
     }
 
     public function canEdit()
     {
-//        return $this->isEditable();
         return 1;
     }
     
     public function isCreatable($force_create = false, &$errors = array()) {
-        
-        global $user;
-        if($force_create || $user->rights->admin or $user->rights->produit->creer)
-            return 1;
-        return 0;
+        return $this->isEditable($force_create, $errors);
     }
     
     public function isEditable($force_edit = false, &$errors = array()) {

@@ -1891,7 +1891,7 @@ class BS_SAV extends BimpObject
                     $tabFile2[] = "application/pdf";
                     $tabFile3[] = $ref_propal . ".pdf";
                 } elseif (in_array((int) $this->getData('status'), self::$need_propal_status)) {
-                    $errors[] = 'Attention: PDF du devis non trouvé et donc non envoyé au client';
+                    $errors[] = 'Attention: PDF du devis non trouvé et donc non envoyé au client File : '.$fileProp;
                     dol_syslog('SAV "' . $this->getRef() . '" - ID ' . $this->id . ': échec envoi du devis au client '.print_r($errors,1), LOG_ERR);
                 }
             } else {

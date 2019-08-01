@@ -2635,29 +2635,34 @@ class BS_SAV extends BimpObject
                     $new_status = self::BS_SAV_DEVIS_ACCEPTE;
                 }
                 $propal->dol_object->valid($user);
-                $propal->dol_object->cloture($user, 2, "Auto via SAV sous garentie");
+                $propal->dol_object->cloture($user, 2, "Auto via SAV sous garantie");
                 $propal->fetch($propal->id);
                 $propal->dol_object->generateDocument(self::$propal_model_pdf, $langs);
             } else {
                 $this->addNote('Devis envoyé le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs));
                 $new_status = self::BS_SAV_ATT_CLIENT;
                 $propal->dol_object->valid($user);
-                $propal->dol_object->generateDocument(self::$propal_model_pdf, $langs);
+                if(!$propal->dol_object->generateDocument(self::$propal_model_pdf, $langs)){
+                        $errors[] = "Impossible de générer le PDF validation impossible";
+                        $propal->dol_object->reopen($user, 0);
+                }
             }
             $propal->lines_locked = 0;
 
-            if (!is_null($new_status)) {
-                $errors = $this->setNewStatus($new_status);
-            }
+            if(!count($errors)){
+                if (!is_null($new_status)) {
+                    $errors = array_merge($errors,$this->setNewStatus($new_status));
+                }
 
-            if (!(int) $this->getData('id_user_tech')) {
-                $this->updateField('id_user_tech', (int) $user->id);
-            }
+                if (!(int) $this->getData('id_user_tech')) {
+                    $this->updateField('id_user_tech', (int) $user->id);
+                }
 
-            $propal->hydrateFromDolObject();
+                $propal->hydrateFromDolObject();
 
-            if (isset($data['send_msg']) && (int) $data['send_msg']) {
-                $warnings = array_merge($warnings, $this->sendMsg('Devis'));
+                if (isset($data['send_msg']) && (int) $data['send_msg']) {
+                    $warnings = array_merge($warnings, $this->sendMsg('Devis'));
+                }
             }
         }
 

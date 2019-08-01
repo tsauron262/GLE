@@ -2915,8 +2915,8 @@ class BimpComm extends BimpDolObject
             if ((int) $this->getData('fk_soc') !== (int) $this->getInitData('fk_soc')) {
                 $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', (int) $this->getData('fk_soc'));
                 if (BimpObject::objectLoaded($soc)) {
-                    $zone = $this->getZoneByCountry((int) $soc->getData('fk_pays'));
-                    $this->set('zone_vente', $zone);
+//                    $zone = $this->getZoneByCountry((int) $soc->getData('fk_pays'));
+//                    $this->set('zone_vente', $zone);
                 }
             }
         }

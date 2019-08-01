@@ -2642,6 +2642,7 @@ class BS_SAV extends BimpObject
                 $this->addNote('Devis envoyé le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs));
                 $new_status = self::BS_SAV_ATT_CLIENT;
                 $propal->dol_object->valid($user);
+                $propal->fetch($propal->id);
                 if(!$propal->dol_object->generateDocument(self::$propal_model_pdf, $langs)){
                         $errors[] = "Impossible de générer le PDF validation impossible";
                         $propal->dol_object->reopen($user, 0);

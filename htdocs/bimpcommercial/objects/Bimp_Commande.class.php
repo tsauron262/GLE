@@ -1717,6 +1717,12 @@ class Bimp_Commande extends BimpComm
         $facture->dol_object->array_options['options_entrepot'] = $id_entrepot;
         $facture->dol_object->array_options['options_type'] = $ef_type;
 
+        if (empty($other_commandes)) {
+            $facture->dol_object->array_options['options_pdf_hide_reduc'] = $this->getData('pdf_hide_reduc');
+            $facture->dol_object->array_options['options_pdf_hide_total'] = $this->getData('pdf_hide_total');
+            $facture->dol_object->array_options['options_pdf_hide_ttc'] = $this->getData('pdf_hide_ttc');
+        }
+
         // Possibility to add external linked objects with hooks
         $facture->dol_object->linked_objects[$facture->dol_object->origin] = array($facture->dol_object->origin_id);
 
@@ -1869,6 +1875,7 @@ class Bimp_Commande extends BimpComm
                         'id_obj'             => (int) $facture->id,
                         'type'               => $line->getData('type'),
                         'remisable'          => $line->getData('remisable'),
+                        'hide_product_label' => $line->getData('hide_product_label'),
                         'force_qty_1'        => $line->getData('force_qty_1'),
                         'linked_id_object'   => (int) $line->id,
                         'linked_object_name' => 'commande_line',

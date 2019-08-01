@@ -1,0 +1,94 @@
+table: bimp_commission
+common_fields: 0
+
+parent_module: bimpcore
+parent_object: Bimp_User
+parent_id_property: id_user
+
+list_page_url:
+    controller: commissions
+    
+header_list_name: default
+icon: fas_comment-dollar
+
+labels: 
+    name: Commission
+    is_female: 1
+    
+fields: 
+    id_user: 
+        label: Utilisateur
+        type: id_parent
+        input:
+            type: search_user
+        required: 1
+        
+    date: 
+        label: Date
+        type: date
+        input: 
+            display_now: 1
+        
+    total_marges: 
+        label: Total marges
+        type: money
+        default_value: 0
+        
+    status: 
+        label: Statut
+        type: int
+        values: 
+            array: status_list
+        
+forms: 
+    default: 
+        rows: 
+            - field: id_user
+            - field: date
+              
+    edit: 
+        rows: 
+            - field: date
+    
+filters_panel: 
+    default: 
+        filters: 
+            - field: id_user
+            - field: date
+            - field: status
+lists: 
+    default: 
+        title: Liste des commissions
+        checkboxes: 1
+        bulk_actions:
+            - label: supprimer les commissions sélectionnées
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this))
+        list_filters: 
+            callback: getListFilters
+        filters_panel: default
+        sort_field: id
+        sort_way: desc
+        n: 10
+        add_form_name: default
+        add_form_values: 
+            fields: 
+                id_user: 
+                    request: id_user
+        add_btn_label: Nouvelle commission
+        edit_btn: 1
+        edit_form: edit
+        delete_btn: 1
+        extra_btn: 
+            callback: getListExtraBtn
+        cols: 
+            - field: date
+            - field: id_user
+              display: nom_url
+            - field: total_marges
+            - field: status
+              
+    
+        
+        
+    

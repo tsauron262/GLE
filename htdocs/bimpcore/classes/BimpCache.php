@@ -634,7 +634,7 @@ class BimpCache
         if ((int) $id_societe) {
             $cache_key = 'societe_' . $id_societe . '_contacts_array';
             if (!isset(self::$cache[$cache_key])) {
-                self::$cache[$cache_key] = array(""=>"");
+                self::$cache[$cache_key] = array("" => "");
                 $where = '`fk_soc` = ' . (int) $id_societe;
                 $rows = self::getBdb()->getRows('socpeople', $where, null, 'array', array('rowid', 'firstname', 'lastname'));
                 if (!is_null($rows)) {
@@ -1037,11 +1037,13 @@ class BimpCache
 
             if (BimpObject::objectLoaded($product)) {
                 $list = $product->dol_object->list_suppliers();
-                $rows = self::getBdb()->getRows('societe', '`rowid` IN (' . implode(',', $list) . ')', null, 'array', array('rowid', 'nom', 'code_fournisseur'));
-                if (!is_null($rows)) {
-                    foreach ($rows as $r) {
-                        if (!isset(self::$cache[$cache_key][(int) $r['rowid']])) {
-                            self::$cache[$cache_key][(int) $r['rowid']] = $r['code_fournisseur'] . ' - ' . $r['nom'];
+                if (!empty($list)) {
+                    $rows = self::getBdb()->getRows('societe', '`rowid` IN (' . implode(',', $list) . ')', null, 'array', array('rowid', 'nom', 'code_fournisseur'));
+                    if (!is_null($rows)) {
+                        foreach ($rows as $r) {
+                            if (!isset(self::$cache[$cache_key][(int) $r['rowid']])) {
+                                self::$cache[$cache_key][(int) $r['rowid']] = $r['code_fournisseur'] . ' - ' . $r['nom'];
+                            }
                         }
                     }
                 }

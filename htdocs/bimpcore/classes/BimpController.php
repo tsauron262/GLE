@@ -2091,7 +2091,7 @@ class BimpController
         if(method_exists($this, $fonction)){
             if(isset($params2))
                 return $this->$fonction($params1, $params2);
-            elseif(isset($params2))
+            elseif(isset($params1))
                 return $this->$fonction($params1);
             else
                 return $this->$fonction();

@@ -1,1 +1,168 @@
+table: bimp_revalorisation
+common_fields: 0
 
+icon: fas_search-dollar
+
+list_page_url:
+    controller: commission
+    url_params: 
+        tab: revalorisations
+    
+header_list_name: default
+header_btn: 
+    callback: getActionsButtons
+
+
+labels: 
+    name: Revalorisation
+    is_female: 1
+
+objects: 
+    facture_line: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcommercial
+                name: Bimp_FactureLine
+            id_object: 
+                field_value: id_facture_line
+                
+fields: 
+    id_facture_line:
+        label: Ligne de facture
+        type: id_object
+        object: facture_line
+#        required: 1
+            
+    id_user: 
+        label: Utilisateur
+        type: id_object
+        object: user
+        input: 
+            type: search_user
+        required: 1
+        
+    type: 
+        label: Type
+        values: 
+            array: types
+        required: 1
+            
+    date: 
+        label: Date
+        type: date
+        required: 1
+        
+    amount: 
+        label: Montant
+        type: money
+        required: 1
+        
+    status: 
+        label: Statut
+        type: int
+        values: 
+            array: status_list
+        default_value: 0
+        
+    applied: 
+        label: Appliquée
+        type: bool
+        default_value: 0
+        
+forms: 
+    default: 
+        rows: 
+            - field: id_user
+              show: 
+                  callback: isNotLoaded
+            - field: type
+            - field: date
+            - field: amount
+        
+fields_tables: 
+    infos: 
+        title: Informations
+        icon: fas_info-circle
+        rows: 
+            - field: type
+            - field: date
+            - field: amount
+            - field: status
+            - field: applied
+            
+    elements: 
+        title: Eléments liés
+        icon: fas_link
+        rows: 
+            - field: id_user
+              display: card
+            - field: id_facture_line
+              display: card
+              
+views: 
+    default: 
+        rows: 
+            - cols: 
+                - type: object_header
+            - cols: 
+                  - type: fields_table
+                    col_lg: 6
+                    col_md: 6
+                    fields_table: 
+                        name: infos
+                  
+                  - type: fields_table
+                    col_lg: 6
+                    col_md: 6
+                    fields_table:
+                        name: elements
+            
+filters_panel: 
+    default: 
+        filters: 
+            - field: id_user
+            - field: type
+            - field: date
+            - field: status
+            - field: applied
+            - field: amount
+            
+lists: 
+    default: 
+        title: Liste des revalorisations
+        checkboxes: 1
+        bulk_actions:
+            - label: supprimer les revalorisations sélectionnées
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this))
+        list_filters: 
+            callback: getListFilters
+        filters_panel: default
+        sort_field: id
+        sort_way: desc
+        n: 10
+        modal_view: default
+        add_form_name: default
+        add_form_values: 
+            fields: 
+                id_user: 
+                    request: id_user
+        add_btn_label: Nouvelle revalorisation
+        edit_btn: 1
+        edit_form: default
+        delete_btn: 1
+        extra_btn: 
+            callback: getActionsButtons
+        cols: 
+            - field: id_user
+              display: nom_url
+            - field: type
+            - field: date
+            - label: Désignation
+              value: 
+                  callback: displayDesc
+            - field: amount
+            - field: status
+            - field: applied

@@ -112,8 +112,7 @@ class BimpStatsFacture {
         }
         
         if(!empty($type)){
-//            $sql .= ' AND f.type IN ('.implode(",",$type).')';
-            $sql .= ' AND f.type NOT IN (3)';
+            $sql .= ' AND f.type IN ('.implode(",",$type).')';
         }
         
         $sql .= " AND (";

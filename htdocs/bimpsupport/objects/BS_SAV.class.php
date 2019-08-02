@@ -1948,6 +1948,7 @@ class BS_SAV extends BimpObject
 
         if (!is_null($propal)) {
             if ($propal->isLoaded()) {
+                $propal->fetch($propal->id);
                 $ref_propal = $propal->dol_object->ref;
                 $fileProp = DOL_DATA_ROOT . "/bimpcore/sav/" . $this->id . "/PC-" . $ref_propal . ".pdf";
                 if (is_file($fileProp)) {

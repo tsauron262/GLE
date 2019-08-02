@@ -3809,7 +3809,7 @@ class Bimp_CommandeLine extends ObjectLine
             }
 
             if ((int) $this->getData('type') !== self::LINE_TEXT) {
-//                if ($commande->isLogistiqueActive()) {
+                if ($commande->isLogistiqueActive()) {
                     $status_forced = $commande->getData('status_forced');
 
                     $fullQty = abs($fullQty);
@@ -3859,7 +3859,7 @@ class Bimp_CommandeLine extends ObjectLine
                     if ($qty_shipped_not_billed !== (float) $this->getData('qty_shipped_not_billed')) {
                         $this->updateField('qty_shipped_not_billed', $qty_shipped_not_billed, null, true);
                     }
-//                }
+                }
             } else {
                 if ((float) $this->qty && !(float) $this->pu_ht) {
                     $this->qty = 0;

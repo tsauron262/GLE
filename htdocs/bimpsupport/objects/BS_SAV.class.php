@@ -1877,7 +1877,7 @@ class BS_SAV extends BimpObject
 
         if (!is_null($propal)) {
             if ($propal->isLoaded()) {
-                $ref_propal = $propal->getData('ref');
+                $ref_propal = $propal->dol_object->ref;
                 $fileProp = DOL_DATA_ROOT . "/bimpcore/sav/" . $this->id . "/PC-" . $ref_propal . ".pdf";
                 if (is_file($fileProp)) {
                     $tabFile[] = $fileProp;
@@ -2642,7 +2642,6 @@ class BS_SAV extends BimpObject
                 $this->addNote('Devis envoyé le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs));
                 $new_status = self::BS_SAV_ATT_CLIENT;
                 $propal->dol_object->valid($user);
-                $propal->fetch($propal->id);
                 if(!$propal->dol_object->generateDocument(self::$propal_model_pdf, $langs)){
                         $errors[] = "Impossible de générer le PDF validation impossible";
                         $propal->dol_object->reopen($user, 0);

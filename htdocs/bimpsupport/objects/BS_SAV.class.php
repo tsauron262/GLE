@@ -1964,6 +1964,8 @@ class BS_SAV extends BimpObject
                 } elseif (in_array((int) $this->getData('status'), self::$need_propal_status)) {
                     $errors[] = 'Attention: PDF du devis non trouvé et donc non envoyé au client File : '.$fileProp;
                     dol_syslog('SAV "' . $this->getRef() . '" - ID ' . $this->id . ': échec envoi du devis au client '.print_r($errors,1), LOG_ERR);
+                } else{
+                    $errors[] = 'Attention: PDF du devis pas encore créer File : '.$fileProp;
                 }
             } else {
                 unset($propal);
@@ -2712,10 +2714,12 @@ class BS_SAV extends BimpObject
             } else {
                 $this->addNote('Devis envoyé le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs));
                 $new_status = self::BS_SAV_ATT_CLIENT;
-                $propal->dol_object->valid($user);
-                if(!$propal->dol_object->generateDocument(self::$propal_model_pdf, $langs)){
-                        $errors[] = "Impossible de générer le PDF validation impossible";
-                        $propal->dol_object->reopen($user, 0);
+                if(!$propal->dol_object->valid($user)){
+                    $errors[] = "Validation de devis impossible !!!";
+                }
+                if(!count($errors) && !$propal->dol_object->generateDocument(self::$propal_model_pdf, $langs)){
+                    $errors[] = "Impossible de générer le PDF validation impossible";
+                    $propal->dol_object->reopen($user, 0);
                 }
             }
             $propal->lines_locked = 0;
@@ -2736,6 +2740,9 @@ class BS_SAV extends BimpObject
                 }
             }
         }
+        
+        if(count($errors))
+            dol_syslog ('Impossible de validé propal via sAv : '.print_r($errors,1),LOG_ERR);
 
         return array(
             'errors'   => $errors,

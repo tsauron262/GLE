@@ -130,6 +130,28 @@ fields:
                 method: displayQty
                 params: 
                     - to_bill
+                    
+    qty_shipped_not_billed: 
+        label: Qté livrée non facturée
+        type: qty
+        default_value: 0
+        display: 
+            badge:
+                type: callback
+                method: displayQty
+                params: 
+                    - shipped_not_billed
+                    
+    qty_billed_not_shipped: 
+        label: Qté facturer non livrée
+        type: qty
+        default_value: 0
+        display: 
+            badge:
+                type: callback
+                method: displayQty
+                params: 
+                    - billed_not_shipped
         
 forms: 
     commande_fourn: 
@@ -321,6 +343,10 @@ filters_panels:
                 field: qty_shipped
             qty_billed: 
                 field: qty_billed
+            qty_billed_not_shipped: 
+                field: qty_billed_not_shipped
+            qty_shipped_not_billed: 
+                field: qty_shipped_not_billed
                         
 lists_cols:
     commande: 
@@ -363,6 +389,18 @@ lists_cols:
     qty_to_bill: 
         label: Qté à fac. 
         field: qty_to_bill
+        display: badge
+        min_width: 60px
+        max_width: 60px
+    qty_billed_not_shipped: 
+        label: Qté fac non liv. 
+        field: qty_billed_not_shipped
+        display: badge
+        min_width: 60px
+        max_width: 60px
+    qty_shipped_not_billed: 
+        label: Qté liv. non fac.
+        field: qty_shipped_not_billed
         display: badge
         min_width: 60px
         max_width: 60px

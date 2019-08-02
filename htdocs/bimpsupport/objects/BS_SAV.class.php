@@ -1747,6 +1747,7 @@ class BS_SAV extends BimpObject
         }
 
         $garantieHt = $garantieTtc = $garantiePa = 0;
+        $garantieHtService = $garantieTtcService = $garantiePaService = 0;
 
         BimpObject::loadClass($this->module, 'BS_SavPropalLine');
 
@@ -1758,9 +1759,20 @@ class BS_SAV extends BimpObject
                     $line->fetch($line->id);
                     $remise = (float) $line->remise;
                     $coefRemise = (100 - $remise) / 100;
-                    $garantieHt += ((float) $line->pu_ht * (float) $line->qty * (float) $coefRemise);
-                    $garantieTtc += ((float) $line->pu_ht * (float) $line->qty * ((float) $line->tva_tx / 100) * $coefRemise);
-                    $garantiePa += (float) $line->pa_ht * (float) $line->qty;
+                    $prod_type = $line->getData('product_type');
+                    $prod = $line->getChildObject('product');
+                    if($prod->isLoaded())
+                        $prod_type = $prod->getData('fk_product_type');
+                    if($prod_type != 1){
+                        $garantieHt += ((float) $line->pu_ht * (float) $line->qty * (float) $coefRemise);
+                        $garantieTtc += ((float) $line->pu_ht * (float) $line->qty * ((float) $line->tva_tx / 100) * $coefRemise);
+                        $garantiePa += (float) $line->pa_ht * (float) $line->qty;
+                    }
+                    else{
+                        $garantieHtService += ((float) $line->pu_ht * (float) $line->qty * (float) $coefRemise);
+                        $garantieTtcService += ((float) $line->pu_ht * (float) $line->qty * ((float) $line->tva_tx / 100) * $coefRemise);
+                        $garantiePaService += (float) $line->pa_ht * (float) $line->qty;
+                    }
                 } else {
                     $this->allGarantie = false;
                 }
@@ -1835,6 +1847,65 @@ class BS_SAV extends BimpObject
                 $line_errors = $line->delete($line_warnings, true);
             }
         }
+        
+        
+        
+
+        $line = BimpCache::findBimpObjectInstance('bimpsupport', 'BS_SavPropalLine', array(
+                    'id_obj'             => (int) $propal->id,
+                    'linked_id_object'   => (int) $this->id,
+                    'linked_object_name' => 'sav_garantie_service'
+                        ), true, true, true);
+
+        if (!BimpObject::objectLoaded($line)) {
+            $line = BimpObject::getInstance('bimpsupport', 'BS_SavPropalLine');
+        }
+
+        $line_errors = array();
+
+        if ((float) $garantieHtService > 0) {
+            $line->validateArray(array(
+                'id_obj'             => (int) $propal->id,
+                'type'               => BS_SavPropalLine::LINE_FREE,
+                'deletable'          => 0,
+                'editable'           => 0,
+                'linked_id_object'   => (int) $this->id,
+                'linked_object_name' => 'sav_garantie',
+                'remisable'          => 0
+            ));
+
+            $line->desc = 'Garantie main d\'oeuvre';
+            $line->id_product = 0;
+            $line->pu_ht = -$garantieHtService;
+            $line->pa_ht = -$garantiePaService;
+            $line->product_type = 1;
+            $line->id_fourn_price = 0;
+            $line->qty = 1;
+            if ((float) $garantieHt) {
+                $line->tva_tx = 100 * ($garantieTtcService / $garantieHtService);
+            } else {
+                $line->tva_tx = 0;
+            }
+            $line->remise = 0;
+
+            $error_label = '';
+            if (!$line->isLoaded()) {
+//                echo 'New Garantie: '.$garantieHt.'<br/>';
+                $error_label = 'création';
+                $line_errors = $line->create($line_warnings, true);
+            } else {
+//                echo 'Maj Garantie: '.$garantieHt.'<br/>';
+                $error_label = 'mise à jour';
+                $line_errors = $line->update($line_warnings, true);
+            }
+        } else {
+            if ($line->isLoaded()) {
+                $error_label = 'suppression';
+                $line_errors = $line->delete($line_warnings, true);
+            }
+        }
+        
+        
 
         if (count($line_errors)) {
             return BimpTools::getMsgFromArray($line_errors, 'Des erreurs sont survenues lors de la ' . $error_label . ' de la ligne "Garantie"');

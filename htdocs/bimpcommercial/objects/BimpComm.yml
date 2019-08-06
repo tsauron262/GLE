@@ -56,6 +56,9 @@ objects:
                 field_value: fk_user_valid
                 
 fields:
+    date_valid:
+        type: date
+        label: Date Validation
     entrepot: 
         label: Entrepôt
         dol_extra_field: 1
@@ -537,6 +540,8 @@ filters_panels:
                 field: fk_user_valid
             date_create: 
                 field: datec
+            date_valid: 
+                field: date_valid
             availability:
                 field: fk_availability
             cond_reglement: 

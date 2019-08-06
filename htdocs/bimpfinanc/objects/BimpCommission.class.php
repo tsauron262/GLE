@@ -337,7 +337,7 @@ class BimpCommission extends BimpObject
                     $lines = $facture->getLines('not_text');
 
                     foreach ($lines as $line) {
-                        $data['total_ca'] += (float) $line->getTotalHT();
+                        $data['total_ca'] += (float) $line->getTotalHTWithRemises();
                         $data['total_pa'] += ((float) $line->pa_ht * (float) $line->qty);
                     }
                 }

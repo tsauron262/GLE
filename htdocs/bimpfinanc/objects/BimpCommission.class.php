@@ -35,8 +35,10 @@ class BimpCommission extends BimpObject
         switch ($action) {
             case 'createCommissions';
             case 'validate':
-            case 'reopen':
                 return (int) $this->can('create');
+
+            case 'reopen':
+                return (int) $this->can('delete');
         }
 
         return (int) parent::canSetAction($action);

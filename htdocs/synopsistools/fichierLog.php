@@ -62,7 +62,7 @@ if ($inverser) {
     $text = implode("\n", $textT);
 }
 
-$tabPrefixe = array("" => "Général", "_deprecated" => "Deprecated", "_recur" => "Récurent", "_mail" => "Mail", "_sms" => "SMS", "_apple" => "Apple", "_apple2" => "Apple2", "_apple3" => "Apple3", "_time" => "Pages lentes", "_mysqllong" => "Longue query", "_caldav" => "CalDav", "_caldav2" => "CalDav2", "_ldap" => "Ldap", "_caldavLog" => "Log Caldav", "_sauv" => "Sauv", "_admin" => "Log Admin", "_extract" => "Export");
+$tabPrefixe = array("" => "Général", "_deprecated" => "Deprecated", "_recur" => "Récurent", "_mail" => "Mail", "_sms" => "SMS", "_apple" => "Apple", "_apple2" => "Apple2", "_apple3" => "Apple3", "_time" => "Pages lentes", "_mysqllong" => "Longue query", "_caldav" => "CalDav", "_caldav2" => "CalDav2", "_ldap" => "Ldap", "_caldavLog" => "Log Caldav", "_sauv" => "Sauv", "_admin" => "Log Admin", "_extract" => "Export", "_devissav" => "Devis SAV");
 
 
 foreach ($tabPrefixe as $prefV => $pref) {

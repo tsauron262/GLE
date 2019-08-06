@@ -8,7 +8,6 @@ list_page_url:
         tab: default
     
 header_list_name: default
-header_edit_form: edit
 header_btn: 
     callback: getActionsButtons
     
@@ -153,10 +152,6 @@ forms:
             - field: id_user
             - field: id_entrepot
             - field: date
-              
-    edit: 
-        rows: 
-            - field: date
             
     generate: 
         title: Générer des commissions par groupe
@@ -219,8 +214,6 @@ lists:
                 id_user: 
                     request: id_user
         add_btn_label: Nouvelle commission
-        edit_btn: 1
-        edit_form: edit
         delete_btn: 1
         header_buttons: 
             callback: getListHeaderButtons

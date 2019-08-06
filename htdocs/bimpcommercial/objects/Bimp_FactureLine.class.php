@@ -44,6 +44,89 @@ class Bimp_FactureLine extends ObjectLine
         return parent::isFieldEditable($field, $force_edit);
     }
 
+    // Getters params: 
+
+    public function getListExtraBtn()
+    {
+        $buttons = parent::getListExtraBtn();
+
+        if ($this->isLoaded() && $this->isNotTypeText()) {
+            $facture = $this->getParentInstance();
+            if (BimpObject::objectLoaded($facture)) {
+                if (in_array((int) $facture->getData('fk_statut'), array(1, 2))) {
+                    $reval = BimpObject::getInstance('bimpfinanc', 'BimpRevalorisation');
+                    $onclick = $reval->getJsLoadModalForm('default', 'Ajout d\\\'une revalorisation', array(
+                        'id_facture'      => (int) $facture->id,
+                        'id_facture_line' => (int) $this->id
+                    ));
+
+                    $buttons[] = array(
+                        'label'   => 'Ajouter une revalorisation',
+                        'icon'    => 'fas_search-dollar',
+                        'onclick' => $onclick
+                    );
+                }
+            }
+        }
+
+        return $buttons;
+    }
+
+    // Affichages: 
+
+    public function displayRevalorisations()
+    {
+        $html = '';
+        if ($this->isLoaded()) {
+            $total_attente = 0;
+            $total_accepted = 0;
+            $total_refused = 0;
+
+            $revals = BimpCache::getBimpObjectObjects('bimpfinanc', 'BimpRevalorisation', array(
+                        'id_facture_line' => (int) $this->id
+            ));
+
+            foreach ($revals as $reval) {
+                switch ((int) $reval->getData('status')) {
+                    case 0:
+                        $total_attente += (float) $reval->getTotal();
+                        break;
+
+                    case 1:
+                        $total_accepted += (float) $reval->getTotal();
+                        break;
+
+                    case 2:
+                        $total_refused += (float) $reval->getTotal();
+                        break;
+                }
+            }
+
+            if ($total_attente) {
+                $html .= '<span class="warning">';
+                $html .= BimpRender::renderIcon('fas_hourglass-start', 'iconLeft');
+                $html .= BimpTools::displayMoneyValue($total_attente);
+                $html .= '</span>';
+            }
+
+            if ($total_accepted) {
+                $html .= '<span class="success">';
+                $html .= BimpRender::renderIcon('fas_check', 'iconLeft');
+                $html .= BimpTools::displayMoneyValue($total_accepted);
+                $html .= '</span>';
+            }
+
+            if ($total_refused) {
+                $html .= '<span class="danger">';
+                $html .= BimpRender::renderIcon('fas_times', 'iconLeft');
+                $html .= BimpTools::displayMoneyValue($total_refused);
+                $html .= '</span>';
+            }
+        }
+
+        return $html;
+    }
+
     // Traitements:
 
     public function onFactureValidate()

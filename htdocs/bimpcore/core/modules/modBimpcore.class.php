@@ -263,6 +263,10 @@ class modBimpcore extends DolibarrModules
 
                 $this->_load_tables('/bimpcore/sql/');
 
+                $extrafields = new ExtraFields($this->db);
+                $extrafields->addExtraField('secteur', 'Secteur', 'sellist', 1, 12, 'user', 0, 0, '', array('options'=>array('bimp_c_secteur:valeur:clef'=>'')), 0, '', 1);
+                $extrafields->addExtraField('secteur', 'Secteur', 'sellist', 1, 12, 'usergroup', 0, 0, '', array('options'=>array('bimp_c_secteur:valeur:clef'=>'')), 0, '', 1);
+                
 		return $this->_init($sql, $options);
 	}
 

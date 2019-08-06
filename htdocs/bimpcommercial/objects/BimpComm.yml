@@ -587,6 +587,10 @@ lists_cols:
         field: total
     total_tva: 
         field: tva
+    total_pa: 
+        label: Total achats
+        value: 
+            callback: displayTotalPA
     cond_reglement: 
         field: fk_cond_reglement
     mode_reglement: 

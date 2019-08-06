@@ -1,0 +1,35 @@
+
+table: usergroup
+primary: rowid
+
+
+labels: 
+    name: Groupe d'utilisateur
+    
+fields: 
+    nom: 
+        label: Nom
+        dol_prop: name
+        
+    note: 
+        label: Note
+        type: text
+        
+    mail: 
+        label: Mail principal
+        dol_extra_field: 1
+        
+    alias: 
+        label: Alias mail
+        dol_extra_field: 1
+        
+    displayedinglobaladdressbook: 
+        label: Dans l'annuaire
+        type: bool
+        default_value: 0
+        
+    secteur: 
+        label: Secteur
+        dol_extra_field: 1
+        values: 
+            array: secteurs

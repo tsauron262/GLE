@@ -725,6 +725,7 @@ lists:
             margin:
                 
     default: 
+        configurable: 1
         checkboxes: 1
         positions: 1
         positions_open: 1

@@ -4,14 +4,13 @@ common_fields: 0
 icon: fas_search-dollar
 
 list_page_url:
-    controller: commission
+    controller: index
     url_params: 
         tab: revalorisations
     
 header_list_name: default
 header_btn: 
     callback: getActionsButtons
-
 
 labels: 
     name: Revalorisation
@@ -28,20 +27,30 @@ objects:
             id_object: 
                 field_value: id_facture_line
                 
+    user_processed: 
+        extends: user
+        instance: 
+            id_object: 
+                field_value: id_user_processed
+                                    
 fields: 
+    id_facture: 
+        label: Facture
+        type: id_object
+        object: facture
+        required: 1
+        
     id_facture_line:
         label: Ligne de facture
         type: id_object
         object: facture_line
-#        required: 1
-            
-    id_user: 
-        label: Utilisateur
-        type: id_object
-        object: user
-        input: 
-            type: search_user
         required: 1
+
+    id_commission: 
+        label: Commission
+        type: id_object
+        object: commission
+        default_value: 0
         
     type: 
         label: Type
@@ -55,9 +64,15 @@ fields:
         required: 1
         
     amount: 
-        label: Montant
+        label: Montant unitaire
         type: money
         required: 1
+        
+    qty: 
+        label: Qté
+        type: qty
+        decimals: 4
+        default_value: 0
         
     status: 
         label: Statut
@@ -66,21 +81,75 @@ fields:
             array: status_list
         default_value: 0
         
-    applied: 
-        label: Appliquée
-        type: bool
-        default_value: 0
+    date_processed: 
+        label: traitée le
+        type: date
+        
+    id_user_processed: 
+        label: Traitée par
+        type: id_object
+        object: user_processed
         
 forms: 
     default: 
         rows: 
-            - field: id_user
+            - custom: 1
+              input_name: id_facture
+              data_type: id_object
+              object: facture
+              label: Facture
+              input: 
+                  type: search_object
+              show: 
+                  callback: isNotLoaded
+              value: 
+                  field_value: id_facture
+            - custom: 1
+              input_name: id_facture_line
+              label: Ligne
+              input: 
+                  type: select
+                  options: 
+                      array: factureLines
+              display_if: 
+                  field_name: id_facture
+                  hide_values: 0
+              depends_on: id_facture
               show: 
                   callback: isNotLoaded
             - field: type
             - field: date
             - field: amount
+            - field: qty
         
+    add_to_commission: 
+        title: Ajout à une commission
+        rows: 
+#            - custom: 1
+#              label: Utilisateur
+#              input_name: id_user
+#              data_type: id
+#              required: 1
+#              input: 
+#                  type: search_user
+#              value: 
+#                  callback: 
+#                      method: getCommercialId
+#                      object: facture            
+            - custom: 1
+              label: Commission
+              input_name: id_commission
+              data_type: id
+              required: 1
+              input: 
+                  type: select
+                  options: 
+                      array: draftCommission
+#              depends_on: id_user
+#              display_if: 
+#                  field_name: id_user
+#                  hide_values: 0
+                  
 fields_tables: 
     infos: 
         title: Informations
@@ -89,17 +158,26 @@ fields_tables:
             - field: type
             - field: date
             - field: amount
+            - field: qty
+              edit: 1
+            - label: Total
+              value: 
+                  callback: displayTotal
             - field: status
-            - field: applied
+            - field: id_commission
+              display: nom_url
+              show: 
+                  field_value: id_commission
             
     elements: 
         title: Eléments liés
         icon: fas_link
         rows: 
-            - field: id_user
+            - field: id_facture
               display: card
-            - field: id_facture_line
-              display: card
+            - label: Ligne de facture
+              value: 
+                  callback: displayDesc
               
 views: 
     default: 
@@ -122,17 +200,49 @@ views:
 filters_panel: 
     default: 
         filters: 
-            - field: id_user
+            - field: status
             - field: type
             - field: date
-            - field: status
-            - field: applied
             - field: amount
             
+lists_cols: 
+    facture: 
+        field: id_facture
+        display: nom_url
+    type: 
+        field: type
+    commercial: 
+        label: Commercial facture
+        value: 
+            callback: 
+                method: displayCommercial
+                object: facture
+    date: 
+        field: date
+    desc: 
+        label: Désignation
+        value: 
+            callback: displayDesc
+    amount: 
+        field: amount
+    qty: 
+        field: qty
+        edit: 1
+    total: 
+        label: total
+        value: 
+            callback: displayTotal
+    status: 
+        field: status
+    commission: 
+        field: id_commission
+        display: nom_url
+
 lists: 
     default: 
         title: Liste des revalorisations
         checkboxes: 1
+        configurable: 1
         bulk_actions:
             - label: supprimer les revalorisations sélectionnées
               icon: fas_trash-alt
@@ -144,25 +254,56 @@ lists:
         sort_way: desc
         n: 10
         modal_view: default
-        add_form_name: default
-        add_form_values: 
-            fields: 
-                id_user: 
-                    request: id_user
-        add_btn_label: Nouvelle revalorisation
+#        add_form_name: default
+#        add_btn_label: Nouvelle revalorisation
         edit_btn: 1
         edit_form: default
         delete_btn: 1
+        update_btn: 1
         extra_btn: 
             callback: getActionsButtons
         cols: 
-            - field: id_user
-              display: nom_url
-            - field: type
-            - field: date
-            - label: Désignation
-              value: 
-                  callback: displayDesc
-            - field: amount
-            - field: status
-            - field: applied
+            facture: 
+            type: 
+            commercial: 
+            date: 
+            desc: 
+            amount: 
+            qty: 
+            total:
+            status: 
+            commission: 
+        
+    commission: 
+        enable_search: 0
+        pagination: 1
+        n: 20
+        sort_field: id
+        sort_way: asc
+        extra_btn: 
+            callback: getCommissionListButtons
+        modal_view: default
+        cols: 
+            facture: 
+            type: 
+            date: 
+            desc: 
+            total: 
+            status: 
+                
+    facture: 
+        enable_search: 0
+        pagination: 1
+        n: 20
+        sort_field: id
+        sort_way: asc
+        extra_btn: 
+            callback: getActionsButtons
+        modal_view: default
+        cols: 
+            type: 
+            date: 
+            desc: 
+            total: 
+            status:  
+            commission: 

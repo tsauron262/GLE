@@ -1,0 +1,21 @@
+
+- Importer seulements fichiers fonts et scss
+
+- renommer brands.scss en _fa-brands.scss. 
+- Idem pour regular.scss et solid.scss
+
+- Dans _variables.scss : 
+
+$fa-font-path: "../fonts/fa5" !default;
+$fa-css-prefix: fa5 !default;
+
+- Renommer font-family: 
+    - _fa-brands.scss: FA5B
+    - _fa-solid.scss: FA5S (+ virer ".fa") 
+    - _fa-regular.scss: FA5R
+
+- fontawesome.scss => ajouter: 
+
+@import 'fa-brands';
+@import 'fa-regular';
+@import 'fa-solid';

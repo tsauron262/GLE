@@ -3321,6 +3321,32 @@ class BimpObject extends BimpCache
 
         return $errors;
     }
+    
+    public function updateFields($fields_values, $force_update = true, &$warnings = array())
+    {
+        $errors = array();
+        
+        if (!$this->isLoaded($errors)) {
+            return $errors;
+        }
+        
+        $update = false;
+        
+        foreach ($fields_values as $field => $value) {
+            if ($this->field_exists($field)) {
+                if ($value != $this->getData($field)) {
+                    $this->set($field, $value);
+                    $update = true;
+                }
+            }
+        }
+        
+        if ($update) {
+            $errors = $this->update($warnings, $force_update);
+        }
+        
+        return $errors;
+    }
 
     public function find($filters, $return_first = false, $delete_if_multiple = false)
     {
@@ -5141,7 +5167,7 @@ class BimpObject extends BimpCache
         }
     }
 
-    public function renderSearchInput($input_name)
+    public function renderSearchInput($input_name, $value = null)
     {
         $search_data = $this->getSearchData();
 
@@ -5160,7 +5186,7 @@ class BimpObject extends BimpCache
             $params['join_on'] = 'a.' . $this->getPrimary() . ' = ef.fk_object';
         }
 
-        $html = BimpInput::renderSearchListInput($input_name, $params, 0, 'default');
+        $html = BimpInput::renderSearchListInput($input_name, $params, $value, 'default');
         $html .= '<p class="inputHelp">Rechercher ' . $this->getLabel('a') . '</p>';
         return $html;
     }

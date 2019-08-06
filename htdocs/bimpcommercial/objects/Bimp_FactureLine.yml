@@ -36,7 +36,16 @@ objects:
         instance: 
             bimp_object: 
                 name: FactureDolLine
-                
+       
+lists_cols: 
+    reval: 
+        label: Revalorisations
+        value: 
+            callback: displayRevalorisations
+        
+        
 lists: 
     default: 
-        objects_change_reload: ObjectLineRemise,Bimp_Facture
+        objects_change_reload: ObjectLineRemise,Bimp_Facture,BimpRevalorisation
+    global: 
+        objects_change_reload: ObjectLineRemise,Bimp_Facture,BimpRevalorisation

@@ -167,6 +167,11 @@ fields:
         label: Vérouiller les en-têtes
         type: bool
         default_value: 0
+    secteur: 
+        label: Secteur
+        dol_extra_field: 1
+        values: 
+            array: secteurs
         
 forms:
     light: 
@@ -188,6 +193,7 @@ forms:
             - field: signature
             - field: defaultentrepot
             - field: apple_centre
+            - field: secteur
             - field: echec_auth
             
 lists_cols: 
@@ -248,6 +254,9 @@ lists_cols:
         field: defaultentrepot
     apple_centre: 
         field: apple_centre
+    secteur: 
+        field: secteur
+        dol_extra_field: 1
         
 lists:
     default: 
@@ -325,6 +334,7 @@ fields_tables:
             - field: comp
             - field: defaultentrepot
             - field: apple_centre
+            - field: secteur
         
     notes: 
         title: Notes

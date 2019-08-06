@@ -1,0 +1,2782 @@
+/*!
+ * Font Awesome Free 5.1.1 by @fontawesome - https://fontawesome.com
+ * License - https://fontawesome.com/license (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License)
+ */
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031}}
+.fa5.fa5-glass:before {
+  content: "\f000"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000033}}
+.fa5.fa5-meetup {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000038}}
+.fa5.fa5-star-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\0000312}}
+.fa5.fa5-star-o:before {
+  content: "\f005"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\0000314}}
+.fa5.fa5-remove:before {
+  content: "\f00d"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\0000316}}
+.fa5.fa5-close:before {
+  content: "\f00d"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\0000318}}
+.fa5.fa5-gear:before {
+  content: "\f013"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\0000320}}
+.fa5.fa5-trash-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\0000324}}
+.fa5.fa5-trash-o:before {
+  content: "\f2ed"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\0000326}}
+.fa5.fa5-file-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\0000330}}
+.fa5.fa5-file-o:before {
+  content: "\f15b"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\0000332}}
+.fa5.fa5-clock-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\0000336}}
+.fa5.fa5-clock-o:before {
+  content: "\f017"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\0000338}}
+.fa5.fa5-arrow-circle-o-down {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\0000342}}
+.fa5.fa5-arrow-circle-o-down:before {
+  content: "\f358"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\0000344}}
+.fa5.fa5-arrow-circle-o-up {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\0000348}}
+.fa5.fa5-arrow-circle-o-up:before {
+  content: "\f35b"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\0000350}}
+.fa5.fa5-play-circle-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\0000354}}
+.fa5.fa5-play-circle-o:before {
+  content: "\f144"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\0000356}}
+.fa5.fa5-repeat:before {
+  content: "\f01e"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\0000358}}
+.fa5.fa5-rotate-right:before {
+  content: "\f01e"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\0000360}}
+.fa5.fa5-refresh:before {
+  content: "\f021"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\0000362}}
+.fa5.fa5-list-alt {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\0000367}}
+.fa5.fa5-dedent:before {
+  content: "\f03b"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\0000369}}
+.fa5.fa5-video-camera:before {
+  content: "\f03d"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\0000371}}
+.fa5.fa5-picture-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\0000375}}
+.fa5.fa5-picture-o:before {
+  content: "\f03e"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\0000377}}
+.fa5.fa5-photo {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\0000381}}
+.fa5.fa5-photo:before {
+  content: "\f03e"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\0000383}}
+.fa5.fa5-image {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\0000387}}
+.fa5.fa5-image:before {
+  content: "\f03e"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\0000389}}
+.fa5.fa5-pencil:before {
+  content: "\f303"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\0000391}}
+.fa5.fa5-map-marker:before {
+  content: "\f3c5"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\0000393}}
+.fa5.fa5-pencil-square-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\0000397}}
+.fa5.fa5-pencil-square-o:before {
+  content: "\f044"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\0000399}}
+.fa5.fa5-share-square-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003103}}
+.fa5.fa5-share-square-o:before {
+  content: "\f14d"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003105}}
+.fa5.fa5-check-square-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003109}}
+.fa5.fa5-check-square-o:before {
+  content: "\f14a"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003111}}
+.fa5.fa5-arrows:before {
+  content: "\f0b2"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003113}}
+.fa5.fa5-times-circle-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003117}}
+.fa5.fa5-times-circle-o:before {
+  content: "\f057"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003119}}
+.fa5.fa5-check-circle-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003123}}
+.fa5.fa5-check-circle-o:before {
+  content: "\f058"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003125}}
+.fa5.fa5-mail-forward:before {
+  content: "\f064"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003127}}
+.fa5.fa5-eye {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003132}}
+.fa5.fa5-eye-slash {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003137}}
+.fa5.fa5-warning:before {
+  content: "\f071"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003139}}
+.fa5.fa5-calendar:before {
+  content: "\f073"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003141}}
+.fa5.fa5-arrows-v:before {
+  content: "\f338"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003143}}
+.fa5.fa5-arrows-h:before {
+  content: "\f337"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003145}}
+.fa5.fa5-bar-chart {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003149}}
+.fa5.fa5-bar-chart:before {
+  content: "\f080"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003151}}
+.fa5.fa5-bar-chart-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003155}}
+.fa5.fa5-bar-chart-o:before {
+  content: "\f080"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003157}}
+.fa5.fa5-twitter-square {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003162}}
+.fa5.fa5-facebook-square {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003167}}
+.fa5.fa5-gears:before {
+  content: "\f085"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003169}}
+.fa5.fa5-thumbs-o-up {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003173}}
+.fa5.fa5-thumbs-o-up:before {
+  content: "\f164"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003175}}
+.fa5.fa5-thumbs-o-down {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003179}}
+.fa5.fa5-thumbs-o-down:before {
+  content: "\f165"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003181}}
+.fa5.fa5-heart-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003185}}
+.fa5.fa5-heart-o:before {
+  content: "\f004"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003187}}
+.fa5.fa5-sign-out:before {
+  content: "\f2f5"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003189}}
+.fa5.fa5-linkedin-square {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003193}}
+.fa5.fa5-linkedin-square:before {
+  content: "\f08c"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003195}}
+.fa5.fa5-thumb-tack:before {
+  content: "\f08d"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003197}}
+.fa5.fa5-external-link:before {
+  content: "\f35d"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003199}}
+.fa5.fa5-sign-in:before {
+  content: "\f2f6"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003201}}
+.fa5.fa5-github-square {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003206}}
+.fa5.fa5-lemon-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003210}}
+.fa5.fa5-lemon-o:before {
+  content: "\f094"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003212}}
+.fa5.fa5-square-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003216}}
+.fa5.fa5-square-o:before {
+  content: "\f0c8"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003218}}
+.fa5.fa5-bookmark-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003222}}
+.fa5.fa5-bookmark-o:before {
+  content: "\f02e"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003224}}
+.fa5.fa5-twitter {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003229}}
+.fa5.fa5-facebook {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003233}}
+.fa5.fa5-facebook:before {
+  content: "\f39e"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003235}}
+.fa5.fa5-facebook-f {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003239}}
+.fa5.fa5-facebook-f:before {
+  content: "\f39e"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003241}}
+.fa5.fa5-github {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003246}}
+.fa5.fa5-credit-card {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003251}}
+.fa5.fa5-feed:before {
+  content: "\f09e"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003253}}
+.fa5.fa5-hdd-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003257}}
+.fa5.fa5-hdd-o:before {
+  content: "\f0a0"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003259}}
+.fa5.fa5-hand-o-right {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003263}}
+.fa5.fa5-hand-o-right:before {
+  content: "\f0a4"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003265}}
+.fa5.fa5-hand-o-left {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003269}}
+.fa5.fa5-hand-o-left:before {
+  content: "\f0a5"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003271}}
+.fa5.fa5-hand-o-up {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003275}}
+.fa5.fa5-hand-o-up:before {
+  content: "\f0a6"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003277}}
+.fa5.fa5-hand-o-down {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003281}}
+.fa5.fa5-hand-o-down:before {
+  content: "\f0a7"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003283}}
+.fa5.fa5-arrows-alt:before {
+  content: "\f31e"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003285}}
+.fa5.fa5-group:before {
+  content: "\f0c0"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003287}}
+.fa5.fa5-chain:before {
+  content: "\f0c1"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003289}}
+.fa5.fa5-scissors:before {
+  content: "\f0c4"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003291}}
+.fa5.fa5-files-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003295}}
+.fa5.fa5-files-o:before {
+  content: "\f0c5"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003297}}
+.fa5.fa5-floppy-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003301}}
+.fa5.fa5-floppy-o:before {
+  content: "\f0c7"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003303}}
+.fa5.fa5-navicon:before {
+  content: "\f0c9"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003305}}
+.fa5.fa5-reorder:before {
+  content: "\f0c9"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003307}}
+.fa5.fa5-pinterest {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003312}}
+.fa5.fa5-pinterest-square {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003317}}
+.fa5.fa5-google-plus-square {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003322}}
+.fa5.fa5-google-plus {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003326}}
+.fa5.fa5-google-plus:before {
+  content: "\f0d5"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003328}}
+.fa5.fa5-money {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003332}}
+.fa5.fa5-money:before {
+  content: "\f3d1"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003334}}
+.fa5.fa5-unsorted:before {
+  content: "\f0dc"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003336}}
+.fa5.fa5-sort-desc:before {
+  content: "\f0dd"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003338}}
+.fa5.fa5-sort-asc:before {
+  content: "\f0de"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003340}}
+.fa5.fa5-linkedin {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003344}}
+.fa5.fa5-linkedin:before {
+  content: "\f0e1"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003346}}
+.fa5.fa5-rotate-left:before {
+  content: "\f0e2"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003348}}
+.fa5.fa5-legal:before {
+  content: "\f0e3"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003350}}
+.fa5.fa5-tachometer:before {
+  content: "\f3fd"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003352}}
+.fa5.fa5-dashboard:before {
+  content: "\f3fd"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003354}}
+.fa5.fa5-comment-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003358}}
+.fa5.fa5-comment-o:before {
+  content: "\f075"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003360}}
+.fa5.fa5-comments-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003364}}
+.fa5.fa5-comments-o:before {
+  content: "\f086"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003366}}
+.fa5.fa5-flash:before {
+  content: "\f0e7"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003368}}
+.fa5.fa5-clipboard {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003373}}
+.fa5.fa5-paste {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003377}}
+.fa5.fa5-paste:before {
+  content: "\f328"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003379}}
+.fa5.fa5-lightbulb-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003383}}
+.fa5.fa5-lightbulb-o:before {
+  content: "\f0eb"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003385}}
+.fa5.fa5-exchange:before {
+  content: "\f362"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003387}}
+.fa5.fa5-cloud-download:before {
+  content: "\f381"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003389}}
+.fa5.fa5-cloud-upload:before {
+  content: "\f382"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003391}}
+.fa5.fa5-bell-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003395}}
+.fa5.fa5-bell-o:before {
+  content: "\f0f3"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003397}}
+.fa5.fa5-cutlery:before {
+  content: "\f2e7"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003399}}
+.fa5.fa5-file-text-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003403}}
+.fa5.fa5-file-text-o:before {
+  content: "\f15c"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003405}}
+.fa5.fa5-building-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003409}}
+.fa5.fa5-building-o:before {
+  content: "\f1ad"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003411}}
+.fa5.fa5-hospital-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003415}}
+.fa5.fa5-hospital-o:before {
+  content: "\f0f8"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003417}}
+.fa5.fa5-tablet:before {
+  content: "\f3fa"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003419}}
+.fa5.fa5-mobile:before {
+  content: "\f3cd"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003421}}
+.fa5.fa5-mobile-phone:before {
+  content: "\f3cd"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003423}}
+.fa5.fa5-circle-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003427}}
+.fa5.fa5-circle-o:before {
+  content: "\f111"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003429}}
+.fa5.fa5-mail-reply:before {
+  content: "\f3e5"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003431}}
+.fa5.fa5-github-alt {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003436}}
+.fa5.fa5-folder-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003440}}
+.fa5.fa5-folder-o:before {
+  content: "\f07b"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003442}}
+.fa5.fa5-folder-open-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003446}}
+.fa5.fa5-folder-open-o:before {
+  content: "\f07c"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003448}}
+.fa5.fa5-smile-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003452}}
+.fa5.fa5-smile-o:before {
+  content: "\f118"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003454}}
+.fa5.fa5-frown-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003458}}
+.fa5.fa5-frown-o:before {
+  content: "\f119"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003460}}
+.fa5.fa5-meh-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003464}}
+.fa5.fa5-meh-o:before {
+  content: "\f11a"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003466}}
+.fa5.fa5-keyboard-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003470}}
+.fa5.fa5-keyboard-o:before {
+  content: "\f11c"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003472}}
+.fa5.fa5-flag-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003476}}
+.fa5.fa5-flag-o:before {
+  content: "\f024"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003478}}
+.fa5.fa5-mail-reply-all:before {
+  content: "\f122"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003480}}
+.fa5.fa5-star-half-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003484}}
+.fa5.fa5-star-half-o:before {
+  content: "\f089"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003486}}
+.fa5.fa5-star-half-empty {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003490}}
+.fa5.fa5-star-half-empty:before {
+  content: "\f089"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003492}}
+.fa5.fa5-star-half-full {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003496}}
+.fa5.fa5-star-half-full:before {
+  content: "\f089"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003498}}
+.fa5.fa5-code-fork:before {
+  content: "\f126"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003500}}
+.fa5.fa5-chain-broken:before {
+  content: "\f127"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003502}}
+.fa5.fa5-shield:before {
+  content: "\f3ed"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003504}}
+.fa5.fa5-calendar-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003508}}
+.fa5.fa5-calendar-o:before {
+  content: "\f133"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003510}}
+.fa5.fa5-maxcdn {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003515}}
+.fa5.fa5-html5 {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003520}}
+.fa5.fa5-css3 {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003525}}
+.fa5.fa5-ticket:before {
+  content: "\f3ff"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003527}}
+.fa5.fa5-minus-square-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003531}}
+.fa5.fa5-minus-square-o:before {
+  content: "\f146"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003533}}
+.fa5.fa5-level-up:before {
+  content: "\f3bf"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003535}}
+.fa5.fa5-level-down:before {
+  content: "\f3be"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003537}}
+.fa5.fa5-pencil-square:before {
+  content: "\f14b"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003539}}
+.fa5.fa5-external-link-square:before {
+  content: "\f360"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003541}}
+.fa5.fa5-compass {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003546}}
+.fa5.fa5-caret-square-o-down {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003550}}
+.fa5.fa5-caret-square-o-down:before {
+  content: "\f150"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003552}}
+.fa5.fa5-toggle-down {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003556}}
+.fa5.fa5-toggle-down:before {
+  content: "\f150"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003558}}
+.fa5.fa5-caret-square-o-up {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003562}}
+.fa5.fa5-caret-square-o-up:before {
+  content: "\f151"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003564}}
+.fa5.fa5-toggle-up {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003568}}
+.fa5.fa5-toggle-up:before {
+  content: "\f151"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003570}}
+.fa5.fa5-caret-square-o-right {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003574}}
+.fa5.fa5-caret-square-o-right:before {
+  content: "\f152"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003576}}
+.fa5.fa5-toggle-right {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003580}}
+.fa5.fa5-toggle-right:before {
+  content: "\f152"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003582}}
+.fa5.fa5-eur:before {
+  content: "\f153"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003584}}
+.fa5.fa5-euro:before {
+  content: "\f153"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003586}}
+.fa5.fa5-gbp:before {
+  content: "\f154"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003588}}
+.fa5.fa5-usd:before {
+  content: "\f155"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003590}}
+.fa5.fa5-dollar:before {
+  content: "\f155"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003592}}
+.fa5.fa5-inr:before {
+  content: "\f156"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003594}}
+.fa5.fa5-rupee:before {
+  content: "\f156"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003596}}
+.fa5.fa5-jpy:before {
+  content: "\f157"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003598}}
+.fa5.fa5-cny:before {
+  content: "\f157"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003600}}
+.fa5.fa5-rmb:before {
+  content: "\f157"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003602}}
+.fa5.fa5-yen:before {
+  content: "\f157"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003604}}
+.fa5.fa5-rub:before {
+  content: "\f158"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003606}}
+.fa5.fa5-ruble:before {
+  content: "\f158"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003608}}
+.fa5.fa5-rouble:before {
+  content: "\f158"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003610}}
+.fa5.fa5-krw:before {
+  content: "\f159"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003612}}
+.fa5.fa5-won:before {
+  content: "\f159"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003614}}
+.fa5.fa5-btc {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003619}}
+.fa5.fa5-bitcoin {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003623}}
+.fa5.fa5-bitcoin:before {
+  content: "\f15a"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003625}}
+.fa5.fa5-file-text:before {
+  content: "\f15c"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003627}}
+.fa5.fa5-sort-alpha-asc:before {
+  content: "\f15d"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003629}}
+.fa5.fa5-sort-alpha-desc:before {
+  content: "\f15e"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003631}}
+.fa5.fa5-sort-amount-asc:before {
+  content: "\f160"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003633}}
+.fa5.fa5-sort-amount-desc:before {
+  content: "\f161"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003635}}
+.fa5.fa5-sort-numeric-asc:before {
+  content: "\f162"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003637}}
+.fa5.fa5-sort-numeric-desc:before {
+  content: "\f163"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003639}}
+.fa5.fa5-youtube-square {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003644}}
+.fa5.fa5-youtube {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003649}}
+.fa5.fa5-xing {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003654}}
+.fa5.fa5-xing-square {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003659}}
+.fa5.fa5-youtube-play {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003663}}
+.fa5.fa5-youtube-play:before {
+  content: "\f167"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003665}}
+.fa5.fa5-dropbox {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003670}}
+.fa5.fa5-stack-overflow {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003675}}
+.fa5.fa5-instagram {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003680}}
+.fa5.fa5-flickr {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003685}}
+.fa5.fa5-adn {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003690}}
+.fa5.fa5-bitbucket {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003695}}
+.fa5.fa5-bitbucket-square {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003699}}
+.fa5.fa5-bitbucket-square:before {
+  content: "\f171"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003701}}
+.fa5.fa5-tumblr {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003706}}
+.fa5.fa5-tumblr-square {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003711}}
+.fa5.fa5-long-arrow-down:before {
+  content: "\f309"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003713}}
+.fa5.fa5-long-arrow-up:before {
+  content: "\f30c"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003715}}
+.fa5.fa5-long-arrow-left:before {
+  content: "\f30a"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003717}}
+.fa5.fa5-long-arrow-right:before {
+  content: "\f30b"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003719}}
+.fa5.fa5-apple {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003724}}
+.fa5.fa5-windows {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003729}}
+.fa5.fa5-android {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003734}}
+.fa5.fa5-linux {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003739}}
+.fa5.fa5-dribbble {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003744}}
+.fa5.fa5-skype {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003749}}
+.fa5.fa5-foursquare {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003754}}
+.fa5.fa5-trello {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003759}}
+.fa5.fa5-gratipay {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003764}}
+.fa5.fa5-gittip {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003768}}
+.fa5.fa5-gittip:before {
+  content: "\f184"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003770}}
+.fa5.fa5-sun-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003774}}
+.fa5.fa5-sun-o:before {
+  content: "\f185"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003776}}
+.fa5.fa5-moon-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003780}}
+.fa5.fa5-moon-o:before {
+  content: "\f186"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003782}}
+.fa5.fa5-vk {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003787}}
+.fa5.fa5-weibo {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003792}}
+.fa5.fa5-renren {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003797}}
+.fa5.fa5-pagelines {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003802}}
+.fa5.fa5-stack-exchange {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003807}}
+.fa5.fa5-arrow-circle-o-right {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003811}}
+.fa5.fa5-arrow-circle-o-right:before {
+  content: "\f35a"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003813}}
+.fa5.fa5-arrow-circle-o-left {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003817}}
+.fa5.fa5-arrow-circle-o-left:before {
+  content: "\f359"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003819}}
+.fa5.fa5-caret-square-o-left {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003823}}
+.fa5.fa5-caret-square-o-left:before {
+  content: "\f191"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003825}}
+.fa5.fa5-toggle-left {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003829}}
+.fa5.fa5-toggle-left:before {
+  content: "\f191"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003831}}
+.fa5.fa5-dot-circle-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003835}}
+.fa5.fa5-dot-circle-o:before {
+  content: "\f192"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003837}}
+.fa5.fa5-vimeo-square {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003842}}
+.fa5.fa5-try:before {
+  content: "\f195"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003844}}
+.fa5.fa5-turkish-lira:before {
+  content: "\f195"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003846}}
+.fa5.fa5-plus-square-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003850}}
+.fa5.fa5-plus-square-o:before {
+  content: "\f0fe"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003852}}
+.fa5.fa5-slack {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003857}}
+.fa5.fa5-wordpress {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003862}}
+.fa5.fa5-openid {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003867}}
+.fa5.fa5-institution:before {
+  content: "\f19c"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003869}}
+.fa5.fa5-bank:before {
+  content: "\f19c"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003871}}
+.fa5.fa5-mortar-board:before {
+  content: "\f19d"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003873}}
+.fa5.fa5-yahoo {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003878}}
+.fa5.fa5-google {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003883}}
+.fa5.fa5-reddit {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003888}}
+.fa5.fa5-reddit-square {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003893}}
+.fa5.fa5-stumbleupon-circle {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003898}}
+.fa5.fa5-stumbleupon {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003903}}
+.fa5.fa5-delicious {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003908}}
+.fa5.fa5-digg {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003913}}
+.fa5.fa5-pied-piper-pp {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003918}}
+.fa5.fa5-pied-piper-alt {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003923}}
+.fa5.fa5-drupal {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003928}}
+.fa5.fa5-joomla {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003933}}
+.fa5.fa5-spoon:before {
+  content: "\f2e5"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003935}}
+.fa5.fa5-behance {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003940}}
+.fa5.fa5-behance-square {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003945}}
+.fa5.fa5-steam {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003950}}
+.fa5.fa5-steam-square {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003955}}
+.fa5.fa5-automobile:before {
+  content: "\f1b9"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003957}}
+.fa5.fa5-cab:before {
+  content: "\f1ba"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003959}}
+.fa5.fa5-envelope-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003963}}
+.fa5.fa5-envelope-o:before {
+  content: "\f0e0"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003965}}
+.fa5.fa5-deviantart {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003970}}
+.fa5.fa5-soundcloud {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003975}}
+.fa5.fa5-file-pdf-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003979}}
+.fa5.fa5-file-pdf-o:before {
+  content: "\f1c1"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003981}}
+.fa5.fa5-file-word-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003985}}
+.fa5.fa5-file-word-o:before {
+  content: "\f1c2"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003987}}
+.fa5.fa5-file-excel-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003991}}
+.fa5.fa5-file-excel-o:before {
+  content: "\f1c3"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003993}}
+.fa5.fa5-file-powerpoint-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003997}}
+.fa5.fa5-file-powerpoint-o:before {
+  content: "\f1c4"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\00003999}}
+.fa5.fa5-file-image-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031003}}
+.fa5.fa5-file-image-o:before {
+  content: "\f1c5"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031005}}
+.fa5.fa5-file-photo-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031009}}
+.fa5.fa5-file-photo-o:before {
+  content: "\f1c5"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031011}}
+.fa5.fa5-file-picture-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031015}}
+.fa5.fa5-file-picture-o:before {
+  content: "\f1c5"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031017}}
+.fa5.fa5-file-archive-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031021}}
+.fa5.fa5-file-archive-o:before {
+  content: "\f1c6"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031023}}
+.fa5.fa5-file-zip-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031027}}
+.fa5.fa5-file-zip-o:before {
+  content: "\f1c6"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031029}}
+.fa5.fa5-file-audio-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031033}}
+.fa5.fa5-file-audio-o:before {
+  content: "\f1c7"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031035}}
+.fa5.fa5-file-sound-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031039}}
+.fa5.fa5-file-sound-o:before {
+  content: "\f1c7"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031041}}
+.fa5.fa5-file-video-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031045}}
+.fa5.fa5-file-video-o:before {
+  content: "\f1c8"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031047}}
+.fa5.fa5-file-movie-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031051}}
+.fa5.fa5-file-movie-o:before {
+  content: "\f1c8"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031053}}
+.fa5.fa5-file-code-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031057}}
+.fa5.fa5-file-code-o:before {
+  content: "\f1c9"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031059}}
+.fa5.fa5-vine {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031064}}
+.fa5.fa5-codepen {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031069}}
+.fa5.fa5-jsfiddle {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031074}}
+.fa5.fa5-life-ring {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031079}}
+.fa5.fa5-life-bouy {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031083}}
+.fa5.fa5-life-bouy:before {
+  content: "\f1cd"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031085}}
+.fa5.fa5-life-buoy {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031089}}
+.fa5.fa5-life-buoy:before {
+  content: "\f1cd"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031091}}
+.fa5.fa5-life-saver {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031095}}
+.fa5.fa5-life-saver:before {
+  content: "\f1cd"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031097}}
+.fa5.fa5-support {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031101}}
+.fa5.fa5-support:before {
+  content: "\f1cd"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031103}}
+.fa5.fa5-circle-o-notch:before {
+  content: "\f1ce"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031105}}
+.fa5.fa5-rebel {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031110}}
+.fa5.fa5-ra {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031114}}
+.fa5.fa5-ra:before {
+  content: "\f1d0"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031116}}
+.fa5.fa5-resistance {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031120}}
+.fa5.fa5-resistance:before {
+  content: "\f1d0"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031122}}
+.fa5.fa5-empire {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031127}}
+.fa5.fa5-ge {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031131}}
+.fa5.fa5-ge:before {
+  content: "\f1d1"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031133}}
+.fa5.fa5-git-square {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031138}}
+.fa5.fa5-git {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031143}}
+.fa5.fa5-hacker-news {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031148}}
+.fa5.fa5-y-combinator-square {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031152}}
+.fa5.fa5-y-combinator-square:before {
+  content: "\f1d4"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031154}}
+.fa5.fa5-yc-square {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031158}}
+.fa5.fa5-yc-square:before {
+  content: "\f1d4"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031160}}
+.fa5.fa5-tencent-weibo {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031165}}
+.fa5.fa5-qq {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031170}}
+.fa5.fa5-weixin {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031175}}
+.fa5.fa5-wechat {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031179}}
+.fa5.fa5-wechat:before {
+  content: "\f1d7"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031181}}
+.fa5.fa5-send:before {
+  content: "\f1d8"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031183}}
+.fa5.fa5-paper-plane-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031187}}
+.fa5.fa5-paper-plane-o:before {
+  content: "\f1d8"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031189}}
+.fa5.fa5-send-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031193}}
+.fa5.fa5-send-o:before {
+  content: "\f1d8"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031195}}
+.fa5.fa5-circle-thin {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031199}}
+.fa5.fa5-circle-thin:before {
+  content: "\f111"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031201}}
+.fa5.fa5-header:before {
+  content: "\f1dc"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031203}}
+.fa5.fa5-sliders:before {
+  content: "\f1de"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031205}}
+.fa5.fa5-futbol-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031209}}
+.fa5.fa5-futbol-o:before {
+  content: "\f1e3"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031211}}
+.fa5.fa5-soccer-ball-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031215}}
+.fa5.fa5-soccer-ball-o:before {
+  content: "\f1e3"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031217}}
+.fa5.fa5-slideshare {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031222}}
+.fa5.fa5-twitch {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031227}}
+.fa5.fa5-yelp {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031232}}
+.fa5.fa5-newspaper-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031236}}
+.fa5.fa5-newspaper-o:before {
+  content: "\f1ea"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031238}}
+.fa5.fa5-paypal {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031243}}
+.fa5.fa5-google-wallet {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031248}}
+.fa5.fa5-cc-visa {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031253}}
+.fa5.fa5-cc-mastercard {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031258}}
+.fa5.fa5-cc-discover {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031263}}
+.fa5.fa5-cc-amex {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031268}}
+.fa5.fa5-cc-paypal {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031273}}
+.fa5.fa5-cc-stripe {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031278}}
+.fa5.fa5-bell-slash-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031282}}
+.fa5.fa5-bell-slash-o:before {
+  content: "\f1f6"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031284}}
+.fa5.fa5-trash:before {
+  content: "\f2ed"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031286}}
+.fa5.fa5-copyright {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031291}}
+.fa5.fa5-eyedropper:before {
+  content: "\f1fb"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031293}}
+.fa5.fa5-area-chart:before {
+  content: "\f1fe"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031295}}
+.fa5.fa5-pie-chart:before {
+  content: "\f200"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031297}}
+.fa5.fa5-line-chart:before {
+  content: "\f201"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031299}}
+.fa5.fa5-lastfm {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031304}}
+.fa5.fa5-lastfm-square {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031309}}
+.fa5.fa5-ioxhost {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031314}}
+.fa5.fa5-angellist {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031319}}
+.fa5.fa5-cc {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031323}}
+.fa5.fa5-cc:before {
+  content: "\f20a"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031325}}
+.fa5.fa5-ils:before {
+  content: "\f20b"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031327}}
+.fa5.fa5-shekel:before {
+  content: "\f20b"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031329}}
+.fa5.fa5-sheqel:before {
+  content: "\f20b"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031331}}
+.fa5.fa5-meanpath {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031335}}
+.fa5.fa5-meanpath:before {
+  content: "\f2b4"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031337}}
+.fa5.fa5-buysellads {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031342}}
+.fa5.fa5-connectdevelop {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031347}}
+.fa5.fa5-dashcube {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031352}}
+.fa5.fa5-forumbee {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031357}}
+.fa5.fa5-leanpub {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031362}}
+.fa5.fa5-sellsy {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031367}}
+.fa5.fa5-shirtsinbulk {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031372}}
+.fa5.fa5-simplybuilt {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031377}}
+.fa5.fa5-skyatlas {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031382}}
+.fa5.fa5-diamond {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031386}}
+.fa5.fa5-diamond:before {
+  content: "\f3a5"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031388}}
+.fa5.fa5-intersex:before {
+  content: "\f224"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031390}}
+.fa5.fa5-facebook-official {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031394}}
+.fa5.fa5-facebook-official:before {
+  content: "\f09a"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031396}}
+.fa5.fa5-pinterest-p {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031401}}
+.fa5.fa5-whatsapp {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031406}}
+.fa5.fa5-hotel:before {
+  content: "\f236"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031408}}
+.fa5.fa5-viacoin {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031413}}
+.fa5.fa5-medium {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031418}}
+.fa5.fa5-y-combinator {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031423}}
+.fa5.fa5-yc {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031427}}
+.fa5.fa5-yc:before {
+  content: "\f23b"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031429}}
+.fa5.fa5-optin-monster {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031434}}
+.fa5.fa5-opencart {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031439}}
+.fa5.fa5-expeditedssl {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031444}}
+.fa5.fa5-battery-4:before {
+  content: "\f240"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031446}}
+.fa5.fa5-battery:before {
+  content: "\f240"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031448}}
+.fa5.fa5-battery-3:before {
+  content: "\f241"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031450}}
+.fa5.fa5-battery-2:before {
+  content: "\f242"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031452}}
+.fa5.fa5-battery-1:before {
+  content: "\f243"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031454}}
+.fa5.fa5-battery-0:before {
+  content: "\f244"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031456}}
+.fa5.fa5-object-group {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031461}}
+.fa5.fa5-object-ungroup {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031466}}
+.fa5.fa5-sticky-note-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031470}}
+.fa5.fa5-sticky-note-o:before {
+  content: "\f249"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031472}}
+.fa5.fa5-cc-jcb {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031477}}
+.fa5.fa5-cc-diners-club {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031482}}
+.fa5.fa5-clone {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031487}}
+.fa5.fa5-hourglass-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031491}}
+.fa5.fa5-hourglass-o:before {
+  content: "\f254"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031493}}
+.fa5.fa5-hourglass-1:before {
+  content: "\f251"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031495}}
+.fa5.fa5-hourglass-2:before {
+  content: "\f252"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031497}}
+.fa5.fa5-hourglass-3:before {
+  content: "\f253"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031499}}
+.fa5.fa5-hand-rock-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031503}}
+.fa5.fa5-hand-rock-o:before {
+  content: "\f255"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031505}}
+.fa5.fa5-hand-grab-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031509}}
+.fa5.fa5-hand-grab-o:before {
+  content: "\f255"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031511}}
+.fa5.fa5-hand-paper-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031515}}
+.fa5.fa5-hand-paper-o:before {
+  content: "\f256"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031517}}
+.fa5.fa5-hand-stop-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031521}}
+.fa5.fa5-hand-stop-o:before {
+  content: "\f256"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031523}}
+.fa5.fa5-hand-scissors-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031527}}
+.fa5.fa5-hand-scissors-o:before {
+  content: "\f257"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031529}}
+.fa5.fa5-hand-lizard-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031533}}
+.fa5.fa5-hand-lizard-o:before {
+  content: "\f258"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031535}}
+.fa5.fa5-hand-spock-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031539}}
+.fa5.fa5-hand-spock-o:before {
+  content: "\f259"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031541}}
+.fa5.fa5-hand-pointer-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031545}}
+.fa5.fa5-hand-pointer-o:before {
+  content: "\f25a"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031547}}
+.fa5.fa5-hand-peace-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031551}}
+.fa5.fa5-hand-peace-o:before {
+  content: "\f25b"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031553}}
+.fa5.fa5-registered {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031558}}
+.fa5.fa5-creative-commons {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031563}}
+.fa5.fa5-gg {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031568}}
+.fa5.fa5-gg-circle {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031573}}
+.fa5.fa5-tripadvisor {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031578}}
+.fa5.fa5-odnoklassniki {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031583}}
+.fa5.fa5-odnoklassniki-square {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031588}}
+.fa5.fa5-get-pocket {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031593}}
+.fa5.fa5-wikipedia-w {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031598}}
+.fa5.fa5-safari {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031603}}
+.fa5.fa5-chrome {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031608}}
+.fa5.fa5-firefox {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031613}}
+.fa5.fa5-opera {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031618}}
+.fa5.fa5-internet-explorer {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031623}}
+.fa5.fa5-television:before {
+  content: "\f26c"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031625}}
+.fa5.fa5-contao {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031630}}
+.fa5.fa5-500px {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031635}}
+.fa5.fa5-amazon {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031640}}
+.fa5.fa5-calendar-plus-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031644}}
+.fa5.fa5-calendar-plus-o:before {
+  content: "\f271"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031646}}
+.fa5.fa5-calendar-minus-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031650}}
+.fa5.fa5-calendar-minus-o:before {
+  content: "\f272"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031652}}
+.fa5.fa5-calendar-times-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031656}}
+.fa5.fa5-calendar-times-o:before {
+  content: "\f273"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031658}}
+.fa5.fa5-calendar-check-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031662}}
+.fa5.fa5-calendar-check-o:before {
+  content: "\f274"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031664}}
+.fa5.fa5-map-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031668}}
+.fa5.fa5-map-o:before {
+  content: "\f279"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031670}}
+.fa5.fa5-commenting {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031674}}
+.fa5.fa5-commenting:before {
+  content: "\f4ad"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031676}}
+.fa5.fa5-commenting-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031680}}
+.fa5.fa5-commenting-o:before {
+  content: "\f4ad"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031682}}
+.fa5.fa5-houzz {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031687}}
+.fa5.fa5-vimeo {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031691}}
+.fa5.fa5-vimeo:before {
+  content: "\f27d"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031693}}
+.fa5.fa5-black-tie {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031698}}
+.fa5.fa5-fonticons {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031703}}
+.fa5.fa5-reddit-alien {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031708}}
+.fa5.fa5-edge {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031713}}
+.fa5.fa5-credit-card-alt:before {
+  content: "\f09d"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031715}}
+.fa5.fa5-codiepie {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031720}}
+.fa5.fa5-modx {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031725}}
+.fa5.fa5-fort-awesome {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031730}}
+.fa5.fa5-usb {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031735}}
+.fa5.fa5-product-hunt {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031740}}
+.fa5.fa5-mixcloud {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031745}}
+.fa5.fa5-scribd {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031750}}
+.fa5.fa5-pause-circle-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031754}}
+.fa5.fa5-pause-circle-o:before {
+  content: "\f28b"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031756}}
+.fa5.fa5-stop-circle-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031760}}
+.fa5.fa5-stop-circle-o:before {
+  content: "\f28d"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031762}}
+.fa5.fa5-bluetooth {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031767}}
+.fa5.fa5-bluetooth-b {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031772}}
+.fa5.fa5-gitlab {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031777}}
+.fa5.fa5-wpbeginner {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031782}}
+.fa5.fa5-wpforms {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031787}}
+.fa5.fa5-envira {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031792}}
+.fa5.fa5-wheelchair-alt {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031796}}
+.fa5.fa5-wheelchair-alt:before {
+  content: "\f368"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031798}}
+.fa5.fa5-question-circle-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031802}}
+.fa5.fa5-question-circle-o:before {
+  content: "\f059"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031804}}
+.fa5.fa5-volume-control-phone:before {
+  content: "\f2a0"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031806}}
+.fa5.fa5-asl-interpreting:before {
+  content: "\f2a3"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031808}}
+.fa5.fa5-deafness:before {
+  content: "\f2a4"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031810}}
+.fa5.fa5-hard-of-hearing:before {
+  content: "\f2a4"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031812}}
+.fa5.fa5-glide {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031817}}
+.fa5.fa5-glide-g {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031822}}
+.fa5.fa5-signing:before {
+  content: "\f2a7"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031824}}
+.fa5.fa5-viadeo {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031829}}
+.fa5.fa5-viadeo-square {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031834}}
+.fa5.fa5-snapchat {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031839}}
+.fa5.fa5-snapchat-ghost {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031844}}
+.fa5.fa5-snapchat-square {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031849}}
+.fa5.fa5-pied-piper {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031854}}
+.fa5.fa5-first-order {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031859}}
+.fa5.fa5-yoast {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031864}}
+.fa5.fa5-themeisle {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031869}}
+.fa5.fa5-google-plus-official {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031873}}
+.fa5.fa5-google-plus-official:before {
+  content: "\f2b3"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031875}}
+.fa5.fa5-google-plus-circle {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031879}}
+.fa5.fa5-google-plus-circle:before {
+  content: "\f2b3"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031881}}
+.fa5.fa5-font-awesome {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031886}}
+.fa5.fa5-fa {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031890}}
+.fa5.fa5-fa:before {
+  content: "\f2b4"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031892}}
+.fa5.fa5-handshake-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031896}}
+.fa5.fa5-handshake-o:before {
+  content: "\f2b5"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031898}}
+.fa5.fa5-envelope-open-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031902}}
+.fa5.fa5-envelope-open-o:before {
+  content: "\f2b6"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031904}}
+.fa5.fa5-linode {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031909}}
+.fa5.fa5-address-book-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031913}}
+.fa5.fa5-address-book-o:before {
+  content: "\f2b9"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031915}}
+.fa5.fa5-vcard:before {
+  content: "\f2bb"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031917}}
+.fa5.fa5-address-card-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031921}}
+.fa5.fa5-address-card-o:before {
+  content: "\f2bb"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031923}}
+.fa5.fa5-vcard-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031927}}
+.fa5.fa5-vcard-o:before {
+  content: "\f2bb"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031929}}
+.fa5.fa5-user-circle-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031933}}
+.fa5.fa5-user-circle-o:before {
+  content: "\f2bd"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031935}}
+.fa5.fa5-user-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031939}}
+.fa5.fa5-user-o:before {
+  content: "\f007"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031941}}
+.fa5.fa5-id-badge {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031946}}
+.fa5.fa5-drivers-license:before {
+  content: "\f2c2"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031948}}
+.fa5.fa5-id-card-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031952}}
+.fa5.fa5-id-card-o:before {
+  content: "\f2c2"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031954}}
+.fa5.fa5-drivers-license-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031958}}
+.fa5.fa5-drivers-license-o:before {
+  content: "\f2c2"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031960}}
+.fa5.fa5-quora {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031965}}
+.fa5.fa5-free-code-camp {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031970}}
+.fa5.fa5-telegram {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031975}}
+.fa5.fa5-thermometer-4:before {
+  content: "\f2c7"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031977}}
+.fa5.fa5-thermometer:before {
+  content: "\f2c7"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031979}}
+.fa5.fa5-thermometer-3:before {
+  content: "\f2c8"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031981}}
+.fa5.fa5-thermometer-2:before {
+  content: "\f2c9"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031983}}
+.fa5.fa5-thermometer-1:before {
+  content: "\f2ca"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031985}}
+.fa5.fa5-thermometer-0:before {
+  content: "\f2cb"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031987}}
+.fa5.fa5-bathtub:before {
+  content: "\f2cd"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031989}}
+.fa5.fa5-s15:before {
+  content: "\f2cd"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031991}}
+.fa5.fa5-window-maximize {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000031996}}
+.fa5.fa5-window-restore {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000032001}}
+.fa5.fa5-times-rectangle:before {
+  content: "\f410"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000032003}}
+.fa5.fa5-window-close-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000032007}}
+.fa5.fa5-window-close-o:before {
+  content: "\f410"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000032009}}
+.fa5.fa5-times-rectangle-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000032013}}
+.fa5.fa5-times-rectangle-o:before {
+  content: "\f410"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000032015}}
+.fa5.fa5-bandcamp {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000032020}}
+.fa5.fa5-grav {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000032025}}
+.fa5.fa5-etsy {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000032030}}
+.fa5.fa5-imdb {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000032035}}
+.fa5.fa5-ravelry {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000032040}}
+.fa5.fa5-eercast {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000032044}}
+.fa5.fa5-eercast:before {
+  content: "\f2da"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000032046}}
+.fa5.fa5-snowflake-o {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000032050}}
+.fa5.fa5-snowflake-o:before {
+  content: "\f2dc"; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000032052}}
+.fa5.fa5-superpowers {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000032057}}
+.fa5.fa5-wpexplorer {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/flo\/NetBeansProjects\/BIMP_ERP_DEV\/BIMP_ERP_DEV\/htdocs\/bimpcore\/views\/scss\/fontawesome5_old\/_shims\.scss}line{font-family:\000032062}}
+.fa5.fa5-spotify {
+  font-family: 'Font Awesome 5 Brands';
+  font-weight: 400; }

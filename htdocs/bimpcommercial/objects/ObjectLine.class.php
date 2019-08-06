@@ -735,6 +735,11 @@ class ObjectLine extends BimpObject
         return round(BimpTools::calculatePriceTaxIn((float) $this->pu_ht, (float) $this->tva_tx) * (float) $this->qty, 8);
     }
 
+    public function getTotalPA()
+    {
+        return (float) $this->pa_ht * (float) $this->qty;
+    }
+
     public function getMargin()
     {
         $pu = (float) $this->pu_ht;
@@ -968,7 +973,7 @@ class ObjectLine extends BimpObject
         if (!$this->isLoaded()) {
             $this->getIdProductFromPost();
         }
-        
+
         if ((int) $this->id_product) {
             if (is_null($this->product)) {
                 $this->product = BimpObject::getInstance('bimpcore', 'Bimp_Product', (int) $this->id_product);

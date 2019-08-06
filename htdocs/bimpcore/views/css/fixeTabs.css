@@ -3,8 +3,7 @@
 /*$state-danger-text:              #a94442 !default;*/
 /* line 4, ../scss/fixeTabs.scss */
 #id-right {
-  padding-bottom: 60px;
-}
+  padding-bottom: 60px; }
 
 /* line 8, ../scss/fixeTabs.scss */
 #bimp_fixe_tabs {
@@ -12,62 +11,52 @@
   z-index: 1000;
   bottom: 0;
   right: 0;
-  display: inline-block;
-}
-/* line 15, ../scss/fixeTabs.scss */
-#bimp_fixe_tabs #bimp_fixe_tabs_captions {
-  text-align: right;
-  display: block;
-  background-color: transparent;
-}
-/* line 20, ../scss/fixeTabs.scss */
-#bimp_fixe_tabs #bimp_fixe_tabs_captions .fixe_tab_caption {
-  -webkit-transition: all 0.3s ease;
-  -o-transition: all 0.3s ease;
-  transition: all 0.3s ease;
-  display: inline-block;
-  padding: 12px 8px;
-  margin: 0 3px;
-  border-left: 1px solid #636363;
-  border-right: 1px solid #636363;
-  border-top: 3px solid #EF7D00;
-  background-color: #fff;
-  box-shadow: 0 0 4px #636363;
-  cursor: pointer;
-  z-index: 1002;
-}
-/* line 34, ../scss/fixeTabs.scss */
-#bimp_fixe_tabs #bimp_fixe_tabs_captions .fixe_tab_caption .title {
-  font-size: 15px;
-  color: #282828;
-}
-/* line 37, ../scss/fixeTabs.scss */
-#bimp_fixe_tabs #bimp_fixe_tabs_captions .fixe_tab_caption .title span {
-  margin: 0 2px;
-}
-/* line 42, ../scss/fixeTabs.scss */
-#bimp_fixe_tabs #bimp_fixe_tabs_captions .fixe_tab_caption.active, #bimp_fixe_tabs #bimp_fixe_tabs_captions .fixe_tab_caption:hover {
-  background-color: #EF7D00;
-}
-/* line 44, ../scss/fixeTabs.scss */
-#bimp_fixe_tabs #bimp_fixe_tabs_captions .fixe_tab_caption.active .title, #bimp_fixe_tabs #bimp_fixe_tabs_captions .fixe_tab_caption:hover .title {
-  color: #fff;
-}
-/* line 51, ../scss/fixeTabs.scss */
-#bimp_fixe_tabs #bimp_fixe_tabs_contents {
-  display: none;
-  background-color: #fff;
-  box-shadow: 0 0 4px #636363;
-  z-index: 1001;
-}
-/* line 57, ../scss/fixeTabs.scss */
-#bimp_fixe_tabs #bimp_fixe_tabs_contents .fixe_tab_content {
-  background-color: #DCDCDC;
-  display: none;
-  padding: 8px;
-  text-align: right;
-}
-/* line 63, ../scss/fixeTabs.scss */
-#bimp_fixe_tabs #bimp_fixe_tabs_contents .fixe_tab_content div {
-  text-align: left;
-}
+  display: inline-block; }
+  /* line 15, ../scss/fixeTabs.scss */
+  #bimp_fixe_tabs #bimp_fixe_tabs_captions {
+    text-align: right;
+    display: block;
+    background-color: transparent; }
+    /* line 20, ../scss/fixeTabs.scss */
+    #bimp_fixe_tabs #bimp_fixe_tabs_captions .fixe_tab_caption {
+      -webkit-transition: all 0.3s ease;
+      -o-transition: all 0.3s ease;
+      transition: all 0.3s ease;
+      display: inline-block;
+      padding: 12px 8px;
+      margin: 0 3px;
+      border-left: 1px solid #636363;
+      border-right: 1px solid #636363;
+      border-top: 3px solid #EF7D00;
+      background-color: #fff;
+      box-shadow: 0 0 4px #636363;
+      cursor: pointer;
+      z-index: 1002; }
+      /* line 34, ../scss/fixeTabs.scss */
+      #bimp_fixe_tabs #bimp_fixe_tabs_captions .fixe_tab_caption .title {
+        font-size: 15px;
+        color: #282828; }
+        /* line 37, ../scss/fixeTabs.scss */
+        #bimp_fixe_tabs #bimp_fixe_tabs_captions .fixe_tab_caption .title span {
+          margin: 0 2px; }
+      /* line 42, ../scss/fixeTabs.scss */
+      #bimp_fixe_tabs #bimp_fixe_tabs_captions .fixe_tab_caption.active, #bimp_fixe_tabs #bimp_fixe_tabs_captions .fixe_tab_caption:hover {
+        background-color: #EF7D00; }
+        /* line 44, ../scss/fixeTabs.scss */
+        #bimp_fixe_tabs #bimp_fixe_tabs_captions .fixe_tab_caption.active .title, #bimp_fixe_tabs #bimp_fixe_tabs_captions .fixe_tab_caption:hover .title {
+          color: #fff; }
+  /* line 51, ../scss/fixeTabs.scss */
+  #bimp_fixe_tabs #bimp_fixe_tabs_contents {
+    display: none;
+    background-color: #fff;
+    box-shadow: 0 0 4px #636363;
+    z-index: 1001; }
+    /* line 57, ../scss/fixeTabs.scss */
+    #bimp_fixe_tabs #bimp_fixe_tabs_contents .fixe_tab_content {
+      background-color: #DCDCDC;
+      display: none;
+      padding: 8px;
+      text-align: right; }
+      /* line 63, ../scss/fixeTabs.scss */
+      #bimp_fixe_tabs #bimp_fixe_tabs_contents .fixe_tab_content div {
+        text-align: left; }

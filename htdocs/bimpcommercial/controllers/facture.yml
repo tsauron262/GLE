@@ -14,3 +14,29 @@ objects:
             bimp_object: Bimp_Facture
             id_object: 
                 request: id
+
+sections: 
+    - type: tabs
+      tabs: 
+          default: 
+              sections: 
+                    1:
+                      nav_tabs: 
+                          
+                          
+sections: 
+    - type: tabs
+      tabs: 
+          default: 
+              sections: 
+                  1: 
+                      nav_tabs: 
+                          4:
+                                id: revals
+                                title: Revalorisations
+                                struct: 
+                                    type: custom
+                                    custom: 
+                                        callback: 
+                                            method: renderRevalorisationsList
+                                            object: facture

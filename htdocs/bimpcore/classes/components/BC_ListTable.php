@@ -920,7 +920,7 @@ class BC_ListTable extends BC_List
             if (count($buttons)) {
                 $title = BimpTools::ucfirst($this->object->getLabel('name_plur')) . ' sélectionné' . ($this->object->isLabelFemale() ? 'e' : '') . 's';
                 $html .= BimpRender::renderDropDownButton($title, $buttons, array(
-                            'icon' => 'check-square-o'
+                            'icon' => 'fas_check-square'
                 ));
             }
         }

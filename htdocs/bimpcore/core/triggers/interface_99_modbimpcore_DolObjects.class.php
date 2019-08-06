@@ -106,7 +106,6 @@ class InterfaceDolObjects extends DolibarrTriggers
                             // noFetchOnTrigger: On est dans le cas d'un create() ou update() via le BimpObject, donc pas de fetch(). 
                             if (BimpObject::objectLoaded($bimp_object) && !$bimp_object->noFetchOnTrigger) { 
                                 $bimp_object->fetch((int) $object->id);
-                                return 0;
                             }
                         }
                     }

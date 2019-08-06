@@ -1,4 +1,4 @@
-objects: 
+objects:
 #   Dol objets: 
     entrepot:
         relation: hasOne
@@ -38,6 +38,16 @@ objects:
                 name: Bimp_User
             id_object:
                 field_value: id_user
+                
+    group: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            dol_object: 
+                module: bimpcore
+                name: Bimp_UserGroup
+            id_object: 
+                field_value: id_group
                 
     societe:
         relation: hasOne
@@ -261,6 +271,27 @@ objects:
             bimp_object: 
                 module: bimpcore
                 name: BimpFile
+                
+#    BimpFinanc
+    commission: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpfinanc
+                name: BimpCommission
+            id_object: 
+                field_value: id_commission
+           
+    revalorisation: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpfinanc
+                name: BimpRevalorisation
+            id_object: 
+                field_value: id_revalorisation
                 
 associations: 
     files: 

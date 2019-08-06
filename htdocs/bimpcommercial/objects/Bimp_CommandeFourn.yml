@@ -598,6 +598,7 @@ lists_cols:
 #        field: fk_account
 #        display: nom_url
         
+    total_pa: unset
     ref_client: unset
     availability: unset
     input_reason: unset

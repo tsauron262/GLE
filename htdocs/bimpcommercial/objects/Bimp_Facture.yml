@@ -599,6 +599,7 @@ lists:
             soc: unset
             
     commission: 
+        total_row: 1
         enable_search: 0
         position: 0
         configurable: 0

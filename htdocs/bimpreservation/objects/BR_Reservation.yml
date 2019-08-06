@@ -647,7 +647,7 @@ lists:
         modal_view: default
         sort_field: id_product
         sort_way: asc
-        n: 25
+        n: 10
         extra_btn: 
             callback: getListExtraBtn
         cols:

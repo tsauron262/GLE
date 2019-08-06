@@ -908,6 +908,8 @@ class Bimp_CommandeLine extends ObjectLine
 
                 case 'to_ship';
                 case 'to_bill':
+                case 'billed_not_shipped':
+                case 'shipped_not_billed':
                     if ($qty <= 0) {
                         $class = 'success';
                     } elseif ($qty < $full_qty) {
@@ -3844,6 +3846,18 @@ class Bimp_CommandeLine extends ObjectLine
 
                     if ($to_bill_qty !== (float) $this->getData('qty_to_bill')) {
                         $this->updateField('qty_to_bill', $to_bill_qty, null, true);
+                    }
+
+                    // Diff:
+                    $qty_billed_not_shipped = $billed_qty - $shipped_qty;
+                    $qty_shipped_not_billed = $shipped_qty - $billed_qty;
+
+                    if ($qty_billed_not_shipped !== (float) $this->getData('qty_billed_not_shipped')) {
+                        $this->updateField('qty_billed_not_shipped', $qty_billed_not_shipped, null, true);
+                    }
+
+                    if ($qty_shipped_not_billed !== (float) $this->getData('qty_shipped_not_billed')) {
+                        $this->updateField('qty_shipped_not_billed', $qty_shipped_not_billed, null, true);
                     }
                 }
             } else {

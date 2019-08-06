@@ -1747,6 +1747,7 @@ class BS_SAV extends BimpObject
         }
 
         $garantieHt = $garantieTtc = $garantiePa = 0;
+        $garantieHtService = $garantieTtcService = $garantiePaService = 0;
 
         BimpObject::loadClass($this->module, 'BS_SavPropalLine');
 
@@ -1758,9 +1759,20 @@ class BS_SAV extends BimpObject
                     $line->fetch($line->id);
                     $remise = (float) $line->remise;
                     $coefRemise = (100 - $remise) / 100;
-                    $garantieHt += ((float) $line->pu_ht * (float) $line->qty * (float) $coefRemise);
-                    $garantieTtc += ((float) $line->pu_ht * (float) $line->qty * ((float) $line->tva_tx / 100) * $coefRemise);
-                    $garantiePa += (float) $line->pa_ht * (float) $line->qty;
+                    $prod_type = $line->getData('product_type');
+                    $prod = $line->getChildObject('product');
+                    if($prod->isLoaded())
+                        $prod_type = $prod->getData('fk_product_type');
+                    if($prod_type != 1){
+                        $garantieHt += ((float) $line->pu_ht * (float) $line->qty * (float) $coefRemise);
+                        $garantieTtc += ((float) $line->pu_ht * (float) $line->qty * ((float) $line->tva_tx / 100) * $coefRemise);
+                        $garantiePa += (float) $line->pa_ht * (float) $line->qty;
+                    }
+                    else{
+                        $garantieHtService += ((float) $line->pu_ht * (float) $line->qty * (float) $coefRemise);
+                        $garantieTtcService += ((float) $line->pu_ht * (float) $line->qty * ((float) $line->tva_tx / 100) * $coefRemise);
+                        $garantiePaService += (float) $line->pa_ht * (float) $line->qty;
+                    }
                 } else {
                     $this->allGarantie = false;
                 }
@@ -1835,6 +1847,65 @@ class BS_SAV extends BimpObject
                 $line_errors = $line->delete($line_warnings, true);
             }
         }
+        
+        
+        
+
+        $line = BimpCache::findBimpObjectInstance('bimpsupport', 'BS_SavPropalLine', array(
+                    'id_obj'             => (int) $propal->id,
+                    'linked_id_object'   => (int) $this->id,
+                    'linked_object_name' => 'sav_garantie_service'
+                        ), true, true, true);
+
+        if (!BimpObject::objectLoaded($line)) {
+            $line = BimpObject::getInstance('bimpsupport', 'BS_SavPropalLine');
+        }
+
+        $line_errors = array();
+
+        if ((float) $garantieHtService > 0) {
+            $line->validateArray(array(
+                'id_obj'             => (int) $propal->id,
+                'type'               => BS_SavPropalLine::LINE_FREE,
+                'deletable'          => 0,
+                'editable'           => 0,
+                'linked_id_object'   => (int) $this->id,
+                'linked_object_name' => 'sav_garantie',
+                'remisable'          => 0
+            ));
+
+            $line->desc = 'Garantie main d\'oeuvre';
+            $line->id_product = 0;
+            $line->pu_ht = -$garantieHtService;
+            $line->pa_ht = -$garantiePaService;
+            $line->product_type = 1;
+            $line->id_fourn_price = 0;
+            $line->qty = 1;
+            if ((float) $garantieHt) {
+                $line->tva_tx = 100 * ($garantieTtcService / $garantieHtService);
+            } else {
+                $line->tva_tx = 0;
+            }
+            $line->remise = 0;
+
+            $error_label = '';
+            if (!$line->isLoaded()) {
+//                echo 'New Garantie: '.$garantieHt.'<br/>';
+                $error_label = 'création';
+                $line_errors = $line->create($line_warnings, true);
+            } else {
+//                echo 'Maj Garantie: '.$garantieHt.'<br/>';
+                $error_label = 'mise à jour';
+                $line_errors = $line->update($line_warnings, true);
+            }
+        } else {
+            if ($line->isLoaded()) {
+                $error_label = 'suppression';
+                $line_errors = $line->delete($line_warnings, true);
+            }
+        }
+        
+        
 
         if (count($line_errors)) {
             return BimpTools::getMsgFromArray($line_errors, 'Des erreurs sont survenues lors de la ' . $error_label . ' de la ligne "Garantie"');
@@ -1877,7 +1948,7 @@ class BS_SAV extends BimpObject
 
         if (!is_null($propal)) {
             if ($propal->isLoaded()) {
-                $ref_propal = $propal->getData('ref');
+                $ref_propal = $propal->getSavedData("ref");
                 $fileProp = DOL_DATA_ROOT . "/bimpcore/sav/" . $this->id . "/PC-" . $ref_propal . ".pdf";
                 if (is_file($fileProp)) {
                     $tabFile[] = $fileProp;
@@ -1890,9 +1961,12 @@ class BS_SAV extends BimpObject
                     $tabFile[] = $fileProp;
                     $tabFile2[] = "application/pdf";
                     $tabFile3[] = $ref_propal . ".pdf";
+                    dol_syslog('SAV "' . $this->getRef() . '" - ID ' . $this->id . ': pdf devis OK ', LOG_ERR);
                 } elseif (in_array((int) $this->getData('status'), self::$need_propal_status)) {
-                    $errors[] = 'Attention: PDF du devis non trouvé et donc non envoyé au client';
+                    $errors[] = 'Attention: PDF du devis non trouvé et donc non envoyé au client File : '.$fileProp;
                     dol_syslog('SAV "' . $this->getRef() . '" - ID ' . $this->id . ': échec envoi du devis au client '.print_r($errors,1), LOG_ERR);
+                } else{
+                    $errors[] = 'Attention: PDF du devis pas encore créer File : '.$fileProp;
                 }
             } else {
                 unset($propal);
@@ -2635,31 +2709,41 @@ class BS_SAV extends BimpObject
                     $new_status = self::BS_SAV_DEVIS_ACCEPTE;
                 }
                 $propal->dol_object->valid($user);
-                $propal->dol_object->cloture($user, 2, "Auto via SAV sous garentie");
+                $propal->dol_object->cloture($user, 2, "Auto via SAV sous garantie");
                 $propal->fetch($propal->id);
                 $propal->dol_object->generateDocument(self::$propal_model_pdf, $langs);
             } else {
                 $this->addNote('Devis envoyé le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs));
                 $new_status = self::BS_SAV_ATT_CLIENT;
-                $propal->dol_object->valid($user);
-                $propal->dol_object->generateDocument(self::$propal_model_pdf, $langs);
+                if(!$propal->dol_object->valid($user)){
+                    $errors[] = "Validation de devis impossible !!!";
+                }
+                if(!count($errors) && !$propal->dol_object->generateDocument(self::$propal_model_pdf, $langs)){
+                    $errors[] = "Impossible de générer le PDF validation impossible";
+                    $propal->dol_object->reopen($user, 0);
+                }
             }
             $propal->lines_locked = 0;
 
-            if (!is_null($new_status)) {
-                $errors = $this->setNewStatus($new_status);
-            }
+            if(!count($errors)){
+                if (!is_null($new_status)) {
+                    $errors = array_merge($errors,$this->setNewStatus($new_status));
+                }
 
-            if (!(int) $this->getData('id_user_tech')) {
-                $this->updateField('id_user_tech', (int) $user->id);
-            }
+                if (!(int) $this->getData('id_user_tech')) {
+                    $this->updateField('id_user_tech', (int) $user->id);
+                }
 
-            $propal->hydrateFromDolObject();
+                $propal->hydrateFromDolObject();
 
-            if (isset($data['send_msg']) && (int) $data['send_msg']) {
-                $warnings = array_merge($warnings, $this->sendMsg('Devis'));
+                if (isset($data['send_msg']) && (int) $data['send_msg']) {
+                    $warnings = array_merge($warnings, $this->sendMsg('Devis'));
+                }
             }
         }
+        
+        if(count($errors))
+            dol_syslog ('Impossible de validé propal via sAv : '.print_r($errors,1),LOG_ERR);
 
         return array(
             'errors'   => $errors,

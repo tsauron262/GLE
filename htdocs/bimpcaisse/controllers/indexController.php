@@ -874,7 +874,7 @@ class indexController extends BimpController
                         foreach ($validate_errors as $e) {
                             $msg .= ' - ' . $e . "\n";
                         }
-                        dol_syslog($msg, LOG_ERR);
+                        dol_syslog($msg, LOG_DEBUG);
                     }
 //                    }
                 } else {

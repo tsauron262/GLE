@@ -11,8 +11,8 @@ class BimpCommission extends BimpObject
         1 => array('label' => 'Validée', 'icon' => 'fas_check', 'classes' => array('success'))
     );
     public static $types = array(
-        self::TYPE_USER     => array('label' => 'Commission utilisateur', 'icon' => 'fas-user'),
-        self::TYPE_ENTREPOT => array('label' => 'Commission entrepôt', 'icon' => 'fas-warehouse'),
+        self::TYPE_USER     => array('label' => 'Commission utilisateur', 'icon' => 'fas_user'),
+        self::TYPE_ENTREPOT => array('label' => 'Commission entrepôt', 'icon' => 'fas_warehouse'),
     );
 
     // Gestion des droits user: 
@@ -135,6 +135,30 @@ class BimpCommission extends BimpObject
         return $buttons;
     }
 
+    // Getters données: 
+
+    public function getName($withGeneric = true)
+    {
+        if ($this->isLoaded()) {
+            $label = 'Commission ';
+            switch ((int) $this->getData('type')) {
+                case self::TYPE_USER:
+                    $label .= ' utilisateur';
+                    break;
+
+                case self::TYPE_ENTREPOT:
+                    $label .= ' entrepôt';
+                    break;
+            }
+
+            $label .= ' #' . $this->id;
+
+            return $label;
+        }
+
+        return '';
+    }
+
     // Getters cache: 
 
     public function getRevalorisationsListCacheKey()
@@ -154,7 +178,18 @@ class BimpCommission extends BimpObject
             if ($refresh_cache || !isset(self::$cache[$cache_key])) {
                 self::$cache[$cache_key] = array();
 
-                $rows = $this->db->getRows('facture', 'id_commission = ' . (int) $this->id, null, 'array', array('rowid'));
+                $field = '';
+                switch ((int) $this->getData('type')) {
+                    case self::TYPE_USER:
+                        $field = 'id_user_commission';
+                        break;
+
+                    case self::TYPE_ENTREPOT:
+                        $field = 'id_entrepot_commission';
+                        break;
+                }
+
+                $rows = $this->db->getRows('facture', $field . ' = ' . (int) $this->id, null, 'array', array('rowid'));
                 if (is_array($rows)) {
                     foreach ($rows as $r) {
                         self::$cache[$cache_key][] = (int) $r['rowid'];
@@ -168,7 +203,7 @@ class BimpCommission extends BimpObject
         return array();
     }
 
-    public function getAvailableFacturesList()
+    public function getAvailableFacturesList($paid_only = false)
     {
         if ($this->isLoaded()) {
             $date = $this->getData('date');
@@ -184,7 +219,7 @@ class BimpCommission extends BimpObject
                         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'element_contact ec ON ec.element_id = f.rowid ';
                         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'facture_extrafields fef ON f.rowid = fef.fk_object ';
                         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'entrepot e ON fef.entrepot = e.rowid';
-                        $sql .= ' WHERE f.id_commission = 0';
+                        $sql .= ' WHERE f.id_user_commission = 0';
                         $sql .= ' AND f.date_valid <= \'' . $date . ' 23:59:59\'';
                         $sql .= ' AND f.fk_statut IN (1,2)';
                         $sql .= ' AND f.type IN (0,1,2)';
@@ -192,7 +227,11 @@ class BimpCommission extends BimpObject
                         $sql .= '(SELECT ctc.`rowid` FROM ' . MAIN_DB_PREFIX . 'c_type_contact ctc';
                         $sql .= ' WHERE ctc.source = \'internal\' AND ctc.element = \'facture\' AND ctc.code = \'SALESREPFOLL\')';
                         $sql .= ' AND ec.fk_socpeople = ' . $id_user;
-                        $sql .= ' AND e.has_commissions = 0';
+                        $sql .= ' AND e.has_users_commissions = 1';
+
+                        if ($paid_only) {
+                            $sql .= ' AND f.paye = 1';
+                        }
                     }
                     break;
 
@@ -203,11 +242,15 @@ class BimpCommission extends BimpObject
                         $sql = 'SELECT f.`rowid` as id FROM ' . MAIN_DB_PREFIX . 'facture f ';
                         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'facture_extrafields fef ON f.rowid = fef.fk_object ';
                         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'entrepot e ON fef.entrepot = e.rowid';
-                        $sql .= ' WHERE f.id_commission = 0';
+                        $sql .= ' WHERE f.id_entrepot_commission = 0';
                         $sql .= ' AND f.date_valid <= \'' . $date . ' 23:59:59\'';
                         $sql .= ' AND f.fk_statut IN (1,2)';
                         $sql .= ' AND f.type IN (0,1,2)';
                         $sql .= ' AND e.rowid = ' . $id_entrepot;
+
+                        if ($paid_only) {
+                            $sql .= ' AND f.paye = 1';
+                        }
                     }
                     break;
             }
@@ -240,7 +283,18 @@ class BimpCommission extends BimpObject
             if ($refresh_cache || !isset(self::$cache[$cache_key])) {
                 self::$cache[$cache_key] = array();
 
-                $rows = $this->db->getRows('bimp_revalorisation', 'id_commission = ' . (int) $this->id, null, 'array', array('id'));
+                $field = '';
+                switch ((int) $this->getData('type')) {
+                    case self::TYPE_USER:
+                        $field = 'id_user_commission';
+                        break;
+
+                    case self::TYPE_ENTREPOT:
+                        $field = 'id_entrepot_commission';
+                        break;
+                }
+
+                $rows = $this->db->getRows('bimp_revalorisation', $field . ' = ' . (int) $this->id, null, 'array', array('id'));
                 if (is_array($rows)) {
                     foreach ($rows as $r) {
                         self::$cache[$cache_key][] = (int) $r['id'];
@@ -265,17 +319,19 @@ class BimpCommission extends BimpObject
                     $id_user = (int) $this->getData('id_user');
 
                     if ($id_user) {
-                        $sql = 'SELECT r.id FROM ' . MAIN_DB_PREFIX . 'bimp_revalorisation r ';
-                        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'element_contact ec ON ec.element_id = r.id_facture ';
-                        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'facture_extrafields fef ON r.id_facture = fef.fk_object ';
+                        $sql = 'SELECT r.id FROM ' . MAIN_DB_PREFIX . 'bimp_revalorisation r';
+                        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'element_contact ec ON ec.element_id = r.id_facture';
+                        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'facture f ON f.rowid = r.id_facture';
+                        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'facture_extrafields fef ON r.id_facture = fef.fk_object';
                         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'entrepot e ON fef.entrepot = e.rowid';
-                        $sql .= ' WHERE r.id_commission = 0';
+                        $sql .= ' WHERE r.id_user_commission = 0';
                         $sql .= ' AND r.status = 1';
                         $sql .= ' AND ec.fk_c_type_contact = ';
                         $sql .= '(SELECT ctc.`rowid` FROM ' . MAIN_DB_PREFIX . 'c_type_contact ctc';
                         $sql .= ' WHERE ctc.source = \'internal\' AND ctc.element = \'facture\' AND ctc.code = \'SALESREPFOLL\')';
                         $sql .= ' AND ec.fk_socpeople = ' . $id_user;
-                        $sql .= ' AND e.has_commissions = 0';
+                        $sql .= ' AND e.has_users_commissions = 1';
+                        $sql .= ' AND f.fk_statut IN (1,2)';
                     }
                     break;
 
@@ -285,7 +341,7 @@ class BimpCommission extends BimpObject
                     if ($id_entrepot) {
                         $sql = 'SELECT r.id FROM ' . MAIN_DB_PREFIX . 'bimp_revalorisation r ';
                         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'facture_extrafields fef ON fef.fk_object = r.id_facture';
-                        $sql .= ' WHERE r.id_commission = 0';
+                        $sql .= ' WHERE r.id_entrepot_commission = 0';
                         $sql .= ' AND r.status = 1';
                         $sql .= ' AND fef.entrepot = ' . $id_entrepot;
                     }
@@ -459,17 +515,32 @@ class BimpCommission extends BimpObject
 
         $content = '';
 
+        $obj_field = '';
+        $list_name = '';
+
+        switch ((int) $this->getData('type')) {
+            case self::TYPE_USER:
+                $obj_field = 'id_user_commission';
+                $list_name = 'user_commission';
+                break;
+
+            case self::TYPE_ENTREPOT:
+                $obj_field = 'id_entrepot_commission';
+                $list_name = 'entrepot_commission';
+                break;
+        }
+
         // Factures: 
 
         $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
 
-        $bc_list = new BC_ListTable($facture, 'commission', 1, null, 'Factures liées', 'fas_link');
-        $bc_list->addFieldFilterValue('id_commission', $this->id);
+        $bc_list = new BC_ListTable($facture, $list_name, 1, null, 'Factures liées', 'fas_link');
+        $bc_list->addFieldFilterValue($obj_field, $this->id);
         $bc_list->addIdentifierSuffix('associated_to_' . $this->id);
 
         $content .= $bc_list->renderHtml();
 
-        $bc_list = new BC_ListTable($facture, 'commission', 1, null, 'Factures disponibles', 'fas_check');
+        $bc_list = new BC_ListTable($facture, $list_name, 1, null, 'Factures disponibles', 'fas_check');
         $bc_list->addFieldFilterValue('rowid', array(
             'in' => $this->getAvailableFacturesList()
         ));
@@ -487,13 +558,13 @@ class BimpCommission extends BimpObject
         $content = '';
         $revalorisation = BimpObject::getInstance('bimpfinanc', 'BimpRevalorisation');
 
-        $bc_list = new BC_ListTable($revalorisation, 'commission', 1, null, 'Revalorisations liées', 'fas_link');
-        $bc_list->addFieldFilterValue('id_commission', $this->id);
+        $bc_list = new BC_ListTable($revalorisation, $list_name, 1, null, 'Revalorisations liées', 'fas_link');
+        $bc_list->addFieldFilterValue($obj_field, $this->id);
         $bc_list->addIdentifierSuffix('associated_to_' . $this->id);
 
         $content .= $bc_list->renderHtml();
 
-        $bc_list = new BC_ListTable($revalorisation, 'commission', 1, null, 'Revalorisations disponibles', 'fas_check');
+        $bc_list = new BC_ListTable($revalorisation, $list_name, 1, null, 'Revalorisations disponibles', 'fas_check');
         $bc_list->addFieldFilterValue('id', array(
             'in' => $this->getAvailableRevalorisationsList()
         ));
@@ -597,11 +668,22 @@ class BimpCommission extends BimpObject
 
         if (!count($errors)) {
             // Ajout des factures dispos: 
-            $factures = $this->getAvailableFacturesList();
+            $factures = $this->getAvailableFacturesList((int) BimpTools::getPostFieldValue('paid_only', 0));
+            $obj_field = '';
+            switch ((int) $this->getData('type')) {
+                case self::TYPE_USER:
+                    $obj_field = 'id_user_commission';
+                    break;
+
+                case self::TYPE_ENTREPOT:
+                    $obj_field = 'id_entrepot_commission';
+                    break;
+            }
+
             foreach ($factures as $id_facture) {
                 $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_facture);
                 if (BimpObject::objectLoaded($facture)) {
-                    $up_errors = $facture->updateField('id_commission', (int) $this->id);
+                    $up_errors = $facture->updateField($obj_field, (int) $this->id);
 
                     if (count($up_errors)) {
                         $warnings[] = BimpTools::getMsgFromArray($up_errors, 'Echec de l\'enregistrement de la commission pour la facture ' . $facture->getRef());
@@ -614,7 +696,7 @@ class BimpCommission extends BimpObject
             foreach ($revals as $id_reval) {
                 $reval = BimpCache::getBimpObjectInstance('bimpfinanc', 'BimpRevalorisation', (int) $id_reval);
                 if (BimpObject::objectLoaded($reval)) {
-                    $up_errors = $reval->updateField('id_commission', (int) $this->id);
+                    $up_errors = $reval->updateField($obj_field, (int) $this->id);
 
                     if (count($up_errors)) {
                         $warnings[] = BimpTools::getMsgFromArray($up_errors, 'Echec de l\'enregistrement de la commission pour la revalorisation #' . $reval->id);
@@ -640,19 +722,37 @@ class BimpCommission extends BimpObject
     public function delete(&$warnings = array(), $force_delete = false)
     {
         $id = $this->id;
+        $type = (int) $this->getData('type');
 
         $errors = parent::delete($warnings, $force_delete);
 
         if (!count($errors) && (int) $id) {
-            if ($this->db->update('facture', array(
-                        'id_commission' => 0
-                            ), '`id_commission` = ' . (int) $id) <= 0) {
-                $warnings[] = 'Echec du retrait de la commission supprimée des factures associées. ' . $this->db->db->lasterror();
-            }
-            if ($this->db->update('bimp_revalorisation', array(
-                        'id_commission' => 0
-                            ), '`id_commission` = ' . (int) $id) <= 0) {
-                $warnings[] = 'Echec du retrait de la commission supprimée des revalorisations associées. ' . $this->db->db->lasterror();
+            switch ($type) {
+                case self::TYPE_USER:
+                    if ($this->db->update('facture', array(
+                                'id_user_commission' => 0
+                                    ), '`id_user_commission` = ' . (int) $id) <= 0) {
+                        $warnings[] = 'Echec du retrait de la commission supprimée des factures associées. ' . $this->db->db->lasterror();
+                    }
+                    if ($this->db->update('bimp_revalorisation', array(
+                                'id_user_commission' => 0
+                                    ), '`id_user_commission` = ' . (int) $id) <= 0) {
+                        $warnings[] = 'Echec du retrait de la commission supprimée des revalorisations associées. ' . $this->db->db->lasterror();
+                    }
+                    break;
+
+                case self::TYPE_ENTREPOT:
+                    if ($this->db->update('facture', array(
+                                'id_entrepot_commission' => 0
+                                    ), '`id_entrepot_commission` = ' . (int) $id) <= 0) {
+                        $warnings[] = 'Echec du retrait de la commission supprimée des factures associées. ' . $this->db->db->lasterror();
+                    }
+                    if ($this->db->update('bimp_revalorisation', array(
+                                'id_entrepot_commission' => 0
+                                    ), '`id_entrepot_commission` = ' . (int) $id) <= 0) {
+                        $warnings[] = 'Echec du retrait de la commission supprimée des revalorisations associées. ' . $this->db->db->lasterror();
+                    }
+                    break;
             }
         }
 
@@ -702,6 +802,7 @@ class BimpCommission extends BimpObject
         $commission = BimpObject::getInstance('bimpfinanc', 'BimpCommission');
 
         $errors = $commission->validateArray(array(
+            'type'    => BimpCommission::TYPE_USER,
             'id_user' => (int) $id_user,
             'date'    => $date
         ));

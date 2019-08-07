@@ -1181,6 +1181,29 @@ class ObjectLine extends BimpObject
         return 3;
     }
 
+    public function getRemiseCRT()
+    {
+        if ($this->field_exists('remise_crt')) {
+            if ((int) $this->getData('remise_crt')) {
+                $remise_percent = 0;
+                if ($this->field_exists('remise_crt_percent')) {
+                    $remise_percent = (float) $this->getData('remise_crt_percent');
+                } else {
+                    $product = $this->getProduct();
+                    if (BimpObject::objectLoaded($product)) {
+                        $remise_percent = (float) $product->getRemiseCrt();
+                    }
+                }
+
+                if ($remise_percent) {
+                    return (float) $this->pu_ht * ($remise_percent / 100);
+                }
+            }
+        }
+
+        return 0;
+    }
+
     // Affichages: 
 
     public function displaySerials()
@@ -2864,6 +2887,12 @@ class ObjectLine extends BimpObject
                     $html .= '<span class="warning">Attente sélection d\'un produit</span>';
                 }
                 break;
+
+//            case 'remise_crt_percent':
+//                if ((int) $this->getData('remise_crt')) {
+//                    
+//                } 
+//                break;
 
 //            case 'remise_pa':
 //                $product = $this->getProduct();

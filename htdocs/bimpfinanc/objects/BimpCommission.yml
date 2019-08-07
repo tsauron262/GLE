@@ -66,6 +66,7 @@ fields_tables:
         title: Informations
         icon: fas_info-circle
         rows: 
+            - field: type
             - field: id_user
               display: card
               show: 
@@ -152,6 +153,13 @@ forms:
             - field: id_user
             - field: id_entrepot
             - field: date
+            - custom: 1
+              label: Inclure uniquement les facture entièrement payées
+              input_name: paid_only
+              value: 0
+              data_type: bool
+              input: 
+                  type: toggle
             
     generate: 
         title: Générer des commissions par groupe
@@ -168,6 +176,13 @@ forms:
               input: 
                   type: search_group
             - field: date
+            - custom: 1
+              label: Uniquement les facture entièrement payée
+              input_name: paid_only
+              value: 0
+              data_type: bool
+              input: 
+                  type: toggle
     
 filters_panel: 
     default: 

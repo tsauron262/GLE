@@ -31,7 +31,8 @@ class BimpRevalorisation extends BimpObject
                 return 1;
 
             case 'addToCommission':
-            case 'removeFromCommission':
+            case 'removeFromUserCommission':
+            case 'removeFromEntrepotCommission':
                 $commission = BimpObject::getInstance('bimpfinanc', 'BimpCommission');
                 return (int) $commission->can('create');
         }
@@ -62,11 +63,18 @@ class BimpRevalorisation extends BimpObject
                         return 1;
 
                     case 1:
-                        if ((int) $this->getData('id_commission')) {
-                            $commission = $this->getChildObject('commission');
-                            if (BimpObject::objectLoaded($commission)) {
-                                if ((int) $commission->getData('status') !== 0) {
-                                    $errors[] = 'Cette revalorisation a été ajoutée à une commission qui n\'est plus au statut "En attente"';
+                        if ((int) $this->getData('id_user_commission') || (int) $this->getData('id_entrepot_commission')) {
+                            $user_commission = $this->getChildObject('user_commission');
+                            if (BimpObject::objectLoaded($user_commission)) {
+                                if ((int) $user_commission->getData('status') !== 0) {
+                                    $errors[] = 'Cette revalorisation a été ajoutée à une commission utilisateur qui n\'est plus au statut "En attente"';
+                                    return 0;
+                                }
+                            }
+                            $entrepot_commission = $this->getChildObject('entrepot_commission');
+                            if (BimpObject::objectLoaded($entrepot_commission)) {
+                                if ((int) $entrepot_commission->getData('status') !== 0) {
+                                    $errors[] = 'Cette revalorisation a été ajoutée à une commission entrepôt qui n\'est plus au statut "En attente"';
                                     return 0;
                                 }
                             }
@@ -86,24 +94,41 @@ class BimpRevalorisation extends BimpObject
                     $errors[] = 'Cette revalorisation n\'a pas le statut "Acceptée"';
                     return 0;
                 }
-                if ((int) $this->getData('id_commission')) {
-                    $errors[] = 'Cette revalorisation a déjà été attribué à une commission';
+                if ((int) $this->getData('id_user_commission') && (int) $this->getData('id_entrepot_commission')) {
+                    $errors[] = 'Cette revalorisation n\'est pas attribuable à une nouvelle commission';
                     return 0;
                 }
                 return 1;
 
-            case 'removeFromCommission':
+            case 'removeFromUserCommission':
                 if (!$this->isLoaded($errors)) {
                     return 0;
                 }
-                if (!(int) $this->getData('id_commission')) {
-                    $errors[] = 'Cette revalorisation n\'est attribuée à aucune commission';
+                if (!(int) $this->getData('id_user_commission')) {
+                    $errors[] = 'Cette revalorisation n\'est attribuée à aucune commission utilisateur';
                     return 0;
                 }
-                $commission = $this->getChildObject('commission');
+                $commission = $this->getChildObject('user_commission');
                 if (BimpObject::objectLoaded($commission)) {
                     if ((int) $commission->getData('status') !== 0) {
-                        $errors[] = 'La commission n\'est plus au statut "brouillon"';
+                        $errors[] = 'La commission utilisateur n\'est plus au statut "brouillon"';
+                        return 0;
+                    }
+                }
+                return 1;
+
+            case 'removeFromEntrepotCommission':
+                if (!$this->isLoaded($errors)) {
+                    return 0;
+                }
+                if (!(int) $this->getData('id_entrepot_commission')) {
+                    $errors[] = 'Cette revalorisation n\'est attribuée à aucune commission entrepôt';
+                    return 0;
+                }
+                $commission = $this->getChildObject('entrepot_commission');
+                if (BimpObject::objectLoaded($commission)) {
+                    if ((int) $commission->getData('status') !== 0) {
+                        $errors[] = 'La commission entrepôt n\'est plus au statut "brouillon"';
                         return 0;
                     }
                 }
@@ -144,31 +169,54 @@ class BimpRevalorisation extends BimpObject
             if (BimpObject::objectLoaded($facture)) {
                 $id_entrepot = (int) $facture->getData('entrepot');
                 if ($id_entrepot) {
-                    $has_commissions = (int) $this->db->getValue('entrepot', 'has_commissions', '`rowid` = ' . $id_entrepot);
-                    if ($has_commissions) {
-                        foreach (BimpCache::getBimpObjectObjects('bimpfinanc', 'BimpCommission', array(
-                            'type'        => 2,
-                            'id_entrepot' => $id_entrepot,
-                            'status'      => 0
-                        )) as $commission) {
-                            $return[(int) $commission->id] = 'Commission #' . $commission->id . ' (' . $commission->displayData('date', 'default', false, true) . ')';
-                        }
-                    } else {
-                        $id_user = (int) BimpTools::getPostFieldValue('id_user', 0);
-                        if (!$id_user) {
+                    if (!(int) $this->getData('id_user_commission')) {
+                        $has_user_commissions = (int) $this->db->getValue('entrepot', 'has_users_commissions', '`rowid` = ' . $id_entrepot);
+                        if ($has_user_commissions) {
                             $id_user = (int) $facture->getCommercialId();
-                        }
-
-                        if ($id_user) {
-                            foreach (BimpCache::getBimpObjectObjects('bimpfinanc', 'BimpCommission', array(
-                                'type'    => 1,
-                                'id_user' => $id_user,
-                                'status'  => 0
-                            )) as $commission) {
-                                $return[(int) $commission->id] = 'Commission #' . $commission->id . ' (' . $commission->displayData('date', 'default', false, true) . ')';
+                            if ($id_user) {
+                                foreach (BimpCache::getBimpObjectObjects('bimpfinanc', 'BimpCommission', array(
+                                    'type'    => 1,
+                                    'id_user' => $id_user,
+                                    'status'  => 0
+                                )) as $commission) {
+                                    $return[(int) $commission->id] = $commission->getName() . ' (' . $commission->displayData('date', 'default', false, true) . ')';
+                                }
                             }
                         }
                     }
+
+                    if (!(int) $this->getData('id_entrepot_commission')) {
+                        $has_entrepot_commissions = (int) $this->db->getValue('entrepot', 'has_entrepot_commissions', '`rowid` = ' . $id_entrepot);
+                        if ($has_entrepot_commissions) {
+                            foreach (BimpCache::getBimpObjectObjects('bimpfinanc', 'BimpCommission', array(
+                                'type'        => 2,
+                                'id_entrepot' => $id_entrepot,
+                                'status'      => 0
+                            )) as $commission) {
+                                $return[(int) $commission->id] = $commission->getName() . ' (' . $commission->displayData('date', 'default', false, true) . ')';
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return $return;
+    }
+
+    public function getFactureLinesArray()
+    {
+        $return = array();
+        $id_facture = (int) BimpTools::getPostFieldValue('id_facture', (int) $this->getData('id_facture'));
+
+        if ($id_facture) {
+            $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
+
+
+            if (BimpObject::objectLoaded($facture)) {
+                $lines = $facture->getLines('not_text');
+                foreach ($lines as $line) {
+                    $return[(int) $line->id] = 'N°' . $line->getData('position') . ' - ' . str_replace('<br/>', ' ', $line->displayLineData('desc_light'));
                 }
             }
         }
@@ -233,28 +281,49 @@ class BimpRevalorisation extends BimpObject
         return $buttons;
     }
 
-    public function getCommissionListButtons()
+    public function getCommissionListButtons($comm_type = null)
     {
         $buttons = array();
 
-        if ($this->isActionAllowed('addToCommission') && $this->canSetAction('addToCommission')) {
-            $buttons[] = array(
-                'label'   => 'Ajouter à une commission',
-                'icon'    => 'fas_comment-dollar',
-                'onclick' => $this->getJsActionOnclick('addToCommission', array(), array(
-                    'form_name' => 'add_to_commission'
-                ))
-            );
+        if (is_null($comm_type) || (int) $comm_type === 1) {
+            if ($this->isActionAllowed('removeFromUserCommission') && $this->canSetAction('removeFromUserCommission')) {
+                $commission = $this->getChildObject('user_commission');
+                if (BimpObject::objectLoaded($commission)) {
+                    $buttons[] = array(
+                        'label'   => 'Retirer de la commission utilisateur #' . $commission->id,
+                        'icon'    => 'fas_times',
+                        'onclick' => $this->getJsActionOnclick('removeFromUserCommission', array(), array(
+                            'confirm_msg' => 'Veuillez confirmer le retrait de la commission #' . $commission->id
+                        ))
+                    );
+                }
+            }
         }
 
-        if ($this->isActionAllowed('removeFromCommission') && $this->canSetAction('removeFromCommission')) {
-            $commission = $this->getChildObject('commission');
-            if (BimpObject::objectLoaded($commission)) {
+        if (is_null($comm_type) || (int) $comm_type === 2) {
+            if ($this->isActionAllowed('removeFromEntrepotCommission') && $this->canSetAction('removeFromEntrepotCommission')) {
+                $commission = $this->getChildObject('entrepot_commission');
+                if (BimpObject::objectLoaded($commission)) {
+                    $buttons[] = array(
+                        'label'   => 'Retirer de la commission entrepôt #' . $commission->id,
+                        'icon'    => 'fas_times',
+                        'onclick' => $this->getJsActionOnclick('removeFromEntrepotCommission', array(), array(
+                            'confirm_msg' => 'Veuillez confirmer le retrait de la commission entrepôt #' . $commission->id
+                        ))
+                    );
+                }
+            }
+        }
+
+        if (is_null($comm_type) ||
+                ($comm_type === 1 && !(int) $this->getData('id_user_commission')) ||
+                ($comm_type === 2 && !(int) $this->getData('id_entrepot_commission'))) {
+            if ($this->isActionAllowed('addToCommission') && $this->canSetAction('addToCommission')) {
                 $buttons[] = array(
-                    'label'   => 'Retirer de la commission #' . $commission->id,
-                    'icon'    => 'fas_times',
-                    'onclick' => $this->getJsActionOnclick('removeFromCommission', array(), array(
-                        'confirm_msg' => 'Veuillez confirmer le retrait de la commission #' . $commission->id
+                    'label'   => 'Ajouter à une commission',
+                    'icon'    => 'fas_comment-dollar',
+                    'onclick' => $this->getJsActionOnclick('addToCommission', array(), array(
+                        'form_name' => 'add_to_commission'
                     ))
                 );
             }
@@ -285,6 +354,24 @@ class BimpRevalorisation extends BimpObject
     public function displayTotal()
     {
         return BimpTools::displayMoneyValue((float) $this->getTotal());
+    }
+
+    public function displayCommissions()
+    {
+        $html = '';
+        if ($this->isLoaded()) {
+            $user_comm = $this->getChildObject('user_commission');
+            if (BimpObject::objectLoaded($user_comm)) {
+                $html .= 'Utilisateur: ' . $user_comm->getNomUrl(1, 1, 1, 'default');
+            }
+
+            $entrepot_comm = $this->getChildObject('entrepot_commission');
+            if (BimpObject::objectLoaded($entrepot_comm)) {
+                $html .= ($html ? '<br/>' : ' ') . 'Entrepôt: ' . $entrepot_comm->getNomUrl(1, 1, 1, 'default');
+            }
+        }
+
+        return $html;
     }
 
     // Rendus HTML: 
@@ -387,7 +474,6 @@ class BimpRevalorisation extends BimpObject
         $success = '';
 
         $id_commission = (isset($data['id_commission']) ? (int) $data['id_commission'] : 0);
-//        $id_user = (isset($data['id_user']) ? (int) $data['id_user'] : 0);
 
         if (!$id_commission) {
             $errors[] = 'Aucune commission sélectionnée';
@@ -396,32 +482,48 @@ class BimpRevalorisation extends BimpObject
 
             if (!BimpObject::objectLoaded($commission)) {
                 $errors[] = 'La commission d\'ID ' . $id_commission . ' n\'existe pas';
+            } elseif ((int) $commission->getData('status') !== 0) {
+                $errors[] = 'La commission #' . $commission->id . ' n\'est plus au statut "brouillon"';
+            } else {
+                $draftCommissions = $this->getDraftCommissionArray();
+                if (!array_key_exists((int) $commission->id, $draftCommissions)) {
+                    $errors[] = 'Cette revalorisation n\'est pas attribuable à la commission #' . $commission->id;
+                }
             }
         }
 
-//        if (!$id_user) {
-//            $errors[] = 'Utilisateur absent';
-//        }
-
         if (!count($errors)) {
-//            if ($id_user !== (int) $commission->getData('id_user')) {
-//                $errors[] = 'L\'utilisateur sélectionné ne correspond pas à celui de la commission sélectionnée';
-//            } else {
-                $errors = $this->updateField('id_commission', (int) $commission->id);
-
-                if (!count($errors)) {
-                    $comm_warnings = array();
-                    $comm_errors = $commission->updateAmounts($comm_warnings);
-
-                    if (count($comm_warnings)) {
-                        $warnings[] = BimpTools::getMsgFromArray($comm_warnings, 'Erreurs lors de la mise à jour des montants de la commission #' . $commission->id);
+            switch ((int) $commission->getData('type')) {
+                case BimpCommission::TYPE_USER:
+                    if ((int) $this->getData('id_user_commission')) {
+                        $errors[] = 'Cette révalorisation est déjà attribuée à une commission utilisateur';
+                    } else {
+                        $errors = $this->updateField('id_user_commission', (int) $commission->id);
                     }
+                    break;
 
-                    if (count($comm_errors)) {
-                        $warnings[] = BimpTools::getMsgFromArray($comm_errors, 'Echec de la mise à jour des montants de la commission #' . $commission->id);
+                case BimpCommission::TYPE_ENTREPOT:
+                    if ((int) $this->getData('id_entrepot_commission')) {
+                        $errors[] = 'Cette révalorisation est déjà attribuée à une commission entrepôt';
+                    } else {
+                        $errors = $this->updateField('id_entrepot_commission', (int) $commission->id);
                     }
+                    break;
+            }
+
+
+            if (!count($errors)) {
+                $comm_warnings = array();
+                $comm_errors = $commission->updateAmounts($comm_warnings);
+
+                if (count($comm_warnings)) {
+                    $warnings[] = BimpTools::getMsgFromArray($comm_warnings, 'Erreurs lors de la mise à jour des montants de la commission #' . $commission->id);
                 }
-//            }
+
+                if (count($comm_errors)) {
+                    $warnings[] = BimpTools::getMsgFromArray($comm_errors, 'Echec de la mise à jour des montants de la commission #' . $commission->id);
+                }
+            }
         }
 
         return array(
@@ -430,18 +532,51 @@ class BimpRevalorisation extends BimpObject
         );
     }
 
-    public function actionRemoveFromCommission($data, &$success)
+    public function actionRemoveFromUserCommission($data, &$success)
     {
         $errors = array();
         $warnings = array();
-        $success = 'Retrait de la commission effectuée avec succès';
+        $success = 'Retrait de la commission utilisateur effectuée avec succès';
 
-        $commission = $this->getChildObject('commission');
+        $commission = $this->getChildObject('user_commission');
 
         if (!BimpObject::objectLoaded($commission)) {
             $errors[] = 'Commission absente ou invalide';
         } else {
-            $errors = $this->updateField('id_commission', 0);
+            $errors = $this->updateField('id_user_commission', 0);
+
+            if (!count($errors)) {
+                $comm_warnings = array();
+                $comm_errors = $commission->updateAmounts($comm_warnings);
+
+                if (count($comm_warnings)) {
+                    $warnings[] = BimpTools::getMsgFromArray($comm_warnings, 'Erreurs lors de la mise à jour des montants de la commission #' . $commission->id);
+                }
+
+                if (count($comm_errors)) {
+                    $warnings[] = BimpTools::getMsgFromArray($comm_errors, 'Echec de la mise à jour des montants de la commission #' . $commission->id);
+                }
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionRemoveFromEntrepotCommission($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Retrait de la commission entrepôt effectuée avec succès';
+
+        $commission = $this->getChildObject('entrepot_commission');
+
+        if (!BimpObject::objectLoaded($commission)) {
+            $errors[] = 'Commission absente ou invalide';
+        } else {
+            $errors = $this->updateField('id_entrepot_commission', 0);
 
             if (!count($errors)) {
                 $comm_warnings = array();

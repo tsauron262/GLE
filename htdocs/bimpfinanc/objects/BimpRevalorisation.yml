@@ -32,26 +32,54 @@ objects:
         instance: 
             id_object: 
                 field_value: id_user_processed
+                
+    user_commission: 
+        extends: commission
+        instance: 
+            id_object: 
+                field_value: id_user_commission
+                
+    entrepot_commission: 
+        extends: commission
+        instance: 
+            id_object: 
+                field_value: id_entrepot_commission
                                     
 fields: 
     id_facture: 
         label: Facture
         type: id_object
         object: facture
+        input: 
+            type: search_object
         required: 1
         
     id_facture_line:
         label: Ligne de facture
         type: id_object
         object: facture_line
+        input: 
+            type: select
+            options: 
+                array: factureLines
+        display_if: 
+            field_name: id_facture
+            hide_values: 0
+        depends_on: id_facture
         required: 1
 
-    id_commission: 
-        label: Commission
+    id_user_commission: 
+        label: Commission utilisateur
         type: id_object
-        object: commission
+        object: user_commission
         default_value: 0
         
+    id_entrepot_commission: 
+        label: Commission entrepôt
+        type: id_object
+        object: entrepot_commission
+        default_value: 0
+    
     type: 
         label: Type
         values: 
@@ -93,28 +121,10 @@ fields:
 forms: 
     default: 
         rows: 
-            - custom: 1
-              input_name: id_facture
-              data_type: id_object
-              object: facture
-              label: Facture
-              input: 
-                  type: search_object
+            - field: id_facture
               show: 
                   callback: isNotLoaded
-              value: 
-                  field_value: id_facture
-            - custom: 1
-              input_name: id_facture_line
-              label: Ligne
-              input: 
-                  type: select
-                  options: 
-                      array: factureLines
-              display_if: 
-                  field_name: id_facture
-                  hide_values: 0
-              depends_on: id_facture
+            - field: id_facture_line
               show: 
                   callback: isNotLoaded
             - field: type
@@ -124,18 +134,7 @@ forms:
         
     add_to_commission: 
         title: Ajout à une commission
-        rows: 
-#            - custom: 1
-#              label: Utilisateur
-#              input_name: id_user
-#              data_type: id
-#              required: 1
-#              input: 
-#                  type: search_user
-#              value: 
-#                  callback: 
-#                      method: getCommercialId
-#                      object: facture            
+        rows:       
             - custom: 1
               label: Commission
               input_name: id_commission
@@ -145,10 +144,6 @@ forms:
                   type: select
                   options: 
                       array: draftCommission
-#              depends_on: id_user
-#              display_if: 
-#                  field_name: id_user
-#                  hide_values: 0
                   
 fields_tables: 
     infos: 
@@ -164,10 +159,14 @@ fields_tables:
               value: 
                   callback: displayTotal
             - field: status
-            - field: id_commission
+            - field: id_user_commission
               display: nom_url
               show: 
-                  field_value: id_commission
+                  field_value: id_user_commission
+            - field: id_entrepot_commission
+              display: nom_url
+              show: 
+                  field_value: id_entrepot_commission
             
     elements: 
         title: Eléments liés
@@ -234,9 +233,10 @@ lists_cols:
             callback: displayTotal
     status: 
         field: status
-    commission: 
-        field: id_commission
-        display: nom_url
+    commissions: 
+        label: Commissions
+        value: 
+            callback: displayCommissions
 
 lists: 
     default: 
@@ -254,8 +254,8 @@ lists:
         sort_way: desc
         n: 10
         modal_view: default
-#        add_form_name: default
-#        add_btn_label: Nouvelle revalorisation
+        add_form_name: default
+        add_btn_label: Nouvelle revalorisation
         edit_btn: 1
         edit_form: default
         delete_btn: 1
@@ -272,7 +272,7 @@ lists:
             qty: 
             total:
             status: 
-            commission: 
+            commissions: 
         
     commission: 
         enable_search: 0
@@ -281,7 +281,8 @@ lists:
         sort_field: id
         sort_way: asc
         extra_btn: 
-            callback: getCommissionListButtons
+            callback: 
+                method: getCommissionListButtons
         modal_view: default
         cols: 
             facture: 
@@ -291,14 +292,29 @@ lists:
             total: 
             status: 
                 
+    user_commission: 
+        extends: commission
+        extra_btn: 
+            callback: 
+                params: 
+                    - 1
+                    
+    entrepot_commission: 
+        extends: commission
+        extra_btn: 
+            callback: 
+                params: 
+                    - 2
+                
     facture: 
-        enable_search: 0
         pagination: 1
         n: 20
         sort_field: id
         sort_way: asc
         extra_btn: 
             callback: getActionsButtons
+        edit_btn: 1
+        edit_form: default
         modal_view: default
         cols: 
             type: 
@@ -306,4 +322,4 @@ lists:
             desc: 
             total: 
             status:  
-            commission: 
+            commissions: 

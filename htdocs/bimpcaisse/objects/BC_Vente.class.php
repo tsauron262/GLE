@@ -2372,13 +2372,25 @@ class BC_Vente extends BimpObject
 
             $line = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureLine');
 
+            $remise_crt = (int) $article->getData('remise_crt');
+            $remise_crt_percent = 0;
+
+            if ($remise_crt) {
+                $remise_crt_percent = (float) $article->getData('remise_crt_percent');
+                if (!$remise_crt_percent) {
+                    if (BimpObject::objectLoaded($product)) {
+                        $remise_crt_percent = (float) $product->getRemiseCrt();
+                    }
+                }
+            }
+
             $line->validateArray(array(
                 'id_obj'             => (int) $facture->id,
                 'type'               => ObjectLine::LINE_PRODUCT,
                 'linked_object_name' => 'bc_vente_article',
                 'linked_id_object'   => (int) $article->id,
-                'remise_crt'         => (int) $article->getData('remise_crt'),
-                'remise_crt_percent' => (float) $article->getData('remise_crt_percent')
+                'remise_crt'         => $remise_crt,
+                'remise_crt_percent' => $remise_crt_percent
             ));
 
             $line->id_product = (int) $product->id;

@@ -1197,7 +1197,9 @@ class ObjectLine extends BimpObject
                 $remise_percent = 0;
                 if ($this->field_exists('remise_crt_percent')) {
                     $remise_percent = (float) $this->getData('remise_crt_percent');
-                } else {
+                } 
+                
+                if (!$remise_percent) {
                     $product = $this->getProduct();
                     if (BimpObject::objectLoaded($product)) {
                         $remise_percent = (float) $product->getRemiseCrt();

@@ -49,6 +49,11 @@ fields:
         label: Remise CRT
         type: bool
         default_value: 0
+        
+    remise_crt_percent:
+        label: Pourcentage remise CRT
+        type: percent
+        default_value: 0
     
 lists: 
     default: 
@@ -69,6 +74,8 @@ lists:
                 field: qty
             crt: 
                 field: remise_crt
+            crt_percent: 
+                field: remise_crt_percent
             pu: 
                 field: unit_price_tax_in
             total:

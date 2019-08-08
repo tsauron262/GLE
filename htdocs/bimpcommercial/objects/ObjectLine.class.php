@@ -2907,7 +2907,7 @@ class ObjectLine extends BimpObject
                                 'addon_right' => '<i class="fa fa-percent"></i>'
                     ));
                     $html .= '<p class="inputHelp">';
-                    $html .= 'Ne modifiez cette valeur que pour les cas éligibles à une remise CRT exceptionnelle.<br/>Attention: toute remise CRT erronée pour donner lieu à un refus.';
+                    $html .= 'Ne modifiez cette valeur que pour les cas éligibles à une remise CRT exceptionnelle.<br/>Attention: toute remise CRT erronée pourra donner lieu à un refus.';
                     $html .= '</p>';
                 } else {
                     $html .= '<input type="hidden" name="' . $prefixe . 'remise_crt_percent" value="0"/>';

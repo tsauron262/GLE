@@ -104,17 +104,26 @@ class BC_Vente extends BimpObject
                 $tva = (float) $article->getData('tva_tx');
             }
 
+            $remise_crt = (int) $article->getData('remise_crt');
+            if ($remise_crt) {
+                $remise_crt_percent = (float) $article->getData('remise_crt_percent');
+            } else {
+                $remise_crt_percent = 0;
+            }
+
             $article_total_ttc = (float) ($unit_price * $qty);
             $nb_articles += $qty;
             $total_ttc += $article_total_ttc;
             $articles[(int) $article->id] = array(
-                'id_article'    => (int) $article->id,
-                'qty'           => (int) $qty,
-                'unit_price'    => (float) $unit_price,
-                'unit_price_ht' => (float) $article->getData('unit_price_tax_ex'),
-                'total_ttc'     => $article_total_ttc,
-                'tva'           => $tva,
-                'total_remises' => 0
+                'id_article'         => (int) $article->id,
+                'qty'                => (int) $qty,
+                'unit_price'         => (float) $unit_price,
+                'unit_price_ht'      => (float) $article->getData('unit_price_tax_ex'),
+                'total_ttc'          => $article_total_ttc,
+                'tva'                => $tva,
+                'total_remises'      => 0,
+                'remise_crt'         => $remise_crt,
+                'remise_crt_percent' => $remise_crt_percent
             );
         }
 
@@ -1351,6 +1360,22 @@ class BC_Vente extends BimpObject
             $html .= '<span style="display: inline-block; font-weight: bold; margin-top: -11px; vertical-align: middle; margin-right: 10px;">Remise CRT: </span>';
             $html .= BimpInput::renderInput('toggle', 'article_remise_crt', (int) $article->getData('remise_crt'));
             $html .= '</div>';
+
+            $html .= '<div class="article_remise_crt_percent" style="margin: 10px 0;' . (!(int) $article->getData('remise_crt') ? 'display: none;' : '') . '">';
+            $html .= '<span style="display: inline-block; font-weight: bold; margin-top: -11px; vertical-align: middle; margin-right: 10px;">Pourcentage Remise CRT: </span>';
+            $html .= BimpInput::renderInput('text', 'article_remise_crt_percent', (int) $article->getData('remise_crt_percent', array(
+                                'data'        => array(
+                                    'data_type' => 'number',
+                                    'decimals'  => 4,
+                                    'min'       => 0,
+                                    'max'       => 100
+                                ),
+                                'addon_right' => '<i class="fa fa-percent"></i>'
+            )));
+            $html .= '<p class="inputHelp">';
+            $html .= 'Ne modifiez cette valeur que pour les cas éligibles à une remise CRT exceptionnelle.<br/>Attention: toute remise CRT erronée pourra donner lieu à un refus.';
+            $html .= '</p>';
+            $html .= '</div>';
         }
 
         // Remises: 
@@ -1427,6 +1452,22 @@ class BC_Vente extends BimpObject
             $html .= '<span style="display: inline-block; font-weight: bold; margin-top: -11px; vertical-align: middle; margin-right: 10px;">Remise CRT: </span>';
             $html .= BimpInput::renderInput('toggle', 'article_remise_crt', (int) $article->getData('remise_crt'));
             $html .= '</div>';
+
+            $html .= '<div class="article_remise_crt_percent" style="margin: 10px 0;' . (!(int) $article->getData('remise_crt') ? 'display: none;' : '') . '">';
+            $html .= '<span style="display: inline-block; font-weight: bold; margin-top: -11px; vertical-align: middle; margin-right: 10px;">Pourcentage Remise CRT: </span>';
+            $html .= BimpInput::renderInput('text', 'article_remise_crt_percent', (int) $article->getData('remise_crt_percent', array(
+                                'data'        => array(
+                                    'data_type' => 'number',
+                                    'decimals'  => 4,
+                                    'min'       => 0,
+                                    'max'       => 100
+                                ),
+                                'addon_right' => '<i class="fa fa-percent"></i>'
+            )));
+            $html .= '<p class="inputHelp">';
+            $html .= 'Ne modifiez cette valeur que pour les cas éligibles à une remise CRT exceptionnelle.<br/>Attention: toute remise CRT erronée pourra donner lieu à un refus.';
+            $html .= '</p>';
+            $html .= '</div>';
         }
 
         // Remises: 
@@ -1472,7 +1513,7 @@ class BC_Vente extends BimpObject
             $facture = $this->getChildObject('facture');
             require_once DOL_DOCUMENT_ROOT . '/bimpcore/classes/BimpTicket.php';
             $avoir = null;
-            if($this->getData('id_avoir') > 0)
+            if ($this->getData('id_avoir') > 0)
                 $avoir = $this->getChildObject('avoir');
 
             global $db;
@@ -1977,7 +2018,7 @@ class BC_Vente extends BimpObject
 
             $this->set('status', 2);
             $update_errors = $this->update();
-            
+
             // Mise à jour du statut de la vente: 
 
             if (count($update_errors)) {
@@ -1985,7 +2026,7 @@ class BC_Vente extends BimpObject
                 $errors = array_merge($errors, $update_errors);
                 return false;
             }
-            
+
             $id_facture = (int) $this->createFacture($facture_errors, $facture_warnings, true);
 
             if (count($facture_errors) || !$id_facture) {
@@ -2336,7 +2377,8 @@ class BC_Vente extends BimpObject
                 'type'               => ObjectLine::LINE_PRODUCT,
                 'linked_object_name' => 'bc_vente_article',
                 'linked_id_object'   => (int) $article->id,
-                'remise_crt'         => (int) $article->getData('remise_crt')
+                'remise_crt'         => (int) $article->getData('remise_crt'),
+                'remise_crt_percent' => (float) $article->getData('remise_crt_percent')
             ));
 
             $line->id_product = (int) $product->id;
@@ -2389,10 +2431,10 @@ class BC_Vente extends BimpObject
             $msg = 'Echec de la validation de la facture';
             $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($facture->dol_object), $msg);
         }
-        
-        
+
+
         global $idAvoirFact;
-        if(isset($idAvoirFact) && $idAvoirFact > 0){
+        if (isset($idAvoirFact) && $idAvoirFact > 0) {
             $this->updateField("id_avoir", $idAvoirFact);
             $idAvoirFact = 0;
         }
@@ -2446,7 +2488,7 @@ class BC_Vente extends BimpObject
                     }
                 }
             }
-            
+
             // Ajout du rendu monnaie:
             if ($total_paid > $total_facture_ttc) {
                 $returned = round($total_facture_ttc - $total_paid, 2);

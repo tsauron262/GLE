@@ -5,7 +5,7 @@ extends:
 fields: 
     remise_pa: unset
     remise_crt: unset
-#    remise_crt_percent: unset
+    remise_crt_percent: unset
     
 forms: 
     fournline: 

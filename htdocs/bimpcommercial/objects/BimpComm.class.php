@@ -1368,7 +1368,7 @@ class BimpComm extends BimpDolObject
 
     public function renderMarginTableExtra($marginInfo)
     {
-        if (in_array($this->object_name, array('Bimp_Propal', 'Bimp_Commande'))) {
+        if (in_array($this->object_name, array('Bimp_Propal', 'BS_SavPropal', 'Bimp_Commande'))) {
             $remises_crt = 0;
 
             $lines = $this->getLines('not_text');
@@ -2183,7 +2183,7 @@ class BimpComm extends BimpDolObject
                 'type'      => $line->getData('type'),
                 'deletable' => $line->getData('deletable'),
                 'editable'  => $line->getData('Editable'),
-                'remisable' => $line->getData('remisable')
+                'remisable' => $line->getData('remisable'),
             ));
 
             if ($line->getData('linked_object_name')) {
@@ -2210,6 +2210,7 @@ class BimpComm extends BimpDolObject
             if ($line->field_exists('remise_crt') &&
                     $line_instance->field_exists('remise_crt')) {
                 $line_instance->set('remise_crt', (int) $line->getData('remise_crt'));
+                $line_instance->set('remise_crt_percent', (float) $line->getData('remise_crt_percent'));
             }
 
             if ($line->field_exists('remise_pa') &&

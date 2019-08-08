@@ -2012,17 +2012,8 @@ class Bimp_Facture extends BimpComm
                     } elseif ((int) $line->getData('type') !== ObjectLine::LINE_TEXT) {
                         // Création des revalorisations sur remise CRT: 
                         if ((int) $line->getData('remise_crt')) {
-                            $product = $line->getProduct();
-                            if (!BimpObject::objectLoaded($product)) {
-                                continue;
-                            }
+                            $remise_pa = (float) $line->getRemiseCRT();
 
-                            $remise_percent = (float) $product->getRemiseCrt();
-                            if (!$remise_percent) {
-                                continue;
-                            }
-
-                            $remise_pa = (float) $line->pu_ht * ($remise_percent / 100);
                             if (!$remise_pa) {
                                 continue;
                             }

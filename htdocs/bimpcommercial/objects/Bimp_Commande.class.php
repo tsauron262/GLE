@@ -1880,6 +1880,7 @@ class Bimp_Commande extends BimpComm
                         'linked_id_object'   => (int) $line->id,
                         'linked_object_name' => 'commande_line',
                         'remise_crt'         => (int) $line->getData('remise_crt'),
+                        'remise_crt_percent' => (float) $line->getData('remise_crt_percent'),
                         'remise_pa'          => (float) $line->getData('remise_pa')
                     ));
 

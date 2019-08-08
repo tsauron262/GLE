@@ -177,7 +177,7 @@ forms:
                   type: search_group
             - field: date
             - custom: 1
-              label: Uniquement les facture entièrement payée
+              label: Inclure uniquement les facture entièrement payée
               input_name: paid_only
               value: 0
               data_type: bool

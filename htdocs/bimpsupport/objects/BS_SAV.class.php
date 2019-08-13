@@ -1881,7 +1881,7 @@ class BS_SAV extends BimpObject
             $line->product_type = 1;
             $line->id_fourn_price = 0;
             $line->qty = 1;
-            if ((float) $garantieHt) {
+            if ((float) $garantieHtService) {
                 $line->tva_tx = 100 * ($garantieTtcService / $garantieHtService);
             } else {
                 $line->tva_tx = 0;

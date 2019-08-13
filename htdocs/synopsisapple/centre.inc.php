@@ -21,7 +21,7 @@ $tabCentre = array("V" => array("04 75 81 81 54", "sav07@bimp.fr", "Saint Peray 
     "MONTP" => array("04 67 555 111", "sav34@bimp.fr", "Montpellier", 218, "1187561", "34000", "Montpellier", "36 Rue Saint-Guilhem",38),
     "MAU" => array("04 67 222 143", "sav341@bimp.fr", "Mauguio", 221, "1187560", "34130", "Mauguio", "39 Rue René Fonck",37),
     
-    "BB" => array("09 53 01 39 84", "sav01@bimp.fr", "Bourg-en-Bresse", 58, "1199659", "01000", "Bourg-en-Bresse", "11 Avenue de la Victoire")
+    "BB" => array("09 53 01 39 84", "sav01@bimp.fr", "Bourg-en-Bresse", 58, "1199659", "01000", "Bourg-en-Bresse", "20 Avenue des granges barde")
     
     );
 

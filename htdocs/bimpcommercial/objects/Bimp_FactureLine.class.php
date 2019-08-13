@@ -53,19 +53,19 @@ class Bimp_FactureLine extends ObjectLine
         if ($this->isLoaded() && $this->isNotTypeText()) {
             $facture = $this->getParentInstance();
             if (BimpObject::objectLoaded($facture)) {
-                if (in_array((int) $facture->getData('fk_statut'), array(1, 2))) {
-                    $reval = BimpObject::getInstance('bimpfinanc', 'BimpRevalorisation');
-                    $onclick = $reval->getJsLoadModalForm('default', 'Ajout d\\\'une revalorisation', array(
+                $reval = BimpObject::getInstance('bimpfinanc', 'BimpRevalorisation');
+                $onclick = $reval->getJsLoadModalForm('default', 'Ajout d\\\'une revalorisation', array(
+                    'fields' => array(
                         'id_facture'      => (int) $facture->id,
                         'id_facture_line' => (int) $this->id
-                    ));
+                    )
+                ));
 
-                    $buttons[] = array(
-                        'label'   => 'Ajouter une revalorisation',
-                        'icon'    => 'fas_search-dollar',
-                        'onclick' => $onclick
-                    );
-                }
+                $buttons[] = array(
+                    'label'   => 'Ajouter une revalorisation',
+                    'icon'    => 'fas_search-dollar',
+                    'onclick' => $onclick
+                );
             }
         }
 
@@ -110,6 +110,9 @@ class Bimp_FactureLine extends ObjectLine
             }
 
             if ($total_accepted) {
+                if ($html) {
+                    $html .= '<br/>';
+                }
                 $html .= '<span class="success">';
                 $html .= BimpRender::renderIcon('fas_check', 'iconLeft');
                 $html .= BimpTools::displayMoneyValue($total_accepted);
@@ -117,6 +120,9 @@ class Bimp_FactureLine extends ObjectLine
             }
 
             if ($total_refused) {
+                if ($html) {
+                    $html .= '<br/>';
+                }
                 $html .= '<span class="danger">';
                 $html .= BimpRender::renderIcon('fas_times', 'iconLeft');
                 $html .= BimpTools::displayMoneyValue($total_refused);

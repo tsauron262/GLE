@@ -126,4 +126,24 @@ class BC_VenteArticle extends BimpObject
         }
         return $extra_percent;
     }
+
+    public function validate()
+    {
+        if ((int) $this->getData('remise_crt')) {
+            $product = $this->getChildObject('product');
+            if (BimpObject::objectLoaded($product)) {
+                $remise_crt_percent = $product->getRemiseCrt();
+                if (!$remise_crt_percent) {
+                    $this->set('remise_crt', 0);
+                    $this->set('remise_crt_percent', 0);
+                } elseif (!(float) $this->getData('remise_crt_percent')) {
+                    $this->set('remise_crt_percent', $remise_crt_percent);
+                }
+            }
+        } else {
+            $this->set('remise_crt_percent', 0);
+        }
+
+        return parent::validate();
+    }
 }

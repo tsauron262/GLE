@@ -1012,6 +1012,10 @@ class BimpInput
                 } else {
                     $fl = false;
                 }
+
+                if (!preg_match('/\./', $field_name)) {
+                    $sql .= 'a.';
+                }
                 $sql .= $field_name . ' as label_' . $i;
                 $i++;
             }
@@ -1024,7 +1028,12 @@ class BimpInput
             if ($join) {
                 $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . $join . ' ON ' . $join_on;
             }
-            $sql .= ' WHERE ' . $field_return_value . ' = ' . (is_string($value) ? '\'' . $value . '\'' : $value);
+            $sql .= ' WHERE ';
+
+            if (!preg_match('/\./', $field_return_value)) {
+                $sql .= 'a.';
+            }
+            $sql .= $field_return_value . ' = ' . (is_string($value) ? '\'' . $value . '\'' : $value);
 
             $result = $bdb->executeS($sql, 'array');
 

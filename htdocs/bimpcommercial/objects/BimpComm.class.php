@@ -1366,6 +1366,57 @@ class BimpComm extends BimpDolObject
         return $html;
     }
 
+    public function renderMarginTableExtra($marginInfo)
+    {
+        if (in_array($this->object_name, array('Bimp_Propal', 'BS_SavPropal', 'Bimp_Commande'))) {
+            $remises_crt = 0;
+
+            $lines = $this->getLines('not_text');
+
+            foreach ($lines as $line) {
+                $remises_crt += (float) $line->getRemiseCRT() * (float) $line->qty;
+            }
+
+            $total_pv = (float) $marginInfo['pv_total'];
+            $total_pa = (float) $marginInfo['pa_total'];
+
+            if ($remises_crt) {
+                $html .= '<tr>';
+                $html .= '<td>Remises CRT prévues</td>';
+                $html .= '<td></td>';
+                $html .= '<td><span class="danger">-' . BimpTools::displayMoneyValue($remises_crt, '') . '</span></td>';
+                $html .= '<td></td>';
+                $html .= '</tr>';
+
+                $total_pa -= $remises_crt;
+            }
+
+            if ((float) $total_pa !== (float) $marginInfo['pa_total']) {
+                $total_marge = $total_pv - $total_pa;
+                $tx = 0;
+
+
+                if (BimpCore::getConf('bimpcomm_tx_marque')) {
+                    if ($total_pv) {
+                        $tx = ($total_marge / $total_pv) * 100;
+                    }
+                } else {
+                    if ($total_pa) {
+                        $tx = ($total_marge / $total_pa) * 100;
+                    }
+                }
+
+                $html .= '<tr>';
+                $html .= '<td>Marge finale prévue</td>';
+                $html .= '<td>' . BimpTools::displayMoneyValue($total_pv, '') . '</td>';
+                $html .= '<td>' . BimpTools::displayMoneyValue($total_pa, '') . '</td>';
+                $html .= '<td>' . BimpTools::displayMoneyValue($total_marge, '') . ' (' . BimpTools::displayFloatValue($tx, 4) . ' %)</td>';
+                $html .= '</tr>';
+            }
+        }
+        return $html;
+    }
+
     public function renderFilesTable()
     {
         $html = '';
@@ -2132,7 +2183,7 @@ class BimpComm extends BimpDolObject
                 'type'      => $line->getData('type'),
                 'deletable' => $line->getData('deletable'),
                 'editable'  => $line->getData('Editable'),
-                'remisable' => $line->getData('remisable')
+                'remisable' => $line->getData('remisable'),
             ));
 
             if ($line->getData('linked_object_name')) {
@@ -2159,6 +2210,7 @@ class BimpComm extends BimpDolObject
             if ($line->field_exists('remise_crt') &&
                     $line_instance->field_exists('remise_crt')) {
                 $line_instance->set('remise_crt', (int) $line->getData('remise_crt'));
+                $line_instance->set('remise_crt_percent', (float) $line->getData('remise_crt_percent'));
             }
 
             if ($line->field_exists('remise_pa') &&

@@ -1360,7 +1360,7 @@ class BimpCache
             $where = '';
 
             if ($has_commissions_only) {
-                $where .= '`has_commissions` = 1';
+                $where .= '`has_entrepot_commissions` = 1';
             } else {
                 $where .= '1';
             }

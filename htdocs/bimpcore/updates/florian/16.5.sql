@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bc_vente_article` ADD `remise_crt_percent` DECIMAL(24,4) NOT NULL DEFAULT '0';

@@ -44,6 +44,18 @@ objects:
                 fields: 
                     parent_object_name: Bimp_Facture
                     
+    user_commission: 
+        extends: commission
+        instance: 
+            id_object: 
+                field_value: id_user_commission
+                
+    entrepot_commission: 
+        extends: commission
+        instance: 
+            id_object: 
+                field_value: id_entrepot_commission
+                    
 fields: 
     facnumber: 
         label: Référence
@@ -133,11 +145,17 @@ fields:
         type: money
         default_value: 0
         
-    id_commission: 
-       label: Commission
-       type: id_object
-       object: commission
-       default_value: 0
+    id_user_commission: 
+        label: Commission utilisateur
+        type: id_object
+        object: user_commission
+        default_value: 0
+        
+    id_entrepot_commission: 
+        label: Commission entrepôt
+        type: id_object
+        object: entrepot_commission
+        default_value: 0
        
 forms:     
     default: 
@@ -450,10 +468,14 @@ fields_tables:
             - label: Commercial
               value: 
                   callback: displayCommercial
-            - field: id_commission
+            - field: id_user_commission
               display: nom_url
               show: 
-                  callback: showCommission
+                  callback: showUserCommission
+            - field: id_entrepot_commission
+              display: nom_url
+              show: 
+                  callback: showEntrepotCommission
     
     client: 
         rows: 
@@ -564,8 +586,7 @@ lists_cols:
     secteur_comm_check: 
         label: Secteur
         value: 
-            callback: displaySecteurWithCommercialCheck
-        
+            callback: displaySecteurWithCommercialCheck        
     
 lists: 
     default: 
@@ -608,12 +629,14 @@ lists:
         sort_field: datec
         sort_way: asc
         extra_btn: 
-            callback: getCommissionListButtons
+            callback:
+                method: getCommissionListButtons
         modal_view: full
         page_btn: 1
         cols: 
             ref: 
             type: 
+            date_valid:
             commercial:
             secteur_comm_check:
             statut: 
@@ -621,6 +644,20 @@ lists:
             total_ht: 
             total_pa:
             marge: 
+            
+    user_commission: 
+        extends: commission
+        extra_btn: 
+            callback: 
+                params: 
+                    - 1
+
+    entrepot_commission: 
+        extends: commission
+        extra_btn: 
+            callback: 
+                params: 
+                    - 2
             
 cards: 
     default: 

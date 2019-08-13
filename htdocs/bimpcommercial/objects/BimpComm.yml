@@ -56,9 +56,6 @@ objects:
                 field_value: fk_user_valid
                 
 fields:
-    date_valid:
-        type: date
-        label: Date Validation
     entrepot: 
         label: Entrepôt
         dol_extra_field: 1
@@ -165,6 +162,9 @@ fields:
         filter: 
             input: 
                 type: search_user
+    date_valid:
+        type: date
+        label: Date Validation
     total: 
         label: Total TTC
         dol_prop: total_ttc
@@ -612,6 +612,8 @@ lists_cols:
         display: nom_url
     zone_vente:
         field: zone_vente
+    date_valid: 
+        field: date_valid
         
 lists: 
     default: 

@@ -507,6 +507,8 @@ class BimpObject extends BimpCache
                 }
                 $ref_prop = 'ef.' . $ref_prop;
                 $has_extrafields = true;
+            } else {
+                $ref_prop = $ref_prop;
             }
             $n++;
             $fields_seach[] = $ref_prop;
@@ -3321,17 +3323,17 @@ class BimpObject extends BimpCache
 
         return $errors;
     }
-    
+
     public function updateFields($fields_values, $force_update = true, &$warnings = array())
     {
         $errors = array();
-        
+
         if (!$this->isLoaded($errors)) {
             return $errors;
         }
-        
+
         $update = false;
-        
+
         foreach ($fields_values as $field => $value) {
             if ($this->field_exists($field)) {
                 if ($value != $this->getData($field)) {
@@ -3340,11 +3342,11 @@ class BimpObject extends BimpCache
                 }
             }
         }
-        
+
         if ($update) {
             $errors = $this->update($warnings, $force_update);
         }
-        
+
         return $errors;
     }
 

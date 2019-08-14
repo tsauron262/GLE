@@ -1536,6 +1536,7 @@ class BimpTools
                 $code = 'M';
                 $value = $value / 1000000;
             } elseif ($value > 100000) {
+                $code = 'K';
                 $value = $value / 1000;
             }
             $price = price($value, 1, '', 1, -1, -1) . ' ' . $code . self::getCurrencyHtml($currency);

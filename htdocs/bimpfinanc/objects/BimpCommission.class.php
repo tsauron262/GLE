@@ -121,16 +121,16 @@ class BimpCommission extends BimpObject
     {
         $buttons = array();
 
-        $buttons[] = array(
-            'classes'     => array('btn', 'btn-default'),
-            'label'       => 'Générer des commissions par groupe',
-            'icon_before' => 'fas_cogs',
-            'attr'        => array(
-                'onclick' => $this->getJsActionOnclick('createCommissions', array(), array(
-                    'form_name' => 'generate'
-                ))
-            )
-        );
+//        $buttons[] = array(
+//            'classes'     => array('btn', 'btn-default'),
+//            'label'       => 'Générer des commissions par groupe',
+//            'icon_before' => 'fas_cogs',
+//            'attr'        => array(
+//                'onclick' => $this->getJsActionOnclick('createCommissions', array(), array(
+//                    'form_name' => 'generate'
+//                ))
+//            )
+//        );
 
         return $buttons;
     }

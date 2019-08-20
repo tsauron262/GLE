@@ -16,7 +16,7 @@ $bdb = new BimpDb($db);
 
 set_time_limit(1200);
 
-$rows = file(DOL_DOCUMENT_ROOT . '/bimpcore/equipments_list.txt');
+$rows = file(DOL_DOCUMENT_ROOT . '/bimpcore/equipments_list.txt', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 
 $id_comm_line = 127620;
 

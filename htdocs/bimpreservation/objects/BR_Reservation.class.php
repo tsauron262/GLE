@@ -255,98 +255,13 @@ class BR_Reservation extends BimpObject
 
         return $avoirs;
     }
-
-    public function getCommandeClientLinesArray()
-    {
-        $commande = $this->getChildObject('commande_client');
-        if (!BimpObject::objectLoaded($commande)) {
-            return array();
-        }
-
-        $id_product = (int) $this->getData('id_product');
-
-        $lines = array();
-
-        $n = 0;
-        foreach ($commande->getLines() as $line) {
-            $n++;
-            if ($id_product) {
-                if ((int) $line->id_product !== $id_product) {
-                    continue;
-                }
-            }
-
-            $lines[(int) $line->id] = 'Ligne ' . $n . ' - Produit: ' . $line->displayLineData('id_product', 0, 'ref_nom', true);
-        }
-
-        return $lines;
-    }
-
-    public function getCommandeFournisseurLinesArray()
-    {
-        $commande = $this->getChildObject('commande_fournisseur');
-        if (is_null($commande) || !isset($commande->id) || !$commande->id) {
-            return array();
-        }
-
-        $lines = array();
-
-        foreach ($commande->lines as $n => $line) {
-            $label = 'Ligne ' . ($n + 1);
-            if (isset($line->product_label) && $line->product_label) {
-                $label .= '- produit: "' . $line->product_label . '"';
-                if (isset($line->product_ref) && $line->product_ref) {
-                    $label .= ' (ref: "' . $line->product_ref . '")';
-                }
-            } elseif (isset($line->label) && $line->label) {
-                $label .= ' - ' . $line->label;
-            } elseif (isset($line->description) && $line->description) {
-                $label .= ' - ' . $line->description;
-            }
-
-            $lines[(int) $line->id] = $label;
-        }
-
-        return $lines;
-    }
-
-    public function getStatusListArray()
-    {
-        $type = (int) $this->getData('type');
-        $status = array();
-
-        switch ($type) {
-            case self::BR_RESERVATION_COMMANDE:
-                foreach (self::$commande_status as $key) {
-                    $status[$key] = self::$status_list[$key];
-                }
-                break;
-
-            case self::BR_RESERVATION_TRANSFERT:
-                foreach (self::$transfert_status as $key) {
-                    $status[$key] = self::$status_list[$key];
-                }
-                break;
-
-            case self::BR_RESERVATION_TEMPORAIRE:
-                foreach (self::$temp_status as $key) {
-                    $status[$key] = self::$status_list[$key];
-                }
-                break;
-
-            case self::BR_RESERVATION_SAV:
-                foreach (self::$sav_status as $key) {
-                    $status[$key] = self::$status_list[$key];
-                }
-                break;
-
-            default:
-                $status = self::$status_list;
-                break;
-        }
-
-        return $status;
-    }
+    
+    
+    
+    
+    
+    
+    
 
     public function getShipmentsArray()
     {

@@ -13770,11 +13770,11 @@ button.close {
   text-align: right; }
 
 /*Fonts styles*/
-/* line 16, ../scss/bimpcore/_helpers.scss */
+/* line 17, ../scss/bimpcore/_helpers.scss */
 .bold {
   font-weight: bold; }
 
-/* line 20, ../scss/bimpcore/_helpers.scss */
+/* line 21, ../scss/bimpcore/_helpers.scss */
 p.smallInfo {
   color: #787878;
   margin: 5px 0;
@@ -13782,21 +13782,48 @@ p.smallInfo {
   font-style: italic; }
 
 /*Scrolls*/
-/* line 29, ../scss/bimpcore/_helpers.scss */
+/* line 30, ../scss/bimpcore/_helpers.scss */
 .h_auto_scroll {
   overflow-x: auto; }
 
-/* line 33, ../scss/bimpcore/_helpers.scss */
+/* line 34, ../scss/bimpcore/_helpers.scss */
 .v_auto_scroll {
   overflow-y: auto; }
 
-/* line 37, ../scss/bimpcore/_helpers.scss */
+/* line 38, ../scss/bimpcore/_helpers.scss */
 .h_scroll {
   overflow-x: scroll; }
 
-/* line 41, ../scss/bimpcore/_helpers.scss */
+/* line 42, ../scss/bimpcore/_helpers.scss */
 .v_scroll {
   overflow-y: scroll; }
+
+/* Hovers */
+/* line 48, ../scss/bimpcore/_helpers.scss */
+span.hover {
+  cursor: pointer;
+  color: #636363;
+  -webkit-transition: all 0.3s ease;
+  -o-transition: all 0.3s ease;
+  transition: all 0.3s ease; }
+  /* line 53, ../scss/bimpcore/_helpers.scss */
+  span.hover:hover, span.hover.hover-default:hover {
+    color: #282828; }
+  /* line 57, ../scss/bimpcore/_helpers.scss */
+  span.hover.hover-primary:hover {
+    color: #EF7D00; }
+  /* line 60, ../scss/bimpcore/_helpers.scss */
+  span.hover.hover-success:hover {
+    color: #348C41; }
+  /* line 63, ../scss/bimpcore/_helpers.scss */
+  span.hover.hover-warning:hover {
+    color: #E69900; }
+  /* line 66, ../scss/bimpcore/_helpers.scss */
+  span.hover.hover-danger:hover {
+    color: #A00000; }
+  /* line 69, ../scss/bimpcore/_helpers.scss */
+  span.hover.hover-important:hover {
+    color: #963E96; }
 
 @-webkit-keyframes bimp-spin {
   0% {

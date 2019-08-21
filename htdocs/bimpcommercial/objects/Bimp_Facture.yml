@@ -623,7 +623,7 @@ lists:
         total_row: 1
         enable_search: 0
         position: 0
-        configurable: 0
+        configurable: 1
         pagination: 1
         n: 20
         sort_field: datec

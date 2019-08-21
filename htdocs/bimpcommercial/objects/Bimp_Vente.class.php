@@ -287,7 +287,7 @@ class Bimp_Vente extends BimpObject
         $product = BimpObject::getInstance('bimpcore', 'Bimp_Product');
         $products_list = $product->getList(array(
             'cp.fk_categorie' => (int) $id_category
-                ), null, null, 'id', 'asc', 'array', array('rowid', 'ref'), array(
+                ), null, null, 'id', 'asc', 'array', array('rowid', 'ref', 'cur_pa_ht', 'pmp'), array(
             'cp' => array(
                 'alias' => 'cp',
                 'table' => 'categorie_product',
@@ -366,7 +366,7 @@ Champ recommandé
 (10)";"Type du client final
 
 Champ recommandé
-(2)";Erreurs
+(2)";Erreurs;Prix d\'achat actuel
 ID d’emplacement pour le(s) entrepôt(s), le(s) magasin(s) et tout autre point de vente (peut être un ID attribué par le client ou par Apple);Référence commerciale du produit (MPN) / Code JAN;Unités vendues et expédiées depuis les entrepôts ou les points de vente au client final (quantité brute en cas de « Quantité vendue renvoyée », sinon quantité nette).;Unités retournées par le client final.;Unités en stock prêtes à la vente dans les entrepôts et les points de vente (sans paiement ni dépôt du client) ;Unités de démonstration faisant partie des stocks dans les points de vente et les entrepôts;Unités en transit : entre les entrepôts et les points de vente ou inversement ;Stocks invendables (par exemple, unités endommagées, hors d’usage à l’arrivée ou ouvertes avant d’être renvoyées);Unités (avec paiement/versement d’arrhes du client) en attente d’expédition dans les entrepôts et les points de vente) ;Unités commandées (avec paiement/versement d’arrhes du client) non expédiées pour cause de stocks insuffisants.;Stocks envoyés par Apple ou ses distributeurs et réservés dans les entrepôts ou les points de vente ;"1R - Université, Établissement d’enseignement supérieur ou école
 21 - Petite entreprise
 2L - Entreprise(ventes à une personne morale)
@@ -380,12 +380,28 @@ VO - École élémentaire
 VQ - Collège
  QW - Gouvernement
 
-";Erreurs de validation de base' . "\n";
+";' . "\n";
 
         $entrepots = BimpCache::getEntrepotsShipTos();
 
         foreach ($products_list as $p) {
             $entrepots_data = $product->getAppleCsvData($dateFrom, $dateTo, $entrepots, $p['rowid']);
+
+            $pa_ht = (float) $p['cur_pa_ht'];
+
+            if (!$pa_ht) {
+                $pa_ht = (float) $p['pmp'];
+                if (!$pa_ht) {
+                    $sql = 'SELECT price FROM ' . MAIN_DB_PREFIX . 'product_fournisseur_price WHERE';
+                    $sql .= ' fk_product = ' . (int) $p['rowid'];
+                    $sql .= ' AND tms = (SELECT MAX(tms) FROM ' . MAIN_DB_PREFIX . 'product_fournisseur_price WHERE fk_product = ' . (int) $p['rowid'] . ')';
+
+                    $result = $this->db->executeS($sql);
+                    if (isset($result[0]->price)) {
+                        $pa_ht = (float) $result[0]->price;
+                    }
+                }
+            }
 
             foreach ($entrepots_data as $ship_to => $data) {
                 if ($data['stock'] < 0)
@@ -406,10 +422,12 @@ VQ - Collège
                                 0,
                                 0,
                                 '',
-                                ''
+                                '',
+                                $pa_ht
                             )) . "\n";
 //                    break 2;
                 }
+                break;
             }
         }
 

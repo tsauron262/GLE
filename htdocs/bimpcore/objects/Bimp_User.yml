@@ -274,6 +274,8 @@ lists:
         page_btn: 1
         modal_view: default
         edit_btn: 1
+        edit_form: 
+            callback: getEditFormName
         cols:
             gender:
             firstname:
@@ -362,6 +364,8 @@ fields_tables:
         
 views: 
     default: 
+        edit_form: 
+            callback: getEditFormName
         rows: 
             - cols: 
                 - type: fields_table
@@ -382,8 +386,7 @@ views:
                   col_md: 6
                   col_sm: 12
                   fields_table: 
-                      name: security
-                      
+                      name: security       
                       
             - cols: 
                 - type: fields_table

@@ -125,22 +125,6 @@ class PropalPDF extends BimpDocumentPDF
         return $html;
     }
 
-    public function renderTop()
-    {
-        parent::renderTop();
-
-        if (isset($this->propal->note_public) && $this->propal->note_public) {
-            $html = '<div style="font-size: 7px; line-height: 8px;">';
-            $html .= $this->propal->note_public;
-            $html .= '</div>';
-
-            if (isset($this->object->array_options['options_libelle']) && $this->object->array_options['options_libelle']) {
-                $this->pdf->addVMargin(2);
-            }
-            $this->writeContent($html);
-        }
-    }
-
     public function getPaymentInfosHtml()
     {
         global $conf;

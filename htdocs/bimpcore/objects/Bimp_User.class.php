@@ -8,20 +8,81 @@ class Bimp_User extends BimpObject
         'man'   => 'Homme',
         'woman' => 'Femme'
     );
-    
-    public function getName($withGeneric = true) {
-        return $this->getInstanceName();
+
+    // Gestion des droits: 
+
+    public function canView()
+    {
+        global $user;
+
+        if ((int) $user->id === (int) $this->id) {
+            return 1;
+        }
+
+        if ($user->admin || $user->rights->user->user->lire) {
+            return 1;
+        }
+
+        return 0;
+    }
+
+    public function canCreate()
+    {
+        global $user;
+
+        if ($user->admin || $user->rights->user->user->creer) {
+            return 1;
+        }
+
+        return 0;
+    }
+
+    public function canEdit()
+    {
+        return $this->canCreate();
+    }
+
+    public function canDelete()
+    {
+        return $this->canCreate();
     }
 
     // Getters: 
 
+    public function getName($withGeneric = true)
+    {
+        return $this->getInstanceName();
+    }
+
     public function getInstanceName()
     {
         if ($this->isLoaded()) {
-            return  dolGetFirstLastname($this->getData('firstname'), $this->getData('lastname'));
+            return dolGetFirstLastname($this->getData('firstname'), $this->getData('lastname'));
         }
 
         return ' ';
+    }
+
+    public function getPageTitle()
+    {
+        return $this->getInstanceName();
+    }
+
+    // Getters params: 
+
+    public function getEditFormName()
+    {
+        global $user;
+
+        if ($user->admin || $user->rights->user->user->creer) {
+            return 'default';
+        }
+
+        if ((int) $user->id === (int) $this->id) {
+            return 'light';
+        }
+
+        return null;
     }
 
     // Affichage: 

@@ -3093,6 +3093,17 @@ class Bimp_Facture extends BimpComm
     }
 
     // Overrides BimpObject:
+    
+    public function validate()
+    {
+        $errors = parent::validate();
+        
+        if (!count($errors)) {
+            
+        }
+        
+        return $errors;
+    }
 
     public function duplicate($new_data = array(), &$warnings = array(), $force_create = false)
     {

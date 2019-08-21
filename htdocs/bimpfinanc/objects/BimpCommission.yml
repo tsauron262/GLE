@@ -241,6 +241,10 @@ lists:
             status: 
             ecarts: 
             
+    user: 
+        extends: default
+        cols: 
+            owner: unset
               
     
         

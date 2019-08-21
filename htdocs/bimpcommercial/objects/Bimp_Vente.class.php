@@ -427,7 +427,6 @@ VQ - Collège
                             )) . "\n";
 //                    break 2;
                 }
-                break;
             }
         }
 

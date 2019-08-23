@@ -392,6 +392,8 @@ VQ - Collège
             $entrepots_data = $product->getAppleCsvData($dateFrom, $dateTo, $entrepots, $p['rowid']);
 
             foreach ($entrepots_data as $ship_to => $data) {
+                if ($data['ventes'] < 0)
+                    $data['ventes'] = 0;
                 if ($data['stock'] < 0)
                     $data['stock'] = 0;
                 if ($data['stock_showroom'] < 0)

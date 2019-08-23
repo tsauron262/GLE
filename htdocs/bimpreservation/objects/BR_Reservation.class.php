@@ -271,7 +271,7 @@ class BR_Reservation extends BimpObject
         foreach ($commande->getLines() as $line) {
             $n++;
             if ($id_product) {
-                if ((int) $line->id_product !== $id_product) {
+                if ((int) $line->id_product !== (int) $id_product) {
                     continue;
                 }
             }

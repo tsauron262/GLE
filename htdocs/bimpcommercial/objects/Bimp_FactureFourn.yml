@@ -117,6 +117,7 @@ fields:
         label: Date d'échéance
         dol_prop: date_echeance
         type: date
+        required: 1
     fk_user_author: 
         dol_prop: unset
     fk_user_valid: 

@@ -540,13 +540,13 @@ class Bimp_Product extends BimpObject
 
     // Getters stocks: 
 
-    public function getStocksForEntrepot($id_entrepot, $type = '')
+    public function getStocksForEntrepot($id_entrepot, $type = 'virtuel') // $type : 'reel' / 'dispo' / 'virtuel'
     {
         $stocks = array(
             'id_stock'       => 0,
             'reel'           => 0,
-            'commandes'      => 0, // qté en commande fournisseur
             'dispo'          => 0, // Stock réel - réel réservés
+            'commandes'      => 0, // qté en commande fournisseur
             'virtuel'        => 0, // reel - total_reserves + commandes
             'total_reserves' => 0, // Réservations du statut 0 à - de 300
             'reel_reserves'  => 0, // Réservations du statut 200 à - de 300 + statut 2 (A réserver)
@@ -561,41 +561,46 @@ class Bimp_Product extends BimpObject
                 $stocks['reel'] = $product->stock_warehouse[(int) $id_entrepot]->real;
             }
 
-            $sql = 'SELECT line.rowid as id_line, c.rowid as id_commande FROM ' . MAIN_DB_PREFIX . 'commande_fournisseurdet line';
-            $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commande_fournisseur c ON c.rowid = line.fk_commande';
-            $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commande_fournisseur_extrafields cef ON c.rowid = cef.fk_object';
-            $sql .= ' WHERE line.fk_product = ' . (int) $this->id;
-            $sql .= ' AND c.fk_statut < 5';
-            $sql .= ' AND cef.entrepot = ' . (int) $id_entrepot;
+            if (in_array($type, array('dispo', 'virtuel'))) {
+                BimpObject::loadClass('bimpreservation', 'BR_Reservation');
 
-            $rows = $this->db->executeS($sql, 'array');
+                $reserved = BR_Reservation::getProductCounts($this->id, (int) $id_entrepot);
+                $stocks['total_reserves'] = $reserved['total'];
+                $stocks['reel_reserves'] = $reserved['reel'];
 
-            if (!is_null($rows)) {
-                foreach ($rows as $r) {
-                    // Pour être sûr que les BimpLines existent: 
-                    $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn', (int) $r['id_commande']);
-                    if (BimpObject::ObjectLoaded($commande)) {
-                        $commande->checkLines();
+                $stocks['dispo'] = $stocks['reel'] - $stocks['reel_reserves'];
+
+                if (in_array($type, array('virtuel'))) {
+                    $sql = 'SELECT line.rowid as id_line, c.rowid as id_commande FROM ' . MAIN_DB_PREFIX . 'commande_fournisseurdet line';
+                    $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commande_fournisseur c ON c.rowid = line.fk_commande';
+                    $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commande_fournisseur_extrafields cef ON c.rowid = cef.fk_object';
+                    $sql .= ' WHERE line.fk_product = ' . (int) $this->id;
+                    $sql .= ' AND c.fk_statut < 5';
+                    $sql .= ' AND cef.entrepot = ' . (int) $id_entrepot;
+
+                    $rows = $this->db->executeS($sql, 'array');
+
+                    if (!is_null($rows)) {
+                        foreach ($rows as $r) {
+                            // Pour être sûr que les BimpLines existent: 
+                            $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn', (int) $r['id_commande']);
+                            if (BimpObject::ObjectLoaded($commande)) {
+                                $commande->checkLines();
+                            }
+
+                            $bimp_line = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFournLine', array(
+                                        'id_line' => (int) $r['id_line']
+                                            ), true);
+
+                            if (BimpObject::ObjectLoaded($bimp_line)) {
+                                $stocks['commandes'] += ((float) $bimp_line->getFullQty() - $bimp_line->getReceivedQty(null, true));
+                            }
+                        }
                     }
 
-                    $bimp_line = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFournLine', array(
-                                'id_line' => (int) $r['id_line']
-                                    ), true);
-
-                    if (BimpObject::ObjectLoaded($bimp_line)) {
-                        $stocks['commandes'] += ((float) $bimp_line->getFullQty() - $bimp_line->getReceivedQty(null, true));
-                    }
+                    $stocks['virtuel'] = $stocks['reel'] - $stocks['total_reserves'] + $stocks['commandes'];
                 }
             }
-
-            BimpObject::loadClass('bimpreservation', 'BR_Reservation');
-
-            $reserved = BR_Reservation::getProductCounts($this->id, (int) $id_entrepot);
-            $stocks['total_reserves'] = $reserved['total'];
-            $stocks['reel_reserves'] = $reserved['reel'];
-
-            $stocks['dispo'] = $stocks['reel'] - $stocks['reel_reserves'];
-            $stocks['virtuel'] = $stocks['reel'] - $stocks['total_reserves'] + $stocks['commandes'];
         }
 
         return $stocks;

@@ -374,6 +374,17 @@ forms:
                 display_if: 
                     field_name: id_facture
                     show_values: 0
+            date_lim_reglement: 
+                custom: 1
+                label: Date d'échéance
+                data_type: date
+                input_name: date_lim_reglement
+                required: 1
+                input: 
+                    type: date
+                display_if: 
+                    field_name: id_facture
+                    show_values: 0
             cond_reglement: 
                 custom: 1
                 label: Conditions de réglement

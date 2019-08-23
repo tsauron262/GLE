@@ -1902,6 +1902,10 @@ class BimpTools
         return $array;
     }
 
+    public static function getDateLimReglement($date_begin, $id_cond_reglement)
+    {
+    }
+    
     // Gestion des couleurs: 
 
     public static function changeColorLuminosity($color_code, $percentage_adjuster = 0)

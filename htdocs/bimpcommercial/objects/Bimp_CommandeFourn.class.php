@@ -1431,6 +1431,7 @@ class Bimp_CommandeFourn extends BimpComm
                     // Création de la facture: 
                     $ref_supplier = (isset($data['ref_supplier']) ? $data['ref_supplier'] : '');
                     $datef = (isset($data['datef']) ? $data['datef'] : date('Y-m-d'));
+                    $date_lim_reglement = (isset($data['date_lim_reglement']) ? $data['date_lim_reglement'] : '');
                     $id_entrepot = (isset($data['id_entrepot']) ? (int) $data['id_entrepot'] : (int) $base_commande->getData('entrepot'));
                     $libelle = (isset($data['libelle']) ? $data['libelle'] : $base_commande->getData('libelle'));
                     $ef_type = (isset($data['ef_type']) ? $data['ef_type'] : $base_commande->getData('ef_type'));
@@ -1442,16 +1443,17 @@ class Bimp_CommandeFourn extends BimpComm
                     $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureFourn');
 
                     $errors = $facture->validateArray(array(
-                        'libelle'           => $libelle,
-                        'ef_type'           => $ef_type,
-                        'entrepot'          => $id_entrepot,
-                        'fk_soc'            => $fk_soc,
-                        'ref_supplier'      => $ref_supplier,
-                        'datef'             => $datef,
-                        'fk_cond_reglement' => $id_cond_reglement,
-                        'fk_mode_reglement' => $id_mode_reglement,
-                        'note_public'       => $note_public,
-                        'note_private'      => $note_private
+                        'libelle'            => $libelle,
+                        'ef_type'            => $ef_type,
+                        'entrepot'           => $id_entrepot,
+                        'fk_soc'             => $fk_soc,
+                        'ref_supplier'       => $ref_supplier,
+                        'datef'              => $datef,
+                        'date_lim_reglement' => $date_lim_reglement,
+                        'fk_cond_reglement'  => $id_cond_reglement,
+                        'fk_mode_reglement'  => $id_mode_reglement,
+                        'note_public'        => $note_public,
+                        'note_private'       => $note_private
                     ));
 
                     $facture->dol_object->linked_objects['order_supplier'] = array((int) $base_commande->id);

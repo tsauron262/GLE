@@ -3272,6 +3272,12 @@ class Bimp_Facture extends BimpComm
     {
         $init_fk_account = (int) $this->getInitData('fk_account');
         $fk_account = (int) $this->getData('fk_account');
+        
+        $id_cond_reglement = (int) $this->getData('fk_cond_reglement');
+        
+        if ($id_cond_reglement !== (int) $this->getInitData('fk_cond_reglement')) {
+            $this->set('date_lim_reglement', BimpTools::getDateFromDolDate($this->dol_object->calculate_date_lim_reglement($id_cond_reglement)));
+        }
 
         $errors = parent::update($warnings, $force_update);
 

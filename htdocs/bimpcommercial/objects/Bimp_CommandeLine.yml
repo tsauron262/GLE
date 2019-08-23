@@ -404,6 +404,10 @@ lists_cols:
         display: badge
         min_width: 60px
         max_width: 60px
+    qty_logistique: 
+        label: Qtés logistique
+        value: 
+            callback: displayLogistiqueQties
     date: 
         field: date_commande
         child: parent

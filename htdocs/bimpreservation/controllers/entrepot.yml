@@ -21,8 +21,10 @@ sections:
                 - type: custom
                   custom: 
                       callback: 
-                          method: renderReservationsTab
+                          method: renderTabs
                           params: 
+                              - renderReservationsTab
+                              - default
                               - to_reserve
                               
         to_process:
@@ -31,8 +33,10 @@ sections:
                 - type: custom
                   custom: 
                       callback: 
-                          method: renderReservationsTab
+                          method: renderTabs
                           params: 
+                              - renderReservationsTab
+                              - to_process
                               - to_process
                               
         to_deliver:
@@ -41,18 +45,22 @@ sections:
                 - type: custom
                   custom: 
                       callback: 
-                          method: renderReservationsTab
+                          method: renderTabs
                           params: 
+                              - renderReservationsTab
+                              - to_deliver
                               - to_deliver
                               
-        completed:
+        to_deliver:
             label: Réservations terminées
             sections:
                 - type: custom
                   custom: 
                       callback: 
-                          method: renderReservationsTab
+                          method: renderTabs
                           params: 
+                              - renderReservationsTab
+                              - to_deliver
                               - to_deliver
                               
         all_res: 
@@ -61,6 +69,8 @@ sections:
                 - type: custom
                   custom: 
                       callback: 
-                          method: renderReservationsTab
+                          method: renderTabs
                           params: 
+                              - renderReservationsTab
+                              - all_res
                               - all_res

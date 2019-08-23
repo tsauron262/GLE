@@ -1,16 +1,39 @@
 bootstrap: 1
+title: Financier
 
 objects: 
     PaiementInc: 
         instance: 
             bimp_object: Bimp_PaiementInc
                 
-                
+    commission:
+        instance:
+            bimp_object: BimpCommission
+            
+    revalorisation: 
+        instance:
+            bimp_object: BimpRevalorisation
+            
 sections:
     - type: tabs
       tabs: 
         default:
-            label: Paiements
+            label: Commissions
+            icon: fas_comment-dollar
+            sections:
+                - type: list
+                  list: 
+                      object: commission
+        sav:
+            label: Revalorisations
+            icon: fas_search-dollar
+            sections:
+                - type: list
+                  list: 
+                      object: revalorisation
+        paiements_inc:
+            label: Paiements non identifiés
+            icon: fas_ambulance
             sections:
                 - type: list
                   list: 

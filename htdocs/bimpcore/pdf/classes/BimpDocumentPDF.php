@@ -463,6 +463,18 @@ class BimpDocumentPDF extends BimpModelPDF
         if (isset($this->object->array_options['options_libelle']) && $this->object->array_options['options_libelle']) {
             $this->writeContent('<p style="font-size: 10px">Objet : <strong>' . $this->object->array_options['options_libelle'] . '</strong></p>');
         }
+        
+        if (isset($this->object->note_public) && $this->object->note_public) {
+            $html = '<div style="font-size: 7px; line-height: 8px;">';
+            $html .= $this->object->note_public;
+            $html .= '</div>';
+
+            if (isset($this->object->array_options['options_libelle']) && $this->object->array_options['options_libelle']) {
+                $this->pdf->addVMargin(2);
+            }
+            
+            $this->writeContent($html);
+        }
     }
 
     public function renderBeforeLines()

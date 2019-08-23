@@ -203,6 +203,11 @@ class BC_FieldFilter extends BC_Filter
             case 'range':
                 foreach ($this->values as $value) {
                     if (is_array($value)) {
+                        if (isset($value['max']) && $value['max'] !== '') {
+                            if (preg_match('/^\d{4}\-\d{2}\-\d{2}$/', $value['max'])) {
+                                $value['max'] .= ' 23:59:59';
+                            }
+                        }
                         if (isset($value['min']) || isset($value['max'])) {
                             if ($value['min'] !== '' && $value['max'] === '') {
                                 $or_field[] = array(

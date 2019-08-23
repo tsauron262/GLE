@@ -1,0 +1,21 @@
+bootstrap: 1
+
+title: 
+    callback: 
+        object: commission
+        method: getPageTitle
+        
+objects: 
+    commission: 
+        instance: 
+            bimp_object: BimpCommission
+            id_object: 
+                request: id
+                
+sections: 
+    - type: view
+      view: 
+          panel: 0
+          name: default
+          object: commission
+          

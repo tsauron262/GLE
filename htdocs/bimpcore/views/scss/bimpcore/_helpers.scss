@@ -13,10 +13,11 @@
 }
 
 /*Fonts styles*/
+
 .bold {
     font-weight: bold;
 }
- 
+
 p.smallInfo {
     color: #787878;
     margin: 5px 0;
@@ -40,4 +41,32 @@ p.smallInfo {
 
 .v_scroll {
     overflow-y: scroll;
+}
+
+/* Hovers */
+
+span.hover {
+    cursor: pointer;
+    color: $gray-dark;
+    @include transition(all 0.3s ease);
+
+    &:hover, 
+        &.hover-default:hover {
+        color: $gray-darker;
+    }
+    &.hover-primary:hover {
+        color: $primary;
+    }
+    &.hover-success:hover {
+        color: $success;    
+    }
+    &.hover-warning:hover {
+        color: $warning;
+    }
+    &.hover-danger:hover {
+        color: $danger;
+    }
+    &.hover-important:hover {
+        color: $important;
+    }
 }

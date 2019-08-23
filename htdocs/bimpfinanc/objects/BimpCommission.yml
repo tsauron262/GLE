@@ -1,28 +1,49 @@
 table: bimp_commission
 common_fields: 0
-
-parent_module: bimpcore
-parent_object: Bimp_User
-parent_id_property: id_user
-
+icon: fas_comment-dollar
+controller: commission
 list_page_url:
-    controller: commissions
+    controller: index
+    url_params: 
+        tab: default
     
 header_list_name: default
-icon: fas_comment-dollar
-
+header_btn: 
+    callback: getActionsButtons
+    
 labels: 
     name: Commission
     is_female: 1
     
 fields: 
+    type: 
+        label: Type
+        values: 
+            array: types
+        default_value: 1
     id_user: 
         label: Utilisateur
-        type: id_parent
+        type: id_object
+        object: user
         input:
             type: search_user
-        required: 1
-        
+        display_if: 
+            field_name: type
+            show_values: 1
+        required_if: type=1
+        default_value: 0
+    id_entrepot: 
+        label: Entrepôt
+        type: id_object
+        object: entrepot
+        input: 
+            type: search_entrepot
+            has_commissions_only: 1
+        display_if: 
+            field_name: type
+            show_values: 2
+        required_if: type=2
+        default_value: 0
     date: 
         label: Date
         type: date
@@ -40,15 +61,128 @@ fields:
         values: 
             array: status_list
         
+fields_tables: 
+    infos: 
+        title: Informations
+        icon: fas_info-circle
+        rows: 
+            - field: type
+            - field: id_user
+              display: card
+              show: 
+                  field_value: id_user
+            - field: id_entrepot
+              display: nom_url
+              show: 
+                  field_value: id_entrepot
+            - field: status
+            - field: date
+            - label: Ecarts secteurs
+              value: 
+                  callback: displaySecteursErrors
+            
+    amounts: 
+        title: Montants
+        icon: fas_euro-sign
+        rows: 
+            - label: Total CA
+              value: 
+                  callback: 
+                      method: displayAmount
+                      params: 
+                          - total_ca
+            - label: Total achats
+              value: 
+                  callback: 
+                      method: displayAmount
+                      params: 
+                          - total_pa
+            - label: Total revalorisations
+              value: 
+                  callback: 
+                      method: displayAmount
+                      params: 
+                          - total_reval
+            - label: Total marges
+              value: 
+                  callback: 
+                      method: displayAmount
+                      params: 
+                          - total_marges
+            - label: Taux de marge
+              value: 
+                  callback: 
+                      method: displayAmount
+                      params: 
+                          - tx_marge
+            - label: Taux de marque
+              value: 
+                  callback: 
+                      method: displayAmount
+                      params: 
+                          - tx_marque
+                
+views: 
+    default: 
+        objects_change_reload: Bimp_Facture,BimpRevalorisation
+        rows: 
+            - cols: 
+                - type: object_header
+            - cols: 
+                  - type: fields_table
+                    col_lg: 6
+                    col_md: 6
+                    fields_table: 
+                        name: infos
+                  
+                  - type: fields_table
+                    col_lg: 6
+                    col_md: 6
+                    fields_table:
+                        name: amounts
+                        
+            - cols: 
+                - type: custom
+                  custom: 
+                      callback: renderDetailsView
+    
 forms: 
     default: 
         rows: 
+            - field: type
             - field: id_user
+            - field: id_entrepot
             - field: date
-              
-    edit: 
+            - custom: 1
+              label: Inclure uniquement les facture entièrement payées
+              input_name: paid_only
+              value: 0
+              data_type: bool
+              input: 
+                  type: toggle
+            
+    generate: 
+        title: Générer des commissions par groupe
+        icon: fas_cogs
+        msgs: 
+            - type: info
+              content: Cet outil permet de générer les commissions de chaque utilisateur d'un groupe
         rows: 
+            - custom: 1
+              label: Groupe d'utilisateur
+              input_name: id_group
+              data_type: id
+              required: 1
+              input: 
+                  type: search_group
             - field: date
+            - custom: 1
+              label: Inclure uniquement les facture entièrement payée
+              input_name: paid_only
+              value: 0
+              data_type: bool
+              input: 
+                  type: toggle
     
 filters_panel: 
     default: 
@@ -56,6 +190,23 @@ filters_panel:
             - field: id_user
             - field: date
             - field: status
+
+lists_cols: 
+    date: 
+        field: date
+    owner: 
+        label: Utilisateur / Entrepôt
+        value: 
+            callback: displayLinkedObject
+    marges: 
+        field: total_marges
+    status: 
+        field: status
+    ecarts: 
+        label: Ecarts secteurs
+        value: 
+            callback: displaySecteursErrors
+
 lists: 
     default: 
         title: Liste des commissions
@@ -70,23 +221,30 @@ lists:
         sort_field: id
         sort_way: desc
         n: 10
+        page_btn: 1
+        modal_view: default
         add_form_name: default
         add_form_values: 
             fields: 
                 id_user: 
                     request: id_user
         add_btn_label: Nouvelle commission
-        edit_btn: 1
-        edit_form: edit
         delete_btn: 1
+        header_buttons: 
+            callback: getListHeaderButtons
         extra_btn: 
             callback: getListExtraBtn
         cols: 
-            - field: date
-            - field: id_user
-              display: nom_url
-            - field: total_marges
-            - field: status
+            date: 
+            owner: 
+            marges: 
+            status: 
+            ecarts: 
+            
+    user: 
+        extends: default
+        cols: 
+            owner: unset
               
     
         

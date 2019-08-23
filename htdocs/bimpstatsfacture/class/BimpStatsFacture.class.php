@@ -110,7 +110,11 @@ class BimpStatsFacture {
         } else if (!empty($types)) {     // Non renseigné NOT selected
             $sql .= ' AND e.type IN (\'' . implode("','", $types) . '\')';
         }
-
+        
+        if(!empty($type)){
+            $sql .= ' AND f.type IN ('.implode(",",$type).')';
+        }
+        
         $sql .= " AND (";
         if (!empty($centres) and $placeType == 'c') {
             $sql .= ' (e.centre IN (\'' . implode("','", $centres) . '\')';

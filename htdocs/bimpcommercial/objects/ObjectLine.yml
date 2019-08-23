@@ -132,6 +132,11 @@ fields:
         type: bool
         default_value: 0
         
+    remise_crt_percent: 
+        label: Pourcentage remise CRT
+        type: percent
+        default_value: 0
+        
     hide_product_label: 
         label: Ne pas afficher l'intitulé du produit
         type: bool
@@ -359,6 +364,20 @@ forms:
                 display_if: 
                     field_name: type
                     show_values: 1
+            remise_crt_percent:
+                custom: 1
+                label: Pourcentage remise CRT
+                input_name: remise_crt_percent
+                data_type: percent
+                content: 
+                    callback: 
+                        method: renderLineInput
+                        params: 
+                            - remise_crt_percent
+                depends_on: id_product,remise_crt
+                display_if: 
+                    field_name: remise_crt
+                    show_values: 1
 #            remise_pa:
 #                custom: 1
 #                label: Remise sur le prix d'achat
@@ -530,6 +549,15 @@ forms:
                         method: renderLineInput
                         params: 
                             - remise_crt
+                            - 0
+                            - ''
+                            - 1
+            remise_crt_percent: 
+                content: 
+                    callback: 
+                        method: renderLineInput
+                        params: 
+                            - remise_crt_percent
                             - 0
                             - ''
                             - 1
@@ -725,6 +753,7 @@ lists:
             margin:
                 
     default: 
+        configurable: 1
         checkboxes: 1
         positions: 1
         positions_open: 1

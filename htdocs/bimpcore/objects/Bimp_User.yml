@@ -167,6 +167,11 @@ fields:
         label: Vérouiller les en-têtes
         type: bool
         default_value: 0
+    secteur: 
+        label: Secteur
+        dol_extra_field: 1
+        values: 
+            array: secteurs
         
 forms:
     light: 
@@ -188,6 +193,7 @@ forms:
             - field: signature
             - field: defaultentrepot
             - field: apple_centre
+            - field: secteur
             - field: echec_auth
             
 lists_cols: 
@@ -248,6 +254,9 @@ lists_cols:
         field: defaultentrepot
     apple_centre: 
         field: apple_centre
+    secteur: 
+        field: secteur
+        dol_extra_field: 1
         
 lists:
     default: 
@@ -265,6 +274,8 @@ lists:
         page_btn: 1
         modal_view: default
         edit_btn: 1
+        edit_form: 
+            callback: getEditFormName
         cols:
             gender:
             firstname:
@@ -325,6 +336,7 @@ fields_tables:
             - field: comp
             - field: defaultentrepot
             - field: apple_centre
+            - field: secteur
         
     notes: 
         title: Notes
@@ -352,6 +364,8 @@ fields_tables:
         
 views: 
     default: 
+        edit_form: 
+            callback: getEditFormName
         rows: 
             - cols: 
                 - type: fields_table
@@ -372,8 +386,7 @@ views:
                   col_md: 6
                   col_sm: 12
                   fields_table: 
-                      name: security
-                      
+                      name: security       
                       
             - cols: 
                 - type: fields_table

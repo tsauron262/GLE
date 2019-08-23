@@ -99,6 +99,11 @@ class Bimp_Facture extends BimpComm
                     return 1;
                 }
                 return 0;
+
+            case 'removeFromCommission':
+            case 'addToCommission':
+                $commission = BimpObject::getInstance('bimpfinanc', 'BimpCommission');
+                return (int) $commission->can('create');
         }
 
         return parent::canSetAction($action);
@@ -133,7 +138,7 @@ class Bimp_Facture extends BimpComm
 
     public function isActionAllowed($action, &$errors = array())
     {
-        if (in_array($action, array('validate', 'modify', 'reopen', 'sendMail', 'addAcompte'))) {
+        if (in_array($action, array('validate', 'modify', 'reopen', 'sendMail', 'addAcompte', 'removeFromUserCommission', 'removeFromEntrepotCommission', 'addToCommission'))) {
             if (!$this->isLoaded()) {
                 $errors[] = 'ID de la facture absent';
                 return 0;
@@ -268,9 +273,74 @@ class Bimp_Facture extends BimpComm
                     return 0;
                 }
                 return (int) parent::isActionAllowed($action, $errors);
+
+            case 'removeFromUserCommission':
+                if (!(int) $this->getData('id_user_commission')) {
+                    $errors[] = 'Cette facture n\'est associée à aucune commission utilisateur';
+                    return 0;
+                }
+                $commission = $this->getChildObject('user_commission');
+                if (!BimpObject::objectLoaded($commission)) {
+                    $errors[] = 'La commission #' . $this->getData('id_user_commission') . ' n\'existe plus';
+                    return 0;
+                }
+                if ((int) $commission->getData('status') !== 0) {
+                    $errors[] = 'La commission #' . $commission->id . ' n\'est plus au statut "brouillon"';
+                    return 0;
+                }
+                return 1;
+
+            case 'removeFromEntrepotCommission':
+                if (!(int) $this->getData('id_entrepot_commission')) {
+                    $errors[] = 'Cette facture n\'est associée à aucune commission entrepôt';
+                    return 0;
+                }
+                $commission = $this->getChildObject('entrepot_commission');
+                if (!BimpObject::objectLoaded($commission)) {
+                    $errors[] = 'La commission #' . $this->getData('id_entrepot_commission') . ' n\'existe plus';
+                    return 0;
+                }
+                if ((int) $commission->getData('status') !== 0) {
+                    $errors[] = 'La commission #' . $commission->id . ' n\'est plus au statut "brouillon"';
+                    return 0;
+                }
+                return 1;
+
+            case 'addToCommission':
+                if (!in_array($type, array(0, 1, 2))) {
+                    $errors[] = 'Cette facture ne peut pas être attribuée à une commission';
+                    return 0;
+                }
+                if (!in_array($status, array(1, 2))) {
+                    $errors[] = 'Cette facture n\'est pas validée';
+                    return 0;
+                }
+                if ((int) $this->getData('id_user_commission') && (int) $this->getData('id_entrepot_commission')) {
+                    $errors[] = 'Cette facture n\'est attribuable à aucune commission';
+                    return 0;
+                }
+                return 1;
         }
 
         return (int) parent::isActionAllowed($action, $errors);
+    }
+
+    public function showUserCommission()
+    {
+        if ((int) $this->getData('id_user_commission') > 0) {
+            return 1;
+        }
+
+        return 0;
+    }
+
+    public function showEntrepotCommission()
+    {
+        if ((int) $this->getData('id_entrepot_commission') > 0) {
+            return 1;
+        }
+
+        return 0;
     }
 
     // Getters params: 
@@ -569,6 +639,63 @@ class Bimp_Facture extends BimpComm
             }
         }
 
+//         Ajout à une commission: 
+        if ($this->isActionAllowed('addToCommission') && $this->canSetAction('addToCommission')) {
+            $buttons[] = array(
+                'label'   => 'Ajouter à une commission',
+                'icon'    => 'fas_comment-dollar',
+                'onclick' => $this->getJsActionOnclick('addToCommission', array(), array(
+                    'form_name' => 'add_to_commission'
+                ))
+            );
+        }
+
+        return $buttons;
+    }
+
+    public function getCommissionListButtons($comm_type = null)
+    {
+        $buttons = array();
+
+        if ($this->isLoaded()) {
+            if ((is_null($comm_type) || (int) $comm_type === 1) && (int) $this->getData('id_user_commission')) {
+                if ($this->isActionAllowed('removeFromUserCommission') && $this->canSetAction('removeFromUserCommission')) {
+                    $buttons[] = array(
+                        'label'   => 'Retirer de la commission utilisateur',
+                        'icon'    => 'fas_times',
+                        'onclick' => $this->getJsActionOnclick('removeFromUserCommission', array(), array(
+                            'confirm_msg' => 'Veuillez confirmer le retrait de cette facture de la commission #' . (int) $this->getData('id_user_commission')
+                        ))
+                    );
+                }
+            }
+
+            if ((is_null($comm_type) || (int) $comm_type === 2) && (int) $this->getData('id_entrepot_commission')) {
+                if ($this->isActionAllowed('removeFromEntrepotCommission') && $this->canSetAction('removeFromEntrepotCommission')) {
+                    $buttons[] = array(
+                        'label'   => 'Retirer de la commission entrepôt',
+                        'icon'    => 'fas_times',
+                        'onclick' => $this->getJsActionOnclick('removeFromEntrepotCommission', array(), array(
+                            'confirm_msg' => 'Veuillez confirmer le retrait de cette facture de la commission #' . (int) $this->getData('id_entrepot_commission')
+                        ))
+                    );
+                }
+            }
+
+            if ($this->isActionAllowed('addToCommission') && $this->canSetAction('addToCommission')) {
+                if (is_null($comm_type) ||
+                        ($comm_type === 1 && !(int) $this->getData('id_user_commission')) ||
+                        ($comm_type === 2 && !(int) $this->getData('id_entrepot_commission'))) {
+                    $buttons[] = array(
+                        'label'   => 'Ajouter à une commission',
+                        'icon'    => 'fas_plus',
+                        'onclick' => $this->getJsActionOnclick('addToCommission', array(), array(
+                            'form_name' => 'add_to_commission'
+                        ))
+                    );
+                }
+            }
+        }
 
         return $buttons;
     }
@@ -728,6 +855,57 @@ class Bimp_Facture extends BimpComm
         return $options;
     }
 
+    public function getDraftCommissionsArray()
+    {
+        if ((int) $this->isLoaded()) {
+            BimpObject::loadClass('bimpfinanc', 'BimpCommission');
+            $return = array();
+
+            $id_entrepot = (int) $this->getData('entrepot');
+
+            if ($id_entrepot) {
+                if (!(int) $this->getData('id_user_commission')) {
+                    $has_user_commissions = (int) $this->db->getValue('entrepot', 'has_users_commissions', '`rowid` = ' . $id_entrepot);
+                    if ($has_user_commissions) {
+                        $contacts = $this->dol_object->getIdContact('internal', 'SALESREPFOLL');
+                        if (isset($contacts[0]) && $contacts[0]) {
+                            $commissions = BimpCache::getBimpObjectObjects('bimpfinanc', 'BimpCommission', array(
+                                        'type'    => BimpCommission::TYPE_USER,
+                                        'id_user' => (int) $contacts[0],
+                                        'status'  => 0
+                            ));
+
+                            foreach ($commissions as $commission) {
+                                $dt = new DateTime($commission->getData('date'));
+                                $return[(int) $commission->id] = $commission->getName() . '  - ' . $dt->format('d / m / Y');
+                            }
+                        }
+                    }
+                }
+
+                if (!(int) $this->getData('id_entrepot_commission')) {
+                    $has_entrepot_commissions = (int) $this->db->getValue('entrepot', 'has_entrepot_commissions', '`rowid` = ' . $id_entrepot);
+                    if ($has_entrepot_commissions) {
+                        $commissions = BimpCache::getBimpObjectObjects('bimpfinanc', 'BimpCommission', array(
+                                    'type'        => BimpCommission::TYPE_ENTREPOT,
+                                    'id_entrepot' => $id_entrepot,
+                                    'status'      => 0
+                        ));
+
+                        foreach ($commissions as $commission) {
+                            $dt = new DateTime($commission->getData('date'));
+                            $return[(int) $commission->id] = $commission->getName() . ' - ' . $dt->format('d / m / Y');
+                        }
+                    }
+                }
+            }
+
+            return $return;
+        }
+
+        return array();
+    }
+
     // Getters données: 
 
     public function getRemainToPay()
@@ -776,6 +954,39 @@ class Bimp_Facture extends BimpComm
     public function getRequestIdFactureToCorrect()
     {
         return BimpTools::getValue('id_facture_to_correct', BimpTools::getValue('param_values/fields/id_facture_to_correct', 0));
+    }
+
+    public function getTotalRevalorisations()
+    {
+        $totals = array(
+            'attente'  => 0,
+            'accepted' => 0,
+            'refused'  => 0
+        );
+
+        if ($this->isLoaded()) {
+            $revals = BimpCache::getBimpObjectObjects('bimpfinanc', 'BimpRevalorisation', array(
+                        'id_facture' => (int) $this->id
+            ));
+
+            foreach ($revals as $reval) {
+                switch ((int) $reval->getData('status')) {
+                    case 0:
+                        $totals['attente'] += $reval->getTotal();
+                        break;
+
+                    case 1:
+                        $totals['accepted'] += $reval->getTotal();
+                        break;
+
+                    case 2:
+                        $totals['refused'] += $reval->getTotal();
+                        break;
+                }
+            }
+        }
+
+        return $totals;
     }
 
     // Affichages: 
@@ -1091,6 +1302,44 @@ class Bimp_Facture extends BimpComm
         return $html;
     }
 
+    public function displaySecteurWithCommercialCheck()
+    {
+        if ($this->isLoaded()) {
+            $class = '';
+
+            $user = $this->getCommercial();
+            $secteur = $this->getData('ef_type');
+
+            if (BimpObject::objectLoaded($user)) {
+                $user_secteur = $user->getData('secteur');
+
+                if ($user_secteur) {
+                    if (($user_secteur != $secteur)) {
+                        $class = 'danger';
+                    } else {
+                        $class = 'success';
+                    }
+                }
+            }
+
+            $html = '';
+
+            if ($class) {
+                $html .= '<span class="' . $class . '">';
+            }
+
+            $html .= $this->displayData('ef_type');
+
+            if ($class) {
+                $html .= '</span>';
+            }
+
+            return $html;
+        }
+
+        return '';
+    }
+
     //Rendus HTML: 
 
     public function renderContentExtraLeft()
@@ -1245,7 +1494,7 @@ class Bimp_Facture extends BimpComm
                 $html .= '<td>' . BimpTools::displayMoneyValue(-$total_paid, 'EUR') . '</td>';
                 $html .= '<td></td>';
                 $html .= '</tr>';
-                
+
                 // Converti en remise: 
                 BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
                 $discount = new DiscountAbsolute($this->db->db);
@@ -1530,12 +1779,105 @@ class Bimp_Facture extends BimpComm
             return array(
                 array(
                     'content' => $html,
-                    'type' => 'warning'
+                    'type'    => 'warning'
                 )
             );
         }
 
         return array();
+    }
+
+    public function renderRevalorisationsList()
+    {
+        $html = '';
+
+        if ($this->isLoaded()) {
+            $reval = BimpObject::getInstance('bimpfinanc', 'BimpRevalorisation');
+            $bc_list = new BC_ListTable($reval, 'facture');
+            $bc_list->addFieldFilterValue('id_facture', (int) $this->id);
+
+            $html .= $bc_list->renderHtml();
+        }
+
+        return $html;
+    }
+
+    public function renderMarginTableExtra($marginInfo)
+    {
+        $html = '';
+
+        $total_pv = (float) $marginInfo['pv_total'];
+        $total_pa = (float) $marginInfo['pa_total'];
+
+        if (!(int) $this->getData('fk_statut')) {
+            $remises_crt = 0;
+
+            $lines = $this->getLines('not_text');
+
+            foreach ($lines as $line) {
+                $remises_crt += (float) $line->getRemiseCRT() * (float) $line->qty;
+            }
+
+            if ($remises_crt) {
+                $html .= '<tr>';
+                $html .= '<td>Remises CRT prévues</td>';
+                $html .= '<td></td>';
+                $html .= '<td><span class="danger">-' . BimpTools::displayMoneyValue($remises_crt, '') . '</span></td>';
+                $html .= '<td></td>';
+                $html .= '</tr>';
+
+                $total_pa -= $remises_crt;
+            }
+        }
+
+        $revals = $this->getTotalRevalorisations();
+
+        if ((float) $revals['accepted']) {
+            $html .= '<tr>';
+            $html .= '<td>Revalorisations acceptées</td>';
+            $html .= '<td></td>';
+            $html .= '<td><span class="danger">-' . BimpTools::displayMoneyValue($revals['accepted'], '') . '</span></td>';
+            $html .= '<td></td>';
+            $html .= '</tr>';
+
+            $total_pa -= (float) $revals['accepted'];
+        }
+
+        if ((float) $revals['attente']) {
+            $html .= '<tr>';
+            $html .= '<td>Revalorisations en attente</td>';
+            $html .= '<td></td>';
+            $html .= '<td><span class="danger">-' . BimpTools::displayMoneyValue($revals['attente'], '') . '</span></td>';
+            $html .= '<td></td>';
+            $html .= '</tr>';
+
+            $total_pa -= (float) $revals['attente'];
+        }
+
+        if ((float) $total_pa !== (float) $marginInfo['pa_total']) {
+            $total_marge = $total_pv - $total_pa;
+            $tx = 0;
+
+
+            if (BimpCore::getConf('bimpcomm_tx_marque')) {
+                if ($total_pv) {
+                    $tx = ($total_marge / $total_pv) * 100;
+                }
+            } else {
+                if ($total_pa) {
+                    $tx = ($total_marge / $total_pa) * 100;
+                }
+            }
+
+            $html .= '<tr>';
+            $html .= '<td>Marge finale prévue</td>';
+            $html .= '<td>' . BimpTools::displayMoneyValue($total_pv, '') . '</td>';
+            $html .= '<td>' . BimpTools::displayMoneyValue($total_pa, '') . '</td>';
+            $html .= '<td>' . BimpTools::displayMoneyValue($total_marge, '') . ' (' . BimpTools::displayFloatValue($tx, 4) . ' %)</td>';
+            $html .= '</tr>';
+        }
+
+        return $html;
     }
 
     // Traitements: 
@@ -1665,6 +2007,44 @@ class Bimp_Facture extends BimpComm
                                     $this->db->delete('bimp_facture_line', '`id` = ' . (int) $line->id);
                                     $done++;
                                 }
+                            }
+                        }
+                    } elseif ((int) $line->getData('type') !== ObjectLine::LINE_TEXT) {
+                        // Création des revalorisations sur remise CRT: 
+                        if ((int) $line->getData('remise_crt')) {
+                            $remise_pa = (float) $line->getRemiseCRT();
+
+                            if (!$remise_pa) {
+                                continue;
+                            }
+
+                            // On vérifie qu'une reval n'existe pas déjà: 
+                            $reval = BimpCache::findBimpObjectInstance('', '', array(
+                                        'id_facture'      => (int) $this->id,
+                                        'id_facture_line' => (int) $line->id,
+                                        'type'            => 'crt'
+                            ));
+
+                            if (BimpObject::objectLoaded($reval)) {
+                                continue;
+                            }
+
+                            $reval = BimpObject::getInstance('bimpfinanc', 'BimpRevalorisation');
+
+                            $dt = new DateTime($this->getData('datec'));
+
+                            $reval_errors = $reval->validateArray(array(
+                                'id_facture'      => (int) $this->id,
+                                'id_facture_line' => (int) $line->id,
+                                'type'            => 'crt',
+                                'date'            => $dt->format('Y-m-d'),
+                                'amount'          => $remise_pa,
+                                'qty'             => (float) $line->qty
+                            ));
+
+                            if (!count($reval_errors)) {
+                                $reval_warnings = array();
+                                $reval->create($reval_warnings, true);
                             }
                         }
                     }
@@ -2065,7 +2445,7 @@ class Bimp_Facture extends BimpComm
             $discount->description = '(DEPOSIT)';
         elseif ($this->dol_object->type == Facture::TYPE_STANDARD || $this->dol_object->type == Facture::TYPE_REPLACEMENT || $this->dol_object->type == Facture::TYPE_SITUATION)
             $discount->description = '(EXCESS RECEIVED)';
-        
+
         $discount->fk_soc = $this->dol_object->socid;
         $discount->fk_facture_source = $this->dol_object->id;
 
@@ -2087,7 +2467,7 @@ class Bimp_Facture extends BimpComm
         } else {
             echo 'ka';
         }
-        
+
         if ($this->dol_object->type == Facture::TYPE_DEPOSIT) {
             // Insert one discount by VAT rate category
             $amount_ht = $amount_tva = $amount_ttc = array();
@@ -2597,13 +2977,141 @@ class Bimp_Facture extends BimpComm
         );
     }
 
+    public function actionRemoveFromUserCommission($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Retrait de la commission effectuée avec succès';
+
+        $commission = $this->getChildObject('user_commission');
+
+        if (BimpObject::objectLoaded($commission)) {
+            $errors = $this->updateField('id_user_commission', 0);
+
+            if (!count($errors)) {
+                $com_errors = $commission->updateAmounts();
+
+                if (count($com_errors)) {
+                    $warnings[] = BimpTools::getMsgFromArray($com_errors, 'Echec de la mise à jour des montants de la commission');
+                }
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionRemoveFromEntrepotCommission($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Retrait de la commission effectuée avec succès';
+
+        $commission = $this->getChildObject('entrepot_commission');
+
+        if (BimpObject::objectLoaded($commission)) {
+            $errors = $this->updateField('id_entrepot_commission', 0);
+
+            if (!count($errors)) {
+                $com_errors = $commission->updateAmounts();
+
+                if (count($com_errors)) {
+                    $warnings[] = BimpTools::getMsgFromArray($com_errors, 'Echec de la mise à jour des montants de la commission');
+                }
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionAddToCommission($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+
+        $id_commission = (isset($data['id_commission']) ? (int) $data['id_commission'] : 0);
+
+        if (!$id_commission) {
+            $errors[] = 'Aucune commission sélectionnée';
+        } else {
+            $commission = BimpCache::getBimpObjectInstance('bimpfinanc', 'BimpCommission', $id_commission);
+            if (!BimpObject::objectLoaded($commission)) {
+                $errors[] = 'La commission d\'ID ' . $id_commission . ' n\'existe pas';
+            } else {
+                if ((int) $commission->getData('status') !== 0) {
+                    $errors[] = 'La commission #' . $commission->id . ' n\'est plus au statut "brouillon"';
+                } else {
+                    $draftCommissions = $this->getDraftCommissionsArray();
+                    if (!array_key_exists((int) $commission->id, $draftCommissions)) {
+                        $errors[] = 'Cette facture n\'est pas attribuable à la commission #' . $commission->id;
+                    } else {
+                        $field = '';
+                        switch ((int) $commission->getData('type')) {
+                            case BimpCommission::TYPE_USER:
+                                $field = 'id_user_commission';
+                                if ((int) $this->getCommercialId() !== (int) $commission->getData('id_user')) {
+                                    $errors[] = 'Le commercial de cette facture ne correspond pas à l\'utilisateur enregistré pour cette commission';
+                                }
+                                break;
+
+                            case BimpCommission::TYPE_ENTREPOT:
+                                $field = 'id_entrepot_commission';
+                                if ((int) $this->getData('entrepot') !== (int) $commission->getData('id_entrepot')) {
+                                    $errors[] = 'L\'entrepot de cette facture ne correspond pas à l\'entrepôt enregistré pour cette commission';
+                                }
+                                break;
+                        }
+
+                        if (!count($errors)) {
+                            $success = 'Facture attribuée à la commission #' . $commission->id . ' avec succès';
+
+                            $errors = $this->updateField($field, $commission->id);
+
+                            if (!count($errors)) {
+                                $comm_errors = $commission->updateAmounts();
+
+                                if (count($comm_errors)) {
+                                    $warnings[] = BimpTools::getMsgFromArray($comm_errors, 'Echec de la mise à jour des montants de la commission');
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
     // Overrides BimpObject:
+    
+    public function validate()
+    {
+        $errors = parent::validate();
+        
+        if (!count($errors)) {
+            
+        }
+        
+        return $errors;
+    }
 
     public function duplicate($new_data = array(), &$warnings = array(), $force_create = false)
     {
         $new_data['datec'] = date('Y-m-d H:i:s');
         $new_data['fk_user_author'] = 0;
         $new_data['fk_user_valid'] = 0;
+        $new_data['id_user_commission'] = 0;
+        $new_data['id_entrepot_commission'] = 0;
 
         return parent::duplicate($new_data, $warnings, $force_create);
     }

@@ -51,7 +51,7 @@ class BimpInput
                     }
                     $html .= $data;
                     if ($extra_class) {
-                        $html .= ' class="'.$extra_class.'"';
+                        $html .= ' class="' . $extra_class . '"';
                     }
                     $html .= '/>';
 
@@ -64,7 +64,7 @@ class BimpInput
                 } else {
                     $html .= '<input type="text" id="' . $input_id . '" name="' . $field_name . '" value="' . $value . '"';
                     if ($extra_class) {
-                        $html .= ' class="'.$extra_class.'"';
+                        $html .= ' class="' . $extra_class . '"';
                     }
                     if (isset($options['placeholder'])) {
                         $html .= ' placeholder="' . $options['placeholder'] . '"';
@@ -400,7 +400,7 @@ class BimpInput
 
             case 'search_object':
                 if (isset($options['object']) && is_a($options['object'], 'BimpObject')) {
-                    $html = $options['object']->renderSearchInput($field_name);
+                    $html = $options['object']->renderSearchInput($field_name, $value);
                 } else {
                     $html .= BimpRender::renderAlerts('Type d\'objet à rechercher invalide');
                 }
@@ -495,7 +495,9 @@ class BimpInput
                 break;
 
             case 'search_entrepot':
-                $options['options'] = BimpCache::getEntrepotsArray();
+                $include_empty = (isset($options['include_empty']) ? (int) $options['include_empty'] : 0);
+                $has_commissions_only = (isset($options['has_commissions_only']) ? (int) $options['has_commissions_only'] : 0);
+                $options['options'] = BimpCache::getEntrepotsArray($include_empty, $has_commissions_only);
                 $html .= self::renderInput('select', $field_name, $value, $options, $form, $option, $input_id);
                 break;
 
@@ -1010,6 +1012,10 @@ class BimpInput
                 } else {
                     $fl = false;
                 }
+
+                if (!preg_match('/\./', $field_name)) {
+                    $sql .= 'a.';
+                }
                 $sql .= $field_name . ' as label_' . $i;
                 $i++;
             }
@@ -1022,7 +1028,12 @@ class BimpInput
             if ($join) {
                 $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . $join . ' ON ' . $join_on;
             }
-            $sql .= ' WHERE ' . $field_return_value . ' = ' . (is_string($value) ? '\'' . $value . '\'' : $value);
+            $sql .= ' WHERE ';
+
+            if (!preg_match('/\./', $field_return_value)) {
+                $sql .= 'a.';
+            }
+            $sql .= $field_return_value . ' = ' . (is_string($value) ? '\'' . $value . '\'' : $value);
 
             $result = $bdb->executeS($sql, 'array');
 

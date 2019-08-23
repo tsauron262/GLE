@@ -39,6 +39,15 @@ function reloadObjectView(view_id) {
         'new_values': new_values
     };
 
+    $view.find('ul.nav-tabs').each(function () {
+        var navtabs_id = $(this).data('navtabs_id');
+        var active = $(this).find('li.active').first().data('navtab_id');
+        
+        if (navtabs_id && active) {
+            data['navtab-' + navtabs_id] = active;
+        }
+    });
+
     BimpAjax('loadObjectView', data, null, {
         $view: $view,
         display_success: false,

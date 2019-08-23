@@ -364,7 +364,7 @@ class BimpComm extends BimpDolObject
                     return $product->getRef();
                 }
                 break;
-                
+
             case 'id_commercial':
                 $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $value);
                 if (BimpObject::ObjectLoaded($user)) {
@@ -824,6 +824,7 @@ class BimpComm extends BimpDolObject
 
             $pv = $line->qty * $line->subprice * (1 - $line->remise_percent / 100);
             $pa_ht = $line->pa_ht;
+
             $pa = $line->qty * $pa_ht;
 
             // calcul des marges
@@ -945,6 +946,31 @@ class BimpComm extends BimpDolObject
         return $zone;
     }
 
+    public function getCommercialId()
+    {
+        if ($this->isLoaded()) {
+            $contacts = $this->dol_object->getIdContact('internal', 'SALESREPFOLL');
+            if (isset($contacts[0]) && $contacts[0]) {
+                return (int) $contacts[0];
+            }
+        }
+
+        return 0;
+    }
+
+    public function getCommercial()
+    {
+        $id_comm = (int) $this->getCommercialId();
+        if ($id_comm) {
+            $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_comm);
+            if (BimpObject::objectLoaded($user)) {
+                return $user;
+            }
+        }
+
+        return null;
+    }
+
     // Getters - Overrides BimpObject
 
     public function getName($with_generic = true)
@@ -969,22 +995,6 @@ class BimpComm extends BimpDolObject
             $dir_output = $this->getDirOutput();
             if ($dir_output) {
                 return $dir_output . '/' . dol_sanitizeFileName($this->getRef()) . '/';
-            }
-        }
-
-        return '';
-    }
-
-    public function displayCommercial()
-    {
-        if ($this->isLoaded()) {
-            $contacts = $this->dol_object->getIdContact('internal', 'SALESREPFOLL');
-            if (isset($contacts[0]) && $contacts[0]) {
-                BimpTools::loadDolClass('contact');
-                $user = new User($this->db->db);
-                if ($user->fetch((int) $contacts[0]) > 0) {
-                    return $user->getNomUrl(1) . BimpRender::renderObjectIcons($user);
-                }
             }
         }
 
@@ -1186,6 +1196,19 @@ class BimpComm extends BimpDolObject
         return $html;
     }
 
+    public function displayTotalPA()
+    {
+        $lines = $this->getLines('not_text');
+
+        $total = 0;
+
+        foreach ($lines as $line) {
+            $total += $line->getTotalPA();
+        }
+
+        return BimpTools::displayMoneyValue($total);
+    }
+
     public function displayPDFButton($display_generate = true, $with_ref = true, $btn_label = '')
     {
         $html = '';
@@ -1231,6 +1254,22 @@ class BimpComm extends BimpDolObject
         }
 
         return $html;
+    }
+
+    public function displayCommercial()
+    {
+        if ($this->isLoaded()) {
+            $contacts = $this->dol_object->getIdContact('internal', 'SALESREPFOLL');
+            if (isset($contacts[0]) && $contacts[0]) {
+                BimpTools::loadDolClass('contact');
+                $user = new User($this->db->db);
+                if ($user->fetch((int) $contacts[0]) > 0) {
+                    return $user->getNomUrl(1) . BimpRender::renderObjectIcons($user);
+                }
+            }
+        }
+
+        return '';
     }
 
     // Rendus HTML: 
@@ -1300,26 +1339,81 @@ class BimpComm extends BimpDolObject
                 $html .= '</tbody>';
 
                 $html .= '<tfoot>';
-                if (!empty($conf->product->enabled) && !empty($conf->service->enabled)) {
-                    $html .= '<tr>';
-                    $html .= '<td>Marge totale</td>';
-                    $html .= '<td>' . price($marginInfo['pv_total']) . '</td>';
-                    $html .= '<td>' . price($marginInfo['pa_total']) . '</td>';
-                    $html .= '<td>' . price($marginInfo['total_margin']) . ' (';
-                    if ($conf_tx_marque) {
-                        $html .= round($marginInfo['total_mark_rate'], 4);
-                    } else {
-                        $html .= round($marginInfo['total_margin_rate'], 4);
-                    }
-
-                    $html .= ' %)</td>';
-                    $html .= '</tr>';
+                $html .= '<tr>';
+                $html .= '<td>Marge totale</td>';
+                $html .= '<td>' . price($marginInfo['pv_total']) . '</td>';
+                $html .= '<td>' . price($marginInfo['pa_total']) . '</td>';
+                $html .= '<td>' . price($marginInfo['total_margin']) . ' (';
+                if ($conf_tx_marque) {
+                    $html .= round($marginInfo['total_mark_rate'], 4);
+                } else {
+                    $html .= round($marginInfo['total_margin_rate'], 4);
                 }
+
+                $html .= ' %)</td>';
+                $html .= '</tr>';
+
+                if (method_exists($this, 'renderMarginTableExtra')) {
+                    $html .= $this->renderMarginTableExtra($marginInfo);
+                }
+
                 $html .= '</tfoot>';
+
                 $html .= '</table>';
             }
         }
 
+        return $html;
+    }
+
+    public function renderMarginTableExtra($marginInfo)
+    {
+        if (in_array($this->object_name, array('Bimp_Propal', 'BS_SavPropal', 'Bimp_Commande'))) {
+            $remises_crt = 0;
+
+            $lines = $this->getLines('not_text');
+
+            foreach ($lines as $line) {
+                $remises_crt += (float) $line->getRemiseCRT() * (float) $line->qty;
+            }
+
+            $total_pv = (float) $marginInfo['pv_total'];
+            $total_pa = (float) $marginInfo['pa_total'];
+
+            if ($remises_crt) {
+                $html .= '<tr>';
+                $html .= '<td>Remises CRT prévues</td>';
+                $html .= '<td></td>';
+                $html .= '<td><span class="danger">-' . BimpTools::displayMoneyValue($remises_crt, '') . '</span></td>';
+                $html .= '<td></td>';
+                $html .= '</tr>';
+
+                $total_pa -= $remises_crt;
+            }
+
+            if ((float) $total_pa !== (float) $marginInfo['pa_total']) {
+                $total_marge = $total_pv - $total_pa;
+                $tx = 0;
+
+
+                if (BimpCore::getConf('bimpcomm_tx_marque')) {
+                    if ($total_pv) {
+                        $tx = ($total_marge / $total_pv) * 100;
+                    }
+                } else {
+                    if ($total_pa) {
+                        $tx = ($total_marge / $total_pa) * 100;
+                    }
+                }
+
+                $html .= '<tr>';
+                $html .= '<td>Marge finale prévue</td>';
+                $html .= '<td>' . BimpTools::displayMoneyValue($total_pv, '') . '</td>';
+                $html .= '<td>' . BimpTools::displayMoneyValue($total_pa, '') . '</td>';
+                $html .= '<td>' . BimpTools::displayMoneyValue($total_marge, '') . ' (' . BimpTools::displayFloatValue($tx, 4) . ' %)</td>';
+                $html .= '</tr>';
+            }
+        }
         return $html;
     }
 
@@ -1844,8 +1938,8 @@ class BimpComm extends BimpDolObject
         $client = $this->getChildObject('client');
 
         $emails = array(
-            "" => "",
-             $user->email => $user->getFullName($langs)." (".$user->email.")"
+            ""           => "",
+            $user->email => $user->getFullName($langs) . " (" . $user->email . ")"
         );
 
         if (BimpObject::objectLoaded($client)) {
@@ -2089,7 +2183,7 @@ class BimpComm extends BimpDolObject
                 'type'      => $line->getData('type'),
                 'deletable' => $line->getData('deletable'),
                 'editable'  => $line->getData('Editable'),
-                'remisable' => $line->getData('remisable')
+                'remisable' => $line->getData('remisable'),
             ));
 
             if ($line->getData('linked_object_name')) {
@@ -2116,6 +2210,7 @@ class BimpComm extends BimpDolObject
             if ($line->field_exists('remise_crt') &&
                     $line_instance->field_exists('remise_crt')) {
                 $line_instance->set('remise_crt', (int) $line->getData('remise_crt'));
+                $line_instance->set('remise_crt_percent', (float) $line->getData('remise_crt_percent'));
             }
 
             if ($line->field_exists('remise_pa') &&
@@ -2229,7 +2324,7 @@ class BimpComm extends BimpDolObject
 
     public function createAcompte($amount, $id_mode_paiement, $bank_account = 1, $date_paiement = null, &$warnings = array())
     {
-        
+
         global $user, $langs;
         $errors = array();
 
@@ -2279,7 +2374,7 @@ class BimpComm extends BimpDolObject
             $factureA->cond_reglement_id = 1;
             $factureA->modelpdf = 'bimpfact';
             $factureA->fk_account = $bank_account;
-                      
+
             if ($this->field_exists('ef_type') && $this->dol_field_exists('ef_type')) {
                 $factureA->array_options['options_type'] = $this->getData('ef_type');
             }
@@ -2832,18 +2927,18 @@ class BimpComm extends BimpDolObject
         $errors = array();
         $warnings = array();
         $success = 'Acompte créé avec succès';
-        
+
         $id_mode_paiement = isset($data['id_mode_paiement']) ? (int) $data['id_mode_paiement'] : 0;
         $amount = isset($data['amount']) ? (float) $data['amount'] : 0;
-        
-        if(!$data['date']) {
+
+        if (!$data['date']) {
             $errors[] = 'Date de paiement absent';
         }
-        
-        if($data['id_mode_paiement'] == 2 && is_null($data['bank_account'])) {
+
+        if ($data['id_mode_paiement'] == 2 && is_null($data['bank_account'])) {
             $errors[] = "Le compte banqaire est obligatoire pour un virement bancaire";
         }
-        
+
         if (!$id_mode_paiement) {
             $errors[] = 'Mode de paiement absent';
         }
@@ -2915,8 +3010,8 @@ class BimpComm extends BimpDolObject
             if ((int) $this->getData('fk_soc') !== (int) $this->getInitData('fk_soc')) {
                 $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', (int) $this->getData('fk_soc'));
                 if (BimpObject::objectLoaded($soc)) {
-                    $zone = $this->getZoneByCountry((int) $soc->getData('fk_pays'));
-                    $this->set('zone_vente', $zone);
+//                    $zone = $this->getZoneByCountry((int) $soc->getData('fk_pays'));
+//                    $this->set('zone_vente', $zone);
                 }
             }
         }

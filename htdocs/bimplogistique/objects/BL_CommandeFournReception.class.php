@@ -337,7 +337,7 @@ class BL_CommandeFournReception extends BimpObject
         $html = '';
 
         $html .= '<td style="width: 220px;">';
-        
+
         $decimals = $line->getQtyDecimals();
 
         $options = array(
@@ -1174,6 +1174,9 @@ class BL_CommandeFournReception extends BimpObject
 
     public function validateReception($date_received = null, $check_data = true)
     {
+        set_time_limit(1200);
+        ignore_user_abort(true);
+
         $errors = array();
 
         if (!(int) $this->getData('status') === self::BLCFR_BROUILLON) {
@@ -1235,6 +1238,9 @@ class BL_CommandeFournReception extends BimpObject
 
     public function cancelReception(&$warnings = array())
     {
+        set_time_limit(1200);
+        ignore_user_abort(true);
+
         $errors = array();
 
         if (!$this->isLoaded()) {

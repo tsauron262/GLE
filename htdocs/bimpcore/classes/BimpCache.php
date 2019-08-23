@@ -3,6 +3,16 @@
 class BimpCache
 {
 
+//    RÈGLES POUR LES NOMS DES MÉTHODES DE BIMPCACHE: 
+//    (Afin de connaître le return d'une méthode sans avoir à rentrer dedans) 
+//    
+//    getObjectsArray : renvoie un tableau sous la forme id => label
+//    getObjectList : renvoie un tableau d'IDs.
+//    getObjectData : renvoie un tableau de données
+//    getObjects : renvoie un tableau d'objets fetchés.                     
+//    
+//    /!\ Attention, il est ultra-important de faire en sorte que la cache_key soit unique!
+
     public static $bdb = null;
     public static $cache = array();
     public static $nextBimpObjectCacheId = 1;
@@ -863,11 +873,10 @@ class BimpCache
         return self::getCacheArray($cache_key, $include_empty);
     }
 
-    // Group: 
-
     public static function getUserGroupsArray($include_empty = 1)
     {
-        $cache_key = 'groups';
+        $cache_key = 'users_groups_array';
+
         if (!isset(self::$cache[$cache_key])) {
             if ($include_empty)
                 self::$cache[$cache_key] = array("" => "");
@@ -885,19 +894,6 @@ class BimpCache
         }
 
         return self::getCacheArray($cache_key, $include_empty);
-    }
-
-    public static function getGroupIds($idUser)
-    {
-        $cache_key = 'groupsIduser' . $idUser;
-        if (!isset(self::$cache[$cache_key])) {
-            require_once(DOL_DOCUMENT_ROOT . "/user/class/usergroup.class.php");
-            $userGroup = new UserGroup(self::getBdb()->db);
-            $listIdGr = array();
-            foreach ($userGroup->listGroupsForUser($idUser, false) as $obj)
-                self::$cache[$cache_key][] = $obj->id;
-        }
-        return self::getCacheArray($cache_key);
     }
 
     public static function getUserCentresArray()
@@ -964,6 +960,39 @@ class BimpCache
         }
 
         return self::getCacheArray($cache_key, $include_empty);
+    }
+
+    // User Groups: 
+
+    public static function getGroupIds($idUser)
+    {
+        $cache_key = 'groupsIduser' . $idUser;
+        if (!isset(self::$cache[$cache_key])) {
+            require_once(DOL_DOCUMENT_ROOT . "/user/class/usergroup.class.php");
+            $userGroup = new UserGroup(self::getBdb()->db);
+            $listIdGr = array();
+            foreach ($userGroup->listGroupsForUser($idUser, false) as $obj)
+                self::$cache[$cache_key][] = $obj->id;
+        }
+        return self::getCacheArray($cache_key);
+    }
+
+    public static function getGroupUsersList($id_group)
+    {
+        $cache_key = 'user_group_' . $id_group . '_users_list';
+
+        if (!isset(self::$cache[$cache_key])) {
+            self::$cache[$cache_key] = array();
+
+            $rows = self::getBdb()->getRows('usergroup_user', '`fk_usergroup` = ' . (int) $id_group, null, 'array', array('fk_user'));
+            if (is_array($rows)) {
+                foreach ($rows as $r) {
+                    self::$cache[$cache_key][] = (int) $r['fk_user'];
+                }
+            }
+        }
+
+        return self::$cache[$cache_key];
     }
 
     // MySoc: 
@@ -1319,20 +1348,32 @@ class BimpCache
         return self::getCacheArray('centres_array', true, '', '');
     }
 
-    public static function getEntrepotsArray($include_empty = false)
+    public static function getEntrepotsArray($include_empty = false, $has_commissions_only = false)
     {
-        if (!isset(self::$cache['entrepots'])) {
-            self::$cache['entrepots'] = array();
+        $cache_key = 'entrepots';
+        if ($has_commissions_only) {
+            $cache_key .= '_has_commissions_only';
+        }
+        if (!isset(self::$cache[$cache_key])) {
+            self::$cache[$cache_key] = array();
 
-            $rows = self::getBdb()->getRows('entrepot', '1', null, 'object', array('rowid', 'ref', 'lieu'), 'ref', 'asc');
+            $where = '';
+
+            if ($has_commissions_only) {
+                $where .= '`has_entrepot_commissions` = 1';
+            } else {
+                $where .= '1';
+            }
+
+            $rows = self::getBdb()->getRows('entrepot', $where, null, 'object', array('rowid', 'ref', 'lieu'), 'ref', 'asc');
             if (!is_null($rows)) {
                 foreach ($rows as $r) {
-                    self::$cache['entrepots'][(int) $r->rowid] = $r->ref . ' - ' . $r->lieu;
+                    self::$cache[$cache_key][(int) $r->rowid] = $r->ref . ' - ' . $r->lieu;
                 }
             }
         }
 
-        return self::getCacheArray('entrepots', $include_empty);
+        return self::getCacheArray($cache_key, $include_empty);
     }
 
     public static function getEntrepotsShipTos($include_empty = false)

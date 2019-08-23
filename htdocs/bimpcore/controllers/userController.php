@@ -6,7 +6,7 @@ class userController extends BimpController
 {
 
     public function displayHead()
-    {        
+    {
         $b_user = $this->config->getObject('', 'user');
         $head = user_prepare_head($b_user->dol_object);
         dol_fiche_head($head, 'formSimple', 'Mes infos', -1, 'user');
@@ -14,41 +14,31 @@ class userController extends BimpController
 
     public function renderHtml()
     {
-        $html = '';
-
-        global $user;
-        $b_user = $this->config->getObject('', 'user');
-
-        if ($user->id == $b_user->id) {//On est dans le form de l'utilisateur
-            $object = $user;
-            $droitLire = 1;
-            $droitModifSimple = 1;
-            $droitModif = 0; //$object->rights->user->self->creer;
-        } else {
-            $object = $b_user->dol_object;
-            $object->getrights('user');
-            $droitLire = $user->rights->user->user->lire;
-            $droitModifSimple = $user->rights->user->user->creer;
-            $droitModif = $droitModifSimple;
-        }
+        $tabs = array();
 
         $b_user = $this->config->getObject('', 'user');
+
         $view = new BC_View($b_user, 'default', false, 1, 'Utilisateur ' . $b_user->getData('login'));
 
-        $full_rights = false;
-        if ($droitModif) {
-            $view->params['edit_form'] = 'default';
-        } elseif ($droitModifSimple) {
-            $view->params['edit_form'] = 'light';
-        } elseif ($droitLire) {
-            $view->params['edit_form'] = null;
-        }
+        $tabs[] = array(
+            'id'      => 'infos',
+            'title'   => BimpRender::renderIcon('fas_info-circle', 'iconLeft') . 'Infos',
+            'content' => $view->renderHtml()
+        );
 
-        if ($droitLire) {
-            $html .= $view->renderHtml();
-        } else
-            $html .= BimpRender::renderAlerts('Vous n\'avez pas la permission de voir cette page');
+        $title = $b_user->getName() . ' - Liste des commissions';
+        $commission = BimpObject::getInstance('bimpfinanc', 'BimpCommission');
 
-        return $html;
+        $list = new BC_ListTable($commission, 'user', 1, null, $title, $commission->params['icon']);
+        $list->addFieldFilterValue('type', BimpCommission::TYPE_USER);
+        $list->addFieldFilterValue('id_user', (int) $b_user->id);
+
+        $tabs[] = array(
+            'id'      => 'commissions',
+            'title'   => BimpRender::renderIcon($commission->params['icon'], 'iconLeft') . 'Commissions',
+            'content' => $list->renderHtml()
+        );
+
+        return BimpRender::renderNavTabs($tabs);
     }
 }

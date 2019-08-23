@@ -112,6 +112,10 @@ class BC_Input extends BimpComponent
         'select_remises_fourn'        => array(
             'id_fourn'      => array('data_type' => 'int', 'required' => 1),
             'extra_filters' => array('default' => '')
+        ),
+        'search_entrepot'             => array(
+            'include_empty'        => array('data_type' => 'bool', 'default' => 0),
+            'has_commissions_only' => array('data_type' => 'bool', 'default' => 0)
         )
     );
 
@@ -396,6 +400,11 @@ class BC_Input extends BimpComponent
                 $options['id_fourn'] = isset($this->params['id_fourn']) ? $this->params['id_fourn'] : 0;
                 $options['extra_filters'] = isset($this->params['extra_filters']) ? $this->params['extra_filters'] : '';
                 break;
+
+            case 'search_entrepot':
+                $options['include_empty'] = isset($this->params['include_empty']) ? $this->params['include_empty'] : 0;
+                $options['has_commissions_only'] = isset($this->params['has_commissions_only']) ? $this->params['has_commissions_only'] : 0;
+                break;
         }
 
         return $options;
@@ -562,7 +571,7 @@ class BC_Input extends BimpComponent
                 $extra_data['display_card_mode'] = $this->display_card_mode;
             }
         }
-        
+
         if (isset($this->params['extra_content'])) {
             $content .= $this->params['extra_content'];
         }

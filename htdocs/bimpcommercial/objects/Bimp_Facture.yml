@@ -44,6 +44,18 @@ objects:
                 fields: 
                     parent_object_name: Bimp_Facture
                     
+    user_commission: 
+        extends: commission
+        instance: 
+            id_object: 
+                field_value: id_user_commission
+                
+    entrepot_commission: 
+        extends: commission
+        instance: 
+            id_object: 
+                field_value: id_entrepot_commission
+                    
 fields: 
     facnumber: 
         label: Référence
@@ -124,7 +136,6 @@ fields:
         type: bool
         default_value: 0
         sortable: 0
-        
     ref: unset
     fk_availability: unset
     fk_input_reason: unset
@@ -134,8 +145,19 @@ fields:
         type: money
         default_value: 0
         
-forms: 
-    
+    id_user_commission: 
+        label: Commission utilisateur
+        type: id_object
+        object: user_commission
+        default_value: 0
+        
+    id_entrepot_commission: 
+        label: Commission entrepôt
+        type: id_object
+        object: entrepot_commission
+        default_value: 0
+       
+forms:     
     default: 
         msgs: 
             callback: renderCreateWarning
@@ -410,6 +432,18 @@ forms:
               display_if: 
                   field_name: hide_force_validation
                   hide_values: 1
+                  
+    add_to_commission: 
+        title: Ajout à une commission
+        rows: 
+            - custom: 1
+              label: Commission
+              input_name: id_commission
+              data_typel: id
+              input: 
+                  type: select
+                  options: 
+                      array: draftCommissions
               
 fields_tables: 
     infos: 
@@ -431,6 +465,17 @@ fields_tables:
                   callback: isEditable
             - field: zone_vente
               edit: 1
+            - label: Commercial
+              value: 
+                  callback: displayCommercial
+            - field: id_user_commission
+              display: nom_url
+              show: 
+                  callback: showUserCommission
+            - field: id_entrepot_commission
+              display: nom_url
+              show: 
+                  callback: showEntrepotCommission
     
     client: 
         rows: 
@@ -481,11 +526,11 @@ fields_tables:
             
 views: 
     default: 
-        objects_change_reload: Bimp_FactureLine,Bimp_Paiement,ObjectLineRemise,BimpFile
+        objects_change_reload: Bimp_FactureLine,Bimp_Paiement,ObjectLineRemise,BimpFile,BimpRevalorisation
     content_infos: 
-        objects_change_reload: Bimp_FactureLine,Bimp_Paiement,ObjectLineRemise,BimpFile
+        objects_change_reload: Bimp_FactureLine,Bimp_Paiement,ObjectLineRemise,BimpFile,BimpRevalorisation
     full: 
-        objects_change_reload: Bimp_FactureLine,Bimp_Paiement,ObjectLineRemise,BimpFile
+        objects_change_reload: Bimp_FactureLine,Bimp_Paiement,ObjectLineRemise,BimpFile,BimpRevalorisation
         
 filters_panels: 
     default: 
@@ -538,6 +583,10 @@ lists_cols:
     marge:
         field: marge
         has_total: 1
+    secteur_comm_check: 
+        label: Secteur
+        value: 
+            callback: displaySecteurWithCommercialCheck        
     
 lists: 
     default: 
@@ -569,6 +618,46 @@ lists:
         extends: default
         cols: 
             soc: unset
+            
+    commission: 
+        total_row: 1
+        enable_search: 0
+        position: 0
+        configurable: 1
+        pagination: 1
+        n: 20
+        sort_field: datec
+        sort_way: asc
+        extra_btn: 
+            callback:
+                method: getCommissionListButtons
+        modal_view: full
+        page_btn: 1
+        cols: 
+            ref: 
+            type: 
+            date_valid:
+            commercial:
+            secteur_comm_check:
+            statut: 
+            paid: 
+            total_ht: 
+            total_pa:
+            marge: 
+            
+    user_commission: 
+        extends: commission
+        extra_btn: 
+            callback: 
+                params: 
+                    - 1
+
+    entrepot_commission: 
+        extends: commission
+        extra_btn: 
+            callback: 
+                params: 
+                    - 2
             
 cards: 
     default: 

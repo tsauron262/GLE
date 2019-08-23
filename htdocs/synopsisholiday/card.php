@@ -137,7 +137,13 @@ if ($action == 'create') {
                 header('Location: card.php?action=request&error=alreadyCP');
                 exit;
             } else if ($verifCP < 0) {
-                header('Location: card.php?action=request&error=substituteCP');
+                $ids_user = '';
+                foreach($cp->holiday as $h) {
+                    if((int) $h['fk_substitute'] == (int) $userid)
+                        $ids_user .= $h['fk_user'] . '_';
+                }
+                $ids_user = rtrim($ids_user, '_');
+                header('Location: card.php?action=request&error=substituteCP&ids_user=' . $ids_user);
                 exit;
             }
         } else {
@@ -331,7 +337,13 @@ if ($action == 'update') {
                     header('Location: card.php?action=edit&error=alreadyCP');
                     exit;
                 } else if ($verifCP < 0) {
-                    header('Location: card.php?action=edit&error=substituteCP');
+                    $ids_user = '';
+                    foreach($cp->holiday as $h) {
+                        if((int) $h['fk_substitute'] == (int) $userid)
+                            $ids_user .= $h['fk_user'] . '_';
+                    }
+                    $ids_user = rtrim($ids_user, '_');
+                    header('Location: card.php?action=edit&error=substituteCP&ids_user=' . $ids_user);
                     exit;
                 }
             } else {
@@ -1355,7 +1367,16 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
                     $errors[] = $langs->trans('alreadyCPexist');
                     break;
                 case 'substituteCP':
-                    $errors[] = 'Vous ne pouvez pas déposer de congés sur cette période car vous avez été désigné comme remplaçant.';
+                    $str_ids_user = GETPOST('ids_user');
+                    $tab_ids_user = explode( '_', $str_ids_user);
+                    $names = '';
+                    foreach($tab_ids_user as $id_u) {
+                        $user = new User($db);
+                        $user->fetch((int) $id_u);
+                        $names .= $user->firstname . ' ' . $user->lastname . ', ';
+                    }
+                    $names = substr($names, 0, -2);
+                    $errors[] = 'Vous ne pouvez pas déposer de congés sur cette période car vous avez été désigné comme remplaçant de '. $names . '.';
                     break;
                 case 'BothExceptionAndRtt':
                     $errors[] = 'Veuillez ne sélectionner qu\'un seul choix dans la partie "Absence exceptionnelle / RTT".';

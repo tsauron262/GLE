@@ -98,6 +98,14 @@ function BC_Vente() {
                     }
 
                     displayMoneyValue((article.total_ttc - article.total_remises), $line.find('.final_price'));
+
+                    if (article.remise_crt) {
+                        $line.find('.article_remise_crt_percent').stop().slideDown(250);
+                        var $input = $line.find('.article_remise_crt_percent').find('input[name="article_remise_crt_percent"]').val(article.remise_crt_percent);
+                    } else {
+                        $line.find('.article_remise_crt_percent').stop().slideUp(250);
+                        var $input = $line.find('.article_remise_crt_percent').find('input[name="article_remise_crt_percent"]').val(0);
+                    }
                 }
             }
         }
@@ -1100,6 +1108,20 @@ function saveArticleRemiseCrt($input) {
     }
 }
 
+function saveArticleRemiseCrtPercent($input) {
+    if ($.isOk($input)) {
+        var $container = $input.findParentByClass('cartArticleLine');
+        if (!$.isOk($container)) {
+            bimp_msg('Une erreur est survenue. L\'option n\'a pas pu être enregistrée', 'danger');
+            return;
+        }
+
+        var id_article = parseInt($container.data('id_article'));
+        var remise_crt_percent = parseFloat($input.val());
+
+        saveObjectField('bimpcaisse', 'BC_VenteArticle', id_article, 'remise_crt_percent', remise_crt_percent);
+    }
+}
 // Retours vente: 
 
 function loadReturnForm($button) {
@@ -1356,6 +1378,9 @@ function setCartLineEvents($line) {
 
             $line.find('[name="article_remise_crt"]').change(function () {
                 saveArticleRemiseCrt($(this));
+            });
+            $line.find('[name="article_remise_crt_percent"]').change(function () {
+                saveArticleRemiseCrtPercent($(this));
             });
 
             $line.data('event_init', 1);

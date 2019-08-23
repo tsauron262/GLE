@@ -87,28 +87,30 @@ class Bimp_Product extends BimpObject
     }
 
     // Droits user: 
-    
-    
-/*
- * Exeptionnelement les droit dans les isCre.. et isEdi... pour la creation des prod par les commerciaux
- */
+
+
+    /*
+     * Exeptionnelement les droit dans les isCre.. et isEdi... pour la creation des prod par les commerciaux
+     */
     public function canCreate()
     {
-            return 1;
+        return 1;
     }
 
     public function canEdit()
     {
         return 1;
     }
-    
-    public function isCreatable($force_create = false, &$errors = array()) {
+
+    public function isCreatable($force_create = false, &$errors = array())
+    {
         return $this->isEditable($force_create, $errors);
     }
-    
-    public function isEditable($force_edit = false, &$errors = array()) {
+
+    public function isEditable($force_edit = false, &$errors = array())
+    {
         global $user;
-        if($force_edit || $user->rights->admin or $user->rights->produit->creer)
+        if ($force_edit || $user->rights->admin or $user->rights->produit->creer)
             return 1;
     }
 
@@ -149,13 +151,13 @@ class Bimp_Product extends BimpObject
         }
         return 0;
     }
-    
+
     public function iAmAdminRedirect()
     {
         global $user;
         if ($user->rights->bimpcommercial->validProd)
             return 1;
-        
+
         return parent::iAmAdminRedirect();
     }
 
@@ -205,10 +207,10 @@ class Bimp_Product extends BimpObject
                 if (!$this->isLoaded($errors)) {
                     return 0;
                 }
-                if((int) $this->getData('validate') == 1) {
+                if ((int) $this->getData('validate') == 1) {
                     return 0;
                 }
-                if((int) $this->getData('tosell') == 0 and (int) $this->getData('tobuy')  == 0) {
+                if ((int) $this->getData('tosell') == 0 and (int) $this->getData('tobuy') == 0) {
                     return 0;
                 }
                 return 1;
@@ -450,8 +452,9 @@ class Bimp_Product extends BimpObject
         }
 
         if ((int) $id_product) {
-            if (!isset(self::$ventes[$id_product]))
+            if (!isset(self::$ventes[$id_product])) {
                 self::initVentes($dateMin, $dateMax);
+            }
 
             if (isset(self::$ventes[$dateMin . "-" . $dateMax][$id_product][$id_entrepot])) {
                 return self::$ventes[$dateMin . "-" . $dateMax][$id_product][$id_entrepot];
@@ -662,7 +665,7 @@ class Bimp_Product extends BimpObject
             }
         }
 
-        $html = '<span class="objectIcon displayProductStocksBtn'.($serialisable? ' green' : '') .'" title="Stocks" data-id_product="' . $id_product . '" data-id_entrepot="' . (int) $id_entrepot . '">';
+        $html = '<span class="objectIcon displayProductStocksBtn' . ($serialisable ? ' green' : '') . '" title="Stocks" data-id_product="' . $id_product . '" data-id_entrepot="' . (int) $id_entrepot . '">';
         $html .= BimpRender::renderIcon('fas_box-open');
         $html .= '</span>';
         $html .= '<div class="productStocksContainer hideOnClickOut" id="product_' . $id_product . '_stocks_popover_container"></div>';
@@ -898,7 +901,7 @@ class Bimp_Product extends BimpObject
         if (!empty($rows)) {
             return number_format($rows[0]->price, 2) . ' €';
         }
-        return 00.00. ' €';
+        return 00.00 . ' €';
     }
 
     // Affichages: 
@@ -950,7 +953,7 @@ class Bimp_Product extends BimpObject
     }
 
     // Rendus HTML: 
-    
+
     public function renderHeaderExtraLeft()
     {
         $html = '';
@@ -1083,10 +1086,10 @@ class Bimp_Product extends BimpObject
         }
         return $html;
     }
-    
+
     public function renderStatusRefuse()
     {
-        if(!$this->getData('tobuy') and !$this->getData('tobuy')) {
+        if (!$this->getData('tobuy') and ! $this->getData('tobuy')) {
             $color = 'danger';
             $text = 'OUI';
         } else {
@@ -1099,7 +1102,7 @@ class Bimp_Product extends BimpObject
         $html .= '<input type="hidden" name="validate" value="1"><span class="' . $color . '">' . $text . '</span></div>';
         return $html;
     }
-    
+
     public function renderValidationDuration()
     {
         $date_ask_valid = new DateTime($this->getData('date_ask_valid'));
@@ -1116,10 +1119,10 @@ class Bimp_Product extends BimpObject
         $html .= '</strong>';
         return $html;
     }
-    
+
     public function getTimeValidation()
     {
-
+        
     }
 
     public function renderMergeKeptProductInput()
@@ -1210,7 +1213,7 @@ class Bimp_Product extends BimpObject
     public function validateProduct()
     {
         global $user;
-        
+
         $errors = array();
         if (!(int) $this->getCurrentFournPriceId(null, true)) {
             $errors[] = "Veuillez enregistrer au moins un prix d'achat fournisseur";
@@ -1220,9 +1223,9 @@ class Bimp_Product extends BimpObject
                 (int) $this->getData('serialisable') == 1)
             $errors[] = "Un service ne peut pas être sérialisé.";
 
-        if((int) $this->getData('tosell') != 1)
+        if ((int) $this->getData('tosell') != 1)
             $errors[] = "Ce produit n'est pas disponible à la vente";
-            
+
         if (sizeof($errors) > 0)
             return $errors;
 
@@ -1307,24 +1310,24 @@ class Bimp_Product extends BimpObject
 
         return $errors;
     }
-    
+
     public function refuseProduct()
     {
         global $user;
-        
+
         $errors = array();
-        
+
         // test si il y a des ventes ?
         // test un service peut-il être refusé ?
-        
-        if($this->getData('valid') == 1)
+
+        if ($this->getData('valid') == 1)
             $errors[] = "Le produit est validé, il ne peut pas être refusé";
-        
+
 
         if (sizeof($errors) > 0)
             return $errors;
 
- 
+
 //        $this->updateField('fk_user_valid', (int) $user->id);
 //        $this->updateField('date_valid', $datetime->format('Y-m-d H:i:s'));
         $this->updateField('tosell', 0);
@@ -1427,7 +1430,7 @@ class Bimp_Product extends BimpObject
             $errors[] = "Envoi email vers " . $to . " pour la propale " . $propal->getNomUrl() . " impossible.";
         return $errors;
     }
-    
+
     private function sendEmailCommandeRefuse($commande, $to)
     {
         $errors = array();
@@ -1720,13 +1723,12 @@ class Bimp_Product extends BimpObject
             'success_callback' => $success_callback
         );
     }
-    
+
     public function actionRefuse($data = array(), &$success = '')
     {
         $errors = $this->refuseProduct();
         return $errors;
     }
-
 
     // Overrides:
 
@@ -1808,7 +1810,8 @@ class Bimp_Product extends BimpObject
     {
         global $db;
         self::$ventes = array();
-        $query = "SELECT `fk_product`, entrepot, sum(qty) as qty, sum(l.total_ht) as total_ht, sum(l.total_ttc) as total_ttc ";
+        $query = "SELECT `fk_product`, entrepot, sum(qty) as qty, sum(l.total_ht) as total_ht, sum(l.total_ttc) as total_ttc";
+//        $query .= ", sum(l.qty * l.buy_price_ht) as total_achats";
         $query .= " FROM `llx_facturedet` l, llx_facture f, llx_facture_extrafields e";
         $query .= " WHERE `fk_facture` = f.rowid AND e.fk_object = f.rowid AND fk_product > 0";
         if ($dateMin)
@@ -1826,11 +1829,13 @@ class Bimp_Product extends BimpObject
             self::$ventes[$dateMin . "-" . $dateMax][$ln->fk_product][$ln->entrepot]['qty'] = $ln->qty;
             self::$ventes[$dateMin . "-" . $dateMax][$ln->fk_product][$ln->entrepot]['total_ht'] = $ln->total_ht;
             self::$ventes[$dateMin . "-" . $dateMax][$ln->fk_product][$ln->entrepot]['total_ttc'] = $ln->total_ttc;
+//            self::$ventes[$dateMin . "-" . $dateMax][$ln->fk_product][$ln->entrepot]['total_achats'] = $ln->total_achats;
 //            if(!isset(self::$ventes[$dateMin."-".$dateMax][$ln->fk_product][null]))
 //                    self::$ventes[$dateMin."-".$dateMax][$ln->fk_product][null] = array();
             self::$ventes[$dateMin . "-" . $dateMax][$ln->fk_product][null]['qty'] += $ln->qty;
             self::$ventes[$dateMin . "-" . $dateMax][$ln->fk_product][null]['total_ht'] += $ln->total_ht;
             self::$ventes[$dateMin . "-" . $dateMax][$ln->fk_product][null]['total_ttc'] += $ln->total_ttc;
+//            self::$ventes[$dateMin . "-" . $dateMax][$ln->fk_product][null]['total_achats'] += $ln->total_achats;
         }
 
         $sql2 = $db->query($query . " AND `subprice` < 0" . $group_by);
@@ -1839,10 +1844,12 @@ class Bimp_Product extends BimpObject
             self::$ventes[$dateMin . "-" . $dateMax][$ln->fk_product][$ln->entrepot]['qty'] = ($ln->qty * -1);
             self::$ventes[$dateMin . "-" . $dateMax][$ln->fk_product][$ln->entrepot]['total_ht'] = $ln->total_ht;
             self::$ventes[$dateMin . "-" . $dateMax][$ln->fk_product][$ln->entrepot]['total_ttc'] = $ln->total_ttc;
+//            self::$ventes[$dateMin . "-" . $dateMax][$ln->fk_product][$ln->entrepot]['total_achats'] = $ln->total_achats;
 
             self::$ventes[$dateMin . "-" . $dateMax][$ln->fk_product][null]['qty'] += ($ln->qty * -1);
             self::$ventes[$dateMin . "-" . $dateMax][$ln->fk_product][null]['total_ht'] += $ln->total_ht;
             self::$ventes[$dateMin . "-" . $dateMax][$ln->fk_product][null]['total_ttc'] += $ln->total_ttc;
+//            self::$ventes[$dateMin . "-" . $dateMax][$ln->fk_product][null]['total_achats'] += $ln->total_achats;
         }
     }
 

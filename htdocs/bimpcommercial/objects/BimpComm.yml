@@ -459,11 +459,14 @@ forms:
               label: Compte bancaire
               input_name: bank_account
               data_type: int
+              value: 
+                  callback: getAcompteDefaultBankAccount
               input: 
                     type: select_mysoc_account
-              display_if:
-                  field_name: id_mode_paiement
-                  show_values: 2
+#              display_if:
+#                  field_name: id_mode_paiement
+#                  show_values: 2
+
 
 fields_tables: 
     infos: 

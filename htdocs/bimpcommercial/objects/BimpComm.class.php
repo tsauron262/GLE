@@ -415,6 +415,25 @@ class BimpComm extends BimpDolObject
         parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors);
     }
 
+    public function getAcompteDefaultBankAccount()
+    {
+        if ($this->useCaisseForPayments) {
+            global $user;
+            $caisse = BimpObject::getInstance('bimpcaisse', 'BC_Caisse');
+            $id_caisse = (int) $caisse->getUserCaisse((int) $user->id);
+            if ($id_caisse) {
+                $caisse = BimpCache::getBimpObjectInstance('bimpcaisse', 'BC_Caisse', $id_caisse);
+                if ($caisse->isLoaded()) {
+                    if ($caisse->isValid($errors)) {
+                        return (int) $caisse->getData('id_account');
+                    }
+                }
+            }
+        }
+
+        return (int) BimpCore::getConf('bimpcaisse_id_default_account');
+    }
+
     // Getters données: 
 
     public function getLines($types = null)
@@ -2322,7 +2341,7 @@ class BimpComm extends BimpDolObject
         return count($errors) ? 0 : 1;
     }
 
-    public function createAcompte($amount, $id_mode_paiement, $bank_account = 1, $date_paiement = null, &$warnings = array())
+    public function createAcompte($amount, $id_mode_paiement, $id_bank_account = 0, $date_paiement = null, &$warnings = array())
     {
 
         global $user, $langs;
@@ -2351,6 +2370,28 @@ class BimpComm extends BimpDolObject
             }
         }
 
+        if (!(int) $id_bank_account) {
+            if ($this->useCaisseForPayments) {
+                $id_bank_account = (int) $caisse->getData('id_account');
+            } else {
+                $id_bank_account = (int) BimpCore::getConf('bimpcaisse_id_default_account');
+            }
+        }
+
+        $bank_account = null;
+
+        if (!$id_bank_account) {
+            $errors[] = 'Compte bancaire absent';
+        } else {
+            BimpTools::loadDolClass('compta/bank', 'account');
+            $bank_account = new Account($this->db->db);
+            $bank_account->fetch((int) $id_bank_account);
+
+            if (!BimpObject::objectLoaded($bank_account)) {
+                $errors[] = 'Le compte bancaire d\'ID ' . $id_bank_account . ' n\'existe pas';
+            }
+        }
+
         if (count($errors)) {
             return $errors;
         }
@@ -2373,7 +2414,7 @@ class BimpComm extends BimpDolObject
             $factureA->socid = $id_client;
             $factureA->cond_reglement_id = 1;
             $factureA->modelpdf = 'bimpfact';
-            $factureA->fk_account = $bank_account;
+            $factureA->fk_account = $id_bank_account;
 
             if ($this->field_exists('ef_type') && $this->dol_field_exists('ef_type')) {
                 $factureA->array_options['options_type'] = $this->getData('ef_type');
@@ -2396,28 +2437,9 @@ class BimpComm extends BimpDolObject
                 if ($payement->create($user) <= 0) {
                     $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($payement), 'Des erreurs sont survenues lors de la création du paiement de la facture d\'acompte');
                 } else {
-                    if ($this->useCaisseForPayments) {
-                        $id_account = (int) $caisse->getData('id_account');
-                    } else {
-                        $id_account = (int) BimpCore::getConf('bimpcaisse_id_default_account');
-                    }
-
                     // Ajout du paiement au compte bancaire: 
-                    if ($payement->addPaymentToBank($user, 'payment', '(CustomerInvoicePayment)', $id_account, '', '') < 0) {
-                        $account_label = '';
-
-                        if ($this->useCaisseForPayments) {
-                            $account = $caisse->getChildObject('account');
-
-                            if (BimpObject::objectLoaded($account)) {
-                                $account_label = '"' . $account->bank . '"';
-                            }
-                        }
-
-                        if (!$account_label) {
-                            $account_label = ' d\'ID ' . $id_account;
-                        }
-                        $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($payement), 'Echec de l\'ajout de l\'acompte au compte bancaire ' . $account_label);
+                    if ($payement->addPaymentToBank($user, 'payment', '(CustomerInvoicePayment)', $id_bank_account, '', '') < 0) {
+                        $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($payement), 'Echec de l\'ajout de l\'acompte au compte bancaire ' . $bank_account->bank);
                     }
 
                     // Enregistrement du paiement caisse: 
@@ -2929,6 +2951,7 @@ class BimpComm extends BimpDolObject
         $success = 'Acompte créé avec succès';
 
         $id_mode_paiement = isset($data['id_mode_paiement']) ? (int) $data['id_mode_paiement'] : 0;
+        $id_bank_account = isset($data['bank_account']) ? (int) $data['bank_account'] : 0;
         $amount = isset($data['amount']) ? (float) $data['amount'] : 0;
 
         if (!$data['date']) {
@@ -2947,7 +2970,7 @@ class BimpComm extends BimpDolObject
         }
 
         if (!count($errors)) {
-            $errors = $this->createAcompte($amount, $id_mode_paiement, $data['bank_account'], $data['date'], $warnings);
+            $errors = $this->createAcompte($amount, $id_mode_paiement, $id_bank_account, $data['date'], $warnings);
         }
 
         return array(

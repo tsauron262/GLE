@@ -1970,9 +1970,6 @@ class Bimp_Facture extends BimpComm
             }
         }
 
-//        echo 'ON VALIDATE<pre>';
-//        print_r($errors);
-//        echo '</pre>';
 
         return $errors;
     }

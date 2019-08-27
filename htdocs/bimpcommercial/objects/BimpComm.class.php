@@ -2355,11 +2355,15 @@ class BimpComm extends BimpDolObject
             return $errors;
         }
 
-        if ($this->useCaisseForPayments) {
+        $type_paiement = $this->db->getValue('c_paiement', 'code', '`id` = ' . (int) $id_mode_paiement);
+        
+        $use_caisse = $this->useCaisseForPayments && in_array($type_paiement, array('LIQ'));
+
+        if ($use_caisse) {
             $caisse = BimpObject::getInstance('bimpcaisse', 'BC_Caisse');
             $id_caisse = (int) $caisse->getUserCaisse((int) $user->id);
             if (!$id_caisse) {
-                $errors[] = 'Veuillez-vous <a href="' . DOL_URL_ROOT . '/bimpcaisse/index.php" target="_blank">connecter à une caisse</a> pour l\'enregistrement de l\'acompte';
+                $errors[] = 'Connexion à une caisse obligatoire pour les paiements en espèces. Veuillez-vous <a href="' . DOL_URL_ROOT . '/bimpcaisse/index.php" target="_blank">connecter à une caisse</a> pour l\'enregistrement de l\'acompte';
             } else {
                 $caisse = BimpCache::getBimpObjectInstance('bimpcaisse', 'BC_Caisse', $id_caisse);
                 if (!$caisse->isLoaded()) {
@@ -2371,7 +2375,7 @@ class BimpComm extends BimpDolObject
         }
 
         if (!(int) $id_bank_account) {
-            if ($this->useCaisseForPayments) {
+            if ($use_caisse) {
                 $id_bank_account = (int) $caisse->getData('id_account');
             } else {
                 $id_bank_account = (int) BimpCore::getConf('bimpcaisse_id_default_account');
@@ -2443,7 +2447,7 @@ class BimpComm extends BimpDolObject
                     }
 
                     // Enregistrement du paiement caisse: 
-                    if ($this->useCaisseForPayments) {
+                    if ($use_caisse) {
                         $errors = array_merge($errors, $caisse->addPaiement($payement, $factureA->id));
                     }
 

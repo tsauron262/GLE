@@ -17,6 +17,7 @@ class Bimp_Paiement extends BimpObject
     }
 
     // Getters: 
+    
     public function getAmountFromFacture()
     {
         $id_facture = (int) BimpTools::getValue('fields/id_facture', 0);

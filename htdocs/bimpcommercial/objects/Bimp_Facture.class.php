@@ -1970,6 +1970,10 @@ class Bimp_Facture extends BimpComm
             }
         }
 
+//        echo 'ON VALIDATE<pre>';
+//        print_r($errors);
+//        echo '</pre>';
+
         return $errors;
     }
 
@@ -2602,9 +2606,12 @@ class Bimp_Facture extends BimpComm
                 }
             }
 
-            $today = date('Y-m-d');
-            if ($this->getData('datef') != $today)
-                $errors[] = $this->updateField('datef', $today);
+            if (!count($errors)) {
+                $today = date('Y-m-d');
+                if ($this->getData('datef') != $today) {
+                    $errors = $this->updateField('datef', $today);
+                }
+            }
 
             if (!count($errors)) {
                 $result = $this->dol_object->validate($user, '', $id_entrepot);
@@ -3093,15 +3100,15 @@ class Bimp_Facture extends BimpComm
     }
 
     // Overrides BimpObject:
-    
+
     public function validate()
     {
         $errors = parent::validate();
-        
+
         if (!count($errors)) {
             
         }
-        
+
         return $errors;
     }
 
@@ -3272,9 +3279,9 @@ class Bimp_Facture extends BimpComm
     {
         $init_fk_account = (int) $this->getInitData('fk_account');
         $fk_account = (int) $this->getData('fk_account');
-        
+
         $id_cond_reglement = (int) $this->getData('fk_cond_reglement');
-        
+
         if ($id_cond_reglement !== (int) $this->getInitData('fk_cond_reglement')) {
             $this->set('date_lim_reglement', BimpTools::getDateFromDolDate($this->dol_object->calculate_date_lim_reglement($id_cond_reglement)));
         }

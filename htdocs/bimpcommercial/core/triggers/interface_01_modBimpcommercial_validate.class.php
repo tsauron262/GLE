@@ -34,7 +34,6 @@ class Interfacevalidate extends DolibarrTriggers
     {
         global $conf;
 
-
         if ($action == 'PROPAL_VALIDATE') {
             $bimp_object = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $object->id);
             if (!(int) $bimp_object->lines_locked) {
@@ -184,7 +183,7 @@ class Interfacevalidate extends DolibarrTriggers
                 $bimp_object->onValidate();
             }
         }
-        
+
         if ($action == 'BILL_SUPPLIER_VALIDATE') {
             $bimp_object = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureFourn', $object->id);
             if (BimpObject::objectLoaded($bimp_object)) {
@@ -215,11 +214,12 @@ class Interfacevalidate extends DolibarrTriggers
             if ($action == 'PROPAL_VALIDATE' || $action == 'ORDER_VALIDATE') {
                 //attention pas de condition de regelment sur les facture acompte
                 if (in_array($object->cond_reglement_id, array(0, 39)) || $object->cond_reglement_code == "VIDE") {
-                    setEventMessages("Merci de séléctionné les condition de réglements", null, 'errors');
+                    setEventMessages("Merci de séléctionner les conditions de réglement", null, 'errors');
                     return -2;
                 }
             }
         }
+
         if ($action == 'ORDER_VALIDATE' || $action == 'PROPAL_VALIDATE' || $action == 'BILL_VALIDATE') {
             $tabConatact = $object->getIdContact('internal', 'SALESREPFOLL');
             if (count($tabConatact) < 1) {

@@ -248,7 +248,7 @@ class BL_CommandeShipment extends BimpObject
                         'onclick' => $this->getJsActionOnclick('createFacture', array(
                             'id_client'      => (int) $this->getIdClient(),
                             'id_contact'     => (int) $this->getcontact(),
-                            'libelle'        => addslashes($commande->getData('libelle')),
+                            'libelle'        => addslashes(htmlentities($commande->getData('libelle'))),
                             'cond_reglement' => (int) $commande->getData('fk_cond_reglement')
                                 ), array(
                             'form_name'        => 'facture',

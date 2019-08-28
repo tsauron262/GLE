@@ -2,10 +2,16 @@
 
 class BimpLog
 {
+
     public static $h_file = null;
+    public static $active = false;
 
     public static function getHFile()
     {
+        if (!self::$active) {
+            return;
+        }
+
         if (is_null(self::$h_file)) {
             global $user;
             $dir = DOL_DATA_ROOT . '/bimpcore/logs/' . date('Y') . '/' . date('m') . '/' . date('d') . '/' . (isset($user->id) ? $user->id : '0');
@@ -23,6 +29,10 @@ class BimpLog
 
     public static function actionStart($action_name, $desc, $object = null)
     {
+        if (!self::$active) {
+            return;
+        }
+
         self::writeFile(array(
             'NEW',
             date('H:i:s'),
@@ -35,6 +45,10 @@ class BimpLog
 
     public static function actionErrors($errors)
     {
+        if (!self::$active) {
+            return;
+        }
+
         if (is_string($errors) && $errors) {
             $errors = array($errors);
         }
@@ -77,6 +91,10 @@ class BimpLog
 
     public static function actionInfos($infos)
     {
+        if (!self::$active) {
+            return;
+        }
+
         if (is_string($infos) && $infos) {
             $infos = array($infos);
         }
@@ -97,6 +115,10 @@ class BimpLog
 
     public static function actionData($data, $label = '')
     {
+        if (!self::$active) {
+            return;
+        }
+
         if (!empty($data)) {
             $json = json_encode($data);
 
@@ -110,6 +132,10 @@ class BimpLog
 
     public static function actionEnd($action_name, $errors = array(), $warnings = array())
     {
+        if (!self::$active) {
+            return;
+        }
+
         self::actionErrors($errors);
         self::actionWarnings($warnings);
 
@@ -122,6 +148,10 @@ class BimpLog
 
     public static function writeFile($data)
     {
+        if (!self::$active) {
+            return;
+        }
+
         $line = '';
         foreach ($data as $d) {
             if ($line) {
@@ -129,7 +159,7 @@ class BimpLog
             }
             $d = str_replace(';', '[PV]', $d);
             $d = str_replace("\n", '[RC]', $d);
-            
+
             $line .= $d;
         }
         $line .= "\n";
@@ -140,18 +170,20 @@ class BimpLog
     public static function loadFile($file)
     {
         $actions = array();
-        
+
         if (file_exists($file)) {
             $rows = file($file);
-            
-            
         }
-        
+
         return $actions;
     }
 
     public static function end()
     {
+        if (!self::$active) {
+            return;
+        }
+
         if (!is_null(self::$h_file)) {
             fclose(self::$h_file);
             self::$h_file = null;

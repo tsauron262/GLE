@@ -1,6 +1,7 @@
 <?php
 
 class BL_CommandeFournReception extends BimpObject
+
 {
 
     const BLCFR_BROUILLON = 0;

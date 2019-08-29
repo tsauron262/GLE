@@ -363,7 +363,7 @@ class BimpDocumentPDF extends BimpModelPDF
             if ($usertmp->email != "")
                 $this->fromCompany = $usertmp->email;
         }
-        
+
         return $html;
     }
 
@@ -463,7 +463,7 @@ class BimpDocumentPDF extends BimpModelPDF
         if (isset($this->object->array_options['options_libelle']) && $this->object->array_options['options_libelle']) {
             $this->writeContent('<p style="font-size: 10px">Objet : <strong>' . $this->object->array_options['options_libelle'] . '</strong></p>');
         }
-        
+
         if (isset($this->object->note_public) && $this->object->note_public) {
             $html = '<div style="font-size: 7px; line-height: 8px;">';
             $html .= $this->object->note_public;
@@ -472,7 +472,7 @@ class BimpDocumentPDF extends BimpModelPDF
             if (isset($this->object->array_options['options_libelle']) && $this->object->array_options['options_libelle']) {
                 $this->pdf->addVMargin(2);
             }
-            
+
             $this->writeContent($html);
         }
     }
@@ -628,7 +628,7 @@ class BimpDocumentPDF extends BimpModelPDF
                                     } else {
                                         $fl = false;
                                     }
-                                    $desc.= $equipment->getData('serial');
+                                    $desc .= $equipment->getData('serial');
                                 }
                             }
                             $desc .= '</span>';
@@ -705,13 +705,22 @@ class BimpDocumentPDF extends BimpModelPDF
 
             if (isset($bimpLines[$line->id])) {
                 $bimpLine = $bimpLines[$line->id];
-                if ($bimpLine->getData("force_qty_1") && $row['qte'] > 1) {
-                    $row['pu_ht'] = price(str_replace(",", ".", $row['pu_ht']) * $row['qte']);
-                    $product->array_options['options_deee'] = $product->array_options['options_deee'] * $row['qte'];
-                    $product->array_options['options_rpcp'] = $product->array_options['options_rpcp'] * $row['qte'];
-                    if ($row['pu_remise'] > 0)
-                        $row['pu_remise'] = BimpTools::displayMoneyValue($row['pu_remise'] * $row['qte'], "");
-                    $row['qte'] = 1;
+                if ($bimpLine->getData("force_qty_1")) {
+                    if ($row['qte'] > 1) {
+                        $row['pu_ht'] = price(str_replace(",", ".", $row['pu_ht']) * $row['qte']);
+                        $product->array_options['options_deee'] = $product->array_options['options_deee'] * $row['qte'];
+                        $product->array_options['options_rpcp'] = $product->array_options['options_rpcp'] * $row['qte'];
+                        if ($row['pu_remise'] > 0)
+                            $row['pu_remise'] = BimpTools::displayMoneyValue($row['pu_remise'] * $row['qte'], "");
+                        $row['qte'] = 1;
+                    } elseif ($row['qte'] < 1) {
+                        $row['pu_ht'] = price(str_replace(",", ".", $row['pu_ht']) * ($row['qte'] * -1));
+                        $product->array_options['options_deee'] = $product->array_options['options_deee'] * ($row['qte'] * -1);
+                        $product->array_options['options_rpcp'] = $product->array_options['options_rpcp'] * ($row['qte'] * -1);
+                        if ($row['pu_remise'] > 0)
+                            $row['pu_remise'] = BimpTools::displayMoneyValue($row['pu_remise'] * ($row['qte'] * -1), "");
+                        $row['qte'] = -1;
+                    }
                 }
             }
 
@@ -808,9 +817,9 @@ class BimpDocumentPDF extends BimpModelPDF
             $html .= "</span>";
             $html .= "</p>";
         }
-        
+
         $html .= '<p style="font-size: 6px; font-style: italic">Merci de noter systématiquement le n° de facture sur votre règlement.</p>';
-        
+
         $this->writeContent($html);
     }
 
@@ -1187,7 +1196,7 @@ class BimpDocumentPDF extends BimpModelPDF
                             }
 
                             $html .= '<tr>';
-                            $html .= '<td style="background-color: #F0F0F0;">' . $totalvat . ' ('.price($this->ht[$tvakey]).' €)</td>';
+                            $html .= '<td style="background-color: #F0F0F0;">' . $totalvat . ' (' . price($this->ht[$tvakey]) . ' €)</td>';
                             $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . price($tvaval, 0, $this->langs);
                             if ((int) $this->periodicity) {
                                 $html .= ' / ' . BimpComm::$pdf_periodicity_label_masc[(int) $this->periodicity];

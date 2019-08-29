@@ -31,6 +31,52 @@ class Equipment extends BimpObject
         $this->iconeDef = "fa-laptop";
     }
 
+    // Gestion des droits: 
+    // Exeptionnelement les droit dans les isCre.. et isEdi... pour la creation des prod par les commerciaux
+
+    public function canDelete()
+    {
+        global $user;
+        return (int) $user->admin;
+    }
+
+    public function canCreate()
+    {
+        return 1;
+    }
+
+    public function canEdit()
+    {
+        return 1;
+    }
+
+    public function isCreatable($force_create = false, &$errors = array())
+    {
+        return $this->isEditable($force_create, $errors);
+    }
+
+    public function isEditable($force_edit = false, &$errors = array())
+    {
+        global $user;
+        if ($force_edit || $user->rights->admin or $user->rights->produit->creer)
+            return 1;
+    }
+
+    public function canEditField($field_name)
+    {
+        global $user;
+
+        switch ($field_name) {
+            case 'validate':
+                if ((int) $user->admin != 1) {
+                    return 0;
+                }
+                return 1;
+        }
+
+        return parent::canEditField($field_name);
+    }
+
     // Getters booléens: 
 
     public function isAvailable($id_entrepot = 0, &$errors = array(), $allowed = array())
@@ -133,18 +179,27 @@ class Equipment extends BimpObject
 //                }
 //            }
 //        }
-
         // Check retour en commande client: 
         if ((int) $this->getData('id_commande_line_return')) {
             if (!isset($allowed['id_commande_line_return']) || ((int) $allowed['id_commande_line_return'] !== (int) $this->getData('id_commande_line_return'))) {
+                $line_check = false;
                 $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $this->getData('id_commande_line_return'));
                 if (BimpObject::objectLoaded($line) && $line->getFullQty() < 0) {
-                    $commande = $line->getParentInstance();
-                    if (BimpObject::objectLoaded($commande)) {
-                        $msg = 'Un retour est en cours pour l\'équipement ' . $this->getNomUrl(0, 1, 1, 'default');
-                        $msg .= ' dans la commande client ' . $commande->getNomUrl(0, 1, 1, 'full') . " a la ligne ".$this->getData('id_commande_line_return');
-                        $errors[] = $msg;
+                    // On verifie que l'équipement est bien attribué en retour à la ligne de commande: 
+                    $equipments_returns = $line->getData('equipments_returned');
+                    if (array_key_exists((int) $this->id, $equipments_returns)) {
+                        $line_check = true;
+                        $commande = $line->getParentInstance();
+                        if (BimpObject::objectLoaded($commande)) {
+                            $msg = 'Un retour est en cours pour l\'équipement ' . $this->getNomUrl(0, 1, 1, 'default');
+                            $msg .= ' dans la commande client ' . $commande->getNomUrl(0, 1, 1, 'full') . " a la ligne " . $this->getData('id_commande_line_return');
+                            $errors[] = $msg;
+                        }
                     }
+                }
+
+                if (!$line_check) {
+                    $this->updateField('id_commande_line_return', 0);
                 }
             }
         }
@@ -1082,51 +1137,4 @@ class Equipment extends BimpObject
 
         return $errors;
     }
-
-    // Gestion des droits: 
-
-    public function canDelete()
-    {
-        global $user;
-        return (int) $user->admin;
-    }
-     
-/*
- * Exeptionnelement les droit dans les isCre.. et isEdi... pour la creation des prod par les commerciaux
- */
-    public function canCreate()
-    {
-            return 1;
-    }
-
-    public function canEdit()
-    {
-        return 1;
-    }
-    
-    public function isCreatable($force_create = false, &$errors = array()) {
-        return $this->isEditable($force_create, $errors);
-    }
-    
-    public function isEditable($force_edit = false, &$errors = array()) {
-        global $user;
-        if($force_edit || $user->rights->admin or $user->rights->produit->creer)
-            return 1;
-    }
-
-    public function canEditField($field_name)
-    {
-        global $user;
-
-        switch ($field_name) {
-            case 'validate':
-                if ((int) $user->admin != 1) {
-                    return 0;
-                }
-                return 1;
-        }
-
-        return parent::canEditField($field_name);
-    }
-
 }

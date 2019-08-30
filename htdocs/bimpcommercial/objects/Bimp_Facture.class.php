@@ -1175,11 +1175,12 @@ class Bimp_Facture extends BimpComm
 
                 $absolute_discount = price2num($soc->getAvailableDiscounts('', $filterabsolutediscount), 'MT');
                 $absolute_creditnote = price2num($soc->getAvailableDiscounts('', $filtercreditnote), 'MT');
+                
+                $discounts_amounts = price2num($soc->getAvailableDiscounts('', ''), 'MT');
 
                 $can_use_discount = false;
                 $can_use_credit_note = false;
                 $can_add_credit_note = false;
-
 
                 if ($absolute_discount > 0) {
                     $can_view_discounts = true;
@@ -1195,6 +1196,20 @@ class Bimp_Facture extends BimpComm
                 }
 
                 if ($absolute_creditnote > 0) {
+                    $can_view_discounts = true;
+                    $html .= '<br/>';
+                    if ($status !== Facture::STATUS_VALIDATED || $type === Facture::TYPE_CREDIT_NOTE) {
+                        $html .= '<i class="' . BimpRender::renderIconClass('question-circle') . ' iconLeft objectIcon bs-popover" ';
+                        $html .= BimpRender::renderPopoverData($langs->trans("CreditNoteDepositUse"), 'top', 'true') . ' style="margin-left: 0"></i>';
+                        $html .= $langs->trans("CompanyHasCreditNote", price($absolute_creditnote), $langs->transnoentities("Currency" . $conf->currency));
+                    } else {
+                        $html .= $langs->trans("CompanyHasCreditNote", price($absolute_creditnote), $langs->transnoentities("Currency" . $conf->currency));
+                        $can_use_credit_note = true;
+                        $can_add_credit_note = true;
+                    }
+                }
+                
+                if ($discounts_amounts > 0) {
                     $can_view_discounts = true;
                     $html .= '<br/>';
                     if ($status !== Facture::STATUS_VALIDATED || $type === Facture::TYPE_CREDIT_NOTE) {

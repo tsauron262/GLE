@@ -24,6 +24,10 @@ objects:
         instance: 
             bimp_object: Bimp_Product
             
+    stocks: 
+        instance: 
+            bimp_object: Bimp_Stock
+            
     correctifs: 
         instance: 
             bimp_object: BimpCorrectif
@@ -67,6 +71,14 @@ sections:
                   list: 
                       panel: 1
                       object: products
+                      name: default
+        stocks: 
+            label: Stocks
+            sections: 
+                - type: list
+                  list: 
+                      panel: 1
+                      object: stocks
                       name: default
         correctifs: 
             label: Correctifs

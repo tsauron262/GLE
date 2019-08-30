@@ -2026,7 +2026,7 @@ class Bimp_Facture extends BimpComm
                             }
 
                             // On vérifie qu'une reval n'existe pas déjà: 
-                            $reval = BimpCache::findBimpObjectInstance('', '', array(
+                            $reval = BimpCache::findBimpObjectInstance('bimpfinanc', 'BimpRevalorisation', array(
                                         'id_facture'      => (int) $this->id,
                                         'id_facture_line' => (int) $line->id,
                                         'type'            => 'crt'

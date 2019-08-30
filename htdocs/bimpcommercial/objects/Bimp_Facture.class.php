@@ -1381,32 +1381,39 @@ class Bimp_Facture extends BimpComm
                 $rows = $this->db->getRows('societe_remise_except', '`fk_facture` = ' . (int) $this->id, null, 'array');
                 if (!is_null($rows) && count($rows)) {
                     foreach ($rows as $r) {
+                        $html .= '<tr>';
+
                         $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $r['fk_facture_source']);
+                        $label = '';
+
                         if ($facture->isLoaded()) {
-                            $html .= '<tr>';
-                            $html .= '<td style="text-align: right;">';
+
                             if ((int) $facture->getData('type') === Facture::TYPE_STANDARD) {
-                                $html .= 'Trop perçu facture ';
+                                $label = 'Trop perçu facture ';
                                 $total_credit_note += (float) $r['amount_ttc'];
                             }
                             if ((int) $facture->getData('type') === Facture::TYPE_CREDIT_NOTE) {
-                                $html .= 'Avoir ';
+                                $label = 'Avoir ';
                                 $total_credit_note += (float) $r['amount_ttc'];
                             } elseif ((int) $facture->getData('type') === Facture::TYPE_DEPOSIT) {
-                                $html .= 'Acompte ';
+                                $label = 'Acompte ';
                                 $total_deposit += (float) $r['amount_ttc'];
                             }
-                            $html .= $facture->dol_object->getNomUrl(0);
-                            $html .= ' : </td>';
-
-                            $html .= '<td>' . BimpTools::displayMoneyValue((float) $r['amount_ttc'], 'EUR') . '</td>';
-                            $html .= '<td class="buttons">';
-                            $onclick = $this->getJsActionOnclick('removeDiscount', array('id_discount' => (int) $r['rowid']));
-                            $html .= BimpRender::renderRowButton('Retirer', 'fas_trash-alt', $onclick);
-                            $html .= '</td>';
-
-                            $html .= '</tr>';
+                            $label .= $facture->dol_object->getNomUrl(0);
+                        } else {
+                            $label = ((string) $r['description'] ? $r['description'] : 'Remise');
+                            $total_credit_note += (float) $r['amount_ttc'];
                         }
+
+                        $html .= '<td style="text-align: right;">';
+                        $html .= $label . ' : </td>';
+
+                        $html .= '<td>' . BimpTools::displayMoneyValue((float) $r['amount_ttc'], 'EUR') . '</td>';
+                        $html .= '<td class="buttons">';
+                        $onclick = $this->getJsActionOnclick('removeDiscount', array('id_discount' => (int) $r['rowid']));
+                        $html .= BimpRender::renderRowButton('Retirer', 'fas_trash-alt', $onclick);
+                        $html .= '</td>';
+                        $html .= '</tr>';
                     }
                 }
 

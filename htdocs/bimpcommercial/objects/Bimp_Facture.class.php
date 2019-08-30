@@ -1558,9 +1558,6 @@ class Bimp_Facture extends BimpComm
 
         if ($this->isLoaded()) {
             $type = (int) $this->getData('type');
-            $mult = 1;
-            $title = 'Paiements effectués';
-
 
             $rows = $this->db->getRows('paiement_facture', '`fk_facture` = ' . (int) $this->id, null, 'array');
 
@@ -1573,6 +1570,8 @@ class Bimp_Facture extends BimpComm
                 $title = 'Remboursements effectués';
             } else {
                 $html .= '<th>Paiement</th>';
+                $mult = 1;
+                $title = 'Paiements effectués';
             }
             $html .= '<th>Date</th>';
             $html .= '<th>Type</th>';
@@ -1591,7 +1590,7 @@ class Bimp_Facture extends BimpComm
                         $html .= '<td>' . $paiement->displayData('datep') . '</td>';
                         $html .= '<td>' . $paiement->displayType() . '</td>';
                         $html .= '<td>' . $paiement->displayAccount() . '</td>';
-                        $html .= '<td>' . BimpTools::displayMoneyValue((float) $paiement->getData('amount') * $mult, 'EUR') . '</td>';
+                        $html .= '<td>' . $paiement->displayAmount($this->id, $mult) . '</td>';
                         $html .= '</tr>';
                     }
                 }

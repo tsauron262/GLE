@@ -2520,8 +2520,8 @@ class BC_Vente extends BimpObject
                     } else {
                         if (!empty($conf->banque->enabled)) {
                             if ($p->addPaymentToBank($user, 'payment', '(CustomerInvoicePayment)', $id_account, '', '') < 0) {
-                                $warnings[] = 'Echec de l\'ajout du rendu monnaire de ' . BimpTools::displayMoneyValue($returned, 'EUR') . ' au compte bancaire ' . $account_label;
-                                BimpTools::getErrorsFromDolObject($p, $errors, $langs);
+                                $msg = 'Echec de l\'ajout du rendu monnaire de ' . BimpTools::displayMoneyValue($returned, 'EUR') . ' au compte bancaire ' . $account_label;
+                                $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($p, $errors, $langs), $msg);
                             }
                         }
 

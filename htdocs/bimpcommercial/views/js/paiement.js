@@ -1,8 +1,11 @@
 function onFacturePaymentChange($container) {
+    var is_rbt = parseInt($container.data('is_rbt'));
 
+    var total_to_return = 0;
     var total_payments = 0;
     var total_to_pay = $container.find('[name="total_to_pay"]').val();
     var total_avoirs = 0;
+    var rest_to_pay = 0;
 
     if (total_to_pay === '') {
         total_to_pay = 0;
@@ -10,7 +13,12 @@ function onFacturePaymentChange($container) {
         total_to_pay = parseFloat(total_to_pay);
     }
 
+    rest_to_pay = total_to_pay;
+
     $container.find('input.facture_payment_input').each(function () {
+        var line_total_paid = 0;
+        var line_to_return = 0;
+
         var value = $(this).val();
         if (value === '') {
             value = 0;
@@ -23,42 +31,48 @@ function onFacturePaymentChange($container) {
             avoirs = 0;
         }
 
+        line_total_paid = value + avoirs;
+
         var to_pay = parseFloat($(this).data('to_pay'));
         if (isNaN(to_pay)) {
             to_pay = 0;
         }
 
         if (to_pay >= 0) {
-            if ((value + avoirs) > to_pay) {
-                value = to_pay - avoirs;
-                $(this).val(value);
+            if (line_total_paid > to_pay) {
+                if (!is_rbt) {
+                    line_to_return = (line_total_paid - to_pay);
+                } else {
+                    value = to_pay - avoirs;
+                    $(this).val(value);
+                    line_total_paid = value + avoirs;
+                }
             }
         } else {
-            if ((value + avoirs) < to_pay) {
+            if (line_total_paid < to_pay) {
                 value = to_pay - avoirs;
                 $(this).val(value);
+                line_total_paid = value + avoirs;
             }
         }
 
         total_payments += value;
         total_avoirs += avoirs;
+        total_to_return += line_to_return;
+        rest_to_pay -= (line_total_paid - line_to_return);
     });
-
-    var diff = total_to_pay - total_payments - total_avoirs;
-    var rest_to_pay = 0;
-    var to_return = 0;
-
-    if (diff > 0) {
-        rest_to_pay = diff;
-    } else {
-        to_return = -diff;
-    }
 
     displayMoneyValue(total_payments, $container.find('span.total_payments'));
     displayMoneyValue(rest_to_pay, $container.find('span.rest_to_pay'));
-    displayMoneyValue(to_return, $container.find('span.to_return'));
+    displayMoneyValue(total_to_return, $container.find('span.to_return'));
 
     $container.find('[name="total_paid_amount"]').val(total_payments);
+
+    if (total_to_return > 0) {
+        $container.find('.to_return_option_container').stop().slideDown(250);
+    } else {
+        $container.find('.to_return_option_container').stop().slideUp(250);
+    }
 }
 
 function onClientTotalPaidAmountChange($container) {
@@ -78,6 +92,7 @@ function onClientTotalPaidAmountChange($container) {
 
     var rest = total_paid;
     var rest_to_pay = total_to_pay;
+    var $lastInput = null;
 
     $container.find('input.facture_payment_input').each(function () {
         var avoirs = parseFloat($(this).data('avoirs'));
@@ -101,6 +116,7 @@ function onClientTotalPaidAmountChange($container) {
         $(this).val(to_pay);
         rest -= to_pay;
         rest_to_pay -= (to_pay + avoirs);
+        $lastInput = $(this);
     });
 
     if (rest_to_pay < 0) {
@@ -114,6 +130,10 @@ function onClientTotalPaidAmountChange($container) {
         rest = 0;
     }
 
+    if (rest > 0 && $.isOk($lastInput)) {
+        $lastInput.val(Math.round10(parseFloat($lastInput.val()) + rest, -2));
+    }
+
     total_paid = Math.round10(total_paid, -2);
     rest_to_pay = Math.round10(rest_to_pay, -2);
     rest = Math.round10(rest, -2);
@@ -121,6 +141,12 @@ function onClientTotalPaidAmountChange($container) {
     displayMoneyValue(total_paid, $container.find('span.total_payments'));
     displayMoneyValue(rest_to_pay, $container.find('span.rest_to_pay'));
     displayMoneyValue(rest, $container.find('span.to_return'));
+
+    if (rest > 0) {
+        $container.find('.to_return_option_container').stop().slideDown(250);
+    } else {
+        $container.find('.to_return_option_container').stop().slideUp(250);
+    }
 }
 
 function onClientFacturesPaymentsInputsLoaded($container) {
@@ -142,6 +168,7 @@ function onClientFacturesPaymentsInputsLoaded($container) {
             onFacturePaymentChange($container);
         });
     });
+
     $container.find('[name="total_paid_amount"]').change(function () {
         onClientTotalPaidAmountChange($container);
     });
@@ -157,7 +184,6 @@ function onAvoirsChange($container) {
             var $facturesInputs = $form.find('.factures_inputContainer').find('input.facture_payment_input');
             $facturesInputs.each(function () {
                 $(this).data('avoirs', 0);
-                $(this).data('max', $(this).data('to_pay'));
                 $(this).findParentByClass('facture_payment_row').find('td.facture_avoirs').text('');
             });
             $rows.each(function () {
@@ -180,7 +206,7 @@ function onAvoirsChange($container) {
                         if (!check) {
                             var toPay = parseFloat($(this).data('to_pay'));
                             var avoirs = parseFloat($(this).data('avoirs'));
-                             if (Math.round10((toPay - avoirs), -2) >= amount) {
+                            if (Math.round10((toPay - avoirs), -2) >= amount) {
                                 var $input = $(this);
                                 check = true;
                                 total_avoirs += amount;
@@ -191,7 +217,6 @@ function onAvoirsChange($container) {
                                 });
                                 avoirs += amount;
                                 $input.data('avoirs', avoirs);
-                                $input.data('max', toPay - avoirs);
                                 displayMoneyValue(avoirs, $input.findParentByClass('facture_payment_row').find('td.facture_avoirs'));
                             }
                         }

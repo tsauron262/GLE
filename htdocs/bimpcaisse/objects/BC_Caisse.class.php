@@ -246,7 +246,7 @@ class BC_Caisse extends BimpObject
         return $errors;
     }
 
-    public function addPaiement(Paiement $paiement, $id_facture, $id_vente = 0)
+    public function addPaiement(Paiement $paiement, $id_facture = 0, $id_vente = 0)
     {
         $errors = array();
 

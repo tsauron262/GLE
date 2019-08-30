@@ -6,6 +6,7 @@ class Bimp_Paiement extends BimpObject
 {
 
     public $useCaisse = false;
+    public $facs_amounts = null;
     public static $paiement_factures_types = array(Facture::TYPE_STANDARD, Facture::TYPE_DEPOSIT, Facture::TYPE_REPLACEMENT, Facture::TYPE_SITUATION);
     public static $rbt_factures_type = array(Facture::TYPE_CREDIT_NOTE);
 
@@ -17,7 +18,7 @@ class Bimp_Paiement extends BimpObject
     }
 
     // Getters: 
-    
+
     public function getAmountFromFacture()
     {
         $id_facture = (int) BimpTools::getValue('fields/id_facture', 0);
@@ -38,6 +39,27 @@ class Bimp_Paiement extends BimpObject
         return array($user, 1);
     }
 
+    public function getFacsAmounts()
+    {
+        if (is_null($this->facs_amounts)) {
+            if ($this->isLoaded()) {
+                $this->facs_amounts = array();
+
+                $rows = $this->db->getRows('paiement_facture', '`fk_paiement` = ' . (int) $this->id, null, 'array', array('fk_facture', 'amount'));
+
+                if (is_array($rows)) {
+                    foreach ($rows as $r) {
+                        $this->facs_amounts[(int) $r['fk_facture']] = (float) $r['amount'];
+                    }
+                }
+            } else {
+                return array();
+            }
+        }
+
+        return $this->facs_amounts;
+    }
+
     // Affichages: 
 
     public function displayType()
@@ -47,7 +69,7 @@ class Bimp_Paiement extends BimpObject
         }
     }
 
-    public function DisplayAccount()
+    public function displayAccount()
     {
         if ($this->isLoaded() && isset($this->dol_object->fk_account) && (int) $this->dol_object->fk_account) {
             BimpTools::loadDolClass('compta/bank', 'account');
@@ -56,6 +78,23 @@ class Bimp_Paiement extends BimpObject
                 return $account->getNomUrl(1);
             } else {
                 return BimpRender::renderAlerts('Le compte bancaire d\'ID ' . $this->dol_object->fk_account . ' n\'existe pas');
+            }
+        }
+
+        return '';
+    }
+
+    public function displayAmount($id_facture = 0, $mult = 1)
+    {
+        if ($this->isLoaded()) {
+            if ((int) $id_facture) {
+                $amounts = $this->getFacsAmounts();
+
+                if (isset($amounts[(int) $id_facture])) {
+                    return BimpTools::displayMoneyValue((float) $amounts[(int) $id_facture] * $mult);
+                }
+            } else {
+                return BimpTools::displayMoneyValue((float) $this->getData('amount') * $mult);
             }
         }
 
@@ -151,7 +190,6 @@ class Bimp_Paiement extends BimpObject
                 'fk_soc'    => $id_client,
                 'paye'      => 0,
                 'type'      => array('IN' => (!$is_rbt ? self::$paiement_factures_types : self::$rbt_factures_type)),
-//                'type'      => Facture::TYPE_STANDARD,
                 'fk_statut' => 1,
                 'total_ttc' => array(
                     'operator' => ($is_rbt ? '<' : '>'),
@@ -162,7 +200,7 @@ class Bimp_Paiement extends BimpObject
 
         if (!count($list)) {
             if ($is_rbt) {
-                return BimpRender::renderAlerts('Aucun avoir à rembourser trouvé pour ce client', 'warning');
+                return BimpRender::renderAlerts('Aucun avoir ou trop perçu à rembourser trouvé pour ce client', 'warning');
             } else {
                 return BimpRender::renderAlerts('Aucune facture à payer trouvée pour ce client', 'warning');
             }
@@ -180,7 +218,7 @@ class Bimp_Paiement extends BimpObject
             'style'       => 'max-width: 90px'
         );
 
-        $html .= '<div id="factures_payments_' . $rand . '" class="factures_payment_container">';
+        $html .= '<div id="factures_payments_' . $rand . '" class="factures_payment_container" data-is_rbt="' . (int) $is_rbt . '">';
 
         $html .= '<div style="margin: 15px 0; text-align: right">';
         $html .= '<span style="font-weight: bold;">Somme totale ' . ($is_rbt ? 'remboursée' : 'versée') . ':&nbsp;&nbsp;</span>';
@@ -244,15 +282,9 @@ class Bimp_Paiement extends BimpObject
 
                 $at_least_one = true;
 
+                $options['data']['min'] = 0;
                 $options['data']['to_pay'] = $to_pay;
-
-                if ($montant_ttc < 0) {
-                    $options['data']['min'] = $montant_ttc;
-                    $options['data']['max'] = 0;
-                } else {
-                    $options['data']['min'] = 0;
-                    $options['data']['max'] = $montant_ttc;
-                }
+                $options['data']['total_amount'] = $montant_ttc;
 
                 $total_ttc += $montant_ttc;
                 $total_paid += $paid;
@@ -327,8 +359,24 @@ class Bimp_Paiement extends BimpObject
         $html .= 'Reste à ' . ($is_rbt ? 'rembourser' : 'régler') . ':&nbsp;<span class="rest_to_pay">' . BimpTools::displayMoneyValue($total_to_pay, 'EUR') . '</span>';
         $html .= '</div>';
         $html .= '<div class="to_return_container" style="font-weight: bold; margin: 5px 0 10px; padding: 8px 12px; color: #fff; font-size: 14px; text-align: center; background-color: #348B41">';
-        $html .= ($is_rbt ? 'Trop remboursé' : 'A rendre') . ':&nbsp;<span class="to_return">0,00 &euro;</span>';
+        $html .= ($is_rbt ? 'Trop remboursé' : 'Trop perçu') . ':&nbsp;<span class="to_return">0,00 &euro;</span>';
         $html .= '</div>';
+
+        if (!$is_rbt) {
+            $html .= '<div class="to_return_option_container" style="margin: 10px 0; font-size: 14px; display: none">';
+            $html .= '<span class="bold">Trop perçu :</span>';
+
+            $html .= BimpInput::renderInput('select', 'to_return_option', '', array(
+                        'options' => array(
+                            ''       => '',
+                            'keep'   => 'Conserver dans la facture',
+                            'return' => 'Rendre en espèce',
+                            'remise' => 'Convertir en remise client'
+                        )
+            ));
+
+            $html .= '</div>';
+        }
 
         $html .= '<script type="text/javascript">';
         $html .= 'onClientFacturesPaymentsInputsLoaded($(\'#factures_payments_' . $rand . '\'))';
@@ -339,6 +387,13 @@ class Bimp_Paiement extends BimpObject
     }
 
     // Overrides: 
+
+    public function reset()
+    {
+        unset($this->facs_amounts);
+        $this->facs_amounts = null;
+        parent::reset();
+    }
 
     public function validatePost()
     {
@@ -444,8 +499,6 @@ class Bimp_Paiement extends BimpObject
 
         if (is_null($type_paiement) || !(string) $type_paiement) {
             $errors[] = 'Mode paiement invalide';
-        } elseif (round(($total_paid + $total_avoirs), 2) > $total_to_pay && $type_paiement !== 'LIQ') {
-            $errors[] = 'Le versement d\'une somme supérieure au total des factures n\'est possible que pour un paiement en espèces';
         } elseif (!$use_caisse && $type_paiement === 'LIQ') {
             $errors[] = 'Le réglement en espèce n\'est possible que pour un paiement en caisse';
         }
@@ -472,6 +525,12 @@ class Bimp_Paiement extends BimpObject
         BimpTools::loadDolClass('compta/facture', 'facture');
         $factures = array();
 
+        $to_return_option = BimpTools::getPostFieldValue('to_return_option', '');
+        $total_to_return = 0;
+        $to_return_amounts = array();
+        $facs_to_convert = array();
+
+
         // Calcul du total payé par facture. 
         while (BimpTools::isSubmit('amount_' . $i)) {
             $id_facture = (int) BimpTools::getValue('amount_' . $i . '_id_facture', 0);
@@ -495,7 +554,6 @@ class Bimp_Paiement extends BimpObject
                     $paid = (float) $factures[$id_facture]->dol_object->getSommePaiement();
                     $paid += (float) $factures[$id_facture]->dol_object->getSumCreditNotesUsed();
                     $paid += (float) $factures[$id_facture]->dol_object->getSumDepositsUsed();
-                    $paid = round($paid, 2);
 
                     if (!$is_rbt) {
                         foreach ($avoirs as $avoir) {
@@ -505,13 +563,43 @@ class Bimp_Paiement extends BimpObject
                         }
                     }
 
-                    $diff = abs($factures[$id_facture]->dol_object->total_ttc) - abs($paid) - $avoir_used - $amount;
+                    $to_pay = abs($factures[$id_facture]->dol_object->total_ttc) - abs($paid);
+                    $diff = $to_pay - $avoir_used - $amount;
+
                     if ($diff > -0.01 && $diff < 0.01) {
                         $amount = (abs($factures[$id_facture]->dol_object->total_ttc) - abs($paid) - $avoir_used); // Eviter les problèmes d'arrondis
+                        $diff = 0;
                     }
-                    
+
+                    if ($diff < 0) {
+                        if ($is_rbt) {
+                            $errors[] = 'Il n\'est pas possible d\'enregistrer des sommes supérieures aux montants dûs pour les remboursements';
+                            break;
+                        }
+
+                        if (!$to_return_option) {
+                            $errors[] = 'Veuillez sélectionner une option pour le traitement du trop perçu';
+                            break;
+                        }
+
+                        switch ($to_return_option) {
+                            case 'remise':
+                                $facs_to_convert[] = $id_facture;
+                                break;
+
+                            case 'return':
+                                if (!$use_caisse) {
+                                    $errors[] = 'Le rendu monnaie du trop perçu n\'est possible que pour un paiement en caisse';
+                                    break 2;
+                                }
+                                $to_return_amounts[$id_facture] = $diff;
+                                $total_to_return += abs($diff);
+                                break;
+                        }
+                    }
+
                     $total_factures_versements += $amount;
-                    
+
                     if ($is_rbt) {
                         $amount *= -1;
                     }
@@ -521,16 +609,14 @@ class Bimp_Paiement extends BimpObject
             }
             $i++;
         }
-        
+
         if (count($errors)) {
             return $errors;
         }
 
 //        $total_factures_versements = round($total_factures_versements, 2);
 //        $total_paid = round($total_paid, 2);
-
 //        $total_factures_versements = round($total_factures_versements, 2);
-        
 //        if ($total_factures_versements > ($total_paid + 0.009999999)) {
 //            $errors[] = 'Le champ "Somme totale versée" (' . $total_paid . ') est inférieur au total des réglements des factures (' . $total_factures_versements . ')';
 //            return $errors;
@@ -562,7 +648,7 @@ class Bimp_Paiement extends BimpObject
                                     $warnings[] = 'L\'avoir client d\'ID ' . $avoir['id_discount'] . ' a déjà été consommé et n\'a donc pas pu être utilisé en paiement de la facture ' . $facture->getNomUrl(0, 1, 1, 'full');
                                 } else {
                                     // Ajout de l'avoir à la facture: 
-                                    if ($discount->link_to_invoice(0, (int) $facture->id)) {
+                                    if ($discount->link_to_invoice(0, (int) $facture->id) < 0) {
                                         $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($discount), 'Echec de l\'utilisation de l\'avoir client #' . $discount->id . ' en paiement de la facture ' . $facture->getNomUrl(0, 1, 1, 'full'));
                                     } else {
                                         $facture->checkIsPaid();
@@ -575,25 +661,8 @@ class Bimp_Paiement extends BimpObject
                 }
             }
 
-            // Enregistrement du paiement en caisse: 
+
             if ($this->isLoaded()) {
-                if ($use_caisse) {
-                    $bc_paiement = BimpObject::getInstance('bimpcaisse', 'BC_Paiement');
-                    $paiement_errors = $bc_paiement->validateArray(array(
-                        'id_caisse'         => (int) $caisse->id,
-                        'id_caisse_session' => (int) $caisse->getData('id_current_session'),
-                        'id_facture'        => (int) 0,
-                        'id_paiement'       => (int) $this->id
-                    ));
-                    if (!count($paiement_errors)) {
-                        $paiement_errors = $bc_paiement->create();
-                    }
-
-                    if (count($paiement_errors)) {
-                        $warnings[] = BimpTools::getMsgFromArray($paiement_errors, 'Echec de l\'enregistrement du paiement en caisse');
-                    }
-                }
-
                 // Ajout du paiement au compte financier:
                 if (!empty($conf->banque->enabled)) {
                     $this->dol_object->error = '';
@@ -613,17 +682,53 @@ class Bimp_Paiement extends BimpObject
                     }
                 }
 
-                // Correction fonds de caisse:
-                if ($this->useCaisse && $total_factures_versements !== 0 && $type_paiement === 'LIQ') {
-                    if ($is_rbt) {
-                        $total_factures_versements *= -1;
+                // Enregistrement du paiement dans la caisse: 
+                if ($use_caisse) {
+                    $paiement_errors = $caisse->addPaiement($this->dol_object);
+                    if (count($paiement_errors)) {
+                        $warnings[] = BimpTools::getMsgFromArray($paiement_errors, 'Echec de l\'enregistrement en caisse du paiement');
                     }
-                    $fonds = (float) $caisse->getData('fonds');
-                    $fonds += round($total_factures_versements, 2);
-                    $caisse->set('fonds', $fonds);
-                    $update_errors = $caisse->update();
-                    if (count($update_errors)) {
-                        $warnings[] = BimpTools::getMsgFromArray($update_errors, 'Echec de la mise à jour du fonds de caisse (Nouveau montant: ' . $fonds . ')');
+                }
+
+                // Création du paiement pour le rendu monnaie si nécessaire: 
+                if ($to_return_option === 'return' && $total_to_return > 0) {
+                    // Création du paiement: 
+                    $p = new Paiement($db);
+                    $p->datepaye = dol_now();
+                    $p->amounts = $to_return_amounts;
+                    $p->paiementid = (int) dol_getIdFromCode($db, 'LIQ', 'c_paiement');
+                    $p->note = 'Rendu monnaie d\'un trop perçu (Paiement #' . $this->id . ')';
+
+                    if ($p->create($user) < 0) {
+                        $msg = 'Echec de la création du paiement pour le rendu monnaie de ' . BimpTools::displayMoneyValue($total_to_return, 'EUR');
+                        $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($p), $msg);
+                    } else {
+                        // Ajout du paiement au compte financier: 
+                        if (!empty($conf->banque->enabled)) {
+                            if ($p->addPaymentToBank($user, 'payment', 'Rendu monnaie du trop perçu (Paiement #' . $this->id . ')', $account->id, '', '') < 0) {
+                                $msg = 'Echec de l\'ajout du rendu monnaire de ' . BimpTools::displayMoneyValue($total_to_return, 'EUR') . ' au compte bancaire ' . $account->bank;
+                                $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($p, $errors), $msg);
+                            }
+                        }
+
+                        // Enregistrement du paiement dans la caisse: 
+                        $paiement_errors = $caisse->addPaiement($p);
+                        if (count($paiement_errors)) {
+                            $warnings[] = BimpTools::getMsgFromArray($paiement_errors, 'Des erreurs sont survenues lors de l\'enregistrement en caisse du rendu monnaie de ' . BimpTools::displayMoneyValue($total_to_return, 'EUR'));
+                        }
+                    }
+                }
+
+                // Conversion des trop-perçus en remises si nécessaire: 
+                if ($to_return_option === 'remise') {
+                    foreach ($facs_to_convert as $id_facture) {
+                        $facture = isset($factures[(int) $id_facture]) ? $factures[(int) $id_facture] : null;
+                        if (BimpObject::objectLoaded($facture)) {
+                            $fac_errors = $facture->convertToRemise();
+                            if (count($fac_errors)) {
+                                $warnings[] = BimpTools::getMsgFromArray($fac_errors, 'Echec de la conversion en remise du trop perçu pour la facture ' . $facture->getRef());
+                            }
+                        }
                     }
                 }
             }

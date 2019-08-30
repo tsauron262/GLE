@@ -765,6 +765,7 @@ filters_panels:
             - field: ref
             - field: label
             - field: fk_product_type
+            - field: stock
             - field: price
             - field: price_ttc
             - field: barcode

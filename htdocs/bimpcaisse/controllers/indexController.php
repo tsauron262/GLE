@@ -477,10 +477,23 @@ class indexController extends BimpController
 
     public function renderSessionPaymentsTab(BC_Caisse $caisse)
     {
+        $html = '';
         $errors = array();
 
         if (!$this->isCaisseValide($caisse, $errors)) {
             return BimpRender::renderAlerts($errors);
+        }
+
+        $sql = 'SELECT MAX(id) as id FROM ' . MAIN_DB_PREFIX . 'bc_caisse_session WHERE id_caisse = ' . (int) $caisse->id . ' AND id_user_closed > 0';
+        $result = BimpCache::getBdb()->executeS($sql, 'array');
+
+        if (isset($result[0]['id']) && (int) $result[0]['id']) {
+            $html .= '<div class="buttonsContainer align-right">';
+            $recap_url = DOL_URL_ROOT . '/bimpcore/view.php?module=bimpcaisse&object_name=BC_CaisseSession&id_object=' . (int) $result[0]['id'] . '&view=recap';
+            $html .= '<button class="btn btn-default" onclick="window.open(\'' . $recap_url . '\', \'Récapitulatif session de caisse\', \'menubar=no, status=no, width=827, height=900\');">';
+            $html .= BimpRender::renderIcon('fas_print', 'iconLeft') . ' Session de caisse précédente';
+            $html .= '</button>';
+            $html .= '</div>';
         }
 
         $session = BimpCache::getBimpObjectInstance('bimpcaisse', 'BC_CaisseSession', (int) $caisse->getData('id_current_session'));

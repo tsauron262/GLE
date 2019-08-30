@@ -105,9 +105,14 @@ class ObjectLine extends BimpObject
         if (isset($user->rights->bimpcommercial->priceVente) && (int) $user->rights->bimpcommercial->priceVente == 1) {
             return 1;
         }
-        if ($this->getChildObject("product") && $this->getChildObject("product")->id > 0)
-            if ($this->getChildObject("product")->getData("price") == 1 || $this->getChildObject("product")->getData("price") == 0)
+        
+        $product = $this->getProduct();
+
+        if (BimpObject::objectLoaded($product)) {
+            if ($product->getData("price") == 1 || $product->getData("price") == 0)
                 return 1;
+        }
+
         return 0;
     }
 
@@ -1197,8 +1202,8 @@ class ObjectLine extends BimpObject
                 $remise_percent = 0;
                 if ($this->field_exists('remise_crt_percent')) {
                     $remise_percent = (float) $this->getData('remise_crt_percent');
-                } 
-                
+                }
+
                 if (!$remise_percent) {
                     $product = $this->getProduct();
                     if (BimpObject::objectLoaded($product)) {

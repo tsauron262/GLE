@@ -1258,7 +1258,11 @@ class Bimp_CommandeFournLine extends FournObjectLine
                             'id_product' => $id_product,
                             'serial'     => $serial
                                 ), true)) {
-                    $errors[] = 'Un équipement existe déjà pour le numéro de série "' . $serial . '": ' . $equipment->getNomUrl(1, 0, 1, 'default') . '';
+                    $place = $equipment->getCurrentPlace();
+
+                    if ((int) $place->getData('type') !== BE_Place::BE_PLACE_FREE) {
+                        $errors[] = 'Un équipement existe déjà pour le numéro de série "' . $serial . '": ' . $equipment->getNomUrl(1, 0, 1, 'default') . '';
+                    }
                 }
             }
         }
@@ -1452,32 +1456,58 @@ class Bimp_CommandeFournLine extends FournObjectLine
                 $reception_data['equipments'] = array();
                 foreach ($reception_data['serials'] as $serial_data) {
                     // Création de l'équipement: 
-                    $equipment = BimpObject::getInstance('bimpequipment', 'Equipment');
+                    $eq_errors = array();
 
                     $pu_ht = (isset($serial_data['pu_ht']) ? (float) $serial_data['pu_ht'] : (float) $this->getUnitPriceHTWithRemises());
                     $tva_tx = (isset($serial_data['tva_tx']) ? (float) $serial_data['tva_tx'] : (float) $this->tva_tx);
 
-                    $eq_errors = $equipment->validateArray(array(
-                        'id_product'    => $product->id,
-                        'type'          => 1, // Dans produits? à sélectionner ? 
-                        'serial'        => $serial_data['serial'],
-                        'date_purchase' => $commande_fourn->getData('date_commande'),
-                        'prix_achat'    => $pu_ht,
-                        'achat_tva_tx'  => $tva_tx
+                    // Un équipement peut déjà exister pour un serial dans le cas d'un retour du fournisseur...
+                    $equipment = BimpCache::findBimpObjectInstance('bimpequipment', 'Equipment', array(
+                                'id_product' => (int) $product->id,
+                                'serial'     => $serial_data['serial']
                     ));
 
-                    $eq_warnings = array();
-                    if (!count($eq_errors)) {
-                        $eq_errors = $equipment->create($eq_warnings, true);
+                    if (BimpObject::objectLoaded($equipment)) {
+                        $equipment->set('date_purchase', $commande_fourn->getData('date_commande'));
+                        $equipment->set('prix_achat', $pu_ht);
+                        $equipment->set('achat_tva_tx', $tva_tx);
+
+                        $eq_warnings = array();
+                        $eq_errors = $equipment->update($eq_warnings, true);
+
+                        if (count($eq_errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($eq_errors, 'Echec de la mise à jour de l\'équipement "' . $serial_data['serial'] . '"');
+                        }
+
+                        if (count($eq_warnings)) {
+                            $errors[] = BimpTools::getMsgFromArray($eq_errors, 'Des erreurs sont survenues suite à la mise à jour de l\'équipement "' . $serial_data['serial'] . '"');
+                        }
+                    } else {
+                        $equipment = BimpObject::getInstance('bimpequipment', 'Equipment');
+
+                        $eq_errors = $equipment->validateArray(array(
+                            'id_product'    => $product->id,
+                            'type'          => 1, // Dans produits? à sélectionner ? 
+                            'serial'        => $serial_data['serial'],
+                            'date_purchase' => $commande_fourn->getData('date_commande'),
+                            'prix_achat'    => $pu_ht,
+                            'achat_tva_tx'  => $tva_tx
+                        ));
+
+                        $eq_warnings = array();
+                        if (!count($eq_errors)) {
+                            $eq_errors = $equipment->create($eq_warnings, true);
+                        }
+
+                        if (count($eq_errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($eq_errors, 'Echec de la création de l\'équipement pour le numéro de série "' . $serial_data['serial'] . '"');
+                        }
+
+                        if (count($eq_warnings)) {
+                            $errors[] = BimpTools::getMsgFromArray($eq_errors, 'Des erreurs sont survenues suite à la création de l\'équipement pour le numéro de série "' . $serial_data['serial'] . '"');
+                        }
                     }
 
-                    if (count($eq_errors)) {
-                        $errors[] = BimpTools::getMsgFromArray($eq_errors, 'Echec de la création de l\'équipement pour le numéro de série "' . $serial_data['serial'] . '"');
-                    }
-
-                    if (count($eq_warnings)) {
-                        $errors[] = BimpTools::getMsgFromArray($eq_errors, 'Des erreurs sont survenues suite à la création de l\'équipement pour le numéro de série "' . $serial_data['serial'] . '"');
-                    }
 
                     if (!count($eq_errors)) {
                         $equipments[] = $equipment->id;

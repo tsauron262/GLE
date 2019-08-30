@@ -3,15 +3,20 @@ primary: rowid
 
 
 labels: 
-    name: Stock par Entrepot
+    name: Stock par entrepôt
+    name_plur: Stocks par entrepôt
     is_female: 0
     
-objects:
-                
+objects:   
     product: 
         instance: 
             id_object: fk_product
             
+    entrepot: 
+        instance: 
+            id_object: 
+                field_value: fk_entrepot
+                
     category: 
         relation: none
         delete: 0
@@ -36,7 +41,9 @@ fields:
         
     reel: 
         label: Stock
-        type: int
+        type: qty
+        default_value: 0
+        
     stockShowRoom: 
         label: Stock ShowRoom
         extra: 1
@@ -46,6 +53,7 @@ fields:
         label: Nb Ventes
         extra: 1
         type: int
+        
     ventes_ht:
         label: Ventes Ht
         extra: 1

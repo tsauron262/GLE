@@ -366,11 +366,11 @@ class TransferLine extends BimpObject
         }
 
         if (!count($errors)) {
-            $this->set('quantity_transfered', $this->getData('quantity_received'));
-            $up_errors = $this->update();
-            if (count($up_errors)) {
-                $errors = BimpTools::getMsgFromArray($up_errors, 'Echec de l\'enregistrement des quantités transférées');
-            }
+            $errors = array_merge($errors, $this->set('quantity_transfered', $this->getData('quantity_received')));
+            $errors = array_merge($errors, $this->update());
+//            if (count($up_errors)) {
+//                $errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec de l\'enregistrement des quantités transférées');
+//            }
         }
 
         return $errors;

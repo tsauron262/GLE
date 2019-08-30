@@ -25,15 +25,15 @@ class Transfer extends BimpDolObject {
         $status = (int) $this->getData('status');
 
         // Draft
-        if ($status == 0) {
-            $this->data['date_opening'] = '';
-            $this->data['date_closing'] = '';
+        if ($status == self::STATUS_SENDING) {
+            $this->updateField("date_opening", '');
+            $this->updateField("date_closing", '');
             // Open
-        } elseif ($status == 1) {
-            $this->data['date_opening'] = date("Y-m-d H:i:s");
-            $this->data['date_closing'] = '';
-        } elseif ($status == 2) {
-            $this->data['date_closing'] = date("Y-m-d H:i:s");
+        } elseif ($status == self::STATUS_RECEPTING) {
+            $this->updateField("date_opening", date("Y-m-d H:i:s"));
+            $this->updateField("date_closing", '');
+        } elseif ($status == self::STATUS_CLOSED) {
+            $this->updateField("date_closing", date("Y-m-d H:i:s"));
         } else {
             $warnings[] = "Statut non reconnu, value = " . $status;
         }
@@ -71,22 +71,17 @@ class Transfer extends BimpDolObject {
             if ($this->getData('status') == Transfer::STATUS_CLOSED and ! $user->rights->bimptransfer->admin) {
                 $html .= '<p>Le statut du transfert ne permet pas d\'ajouter des lignes</p>';
             } else {
-//                $header_table = 'Lignes ';
                 $header_table .= '<span style="margin-left: 100px">Ajouter</span>';
-//                $header_table .= '<input class="search_list_input"  name="insert_line" type="text" style="width: 400px; margin-left: 10px;" value="" >';
                 $header_table .= BimpInput::renderInput('search_product', 'insert_line', '', array('filter_type' => 'both'));
 
                 $header_table .= '<span style="margin-left: 100px">Quantité</span>';
                 $header_table .= '<input class="search_list_input"  name="insert_quantity" type="number" min=1 style="width: 80px; margin-left: 10px;" value="1" >';
-
-//                $header_table .= '<p class="inputHelp">Entrez la référence ou le code-barre d\'un produit.<br/>Laissez vide si vous sélectionnez un équipement.</p>';
 
                 $html = BimpRender::renderPanel($header_table, $html, '', array(
                             'foldable' => false,
                             'type' => 'secondary',
                             'icon' => 'fas_plus-circle',
                 ));
-//                require_once DOL_DOCUMENT_ROOT . '/bimptransfer/scan/scan.php';
             }
         }
 
@@ -104,7 +99,7 @@ class Transfer extends BimpDolObject {
                 $buttons[] = array(
                     'label' => 'Terminer le transfert',
                     'icon' => 'fas_window-close',
-                    'onclick' => $this->getJsActionOnclick('close', array(), array(
+                    'onclick' => $this->getJsActionOnclick('setSatut', array("status" => Transfer::STATUS_CLOSED), array(
                         'success_callback' => 'function(result) {reloadTransfertLines(); removeInputs()}',
                     ))
                 );
@@ -153,34 +148,30 @@ class Transfer extends BimpDolObject {
         if ($data['status'] == Transfer::STATUS_CLOSED)
             $errors = $this->prepareClose();
 
-        if (sizeof($errors) == 0)
+        if (sizeof($errors) == 0) {
             $this->updateField("status", $data['status']);
-
-        $this->update();
+            $this->update();
+        }
+        
+        return $errors;
     }
 
     public function prepareClose() {
         $errors = array();
 
-        // TODO transféré ceux en cours avant ?
         $transfer_lines_obj = BimpObject::getInstance('bimptransfer', 'TransferLine');
         $transfer_lines = $transfer_lines_obj->getList(array(
             'id_transfer' => $this->getData('id')
                 ), null, null, 'date_create', 'desc', 'array', array(
             'id'
-//            'id_product',
-//            'id_equipment',
-//            'quantity_sent',
-//            'quantity_received',
-//            'quantity_transfered'
         ));
 
         foreach ($transfer_lines as $line) {
             $transfer_lines_obj->fetch($line['id']);
+            $errors = array_merge($errors, $transfer_lines_obj->transfer());
             $transfer_lines_obj->updateReservation(true);
         }
 
-        // Date fermeture
 
         return $errors;
     }

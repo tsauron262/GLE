@@ -1,6 +1,6 @@
 table: product_stock
 primary: rowid
-
+icon: fas_box-open
 
 labels: 
     name: Stock par entrepôt
@@ -71,7 +71,7 @@ fields:
 lists: 
     default: 
         title: Produits/Entrepots
-        icon: fas_box
+        icon: fas_box-open
         configurable: 1
         filters_panel: default
         sort_field: id

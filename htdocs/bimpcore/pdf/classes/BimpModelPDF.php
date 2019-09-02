@@ -214,11 +214,18 @@ Abstract class BimpModelPDF
         $path = DOL_DATA_ROOT . "/divers/";
 
         $nObj = $this->typeObject;
-        if ($nObj != "") {
-            if (isset($conf->$nObj) && isset($conf->$nObj->dir_output))
-                $path = $conf->$nObj->dir_output . "/";
+        if(is_object($this->object_conf)){
+            $objConf = $this->object_conf;
+        }
+        elseif ($nObj != "") {
+            if (isset($conf->$nObj))
+                $objConf = $conf->$nObj;
             else
                 $path .= $nObj . "/";
+        }
+        if(is_object($objConf)){
+            if (isset($objConf->dir_output))
+                $path = $objConf->dir_output . "/";
         }
 
         if (isset($this->object) && isset($this->object->ref))

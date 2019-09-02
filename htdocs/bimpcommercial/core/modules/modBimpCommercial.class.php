@@ -344,17 +344,23 @@ class modBimpCommercial extends DolibarrModules
                 }
                 
 
+                // Propales: 
                 //$sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'einstein';";
                 $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'azur';";
                 $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimpdevis', 1, 'propal', 'Devis BIMP', NULL);";
                 $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimployerdevis', 1, 'propal', 'Proposition loyer', NULL);";
                 
+                // Commande
+                $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'einstein';";
+                $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimpcommande', 1, 'order', 'Commande', NULL);";
+                
                 //Facture
                 $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'crabe';";
                 $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimpfact', 1, 'invoice', 'Facture', NULL);";
                 
-                $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'einstein';";
-                $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimpcommande', 1, 'order', 'Commande', NULL);";
+                // Commande fourn: 
+//                $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'muscadet';";
+//                $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimpcommandefourn', 1, 'order_supplier', 'Commande fournisseur', NULL);";
                 
                 // Dash board commercial
                 $sql[] = "UPDATE " . MAIN_DB_PREFIX . "menu SET `url`='/bimpcommercial/index.php?fc=tabCommercial&amp;mainmenu=commercial&amp;leftmenu=' WHERE `type` LIKE 'top' AND `mainmenu` LIKE 'commercial'";
@@ -418,10 +424,13 @@ class modBimpCommercial extends DolibarrModules
                 
                 $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'einstein', 1, 'order', 'einstein', NULL);";
                 
-                
                 //Facture
                 $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'bimpfact';";
                 $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'crabe', 1, 'invoice', 'crabe', NULL);";
+                
+                // Commande Fourn: 
+//                $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'bimpcommandefourn';";
+//                $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'muscadet', 1, 'order_supplier', 'muscadet', NULL);";
                 
                 // Dash board commercial
                 $sql[] = "UPDATE " . MAIN_DB_PREFIX . "menu SET `url`='/comm/index.php?mainmenu=commercial&amp;leftmenu=' WHERE `type` LIKE 'top' AND `mainmenu` LIKE 'commercial'";

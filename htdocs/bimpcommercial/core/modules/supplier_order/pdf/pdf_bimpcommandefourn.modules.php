@@ -33,6 +33,8 @@ require_once DOL_DOCUMENT_ROOT.'/bimpcore/pdf/classes/OrderFournPDF.php';
 class pdf_bimpcommandefourn extends OrderFournPDF
 {
     public function initData() {
+        global $conf;
+        $this->object_conf = $conf->fournisseur->commande;
         parent::initData();
     }
 }

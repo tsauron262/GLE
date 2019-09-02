@@ -59,8 +59,9 @@ lists:
         sort_way: desc
         cols: 
             product: 
-                field: fk_product
-                display: nom_url
+                label: Produit
+                value: 
+                    callback: displayProduct
             entrepot: 
                 field: fk_entrepot
                 display: nom_url

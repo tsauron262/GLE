@@ -10,7 +10,8 @@ labels:
 objects:   
     product: 
         instance: 
-            id_object: fk_product
+            id_object: 
+                field_value: fk_product
             
     entrepot: 
         instance: 
@@ -26,7 +27,6 @@ objects:
                 file: categorie
                 
 fields: 
-#    Champs facturedet: 
     fk_entrepot: 
         label: Entrepot
         type: id_object
@@ -38,6 +38,8 @@ fields:
         label: Produit
         type: id_object
         object: product
+        input: 
+            type: search_product
         
     reel: 
         label: Stock
@@ -66,8 +68,6 @@ fields:
         items_data_type: id_object
         object: category
 
-            
-                                    
 lists: 
     default: 
         title: Produits/Entrepots
@@ -82,8 +82,9 @@ lists:
                 field: fk_entrepot
                 display: nom_url
             fk_product: 
-                field: fk_product
-                display: nom_url
+                label: Produit
+                value: 
+                    callback: displayProduct
             reel: 
                 field: reel
             stockShowRoom:

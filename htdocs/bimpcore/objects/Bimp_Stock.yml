@@ -25,6 +25,10 @@ fields:
         object: product
         input: 
             type: search_product
+        display: 
+            nom_url_libelle: 
+                type: callback
+                method: displayProduct
             
     fk_entrepot:
         label: Entrepôt
@@ -59,9 +63,8 @@ lists:
         sort_way: desc
         cols: 
             product: 
-                label: Produit
-                value: 
-                    callback: displayProduct
+                field: fk_product
+                display: nom_url_libelle
             entrepot: 
                 field: fk_entrepot
                 display: nom_url

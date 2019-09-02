@@ -40,6 +40,10 @@ fields:
         object: product
         input: 
             type: search_product
+        display: 
+            nom_url_libelle: 
+                type: callback
+                method: displayProduct
         
     reel: 
         label: Stock
@@ -82,9 +86,8 @@ lists:
                 field: fk_entrepot
                 display: nom_url
             fk_product: 
-                label: Produit
-                value: 
-                    callback: displayProduct
+                field: fk_product
+                display: nom_url_libelle
             reel: 
                 field: reel
             stockShowRoom:

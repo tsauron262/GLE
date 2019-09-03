@@ -583,7 +583,7 @@ fields_tables:
         icon: fas_check-square
         rows: 
             - field: validate
-              edit: 1
+              edit: 0
             - field: serialisable
               edit: 1
             - field: type2

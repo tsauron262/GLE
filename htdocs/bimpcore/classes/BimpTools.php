@@ -2032,4 +2032,44 @@ class BimpTools
         self::$context = $context;
         $_SESSION['context'] = $context;
     }
+    
+    public static function bloqueDebloque($type, $bloque = true){
+        $file = static::getFileBloqued($type);
+        if($bloque)
+            file_put_contents ($file, "Yes");
+        elseif(is_file($file))
+            unlink ($file);
+    }
+    
+    public static function getFileBloqued($type){
+        $folder = DOL_DATA_ROOT.'/bloqueFile/';
+        if(!is_dir($folder))
+            mkdir ($folder);
+        return $folder.$type.".txt";
+        
+    }
+    
+    public static function isBloqued($type){
+        $file = static::getFileBloqued($type);
+        return (file_exists($file));
+    }
+    
+    public static function sleppIfBloqued($type, $nb = 0){
+        $nbMax = 10;
+        $nb++;
+        if(static::isBloqued($type)){
+            if($nb < $nbMax){
+                sleep(1);
+                return static::sleppIfBloqued($type, $nb);
+            }
+            else{
+                $text = "Attention bloquage de plus de ".$nbMax." secondes voir pour type : ".$type;
+                dol_syslog("ATTENTION ".$text,3);
+                mailSyn2("Bloquage anormal", "dev@bimp.fr", "admin@bimp.fr", "Attention : ".$text);
+                die($text);
+            }
+        }
+        else
+            return 0;
+    }
 }

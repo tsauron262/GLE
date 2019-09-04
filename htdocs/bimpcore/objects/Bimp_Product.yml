@@ -512,7 +512,7 @@ forms:
             - field: localtax1_type
             - field: localtax2_tx
             - field: localtax2_type
-            - field: ref_constructeur
+#            - field: ref_constructeur
             - field: crt
             - field: rpcp
             - field: price
@@ -619,7 +619,7 @@ fields_tables:
             - field: localtax1_type
             - field: localtax2_tx
             - field: localtax2_type
-            - field: ref_constructeur
+#            - field: ref_constructeur
             - field: crt
 
     measures: 

@@ -194,8 +194,10 @@ function onAvoirsChange($container) {
                 label = label.replace('  <span class="danger">Cet avoir ne peut pas être pris en compte car il dépasse le montant à payer de toutes les factures</span>', '');
                 $row.removeAttr('style');
                 $td.html(label);
-                label = label.replace(/ /g, '');
-                var amount = parseFloat(label.replace(/^.*\-([0-9]+),([0-9]{2})TTC\)/, '$1.$2'));
+                var amount = label.replace(/ /g, '');
+                bimp_msg(amount);
+                amount = parseFloat(amount.replace(/^.*\(\-?([0-9]+),([0-9]{2})TTC\)/, '$1.$2'));
+                bimp_msg(amount);
                 if (isNaN(amount)) {
                     var text = label + '  <span class="danger">Erreur: Montant invalide - cet avoir n\'est pas pris en compte</span>';
                     $row.css('background-color', '#FFEBEB');

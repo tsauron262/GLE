@@ -306,11 +306,9 @@ forms:
               input_name: id_discount
               data_type: int
               input: 
-                  type: select_remises
-                  id_client: 
-                      field_value: fk_soc
-                  extra_filters:
-                      callback: getRequestSelectRemisesFilters
+                  type: select
+                  options: 
+                      array: socAvailableDiscounts
         
     remise_globale: 
         title: Remise Globale
@@ -434,6 +432,42 @@ forms:
         icon: fas_hand-holding-usd
         rows: 
             - custom: 1
+              hidden: 1
+              input_name: caisse_active
+              input: 
+                  type: hidden
+              value: 
+                  conf: use_caisse_for_payments
+            - custom: 1
+              label: Paiement en caisse
+              input_name: use_caisse
+              data_type: bool
+              input: 
+                  type: toggle
+              value: 
+                  conf: use_caisse_for_payments
+              display_if: 
+                  field_name: caisse_active
+                  hide_values: 0
+            - custom: 1
+              label: Caisse
+              input_name: id_caisse
+              data_type: id
+              content: 
+                  callback: renderCaisseInput
+              display_if: 
+                  field_name: use_caisse
+                  hide_values: 0
+            - custom: 1
+              label: Compte bancaire
+              input_name: bank_account
+              data_type: int
+              value: 
+                  callback: getAcompteDefaultBankAccount
+              input: 
+                    type: select_mysoc_account
+              depends_on: id_caisse
+            - custom: 1
               label: Mode de paiement
               input_name: id_mode_paiement
               data_type: id
@@ -455,17 +489,6 @@ forms:
               required: 1
               input: 
                   type: text
-            - custom: 1
-              label: Compte bancaire
-              input_name: bank_account
-              data_type: int
-              value: 
-                  callback: getAcompteDefaultBankAccount
-              input: 
-                    type: select_mysoc_account
-#              display_if:
-#                  field_name: id_mode_paiement
-#                  show_values: 2
 
 
 fields_tables: 

@@ -164,6 +164,7 @@ class Bimp_Paiement extends BimpObject
                 $html .= '</div>';
             }
         } else {
+            $html .= '<span class="warning">Le paiement en caisse n\'est pas disponible</span>';
             $id_caisse = 0;
         }
 

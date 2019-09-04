@@ -233,13 +233,13 @@ class BC_ListTable extends BC_List
                 );
 
                 if ((int) $item_params['page_btn']) {
-                    $controller = $object->getController();
-                    if ($controller) {
-                        $row['params']['url'] = DOL_URL_ROOT . '/' . $object->module . '/index.php?fc=' . $controller . '&id=' . $item[$primary];
+                    $url = $object->getUrl();
+                    if ($url) {
+                        $row['params']['url'] = $url;
                         $row['params']['page_btn_label'] = 'Afficher la page';
                     } elseif ($object->isDolObject()) {
-                        $row['params']['url'] = BimpTools::getDolObjectUrl($object->dol_object, (int) $item[$primary]);
-                        $row['params']['page_btn_label'] = 'Afficher la fiche ' . $object->getLabel();
+//                        $row['params']['url'] = BimpTools::getDolObjectUrl($object->dol_object, (int) $item[$primary]);
+//                        $row['params']['page_btn_label'] = 'Afficher la fiche ' . $object->getLabel();
                     }
                 }
 

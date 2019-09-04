@@ -1763,12 +1763,13 @@ class Bimp_Commande extends BimpComm
 
         // Insertion des acomptes:
         if (count($remises)) {
-            foreach ($remises as $id_remise) {
-                $facture->dol_object->error = '';
-                $facture->dol_object->errors = array();
+            $facture->fetch((int) $id_facture);
 
-                if ($facture->dol_object->insert_discount((int) $id_remise) <= 0) {
-                    $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($facture->dol_object), 'Echec de l\'insertion de la remise client d\'ID ' . $id_remise);
+            foreach ($remises as $id_remise) {
+                $rem_errors = $facture->insertDiscount((int) $id_remise);
+
+                if (count($rem_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($rem_errors, 'Echec de l\'insertion de la remise client #' . $id_remise);
                 }
             }
         }

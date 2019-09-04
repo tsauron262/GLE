@@ -1151,8 +1151,12 @@ class BimpObject extends BimpCache
 
     // Gestion des données:
 
-    public function printData()
+    public function printData($return_html = false)
     {
+        if ($return_html) {
+            return '<pre>' . print_r($this->data, 1) . '</pre>';
+        }
+
         echo '<pre>';
         print_r($this->data);
         echo '</pre>';

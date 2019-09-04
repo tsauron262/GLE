@@ -370,19 +370,22 @@ class BimpInput
                 return self::renderInput('select', $field_name, $value, $options, $form, $option, $input_id);
 
             case 'select_remises':
-                if (!isset($options['id_client'])) {
-                    $options['id_client'] = 0;
-                }
-                $filter = 'fk_facture IS NULL AND fk_facture_line IS NULL';
+                $is_fourn = false;
 
-                if (isset($options['extra_filters']) && $options['extra_filters']) {
-                    $filter .= ' AND ' . $options['extra_filters'];
+                if (isset($options['id_client']) && (int) $options['id_client']) {
+                    $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', (int) $options['id_client']);
+                } elseif (isset($options['id_fourn']) && (int) $options['id_fourn']) {
+                    $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Fournisseur', (int) $options['id_fourn']);
+                    $is_fourn = true;
                 }
 
-                ob_start();
-                $form->select_remises((int) $value, $field_name, $filter, (int) $options['id_client']);
-                $html .= ob_get_clean();
-                break;
+                if (BimpObject::objectLoaded($soc)) {
+                    $options['options'] = $soc->getAvailableDiscountsArray($is_fourn);
+                } else {
+                    $options['options'] = array();
+                }
+
+                return self::renderInput('select', $field_name, $value, $options);
 
             case 'select_remises_fourn':
                 if (!isset($options['id_fourn'])) {
@@ -1288,6 +1291,9 @@ class BimpInput
         $html = '';
         $color = null;
         $icon = null;
+        $disabled = false;
+        $data = array();
+
         if (is_array($option)) {
             if (isset($option['label'])) {
                 $label = $option['label'];
@@ -1295,6 +1301,14 @@ class BimpInput
                 $label = $option['value'];
             } else {
                 $label = $option_value;
+            }
+
+            if (isset($option['disabled']) && (int) $option['disabled']) {
+                $disabled = true;
+            }
+
+            if (isset($option['data']) && is_array($option['data'])) {
+                $data = $option['data'];
             }
 
             if (isset($option['color'])) {
@@ -1336,6 +1350,15 @@ class BimpInput
         if (!is_null($icon)) {
             $html .= ' data-icon_class="' . $icon . '"';
         }
+
+        foreach ($data as $data_name => $data_value) {
+            $html .= ' data-' . $data_name . '="' . $data_value . '"';
+        }
+        
+        if ($disabled) {
+            $html .= ' disabled';
+        }
+
         $html .= '>' . $label . '</option>';
 
         return $html;

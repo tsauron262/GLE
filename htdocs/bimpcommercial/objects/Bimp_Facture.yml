@@ -136,184 +136,225 @@ fields:
         type: bool
         default_value: 0
         sortable: 0
-    ref: unset
-    fk_availability: unset
-    fk_input_reason: unset
-    total_ht: unset
     marge: 
         label: Marge
         type: money
         default_value: 0
-        
     id_user_commission: 
         label: Commission utilisateur
         type: id_object
         object: user_commission
         default_value: 0
-        
     id_entrepot_commission: 
         label: Commission entrepôt
         type: id_object
         object: entrepot_commission
         default_value: 0
+        
+    ref: unset
+    fk_availability: unset
+    fk_input_reason: unset
+    total_ht: unset
        
 forms:     
     default: 
         msgs: 
             callback: renderCreateWarning
         rows:
-            - custom: 1
-              lable: Origine
-              input_name: origin
-              input: 
-                  type: hidden
-              value: 
-                  request_field: origin
-              hidden: 1
-              
-            - custom: 1
-              lable: Origine
-              input_name: origin_id
-              data_type: int
-              input: 
-                  type: hidden
-              value: 
-                  request_field: origin_id
-              hidden: 1
-              
-            - field: fk_soc
-                  
-            - field: ref_client
+            origin: 
+                custom: 1
+                lable: Origine
+                input_name: origin
+                input: 
+                    type: hidden
+                value: 
+                    request_field: origin
+                hidden: 1
+            origin_id: 
+                custom: 1
+                lable: Origine
+                input_name: origin_id
+                data_type: int
+                input: 
+                    type: hidden
+                value: 
+                    request_field: origin_id
+                hidden: 1
+            soc: 
+                field: fk_soc
+            ref_client: 
+                field: ref_client
+            type: 
+                field: type
+                show: 
+                    callback: isNotLoaded
+            typedeposit: 
+                custom: 1
+                label: Type d'acompte
+                input_name: typedeposit
+                input: 
+                    type: select
+                    options: 
+                        array: typesDeposit
+                display_if:
+                    fields_names: type,origin
+                    type: 
+                        hide_values: 1,2,4,5
+                    origin: 
+                        show_values: propal,commande
+                show: 
+                    callback: isNotLoaded
+            id_facture_replaced: 
+                custom: 1
+                label: Facture remplacée
+                input_name: id_facture_replaced
+                data_type: int
+                input: 
+                    type: select
+                    options: 
+                        array: replacedInvoices
+                value: 
+                    callback: getRequestIdFactureReplaced
+                display_if: 
+                    field_name: type
+                    show_values: 1
+                show: 
+                    callback: isNotLoaded
+                depends_on: fk_soc
+            id_facture_to_correct: 
+                custom: 1
+                label: Facture à corriger
+                input_name: id_facture_to_correct
+                data_type: int
+                input: 
+                    type: select
+                    options: 
+                        array: FacturesToCorrect
+                value: 
+                    callback: getRequestIdFactureToCorrect
+                display_if: 
+                    field_name: type
+                    show_values: 2
+                depends_on: fk_soc
+                show: 
+                    callback: isNotLoaded
+            avoir_same_lines: 
+                custom: 1
+                label: Créer l'avoir avec les même lignes que la factures dont il est issu
+                data_type: bool
+                input: 
+                    type: toggle
+                value: 1
+                input_name: avoir_same_lines
+                display_if: 
+                    fields_names: type,id_facture_to_correct
+                    type: 
+                        show_values: 2
+                    id_facture_to_correct:
+                        hide_values: 0
+                show: 
+                    callback: isNotLoaded
+            avoir_remain_to_pay: 
+                custom: 1
+                label: Créer l'avoir avec le montant restant à payer de la facture dont il est issu.
+                data_type: bool
+                input: 
+                    type: toggle
+                value: 0
+                input_name: avoir_remain_to_pay
+                display_if: 
+                    fields_names: type,id_facture_to_correct
+                    type: 
+                        show_values: 2
+                    id_facture_to_correct:
+                        hide_values: 0
+                show: 
+                    callback: isNotLoaded
+            ef_type: 
+                field: ef_type
+            entrepot: 
+                field: entrepot
+                show: 
+                    callback: isEditable
+            centre: 
+                field: centre
+                show: 
+                    callback: isEditable
+            libelle: 
+                field: libelle
+            datef: 
+                field: datef
+                show: 
+                    callback: isEditable
+            cond_reglement: 
+                field: fk_cond_reglement
+                show: 
+                    callback: isEditable
+            mode_reglement: 
+                field: fk_mode_reglement
+                show: 
+                    callback: isEditable
+            date_lim_reglement: 
+                field: date_lim_reglement
+            account: 
+                field: fk_account
+                show: 
+                    callback: isEditable
+            pdf_hide_reduc: 
+                field: pdf_hide_reduc
+            pdf_hide_total: 
+                field: pdf_hide_total
+            pdf_hide_ttc: 
+                field: pdf_hide_ttc
+            model_pdf: 
+                field: model_pdf
+                show: 
+                    callback: isNotLoaded
+            zone_vente: 
+                field: zone_vente
+                show: 
+                    callback: isLoaded
+            remise_globale_label: 
+                field: remise_globale_label
+                show: 
+                    callback: hasRemiseGlobale
+            note_private: 
+                field: note_private
+            note_public: 
+                field: note_public
             
-            - field: type
-              show: 
-                  callback: isNotLoaded
-                  
-            - custom: 1
-              label: Type d'acompte
-              input_name: typedeposit
-              input: 
-                  type: select
-                  options: 
-                      array: typesDeposit
-              display_if:
-                  fields_names: type,origin
-                  type: 
-                      hide_values: 1,2,4,5
-                  origin: 
-                      show_values: propal,commande
-              show: 
-                  callback: isNotLoaded
-                      
-            - custom: 1
-              label: Facture remplacée
-              input_name: id_facture_replaced
-              data_type: int
-              input: 
-                  type: select
-                  options: 
-                      array: replacedInvoices
-              value: 
-                callback: getRequestIdFactureReplaced
-              display_if: 
-                  field_name: type
-                  show_values: 1
-              show: 
-                  callback: isNotLoaded
-              depends_on: fk_soc
-                  
-            - custom: 1
-              label: Facture à corriger
-              input_name: id_facture_to_correct
-              data_type: int
-              input: 
-                  type: select
-                  options: 
-                      array: FacturesToCorrect
-              value: 
-                  callback: getRequestIdFactureToCorrect
-              display_if: 
-                  field_name: type
-                  show_values: 2
-              depends_on: fk_soc
-              show: 
-                  callback: isNotLoaded
-              
-            - custom: 1
-              label: Créer l'avoir avec les même lignes que la factures dont il est issu
-              data_type: bool
-              input: 
-                  type: toggle
-              value: 1
-              input_name: avoir_same_lines
-              display_if: 
-                  fields_names: type,id_facture_to_correct
-                  type: 
-                      show_values: 2
-                  id_facture_to_correct:
-                      hide_values: 0
-              show: 
-                  callback: isNotLoaded
-            
-            - custom: 1
-              label: Créer l'avoir avec le montant restant à payer de la facture dont il est issu.
-              data_type: bool
-              input: 
-                  type: toggle
-              value: 0
-              input_name: avoir_remain_to_pay
-              display_if: 
-                  fields_names: type,id_facture_to_correct
-                  type: 
-                      show_values: 2
-                  id_facture_to_correct:
-                      hide_values: 0
-              show: 
-                  callback: isNotLoaded
-                 
-            - field: ef_type
-            - field: entrepot
-              show: 
-                  callback: isEditable
-            
-            - field: centre
-              show: 
-                  callback: isEditable
-            
-            - field: libelle
-            
-            - field: datef
-              show: 
-                  callback: isEditable
-                  
-            - field: fk_cond_reglement
-              show: 
-                  callback: isEditable
-            - field: fk_mode_reglement
-              show: 
-                  callback: isEditable
-                  
-            - field: date_lim_reglement
-                  
-            - field: fk_account
-              show: 
-                  callback: isEditable
-                  
-            - field: pdf_hide_reduc
-            - field: pdf_hide_total
-            - field: pdf_hide_ttc
-            - field: model_pdf
-              show: 
-                  callback: isNotLoaded
-            - field: zone_vente
-              show: 
-                  callback: isLoaded
-            - field: remise_globale_label
-              show: 
-                  callback: hasRemiseGlobale
-            - field: note_private
-            
-            - field: note_public
+    refacture: 
+        extends: default
+        msgs: unset
+        rows: 
+            type: 
+                field: unset
+                show: unset
+                label: Type
+                custom: 1
+                hidden: 1
+                input_name: type
+                data_type: int
+                input: 
+                    type: hidden
+                value: 0
+                
+            id_avoir_to_refacture: 
+                custom: 1
+                hidden: 1
+                label: Avoir à refacturer
+                input_name: id_avoir_to_refacture
+                data_type: id
+                input: 
+                    type: hidden
+                
+            typedeposit: unset
+            id_facture_replaced: unset
+            id_facture_to_correct: unset
+            avoir_same_lines: unset
+            avoir_remain_to_pay: unset
+            typedeposit: unset
+            typedeposit: unset
             
     paid_partially:
         msgs: 
@@ -444,7 +485,7 @@ forms:
                   type: select
                   options: 
                       array: draftCommissions
-              
+                                    
 fields_tables: 
     infos: 
         rows: 

@@ -10,7 +10,7 @@ class Bimp_Societe extends BimpObject
     public function __construct($module, $object_name)
     {
         global $langs;
-        if(isset($langs)){
+        if (isset($langs)) {
             $langs->load("companies");
             $langs->load("commercial");
             $langs->load("bills");
@@ -24,10 +24,10 @@ class Bimp_Societe extends BimpObject
     public function checkValidity()
     {
         $errors = array();
-        
+
         return $errors;
     }
-    
+
     public function getSocieteLabel()
     {
         if ($this->soc_type == "client" || (int) $this->getData('client') > 0) {
@@ -115,7 +115,7 @@ class Bimp_Societe extends BimpObject
 
         return $contacts;
     }
-    
+
     public function getFilesDir()
     {
         if ($this->isLoaded()) {
@@ -155,8 +155,9 @@ class Bimp_Societe extends BimpObject
         }
         return '';
     }
-    
-    public function getNomUrl($withpicto = true, $ref_only = true, $page_link = false, $modal_view = '') {
+
+    public function getNomUrl($withpicto = true, $ref_only = true, $page_link = false, $modal_view = '')
+    {
         return $this->dol_object->getNomUrl(1);
     }
 
@@ -176,6 +177,107 @@ class Bimp_Societe extends BimpObject
     {
         global $user;
         return array($this->id, $user);
+    }
+
+    public function getAvailableDiscountsAmounts($is_fourn = false)
+    {
+        if ($this->isLoaded()) {
+            global $conf;
+
+            $sql = 'SELECT SUM(r.amount_ttc) as amount';
+            $sql .= ' FROM ' . MAIN_DB_PREFIX . 'societe_remise_except r';
+            $sql .= ' WHERE r.entity = ' . $conf->entity;
+            $sql .= ' AND r.discount_type = ' . ($is_fourn ? 1 : 0);
+            $sql .= ' AND r.fk_soc = ' . (int) $this->id;
+
+            if ($is_fourn) {
+                $sql .= ' AND (r.fk_invoice_supplier IS NULL AND r.fk_invoice_supplier_line IS NULL)';
+            } else {
+                $sql .= ' AND (r.fk_facture IS NULL AND r.fk_facture_line IS NULL)';
+                $sql .= ' AND (SELECT COUNT(fdet.rowid) FROM ' . MAIN_DB_PREFIX . 'facturedet fdet WHERE fdet.fk_remise_except = r.rowid) = 0';
+                $sql .= ' AND (SELECT COUNT(cdet.rowid) FROM ' . MAIN_DB_PREFIX . 'commandedet cdet WHERE cdet.fk_remise_except = r.rowid) = 0';
+                $sql .= ' AND (SELECT COUNT(pdet.rowid) FROM ' . MAIN_DB_PREFIX . 'propaldet pdet WHERE pdet.fk_remise_except = r.rowid) = 0';
+            }
+
+            $result = $this->db->executeS($sql, 'array');
+
+            if (isset($result[0]['amount'])) {
+                return (float) $result[0]['amount'];
+            }
+        }
+
+        return 0;
+    }
+
+    public function getAvailableDiscountsArray($is_fourn = false)
+    {
+        $discounts = array();
+
+        if ($this->isLoaded()) {
+            global $conf;
+
+            $sql = 'SELECT r.rowid as id, r.description, r.amount_ttc as amount';
+            $sql .= ' FROM ' . MAIN_DB_PREFIX . 'societe_remise_except r';
+            $sql .= ' WHERE r.entity = ' . $conf->entity;
+            $sql .= ' AND r.discount_type = ' . ($is_fourn ? 1 : 0);
+            $sql .= ' AND r.fk_soc = ' . (int) $this->id;
+
+            if ($is_fourn) {
+                $sql .= ' AND (r.fk_invoice_supplier IS NULL AND r.fk_invoice_supplier_line IS NULL)';
+            } else {
+                $sql .= ' AND (r.fk_facture IS NULL AND r.fk_facture_line IS NULL)';
+//                $sql .= ' AND (SELECT COUNT(pdet.rowid) FROM ' . MAIN_DB_PREFIX . 'propaldet pdet WHERE pdet.fk_remise_except = r.rowid) = 0';
+//                $sql .= ' AND (SELECT COUNT(cdet.rowid) FROM ' . MAIN_DB_PREFIX . 'commandedet cdet WHERE cdet.fk_remise_except = r.rowid) = 0';
+            }
+
+            $rows = $this->db->executeS($sql, 'array');
+
+            if (!is_null($rows)) {
+                foreach ($rows as $r) {
+                    $disabled_label = '';
+
+                    $id_facture = (int) $this->db->getValue('facturedet', 'fk_facture', 'fk_remise_except = ' . (int) $r['id']);
+                    if ($id_facture) {
+                        $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
+                        if (BimpObject::objectLoaded($facture)) {
+                            $disabled_label = ' - Ajouté à la facture "' . $facture->getRef() . '"';
+                        } else {
+                            $this->db->delete('facturedet', '`fk_facture` = ' . $id_facture . ' AND `fk_remise_except` = ' . (int) $r['id']);
+                        }
+                    } else {
+                        $id_commande = (int) $this->db->getValue('commandedet', 'fk_commande', 'fk_remise_except = ' . (int) $r['id']);
+                        if ($id_commande) {
+                            $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $id_commande);
+                            if (BimpObject::objectLoaded($commande)) {
+                                $disabled_label = ' - Ajouté à la commande "' . $commande->getRef() . '"';
+                            } else {
+                                $this->db->delete('commandedet', '`fk_commande` = ' . $id_commande . ' AND `fk_remise_except` = ' . (int) $r['id']);
+                            }
+                        } else {
+                            $id_propal = (int) $this->db->getValue('propaldet', 'fk_propal', 'fk_remise_except = ' . (int) $r['id']);
+                            if ($id_propal) {
+                                $propal = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $id_propal);
+                                if (BimpObject::objectLoaded($propal)) {
+                                    $disabled_label = ' - Ajouté à la propale "' . $propal->getRef() . '"';
+                                } else {
+                                    $this->db->delete('propaldet', '`fk_propal` = ' . $id_propal . ' AND `fk_remise_except` = ' . (int) $r['id']);
+                                }
+                            }
+                        }
+                    }
+
+                    $discounts[(int) $r['id']] = array(
+                        'label'    => BimpTools::getRemiseExceptLabel($r['description']) . ' (' . BimpTools::displayMoneyValue((float) $r['amount'], '') . ' TTC)' . $disabled_label,
+                        'disabled' => ($disabled_label ? 1 : 0),
+                        'data'     => array(
+                            'amount_ttc' => (float) $r['amount']
+                        )
+                    );
+                }
+            }
+        }
+
+        return $discounts;
     }
 
     // Overrides: 

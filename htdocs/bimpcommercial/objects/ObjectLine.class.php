@@ -105,7 +105,7 @@ class ObjectLine extends BimpObject
         if (isset($user->rights->bimpcommercial->priceVente) && (int) $user->rights->bimpcommercial->priceVente == 1) {
             return 1;
         }
-        
+
         $product = $this->getProduct();
 
         if (BimpObject::objectLoaded($product)) {
@@ -1310,8 +1310,9 @@ class ObjectLine extends BimpObject
                         }
                     }
 
-                    $desc = BimpTools::cleanString($this->desc);
+
                     $text = '';
+                    $desc = '';
 
                     if ((int) $this->id_remise_except) {
                         BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
@@ -1321,11 +1322,21 @@ class ObjectLine extends BimpObject
                         if (!BimpObject::objectLoaded($discount)) {
                             $html .= BimpRender::renderAlerts('La remise d\'ID ' . $this->id_remise_except) . ' n\'existe plus';
                         } else {
-                            $desc = str_replace('Acompte Acompte', 'Acompte', $desc);
-                            $html .= 'Remise ' . $discount->getNomUrl(1);
-                            $html .= ' ' . $desc;
+                            $desc = BimpTools::getRemiseExceptLabel($discount->description);
+                            
+                            if (!$desc) {
+                                $desc = 'Remise client';
+                            }
+                            
+                            $text = $desc;
+
+                            if (!$no_html) {
+                                $text .= ' ' . $discount->getNomUrl(1);
+                            }
                         }
                     } else {
+                        $desc = BimpTools::cleanString($this->desc);
+
                         $product = $this->getProduct();
                         if (BimpObject::objectLoaded($product)) {
                             $text .= $this->displayLineData('id_product', 0, 'nom_url', $no_html);

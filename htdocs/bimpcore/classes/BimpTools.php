@@ -1048,6 +1048,8 @@ class BimpTools
             if ($or_clause) {
                 $sql .= '(' . $or_clause . ')';
             }
+        } elseif (is_array($filter) && isset($filter['custom'])) {
+            $sql .= $filter['custom'];
         } else {
             if (preg_match('/\./', $field)) {
                 $sql .= $field;
@@ -1904,8 +1906,25 @@ class BimpTools
 
     public static function getDateLimReglement($date_begin, $id_cond_reglement)
     {
+        
     }
-    
+
+    public static function getRemiseExceptLabel($desc)
+    {
+        global $langs;
+
+        if (preg_match('/\(CREDIT_NOTE\)/', $desc))
+            $desc = preg_replace('/\(CREDIT_NOTE\)/', $langs->trans("CreditNote"), $desc);
+        if (preg_match('/\(DEPOSIT\)/', $desc))
+            $desc = preg_replace('/\(DEPOSIT\)/', $langs->trans("Deposit"), $desc);
+        if (preg_match('/\(EXCESS RECEIVED\)/', $desc))
+            $desc = preg_replace('/\(EXCESS RECEIVED\)/', $langs->trans("ExcessReceived"), $desc);
+        if (preg_match('/\(EXCESS PAID\)/', $desc))
+            $desc = preg_replace('/\(EXCESS PAID\)/', $langs->trans("ExcessPaid"), $desc);
+
+        return $desc;
+    }
+
     // Gestion des couleurs: 
 
     public static function changeColorLuminosity($color_code, $percentage_adjuster = 0)

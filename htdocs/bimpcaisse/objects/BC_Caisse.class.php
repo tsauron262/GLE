@@ -21,8 +21,9 @@ class BC_Caisse extends BimpObject
     );
 
     // Getters:
-    
-    public function canDelete(){
+
+    public function canDelete()
+    {
         global $user;
         if ($user->admin)
             return 1;
@@ -147,6 +148,50 @@ class BC_Caisse extends BimpObject
         }
 
         return $caisses;
+    }
+
+    // Rendu HTML
+
+    public static function renderUserCaisseInput()
+    {
+        $html = '';
+
+        if ((int) BimpCore::getConf('use_caisse_for_payments')) {
+            global $user;
+            $caisse = BimpObject::getInstance('bimpcaisse', 'BC_Caisse');
+            $id_caisse = (int) $caisse->getUserCaisse((int) $user->id);
+
+            if ($id_caisse) {
+                $caisse = BimpCache::getBimpObjectInstance('bimpcaisse', 'BC_Caisse', $id_caisse);
+                if (!BimpObject::objectLoaded($caisse)) {
+                    $html .= BimpRender::renderAlerts('Erreur: la caisse à laquelle vous êtes connecté semble ne plus exister');
+                    $id_caisse = 0;
+                } else {
+                    $html .= $caisse->getData('name');
+                    $html .= '<div style="text-align: center; margin: 15px 0">';
+                    $url = DOL_URL_ROOT . '/bimpcaisse/index.php';
+                    $html .= '<a class="btn btn-default" href="' . $url . '" target="_blank"><i class="fa fa-external-link iconLeft"></i>Se connecter à une autre caisse</a>';
+                    $html .= '<span class="btn btn-default" onclick="reloadParentInput($(this), \'id_caisse\');"><i class="fas fa5-redo iconLeft"></i>Actualiser</span>';
+                    $html .= '</div>';
+                }
+            }
+
+            if (!$id_caisse) {
+                $html .= BimpRender::renderAlerts('Vous n\'êtes connecté à aucune caisse', 'warning');
+                $html .= '<div style="text-align: center; margin: 15px 0">';
+                $url = DOL_URL_ROOT . '/bimpcaisse/index.php';
+                $html .= '<a class="btn btn-default" href="' . $url . '" target="_blank"><i class="fa fa-external-link iconLeft"></i>Se connecter à une caisse</a>';
+                $html .= '<span class="btn btn-default" onclick="reloadParentInput($(this), \'id_caisse\');"><i class="fas fa5-redo iconLeft"></i>Actualiser</span>';
+                $html .= '</div>';
+            }
+        } else {
+            $html .= '<span class="warning">Le paiement en caisse n\'est pas disponible</span>';
+            $id_caisse = 0;
+        }
+
+        $html .= '<input type="hidden" name="id_caisse" value="' . $id_caisse . '"/>';
+
+        return $html;
     }
 
     // Traitements: 

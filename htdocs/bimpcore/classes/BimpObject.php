@@ -1148,11 +1148,34 @@ class BimpObject extends BimpCache
 
         return $fields;
     }
+    
+    public function getDefaultBankAccount()
+    {
+        if ((int) BimpCore::getConf('use_caisse_for_payments')) {
+            global $user;
+            $caisse = BimpObject::getInstance('bimpcaisse', 'BC_Caisse');
+            $id_caisse = (int) $caisse->getUserCaisse((int) $user->id);
+            if ($id_caisse) {
+                $caisse = BimpCache::getBimpObjectInstance('bimpcaisse', 'BC_Caisse', $id_caisse);
+                if ($caisse->isLoaded()) {
+                    if ($caisse->isValid()) {
+                        return (int) $caisse->getData('id_account');
+                    }
+                }
+            }
+        }
+
+        return (int) BimpCore::getConf('bimpcaisse_id_default_account');
+    }
 
     // Gestion des données:
 
-    public function printData()
+    public function printData($return_html = false)
     {
+        if ($return_html) {
+            return '<pre>' . print_r($this->data, 1) . '</pre>';
+        }
+
         echo '<pre>';
         print_r($this->data);
         echo '</pre>';
@@ -5292,6 +5315,12 @@ class BimpObject extends BimpCache
         $html .= '</table>';
 
         return $html;
+    }
+
+    public function renderCaisseInput()
+    {
+        BimpObject::loadClass('bimpcaisse', 'BC_Caisse');
+        return BC_Caisse::renderUserCaisseInput();
     }
 
     // Générations javascript: 

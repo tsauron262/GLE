@@ -463,7 +463,7 @@ forms:
               input_name: bank_account
               data_type: int
               value: 
-                  callback: getAcompteDefaultBankAccount
+                  callback: getDefaultBankAccount
               input: 
                     type: select_mysoc_account
               depends_on: id_caisse

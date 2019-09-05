@@ -445,25 +445,6 @@ class BimpComm extends BimpDolObject
         parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors);
     }
 
-    public function getAcompteDefaultBankAccount()
-    {
-        if ($this->useCaisseForPayments) {
-            global $user;
-            $caisse = BimpObject::getInstance('bimpcaisse', 'BC_Caisse');
-            $id_caisse = (int) $caisse->getUserCaisse((int) $user->id);
-            if ($id_caisse) {
-                $caisse = BimpCache::getBimpObjectInstance('bimpcaisse', 'BC_Caisse', $id_caisse);
-                if ($caisse->isLoaded()) {
-                    if ($caisse->isValid()) {
-                        return (int) $caisse->getData('id_account');
-                    }
-                }
-            }
-        }
-
-        return (int) BimpCore::getConf('bimpcaisse_id_default_account');
-    }
-
     // Getters données: 
 
     public function getLines($types = null)
@@ -2003,48 +1984,6 @@ class BimpComm extends BimpDolObject
         $html .= BimpInput::renderInput('text', $input_name . '_add_value_custom', '');
         $html .= '<p class="inputHelp">Entrez une adresse e-mail valide puis cliquez sur "Ajouter"</p>';
         $html .= '</div>';
-
-        return $html;
-    }
-
-    public function renderCaisseInput()
-    {
-        $html = '';
-
-        if ((int) BimpCore::getConf('use_caisse_for_payments')) {
-            global $user;
-            $caisse = BimpObject::getInstance('bimpcaisse', 'BC_Caisse');
-            $id_caisse = (int) $caisse->getUserCaisse((int) $user->id);
-
-            if ($id_caisse) {
-                $caisse = BimpCache::getBimpObjectInstance('bimpcaisse', 'BC_Caisse', $id_caisse);
-                if (!BimpObject::objectLoaded($caisse)) {
-                    $html .= BimpRender::renderAlerts('Erreur: la caisse à laquelle vous êtes connecté semble ne plus exister');
-                    $id_caisse = 0;
-                } else {
-                    $html .= $caisse->getData('name');
-                    $html .= '<div style="text-align: center; margin: 15px 0">';
-                    $url = DOL_URL_ROOT . '/bimpcaisse/index.php';
-                    $html .= '<a class="btn btn-default" href="' . $url . '" target="_blank"><i class="fa fa-external-link iconLeft"></i>Se connecter à une autre caisse</a>';
-                    $html .= '<span class="btn btn-default" onclick="reloadParentInput($(this), \'id_caisse\');"><i class="fas fa5-redo iconLeft"></i>Actualiser</span>';
-                    $html .= '</div>';
-                }
-            }
-
-            if (!$id_caisse) {
-                $html .= BimpRender::renderAlerts('Vous n\'êtes connecté à aucune caisse', 'warning');
-                $html .= '<div style="text-align: center; margin: 15px 0">';
-                $url = DOL_URL_ROOT . '/bimpcaisse/index.php';
-                $html .= '<a class="btn btn-default" href="' . $url . '" target="_blank"><i class="fa fa-external-link iconLeft"></i>Se connecter à une caisse</a>';
-                $html .= '<span class="btn btn-default" onclick="reloadParentInput($(this), \'id_caisse\');"><i class="fas fa5-redo iconLeft"></i>Actualiser</span>';
-                $html .= '</div>';
-            }
-        } else {
-            $html .= '<span class="warning">Le paiement en caisse n\'est pas disponible</span>';
-            $id_caisse = 0;
-        }
-
-        $html .= '<input type="hidden" name="id_caisse" value="' . $id_caisse . '"/>';
 
         return $html;
     }

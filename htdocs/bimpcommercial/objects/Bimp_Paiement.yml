@@ -88,9 +88,9 @@ forms:
                 input_name: id_account
                 input: 
                     type: select_mysoc_account
-                display_if: 
-                    field_name: use_caisse
-                    show_values: 0
+                value: 
+                    callback: getDefaultBankAccount
+                depends_on: id_caisse
             datep:
                 field: datep
             mode_paiement:
@@ -156,6 +156,30 @@ forms:
                 content: 
                     callback: renderFacturesAmountsInputs
           
-          
+    single: 
+        extends: default
+        rows: 
+            rbt: unset
+            soc: unset
+            avoirs: unset
+            factures: unset
+            
+            id_facture: 
+                custom: 1
+                label: Facture
+                input_name: id_facture
+                hidden: 1
+                input: 
+                    type: hidden
+            
+            amount: 
+                custom: 1
+                input_name: single_amount
+                label: Montant
+                data_type: money
+                min: 0
+                decimals: 2
+                input: 
+                    type: text
                   
         

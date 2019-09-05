@@ -64,9 +64,6 @@ class Bimp_Facture extends BimpComm
                 return 0;
 
             case 'modify':
-//                if ($this->can("create")) {
-//                    return 1;
-//                }
                 return 0;
 
             case 'reopen':
@@ -76,24 +73,19 @@ class Bimp_Facture extends BimpComm
                 }
                 return 0;
 
-            case 'convertToReduc':
+
             case 'addContact':
             case 'cancel':
                 return $this->can("create");
 
             case 'classifyPaid':
+            case 'convertToReduc':
+            case 'payBack':
                 if ($user->rights->facture->paiement) {
                     return 1;
                 }
                 return 0;
-//
-//            case 'close':
-//            case 'reopen':
-//                if (!empty($user->rights->propal->cloturer)) {
-//                    return 1;
-//                }
-//                return 0;
-//
+
             case 'sendMail':
                 if (empty($conf->global->MAIN_USE_ADVANCED_PERMS) || $user->rights->facture->invoice_advance->send) {
                     return 1;
@@ -324,6 +316,43 @@ class Bimp_Facture extends BimpComm
                 }
                 return 1;
 
+            case 'payBack':
+                if (!in_array($type, array(Facture::TYPE_CREDIT_NOTE, Facture::TYPE_DEPOSIT, Facture::TYPE_STANDARD, Facture::TYPE_REPLACEMENT))) {
+                    $errors[] = 'Remboursement du trop perçu non autorisé pour ce type de facture';
+                    return 0;
+                }
+
+                if (!in_array($status, array(1, 2))) {
+                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' n\'est pas au statut "validé' . $this->e() . '"';
+                    return 0;
+                }
+
+                if ((int) $this->dol_object->paye) {
+                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' est classé' . $this->e() . ' "payé' . $this->e() . '"';
+                    return 0;
+                }
+
+                $remainToPay = (float) $this->getRemainToPay();
+
+                switch ($type) {
+                    case Facture::TYPE_STANDARD:
+                    case Facture::TYPE_REPLACEMENT:
+                    case Facture::TYPE_DEPOSIT:
+                        if ($remainToPay >= 0) {
+                            $errors[] = 'Il n\'y a aucun trop-perçu à rembourser pour ' . $this->getLabel('this');
+                            return 0;
+                        }
+                        break;
+
+                    case Facture::TYPE_CREDIT_NOTE:
+                        if ($remainToPay <= 0) {
+                            $errors[] = 'Il n\'y a pas de trop remboursé à payer par le client pour cet avoir';
+                            return 0;
+                        }
+                        break;
+                }
+                return 1;
+
             case 'removeFromUserCommission':
                 if (!(int) $this->getData('id_user_commission')) {
                     $errors[] = 'Cette facture n\'est associée à aucune commission utilisateur';
@@ -538,6 +567,32 @@ class Bimp_Facture extends BimpComm
                 $buttons[] = array(
                     'label'   => 'Saisir ' . ($type === Facture::TYPE_CREDIT_NOTE ? 'remboursement' : 'règlement'),
                     'icon'    => 'euro',
+                    'onclick' => $onclick
+                );
+            }
+
+            // Remboursement trop perçu / payé. 
+            if ($this->isActionAllowed('payBack') && $this->canSetAction('payBack')) {
+
+
+                if ($type === Facture::TYPE_CREDIT_NOTE) {
+                    $label = 'Paiement trop remboursé';
+                } else {
+                    $label = 'Remboursement trop perçu';
+                }
+
+                $paiement = BimpObject::getInstance('bimpcommercial', 'Bimp_Paiement');
+
+                $onclick = $paiement->getJsLoadModalForm('single', $label, array(
+                    'fields' => array(
+                        'id_facture'    => (int) $this->id,
+                        'single_amount' => (string) abs(round((float) $this->getRemainToPay(), 2))
+                    )
+                ));
+
+                $buttons[] = array(
+                    'label'   => $label,
+                    'icon'    => 'fas_reply',
                     'onclick' => $onclick
                 );
             }
@@ -1299,68 +1354,78 @@ class Bimp_Facture extends BimpComm
             $status = (int) $this->getData('fk_statut');
             $type = (int) $this->getData('type');
 
-            global $langs, $conf;
+            global $langs;
 
+            $total_ttc = (float) $this->getData('total_ttc');
             $total_paid = (float) $this->dol_object->getSommePaiement();
+            $total_avoirs = 0;
+
+            // *** Facturé *** 
+
+            $html .= '<tr>';
+            $html .= '<td style="text-align: right;"><strong>Facturé</strong> : </td>';
+            $html .= '<td>' . BimpTools::displayMoneyValue($total_ttc) . '</td>';
+            $html .= '<td></td>';
+            $html .= '</tr>';
+
+            // *** Déjà payé : *** 
+
+            $html .= '<tr>';
+            $html .= '<td style="text-align: right;"><strong>Paiements effectués</strong>';
+//            if ((int) $this->getData('type') !== Facture::TYPE_DEPOSIT) {
+//                $html .= '<br/>(Hors avoirs et acomptes)';
+//            }
+            $html .= ' : </td>';
+            $html .= '<td>' . BimpTools::displayMoneyValue($total_paid, 'EUR') . '</td>';
+            $html .= '<td></td>';
+            $html .= '</tr>';
+
+
+            // *** Avoirs utilisés: ***
+            $rows = $this->db->getRows('societe_remise_except', '`fk_facture` = ' . (int) $this->id, null, 'array');
+            if (!is_null($rows) && count($rows)) {
+                foreach ($rows as $r) {
+                    $html .= '<tr>';
+
+                    $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $r['fk_facture_source']);
+                    $label = '';
+
+                    if ($facture->isLoaded()) {
+                        switch ((int) $facture->getData('type')) {
+                            case Facture::TYPE_STANDARD:
+                            case Facture::TYPE_REPLACEMENT:
+                                $label = 'Trop perçu facture ';
+                                break;
+                            case Facture::TYPE_CREDIT_NOTE:
+                                $label = 'Avoir ';
+                                break;
+                            case Facture::TYPE_DEPOSIT:
+                                $label = 'Acompte ';
+                                break;
+                        }
+                        $label .= $facture->dol_object->getNomUrl(0);
+                    } else {
+                        $label = ((string) $r['description'] ? $r['description'] : 'Remise');
+                    }
+
+                    $total_avoirs += (float) $r['amount_ttc'];
+
+                    $html .= '<td style="text-align: right;">';
+                    $html .= $label . ' : </td>';
+
+                    $html .= '<td>' . BimpTools::displayMoneyValue((float) $r['amount_ttc'], 'EUR') . '</td>';
+                    $html .= '<td class="buttons">';
+                    $onclick = $this->getJsActionOnclick('removeDiscount', array('id_discount' => (int) $r['rowid']));
+                    $html .= BimpRender::renderRowButton('Retirer', 'fas_trash-alt', $onclick);
+                    $html .= '</td>';
+                    $html .= '</tr>';
+                }
+            }
+
+            $remainToPay = $total_ttc - $total_paid - $total_avoirs;
+            $remainToPay_final = $remainToPay;
 
             if ($type !== Facture::TYPE_CREDIT_NOTE) {
-                $total_credit_note = 0;
-                $total_deposit = 0;
-
-                $html .= '<tr>';
-                $html .= '<td style="text-align: right;"><strong>Déjà réglé</strong>';
-                if ((int) $this->getData('type') !== Facture::TYPE_DEPOSIT) {
-                    $html .= '<br/>(Hors avoirs et acomptes)';
-                }
-                $html .= ' : </td>';
-                $html .= '<td>' . BimpTools::displayMoneyValue($total_paid, 'EUR') . '</td>';
-                $html .= '<td>';
-                $html .= '</td>';
-                $html .= '</tr>';
-
-                // Avoirs utilisés: 
-                $rows = $this->db->getRows('societe_remise_except', '`fk_facture` = ' . (int) $this->id, null, 'array');
-                if (!is_null($rows) && count($rows)) {
-                    foreach ($rows as $r) {
-                        $html .= '<tr>';
-
-                        $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $r['fk_facture_source']);
-                        $label = '';
-
-                        if ($facture->isLoaded()) {
-
-                            if ((int) $facture->getData('type') === Facture::TYPE_STANDARD) {
-                                $label = 'Trop perçu facture ';
-                                $total_credit_note += (float) $r['amount_ttc'];
-                            }
-                            if ((int) $facture->getData('type') === Facture::TYPE_CREDIT_NOTE) {
-                                $label = 'Avoir ';
-                                $total_credit_note += (float) $r['amount_ttc'];
-                            } elseif ((int) $facture->getData('type') === Facture::TYPE_DEPOSIT) {
-                                $label = 'Acompte ';
-                                $total_deposit += (float) $r['amount_ttc'];
-                            }
-                            $label .= $facture->dol_object->getNomUrl(0);
-                        } else {
-                            $label = ((string) $r['description'] ? $r['description'] : 'Remise');
-                            $total_credit_note += (float) $r['amount_ttc'];
-                        }
-
-                        $html .= '<td style="text-align: right;">';
-                        $html .= $label . ' : </td>';
-
-                        $html .= '<td>' . BimpTools::displayMoneyValue((float) $r['amount_ttc'], 'EUR') . '</td>';
-                        $html .= '<td class="buttons">';
-                        $onclick = $this->getJsActionOnclick('removeDiscount', array('id_discount' => (int) $r['rowid']));
-                        $html .= BimpRender::renderRowButton('Retirer', 'fas_trash-alt', $onclick);
-                        $html .= '</td>';
-                        $html .= '</tr>';
-                    }
-                }
-
-                $remainToPay = (float) $this->getData('total_ttc') - $total_paid - $total_credit_note - $total_deposit;
-                $remainToPay_final = $remainToPay;
-
                 // Payée partiellement 'escompte': 
                 if (($status == Facture::STATUS_CLOSED || $status == Facture::STATUS_ABANDONED)) {
                     $label = '';
@@ -1401,54 +1466,21 @@ class Bimp_Facture extends BimpComm
                 $discount = new DiscountAbsolute($this->db->db);
                 $discount->fetch(0, $this->id);
                 if (BimpObject::objectLoaded($discount)) {
-                    $remainToPay_final = 0;
+                    $remainToPay_final += (float) $discount->amount_ttc;
                     $html .= '<tr>';
                     $html .= '<td style="text-align: right;">';
                     $html .= '<strong>Trop perçu converti en </strong>' . $discount->getNomUrl(1, 'discount');
                     $html .= '</td>';
-                    $html .= '<td>';
-                    $html .= BimpTools::displayMoneyValue($discount->amount_ttc);
-                    $html .= '</td>';
+                    $html .= '<td>' . BimpTools::displayMoneyValue($discount->amount_ttc) . '</td>';
                     $html .= '</tr>';
                 }
-
-                $html .= '<tr>';
-                $html .= '<td style="text-align: right;"><strong>Facturé</strong> : </td>';
-                $html .= '<td>' . $this->displayData('total_ttc') . '</td>';
-                $html .= '<td></td>';
-                $html .= '</tr>';
-
-                // Reste à payer: 
-                if ((int) $this->getData('paye')) {
-                    $remainToPay_final = 0;
-                    $class = 'success';
-                } else {
-                    $class = ($remainToPay_final > 0 ? 'danger' : 'success');
-                }
-
-                $html .= '<tr style="background-color: #F0F0F0; font-weight: bold">';
-                $html .= '<td style="text-align: right;"><strong>Reste à payer</strong> : </td>';
-                $html .= '<td style="font-size: 18px;">';
-                $html .= '<span class="' . $class . '">';
-                $html .= BimpTools::displayMoneyValue($remainToPay_final, 'EUR');
-                $html .= '</span>';
-                $html .= '</td>';
-                $html .= '<td></td>';
-                $html .= '</tr>';
             } else {
-                // Avoirs: 
-                $html .= '<tr>';
-                $html .= '<td style="text-align: right;"><strong>' . $langs->trans('AlreadyPaidBack') . '</strong> : </td>';
-                $html .= '<td>' . BimpTools::displayMoneyValue(-$total_paid, 'EUR') . '</td>';
-                $html .= '<td></td>';
-                $html .= '</tr>';
-
                 // Converti en remise: 
                 BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
                 $discount = new DiscountAbsolute($this->db->db);
                 $discount->fetch(0, $this->id);
                 if (BimpObject::objectLoaded($discount)) {
-                    $remainToPay_final = 0;
+                    $remainToPay_final += $discount->amount_ttc;
                     $html .= '<tr>';
                     $html .= '<td style="text-align: right;">';
                     $html .= '<strong>Converti en </strong>' . $discount->getNomUrl(1, 'discount');
@@ -1458,38 +1490,86 @@ class Bimp_Facture extends BimpComm
                     $html .= '</td>';
                     $html .= '</tr>';
                 }
-
-                $html .= '<tr>';
-                $html .= '<td style="text-align: right;"><strong>' . $langs->trans("Billed") . '</strong> : </td>';
-                $html .= '<td>' . BimpTools::displayMoneyValue($this->getData('total_ttc') * -1) . '</td>';
-                $html .= '<td></td>';
-                $html .= '</tr>';
-
-                $html .= '<tr>';
-                $html .= '<td style="text-align: right;"><strong>';
-
-                $remainToPay = (float) $this->getRemainToPay();
-
-                $mult = -1;
-                if ($remainToPay < 0) {
-                    $html .= $langs->trans('RemainderToPayBack');
-                    $class = 'danger';
-                } elseif ($remainToPay > 0) {
-                    $html .= 'Trop remboursé';
-                    $class = 'warning';
-                    $mult = 1;
-                } else {
-                    $html .= $langs->trans('RemainderToPayBack');
-                    $class = 'success';
-                }
-                $html .= '</strong> : </td>';
-                $html .= '<td><span class="' . $class . '">' . BimpTools::displayMoneyValue($remainToPay * $mult) . '</span></td>';
-                $html .= '<td></td>';
-                $html .= '</tr>';
             }
+
+            // Reste à payer: 
+            if ((int) $this->getData('paye')) {
+                $remainToPay_final = 0;
+                $class = 'success';
+            } elseif ($type !== Facture::TYPE_CREDIT_NOTE) {
+                $class = ($remainToPay_final > 0 ? 'danger' : ($remainToPay_final < 0 ? 'warning' : 'success'));
+            } else {
+                $class = ($remainToPay_final < 0 ? 'danger' : ($remainToPay_final > 0 ? 'warning' : 'success'));
+            }
+
+            $html .= '<tr style="background-color: #F0F0F0; font-weight: bold">';
+            $html .= '<td style="text-align: right;"><strong>Reste à payer</strong> : </td>';
+            $html .= '<td style="font-size: 18px;">';
+            $html .= '<span class="' . $class . '">';
+            $html .= BimpTools::displayMoneyValue($remainToPay_final, 'EUR');
+            $html .= '</span>';
+            $html .= '</td>';
+            $html .= '<td></td>';
+            $html .= '</tr>';
 
             $html .= '</tbody>';
             $html .= '</table>';
+
+            // Boutons 
+
+            $html .= '<div class="buttonsContainer align-center">';
+            if ($this->isActionAllowed('convertToReduc') && $this->canSetAction('convertToReduc')) {
+                $label = '';
+                $confirm_msg = '';
+
+                switch ($type) {
+                    case Facture::TYPE_STANDARD:
+                        $label = 'Convertir trop perçu en remise';
+                        $confirm_msg = strip_tags($langs->trans('ConfirmConvertToReduc', strtolower($langs->transnoentities('ExcessReceived'))));
+                        break;
+
+                    case Facture::TYPE_CREDIT_NOTE:
+                        $label = 'Convertir le reste à rembourser en remise';
+                        $confirm_msg = strip_tags($langs->trans('ConfirmConvertToReduc', strtolower($langs->transnoentities('CreditNote'))));
+                        break;
+
+                    case Facture::TYPE_DEPOSIT:
+                        $label = 'Convertir en remise';
+                        $confirm_msg = strip_tags($langs->trans('ConfirmConvertToReduc', strtolower($langs->transnoentities('Deposit'))));
+                        break;
+                }
+
+                if ($label) {
+                    $html .= '<button class="btn btn-default" onclick="' . $this->getJsActionOnclick('convertToReduc', array(), array(
+                                'confirm_msg' => $confirm_msg
+                            )) . '">';
+                    $html .= BimpRender::renderIcon('fas_percent', 'iconLeft') . $label;
+                    $html .= '</button>';
+                }
+            }
+
+            if ($this->isActionAllowed('payBack') && $this->canSetAction('payBack')) {
+                if ($type === Facture::TYPE_CREDIT_NOTE) {
+                    $label = 'Paiement trop remboursé';
+                } else {
+                    $label = 'Rembourser trop perçu';
+                }
+
+                $paiement = BimpObject::getInstance('bimpcommercial', 'Bimp_Paiement');
+
+                $onclick = $paiement->getJsLoadModalForm('single', $label, array(
+                    'fields' => array(
+                        'id_facture'    => (int) $this->id,
+                        'single_amount' => abs((float) $this->getRemainToPay())
+                    )
+                ));
+
+                $html .= '<button class="btn btn-default" onclick="' . $onclick . '">';
+                $html .= BimpRender::renderIcon('fas_reply', 'iconLeft') . $label;
+                $html .= '</button>';
+            }
+
+            $html .= '</div>';
 
             $html = BimpRender::renderPanel('Total Paiements', $html, '', array(
                         'icon' => 'euro',
@@ -1555,46 +1635,50 @@ class Bimp_Facture extends BimpComm
             $buttons = array();
 
             global $user;
-            if (!(int) $this->getData('paye') && in_array($type, array(Facture::TYPE_STANDARD, Facture::TYPE_REPLACEMENT, Facture::TYPE_DEPOSIT)) && $user->rights->facture->paiement) {
-                if (in_array((int) $this->getData('fk_statut'), array(1, 2))) {
-                    $discount_amount = (float) $this->getSocAvailableDiscountsAmounts();
+            if (!(int) $this->getData('paye') && in_array($type, array(Facture::TYPE_STANDARD, Facture::TYPE_REPLACEMENT, Facture::TYPE_DEPOSIT, Facture::TYPE_CREDIT_NOTE))) {
+                if ($user->rights->facture->paiement && in_array((int) $this->getData('fk_statut'), array(1, 2))) {
+                    $is_avoir = ($type === Facture::TYPE_CREDIT_NOTE ? 1 : 0);
 
-                    if ($discount_amount) {
-                        $buttons[] = array(
-                            'label'       => 'Appliquer un avoir disponible',
-                            'icon_before' => 'fas_file-import',
-                            'classes'     => array('btn', 'btn-default'),
-                            'attr'        => array(
-                                'onclick' => $this->getJsActionOnclick('useRemise', array(), array(
-                                    'form_name' => 'use_remise'
-                                ))
-                            )
-                        );
+                    if (!$is_avoir) {
+                        $discount_amount = (float) $this->getSocAvailableDiscountsAmounts();
+                        if ($discount_amount) {
+                            $buttons[] = array(
+                                'label'       => 'Appliquer un avoir disponible',
+                                'icon_before' => 'fas_file-import',
+                                'classes'     => array('btn', 'btn-default'),
+                                'attr'        => array(
+                                    'onclick' => $this->getJsActionOnclick('useRemise', array(), array(
+                                        'form_name' => 'use_remise'
+                                    ))
+                                )
+                            );
+                        }
                     }
-                }
 
-                $paiement = BimpObject::getInstance('bimpcommercial', 'Bimp_Paiement');
-                $id_mode_paiement = ((int) $this->getData('fk_mode_reglement') ? (int) $this->getData('fk_mode_reglement') : (int) BimpCore::getConf('default_id_mode_paiement'));
-                if ($id_mode_paiement) {
-                    $id_mode_paiement = dol_getIdFromCode($this->db->db, $id_mode_paiement, 'c_paiement', 'id', 'code');
-                } else {
-                    $id_mode_paiement = '';
-                }
+                    $paiement = BimpObject::getInstance('bimpcommercial', 'Bimp_Paiement');
+                    $id_mode_paiement = ((int) $this->getData('fk_mode_reglement') ? (int) $this->getData('fk_mode_reglement') : (int) BimpCore::getConf('default_id_mode_paiement'));
+                    if ($id_mode_paiement) {
+                        $id_mode_paiement = dol_getIdFromCode($this->db->db, $id_mode_paiement, 'c_paiement', 'id', 'code');
+                    } else {
+                        $id_mode_paiement = '';
+                    }
 
-                $onclick = $paiement->getJsLoadModalForm('default', 'Paiement Factures', array(
-                    'fields' => array(
-                        'id_client'        => (int) $this->getData('fk_soc'),
-                        'id_mode_paiement' => $id_mode_paiement,
-                    )
-                ));
-                $buttons[] = array(
-                    'label'       => 'Saisir réglement',
-                    'icon_before' => 'plus-circle',
-                    'classes'     => array('btn', 'btn-default'),
-                    'attr'        => array(
-                        'onclick' => $onclick
-                    )
-                );
+                    $onclick = $paiement->getJsLoadModalForm('default', 'Paiement Factures', array(
+                        'fields' => array(
+                            'is_rbt'           => $is_avoir,
+                            'id_client'        => (int) $this->getData('fk_soc'),
+                            'id_mode_paiement' => $id_mode_paiement,
+                        )
+                    ));
+                    $buttons[] = array(
+                        'label'       => 'Saisir ' . ($is_avoir ? 'remboursement' : 'réglement'),
+                        'icon_before' => 'plus-circle',
+                        'classes'     => array('btn', 'btn-default'),
+                        'attr'        => array(
+                            'onclick' => $onclick
+                        )
+                    );
+                }
             }
 
             $return .= BimpRender::renderPanel($title, $html, '', array(
@@ -2540,6 +2624,66 @@ class Bimp_Facture extends BimpComm
 
             $total_ttc = '';
         }
+    }
+
+    public function checkSingleAmoutPaiement(&$amount)
+    {
+        $errors = array();
+
+        if (!$this->isLoaded($errors)) {
+            return $errors;
+        }
+
+        $amount = (float) $amount;
+
+        if (!$amount) {
+            $errors[] = 'Aucun montant spécifié';
+            return $errors;
+        }
+
+        $remain_to_pay = (float) $this->getRemainToPay();
+
+        if (!in_array((int) $this->getData('fk_statut'), array(1, 2))) {
+            $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' n\'est pas validé' . $this->e();
+            return $errors;
+        }
+
+        if ((int) $this->getData('paye') || !$remain_to_pay) {
+            $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' est entièrement payé' . $this->e();
+            return $errors;
+        }
+
+        switch ((int) $this->getData('type')) {
+            case Facture::TYPE_STANDARD:
+            case Facture::TYPE_REPLACEMENT:
+            case Facture::TYPE_DEPOSIT:
+                if ($remain_to_pay < 0) {
+                    if ($amount < 0) {
+                        $errors[] = 'Les factures ayant un trop-perçu ne peuvent pas être remboursées d\'un montant négatif';
+                    } elseif ($amount > abs($remain_to_pay)) {
+                        $errors[] = 'Le remboursement d\'un trop-perçu ne peut pas être supérieur à ce trop-perçu';
+                    } else {
+                        $amount *= -1;
+                    }
+                }
+                break;
+
+            case Facture::TYPE_CREDIT_NOTE:
+                if ($remain_to_pay > 0) {
+                    if ($amount < 0) {
+                        $errors[] = 'Les avoirs ayant un trop-payé ne peuvent pas être remboursés d\'un montant négatif';
+                    } elseif ($amount > $remain_to_pay) {
+                        $errors[] = 'Le remboursement d\'un trop-payé ne peut pas être supérieur à ce trop-payé';
+                    }
+                }
+                break;
+
+            default:
+                $errors[] = 'Les paiements ne sont pas possibles pour les factures de type "' . self::$types[(int) $this->getData('type')]['label'] . '"';
+                break;
+        }
+
+        return $errors;
     }
 
     // Actions - Overrides BimpComm:

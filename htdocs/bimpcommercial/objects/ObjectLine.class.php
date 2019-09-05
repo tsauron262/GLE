@@ -91,6 +91,11 @@ class ObjectLine extends BimpObject
         if (isset($user->rights->bimpcommercial->priceAchat) && (int) $user->rights->bimpcommercial->priceAchat) {
             return 1;
         }
+        $product = $this->getProduct();
+        if (BimpObject::objectLoaded($product)) {
+            if ($product->getData("price") == 1 || $product->getData("price") == 0)
+                return 1;
+        }
         return 0;
     }
 

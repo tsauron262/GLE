@@ -922,7 +922,7 @@ class BimpComm extends BimpDolObject
                 $params = BimpTools::getValue('param_values');
                 if(isset($params)){
                     $params = json_decode($params);
-                    if(isset($params->fields) && isset($params->fields->fk_soc))
+                    if(is_object($params) && isset($params->fields) && isset($params->fields->fk_soc))
                         $id_soc = $params->fields->fk_soc;
                 }
             }
@@ -946,6 +946,14 @@ class BimpComm extends BimpDolObject
     {
         if (!$this->isLoaded()) {
             $id_soc = (int) BimpTools::getPostFieldValue('fk_soc', 0);
+            if (!$id_soc) {
+                $params = BimpTools::getValue('param_values');
+                if(isset($params)){
+                    $params = json_decode($params);
+                    if(is_object($params) && isset($params->fields) && isset($params->fields->fk_soc))
+                        $id_soc = $params->fields->fk_soc;
+                }
+            }
             if ($id_soc) {
                 $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $id_soc);
                 if (BimpObject::objectLoaded($soc)) {

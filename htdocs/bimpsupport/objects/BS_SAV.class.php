@@ -741,7 +741,7 @@ class BS_SAV extends BimpObject
                 $callback = 'function() {bimp_reloadPage();}';
                 $buttons[] = array(
                     'label'   => 'Ajouter Acompte',
-                    'icon'    => 'arrow-circle-right',
+                    'icon'    => 'plus-circle',
                     'onclick' => $this->getJsActionOnclick('addAcompte', array(), array(
                         'form_name'        => 'add_acompte',
                         'success_callback' => $callback

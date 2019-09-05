@@ -691,37 +691,59 @@ class Bimp_Facture extends BimpComm
                 );
             }
 
-
-            if (in_array($type, array(Facture::TYPE_DEPOSIT, Facture::TYPE_STANDARD, Facture::TYPE_PROFORMA)) && $this->can("create")) {
-                if ($status == 0) {
-                    // Convertir en facture modèle:
-                    if (!$id_replacing_invoice && count($this->dol_object->lines) > 0) {
-                        $url = DOL_URL_ROOT . '/compta/facture/fiche-rec.php?facid=' . $this->id . '&action=create';
+            if ($this->can("create")) {
+                if (in_array($type, array(Facture::TYPE_DEPOSIT, Facture::TYPE_STANDARD, Facture::TYPE_PROFORMA))) {
+                    if ($status == 0) {
+                        // Convertir en facture modèle:
+                        if (!$id_replacing_invoice && count($this->dol_object->lines) > 0) {
+                            $url = DOL_URL_ROOT . '/compta/facture/fiche-rec.php?facid=' . $this->id . '&action=create';
+                            $buttons[] = array(
+                                'label'   => $langs->trans("ChangeIntoRepeatableInvoice"),
+                                'icon'    => 'fas_copy',
+                                'onclick' => 'window.location = \'' . $url . '\';'
+                            );
+                        }
+                    } else {
+                        // Créer un avoir:
+                        $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
+                        $values = array(
+                            'fields' => array(
+                                'fk_soc'                => (int) $this->getData('fk_soc'),
+                                'ref_client'            => $this->getData('ref_client'),
+                                'type'                  => Facture::TYPE_CREDIT_NOTE,
+                                'id_facture_to_correct' => (int) $this->id,
+                                'fk_account'            => (int) $this->getData('fk_account'),
+                                'entrepot'              => (int) $this->getData('entrepot'),
+                                'centre'                => $this->getData('centre'),
+                                'ef_type'               => $this->getData('ef_type')
+                            )
+                        );
+                        $onclick = $facture->getJsLoadModalForm('default', 'Créer un avoir', $values, null, 'redirect');
                         $buttons[] = array(
-                            'label'   => $langs->trans("ChangeIntoRepeatableInvoice"),
-                            'icon'    => 'fas_copy',
-                            'onclick' => 'window.location = \'' . $url . '\';'
+                            'label'   => $langs->trans("CreateCreditNote"),
+                            'icon'    => 'fas_file-import',
+                            'onclick' => $onclick
                         );
                     }
-                } else {
-                    // Créer un avoir:
+                } elseif ($type === Facture::TYPE_CREDIT_NOTE) {
+                    // Refacturer: 
                     $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
                     $values = array(
                         'fields' => array(
                             'fk_soc'                => (int) $this->getData('fk_soc'),
                             'ref_client'            => $this->getData('ref_client'),
-                            'type'                  => Facture::TYPE_CREDIT_NOTE,
-                            'id_facture_to_correct' => (int) $this->id,
+                            'type'                  => Facture::TYPE_STANDARD,
+                            'id_avoir_to_refacture' => (int) $this->id,
                             'fk_account'            => (int) $this->getData('fk_account'),
                             'entrepot'              => (int) $this->getData('entrepot'),
                             'centre'                => $this->getData('centre'),
                             'ef_type'               => $this->getData('ef_type')
                         )
                     );
-                    $onclick = $facture->getJsLoadModalForm('default', 'Créer un avoir', $values, null, 'redirect');
+                    $onclick = $facture->getJsLoadModalForm('refacture', 'Refacturation de l\\\'avoir ' . $this->getRef(), $values, null, 'redirect');
                     $buttons[] = array(
-                        'label'   => $langs->trans("CreateCreditNote"),
-                        'icon'    => 'fas_file-import',
+                        'label'   => 'Refacturer',
+                        'icon'    => 'fas_redo',
                         'onclick' => $onclick
                     );
                 }
@@ -3177,6 +3199,7 @@ class Bimp_Facture extends BimpComm
         }
 
         $type = (int) $this->getData('type');
+        $avoir_to_refacture = null;
 
         switch ($type) {
             case Facture::TYPE_REPLACEMENT:
@@ -3250,9 +3273,35 @@ class Bimp_Facture extends BimpComm
                 break;
 
             case Facture::TYPE_STANDARD:
+                if (BimpTools::isSubmit('id_avoir_to_refacture')) {
+                    $id_avoir_to_refacture = (int) BimpTools::getPostFieldValue('id_avoir_to_refacture', 0);
+                    if (!$id_avoir_to_refacture) {
+                        $errors[] = 'ID de l\'avoir à refacturer absent';
+                        return $errors;
+                    } else {
+                        $avoir_to_refacture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_avoir_to_refacture);
+                        if (!BimpObject::objectLoaded($avoir_to_refacture)) {
+                            $errors[] = 'L\'avoir à refacturer d\'ID ' . $id_avoir_to_refacture . ' n\'existe pas';
+                            return $errors;
+                        } elseif ((int) $avoir_to_refacture->getData('type') !== Facture::TYPE_CREDIT_NOTE) {
+                            $errors[] = 'Type de l\'avoir à refacturer invalide';
+                            return $errors;
+                        }
+                        $this->dol_object->linked_objects['facture'] = array($id_avoir_to_refacture);
+                    }
+                }
             case Facture::TYPE_DEPOSIT:
             case Facture::TYPE_PROFORMA:
                 $errors = parent::create($warnings, true);
+
+                if (!count($errors)) {
+                    if (BimpObject::objectLoaded($avoir_to_refacture)) {
+                        $lines_errors = $this->createLinesFromOrigin($avoir_to_refacture, true);
+                        if (count($lines_errors)) {
+                            $warnings[] = BimpTools::getMsgFromArray($lines_errors);
+                        }
+                    }
+                }
                 break;
 
             default:

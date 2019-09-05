@@ -490,7 +490,6 @@ forms:
               input: 
                   type: text
 
-
 fields_tables: 
     infos: 
         title: Informations

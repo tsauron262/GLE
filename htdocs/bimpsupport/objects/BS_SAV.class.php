@@ -736,6 +736,19 @@ class BS_SAV extends BimpObject
                 );
             }
 
+            // Ajouter acompte: 
+            if ($this->isActionAllowed('validate_propal') && $this->getData('id_facture_acompte') < 1) {
+                $callback = 'function() {bimp_reloadPage();}';
+                $buttons[] = array(
+                    'label'   => 'Ajouter Acompte',
+                    'icon'    => 'plus-circle',
+                    'onclick' => $this->getJsActionOnclick('addAcompte', array(), array(
+                        'form_name'        => 'add_acompte',
+                        'success_callback' => $callback
+                    ))
+                );
+            }
+
             // Payer facture: 
             if ((int) $this->getData('id_facture')) {
                 $facture = $this->getChildObject('facture');
@@ -3607,6 +3620,26 @@ class BS_SAV extends BimpObject
         }
 
         return $errors;
+    }
+    
+    public function actionAddAcompte($data, &$success){
+        $errors = array();
+        $warnings = array();
+        // Création de la facture d'acompte: 
+        $this->updateField('acompte', $data['acompte']);
+        $_POST['mode_paiement_acompte'] = $data['mode_paiement_acompte'];
+        if ($this->getData("id_facture_acompte") < 1 && (float) $this->getData('acompte') > 0) {
+            $fac_errors = $this->createAccompte((float) $this->getData('acompte'), false);
+            if (count($fac_errors)) {
+                $warnings[] = BimpTools::getMsgFromArray($fac_errors, 'Des erreurs sont survenues lors de la création de la facture d\'acompte');
+            }
+            else
+                $success = "Acompte créer avec succés.";
+        }
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
     }
 
     public function actionCorrectAcompteModePaiement($data, &$success)

@@ -56,11 +56,15 @@ fields:
         label: Utilisateur à l'ouverture
         type: id_object
         object: user_open
+        input: 
+            type: search_user
         
     id_user_closed: 
         label: Utilisateur à la fermeture
         type: id_object
         object: user_closed
+        input: 
+            type: search_user
         
 fields_tables: 
     default: 

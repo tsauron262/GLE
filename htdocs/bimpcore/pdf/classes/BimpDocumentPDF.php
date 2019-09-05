@@ -361,7 +361,7 @@ class BimpDocumentPDF extends BimpModelPDF
             if ($usertmp->office_phone != "")
                 $this->fromCompany->phone = $usertmp->office_phone;
             if ($usertmp->email != "")
-                $this->fromCompany = $usertmp->email;
+                $this->fromCompany->email = $usertmp->email;
         }
 
         return $html;
@@ -450,6 +450,14 @@ class BimpDocumentPDF extends BimpModelPDF
         $html .= '<td style="width: 40%">';
 
         $html .= $this->getTargetInfosHtml();
+        
+        if(isset($this->contactFinal) && is_object($this->contactFinal)){
+            $html .= '<br/><div class="section_title" style="width: 40%; border-top: solid 1px #' . $primary . '; ">';
+            $html .= '<span style="color: #' . $primary . '">' . ('Client Final :') . '</span></div>';
+            $html .= '';
+            $html .= str_replace("\n", '<br/>', pdf_build_address($this->langs, $this->fromCompany, $this->thirdparty, $this->contactFinal, !is_null($this->contactFinal) ? 1 : 0, 'target'));
+        }
+            
         $html .= '</td>';
         $html .= '</tr>';
         $html .= '</table>';

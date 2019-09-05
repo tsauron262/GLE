@@ -13,6 +13,7 @@ class BE_Place extends BimpObject
     const BE_PLACE_VOL = 6;
     const BE_PLACE_PRET = 7;
     const BE_PLACE_SAV = 8;
+    const BE_PLACE_INTERNE = 9;
 
     public static $types = array(
         1 => 'Client',
@@ -22,9 +23,10 @@ class BE_Place extends BimpObject
         5 => 'En Présentation',
         6 => 'Vol',
         7 => 'Matériel de prêt',
-        8 => 'SAV'
+        8 => 'SAV',
+        9 => 'Utilisation interne'
     );
-    public static $entrepot_types = array(self::BE_PLACE_ENTREPOT, self::BE_PLACE_PRESENTATION, self::BE_PLACE_PRET, self::BE_PLACE_SAV, self::BE_PLACE_VOL);
+    public static $entrepot_types = array(self::BE_PLACE_ENTREPOT, self::BE_PLACE_PRESENTATION, self::BE_PLACE_PRET, self::BE_PLACE_SAV, self::BE_PLACE_VOL, self::BE_PLACE_INTERNE);
 
     // Getters booléens: 
     
@@ -79,6 +81,7 @@ class BE_Place extends BimpObject
                 case self::BE_PLACE_VOL:
                 case self::BE_PLACE_SAV:
                 case self::BE_PLACE_PRET:
+                case self::BE_PLACE_INTERNE:
                     $entrepot = $this->getChildObject('entrepot');
                     if (BimpObject::ObjectLoaded($entrepot)) {
                         $name = 'Entrepôt "' . $entrepot->lieu . '"';
@@ -118,6 +121,7 @@ class BE_Place extends BimpObject
                 case self::BE_PLACE_VOL:
                 case self::BE_PLACE_SAV:
                 case self::BE_PLACE_PRET:
+                case self::BE_PLACE_INTERNE:
                     return $this->displayData('id_entrepot', 'nom_url');
 
                 case self::BE_PLACE_USER:
@@ -152,6 +156,7 @@ class BE_Place extends BimpObject
 
                 case self::BE_PLACE_ENTREPOT:
                 case self::BE_PLACE_PRESENTATION:
+                case self::BE_PLACE_INTERNE:
                 case self::BE_PLACE_VOL:
                 case self::BE_PLACE_SAV:
                     $id_entrepot = $this->getData('id_entrepot');

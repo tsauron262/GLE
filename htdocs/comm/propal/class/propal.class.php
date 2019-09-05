@@ -1702,6 +1702,10 @@ class Propal extends CommonObject
 		// Define new ref
 		if (! $error && (preg_match('/^[\(]?PROV/i', $this->ref) || empty($this->ref))) // empty should not happened, but when it occurs, the test save life
 		{
+                        /* mod drsi*/
+                        BimpTools::sleppIfBloqued("numPropal");
+                        BimpTools::bloqueDebloque("numPropal");
+                        /*fmoddrsi*/
 			$num = $this->getNextNumRef($soc);
 		}
 		else
@@ -1717,6 +1721,9 @@ class Propal extends CommonObject
 
 		dol_syslog(get_class($this)."::valid", LOG_DEBUG);
 		$resql=$this->db->query($sql);
+                /*moddrsi*/
+                BimpTools::bloqueDebloque("numPropal", 0);
+                /*fmoddrsi*/
 		if (! $resql)
 		{
 			dol_print_error($this->db);

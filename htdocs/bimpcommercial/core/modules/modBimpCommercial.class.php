@@ -359,8 +359,8 @@ class modBimpCommercial extends DolibarrModules
                 $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimpfact', 1, 'invoice', 'Facture', NULL);";
                 
                 // Commande fourn: 
-//                $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'muscadet';";
-//                $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimpcommandefourn', 1, 'order_supplier', 'Commande fournisseur', NULL);";
+                $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'muscadet';";
+                $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimpcommandefourn', 1, 'order_supplier', 'Commande fournisseur', NULL);";
                 
                 // Dash board commercial
                 $sql[] = "UPDATE " . MAIN_DB_PREFIX . "menu SET `url`='/bimpcommercial/index.php?fc=tabCommercial&amp;mainmenu=commercial&amp;leftmenu=' WHERE `type` LIKE 'top' AND `mainmenu` LIKE 'commercial'";
@@ -429,8 +429,8 @@ class modBimpCommercial extends DolibarrModules
                 $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'crabe', 1, 'invoice', 'crabe', NULL);";
                 
                 // Commande Fourn: 
-//                $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'bimpcommandefourn';";
-//                $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'muscadet', 1, 'order_supplier', 'muscadet', NULL);";
+                $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'bimpcommandefourn';";
+                $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'muscadet', 1, 'order_supplier', 'muscadet', NULL);";
                 
                 // Dash board commercial
                 $sql[] = "UPDATE " . MAIN_DB_PREFIX . "menu SET `url`='/comm/index.php?mainmenu=commercial&amp;leftmenu=' WHERE `type` LIKE 'top' AND `mainmenu` LIKE 'commercial'";

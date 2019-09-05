@@ -2266,6 +2266,12 @@ class Facture extends CommonInvoice
 				$this->date=dol_now();
 				$this->date_lim_reglement=$this->calculate_date_lim_reglement();
 			}
+                        
+                        
+                        /* mod drsi*/
+                        BimpTools::sleppIfBloqued("numFact");
+                        BimpTools::bloqueDebloque("numFact");
+                        /*fmoddrsi*/
 			$num = $this->getNextNumRef($this->thirdparty);
 		}
 		else
@@ -2290,6 +2296,9 @@ class Facture extends CommonInvoice
 
 			dol_syslog(get_class($this)."::validate", LOG_DEBUG);
 			$resql=$this->db->query($sql);
+                        /*moddrsi*/
+                        BimpTools::bloqueDebloque("numFact", 0);
+                        /*fmoddrsi*/
 			if (! $resql)
 			{
 				dol_print_error($this->db);

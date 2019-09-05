@@ -397,6 +397,7 @@ class ObjectLine extends BimpObject
             if (is_object($product) && $product->id > 0) {
                 if ($product->dol_field_exists('validate')) {
                     if (!(int) $product->getData('validate')) {
+                        $this->db->db->rollback();
                         global $user;
                         $errors[] = 'Le produit "' . $product->getRef() . ' - ' . $product->getData('label') . '" n\'est pas validé';
                         if (mailSyn2("Validation produit", "XX_Achats@bimp.fr", null, "Bonjour " . $user->getNomUrl(1) . "souhaite que vous validiez " . $product->getNomUrl(1) . "<br/>Cordialement")) {
@@ -406,6 +407,7 @@ class ObjectLine extends BimpObject
                                 $product->updateField('date_ask_valid', $datetime->format('Y-m-d H:i:s'));
                             }
                         }
+                        $this->db->db->begin();
                         return 0;
                     }
                 }

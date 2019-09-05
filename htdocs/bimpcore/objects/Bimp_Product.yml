@@ -512,7 +512,7 @@ forms:
             - field: localtax1_type
             - field: localtax2_tx
             - field: localtax2_type
-            - field: ref_constructeur
+#            - field: ref_constructeur
             - field: crt
             - field: rpcp
             - field: price
@@ -583,7 +583,7 @@ fields_tables:
         icon: fas_check-square
         rows: 
             - field: validate
-              edit: 1
+              edit: 0
             - field: serialisable
               edit: 1
             - field: type2
@@ -619,7 +619,7 @@ fields_tables:
             - field: localtax1_type
             - field: localtax2_tx
             - field: localtax2_type
-            - field: ref_constructeur
+#            - field: ref_constructeur
             - field: crt
 
     measures: 
@@ -815,6 +815,12 @@ lists_cols:
         field: fk_user_modif
     datec:
         field: datec
+    date_ask_valid:
+        field: date_ask_valid
+    date_valid:
+        field: date_valid
+    fk_user_valid:
+        field: fk_user_valid
                 
 lists: 
     default: 

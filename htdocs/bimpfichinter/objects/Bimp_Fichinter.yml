@@ -387,15 +387,15 @@ fields_tables:
               edit: 1
             - field: note_private
               edit: 1
-    horraire:
-        title: Horraire
+    horaire:
+        title: Horaire
         icon: fas_calendar-check
         rows: 
             - field: datei 
               edit: 1
             - field: date_valid 
             - field: duree 
-#            - label: Horraire arrivé AM
+#            - label: Horaire arrivé AM
 #              value:
 #                  callback:
 #                      method: displayExtra
@@ -466,7 +466,7 @@ views:
                   col_md: 6
                   col_sm: 12
                   fields_table: 
-                      name: horraire
+                      name: horaire
             
             - cols: 
                 - type: fields_table

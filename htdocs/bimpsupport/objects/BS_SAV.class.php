@@ -3623,6 +3623,8 @@ class BS_SAV extends BimpObject
     }
     
     public function actionAddAcompte($data, &$success){
+        $errors = array();
+        $warnings = array();
         // Création de la facture d'acompte: 
         $this->updateField('acompte', $data['acompte']);
         $_POST['mode_paiement_acompte'] = $data['mode_paiement_acompte'];
@@ -3631,7 +3633,13 @@ class BS_SAV extends BimpObject
             if (count($fac_errors)) {
                 $warnings[] = BimpTools::getMsgFromArray($fac_errors, 'Des erreurs sont survenues lors de la création de la facture d\'acompte');
             }
+            else
+                $success = "Acompte créer avec succés.";
         }
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
     }
 
     public function actionCorrectAcompteModePaiement($data, &$success)

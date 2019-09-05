@@ -542,6 +542,21 @@ forms:
               input_name: mode_paiement
               input: 
                   type: select_payment
+                  
+    add_acompte:
+        rows: 
+            - field: acompte
+            - label: Mode de paiement de l'acompte
+              custom: 1
+              data_type: int
+              input_name: mode_paiement_acompte
+              input: 
+                  type: select_payment
+                  include_empty: 1
+              display_if: 
+                  field_name: acompte
+                  hide_values: 0,
+              value: 6
               
 fields_tables: 
     infos: 

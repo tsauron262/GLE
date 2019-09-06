@@ -1,0 +1,83 @@
+
+table: be_package_product
+
+labels: 
+    name: produit
+    
+parent_object: BE_Package
+parent_id_property: id_package
+
+fields: 
+    id_package: 
+        label: Package
+        type: id_parent
+        
+    id_product:
+        label: Produit
+        type: id_object
+        object: product
+        required: 1
+        input: 
+            type: search_product
+        display: 
+            default: 
+                callback: displayProduct
+        
+    qty: 
+        label: Quantité
+        type: qty
+        min: 0
+        max: none
+        decimals: 0
+        default_value: 1
+        
+forms: 
+    default: 
+        rows: 
+            - field: id_product
+            - field: qty
+            - custom: 1
+              label: Entrepôt d'origine
+              data_type: id
+              input_name: id_entrepot_src
+              input: 
+                  type: search_entrepot
+                  include_empty: 1
+              value: 0
+              
+    edit: 
+        rows: 
+            - field: qty
+            - custom: 1
+              label: Entrepôt d'origine / de destination
+              data_type: id
+              input_name: id_entrepot
+              input: 
+                  type: search_entrepot
+                  include_empty: 1
+              value: 0
+            
+lists: 
+    default: 
+        enable_search: 0
+        enable_sort: 0
+        checkboxes: 1
+        bulk_actions: 
+            - label: Retirer les produits sélectionnés
+              icon: fas_trash-alt
+              onclick: removeSelectedProductsFromPackage('list_id', $(this));
+        sort_field: id
+        sort_way: asc
+        n: 20
+        edit_btn: 1
+        edit_form: edit
+        extra_btn: 
+            callback: getListExtraButtons
+        cols: 
+            product: 
+                field: id_product
+            qty:
+                field: qty
+                
+                
+        

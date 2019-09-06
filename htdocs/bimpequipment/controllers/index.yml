@@ -21,6 +21,10 @@ objects:
         instance: 
             bimp_object: BE_Connection
             
+    package: 
+        instance: 
+            bimp_object: BE_Package
+            
 sections:
     - type: tabs
       tabs: 
@@ -32,14 +36,20 @@ sections:
                       panel: 1
                       object: equipment
                       
-        reseaux:
-            label: Réseaux
-            sections:
+        packages: 
+            label: Packages
+            sections: 
                 - type: list
                   list: 
-                      panel: 1
-                      object: reseau
-                - type: list
-                  list: 
-                      panel: 1
-                      object: connection
+                      object: package
+#        reseaux:
+#            label: Réseaux
+#            sections:
+#                - type: list
+#                  list: 
+#                      panel: 1
+#                      object: reseau
+#                - type: list
+#                  list: 
+#                      panel: 1
+#                      object: connection

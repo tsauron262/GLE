@@ -355,6 +355,23 @@ class Equipment extends BimpObject
         return 0;
     }
 
+    // Getters params: 
+
+    public function getPackageListExtraBtn()
+    {
+        $buttons = array();
+
+        if ($this->isLoaded()) {
+            $buttons[] = array(
+                'label'   => 'Retirer',
+                'icon'    => 'fas_trash',
+                'onclick' => 'removeEquipmentFromPackage(' . $this->id . ')'
+            );
+        }
+
+        return $buttons;
+    }
+
     // Getters données: 
 
     public function getName()

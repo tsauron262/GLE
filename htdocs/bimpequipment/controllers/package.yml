@@ -1,0 +1,23 @@
+
+bootstrap: 1
+
+title: 
+    callback: 
+        object: package
+        method: getPageTitle
+        
+js:
+    - /bimpequipment/views/js/package.js
+
+objects:
+    package:
+        instance: 
+            bimp_object: BE_Package
+            id_object:
+                request: id
+                
+sections: 
+    - type: view
+      view: 
+          object: package
+          panel: 0

@@ -29,7 +29,7 @@ class BE_Place extends BimpObject
     public static $entrepot_types = array(self::BE_PLACE_ENTREPOT, self::BE_PLACE_PRESENTATION, self::BE_PLACE_PRET, self::BE_PLACE_SAV, self::BE_PLACE_VOL, self::BE_PLACE_INTERNE);
 
     // Getters booléens: 
-    
+
     public function getContactsArray()
     {
         $contacts = array();
@@ -51,10 +51,10 @@ class BE_Place extends BimpObject
     public function getTdStyle()
     {
         if ($this->isLoaded()) {
-            $equipement = $this->getParentInstance();
-            if ($equipement->isLoaded()) {
-                $place = $equipement->getCurrentPlace();
-                if (!$place->isLoaded() || ((int) $place->id !== (int) $this->id)) {
+            $parent = $this->getParentInstance();
+            if ($parent->isLoaded()) {
+                $place = $parent->getCurrentPlace();
+                if (!BimpObject::objectLoaded($place) || ((int) $place->id !== (int) $this->id)) {
                     return 'background-color: #D2D2D2!important;';
                 }
             }

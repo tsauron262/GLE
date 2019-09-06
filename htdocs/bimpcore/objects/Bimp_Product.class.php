@@ -518,24 +518,44 @@ class Bimp_Product extends BimpObject
 
     public function getPropals()
     {
-        // 
-        require_once DOL_DOCUMENT_ROOT . '/comm/propal/class/propal.class.php';
         $propals = array();
+        if ($this->isLoaded()) {
+            require_once DOL_DOCUMENT_ROOT . '/comm/propal/class/propal.class.php';
 
-        $sql = 'SELECT DISTINCT(p.rowid) as id';
-        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'propal as p';
-        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'propaldet as pd ON p.rowid=pd.fk_propal';
-        $sql .= ' WHERE pd.fk_product=' . $this->getData('id');
+            $sql = 'SELECT DISTINCT(p.rowid) as id';
+            $sql .= ' FROM ' . MAIN_DB_PREFIX . 'propal as p';
+            $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'propaldet as pd ON p.rowid=pd.fk_propal';
+            $sql .= ' WHERE pd.fk_product=' . $this->getData('id');
 
-        $result = $this->db->db->query($sql);
-        if ($result and $this->db->db->num_rows($result) > 0) {
-            while ($result and $obj = $this->db->db->fetch_object($result)) {
-                $propal = new Propal($this->db->db);
-                $propal->fetch($obj->id);
-                $propals[] = $propal;
+            $result = $this->db->db->query($sql);
+            if ($result and $this->db->db->num_rows($result) > 0) {
+                while ($result and $obj = $this->db->db->fetch_object($result)) {
+                    $propal = new Propal($this->db->db);
+                    $propal->fetch($obj->id);
+                    $propals[] = $propal;
+                }
             }
         }
+
         return $propals;
+    }
+
+    public function getVentesCaisse()
+    {
+        $ventes = array();
+
+        if ($this->isLoaded()) {
+            $rows = $this->db->getRows('bc_vente_article', '`id_product` = ' . (int) $this->id, null, 'array', array('id_vente'));
+            if (is_array($rows)) {
+                foreach ($rows as $r) {
+                    if (!in_array((int) $r['id_vente'], $ventes)) {
+                        $ventes[] = (int) $r['id_vente'];
+                    }
+                }
+            }
+        }
+
+        return $ventes;
     }
 
     // Getters stocks: 
@@ -1313,6 +1333,21 @@ class Bimp_Product extends BimpObject
             }
         }
 
+        // Ventes en caisse: 
+        $ventes = $this->getVentesCaisse();
+
+        foreach ($ventes as $id_vente) {
+            $vente = BimpCache::getBimpObjectInstance('bimpcaisse', 'BC_Vente', (int) $id_vente);
+            if (BimpObject::objectLoaded($vente)) {
+                $user = new User($this->db->db);
+                $user->fetch((int) $vente->getData('id_user_resp'));
+
+                if (BimpObject::objectLoaded($user)) {
+                    $errors = array_merge($errors, $this->sendEmailVenteCaisseValid($vente, $user->email));
+                }
+            }
+        }
+
         return $errors;
     }
 
@@ -1409,6 +1444,21 @@ class Bimp_Product extends BimpObject
             }
         }
 
+        // Ventes en caisse: 
+        $ventes = $this->getVentesCaisse();
+
+        foreach ($ventes as $id_vente) {
+            $vente = BimpCache::getBimpObjectInstance('bimpcaisse', 'BC_Vente', (int) $id_vente);
+            if (BimpObject::objectLoaded($vente)) {
+                $user = new User($this->db->db);
+                $user->fetch((int) $vente->getData('id_user_resp'));
+
+                if (BimpObject::objectLoaded($user)) {
+                    $errors = array_merge($errors, $this->sendEmailVenteCaisseRefuse($vente, $user->email));
+                }
+            }
+        }
+
         return $errors;
     }
 
@@ -1445,6 +1495,30 @@ class Bimp_Product extends BimpObject
         $msg .= ' doit être modifiée.';
         if (!mailSyn2($subject, $to, $from, $msg))
             $errors[] = "Envoi email vers " . $to . " pour la commande " . $commande->getNomUrl() . " impossible.";
+        return $errors;
+    }
+
+    private function sendEmailVenteCaisseValid($vente, $to)
+    {
+        $errors = array();
+        $subject = 'Produit validé pour la vente #' . $vente->id;
+        $from = 'gle@bimp.fr';
+        $msg = 'Bonjour,<br/>Le produit ' . $this->getData('ref') . ' a été validé, la vente #' . $vente->id;
+        $msg .= ' peut être validée.';
+        if (!mailSyn2($subject, $to, $from, $msg))
+            $errors[] = "Echec envoi email à " . $to . " pour la vente #" . $vente->id;
+        return $errors;
+    }
+
+    private function sendEmailVenteCaisseRefuse($vente, $to)
+    {
+        $errors = array();
+        $subject = 'Produit refusé pour la vente #' . $vente->id;
+        $from = 'gle@bimp.fr';
+        $msg = 'Bonjour,<br/>Le produit ' . $this->getData('ref') . ' a été refusé.';
+        $msg .= ' Veuillez retirer ce produit de cette vente.';
+        if (!mailSyn2($subject, $to, $from, $msg))
+            $errors[] = "Echec envoi email à " . $to . " pour la vente #" . $vente->id;
         return $errors;
     }
 

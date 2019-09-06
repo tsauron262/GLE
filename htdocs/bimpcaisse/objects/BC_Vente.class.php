@@ -1498,6 +1498,24 @@ class BC_Vente extends BimpObject
             $html .= '</div>';
         }
 
+        // Check validation du produit: 
+        if (!(int) $product->getData('validate')) {
+            $html .= '<div style="margin: 10px 0">';
+            $msg = 'Attention: ce produit n\'est pas validé. La vente ne pourra pas être validée.<br/>';
+            $msg .= 'Un e-mail a été envoyé pour validation d\'urgence.<br/>';
+            $userResp = new User($this->db->db);
+            if (!(int) $this->getData('id_user_resp')) {
+                global $user;
+                $this->updateField('id_user_resp', (int) $user->id);
+            } 
+            $userResp->fetch((int) $this->getData('id_user_resp'));
+            if (BimpObject::objectLoaded($userResp)) {
+                $msg .= 'Un email sera envoyé à ' . $userResp->email . ' lorsque le produit aura été validé.';
+            }
+            $html .= BimpRender::renderAlerts($msg);
+            $html .= '</div>';
+        }
+
         $html .= '</div>';
 
         return $html;
@@ -1657,6 +1675,19 @@ class BC_Vente extends BimpObject
 
                 if (!count($article_errors)) {
                     $html .= $this->renderCartProductLine($article, $product);
+
+                    if (!(int) $product->getData('validate')) {
+                        $msg = 'Bonjour, ' . "\n\n";
+                        $msg .= 'Le produit ' . $product->getNomUrl(0) . ' a été ajouté à une vente en caisse alors qu\'il n\'est pas validé.' . "\n";
+                        $msg .= 'Une validation d\'urgence est nécessaire pour finaliser la vente' . "\n\n";
+                        $msg .= 'Cordialement.';
+                        if (mailSyn2("[URGENT] Demande de validation de produit en urgence", "achat@bimp.fr", null, $msg, array(), array(), array(), 'dev@bimp.fr')) {
+                            if ($product->getData('date_ask_valid') == null or $product->getData('date_ask_valid') == '') {
+                                $datetime = new DateTime();
+                                $product->updateField('date_ask_valid', $datetime->format('Y-m-d H:i:s'));
+                            }
+                        }
+                    }
                 }
             }
             if (count($article_errors)) {
@@ -2441,9 +2472,11 @@ class BC_Vente extends BimpObject
         // Validation de la facture:         
         if ($facture->dol_object->validate($user) <= 0) {
             $msg = 'Echec de la validation de la facture';
-            $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($facture->dol_object), $msg);
+            $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($facture->dol_object), $msg);
+            $del_warnings = array();
+            $facture->delete($del_warnings, true);
+            return 0;
         }
-
 
         global $idAvoirFact;
         if (isset($idAvoirFact) && $idAvoirFact > 0) {

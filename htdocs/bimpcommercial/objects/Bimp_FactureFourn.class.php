@@ -172,6 +172,7 @@ class Bimp_FactureFourn extends BimpComm
                 break;
 
             case 'duplicate':
+                return 1;
             case 'create_credit_note':
                 return 0;
 
@@ -382,17 +383,16 @@ class Bimp_FactureFourn extends BimpComm
             }
 
             // Cloner: 
-//            if ($this->isActionAllowed('duplicate') && $this->canSetAction('duplicate')) {
-//                $buttons[] = array(
-//                    'label'   => 'Cloner',
-//                    'icon'    => 'fas_copy',
-//                    'onclick' => ''
-//                    'onclick' => $this->getJsActionOnclick('duplicate', array(), array(
-//                        'confirm_msg' => 'Etes-vous sûr de vouloir cloner ' . $this->getLabel('this')
-//                        'form_name' => 'duplicate_propal'
-//                    ))
-//                );
-//            }
+            if ($this->isActionAllowed('duplicate') && $this->canSetAction('duplicate')) {
+                $buttons[] = array(
+                    'label'   => 'Cloner',
+                    'icon'    => 'fas_copy',
+                    'onclick' => $this->getJsActionOnclick('duplicate', array(), array(
+                        'confirm_msg' => 'Etes-vous sûr de vouloir cloner ' . $this->getLabel('this'),
+                        'form_name' => 'duplicate_propal'
+                    ))
+                );
+            }
             // Créer un avoir: 
 //            if ($this->isActionAllowed('create_credit_note') && $this->canSetAction('create_credit_note')) {
 //                $buttons[] = array(

@@ -218,7 +218,7 @@ class Bimp_Paiement extends BimpObject
             $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $item['rowid']);
             if ($facture->isLoaded()) {
                 $montant_ttc = round((float) $facture->dol_object->total_ttc, 2);
-                $paid = round((float) $facture->getTotalPaid());
+                $paid = round((float) $facture->getTotalPaid(), 2);
                 $to_pay = $montant_ttc - $paid;
                 $to_pay = round($to_pay, 2);
 

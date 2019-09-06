@@ -221,12 +221,27 @@ class Interfacevalidate extends DolibarrTriggers
         }
 
         if ($action == 'ORDER_VALIDATE' || $action == 'PROPAL_VALIDATE' || $action == 'BILL_VALIDATE') {
+            if (!is_object($object->thirdparty)) {
+                $object->thirdparty = new Societe($this->db);
+                $object->thirdparty->fetch($object->socid);
+            }
+            
+            $actuel = $object->thirdparty->get_OutstandingBill();
+            if($action == 'BILL_VALIDATE')
+                $actuel = $actuel - $object->total_ttc;
+            $max = $object->thirdparty->outstanding_limit;
+            $futur = $actuel + $object->total_ttc;
+            if($max > 0 && $object->total_ttc > 0 && $max < $futur){
+                $msg = "Impossible de valider, montant encours dépassé. Montant Maximum : ".price($max)." € montant actuel :".price($actuel)." € montant necessaire : ".price($futur)." €.";
+                $this->errors[] = $msg;
+//                setEventMessages($msg, null, 'errors');
+                return -2;
+            }
+            
+            
+            
             $tabConatact = $object->getIdContact('internal', 'SALESREPFOLL');
             if (count($tabConatact) < 1) {
-                if (!is_object($object->thirdparty)) {
-                    $object->thirdparty = new Societe($this->db);
-                    $object->thirdparty->fetch($object->socid);
-                }
                 $tabComm = $object->thirdparty->getSalesRepresentatives($user);
                 if (count($tabComm) > 0) {
                     $object->add_contact($tabComm[0]['id'], 'SALESREPFOLL', 'internal');

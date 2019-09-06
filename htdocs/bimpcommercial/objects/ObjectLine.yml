@@ -583,6 +583,8 @@ filters_panels:
             product: 
                 field: fk_product
                 child: dol_line
+            remise_crt:
+                field: remise_crt
             categ1:
                 custom: 1
                 label: Catégorie (1)

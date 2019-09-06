@@ -1498,6 +1498,13 @@ class BC_Vente extends BimpObject
             $html .= '</div>';
         }
 
+        // Check validation du produit: 
+        if (!(int) $product->getData('validate')) {
+            $html .= '<div style="margin: 10px 0">';
+            $html .= BimpRender::renderAlerts('Attention: ce produit n\'est pas validé. La vente ne pourra pas être validée');
+            $html .= '</div>';
+        }
+
         $html .= '</div>';
 
         return $html;
@@ -2441,9 +2448,11 @@ class BC_Vente extends BimpObject
         // Validation de la facture:         
         if ($facture->dol_object->validate($user) <= 0) {
             $msg = 'Echec de la validation de la facture';
-            $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($facture->dol_object), $msg);
+            $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($facture->dol_object), $msg);
+            $del_warnings = array();
+            $facture->delete($del_warnings, true);
+            return 0;
         }
-
 
         global $idAvoirFact;
         if (isset($idAvoirFact) && $idAvoirFact > 0) {

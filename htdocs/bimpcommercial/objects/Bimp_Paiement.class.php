@@ -217,10 +217,8 @@ class Bimp_Paiement extends BimpObject
         foreach ($list as $item) {
             $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $item['rowid']);
             if ($facture->isLoaded()) {
-                $montant_ttc = (float) $facture->dol_object->total_ttc;
-                $paid = (float) $facture->dol_object->getSommePaiement();
-                $paid += (float) $facture->dol_object->getSumCreditNotesUsed();
-                $paid += (float) $facture->dol_object->getSumDepositsUsed();
+                $montant_ttc = round((float) $facture->dol_object->total_ttc, 2);
+                $paid = round((float) $facture->getTotalPaid());
                 $to_pay = $montant_ttc - $paid;
                 $to_pay = round($to_pay, 2);
 
@@ -512,7 +510,7 @@ class Bimp_Paiement extends BimpObject
                         $factures[$id_facture] = $facture;
 
                         $avoir_used = 0;
-                        $to_pay = (float) $facture->getRemainToPay();
+                        $to_pay = round((float) $facture->getRemainToPay(), 2);
                         $mult = 1;
 
                         if (!$is_rbt) {
@@ -526,6 +524,10 @@ class Bimp_Paiement extends BimpObject
                         }
 
                         $diff = $to_pay - $avoir_used - ($amount * $mult);
+
+                        if ($diff < 0.01 && $diff > -0.01) {
+                            $diff = 0;
+                        }
 
                         if ($is_rbt) {
                             if ($diff > 0) {
@@ -579,6 +581,13 @@ class Bimp_Paiement extends BimpObject
             }
 
             if (!count($errors)) {
+                // Check paiements factures: 
+                foreach ($this->dol_object->amounts as $id_facture => $amount) {
+                    if (BimpObject::objectLoaded($factures[(int) $id_facture])) {
+                        $factures[(int) $id_facture]->checkIsPaid();
+                    }
+                }
+
                 // Insertion des avoirs éventuels: 
                 if (!empty($avoirs) && !$is_rbt) {
                     BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');

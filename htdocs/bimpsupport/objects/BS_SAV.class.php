@@ -2721,16 +2721,20 @@ class BS_SAV extends BimpObject
                 if ((int) $this->getData('status') !== self::BS_SAV_ATT_PIECE) {
                     $new_status = self::BS_SAV_DEVIS_ACCEPTE;
                 }
-                $propal->dol_object->valid($user);
-                $propal->dol_object->cloture($user, 2, "Auto via SAV sous garantie");
-                $propal->fetch($propal->id);
-                $propal->dol_object->generateDocument(self::$propal_model_pdf, $langs);
+                
+                if($propal->dol_object->valid($user) < 1)
+                    $errors[] = "Validation de devis impossible !!!".BimpTools::getMsgFromArray($propal->dol_object->errors);
+                else{    
+                    $propal->dol_object->cloture($user, 2, "Auto via SAV sous garantie");
+                    $propal->fetch($propal->id);
+                    $propal->dol_object->generateDocument(self::$propal_model_pdf, $langs);
+                }
             } else {
                 $this->addNote('Devis envoyé le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs));
                 $new_status = self::BS_SAV_ATT_CLIENT;
                 
-                if (!$propal->dol_object->valid($user)) {
-                    $errors[] = "Validation de devis impossible !!!";
+                if ($propal->dol_object->valid($user) < 1) {
+                    $errors[] = "Validation de devis impossible !!!".BimpTools::getMsgFromArray($propal->dol_object->errors);;
                 }
 
                 if (!count($errors) && !$propal->dol_object->generateDocument(self::$propal_model_pdf, $langs)) {

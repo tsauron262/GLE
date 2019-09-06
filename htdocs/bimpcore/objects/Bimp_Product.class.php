@@ -1240,7 +1240,7 @@ class Bimp_Product extends BimpObject
         global $user;
 
         $errors = array();
-        if (!(int) $this->getCurrentFournPriceId(null, true)) {
+        if ($this->getData("fk_product_type") == 0 && !(int) $this->getCurrentFournPriceId(null, true)) {
             $errors[] = "Veuillez enregistrer au moins un prix d'achat fournisseur";
         }
 

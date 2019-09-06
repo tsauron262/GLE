@@ -300,6 +300,11 @@ lists_cols:
                     
     remise_crt: unset
     remise_pa: unset
+    
+filters_panels: 
+    default: 
+        filters: 
+            remise_crt: unset
                     
 lists: 
     default: 

@@ -39,6 +39,11 @@ class Bimp_User extends BimpObject
 
     public function canEdit()
     {
+        global $user;
+        if($this->id == $user->id)
+            return 1; //patch pour modifié son user.
+        
+        
         return $this->canCreate();
     }
 

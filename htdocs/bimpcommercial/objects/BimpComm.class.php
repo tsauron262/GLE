@@ -671,6 +671,17 @@ class BimpComm extends BimpDolObject
                     $formMail->substit['__LINES__'] = '';
                     $topic = $template['topic'];
                     $topic = make_substitutions($topic, $formMail->substit);
+                    
+                    $soc = $this->getChildObject("client");
+                    if(isset($soc) && is_object($soc)){
+                        $formMail->setSubstitFromObject($soc->dol_object, $langs);
+                        $topic = make_substitutions($topic, $formMail->substit);
+                    }
+                    $soc = $this->getChildObject("societe");
+                    if(isset($soc) && is_object($soc)){
+                        $formMail->setSubstitFromObject($soc->dol_object, $langs);
+                        $topic = make_substitutions($topic, $formMail->substit);
+                    }
                 }
             }
         }
@@ -1979,14 +1990,23 @@ class BimpComm extends BimpDolObject
 
         $html .= BimpInput::renderInput('select', $input_name . '_add_value', '', array(
                     'options'     => $emails,
-                    'extra_class' => 'emails_select'
+                    'extra_class' => 'emails_select principal'
         ));
-
+        
+        
         $html .= '<p class="inputHelp selectMailHelp">';
         $html .= 'Sélectionnez une adresse e-mail puis cliquez sur "Ajouter"';
         $html .= '</p>';
+        
+        
+
 
         $html .= '<div class="mail_custom_value" style="display: none; margin-top: 10px">';
+//        $form = new Form(self::getBdb()->db);
+//        $html .= $form->select_dolusers('', $input_name . '_add_value2', 1, null, 0, '', '', '0', 0, 0, '', 0, '', $morecss='emails_select searchable_select', 1);
+//
+//        $html .= " ou ";
+        
         $html .= BimpInput::renderInput('text', $input_name . '_add_value_custom', '');
         $html .= '<p class="inputHelp">Entrez une adresse e-mail valide puis cliquez sur "Ajouter"</p>';
         $html .= '</div>';

@@ -1240,7 +1240,7 @@ class Bimp_Product extends BimpObject
         global $user;
 
         $errors = array();
-        if (!(int) $this->getCurrentFournPriceId(null, true)) {
+        if ($this->getData("fk_product_type") == 0 && !(int) $this->getCurrentFournPriceId(null, true)) {
             $errors[] = "Veuillez enregistrer au moins un prix d'achat fournisseur";
         }
 
@@ -1736,6 +1736,39 @@ class Bimp_Product extends BimpObject
                 $qty = isset($data['qty']) ? (int) $data['qty'] : 1;
 
                 $url = DOL_URL_ROOT . '/bimplogistique/etiquette_produit.php?id_product=' . $this->id . '&qty=' . $qty . '&type=' . $type;
+
+                $success_callback = 'window.open(\'' . $url . '\')';
+            }
+        }
+
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $success_callback
+        );
+    }
+    
+    public function actionPrintEtiquettes($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+        $success_callback = '';
+        
+        $ids = $data['id_objects'];
+
+        if (!count($ids)) {
+            $errors[] = 'ID des produits absent';
+        } else {
+            $type = isset($data['type']) ? (string) $data['type'] : '';
+
+            if (!$type) {
+                $errors[] = 'Type d\'étiquette à générer absent';
+            } else {
+                $qty = isset($data['qty']) ? (int) $data['qty'] : 1;
+
+                $url = DOL_URL_ROOT . '/bimplogistique/etiquette_produit.php?id_products=' . implode(',',$ids) . '&qty=1&type=' . $type;
 
                 $success_callback = 'window.open(\'' . $url . '\')';
             }

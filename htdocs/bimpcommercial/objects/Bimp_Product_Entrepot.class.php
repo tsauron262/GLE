@@ -7,6 +7,19 @@ class Bimp_Product_Entrepot extends BimpObject
     {
         return 56;
     }
+    
+    function actionPrintEtiquettes($data, &$success){
+        $prod = BimpObject::getInstance('bimpcore', 'Bimp_Product');
+        
+        $newIds = array();
+        foreach($data['id_objects'] as $id){
+            $tmp = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Product_Entrepot', $id);
+            $newIds[] = $tmp->getData('fk_product');
+          
+        }
+        $data['id_objects'] = $newIds;
+        return $prod->actionPrintEtiquettes($data, $success);
+    }
 
     public function displayProduct()
     {

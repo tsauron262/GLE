@@ -14,7 +14,9 @@ if (!$type) {
 }
 
 $id_product = (int) BimpTools::getValue('id_product', 0);
-$id_products = explode(',', BimpTools::getValue('id_products', 0));
+$id_products = array();
+if(BimpTools::getValue('id_products', 0) != '')
+    explode(',', BimpTools::getValue('id_products', 0));
 
 if (!$id_product && count($id_products) == 0) {
     die('Erreur: ID du produit');

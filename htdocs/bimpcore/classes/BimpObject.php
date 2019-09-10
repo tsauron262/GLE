@@ -4740,8 +4740,6 @@ class BimpObject extends BimpCache
                 $html .= '>';
                 $html .= BimpRender::renderIcon('fas_edit');
                 $html .= '</span>';
-            } else {
-                $html .= 'FAIL';
             }
 
             if ((int) $this->params['header_delete_btn'] && $this->isDeletable() && $this->can('delete')) {
@@ -5460,6 +5458,13 @@ class BimpObject extends BimpCache
         } else {
             $js .= 'null';
         }
+        $js .= ', ';
+        if (isset($params['no_triggers'])) {
+            $js .= ((int) $params['no_triggers'] ? 'true' : 'false');
+        } else {
+            $js .= 'false';
+        }
+
         $js .= ');';
 
         return $js;

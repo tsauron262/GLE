@@ -1582,7 +1582,7 @@ class Bimp_Facture extends BimpComm
                 $onclick = $paiement->getJsLoadModalForm('single', $label, array(
                     'fields' => array(
                         'id_facture'    => (int) $this->id,
-                        'single_amount' => abs((float) $this->getRemainToPay())
+                        'single_amount' => abs(round((float) $this->getRemainToPay(), 2))
                     )
                 ));
 

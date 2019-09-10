@@ -743,20 +743,22 @@ class BC_Field extends BimpComponent
                 case 'percent':
                 case 'float':
                 case 'qty':
+                    $return = '';
                     if ($option === 'string') {
                         switch ($this->params['type']) {
                             case 'money':
-                                return BimpTools::displayMoneyValue($this->value);
+                                $return = BimpTools::displayMoneyValue($this->value);
 
                             case 'percent':
-                                return BimpTools::displayFloatValue($this->value) . ' %';
+                                $return = BimpTools::displayFloatValue($this->value) . ' %';
 
                             case 'float':
                             case 'qty':
-                                return BimpTools::displayFloatValue($this->value);
+                                $return =  BimpTools::displayFloatValue($this->value);
                         }
                     }
-                    return $this->value;
+                    $return = $this->value;
+                    return str_replace(".", ",", $return);
 
                 default:
                     return $this->value;

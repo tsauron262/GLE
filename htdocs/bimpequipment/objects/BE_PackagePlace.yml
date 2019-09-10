@@ -1,0 +1,17 @@
+extends: 
+    module: bimpequipment
+    object_name: BE_Place
+    
+table: be_package_place
+common_fields: 1
+
+parent_object: BE_Package
+parent_id_property: id_package
+
+fields: 
+    id_equipment: unset
+    
+    id_package: 
+        label: Package
+        type: id_parent
+        

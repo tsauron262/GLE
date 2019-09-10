@@ -1582,7 +1582,7 @@ class Bimp_Facture extends BimpComm
                 $onclick = $paiement->getJsLoadModalForm('single', $label, array(
                     'fields' => array(
                         'id_facture'    => (int) $this->id,
-                        'single_amount' => abs((float) $this->getRemainToPay())
+                        'single_amount' => abs(round((float) $this->getRemainToPay(), 2))
                     )
                 ));
 
@@ -2656,14 +2656,14 @@ class Bimp_Facture extends BimpComm
             return $errors;
         }
 
-        $amount = (float) $amount;
+        $amount = round((float) $amount, 2);
 
         if (!$amount) {
             $errors[] = 'Aucun montant spécifié';
             return $errors;
         }
 
-        $remain_to_pay = (float) $this->getRemainToPay();
+        $remain_to_pay = round((float) $this->getRemainToPay(), 2);
 
         if (!in_array((int) $this->getData('fk_statut'), array(1, 2))) {
             $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' n\'est pas validé' . $this->e();

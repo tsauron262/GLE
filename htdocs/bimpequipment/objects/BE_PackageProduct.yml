@@ -1,5 +1,6 @@
 
 table: be_package_product
+common_fields: 0
 
 labels: 
     name: produit
@@ -21,7 +22,8 @@ fields:
             type: search_product
         display: 
             default: 
-                callback: displayProduct
+                type: callback
+                method: displayProduct
         
     qty: 
         label: Quantité
@@ -44,18 +46,6 @@ forms:
                   type: search_entrepot
                   include_empty: 1
               value: 0
-              
-    edit: 
-        rows: 
-            - field: qty
-            - custom: 1
-              label: Entrepôt d'origine / de destination
-              data_type: id
-              input_name: id_entrepot
-              input: 
-                  type: search_entrepot
-                  include_empty: 1
-              value: 0
             
 lists: 
     default: 
@@ -69,8 +59,6 @@ lists:
         sort_field: id
         sort_way: asc
         n: 20
-        edit_btn: 1
-        edit_form: edit
         extra_btn: 
             callback: getListExtraButtons
         cols: 

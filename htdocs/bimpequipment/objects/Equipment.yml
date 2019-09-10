@@ -3,6 +3,8 @@ controller: equipment
 icon: desktop
 
 header_list_name: default
+header_edit_form: default
+
 list_page_url: 
     controller: index
             
@@ -132,6 +134,10 @@ fields:
             type: value_part
             part_type: beginning
         
+    ref_immo: 
+        label: Réf. immobilisation
+        default_value: ''
+        
 #   A suppr.
     available: 
         label: Disponible à la vente
@@ -252,6 +258,12 @@ fields:
         required: 0
         sortable: 0
         searchable: 0
+        
+    id_package: 
+        label: Package
+        type: id_object
+        object: package
+        default_value: 0
 
 fields_tables: 
     default: 
@@ -427,84 +439,118 @@ filters_panel:
                 field: date
                 child: places
             
-list:
-    filters_panel: default
-    checkboxes: 1
-    bulk_actions: 
-        - label: Supprimer les équipements sélectionnés
-          icon: fas_trash-alt
-          onclick: deleteSelectedObjects('list_id', $(this));
-          btn_class: deleteSelectedObjects
-    filters_panel: default
-    sort_field: date_create
-    sort_way: desc
-    n: 10
-    list_filters: 
-        callback:
-            method: getListFilters
-    add_form_name: default
-    edit_btn: 1
-    update_btn: 1
-    delete_btn: 1
-    view_btn: 1
-    page_btn: 1
-    total_row: 1
-    modal_view: default
-    cols:
-        id:
-            label: ID
-            field: id
-            min_width: 60px
-        type: 
-            field: type
-        product: 
-            label: Produit
-            value: 
-                callback: 
-                    method: displayProduct
-                    params: 
-                        - nom_url
-            search: 
-                type: value_part
-        serial:
-            field: serial
-        place: 
-            label: Emplacement
-            value:
-                callback: displayCurrentPlace
-            search: 
-                type: value_part
-        place2: 
-            label: Type emplacement
-            value:
-                callback: displayCurrentPlaceType
-            search: 
-                type: values
-                input: 
-                    type: select
-                    options: 
+lists:
+    default: 
+        checkboxes: 1
+        bulk_actions: 
+            - label: Supprimer les équipements sélectionnés
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this));
+              btn_class: deleteSelectedObjects
+        filters_panel: default
+        sort_field: date_create
+        sort_way: desc
+        n: 10
+        list_filters: 
+            callback:
+                method: getListFilters
+        add_form_name: default
+        edit_btn: 1
+        update_btn: 1
+        delete_btn: 1
+        view_btn: 1
+        page_btn: 1
+        total_row: 1
+        modal_view: default
+        cols:
+            id:
+                label: ID
+                field: id
+                min_width: 60px
+            type: 
+                field: type
+            product: 
+                label: Produit
+                value: 
+                    callback: 
+                        method: displayProduct
+                        params: 
+                            - nom_url
+                search: 
+                    type: value_part
+            serial:
+                field: serial
+            place: 
+                label: Emplacement
+                value:
+                    callback: displayCurrentPlace
+                search: 
+                    type: value_part
+            place2: 
+                label: Type emplacement
+                value:
+                    callback: displayCurrentPlaceType
+                search: 
+                    type: values
+                    input: 
+                        type: select
                         options: 
-                            array: typesPlace
-                
-        reserved: 
-            label: Réservé / transfert en cours
-            value: 
-                callback: displayReserved
-            search: 
-                type: values
-                input: 
-                    type: select
-                    options: 
+                            options: 
+                                array: typesPlace
+
+            reserved: 
+                label: Réservé / transfert en cours
+                value: 
+                    callback: displayReserved
+                search: 
+                    type: values
+                    input: 
+                        type: select
                         options: 
-                            array: hasReservations
-        user_create:
-            field: user_create
-        prix_achat:
+                            options: 
+                                array: hasReservations
+            user_create:
+                field: user_create
+            prix_achat:
             field: prix_achat
             has_total: 1
 #        available: 
 #            field: available
 #            edit: 1
+
+    package: 
+        enable_search: 0
+        enable_sort: 0
+        checkboxes: 1
+        bulk_actions: 
+            - label: Retirer les équipements sélectionnés
+              icon: fas_trash-alt
+              onclick: removeSelectedEquipmentsFromPackage('list_id', $(this));
+        sort_field: serial
+        sort_way: asc
+        n: 20
+        extra_btn: 
+            callback: getPackageListExtraBtn
+        cols: 
+            serial: 
+                label: N° de série
+                value: 
+                    callback: 
+                        method: getNomUrl
+                        params: 
+                            - 1
+                            - 1
+                            - 1
+                            - default
+            product: 
+                label: Produit
+                value: 
+                    callback: 
+                        method: displayProduct
+                        params: 
+                            - nom_url
+                            - 0
+                            - 1
     
 searches:
     default: 

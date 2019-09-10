@@ -1344,7 +1344,11 @@ class ObjectLine extends BimpObject
 
                         $product = $this->getProduct();
                         if (BimpObject::objectLoaded($product)) {
-                            $text .= $this->displayLineData('id_product', 0, 'nom_url', $no_html);
+                            global $modeCSV;
+                            if($modeCSV)
+                                $text .= $this->displayLineData('id_product', 0, 'ref', $no_html);
+                            else
+                                $text .= $this->displayLineData('id_product', 0, 'nom_url', $no_html);
 
                             $product_label = BimpTools::cleanString($product->getData('label'));
 

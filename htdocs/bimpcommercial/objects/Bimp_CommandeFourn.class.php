@@ -11,6 +11,7 @@ class Bimp_CommandeFourn extends BimpComm
     public static $email_type = 'order_supplier_send';
     public static $external_contact_type_required = false;
     public static $internal_contact_type_required = false;
+    public static $discount_lines_allowed = false;
     public static $status_list = array(
         0 => array('label' => 'Brouillon', 'icon' => 'fas_file-alt', 'classes' => array('warning')),
         1 => array('label' => 'Validée', 'icon' => 'fas_check', 'classes' => array('info')),

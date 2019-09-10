@@ -448,6 +448,7 @@ list:
     delete_btn: 1
     view_btn: 1
     page_btn: 1
+    total_row: 1
     modal_view: default
     cols:
         id:
@@ -498,6 +499,9 @@ list:
                             array: hasReservations
         user_create:
             field: user_create
+        prix_achat:
+            field: prix_achat
+            has_total: 1
 #        available: 
 #            field: available
 #            edit: 1

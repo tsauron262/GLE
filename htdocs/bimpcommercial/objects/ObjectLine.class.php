@@ -91,6 +91,11 @@ class ObjectLine extends BimpObject
         if (isset($user->rights->bimpcommercial->priceAchat) && (int) $user->rights->bimpcommercial->priceAchat) {
             return 1;
         }
+        $product = $this->getProduct();
+        if (BimpObject::objectLoaded($product)) {
+            if ($product->getData("price") == 1 || $product->getData("price") == 0)
+                return 1;
+        }
         return 0;
     }
 
@@ -105,7 +110,7 @@ class ObjectLine extends BimpObject
         if (isset($user->rights->bimpcommercial->priceVente) && (int) $user->rights->bimpcommercial->priceVente == 1) {
             return 1;
         }
-        
+
         $product = $this->getProduct();
 
         if (BimpObject::objectLoaded($product)) {
@@ -397,15 +402,17 @@ class ObjectLine extends BimpObject
             if (is_object($product) && $product->id > 0) {
                 if ($product->dol_field_exists('validate')) {
                     if (!(int) $product->getData('validate')) {
+                        $this->db->db->rollback();
                         global $user;
                         $errors[] = 'Le produit "' . $product->getRef() . ' - ' . $product->getData('label') . '" n\'est pas validé';
-                        if (mailSyn2("Validation produit", "XX_Achats@bimp.fr", null, "Bonjour " . $user->getNomUrl(1) . "souhaite que vous validiez " . $product->getNomUrl(1) . "<br/>Cordialement")) {
+                        if (mailSyn2("Validation produit", "XX_Achats@bimp.fr", null, "Bonjour " . $user->getNomUrl(0) . "souhaite que vous validiez " . $product->getNomUrl(0) . "<br/>Cordialement")) {
                             $errors[] = "Un e-mail a été envoyé pour validation du produit.";
                             if ($product->getData('date_ask_valid') == null or $product->getData('date_ask_valid') == '') {
                                 $datetime = new DateTime();
                                 $product->updateField('date_ask_valid', $datetime->format('Y-m-d H:i:s'));
                             }
                         }
+                        $this->db->db->begin();
                         return 0;
                     }
                 }
@@ -1308,8 +1315,9 @@ class ObjectLine extends BimpObject
                         }
                     }
 
-                    $desc = BimpTools::cleanString($this->desc);
+
                     $text = '';
+                    $desc = '';
 
                     if ((int) $this->id_remise_except) {
                         BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
@@ -1319,11 +1327,21 @@ class ObjectLine extends BimpObject
                         if (!BimpObject::objectLoaded($discount)) {
                             $html .= BimpRender::renderAlerts('La remise d\'ID ' . $this->id_remise_except) . ' n\'existe plus';
                         } else {
-                            $desc = str_replace('Acompte Acompte', 'Acompte', $desc);
-                            $html .= 'Remise ' . $discount->getNomUrl(1);
-                            $html .= ' ' . $desc;
+                            $desc = BimpTools::getRemiseExceptLabel($discount->description);
+                            
+                            if (!$desc) {
+                                $desc = 'Remise client';
+                            }
+                            
+                            $text = $desc;
+
+                            if (!$no_html) {
+                                $text .= ' ' . $discount->getNomUrl(1);
+                            }
                         }
                     } else {
+                        $desc = BimpTools::cleanString($this->desc);
+
                         $product = $this->getProduct();
                         if (BimpObject::objectLoaded($product)) {
                             $text .= $this->displayLineData('id_product', 0, 'nom_url', $no_html);

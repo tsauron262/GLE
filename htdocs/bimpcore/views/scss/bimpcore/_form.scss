@@ -192,6 +192,18 @@ input {
 
     &[type=text] {
         min-width: 60px;
+
+        &.large {
+            border-top: 1px #3C3C3C solid;
+            border-right: 1px #3C3C3C solid;
+            border-bottom: 1px #3C3C3C solid;
+            border-left: 1px #3C3C3C solid;
+
+            line-height: 22px;
+            vertical-align: middle;
+            font-size: 14px;
+            font-weight: bold;
+        }
     }
 }
 

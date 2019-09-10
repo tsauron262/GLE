@@ -6,6 +6,7 @@ require_once DOL_DOCUMENT_ROOT . '/fourn/class/fournisseur.product.class.php';
 class Bimp_FactureFourn extends BimpComm
 {
 
+    public static $discount_lines_allowed = false;
     public $redirectMode = 4; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
     public static $dol_module = 'facture_fourn';
     public static $files_module_part = 'facture_fournisseur';
@@ -171,6 +172,7 @@ class Bimp_FactureFourn extends BimpComm
                 break;
 
             case 'duplicate':
+                return 1;
             case 'create_credit_note':
                 return 0;
 
@@ -381,17 +383,16 @@ class Bimp_FactureFourn extends BimpComm
             }
 
             // Cloner: 
-//            if ($this->isActionAllowed('duplicate') && $this->canSetAction('duplicate')) {
-//                $buttons[] = array(
-//                    'label'   => 'Cloner',
-//                    'icon'    => 'fas_copy',
-//                    'onclick' => ''
-//                    'onclick' => $this->getJsActionOnclick('duplicate', array(), array(
-//                        'confirm_msg' => 'Etes-vous sûr de vouloir cloner ' . $this->getLabel('this')
-//                        'form_name' => 'duplicate_propal'
-//                    ))
-//                );
-//            }
+            if ($this->isActionAllowed('duplicate') && $this->canSetAction('duplicate')) {
+                $buttons[] = array(
+                    'label'   => 'Cloner',
+                    'icon'    => 'fas_copy',
+                    'onclick' => $this->getJsActionOnclick('duplicate', array(), array(
+                        'confirm_msg' => 'Etes-vous sûr de vouloir cloner ' . $this->getLabel('this'),
+                        'form_name' => 'duplicate_propal'
+                    ))
+                );
+            }
             // Créer un avoir: 
 //            if ($this->isActionAllowed('create_credit_note') && $this->canSetAction('create_credit_note')) {
 //                $buttons[] = array(
@@ -900,13 +901,13 @@ class Bimp_FactureFourn extends BimpComm
             foreach ($lines as $line) {
                 $line->onFactureValidate();
             }
-            
+
             $products = array();
             foreach ($lines as $line) {
                 if (!(int) $line->id_product) {
                     continue;
                 }
-                
+
                 if (!isset($products[(int) $line->id_product])) {
                     $products[(int) $line->id_product] = 0;
                 }
@@ -991,11 +992,11 @@ class Bimp_FactureFourn extends BimpComm
                 // If we're on a standard invoice, we have to get excess paid to create a discount in TTC without VAT
 
                 $sql = 'SELECT SUM(pf.amount) as total_paiements';
-                $sql.= ' FROM ' . MAIN_DB_PREFIX . 'paiementfourn_facturefourn as pf, ' . MAIN_DB_PREFIX . 'paiementfourn as p';
-                $sql.= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'c_paiement as c ON p.fk_paiement = c.id AND c.entity IN (' . getEntity('c_paiement') . ')';
-                $sql.= ' WHERE pf.fk_facturefourn = ' . $object->id;
-                $sql.= ' AND pf.fk_paiementfourn = p.rowid';
-                $sql.= ' AND p.entity IN (' . getEntity('facture') . ')';
+                $sql .= ' FROM ' . MAIN_DB_PREFIX . 'paiementfourn_facturefourn as pf, ' . MAIN_DB_PREFIX . 'paiementfourn as p';
+                $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'c_paiement as c ON p.fk_paiement = c.id AND c.entity IN (' . getEntity('c_paiement') . ')';
+                $sql .= ' WHERE pf.fk_facturefourn = ' . $object->id;
+                $sql .= ' AND pf.fk_paiementfourn = p.rowid';
+                $sql .= ' AND p.entity IN (' . getEntity('facture') . ')';
 
                 $resql = $db->query($sql);
                 if (!$resql)

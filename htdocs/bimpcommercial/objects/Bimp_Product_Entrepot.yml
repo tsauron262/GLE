@@ -1,17 +1,23 @@
 table: product_stock
 primary: rowid
-
+icon: fas_box-open
 
 labels: 
-    name: Stock par Entrepot
+    name: Stock par entrepôt
+    name_plur: Stocks par entrepôt
     is_female: 0
     
-objects:
-                
+objects:   
     product: 
         instance: 
-            id_object: fk_product
+            id_object: 
+                field_value: fk_product
             
+    entrepot: 
+        instance: 
+            id_object: 
+                field_value: fk_entrepot
+                
     category: 
         relation: none
         delete: 0
@@ -21,7 +27,6 @@ objects:
                 file: categorie
                 
 fields: 
-#    Champs facturedet: 
     fk_entrepot: 
         label: Entrepot
         type: id_object
@@ -33,10 +38,18 @@ fields:
         label: Produit
         type: id_object
         object: product
+        input: 
+            type: search_product
+        display: 
+            nom_url_libelle: 
+                type: callback
+                method: displayProduct
         
     reel: 
         label: Stock
-        type: int
+        type: qty
+        default_value: 0
+        
     stockShowRoom: 
         label: Stock ShowRoom
         extra: 1
@@ -46,6 +59,7 @@ fields:
         label: Nb Ventes
         extra: 1
         type: int
+        
     ventes_ht:
         label: Ventes Ht
         extra: 1
@@ -58,13 +72,19 @@ fields:
         items_data_type: id_object
         object: category
 
-            
-                                    
 lists: 
     default: 
         title: Produits/Entrepots
-        icon: fas_box
+        icon: fas_box-open
+        checkboxes: 1
         configurable: 1
+        bulk_actions:
+            - label: étiquettes stock
+              icon: fas_trash-alt
+              onclick: setSelectedObjectsAction($(this), 'list_id', 'printEtiquettes', {'type':'stock'}, '', 'Générer les étiquettes ?', true)
+            - label: étiquettes magasin
+              icon: fas_trash-alt
+              onclick: setSelectedObjectsAction($(this), 'list_id', 'printEtiquettes', {'type':'magasin'}, '', 'Générer les étiquettes ?', true)
         filters_panel: default
         sort_field: id
         sort_way: desc
@@ -75,7 +95,7 @@ lists:
                 display: nom_url
             fk_product: 
                 field: fk_product
-                display: nom_url
+                display: nom_url_libelle
             reel: 
                 field: reel
             stockShowRoom:

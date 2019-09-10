@@ -490,13 +490,12 @@ class BimpObject extends BimpCache
         return array();
     }
 
-    public function getSearchData()
+    public function getSearchData($search_name = 'default')
     {
         $syntaxe = '';
         $has_extrafields = false;
         $fields_seach = array($this->getPrimary());
         $fields_return_label = array();
-
         $ref_prop = $this->getRefProperty();
 
         $n = 0;
@@ -1149,10 +1148,33 @@ class BimpObject extends BimpCache
         return $fields;
     }
 
+    public function getDefaultBankAccount()
+    {
+        if ((int) BimpCore::getConf('use_caisse_for_payments')) {
+            global $user;
+            $caisse = BimpObject::getInstance('bimpcaisse', 'BC_Caisse');
+            $id_caisse = (int) $caisse->getUserCaisse((int) $user->id);
+            if ($id_caisse) {
+                $caisse = BimpCache::getBimpObjectInstance('bimpcaisse', 'BC_Caisse', $id_caisse);
+                if ($caisse->isLoaded()) {
+                    if ($caisse->isValid()) {
+                        return (int) $caisse->getData('id_account');
+                    }
+                }
+            }
+        }
+
+        return (int) BimpCore::getConf('bimpcaisse_id_default_account');
+    }
+
     // Gestion des données:
 
-    public function printData()
+    public function printData($return_html = false)
     {
+        if ($return_html) {
+            return '<pre>' . print_r($this->data, 1) . '</pre>';
+        }
+
         echo '<pre>';
         print_r($this->data);
         echo '</pre>';
@@ -4652,8 +4674,8 @@ class BimpObject extends BimpCache
                 $this->params['header_btn'] = array();
             }
 
+            $header_buttons = array();
             if (count($this->params['header_btn'])) {
-                $header_buttons = array();
                 foreach ($this->params['header_btn'] as $header_btn) {
                     $button = null;
                     $label = isset($header_btn['label']) ? $header_btn['label'] : '';
@@ -4695,43 +4717,44 @@ class BimpObject extends BimpCache
                         $header_buttons[] = BimpRender::renderButton($button, 'button');
                     }
                 }
+            }
 
-                $html .= '<div class="header_buttons">';
-                if (count($header_buttons)) {
-                    if (count($header_buttons) > 6) {
-                        $html .= BimpRender::renderDropDownButton('Actions', $header_buttons, array(
-                                    'icon'       => 'fas_cogs',
-                                    'menu_right' => 1
-                        ));
-                    } else {
-                        foreach ($header_buttons as $btn) {
-                            $html .= str_replace('btn-light-default', 'btn-default', $btn);
-                        }
+            $html .= '<div class="header_buttons">';
+            if (count($header_buttons)) {
+                if (count($header_buttons) > 6) {
+                    $html .= BimpRender::renderDropDownButton('Actions', $header_buttons, array(
+                                'icon'       => 'fas_cogs',
+                                'menu_right' => 1
+                    ));
+                } else {
+                    foreach ($header_buttons as $btn) {
+                        $html .= str_replace('btn-light-default', 'btn-default', $btn);
                     }
                 }
-
-                $html .= '<div style="display: inline-block">';
-                if ($this->params['header_edit_form'] && $this->isEditable() && $this->can('edit')) {
-                    $html .= '<span class="btn btn-primary bs-popover" onclick="' . $this->getJsLoadModalForm($this->params['header_edit_form'], addslashes("Edition " . $this->getLabel('of_the') . ' #' . $this->id)) . '"';
-                    $html .= BimpRender::renderPopoverData('Editer');
-                    $html .= '>';
-                    $html .= BimpRender::renderIcon('fas_edit');
-                    $html .= '</span>';
-                }
-
-                if ((int) $this->params['header_delete_btn'] && $this->isDeletable() && $this->can('delete')) {
-                    $html .= '<span class="btn btn-danger bs-popover" onclick="' . $this->getJsDeleteOnClick(array(
-                                'on_success' => 'reload'
-                            )) . '"';
-                    $html .= BimpRender::renderPopoverData('Supprimer');
-                    $html .= '>';
-                    $html .= BimpRender::renderIcon('fas_trash-alt');
-                    $html .= '</span>';
-                }
-                $html .= '</div>';
-
-                $html .= '</div>';
             }
+
+            $html .= '<div style="display: inline-block">';
+            if ($this->params['header_edit_form'] && $this->isEditable() && $this->can('edit')) {
+                $html .= '<span class="btn btn-primary bs-popover" onclick="' . $this->getJsLoadModalForm($this->params['header_edit_form'], addslashes("Edition " . $this->getLabel('of_the') . ' #' . $this->id)) . '"';
+                $html .= BimpRender::renderPopoverData('Editer');
+                $html .= '>';
+                $html .= BimpRender::renderIcon('fas_edit');
+                $html .= '</span>';
+            } /*else {
+                $html .= 'FAIL';
+            }*/
+
+            if ((int) $this->params['header_delete_btn'] && $this->isDeletable() && $this->can('delete')) {
+                $html .= '<span class="btn btn-danger bs-popover" onclick="' . $this->getJsDeleteOnClick(array(
+                            'on_success' => 'reload'
+                        )) . '"';
+                $html .= BimpRender::renderPopoverData('Supprimer');
+                $html .= '>';
+                $html .= BimpRender::renderIcon('fas_trash-alt');
+                $html .= '</span>';
+            }
+            $html .= '</div>';
+            $html .= '</div>';
 
             $html .= '<div class="header_extra">';
             if (method_exists($this, 'renderHeaderExtraRight')) {
@@ -5292,6 +5315,12 @@ class BimpObject extends BimpCache
         $html .= '</table>';
 
         return $html;
+    }
+
+    public function renderCaisseInput()
+    {
+        BimpObject::loadClass('bimpcaisse', 'BC_Caisse');
+        return BC_Caisse::renderUserCaisseInput();
     }
 
     // Générations javascript: 

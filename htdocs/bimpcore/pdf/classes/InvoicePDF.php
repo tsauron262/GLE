@@ -45,6 +45,15 @@ class InvoicePDF extends BimpDocumentPDF
                         $this->contact = $contact;
                     }
                 }
+                
+                $contacts = $this->facture->getIdContact('external', 'CLIFINAL');
+                if (isset($contacts[0]) && $contacts[0]) {
+                    BimpTools::loadDolClass('contact');
+                    $contact = new Contact($this->db);
+                    if ($contact->fetch((int) $contacts[0]) > 0) {
+                        $this->contactFinal = $contact;
+                    }
+                }
             } else {
                 $this->errors[] = 'Facture invalide (ID absent)';
             }

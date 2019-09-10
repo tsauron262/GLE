@@ -1048,6 +1048,8 @@ class BimpTools
             if ($or_clause) {
                 $sql .= '(' . $or_clause . ')';
             }
+        } elseif (is_array($filter) && isset($filter['custom'])) {
+            $sql .= $filter['custom'];
         } else {
             if (preg_match('/\./', $field)) {
                 $sql .= $field;
@@ -1904,8 +1906,25 @@ class BimpTools
 
     public static function getDateLimReglement($date_begin, $id_cond_reglement)
     {
+        
     }
-    
+
+    public static function getRemiseExceptLabel($desc)
+    {
+        global $langs;
+
+        if (preg_match('/\(CREDIT_NOTE\)/', $desc))
+            $desc = preg_replace('/\(CREDIT_NOTE\)/', $langs->trans("CreditNote"), $desc);
+        if (preg_match('/\(DEPOSIT\)/', $desc))
+            $desc = preg_replace('/\(DEPOSIT\)/', $langs->trans("Deposit"), $desc);
+        if (preg_match('/\(EXCESS RECEIVED\)/', $desc))
+            $desc = preg_replace('/\(EXCESS RECEIVED\)/', $langs->trans("ExcessReceived"), $desc);
+        if (preg_match('/\(EXCESS PAID\)/', $desc))
+            $desc = preg_replace('/\(EXCESS PAID\)/', $langs->trans("ExcessPaid"), $desc);
+
+        return $desc;
+    }
+
     // Gestion des couleurs: 
 
     public static function changeColorLuminosity($color_code, $percentage_adjuster = 0)
@@ -2031,5 +2050,45 @@ class BimpTools
     {
         self::$context = $context;
         $_SESSION['context'] = $context;
+    }
+    
+    public static function bloqueDebloque($type, $bloque = true){
+        $file = static::getFileBloqued($type);
+        if($bloque)
+            file_put_contents ($file, "Yes");
+        elseif(is_file($file))
+            unlink ($file);
+    }
+    
+    public static function getFileBloqued($type){
+        $folder = DOL_DATA_ROOT.'/bloqueFile/';
+        if(!is_dir($folder))
+            mkdir ($folder);
+        return $folder.$type.".txt";
+        
+    }
+    
+    public static function isBloqued($type){
+        $file = static::getFileBloqued($type);
+        return (file_exists($file));
+    }
+    
+    public static function sleppIfBloqued($type, $nb = 0){
+        $nbMax = 10;
+        $nb++;
+        if(static::isBloqued($type)){
+            if($nb < $nbMax){
+                sleep(1);
+                return static::sleppIfBloqued($type, $nb);
+            }
+            else{
+                $text = "Attention bloquage de plus de ".$nbMax." secondes voir pour type : ".$type;
+                dol_syslog("ATTENTION ".$text,3);
+                mailSyn2("Bloquage anormal", "dev@bimp.fr", "admin@bimp.fr", "Attention : ".$text);
+                die($text);
+            }
+        }
+        else
+            return 0;
     }
 }

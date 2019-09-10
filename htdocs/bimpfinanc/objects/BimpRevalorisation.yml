@@ -203,6 +203,8 @@ filters_panel:
             - field: type
             - field: date
             - field: amount
+            - field: ef_type
+              child: facture
             
 lists_cols: 
     facture: 
@@ -237,7 +239,10 @@ lists_cols:
         label: Commissions
         value: 
             callback: displayCommissions
-
+    secteur: 
+        field: ef_type
+        child: facture
+    
 lists: 
     default: 
         title: Liste des revalorisations

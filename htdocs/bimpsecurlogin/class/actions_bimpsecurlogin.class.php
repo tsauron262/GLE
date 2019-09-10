@@ -40,6 +40,10 @@ class securLogSms {
     public function __construct($db) {
         $this->db = $db;
         $this->filename = DOL_DATA_ROOT . "/white-ip.txt";
+        
+        if (defined('MOD_DEV')) {
+            $this->debug = 1;
+        }
     }
 
     public function testSecur() {

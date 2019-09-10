@@ -4740,9 +4740,9 @@ class BimpObject extends BimpCache
                 $html .= '>';
                 $html .= BimpRender::renderIcon('fas_edit');
                 $html .= '</span>';
-            } else {
+            } /*else {
                 $html .= 'FAIL';
-            }
+            }*/
 
             if ((int) $this->params['header_delete_btn'] && $this->isDeletable() && $this->can('delete')) {
                 $html .= '<span class="btn btn-danger bs-popover" onclick="' . $this->getJsDeleteOnClick(array(

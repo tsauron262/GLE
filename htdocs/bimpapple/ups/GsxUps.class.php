@@ -496,6 +496,7 @@ class GsxUps
         if (isset($response['RegisterPartsForBulkReturnResponse']['bulkPartsRegistrationData'])) {
             $html = '<p class="confirmation">Enregistrement de l\'expédition effectuée avec succès</p>';
             $response = $response['RegisterPartsForBulkReturnResponse']['bulkPartsRegistrationData'];
+            print_r($response);
             if (isset($response['packingList']) && !empty($response['packingList'])) {
                 $fileDir = $ship->getFilesDir();
                 $fileCheck = false;

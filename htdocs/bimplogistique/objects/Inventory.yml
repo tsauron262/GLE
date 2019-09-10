@@ -1,0 +1,159 @@
+table: bl_inventory
+controller: inventory
+icon: far_arrow-alt-circle-right
+
+header_btn:
+    callback: getActionsButtons
+
+header_list_name: default
+header_edit_form: default
+
+list_page_url: 
+    controller: index
+            
+labels:
+    name: inventaire
+
+objects:
+    lines: 
+        instance: 
+            bimp_object: InventoryLine
+        delete: 1
+                
+fields: 
+    fk_warehouse:
+        label: Entrepôt
+        type: id_object
+        object: entrepot
+        default_value: 0
+        input:
+            type: search_entrepot 
+
+    date_opening: 
+        label: Date d'ouverture
+        type: datetime
+        required: 0
+        search:
+            type: date_range
+        
+    date_closing: 
+        label: Date de fermeture
+        type: datetime
+        required: 0
+        search:
+            type: date_range
+            
+    status:
+        label: Statut
+        type: int
+        values: 
+            array: status_list
+        edit: 0
+
+fields_tables: 
+    default: 
+        footer_extra_btn:
+            callback: getActionsButtons
+        panel: 1
+        title: Informations
+        icon: info-circle
+        rows:
+            - field: fk_warehouse
+              display: nom_url
+            - field: date_opening
+            - field: date_closing
+            - field: user_create
+            - label: Mouvements
+              value: 
+                  callback: displayMouvementTrace
+            
+views:
+    default:
+        objects_change_reload: lines
+        edit_form: default
+        delete_btn: 1
+        rows:
+            - cols: 
+                  - type: fields_table
+                    col_lg: 7
+                    col_md: 8
+                    col_sm: 12
+                    fields_table:
+                        name: default  
+                        
+                  - type: rows
+                    col_lg: 4
+                    col_md: 5
+                    col_sm: 12
+                    rows: 
+                        - cols: 
+                            - type: object_common_fields
+            
+forms:
+    add:
+        rows: 
+            - field: fk_warehouse
+            
+#    default:
+#        rows: 
+#            - field: fk_warehouse
+            
+lists:
+    default:
+        checkboxes: 1
+        sort_field: id
+        sort_way: desc
+        n: 10
+        list_filters: 
+            callback:
+                method: getListFilters
+        add_form_name: default
+        view_btn: 1
+        page_btn: 1
+        modal_view: default
+        cols:
+            id:
+                label: ID
+                field: id
+                min_width: 60px
+            status:
+                label: Statut
+                field: status
+            fk_warehouse:
+                field: fk_warehouse
+                display: nom_url
+            date_opening:
+                field: date_opening
+            date_closing:
+                field: date_closing
+        
+cards: 
+    default: 
+        title: nom
+        status: status
+        fields: 
+            - label: Ouvert le
+              field: date_opening
+            - label: Fermé le
+              field: date_closing
+        view_btn: 1
+
+forms:
+    default:
+        rows: 
+            - field: fk_warehouse
+            
+    confirm_close: 
+        rows: 
+            - custom: 1
+              label: Date du mouvement de stock
+              input_name: date_mouvement
+              type: datetime
+              input:
+                type: datetime
+                display_now: 1
+            - custom: 1
+              label: Opérations
+              input_name: inut
+              content: 
+                callback: displayDifference

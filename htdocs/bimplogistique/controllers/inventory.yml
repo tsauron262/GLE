@@ -1,0 +1,114 @@
+bootstrap: 1
+
+title: 
+    callback: getPageTitle
+js:
+    - /bimplogistique/views/js/inventory.js
+    
+objects:
+    inventory:
+        instance: 
+            bimp_object: Inventory
+            id_object:
+                request: id
+    inventory_line: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: InventoryLine
+
+sections:
+    - type: object_header
+      object_header:
+          object: inventory
+
+    - type: nav_tabs
+      nav_tabs:
+          - id: infos
+            title: Fiche
+            struct: 
+                type: rows
+                rows: 
+                    - cols: 
+                        - type: view
+                          view:
+                              panel: 1
+                              object: inventory
+                    - cols: 
+                        - type: custom
+                          col_lg: 12
+                          col_md: 6
+                          col_sm: 12
+                          custom: 
+                              callback:
+                                  method: renderAddInputs
+                                  object: inventory
+                    - cols:
+                        - type: custom
+                          custom: 
+                              callback: 
+                                  method: renderNotesList
+                                  object: inventory
+                                  params:
+                                      - 1
+                                      
+          - id: scan
+            title: Scan
+            struct: 
+                type: rows
+                rows: 
+                    - cols: 
+                        - type: custom
+                          col_lg: 12
+                          col_md: 6
+                          col_sm: 12
+                          custom: 
+                              callback:
+                                  method: renderInputs
+                                  object: inventory
+                    - cols:
+                        - type: list
+                          list: 
+                              name: default
+                              children: lines
+                              title: Ligne d'inventaire
+                              object: inventory
+                              
+          - id: stock
+            title: Stock
+            struct: 
+                type: rows
+                rows: 
+                    - cols: 
+                        - type: custom
+                          col_lg: 12
+                          col_md: 6
+                          col_sm: 12
+                          custom: 
+                              callback:
+                                  method: renderStock
+                                  object: inventory
+                                  
+          - id: diff
+            title: Différence
+            struct: 
+                type: rows
+                rows: 
+                    - cols: 
+                        - type: custom
+                          col_lg: 12
+                          col_md: 6
+                          col_sm: 12
+                          custom: 
+                              callback:
+                                  method: renderDiff
+                                  object: inventory
+                                      
+    - type: buttons
+      buttons:
+          - label: Liste d'inventaire
+            url:
+                controller: index
+            icon_before: chevron-left
+            classes: 
+                array: btn,btn-primary

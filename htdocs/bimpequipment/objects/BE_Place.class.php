@@ -30,6 +30,37 @@ class BE_Place extends BimpObject
 
     // Getters booléens: 
 
+    public function isCreatable($force_create = false, &$errors = array())
+    {
+        if ($force_create) {
+            return 1;
+        }
+
+        $equipment = $this->getParentInstance();
+
+        if (!BimpObject::objectLoaded($equipment)) {
+            $errors[] = 'ID de l\'équipement absent';
+            return 0;
+        }
+
+        if (!$force_create && (int) $equipment->getData('id_package')) {
+            $package = $equipment->getChildObject('package');
+            $msg = 'L\'équipement ' . $equipment->getNomUrl(0, 1, 1, 'default') . ' est inclus dans le package ';
+            if (BimpObject::objectLoaded($package)) {
+                $msg .= $package->getNomUrl(0, 1, 1, 'default');
+            } else {
+                $msg .= ' #' . $equipment->getData('id_package');
+            }
+
+            $msg .= '.<br/>Il n\'est pas possible de modifier l\'emplacement de cet équipement';
+
+            $errors[] = $msg;
+            return 0;
+        }
+
+        return 1;
+    }
+
     public function getContactsArray()
     {
         $contacts = array();
@@ -212,9 +243,9 @@ class BE_Place extends BimpObject
         return array('Type invalide ou absent');
     }
 
-    public function create()
+    public function create(&$warnings = array(), $force_create = false)
     {
-        $errors = parent::create();
+        $errors = parent::create($warnings, $force_create);
 
         if ($this->isLoaded()) {
             $equipment = $this->getParentInstance();

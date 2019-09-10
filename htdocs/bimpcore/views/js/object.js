@@ -265,7 +265,7 @@ function setObjectAction($button, object_data, action, extra_data, form_name, $r
                             if (typeof (successCallback) === 'function') {
                                 successCallback(result);
                             }
-                        });
+                        }, null, null, no_triggers);
                     }
                 });
             }

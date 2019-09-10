@@ -126,6 +126,47 @@ class BE_Package extends BimpObject
         return $html;
     }
 
+    public function displayProductsToRemove()
+    {
+        $packageProducts = array();
+
+        $id_pp = BimpTools::getPostFieldValue('id_package_product', 0);
+        if ($id_pp) {
+            $packageProducts[] = $id_pp;
+        } else {
+            $packageProducts = BimpTools::getPostFieldValue('packageProducts', array());
+        }
+
+        $html = '<input type="hidden" name="packageProducts" value="' . implode(',', $packageProducts) . '"/>';
+
+        if (!empty($packageProducts)) {
+            foreach ($packageProducts as $id_pp) {
+                $pp = BimpCache::getBimpObjectInstance('bimpequipment', 'BE_PackageProduct', (int) $id_pp);
+
+                if (BimpObject::objectLoaded($pp)) {
+                    $id_product = (int) $pp->getData('id_product');
+                    if ($id_product) {
+                        $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $id_product);
+                        if (BimpObject::objectLoaded($product)) {
+                            $html .= $product->dol_object->getNomUrl(1);
+                        } else {
+                            $html .= '<span class="danger">Produit #' . $id_product . ' inexistant</span>';
+                        }
+                    } else {
+                        $html .= '<span class="danger">Aucun produit enregistré pour la ligne #' . $id_pp . '</span>';
+                    }
+                } else {
+                    $html .= '<span class="danger">La ligne produit d\'ID ' . $id_pp . ' n\'existe pas</span>';
+                }
+                $html .= '<br/>';
+            }
+        } else {
+            $html .= '<span class="danger">Aucun produit spécifié</span>';
+        }
+
+        return $html;
+    }
+
     // Traitements:
 
     public function checkEquipments()
@@ -177,7 +218,7 @@ class BE_Package extends BimpObject
                 $package = BimpCache::getBimpObjectInstance('bimpequipment', 'BE_Package', (int) $equipment->getData('id_package'));
             }
             if (BimpObject::objectLoaded($package)) {
-                $errors[] = 'L\'équipement "' . $equipment->getNomUrl(0, 1, 1, 'default') . '" est déjà attribué au package "' . $package->getNomUrl(0, 1, 0, 'default') . '"';
+                $errors[] = 'L\'équipement ' . $equipment->getNomUrl(0, 1, 1, 'default') . ' est déjà attribué au package ' . $package->getNomUrl(0, 1, 1, 'default');
             } else {
                 $errors = $equipment->updateField('id_package', (int) $this->id);
 
@@ -566,7 +607,7 @@ class BE_Package extends BimpObject
 
         if ($id_entrepot_dest) {
             BimpTools::resetDolObjectErrors($product->dol_object);
-            if ($product->dol_object->correct_stock($user, (int) $id_entrepot_dest, $qty, 0, 'Ajout au package #' . $this->id, 0, $code_move) <= 0) {
+            if ($product->dol_object->correct_stock($user, (int) $id_entrepot_dest, $qty, 0, 'Retrait du package #' . $this->id, 0, $code_move) <= 0) {
                 $msg = 'Echec de la mise à jour du stock pour le produit "' . $product->getRef() . ' - ' . $product->getName() . '" (ID: ' . $product->id . ')';
                 $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($product->dol_object), $msg);
                 dol_syslog('[ERREUR STOCK] ' . $msg . ' - Retrait du Package #' . $this->id . ' - Produit #' . $product->id . ' - Qté à ajouter: ' . (int) $qty . ' - Entrepôt #' . $id_entrepot_dest, LOG_ERR);
@@ -819,13 +860,55 @@ class BE_Package extends BimpObject
         $warnings = array();
         $success = 'Produit retiré avec succès';
 
+        $pps = array();
+
         $id_pp = (isset($data['id_package_product']) ? (int) $data['id_package_product'] : 0);
         $id_entrepot_dest = (isset($data['id_entrepot_dest']) ? (int) $data['id_entrepot_dest'] : 0);
 
-        if (!$id_pp) {
-            $errors[] = 'ID de la ligne produit absent';
+        if ($id_pp) {
+            $pps[] = $id_pp;
+        } elseif (isset($data['packageProducts'])) {
+            if (is_string($data['packageProducts'])) {
+                $data['packageProducts'] = explode(',', $data['packageProducts']);
+            }
+            $pps = $data['packageProducts'];
+        }
+
+        if (empty($pps)) {
+            $errors[] = 'Aucun produit à retirer spécifié';
         } else {
-            $errors = $this->removePackageProduct($id_pp, $id_entrepot_dest, $warnings);
+            $nDone = 0;
+            foreach ($pps as $id_pp) {
+                $pp = BimpCache::getBimpObjectInstance('bimpequipment', 'BE_PackageProduct', (int) $id_pp);
+
+                if (!BimpObject::objectLoaded($pp)) {
+                    $errors[] = 'La ligne produit #' . $id_pp . ' n\'existe pas';
+                    continue;
+                }
+
+                $pp_warning = array();
+                $pp_errors = $this->removePackageProduct($id_pp, $id_entrepot_dest, $warnings);
+
+                if (count($pp_warning) || count($pp_errors)) {
+                    $product = $pp->getChildObject('product');
+
+                    if (count($pp_warning)) {
+                        $warnings[] = BimpTools::getMsgFromArray($pp_warning, 'Erreurs lors du retrait du produit "' . (BimpObject::objectLoaded($product) ? $product->getRef() : '#' . (int) $pp->getData('id_product')) . '"');
+                    }
+
+                    if (count($pp_errors)) {
+                        $errors[] = BimpTools::getMsgFromArray($pp_errors, 'Echec du retrait du produit "' . (BimpObject::objectLoaded($product) ? $product->getRef() : '#' . (int) $pp->getData('id_product')) . '"');
+                    } else {
+                        $nDone++;
+                    }
+                }
+            }
+
+            if ($nDone > 1) {
+                $success = $nDone . ' produits retirés avec succès';
+            } elseif ($nDone > 0) {
+                $success = 'Produit retiré avec succès';
+            }
         }
 
         return array(

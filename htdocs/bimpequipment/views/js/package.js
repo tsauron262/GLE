@@ -172,10 +172,54 @@ function removeSelectedEquipmentsFromPackage(list_id, $button, ) {
     }, 'removeEquipment', {
         'equipments': equipments_list
     }, 'remove_equipment', null, function () {
-        var $list = $packageView.find('.Equipment_list_table_package');
-        if ($.isOk($list)) {
-            reloadObjectList($list.attr('id'));
-        }
+        reloadObjectList($list.attr('id'));
+    }, null, null, true);
+}
+
+function removeSelectedProductsFromPackage(list_id, $button) {
+    if ($button.hasClass('disabled')) {
+        return;
+    }
+
+    var $list = $('#' + list_id);
+
+    if (!$list.length) {
+        bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger', null, true);
+        return;
+    }
+
+    var id_package = 0;
+    var $packageView = $list.findParentByClass('BE_Package_view');
+    if ($.isOk($packageView)) {
+        id_package = parseInt($packageView.data('id_object'));
+    }
+
+    if (!id_package) {
+        bimp_msg('Erreur technique: ID du package absent', 'danger', null, true);
+        return;
+    }
+
+    var $selected = $list.find('tbody').find('input.item_check:checked');
+
+    if (!$selected.length) {
+        bimp_msg('Aucun produit sélectionné', 'warning', null, true);
+        return;
+    }
+
+    var packageProducts = [];
+
+    $selected.each(function () {
+        packageProducts.push($(this).data('id_object'));
+    });
+
+    setObjectAction($button, {
+        'module': 'bimpequipment',
+        'object_name': 'BE_Package',
+        'id_object': id_package
+    }, 'removeProduct', {
+        'packageProducts': packageProducts
+    }, 'remove_product', null, function () {
+        reloadObjectList($list.attr('id'));
     }, null, null, true);
 }
 

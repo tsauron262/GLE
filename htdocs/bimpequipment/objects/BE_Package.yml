@@ -70,6 +70,11 @@ forms:
     remove_product: 
         rows: 
             - custom: 1
+              label: Produit(s) à retirer
+              input_name: products
+              content: 
+                  callback: displayProductsToRemove
+            - custom: 1
               label: Entrepôt de destination
               data_type: id
               input_name: id_entrepot_dest

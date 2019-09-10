@@ -555,7 +555,7 @@ class GsxUps
 
         return array(
             'ok'   => 0,
-            'html' => '<p class="error">Pas de réponse</p>'
+            'html' => $html.'<p class="error">Pas de réponse</p>'
         );
     }
 

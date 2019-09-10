@@ -163,6 +163,15 @@ class mod_facture_mercure2 extends ModeleNumRefFactures
         if($suffixe == "S" && date ("Ym", $facture->date) < "201802")
             $suffixe ="";
         
+        $tot = 0;
+        foreach($facture->lines as $line){
+            if($line->fk_remise_except < 1){
+                $tot += $line->total_ht;
+            }
+        }
+        if($tot == 0)
+            $mask = str_replace('FA', 'RMB', $mask);
+        
         $mask = str_replace("{TYPE}", $suffixe, $mask);
 
         $where='';

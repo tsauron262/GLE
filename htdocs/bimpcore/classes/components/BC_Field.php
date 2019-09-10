@@ -653,6 +653,13 @@ class BC_Field extends BimpComponent
         if (isset($this->params['values']) && !empty($this->params['values'])) {
             if ($option === 'label') {
                 if (isset($this->params['values'][$this->value])) {
+                    $value = $this->params['values'][$this->value];
+                    if(is_array($value)){
+                        if(isset($value['label']))
+                            return $value['label'];
+                        else
+                            return 'Pas de label (' . $this->value . ')';
+                    }
                     return $this->params['values'][$this->value];
                 } else {
                     return 'Non défini (' . $this->value . ')';

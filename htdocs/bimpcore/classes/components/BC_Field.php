@@ -757,7 +757,7 @@ class BC_Field extends BimpComponent
                     return $this->value;
 
                 default:
-                    return $this->Value;
+                    return $this->value;
             }
         }
     }

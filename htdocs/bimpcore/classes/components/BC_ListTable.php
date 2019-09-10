@@ -1435,6 +1435,7 @@ class BC_ListTable extends BC_List
                         $content = $col_params['value'];
                     }
 
+                    $content = str_replace(array('<br>', '<br/>', '<br />'), ' ', $content);
                     $content = str_replace($separator, '', $content);
                     $content = str_replace("\n", ' ', $content);
 

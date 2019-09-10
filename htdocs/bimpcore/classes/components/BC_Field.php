@@ -648,6 +648,8 @@ class BC_Field extends BimpComponent
 
     public function getNoHtmlValue($option)
     {
+        global $modeCSV;
+        $modeCSV= true;
         $options = array();
 
         if (isset($this->params['values']) && !empty($this->params['values'])) {

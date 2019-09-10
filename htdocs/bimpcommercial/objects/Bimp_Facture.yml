@@ -617,6 +617,7 @@ lists_cols:
                 method: displayPDFButton
                 params: 
                     - false
+        available_csv: 0
     datec: 
         field: datec
     availability: unset

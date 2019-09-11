@@ -5257,8 +5257,8 @@ class BimpObject extends BimpCache
             $content = '';
 
             $col_params = $bc_list->getColParams($col_name);
-
-            if (!(int) $col_params['show'] || (int) $col_params['hidden']) {
+            
+            if (!(int) $col_params['show'] || (int) $col_params['hidden'] || !(int) $col_params['available_csv']) {
                 continue;
             }
 

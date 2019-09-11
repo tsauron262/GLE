@@ -28,6 +28,7 @@ class BC_ListTable extends BC_List
         'child'       => array('default' => ''),
         'edit'        => array('data_type' => 'bool', 'default' => 0),
         'history'     => array('data_type' => 'bool', 'default' => 0),
+        'available_csv'     => array('data_type' => 'bool', 'default' => 1),
         'display'     => array('default' => ''),
         'label'       => array('default' => ''),
         'value'       => array('default' => ''),
@@ -1372,6 +1373,10 @@ class BC_ListTable extends BC_List
             $fl = true;
             foreach ($this->cols as $col_name) {
                 $col_params = $this->getColParams($col_name);
+
+                if (!(int) $col_params['show'] || (int) $col_params['hidden'] || !(int) $col_params['available_csv']) {
+                    continue;
+                }
                 $label = $col_params['label'];
                 if (!$label && $col_params['field']) {
                     $field_object = $this->object;
@@ -1408,7 +1413,7 @@ class BC_ListTable extends BC_List
                 foreach ($this->cols as $col_name) {
                     $col_params = $this->getColParams($col_name);
 
-                    if (!(int) $col_params['show'] || (int) $col_params['hidden']) {
+                    if (!(int) $col_params['show'] || (int) $col_params['hidden'] || !(int) $col_params['available_csv']) {
                         continue;
                     }
 
@@ -1435,6 +1440,7 @@ class BC_ListTable extends BC_List
                         $content = $col_params['value'];
                     }
 
+                    $content = str_replace(array('<br>', '<br/>', '<br />'), ' ', $content);
                     $content = str_replace($separator, '', $content);
                     $content = str_replace("\n", ' ', $content);
 

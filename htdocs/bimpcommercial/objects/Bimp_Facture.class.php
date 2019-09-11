@@ -1187,6 +1187,9 @@ class Bimp_Facture extends BimpComm
             $html .= $label . '</span>';
         }
 
+        global $modeCSV;
+        if($modeCSV)
+            return html_entity_decode ($label);
         return $html;
     }
 

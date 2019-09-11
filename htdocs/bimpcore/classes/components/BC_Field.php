@@ -648,11 +648,20 @@ class BC_Field extends BimpComponent
 
     public function getNoHtmlValue($option)
     {
+        global $modeCSV;
+        $modeCSV= true;
         $options = array();
 
         if (isset($this->params['values']) && !empty($this->params['values'])) {
             if ($option === 'label') {
                 if (isset($this->params['values'][$this->value])) {
+                    $value = $this->params['values'][$this->value];
+                    if(is_array($value)){
+                        if(isset($value['label']))
+                            return $value['label'];
+                        else
+                            return 'Pas de label (' . $this->value . ')';
+                    }
                     return $this->params['values'][$this->value];
                 } else {
                     return 'Non défini (' . $this->value . ')';
@@ -734,23 +743,25 @@ class BC_Field extends BimpComponent
                 case 'percent':
                 case 'float':
                 case 'qty':
+                    $return = '';
                     if ($option === 'string') {
                         switch ($this->params['type']) {
                             case 'money':
-                                return BimpTools::displayMoneyValue($this->value);
+                                $return = BimpTools::displayMoneyValue($this->value);
 
                             case 'percent':
-                                return BimpTools::displayFloatValue($this->value) . ' %';
+                                $return = BimpTools::displayFloatValue($this->value) . ' %';
 
                             case 'float':
                             case 'qty':
-                                return BimpTools::displayFloatValue($this->value);
+                                $return =  BimpTools::displayFloatValue($this->value);
                         }
                     }
-                    return $this->value;
+                    $return = $this->value;
+                    return str_replace(".", ",", $return);
 
                 default:
-                    return $this->Value;
+                    return $this->value;
             }
         }
     }

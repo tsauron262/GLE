@@ -34,15 +34,6 @@ sections:
                           view:
                               panel: 1
                               object: inventory
-                    - cols: 
-                        - type: custom
-                          col_lg: 12
-                          col_md: 6
-                          col_sm: 12
-                          custom: 
-                              callback:
-                                  method: renderAddInputs
-                                  object: inventory
                     - cols:
                         - type: custom
                           custom: 

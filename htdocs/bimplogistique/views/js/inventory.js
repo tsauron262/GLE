@@ -69,3 +69,6 @@ function reloadEquipmentList(id) {
         id_object: 0
     }));
 }
+
+//reloadObjectListCustom(list_id, callback) {
+//    var $list = $('#' + list_id);

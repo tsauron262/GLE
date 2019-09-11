@@ -51,7 +51,9 @@ class Inventory extends BimpDolObject {
                 $buttons[] = array(
                     'label' => 'Commencer l\'inventaire',
                     'icon' => 'fas_box',
-                    'onclick' => $this->getJsActionOnclick('setSatus', array("status" => self::STATUS_OPEN), array())
+                    'onclick' => $this->getJsActionOnclick('setSatus', array("status" => self::STATUS_OPEN), array(
+                        'success_callback' => 'function(result) {bimp_reloadPage();}')
+                    )
                 );
             }
         }
@@ -62,7 +64,10 @@ class Inventory extends BimpDolObject {
                 $buttons[] = array(
                     'label' => 'Fermer l\'inventaire',
                     'icon' => 'fas_window-close',
-                    'onclick' => $this->getJsActionOnclick('setSatus', array("status" => self::STATUS_CLOSED), array('form_name' => 'confirm_close'))
+                    'onclick' => $this->getJsActionOnclick('setSatus', array("status" => self::STATUS_CLOSED), array(
+                        'form_name' => 'confirm_close',
+                        'success_callback' => 'function(result) {bimp_reloadPage();}'
+                        ))
                 );
             }
         }
@@ -185,6 +190,8 @@ class Inventory extends BimpDolObject {
         $diff_eq = $this->getDiffEquipment();
         // Excès
         $nb_en_trop = count($diff_eq['ids_en_trop']);
+        
+        print_r($diff_eq['ids_en_trop']);
         if ($nb_en_trop == 1)
             $errors[] = 'Merci de traiter le cas du produit sérialisé en excès.';
         if ($nb_en_trop > 1)
@@ -261,6 +268,7 @@ class Inventory extends BimpDolObject {
         $list->addJoin('bl_inventory_det', 'a.rowid = inv_det.fk_product AND inv_det.fk_inventory = ' . $this->getData('id'), 'inv_det');
         $list->addJoin('product_stock', 'a.rowid = ps.fk_product AND ps.fk_entrepot = ' . $this->getData('fk_warehouse'), 'ps');
         $html .= $list->renderHtml();
+        
 
         return $html;
     }
@@ -273,7 +281,7 @@ class Inventory extends BimpDolObject {
         );
 
         $sql = ' SELECT SUM(inv_det.qty) as qty FROM ' . MAIN_DB_PREFIX . 'bl_inventory_det as inv_det';
-        $sql .= ' WHERE inv_det.fk_product = a.rowid AND inv_det.fk_inventory = ' . $this->getData('id') . ' AND inv_det.error = 0';
+        $sql .= ' WHERE inv_det.fk_product = a.rowid AND inv_det.fk_inventory = ' . $this->getData('id');
         $sql .= ' GROUP BY inv_det.fk_product';
 
         $product = BimpObject::getInstance('bimpcore', 'Bimp_Product');
@@ -311,7 +319,6 @@ class Inventory extends BimpDolObject {
                 $html .= BimpRender::renderAlerts($error);
             }
         }
-
 
         foreach ($this->getErrorsProduct() as $error) {
             $html .= BimpRender::renderAlerts($error, 'warning');
@@ -396,7 +403,8 @@ class Inventory extends BimpDolObject {
         $result = $this->db->db->query($sql);
         if ($result and mysqli_num_rows($result) > 0) {
             while ($obj = $this->db->db->fetch_object($result)) {
-                $ids_scanned[$obj->fk_equipment] = $obj->fk_equipment;
+                if((int) $obj->fk_equipment > 0)
+                    $ids_scanned[$obj->fk_equipment] = $obj->fk_equipment;
             }
         }
 

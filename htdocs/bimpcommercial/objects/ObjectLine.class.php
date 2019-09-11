@@ -1586,7 +1586,11 @@ class ObjectLine extends BimpObject
 
     public function displayUnitPriceHTWithRemises()
     {
-        return BimpTools::displayMoneyValue($this->getUnitPriceHTWithRemises(), 'EUR');
+        global $modeCSV;
+        if($modeCSV)
+            return $this->priceToCsv ($this->getUnitPriceHTWithRemises());
+        else
+            return BimpTools::displayMoneyValue($this->getUnitPriceHTWithRemises(), 'EUR');
     }
 
     // Gestion ligne dolibarr:

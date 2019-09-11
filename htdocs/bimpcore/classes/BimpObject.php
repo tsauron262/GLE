@@ -6649,4 +6649,8 @@ class BimpObject extends BimpCache
         if ($user->admin)
             return 1;
     }
+    
+    public static function priceToCsv($price){
+        return str_replace(array(" ", 'EUR', '€'), "", str_replace(".", ",", $price));
+    }
 }

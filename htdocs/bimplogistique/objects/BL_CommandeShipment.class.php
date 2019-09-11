@@ -34,7 +34,7 @@ class BL_CommandeShipment extends BimpObject
 
         return (int) parent::isEditable($force_edit);
     }
-    
+
     //getShipmentQty de commmande line
 
     public function isActionAllowed($action, &$errors = array())
@@ -115,11 +115,10 @@ class BL_CommandeShipment extends BimpObject
     public function canSetAction($action)
     {
 
-        switch($action) {
+        switch ($action) {
             case 'editFacture':
                 $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
                 return $facture->can('create');
-            
         }
         return (int) parent::canSetAction($action);
     }
@@ -330,14 +329,14 @@ class BL_CommandeShipment extends BimpObject
             $prev_shipments = array();
             $filtre = array();
             $filtre['id'] = array(
-                    'operator' => '<>',
-                    'value'    => $this->id
-                );
-            if($this->getData('date_shipped'))
+                'operator' => '<>',
+                'value'    => $this->id
+            );
+            if ($this->getData('date_shipped'))
                 $filtre['date_shipped'] = array(
-                        'operator' => '<',
-                        'value'    => $this->getData('date_shipped')
-                    );
+                    'operator' => '<',
+                    'value'    => $this->getData('date_shipped')
+                );
             $list = $this->getList($filtre, null, null, 'num_livraison', 'asc', 'array', array('id'));
 
             foreach ($list as $item) {
@@ -463,6 +462,22 @@ class BL_CommandeShipment extends BimpObject
         }
 
         return '';
+    }
+
+    public function getBulkFactureEntrepot()
+    {
+        $shipments_list = BimpTools::getPostFieldValue('id_objects', array());
+        
+        if (is_array($shipments_list) && !empty($shipments_list)) {
+            foreach ($shipments_list as $id_shipment) {
+                $shipment = BimpCache::getBimpObjectInstance($this->module, $this->object_name, (int) $id_shipment);
+                if ((int) $shipment->getData('id_entrepot')) {
+                    return (int) $shipment->getData('id_entrepot') . '<br/>';
+                }
+            }
+        }
+
+        return 0;
     }
 
     // Affichages: 
@@ -693,7 +708,7 @@ class BL_CommandeShipment extends BimpObject
     public function renderCommandeLinesForm()
     {
         $html = '';
-        
+
         $commande = $this->getParentInstance();
 
         if (!BimpObject::objectLoaded($commande)) {
@@ -1371,7 +1386,7 @@ class BL_CommandeShipment extends BimpObject
         $body_html = '';
         $has_lines = false;
         $colspan = 5;
-        
+
         $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
         $canEdit = $facture->can('create');
 
@@ -2233,9 +2248,7 @@ class BL_CommandeShipment extends BimpObject
 
         return $errors;
     }
-    
-    
-    
+
     public function getCustomFilterValueLabel($field_name, $value)
     {
         switch ($field_name) {
@@ -2245,7 +2258,7 @@ class BL_CommandeShipment extends BimpObject
                     return $product->getRef();
                 }
                 break;
-                
+
             case 'id_commercial':
                 $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $value);
                 if (BimpObject::ObjectLoaded($user)) {
@@ -2295,5 +2308,4 @@ class BL_CommandeShipment extends BimpObject
 
         parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors);
     }
-
 }

@@ -117,11 +117,13 @@ class importProd extends importCat {
             $this->traiteChamp("status_buy", ($this->isProdActif($ln)) ? "1" : "0");
 
 
+            $ln['ArtLib'] = utf8_decode($ln['ArtLib']);
             $this->traiteChamp("label", $ln['ArtLib']);
             
             $this->traiteChamp("pmp", $ln['ArtLastPA'], true);
             
             $desc = ($ln['ArtGCmtTxt'] != "")? $ln['ArtGCmtTxt'] : $ln['ArtLib'];
+            
             
             $this->traiteChamp("description", $desc);
             $this->traiteChamp("ref", $ln['ArtCode']);

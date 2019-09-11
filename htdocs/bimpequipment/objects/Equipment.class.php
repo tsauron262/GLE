@@ -179,6 +179,7 @@ class Equipment extends BimpObject
 //                }
 //            }
 //        }
+//        
         // Check retour en commande client: 
         if ((int) $this->getData('id_commande_line_return')) {
             if (!isset($allowed['id_commande_line_return']) || ((int) $allowed['id_commande_line_return'] !== (int) $this->getData('id_commande_line_return'))) {

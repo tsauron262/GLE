@@ -3521,8 +3521,10 @@ class BimpObject extends BimpCache
             $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
         } elseif (!$force_delete && !$this->can("delete")) {
             $errors[] = 'Vous n\'avez pas la permission de supprimer ' . $this->getLabel('this');
-        } elseif (!$this->isDeletable($force_delete)) {
-            $errors[] = 'Il n\'est pas possible de supprimer ' . $this->getLabel('this');
+        } elseif (!$this->isDeletable($force_delete, $errors)) {
+            if (empty($errors)) {
+                $errors[] = 'Il n\'est pas possible de supprimer ' . $this->getLabel('this');
+            }
         }
 
         if (count($errors)) {

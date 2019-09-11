@@ -264,7 +264,7 @@ class InvoicePDF extends BimpDocumentPDF
             }
         }
 
-        if (empty($this->object->mode_reglement_code) || $this->object->mode_reglement_code == 'VIR') {
+//        if (empty($this->object->mode_reglement_code) || $this->object->mode_reglement_code == 'VIR') {
             if (!empty($this->object->fk_account) || !empty($this->object->fk_bank) || !empty($conf->global->FACTURE_RIB_NUMBER)) {
                 $html .= '<tr><td>';
                 $bankid = (empty($this->object->fk_account) ? $conf->global->FACTURE_RIB_NUMBER : $this->object->fk_account);
@@ -278,7 +278,7 @@ class InvoicePDF extends BimpDocumentPDF
                 $html .= $this->getBankHtml($account);
                 $html .= '</td></tr>';
             }
-        }
+//        }
 
         $html .= '</table></div>';
 

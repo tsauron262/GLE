@@ -53,7 +53,7 @@ class importProdFourn extends import8sens {
                 while ($ln3 = $this->db->fetch_object($sql3)){
                     if($ln3->fk_product == $prodId){
                         if($ln['Pro1TaxTaux'] == "")
-                            $ln['Pro1TaxTaux'] = 0;
+                            $ln['Pro1TaxTaux'] = 20;
                         $ok = true;
                         $achanger = "";
                         if($ln3->ref_fourn != $ln['ProCode'])

@@ -139,13 +139,18 @@ class BE_Place extends BimpObject
         return $name;
     }
 
-    public function displayPlace()
+    public function displayPlace($with_type = false)
     {
+        $html = '';
         $type = $this->getData('type');
         if (!is_null($type)) {
             switch ($type) {
                 case self::BE_PLACE_CLIENT:
-                    return $this->displayData('id_client', 'nom_url');
+                    if ($with_type) {
+                        $html .= 'Client: ';
+                    }
+                    $html .= $this->displayData('id_client', 'nom_url');
+                    break;
 
                 case self::BE_PLACE_ENTREPOT:
                 case self::BE_PLACE_PRESENTATION:
@@ -153,17 +158,26 @@ class BE_Place extends BimpObject
                 case self::BE_PLACE_SAV:
                 case self::BE_PLACE_PRET:
                 case self::BE_PLACE_INTERNE:
-                    return $this->displayData('id_entrepot', 'nom_url');
+                    if ($with_type) {
+                        $html .= 'Entrepôt: ';
+                    }
+                    $html .= $this->displayData('id_entrepot', 'nom_url');
+                    break;
 
                 case self::BE_PLACE_USER:
-                    return $this->displayData('id_user', 'nom_url');
+                    if ($with_type) {
+                        $html .= 'Utilisateur: ';
+                    }
+                    $html .= $this->displayData('id_user', 'nom_url');
+                    break;
 
                 case self::BE_PLACE_FREE:
-                    return $this->getData('place_name');
+                    $html .= $this->getData('place_name');
+                    break;
             }
         }
 
-        return '';
+        return $html;
     }
 
     // Overrides: 

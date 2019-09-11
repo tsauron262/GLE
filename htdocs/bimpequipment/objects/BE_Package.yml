@@ -138,6 +138,34 @@ views:
                   list: 
                       children: places
             
+filters_panel: 
+    default: 
+        filters: 
+            ref: 
+                field: ref
+            labe: 
+                field: label
+            position_place: 
+                field: position
+                child: places
+            type_place: 
+                field: type
+                child: places
+            place_entrepot: 
+                field: id_entrepot
+                child: places
+            place_user: 
+                field: id_user
+                child: places
+            place_client: 
+                field: id_client
+                child: places
+            place_infos: 
+                field: infos
+                child: places
+            place_date:
+                field: date
+                child: places
 lists:
     default: 
         checkboxes: 1
@@ -162,6 +190,17 @@ lists:
                 field: ref
             label: 
                 field: label
+            place_type: 
+                label: Type emplacement
+                value: 
+                    callback: displayCurrentPlaceType
+                search: 
+                    type: values
+                    input: 
+                        type: select
+                        options: 
+                            options: 
+                                array: typesPlace
             place: 
                 label: Emplacement
                 value: 

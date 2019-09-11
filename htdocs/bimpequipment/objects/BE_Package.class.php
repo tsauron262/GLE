@@ -34,7 +34,12 @@ class BE_Package extends BimpObject
 
     public function isDeletable($force_delete = false, &$errors = array())
     {
-        // todo: checker si produits / équipements présents 
+        if ($this->hasEquipments() || $this->hasProducts()) {
+            $errors[] = 'Ce package ne peut pas être supprimé car il contient encore des produits ou des équipements';
+            return 0;
+        }
+
+        return 1;
     }
 
     public function isActionAllowed($action, &$errors = array())
@@ -44,6 +49,38 @@ class BE_Package extends BimpObject
         }
 
         return parent::isActionAllowed($action, $errors);
+    }
+
+    public function hasEquipments()
+    {
+        if ($this->isLoaded()) {
+            $sql = 'SELECT COUNT(id) as num FROM ' . MAIN_DB_PREFIX . 'be_equipment ';
+            $sql .= ' WHERE `id_package` = ' . (int) $this->id;
+
+            $result = $this->db->executeS($sql, 'array');
+
+            if (isset($result[0]['num']) && (int) $result[0]['num'] > 0) {
+                return 1;
+            }
+        }
+
+        return 0;
+    }
+
+    public function hasProducts()
+    {
+        if ($this->isLoaded()) {
+            $sql = 'SELECT COUNT(id) as num FROM ' . MAIN_DB_PREFIX . 'be_package_product ';
+            $sql .= ' WHERE `id_package` = ' . (int) $this->id;
+
+            $result = $this->db->executeS($sql, 'array');
+
+            if (isset($result[0]['num']) && (int) $result[0]['num'] > 0) {
+                return 1;
+            }
+        }
+
+        return 0;
     }
 
     // Getters: 
@@ -92,6 +129,96 @@ class BE_Package extends BimpObject
         }
 
         return $this->getChildrenObjects('products');
+    }
+
+    public static function getTypesPlaceArray()
+    {
+        BimpObject::loadClass('bimpequipment', 'BE_Place');
+
+        return BE_Place::$types;
+    }
+
+    // Getters filtres: 
+
+    public function getPlace_typeSearchFilters(&$filters, $value, &$joins = array(), $main_alias = 'a')
+    {
+        if ((string) $value) {
+            $joins['placeType'] = array(
+                'table' => 'be_package_place',
+                'alias' => 'placeType',
+                'on'    => 'placeType.id_package = ' . $main_alias . '.id'
+            );
+
+            $filters['placeType.position'] = 1;
+            $filters['or_placeType'] = array(
+                'or' => array(
+                    'placeType.type' => array(
+                        'part_type' => 'middle',
+                        'part'      => $value
+                    )
+                )
+            );
+        }
+    }
+
+    public function getPlaceSearchFilters(&$filters, $value, &$joins = array(), $main_alias = 'a')
+    {
+        if ((string) $value) {
+            $joins['place'] = array(
+                'table' => 'be_package_place',
+                'alias' => 'place',
+                'on'    => 'place.id_package = ' . $main_alias . '.id'
+            );
+            $joins['place_entrepot'] = array(
+                'table' => 'entrepot',
+                'alias' => 'place_entrepot',
+                'on'    => 'place_entrepot.rowid = place.id_entrepot'
+            );
+            $joins['place_user'] = array(
+                'table' => 'user',
+                'alias' => 'place_user',
+                'on'    => 'place_user.rowid = place.id_user'
+            );
+            $joins['place_client'] = array(
+                'table' => 'societe',
+                'alias' => 'place_client',
+                'on'    => 'place_client.rowid = place.id_client'
+            );
+
+            $filters['place.position'] = 1;
+            $filters['or_place'] = array(
+                'or' => array(
+                    'place.place_name'         => array(
+                        'part_type' => 'middle',
+                        'part'      => $value
+                    ),
+                    'place_entrepot.lieu'      => array(
+                        'part_type' => 'middle',
+                        'part'      => $value
+                    ),
+                    'place_entrepot.ref'       => array(
+                        'part_type' => 'middle',
+                        'part'      => $value
+                    ),
+                    'place_user.firstname'     => array(
+                        'part_type' => 'middle',
+                        'part'      => $value
+                    ),
+                    'place_user.lastname'      => array(
+                        'part_type' => 'middle',
+                        'part'      => $value
+                    ),
+                    'place_client.nom'         => array(
+                        'part_type' => 'middle',
+                        'part'      => $value
+                    ),
+                    'place_client.code_client' => array(
+                        'part_type' => 'middle',
+                        'part'      => $value
+                    ),
+                )
+            );
+        }
     }
 
     // Affichages:
@@ -167,6 +294,33 @@ class BE_Package extends BimpObject
         return $html;
     }
 
+    public function displayCurrentPlace($no_html = false)
+    {
+        if ($this->isLoaded()) {
+            $place = $this->getCurrentPlace();
+
+            if (BimpObject::objectLoaded($place)) {
+                if ($no_html) {
+                    return $place->getPlaceName();
+                } else {
+                    return $place->displayPlace();
+                }
+            }
+        }
+
+        return '';
+    }
+
+    public function displayCurrentPlaceType()
+    {
+        $place = $this->getCurrentPlace();
+        if (!is_null($place) && $place->isLoaded()) {
+            return $place->displayData("type");
+        }
+
+        return '';
+    }
+
     // Traitements:
 
     public function checkEquipments()
@@ -220,6 +374,10 @@ class BE_Package extends BimpObject
             if (BimpObject::objectLoaded($package)) {
                 $errors[] = 'L\'équipement ' . $equipment->getNomUrl(0, 1, 1, 'default') . ' est déjà attribué au package ' . $package->getNomUrl(0, 1, 1, 'default');
             } else {
+                if (!$equipment->isAvailable(0, $errors)) {
+                    return $errors;
+                }
+
                 $errors = $equipment->updateField('id_package', (int) $this->id);
 
                 if (!count($errors)) {
@@ -777,7 +935,7 @@ class BE_Package extends BimpObject
         return $html;
     }
 
-    // Actions: 
+    // Actions:
 
     public function actionAddProduct($data, &$success)
     {

@@ -432,6 +432,12 @@ filters_panel:
             place_entrepot: 
                 field: id_entrepot
                 child: places
+            place_user: 
+                field: id_user
+                child: places
+            place_client: 
+                field: id_client
+                child: places
             place_infos: 
                 field: infos
                 child: places
@@ -512,8 +518,8 @@ lists:
             user_create:
                 field: user_create
             prix_achat:
-            field: prix_achat
-            has_total: 1
+                field: prix_achat
+                has_total: 1
 #        available: 
 #            field: available
 #            edit: 1

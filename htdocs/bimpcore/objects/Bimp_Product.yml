@@ -572,6 +572,7 @@ fields_tables:
 #            - field: price_min_ttc
 #            - field: cost_price
             - field: cur_pa_ht
+            - field: pmp
             - custom: 1
               label: Meilleur prix d'achat
               value:
@@ -837,6 +838,8 @@ lists_cols:
         field: date_valid
     fk_user_valid:
         field: fk_user_valid
+    cur_pa_ht:
+        field: cur_pa_ht
                 
 lists: 
     default: 

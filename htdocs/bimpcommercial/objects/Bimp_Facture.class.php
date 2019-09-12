@@ -99,7 +99,7 @@ class Bimp_Facture extends BimpComm
         }
 
         return parent::canSetAction($action);
-    }
+    } 
 
     // Getters booléens:
 

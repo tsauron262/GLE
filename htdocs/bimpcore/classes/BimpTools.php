@@ -715,9 +715,15 @@ class BimpTools
         }
     }
 
-    public static function getNextRef($table, $field, $prefix)
+    public static function getNextRef($table, $field, $prefix = '')
     {
-        $max = BimpCache::getBdb()->getMax($table, $field);
+        if ($prefix) {
+            $where = '`' . $field . '` LIKE \'' . $prefix . '%\'';
+        } else {
+            $where = '1';
+        }
+        
+        $max = BimpCache::getBdb()->getMax($table, $field, $where);
 
         if ((string) $max) {
             if (preg_match('/^' . $prefix . '([0-9]+)$/', $max, $matches)) {

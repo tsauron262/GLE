@@ -25,6 +25,10 @@ objects:
         instance: 
             bimp_object: BE_Package
             
+    immos: 
+        instance: 
+            bimp_object: BE_ProductImmos
+            
 sections:
     - type: tabs
       tabs: 
@@ -42,6 +46,14 @@ sections:
                 - type: list
                   list: 
                       object: package
+                      
+        immos: 
+            label: Immobilisations
+            sections: 
+                - type: list
+                  list: 
+                      object: immos
+                      name: immos
 #        reseaux:
 #            label: Réseaux
 #            sections:

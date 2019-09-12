@@ -1,0 +1,63 @@
+extends: 
+    module: bimpcore
+    object_name: Bimp_Product
+    
+controller: unset
+header_list_name: unset
+header_edit_form: unset
+header_delete_btn: unset
+list_page_url: unset
+
+labels: 
+    name: Total équipment
+    name_plur: Total équipements
+    
+fields: 
+    qty: 
+        label: Qté
+        type: int
+        decimals: 0
+        searchable: 0
+        sortable: 0
+        
+    total_achats: 
+        label: Total achats
+        type: money
+        decimals: 2
+        searchable: 0
+        sortable: 0
+    
+filters_panels: 
+    immos: 
+        filters: 
+            ref: 
+                field: ref
+            label: 
+                field: label
+            place_type:
+                custom: 1
+                label: Type emplacement
+                field: place_type
+                type: check_list
+                items: 
+                    array: placeTypes
+lists_cols: 
+    qty_immos: 
+        field: qty
+    total_achats_immos: 
+        field: total_achats
+        
+lists: 
+    immos: 
+        configurable: 1
+        filters_panel: immos
+        sort_field: rowid
+        sort_way: asc
+        n: 10
+        list_filters: 
+            callback: getImmosListFilters
+        cols: 
+            ref: 
+            label:
+            qty_immos: 
+            total_achats_immos:

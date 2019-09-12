@@ -45,7 +45,6 @@ forms:
     default: 
         rows: 
             - field: label
-            - field: ref
             
     edit_product: 
         rows: 

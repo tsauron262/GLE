@@ -259,13 +259,27 @@ class BimpDb
     {
         $sql = 'SELECT MAX(`' . $field . '`) as max FROM ' . MAIN_DB_PREFIX . $table . ' WHERE ' . $where;
 
-        $result = $this->db->executeS($sql, 'array');
+        $result = $this->executeS($sql, 'array');
 
         if (isset($result[0]['max'])) {
             return $result[0]['max'];
         }
 
         return null;
+    }
+
+    public function getSum($table, $field, $where = '1')
+    {
+        $sql = 'SELECT SUM(`' . $field . '`) as sum FROM ' . MAIN_DB_PREFIX . $table;
+        $sql .= ' WHERE ' . $where;
+
+        $result = $this->executeS($sql, 'array');
+
+        if (isset($result[0]['sum'])) {
+            return $result[0]['sum'];
+        }
+
+        return 0;
     }
 
     public function getValues($table, $field, $where, $limit = null)

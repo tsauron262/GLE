@@ -2153,7 +2153,7 @@ class BimpObject extends BimpCache
     // Getters Listes
 
     public function getList($filters = array(), $n = null, $p = null, $order_by = 'id', $order_way = 'DESC', $return = 'array', $return_fields = null, $joins = array(), $extra_order_by = null, $extra_order_way = 'ASC')
-    {
+    {        
         $table = $this->getTable();
         $primary = $this->getPrimary();
 
@@ -5257,7 +5257,7 @@ class BimpObject extends BimpCache
             $content = '';
 
             $col_params = $bc_list->getColParams($col_name);
-            
+
             if (!(int) $col_params['show'] || (int) $col_params['hidden'] || !(int) $col_params['available_csv']) {
                 continue;
             }
@@ -6487,6 +6487,25 @@ class BimpObject extends BimpCache
             $errors[] = 'Paramètres de la liste absent';
         }
 
+        $dir = DOL_DATA_ROOT . '/bimpcore';
+        $dir_error = BimpTools::makeDirectories(array(
+                    'lists_csv' => array(
+                        $this->module => array(
+                            $this->object_name => $list_name
+                        )
+                    )
+                        ), $dir);
+
+        if ($dir_error) {
+            $errors[] = $dir_error;
+        } else {
+            $dir .= '/lists_csv/' . $this->module . '/' . $this->object_name . '/' . $list_name;
+
+            if (!file_exists($dir)) {
+                $errors[] = 'Echec de la création du dossier "' . $dir . '"';
+            }
+        }
+
         if (!count($errors)) {
             $post_temp = $_POST;
             $_POST = $list_data;
@@ -6501,26 +6520,11 @@ class BimpObject extends BimpCache
                 $content = $list->renderCsvContent($separator, $col_options, $headers, $errors);
 
                 if ($content && !count($errors)) {
-                    $dir = DOL_DATA_ROOT . '/bimpcore';
-                    BimpTools::makeDirectories(array(
-                        'lists_csv' => array(
-                            $this->module => array(
-                                $this->object_name => $list_name
-                            )
-                        )
-                            ), $dir);
-
-                    $dir .= '/lists_csv/' . $this->module . '/' . $this->object_name . '/' . $list_name;
-
-                    if (!file_exists($dir)) {
-                        $errors[] = 'Echec de la création du dossier "' . $dir . '"';
+                    if (!file_put_contents($dir . '/' . $file_name . '.csv', $content)) {
+                        $errors[] = 'Echec de la création du fichier "' . $file_name . '"';
                     } else {
-                        if (!file_put_contents($dir . '/' . $file_name . '.csv', $content)) {
-                            $errors[] = 'Echec de la création du fichier "' . $file_name . '"';
-                        } else {
-                            $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . htmlentities('lists_csv/' . $this->module . '/' . $this->object_name . '/' . $list_name . '/' . $file_name . '.csv');
-                            $success_callback = 'window.open(\'' . $url . '\')';
-                        }
+                        $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . htmlentities('lists_csv/' . $this->module . '/' . $this->object_name . '/' . $list_name . '/' . $file_name . '.csv');
+                        $success_callback = 'window.open(\'' . $url . '\')';
                     }
                 } elseif (!count($errors)) {
                     $warnings[] = 'Aucun contenu à générer trouvé';
@@ -6649,8 +6653,9 @@ class BimpObject extends BimpCache
         if ($user->admin)
             return 1;
     }
-    
-    public static function priceToCsv($price){
+
+    public static function priceToCsv($price)
+    {
         return str_replace(array(" ", 'EUR', '€'), "", str_replace(".", ",", $price));
     }
 }

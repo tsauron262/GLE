@@ -99,7 +99,7 @@ class Bimp_Facture extends BimpComm
         }
 
         return parent::canSetAction($action);
-    }
+    } 
 
     // Getters booléens:
 
@@ -262,6 +262,15 @@ class Bimp_Facture extends BimpComm
             case 'addAcompte':
                 if ($type !== Facture::TYPE_STANDARD) {
                     $errors[] = 'Ajout d\'accompte possible uniquement pour les factures standards';
+                    return 0;
+                }
+                if ((int) $this->dol_object->paye) {
+                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' est classé' . $this->e() . ' "payé' . $this->e() . '"';
+                    return 0;
+                }
+
+                if (!in_array($status, array(0, 1))) {
+                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' n\'est pas au statut "brouillon" ou "validé' . $this->e() . '"';
                     return 0;
                 }
                 return (int) parent::isActionAllowed($action, $errors);
@@ -1188,8 +1197,8 @@ class Bimp_Facture extends BimpComm
         }
 
         global $modeCSV;
-        if($modeCSV)
-            return html_entity_decode ($label);
+        if ($modeCSV)
+            return html_entity_decode($label);
         return $html;
     }
 

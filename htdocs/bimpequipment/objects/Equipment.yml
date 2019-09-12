@@ -271,36 +271,45 @@ fields_tables:
         title: Informations
         icon: info-circle
         rows:
-            - label: Produit
-              value: 
-                  callback: 
-                      method: displayProduct
-                      params: 
-                          - card
             - field: serial
+            - field: ref_immo
             - label: Disponibilité
               value: 
                   callback: displayAvailability
-#            - field: return_available
-#              edit: 1
+            - label: Réservé / transfert en cours
+              value: 
+                  callback: displayReserved
             - field: date_purchase
             - field: prix_achat
             - field: achat_tva_tx
             - field: prix_vente_except 
             - field: warranty_type
             - field: date_warranty_end
-            - label: Réservé / transfert en cours
+            - field: note
+              edit: 1
+    
+    objects: 
+        panel: 1
+        title: Objets liés
+        icon: fas_link
+        rows: 
+            - label: Produit
               value: 
-                  callback: displayReserved
+                  callback: 
+                      method: displayProduct
+                      params: 
+                          - card
+            - field: id_package
+              display: nom_url
+              show:
+                  field_value: id_package
             - label: Type d'élément d'origine
               field: origin_element
             - field: origin_id_element
               label: Element d'origine
-            - field: note
-              edit: 1
             - association: contrats
               edit: 1
-              
+    
     vente: 
         show: 
             callback: isSold
@@ -332,6 +341,10 @@ views:
                     col_md: 5
                     col_sm: 12
                     rows: 
+                        - cols: 
+                            - type: fields_table
+                              fields_table: 
+                                  name: objects
                         - cols: 
                             - type: fields_table
                               fields_table:
@@ -423,6 +436,14 @@ filters_panel:
                 field: date_vente
             type: 
                 field: type
+            in_package: 
+                custom: 1
+                field: in_package
+                label: inclus dans un package
+                type: check_list
+                items: 
+                    0: NON
+                    1: OUI                
             place_position: 
                 field: position
                 child: places
@@ -445,9 +466,68 @@ filters_panel:
                 field: date
                 child: places
             
+lists_cols: 
+    id:
+        label: ID
+        field: id
+        min_width: 60px
+    ref_immo: 
+        field: ref_immo
+    type: 
+        field: type
+    product: 
+        label: Produit
+        value: 
+            callback: 
+                method: displayProduct
+                params: 
+                    - nom_url
+        search: 
+            type: value_part
+    serial:
+        field: serial
+    place: 
+        label: Emplacement
+        value:
+            callback: displayCurrentPlace
+        search: 
+            type: value_part
+    place2: 
+        label: Type emplacement
+        value:
+            callback: displayCurrentPlaceType
+        search: 
+            type: values
+            input: 
+                type: select
+                options: 
+                    options: 
+                        array: typesPlace
+
+    package: 
+        field: id_package
+        display: nom_url
+    reserved: 
+        label: Réservé / transfert en cours
+        value: 
+            callback: displayReserved
+        search: 
+            type: values
+            input: 
+                type: select
+                options: 
+                    options: 
+                        array: hasReservations
+    user_create:
+        field: user_create
+    prix_achat:
+        field: prix_achat
+        has_total: 1
+
 lists:
     default: 
         checkboxes: 1
+        configurable: 1
         bulk_actions: 
             - label: Supprimer les équipements sélectionnés
               icon: fas_trash-alt
@@ -469,60 +549,13 @@ lists:
         total_row: 1
         modal_view: default
         cols:
-            id:
-                label: ID
-                field: id
-                min_width: 60px
-            type: 
-                field: type
             product: 
-                label: Produit
-                value: 
-                    callback: 
-                        method: displayProduct
-                        params: 
-                            - nom_url
-                search: 
-                    type: value_part
             serial:
-                field: serial
-            place: 
-                label: Emplacement
-                value:
-                    callback: displayCurrentPlace
-                search: 
-                    type: value_part
             place2: 
-                label: Type emplacement
-                value:
-                    callback: displayCurrentPlaceType
-                search: 
-                    type: values
-                    input: 
-                        type: select
-                        options: 
-                            options: 
-                                array: typesPlace
-
-            reserved: 
-                label: Réservé / transfert en cours
-                value: 
-                    callback: displayReserved
-                search: 
-                    type: values
-                    input: 
-                        type: select
-                        options: 
-                            options: 
-                                array: hasReservations
+            place: 
+            package: 
             user_create:
-                field: user_create
             prix_achat:
-                field: prix_achat
-                has_total: 1
-#        available: 
-#            field: available
-#            edit: 1
 
     package: 
         enable_search: 0
@@ -538,7 +571,7 @@ lists:
         extra_btn: 
             callback: getPackageListExtraBtn
         cols: 
-            serial: 
+            pack_serial: 
                 label: N° de série
                 value: 
                     callback: 
@@ -548,7 +581,7 @@ lists:
                             - 1
                             - 1
                             - default
-            product: 
+            pack_product: 
                 label: Produit
                 value: 
                     callback: 

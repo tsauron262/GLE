@@ -312,6 +312,9 @@ forms:
             id_entrepot: 
                 show: 1
                 required: 1
+                value: 
+                    field_value: unset
+                    callback: getBulkFactureEntrepot
             ef_type: 
                 show: 1
                 required: 1

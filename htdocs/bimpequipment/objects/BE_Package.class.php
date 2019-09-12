@@ -1194,4 +1194,19 @@ class BE_Package extends BimpObject
             'success_callback' => 'triggerObjectChange(\'bimpequipment\', \'BE_PackageProduct\', 0)'
         );
     }
+
+    // Overrides :
+
+    public function create(&$warnings = array(), $force_create = false)
+    {
+        $ref = BimpTools::getNextRef($this->getTable(), 'ref', 'PKG');
+
+        if (!$ref) {
+            return array('Echec attribution d\'une nouvelle référence');
+        }
+
+        $this->set('ref', $ref);
+
+        return parent::create($warnings, $force_create);
+    }
 }

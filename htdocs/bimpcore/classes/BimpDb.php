@@ -93,20 +93,20 @@ class BimpDb
 
     public function execute($sql)
     {
-        $transac = (stripos(trim($sql), "SELECT") === 0)? 0 : 1;
-        if($transac)
+        $transac = (stripos(trim($sql), "SELECT") === 0) ? 0 : 1;
+        if ($transac)
             $this->db->begin();
 
         $result = $this->db->query($sql);
 
-        if($transac){
+        if ($transac) {
             if ($result > 0) {
                 $this->db->commit();
             } else {
                 $this->db->rollback();
             }
         }
-        if(!$result)
+        if (!$result)
             $this->logSqlError();
 
         return $result;
@@ -252,6 +252,19 @@ class BimpDb
             return $obj->$field;
         }
         $this->db->free($result);
+        return null;
+    }
+
+    public function getMax($table, $field, $where = '1')
+    {
+        $sql = 'SELECT MAX(`' . $field . '`) as max FROM ' . MAIN_DB_PREFIX . $table . ' WHERE ' . $where;
+
+        $result = $this->db->executeS($sql, 'array');
+
+        if (isset($result[0]['max'])) {
+            return $result[0]['max'];
+        }
+
         return null;
     }
 

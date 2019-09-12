@@ -715,6 +715,23 @@ class BimpTools
         }
     }
 
+    public static function getNextRef($table, $field, $prefix)
+    {
+        $max = BimpCache::getBdb()->getMax($table, $field);
+
+        if ((string) $max) {
+            if (preg_match('/^' . $prefix . '([0-9]+)$/', $max, $matches)) {
+                $num = (int) $matches[1] + 1;
+            } else {
+                $num = 1;
+            }
+        } else {
+            $num = 1;
+        }
+
+        return $prefix . $num;
+    }
+
     // Gestion fichiers:
 
     public static function makeDirectories($dir_tree, $root_dir = null)
@@ -2051,44 +2068,45 @@ class BimpTools
         self::$context = $context;
         $_SESSION['context'] = $context;
     }
-    
-    public static function bloqueDebloque($type, $bloque = true){
+
+    public static function bloqueDebloque($type, $bloque = true)
+    {
         $file = static::getFileBloqued($type);
-        if($bloque)
-            file_put_contents ($file, "Yes");
-        elseif(is_file($file))
-            unlink ($file);
+        if ($bloque)
+            file_put_contents($file, "Yes");
+        elseif (is_file($file))
+            unlink($file);
     }
-    
-    public static function getFileBloqued($type){
-        $folder = DOL_DATA_ROOT.'/bloqueFile/';
-        if(!is_dir($folder))
-            mkdir ($folder);
-        return $folder.$type.".txt";
-        
+
+    public static function getFileBloqued($type)
+    {
+        $folder = DOL_DATA_ROOT . '/bloqueFile/';
+        if (!is_dir($folder))
+            mkdir($folder);
+        return $folder . $type . ".txt";
     }
-    
-    public static function isBloqued($type){
+
+    public static function isBloqued($type)
+    {
         $file = static::getFileBloqued($type);
         return (file_exists($file));
     }
-    
-    public static function sleppIfBloqued($type, $nb = 0){
+
+    public static function sleppIfBloqued($type, $nb = 0)
+    {
         $nbMax = 10;
         $nb++;
-        if(static::isBloqued($type)){
-            if($nb < $nbMax){
+        if (static::isBloqued($type)) {
+            if ($nb < $nbMax) {
                 sleep(1);
                 return static::sleppIfBloqued($type, $nb);
-            }
-            else{
-                $text = "Attention bloquage de plus de ".$nbMax." secondes voir pour type : ".$type;
-                dol_syslog("ATTENTION ".$text,3);
-                mailSyn2("Bloquage anormal", "dev@bimp.fr", "admin@bimp.fr", "Attention : ".$text);
+            } else {
+                $text = "Attention bloquage de plus de " . $nbMax . " secondes voir pour type : " . $type;
+                dol_syslog("ATTENTION " . $text, 3);
+                mailSyn2("Bloquage anormal", "dev@bimp.fr", "admin@bimp.fr", "Attention : " . $text);
                 die($text);
             }
-        }
-        else
+        } else
             return 0;
     }
 }

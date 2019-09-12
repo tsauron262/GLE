@@ -682,6 +682,27 @@ class Equipment extends BimpObject
         return $equipments;
     }
 
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array())
+    {
+        switch ($field_name) {
+            case 'in_package':
+                if (empty($values) || (in_array(0, $values) && in_array(1, $values))) {
+                    // On ne filtre pas...
+                    break;
+                }
+                if (in_array(0, $values)) {
+                    $filters['a.id_package'] = 0;
+                }
+                if (in_array(1, $values)) {
+                    $filters['a.id_package'] = array(
+                        'operator' => '>',
+                        'value'    => 0
+                    );
+                }
+                break;
+        }
+    }
+
     // Affichage: 
 
     public function displayOriginElement()

@@ -3521,8 +3521,10 @@ class BimpObject extends BimpCache
             $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
         } elseif (!$force_delete && !$this->can("delete")) {
             $errors[] = 'Vous n\'avez pas la permission de supprimer ' . $this->getLabel('this');
-        } elseif (!$this->isDeletable($force_delete)) {
-            $errors[] = 'Il n\'est pas possible de supprimer ' . $this->getLabel('this');
+        } elseif (!$this->isDeletable($force_delete, $errors)) {
+            if (empty($errors)) {
+                $errors[] = 'Il n\'est pas possible de supprimer ' . $this->getLabel('this');
+            }
         }
 
         if (count($errors)) {
@@ -4740,9 +4742,7 @@ class BimpObject extends BimpCache
                 $html .= '>';
                 $html .= BimpRender::renderIcon('fas_edit');
                 $html .= '</span>';
-            } /*else {
-                $html .= 'FAIL';
-            }*/
+            }
 
             if ((int) $this->params['header_delete_btn'] && $this->isDeletable() && $this->can('delete')) {
                 $html .= '<span class="btn btn-danger bs-popover" onclick="' . $this->getJsDeleteOnClick(array(
@@ -5257,8 +5257,8 @@ class BimpObject extends BimpCache
             $content = '';
 
             $col_params = $bc_list->getColParams($col_name);
-
-            if (!(int) $col_params['show'] || (int) $col_params['hidden']) {
+            
+            if (!(int) $col_params['show'] || (int) $col_params['hidden'] || !(int) $col_params['available_csv']) {
                 continue;
             }
 
@@ -5460,6 +5460,13 @@ class BimpObject extends BimpCache
         } else {
             $js .= 'null';
         }
+        $js .= ', ';
+        if (isset($params['no_triggers'])) {
+            $js .= ((int) $params['no_triggers'] ? 'true' : 'false');
+        } else {
+            $js .= 'false';
+        }
+
         $js .= ');';
 
         return $js;
@@ -6641,5 +6648,9 @@ class BimpObject extends BimpCache
 //        return 0;
         if ($user->admin)
             return 1;
+    }
+    
+    public static function priceToCsv($price){
+        return str_replace(array(" ", 'EUR', '€'), "", str_replace(".", ",", $price));
     }
 }

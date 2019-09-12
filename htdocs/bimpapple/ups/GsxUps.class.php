@@ -496,45 +496,53 @@ class GsxUps
         if (isset($response['RegisterPartsForBulkReturnResponse']['bulkPartsRegistrationData'])) {
             $html = '<p class="confirmation">Enregistrement de l\'expédition effectuée avec succès</p>';
             $response = $response['RegisterPartsForBulkReturnResponse']['bulkPartsRegistrationData'];
-            if (isset($response['packingList']) && !empty($response['packingList'])) {
-                $fileDir = $ship->getFilesDir();
-                $fileCheck = false;
-                if ($fileDir) {
-                    if (file_put_contents($fileDir . '/PackingList.pdf', $response['packingList']))
-                        $fileCheck = true;
-                }
-                if (!$fileCheck)
-                    $html .= '<p class="error">Echec de la création du fichier PDF pour la liste de composants</p>';
 
-                // to remove:
-//                if (!file_exists(dirname(__FILE__) . "/labels/" . $ship->upsInfos['trackingNumber']))
-//                    mkdir(dirname(__FILE__) . "/labels/" . $ship->upsInfos['trackingNumber']);
-//                $filePath = dirname(__FILE__) . "/labels/" . $ship->upsInfos['trackingNumber'] . '/packinglist.pdf';
-//                file_put_contents($filePath, $response['packingList']);
-                // ---------
+            
+            if(isset($response['messages']) && $response['messages'] != ""){
+                    $html .= '<p class="error">Echec :'.$response['messages'].'</p>';
             }
-            if (isset($response['bulkReturnId']) && !empty($response['bulkReturnId']))
-                $ship->gsxInfos['bulkReturnId'] = $response['bulkReturnId'];
-            if (isset($response['trackingURL']) && !empty($response['trackingURL']))
-                $ship->gsxInfos['trackingURL'] = $response['trackingURL'];
-            if (isset($response['confirmationMessage']) && !empty($response['confirmationMessage']))
-                $ship->gsxInfos['confirmation'] = $response['confirmationMessage'];
+            else{
+            
+                if (isset($response['packingList']) && !empty($response['packingList'])) {
+                    $fileDir = $ship->getFilesDir();
+                    $fileCheck = false;
+                    if ($fileDir) {
+                        if (file_put_contents($fileDir . '/PackingList.pdf', $response['packingList']))
+                            $fileCheck = true;
+                    }
+                    if (!$fileCheck)
+                        $html .= '<p class="error">Echec de la création du fichier PDF pour la liste de composants</p>';
 
-            if (!$ship->update()) {
-                $html .= '<p class="error">Echec de l\'enregistrement des informations retournées par GSX</p>';
-                if (count($ship->errors)) {
-                    $html .= $ship->displayErrors();
+                    // to remove:
+    //                if (!file_exists(dirname(__FILE__) . "/labels/" . $ship->upsInfos['trackingNumber']))
+    //                    mkdir(dirname(__FILE__) . "/labels/" . $ship->upsInfos['trackingNumber']);
+    //                $filePath = dirname(__FILE__) . "/labels/" . $ship->upsInfos['trackingNumber'] . '/packinglist.pdf';
+    //                file_put_contents($filePath, $response['packingList']);
+                    // ---------
                 }
-                return array(
-                    'ok'   => 0,
-                    'html' => $html
-                );
-            } else {
-                $html .= $ship->getInfosHtml();
-                return array(
-                    'ok'   => 1,
-                    'html' => $html
-                );
+                if (isset($response['bulkReturnId']) && !empty($response['bulkReturnId']))
+                    $ship->gsxInfos['bulkReturnId'] = $response['bulkReturnId'];
+                if (isset($response['trackingURL']) && !empty($response['trackingURL']))
+                    $ship->gsxInfos['trackingURL'] = $response['trackingURL'];
+                if (isset($response['confirmationMessage']) && !empty($response['confirmationMessage']))
+                    $ship->gsxInfos['confirmation'] = $response['confirmationMessage'];
+
+                if (!$ship->update()) {
+                    $html .= '<p class="error">Echec de l\'enregistrement des informations retournées par GSX</p>';
+                    if (count($ship->errors)) {
+                        $html .= $ship->displayErrors();
+                    }
+                    return array(
+                        'ok'   => 0,
+                        'html' => $html
+                    );
+                } else {
+                    $html .= $ship->getInfosHtml();
+                    return array(
+                        'ok'   => 1,
+                        'html' => $html
+                    );
+                }
             }
         }
 
@@ -547,7 +555,7 @@ class GsxUps
 
         return array(
             'ok'   => 0,
-            'html' => '<p class="error">Pas de réponse</p>'
+            'html' => $html.'<p class="error">Pas de réponse</p>'
         );
     }
 

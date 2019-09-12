@@ -806,6 +806,12 @@ input[type=text].large_input {
 
     .singleLineFormContent {
         padding: 5px 12px; 
+
+        select,
+        .select2-container {
+            width: 250px !important;
+            max-width: 100%!important;
+        }
     }
 
     .inputContainer {

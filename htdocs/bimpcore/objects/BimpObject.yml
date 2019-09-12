@@ -241,7 +241,7 @@ objects:
             id_object: 
                 field_value: id_vente
                 
-#    Bimp Equipment object: 
+#    Bimp Equipment objects: 
     equipment: 
         relation: hasOne
         delete: 0
@@ -251,6 +251,16 @@ objects:
                 name: Equipment
             id_object: 
                 field_value: id_equipment
+                
+    package: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpequipment
+                name: BE_Package
+            id_object: 
+                field_value: id_package
                 
 #    Bimp Reservation objects: 
     reservation: 

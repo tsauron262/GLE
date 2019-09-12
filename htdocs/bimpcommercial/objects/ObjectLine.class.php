@@ -1344,7 +1344,11 @@ class ObjectLine extends BimpObject
 
                         $product = $this->getProduct();
                         if (BimpObject::objectLoaded($product)) {
-                            $text .= $this->displayLineData('id_product', 0, 'nom_url', $no_html);
+                            global $modeCSV;
+                            if($modeCSV)
+                                $text .= $this->displayLineData('id_product', 0, 'ref', $no_html);
+                            else
+                                $text .= $this->displayLineData('id_product', 0, 'nom_url', $no_html);
 
                             $product_label = BimpTools::cleanString($product->getData('label'));
 
@@ -1582,7 +1586,11 @@ class ObjectLine extends BimpObject
 
     public function displayUnitPriceHTWithRemises()
     {
-        return BimpTools::displayMoneyValue($this->getUnitPriceHTWithRemises(), 'EUR');
+        global $modeCSV;
+        if($modeCSV)
+            return $this->priceToCsv ($this->getUnitPriceHTWithRemises());
+        else
+            return BimpTools::displayMoneyValue($this->getUnitPriceHTWithRemises(), 'EUR');
     }
 
     // Gestion ligne dolibarr:

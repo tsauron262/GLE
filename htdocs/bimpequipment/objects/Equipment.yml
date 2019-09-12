@@ -3,6 +3,8 @@ controller: equipment
 icon: desktop
 
 header_list_name: default
+header_edit_form: default
+
 list_page_url: 
     controller: index
             
@@ -132,6 +134,10 @@ fields:
             type: value_part
             part_type: beginning
         
+    ref_immo: 
+        label: Réf. immobilisation
+        default_value: ''
+        
 #   A suppr.
     available: 
         label: Disponible à la vente
@@ -252,6 +258,12 @@ fields:
         required: 0
         sortable: 0
         searchable: 0
+        
+    id_package: 
+        label: Package
+        type: id_object
+        object: package
+        default_value: 0
 
 fields_tables: 
     default: 
@@ -259,36 +271,45 @@ fields_tables:
         title: Informations
         icon: info-circle
         rows:
-            - label: Produit
-              value: 
-                  callback: 
-                      method: displayProduct
-                      params: 
-                          - card
             - field: serial
+            - field: ref_immo
             - label: Disponibilité
               value: 
                   callback: displayAvailability
-#            - field: return_available
-#              edit: 1
+            - label: Réservé / transfert en cours
+              value: 
+                  callback: displayReserved
             - field: date_purchase
             - field: prix_achat
             - field: achat_tva_tx
             - field: prix_vente_except 
             - field: warranty_type
             - field: date_warranty_end
-            - label: Réservé / transfert en cours
+            - field: note
+              edit: 1
+    
+    objects: 
+        panel: 1
+        title: Objets liés
+        icon: fas_link
+        rows: 
+            - label: Produit
               value: 
-                  callback: displayReserved
+                  callback: 
+                      method: displayProduct
+                      params: 
+                          - card
+            - field: id_package
+              display: nom_url
+              show:
+                  field_value: id_package
             - label: Type d'élément d'origine
               field: origin_element
             - field: origin_id_element
               label: Element d'origine
-            - field: note
-              edit: 1
             - association: contrats
               edit: 1
-              
+    
     vente: 
         show: 
             callback: isSold
@@ -320,6 +341,10 @@ views:
                     col_md: 5
                     col_sm: 12
                     rows: 
+                        - cols: 
+                            - type: fields_table
+                              fields_table: 
+                                  name: objects
                         - cols: 
                             - type: fields_table
                               fields_table:
@@ -411,6 +436,14 @@ filters_panel:
                 field: date_vente
             type: 
                 field: type
+            in_package: 
+                custom: 1
+                field: in_package
+                label: inclus dans un package
+                type: check_list
+                items: 
+                    0: NON
+                    1: OUI                
             place_position: 
                 field: position
                 child: places
@@ -420,6 +453,12 @@ filters_panel:
             place_entrepot: 
                 field: id_entrepot
                 child: places
+            place_user: 
+                field: id_user
+                child: places
+            place_client: 
+                field: id_client
+                child: places
             place_infos: 
                 field: infos
                 child: places
@@ -427,84 +466,130 @@ filters_panel:
                 field: date
                 child: places
             
-list:
-    filters_panel: default
-    checkboxes: 1
-    bulk_actions: 
-        - label: Supprimer les équipements sélectionnés
-          icon: fas_trash-alt
-          onclick: deleteSelectedObjects('list_id', $(this));
-          btn_class: deleteSelectedObjects
-    filters_panel: default
-    sort_field: date_create
-    sort_way: desc
-    n: 10
-    list_filters: 
-        callback:
-            method: getListFilters
-    add_form_name: default
-    edit_btn: 1
-    update_btn: 1
-    delete_btn: 1
-    view_btn: 1
-    page_btn: 1
-    total_row: 1
-    modal_view: default
-    cols:
-        id:
-            label: ID
-            field: id
-            min_width: 60px
-        type: 
-            field: type
-        product: 
-            label: Produit
-            value: 
-                callback: 
-                    method: displayProduct
-                    params: 
-                        - nom_url
-            search: 
-                type: value_part
-        serial:
-            field: serial
-        place: 
-            label: Emplacement
-            value:
-                callback: displayCurrentPlace
-            search: 
-                type: value_part
-        place2: 
-            label: Type emplacement
-            value:
-                callback: displayCurrentPlaceType
-            search: 
-                type: values
-                input: 
-                    type: select
+lists_cols: 
+    id:
+        label: ID
+        field: id
+        min_width: 60px
+    ref_immo: 
+        field: ref_immo
+    type: 
+        field: type
+    product: 
+        label: Produit
+        value: 
+            callback: 
+                method: displayProduct
+                params: 
+                    - nom_url
+        search: 
+            type: value_part
+    serial:
+        field: serial
+    place: 
+        label: Emplacement
+        value:
+            callback: displayCurrentPlace
+        search: 
+            type: value_part
+    place2: 
+        label: Type emplacement
+        value:
+            callback: displayCurrentPlaceType
+        search: 
+            type: values
+            input: 
+                type: select
+                options: 
                     options: 
-                        options: 
-                            array: typesPlace
-                
-        reserved: 
-            label: Réservé / transfert en cours
-            value: 
-                callback: displayReserved
-            search: 
-                type: values
-                input: 
-                    type: select
+                        array: typesPlace
+
+    package: 
+        field: id_package
+        display: nom_url
+    reserved: 
+        label: Réservé / transfert en cours
+        value: 
+            callback: displayReserved
+        search: 
+            type: values
+            input: 
+                type: select
+                options: 
                     options: 
-                        options: 
-                            array: hasReservations
-        user_create:
-            field: user_create
-        prix_achat:
-            field: prix_achat
-            has_total: 1
-#        available: 
-#            field: available
-#            edit: 1
+                        array: hasReservations
+    user_create:
+        field: user_create
+    prix_achat:
+        field: prix_achat
+        has_total: 1
+
+lists:
+    default: 
+        checkboxes: 1
+        configurable: 1
+        bulk_actions: 
+            - label: Supprimer les équipements sélectionnés
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this));
+              btn_class: deleteSelectedObjects
+        filters_panel: default
+        sort_field: date_create
+        sort_way: desc
+        n: 10
+        list_filters: 
+            callback:
+                method: getListFilters
+        add_form_name: default
+        edit_btn: 1
+        update_btn: 1
+        delete_btn: 1
+        view_btn: 1
+        page_btn: 1
+        total_row: 1
+        modal_view: default
+        cols:
+            product: 
+            serial:
+            place2: 
+            place: 
+            package: 
+            user_create:
+            prix_achat:
+
+    package: 
+        enable_search: 0
+        enable_sort: 0
+        checkboxes: 1
+        bulk_actions: 
+            - label: Retirer les équipements sélectionnés
+              icon: fas_trash-alt
+              onclick: removeSelectedEquipmentsFromPackage('list_id', $(this));
+        sort_field: serial
+        sort_way: asc
+        n: 20
+        extra_btn: 
+            callback: getPackageListExtraBtn
+        cols: 
+            pack_serial: 
+                label: N° de série
+                value: 
+                    callback: 
+                        method: getNomUrl
+                        params: 
+                            - 1
+                            - 1
+                            - 1
+                            - default
+            pack_product: 
+                label: Produit
+                value: 
+                    callback: 
+                        method: displayProduct
+                        params: 
+                            - nom_url
+                            - 0
+                            - 1
     
 searches:
     default: 

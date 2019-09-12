@@ -15573,12 +15573,17 @@ input[type=text].large_input {
   /* line 807, ../scss/bimpcore/_form.scss */
   .singleLineForm .singleLineFormContent {
     padding: 5px 12px; }
-  /* line 811, ../scss/bimpcore/_form.scss */
+    /* line 810, ../scss/bimpcore/_form.scss */
+    .singleLineForm .singleLineFormContent select,
+    .singleLineForm .singleLineFormContent .select2-container {
+      width: 250px !important;
+      max-width: 100% !important; }
+  /* line 817, ../scss/bimpcore/_form.scss */
   .singleLineForm .inputContainer {
     display: inline-block;
     padding: 4px 0;
     margin-right: 20px; }
-    /* line 816, ../scss/bimpcore/_form.scss */
+    /* line 822, ../scss/bimpcore/_form.scss */
     .singleLineForm .inputContainer .inputHelp {
       display: none; }
 

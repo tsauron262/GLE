@@ -13,8 +13,10 @@ function onEMailSelectChange($select) {
                 } else {
                     $inputContainer.find('.mail_custom_value').find('input').attr('name', field_name + '_add_value_custom');
                     $select.attr('name', field_name + '_add_value');
-                    $inputContainer.find('.selectMailHelp').slideDown(250);
-                    $inputContainer.find('.mail_custom_value').slideUp(250);
+                    if($inputContainer.find('.emails_select.principal').val() !== 'custom'){
+                        $inputContainer.find('.selectMailHelp').slideDown(250);
+                        $inputContainer.find('.mail_custom_value').slideUp(250);
+                    }
                 }
             }
         }

@@ -1299,7 +1299,11 @@ class BimpComm extends BimpDolObject
                 BimpTools::loadDolClass('contact');
                 $user = new User($this->db->db);
                 if ($user->fetch((int) $contacts[0]) > 0) {
-                    return $user->getNomUrl(1) . BimpRender::renderObjectIcons($user);
+                    global $modeCSV, $langs;
+                    if($modeCSV)
+                        return $user->getFullName($langs);
+                    else
+                        return $user->getNomUrl(1) . BimpRender::renderObjectIcons($user);
                 }
             }
         }

@@ -1,1 +1,207 @@
+table: be_package
+controller: package
+icon: fas_boxes
 
+header_list_name: default
+header_edit_form: default
+
+list_page_url: 
+    controller: index
+    url_params: 
+        tab: packages
+            
+labels:
+    name: Package
+
+objects:
+    places: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: BE_PackagePlace
+            
+    products: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: BE_PackageProduct
+                
+fields: 
+    label: 
+        label: Libellé
+    
+    ref: 
+        label: Référence
+        
+    products: 
+        label: Produits
+        type: json
+        
+    equipments: 
+        label: Equipements
+        type: json
+        
+forms: 
+    default: 
+        rows: 
+            - field: label
+            - field: ref
+            
+    edit_product: 
+        rows: 
+            - custom: 1
+              label: Quantité
+              data_type: qty
+              input_name: qty
+              input: 
+                  type: qty
+              min: 1
+              decimals: 0
+              
+            - custom: 1
+              label: Entrepôt d'origine / de destination
+              data_type: id
+              input_name: id_entrepot
+              input: 
+                  type: search_entrepot
+                  include_empty: 1
+              value: 0
+        
+    remove_product: 
+        rows: 
+            - custom: 1
+              label: Produit(s) à retirer
+              input_name: products
+              content: 
+                  callback: displayProductsToRemove
+            - custom: 1
+              label: Entrepôt de destination
+              data_type: id
+              input_name: id_entrepot_dest
+              input: 
+                  type: search_entrepot
+                  include_empty: 1
+              value: 0
+              
+    remove_equipment: 
+        rows: 
+            - custom: 1
+              label: Equipement(s) à retirer
+              input_name: equipments
+              content: 
+                  callback: displayEquipmentsToRemove
+            - custom: 1
+              label: Conserver l'emplacement du package
+              input_name: keep_place
+              value: 0
+              data_type: bool
+              input: 
+                  type: toggle
+            - custom: 1
+              label: Emplacement de destination
+              input_name: place
+              content: 
+                  callback: renderEquipmentPlaceForm
+              display_if: 
+                  field_name: keep_place
+                  show_values: 0
+            
+views:
+    default: 
+        rows: 
+            - cols: 
+                - type: object_header
+            - cols: 
+                - type: custom
+                  col_lg: 6
+                  col_md: 6
+                  custom: 
+                      callback: renderProductsQuickForm
+                - type: custom
+                  col_lg: 6
+                  col_md: 6
+                  custom: 
+                      callback: renderEquipmentsQuickForm
+            - cols: 
+                - type: custom
+                  col_lg: 6
+                  col_md: 6
+                  custom: 
+                      callback: renderProductsList
+                - type: custom
+                  col_lg: 6
+                  col_md: 6
+                  custom: 
+                      callback: renderEquipmentsList
+            - cols: 
+                - type: list
+                  list: 
+                      children: places
+            
+filters_panel: 
+    default: 
+        filters: 
+            ref: 
+                field: ref
+            labe: 
+                field: label
+            position_place: 
+                field: position
+                child: places
+            type_place: 
+                field: type
+                child: places
+            place_entrepot: 
+                field: id_entrepot
+                child: places
+            place_user: 
+                field: id_user
+                child: places
+            place_client: 
+                field: id_client
+                child: places
+            place_infos: 
+                field: infos
+                child: places
+            place_date:
+                field: date
+                child: places
+lists:
+    default: 
+        checkboxes: 1
+        bulk_actions: 
+            - label: Supprimer les packages sélectionnés
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this));
+              btn_class: deleteSelectedObjects
+        filters_panel: default
+        sort_field: date_create
+        sort_way: desc
+        n: 10
+        add_form_name: default
+        edit_btn: 1
+        update_btn: 1
+        delete_btn: 1
+        view_btn: 1
+        page_btn: 1
+        modal_view: default
+        cols:
+            ref: 
+                field: ref
+            label: 
+                field: label
+            place_type: 
+                label: Type emplacement
+                value: 
+                    callback: displayCurrentPlaceType
+                search: 
+                    type: values
+                    input: 
+                        type: select
+                        options: 
+                            options: 
+                                array: typesPlace
+            place: 
+                label: Emplacement
+                value: 
+                    callback: displayCurrentPlace

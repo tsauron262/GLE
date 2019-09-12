@@ -179,6 +179,7 @@ class Equipment extends BimpObject
 //                }
 //            }
 //        }
+//        
         // Check retour en commande client: 
         if ((int) $this->getData('id_commande_line_return')) {
             if (!isset($allowed['id_commande_line_return']) || ((int) $allowed['id_commande_line_return'] !== (int) $this->getData('id_commande_line_return'))) {
@@ -362,11 +363,21 @@ class Equipment extends BimpObject
         $buttons = array();
 
         if ($this->isLoaded()) {
-            $buttons[] = array(
-                'label'   => 'Retirer',
-                'icon'    => 'fas_trash',
-                'onclick' => 'removeEquipmentFromPackage(' . $this->id . ')'
-            );
+            $package = $this->getChildObject('package');
+            if (BimpObject::objectLoaded($package)) {
+                if ($package->isActionAllowed('removeEquipment') && $package->canSetAction('removeEquipment')) {
+                    $buttons[] = array(
+                        'label'   => 'Retirer',
+                        'icon'    => 'fas_trash-alt',
+                        'onclick' => $package->getJsActionOnclick('removeEquipment', array(
+                            'id_equipment' => (int) $this->id
+                                ), array(
+                            'form_name'   => 'remove_equipment',
+                            'no_triggers' => true
+                        ))
+                    );
+                }
+            }
         }
 
         return $buttons;
@@ -671,6 +682,27 @@ class Equipment extends BimpObject
         return $equipments;
     }
 
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array())
+    {
+        switch ($field_name) {
+            case 'in_package':
+                if (empty($values) || (in_array(0, $values) && in_array(1, $values))) {
+                    // On ne filtre pas...
+                    break;
+                }
+                if (in_array(0, $values)) {
+                    $filters['a.id_package'] = 0;
+                }
+                if (in_array(1, $values)) {
+                    $filters['a.id_package'] = array(
+                        'operator' => '>',
+                        'value'    => 0
+                    );
+                }
+                break;
+        }
+    }
+
     // Affichage: 
 
     public function displayOriginElement()
@@ -740,10 +772,18 @@ class Equipment extends BimpObject
         return '</span class="danger">NON</span>';
     }
 
-    public function displayProduct($display_name = 'default', $no_html = false)
+    public function displayProduct($display_name = 'default', $no_html = false, $with_label = false)
     {
         if ((int) $this->getData('id_product')) {
-            return $this->displayData('id_product', $display_name, ($no_html ? 0 : 1), $no_html);
+            $html = $this->displayData('id_product', $display_name, ($no_html ? 0 : 1), $no_html);
+            if ($with_label) {
+                $product = $this->getChildObject('product');
+                if (BimpObject::objectLoaded($product)) {
+                    $html .= '<br/>' . $product->label;
+                }
+            }
+
+            return $html;
         }
 
         return $this->displayData('product_label', 'default', ($no_html ? 0 : 1), $no_html);
@@ -832,7 +872,7 @@ class Equipment extends BimpObject
                 $new_place = BimpCache::getBimpObjectInstance($this->module, 'BE_Place', $items[0]['id']);
                 $codemove = $new_place->getData('code_mvt');
                 if (is_null($codemove) || !$codemove) {
-                    $codemove = dol_print_date(dol_now(), 'EQ' . (int) $this->id . '_PLACE' . (int) $new_place->id);
+                    $codemove = 'EQ' . (int) $this->id . '_PLACE' . (int) $new_place->id;
                 }
                 $new_place_infos = $new_place->getData('infos');
                 $label = ($new_place_infos ? $new_place_infos . ' - ' : '') . 'Produit "' . $product->ref . '" - serial: "' . $this->getData('serial') . '"';
@@ -874,7 +914,10 @@ class Equipment extends BimpObject
                             $prev_place_element = 'entrepot';
                             $prev_place_id_element = (int) $prev_place->getData('id_entrepot');
                             if ((int) $prev_place->getData('type') === BE_Place::BE_PLACE_ENTREPOT) {
-                                $product->correct_stock($user, $prev_place_id_element, 1, 1, $label, 0, $codemove, $new_place_element, $new_place_id_element);
+                                if ($product->correct_stock($user, $prev_place_id_element, 1, 1, $label, 0, $codemove, $new_place_element, $new_place_id_element) <= 0) {
+                                    $msg = 'Echec de la mise à jour du stock pour le produit "' . $product->ref . ' - ' . $product->label . '" (ID: ' . $product->id . ')';
+                                    dol_syslog('[ERREUR STOCK] ' . $msg . ' - Nouvel emplacement équipement #' . $this->id . ' - Produit #' . $product->id . ' - Qté à retirer: 1 - Entrepôt #' . $prev_place_id_element, LOG_ERR);
+                                }
                             }
                             break;
 
@@ -895,7 +938,10 @@ class Equipment extends BimpObject
                 }
 
                 if ((int) $new_place->getData('type') === BE_Place::BE_PLACE_ENTREPOT) {
-                    $product->correct_stock($user, $new_place_id_element, 1, 0, $label, 0, $codemove, $prev_place_element, $prev_place_id_element);
+                    if ($product->correct_stock($user, $new_place_id_element, 1, 0, $label, 0, $codemove, $prev_place_element, $prev_place_id_element) <= 0) {
+                        $msg = 'Echec de la mise à jour du stock pour le produit "' . $product->ref . ' - ' . $product->label . '" (ID: ' . $product->id . ')';
+                        dol_syslog('[ERREUR STOCK] ' . $msg . ' - Nouvel emplacement équipement #' . $this->id . ' - Produit #' . $product->id . ' - Qté à ajouter: 1 - Entrepôt #' . $new_place_id_element, LOG_ERR);
+                    }
                 }
             }
 

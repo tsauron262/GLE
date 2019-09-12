@@ -190,11 +190,15 @@ function setObjectNewStatus($button, object_data, new_status, extra_data, $resul
     });
 }
 
-function setObjectAction($button, object_data, action, extra_data, form_name, $resultContainer, successCallback, confirm_msg, on_form_submit) {
+function setObjectAction($button, object_data, action, extra_data, form_name, $resultContainer, successCallback, confirm_msg, on_form_submit, no_triggers) {
     if (typeof (confirm_msg) === 'string') {
         if (!confirm(confirm_msg.replace(/&quote;/g, '"'))) {
             return;
         }
+    }
+
+    if (typeof (no_triggers) === 'undefined') {
+        no_triggers = false;
     }
 
     if (typeof (extra_data) === 'undefined') {
@@ -261,7 +265,7 @@ function setObjectAction($button, object_data, action, extra_data, form_name, $r
                             if (typeof (successCallback) === 'function') {
                                 successCallback(result);
                             }
-                        });
+                        }, null, null, no_triggers);
                     }
                 });
             }
@@ -284,17 +288,23 @@ function setObjectAction($button, object_data, action, extra_data, form_name, $r
             id_object: object_data.id_object,
             display_processing: true,
             processing_padding: 10,
+            append_html: true,
             success: function (result, bimpAjax) {
                 if (typeof (successCallback) === 'function') {
                     successCallback(result);
                 }
-                if (typeof (result.success_callback) !== 'string' ||
-                        !/window\.location/.test(result.success_callback)) {
-                    $('body').trigger($.Event('objectChange', {
-                        module: bimpAjax.module,
-                        object_name: bimpAjax.object_name,
-                        id_object: bimpAjax.id_object
-                    }));
+
+                if (!no_triggers) {
+                    if (typeof (result.success_callback) !== 'string' ||
+                            !/window\.location/.test(result.success_callback)) {
+                        if (!$.isOk($resultContainer) || (typeof (result.html) === 'undefined') || !result.html) {
+                            $('body').trigger($.Event('objectChange', {
+                                module: bimpAjax.module,
+                                object_name: bimpAjax.object_name,
+                                id_object: bimpAjax.id_object
+                            }));
+                        }
+                    }
                 }
             }
         });

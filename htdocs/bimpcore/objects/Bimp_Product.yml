@@ -808,6 +808,22 @@ filters_panels:
                       callback: getCategoriesArray
       
 lists_cols: 
+    ref: 
+        field: ref
+    label: 
+        field: label
+    type: 
+        field: fk_product_type
+    barcode: 
+        field: barcode
+    stock: 
+        field: stock
+    price: 
+        field: price_ttc
+    tva: 
+        field: tva_tx
+    serialisable: 
+        field: serialisable
     zone_pr: 
         field: zone_pr
     validate: 
@@ -849,21 +865,13 @@ lists:
         modal_view: default
         cols: 
             ref: 
-                field: ref
             label: 
-                field: label
             type: 
-                field: fk_product_type
             barcode: 
-                field: barcode
             stock: 
-                field: stock
             price: 
-                field: price_ttc
             tva: 
-                field: tva_tx
             serialisable: 
-                field: serialisable
                 
 cards: 
     default: 

@@ -409,6 +409,16 @@ class BE_Package extends BimpObject
             return $errors;
         }
 
+        if ($product->isTypeService()) {
+            $errors[] = 'Le produit "' . $product->getRef() . '" est de type "service"';
+            return $errors;
+        }
+
+        if ($product->isSerialisable()) {
+            $errors[] = 'Le produit "' . $product->getRef() . '" est sérialisé. Veuillez ajouter les équipements via leurs numéros de série';
+            return $errors;
+        }
+
         $pp = BimpCache::findBimpObjectInstance('bimpequipment', 'BE_PackageProduct', array(
                     'id_package' => (int) $this->id,
                     'id_product' => (int) $id_product
@@ -589,6 +599,7 @@ class BE_Package extends BimpObject
                         case BE_Place::BE_PLACE_VOL:
                         case BE_Place::BE_PLACE_PRET:
                         case BE_Place::BE_PLACE_SAV:
+                        case BE_Place::BE_PLACE_INTERNE:
                             $new_place_element = 'entrepot';
                             $new_place_id_element = (int) $new_place->getData('id_entrepot');
                             break;
@@ -612,6 +623,7 @@ class BE_Package extends BimpObject
                             case BE_Place::BE_PLACE_VOL:
                             case BE_Place::BE_PLACE_PRET:
                             case BE_Place::BE_PLACE_SAV:
+                            case BE_Place::BE_PLACE_INTERNE:
                                 $prev_place_element = 'entrepot';
                                 $prev_place_id_element = (int) $prev_place->getData('id_entrepot');
                                 if ((int) $prev_place->getData('type') === BE_Place::BE_PLACE_ENTREPOT) {
@@ -681,7 +693,7 @@ class BE_Package extends BimpObject
         $id_entrepot_dest = 0;
 
         if (BimpObject::objectLoaded($place)) {
-            if (in_array((int) $place->getData('type'), BE_Place::$entrepot_types)) {
+            if ((int) $place->getData('type') === BE_Place::BE_PLACE_ENTREPOT) {
                 $id_entrepot_dest = (int) $place->getData('id_entrepot');
                 if (!$id_entrepot_dest) {
                     $errors[] = 'ID de l\'entrepôt absent pour l\'emplacement actuel du package';
@@ -739,7 +751,7 @@ class BE_Package extends BimpObject
         $id_entrepot_src = 0;
 
         if (BimpObject::objectLoaded($place)) {
-            if (in_array((int) $place->getData('type'), BE_Place::$entrepot_types)) {
+            if ((int) $place->getData('type') === BE_Place::BE_PLACE_ENTREPOT) {
                 $id_entrepot_src = (int) $place->getData('id_entrepot');
                 if (!$id_entrepot_src) {
                     $errors[] = 'ID de l\'entrepôt absent pour l\'emplacement actuel du package';

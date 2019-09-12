@@ -357,7 +357,7 @@ class BC_List extends BC_Panel
     }
 
     protected function fetchItems()
-    {        
+    {           
         $this->fetchFiltersPanelValues();
 
         if (!$this->isOk()) {
@@ -377,7 +377,7 @@ class BC_List extends BC_Panel
                 $this->mergeFilter($list_filter['name'], $list_filter['filter']);
             }
         }
-
+        
         if (!is_null($this->bc_filtersPanel)) {
             $panelFilters = array();
             $filters_errors = $this->bc_filtersPanel->getSqlFilters($panelFilters, $joins);

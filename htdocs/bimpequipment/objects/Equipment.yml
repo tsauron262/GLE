@@ -325,6 +325,7 @@ fields_tables:
             
 views:
     infos:
+        objects_change_reload: BE_Place
         edit_form: default
         delete_btn: 1
         rows:
@@ -351,6 +352,7 @@ views:
                                   name: vente
                               
     default: 
+        objects_change_reload: BE_Place
         rows: 
             - cols: 
                 - type: object_header

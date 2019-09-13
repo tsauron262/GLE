@@ -5955,6 +5955,7 @@ function getCommonSubstitutionArray($outputlangs, $onlykey=0, $exclude=null, $ob
 			$substitutionarray['__EXTRAFIELD_XXX__'] = '__EXTRAFIELD_XXX__';
 
 			$substitutionarray['__THIRDPARTY_ID__'] = '__THIRDPARTY_ID__';
+			$substitutionarray['__THIRDPARTY_CODECLI__'] = '__THIRDPARTY_CODECLI__';
 			$substitutionarray['__THIRDPARTY_NAME__'] = '__THIRDPARTY_NAME__';
 			$substitutionarray['__THIRDPARTY_EMAIL__'] = '__THIRDPARTY_EMAIL__';
 
@@ -6022,6 +6023,7 @@ function getCommonSubstitutionArray($outputlangs, $onlykey=0, $exclude=null, $ob
 			if (is_object($object) && $object->element == 'societe')
 			{
 				$substitutionarray['__THIRDPARTY_ID__'] = (is_object($object)?$object->id:'');
+				$substitutionarray['__THIRDPARTY_CODECLI__'] = (is_object($object)?$object->code_client:'');
 				$substitutionarray['__THIRDPARTY_NAME__'] = (is_object($object)?$object->name:'');
 				$substitutionarray['__THIRDPARTY_NAME_ALIAS__'] = (is_object($object)?$object->name_alias:'');
 				$substitutionarray['__THIRDPARTY_EMAIL__'] = (is_object($object)?$object->email:'');
@@ -6030,6 +6032,7 @@ function getCommonSubstitutionArray($outputlangs, $onlykey=0, $exclude=null, $ob
 			{
 				$substitutionarray['__THIRDPARTY_ID__'] = (is_object($object->thirdparty)?$object->thirdparty->id:'');
 				$substitutionarray['__THIRDPARTY_NAME__'] = (is_object($object->thirdparty)?$object->thirdparty->name:'');
+				$substitutionarray['__THIRDPARTY_CODECLI__'] = (is_object($object->thirdparty)?$object->thirdparty->code_client:'');
 				$substitutionarray['__THIRDPARTY_NAME_ALIAS__'] = (is_object($object->thirdparty)?$object->thirdparty->name_alias:'');
 				$substitutionarray['__THIRDPARTY_EMAIL__'] = (is_object($object->thirdparty)?$object->thirdparty->email:'');
 			}

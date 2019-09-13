@@ -782,7 +782,7 @@ class Bimp_Propal extends BimpComm
                 return 0;
 
             case 'modify':
-                return $this->can("edit");
+                return ($user->admin);//$this->can("edit");
 
             case 'createOrder':
                 $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande');

@@ -1,0 +1,22 @@
+title: Inventaires
+bootstrap: 1
+    
+objects: 
+    inventory:
+        instance: 
+            bimp_object: Inventory
+            
+    inventoryline:
+        instance: 
+            bimp_object: inventoryLine
+            
+sections:
+    - type: tabs
+      tabs: 
+        default:
+            label: Inventaires
+            sections:
+                - type: list
+                  list: 
+                      panel: 1
+                      object: inventory

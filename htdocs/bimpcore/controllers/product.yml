@@ -12,6 +12,12 @@ objects:
             id_object:
                 request: id
 
+js: 
+    - /bimpcore/views/js/categorize.js
+    - /bimpcore/views/js/history.js
+css: 
+    - /bimpcore/views/css/product.css
+    
 sections:
     - type: object_header
       object_header: 
@@ -53,7 +59,13 @@ sections:
                 view:
                     object: produit
                     name: product_categorize
-            show: 0
+          - id: history
+            title: Object référents
+            struct:
+                type: view
+                view:
+                    object: produit
+                    name: product_history
           - id: notes
             title: Notes
             struct:

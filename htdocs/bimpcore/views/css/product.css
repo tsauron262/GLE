@@ -1,0 +1,67 @@
+.customDiv {
+    border-radius: 8px;
+    margin:5px;
+    padding: 15px;
+    border:solid 1px;
+    text-align: center;
+    display: inline-block;
+    font-size: 20px;
+    border-color:black;
+    background-color:white;
+}
+
+.customLi {
+    padding:3px;
+    display: inline;
+}
+
+.unremovable {
+    background-color:#8b9fbf;
+}
+
+.navDiv {
+    color: white;
+}
+
+.fixDiv {
+    margin-top: 20px;
+}
+.errorDiv {
+    background-color: #ff887a;
+}
+
+.divClikable {
+    background-color:#636363;
+    color: white;
+}
+
+.divClikable:hover {
+    background-color: #EF7D00;
+    cursor: pointer;  
+}
+
+.divClikable:active {
+    background-color: #EF7D00;
+}
+
+.fillTheDiv {
+    display:block;
+    height:100%;
+    width:100%;
+    text-decoration: none;
+}
+
+#annex {
+
+}
+
+#choice {
+    text-align:center;
+}
+
+.categ_container {
+    padding: 10px;
+    border: 2px solid #636363;
+    border-radius: 3px;
+    background: #fff3e6;
+}

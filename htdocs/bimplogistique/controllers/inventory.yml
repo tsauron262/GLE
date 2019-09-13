@@ -1,0 +1,95 @@
+bootstrap: 1
+
+title: 
+    callback: getPageTitle
+js:
+    - /bimplogistique/views/js/inventory.js
+    
+objects:
+    inventory:
+        instance: 
+            bimp_object: Inventory
+            id_object:
+                request: id
+    inventory_line: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: InventoryLine
+
+sections:
+    - type: tabs
+      tabs: 
+        default:
+          label: Fiche
+          sections:
+           - type: object_header
+             object_header:
+                object: inventory
+           - type: view
+             view:
+                panel: 1
+                object: inventory
+           - type: custom
+             custom: 
+                  callback: 
+                      method: renderNotesList
+                      object: inventory
+                      params:
+                          - 1
+
+        scan:
+          label: Scan
+          sections:
+               - type: object_header
+                 object_header:
+                    object: inventory
+               - type: custom
+                 custom: 
+                      callback:
+                          method: renderInputs
+                          object: inventory
+               - type: list
+                 list: 
+                      name: default
+                      children: lines
+                      title: Ligne d'inventaire
+                      object: inventory
+        stock:
+          label: Stock
+          sections:
+               - type: object_header
+                 object_header:
+                    object: inventory
+               - type: custom
+                 custom: 
+                      callback:
+                          object: inventory
+                          method: renderTabs
+                          params:
+                            - renderStock
+                            - stock
+
+        diff:
+          label: Différence
+          sections:
+               - type: object_header
+                 object_header:
+                    object: inventory
+               - type: custom
+                 custom: 
+                      callback:
+                          method: renderTabs
+                          object: inventory
+                          params:
+                            - renderDiff
+                            - diff
+                          
+    - type: buttons
+      buttons:
+          - label: Liste d'inventaire
+            url:
+                controller: index
+            icon_before: chevron-left
+            classes: 
+                array: btn,btn-primary

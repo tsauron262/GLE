@@ -125,7 +125,7 @@ class Bimp_Propal extends BimpComm
 
                 // Modifier
                 if ($this->isActionAllowed('modify')) {
-                    if ($this->canSetAction('modify')) {
+                    if ($this->canSetAction('modify') && $user->admin) {
                         $buttons[] = array(
                             'label'   => 'Modifier',
                             'icon'    => 'undo',

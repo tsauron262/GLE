@@ -723,6 +723,10 @@ lists_cols:
         field: date_livraison
     total_ttc: 
         field: total_ttc
+        has_total: 1
+    total_ht: 
+        field: total_ht
+        has_total: 1
     facture: 
         field: id_facture
         display: nom_url
@@ -762,6 +766,7 @@ lists_cols:
         
 lists: 
     default: 
+        total_row: 1
         title: Liste des commandes
         icon: fas_dolly
         bulk_actions:

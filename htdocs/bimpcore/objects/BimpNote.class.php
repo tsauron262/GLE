@@ -174,7 +174,7 @@ class BimpNote extends BimpObject
         if ($this->isLoaded()) {
             if($this->getData('user_create') != $user->id)
                 $buttons[] = array(
-                    'label'   => 'Attribuer un équipement',
+                    'label'   => 'Répondre par mail',
                     'icon'    => 'far fa-paper-plane',
                     'onclick' => $this->getJsRepondre());
         }

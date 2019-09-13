@@ -1102,7 +1102,6 @@ class Bimp_Product extends BimpObject
         $html = '';
 
         if ($this->isLoaded()) {
-
             $html = BimpRender::renderPanel('Catégories hors module ', '', '', array(
                         'foldable' => true,
                         'type' => 'secondary',
@@ -1176,7 +1175,7 @@ class Bimp_Product extends BimpObject
                     'type' => 'secondary'
         ));
 
-        $html .= '<div id="selected_object">fdzafazfzafafzafazfzafazfazzafzafaz</div>';
+        $html .= '<div id="selected_object"></div>';
         
         return $html;
     }

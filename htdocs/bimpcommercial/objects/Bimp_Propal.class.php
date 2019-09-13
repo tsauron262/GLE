@@ -125,7 +125,7 @@ class Bimp_Propal extends BimpComm
 
                 // Modifier
                 if ($this->isActionAllowed('modify')) {
-                    if ($this->canSetAction('modify')) {
+                    if ($this->canSetAction('modify') && $user->admin) {
                         $buttons[] = array(
                             'label'   => 'Modifier',
                             'icon'    => 'undo',
@@ -782,7 +782,7 @@ class Bimp_Propal extends BimpComm
                 return 0;
 
             case 'modify':
-                return ($user->admin);//$this->can("edit");
+                return $this->can("edit");
 
             case 'createOrder':
                 $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande');

@@ -339,25 +339,61 @@ class BimpDocumentPDF extends BimpModelPDF
 
         $primary = BimpCore::getParam('pdf/primary', '000000');
 
-        if ($comm1 != $comm2 && $comm1 > 0 && $comm2 > 0) {
+        $label = 'Interlocuteur';
+        $usertmp = null;
+
+        if ($comm1 > 0) {
+            if ($comm2 > 0 && $comm1 != $comm2) {
+                $label .= ' client';
+            }
             $usertmp = new User($this->db);
             $usertmp->fetch($comm1);
-            $html .= '<div class="row" style="border-top: solid 1px #' . $primary . '"><span style="font-weight: bold; color: #' . $primary . ';">' . $this->langs->transnoentities('Interlocuteur') . ' client :</span><br/>' . $usertmp->getFullName($this->langs, 0, -1, 20) . '</div>';
-            $usertmp = new User($this->db);
-            $usertmp->fetch($comm2);
-            $html .= '<div class="row" style="border-top: solid 1px #' . $primary . '"><span style="font-weight: bold; color: #' . $primary . ';">' . $this->langs->transnoentities('Émetteur') . ' devis :</span><br/> ' . $usertmp->getFullName($this->langs, 0, -1, 20) . '</div>';
-        } else {
-            if ($comm1 > 0) {
-                $usertmp = new User($this->db);
-                $usertmp->fetch($comm1);
-                $html .= '<div class="row" style="border-top: solid 1px #' . $primary . '"><span style="font-weight: bold; color: #' . $primary . ';">' . $this->langs->transnoentities('Interlocuteur') . ' :</span><br/> ' . $usertmp->getFullName($this->langs, 0, -1, 25) . '</div>';
-            } elseif ($comm2 > 0) {
-                $usertmp = new User($this->db);
-                $usertmp->fetch($comm2);
-                $html .= '<div class="row" style="border-top: solid 1px #' . $primary . '"><span style="font-weight: bold; color: #' . $primary . ';">' . $this->langs->transnoentities('Interlocuteur') . ' :</span><br/> ' . $usertmp->getFullName($this->langs, 0, -1, 25) . '</div>';
+
+            if (BimpObject::objectLoaded($usertmp)) {
+                $html .= '<div class="row" style="border-top: solid 1px #' . $primary . '">';
+                $html .= '<span style="font-weight: bold; color: #' . $primary . ';">';
+                $html .= $label . ' :</span>';
+                $html .= '<br/>' . $usertmp->getFullName($this->langs, 0, -1, 20);
+                if ($usertmp->email) {
+                    $html .= '<br/><span style="font-size: 7px;">' . $usertmp->email . '</span>';
+                }
+                if ($usertmp->office_phone) {
+                    $html .= '<span style="font-size: 7px;">' . ($usertmp->email ? ' - ' : '<br/>') . $usertmp->office_phone . '</span>';
+                }
+                $html .= '</div>';
             }
         }
+
+        if ($comm2 > 0) {
+            if (!$comm1 || ($comm1 > 0 && $comm1 != $comm2)) {
+                if ($comm1 > 0) {
+                    $label = 'Emetteur devis';
+                } else {
+                    $label = 'Interlocuteur';
+                }
+
+                $usertmp = new User($this->db);
+                $usertmp->fetch($comm2);
+
+                if (BimpObject::objectLoaded($usertmp)) {
+                    $html .= '<div class="row" style="border-top: solid 1px #' . $primary . '">';
+                    $html .= '<span style="font-weight: bold; color: #' . $primary . ';">';
+                    $html .= $label . ' :</span>';
+                    $html .= '<br/>' . $usertmp->getFullName($this->langs, 0, -1, 20);
+                    if ($usertmp->email) {
+                        $html .= '<br/><span style="font-size: 7px;">' . $usertmp->email . '</span>';
+                    }
+                    if ($usertmp->office_phone) {
+                        $html .= '<span style="font-size: 7px;">' . ($usertmp->email ? ' - ' : '<br/>') . $usertmp->office_phone . '</span>';
+                    }
+                    $html .= '</div>';
+                }
+            }
+        }
+
+
         if (isset($usertmp)) {
+            // Je suis pas sûr que ça marche ça, à ce stade le fromcompany est déjà printé:
             if ($usertmp->office_phone != "")
                 $this->fromCompany->phone = $usertmp->office_phone;
             if ($usertmp->email != "")
@@ -450,14 +486,14 @@ class BimpDocumentPDF extends BimpModelPDF
         $html .= '<td style="width: 40%">';
 
         $html .= $this->getTargetInfosHtml();
-        
-        if(isset($this->contactFinal) && is_object($this->contactFinal)){
+
+        if (isset($this->contactFinal) && is_object($this->contactFinal)) {
             $html .= '<br/><div class="section_title" style="width: 40%; border-top: solid 1px #' . $primary . '; ">';
             $html .= '<span style="color: #' . $primary . '">' . ('Client Final :') . '</span></div>';
             $html .= '';
             $html .= str_replace("\n", '<br/>', pdf_build_address($this->langs, $this->fromCompany, $this->thirdparty, $this->contactFinal, !is_null($this->contactFinal) ? 1 : 0, 'target'));
         }
-            
+
         $html .= '</td>';
         $html .= '</tr>';
         $html .= '</table>';

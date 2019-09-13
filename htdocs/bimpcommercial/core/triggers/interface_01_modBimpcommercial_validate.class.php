@@ -33,6 +33,14 @@ class Interfacevalidate extends DolibarrTriggers
     public function runTrigger($action, $object, User $user, Translate $langs, Conf $conf)
     {
         global $conf;
+        
+        
+        if ($action == 'ORDER_VALIDATE' || $action == 'PROPAL_VALIDATE' || $action == 'BILL_VALIDATE') {
+            if (!is_object($object->thirdparty)) {
+                $object->thirdparty = new Societe($this->db);
+                $object->thirdparty->fetch($object->socid);
+            }
+        }
 
         if ($action == 'PROPAL_VALIDATE') {
             $bimp_object = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $object->id);
@@ -192,39 +200,8 @@ class Interfacevalidate extends DolibarrTriggers
         }
 
 
-        if (!defined("NOT_VERIF") && !BimpDebug::isActive('bimpcommercial/no_validate')) {
-            if ($action == 'ORDER_VALIDATE') {
-                $bvo = new BimpValidateOrder($user->db);
-                if ($bvo->checkValidateRights($user, $object) < 1)
-                    return -2;
-
-                //            $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
-                //            $this->errors = array_merge($this->errors, $reservation->createReservationsFromCommandeClient($idEn, $object->id));
-
-                $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande', $object->id);
-                $res_errors = $commande->createReservations();
-                if (count($res_errors)) {
-                    $this->errors[] = BimpTools::getMsgFromArray($res_errors, 'Des erreurs sont survenues lors de la création des réservations');
-                }
-                if (count($this->errors) > 0)
-                    return -2;
-            }
-
-
-            if ($action == 'PROPAL_VALIDATE' || $action == 'ORDER_VALIDATE') {
-                //attention pas de condition de regelment sur les facture acompte
-                if (in_array($object->cond_reglement_id, array(0, 39)) || $object->cond_reglement_code == "VIDE") {
-                    setEventMessages("Merci de séléctionner les conditions de réglement", null, 'errors');
-                    return -2;
-                }
-            }
-        }
 
         if ($action == 'ORDER_VALIDATE' || $action == 'PROPAL_VALIDATE' || $action == 'BILL_VALIDATE') {
-            if (!is_object($object->thirdparty)) {
-                $object->thirdparty = new Societe($this->db);
-                $object->thirdparty->fetch($object->socid);
-            }
             
             $actuel = $object->thirdparty->get_OutstandingBill();
             if($action == 'BILL_VALIDATE')
@@ -236,6 +213,24 @@ class Interfacevalidate extends DolibarrTriggers
                 $this->errors[] = $msg;
 //                setEventMessages($msg, null, 'errors');
                 return -2;
+            }
+            
+            
+            //contact facturation
+            $tabConatact = $object->getIdContact('external', 'BILLING');
+            if (count($tabConatact) < 1) {
+                    setEventMessages("Merci de precisé le contact facturation", null, 'errors');
+                    return -2;
+            }else{
+                foreach($tabConatact as $contactId){
+                    require_once(DOL_DOCUMENT_ROOT.'/contact/class/contact.class.php');
+                    $contactObj = new Contact($this->db);
+                    $contactObj->fetch($contactId);
+                    if(stripos($contactObj->email, "@") < 1){
+                        setEventMessages("Le contact facturation na pas d'email", null, 'errors');
+                        return -2;
+                    }
+                }
             }
             
             
@@ -263,6 +258,34 @@ class Interfacevalidate extends DolibarrTriggers
                 $idEn = $object->array_options['options_entrepot'];
                 if ($idEn < 1) {
                     setEventMessages("Pas d'entrepôt associé", null, 'errors');
+                    return -2;
+                }
+            }
+        }
+        
+        if (!defined("NOT_VERIF") && !BimpDebug::isActive('bimpcommercial/no_validate')) {
+            if ($action == 'ORDER_VALIDATE') {
+                $bvo = new BimpValidateOrder($user->db);
+                if ($bvo->checkValidateRights($user, $object) < 1)
+                    return -2;
+
+                //            $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
+                //            $this->errors = array_merge($this->errors, $reservation->createReservationsFromCommandeClient($idEn, $object->id));
+
+                $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande', $object->id);
+                $res_errors = $commande->createReservations();
+                if (count($res_errors)) {
+                    $this->errors[] = BimpTools::getMsgFromArray($res_errors, 'Des erreurs sont survenues lors de la création des réservations');
+                }
+                if (count($this->errors) > 0)
+                    return -2;
+            }
+
+
+            if ($action == 'PROPAL_VALIDATE' || $action == 'ORDER_VALIDATE') {
+                //attention pas de condition de regelment sur les facture acompte
+                if (in_array($object->cond_reglement_id, array(0, 39)) || $object->cond_reglement_code == "VIDE") {
+                    setEventMessages("Merci de séléctionner les conditions de réglement", null, 'errors');
                     return -2;
                 }
             }

@@ -136,6 +136,13 @@ class BC_Input extends BimpComponent
         $this->params_def['auto_save'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['extra_content'] = array('default' => '');
 
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
+
         parent::__construct($object, '', $path);
 
         if ($this->data_type === 'items_list') {
@@ -228,6 +235,8 @@ class BC_Input extends BimpComponent
                 }
                 break;
         }
+
+        $current_bc = $prev_bc;
     }
 
     public function setNamePrefix($prefix)
@@ -418,6 +427,13 @@ class BC_Input extends BimpComponent
             return $html;
         }
 
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
+
         if (is_null($this->value)) {
             $this->value = '';
         }
@@ -578,11 +594,19 @@ class BC_Input extends BimpComponent
 
         $html .= BimpInput::renderInputContainer($this->input_name, $this->value, $content, $this->name_prefix, $required, (int) $this->params['multiple'], implode(' ', $this->extraClasses), $extra_data);
 
+        $current_bc = $prev_bc;
         return $html;
     }
 
     protected function renderSearchListInput($input_name = null)
     {
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
+
         if (is_null($this->value)) {
             $this->value = '';
         }
@@ -591,6 +615,9 @@ class BC_Input extends BimpComponent
             $input_name = $this->name_prefix . $this->input_name;
         }
 
-        return BimpInput::renderSearchListInputFromConfig($this->object, $this->config_path, $input_name, $this->new_value, $this->option);
+        $html = BimpInput::renderSearchListInputFromConfig($this->object, $this->config_path, $input_name, $this->new_value, $this->option);
+
+        $current_bc = $prev_bc;
+        return $html;
     }
 }

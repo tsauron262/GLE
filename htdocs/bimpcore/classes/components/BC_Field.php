@@ -81,6 +81,13 @@ class BC_Field extends BimpComponent
         $this->edit = $edit;
         $this->force_edit = $force_edit;
 
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
+
         parent::__construct($object, $name, $path);
 
         $this->value = $this->object->getData($name);
@@ -104,6 +111,8 @@ class BC_Field extends BimpComponent
                 $this->params = array_merge($this->params, parent::fetchParams($this->config_path, self::$type_params_def['id_object']));
             }
         }
+
+        $current_bc = $prev_bc;
     }
 
     public function renderHtml()
@@ -118,9 +127,17 @@ class BC_Field extends BimpComponent
             }
         }
 
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
+
         $html = parent::renderHtml();
 
         if (count($this->errors)) {
+            $current_bc = $prev_bc;
             return $html;
         }
 
@@ -135,6 +152,8 @@ class BC_Field extends BimpComponent
             $html .= $this->displayValue();
         }
 
+
+        $current_bc = $prev_bc;
         return $html;
     }
 
@@ -143,6 +162,13 @@ class BC_Field extends BimpComponent
         if (!$this->params['show']) {
             return '';
         }
+
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
 
         if (is_null($input_path)) {
             $input_path = $this->config_path . '/input';
@@ -174,6 +200,7 @@ class BC_Field extends BimpComponent
             $html .= '</div>';
         }
 
+        $current_bc = $prev_bc;
         return $html;
     }
 
@@ -182,6 +209,13 @@ class BC_Field extends BimpComponent
         if (!$this->params['viewable'] || !$this->object->canViewField($this->name)) {
             return BimpRender::renderAlerts('Vous n\'avez pas la permission de voir ce champ', 'warning');
         }
+
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
 
         $html = '';
 
@@ -222,6 +256,7 @@ class BC_Field extends BimpComponent
             $html .= '</div>';
         }
 
+        $current_bc = $prev_bc;
         return $html;
     }
 
@@ -517,6 +552,13 @@ class BC_Field extends BimpComponent
             return '';
         }
 
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
+
         $input_id = $this->object->object_name . '_search_' . $this->name;
         $input_name = 'search_' . $this->name;
 
@@ -543,6 +585,7 @@ class BC_Field extends BimpComponent
             $content = BimpInput::renderInput($search_data['input_type'], $input_name, null, $search_data['input_options'], null, 'default', $input_id);
         }
 
+        $current_bc = $prev_bc;
         return BimpInput::renderSearchInputContainer($input_name, $search_data['search_type'], $search_data['search_on_key_up'], 1, $content, $extra_data);
     }
 
@@ -550,6 +593,13 @@ class BC_Field extends BimpComponent
 
     public function getNoHtmlOptions(&$default_value = '')
     {
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
+
         $options = array();
 
         if (isset($this->params['values']) && !empty($this->params['values'])) {
@@ -643,38 +693,50 @@ class BC_Field extends BimpComponent
             }
         }
 
+        $current_bc = $prev_bc;
         return $options;
     }
 
     public function getNoHtmlValue($option)
     {
         global $modeCSV;
-        $modeCSV= true;
-        $options = array();
+        $modeCSV = true;
+
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
+
+        $value = '';
 
         if (isset($this->params['values']) && !empty($this->params['values'])) {
             if ($option === 'label') {
                 if (isset($this->params['values'][$this->value])) {
                     $value = $this->params['values'][$this->value];
-                    if(is_array($value)){
-                        if(isset($value['label']))
-                            return $value['label'];
-                        else
-                            return 'Pas de label (' . $this->value . ')';
+                    if (is_array($value)) {
+                        if (isset($value['label'])) {
+                            $value = $value['label'];
+                        } else {
+                            $value = 'Pas de label (' . $this->value . ')';
+                        }
+                    } else {
+                        $value = $this->params['values'][$this->value];
                     }
-                    return $this->params['values'][$this->value];
                 } else {
-                    return 'Non défini (' . $this->value . ')';
+                    $value = 'Non défini (' . $this->value . ')';
                 }
+            } else {
+                $value = $this->value;
             }
-            return $this->value;
         } else {
             switch ($this->params['type']) {
                 case 'date':
                 case 'time':
                 case 'datetime':
                     if (!(string) $this->value) {
-                        return '';
+                        break;
                     }
                     $dt = new DateTime($this->value);
                     if (!(string) $option) {
@@ -690,13 +752,16 @@ class BC_Field extends BimpComponent
                                 break;
                         }
                     }
-                    return $dt->format($option);
+                    $value = $dt->format($option);
+                    break;
 
                 case 'bool':
                     if ($option === 'number') {
-                        return (int) $this->value;
+                        $value = (int) $this->value;
+                    } else {
+                        $value = ((int) $this->value ? 'OUI' : 'NON');
                     }
-                    return ((int) $this->value ? 'OUI' : 'NON');
+                    break;
 
                 case 'id_object':
                 case 'id_parent':
@@ -705,7 +770,8 @@ class BC_Field extends BimpComponent
                     }
                     switch ($option) {
                         case 'id':
-                            return $this->value;
+                            $value = $this->value;
+                            break;
 
                         case 'fullname';
                         default:
@@ -720,49 +786,56 @@ class BC_Field extends BimpComponent
                             }
 
                             if (!BimpObject::objectLoaded($obj)) {
-                                return $this->value;
+                                $value = $this->value;
+                            } else {
+                                if ($option === 'fullname') {
+                                    if (method_exists($obj, 'getName')) {
+                                        $value = $obj->getName();
+                                    } elseif (isset($obj->ref)) {
+                                        $value = $obj->ref;
+                                    } else {
+                                        $value = "N/C";
+                                    }
+                                } elseif ($obj->field_exists($option)) {
+                                    $value = $obj->getData($option);
+                                } else {
+                                    $value = $this->value;
+                                }
                             }
-
-                            if ($option === 'fullname') {
-                                if(method_exists($obj, 'getName'))
-                                    return $obj->getName();
-                                elseif(isset($obj->ref))
-                                    return $obj->ref;
-                                else
-                                    return "N/C";
-                            }
-
-                            if ($obj->field_exists($option)) {
-                                return $obj->getData($option);
-                            }
-
-                            return $this->value;
+                            break;
                     }
+                    break;
 
                 case 'money':
                 case 'percent':
                 case 'float':
                 case 'qty':
-                    $return = '';
                     if ($option === 'string') {
                         switch ($this->params['type']) {
                             case 'money':
-                                $return = BimpTools::displayMoneyValue($this->value);
+                                $value = BimpTools::displayMoneyValue($this->value);
+                                break;
 
                             case 'percent':
-                                $return = BimpTools::displayFloatValue($this->value) . ' %';
+                                $value = BimpTools::displayFloatValue($this->value) . ' %';
+                                break;
 
                             case 'float':
                             case 'qty':
-                                $return =  BimpTools::displayFloatValue($this->value);
+                                $value = BimpTools::displayFloatValue($this->value);
+                                break;
                         }
+                    } else {
+                        $value = str_replace(".", ",", $this->value);
                     }
-                    $return = $this->value;
-                    return str_replace(".", ",", $return);
+                    break;
 
                 default:
-                    return $this->value;
+                    $value = $this->value;
             }
         }
+
+        $current_bc = $prev_bc;
+        return $value;
     }
 }

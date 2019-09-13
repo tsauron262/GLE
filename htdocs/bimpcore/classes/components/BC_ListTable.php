@@ -23,26 +23,26 @@ class BC_ListTable extends BC_List
         'td_style'        => array('default' => '')
     );
     public $col_params = array(
-        'show'        => array('data_type' => 'bool', 'default' => 1),
-        'field'       => array('default' => ''),
-        'child'       => array('default' => ''),
-        'edit'        => array('data_type' => 'bool', 'default' => 0),
-        'history'     => array('data_type' => 'bool', 'default' => 0),
-        'available_csv'     => array('data_type' => 'bool', 'default' => 1),
-        'display'     => array('default' => ''),
-        'label'       => array('default' => ''),
-        'value'       => array('default' => ''),
-        'true_value'  => array('default' => null),
-        'width'       => array('default' => null),
-        'min_width'   => array('default' => null),
-        'max_width'   => array('default' => null),
-        'hidden'      => array('data_type' => 'bool', 'default' => 0),
-        'search_list' => array('data_type' => 'array', 'compile' => true, 'default' => null),
-        'field_name'  => array(),
-        'search'      => array('type' => 'definitions', 'defs_type' => 'search', 'default' => null),
-        'col_style'   => array('default' => ''),
-        'has_total'   => array('data_type' => 'bool', 'default' => 0),
-        'total_type'  => array('default' => null),
+        'show'          => array('data_type' => 'bool', 'default' => 1),
+        'field'         => array('default' => ''),
+        'child'         => array('default' => ''),
+        'edit'          => array('data_type' => 'bool', 'default' => 0),
+        'history'       => array('data_type' => 'bool', 'default' => 0),
+        'available_csv' => array('data_type' => 'bool', 'default' => 1),
+        'display'       => array('default' => ''),
+        'label'         => array('default' => ''),
+        'value'         => array('default' => ''),
+        'true_value'    => array('default' => null),
+        'width'         => array('default' => null),
+        'min_width'     => array('default' => null),
+        'max_width'     => array('default' => null),
+        'hidden'        => array('data_type' => 'bool', 'default' => 0),
+        'search_list'   => array('data_type' => 'array', 'compile' => true, 'default' => null),
+        'field_name'    => array(),
+        'search'        => array('type' => 'definitions', 'defs_type' => 'search', 'default' => null),
+        'col_style'     => array('default' => ''),
+        'has_total'     => array('data_type' => 'bool', 'default' => 0),
+        'total_type'    => array('default' => null),
     );
     protected $selected_rows = array();
     protected $totals = array();
@@ -66,6 +66,13 @@ class BC_ListTable extends BC_List
         $this->params_def['inline_view_item'] = array('data_type' => 'int', 'default' => 0);
         $this->params_def['after_list_content'] = array('default' => '');
         $this->params_def['enable_csv'] = array('data_type' => 'bool', 'default' => 1);
+
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
 
         $path = null;
 
@@ -126,6 +133,8 @@ class BC_ListTable extends BC_List
                 $this->colspan++;
             }
         }
+
+        $current_bc = $prev_bc;
     }
 
     protected function fetchCols()
@@ -196,6 +205,13 @@ class BC_ListTable extends BC_List
 
     protected function fetchRows()
     {
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
+
         if (is_null($this->items)) {
             $this->fetchItems();
         }
@@ -344,10 +360,19 @@ class BC_ListTable extends BC_List
         if ((int) $this->params['total_row']) {
             $this->fetchTotals();
         }
+
+        $current_bc = $prev_bc;
     }
 
     protected function fetchTotals()
     {
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
+
         $fields = array();
 
         foreach ($this->totals as $col_name => $params) {
@@ -377,6 +402,8 @@ class BC_ListTable extends BC_List
                 }
             }
         }
+
+        $current_bc = $prev_bc;
     }
 
     public function setSelectedRows($selected_rows)
@@ -386,6 +413,13 @@ class BC_ListTable extends BC_List
 
     public function getColParams($col_name)
     {
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
+
         $col_params = array();
         if (isset($this->params['extra_cols'][$col_name])) {
             $this->object->config->params['lists_cols'][$col_name] = $this->params['extra_cols'][$col_name];
@@ -400,6 +434,8 @@ class BC_ListTable extends BC_List
         } else {
             $col_params = $this->fetchParams($this->config_path . '/cols/' . $col_name, $this->col_params);
         }
+
+        $current_bc = $prev_bc;
         return $col_params;
     }
 
@@ -407,6 +443,13 @@ class BC_ListTable extends BC_List
 
     public function renderBeforePanelHtml()
     {
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
+
         $html = '';
         $html .= '<div id="' . $this->identifier . '_objectViewContainer" class="objectViewContainer"';
 
@@ -439,6 +482,8 @@ class BC_ListTable extends BC_List
         $html .= '</div>';
 
         $html .= '<div id="' . $this->identifier . '_objectFormContainer" class="objectFormContainer" style="display: none"></div>';
+
+        $current_bc = $prev_bc;
         return $html;
     }
 
@@ -449,6 +494,13 @@ class BC_ListTable extends BC_List
         if (count($this->errors)) {
             return parent::renderHtml();
         }
+
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
 
         $html .= $this->renderListParamsInputs();
 
@@ -508,11 +560,19 @@ class BC_ListTable extends BC_List
 
         $html .= '<div class="ajaxResultContainer" id="' . $this->identifier . '_result"></div>';
 
+        $current_bc = $prev_bc;
         return $html;
     }
 
     public function renderHtmlFooter()
     {
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
+
         $html = $this->renderBulkActions();
 
         $html .= $this->renderFooterExtraBtn();
@@ -521,11 +581,19 @@ class BC_ListTable extends BC_List
             $html .= $this->params['footer_extra_content'];
         }
 
+        $current_bc = $prev_bc;
         return $html;
     }
 
     public function renderHeaderRow()
     {
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
+
         $html = '';
 
         if ($this->isOk() && count($this->cols)) {
@@ -670,6 +738,7 @@ class BC_ListTable extends BC_List
             $html .= '</tr>';
         }
 
+        $current_bc = $prev_bc;
         return $html;
     }
 
@@ -678,6 +747,13 @@ class BC_ListTable extends BC_List
         if (!$this->search || !$this->params['enable_search'] || !$this->isOk() || !count($this->cols)) {
             return '';
         }
+
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
 
         if (!is_null($this->id_parent)) {
             $this->object->setIdParent($this->id_parent);
@@ -743,6 +819,7 @@ class BC_ListTable extends BC_List
 
         $this->object->reset();
 
+        $current_bc = $prev_bc;
         return $html;
     }
 
@@ -802,6 +879,13 @@ class BC_ListTable extends BC_List
             return '';
         }
 
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
+
         $html = '';
 
         $this->object->reset();
@@ -859,6 +943,7 @@ class BC_ListTable extends BC_List
             $html .= '</tr>';
         }
 
+        $current_bc = $prev_bc;
         return $html;
     }
 
@@ -883,6 +968,13 @@ class BC_ListTable extends BC_List
 
     public function renderBulkActions()
     {
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
+
         $html = '';
 
         if (count($this->params['bulk_actions']) && (int) $this->params['checkboxes']) {
@@ -956,6 +1048,7 @@ class BC_ListTable extends BC_List
         }
 
         $this->setConfPath();
+        $current_bc = $prev_bc;
         return $html;
     }
 
@@ -966,6 +1059,13 @@ class BC_ListTable extends BC_List
         if (!count($this->params['bulk_actions'])) {
             return $html;
         }
+
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
 
         $html .= '<div id="' . $this->identifier . '_bulkActionsPopup" class="tinyPopup listPopup">';
         $html .= '<div class="title">';
@@ -1001,11 +1101,19 @@ class BC_ListTable extends BC_List
         $html .= '</div>';
 
         $this->setConfPath();
+        $current_bc = $prev_bc;
         return $html;
     }
 
     public function renderParametersPopup()
     {
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
+
         $html = '';
         $content = '';
 
@@ -1106,6 +1214,7 @@ class BC_ListTable extends BC_List
             $html .= '</div>';
         }
 
+        $current_bc = $prev_bc;
         return $html;
     }
 
@@ -1147,6 +1256,13 @@ class BC_ListTable extends BC_List
         if (!$this->isOk() || !count($this->cols)) {
             return '';
         }
+
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
 
         if (is_null($this->rows)) {
             $this->fetchRows();
@@ -1352,11 +1468,19 @@ class BC_ListTable extends BC_List
             $html .= '</tr>';
         }
 
+        $current_bc = $prev_bc;
         return $html;
     }
 
     public function renderCsvContent($separator, $col_options, $headers = true, &$errors = array())
     {
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
+
         if (is_null($this->items)) {
             $this->fetchItems();
         }
@@ -1400,6 +1524,7 @@ class BC_ListTable extends BC_List
         }
 
         if (is_null($this->items) || !count($this->items)) {
+            $current_bc = $prev_bc;
             return $rows;
         }
 
@@ -1440,11 +1565,11 @@ class BC_ListTable extends BC_List
                         $content = $col_params['value'];
                     }
 
-                    $content = strip_tags($content);
                     $content = str_replace(array('<br>', '<br/>', '<br />'), ' ', $content);
+                    $content = strip_tags($content);
+                    $content = html_entity_decode($content);
                     $content = str_replace($separator, '', $content);
                     $content = str_replace("\n", ' ', $content);
-                    
 
                     $line .= (!$fl ? $separator : '' ) . $content;
 
@@ -1462,7 +1587,7 @@ class BC_ListTable extends BC_List
         }
 
         $this->setConfPath();
-
+        $current_bc = $prev_bc;
         return $rows;
     }
 }

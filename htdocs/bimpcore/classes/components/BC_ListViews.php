@@ -19,6 +19,13 @@ class BC_ListViews extends BC_List
         $this->params_def['item_col_sm'] = array('data_type' => 'int');
         $this->params_def['item_col_xs'] = array('data_type' => 'int');
 
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
+
         $path = null;
 
         if (!$name || $name === 'default') {
@@ -35,9 +42,9 @@ class BC_ListViews extends BC_List
         parent::__construct($object, $path, $name, $level, $id_parent, $title, $icon);
 
         if (is_null($this->params['icon']) || !$this->params['icon'] || $this->params['icon'] === 'fas_list') {
-                $this->params['icon'] = 'fas_th-large';
-            }
-            
+            $this->params['icon'] = 'fas_th-large';
+        }
+
         $this->data['item_view_name'] = $this->params['item_view'];
 
         if (is_null($this->params['item_col_lg'])) {
@@ -69,6 +76,8 @@ class BC_ListViews extends BC_List
                 $this->errors[] = 'Vous n\'avez pas la permission de voir ' . $this->object->getLabel('the_plur');
             }
         }
+
+        $current_bc = $prev_bc;
     }
 
     public function renderHtmlContent()
@@ -102,6 +111,13 @@ class BC_ListViews extends BC_List
             $this->errors[] = 'Erreur d\'initialisation de la liste';
             return BimpRender::renderAlerts($this->errors);
         }
+
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
 
         if (is_null($this->items)) {
             $this->fetchItems();
@@ -176,6 +192,7 @@ class BC_ListViews extends BC_List
             }
         }
 
+        $current_bc = $prev_bc;
         return $html;
     }
 

@@ -14,6 +14,13 @@ class BC_Search extends BimpComponent
         $this->params_def['joins'] = array('type' => 'definitions', 'defs_type' => 'join', 'multiple' => 1);
         $this->params_def['list_name'] = array('default' => 'default');
 
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
+
         $this->search_value = $search_value;
 
         if (!$name || $name === 'default') {
@@ -38,6 +45,8 @@ class BC_Search extends BimpComponent
                 $this->errors[] = 'Vous n\'avez pas la permission de voir ' . $this->object->getLabel('the_plur');
             }
         }
+
+        $current_bc = $prev_bc;
     }
 
     public function searchItems()
@@ -94,6 +103,13 @@ class BC_Search extends BimpComponent
 
     public function renderHtml()
     {
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
+
         $html = parent::renderHtml();
 
         $items = $this->searchItems();
@@ -127,6 +143,7 @@ class BC_Search extends BimpComponent
         ));
         $html .= $list->renderHtml();
 
+        $current_bc = $prev_bc;
         return $html;
     }
 }

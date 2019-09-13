@@ -10,7 +10,7 @@ list_page_url: unset
 
 labels: 
     name: Total équipment
-    name_plur: Total équipements
+    name_plur: Totaux équipements
     
 fields: 
     qty: 
@@ -34,6 +34,11 @@ filters_panels:
                 field: ref
             label: 
                 field: label
+            place_position: 
+                custom: 1
+                label: Position emplacement
+                field: place_position
+                type: range                
             place_type:
                 custom: 1
                 label: Type emplacement
@@ -41,6 +46,34 @@ filters_panels:
                 type: check_list
                 items: 
                     array: placeTypes
+            place_entrepot: 
+                custom: 1
+                label: Entrepôt emplacement
+                field: place_id_entrepot
+                type: value
+                input: 
+                    type: search_entrepot
+            place_user: 
+                custom: 1
+                label: Utilisateur emplacement
+                field: place_id_user
+                type: value
+                input: 
+                    type: search_user
+            place_client: 
+                custom: 1
+                label: Client emplacement
+                field: place_id_client
+                type: value
+                input: 
+                    type: search_societe
+                    societe_type: customer
+            place_name: 
+                custom: 1
+                label: Nom libre emplacement
+                field: place_name
+                type: value_part
+                    
 lists_cols: 
     qty_immos: 
         field: qty
@@ -49,13 +82,22 @@ lists_cols:
         
 lists: 
     immos: 
+        title: Totaux équipements
         configurable: 1
         filters_panel: immos
+        filters_panel_open: 1
         sort_field: rowid
         sort_way: asc
-        n: 10
+        n: 20
         list_filters: 
             callback: getImmosListFilters
+        extra_btn: 
+            callback: getListExtraBtn
+        joins: 
+            ef: 
+                alias: ef
+                table: product_extrafields
+                on: a.rowid = ef.fk_object
         cols: 
             ref: 
             label:

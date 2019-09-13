@@ -17,87 +17,6 @@ class BimpTools
     );
     private static $context = "";
 
-    public static function processImport($prefixe)
-    {
-//        $prob = array();
-//
-//        $commandes = array(
-//            'IMPORT_CF' => Array(
-//                Array
-//                    (
-//                    'ref'          => 'APP-TEST2',
-//                    'qty'          => 4,
-//                    'qtyEnBl'      => 0,
-//                    'soc'          => 'FGLE00409',
-//                    'pv'           => '100,11',
-//                    'pa'           => '50,55',
-//                    'qteBlNonFact' => 0,
-//                    'dep'          => 'PR',
-//                    'soc2'         => 'CLGLE007183'
-//                ),
-//                Array
-//                    (
-//                    'ref'          => 'APP-TESTEST',
-//                    'soc'          => '0096157',
-//                    'dep'          => 'PR',
-//                    'qty'          => 23,
-//                    'qtyEnBl'      => 23,
-//                    'qteBlNonFact' => 23,
-//                    'pv'           => 1079,
-//                    'pa'           => 910,
-//                    'br'           => Array
-//                        (
-//                        'BR1' => Array
-//                            (
-//                            'qteBlNonFact' => 4
-//                        ),
-//                        'BR2' => Array
-//                            (
-//                            'qteBlNonFact' => 1
-//                        ),
-//                        'BR3' => Array
-//                            (
-//                            'qteBlNonFact' => 18
-//                        )
-//                    )
-//                )
-//            )
-//        );
-    }
-
-    public static function getCommercialArray($socid)
-    {
-        // Cette fonction n'a rien à faire ici, daplacée dans BimpCache, deplus quelques erreurs dans le code: une même instance est affecté à chaque entrée du tableau.
-        // Donc: toutes les entrées du tableau contiendront le dernier user qui aura été fetché. 
-
-        return BimpCache::getSocieteCommerciauxObjectsList($socid);
-
-//        global $db;
-//        $conf;
-//        require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
-//        $bimp = new BimpDb($db);
-//        $return = Array();
-//        $comm_list = $bimp->getRows('societe_commerciaux', 'fk_soc = ' . $socid);
-//        $need_default = true;
-//        $instance = new User($db);
-//        if (count($comm_list) > 0) {
-//            foreach ($comm_list as $comm) {
-//                $instance->fetch($comm->fk_user);
-//                if ($instance->statut == 1) {
-//                    $return[$comm->fk_user] = $instance;
-//                    $need_default = false;
-//                }
-//            }
-//        }
-//        if ($need_default) {
-//            $default_id_commercial = BimpCore::getConf('default_id_commercial');
-//            $instance->fetch($default_id_commercial);
-//            $return[$default_id_commercial] = $instance;
-//        }
-//        $instance = null;
-//        return $return;
-    }
-
     // Gestion GET / POST
 
     public static function isSubmit($key)
@@ -722,7 +641,7 @@ class BimpTools
         } else {
             $where = '1';
         }
-        
+
         $max = BimpCache::getBdb()->getMax($table, $field, $where);
 
         if ((string) $max) {
@@ -1946,6 +1865,12 @@ class BimpTools
             $desc = preg_replace('/\(EXCESS PAID\)/', $langs->trans("ExcessPaid"), $desc);
 
         return $desc;
+    }
+
+    public static function getCommercialArray($socid)
+    {
+        // Ce type de fonction ne doit pas être mise dans BimpTools mais dans BimpCache. 
+        return BimpCache::getSocieteCommerciauxObjectsList($socid);
     }
 
     // Gestion des couleurs: 

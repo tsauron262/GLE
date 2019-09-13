@@ -389,7 +389,7 @@ class BimpObject extends BimpCache
     {
         $prop = $this->getParentIdProperty();
         if (!is_null($prop)) {
-            return $this->getData($prop);
+            return (int) $this->getData($prop);
         }
 
         return null;
@@ -2153,7 +2153,7 @@ class BimpObject extends BimpCache
     // Getters Listes
 
     public function getList($filters = array(), $n = null, $p = null, $order_by = 'id', $order_way = 'DESC', $return = 'array', $return_fields = null, $joins = array(), $extra_order_by = null, $extra_order_way = 'ASC')
-    {        
+    {
         $table = $this->getTable();
         $primary = $this->getPrimary();
 
@@ -2221,6 +2221,7 @@ class BimpObject extends BimpCache
         $sql .= BimpTools::getSqlLimit($n, $p);
 
 //        echo $sql . '<br/><br/>'; 
+//        return;
 //        exit;
 
         if (BimpDebug::isActive('bimpcore/objects/print_list_sql') || BimpTools::isSubmit('list_sql')) {
@@ -5377,6 +5378,59 @@ class BimpObject extends BimpCache
         if ($this->isLoaded()) {
             $js = 'loadModalView(\'' . $this->module . '\', \'' . $this->object_name . '\', ' . $this->id . ', \'' . $view_name . '\', $(this), \'' . htmlentities($title) . '\');';
         }
+
+        return $js;
+    }
+
+    public function getJsLoadModalList($list_name = 'default', $params = array())
+    {
+        $js = 'loadModalList(\'' . $this->module . '\', \'' . $this->object_name . '\', \'' . $list_name . '\', ';
+
+        if (isset($params['id_parent']) && (int) $params['id_parent']) {
+            $js .= (int) $params['id_parent'];
+        } elseif ((int) $this->getParentId()) {
+            $js .= (int) $this->getParentId();
+        } else {
+            $js .= 'null';
+        }
+
+        $js .= ', $(this), ';
+
+        if (isset($params['title']) && (string) $params['title']) {
+            $js .= htmlentities($params['title']);
+        } else {
+            $js .= 'Liste des ' . htmlentities($this->getLabel('name_plur'));
+        }
+        $js .= ', ';
+
+        if (isset($params['extra_data']) && is_array($params['extra_data']) && !empty($params['extra_data'])) {
+            $js .= '{';
+            $data = '';
+            foreach ($params['extra_data'] as $key => $value) {
+                $data .= $key . ': "' . $value . '"';
+            }
+            $js .= htmlentities($data);
+            $js .= '}';
+        } else {
+            $js .= '{}';
+        }
+        $js .= ', ';
+
+        if (isset($params['extra_filters']) && is_array($params['extra_filters']) && !empty($params['extra_filters'])) {
+            $js .= json_encode($params['extra_data']);
+        } else {
+            $js .= '';
+        }
+        $js .= ', ';
+
+        if (isset($params['extra_joins']) && is_array($params['extra_joins']) && !empty($params['extra_joins'])) {
+            $js .= json_encode($params['extra_joins']);
+        } else {
+            $js .= '';
+        }
+
+        $js .= ');';
+
         return $js;
     }
 

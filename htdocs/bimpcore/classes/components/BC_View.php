@@ -14,6 +14,13 @@ class BC_View extends BC_Panel
         $this->params_def['buttons'] = array('type' => 'definitions', 'defs_type' => 'button', 'multiple' => true);
         $this->params_def['edit_form'] = array();
 
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
+
         $path = '';
 
         if (!is_null($object) && is_a($object, 'BimpObject')) {
@@ -50,6 +57,8 @@ class BC_View extends BC_Panel
                 $this->errors[] = 'Vous n\'avez pas la permission de voir ' . $this->object->getLabel('this');
             }
         }
+
+        $current_bc = $prev_bc;
     }
 
     public function setNewValues($new_values)

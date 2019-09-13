@@ -977,6 +977,17 @@ class Bimp_Product extends BimpObject
         return '';
     }
 
+    public function displayRefShort()
+    {
+        $ref = $this->getRef();
+
+        if (preg_match('/^[A-Za-z0-9]{3,4}\-(.*)$/', $ref, $matches)) {
+            return $matches[1];
+        }
+
+        return $ref;
+    }
+
     // Rendus HTML: 
 
     public function renderHeaderExtraLeft()
@@ -1748,14 +1759,14 @@ class Bimp_Product extends BimpObject
             'success_callback' => $success_callback
         );
     }
-    
+
     public function actionPrintEtiquettes($data, &$success)
     {
         $errors = array();
         $warnings = array();
         $success = '';
         $success_callback = '';
-        
+
         $ids = $data['id_objects'];
 
         if (!count($ids)) {
@@ -1768,7 +1779,7 @@ class Bimp_Product extends BimpObject
             } else {
                 $qty = isset($data['qty']) ? (int) $data['qty'] : 1;
 
-                $url = DOL_URL_ROOT . '/bimplogistique/etiquette_produit.php?id_products=' . implode(',',$ids) . '&qty=1&type=' . $type;
+                $url = DOL_URL_ROOT . '/bimplogistique/etiquette_produit.php?id_products=' . implode(',', $ids) . '&qty=1&type=' . $type;
 
                 $success_callback = 'window.open(\'' . $url . '\')';
             }

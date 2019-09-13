@@ -1,0 +1,48 @@
+table: bl_inventory_det
+
+parent_module: bimplogistique
+parent_object: Inventory
+parent_id_property: fk_inventory
+
+object:
+    
+fields: 
+    qty:
+        label: Quantité
+        type: int
+                
+    fk_inventory:
+        label: Id de l'inventaire
+        type: id_object
+        object: inventory
+        
+    fk_product:
+        label: Produit
+        type: id_object
+        object: product
+
+    fk_equipment:
+        label: Équipement
+        type: id_object
+        object: equipment
+
+lists:
+    default:
+       objects_change_reload: Inventory
+       delete_btn: 1
+       sort_field: id
+       sort_way: desc
+       n: 50
+       cols:
+           fk_product: 
+               field: fk_product
+               display: nom_url
+           fk_equipment: 
+               field: fk_equipment
+               display: nom_url
+           qty: 
+               field: qty
+           date_create:
+               field: date_create
+           user_create:
+               field: user_create

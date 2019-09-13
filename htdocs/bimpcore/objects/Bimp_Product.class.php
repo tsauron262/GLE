@@ -367,8 +367,8 @@ class Bimp_Product extends BimpObject
         $buttons = array();
         if ($line_qty >= 0 && $this->isActionAllowed('generateEtiquettes')) {
             $buttons[] = array(
-                'label'   => 'Générer des étiquettes',
-                'icon'    => 'fas_sticky-note',
+                'label' => 'Générer des étiquettes',
+                'icon' => 'fas_sticky-note',
                 'onclick' => $this->getJsActionOnclick('generateEtiquettes', array(
                     'qty' => (int) $line_qty
                         ), array(
@@ -591,35 +591,35 @@ class Bimp_Product extends BimpObject
                 $stocks['dispo'] = $stocks['reel'] - $stocks['reel_reserves'];
 
                 if (in_array($type, array('virtuel'))) {
-                    $sql = 'SELECT line.rowid as id_line, c.rowid as id_commande FROM ' . MAIN_DB_PREFIX . 'commande_fournisseurdet line';
-                    $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commande_fournisseur c ON c.rowid = line.fk_commande';
-                    $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commande_fournisseur_extrafields cef ON c.rowid = cef.fk_object';
-                    $sql .= ' WHERE line.fk_product = ' . (int) $this->id;
-                    $sql .= ' AND c.fk_statut < 5';
-                    $sql .= ' AND cef.entrepot = ' . (int) $id_entrepot;
+            $sql = 'SELECT line.rowid as id_line, c.rowid as id_commande FROM ' . MAIN_DB_PREFIX . 'commande_fournisseurdet line';
+            $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commande_fournisseur c ON c.rowid = line.fk_commande';
+            $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commande_fournisseur_extrafields cef ON c.rowid = cef.fk_object';
+            $sql .= ' WHERE line.fk_product = ' . (int) $this->id;
+            $sql .= ' AND c.fk_statut < 5';
+            $sql .= ' AND cef.entrepot = ' . (int) $id_entrepot;
 
-                    $rows = $this->db->executeS($sql, 'array');
+            $rows = $this->db->executeS($sql, 'array');
 
-                    if (!is_null($rows)) {
-                        foreach ($rows as $r) {
-                            // Pour être sûr que les BimpLines existent: 
-                            $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn', (int) $r['id_commande']);
-                            if (BimpObject::ObjectLoaded($commande)) {
-                                $commande->checkLines();
-                            }
-
-                            $bimp_line = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFournLine', array(
-                                        'id_line' => (int) $r['id_line']
-                                            ), true);
-
-                            if (BimpObject::ObjectLoaded($bimp_line)) {
-                                $stocks['commandes'] += ((float) $bimp_line->getFullQty() - $bimp_line->getReceivedQty(null, true));
-                            }
-                        }
+            if (!is_null($rows)) {
+                foreach ($rows as $r) {
+                    // Pour être sûr que les BimpLines existent: 
+                    $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn', (int) $r['id_commande']);
+                    if (BimpObject::ObjectLoaded($commande)) {
+                        $commande->checkLines();
                     }
 
-                    $stocks['virtuel'] = $stocks['reel'] - $stocks['total_reserves'] + $stocks['commandes'];
+                    $bimp_line = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFournLine', array(
+                                'id_line' => (int) $r['id_line']
+                                    ), true);
+
+                    if (BimpObject::ObjectLoaded($bimp_line)) {
+                        $stocks['commandes'] += ((float) $bimp_line->getFullQty() - $bimp_line->getReceivedQty(null, true));
+                    }
                 }
+            }
+
+            $stocks['virtuel'] = $stocks['reel'] - $stocks['total_reserves'] + $stocks['commandes'];
+        }
             }
         }
 
@@ -1103,12 +1103,81 @@ class Bimp_Product extends BimpObject
 
         if ($this->isLoaded()) {
 
-            $html = BimpRender::renderPanel('Catégories', $html, '', array(
-                        'foldable' => false,
-                        'type'     => 'secondary',
-                        'panel_id' => 'test',
+            $html = BimpRender::renderPanel('Catégories hors module ', '', '', array(
+                        'foldable' => true,
+                        'type' => 'secondary',
+                        'panel_id' => 'annex',
+                        'panel_class' => 'categ_container'
+            ));
+
+            $html .= BimpRender::renderPanel('Catégorisation', '', '', array(
+                        'foldable' => true,
+                        'type' => 'secondary',
+                        'panel_id' => 'categorization',
+                        'panel_class' => 'categ_container'
+            ));
+
+            $html .= BimpRender::renderPanel('Choix', '', '', array(
+                        'foldable' => true,
+                        'type' => 'secondary',
+                        'panel_id' => 'choice',
+                        'panel_class' => 'categ_container'
             ));
         }
+        return $html;
+    }
+
+    public function renderHistory()
+    {
+        $html = '';
+
+        if (!$this->isLoaded())
+            return $html;
+        
+        $body .= '<table id="history_table" class="noborder objectlistTable">';
+        // Thead
+        $body .= '<thead>';
+        $body .= '<th>Historique</th>';
+        $body .= '<th>Nombre de tiers</th>';
+        $body .= '<th>Nombre d\'objets référent</th>';
+        $body .= '<th>Quantité totale</th>';
+        $body .= '<thead/>';
+
+
+        $stats_propale = $this->load_stats_propale();
+        $stats_prop_supplier = $this->load_stats_proposal_supplier();
+        $stats_command = $this->load_stats_commande();
+        $stats_comm_fourn = $this->load_stats_commande_fournisseur();
+        $stats_facture = $this->load_stats_facture();
+        $stats_fact_fourn = $this->load_stats_facture_fournisseur();
+        $stats_contrat = $this->load_stats_contrat();
+
+        $stats = array($stats_propale, $stats_prop_supplier, $stats_command,
+            $stats_comm_fourn, $stats_facture,
+            $stats_fact_fourn, $stats_contrat);
+
+        $body .= '<tbody>';
+        foreach ($stats as $s) {
+            // Tbody
+            $body .= '<tr style="height: 45px;">';
+            $body .= '<td id="' . $s['id'] . '" style="cursor: pointer;"';
+            $body .= ' name="display_details">';
+            $body .= '<a><strong>' . $s['name'] . '</strong></a></td>';
+            $body .= '<td><strong>' . $s['nb_object'] . '</strong></td>';
+            $body .= '<td><strong>' . $s['nb_ref'] . '</strong></td>';
+            $body .= '<td><strong>' . $s['qty'] . '</strong></td>';
+            $body .= '</tr>';
+        }
+        $body .= '</tbody>';
+        $body .= '</table>';
+
+        $html .= BimpRender::renderPanel('Historique', $body, '', array(
+                    'foldable' => false,
+                    'type' => 'secondary'
+        ));
+
+        $html .= '<div id="selected_object">fdzafazfzafafzafazfzafazfazzafzafaz</div>';
+        
         return $html;
     }
 
@@ -1128,8 +1197,7 @@ class Bimp_Product extends BimpObject
         return $html;
     }
 
-    public function renderValidationDuration()
-    {
+    public function renderValidationDuration() {
         $date_ask_valid = new DateTime($this->getData('date_ask_valid'));
         $date_valid = new DateTime($this->getData('date_valid'));
 
@@ -1145,13 +1213,11 @@ class Bimp_Product extends BimpObject
         return $html;
     }
 
-    public function getTimeValidation()
-    {
+    public function getTimeValidation() {
         
     }
 
-    public function renderMergeKeptProductInput()
-    {
+    public function renderMergeKeptProductInput() {
         $errors = array();
 
         if (!$this->isLoaded($errors)) {
@@ -1186,8 +1252,7 @@ class Bimp_Product extends BimpObject
 
     // Traitements: 
 
-    public function addConfigExtraParams()
-    {
+    public function addConfigExtraParams() {
         $entrepots = BimpCache::getEntrepotsArray();
 
         $cols = array();
@@ -1209,8 +1274,7 @@ class Bimp_Product extends BimpObject
         $this->config->addParams('lists_cols', $cols);
     }
 
-    public function fetchStocks()
-    {
+    public function fetchStocks() {
         $this->stocks = array();
 
         $where = '`statut` > 0';
@@ -1224,19 +1288,18 @@ class Bimp_Product extends BimpObject
                 $stocks = $this->getStocksForEntrepot((int) $r['rowid']);
                 $this->stocks[(int) $r['rowid']] = array(
                     'entrepot_label' => $r['ref'],
-                    'reel'           => $stocks['reel'],
-                    'dispo'          => $stocks['dispo'],
-                    'virtuel'        => $stocks['virtuel'],
-                    'commandes'      => $stocks['commandes'],
+                    'reel' => $stocks['reel'],
+                    'dispo' => $stocks['dispo'],
+                    'virtuel' => $stocks['virtuel'],
+                    'commandes' => $stocks['commandes'],
                     'total_reserves' => $stocks['total_reserves'],
-                    'reel_reserves'  => $stocks['reel_reserves']
+                    'reel_reserves' => $stocks['reel_reserves']
                 );
             }
         }
     }
 
-    public function validateProduct()
-    {
+    public function validateProduct() {
         global $user;
 
         $errors = array();
@@ -1995,4 +2058,358 @@ class Bimp_Product extends BimpObject
         }
         return '';
     }
+
+    function load_stats_propale($socid = 0)
+    {
+        global $user;
+
+        $sql = "SELECT COUNT(DISTINCT p.fk_soc) as nb_customers, COUNT(DISTINCT p.rowid) as nb,";
+        $sql .= " COUNT(pd.rowid) as nb_rows, SUM(pd.qty) as qty";
+        $sql .= " FROM " . MAIN_DB_PREFIX . "propaldet as pd";
+        $sql .= ", " . MAIN_DB_PREFIX . "propal as p";
+        $sql .= ", " . MAIN_DB_PREFIX . "societe as s";
+        if (!$user->rights->societe->client->voir && !$socid)
+            $sql .= ", " . MAIN_DB_PREFIX . "societe_commerciaux as sc";
+        $sql .= " WHERE p.rowid = pd.fk_propal";
+        $sql .= " AND p.fk_soc = s.rowid";
+        $sql .= " AND p.entity IN (" . getEntity('propal') . ")";
+        $sql .= " AND pd.fk_product = " . $this->id;
+        if (!$user->rights->societe->client->voir && !$socid)
+            $sql .= " AND p.fk_soc = sc.fk_soc AND sc.fk_user = " . $user->id;
+        //$sql.= " AND pr.fk_statut != 0";
+        if ($socid > 0)
+            $sql .= " AND p.fk_soc = " . $socid;
+
+        $result = $this->db->db->query($sql);
+        if ($result) {
+            $obj = $this->db->db->fetch_object($result);
+            $stats = array(
+                'id' => 'Bimp_Propal',
+                'name' => 'Propositions commerciales',
+                'nb_object' => $obj->nb_customers,
+                'nb_ref' => $obj->nb,
+                'qty' => $obj->qty ? $obj->qty : 0
+            );
+            return $stats;
+        } else {
+            $this->error = $this->db->db->error();
+            return -1;
+        }
+    }
+
+    function load_stats_proposal_supplier($socid = 0)
+    {
+        global $user;
+
+        $sql = "SELECT COUNT(DISTINCT p.fk_soc) as nb_suppliers, COUNT(DISTINCT p.rowid) as nb,";
+        $sql .= " COUNT(pd.rowid) as nb_rows, SUM(pd.qty) as qty";
+        $sql .= " FROM " . MAIN_DB_PREFIX . "supplier_proposaldet as pd";
+        $sql .= ", " . MAIN_DB_PREFIX . "supplier_proposal as p";
+        $sql .= ", " . MAIN_DB_PREFIX . "societe as s";
+        if (!$user->rights->societe->client->voir && !$socid)
+            $sql .= ", " . MAIN_DB_PREFIX . "societe_commerciaux as sc";
+        $sql .= " WHERE p.rowid = pd.fk_supplier_proposal";
+        $sql .= " AND p.fk_soc = s.rowid";
+        $sql .= " AND p.entity IN (" . getEntity('supplier_proposal') . ")";
+        $sql .= " AND pd.fk_product = " . $this->id;
+        if (!$user->rights->societe->client->voir && !$socid)
+            $sql .= " AND p.fk_soc = sc.fk_soc AND sc.fk_user = " . $user->id;
+        //$sql.= " AND pr.fk_statut != 0";
+        if ($socid > 0)
+            $sql .= " AND p.fk_soc = " . $socid;
+
+        $result = $this->db->db->query($sql);
+        if ($result) {
+            $obj = $this->db->db->fetch_object($result);
+            $stats = array(
+                'id' => 'Bimp_PropalFourn',
+                'name' => 'Propositions commerciales fournisseurs',
+                'nb_object' => $obj->nb_suppliers,
+                'nb_ref' => $obj->nb,
+                'qty' => $obj->qty ? $obj->qty : 0
+            );
+            return $stats;
+        } else {
+            $this->error = $this->db->db->error();
+            return -1;
+        }
+    }
+
+    function load_stats_commande($socid = 0, $filtrestatut = '', $forVirtualStock = 0)
+    {
+        global $user;
+
+        $sql = "SELECT COUNT(DISTINCT c.fk_soc) as nb_customers, COUNT(DISTINCT c.rowid) as nb,";
+        $sql .= " COUNT(cd.rowid) as nb_rows, SUM(cd.qty) as qty";
+        $sql .= " FROM " . MAIN_DB_PREFIX . "commandedet as cd";
+        $sql .= ", " . MAIN_DB_PREFIX . "commande as c";
+        $sql .= ", " . MAIN_DB_PREFIX . "societe as s";
+        if (!$user->rights->societe->client->voir && !$socid && !$forVirtualStock)
+            $sql .= ", " . MAIN_DB_PREFIX . "societe_commerciaux as sc";
+        $sql .= " WHERE c.rowid = cd.fk_commande";
+        $sql .= " AND c.fk_soc = s.rowid";
+        $sql .= " AND c.entity IN (" . getEntity('commande') . ")";
+        $sql .= " AND cd.fk_product = " . $this->id;
+        if (!$user->rights->societe->client->voir && !$socid && !$forVirtualStock)
+            $sql .= " AND c.fk_soc = sc.fk_soc AND sc.fk_user = " . $user->id;
+        if ($socid > 0)
+            $sql .= " AND c.fk_soc = " . $socid;
+        if ($filtrestatut <> '')
+            $sql .= " AND c.fk_statut in (" . $filtrestatut . ")";
+
+        $result = $this->db->db->query($sql);
+        if ($result) {
+            $obj = $this->db->db->fetch_object($result);
+
+            $stats = array(
+                'id' => 'Bimp_Commande',
+                'name' => 'Commandes clients',
+                'nb_object' => $obj->nb_customers,
+                'nb_ref' => $obj->nb,
+                'qty' => $obj->qty ? $obj->qty : 0
+            );
+
+//                    // if it's a virtual product, maybe it is in order by extension
+//                    if (! empty($conf->global->ORDER_ADD_ORDERS_WITH_PARENT_PROD_IF_INCDEC))
+//                    {
+//                            $TFather = $this->getFather();
+//                            if (is_array($TFather) && !empty($TFather)) {
+//                                    foreach($TFather as &$fatherData) {
+//                                            $pFather = new Product($this->db->db);
+//                                            $pFather->id = $fatherData['id'];
+//                                            $qtyCoef = $fatherData['qty'];
+//
+//                                            if ($fatherData['incdec']) {
+//                                                    $pFather->load_stats_commande($socid, $filtrestatut);
+//
+//                                                    $stats['nb_object']+=$pFather->stats_commande['nb_object'];
+//                                                    $stats['nb_ref']+=$pFather->stats_commande['nb'];
+//                                                    $stats['qty']+=$pFather->stats_commande['qty'] * $qtyCoef;
+//
+//                                            }
+//                                    }
+//                            }
+//                    }
+//
+//                    // If stock decrease is on invoice validation, the theorical stock continue to
+//                    // count the orders to ship in theorical stock when some are already removed b invoice validation.
+//                    // If option DECREASE_ONLY_UNINVOICEDPRODUCTS is on, we make a compensation.
+//                    if (! empty($conf->global->STOCK_CALCULATE_ON_BILL))
+//                    {
+//                            if (! empty($conf->global->DECREASE_ONLY_UNINVOICEDPRODUCTS))
+//                            {
+//                                    $adeduire = 0;
+//                                    $sql = "SELECT sum(fd.qty) as count FROM ".MAIN_DB_PREFIX."facturedet fd ";
+//                                    $sql .= " JOIN ".MAIN_DB_PREFIX."facture f ON fd.fk_facture = f.rowid ";
+//                                    $sql .= " JOIN ".MAIN_DB_PREFIX."element_element el ON el.fk_target = f.rowid and el.targettype = 'facture' and sourcetype = 'commande'";
+//                                    $sql .= " JOIN ".MAIN_DB_PREFIX."commande c ON el.fk_source = c.rowid ";
+//                                    $sql .= " WHERE c.fk_statut IN (".$filtrestatut.") AND c.facture = 0 AND fd.fk_product = ".$this->id;
+//                                    dol_syslog(__METHOD__.":: sql $sql", LOG_NOTICE);
+//
+//                                    $resql = $this->db->db->query($sql);
+//                                    if ( $resql )
+//                                    {
+//                                            if ($this->db->db->num_rows($resql) > 0)
+//                                            {
+//                                                    $obj = $this->db->db->fetch_object($resql);
+//                                                    $adeduire += $obj->count;
+//                                            }
+//                                    }
+//
+//                                    $stats['qty'] -= $adeduire;
+//                            }
+//                    }
+
+            return $stats;
+        } else {
+            $this->error = $this->db->db->error();
+            return -1;
+        }
+    }
+
+    function load_stats_commande_fournisseur($socid = 0, $filtrestatut = '', $forVirtualStock = 0)
+    {
+        global $user;
+
+        $sql = "SELECT COUNT(DISTINCT c.fk_soc) as nb_suppliers, COUNT(DISTINCT c.rowid) as nb,";
+        $sql .= " COUNT(cd.rowid) as nb_rows, SUM(cd.qty) as qty";
+        $sql .= " FROM " . MAIN_DB_PREFIX . "commande_fournisseurdet as cd";
+        $sql .= ", " . MAIN_DB_PREFIX . "commande_fournisseur as c";
+        $sql .= ", " . MAIN_DB_PREFIX . "societe as s";
+        if (!$user->rights->societe->client->voir && !$socid && !$forVirtualStock)
+            $sql .= ", " . MAIN_DB_PREFIX . "societe_commerciaux as sc";
+        $sql .= " WHERE c.rowid = cd.fk_commande";
+        $sql .= " AND c.fk_soc = s.rowid";
+        $sql .= " AND c.entity IN (" . getEntity('supplier_order') . ")";
+        $sql .= " AND cd.fk_product = " . $this->id;
+        if (!$user->rights->societe->client->voir && !$socid && !$forVirtualStock)
+            $sql .= " AND c.fk_soc = sc.fk_soc AND sc.fk_user = " . $user->id;
+        if ($socid > 0)
+            $sql .= " AND c.fk_soc = " . $socid;
+        if ($filtrestatut != '')
+            $sql .= " AND c.fk_statut in (" . $filtrestatut . ")"; // Peut valoir 0
+
+        $result = $this->db->db->query($sql);
+        if ($result) {
+            $obj = $this->db->db->fetch_object($result);
+            $stats = array(
+                'id' => 'Bimp_CommandeFourn',
+                'name' => 'Commandes fournisseurs',
+                'nb_object' => $obj->nb_suppliers,
+                'nb_ref' => $obj->nb,
+                'qty' => $obj->qty ? $obj->qty : 0
+            );
+            return $stats;
+        } else {
+            $this->error = $this->db->db->error() . ' sql=' . $sql;
+            return -1;
+        }
+    }
+
+    function load_stats_contrat($socid = 0)
+    {
+        global $user;
+
+        $sql = "SELECT COUNT(DISTINCT c.fk_soc) as nb_customers, COUNT(DISTINCT c.rowid) as nb,";
+        $sql .= " COUNT(cd.rowid) as nb_rows, SUM(cd.qty) as qty";
+        $sql .= " FROM " . MAIN_DB_PREFIX . "contratdet as cd";
+        $sql .= ", " . MAIN_DB_PREFIX . "contrat as c";
+        $sql .= ", " . MAIN_DB_PREFIX . "societe as s";
+        if (!$user->rights->societe->client->voir && !$socid)
+            $sql .= ", " . MAIN_DB_PREFIX . "societe_commerciaux as sc";
+        $sql .= " WHERE c.rowid = cd.fk_contrat";
+        $sql .= " AND c.fk_soc = s.rowid";
+        $sql .= " AND c.entity IN (" . getEntity('contract') . ")";
+        $sql .= " AND cd.fk_product = " . $this->id;
+        if (!$user->rights->societe->client->voir && !$socid)
+            $sql .= " AND c.fk_soc = sc.fk_soc AND sc.fk_user = " . $user->id;
+        //$sql.= " AND c.statut != 0";
+        if ($socid > 0)
+            $sql .= " AND c.fk_soc = " . $socid;
+
+        $result = $this->db->db->query($sql);
+        if ($result) {
+            $obj = $this->db->db->fetch_object($result);
+            $stats = array(
+                'id' => 'BContract_contrat',
+                'name' => 'Contrats',
+                'nb_object' => $obj->nb_customers,
+                'nb_ref' => $obj->nb,
+                'qty' => $obj->qty ? $obj->qty : 0
+            );
+            return $stats;
+        } else {
+            $this->error = $this->db->db->error() . ' sql=' . $sql;
+            return -1;
+        }
+    }
+
+    function load_stats_facture($socid = 0)
+    {
+        global $user;
+
+        $sql = "SELECT COUNT(DISTINCT f.fk_soc) as nb_customers, COUNT(DISTINCT f.rowid) as nb,";
+        $sql .= " COUNT(fd.rowid) as nb_rows, SUM(fd.qty) as qty";
+        $sql .= " FROM " . MAIN_DB_PREFIX . "facturedet as fd";
+        $sql .= ", " . MAIN_DB_PREFIX . "facture as f";
+        $sql .= ", " . MAIN_DB_PREFIX . "societe as s";
+        if (!$user->rights->societe->client->voir && !$socid)
+            $sql .= ", " . MAIN_DB_PREFIX . "societe_commerciaux as sc";
+        $sql .= " WHERE f.rowid = fd.fk_facture";
+        $sql .= " AND f.fk_soc = s.rowid";
+        $sql .= " AND f.entity IN (" . getEntity('facture') . ")";
+        $sql .= " AND fd.fk_product = " . $this->id;
+        if (!$user->rights->societe->client->voir && !$socid)
+            $sql .= " AND f.fk_soc = sc.fk_soc AND sc.fk_user = " . $user->id;
+        //$sql.= " AND f.fk_statut != 0";
+        if ($socid > 0)
+            $sql .= " AND f.fk_soc = " . $socid;
+
+        $result = $this->db->db->query($sql);
+        if ($result) {
+            $obj = $this->db->db->fetch_object($result);
+            $stats = array(
+                'id' => 'Bimp_Facture',
+                'name' => 'Factures',
+                'nb_object' => $obj->nb_customers,
+                'nb_ref' => $obj->nb,
+                'qty' => $obj->qty ? $obj->qty : 0
+            );
+            return $stats;
+        } else {
+            $this->error = $this->db->db->error();
+            return -1;
+        }
+    }
+
+    function load_stats_facture_fournisseur($socid = 0)
+    {
+        global $user;
+
+        $sql = "SELECT COUNT(DISTINCT f.fk_soc) as nb_suppliers, COUNT(DISTINCT f.rowid) as nb,";
+        $sql .= " COUNT(fd.rowid) as nb_rows, SUM(fd.qty) as qty";
+        $sql .= " FROM " . MAIN_DB_PREFIX . "facture_fourn_det as fd";
+        $sql .= ", " . MAIN_DB_PREFIX . "facture_fourn as f";
+        $sql .= ", " . MAIN_DB_PREFIX . "societe as s";
+        if (!$user->rights->societe->client->voir && !$socid)
+            $sql .= ", " . MAIN_DB_PREFIX . "societe_commerciaux as sc";
+        $sql .= " WHERE f.rowid = fd.fk_facture_fourn";
+        $sql .= " AND f.fk_soc = s.rowid";
+        $sql .= " AND f.entity IN (" . getEntity('facture_fourn') . ")";
+        $sql .= " AND fd.fk_product = " . $this->id;
+        if (!$user->rights->societe->client->voir && !$socid)
+            $sql .= " AND f.fk_soc = sc.fk_soc AND sc.fk_user = " . $user->id;
+        //$sql.= " AND f.fk_statut != 0";
+        if ($socid > 0)
+            $sql .= " AND f.fk_soc = " . $socid;
+
+        $result = $this->db->db->query($sql);
+        if ($result) {
+            $obj = $this->db->db->fetch_object($result);
+            $stats = array(
+                'id' => 'Bimp_FactureFourn',
+                'name' => 'Factures fournisseurs',
+                'nb_object' => $obj->nb_suppliers,
+                'nb_ref' => $obj->nb,
+                'qty' => $obj->qty ? $obj->qty : 0
+            );
+            return $stats;
+        } else {
+            $this->error = $this->db->db->error();
+            return -1;
+        }
+    }
+
+    public function displayStockInventory()
+    {
+        $id_inventory = BimpTools::getValue('id');
+        $inventory = BimpCache::getBimpObjectInstance('bimplogistique', 'Inventory', $id_inventory);
+        $stock = $this->getStocksForEntrepot($inventory->getData('fk_warehouse'));
+        return $stock['reel'];
+    }
+
+    public function getNbScanned()
+    {
+        global $cache_scann;
+        
+        $id_inventory = BimpTools::getValue('id');
+
+        if (!isset($cache_scann[$id_inventory])) {
+            $sql = 'SELECT SUM(qty) as qty, fk_product';
+            $sql .= ' FROM ' . MAIN_DB_PREFIX . 'bl_inventory_det';
+            $sql .= ' WHERE fk_inventory=' . $id_inventory;
+            $sql .= ' GROUP BY fk_product';
+            $result = $this->db->db->query($sql);
+            if ($result) {
+                while ($obj = $this->db->db->fetch_object($result)) {
+                    $cache_scann[$id_inventory][$obj->fk_product] = $obj->qty;
+                }
+            }
+        }
+        if(isset($cache_scann[$id_inventory][$this->getData('id')]))
+            return $cache_scann[$id_inventory][$this->getData('id')];
+        else
+            return 0;
+    }
+
 }

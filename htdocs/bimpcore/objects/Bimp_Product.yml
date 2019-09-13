@@ -335,6 +335,11 @@ fields:
         type: int
         edit: 1
         
+    physical_stock:
+        label: Stock physique
+        type: int
+        extra: 1
+        
     doli_search_prod:
         label: Produit
         input: 
@@ -517,6 +522,7 @@ forms:
             - field: rpcp
             - field: price
             - field: seuil_stock_alerte
+            - field: desiredstock
             # Measure
             - field: weight
             - field: weight_units
@@ -750,6 +756,13 @@ views:
                   custom:
                       callback: renderCategorize
                       
+    product_history:
+        rows:
+            - cols:
+                - type: custom
+                  custom:
+                      callback: renderHistory
+                      
     stock:
         rows:
             - cols:
@@ -873,6 +886,26 @@ lists:
             tva: 
             serialisable: 
                 
+    inventory:
+        extends: default
+        add_btn: 0
+        cols:
+            type: unset
+            stock: unset
+            price: unset
+            tva: unset
+            stock: unset
+            nb_scanned:
+                label: Nombre scanné
+                value:
+                    callback:
+                        method: getNbScanned
+            stock_entrepot:
+                label: Stock
+                value: 
+                    callback: 
+                        method: displayStockInventory
+        
 cards: 
     default: 
         view_btn: 1

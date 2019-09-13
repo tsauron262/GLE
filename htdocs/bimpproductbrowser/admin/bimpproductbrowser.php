@@ -31,7 +31,7 @@ require_once DOL_DOCUMENT_ROOT . '/core/lib/admin.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/categories.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/treeview.lib.php';
-require_once DOL_DOCUMENT_ROOT . '/bimpproductbrowser/class/productBrowser.class.php';
+//require_once DOL_DOCUMENT_ROOT . '/bimpproductbrowser/class/productBrowser.class.php'; // already in bimpcore
 require_once DOL_DOCUMENT_ROOT . '/core/class/extrafields.class.php';
 
 $arrayofjs = array('/includes/jquery/plugins/jquerytreeview/jquery.treeview.js', '/includes/jquery/plugins/jquerytreeview/lib/jquery.cookie.js');
@@ -109,37 +109,38 @@ print '</tr>' . "\n";
 
 print '</table>';
 
-
 if (!$user->admin)
     accessforbidden();
 
 $categstatic = new Categorie($db);
 
-if ($type == Categorie::TYPE_PRODUCT) {
+//$type = Categorie::TYPE_PRODUCT;
+//
+//if ($type == Categorie::TYPE_PRODUCT) {
     $title = $langs->trans("ProductsCategoryShort");
     $typetext = 'product';
-} elseif ($type == Categorie::TYPE_SUPPLIER) {
-    $title = $langs->trans("SuppliersCategoryShort");
-    $typetext = 'supplier';
-} elseif ($type == Categorie::TYPE_CUSTOMER) {
-    $title = $langs->trans("CustomersCategoriesArea");
-    $typetext = 'customer';
-} elseif ($type == Categorie::TYPE_MEMBER) {
-    $title = $langs->trans("CustomersCategoryShort");
-    $typetext = 'member';
-} elseif ($type == Categorie::TYPE_CONTACT) {
-    $title = $langs->trans("ContactCategoriesShort");
-    $typetext = 'contact';
-} elseif ($type == Categorie::TYPE_ACCOUNT) {
-    $title = $langs->trans("AccountsCategoriesShort");
-    $typetext = 'account';
-} elseif ($type == Categorie::TYPE_PROJECT) {
-    $title = $langs->trans("ProjectsCategoriesShort");
-    $typetext = 'project';
-} else {
-    $title = $langs->trans("Category");
-    $typetext = 'unknown';
-}
+//} elseif ($type == Categorie::TYPE_SUPPLIER) {
+//    $title = $langs->trans("SuppliersCategoryShort");
+//    $typetext = 'supplier';
+//} elseif ($type == Categorie::TYPE_CUSTOMER) {
+//    $title = $langs->trans("CustomersCategoriesArea");
+//    $typetext = 'customer';
+//} elseif ($type == Categorie::TYPE_MEMBER) {
+//    $title = $langs->trans("CustomersCategoryShort");
+//    $typetext = 'member';
+//} elseif ($type == Categorie::TYPE_CONTACT) {
+//    $title = $langs->trans("ContactCategoriesShort");
+//    $typetext = 'contact';
+//} elseif ($type == Categorie::TYPE_ACCOUNT) {
+//    $title = $langs->trans("AccountsCategoriesShort");
+//    $typetext = 'account';
+//} elseif ($type == Categorie::TYPE_PROJECT) {
+//    $title = $langs->trans("ProjectsCategoriesShort");
+//    $typetext = 'project';
+//} else {
+//    $title = $langs->trans("Category");
+//    $typetext = 'unknown';
+//}
 
 // Charge tableau des categories
 $cate_arbo = $categstatic->get_full_arbo($typetext);

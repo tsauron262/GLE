@@ -64,8 +64,11 @@ sections:
                - type: custom
                  custom: 
                       callback:
-                          method: renderStock
                           object: inventory
+                          method: renderTabs
+                          params:
+                            - renderStock
+                            - stock
 
         diff:
           label: Différence
@@ -76,8 +79,11 @@ sections:
                - type: custom
                  custom: 
                       callback:
-                          method: renderDiff
+                          method: renderTabs
                           object: inventory
+                          params:
+                            - renderDiff
+                            - diff
                           
     - type: buttons
       buttons:

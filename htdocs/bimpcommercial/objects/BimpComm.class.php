@@ -111,10 +111,10 @@ class BimpComm extends BimpDolObject
                     $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
                     return 0;
                 }
-                if ($this->object_name !== 'Bimp_Facture' && (int) $this->getData('fk_statut') > 0) {
-                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' n\'est plus au statut "brouillon"';
-                    return 0;
-                }
+//                if ($this->object_name !== 'Bimp_Facture' && (int) $this->getData('fk_statut') > 0) {
+//                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' n\'est plus au statut "brouillon"';
+//                    return 0;
+//                }
                 if ($this->field_exists('invoice_status') && $this->getData('invoice_status') > 0) {
                     $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' est déja facturé' . $this->e();
                     return 0;
@@ -671,14 +671,14 @@ class BimpComm extends BimpDolObject
                     $formMail->substit['__LINES__'] = '';
                     $topic = $template['topic'];
                     $topic = make_substitutions($topic, $formMail->substit);
-                    
+
                     $soc = $this->getChildObject("client");
-                    if(isset($soc) && is_object($soc)){
+                    if (isset($soc) && is_object($soc)) {
                         $formMail->setSubstitFromObject($soc->dol_object, $langs);
                         $topic = make_substitutions($topic, $formMail->substit);
                     }
                     $soc = $this->getChildObject("societe");
-                    if(isset($soc) && is_object($soc)){
+                    if (isset($soc) && is_object($soc)) {
                         $formMail->setSubstitFromObject($soc->dol_object, $langs);
                         $topic = make_substitutions($topic, $formMail->substit);
                     }
@@ -1300,7 +1300,7 @@ class BimpComm extends BimpDolObject
                 $user = new User($this->db->db);
                 if ($user->fetch((int) $contacts[0]) > 0) {
                     global $modeCSV, $langs;
-                    if($modeCSV)
+                    if ($modeCSV)
                         return $user->getFullName($langs);
                     else
                         return $user->getNomUrl(1) . BimpRender::renderObjectIcons($user);
@@ -1996,13 +1996,13 @@ class BimpComm extends BimpDolObject
                     'options'     => $emails,
                     'extra_class' => 'emails_select principal'
         ));
-        
-        
+
+
         $html .= '<p class="inputHelp selectMailHelp">';
         $html .= 'Sélectionnez une adresse e-mail puis cliquez sur "Ajouter"';
         $html .= '</p>';
-        
-        
+
+
 
 
         $html .= '<div class="mail_custom_value" style="display: none; margin-top: 10px">';
@@ -2010,7 +2010,7 @@ class BimpComm extends BimpDolObject
 //        $html .= $form->select_dolusers('', $input_name . '_add_value2', 1, null, 0, '', '', '0', 0, 0, '', 0, '', $morecss='emails_select searchable_select', 1);
 //
 //        $html .= " ou ";
-        
+
         $html .= BimpInput::renderInput('text', $input_name . '_add_value_custom', '');
         $html .= '<p class="inputHelp">Entrez une adresse e-mail valide puis cliquez sur "Ajouter"</p>';
         $html .= '</div>';
@@ -2553,14 +2553,14 @@ class BimpComm extends BimpDolObject
     {
         $errors = array();
 
-        $error_label = 'Insertion de la remise impossible';
-
         if ($this->isLoaded($errors)) {
             if (!method_exists($this->dol_object, 'insert_discount')) {
                 $errors[] = 'L\'utilisation de remise n\'est pas possible pour ' . $this->getLabel('the_plur');
-            } elseif ($this->object_name !== 'Bimp_Facture' && (int) $this->getData('fk_statut') > 0) {
-                $errors[] = $error_label . ' - ' . $this->getData('the') . ' doit avoit le statut "Brouillon';
-            } else {
+            } 
+//            elseif ($this->object_name !== 'Bimp_Facture' && (int) $this->getData('fk_statut') > 0) {
+//                $errors[] = $error_label . ' - ' . $this->getData('the') . ' doit avoit le statut "Brouillon';
+//            } 
+            else {
                 if (!class_exists('DiscountAbsolute')) {
                     require_once DOL_DOCUMENT_ROOT . '/core/class/discount.class.php';
                 }
@@ -2646,6 +2646,7 @@ class BimpComm extends BimpDolObject
                                     $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'insertion de la remise');
                                 }
                             }
+                            $this->checkIsPaid();
                         } else {
                             $line = $this->getLineInstance();
 
@@ -2675,8 +2676,6 @@ class BimpComm extends BimpDolObject
 
                             if (count($line_errors)) {
                                 $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec de la création de la ligne de remise');
-                            } elseif (is_a($this, 'Bimp_Facture')) {
-                                $this->checkIsPaid();
                             }
                         }
                     }
@@ -3145,8 +3144,8 @@ class BimpComm extends BimpDolObject
         }
 
         return array(
-            'errors'           => $errors,
-            'warnings'         => $warnings
+            'errors'   => $errors,
+            'warnings' => $warnings
         );
     }
 

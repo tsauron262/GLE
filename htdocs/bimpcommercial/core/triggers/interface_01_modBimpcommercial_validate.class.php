@@ -215,20 +215,21 @@ class Interfacevalidate extends DolibarrTriggers
                 return -2;
             }
             
-            
-            //contact facturation
-            $tabConatact = $object->getIdContact('external', 'BILLING');
-            if (count($tabConatact) < 1) {
-                    setEventMessages("Merci de precisé le contact facturation", null, 'errors');
-                    return -2;
-            }else{
-                foreach($tabConatact as $contactId){
-                    require_once(DOL_DOCUMENT_ROOT.'/contact/class/contact.class.php');
-                    $contactObj = new Contact($this->db);
-                    $contactObj->fetch($contactId);
-                    if(stripos($contactObj->email, "@") < 1){
-                        setEventMessages("Le contact facturation na pas d'email", null, 'errors');
+            if($action == 'ORDER_VALIDATE'){
+                //contact facturation
+                $tabConatact = $object->getIdContact('external', 'BILLING');
+                if (count($tabConatact) < 1) {
+                        setEventMessages("Merci de precisé le contact facturation", null, 'errors');
                         return -2;
+                }else{
+                    foreach($tabConatact as $contactId){
+                        require_once(DOL_DOCUMENT_ROOT.'/contact/class/contact.class.php');
+                        $contactObj = new Contact($this->db);
+                        $contactObj->fetch($contactId);
+                        if(stripos($contactObj->email, "@") < 1){
+                            setEventMessages("Le contact facturation na pas d'email", null, 'errors');
+                            return -2;
+                        }
                     }
                 }
             }

@@ -1,5 +1,4 @@
 
-
 // Ajax call
 function insertProduct(input, quantity) {
 
@@ -9,17 +8,10 @@ function insertProduct(input, quantity) {
     }, null, {
         processing_msg: 'Insertion en cours',
         success: function (result, bimpAjax) {
-            reloadInventoryLine(result.data.id_inventory_det);
-            reloadProductList(result.id_product);
-            reloadEquipmentList(result.id_equipment);
+            triggerObjectChange('bimplogistique', 'InventoryLine', result.data.id_inventory_det);
         }
     });
 }
-
-// Ready
-$(document).ready(function () {
-    initEvents();
-});
 
 
 /**
@@ -28,11 +20,10 @@ $(document).ready(function () {
 
 function initEvents() {
     var $inputs_selector = $("input[name*=insert_]");
-
-    $inputs_selector.on('keyup mouseup', function (e) {
-        var key = e.which;
+    $inputs_selector.on('keydown', function (event) {
+        var key = event.which;
         if (key === 9 || key === 13) {
-            e.preventDefault();
+            event.preventDefault(event);
             var input = $("input[name=search_insert_line]").val();
             var quantity = $("input[name=insert_quantity]").val();
             insertProduct(input, quantity);
@@ -40,35 +31,32 @@ function initEvents() {
     });
 }
 
-function reloadInventoryLines() {
-    $('tr.InventoryLine_row.objectListItemRow').each(function () {
-        reloadInventoryLine($(this).attr('data-id_object'));
+var waitForElement = function (selector, callback, count) {
+    if ($(selector).length) {
+        callback();
+    } else {
+        setTimeout(function () {
+            if (!count) {
+                count = 0;
+            }
+            count++;
+            if (count < 100) {
+                waitForElement(selector, callback, count);
+            } else {
+                return;
+            }
+        }, 100);
+    }
+};
+
+
+
+// Ready
+$(document).ready(function () {
+    waitForElement('input[name=search_insert_line]', function () {
+        waitForElement('input[name=insert_quantity]', function () {
+            initEvents();
+        });
     });
-}
 
-function reloadInventoryLine(id) {
-    $('body').trigger($.Event('objectChange', {
-        module: 'bimplogistique',
-        object_name: 'InventoryLine',
-        id_object: id
-    }));
-}
-
-function reloadProductList(id) {
-    $('body').trigger($.Event('objectChange', {
-        module: 'bimpcore',
-        object_name: 'Bimp_Product',
-        id_object: id
-    }));
-}
-
-function reloadEquipmentList(id) {
-    $('body').trigger($.Event('objectChange', {
-        module: 'bimpequipment',
-        object_name: 'Equipment',
-        id_object: 0
-    }));
-}
-
-//reloadObjectListCustom(list_id, callback) {
-//    var $list = $('#' + list_id);
+});

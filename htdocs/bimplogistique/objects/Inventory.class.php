@@ -59,7 +59,6 @@ class Inventory extends BimpDolObject {
         }
 
         if ($this->getData('status') == self::STATUS_OPEN) {
-
             if ($user->admin or $user->rights->bimpequipment->inventory->close) { // read et create
                 $buttons[] = array(
                     'label' => 'Fermer l\'inventaire',
@@ -191,7 +190,6 @@ class Inventory extends BimpDolObject {
         // Excès
         $nb_en_trop = count($diff_eq['ids_en_trop']);
         
-        print_r($diff_eq['ids_en_trop']);
         if ($nb_en_trop == 1)
             $errors[] = 'Merci de traiter le cas du produit sérialisé en excès.';
         if ($nb_en_trop > 1)
@@ -312,7 +310,7 @@ class Inventory extends BimpDolObject {
         return $html;
     }
 
-    public function displayDifference() {
+    public function renderDifference() {
         $html = '';
         if (!$this->equipmentIsOk()) {
             foreach ($this->getErrorsEquipment() as $error) {
@@ -399,12 +397,12 @@ class Inventory extends BimpDolObject {
         $sql = 'SELECT fk_equipment';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'bl_inventory_det';
         $sql .= ' WHERE fk_inventory=' . $this->getData('id');
+        $sql .= ' AND fk_equipment > 0';
 
         $result = $this->db->db->query($sql);
         if ($result and mysqli_num_rows($result) > 0) {
             while ($obj = $this->db->db->fetch_object($result)) {
-                if((int) $obj->fk_equipment > 0)
-                    $ids_scanned[$obj->fk_equipment] = $obj->fk_equipment;
+                $ids_scanned[$obj->fk_equipment] = $obj->fk_equipment;
             }
         }
 
@@ -427,7 +425,6 @@ class Inventory extends BimpDolObject {
     }
 
     public function renderInputs() {
-        global $user; // TODO droit
         $html = '';
 
         if ($this->isLoaded()) {

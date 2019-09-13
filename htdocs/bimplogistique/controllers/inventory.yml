@@ -18,83 +18,67 @@ objects:
             bimp_object: InventoryLine
 
 sections:
-    - type: object_header
-      object_header:
-          object: inventory
+    - type: tabs
+      tabs: 
+        default:
+          label: Fiche
+          sections:
+           - type: object_header
+             object_header:
+                object: inventory
+           - type: view
+             view:
+                panel: 1
+                object: inventory
+           - type: custom
+             custom: 
+                  callback: 
+                      method: renderNotesList
+                      object: inventory
+                      params:
+                          - 1
 
-    - type: nav_tabs
-      nav_tabs:
-          - id: infos
-            title: Fiche
-            struct: 
-                type: rows
-                rows: 
-                    - cols: 
-                        - type: view
-                          view:
-                              panel: 1
-                              object: inventory
-                    - cols:
-                        - type: custom
-                          custom: 
-                              callback: 
-                                  method: renderNotesList
-                                  object: inventory
-                                  params:
-                                      - 1
-                                      
-          - id: scan
-            title: Scan
-            struct: 
-                type: rows
-                rows: 
-                    - cols: 
-                        - type: custom
-                          col_lg: 12
-                          col_md: 6
-                          col_sm: 12
-                          custom: 
-                              callback:
-                                  method: renderInputs
-                                  object: inventory
-                    - cols:
-                        - type: list
-                          list: 
-                              name: default
-                              children: lines
-                              title: Ligne d'inventaire
-                              object: inventory
-                              
-          - id: stock
-            title: Stock
-            struct: 
-                type: rows
-                rows: 
-                    - cols: 
-                        - type: custom
-                          col_lg: 12
-                          col_md: 6
-                          col_sm: 12
-                          custom: 
-                              callback:
-                                  method: renderStock
-                                  object: inventory
-                                  
-          - id: diff
-            title: Différence
-            struct: 
-                type: rows
-                rows: 
-                    - cols: 
-                        - type: custom
-                          col_lg: 12
-                          col_md: 6
-                          col_sm: 12
-                          custom: 
-                              callback:
-                                  method: renderDiff
-                                  object: inventory
-                                      
+        scan:
+          label: Scan
+          sections:
+               - type: object_header
+                 object_header:
+                    object: inventory
+               - type: custom
+                 custom: 
+                      callback:
+                          method: renderInputs
+                          object: inventory
+               - type: list
+                 list: 
+                      name: default
+                      children: lines
+                      title: Ligne d'inventaire
+                      object: inventory
+        stock:
+          label: Stock
+          sections:
+               - type: object_header
+                 object_header:
+                    object: inventory
+               - type: custom
+                 custom: 
+                      callback:
+                          method: renderStock
+                          object: inventory
+
+        diff:
+          label: Différence
+          sections:
+               - type: object_header
+                 object_header:
+                    object: inventory
+               - type: custom
+                 custom: 
+                      callback:
+                          method: renderDiff
+                          object: inventory
+                          
     - type: buttons
       buttons:
           - label: Liste d'inventaire

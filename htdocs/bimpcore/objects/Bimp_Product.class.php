@@ -1131,59 +1131,53 @@ class Bimp_Product extends BimpObject
     {
         $html = '';
 
-        if ($this->isLoaded()) {
-            $body .= '<table id="history_table" class="noborder objectlistTable">';
-            // Thead
-            $body .= '<thead>';
-            $body .= '<th>Historique</th>';
-            $body .= '<th>Nombre de tiers</th>';
-            $body .= '<th>Nombre d\'objets référent</th>';
-            $body .= '<th>Quantité totale</th>';
-            $body .= '<thead/>';
+        if (!$this->isLoaded())
+            return $html;
+        
+        $body .= '<table id="history_table" class="noborder objectlistTable">';
+        // Thead
+        $body .= '<thead>';
+        $body .= '<th>Historique</th>';
+        $body .= '<th>Nombre de tiers</th>';
+        $body .= '<th>Nombre d\'objets référent</th>';
+        $body .= '<th>Quantité totale</th>';
+        $body .= '<thead/>';
 
 
-            $stats_propale = $this->load_stats_propale();
-            $stats_prop_supplier = $this->load_stats_proposal_supplier();
-            $stats_command = $this->load_stats_commande();
-            $stats_comm_fourn = $this->load_stats_commande_fournisseur();
-            $stats_facture = $this->load_stats_facture();
-            $stats_fact_fourn = $this->load_stats_facture_fournisseur();
-            $stats_contrat = $this->load_stats_contrat();
+        $stats_propale = $this->load_stats_propale();
+        $stats_prop_supplier = $this->load_stats_proposal_supplier();
+        $stats_command = $this->load_stats_commande();
+        $stats_comm_fourn = $this->load_stats_commande_fournisseur();
+        $stats_facture = $this->load_stats_facture();
+        $stats_fact_fourn = $this->load_stats_facture_fournisseur();
+        $stats_contrat = $this->load_stats_contrat();
 
-            $stats = array($stats_propale, $stats_prop_supplier, $stats_command,
-                $stats_comm_fourn, $stats_facture,
-                $stats_fact_fourn, $stats_contrat);
+        $stats = array($stats_propale, $stats_prop_supplier, $stats_command,
+            $stats_comm_fourn, $stats_facture,
+            $stats_fact_fourn, $stats_contrat);
 
-            $body .= '<tbody>';
-            foreach ($stats as $s) {
-                // Tbody
-                $body .= '<tr style="height: 45px;">';
-                $body .= '<td id="' . $s['id'] . '" style="cursor: pointer;"';
-                $body .= ' name="display_details">';
-                $body .= '<a><strong>' . $s['name'] . '</strong></a></td>';
-                $body .= '<td><strong>' . $s['nb_object'] . '</strong></td>';
-                $body .= '<td><strong>' . $s['nb_ref'] . '</strong></td>';
-                $body .= '<td><strong>' . $s['qty'] . '</strong></td>';
-                $body .= '</tr>';
-            }
-            $body .= '</tbody>';
-            $body .= '</table>';
-
-            $html .= BimpRender::renderPanel('Historique', $body, '', array(
-                        'foldable' => false,
-                        'type' => 'secondary',
-//                        'panel_id' => 'choice',
-//                        'panel_class' => 'categ_container'
-            ));
-
-            $html .= '<div></div>';
-//            $html .= BimpRender::renderPanel('Objet sélectionné', '', '', array(
-//                        'foldable' => false,
-//                        'type'     => 'secondary',
-//                        'panel_id' => 'selected_object',
-////                        'panel_class' => 'categ_container'
-//            ));
+        $body .= '<tbody>';
+        foreach ($stats as $s) {
+            // Tbody
+            $body .= '<tr style="height: 45px;">';
+            $body .= '<td id="' . $s['id'] . '" style="cursor: pointer;"';
+            $body .= ' name="display_details">';
+            $body .= '<a><strong>' . $s['name'] . '</strong></a></td>';
+            $body .= '<td><strong>' . $s['nb_object'] . '</strong></td>';
+            $body .= '<td><strong>' . $s['nb_ref'] . '</strong></td>';
+            $body .= '<td><strong>' . $s['qty'] . '</strong></td>';
+            $body .= '</tr>';
         }
+        $body .= '</tbody>';
+        $body .= '</table>';
+
+        $html .= BimpRender::renderPanel('Historique', $body, '', array(
+                    'foldable' => false,
+                    'type' => 'secondary'
+        ));
+
+        $html .= '<div id="selected_object">fdzafazfzafafzafazfzafazfazzafzafaz</div>';
+        
         return $html;
     }
 

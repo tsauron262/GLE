@@ -156,4 +156,4 @@ forms:
               label: Opérations
               input_name: inut
               content: 
-                callback: displayDifference
+                callback: renderDifference

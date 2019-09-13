@@ -8,6 +8,10 @@ class InventoryLine extends BimpObject {
 
     public function checkInput($input, &$id_product, &$id_equipment) {
         $errors = array();
+        if($input == '') {
+            $errors[] = "Entrée vide";
+            return $errors;
+        }
         $is_product = $this->isProduct($input, $id_product);
         $is_equipment = $this->isEquipment($input, $id_equipment, $id_product);
         if (!$is_equipment and ! $is_product)

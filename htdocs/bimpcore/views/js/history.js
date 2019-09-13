@@ -6,8 +6,9 @@ function send_detail(id) {
     BimpAjax('displayDetails', data ,null, {
         display_processing: true,
         success: function (result, bimpAjax) {
-            $('div#selected_object > div.panel-body').empty();
-            $('div#selected_object > div.panel-body').html(result.html);
+//            console.log($('div#selected_object > div.panel-body'));
+            $('div#selected_object').empty();
+            $('div#selected_object').html(result.html);
         }
     });
 }

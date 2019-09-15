@@ -289,17 +289,28 @@ class Bimp_Facture extends BimpComm
                     return 0;
                 }
 
-                if ((int) $this->dol_object->paye) {
-                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' est classé' . $this->e() . ' "payé' . $this->e() . '"';
-                    return 0;
+
+                if ($type === Facture::TYPE_DEPOSIT) {
+                    if (!(int) $this->dol_object->paye) {
+                        $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' n\'est pas classé' . $this->e() . ' "payé' . $this->e() . '"';
+                        return 0;
+                    }
+                    if (!in_array($status, array(1, 2))) {
+                        $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' n\'est pas au statut "validé" ou "fermé"';
+                        return 0;
+                    }
+                } else {
+                    if ((int) $this->dol_object->paye) {
+                        $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' est classé' . $this->e() . ' "payé' . $this->e() . '"';
+                        return 0;
+                    }
+                    if ($status !== 1) {
+                        $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' n\'est pas au statut "validé' . $this->e() . '"';
+                        return 0;
+                    }
                 }
 
-                if ($status !== 1) {
-                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' n\'est pas au statut "validé' . $this->e() . '"';
-                    return 0;
-                }
-
-                $remainToPay = (float) $this->getRemainToPay();
+                $remainToPay = round((float) $this->getRemainToPay(), 2);
 
                 switch ($type) {
                     case Facture::TYPE_STANDARD:
@@ -317,7 +328,7 @@ class Bimp_Facture extends BimpComm
                         break;
 
                     case Facture::TYPE_DEPOSIT:
-                        if ($remainToPay !== 0) {
+                        if ($remainToPay) {
                             $errors[] = 'Cet facture d\'acompte n\'est pas entièrement payée';
                             return 0;
                         }
@@ -1515,18 +1526,21 @@ class Bimp_Facture extends BimpComm
                     }
                 }
 
-                // Trop perçu converti en remise: 
-                BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
-                $discount = new DiscountAbsolute($this->db->db);
-                $discount->fetch(0, $this->id);
-                if (BimpObject::objectLoaded($discount)) {
-                    $remainToPay_final += (float) $discount->amount_ttc;
-                    $html .= '<tr>';
-                    $html .= '<td style="text-align: right;">';
-                    $html .= '<strong>Trop perçu converti en </strong>' . $discount->getNomUrl(1, 'discount');
-                    $html .= '</td>';
-                    $html .= '<td>' . BimpTools::displayMoneyValue($discount->amount_ttc) . '</td>';
-                    $html .= '</tr>';
+                if ($type !== FActure::TYPE_DEPOSIT) {
+                    // Trop perçu converti en remise: 
+                    BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
+                    $discount = new DiscountAbsolute($this->db->db);
+                    $discount->fetch(0, $this->id);
+                    if (BimpObject::objectLoaded($discount)) {
+                        $remainToPay_final += (float) $discount->amount_ttc;
+                        $html .= '<tr>';
+                        $html .= '<td style="text-align: right;">';
+                        $html .= '<strong>Trop perçu converti en </strong>' . $discount->getNomUrl(1, 'discount');
+                        $html .= '</td>';
+                        $html .= '<td>' . BimpTools::displayMoneyValue($discount->amount_ttc) . '</td>';
+                        $html .= '<td></td>';
+                        $html .= '</tr>';
+                    }
                 }
             } else {
                 // Converti en remise: 
@@ -1542,13 +1556,14 @@ class Bimp_Facture extends BimpComm
                     $html .= '<td>';
                     $html .= BimpTools::displayMoneyValue($discount->amount_ttc);
                     $html .= '</td>';
+                    $html .= '<td></td>';
                     $html .= '</tr>';
                 }
             }
 
             // Reste à payer: 
-            if ((int) $this->getData('paye')) {
-                $remainToPay_final = 0;
+            $paye = (int) $this->getData('paye');
+            if ($paye) {
                 $class = 'success';
             } elseif ($type !== Facture::TYPE_CREDIT_NOTE) {
                 $class = ($remainToPay_final > 0 ? 'danger' : ($remainToPay_final < 0 ? 'warning' : 'success'));
@@ -1558,13 +1573,39 @@ class Bimp_Facture extends BimpComm
 
             $html .= '<tr style="background-color: #F0F0F0; font-weight: bold">';
             $html .= '<td style="text-align: right;"><strong>Reste à payer</strong> : </td>';
-            $html .= '<td style="font-size: 18px;">';
+            $html .= '<td style="font-size: 18px;" colspan="2">';
             $html .= '<span class="' . $class . '">';
-            $html .= BimpTools::displayMoneyValue($remainToPay_final, 'EUR') . ' (' . $this->getRemainToPay() . ')';
+            $html .= BimpTools::displayMoneyValue(($paye ? 0.00 : $remainToPay_final), 'EUR');
             $html .= '</span>';
             $html .= '</td>';
-            $html .= '<td></td>';
             $html .= '</tr>';
+
+            if ($paye && $remainToPay_final) {
+                $html .= '<tr>';
+                $html .= '<td colspan="3">';
+                $html .= '<span style="font-weight: normal; font-size: 11px; font-style: italic; line-height: 12px">';
+                $html .= BimpTools::ucfirst($this->getLabel('this')) . ' a été classé' . $this->e();
+                $html .= ' payé' . $this->e() . ' mais possède un reste à payer réel de ';
+                $html .= '<strong>' . BimpTools::displayMoneyValue($remainToPay_final, 'EUR') . '</strong>';
+                $html .= '</span>';
+                $html .= '</td>';
+                $html .= '</tr>';
+            }
+
+            // Acompte converti en remise: 
+            if ($type === Facture::TYPE_DEPOSIT) {
+                BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
+                $discount = new DiscountAbsolute($this->db->db);
+                $discount->fetch(0, $this->id);
+                if (BimpObject::objectLoaded($discount)) {
+                    $html .= '<tr>';
+                    $html .= '<td colspan="3" style="text-align: center; padding-top: 15px;">';
+                    $html .= '<span class="success">' . BimpRender::renderIcon('fas_check', 'iconLeft') . '</span>';
+                    $html .= '<strong>Cet acompte a été converti en </strong>' . $discount->getNomUrl(1, 'discount');
+                    $html .= '</td>';
+                    $html .= '</tr>';
+                }
+            }
 
             $html .= '</tbody>';
             $html .= '</table>';

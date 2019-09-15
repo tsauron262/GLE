@@ -99,7 +99,7 @@ class Bimp_Facture extends BimpComm
         }
 
         return parent::canSetAction($action);
-    } 
+    }
 
     // Getters booléens:
 
@@ -1045,6 +1045,20 @@ class Bimp_Facture extends BimpComm
         return 0;
     }
 
+    public function getConvertedToReducAmount()
+    {
+        if ($this->isLoaded()) {
+            BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
+            $discount = new DiscountAbsolute($this->db->db);
+            $discount->fetch(0, $this->id);
+            if (BimpObject::objectLoaded($discount)) {
+                return(float) $discount->amount_ttc;
+            }
+        }
+
+        return 0;
+    }
+
     public function getSumPayments()
     {
         if ($this->isLoaded()) {
@@ -1059,6 +1073,12 @@ class Bimp_Facture extends BimpComm
         if ($this->isLoaded()) {
             $paid = (float) $this->getSumPayments();
             $paid += (float) $this->getSumDiscountsUsed();
+
+            // La conversion en remise n'affecte pas le total des paiements dans le cas des factures d'accomptes. 
+
+            if (in_array((int) $this->getData('type'), array(Facture::TYPE_STANDARD, Facture::TYPE_CREDIT_NOTE))) {
+                $paid -= (float) $this->getConvertedToReducAmount();
+            }
 
             return $paid;
         }
@@ -1540,7 +1560,7 @@ class Bimp_Facture extends BimpComm
             $html .= '<td style="text-align: right;"><strong>Reste à payer</strong> : </td>';
             $html .= '<td style="font-size: 18px;">';
             $html .= '<span class="' . $class . '">';
-            $html .= BimpTools::displayMoneyValue($remainToPay_final, 'EUR');
+            $html .= BimpTools::displayMoneyValue($remainToPay_final, 'EUR') . ' (' . $this->getRemainToPay() . ')';
             $html .= '</span>';
             $html .= '</td>';
             $html .= '<td></td>';

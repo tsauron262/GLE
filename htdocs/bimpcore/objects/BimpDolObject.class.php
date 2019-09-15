@@ -50,6 +50,4 @@ class BimpDolObject extends BimpObject
 
         return '';
     }
-
-
 }

@@ -1096,7 +1096,7 @@ class Bimp_Product extends BimpObject
 
         return $html;
     }
-
+    
     public function renderCategorize()
     {
         $html = '';
@@ -1174,7 +1174,7 @@ class Bimp_Product extends BimpObject
                     'foldable' => false,
                     'type' => 'secondary'
         ));
-
+        
         $html .= '<div id="selected_object"></div>';
         
         return $html;
@@ -2385,6 +2385,14 @@ class Bimp_Product extends BimpObject
         $inventory = BimpCache::getBimpObjectInstance('bimplogistique', 'Inventory', $id_inventory);
         $stock = $this->getStocksForEntrepot($inventory->getData('fk_warehouse'));
         return $stock['reel'];
+    }
+    
+    public function canViewStock()
+    {
+        global $user;
+        if($user->rights->inventory->close)
+            return 1;
+        return 0;
     }
 
     public function getNbScanned()

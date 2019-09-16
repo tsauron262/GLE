@@ -278,20 +278,16 @@ forms:
                 custom: 1
                 label: Note publique
                 input_name: note_public
-                data_type: text
+                data_type: html
                 input: 
-                    type: textarea
-                    rows: 3
-                    auto_expand: 1
+                    type: html
             private_note: 
                 custom: 1
                 label: Note privée
                 input_name: note_private
-                data_type: text
+                data_type: html
                 input: 
-                    type: textarea
-                    rows: 3
-                    auto_expand: 1
+                    type: html
             lines: 
                 custom: 1
                 label: Quantités et équipements
@@ -304,20 +300,52 @@ forms:
         rows: 
             client: 
                 value: 
-                    callback: getBulkFactureIdClient
+                    callback: 
+                        method: getBulkFactureValue
+                        params: 
+                            - id_client
                 required: 1
             libelle: 
                 value: 
-                    callback: getBulkFactureLibelle
+                    callback:
+                        method: getBulkFactureValue
+                        params: 
+                            - libelle
             id_entrepot: 
                 show: 1
                 required: 1
                 value: 
                     field_value: unset
-                    callback: getBulkFactureEntrepot
+                    callback:
+                        method: getBulkFactureValue
+                        params: 
+                            - id_entrepot
             ef_type: 
                 show: 1
                 required: 1
+                value: 
+                    callback:
+                        method: getBulkFactureValue
+                        params: 
+                            - ef_type
+            cond_reglement: 
+                value: 
+                    callback:
+                        method: getBulkFactureValue
+                        params: 
+                            - cond_reglement
+            public_note: 
+                value: 
+                    callback:
+                        method: getBulkFactureValue
+                        params: 
+                            - note_public
+            private_note: 
+                value: 
+                    callback:
+                        method: getBulkFactureValue
+                        params: 
+                            - note_private
             lines: 
                 content: 
                     callback: renderBulkFactureFormLinesInputs

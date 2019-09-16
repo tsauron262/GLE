@@ -1310,6 +1310,24 @@ class BimpComm extends BimpDolObject
 
         return '';
     }
+    
+    public function displayClientFact(){
+        $html = '';
+        if($this->isLoaded()){
+            $list_ext = $this->dol_object->liste_contact(-1, 'external',0,'BILLING');
+            if(count($list_ext) > 0){
+                print_r($list_ext);
+                foreach($list_ext as $contact){
+                    if($contact['socid'] != $this->getData('fk_soc')){
+                        $socTemp = new Societe($this->db->db);
+                        $socTemp->fetch($contact['socid']);
+                        $html .= $socTemp->getNomUrl(1);
+                    }
+                }
+            }
+        }
+        return $html;
+    }
 
     // Rendus HTML: 
 

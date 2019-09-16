@@ -12,7 +12,8 @@ class OrderFournPDF extends BimpDocumentPDF
 
     public function __construct($db)
     {
-        parent::__construct($db);
+        global $langs;
+        $this->langs = $langs;
 
         $this->langs->load("main");
         $this->langs->load("dict");
@@ -21,7 +22,11 @@ class OrderFournPDF extends BimpDocumentPDF
         $this->langs->load("products");
         $this->langs->load("orders");
 
+        parent::__construct($db);
+
         $this->pdf->addCgvPages = false;
+
+        $this->target_label = 'Fournisseur';
     }
 
     protected function initData()
@@ -62,6 +67,76 @@ class OrderFournPDF extends BimpDocumentPDF
     public function getDocInfosHtml()
     {
         $html = '';
+
+        $primary = BimpCore::getParam('pdf/primary', '000000');
+
+        $html .= '<div class="row">';
+        $html .= '<span style="font-weight: bold; color: #' . $primary . ';">';
+        $html .= 'Livraison :</span><br/>';
+
+        if (BimpObject::objectLoaded($this->bimpCommObject)) {
+            switch ($this->bimpCommObject->getData('delivery_type')) {
+                case Bimp_CommandeFourn::DELIV_ENTREPOT:
+                default:
+                    $entrepot = $this->bimpCommObject->getChildObject('entrepot');
+                    if (BimpObject::objectLoaded($entrepot)) {
+                        if ($entrepot->address) {
+                            $html .= $entrepot->address . '<br/>';
+                            if ($entrepot->zip) {
+                                $html .= $entrepot->zip . ' ';
+                            } else {
+                                $html .= '<span style="color: #A00000; font-weight: bold">Code postal non défini</span> ';
+                            }
+                            if ($entrepot->town) {
+                                $html .= $entrepot->town;
+                            } else {
+                                $html .= '<span style="color: #A00000; font-weight: bold">Ville non définie</span>';
+                            }
+                        } else {
+                            $html .= '<span style="color: #A00000; font-weight: bold">Erreur: adresse non définie pour l\'entrepôt "' . $entrepot->label . ' - ' . $entrepot->lieu . '"</span>';
+                        }
+                    } elseif ((int) $this->bimpCommObject->getData('entrepot')) {
+                        $html .= '<span style="color: #A00000; font-weight: bold">Erreur: l\'entrepôt #' . $this->bimpCommObject->getData('entrepot') . ' n\'existe pas</span>';
+                    } else {
+                        $html .= '<span style="color: #A00000; font-weight: bold">Entrepôt absent</span>';
+                    }
+                    break;
+
+                case Bimp_CommandeFourn::DELIV_SIEGE:
+                    global $mysoc;
+                    if (is_object($mysoc)) {
+                        if ($mysoc->name) {
+                            $html .= '<span style="font-weight: bold">' . $mysoc->name . '</span><br/>';
+                        }
+                        if ($mysoc->address) {
+                            $html .= $mysoc->address . '<br/>';
+                        }
+                        if ($mysoc->zip) {
+                            $html .= $mysoc->zip . ' ';
+                        }
+                        if ($mysoc->town) {
+                            $html .= $mysoc->town;
+                        }
+                    } else {
+                        $html .= '<span style="color: #A00000; font-weight: bold">Erreur: Siège social non configuré</span>';
+                    }
+                    break;
+
+                case Bimp_CommandeFourn::DELIV_CUSTOM:
+                    $address = $this->bimpCommObject->getData('custom_delivery');
+                    if ($address) {
+                        $address = str_replace("\n", '<br/>', $address);
+                        $html .= $address;
+                    } else {
+                        $html .= '<span style="color: #A00000; font-weight: bold">Adresse non renseignée</span>';
+                    }
+                    break;
+            }
+        }
+
+        $html .= '</div>';
+
+        $html .= '<div style="border-top: solid 1px #' . $primary . ';"></div>';
 
         $html .= '<div>';
 

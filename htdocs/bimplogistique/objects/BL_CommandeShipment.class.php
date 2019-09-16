@@ -517,64 +517,6 @@ class BL_CommandeShipment extends BimpObject
         return '';
     }
 
-    public function getBulkFactureIdClient()
-    {
-        $shipments_list = BimpTools::getPostFieldValue('id_objects', array());
-
-        if (is_array($shipments_list) && !empty($shipments_list)) {
-            foreach ($shipments_list as $id_shipment) {
-                $shipment = BimpCache::getBimpObjectInstance($this->module, $this->object_name, (int) $id_shipment);
-                if (BimpObject::ObjectLoaded($shipment)) {
-                    $commande = $shipment->getParentInstance();
-                    if (BimpObject::ObjectLoaded($commande)) {
-                        if ((int) $commande->getData('fk_soc')) {
-                            return (int) $commande->getData('fk_soc');
-                        }
-                    }
-                }
-            }
-        }
-
-        return 0;
-    }
-
-    public function getBulkFactureLibelle()
-    {
-        $shipments_list = BimpTools::getPostFieldValue('id_objects', array());
-
-        if (is_array($shipments_list) && !empty($shipments_list)) {
-            foreach ($shipments_list as $id_shipment) {
-                $shipment = BimpCache::getBimpObjectInstance($this->module, $this->object_name, (int) $id_shipment);
-                if (BimpObject::ObjectLoaded($shipment)) {
-                    $commande = $shipment->getParentInstance();
-                    if (BimpObject::ObjectLoaded($commande)) {
-                        if ($commande->getData('libelle')) {
-                            return $commande->getData('libelle');
-                        }
-                    }
-                }
-            }
-        }
-
-        return '';
-    }
-
-    public function getBulkFactureEntrepot()
-    {
-        $shipments_list = BimpTools::getPostFieldValue('id_objects', array());
-
-        if (is_array($shipments_list) && !empty($shipments_list)) {
-            foreach ($shipments_list as $id_shipment) {
-                $shipment = BimpCache::getBimpObjectInstance($this->module, $this->object_name, (int) $id_shipment);
-                if ((int) $shipment->getData('id_entrepot')) {
-                    return (int) $shipment->getData('id_entrepot') . '<br/>';
-                }
-            }
-        }
-
-        return 0;
-    }
-
     // Affichages: 
 
     public function displayContact()

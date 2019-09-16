@@ -6,6 +6,10 @@ require_once DOL_DOCUMENT_ROOT . '/fourn/class/fournisseur.product.class.php';
 class Bimp_CommandeFourn extends BimpComm
 {
 
+    const DELIV_ENTREPOT = 0;
+    const DELIV_SIEGE = 1;
+    const DELIV_CUSTOM = 2;
+    
     public $redirectMode = 4; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
     public static $dol_module = 'commande_fournisseur';
     public static $email_type = 'order_supplier_send';
@@ -37,6 +41,11 @@ class Bimp_CommandeFourn extends BimpComm
         'can' => array('label' => 'Annulée', 'classes' => array('danger')),
     );
     public static $logistique_active_status = array(3, 4, 5, 7);
+    public static $delivery_types = array(
+        self::DELIV_ENTREPOT => 'Entrepôt de la commande',
+        self::DELIV_SIEGE => 'Siège social',
+        self::DELIV_CUSTOM => 'Personnalisée'
+    );
 
     // Gestion des autorisations objet: 
 

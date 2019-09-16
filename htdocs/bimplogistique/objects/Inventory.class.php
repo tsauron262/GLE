@@ -22,8 +22,7 @@ class Inventory extends BimpDolObject
     public function canCreate()
     {
         global $user;
-
-        if (!$user->bimpequipment->inventory->create and ! $user->admin) {
+        if (!$user->rights->bimpequipment->inventory->create and ! $user->admin) {
             return 0;
         }
 

@@ -203,7 +203,7 @@ class BimpCommission extends BimpObject
         return array();
     }
 
-    public function getAvailableFacturesList($paid_only = false)
+    public function getAvailableFacturesList($paid_only = false, $secteur = '')
     {
         if ($this->isLoaded()) {
             $date = $this->getData('date');
@@ -250,6 +250,9 @@ class BimpCommission extends BimpObject
 
                         if ($paid_only) {
                             $sql .= ' AND f.paye = 1';
+                        }
+                        if ($secteur) {
+                            $sql .= ' AND fef.type = \'' . $secteur . '\'';
                         }
                     }
                     break;
@@ -308,7 +311,7 @@ class BimpCommission extends BimpObject
         return array();
     }
 
-    public function getAvailableRevalorisationsList()
+    public function getAvailableRevalorisationsList($secteur = '')
     {
         if ($this->isLoaded()) {
             $type = (int) $this->getData('type');
@@ -344,6 +347,10 @@ class BimpCommission extends BimpObject
                         $sql .= ' WHERE r.id_entrepot_commission = 0';
                         $sql .= ' AND r.status = 1';
                         $sql .= ' AND fef.entrepot = ' . $id_entrepot;
+
+                        if ($secteur) {
+                            $sql .= ' AND fef.type = \'' . $secteur . '\'';
+                        }
                     }
                     break;
             }
@@ -463,19 +470,36 @@ class BimpCommission extends BimpObject
 
             foreach ($this->getFacturesList() as $id_facture) {
                 $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_facture);
-                if (BimpObject::objectLoaded($facture)) {
-                    $user = $facture->getCommercial();
-                    $secteur = $facture->getData('ef_type');
 
-                    if (BimpObject::objectLoaded($user)) {
-                        $user_secteur = $user->getData('secteur');
+                switch ((int) $this->getData('type')) {
+                    case self::TYPE_USER:
+                        if (BimpObject::objectLoaded($facture)) {
+                            $user = $facture->getCommercial();
+                            $secteur = $facture->getData('ef_type');
 
-                        if ($user_secteur) {
-                            if (($user_secteur != $secteur)) {
-                                $n++;
+                            if (BimpObject::objectLoaded($user)) {
+                                $user_secteur = $user->getData('secteur');
+
+                                if ($user_secteur) {
+                                    if (($user_secteur != $secteur)) {
+                                        $n++;
+                                    }
+                                }
                             }
                         }
-                    }
+                        break;
+
+                    case self::TYPE_ENTREPOT:
+                        if (BimpObject::objectLoaded($facture)) {
+                            $secteur = $this->getData('secteur');
+                            if ($secteur) {
+                                $fac_secteur = $facture->getData('ef_type');
+                                if ($secteur != $fac_secteur) {
+                                    $n++;
+                                }
+                            }
+                        }
+                        break;
                 }
             }
 
@@ -668,7 +692,7 @@ class BimpCommission extends BimpObject
 
         if (!count($errors)) {
             // Ajout des factures dispos: 
-            $factures = $this->getAvailableFacturesList((int) BimpTools::getPostFieldValue('paid_only', 0));
+            $factures = $this->getAvailableFacturesList((int) BimpTools::getPostFieldValue('paid_only', 0, $this->getData('secteur')));
             $obj_field = '';
             switch ((int) $this->getData('type')) {
                 case self::TYPE_USER:
@@ -692,7 +716,7 @@ class BimpCommission extends BimpObject
             }
 
             // Ajout des reval dispos: 
-            $revals = $this->getAvailableRevalorisationsList();
+            $revals = $this->getAvailableRevalorisationsList($this->getData('secteur'));
             foreach ($revals as $id_reval) {
                 $reval = BimpCache::getBimpObjectInstance('bimpfinanc', 'BimpRevalorisation', (int) $id_reval);
                 if (BimpObject::objectLoaded($reval)) {

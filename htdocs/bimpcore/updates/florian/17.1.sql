@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bimp_commission` ADD `secteur` VARCHAR(12) NOT NULL DEFAULT ''; 

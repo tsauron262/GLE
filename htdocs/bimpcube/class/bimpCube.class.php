@@ -7,7 +7,7 @@ class BimpCube{
     }
     
     public function callTrigerRefresh(){
-        $result = 0;
+        $result = 1;
         $result = $result && $this->db->query("CALL refresh_llx_mat_view_societe();");
         $result = $result && $this->db->query("CALL refresh_llx_mat_view_categorie();");
         $result = $result && $this->db->query("CALL refresh_llx_mat_view_product_cat();");

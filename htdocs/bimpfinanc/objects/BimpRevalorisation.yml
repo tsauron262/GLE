@@ -205,6 +205,8 @@ filters_panel:
             - field: amount
             - field: ef_type
               child: facture
+            - field: entrepot
+              child: facture
             
 lists_cols: 
     facture: 
@@ -218,6 +220,9 @@ lists_cols:
             callback: 
                 method: displayCommercial
                 object: facture
+        search: 
+            input: 
+                type: search_user
     date: 
         field: date
     desc: 
@@ -241,6 +246,9 @@ lists_cols:
             callback: displayCommissions
     secteur: 
         field: ef_type
+        child: facture
+    entrepot: 
+        field: entrepot
         child: facture
     
 lists: 

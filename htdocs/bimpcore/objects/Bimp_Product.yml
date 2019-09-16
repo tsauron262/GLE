@@ -739,6 +739,11 @@ views:
                   col_md: 12
                   custom:
                       callback: renderListeFournisseur
+                - type: custom
+                  col_lg: 12
+                  col_md: 12
+                  custom:
+                      callback: renderListeVente
                       
     product_note:
         rows:
@@ -896,13 +901,16 @@ lists:
             stock: unset
             price: unset
             tva: unset
-            stock: unset
+            
             nb_scanned:
                 label: Nombre scanné
                 value:
                     callback:
                         method: getNbScanned
             stock_entrepot:
+                show: 
+                    callback:
+                        method: canViewStock
                 label: Stock
                 value: 
                     callback: 

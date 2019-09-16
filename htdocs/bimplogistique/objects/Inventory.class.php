@@ -19,11 +19,17 @@ class Inventory extends BimpDolObject
 
     // Droits user: 
 
+    public function getAllInventories() {
+        // mettre 1 vide
+        
+        return array(0 => '', 1 => '#1');
+    }
+    
+    
     public function canCreate()
     {
         global $user;
-
-        if (!$user->bimpequipment->inventory->create and ! $user->admin) {
+        if (!$user->rights->bimpequipment->inventory->create and ! $user->admin) {
             return 0;
         }
 
@@ -241,6 +247,13 @@ class Inventory extends BimpDolObject
 
         return $errors;
     }
+    
+    public function isAdmin() {
+        global $user;
+        if($user->rights->inventory->close or $user->admin)
+            return 1;
+        return 0;
+    }
 
     private function correctProducts()
     {
@@ -291,6 +304,7 @@ class Inventory extends BimpDolObject
         $list->addFieldFilterValue('rien', $filters);
         $list->addJoin('bl_inventory_det', 'a.rowid = inv_det.fk_product AND inv_det.fk_inventory = ' . $this->getData('id'), 'inv_det');
         $list->addJoin('product_stock', 'a.rowid = ps.fk_product AND ps.fk_entrepot = ' . $this->getData('fk_warehouse'), 'ps');
+//        print_r($list);
         $html .= $list->renderHtml();
 
 
@@ -476,6 +490,8 @@ class Inventory extends BimpDolObject
                 ));
             }
         }
+        
+        $html .= '<div id="allow_sound"></div>';
 
         return $html;
     }

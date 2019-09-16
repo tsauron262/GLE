@@ -214,8 +214,7 @@ class Interfacevalidate extends DolibarrTriggers
 //                setEventMessages($msg, null, 'errors');
                 return -2;
             }
-            
-            if($action == 'ORDER_VALIDATE'){
+            if($action == 'ORDER_VALIDATE' && $object->array_options['options_type'] != "E"){
                 //contact facturation
                 $tabConatact = $object->getIdContact('external', 'BILLING');
                 if (count($tabConatact) < 1) {

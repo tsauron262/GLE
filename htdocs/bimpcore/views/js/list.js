@@ -234,7 +234,7 @@ function reloadObjectList(list_id, callback) {
     });
 }
 
-function loadModalList(module, object_name, list_name, id_parent, $button, title, extra_data) {
+function loadModalList(module, object_name, list_name, id_parent, $button, title, extra_data, extra_filters, extra_joins) {
     if (typeof (title) === 'undefined' || !title) {
         title = '<i class="fa fa-bars iconLeft"></i>Liste des ';
         if (typeof (object_labels[object_name].name_plur) !== 'undefined') {
@@ -256,6 +256,14 @@ function loadModalList(module, object_name, list_name, id_parent, $button, title
 
     if (extra_data) {
         data['extra_data'] = extra_data;
+    }
+    
+    if (extra_filters) {
+        data['extra_filters'] = extra_filters;
+    }
+    
+    if (extra_joins) {
+        data['extra_joins'] = extra_joins;
     }
 
     bimpModal.loadAjaxContent($button, 'loadObjectListFullPanel', data, title, '', function (result, bimpAjax) {

@@ -105,6 +105,13 @@ abstract class BimpComponent
 
     public function fetchParams($path, $definitions = null)
     {
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
+
         if (is_null($definitions)) {
             $definitions = $this->params_def;
         }
@@ -118,6 +125,7 @@ abstract class BimpComponent
             }
         }
 
+        $current_bc = $prev_bc;
         return $params;
     }
 

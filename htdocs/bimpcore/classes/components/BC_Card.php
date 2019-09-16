@@ -2,6 +2,7 @@
 
 class BC_Card extends BimpComponent
 {
+
     public $component_name = 'Mini-fiche';
     public static $type = 'card';
     public $display_object = null;
@@ -23,6 +24,13 @@ class BC_Card extends BimpComponent
         $this->params_def['image'] = array();
         $this->params_def['view_btn'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['fields'] = array('type' => 'keys');
+
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
 
         $path = null;
 
@@ -74,6 +82,8 @@ class BC_Card extends BimpComponent
                 $this->errors[] = 'Vous n\'avez pas la permission de voir ' . $this->object->getLabel('this');
             }
         }
+
+        $current_bc = $prev_bc;
     }
 
     public function renderHtml()
@@ -88,6 +98,13 @@ class BC_Card extends BimpComponent
             return '';
         }
 
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
+
         switch ($this->object_type) {
             case 'bimp_object':
                 $html .= $this->renderBimpObjectCard();
@@ -97,6 +114,8 @@ class BC_Card extends BimpComponent
                 $html .= $this->renderDolObjectCard();
                 break;
         }
+
+        $current_bc = $prev_bc;
 
         return $html;
     }
@@ -184,11 +203,8 @@ class BC_Card extends BimpComponent
         }
 
         if (is_array($this->params['title'])) {
-            if (isset($this->params['title']['object_prop'])) {
-                
-            }
-            $prop = $this->object->getConf($this->config_path . '/title/object_prop', null);
-            if (property_exists($this->display_object, $this->params['title']['object_prop'])) {
+            $prop = $this->object->getConf($this->config_path . '/title/object_prop', '');
+            if ($prop && property_exists($this->display_object, $this->params['title']['object_prop'])) {
                 $this->params['title'] = $this->display_object->{$this->params['title']['object_prop']};
             }
         }

@@ -11,6 +11,13 @@ class BC_StatsList extends BC_List
         $this->params_def['group_by'] = array('data_type' => 'array', 'default' => array(), 'request' => true, 'json' => true);
         $this->params_def['group_by_options'] = array('data_type' => 'array', 'compile' => true, 'default' => array());
 
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
+
         $path = null;
 
         if (!is_null($object)) {
@@ -39,6 +46,8 @@ class BC_StatsList extends BC_List
 
         $this->params['filters_panel_open'] = 1;
         $this->params['n'] = 0;
+
+        $current_bc = $prev_bc;
     }
 
     public function renderHtmlContent()
@@ -52,6 +61,13 @@ class BC_StatsList extends BC_List
         if (!$this->object->can("view")) {
             return BimpRender::renderAlerts('Vous n\'avez pas la permission de voir ' . $this->object->getLabel('the_plur'));
         }
+
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
 
         $html .= $this->renderListParamsInputs();
 
@@ -82,6 +98,7 @@ class BC_StatsList extends BC_List
 
         $html .= '<div class="ajaxResultContainer" id="' . $this->identifier . '_result"></div>';
 
+        $current_bc = $prev_bc;
         return $html;
     }
 
@@ -100,6 +117,15 @@ class BC_StatsList extends BC_List
 
     public function renderGroupByOptions()
     {
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
+
+        $html = '';
+
         if (!empty($this->params['group_by_options'])) {
             $group_by_options = array();
 
@@ -124,13 +150,14 @@ class BC_StatsList extends BC_List
 
                 $panel_content .= '</div>';
 
-                return BimpRender::renderPanel('Grouper les résulats par: ', $panel_content, '', array(
+                $html = BimpRender::renderPanel('Grouper les résulats par: ', $panel_content, '', array(
                             'type' => 'secondary',
                             'icon' => 'fas_object-group'
                 ));
             }
         }
 
-        return '';
+        $current_bc = $prev_bc;
+        return $html;
     }
 }

@@ -1229,6 +1229,8 @@ class BimpController
         $module = BimpTools::getValue('module', $this->module);
         $object_name = BimpTools::getValue('object_name');
         $list_name = BimpTools::getValue('list_name', 'default');
+        $extra_filters = BimpTools::getValue('extra_filters', '');
+        $extra_joins = BimpTools::getValue('extra_joins', '');
 
         if (is_null($object_name) || !$object_name) {
             $errors[] = 'Type d\'objet absent';
@@ -1237,6 +1239,23 @@ class BimpController
         if (!count($errors)) {
             $object = BimpObject::getInstance($module, $object_name);
             $list = new BC_ListTable($object, $list_name, 1, $id_parent);
+
+            if ($extra_filters) {
+                $filters = json_decode($extra_filters, 1);
+
+                foreach ($filters as $name => $filter) {
+                    $list->addFieldFilterValue($name, $filter);
+                }
+            }
+
+            if ($extra_joins) {
+                $joins = json_decode($extra_joins, 1);
+
+                foreach ($joins as $join) {
+                    $list->addJoin($join['table'], $join['on'], $join['alias']);
+                }
+            }
+
             $html = $list->renderHtml();
             $list_id = $list->identifier;
         }
@@ -2077,25 +2096,25 @@ class BimpController
     {
         return BimpTools::getValue('id_' . $object_name, null);
     }
-    
-    
-    public function renderTabs($fonction, $nomTabs, $params1 = null, $params2 = null){//pour patch le chargement auto des onglet
-        if(!BimpTools::isSubmit('ajax')){
-            if($nomTabs == '' || $nomTabs == "default"){
-                if(BimpTools::isSubmit('tab') && BimpTools::getValue('tab') != 'default')
-                return 'ne devrais jamais etre visible';
+
+    public function renderTabs($fonction, $nomTabs, $params1 = null, $params2 = null)
+    {//pour patch le chargement auto des onglet
+        if (!BimpTools::isSubmit('ajax')) {
+            if ($nomTabs == '' || $nomTabs == "default") {
+                if (BimpTools::isSubmit('tab') && BimpTools::getValue('tab') != 'default')
+                    return 'ne devrais jamais etre visible';
             }
-            elseif(BimpTools::getValue('tab') != $nomTabs)
+            elseif (BimpTools::getValue('tab') != $nomTabs)
                 return 'ne devrais jamais etre visible2';
         }
-        if(method_exists($this, $fonction)){
-            if(isset($params2))
+        if (method_exists($this, $fonction)) {
+            if (isset($params2))
                 return $this->$fonction($params1, $params2);
-            elseif(isset($params1))
+            elseif (isset($params1))
                 return $this->$fonction($params1);
             else
                 return $this->$fonction();
         }
-        return 'fonction : '.$fonction." inexistante";
+        return 'fonction : ' . $fonction . " inexistante";
     }
 }

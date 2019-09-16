@@ -21,7 +21,7 @@ class BimpCommission extends BimpObject
     {
         global $user;
 
-        return (int) ($user->admin ? 1 : 0);
+        return (int) 1;//($user->admin ? 1 : 0);
     }
 
     public function canCreate()

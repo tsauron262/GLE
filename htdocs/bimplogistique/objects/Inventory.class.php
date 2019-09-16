@@ -19,6 +19,13 @@ class Inventory extends BimpDolObject
 
     // Droits user: 
 
+    public function getAllInventories() {
+        // mettre 1 vide
+        
+        return array(0 => '', 1 => '#1');
+    }
+    
+    
     public function canCreate()
     {
         global $user;
@@ -242,9 +249,8 @@ class Inventory extends BimpDolObject
     }
     
     public function isAdmin() {
-        return 0;
         global $user;
-        if($user->rights->inventory->create)
+        if($user->rights->inventory->close or $user->admin)
             return 1;
         return 0;
     }

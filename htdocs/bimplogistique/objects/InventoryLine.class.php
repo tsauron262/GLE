@@ -21,6 +21,10 @@ class InventoryLine extends BimpObject {
         return $errors;
     }
 
+    public function canCreate(){
+        return 1;
+    }
+    
     public function isProduct($search, &$id_product) {
         $sql = 'SELECT rowid';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'product';

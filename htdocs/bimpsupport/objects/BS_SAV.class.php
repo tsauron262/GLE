@@ -2714,17 +2714,17 @@ class BS_SAV extends BimpObject
             $propal->lines_locked = 1;
 
             $new_status = null;
-            
+
             if ($this->allGarantie) { // Déterminé par $this->generatePropal()
                 $this->addNote('Devis garantie validé auto le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs));
                 // Si on vient de commander les pieces sous garentie (On ne change pas le statut)
                 if ((int) $this->getData('status') !== self::BS_SAV_ATT_PIECE) {
                     $new_status = self::BS_SAV_DEVIS_ACCEPTE;
                 }
-                
-                if($propal->dol_object->valid($user) < 1)
-                    $errors[] = "Validation de devis impossible !!!".BimpTools::getMsgFromArray($propal->dol_object->errors);
-                else{    
+
+                if ($propal->dol_object->valid($user) < 1)
+                    $errors[] = "Validation de devis impossible !!!" . BimpTools::getMsgFromArray($propal->dol_object->errors);
+                else {
                     $propal->dol_object->cloture($user, 2, "Auto via SAV sous garantie");
                     $propal->fetch($propal->id);
                     $propal->dol_object->generateDocument(self::$propal_model_pdf, $langs);
@@ -2732,9 +2732,10 @@ class BS_SAV extends BimpObject
             } else {
                 $this->addNote('Devis envoyé le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs));
                 $new_status = self::BS_SAV_ATT_CLIENT;
-                
+
                 if ($propal->dol_object->valid($user) < 1) {
-                    $errors[] = "Validation de devis impossible !!!".BimpTools::getMsgFromArray($propal->dol_object->errors);;
+                    $errors[] = "Validation de devis impossible !!!" . BimpTools::getMsgFromArray($propal->dol_object->errors);
+                    ;
                 }
 
                 if (!count($errors) && !$propal->dol_object->generateDocument(self::$propal_model_pdf, $langs)) {
@@ -2887,10 +2888,13 @@ class BS_SAV extends BimpObject
                         if ($propalLine->isLoaded()) {
                             if ($propalLine->getData('linked_object_name') == 'sav_garantie')
                                 continue;
+                            
                             $remises = $propalLine->getRemises();
                             $eq_lines = $propalLine->getEquipmentLines();
                             $propalLine->id = null;
                             $propalLine->set('id', 0);
+                            $propalLine->set('id_line', 0);
+                            $propalLine->set('id_parent_line', 0);
                             $propalLine->remise = 0;
                             $propalLine->setIdParent($new_id_propal);
 
@@ -3625,8 +3629,9 @@ class BS_SAV extends BimpObject
 
         return $errors;
     }
-    
-    public function actionAddAcompte($data, &$success){
+
+    public function actionAddAcompte($data, &$success)
+    {
         $errors = array();
         $warnings = array();
         // Création de la facture d'acompte: 
@@ -3636,8 +3641,7 @@ class BS_SAV extends BimpObject
             $fac_errors = $this->createAccompte((float) $this->getData('acompte'), false);
             if (count($fac_errors)) {
                 $warnings[] = BimpTools::getMsgFromArray($fac_errors, 'Des erreurs sont survenues lors de la création de la facture d\'acompte');
-            }
-            else
+            } else
                 $success = "Acompte créer avec succés.";
         }
         return array(

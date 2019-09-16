@@ -1653,7 +1653,7 @@ class BimpTools
 
         if ($no_html) {
             if ($title) {
-                $msg .= $title . ' : ' . "\n";
+                $msg .= htmlentities($title) . ' : ' . "\n";
             }
 
             if (is_array($msgs)) {
@@ -1665,7 +1665,7 @@ class BimpTools
                         $fl = false;
                     }
 
-                    $msg .= "\t" . '- ' . $m;
+                    $msg .= "\t" . '- ' . htmlentities($m);
                 }
             } else {
                 $msg .= "\t" . '- ' . $msgs;

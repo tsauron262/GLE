@@ -1954,11 +1954,6 @@ class BimpComm extends BimpDolObject
         return $html;
     }
 
-    public function renderMailForm()
-    {
-        return BimpRender::renderAlerts('L\'envoi par email n\'est pas disponible pour ' . $this->getLabel('the_plur'));
-    }
-
     public function renderContentExtraLeft()
     {
         return '';

@@ -422,62 +422,99 @@ class BL_CommandeShipment extends BimpObject
         return $total_ttc;
     }
 
-    public function getBulkFactureIdClient()
+    public function getBulkFactureValue($input_name)
     {
+        // Si plusieurs commandes différentes, on ne renvoie les valeurs que si la même pour chaque commande. 
+
         $shipments_list = BimpTools::getPostFieldValue('id_objects', array());
 
         if (is_array($shipments_list) && !empty($shipments_list)) {
+            $commandes = array();
+
             foreach ($shipments_list as $id_shipment) {
                 $shipment = BimpCache::getBimpObjectInstance($this->module, $this->object_name, (int) $id_shipment);
                 if (BimpObject::ObjectLoaded($shipment)) {
                     $commande = $shipment->getParentInstance();
                     if (BimpObject::ObjectLoaded($commande)) {
-                        if ((int) $commande->getData('fk_soc')) {
-                            return (int) $commande->getData('fk_soc');
+                        if (!isset($commandes[(int) $commande->id])) {
+                            $commandes[(int) $commande->id] = $commande;
                         }
                     }
                 }
             }
         }
 
-        return 0;
-    }
-
-    public function getBulkFactureLibelle()
-    {
-        $shipments_list = BimpTools::getPostFieldValue('id_objects', array());
-
-        if (is_array($shipments_list) && !empty($shipments_list)) {
-            foreach ($shipments_list as $id_shipment) {
-                $shipment = BimpCache::getBimpObjectInstance($this->module, $this->object_name, (int) $id_shipment);
-                if (BimpObject::ObjectLoaded($shipment)) {
-                    $commande = $shipment->getParentInstance();
-                    if (BimpObject::ObjectLoaded($commande)) {
-                        if ($commande->getData('libelle')) {
-                            return $commande->getData('libelle');
-                        }
+        switch ($input_name) {
+            case 'id_client':
+                $id_client = 0;
+                foreach ($commandes as $id_commande => $commande) {
+                    if ($id_client && $id_client !== (int) $commande->getData('fk_soc')) {
+                        return 0;
                     }
+                    $id_client = (int) $commande->getData('fk_soc');
                 }
-            }
+                return $id_client;
+
+            case 'id_entrepot':
+                $id_entrepot = 0;
+                foreach ($commandes as $id_commande => $commande) {
+                    if ($id_entrepot && $id_entrepot !== (int) $commande->getData('entrepot')) {
+                        return 0;
+                    }
+                    $id_entrepot = (int) $commande->getData('entrepot');
+                }
+                return $id_entrepot;
+
+            case 'libelle':
+                $libelle = '';
+                foreach ($commandes as $id_commande => $commande) {
+                    if ($libelle && $libelle != $commande->getData('libelle')) {
+                        return '';
+                    }
+                    $libelle = $commande->getData('libelle');
+                }
+                return $libelle;
+
+            case 'cond_reglement':
+                $id_cond_regelement = 0;
+                foreach ($commandes as $id_commande => $commande) {
+                    if ($id_cond_regelement && $id_cond_regelement !== (int) $commande->getData('fk_cond_reglement')) {
+                        return 0;
+                    }
+                    $id_cond_regelement = (int) $commande->getData('fk_cond_reglement');
+                }
+                return $id_cond_regelement;
+
+            case 'ef_type':
+                $secteur = '';
+                foreach ($commandes as $id_commande => $commande) {
+                    if ($secteur && $secteur != $commande->getData('ef_type')) {
+                        return '';
+                    }
+                    $secteur = $commande->getData('ef_type');
+                }
+                return $secteur;
+
+            case 'note_public':
+            case 'note_private':
+                $note = '';
+                foreach ($commandes as $id_commande => $commande) {
+                    $commande_note = $commande->getData($input_name);
+                    if (!$commande_note) {
+                        continue;
+                    }
+                    if ($note) {
+                        $note .= '<br/>';
+                    }
+                    if (count($commandes > 1)) {
+                        $note .= 'Commande ' . $commande->getRef() . ': <br/>';
+                    }
+                    $note .= $commande_note;
+                }
+                return $note;
         }
 
         return '';
-    }
-
-    public function getBulkFactureEntrepot()
-    {
-        $shipments_list = BimpTools::getPostFieldValue('id_objects', array());
-        
-        if (is_array($shipments_list) && !empty($shipments_list)) {
-            foreach ($shipments_list as $id_shipment) {
-                $shipment = BimpCache::getBimpObjectInstance($this->module, $this->object_name, (int) $id_shipment);
-                if ((int) $shipment->getData('id_entrepot')) {
-                    return (int) $shipment->getData('id_entrepot') . '<br/>';
-                }
-            }
-        }
-
-        return 0;
     }
 
     // Affichages: 

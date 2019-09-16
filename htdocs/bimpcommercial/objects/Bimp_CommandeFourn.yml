@@ -182,7 +182,22 @@ fields:
 #        label: Compte bancaire
 #        type: id_object
 #        object: account
+    delivery_type: 
+        label: Addresse de livraison
+        type: int
+        values: 
+            array: delivery_types
+        default_value: 0
         
+    custom_delivery: 
+        label: Adresse de livraison personnalisée
+        type: text
+        input: 
+            auto_expand: 1
+            rows: 3
+        display_if: 
+            field_name: delivery_type
+            show_values: 2
     ref_client: unset
     total: unset
     fk_availability: unset
@@ -199,6 +214,8 @@ forms:
             - field: fk_soc
             - field: fk_user_resp
             - field: ref_supplier
+            - field: delivery_type
+            - field: custom_delivery
             - field: date_livraison
             - field: fk_cond_reglement
             - field: fk_mode_reglement
@@ -248,6 +265,8 @@ forms:
             - field: ef_type
             - field: fk_soc
             - field: ref_supplier
+            - field: delivery_type
+            - field: custom_delivery
             - field: date_livraison
             
     force_status: 
@@ -465,6 +484,10 @@ fields_tables:
               edit: 1
             - field: date_commande
             - field: date_livraison
+              edit: 1
+            - field: delivery_type
+              edit: 1
+            - field: custom_delivery
               edit: 1
             - field: fk_input_method
               show: 

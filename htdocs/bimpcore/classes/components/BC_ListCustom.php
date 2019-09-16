@@ -10,6 +10,13 @@ class BC_ListCustom extends BC_List
     {
         $this->params_def['content_callback'] = array('default' => '');
 
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
+
         $path = null;
 
         if (!is_null($object)) {
@@ -27,6 +34,8 @@ class BC_ListCustom extends BC_List
         }
 
         parent::__construct($object, '', $name, $id_parent, $title, $icon);
+
+        $current_bc = $prev_bc;
     }
 
     public function renderHtmlContent()
@@ -36,10 +45,17 @@ class BC_ListCustom extends BC_List
         if (count($this->errors)) {
             return parent::renderHtml();
         }
-        
+
         if (!$this->object->can("view")) {
-            return BimpRender::renderAlerts('Vous n\'avez pas la permission de voir '.$this->object->getLabel('the_plur'));
+            return BimpRender::renderAlerts('Vous n\'avez pas la permission de voir ' . $this->object->getLabel('the_plur'));
         }
+
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
 
         $html .= $this->renderListParamsInputs();
 
@@ -61,12 +77,20 @@ class BC_ListCustom extends BC_List
 
         $html .= '<div class="ajaxResultContainer" id="' . $this->identifier . '_result"></div>';
 
+        $current_bc = $prev_bc;
         return $html;
     }
 
     public function renderListContent()
     {
         $html = '';
+
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
 
         if (is_null($this->items)) {
             $this->fetchItems();
@@ -78,6 +102,7 @@ class BC_ListCustom extends BC_List
             $html .= BimpRender::renderAlerts('Erreur de configuration: aucun contenu défini pour cette section');
         }
 
+        $current_bc = $prev_bc;
         return $html;
     }
 }

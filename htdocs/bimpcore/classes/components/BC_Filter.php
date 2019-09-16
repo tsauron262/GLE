@@ -28,6 +28,13 @@ class BC_Filter extends BimpComponent
         $this->params_def['show'] = array('data_type' => 'bool', 'default' => 1);
         $this->values = $values;
 
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
+
         parent::__construct($object, $params['name'], $path);
 
         if (isset($params['open'])) {
@@ -39,6 +46,8 @@ class BC_Filter extends BimpComponent
         }
 
         $this->identifier .= '_' . ($this->name ? $this->name . '_' : '') . 'filter';
+
+        $current_bc = $prev_bc;
     }
 
     public function getFilterValueLabel($value)
@@ -46,7 +55,14 @@ class BC_Filter extends BimpComponent
         if (!$this->params['show']) {
             return '';
         }
-        
+
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
+
         $label = '';
 
         switch ($this->params['type']) {
@@ -89,6 +105,7 @@ class BC_Filter extends BimpComponent
                 break;
         }
 
+        $current_bc = $prev_bc;
         return $label;
     }
 
@@ -102,13 +119,20 @@ class BC_Filter extends BimpComponent
         if (!$this->params['show']) {
             return '';
         }
-        
+
         $html = '';
         $html = parent::renderHtml();
 
         if (count($this->errors)) {
             return $html;
         }
+
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
 
         $html .= '<div id="' . $this->identifier . '" class="bimp_filter_container foldable_container ' . ($this->params['open'] ? 'open' : 'closed') . '" data-type="' . $this->params['type'] . '"';
         if ($this->params['type'] === 'value_part') {
@@ -144,6 +168,7 @@ class BC_Filter extends BimpComponent
 
         $html .= '</div>';
 
+        $current_bc = $prev_bc;
         return $html;
     }
 
@@ -152,26 +177,32 @@ class BC_Filter extends BimpComponent
         if (!$this->params['show']) {
             return '';
         }
-        
+
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
+
         $html = '';
 
         $label = $this->getFilterValueLabel($value);
 
-        if (!$label) {
-            return '';
+        if ($label) {
+            if (is_array($value)) {
+                $value = json_encode($value);
+            }
+
+            $html .= '<div class="bimp_filter_value" data-value="' . htmlentities($value) . '" onclick="editBimpFilterValue($(this))">';
+            $html .= '<span class="bimp_filter_value_remove_btn" onclick="removeBimpFilterValue(event, $(this));">';
+            $html .= BimpRender::renderIcon('fas_times');
+            $html .= '</span>';
+            $html .= $label;
+            $html .= '</div>';
         }
 
-        if (is_array($value)) {
-            $value = json_encode($value);
-        }
-
-        $html .= '<div class="bimp_filter_value" data-value="' . htmlentities($value) . '" onclick="editBimpFilterValue($(this))">';
-        $html .= '<span class="bimp_filter_value_remove_btn" onclick="removeBimpFilterValue(event, $(this));">';
-        $html .= BimpRender::renderIcon('fas_times');
-        $html .= '</span>';
-        $html .= $label;
-        $html .= '</div>';
-
+        $current_bc = $prev_bc;
         return $html;
     }
 

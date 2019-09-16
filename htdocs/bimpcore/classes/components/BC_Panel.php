@@ -36,6 +36,13 @@ class BC_Panel extends BimpComponent
         $this->params_def['after_content'] = array('default' => '');
         $this->params_def['modal_format'] = array('default' => $this->default_modal_format);
 
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
+
         $this->content_only = (int) $content_only;
         $this->level = $level;
         $this->identifier = $object->object_name . '_' . ($name ? $name . '_' : '') . static::$type;
@@ -74,6 +81,8 @@ class BC_Panel extends BimpComponent
         $this->data['object_name'] = $this->object->object_name;
         $this->data['id_object'] = ($this->object->isLoaded() ? $this->object->id : 0);
         $this->data['objects_change_reload'] = implode(',', $this->params['objects_change_reload']);
+
+        $current_bc = $prev_bc;
     }
 
     public function renderHtml()
@@ -81,6 +90,13 @@ class BC_Panel extends BimpComponent
         if ((int) !$this->params['show']) {
             return '';
         }
+        
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
 
         $html = '';
         $this->setConfPath();
@@ -180,6 +196,7 @@ class BC_Panel extends BimpComponent
 
         $html .= '</div>';
 
+        $current_bc = $prev_bc;
         return $html;
     }
 
@@ -302,7 +319,7 @@ class BC_Panel extends BimpComponent
         }
         return array();
     }
-    
+
     public function getHeaderIcons()
     {
         if (isset($this->params['header_icons'])) {

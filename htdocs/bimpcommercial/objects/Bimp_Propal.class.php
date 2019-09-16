@@ -18,6 +18,225 @@ class Bimp_Propal extends BimpComm
     );
     public $redirectMode = 4; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
 
+    // Gestion des droits users
+
+    public function canCreate()
+    {
+        global $user;
+        if (isset($user->rights->propal->creer)) {
+            return (int) $user->rights->propal->creer;
+        }
+        return 1;
+    }
+
+    public function canEdit()
+    {
+        return $this->can("create");
+    }
+
+    public function canSetAction($action)
+    {
+        global $conf, $user;
+
+        switch ($action) {
+            case 'validate':
+                if ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && !empty($user->rights->propal->creer)) ||
+                        (!empty($conf->global->MAIN_USE_ADVANCED_PERMS) && !empty($user->rights->propal->propal_advance->validate))) {
+                    return 1;
+                }
+                return 0;
+
+            case 'addContact':
+                if (!empty($user->rights->propale->creer)) {
+                    return 1;
+                }
+                return 0;
+
+            case 'close':
+            case 'reopen':
+            case 'classifyBilled':
+                if (!empty($user->rights->propal->cloturer)) {
+                    return 1;
+                }
+                return 0;
+
+            case 'sendMail':
+                if (empty($conf->global->MAIN_USE_ADVANCED_PERMS) || $user->rights->propal->propal_advance->send) {
+                    return 1;
+                }
+                return 0;
+
+            case 'modify':
+            case 'review':
+                return $this->can("edit");
+
+            case 'createOrder':
+                $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande');
+                return $commande->can("create");
+
+            case 'createContract':
+                if ($user->rights->contrat->creer) {
+                    return 1;
+                }
+                return 0;
+
+            case 'createInvoice':
+                $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
+                return $facture->can("create");
+
+            case 'setRemiseGlobale':
+                return $this->can("edit");
+        }
+        return 1;
+    }
+
+    // Getters booléens: 
+
+    public function isActionAllowed($action, &$errors = array())
+    {
+        global $conf;
+        $status = $this->getData('fk_statut');
+
+        if (in_array($action, array('modify', 'modify', 'review', 'close', 'reopen', 'sendEmail', 'createOrder', 'createContract', 'createInvoice', 'classifyBilled'))) {
+            if (!$this->isLoaded()) {
+                $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
+                return 0;
+            }
+            if (is_null($status)) {
+                $errors[] = 'Statut absent';
+                return 0;
+            }
+        }
+        $status = (int) $status;
+        $soc = $this->getChildObject('client');
+
+        switch ($action) {
+            case 'validate':
+                if (!BimpObject::objectLoaded($soc)) {
+                    $errors[] = 'Client absent';
+                    return 0;
+                }
+                if ($status !== Propal::STATUS_DRAFT) {
+                    $errors[] = 'Statut actuel ' . $this->getLabel('of_the') . ' invalide';
+                    return 0;
+                }
+                if (!count($this->dol_object->lines)) {
+                    $errors[] = 'Aucune ligne enregistrée pour ' . $this->getLabel('this');
+                    return 0;
+                }
+                return 1;
+
+            case 'modify':
+            case 'close':
+                if ($status !== Propal::STATUS_VALIDATED) {
+                    $errors[] = 'Statut actuel ' . $this->getLabel('of_the') . ' invalide';
+                    return 0;
+                }
+                return 1;
+
+            case 'review':
+                if ($status === 0) {
+                    $errors[] = ucfirst($this->getLabel('this')) . ' est encore au statut brouillon';
+                }
+
+                if ((int) $this->getIdSav()) {
+                    $sav = $this->getSav();
+                    if (BimpObject::objectLoaded($sav)) {
+                        $errors[] = ucfirst($this->getLabel('this')) . ' est liée au SAV ' . $sav->getNomUrl(0, 1, 1, 'default') . '. Veuillez utiliser le bouton réviser depuis la fiche SAV';
+                    }
+                }
+                if ($status === Propal::STATUS_SIGNED) {
+                    $errors[] = ucfirst($this->getLabel('this')) . ' est signée';
+                }
+
+                if ($status === Propal::STATUS_BILLED) {
+                    $errors[] = ucfirst($this->getLabel('this')) . ' est facturée';
+                }
+
+                $where = '`fk_source` = ' . $this->id . ' AND `sourcetype` = \'propal\'';
+                $where .= ' AND `targettype` = \'commande\'';
+                $id_commande = (int) $this->db->getValue('element_element', 'fk_target', $where);
+                if ($id_commande) {
+                    $errors[] = 'Une commande a été créée à partir de cette proposition commerciale';
+                }
+
+                return (count($errors) ? 0 : 1);
+
+            case 'reopen':
+                if (!in_array($status, array(Propal::STATUS_SIGNED, Propal::STATUS_NOTSIGNED, Propal::STATUS_BILLED))) {
+                    $errors[] = 'Statut actuel ' . $this->getLabel('of_the') . ' invalide';
+                    return 0;
+                }
+                return 1;
+
+            case 'sendEmail':
+                if (!in_array($status, array(Propal::STATUS_VALIDATED, Propal::STATUS_SIGNED))) {
+                    $errors[] = 'Statut actuel ' . $this->getLabel('of_the') . ' invalide';
+                    return 0;
+                }
+                return 1;
+
+            case 'createOrder':
+                if ($status !== Propal::STATUS_SIGNED) {
+                    $errors[] = 'Statut actuel ' . $this->getLabel('of_the') . ' invalide';
+                    return 0;
+                }
+                if (empty($conf->commande->enabled)) {
+                    $errors[] = 'Création des commandes désactivée';
+                    return 0;
+                }
+                return 1;
+
+            case 'createContract':
+                if ($status !== Propal::STATUS_SIGNED) {
+                    $errors[] = 'Statut actuel ' . $this->getLabel('of_the') . ' invalide';
+                    return 0;
+                }
+                if (empty($conf->contrat->enabled)) {
+                    $errors[] = 'Création des contrats désactivée';
+                    return 0;
+                }
+                return 1;
+
+            case 'createInvoice':
+                if ($status !== Propal::STATUS_SIGNED) {
+                    $errors[] = 'Statut actuel ' . $this->getLabel('of_the') . ' invalide';
+                    return 0;
+                }
+                if (empty($conf->facture->enabled)) {
+                    $errors[] = 'Création des factures désactivée';
+                    return 0;
+                }
+                return 1;
+
+            case 'classifyBilled':
+                $factures = $this->dol_object->getInvoiceArrayList();
+                if ($status !== Propal::STATUS_SIGNED) {
+                    $errors[] = 'Statut actuel ' . $this->getLabel('of_the') . ' invalide';
+                    return 0;
+                }
+                $factures = $this->dol_object->getInvoiceArrayList();
+                if (!empty($conf->global->WORKFLOW_PROPAL_NEED_INVOICE_TO_BE_CLASSIFIED_BILLED) && (!is_array($factures) || !count($factures))) {
+                    $errors[] = 'Aucune facture créée pour ' . $this->getLabel('this');
+                    return 0;
+                }
+                return 1;
+
+            default:
+                return (int) parent::isActionAllowed($action, $errors);
+        }
+
+        return 1;
+    }
+
+    public function iAmAdminRedirect()
+    {
+        global $user;
+        if (in_array($user->id, array(60, 282)))
+            return true;
+        return parent::iAmAdminRedirect();
+    }
+
     // Getters: 
 
     public function getIdSav()
@@ -124,23 +343,53 @@ class Bimp_Propal extends BimpComm
                 }
 
                 // Modifier
-                if ($this->isActionAllowed('modify')) {
-                    if ($this->canSetAction('modify') && $user->admin) {
-                        $buttons[] = array(
-                            'label'   => 'Modifier',
-                            'icon'    => 'undo',
-                            'onclick' => $this->getJsActionOnclick('modify', array())
-                        );
+//                if ($this->isActionAllowed('modify')) {
+//                    if ($this->canSetAction('modify') && $user->admin) {
+//                        $buttons[] = array(
+//                            'label'   => 'Modifier',
+//                            'icon'    => 'fas_undo',
+//                            'onclick' => $this->getJsActionOnclick('modify', array())
+//                        );
+//                    } else {
+//                        $buttons[] = array(
+//                            'label'    => 'Modifier',
+//                            'icon'     => 'fas_undo',
+//                            'onclick'  => '',
+//                            'disabled' => 1,
+//                            'popover'  => 'Vous n\'avez pas la permission de modifier cette proposition commerciale'
+//                        );
+//                    }
+//                }
+                // Réviser: 
+                if ($status > 0) {
+                    $errors = array();
+                    $msg = '';
+                    if ($this->isActionAllowed('review', $errors)) {
+                        if ($this->canSetAction('review')) {
+                            $buttons[] = array(
+                                'label'   => 'Réviser',
+                                'icon'    => 'fas_undo',
+                                'onclick' => $this->getJsActionOnclick('review', array(), array(
+                                    'confirm_msg' => 'Veuillez confirmer la mise en révision de cette proposition commerciale'
+                                ))
+                            );
+                        } else {
+                            $msg = 'Vous n\'avez pas la permission';
+                        }
                     } else {
+                        $msg = BimpTools::getMsgFromArray($errors);
+                    }
+                    if ($msg) {
                         $buttons[] = array(
-                            'label'    => 'Modifier',
-                            'icon'     => 'undo',
+                            'label'    => 'Réviser',
+                            'icon'     => 'fas_undo',
                             'onclick'  => '',
                             'disabled' => 1,
-                            'popover'  => 'Vous n\'avez pas la permission de modifier cette proposition commerciale'
+                            'popover'  => $msg
                         );
                     }
                 }
+
 
                 // Accepter / Refuser
                 if ($this->isActionAllowed('close')) {
@@ -313,14 +562,6 @@ class Bimp_Propal extends BimpComm
         return $conf->propal->dir_output;
     }
 
-    // Affichages: 
-    // Rendus HTML: 
-
-    public function renderMailForm()
-    {
-        return BimpRender::renderAlerts('L\'envoi par email est désactivé pour le moment', 'warning');
-    }
-
     // Rendus HTML - overrides BimpObject
 
     public function renderHeaderExtraLeft()
@@ -405,6 +646,142 @@ class Bimp_Propal extends BimpComm
         $html .= '</div>';
 
         return $html;
+    }
+
+    // Traitements: 
+
+    public function review($check = true, &$errors = array(), &$warnings = array())
+    {
+        $errors = array();
+        if ($check) {
+            if (!$this->isActionAllowed('review', $errors)) {
+                return 0;
+            }
+        }
+
+        require_once(DOL_DOCUMENT_ROOT . "/bimpcore/classes/BimpRevision.php");
+
+        $revision = new BimpRevisionPropal($this->dol_object);
+        $new_id_propal = (int) $revision->reviserPropal(false, true, $this->getData('model_pdf'), $errors);
+
+        if (!$new_id_propal) {
+            return 0;
+        }
+
+        $newPropal = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $new_id_propal);
+
+        if (!BimpObject::objectLoaded($newPropal)) {
+            $errors[] = 'Echec de la création de la révision pour une raison inconnue';
+            return 0;
+        }
+
+        $newPropal->set('remise_globale_label', $this->getData('remise_globale_label'));
+        $newPropal->set('zone_vente', $this->getData('zone_vente'));
+        $pw = array();
+        $newPropal->update($pw, true);
+
+        $lines = $this->getLines();
+
+        $totHt = (float) $this->dol_object->total_ht;
+
+        // Ajout de la ligne "Proposition commerciale révisée" dans la propale actuelle: 
+        $line = BimpObject::getInstance('bimpcommercial', 'Bimp_PropalLine');
+        $line->desc = 'Proposition commerciale révisée';
+        $line->tva_tx = (($this->dol_object->total_ttc / ($totHt != 0 ? $totHt : 1) - 1) * 100);
+        $line->pu_ht = -$totHt;
+        $line->pa_ht = -$totHt;
+        $line->qty = 1;
+
+        $line->validateArray(array(
+            'id_obj'    => (int) $this->id,
+            'type'      => ObjectLine::LINE_FREE,
+            'deletable' => 0,
+            'editable'  => 0,
+            'remisable' => 0
+        ));
+
+        $line_warnings = array();
+        $line_errors = $line->create($line_warnings, true);
+
+        if (count($line_errors)) {
+            $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec de la création de la ligne "révision"');
+        }
+
+        if (count($line_warnings)) {
+            $warnings[] = BimpTools::getMsgFromArray($line_warnings, 'Erreurs suite à la création de la ligne "révision"');
+        }
+
+        global $user, $langs;
+        $this->addNote('Proposition commerciale mise en révision le ' . date('d / m / Y') . ' par ' . $user->getFullName($langs) . "\n" . 'Révision: ' . $newPropal->getRef());
+        $newPropal->addNote('Révision de la proposition: ' . $this->getRef());
+
+        // Copie des lignes: 
+        $newLines = array();
+        foreach ($lines as $line) {
+            $remises = $line->getRemises();
+            $newLine = clone $line;
+
+            $newLine->id = null;
+            $newLine->set('id', 0);
+            $newLine->set('id_line', 0);
+            $newLine->set('id_parent_line', 0);
+            $newLine->remise = 0;
+            $newLine->setIdParent($new_id_propal);
+
+            $newLine_warnings = array();
+            $newLine_errors = $newLine->create($newLine_warnings, true);
+
+            if (count($newLine_warnings)) {
+                $warnings[] = BimpTools::getMsgFromArray($newLine_warnings, 'Erreurs suite à la copie de la ligne n° ' . $line->getData('position'));
+            }
+
+            if (count($newLine_errors)) {
+                $warnings[] = BimpTools::getMsgFromArray($newLine_errors, 'Echec de la copie de la ligne n°' . $line->getData('position'));
+            } else {
+                $newLines[(int) $line->id] = $newLine->id;
+                if (count($remises)) {
+                    $i = 0;
+                    foreach ($remises as $remise) {
+                        $i++;
+                        $newRemise = clone $remise;
+                        $newRemise->id = null;
+                        $newRemise->set('id', 0);
+                        $newRemise->set('id_object_line', $newLine->id);
+
+                        $newRemise_warnings = array();
+                        $newRemise_errors = $newRemise->create($newRemise_warnings, true);
+
+                        if (count($newRemise_errors)) {
+                            $warnings[] = BimpTools::getMsgFromArray($newRemise_errors, 'Echec de la création ' . $newRemise->getLabel('of_the') . ' n°' . $i);
+                        }
+                        if (count($newRemise_warnings)) {
+                            $warnings[] = BimpTools::getMsgFromArray($newRemise_warnings, 'Erreurs suite à la création ' . $newRemise->getLabel('of_the') . ' n°' . $i);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Attribution des lignes parentes: 
+        foreach ($lines as $line) {
+            $id_parent_line = (int) $line->getData('id_parent_line');
+
+            if ($id_parent_line) {
+                if (isset($newLines[(int) $line->id]) && (int) $newLines[(int) $line->id] && isset($newLines[$id_parent_line]) && (int) $newLines[$id_parent_line]) {
+                    $line_instance = BimpCache::getBimpObjectInstance($this->module, $this->object_name . 'Line', (int) $newLines[(int) $line->id]);
+                    if (BimpObject::objectLoaded($line_instance)) {
+                        $line_instance->updateField('id_parent_line', (int) $newLines[(int) $id_parent_line]);
+                    }
+                }
+            }
+        }
+
+        // Ajout de la remise globale: 
+        if ((float) $this->getData('remise_globale')) {
+            $newPropal->setRemiseGlobalePercent((float) $this->getData('remise_globale'));
+        }
+
+        return $new_id_propal;
     }
 
     // Traitements - overrides BimpComm: 
@@ -534,6 +911,23 @@ class Bimp_Propal extends BimpComm
         }
 
         return parent::actionGeneratePdf($data, $success, array(), $wanings);
+    }
+
+    public function actionReview($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Proposition commerciale révisée avec succès';
+
+        $new_id_propal = $this->review(false, $errors, $warnings);
+
+        $url = DOL_URL_ROOT . '/bimpcommercial/index.php?fc=propal&id=' . $new_id_propal;
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => 'window.location = \'' . $url . '\''
+        );
     }
 
     // Overrides BimpObject: 
@@ -731,193 +1125,5 @@ class Bimp_Propal extends BimpComm
         }
 
         return $errors;
-    }
-
-    // Gestion des droits - overrides BimpObject: 
-
-    public function canCreate()
-    {
-        global $user;
-        if (isset($user->rights->propal->creer)) {
-            return (int) $user->rights->propal->creer;
-        }
-        return 1;
-    }
-
-    protected function canEdit()
-    {
-        return $this->can("create");
-    }
-
-    public function canSetAction($action)
-    {
-        global $conf, $user;
-
-        switch ($action) {
-            case 'validate':
-                if ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && !empty($user->rights->propal->creer)) ||
-                        (!empty($conf->global->MAIN_USE_ADVANCED_PERMS) && !empty($user->rights->propal->propal_advance->validate))) {
-                    return 1;
-                }
-                return 0;
-
-            case 'addContact':
-                if (!empty($user->rights->propale->creer)) {
-                    return 1;
-                }
-                return 0;
-
-            case 'close':
-            case 'reopen':
-            case 'classifyBilled':
-                if (!empty($user->rights->propal->cloturer)) {
-                    return 1;
-                }
-                return 0;
-
-            case 'sendMail':
-                if (empty($conf->global->MAIN_USE_ADVANCED_PERMS) || $user->rights->propal->propal_advance->send) {
-                    return 1;
-                }
-                return 0;
-
-            case 'modify':
-                return $this->can("edit");
-
-            case 'createOrder':
-                $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande');
-                return $commande->can("create");
-
-            case 'createContract':
-                if ($user->rights->contrat->creer) {
-                    return 1;
-                }
-                return 0;
-
-            case 'createInvoice':
-                $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
-                return $facture->can("create");
-
-            case 'setRemiseGlobale':
-                return $this->can("edit");
-        }
-        return 1;
-    }
-
-    public function isActionAllowed($action, &$errors = array())
-    {
-        global $conf;
-        $status = $this->getData('fk_statut');
-
-        if (in_array($action, array('modify', 'modify', 'close', 'reopen', 'sendEmail', 'createOrder', 'createContract', 'createInvoice', 'classifyBilled'))) {
-            if (!$this->isLoaded()) {
-                $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
-                return 0;
-            }
-            if (is_null($status)) {
-                $errors[] = 'Statut absent';
-                return 0;
-            }
-        }
-        $status = (int) $status;
-        $soc = $this->getChildObject('client');
-
-        switch ($action) {
-            case 'validate':
-                if (!BimpObject::objectLoaded($soc)) {
-                    $errors[] = 'Client absent';
-                    return 0;
-                }
-                if ($status !== Propal::STATUS_DRAFT) {
-                    $errors[] = 'Statut actuel ' . $this->getLabel('of_the') . ' invalide';
-                    return 0;
-                }
-                if (!count($this->dol_object->lines)) {
-                    $errors[] = 'Aucune ligne enregistrée pour ' . $this->getLabel('this');
-                    return 0;
-                }
-                return 1;
-
-            case 'modify':
-            case 'close':
-                if ($status !== Propal::STATUS_VALIDATED) {
-                    $errors[] = 'Statut actuel ' . $this->getLabel('of_the') . ' invalide';
-                    return 0;
-                }
-                return 1;
-
-            case 'reopen':
-                if (!in_array($status, array(Propal::STATUS_SIGNED, Propal::STATUS_NOTSIGNED, Propal::STATUS_BILLED))) {
-                    $errors[] = 'Statut actuel ' . $this->getLabel('of_the') . ' invalide';
-                    return 0;
-                }
-                return 1;
-
-            case 'sendEmail':
-                if (!in_array($status, array(Propal::STATUS_VALIDATED, Propal::STATUS_SIGNED))) {
-                    $errors[] = 'Statut actuel ' . $this->getLabel('of_the') . ' invalide';
-                    return 0;
-                }
-                return 1;
-
-            case 'createOrder':
-                if ($status !== Propal::STATUS_SIGNED) {
-                    $errors[] = 'Statut actuel ' . $this->getLabel('of_the') . ' invalide';
-                    return 0;
-                }
-                if (empty($conf->commande->enabled)) {
-                    $errors[] = 'Création des commandes désactivée';
-                    return 0;
-                }
-                return 1;
-
-            case 'createContract':
-                if ($status !== Propal::STATUS_SIGNED) {
-                    $errors[] = 'Statut actuel ' . $this->getLabel('of_the') . ' invalide';
-                    return 0;
-                }
-                if (empty($conf->contrat->enabled)) {
-                    $errors[] = 'Création des contrats désactivée';
-                    return 0;
-                }
-                return 1;
-
-            case 'createInvoice':
-                if ($status !== Propal::STATUS_SIGNED) {
-                    $errors[] = 'Statut actuel ' . $this->getLabel('of_the') . ' invalide';
-                    return 0;
-                }
-                if (empty($conf->facture->enabled)) {
-                    $errors[] = 'Création des factures désactivée';
-                    return 0;
-                }
-                return 1;
-
-            case 'classifyBilled':
-                $factures = $this->dol_object->getInvoiceArrayList();
-                if ($status !== Propal::STATUS_SIGNED) {
-                    $errors[] = 'Statut actuel ' . $this->getLabel('of_the') . ' invalide';
-                    return 0;
-                }
-                $factures = $this->dol_object->getInvoiceArrayList();
-                if (!empty($conf->global->WORKFLOW_PROPAL_NEED_INVOICE_TO_BE_CLASSIFIED_BILLED) && (!is_array($factures) || !count($factures))) {
-                    $errors[] = 'Aucune facture créée pour ' . $this->getLabel('this');
-                    return 0;
-                }
-                return 1;
-
-            default:
-                return (int) parent::isActionAllowed($action, $errors);
-        }
-
-        return 1;
-    }
-
-    public function iAmAdminRedirect()
-    {
-        global $user;
-        if (in_array($user->id, array(60, 282)))
-            return true;
-        return parent::iAmAdminRedirect();
     }
 }

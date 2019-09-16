@@ -69,6 +69,13 @@ class BC_Display extends BimpComponent
         $this->field_params = $field_params;
         $this->value = $value;
 
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
+
         if (in_array($name, array('nom', 'nom_url', 'card', 'ref'))) {
             $this->params_def['type']['default'] = $name;
         } elseif (isset($field_params['values']) && !is_null($field_params['values']) && count($field_params['values'])) {
@@ -107,6 +114,8 @@ class BC_Display extends BimpComponent
             }
         }
         parent::__construct($object, $name, $path);
+
+        $current_bc = $prev_bc;
     }
 
     public function renderHtml()
@@ -127,11 +136,20 @@ class BC_Display extends BimpComponent
             }
         }
 
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
+
         if ($this->field_params['type'] === 'items_list') {
             if (!is_array($this->value)) {
+                $current_bc = $prev_bc;
                 return BimpRender::renderAlerts('Valeurs invalides');
             }
             if (!count($this->value)) {
+                $current_bc = $prev_bc;
                 return '';
             }
             $field_params = $this->field_params;
@@ -154,6 +172,8 @@ class BC_Display extends BimpComponent
                 }
                 $html .= $bc_display->renderHtml();
             }
+
+            $current_bc = $prev_bc;
             return $html;
         }
 
@@ -176,6 +196,7 @@ class BC_Display extends BimpComponent
                         $cache_key .= '_' . $this->object->module . '_' . $this->object->object_name . '_' . $this->field_name . '_' . $this->value;
 
                         if (isset(self::$cache[$cache_key])) {
+                            $current_bc = $prev_bc;
                             return self::$cache[$cache_key];
                         }
 
@@ -421,13 +442,16 @@ class BC_Display extends BimpComponent
 
                         if (method_exists($this->object, $method)) {
                             if (empty($params)) {
+                                $current_bc = $prev_bc;
                                 return $this->object->{$method}();
                             } else {
+                                $current_bc = $prev_bc;
                                 return call_user_func_array(array(
                                     $this->object, $method
                                         ), $params);
                             }
                         } else {
+                            $current_bc = $prev_bc;
                             return BimpRender::renderAlerts('Erreur de configuration: méthode "' . $method . '" absente de l\'objet "' . get_class($this->object) . '"');
                         }
 
@@ -460,6 +484,7 @@ class BC_Display extends BimpComponent
             }
         }
 
+        $current_bc = $prev_bc;
         return $html;
     }
 }

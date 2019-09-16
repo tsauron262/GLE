@@ -21,6 +21,13 @@ class BC_List extends BC_Panel
 
     public function __construct(BimpObject $object, $path, $list_name = 'default', $level = 1, $id_parent = null, $title = null, $icon = null)
     {
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
+
         $this->params_def['configurable'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['pagination'] = array('data_type' => 'bool', 'default' => 1);
         $this->params_def['n'] = array('data_type' => 'int', 'default' => 10, 'request' => true);
@@ -115,6 +122,8 @@ class BC_List extends BC_Panel
         $this->setConfPath();
 
         $this->filters = $this->object->getSearchFilters($this->params['joins']);
+
+        $current_bc = $prev_bc;
     }
 
     // Gestion des filtres: 
@@ -146,7 +155,7 @@ class BC_List extends BC_Panel
             $this->params['add_form_values']['fields'][$field_name] = $value;
         }
     }
-
+    
     public function addJoin($table, $on, $alias)
     {
         if (!isset($this->params['joins'][$alias])) {
@@ -156,6 +165,11 @@ class BC_List extends BC_Panel
                 'alias' => $alias
             );
         }
+    }
+
+    public function getFilters()
+    {
+        return $this->filters;
     }
 
     // Gestion des filtres associatifs:
@@ -304,60 +318,72 @@ class BC_List extends BC_Panel
 
     public function fetchFiltersPanelValues()
     {
-        if (is_null($this->bc_filtersPanel)) {
-            if (is_null($this->params['filters_panel'])) {
-                return;
+        if (!is_null($this->bc_filtersPanel)) {
+            return;
+        }
+
+        if (is_null($this->params['filters_panel'])) {
+            return;
+        }
+
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
+
+        $this->bc_filtersPanel = new BC_FiltersPanel($this->object, static::$type, $this->name, $this->identifier, $this->params['filters_panel']);
+
+        if (BimpTools::isSubmit('filters_panel_values')) {
+            $values = array(
+                'fields'   => array(),
+                'children' => array()
+            );
+
+            foreach (BimpTools::getValue('filters_panel_values/fields', array()) as $field_name => $filter) {
+                foreach ($this->bc_filtersPanel->params['filters'] as $key => $params) {
+                    if (isset($params['field']) && $params['field'] === $field_name && !$params['child']) {
+                        if (isset($filter['open'])) {
+                            $this->bc_filtersPanel->params['filters'][$key]['open'] = (int) $filter['open'];
+                        }
+                        if (isset($filter['values'])) {
+                            $values['fields'][$field_name] = $filter['values'];
+                        }
+                        continue 2;
+                    }
+                }
             }
-            $this->bc_filtersPanel = new BC_FiltersPanel($this->object, static::$type, $this->name, $this->identifier, $this->params['filters_panel']);
 
-            if (BimpTools::isSubmit('filters_panel_values')) {
-                $values = array(
-                    'fields'   => array(),
-                    'children' => array()
-                );
-
-                foreach (BimpTools::getValue('filters_panel_values/fields', array()) as $field_name => $filter) {
+            foreach (BimpTools::getValue('filters_panel_values/children', array()) as $child => $fields) {
+                if (!isset($values['children'][$child])) {
+                    $values['children'][$child] = array();
+                }
+                foreach ($fields as $field_name => $filter) {
                     foreach ($this->bc_filtersPanel->params['filters'] as $key => $params) {
-                        if (isset($params['field']) && $params['field'] === $field_name && !$params['child']) {
+                        if (isset($params['field']) && $params['field'] === $field_name && $params['child'] === $child) {
                             if (isset($filter['open'])) {
                                 $this->bc_filtersPanel->params['filters'][$key]['open'] = (int) $filter['open'];
                             }
                             if (isset($filter['values'])) {
-                                $values['fields'][$field_name] = $filter['values'];
+                                $values['children'][$child][$field_name] = $filter['values'];
                             }
                             continue 2;
                         }
                     }
                 }
-
-                foreach (BimpTools::getValue('filters_panel_values/children', array()) as $child => $fields) {
-                    if (!isset($values['children'][$child])) {
-                        $values['children'][$child] = array();
-                    }
-                    foreach ($fields as $field_name => $filter) {
-                        foreach ($this->bc_filtersPanel->params['filters'] as $key => $params) {
-                            if (isset($params['field']) && $params['field'] === $field_name && $params['child'] === $child) {
-                                if (isset($filter['open'])) {
-                                    $this->bc_filtersPanel->params['filters'][$key]['open'] = (int) $filter['open'];
-                                }
-                                if (isset($filter['values'])) {
-                                    $values['children'][$child][$field_name] = $filter['values'];
-                                }
-                                continue 2;
-                            }
-                        }
-                    }
-                }
-
-                $this->bc_filtersPanel->setFiltersValues($values);
-            } elseif (!empty($this->params['filters_panel_values'])) {
-                $this->bc_filtersPanel->setFiltersValues($this->params['filters_panel_values']);
             }
+
+            $this->bc_filtersPanel->setFiltersValues($values);
+        } elseif (!empty($this->params['filters_panel_values'])) {
+            $this->bc_filtersPanel->setFiltersValues($this->params['filters_panel_values']);
         }
+
+        $current_bc = $prev_bc;
     }
 
     protected function fetchItems()
-    {           
+    {
         $this->fetchFiltersPanelValues();
 
         if (!$this->isOk()) {
@@ -365,6 +391,13 @@ class BC_List extends BC_Panel
             $this->items = array();
             return;
         }
+
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
 
         $primary = $this->object->getPrimary();
 
@@ -377,15 +410,15 @@ class BC_List extends BC_Panel
                 $this->mergeFilter($list_filter['name'], $list_filter['filter']);
             }
         }
-        
+
         if (!is_null($this->bc_filtersPanel)) {
             $panelFilters = array();
             $filters_errors = $this->bc_filtersPanel->getSqlFilters($panelFilters, $joins);
-            
+
             if (count($filters_errors)) {
                 $this->errors[] = BimpTools::getMsgFromArray($filters_errors, 'Erreurs sur les filtres');
             }
-            
+
             foreach ($panelFilters as $name => $filter) {
                 $this->mergeFilter($name, $filter);
             }
@@ -521,6 +554,8 @@ class BC_List extends BC_Panel
         if (method_exists($this->object, 'listItemsOverride')) {
             $this->object->listItemsOverride($this->name, $this->items);
         }
+
+        $current_bc = $prev_bc;
     }
 
     public function setItems($items = array())
@@ -640,6 +675,13 @@ class BC_List extends BC_Panel
 
     public function getHeaderButtons()
     {
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
+
         $buttons = parent::getHeaderButtons();
 
         if (isset($this->params['add_form_values']['fields'])) {
@@ -684,6 +726,7 @@ class BC_List extends BC_Panel
             }
         }
 
+        $current_bc = $prev_bc;
         return $buttons;
     }
 }

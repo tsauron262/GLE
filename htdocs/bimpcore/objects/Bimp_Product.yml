@@ -584,7 +584,6 @@ fields_tables:
               value:
                   callback: renderBestBuyPrice
                 
-       
     status: 
         title: Statuts
         icon: fas_check-square
@@ -718,7 +717,6 @@ views:
                   col_md: 5
                   fields_table:
                       name: measures
-            
     
     product_price:
         rows:
@@ -828,6 +826,10 @@ filters_panels:
 lists_cols: 
     ref: 
         field: ref
+    ref_short: 
+        label: Réf. fabricant
+        value: 
+            callback: displayRefShort
     label: 
         field: label
     type: 

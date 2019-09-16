@@ -1,6 +1,6 @@
 table: bl_inventory
 controller: inventory
-icon: far_arrow-alt-circle-right
+icon: fas_clipboard-list
 
 header_btn:
     callback: getActionsButtons
@@ -94,9 +94,24 @@ forms:
         rows: 
             - field: fk_warehouse
             
-#    default:
-#        rows: 
-#            - field: fk_warehouse
+    default:
+        rows: 
+            - field: fk_warehouse
+            
+        confirm_close: 
+            rows: 
+                - custom: 1
+                  label: Date du mouvement de stock
+                  input_name: date_mouvement
+                  type: datetime
+                  input:
+                    type: datetime
+                    display_now: 1
+                - custom: 1
+                  label: Opérations
+                  input_name: inut
+                  content: 
+                    callback: renderDifference
             
 lists:
     default:
@@ -137,23 +152,4 @@ cards:
             - label: Fermé le
               field: date_closing
         view_btn: 1
-
-forms:
-    default:
-        rows: 
-            - field: fk_warehouse
-            
-    confirm_close: 
-        rows: 
-            - custom: 1
-              label: Date du mouvement de stock
-              input_name: date_mouvement
-              type: datetime
-              input:
-                type: datetime
-                display_now: 1
-            - custom: 1
-              label: Opérations
-              input_name: inut
-              content: 
-                callback: renderDifference
+    

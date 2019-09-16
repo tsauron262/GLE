@@ -18,6 +18,13 @@ class BC_FiltersPanel extends BC_Panel
         $this->params_def['filters'] = array('type' => 'definitions', 'defs_type' => 'list_filter', 'multiple' => true);
         $this->params_def['default_values'] = array('data_type' => 'array', 'default' => array(), 'compile' => true);
 
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
+
         $this->list_type = $list_type;
         $this->list_name = $list_name;
         $this->list_identifier = $list_identifier;
@@ -32,6 +39,8 @@ class BC_FiltersPanel extends BC_Panel
         $this->data['list_name'] = $this->list_name;
 
         $this->values = $this->params['default_values'];
+
+        $current_bc = $prev_bc;
     }
 
     public function setFiltersValues($values)
@@ -90,13 +99,20 @@ class BC_FiltersPanel extends BC_Panel
 
     public function getSqlFilters(&$filters = array(), &$joins = array())
     {
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
+
         $errors = array();
 
         foreach ($this->params['filters'] as $key => $filter) {
             if (isset($filter['show']) && !(int) $filter['show']) {
                 continue;
             }
-            
+
             if (isset($filter['field']) && $filter['field']) {
                 $values = $this->getValues($filter['field'], isset($filter['child']) ? $filter['child'] : '');
                 if (!empty($values)) {
@@ -114,6 +130,7 @@ class BC_FiltersPanel extends BC_Panel
             }
         }
 
+        $current_bc = $prev_bc;
         return $errors;
     }
 
@@ -183,6 +200,14 @@ class BC_FiltersPanel extends BC_Panel
             return $html;
         }
 
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
+
+
         $html .= '<div class="filters_toolbar align-right">';
         $html .= BimpRender::renderRowButton('Effacer tous les filtres', 'fas_eraser', 'removeAllListFilters(\'' . $this->identifier . '\')');
         $html .= BimpRender::renderRowButton('Enregistrer les filtres actuels', 'fas_save', 'saveListFilters($(this), \'' . $this->identifier . '\')');
@@ -217,21 +242,22 @@ class BC_FiltersPanel extends BC_Panel
             if (isset($filter['show']) && !(int) $filter['show']) {
                 continue;
             }
-            
+
             if (isset($filter['field']) && (string) $filter['field']) {
                 $values = $this->getValues($filter['field'], isset($filter['child']) ? $filter['child'] : '');
-                
+
                 if ((int) $filter['custom']) {
                     $path = $this->config_path . '/filters/' . $key;
                     $bc_filter = new BC_CustomFilter($this->object, $filter, $path, $values);
                 } else {
                     $bc_filter = new BC_FieldFilter($this->object, $filter, $values);
                 }
-                
+
                 $html .= $bc_filter->renderHtml();
             }
         }
 
+        $current_bc = $prev_bc;
         return $html;
     }
 

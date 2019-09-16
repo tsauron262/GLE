@@ -48,7 +48,7 @@ sections:
                       object: package
                       
         immos: 
-            label: Immobilisations
+            label: Totaux équipements
             sections: 
                 - type: list
                   list: 

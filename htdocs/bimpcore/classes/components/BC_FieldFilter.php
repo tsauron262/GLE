@@ -10,6 +10,13 @@ class BC_FieldFilter extends BC_Filter
 
     public function __construct(BimpObject $object, $params, $values = array())
     {
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
+
         $this->base_object = $object;
 
         if (isset($params['field']) && (string) $params['field']) {
@@ -99,6 +106,8 @@ class BC_FieldFilter extends BC_Filter
         } else {
             $this->errors[] = 'Champ associé invalide';
         }
+
+        $current_bc = $prev_bc;
     }
 
     public function getFilterValueLabel($value)
@@ -106,6 +115,13 @@ class BC_FieldFilter extends BC_Filter
         if (!$this->params['show']) {
             return '';
         }
+
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
 
         $label = '';
 
@@ -156,6 +172,7 @@ class BC_FieldFilter extends BC_Filter
                 break;
         }
 
+        $current_bc = $prev_bc;
         return $label;
     }
 
@@ -165,6 +182,13 @@ class BC_FieldFilter extends BC_Filter
             return array();
         }
 
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
+
         $errors = array();
         $or_field = array();
 
@@ -173,6 +197,7 @@ class BC_FieldFilter extends BC_Filter
         $filter_key = $this->base_object->getFieldSqlKey($field_name, 'a', $this->child_name, $joins, $errors, $this->object);
 
         if (!$filter_key) {
+            $current_bc = $prev_bc;
             return $errors;
         }
 
@@ -247,6 +272,7 @@ class BC_FieldFilter extends BC_Filter
             );
         }
 
+        $current_bc = $prev_bc;
         return $errors;
     }
 
@@ -255,6 +281,13 @@ class BC_FieldFilter extends BC_Filter
         if (!$this->params['show']) {
             return '';
         }
+
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
 
         $html = '';
 
@@ -332,6 +365,7 @@ class BC_FieldFilter extends BC_Filter
                 break;
         }
 
+        $current_bc = $prev_bc;
         return $html;
     }
 }

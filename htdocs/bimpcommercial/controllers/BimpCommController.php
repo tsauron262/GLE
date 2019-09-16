@@ -34,8 +34,6 @@ class BimpCommController extends BimpController
             $errors[] = 'ID ' . $object->getLabel('of_the') . ' absent ou invalide';
         } elseif (!method_exists($object, 'renderMailForm')) {
             $errors[] = 'L\'envoi d\'email n\'est pas disponible pour ' . $object->getLabel('the_plur');
-        } else {
-            $html = $object->renderMailForm();
         }
 
         die(json_encode(array(

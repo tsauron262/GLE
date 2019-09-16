@@ -10,6 +10,13 @@ class BC_CustomFilter extends BC_Filter
     {
         $this->params_def['data_type'] = array('default' => 'string');
 
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
+
         if (isset($params['field']) && $params['field']) {
             $this->field_name = $params['field'];
         } else {
@@ -22,6 +29,8 @@ class BC_CustomFilter extends BC_Filter
 
         $this->data['field_name'] = $this->field_name;
         $this->identifier . '_field_' . $this->field_name;
+
+        $current_bc = $prev_bc;
     }
 
     public function getFilterValueLabel($value)
@@ -29,6 +38,13 @@ class BC_CustomFilter extends BC_Filter
         if (!$this->params['show']) {
             return '';
         }
+
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
 
         $label = '';
 
@@ -39,6 +55,7 @@ class BC_CustomFilter extends BC_Filter
                     if ($this->object->config->isDefined($this->config_path . '/input/options')) {
                         $options = $this->object->getConf($this->config_path . '/input/options', array(), false, 'array');
                         if (isset($options[$value])) {
+                            $current_bc = $prev_bc;
                             return $options[$value];
                         }
                     }
@@ -82,6 +99,7 @@ class BC_CustomFilter extends BC_Filter
                 break;
         }
 
+        $current_bc = $prev_bc;
         return $label;
     }
 
@@ -91,10 +109,18 @@ class BC_CustomFilter extends BC_Filter
             return array();
         }
 
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
+
         $errors = array();
 
         $this->object->getCustomFilterSqlFilters($this->field_name, $this->values, $filters, $joins, $errors);
 
+        $current_bc = $prev_bc;
         return $errors;
     }
 
@@ -103,6 +129,13 @@ class BC_CustomFilter extends BC_Filter
         if (!$this->params['show']) {
             return '';
         }
+
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
 
         $html = '';
 
@@ -160,6 +193,7 @@ class BC_CustomFilter extends BC_Filter
                 break;
         }
 
+        $current_bc = $prev_bc;
         return $html;
     }
 }

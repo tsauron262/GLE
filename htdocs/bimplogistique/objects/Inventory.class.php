@@ -4,19 +4,33 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/objects/BimpDolObject.class.php';
 require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
 
-class Inventory extends BimpDolObject {
+class Inventory extends BimpDolObject
+{
 
     CONST STATUS_DRAFT = 0;
     CONST STATUS_OPEN = 1;
     CONST STATUS_CLOSED = 2;
 
     public static $status_list = Array(
-        self::STATUS_DRAFT => Array('label' => 'Brouillon', 'classes' => Array('success'), 'icon' => 'fas_cogs'),
-        self::STATUS_OPEN => Array('label' => 'Ouvert', 'classes' => Array('warning'), 'icon' => 'fas_arrow-alt-circle-down'),
+        self::STATUS_DRAFT  => Array('label' => 'Brouillon', 'classes' => Array('success'), 'icon' => 'fas_cogs'),
+        self::STATUS_OPEN   => Array('label' => 'Ouvert', 'classes' => Array('warning'), 'icon' => 'fas_arrow-alt-circle-down'),
         self::STATUS_CLOSED => Array('label' => 'Fermé', 'classes' => Array('danger'), 'icon' => 'fas_times')
     );
 
-    public function update(&$warnings = array(), $force_update = false) {
+    // Droits user: 
+
+    public function canCreate()
+    {
+        global $user;
+        if (!$user->rights->bimpequipment->inventory->create and ! $user->admin) {
+            return 0;
+        }
+
+        return 1;
+    }
+
+    public function update(&$warnings = array(), $force_update = false)
+    {
         $status = (int) $this->getData('status');
 
         // Draft
@@ -40,7 +54,8 @@ class Inventory extends BimpDolObject {
         return $errors;
     }
 
-    public function getActionsButtons() {
+    public function getActionsButtons()
+    {
         global $user;
         $buttons = array();
         if (!$this->isLoaded())
@@ -49,8 +64,8 @@ class Inventory extends BimpDolObject {
         if ($this->getData('status') == self::STATUS_DRAFT) {
             if ($user->admin or $user->rights->bimpequipment->inventory->open) {
                 $buttons[] = array(
-                    'label' => 'Commencer l\'inventaire',
-                    'icon' => 'fas_box',
+                    'label'   => 'Commencer l\'inventaire',
+                    'icon'    => 'fas_box',
                     'onclick' => $this->getJsActionOnclick('setSatus', array("status" => self::STATUS_OPEN), array(
                         'success_callback' => 'function(result) {bimp_reloadPage();}')
                     )
@@ -61,12 +76,12 @@ class Inventory extends BimpDolObject {
         if ($this->getData('status') == self::STATUS_OPEN) {
             if ($user->admin or $user->rights->bimpequipment->inventory->close) { // read et create
                 $buttons[] = array(
-                    'label' => 'Fermer l\'inventaire',
-                    'icon' => 'fas_window-close',
+                    'label'   => 'Fermer l\'inventaire',
+                    'icon'    => 'fas_window-close',
                     'onclick' => $this->getJsActionOnclick('setSatus', array("status" => self::STATUS_CLOSED), array(
-                        'form_name' => 'confirm_close',
+                        'form_name'        => 'confirm_close',
                         'success_callback' => 'function(result) {bimp_reloadPage();}'
-                        ))
+                    ))
                 );
             }
         }
@@ -74,10 +89,11 @@ class Inventory extends BimpDolObject {
         return $buttons;
     }
 
-    public function actionSetSatus($data = array(), &$success = '') {
+    public function actionSetSatus($data = array(), &$success = '')
+    {
         $errors = array();
 
-        $date_mouvement =  BimpTools::getPostFieldValue('date_mouvement');
+        $date_mouvement = BimpTools::getPostFieldValue('date_mouvement');
 
         if ((int) $data['status'] == self::STATUS_CLOSED) {
             $errors = array_merge($errors, $this->close());
@@ -94,7 +110,8 @@ class Inventory extends BimpDolObject {
         return $errors;
     }
 
-    public function setDateMouvement($date_mouvement) {
+    public function setDateMouvement($date_mouvement)
+    {
 
         $sql = 'UPDATE ' . MAIN_DB_PREFIX . 'stock_mouvement';
         $sql .= ' SET datem="' . $date_mouvement . '"';
@@ -111,7 +128,8 @@ class Inventory extends BimpDolObject {
         }
     }
 
-    public function getLines($ret_object = false) {
+    public function getLines($ret_object = false)
+    {
         $return = array();
         $inventory_lines_obj = BimpObject::getInstance('bimplogistique', 'InventoryLine');
         $inventory_lines = $inventory_lines_obj->getList(
@@ -132,22 +150,24 @@ class Inventory extends BimpDolObject {
         return $inventory_lines;
     }
 
-    public function create(&$warnings = array(), $force_create = false) {
+    public function create(&$warnings = array(), $force_create = false)
+    {
         global $user;
 
-        if (!$user->bimpequipment->inventory->create and ! $user->admin) {
-            $warnings[] = "Vous n'avez pas les droits de créer un inventaire.";
-            return;
-        }
+        // Ce doit code doit obligatoirement être placé dans $this->canCreate() (c'est géré en auto). 
+//        if (!$user->bimpequipment->inventory->create and ! $user->admin) {
+//            $warnings[] = "Vous n'avez pas les droits de créer un inventaire.";
+//            return;
+//        }
 
         $filters = array(
             'fk_warehouse' => array(
                 'operator' => '=',
-                'value' => $this->getData('fk_warehouse')
+                'value'    => $this->getData('fk_warehouse')
             ),
-            'status' => array(
+            'status'       => array(
                 'operator' => '<',
-                'value' => self::STATUS_CLOSED
+                'value'    => self::STATUS_CLOSED
             ),
         );
 
@@ -168,7 +188,8 @@ class Inventory extends BimpDolObject {
         return parent::create($warnings, $force_create);
     }
 
-    public function close() {
+    public function close()
+    {
         $errors = array();
 
         if ($this->equipmentIsOk()) {
@@ -183,13 +204,14 @@ class Inventory extends BimpDolObject {
         return $errors;
     }
 
-    private function getErrorsEquipment() {
+    private function getErrorsEquipment()
+    {
         $errors = array();
 
         $diff_eq = $this->getDiffEquipment();
         // Excès
         $nb_en_trop = count($diff_eq['ids_en_trop']);
-        
+
         if ($nb_en_trop == 1)
             $errors[] = 'Merci de traiter le cas du produit sérialisé en excès.';
         if ($nb_en_trop > 1)
@@ -203,7 +225,8 @@ class Inventory extends BimpDolObject {
         return $errors;
     }
 
-    private function getErrorsProduct() {
+    private function getErrorsProduct()
+    {
         $errors = array();
 
         $diff = $this->getDiffStock();
@@ -226,7 +249,8 @@ class Inventory extends BimpDolObject {
         return 0;
     }
 
-    private function correctProducts() {
+    private function correctProducts()
+    {
         global $user;
         $errors = array();
 
@@ -253,17 +277,18 @@ class Inventory extends BimpDolObject {
         return $errors;
     }
 
-    public function renderStock() {
+    public function renderStock()
+    {
 
         $filters = array(
             'or' => array(
-                'ps.reel' => array(
+                'ps.reel'     => array(
                     'operator' => '!=',
-                    'value' => 0
+                    'value'    => 0
                 ),
                 'inv_det.qty' => array(
                     'operator' => '!=',
-                    'value' => 0
+                    'value'    => 0
                 ),
             )
         );
@@ -275,16 +300,17 @@ class Inventory extends BimpDolObject {
         $list->addJoin('product_stock', 'a.rowid = ps.fk_product AND ps.fk_entrepot = ' . $this->getData('fk_warehouse'), 'ps');
 //        print_r($list);
         $html .= $list->renderHtml();
-        
+
 
         return $html;
     }
 
-    public function renderDiff() {
+    public function renderDiff()
+    {
 
         $filters = array(
             'operator' => '!=',
-            'value' => "inv_det.qty"
+            'value'    => "inv_det.qty"
         );
 
         $sql = ' SELECT SUM(inv_det.qty) as qty FROM ' . MAIN_DB_PREFIX . 'bl_inventory_det as inv_det';
@@ -319,7 +345,8 @@ class Inventory extends BimpDolObject {
         return $html;
     }
 
-    public function renderDifference() {
+    public function renderDifference()
+    {
         $html = '';
         if (!$this->equipmentIsOk()) {
             foreach ($this->getErrorsEquipment() as $error) {
@@ -334,14 +361,16 @@ class Inventory extends BimpDolObject {
         return $html;
     }
 
-    public function equipmentIsOk() {
+    public function equipmentIsOk()
+    {
         $diff_eq = $this->getDiffEquipment();
         if (count($diff_eq['ids_en_trop']) > 0 or count($diff_eq['ids_manquant']) > 0)
             return false;
         return true;
     }
 
-    public function getDiffStock() { // non sérialisé
+    public function getDiffStock()
+    { // non sérialisé
         $ids_stock = array();
         $ids_scanned = array();
 
@@ -387,7 +416,8 @@ class Inventory extends BimpDolObject {
         return $diff;
     }
 
-    public function getDiffEquipment() {
+    public function getDiffEquipment()
+    {
         $ids_place = array();
         $ids_scanned = array();
 
@@ -433,7 +463,8 @@ class Inventory extends BimpDolObject {
         return array('ids_en_trop' => $ids_en_trop, 'ids_manquant' => $ids_manquant);
     }
 
-    public function renderInputs() {
+    public function renderInputs()
+    {
         $html = '';
 
         if ($this->isLoaded()) {
@@ -448,8 +479,8 @@ class Inventory extends BimpDolObject {
 
                 $html = BimpRender::renderPanel($header_table, $html, '', array(
                             'foldable' => false,
-                            'type' => 'secondary',
-                            'icon' => 'fas_plus-circle',
+                            'type'     => 'secondary',
+                            'icon'     => 'fas_plus-circle',
                 ));
             }
         }
@@ -459,7 +490,8 @@ class Inventory extends BimpDolObject {
         return $html;
     }
 
-    public function displayMouvementTrace() {
+    public function displayMouvementTrace()
+    {
 
         if ($this->getData('status') == self::STATUS_CLOSED) {
             $url = DOL_URL_ROOT . '/product/stock/mouvement.php?search_inventorycode=inventory-id-' . $this->getData('id');
@@ -468,5 +500,4 @@ class Inventory extends BimpDolObject {
 
         return "Disponible à la fermeture de l'inventaire";
     }
-
 }

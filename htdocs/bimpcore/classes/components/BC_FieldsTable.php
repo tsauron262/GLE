@@ -21,6 +21,13 @@ class BC_FieldsTable extends BC_Panel
     {
         $this->params_def['rows'] = array('type' => 'keys');
 
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
+
         $name = $object->getConf($path . '/name', 'default');
 
         if (!$object->config->isDefined($path . '/rows')) {
@@ -43,6 +50,8 @@ class BC_FieldsTable extends BC_Panel
                 $this->errors[] = 'Vous n\'avez pas la permission de voir ' . $this->object->getLabel('this');
             }
         }
+
+        $current_bc = $prev_bc;
     }
 
     public function setNewValues($new_values)
@@ -54,6 +63,13 @@ class BC_FieldsTable extends BC_Panel
 
     public function renderHtmlContent()
     {
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
+
         $html = '';
 
         $html .= '<table class="objectFieldsTable ' . $this->object->object_name . '_fieldsTable">';
@@ -61,7 +77,7 @@ class BC_FieldsTable extends BC_Panel
 
         foreach ($this->params['rows'] as $row) {
             $row_params = $this->fetchParams($this->config_path . '/rows/' . $row, $this->row_params);
-            
+
             if (!(int) $row_params['show']) {
                 continue;
             }
@@ -80,11 +96,11 @@ class BC_FieldsTable extends BC_Panel
                 if (!$field->params['show']) {
                     continue;
                 }
-                
+
                 if (!$field->checkDisplayIf()) {
                     continue;
                 }
-                
+
                 if (isset($this->new_values[$row_params['field']])) {
                     $field->new_value = $this->new_values[$row_params['field']];
                 }
@@ -156,11 +172,19 @@ class BC_FieldsTable extends BC_Panel
         $html .= '</tbody>';
         $html .= '</table>';
 
+        $current_bc = $prev_bc;
         return $html;
     }
 
     public function renderHtmlFooter()
     {
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
+
         $html = '<div class="fieldsTableFooter" style="text-align: right">';
 
         $html .= BimpRender::renderButton(array(
@@ -189,6 +213,7 @@ class BC_FieldsTable extends BC_Panel
 
         $html .= '</div>';
 
+        $current_bc = $prev_bc;
         return $html;
     }
 }

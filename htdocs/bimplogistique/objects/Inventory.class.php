@@ -217,6 +217,14 @@ class Inventory extends BimpDolObject {
 
         return $errors;
     }
+    
+    public function isAdmin() {
+        return 0;
+        global $user;
+        if($user->rights->inventory->create)
+            return 1;
+        return 0;
+    }
 
     private function correctProducts() {
         global $user;
@@ -265,6 +273,7 @@ class Inventory extends BimpDolObject {
         $list->addFieldFilterValue('rien', $filters);
         $list->addJoin('bl_inventory_det', 'a.rowid = inv_det.fk_product AND inv_det.fk_inventory = ' . $this->getData('id'), 'inv_det');
         $list->addJoin('product_stock', 'a.rowid = ps.fk_product AND ps.fk_entrepot = ' . $this->getData('fk_warehouse'), 'ps');
+//        print_r($list);
         $html .= $list->renderHtml();
         
 
@@ -444,6 +453,8 @@ class Inventory extends BimpDolObject {
                 ));
             }
         }
+        
+        $html .= '<div id="allow_sound"></div>';
 
         return $html;
     }

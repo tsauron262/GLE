@@ -71,6 +71,11 @@ sections:
                             - stock
 
         diff:
+          show:
+            callback: 
+              method: isAdmin
+              object: inventory
+
           label: Différence
           sections:
                - type: object_header

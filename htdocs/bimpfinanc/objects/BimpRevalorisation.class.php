@@ -19,7 +19,7 @@ class BimpRevalorisation extends BimpObject
     {
         global $user;
 
-        return (int) ($user->admin ? 1 : 0);
+        return (int) 1;//($user->admin ? 1 : 0);
     }
 
     public function canSetAction($action)
@@ -38,6 +38,28 @@ class BimpRevalorisation extends BimpObject
         }
 
         return (int) parent::canSetAction($action);
+    }
+    
+    
+    public function getCommercialSearchFilters(&$filters, $value, &$joins = array(), $main_alias = 'a')
+    {
+        if ((int) $value) {
+            $filters['typecont.element'] = 'facture';
+            $filters['typecont.source'] = 'internal';
+            $filters['typecont.code'] = 'SALESREPFOLL';
+            $filters['elemcont.fk_socpeople'] = (int) $value;
+
+            $joins['elemcont'] = array(
+                'table' => 'element_contact',
+                'on'    => 'elemcont.element_id = ' . $main_alias . '.id_facture',
+                'alias' => 'elemcont'
+            );
+            $joins['typecont'] = array(
+                'table' => 'c_type_contact',
+                'on'    => 'elemcont.fk_c_type_contact = typecont.rowid',
+                'alias' => 'typecont'
+            );
+        }
     }
 
     // Getters booléens: 

@@ -50,11 +50,14 @@ fields:
             array: status_list
         edit: 0
         
-#    parent:
-#        label: Rattaché à l'inventaire
-#        type: int
-#        values: 
-#            callback: getAllInventories
+    parent:
+        label: Rattaché à l'inventaire
+        type: int
+        values: 
+            callback: getAllInventories
+        input:
+            help: Un inventaire ne peut être rattaché à un inventaire déjà rattaché
+
             
 fields_tables: 
     default: 
@@ -103,7 +106,7 @@ forms:
     default:
         rows: 
             - field: fk_warehouse
-#            - field: parent
+            - field: parent
             
         confirm_close: 
             rows: 
@@ -148,6 +151,8 @@ lists:
                 field: date_opening
             date_closing:
                 field: date_closing
+            parent:
+                field: parent
         
 cards: 
     default: 

@@ -20,9 +20,22 @@ class Inventory extends BimpDolObject
     // Droits user: 
 
     public function getAllInventories() {
-        // mettre 1 vide
+        $inventories = array(0 => '');
         
-        return array(0 => '', 1 => '#1');
+        $sql = 'SELECT i.id as id_inv, CONCAT(e.ref, " ", e.lieu) as nom';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'bl_inventory AS i';
+        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'entrepot AS e ON i.fk_warehouse=e.rowid'; 
+        $sql .= ' WHERE id!=' . $this->getData('id');
+        $sql .= ' AND i.parent=0';
+
+        $result = $this->db->db->query($sql);
+        if ($result and mysqli_num_rows($result) > 0) {
+            while ($obj = $this->db->db->fetch_object($result)) {
+                $inventories[$obj->id_inv] = 'Inv#' . $obj->id_inv . '  ' .$obj->nom;
+            }
+        }
+       
+        return $inventories;
     }
     
     
@@ -439,14 +452,14 @@ class Inventory extends BimpDolObject
             }
         }
 
-        $sql = 'SELECT fk_equipment';
-        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'bl_inventory_det';
-        $sql .= ' WHERE fk_inventory=' . $this->getData('id');
-        $sql .= ' AND fk_equipment > 0';
+        $sql2 = 'SELECT fk_equipment';
+        $sql2 .= ' FROM ' . MAIN_DB_PREFIX . 'bl_inventory_det';
+        $sql2 .= ' WHERE fk_inventory=' . $this->getData('id');
+        $sql2 .= ' AND fk_equipment > 0';
 
-        $result = $this->db->db->query($sql);
-        if ($result and mysqli_num_rows($result) > 0) {
-            while ($obj = $this->db->db->fetch_object($result)) {
+        $result2 = $this->db->db->query($sql2);
+        if ($result2 and mysqli_num_rows($result2) > 0) {
+            while ($obj = $this->db->db->fetch_object($result2)) {
                 $ids_scanned[$obj->fk_equipment] = $obj->fk_equipment;
             }
         }

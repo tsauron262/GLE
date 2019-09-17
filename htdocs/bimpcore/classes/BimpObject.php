@@ -236,6 +236,11 @@ class BimpObject extends BimpCache
                 'input'         => array(
                     'type' => 'hidden'
                 ),
+                'search'        => array(
+                   'input' => array(
+                       'type' => 'search_user'
+                   )
+               ),
                 'default_value' => array(
                     'prop' => array(
                         'name'   => 'id',
@@ -267,6 +272,11 @@ class BimpObject extends BimpCache
                 'object'        => 'user_update',
                 'input'         => array(
                     'type' => 'hidden'
+                ),
+                'search'        => array(
+                   'input' => array(
+                       'type' => 'search_user'
+                   )
                 ),
                 'default_value' => array(
                     'prop' => array(

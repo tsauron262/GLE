@@ -23,6 +23,8 @@ class BimpCube{
         $result = $result && $this->db->query("CALL refresh_llx_mat_view_propaldet_year_m(2019);");
         if($result){
             $this->output .= "OK";
+            return 'success';
         }
+        return 'failure';
     }
 }

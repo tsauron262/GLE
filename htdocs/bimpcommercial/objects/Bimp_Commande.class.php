@@ -155,7 +155,7 @@ class Bimp_Commande extends BimpComm
                     $errors[] = 'ID de la commande absent';
                     return 0;
                 }
-//                return 0; // blocage par trigger : à voir si on fait sauter. 
+                
                 if (!in_array($status, array(1, 2, 3))) {
                     $errors[] = $invalide_error;
                     return 0;

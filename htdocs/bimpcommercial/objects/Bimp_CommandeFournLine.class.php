@@ -1752,7 +1752,9 @@ class Bimp_CommandeFournLine extends FournObjectLine
                                     $eq_errors = $equipment->delete($eq_warnings, true);
 
                                     if (count($eq_errors)) {
-                                        $warnings[] = BimpTools::getMsgFromArray($eq_errors, 'Echec de la suppression de l\'équipement "' . $equipment->getData('serial') . '" (ID: ' . $equipment->id . ')');
+                                        $msg = BimpTools::getMsgFromArray($eq_errors, 'Echec de la suppression de l\'équipement "' . $equipment->getData('serial') . '" (ID: ' . $equipment->id . ')');
+                                        $warnings[] = $msg;
+                                        dol_syslog('Annulation réception ' . $reception->getRef() . ' - Commande Fourn ' . $commande_fourn->getRef() . ' - ' . $msg, LOG_ERR);
                                     }
 
                                     if (count($eq_warnings)) {

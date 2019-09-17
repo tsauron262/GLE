@@ -2888,7 +2888,7 @@ class BS_SAV extends BimpObject
                         if ($propalLine->isLoaded()) {
                             if ($propalLine->getData('linked_object_name') == 'sav_garantie')
                                 continue;
-                            
+
                             $remises = $propalLine->getRemises();
                             $eq_lines = $propalLine->getEquipmentLines();
                             $propalLine->id = null;
@@ -3372,7 +3372,9 @@ class BS_SAV extends BimpObject
                                             }
 
                                             if ($bimpFacture->dol_object->validate($user, '') <= 0) { //pas d'entrepot pour pas de destock
-                                                $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($bimpFacture->dol_object), 'Echec de la validation de la facture');
+                                                $msg = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($bimpFacture->dol_object), 'Echec de la validation de la facture');
+                                                $warnings[] = $msg;
+                                                dol_syslog('SAV "' . $this->getRef() . '": ' . $msg, LOG_ERR);
                                             } else {
                                                 $bimpFacture->fetch($facture->id);
 

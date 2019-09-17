@@ -71,11 +71,11 @@ foreach($tabInfo as $infos){
         
         while($ln = $db->fetch_object($sql)){//equipment
             $i++;
-            $package->addEquipment($ln->id, $errors);
+            $errors = array_merge($errors, $package->addEquipment($ln->id, $errors));
         }
         while($ln = $db->fetch_object($sql2)){//prods
             $i += $ln->reel;
-            $package->addProduct($ln->fk_product, $ln->reel, $ln->fk_entrepot);
+            $errors = array_merge($errors, $package->addProduct($ln->fk_product, $ln->reel, $ln->fk_entrepot));
         }
     }
 }

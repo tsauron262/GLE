@@ -1,7 +1,7 @@
 <?php
 
 global $tabCentre;
-    $tabCentre = array("V"     => array("04 75 81 81 54", "sav07@bimp.fr", "GUILLERAND GRANGES", 19, "1000566", "07500", "GUILLERAND GRANGES", "Espace Colibri \n 85 rue Conrad Kilian", 25),
+    $tabCentre = array("V"     => array("04 75 81 81 54", "sav07@bimp.fr", "GUILHERAND-GRANGES", 19, "1000566", "07500", "GUILLERAND GRANGES", "Espace Colibri \n 85 rue Conrad Kilian", 25),
         "M"     => array("04 50 22 15 55", "sav74@bimp.fr", "Meythet", 58, "462140", "74960", "Meythet", "3 RUE DU VIEUX MOULIN", 21),
         "CB"    => array("09 70 72 12 32", "sav73@bimp.fr", "Chambéry", 213, "1139941", "73000", "Chambéry", "150 rue croix d'or", 36),
         'L'     => array("04 78 17 30 28", "sav69@bimp.fr", "Lyon", 21, "1000565", "69006", "Lyon", "67 rue Vendome", 23),

@@ -6,15 +6,25 @@ llxHeader();
 
 require_once(DOL_DOCUMENT_ROOT."/synopsistools/api/curlRequestApple.class.php");
 $curl = new CurlRequestAppleApi(897316, 897316);
-$curl->init('authenticate/check');
-$result = $curl->exec(array());
-print_r($result);
+if($curl->checkConnexion())
+    echo 'okokokok';
+else
+    echo 'probléme de connexion GSX';
 
 
-$result = $curl->reqLogin('gsx@bimp.fr', '0f35f8dd-129a-4a7b-ac5f-18a5fadf255mv');
-print_r($result);
+echo '<br/><br/><br/>';
+
+$result = $curl->reqLogin('olys_tech_aprvlreqrd@olys.com');
+if($result){
+    echo 'autentification OK';
+}
+else{
+    echo 'autentification BAD';
+}
 
 
+$curl->printErrors();
 
-            $curl->logErrorCurl('fin');
+echo '<br/><br/>Token utilisé : '.$curl->tokenApple.' new token '.$_SESSION['apple_token'];
+
 llxFooter();

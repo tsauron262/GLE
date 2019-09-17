@@ -9,6 +9,8 @@ class curlRequestApple
     public $pword;
     public $certPath;
     public $requestName;
+    public $errors = array();
+    public $tokenApple = '';
     protected $ch;
 
     public function __construct($soldTo, $shipTo)
@@ -96,6 +98,7 @@ class curlRequestApple
         $this->ch = curl_init('https://partner-connect-uat.apple.com/gsx/api/'.$url);
 
         if (!$this->ch) {
+            echo 'aucune connexion vers GSX';
             return false;
         }
 
@@ -119,10 +122,36 @@ class curlRequestApple
         return true;
     }
     
-    public function reqLogin($userAppleId, $token){
+    public function reqLogin($userAppleId){
+        
+        
+        if(isset($_SESSION['apple_token']) && $_SESSION['apple_token'] != '')
+            $this->tokenApple = $_SESSION['apple_token'];
+        elseif(isset($_REQUEST['apple_token']) && $_REQUEST['apple_token'] != '')
+            $this->tokenApple = $_REQUEST['apple_token'];
+        else{
+            echo 'ATTENTION merci d\'inscrire un token dans l\'url';
+            return 0;
+        }
+        
         $this->init('authenticate/token');
-        $return = $this->exec(array('userAppleId'=>$userAppleId, 'authToken'=>$token));
-        return $return;
+        $result = $this->exec(array('userAppleId'=>$userAppleId, 'authToken'=>$this->tokenApple));
+        if(isset($result->authToken)){
+            $_SESSION['apple_token'] = $result->authToken;
+            return 1;
+        }
+        if(!count($this->errors))
+            return 1;//deja logé
+        return 0;
+    }
+    
+    public function checkConnexion(){
+        $this->init('authenticate/check');
+        $result = $this->exec(array());
+        print_r($result);
+        if($result == '')
+            return 1;
+        return 0;
     }
     
 
@@ -139,17 +168,39 @@ class curlRequestApple
             $this->logErrorCurl('pas de rep');
             return false;
         }
-        
-        echo 'result : ';
-        return json_decode($data);
-    }
-
-    public function getLastError()
-    {
-        if (!$this->ch) {
-            return 'Echec de la connexion au service';
+        $data = json_decode($data);
+        if(count($data->errors)){
+            foreach($data->errors as $error)
+                $this->traiteError($error);
         }
-        return curl_error($this->ch);
+            
+        return $data;
+    }
+    
+    public function traiteError($error){
+        if($error->code == 'AUTH_TOKEN_STILL_ACTIVE'){
+            echo '<br/>Token encore valide : '.$error->message.'<br/>';
+            $erreurInc = false;
+        }
+        elseif($error->code == 'UNAUTHORIZED'){
+            echo '<br/>Token invalide : '.$error->message.'<br/>';
+            $_SESSION['apple_token'] = '';
+            $erreurInc = false;
+        }
+        else{
+            $this->errors[] = $error;
+        }
+    }
+    
+    public function printErrors(){
+        if(count($this->errors)){
+            echo '<pre>'.print_r($this->errors,1);
+            if (!$this->ch) {
+                echo 'Echec de la connexion au service';
+            }
+            else
+                echo curl_error($this->ch);
+        }
     }
 }
 

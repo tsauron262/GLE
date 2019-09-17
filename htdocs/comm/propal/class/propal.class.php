@@ -1064,7 +1064,9 @@ class Propal extends CommonObject
 							$line->array_options,
 							$line->fk_unit,
 							$this->element,
-							$line->id
+							$line->id,
+                                                        0,
+                                                        $line->fk_remise_except
 						);
 
 						if ($result < 0)

@@ -574,7 +574,7 @@ class BimpController
 
                 if ($json === false) {
                     $msg = 'Echec de l\'encodage JSON - ' . json_last_error_msg();
-                    dol_syslog('AjaxProcess "' . $action . '" - controller: ' . $this->module . ' ' . $this->controller . ' - ' . $msg . '<pre>'. print_r($result,1), LOG_ERR);
+                    dol_syslog('AjaxProcess "' . $action . '" - controller: ' . $this->module . ' ' . $this->controller . ' - ' . $msg . '<pre>' . print_r($result, 1), LOG_ERR);
                     die(json_encode(array(
                         'errors'     => array($msg),
                         'request_id' => BimpTools::getValue('request_id', 0)
@@ -1229,8 +1229,8 @@ class BimpController
         $module = BimpTools::getValue('module', $this->module);
         $object_name = BimpTools::getValue('object_name');
         $list_name = BimpTools::getValue('list_name', 'default');
-        $extra_filters = BimpTools::getValue('extra_filters', '');
-        $extra_joins = BimpTools::getValue('extra_joins', '');
+        $extra_filters = BimpTools::getValue('extra_filters', array());
+        $extra_joins = BimpTools::getValue('extra_joins', array());
 
         if (is_null($object_name) || !$object_name) {
             $errors[] = 'Type d\'objet absent';
@@ -1241,17 +1241,13 @@ class BimpController
             $list = new BC_ListTable($object, $list_name, 1, $id_parent);
 
             if ($extra_filters) {
-                $filters = json_decode($extra_filters, 1);
-
-                foreach ($filters as $name => $filter) {
+                foreach ($extra_filters as $name => $filter) {
                     $list->addFieldFilterValue($name, $filter);
                 }
             }
 
             if ($extra_joins) {
-                $joins = json_decode($extra_joins, 1);
-
-                foreach ($joins as $join) {
+                foreach ($extra_joins as $join) {
                     $list->addJoin($join['table'], $join['on'], $join['alias']);
                 }
             }

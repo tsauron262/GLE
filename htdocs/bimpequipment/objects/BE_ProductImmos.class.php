@@ -87,7 +87,7 @@ class BE_ProductImmos extends Bimp_Product
                     $filters['or_place_entrepot'] = array(
                         'or' => array(
                             'ppl_entrepot' => array(
-                                'custom' => '(ef.serialisable = 0 AND ' . $this->getPlacePositionSqlFilter('ppl') . ' AND ppl.id_entrepot IN (' . implode(',', $values) . '))'
+                                'custom' => '((ef.serialisable = 0 || ef.serialisable IS NULL) AND ' . $this->getPlacePositionSqlFilter('ppl') . ' AND ppl.id_entrepot IN (' . implode(',', $values) . '))'
                             ),
                             'epl_entrepot' => array(
                                 'custom' => '(ef.serialisable = 1 AND ' . $this->getPlacePositionSqlFilter('epl') . ' AND epl.id_entrepot IN (' . implode(',', $values) . '))'
@@ -106,7 +106,7 @@ class BE_ProductImmos extends Bimp_Product
                     $filters['or_place_user'] = array(
                         'or' => array(
                             'ppl_user' => array(
-                                'custom' => '(ef.serialisable = 0 AND ' . $this->getPlacePositionSqlFilter('ppl') . ' AND ppl.id_user IN (' . implode(',', $values) . '))'
+                                'custom' => '((ef.serialisable = 0 || ef.serialisable IS NULL) AND ' . $this->getPlacePositionSqlFilter('ppl') . ' AND ppl.id_user IN (' . implode(',', $values) . '))'
                             ),
                             'epl_user' => array(
                                 'custom' => '(ef.serialisable = 1 AND ' . $this->getPlacePositionSqlFilter('epl') . ' AND epl.id_user IN (' . implode(',', $values) . '))'
@@ -125,7 +125,7 @@ class BE_ProductImmos extends Bimp_Product
                     $filters['or_place_client'] = array(
                         'or' => array(
                             'ppl_client' => array(
-                                'custom' => '(ef.serialisable = 0 AND ' . $this->getPlacePositionSqlFilter('ppl') . ' AND ppl.id_client IN (' . implode(',', $values) . '))'
+                                'custom' => '((ef.serialisable = 0 || ef.serialisable IS NULL) AND ' . $this->getPlacePositionSqlFilter('ppl') . ' AND ppl.id_client IN (' . implode(',', $values) . '))'
                             ),
                             'epl_client' => array(
                                 'custom' => '(ef.serialisable = 1 AND ' . $this->getPlacePositionSqlFilter('epl') . ' AND epl.id_client IN (' . implode(',', $values) . '))'
@@ -156,7 +156,7 @@ class BE_ProductImmos extends Bimp_Product
                         $filters['or_place_name'] = array(
                             'or' => array(
                                 'ppl_client' => array(
-                                    'custom' => '(ef.serialisable = 0 AND ' . $this->getPlacePositionSqlFilter('ppl') . ' AND ' . BimpTools::getSqlFilter('ppl.place_name', array('or_field' => $or_field)) . ')'
+                                    'custom' => '((ef.serialisable = 0 || ef.serialisable IS NULL) AND ' . $this->getPlacePositionSqlFilter('ppl') . ' AND ' . BimpTools::getSqlFilter('ppl.place_name', array('or_field' => $or_field)) . ')'
                                 ),
                                 'epl_client' => array(
                                     'custom' => '(ef.serialisable = 1 AND ' . $this->getPlacePositionSqlFilter('epl') . ' AND ' . BimpTools::getSqlFilter('ppl.place_name', array('or_field' => $or_field)) . ')'

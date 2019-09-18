@@ -19,6 +19,7 @@ fields:
         decimals: 0
         searchable: 0
         sortable: 0
+        extra: 1
         
     total_achats: 
         label: Total achats
@@ -26,6 +27,7 @@ fields:
         decimals: 2
         searchable: 0
         sortable: 0
+        extra: 1
     
 filters_panels: 
     immos: 
@@ -88,7 +90,7 @@ lists:
         filters_panel_open: 1
         sort_field: rowid
         sort_way: asc
-        n: 20
+        n: 10
         list_filters: 
             callback: getImmosListFilters
         extra_btn: 

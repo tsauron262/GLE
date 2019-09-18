@@ -534,7 +534,9 @@ lists:
             - label: Supprimer les équipements sélectionnés
               icon: fas_trash-alt
               onclick: deleteSelectedObjects('list_id', $(this));
-              btn_class: deleteSelectedObjects
+            - label: Générer étiquettes
+              icon: fas_sticky-note
+              onclick: setSelectedObjectsAction($(this), 'list_id', 'generateEtiquette', {}, null, null, true)
         filters_panel: default
         sort_field: date_create
         sort_way: desc
@@ -542,6 +544,8 @@ lists:
         list_filters: 
             callback:
                 method: getListFilters
+        extra_btn: 
+            callback: getDefaultListExtraBtn
         add_form_name: default
         edit_btn: 1
         update_btn: 1
@@ -567,6 +571,9 @@ lists:
             - label: Retirer les équipements sélectionnés
               icon: fas_trash-alt
               onclick: removeSelectedEquipmentsFromPackage('list_id', $(this));
+            - label: Générer étiquettes
+              icon: fas_sticky-note
+              onclick: setSelectedObjectsAction($(this), 'list_id', 'generateEtiquette', {}, null, null, true)
         sort_field: serial
         sort_way: asc
         n: 20

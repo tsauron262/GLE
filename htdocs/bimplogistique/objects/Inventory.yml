@@ -56,7 +56,7 @@ fields:
         values: 
             callback: getAllInventories
         input:
-            help: Un inventaire ne peut être rattaché à un inventaire déjà rattaché
+            help: Un inventaire ne peut pas être rattaché à un inventaire déjà rattaché
 
             
 fields_tables: 

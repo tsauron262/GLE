@@ -31,7 +31,17 @@ function initEvents() {
             event.preventDefault(event);
             var input = $("input[name=search_insert_line]").val();
             var quantity = $("input[name=insert_quantity]").val();
-            insertProduct(input, quantity);
+            
+            if(0 < parseInt(input) && parseInt(input) < 1000) {
+                $("input[name=search_insert_line]").val('');
+                $("input[name=insert_quantity]").val(input);
+                return;
+            }
+            
+            if(quantity <= 0)
+                alert("Merci de renseigner une quantité supérieure à 0");
+            else
+                insertProduct(input, quantity);
         }
     });
 }

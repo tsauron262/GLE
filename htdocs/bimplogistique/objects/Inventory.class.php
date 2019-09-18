@@ -29,7 +29,7 @@ class Inventory extends BimpDolObject
     public function canCreate()
     {
         global $user;
-        if (!$user->rights->bimpequipment->inventory->create and ! $user->admin) {
+        if (!$user->rights->bimpequipment->inventory->create) {
             return 0;
         }
 
@@ -69,7 +69,7 @@ class Inventory extends BimpDolObject
             return $buttons;
 
         if ($this->getData('status') == self::STATUS_DRAFT) {
-            if ($user->admin or $user->rights->bimpequipment->inventory->open) {
+            if ($user->rights->bimpequipment->inventory->open) {
                 $buttons[] = array(
                     'label'   => 'Commencer l\'inventaire',
                     'icon'    => 'fas_box',
@@ -81,7 +81,7 @@ class Inventory extends BimpDolObject
         }
 
         if ($this->getData('status') == self::STATUS_OPEN) {
-            if ($user->admin or $user->rights->bimpequipment->inventory->close) { // read et create
+            if ($user->rights->bimpequipment->inventory->close) { // read et create
                 $buttons[] = array(
                     'label'   => 'Fermer l\'inventaire',
                     'icon'    => 'fas_window-close',
@@ -250,7 +250,7 @@ class Inventory extends BimpDolObject
     
     public function isAdmin() {
         global $user;
-        if($user->rights->inventory->close or $user->admin)
+        if($user->rights->bimpequipment->inventory->close)
             return 1;
         return 0;
     }

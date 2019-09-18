@@ -273,6 +273,11 @@ class BimpObject extends BimpCache
                 'input'         => array(
                     'type' => 'hidden'
                 ),
+                'search'        => array(
+                   'input' => array(
+                       'type' => 'search_user'
+                   )
+                ),
                 'default_value' => array(
                     'prop' => array(
                         'name'   => 'id',

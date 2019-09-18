@@ -45,7 +45,7 @@ class BE_ProductImmos extends Bimp_Product
             'filter' => array(
                 'or' => array(
                     'cust_noserial'   => array(
-                        'custom' => '(ef.serialisable = 0 AND a.rowid IN (SELECT DISTINCT pp.id_product FROM ' . MAIN_DB_PREFIX . 'be_package_product pp WHERE pp.id_product = a.rowid))'
+                        'custom' => '(ef.serialisable != 1 AND a.rowid IN (SELECT DISTINCT pp.id_product FROM ' . MAIN_DB_PREFIX . 'be_package_product pp WHERE pp.id_product = a.rowid))'
                     ),
                     'ef.serialisable' => 1
                 )

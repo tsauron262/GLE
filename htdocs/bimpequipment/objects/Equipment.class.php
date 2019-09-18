@@ -358,9 +358,22 @@ class Equipment extends BimpObject
 
     // Getters params: 
 
-    public function getPackageListExtraBtn()
+    public function getDefaultListExtraBtn()
     {
         $buttons = array();
+
+        $buttons[] = array(
+            'label'   => 'Etiquette',
+            'icon'    => 'fas_sticky-note',
+            'onclick' => $this->getJsActionOnclick('generateEtiquette')
+        );
+
+        return $buttons;
+    }
+
+    public function getPackageListExtraBtn()
+    {
+        $buttons = $this->getDefaultListExtraBtn();
 
         if ($this->isLoaded()) {
             $package = $this->getChildObject('package');
@@ -397,6 +410,17 @@ class Equipment extends BimpObject
     public function getRef()
     {
         return $this->getData("serial");
+    }
+
+    public function getProductLabel()
+    {
+        $product = $this->getChildObject('product');
+
+        if (BimpObject::objectLoaded($product)) {
+            return $product->label;
+        }
+
+        return (string) $this->getData('product_label');
     }
 
     public function getHasReservationsArray()
@@ -779,7 +803,12 @@ class Equipment extends BimpObject
             if ($with_label) {
                 $product = $this->getChildObject('product');
                 if (BimpObject::objectLoaded($product)) {
-                    $html .= '<br/>' . $product->label;
+                    if ($no_html) {
+                        $html .= "\n";
+                    } else {
+                        $html .= '<br/>';
+                    }
+                    $html .= $product->label;
                 }
             }
 
@@ -1143,6 +1172,36 @@ class Equipment extends BimpObject
             $html = $list->renderHtml();
         }
         return $html;
+    }
+
+    public function actionGenerateEtiquette($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+        $success_callback = '';
+
+        if ($this->isLoaded()) {
+            $url = DOL_URL_ROOT . '/bimpequipment/etiquette_equipment.php?id_equipment=' . $this->id;
+        } elseif (isset($data['id_objects'])) {
+            if (empty($data['id_objects'])) {
+                $errors[] = 'Aucun équipement sélectionné';
+            } else {
+                $url = DOL_URL_ROOT . '/bimpequipment/etiquette_equipment.php?equipments=' . implode(',', $data['id_objects']);
+            }
+        } else {
+            $errors[] = 'Aucun équipement spécifié';
+        }
+
+        if ($url) {
+            $success_callback = 'window.open(\'' . $url . '\');';
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $success_callback
+        );
     }
 
     // Overrides

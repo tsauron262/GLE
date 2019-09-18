@@ -367,8 +367,8 @@ class Bimp_Product extends BimpObject
         $buttons = array();
         if ($line_qty >= 0 && $this->isActionAllowed('generateEtiquettes')) {
             $buttons[] = array(
-                'label' => 'Générer des étiquettes',
-                'icon' => 'fas_sticky-note',
+                'label'   => 'Générer des étiquettes',
+                'icon'    => 'fas_sticky-note',
                 'onclick' => $this->getJsActionOnclick('generateEtiquettes', array(
                     'qty' => (int) $line_qty
                         ), array(
@@ -591,35 +591,35 @@ class Bimp_Product extends BimpObject
                 $stocks['dispo'] = $stocks['reel'] - $stocks['reel_reserves'];
 
                 if (in_array($type, array('virtuel'))) {
-            $sql = 'SELECT line.rowid as id_line, c.rowid as id_commande FROM ' . MAIN_DB_PREFIX . 'commande_fournisseurdet line';
-            $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commande_fournisseur c ON c.rowid = line.fk_commande';
-            $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commande_fournisseur_extrafields cef ON c.rowid = cef.fk_object';
-            $sql .= ' WHERE line.fk_product = ' . (int) $this->id;
-            $sql .= ' AND c.fk_statut < 5';
-            $sql .= ' AND cef.entrepot = ' . (int) $id_entrepot;
+                    $sql = 'SELECT line.rowid as id_line, c.rowid as id_commande FROM ' . MAIN_DB_PREFIX . 'commande_fournisseurdet line';
+                    $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commande_fournisseur c ON c.rowid = line.fk_commande';
+                    $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commande_fournisseur_extrafields cef ON c.rowid = cef.fk_object';
+                    $sql .= ' WHERE line.fk_product = ' . (int) $this->id;
+                    $sql .= ' AND c.fk_statut < 5';
+                    $sql .= ' AND cef.entrepot = ' . (int) $id_entrepot;
 
-            $rows = $this->db->executeS($sql, 'array');
+                    $rows = $this->db->executeS($sql, 'array');
 
-            if (!is_null($rows)) {
-                foreach ($rows as $r) {
-                    // Pour être sûr que les BimpLines existent: 
-                    $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn', (int) $r['id_commande']);
-                    if (BimpObject::ObjectLoaded($commande)) {
-                        $commande->checkLines();
+                    if (!is_null($rows)) {
+                        foreach ($rows as $r) {
+                            // Pour être sûr que les BimpLines existent: 
+                            $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn', (int) $r['id_commande']);
+                            if (BimpObject::ObjectLoaded($commande)) {
+                                $commande->checkLines();
+                            }
+
+                            $bimp_line = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFournLine', array(
+                                        'id_line' => (int) $r['id_line']
+                                            ), true);
+
+                            if (BimpObject::ObjectLoaded($bimp_line)) {
+                                $stocks['commandes'] += ((float) $bimp_line->getFullQty() - $bimp_line->getReceivedQty(null, true));
+                            }
+                        }
                     }
 
-                    $bimp_line = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFournLine', array(
-                                'id_line' => (int) $r['id_line']
-                                    ), true);
-
-                    if (BimpObject::ObjectLoaded($bimp_line)) {
-                        $stocks['commandes'] += ((float) $bimp_line->getFullQty() - $bimp_line->getReceivedQty(null, true));
-                    }
+                    $stocks['virtuel'] = $stocks['reel'] - $stocks['total_reserves'] + $stocks['commandes'];
                 }
-            }
-
-            $stocks['virtuel'] = $stocks['reel'] - $stocks['total_reserves'] + $stocks['commandes'];
-        }
             }
         }
 
@@ -798,14 +798,12 @@ class Bimp_Product extends BimpObject
         $pa_ht = 0;
 
         if ($this->isLoaded()) {
-            if (!$pa_ht) {
-                if ((float) $this->getData('cur_pa_ht')) {
-                    $pa_ht = (float) $this->getData('cur_pa_ht');
-                } elseif ((float) $this->getData('pmp')) {
-                    $pa_ht = (float) $this->getData('pmp');
-                } else {
-                    $pa_ht = (float) $this->getCurrentFournPriceAmount($id_fourn, $with_default);
-                }
+            if ((float) $this->getData('cur_pa_ht')) {
+                $pa_ht = (float) $this->getData('cur_pa_ht');
+            } elseif ((float) $this->getData('pmp')) {
+                $pa_ht = (float) $this->getData('pmp');
+            } else {
+                $pa_ht = (float) $this->getCurrentFournPriceAmount($id_fourn, $with_default);
             }
 
             return $pa_ht;
@@ -1107,30 +1105,30 @@ class Bimp_Product extends BimpObject
 
         return $html;
     }
-    
+
     public function renderCategorize()
     {
         $html = '';
 
         if ($this->isLoaded()) {
             $html = BimpRender::renderPanel('Catégories hors module ', '', '', array(
-                        'foldable' => true,
-                        'type' => 'secondary',
-                        'panel_id' => 'annex',
+                        'foldable'    => true,
+                        'type'        => 'secondary',
+                        'panel_id'    => 'annex',
                         'panel_class' => 'categ_container'
             ));
 
             $html .= BimpRender::renderPanel('Catégorisation', '', '', array(
-                        'foldable' => true,
-                        'type' => 'secondary',
-                        'panel_id' => 'categorization',
+                        'foldable'    => true,
+                        'type'        => 'secondary',
+                        'panel_id'    => 'categorization',
                         'panel_class' => 'categ_container'
             ));
 
             $html .= BimpRender::renderPanel('Choix', '', '', array(
-                        'foldable' => true,
-                        'type' => 'secondary',
-                        'panel_id' => 'choice',
+                        'foldable'    => true,
+                        'type'        => 'secondary',
+                        'panel_id'    => 'choice',
                         'panel_class' => 'categ_container'
             ));
         }
@@ -1143,7 +1141,7 @@ class Bimp_Product extends BimpObject
 
         if (!$this->isLoaded())
             return $html;
-        
+
         $body .= '<table id="history_table" class="noborder objectlistTable">';
         // Thead
         $body .= '<thead>';
@@ -1183,11 +1181,11 @@ class Bimp_Product extends BimpObject
 
         $html .= BimpRender::renderPanel('Historique', $body, '', array(
                     'foldable' => false,
-                    'type' => 'secondary'
+                    'type'     => 'secondary'
         ));
-        
+
         $html .= '<div id="selected_object"></div>';
-        
+
         return $html;
     }
 
@@ -1207,7 +1205,8 @@ class Bimp_Product extends BimpObject
         return $html;
     }
 
-    public function renderValidationDuration() {
+    public function renderValidationDuration()
+    {
         $date_ask_valid = new DateTime($this->getData('date_ask_valid'));
         $date_valid = new DateTime($this->getData('date_valid'));
 
@@ -1223,11 +1222,13 @@ class Bimp_Product extends BimpObject
         return $html;
     }
 
-    public function getTimeValidation() {
+    public function getTimeValidation()
+    {
         
     }
 
-    public function renderMergeKeptProductInput() {
+    public function renderMergeKeptProductInput()
+    {
         $errors = array();
 
         if (!$this->isLoaded($errors)) {
@@ -1262,7 +1263,8 @@ class Bimp_Product extends BimpObject
 
     // Traitements: 
 
-    public function addConfigExtraParams() {
+    public function addConfigExtraParams()
+    {
         $entrepots = BimpCache::getEntrepotsArray();
 
         $cols = array();
@@ -1284,7 +1286,8 @@ class Bimp_Product extends BimpObject
         $this->config->addParams('lists_cols', $cols);
     }
 
-    public function fetchStocks() {
+    public function fetchStocks()
+    {
         $this->stocks = array();
 
         $where = '`statut` > 0';
@@ -1298,18 +1301,19 @@ class Bimp_Product extends BimpObject
                 $stocks = $this->getStocksForEntrepot((int) $r['rowid']);
                 $this->stocks[(int) $r['rowid']] = array(
                     'entrepot_label' => $r['ref'],
-                    'reel' => $stocks['reel'],
-                    'dispo' => $stocks['dispo'],
-                    'virtuel' => $stocks['virtuel'],
-                    'commandes' => $stocks['commandes'],
+                    'reel'           => $stocks['reel'],
+                    'dispo'          => $stocks['dispo'],
+                    'virtuel'        => $stocks['virtuel'],
+                    'commandes'      => $stocks['commandes'],
                     'total_reserves' => $stocks['total_reserves'],
-                    'reel_reserves' => $stocks['reel_reserves']
+                    'reel_reserves'  => $stocks['reel_reserves']
                 );
             }
         }
     }
 
-    public function validateProduct() {
+    public function validateProduct()
+    {
         global $user;
 
         $errors = array();
@@ -2094,11 +2098,11 @@ class Bimp_Product extends BimpObject
         if ($result) {
             $obj = $this->db->db->fetch_object($result);
             $stats = array(
-                'id' => 'Bimp_Propal',
-                'name' => 'Propositions commerciales',
+                'id'        => 'Bimp_Propal',
+                'name'      => 'Propositions commerciales',
                 'nb_object' => $obj->nb_customers,
-                'nb_ref' => $obj->nb,
-                'qty' => $obj->qty ? $obj->qty : 0
+                'nb_ref'    => $obj->nb,
+                'qty'       => $obj->qty ? $obj->qty : 0
             );
             return $stats;
         } else {
@@ -2132,11 +2136,11 @@ class Bimp_Product extends BimpObject
         if ($result) {
             $obj = $this->db->db->fetch_object($result);
             $stats = array(
-                'id' => 'Bimp_PropalFourn',
-                'name' => 'Propositions commerciales fournisseurs',
+                'id'        => 'Bimp_PropalFourn',
+                'name'      => 'Propositions commerciales fournisseurs',
                 'nb_object' => $obj->nb_suppliers,
-                'nb_ref' => $obj->nb,
-                'qty' => $obj->qty ? $obj->qty : 0
+                'nb_ref'    => $obj->nb,
+                'qty'       => $obj->qty ? $obj->qty : 0
             );
             return $stats;
         } else {
@@ -2172,11 +2176,11 @@ class Bimp_Product extends BimpObject
             $obj = $this->db->db->fetch_object($result);
 
             $stats = array(
-                'id' => 'Bimp_Commande',
-                'name' => 'Commandes clients',
+                'id'        => 'Bimp_Commande',
+                'name'      => 'Commandes clients',
                 'nb_object' => $obj->nb_customers,
-                'nb_ref' => $obj->nb,
-                'qty' => $obj->qty ? $obj->qty : 0
+                'nb_ref'    => $obj->nb,
+                'qty'       => $obj->qty ? $obj->qty : 0
             );
 
 //                    // if it's a virtual product, maybe it is in order by extension
@@ -2263,11 +2267,11 @@ class Bimp_Product extends BimpObject
         if ($result) {
             $obj = $this->db->db->fetch_object($result);
             $stats = array(
-                'id' => 'Bimp_CommandeFourn',
-                'name' => 'Commandes fournisseurs',
+                'id'        => 'Bimp_CommandeFourn',
+                'name'      => 'Commandes fournisseurs',
                 'nb_object' => $obj->nb_suppliers,
-                'nb_ref' => $obj->nb,
-                'qty' => $obj->qty ? $obj->qty : 0
+                'nb_ref'    => $obj->nb,
+                'qty'       => $obj->qty ? $obj->qty : 0
             );
             return $stats;
         } else {
@@ -2301,11 +2305,11 @@ class Bimp_Product extends BimpObject
         if ($result) {
             $obj = $this->db->db->fetch_object($result);
             $stats = array(
-                'id' => 'BContract_contrat',
-                'name' => 'Contrats',
+                'id'        => 'BContract_contrat',
+                'name'      => 'Contrats',
                 'nb_object' => $obj->nb_customers,
-                'nb_ref' => $obj->nb,
-                'qty' => $obj->qty ? $obj->qty : 0
+                'nb_ref'    => $obj->nb,
+                'qty'       => $obj->qty ? $obj->qty : 0
             );
             return $stats;
         } else {
@@ -2339,11 +2343,11 @@ class Bimp_Product extends BimpObject
         if ($result) {
             $obj = $this->db->db->fetch_object($result);
             $stats = array(
-                'id' => 'Bimp_Facture',
-                'name' => 'Factures',
+                'id'        => 'Bimp_Facture',
+                'name'      => 'Factures',
                 'nb_object' => $obj->nb_customers,
-                'nb_ref' => $obj->nb,
-                'qty' => $obj->qty ? $obj->qty : 0
+                'nb_ref'    => $obj->nb,
+                'qty'       => $obj->qty ? $obj->qty : 0
             );
             return $stats;
         } else {
@@ -2377,11 +2381,11 @@ class Bimp_Product extends BimpObject
         if ($result) {
             $obj = $this->db->db->fetch_object($result);
             $stats = array(
-                'id' => 'Bimp_FactureFourn',
-                'name' => 'Factures fournisseurs',
+                'id'        => 'Bimp_FactureFourn',
+                'name'      => 'Factures fournisseurs',
                 'nb_object' => $obj->nb_suppliers,
-                'nb_ref' => $obj->nb,
-                'qty' => $obj->qty ? $obj->qty : 0
+                'nb_ref'    => $obj->nb,
+                'qty'       => $obj->qty ? $obj->qty : 0
             );
             return $stats;
         } else {
@@ -2397,11 +2401,11 @@ class Bimp_Product extends BimpObject
         $stock = $this->getStocksForEntrepot($inventory->getData('fk_warehouse'));
         return $stock['reel'];
     }
-    
+
     public function canViewStock()
     {
         global $user;
-        if($user->rights->inventory->close or $user->admin)
+        if ($user->rights->inventory->close or $user->admin)
             return 1;
         return 0;
     }
@@ -2409,7 +2413,7 @@ class Bimp_Product extends BimpObject
     public function getNbScanned()
     {
         global $cache_scann;
-        
+
         $id_inventory = BimpTools::getValue('id');
 
         if (!isset($cache_scann[$id_inventory])) {
@@ -2424,10 +2428,9 @@ class Bimp_Product extends BimpObject
                 }
             }
         }
-        if(isset($cache_scann[$id_inventory][$this->getData('id')]))
+        if (isset($cache_scann[$id_inventory][$this->getData('id')]))
             return $cache_scann[$id_inventory][$this->getData('id')];
         else
             return 0;
     }
-
 }

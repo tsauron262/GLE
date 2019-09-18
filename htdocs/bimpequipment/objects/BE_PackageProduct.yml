@@ -67,5 +67,18 @@ lists:
             qty:
                 field: qty
                 
-                
-        
+    immos: 
+        enable_search: 0
+        enable_sort: 0
+        checkboxes: 0
+        sort_field: id
+        sort_way: asc
+        n: 10
+        cols: 
+            package: 
+                field: id_package
+                display: nom_url
+            product: 
+                field: id_product
+            qty:
+                field: qty

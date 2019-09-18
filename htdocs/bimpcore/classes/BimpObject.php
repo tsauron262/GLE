@@ -237,10 +237,10 @@ class BimpObject extends BimpCache
                     'type' => 'hidden'
                 ),
                 'search'        => array(
-                   'input' => array(
-                       'type' => 'search_user'
-                   )
-               ),
+                    'input' => array(
+                        'type' => 'search_user'
+                    )
+                ),
                 'default_value' => array(
                     'prop' => array(
                         'name'   => 'id',
@@ -3988,13 +3988,6 @@ class BimpObject extends BimpCache
 
         $errors = $this->hydrateFromDolObject($bimpObjectFields);
 
-        $extra_fields = $this->fetchExtraFields();
-
-        foreach ($extra_fields as $field_name => $value) {
-            $this->checkFieldValueType($field_name, $value);
-            $this->data[$field_name] = $value;
-        }
-
         if (!empty($bimpObjectFields)) {
             $result = $this->db->getRow($this->getTable(), '`' . $this->getPrimary() . '` = ' . (int) $id, $bimpObjectFields, 'array');
             if (!is_null($result)) {
@@ -4007,6 +4000,13 @@ class BimpObject extends BimpCache
                     $this->data[$field_name] = $value;
                 }
             }
+        }
+
+        $extra_fields = $this->fetchExtraFields();
+
+        foreach ($extra_fields as $field_name => $value) {
+            $this->checkFieldValueType($field_name, $value);
+            $this->data[$field_name] = $value;
         }
 
         $this->initData = $this->data;
@@ -4550,27 +4550,26 @@ class BimpObject extends BimpCache
     {
         return self::getObjectNotes($this);
     }
-    
-     
-    
-    public function renderTabs($fonction, $nomTabs, $params1 = null, $params2 = null){//pour patch le chargement auto des onglet
-        if(!BimpTools::isSubmit('ajax')){
-            if($nomTabs == '' || $nomTabs == "default"){
-                if(BimpTools::isSubmit('tab') && BimpTools::getValue('tab') != 'default')
-                return 'ne devrais jamais etre visible';
+
+    public function renderTabs($fonction, $nomTabs, $params1 = null, $params2 = null)
+    {//pour patch le chargement auto des onglet
+        if (!BimpTools::isSubmit('ajax')) {
+            if ($nomTabs == '' || $nomTabs == "default") {
+                if (BimpTools::isSubmit('tab') && BimpTools::getValue('tab') != 'default')
+                    return 'ne devrais jamais etre visible';
             }
-            elseif(BimpTools::getValue('tab') != $nomTabs)
+            elseif (BimpTools::getValue('tab') != $nomTabs)
                 return 'ne devrais jamais etre visible2';
         }
-        if(method_exists($this, $fonction)){
-            if(isset($params2))
+        if (method_exists($this, $fonction)) {
+            if (isset($params2))
                 return $this->$fonction($params1, $params2);
-            elseif(isset($params1))
+            elseif (isset($params1))
                 return $this->$fonction($params1);
             else
                 return $this->$fonction();
         }
-        return 'fonction : '.$fonction." inexistante";
+        return 'fonction : ' . $fonction . " inexistante";
     }
 
     public function renderNotesList($filter_by_user = true, $list_model = "default", $suffixe = "")
@@ -5429,9 +5428,9 @@ class BimpObject extends BimpCache
         $js .= ', $(this), ';
 
         if (isset($params['title']) && (string) $params['title']) {
-            $js .= htmlentities($params['title']);
+            $js .= '\'' . htmlentities($params['title']) . '\'';
         } else {
-            $js .= 'Liste des ' . htmlentities($this->getLabel('name_plur'));
+            $js .= '\'Liste des ' . htmlentities($this->getLabel('name_plur')) . '\'';
         }
         $js .= ', ';
 
@@ -5451,14 +5450,14 @@ class BimpObject extends BimpCache
         if (isset($params['extra_filters']) && is_array($params['extra_filters']) && !empty($params['extra_filters'])) {
             $js .= json_encode($params['extra_data']);
         } else {
-            $js .= '';
+            $js .= 'null';
         }
         $js .= ', ';
 
         if (isset($params['extra_joins']) && is_array($params['extra_joins']) && !empty($params['extra_joins'])) {
             $js .= json_encode($params['extra_joins']);
         } else {
-            $js .= '';
+            $js .= 'null';
         }
 
         $js .= ');';

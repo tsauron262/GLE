@@ -274,9 +274,9 @@ class BimpObject extends BimpCache
                     'type' => 'hidden'
                 ),
                 'search'        => array(
-                   'input' => array(
-                       'type' => 'search_user'
-                   )
+                    'input' => array(
+                        'type' => 'search_user'
+                    )
                 ),
                 'default_value' => array(
                     'prop' => array(
@@ -5448,14 +5448,14 @@ class BimpObject extends BimpCache
         $js .= ', ';
 
         if (isset($params['extra_filters']) && is_array($params['extra_filters']) && !empty($params['extra_filters'])) {
-            $js .= json_encode($params['extra_data']);
+            $js .= htmlentities(json_encode($params['extra_filters']));
         } else {
             $js .= 'null';
         }
         $js .= ', ';
 
         if (isset($params['extra_joins']) && is_array($params['extra_joins']) && !empty($params['extra_joins'])) {
-            $js .= json_encode($params['extra_joins']);
+            $js .= htmlentities(json_encode($params['extra_joins']));
         } else {
             $js .= 'null';
         }

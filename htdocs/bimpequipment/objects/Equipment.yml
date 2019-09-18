@@ -599,7 +599,24 @@ lists:
                             - nom_url
                             - 0
                             - 1
-    
+                            
+    immos: 
+        enable_search: 0
+        checkboxes: 0
+        sort_field: serial
+        sort_way: asc
+        n: 10
+        modal_view: default
+        cols: 
+            serial: 
+            product: 
+            package: 
+            ref_immo:
+            place2:
+            place:
+            prix_achat:
+            
+        
 searches:
     default: 
         has_serial: 1

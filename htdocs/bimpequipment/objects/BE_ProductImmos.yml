@@ -75,6 +75,14 @@ filters_panels:
                 label: Nom libre emplacement
                 field: place_name
                 type: value_part
+            place_date: 
+                custom: 1
+                label: Date arrivée emplacement
+                field: place_date
+                data_type: date
+                type: date_range
+                
+                
                     
 lists_cols: 
     qty_immos: 

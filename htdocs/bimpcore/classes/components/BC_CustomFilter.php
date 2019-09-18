@@ -81,7 +81,7 @@ class BC_CustomFilter extends BC_Filter
                     if (!isset($value['min']) || $value['min'] === '') {
                         $label .= '-&infin;';
                     } else {
-                        $label = BimpTools::displayValueByType($value['min'], $this->params['data_type']);
+                        $label .= BimpTools::displayValueByType($value['min'], $this->params['data_type']);
                     }
 
                     $label .= '</strong><br/>Max: <strong>';
@@ -89,7 +89,7 @@ class BC_CustomFilter extends BC_Filter
                     if (!isset($value['max']) || $value['max'] === '') {
                         $label .= '&infin;';
                     } else {
-                        $label = BimpTools::displayValueByType($value['max'], $this->params['data_type']);
+                        $label .= BimpTools::displayValueByType($value['max'], $this->params['data_type']);
                     }
 
                     $label .= '</strong>';

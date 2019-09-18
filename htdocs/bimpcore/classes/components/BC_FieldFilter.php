@@ -8,7 +8,7 @@ class BC_FieldFilter extends BC_Filter
     public $field = null;
     public $field_params = array();
 
-    public function __construct(BimpObject $object, $params, $values = array())
+    public function __construct(BimpObject $object, $params, $panel_path = '', $values = array())
     {
         global $current_bc;
         if (!is_object($current_bc)) {
@@ -45,7 +45,7 @@ class BC_FieldFilter extends BC_Filter
             $params['name'] = 'default';
         }
 
-        $path = 'fields/' . $this->field->name . '/filters';
+        $path = '';
 
         if (is_a($object, 'BimpObject') && (!$params['name'] || $params['name'] === 'default')) {
             if (!is_null($this->field)) {
@@ -57,6 +57,19 @@ class BC_FieldFilter extends BC_Filter
         }
 
         parent::__construct($object, $params, $values, $path);
+
+        if ($this->base_object->config->isDefined($panel_path)) {
+            $this->params = self::override_params($this->params, $this->base_object->config, $panel_path, $this->params_def);
+
+            if (empty($values) && !empty($this->params['default_values'])) {
+                $this->values = $this->params['default_values'];
+                $this->is_default = true;
+            }
+
+            if (isset($params['open'])) {
+                $this->params['open'] = (int) $params['open'];
+            }
+        }
 
         if (!is_null($this->field)) {
             if (is_null($this->params['label'])) {

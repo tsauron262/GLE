@@ -115,13 +115,13 @@ class BC_FiltersPanel extends BC_Panel
 
             if (isset($filter['field']) && $filter['field']) {
                 $values = $this->getValues($filter['field'], isset($filter['child']) ? $filter['child'] : '');
-                if (!empty($values)) {
-                    if ((int) $filter['custom']) {
-                        $path = $this->config_path . '/filters/' . $key;
-                        $bc_filter = new BC_CustomFilter($this->object, $filter, $path, $values);
-                    } else {
-                        $bc_filter = new BC_FieldFilter($this->object, $filter, $values);
-                    }
+                $path = $this->config_path . '/filters/' . $key;
+                if ((int) $filter['custom']) {
+                    $bc_filter = new BC_CustomFilter($this->object, $filter, $path, $values);
+                } else {
+                    $bc_filter = new BC_FieldFilter($this->object, $filter, $path, $values);
+                }
+                if (!empty($bc_filter->values)) {
                     $filter_errors = $bc_filter->getSqlFilters($filters, $joins);
                     if (count($filter_errors)) {
                         $errors[] = BimpTools::getMsgFromArray($filter_errors, 'Filtre "' . $bc_filter->params['label'] . '"');
@@ -245,12 +245,11 @@ class BC_FiltersPanel extends BC_Panel
 
             if (isset($filter['field']) && (string) $filter['field']) {
                 $values = $this->getValues($filter['field'], isset($filter['child']) ? $filter['child'] : '');
-
+                $path = $this->config_path . '/filters/' . $key;
                 if ((int) $filter['custom']) {
-                    $path = $this->config_path . '/filters/' . $key;
                     $bc_filter = new BC_CustomFilter($this->object, $filter, $path, $values);
                 } else {
-                    $bc_filter = new BC_FieldFilter($this->object, $filter, $values);
+                    $bc_filter = new BC_FieldFilter($this->object, $filter, $path, $values);
                 }
 
                 $html .= $bc_filter->renderHtml();

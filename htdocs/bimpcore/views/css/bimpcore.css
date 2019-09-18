@@ -16251,7 +16251,8 @@ td.buttons {
   .bimp_filter_container .bimp_filter_values_container {
     margin-top: 5px; }
   /* line 708, ../scss/bimpcore/_list.scss */
-  .bimp_filter_container .bimp_filter_value {
+  .bimp_filter_container .bimp_filter_value,
+  .bimp_filter_container .bimp_filter_value_default {
     -webkit-transition: all 0.3s ease;
     -o-transition: all 0.3s ease;
     transition: all 0.3s ease;
@@ -16262,26 +16263,37 @@ td.buttons {
     background-color: #3E88D2;
     color: #fff;
     cursor: pointer; }
-    /* line 718, ../scss/bimpcore/_list.scss */
-    .bimp_filter_container .bimp_filter_value:hover {
+    /* line 719, ../scss/bimpcore/_list.scss */
+    .bimp_filter_container .bimp_filter_value:hover,
+    .bimp_filter_container .bimp_filter_value_default:hover {
       background-color: #489FF5; }
-    /* line 722, ../scss/bimpcore/_list.scss */
-    .bimp_filter_container .bimp_filter_value .bimp_filter_value_remove_btn {
+    /* line 723, ../scss/bimpcore/_list.scss */
+    .bimp_filter_container .bimp_filter_value.bimp_filter_value_default,
+    .bimp_filter_container .bimp_filter_value_default.bimp_filter_value_default {
+      background-color: #595959; }
+      /* line 725, ../scss/bimpcore/_list.scss */
+      .bimp_filter_container .bimp_filter_value.bimp_filter_value_default:hover,
+      .bimp_filter_container .bimp_filter_value_default.bimp_filter_value_default:hover {
+        background-color: #595959; }
+    /* line 730, ../scss/bimpcore/_list.scss */
+    .bimp_filter_container .bimp_filter_value .bimp_filter_value_remove_btn,
+    .bimp_filter_container .bimp_filter_value_default .bimp_filter_value_remove_btn {
       margin-left: 10px;
       color: #9EC5E6;
       cursor: pointer;
       float: right; }
-      /* line 729, ../scss/bimpcore/_list.scss */
-      .bimp_filter_container .bimp_filter_value .bimp_filter_value_remove_btn:hover {
+      /* line 737, ../scss/bimpcore/_list.scss */
+      .bimp_filter_container .bimp_filter_value .bimp_filter_value_remove_btn:hover,
+      .bimp_filter_container .bimp_filter_value_default .bimp_filter_value_remove_btn:hover {
         color: #fff; }
-  /* line 735, ../scss/bimpcore/_list.scss */
+  /* line 743, ../scss/bimpcore/_list.scss */
   .bimp_filter_container input[type=text] {
     width: 100%; }
-  /* line 739, ../scss/bimpcore/_list.scss */
+  /* line 747, ../scss/bimpcore/_list.scss */
   .bimp_filter_container i.loading {
     display: none; }
 
-/* line 744, ../scss/bimpcore/_list.scss */
+/* line 752, ../scss/bimpcore/_list.scss */
 .load_saved_filters_container {
   padding: 5px 0;
   margin: 5px 0;

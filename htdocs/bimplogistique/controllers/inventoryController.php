@@ -15,7 +15,10 @@ class inventoryController extends BimpController {
 
         $errors = $inventory_line->checkInput($input, $id_product, $id_equipment);
         
-        $tab = $inventory->createLines($id_product, $id_equipment, $quantity_input);
+        if((int) $id_equipment > 0)
+            $tab = $inventory->createLinesEquipment($id_product, $id_equipment);
+        else
+            $tab = $inventory->createLinesProduct($id_product, $id_equipment, $quantity_input);
         $id_inventory_det = $tab['id_inventory_det'];
         $errors = array_merge($errors, $tab['errors']);
         $msg = $tab['msg'];
@@ -29,9 +32,9 @@ class inventoryController extends BimpController {
         );
 
         die(json_encode(array(
-            'errors' => $errors,
-            'success' => $msg,
-            'data' => $data,
+            'errors'     => $errors,
+            'success'    => $msg,
+            'data'       => $data,
             'request_id' => BimpTools::getValue('request_id', 0)
         )));
     }

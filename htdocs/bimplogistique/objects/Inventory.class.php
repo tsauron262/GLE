@@ -567,12 +567,12 @@ class Inventory extends BimpDolObject
         return 0;
     }
     
-    public function createLines($id_product, $id_equipment, $qty_input) {
+    public function createLinesProduct($id_product, $id_equipment, $qty_input) {
         $errors = array();
         $msg = '';
         $id_inventory_det = 0;
 
-        $qty_missing = -$this->qtyMissing($id_product, $id_equipment);
+        $qty_missing = -$this->qtyMissing($id_product, 0);
         
         $diff = $qty_missing - $qty_input;
         if($qty_missing > 0) { // On en met le plus possible dans l'entrepôt de cet inventaire
@@ -581,7 +581,7 @@ class Inventory extends BimpDolObject
             else // On en attends moins ou on a atteint la bonne quantité
                 $qty_insert = $qty_missing;
             
-            $out = $this->createLine($id_product, $id_equipment, $qty_insert);
+            $out = $this->createLine($id_product, 0, $qty_insert);
             $id_inventory_det = $out['id_inventory_det'];
             $errors = array_merge($errors, $out['errors']);
             $msg .= $this->getMessageAdd($qty_insert);
@@ -596,7 +596,7 @@ class Inventory extends BimpDolObject
                 if($qty_input < 1) // Test d'arrêt
                     break;
                 
-                $qty_missing = -$child->qtyMissing($id_product, $id_equipment);
+                $qty_missing = -$child->qtyMissing($id_product, 0);
                 if($qty_missing > 0) { // Cet entrepôt possède ce produit
                     
                     if($qty_input > $qty_missing)
@@ -604,9 +604,9 @@ class Inventory extends BimpDolObject
                     else
                         $qty_insert = $qty_input;
 
-                    $out = $child->createLine($id_product, $id_equipment, $qty_insert);
+                    $out = $child->createLine($id_product, 0, $qty_insert);
                     $errors = array_merge($errors, $out['errors']);
-                    $msg .= $child->getMessageAdd($qty_insert);
+                    $msg .= $child->getMessageAdd($qty_insert, 1);
                     $qty_input -= $qty_insert;
                 }
             }            
@@ -621,8 +621,57 @@ class Inventory extends BimpDolObject
         return array('id_inventory_det' => $id_inventory_det, 'msg' => $msg, 'errors' => $errors);
     }
     
-    public function getMessageAdd($qty) {
+    public function createLinesEquipment($id_product, $id_equipment) {
+        $id_inventory_det = 0;
+        $errors = array();
+        $msg = '';
+        $filters = array(
+            'position'     => 1,
+            'id_equipment' => $id_equipment
+        );
+        $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
+        $list = $place->getList($filters, 1, 1, 'id', 'desc', 'array', array(
+            'id_entrepot',
+            'type'
+        ));
+        
+        $id_entrepot = (int) $list[0]['id_entrepot'];
+        $type = (int) $list[0]['type'];
+
+        $inserted = false;
+        // Si l'équipmenent n'est pas dans un entrepot ou si il est dans celui de l'inventaire
+        if(!$id_entrepot > 0 or $type != 2 or $this->getData('fk_warehouse') == $id_entrepot) {
+            $out = $this->createLine($id_product, $id_equipment, 1);
+            $errors = array_merge($errors, $out['errors']);
+            $msg .= $this->getMessageAdd(1);
+            $id_inventory_det = $out['id_inventory_det'];
+        } else {
+            $inv_children = $this->getChildren();
+            foreach($inv_children as $child) {
+                if($child->getData('fk_warehouse') == $id_entrepot) {
+                    $out = $child->createLine($id_product, $id_equipment, 1);
+                    $errors = array_merge($errors, $out['errors']);
+                    $msg .= $child->getMessageAdd(1, 1);
+                    $inserted = true;
+                    break;
+                }
+            }
+        }
+        
+        // L'équipement n'a été ajouté nulle part
+        if(!$inserted) {
+            $out = $this->createLine($id_product, $id_equipment, 1);
+            $errors = array_merge($errors, $out['errors']);
+            $msg .= $this->getMessageAdd(1);
+        }
+
+        return array('id_inventory_det' => $id_inventory_det, 'msg' => $msg, 'errors' => $errors);
+    }
+    
+    public function getMessageAdd($qty, $bold = false) {
         $s = ($qty > 1 ? "s" : "");
+        if($bold)
+            return $qty . " produit$s ajouté$s à <strong>" . $this->getEntrepotRef(). '</strong><br/>';
         return $qty . " produit$s ajouté$s à " . $this->getEntrepotRef(). '<br/>';
     }
     

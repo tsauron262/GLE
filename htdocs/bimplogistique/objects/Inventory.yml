@@ -18,7 +18,8 @@ objects:
     lines: 
         instance: 
             bimp_object: InventoryLine
-        delete: 1
+        delete: 
+            callback: isAdmin
                 
 fields: 
     fk_warehouse:

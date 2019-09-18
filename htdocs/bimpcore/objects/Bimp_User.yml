@@ -37,6 +37,9 @@ fields:
             array: genders
     email: 
         label: E-mail
+    alias: 
+        label: Alias mail
+        dol_extra_field: 1
     job: 
         label: Poste / fonction
     employee: 
@@ -182,6 +185,7 @@ forms:
             - field: user_mobile
             - field: phone_perso
             - field: mail_sec
+            - field: alias
             - field: apple_id
             - field: apple_service
             - field: apple_shipto
@@ -315,6 +319,7 @@ fields_tables:
         icon: phone
         rows: 
             - field: email
+            - field: alias
             - field: office_phone
             - field: user_mobile
             - field: phone_perso
@@ -355,7 +360,7 @@ fields_tables:
             - field: apple_shipto
             - field: gsxresa
             
-    apple: 
+    8sens: 
         title: Données 8sens
         icon: file-tex
         rows: 

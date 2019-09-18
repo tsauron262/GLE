@@ -68,7 +68,7 @@ class BE_ProductImmos extends Bimp_Product
                     $filters['or_place_type'] = array(
                         'or' => array(
                             'ppl_type' => array(
-                                'custom' => '(ef.serialisable = 0 AND ' . $this->getPlacePositionSqlFilter('ppl') . ' AND ppl.type IN (' . implode(',', $values) . '))'
+                                'custom' => '((ef.serialisable = 0 || ef.serialisable IS NULL) AND ' . $this->getPlacePositionSqlFilter('ppl') . ' AND ppl.type IN (' . implode(',', $values) . '))'
                             ),
                             'epl_type' => array(
                                 'custom' => '(ef.serialisable = 1 AND ' . $this->getPlacePositionSqlFilter('epl') . ' AND epl.type IN (' . implode(',', $values) . '))'

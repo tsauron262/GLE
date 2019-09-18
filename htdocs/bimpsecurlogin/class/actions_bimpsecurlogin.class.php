@@ -34,7 +34,7 @@ class Actionsbimpsecurlogin {
 class securLogSms {
 
     var $max_tentative = 3;
-    var $debug = 2; //0 pas de auth mail sur ip //1 pas de sms code ecran //2 normal
+    var $debug = 1; //0 pas de auth mail sur ip //1 pas de sms code ecran //2 normal
     var $message = array();
 
     public function __construct($db) {
@@ -256,7 +256,7 @@ class securLogSms {
         }
         
         $tabMsg = array();
-        $tabMsg['newVersion'] = "Nouvelle version, si vous rencontrez des problèmes, les signaler au plus vite.<br/>debugerp@bimp.fr - 06 28 33 50 81";
+//        $tabMsg['newVersion'] = "Nouvelle version, si vous rencontrez des problèmes, les signaler au plus vite.<br/>debugerp@bimp.fr - 06 28 33 50 81";
         
         foreach($tabMsg as $name => $detailMsg){
             if(!is_array($detailMsg))

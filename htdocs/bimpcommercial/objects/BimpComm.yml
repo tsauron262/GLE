@@ -639,6 +639,10 @@ lists_cols:
         field: zone_vente
     date_valid: 
         field: date_valid
+    client_facturation: 
+        label: Client Fact.
+        value: 
+            callback: displayClientFact
         
 lists: 
     default: 

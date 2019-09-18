@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS `llx_be_package` (
   `user_create` int(11) unsigned NOT NULL DEFAULT 0,
   `date_create` datetime NOT NULL DEFAULT current_timestamp(),
   `user_update` int(11) NOT NULL DEFAULT 0,
-  `date_update` datetime NOT NULL DEFAULT current_timestamp(),
+  `date_update` datetime NOT NULL DEFAULT current_timestamp()
 );
 
 CREATE TABLE IF NOT EXISTS `llx_be_package_place` (

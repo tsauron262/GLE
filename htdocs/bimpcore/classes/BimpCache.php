@@ -74,7 +74,7 @@ class BimpCache
                 $module = 'bimpsupport';
                 $object_name = 'BS_SavPropal';
             }
-        } 
+        }
 //        elseif ($object_name === 'Bimp_PropalLine' && (int) $id_object) {
 //            $result = self::$bdb->executeS('SELECT s.id FROM ' . MAIN_DB_PREFIX . 'bs_sav s LEFT JOIN ' . MAIN_DB_PREFIX . 'bs_sav_propal_line l ON l.id_obj = s.id_propal WHERE l.id = ' . (int) $id_object);
 //            if (isset($result[0]['id']) && (int) $result[0]['id']) {

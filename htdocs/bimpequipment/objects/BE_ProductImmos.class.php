@@ -45,7 +45,7 @@ class BE_ProductImmos extends Bimp_Product
             'filter' => array(
                 'or' => array(
                     'cust_noserial'   => array(
-                        'custom' => '(ef.serialisable = 0 AND a.rowid IN (SELECT DISTINCT pp.id_product FROM ' . MAIN_DB_PREFIX . 'be_package_product pp WHERE pp.id_product = a.rowid))'
+                        'custom' => '((ef.serialisable != 1 || ef.serialisable is NULL) AND a.rowid IN (SELECT DISTINCT pp.id_product FROM ' . MAIN_DB_PREFIX . 'be_package_product pp WHERE pp.id_product = a.rowid))'
                     ),
                     'ef.serialisable' => 1
                 )
@@ -68,7 +68,7 @@ class BE_ProductImmos extends Bimp_Product
                     $filters['or_place_type'] = array(
                         'or' => array(
                             'ppl_type' => array(
-                                'custom' => '(ef.serialisable = 0 AND ' . $this->getPlacePositionSqlFilter('ppl') . ' AND ppl.type IN (' . implode(',', $values) . '))'
+                                'custom' => '((ef.serialisable = 0 || ef.serialisable IS NULL) AND ' . $this->getPlacePositionSqlFilter('ppl') . ' AND ppl.type IN (' . implode(',', $values) . '))'
                             ),
                             'epl_type' => array(
                                 'custom' => '(ef.serialisable = 1 AND ' . $this->getPlacePositionSqlFilter('epl') . ' AND epl.type IN (' . implode(',', $values) . '))'
@@ -87,7 +87,7 @@ class BE_ProductImmos extends Bimp_Product
                     $filters['or_place_entrepot'] = array(
                         'or' => array(
                             'ppl_entrepot' => array(
-                                'custom' => '(ef.serialisable = 0 AND ' . $this->getPlacePositionSqlFilter('ppl') . ' AND ppl.id_entrepot IN (' . implode(',', $values) . '))'
+                                'custom' => '((ef.serialisable = 0 || ef.serialisable IS NULL) AND ' . $this->getPlacePositionSqlFilter('ppl') . ' AND ppl.id_entrepot IN (' . implode(',', $values) . '))'
                             ),
                             'epl_entrepot' => array(
                                 'custom' => '(ef.serialisable = 1 AND ' . $this->getPlacePositionSqlFilter('epl') . ' AND epl.id_entrepot IN (' . implode(',', $values) . '))'
@@ -106,7 +106,7 @@ class BE_ProductImmos extends Bimp_Product
                     $filters['or_place_user'] = array(
                         'or' => array(
                             'ppl_user' => array(
-                                'custom' => '(ef.serialisable = 0 AND ' . $this->getPlacePositionSqlFilter('ppl') . ' AND ppl.id_user IN (' . implode(',', $values) . '))'
+                                'custom' => '((ef.serialisable = 0 || ef.serialisable IS NULL) AND ' . $this->getPlacePositionSqlFilter('ppl') . ' AND ppl.id_user IN (' . implode(',', $values) . '))'
                             ),
                             'epl_user' => array(
                                 'custom' => '(ef.serialisable = 1 AND ' . $this->getPlacePositionSqlFilter('epl') . ' AND epl.id_user IN (' . implode(',', $values) . '))'
@@ -125,7 +125,7 @@ class BE_ProductImmos extends Bimp_Product
                     $filters['or_place_client'] = array(
                         'or' => array(
                             'ppl_client' => array(
-                                'custom' => '(ef.serialisable = 0 AND ' . $this->getPlacePositionSqlFilter('ppl') . ' AND ppl.id_client IN (' . implode(',', $values) . '))'
+                                'custom' => '((ef.serialisable = 0 || ef.serialisable IS NULL) AND ' . $this->getPlacePositionSqlFilter('ppl') . ' AND ppl.id_client IN (' . implode(',', $values) . '))'
                             ),
                             'epl_client' => array(
                                 'custom' => '(ef.serialisable = 1 AND ' . $this->getPlacePositionSqlFilter('epl') . ' AND epl.id_client IN (' . implode(',', $values) . '))'
@@ -156,7 +156,7 @@ class BE_ProductImmos extends Bimp_Product
                         $filters['or_place_name'] = array(
                             'or' => array(
                                 'ppl_client' => array(
-                                    'custom' => '(ef.serialisable = 0 AND ' . $this->getPlacePositionSqlFilter('ppl') . ' AND ' . BimpTools::getSqlFilter('ppl.place_name', array('or_field' => $or_field)) . ')'
+                                    'custom' => '((ef.serialisable = 0 || ef.serialisable IS NULL) AND ' . $this->getPlacePositionSqlFilter('ppl') . ' AND ' . BimpTools::getSqlFilter('ppl.place_name', array('or_field' => $or_field)) . ')'
                                 ),
                                 'epl_client' => array(
                                     'custom' => '(ef.serialisable = 1 AND ' . $this->getPlacePositionSqlFilter('epl') . ' AND ' . BimpTools::getSqlFilter('ppl.place_name', array('or_field' => $or_field)) . ')'
@@ -239,31 +239,23 @@ class BE_ProductImmos extends Bimp_Product
         return $alias . '.position = 1';
     }
 
-    public function getQtySql($id_product, $serialisable = 0)
+    public function getPlaceFiltersSql($alias)
     {
-        if (!$serialisable) {
-            $sql = 'SELECT SUM(pp.qty) as qty FROM ' . MAIN_DB_PREFIX . 'be_package_product pp';
-            $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'be_package_place place ON place.id_package = pp.id_package';
-            $sql .= ' WHERE pp.id_product = ' . $id_product;
-        } else {
-            $sql = 'SELECT count(DISTINCT e.id) as qty FROM ' . MAIN_DB_PREFIX . 'be_equipment e';
-            $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'be_equipment_place place ON place.id_equipment = e.id';
-            $sql .= ' WHERE e.id_product = ' . $id_product;
-        }
+        $sql = '';
 
-        $sql .= ' AND ' . $this->getPlacePositionSqlFilter('place');
+        $sql .= $this->getPlacePositionSqlFilter($alias);
 
         if (isset(self::$currentFilters['place_type']) && !empty(self::$currentFilters['place_type'])) {
-            $sql .= ' AND place.type IN (' . implode(',', self::$currentFilters['place_type']) . ')';
+            $sql .= ' AND ' . $alias . '.type IN (' . implode(',', self::$currentFilters['place_type']) . ')';
         }
         if (isset(self::$currentFilters['place_id_entrepot']) && !empty(self::$currentFilters['place_id_entrepot'])) {
-            $sql .= ' AND place.id_entrepot IN (' . implode(',', self::$currentFilters['place_id_entrepot']) . ')';
+            $sql .= ' AND ' . $alias . '.id_entrepot IN (' . implode(',', self::$currentFilters['place_id_entrepot']) . ')';
         }
         if (isset(self::$currentFilters['place_id_user']) && !empty(self::$currentFilters['place_id_user'])) {
-            $sql .= ' AND place.id_user IN (' . implode(',', self::$currentFilters['place_id_user']) . ')';
+            $sql .= ' AND ' . $alias . '.id_user IN (' . implode(',', self::$currentFilters['place_id_user']) . ')';
         }
         if (isset(self::$currentFilters['place_id_client']) && !empty(self::$currentFilters['place_id_client'])) {
-            $sql .= ' AND place.id_client IN (' . implode(',', self::$currentFilters['place_id_client']) . ')';
+            $sql .= ' AND ' . $alias . '.id_client IN (' . implode(',', self::$currentFilters['place_id_client']) . ')';
         }
         if (isset(self::$currentFilters['place_name']) && !empty(self::$currentFilters['place_name'])) {
             $fl = true;
@@ -274,9 +266,32 @@ class BE_ProductImmos extends Bimp_Product
                 } else {
                     $fl = false;
                 }
-                $sql .= 'place.place_name LIKE \'%' . $value . '%\'';
+                $sql .= $alias . '.place_name LIKE \'%' . $value . '%\'';
             }
             $sql .= ')';
+        }
+
+        return $sql;
+    }
+
+    public function getQtySql($id_product, $serialisable = 0)
+    {
+        if (!$serialisable) {
+            $sql = 'SELECT SUM(pp.qty) as qty FROM ' . MAIN_DB_PREFIX . 'be_package_product pp';
+            if (!empty(self::$currentFilters)) {
+                $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'be_package_place place ON place.id_package = pp.id_package';
+            }
+            $sql .= ' WHERE pp.id_product = ' . $id_product;
+        } else {
+            $sql = 'SELECT count(DISTINCT e.id) as qty FROM ' . MAIN_DB_PREFIX . 'be_equipment e';
+            if (!empty(self::$currentFilters)) {
+                $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'be_equipment_place place ON place.id_equipment = e.id';
+            }
+            $sql .= ' WHERE e.id_product = ' . $id_product;
+        }
+
+        if (!empty(self::$currentFilters)) {
+            $sql .= ' AND ' . $this->getPlaceFiltersSql('place');
         }
 
         return $sql;
@@ -287,12 +302,12 @@ class BE_ProductImmos extends Bimp_Product
         $buttons = array();
 
         if ($this->isLoaded()) {
-            $onclick = '';
-            $filters = array();
-            $joins = array();
-            
+//            $onclick = '';
+//            $filters = array();
+//            $joins = array();
+//
 //            $this->getDetailListFilters($filters, $joins);
-            
+//            
 //            if ($this->isSerialisable()) {
 //                $equipment = BimpObject::getInstance('bimpequipment', 'Equipment');
 //                $onclick = $equipment->getJsLoadModalList('immos', array(
@@ -337,14 +352,14 @@ class BE_ProductImmos extends Bimp_Product
 
         return $buttons;
     }
-    
+
     public function getDetailListFilters(&$filters = array(), &$joins = array())
     {
         if ($this->isLoaded()) {
             if ($this->isSerialisable()) {
                 $joins['epl'] = array(
                     'table' => 'be_equipment_place',
-                    'on' => 'epl.id_equipment = a.id',
+                    'on'    => 'epl.id_equipment = a.id',
                     'alias' => 'epl'
                 );
             } else {
@@ -369,16 +384,57 @@ class BE_ProductImmos extends Bimp_Product
                     $qty = 0;
                 }
 
-                // todo... 
-                $pa = 0;
+                $total_achats = 0;
+
+                $sql = 'SELECT SUM(e.prix_achat) as total_achats FROM ' . MAIN_DB_PREFIX . 'be_equipment e ';
+                if (!empty(self::$currentFilters)) {
+                    $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'be_equipment_place place ON place.id_equipment = e.id';
+                }
+
+                $sql .= ' WHERE e.id_product = ' . (int) $this->id;
+                $sql .= ' AND e.prix_achat != 0';
+
+                if (!empty(self::$currentFilters)) {
+                    $sql .= ' AND ' . $this->getPlaceFiltersSql('place');
+                }
+
+                $result = $this->db->executeS($sql, 'array');
+
+                if (isset($result[0]['total_achats'])) {
+                    $total_achats = (float) $result[0]['total_achats'];
+                }
+
+                $sql = 'SELECT COUNT(e.id) as qty FROM ' . MAIN_DB_PREFIX . 'be_equipment e ';
+                if (!empty(self::$currentFilters)) {
+                    $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'be_equipment_place place ON place.id_equipment = e.id';
+                }
+                $sql .= ' WHERE e.id_product = ' . (int) $this->id;
+                $sql .= ' AND e.prix_achat = 0';
+
+                if (!empty(self::$currentFilters)) {
+                    $sql .= ' AND ' . $this->getPlaceFiltersSql('place');
+                }
+
+                $result = $this->db->executeS($sql, 'array');
+
+                $qty_defpa = 0;
+
+                if (isset($result[0]['qty'])) {
+                    $qty_defpa = (int) $result[0]['qty'];
+                }
+
+                if ($qty_defpa > 0) {
+                    $pa_ht = (float) $this->getCurrentPaHt(null, true);
+                    $total_achats += ($pa_ht * $qty_defpa);
+                }
 
                 $fields = array(
                     'qty'          => $qty,
-                    'total_achats' => ($qty * $pa)
+                    'total_achats' => $total_achats
                 );
             } else {
-//                echo $this->getQtySql($this->id, 0); exit;
-                $result = $this->db->executeS($this->getQtySql($this->id, 0), 'array');
+                $sql = $this->getQtySql($this->id, 0);
+                $result = $this->db->executeS($sql, 'array');
 
                 if (isset($result[0]['qty'])) {
                     $qty = (int) $result[0]['qty'];

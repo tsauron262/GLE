@@ -27,15 +27,23 @@ sections:
         default:
             label: Commandes fournisseurs
             sections:
-                - type: list
-                  list: 
-                      object: commande_fourn
+                - type: custom
+                  custom: 
+                      callback: 
+                          method: renderTabs
+                          params: 
+                            - renderCommandesTab
+                            - default
         receptions: 
             label: Réceptions
             sections: 
-                - type: list
-                  list: 
-                      object: reception
+                - type: custom
+                  custom: 
+                      callback: 
+                          method: renderTabs
+                          params: 
+                            - renderReceptionsTab
+                            - receptions
         prods: 
             label: Produits en commande
             sections: 

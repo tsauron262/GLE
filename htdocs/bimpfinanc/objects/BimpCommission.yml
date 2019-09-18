@@ -44,17 +44,22 @@ fields:
             show_values: 2
         required_if: type=2
         default_value: 0
+    secteur: 
+        label: Secteur
+        values: 
+            array: secteurs
+        display_if: 
+            field_name: type
+            show_values: 2
     date: 
         label: Date
         type: date
         input: 
             display_now: 1
-        
     total_marges: 
         label: Total marges
         type: money
         default_value: 0
-        
     status: 
         label: Statut
         type: int
@@ -75,6 +80,7 @@ fields_tables:
               display: nom_url
               show: 
                   field_value: id_entrepot
+            - field: secteur
             - field: status
             - field: date
             - label: Ecarts secteurs
@@ -152,6 +158,7 @@ forms:
             - field: type
             - field: id_user
             - field: id_entrepot
+            - field: secteur
             - field: date
             - custom: 1
               label: Inclure uniquement les facture entièrement payées

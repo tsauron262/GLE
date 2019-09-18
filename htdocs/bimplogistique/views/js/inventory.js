@@ -10,8 +10,8 @@ function insertProduct(input, quantity) {
             $("input[name=search_insert_line]").val('');
             $("input[name=search_insert_line]").focus();
             $("input[name=insert_quantity]").val(1);
-            triggerObjectChange('bimplogistique', 'InventoryLine', result.data.id_inventory_det);
             playBipOk();
+            triggerObjectChange('bimplogistique', 'InventoryLine', result.data.id_inventory_det);
         }, error: function(result, bimpAjax) {
             playBipError();
         }
@@ -24,6 +24,7 @@ function insertProduct(input, quantity) {
  */
 
 function initEvents() {
+    $("input[name=insert_quantity]").css('border', 'SOLID 2px white');
     var $inputs_selector = $("input[name*=insert_]");
     $inputs_selector.on('keydown', function (event) {
         var key = event.which;
@@ -35,6 +36,18 @@ function initEvents() {
             if(0 < parseInt(input) && parseInt(input) < 1000) {
                 $("input[name=search_insert_line]").val('');
                 $("input[name=insert_quantity]").val(input);
+                var time=0.6;
+                $("input[name=insert_quantity]").css({
+                    transition : 'border-color ' + time + 's ease-in-out',
+                    "border-color": "orange"
+                });
+                setTimeout(function(){
+                    $("input[name=insert_quantity]").css({
+                        transition : 'border-color ' + time + 's ease-in-out',
+                        "border-color": "white"
+                    });
+                }, time * 1000);
+
                 return;
             }
             

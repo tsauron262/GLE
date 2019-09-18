@@ -109,20 +109,20 @@ forms:
             - field: fk_warehouse
             - field: parent
             
-        confirm_close: 
-            rows: 
-                - custom: 1
-                  label: Date du mouvement de stock
-                  input_name: date_mouvement
-                  type: datetime
-                  input:
-                    type: datetime
-                    display_now: 1
-                - custom: 1
-                  label: Opérations
-                  input_name: inut
-                  content: 
-                    callback: renderDifference
+    confirm_close: 
+        rows: 
+            - custom: 1
+              label: Date du mouvement de stock
+              input_name: date_mouvement
+              type: datetime
+              input:
+                type: datetime
+                display_now: 1
+            - custom: 1
+              label: Opérations
+              input_name: inut
+              content: 
+                callback: renderDifference
             
 lists:
     default:

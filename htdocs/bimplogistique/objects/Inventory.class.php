@@ -18,6 +18,9 @@ class Inventory extends BimpDolObject
     );
 
     public function getAllInventories() {
+        if($this->hasChildren()) // prevent multiple parent
+            return 'Non';
+        
         $inventories = array(0 => '');
         
         $sql = 'SELECT i.id as id_inv, CONCAT(e.ref, " ", e.lieu) as nom';
@@ -253,9 +256,10 @@ class Inventory extends BimpDolObject
         foreach ($diff as $id => $data) {
             $doli_prod = new Product($this->db->db);
             $doli_prod->fetch($id);
-            $errors[] = 'Le produit ' . $doli_prod->ref . ' a été scanné <strong>' . (float) $data['nb_scan'] .
-                    '</strong> fois et il est présent <strong>' . (float) $data['stock'] . '</strong> fois dans le stock ' .
-                    ' il va être modifié de <strong>' . (float) $data['diff'] . '</strong>.';
+            if((float) $data['nb_scan'] != (float) $data['stock'])
+                $errors[] = 'Le produit ' . $doli_prod->ref . ' a été scanné <strong>' . (float) $data['nb_scan'] .
+                        '</strong> fois et il est présent <strong>' . (float) $data['stock'] . '</strong> fois dans le stock ' .
+                        ' il va être modifié de <strong>' . (float) $data['diff'] . '</strong>.';
         }
 
         return $errors;
@@ -535,6 +539,23 @@ class Inventory extends BimpDolObject
         return "Disponible à la fermeture de l'inventaire";
     }
     
+    public function hasChildren() {
+        $children = array();
+        
+        $sql = 'SELECT id';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'bl_inventory';
+        $sql .= ' WHERE parent=' . $this->getData('id');
+
+        $result = $this->db->db->query($sql);
+        if ($result and mysqli_num_rows($result) > 0) {
+            while ($obj = $this->db->db->fetch_object($result)) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
     public function getChildren() {
         $children = array();
         
@@ -645,6 +666,7 @@ class Inventory extends BimpDolObject
             $errors = array_merge($errors, $out['errors']);
             $msg .= $this->getMessageAdd(1);
             $id_inventory_det = $out['id_inventory_det'];
+            $inserted = true;
         } else {
             $inv_children = $this->getChildren();
             foreach($inv_children as $child) {
@@ -704,5 +726,39 @@ class Inventory extends BimpDolObject
             return $obj->ref;
         }
         return "Entrepôt " . $this->getData('fk_warehouse') . " non définit";
+    }
+    
+    public function renderHeaderExtraLeft() {
+        $html = '';
+        $parent = 0;
+        
+        $sql = 'SELECT CONCAT(e.ref, " ", e.lieu) as nom, i.parent as parent';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'bl_inventory AS i';
+        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'entrepot AS e ON i.fk_warehouse=e.rowid';
+        $sql .= ' WHERE i.id=' . $this->getData('id');
+
+        $result = $this->db->db->query($sql);
+        if ($result and mysqli_num_rows($result) > 0) {
+            while ($obj = $this->db->db->fetch_object($result)) {
+                $parent = (int) $obj->parent;
+                $html .= 'Entrepot : <strong>' . $obj->nom . '</strong>';
+            }
+        }
+        
+        if($parent > 0) {
+            $sql = 'SELECT CONCAT(e.ref, " ", e.lieu) as nom';
+            $sql .= ' FROM ' . MAIN_DB_PREFIX . 'entrepot AS e';
+            $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'bl_inventory AS i ON i.fk_warehouse=e.rowid';
+            $sql .= ' WHERE i.id=' . $this->getData('parent');
+
+            $result = $this->db->db->query($sql);
+            if ($result and mysqli_num_rows($result) > 0) {
+                while ($obj = $this->db->db->fetch_object($result)) {
+                    $html .= '</br>Rattaché à : <strong>' . $obj->nom . '</strong>';
+                }
+            }
+        }
+
+        return $html;
     }
 }

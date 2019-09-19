@@ -630,7 +630,7 @@ td.buttons {
         font-weight: bold;
         text-align: left;
     }
-    
+
     span.navButton {
         font-size: 13px;
         margin: 0 5px;
@@ -705,7 +705,8 @@ td.buttons {
         margin-top: 5px;
     }
 
-    .bimp_filter_value {       
+    .bimp_filter_value,
+    .bimp_filter_value_default {       
         @include transition(all 0.3s ease);
         font-size: 12px;
         display: inline-block;
@@ -717,6 +718,13 @@ td.buttons {
 
         &:hover {
             background-color: #489FF5;
+        }
+
+        &.bimp_filter_value_default {
+            background-color: #595959;
+            &:hover {
+                background-color: #595959;
+            }
         }
 
         .bimp_filter_value_remove_btn {

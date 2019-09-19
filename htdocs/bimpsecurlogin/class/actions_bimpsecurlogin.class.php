@@ -256,7 +256,7 @@ class securLogSms {
         }
         
         $tabMsg = array();
-        $tabMsg['newVersion'] = "Nouvelle version, si vous rencontrez des problèmes, les signaler au plus vite.<br/>debugerp@bimp.fr - 06 28 33 50 81";
+//        $tabMsg['newVersion'] = "Nouvelle version, si vous rencontrez des problèmes, les signaler au plus vite.<br/>debugerp@bimp.fr - 06 28 33 50 81";
         
         foreach($tabMsg as $name => $detailMsg){
             if(!is_array($detailMsg))

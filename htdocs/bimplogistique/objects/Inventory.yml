@@ -18,7 +18,8 @@ objects:
     lines: 
         instance: 
             bimp_object: InventoryLine
-        delete: 1
+        delete: 
+            callback: isAdmin
                 
 fields: 
     fk_warehouse:
@@ -50,11 +51,14 @@ fields:
             array: status_list
         edit: 0
         
-#    parent:
-#        label: Rattaché à l'inventaire
-#        type: int
-#        values: 
-#            callback: getAllInventories
+    parent:
+        label: Rattaché à l'inventaire
+        type: int
+        values: 
+            callback: getAllInventories
+        input:
+            help: Un inventaire ne peut pas être rattaché à un inventaire déjà rattaché
+
             
 fields_tables: 
     default: 
@@ -103,22 +107,22 @@ forms:
     default:
         rows: 
             - field: fk_warehouse
-#            - field: parent
+            - field: parent
             
-        confirm_close: 
-            rows: 
-                - custom: 1
-                  label: Date du mouvement de stock
-                  input_name: date_mouvement
-                  type: datetime
-                  input:
-                    type: datetime
-                    display_now: 1
-                - custom: 1
-                  label: Opérations
-                  input_name: inut
-                  content: 
-                    callback: renderDifference
+    confirm_close: 
+        rows: 
+            - custom: 1
+              label: Date du mouvement de stock
+              input_name: date_mouvement
+              type: datetime
+              input:
+                type: datetime
+                display_now: 1
+            - custom: 1
+              label: Opérations
+              input_name: inut
+              content: 
+                callback: renderDifference
             
 lists:
     default:
@@ -148,6 +152,8 @@ lists:
                 field: date_opening
             date_closing:
                 field: date_closing
+            parent:
+                field: parent
         
 cards: 
     default: 

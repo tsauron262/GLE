@@ -51,6 +51,12 @@ class Inventory extends BimpDolObject
 
         return 1;
     }
+    
+    
+    public function canDelete()
+    {
+        return $this->isAdmin();
+    }
 
     public function update(&$warnings = array(), $force_update = false)
     {

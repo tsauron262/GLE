@@ -636,6 +636,11 @@ class BimpTools
 
     public static function getNextRef($table, $field, $prefix = '')
     {
+        
+        $prefix = str_replace("{AA}", date('y'), $prefix);
+        $prefix = str_replace("{MM}", date('m'), $prefix);
+        
+        
         if ($prefix) {
             $where = '`' . $field . '` LIKE \'' . $prefix . '%\'';
         } else {

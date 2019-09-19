@@ -147,9 +147,9 @@ filters_panel:
             position_place: 
                 field: position
                 child: places
-                default_values: 
-                    - min: ''
-                      max: 1
+#                default_values: 
+#                    - min: ''
+#                      max: 1
             type_place: 
                 field: type
                 child: places

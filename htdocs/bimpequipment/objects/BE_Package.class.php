@@ -1211,7 +1211,7 @@ class BE_Package extends BimpObject
 
     public function create(&$warnings = array(), $force_create = false)
     {
-        $ref = BimpTools::getNextRef($this->getTable(), 'ref', 'PKG');
+        $ref = BimpTools::getNextRef($this->getTable(), 'ref', 'PKG{AA}{MM}-');
 
         if (!$ref) {
             return array('Echec attribution d\'une nouvelle référence');

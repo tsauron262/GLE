@@ -63,6 +63,10 @@ function onUrlHashChange(newUrl) {
         }
         loadTabContent(newUrl, tab_name);
     }
+    
+    $('body').trigger($.Event('urlHashChange', {
+        tab_name: tab_name
+    }));
 }
 
 var is_unloaded = false;

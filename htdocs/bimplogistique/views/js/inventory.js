@@ -33,7 +33,7 @@ function initEvents() {
             var input = $("input[name=search_insert_line]").val();
             var quantity = $("input[name=insert_quantity]").val();
             
-            if(0 < parseInt(input) && parseInt(input) < 1000) {
+            if(-1000 < Number(input) && Number(input) < 1000) {
                 $("input[name=search_insert_line]").val('');
                 $("input[name=insert_quantity]").val(input);
                 var time=0.6;
@@ -50,11 +50,7 @@ function initEvents() {
 
                 return;
             }
-            
-            if(quantity <= 0)
-                alert("Merci de renseigner une quantité supérieure à 0");
-            else
-                insertProduct(input, quantity);
+            insertProduct(input, quantity);
         }
     });
 }
@@ -92,6 +88,7 @@ $(document).ready(function () {
     waitForElement('input[name=search_insert_line]', function () {
         waitForElement('input[name=insert_quantity]', function () {
             initEvents();
+            $('input[name=search_insert_line]').focus();
         });
     });
 

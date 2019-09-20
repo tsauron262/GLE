@@ -46,3 +46,12 @@ lists:
                field: date_create
            user_create:
                field: user_create
+               
+    equipment:
+        extends: default
+        cols:
+            qty: unset
+            fk_warehouse:
+                field: fk_warehouse
+                child: parent
+                display: nom_url

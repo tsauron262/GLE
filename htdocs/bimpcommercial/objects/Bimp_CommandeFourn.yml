@@ -178,22 +178,12 @@ fields:
     status_forced: 
         label: Status forcés
         type: json
-#    fk_account: 
-#        label: Compte bancaire
-#        type: id_object
-#        object: account
     delivery_type: 
         label: Addresse de livraison
         type: int
         values: 
             array: delivery_types
         default_value: 0
-#    type_entrepot: 
-#        label: Type entrepôt
-#        type: int
-#        values: 
-#            array: types_entrepot
-        
     custom_delivery: 
         label: Adresse de livraison personnalisée
         type: text
@@ -203,6 +193,13 @@ fields:
         display_if: 
             field_name: delivery_type
             show_values: 2
+#    type_entrepot:
+#        label: Type entrepôt
+#        type: int
+#        values: 
+#            array: typesEntrepot
+#        default_value: 2
+        
     ref_client: unset
     total: unset
     fk_availability: unset
@@ -214,6 +211,7 @@ forms:
     default: 
         rows: 
             - field: entrepot
+#            - field: type_entrepot
             - field: libelle
             - field: ef_type
             - field: fk_soc
@@ -224,7 +222,6 @@ forms:
             - field: date_livraison
             - field: fk_cond_reglement
             - field: fk_mode_reglement
-#            - field: fk_account
             - field: model_pdf
             - field: zone_vente
               show: 
@@ -482,6 +479,8 @@ fields_tables:
             - field: entrepot
               display: nom_url
               edit: 1
+#            - field: type_entrepot
+#              edit: 1
             - field: ef_type    
             - field: fk_statut
             - field: invoice_status

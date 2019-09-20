@@ -894,6 +894,8 @@ lists:
         edit_form: card
         add_form_name: card
         modal_view: default
+        extra_btn: 
+            callback: getListsButtons
         cols: 
             ref: 
             label: 

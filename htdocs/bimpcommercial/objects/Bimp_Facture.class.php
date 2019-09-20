@@ -2267,6 +2267,14 @@ class Bimp_Facture extends BimpComm
                     $commande_line->onFactureDelete($this->id);
                 }
             }
+
+            $shipments = BimpCache::getBimpObjectObjects('bimplogistique', 'BL_CommandeShipment', array(
+                        'id_facture' => (int) $this->id
+            ));
+
+            foreach ($shipments as $shipment) {
+                $shipment->updateField('id_facture', 0);
+            }
         }
         $this->majStatusOtherPiece();
     }

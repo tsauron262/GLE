@@ -663,6 +663,16 @@ class Inventory extends BimpDolObject
         return array('id_inventory_det' => $id_inventory_det, 'msg' => $msg, 'errors' => $errors);
     }
     
+    public static function equipmentIsScanned($id_equipment, $id_inventory) {
+        $filters = array(
+            'fk_equipment' => $id_equipment,
+            'fk_inventory' => $id_inventory
+        );
+        $inventory_lines_obj = BimpObject::getInstance('bimplogistique', 'InventoryLine');
+        $list = $inventory_lines_obj->getList($filters, 1, 1, 'id', 'desc', 'array', array());
+        return count($list);
+    }
+    
     public function createLinesEquipment($id_product, $id_equipment) {
         $id_inventory_det = 0;
         $errors = array();
@@ -683,6 +693,10 @@ class Inventory extends BimpDolObject
         $inserted = false;
         // Si l'équipmenent n'est pas dans un entrepot ou si il est dans celui de l'inventaire
         if(!$id_entrepot > 0 or $type != 2 or $this->getData('fk_warehouse') == $id_entrepot) {
+            if(self::equipmentIsScanned($id_equipment, $this->getData('id'))) {
+                $errors[] = "Cet équipement a déjà été scanné";
+                return array('id_inventory_det' => 0, 'msg' => '', 'errors' => $errors);
+            }
             $out = $this->createLine($id_product, $id_equipment, 1);
             $errors = array_merge($errors, $out['errors']);
             $msg .= $this->getMessageAdd(1);
@@ -692,6 +706,10 @@ class Inventory extends BimpDolObject
             $inv_children = $this->getChildren();
             foreach($inv_children as $child) {
                 if($child->getData('fk_warehouse') == $id_entrepot) {
+                    if(self::equipmentIsScanned($id_equipment, $child->getData('id'))) {
+                         $errors[] = "Cet équipement a déjà été scanné";
+                         return array('id_inventory_det' => 0, 'msg' => '', 'errors' => $errors);
+                     }
                     $out = $child->createLine($id_product, $id_equipment, 1);
                     $errors = array_merge($errors, $out['errors']);
                     $msg .= $child->getMessageAdd(1, 1);
@@ -703,6 +721,10 @@ class Inventory extends BimpDolObject
         
         // L'équipement n'a été ajouté nulle part
         if(!$inserted) {
+            if(self::equipmentIsScanned($id_equipment, $this->getData('id'))) {
+                 $errors[] = "Cet équipement a déjà été scanné";
+                 return array('id_inventory_det' => 0, 'msg' => '', 'errors' => $errors);
+             }
             $out = $this->createLine($id_product, $id_equipment, 1);
             $errors = array_merge($errors, $out['errors']);
             $msg .= $this->getMessageAdd(1);

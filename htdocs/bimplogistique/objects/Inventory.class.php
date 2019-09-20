@@ -517,7 +517,7 @@ class Inventory extends BimpDolObject
             } else {
                 $header_table = '<span style="margin-left: 100px">Ajouter</span>';
                 $header_table .= BimpInput::renderInput('search_product', 'insert_line', '', array('filter_type' => 'both'));
-
+$header_table .= "<script>initEvents2();</script>";
                 $header_table .= '<span style="margin-left: 100px">Quantité</span>';
                 $header_table .= '<input class="search_list_input"  name="insert_quantity" type="number" min=1 style="width: 80px; margin-left: 10px;" value="1" >';
 

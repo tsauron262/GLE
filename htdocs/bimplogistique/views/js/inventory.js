@@ -24,6 +24,10 @@ function insertProduct(input, quantity) {
  */
 
 function initEvents() {
+    alert('merci de refresh (commande + maj + R)');
+}
+
+function initEvents2() {
     
     waitForElement('input[name=search_insert_line]', function () {
         waitForElement('input[name=insert_quantity]', function () {
@@ -95,7 +99,7 @@ $(document).ready(function () {
         audio_error.play();
     });
    
-    initEvents()
+    //initEvents()
 
 });
 
@@ -111,11 +115,11 @@ function playBipError() {
 
 
 
-$(document).ready(function () {
-    $('body').on('urlHashChange', function (e) {
-        if(e.tab_name == 'scan')
-        setTimeout(function(){
-            initEvents();
-        },500);
-    });
-});
+//$(document).ready(function () {
+//    $('body').on('urlHashChange', function (e) {
+//        if(e.tab_name == 'scan')
+//        setTimeout(function(){
+//            initEvents();
+//        },500);
+//    });
+//});

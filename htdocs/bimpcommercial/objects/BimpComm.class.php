@@ -492,6 +492,11 @@ class BimpComm extends BimpDolObject
         return array();
     }
 
+    public function getContacts()
+    {
+        
+    }
+
     public function getTotalHt()
     {
         if ($this->isDolObject()) {
@@ -595,32 +600,72 @@ class BimpComm extends BimpDolObject
 
         $emails = array();
 
-        if (empty($user->email)) {
-            $langs->load('errors');
-            $emails['user'] = $user->getFullName($langs) . ' &lt;' . $langs->trans('ErrorNoMailDefinedForThisUser') . '&gt;';
-        } else {
-            $emails['user'] = $user->getFullName($langs) . ' &lt;' . $user->email . '&gt;';
+        // User connecté: 
+
+        if (!empty($user->email)) {
+            $emails[$user->email] = $user->getFullName($langs) . ' (' . $user->email . ')';
         }
 
-        $emails['company'] = $conf->global->MAIN_INFO_SOCIETE_NOM . ' &lt;' . $conf->global->MAIN_INFO_SOCIETE_MAIL . '&gt;';
-
-        $aliases = array('user_aliases' => $user->email_aliases, 'global_aliases' => $conf->global->MAIN_INFO_SOCIETE_MAIL_ALIASES);
-
-        foreach ($aliases as $type => $list) {
-            $i = 0;
-            foreach (explode(',', $list) as $alias) {
-                $i++;
+        if (!empty($user->email_aliases)) {
+            foreach (explode(',', $user->email_aliases) as $alias) {
                 $alias = trim($alias);
                 if ($alias) {
-                    $alias = preg_replace('/</', '&lt;', $alias);
-                    $alias = preg_replace('/>/', '&gt;', $alias);
-                    if (!preg_match('/&lt;/', $alias)) {
-                        $alias = '&lt;' . $alias . '&gt;';
+                    $alias = str_replace('/</', '', $alias);
+                    $alias = str_replace('/>/', '', $alias);
+                    if (!isset($emails[$alias])) {
+                        $emails[$alias] = $user->getFullName($langs) . ' (' . $alias . ')';
                     }
-                    $emails[$type . '_' . $i] = $alias;
                 }
             }
         }
+
+        // Société: 
+
+        if (!empty($conf->global->MAIN_INFO_SOCIETE_MAIL)) {
+            $emails[$conf->global->MAIN_INFO_SOCIETE_MAIL] = $conf->global->MAIN_INFO_SOCIETE_NOM . ' (' . $conf->global->MAIN_INFO_SOCIETE_MAIL . ')';
+        }
+
+        if (!empty($conf->global->MAIN_INFO_SOCIETE_MAIL_ALIASES)) {
+            foreach (explode(',', $conf->global->MAIN_INFO_SOCIETE_MAIL_ALIASES) as $alias) {
+                $alias = trim($alias);
+                if ($alias) {
+                    $alias = str_replace('/</', '', $alias);
+                    $alias = str_replace('/>/', '', $alias);
+                    if (!isset($emails[$alias])) {
+                        $emails[$alias] = $conf->global->MAIN_INFO_SOCIETE_NOM . ' (' . $alias . ')';
+                    }
+                }
+            }
+        }
+
+        // Contacts pièce: 
+
+        if ($this->isLoaded()) {
+            $c_user = new User($this->db->db);
+            $contacts = $this->dol_object->liste_contact(-1, 'internal');
+            foreach ($contacts as $item) {
+                $c_user->fetch($item['id']);
+                if (BimpObject::objectLoaded($c_user)) {
+                    if (!empty($c_user->email) && !isset($emails[$c_user->email])) {
+                        $emails[$c_user->email] = $item['libelle'] . ': ' . $c_user->getFullName($langs) . ' (' . $c_user->email . ')';
+                    }
+
+                    if (!empty($c_user->email_aliases)) {
+                        foreach (explode(',', $c_user->email_aliases) as $alias) {
+                            $alias = trim($alias);
+                            if ($alias) {
+                                $alias = str_replace('/</', '', $alias);
+                                $alias = str_replace('/>/', '', $alias);
+                                if (!isset($emails[$alias])) {
+                                    $emails[$alias] = $item['libelle'] . ': ' . $c_user->getFullName($langs) . ' (' . $alias . ')';
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         return $emails;
     }
 
@@ -1310,14 +1355,15 @@ class BimpComm extends BimpDolObject
 
         return '';
     }
-    
-    public function displayClientFact(){
+
+    public function displayClientFact()
+    {
         $html = '';
-        if($this->isLoaded()){
-            $list_ext = $this->dol_object->liste_contact(-1, 'external',0,'BILLING');
-            if(count($list_ext) > 0){
-                foreach($list_ext as $contact){
-                    if($contact['socid'] != $this->getData('fk_soc')){
+        if ($this->isLoaded()) {
+            $list_ext = $this->dol_object->liste_contact(-1, 'external', 0, 'BILLING');
+            if (count($list_ext) > 0) {
+                foreach ($list_ext as $contact) {
+                    if ($contact['socid'] != $this->getData('fk_soc')) {
                         $socTemp = new Societe($this->db->db);
                         $socTemp->fetch($contact['socid']);
                         $html .= $socTemp->getNomUrl(1);
@@ -1993,11 +2039,22 @@ class BimpComm extends BimpDolObject
             $user->email => $user->getFullName($langs) . " (" . $user->email . ")"
         );
 
+        if ($this->isLoaded()) {
+            $contacts = $this->dol_object->liste_contact(-1, 'external');
+            foreach ($contacts as $item) {
+                if (!isset($emails[(int) $item['id']])) {
+                    $emails[(int) $item['id']] = $item['libelle'] . ': ' . $item['firstname'] . ' ' . $item['lastname'] . ' (' . $item['email'] . ')';
+                }
+            }
+        }
+
         if (BimpObject::objectLoaded($client)) {
             $client_emails = self::getSocieteEmails($client->dol_object);
             if (is_array($client_emails)) {
                 foreach ($client_emails as $value => $label) {
-                    $emails[$value] = $label;
+                    if (!isset($emails[$value])) {
+                        $emails[$value] = $label;
+                    }
                 }
             }
         }
@@ -2014,15 +2071,7 @@ class BimpComm extends BimpDolObject
         $html .= 'Sélectionnez une adresse e-mail puis cliquez sur "Ajouter"';
         $html .= '</p>';
 
-
-
-
         $html .= '<div class="mail_custom_value" style="display: none; margin-top: 10px">';
-//        $form = new Form(self::getBdb()->db);
-//        $html .= $form->select_dolusers('', $input_name . '_add_value2', 1, null, 0, '', '', '0', 0, 0, '', 0, '', $morecss='emails_select searchable_select', 1);
-//
-//        $html .= " ou ";
-
         $html .= BimpInput::renderInput('text', $input_name . '_add_value_custom', '');
         $html .= '<p class="inputHelp">Entrez une adresse e-mail valide puis cliquez sur "Ajouter"</p>';
         $html .= '</div>';
@@ -2568,7 +2617,7 @@ class BimpComm extends BimpDolObject
         if ($this->isLoaded($errors)) {
             if (!method_exists($this->dol_object, 'insert_discount')) {
                 $errors[] = 'L\'utilisation de remise n\'est pas possible pour ' . $this->getLabel('the_plur');
-            } 
+            }
 //            elseif ($this->object_name !== 'Bimp_Facture' && (int) $this->getData('fk_statut') > 0) {
 //                $errors[] = $error_label . ' - ' . $this->getData('the') . ' doit avoit le statut "Brouillon';
 //            } 
@@ -2899,10 +2948,14 @@ class BimpComm extends BimpDolObject
 
         if (!isset($data['from']) || !(string) $data['from']) {
             $errors[] = 'Emetteur absent';
+        } elseif (!BimpValidate::isEmail($data['from'])) {
+            $errors[] = 'L\'adresse email de l\'émetteur (' . $data['from'] . ') n\'est pas valide';
         }
 
         if (!isset($data['mail_to']) || !is_array($data['mail_to']) || !count($data['mail_to'])) {
             $errors[] = 'Liste des destinataires absente';
+        } else {
+            
         }
 
         if (!isset($data['mail_object']) || !(string) $data['mail_object']) {
@@ -2914,33 +2967,9 @@ class BimpComm extends BimpDolObject
         }
 
         if (!count($errors)) {
-            $from = '';
+            $from = $data['from'];
             $to = '';
             $cc = '';
-
-            if ($data['from'] === 'user') {
-                if (empty($user->email)) {
-                    $errors[] = 'Aucune adresse e-mail enregistrée pour l\'utilisateur "' . $user->getFullName($langs) . '"';
-                } else {
-                    $from = $user->getFullName($langs) . ' <' . $user->email . '>';
-                }
-            } elseif ($data['from'] === 'company') {
-                $from = $conf->global->MAIN_INFO_SOCIETE_NOM . ' <' . $conf->global->MAIN_INFO_SOCIETE_MAIL . '>';
-            } elseif (preg_match('/^user_aliases_(\d+)$/', $data['from'], $matches)) {
-                if (isset($user->email_aliases)) {
-                    $aliases = explode(', ', (string) $user->email_aliases);
-                    if (isset($aliases[((int) $matches[1]) - 1])) {
-                        $from = $aliases[((int) $matches[1]) - 1];
-                    }
-                }
-            } elseif (preg_match('/^global_aliases_(\d+)$/', $data['from'], $matches)) {
-                if (isset($conf->global->MAIN_INFO_SOCIETE_MAIL_ALIASES)) {
-                    $aliases = explode(',', $conf->global->MAIN_INFO_SOCIETE_MAIL_ALIASES);
-                    if (isset($aliases[((int) $matches[1] - 1)])) {
-                        $from = $aliases[((int) $matches[1]) - 1];
-                    }
-                }
-            }
 
             foreach (array('mail_to', 'copy_to') as $type) {
                 if (isset($data[$type]) && is_array($data[$type])) {

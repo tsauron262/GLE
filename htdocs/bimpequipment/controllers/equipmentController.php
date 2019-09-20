@@ -119,4 +119,19 @@ class equipmentController extends BimpController
             'request_id' => BimpTools::getValue('request_id', 0)
         )));
     }
+    
+    public function renderInventory()
+    {
+        if (!BimpTools::isSubmit('id')) {
+            return BimpRender::renderAlerts('ID de l\'équipement absent');
+        }
+        
+        $inventory_line = BimpObject::getInstance('bimplogistique', 'InventoryLine');
+
+        $list = new BC_ListTable($inventory_line, 'equipment', 1, null, "Lignes d'inventaire contenant l'équipement");
+        $list->addFieldFilterValue('a.fk_equipment', BimpTools::getValue('id'));
+        $list->addJoin('bl_inventory', 'a.fk_inventory = i.id', 'i');
+        return $list->renderHtml();
+    }
+
 }

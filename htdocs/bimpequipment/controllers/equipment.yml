@@ -72,6 +72,13 @@ sections:
                 type: custom
                 custom: 
                     callback: renderSavList
+                    
+          - id: inventory
+            title: Inventaires
+            struct: 
+                type: custom
+                custom: 
+                    callback: renderInventory
            
     - type: buttons
       buttons:

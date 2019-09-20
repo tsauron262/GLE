@@ -24,6 +24,10 @@ function insertProduct(input, quantity) {
  */
 
 function initEvents() {
+    alert('merci de refresh (commande + maj + R)');
+}
+
+function initEvents2() {
     
     waitForElement('input[name=search_insert_line]', function () {
         waitForElement('input[name=insert_quantity]', function () {
@@ -37,7 +41,7 @@ function initEvents() {
                     var input = $("input[name=search_insert_line]").val();
                     var quantity = $("input[name=insert_quantity]").val();
 
-                    if(0 < parseInt(input) && parseInt(input) < 1000) {
+                    if(-1000 < Number(input) && Number(input) < 1000) {
                         $("input[name=search_insert_line]").val('');
                         $("input[name=insert_quantity]").val(input);
                         var time=0.6;
@@ -54,9 +58,6 @@ function initEvents() {
 
                         return;
                     }
-
-                    if(quantity <= 0)
-                        alert("Merci de renseigner une quantité supérieure à 0");
                     else
                         insertProduct(input, quantity);
                 }
@@ -95,7 +96,7 @@ $(document).ready(function () {
         audio_error.play();
     });
    
-    initEvents()
+    //initEvents()
 
 });
 
@@ -111,11 +112,11 @@ function playBipError() {
 
 
 
-$(document).ready(function () {
-    $('body').on('urlHashChange', function (e) {
-        if(e.tab_name == 'scan')
-        setTimeout(function(){
-            initEvents();
-        },500);
-    });
-});
+//$(document).ready(function () {
+//    $('body').on('urlHashChange', function (e) {
+//        if(e.tab_name == 'scan')
+//        setTimeout(function(){
+//            initEvents();
+//        },500);
+//    });
+//});

@@ -1,7 +1,7 @@
 <?php
 
 ini_set('max_execution_time', 6000);
-ini_set('memory_limit','512M');
+//ini_set('memory_limit','512M');
 
 
 class Bimp_Product extends BimpObject
@@ -1147,7 +1147,7 @@ class Bimp_Product extends BimpObject
         $body .= '<table id="history_table" class="noborder objectlistTable">';
         // Thead
         $body .= '<thead>';
-        $body .= '<th>Historique</th>';
+        $body .= '<th>Objets référents</th>';
         $body .= '<th>Nombre de tiers</th>';
         $body .= '<th>Nombre d\'objets référent</th>';
         $body .= '<th>Quantité totale</th>';
@@ -1185,6 +1185,8 @@ class Bimp_Product extends BimpObject
                     'foldable' => false,
                     'type'     => 'secondary'
         ));
+        
+        $html .= '<p>Cliquez sur un lien de la colonne Objets référents pour obtenir une vue détaillée... </p>';
 
         $html .= '<div id="selected_object"></div>';
 
@@ -2434,5 +2436,22 @@ class Bimp_Product extends BimpObject
             return $cache_scann[$id_inventory][$this->getData('id')];
         else
             return 0;
+    }
+    
+    public function getLastMouvement() {
+        $html = '';
+        // Last movement
+        $sql = "SELECT MAX(datem) as datem";
+        $sql.= " FROM ".MAIN_DB_PREFIX."stock_mouvement";
+        $sql.= " WHERE fk_product=" . $this->getData('id');
+        $result = $this->db->db->query($sql);
+        if ($result) {
+                $obj = $this->db->db->fetch_object($result);
+                $html .= $obj->datem;
+        }
+        
+        $html .= ' (<a href="' . DOL_URL_ROOT . '/product/stock/mouvement.php?idproduct=' . 
+                $this->getData('id') . '">Liste complète</a>)';
+        return $html;
     }
 }

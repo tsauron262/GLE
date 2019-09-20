@@ -1172,6 +1172,24 @@ class Bimp_Facture extends BimpComm
         return $totals;
     }
 
+    public function getDefaultMailTo()
+    {
+        $items = array();
+        if ($this->isLoaded()) {
+            $contacts = $this->dol_object->liste_contact(-1, 'external', 0, 'BILLING');
+            $emails = array();
+            foreach ($contacts as $item) {
+                if ((string) $item['email'] && !in_array($item['email'], $emails) 
+                        && (int) $item['id'] && !isset($items[(int) $item['id']])) {
+                    $emails[] = $item['email'];
+                    $items[(string) $item['id']] = $item['libelle'] . ': ' . $item['firstname'] . ' ' . $item['lastname'] . ' (' . $item['email'] . ')';
+                }
+            }
+        }
+
+        return $items;
+    }
+
     // Affichages: 
 
     public function displayPaid()

@@ -1112,7 +1112,12 @@ class BimpComm extends BimpDolObject
 
         return 0;
     }
-
+    
+    public function getDefaultMailTo()
+    {
+        return array();
+    }
+    
     // Getters - Overrides BimpObject
 
     public function getName($with_generic = true)

@@ -593,7 +593,7 @@ class Inventory extends BimpDolObject
         return 0;
     }
     
-    public function createLinesProduct($id_product, $qty_input, $sign) {
+    public function createLinesProduct($id_product, $qty_input) {
         $errors = array();
         $msg = '';
         $id_inventory_det = 0;

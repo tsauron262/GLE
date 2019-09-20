@@ -663,6 +663,17 @@ fields_tables:
             - field: price_min
             - field: seuil_stock_alerte
             - field: desiredstock
+            - field: stock
+            - custom: 1
+              label: Stock virtuel
+              type: integer
+              value: Non implémenté
+#                 callback:
+            - custom: 1
+              label: Dernier mouvement
+              type: string
+              value:
+                 callback: getLastMouvement
 
 views: 
     default: 

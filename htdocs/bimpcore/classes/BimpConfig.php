@@ -123,7 +123,7 @@ class BimpConfig
         return $params;
     }
 
-    public function mergeParams(Array $parent_params, Array $child_params)
+    public static function mergeParams(Array $parent_params, Array $child_params)
     {
         foreach ($child_params as $key => $values) {
             if (isset($parent_params[$key]) && is_array($values) && is_array($parent_params[$key])) {
@@ -131,7 +131,7 @@ class BimpConfig
                     unset($values['unextends']);
                     $parent_params[$key] = $values;
                 } else {
-                    $parent_params[$key] = $this->mergeParams($parent_params[$key], $values);
+                    $parent_params[$key] = self::mergeParams($parent_params[$key], $values);
                 }
             } else {
                 if (is_string($values) && $values === 'unset') {
@@ -271,6 +271,12 @@ class BimpConfig
     public function getCompiledParams($full_path)
     {
         $params = $this->getParams($full_path);
+        if ($full_path === 'fitlers_panel/default/filters/place_position/default_values') {
+            echo '<pre>';
+            print_r($params);
+            echo '</pre>';
+        }
+        
         return $this->compileParams($params, $full_path);
     }
 

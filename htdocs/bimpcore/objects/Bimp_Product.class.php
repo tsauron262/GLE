@@ -2409,7 +2409,7 @@ class Bimp_Product extends BimpObject
     public function canViewStock()
     {
         global $user;
-        if ($user->rights->inventory->close or $user->admin)
+        if ($user->rights->bimpequipment->inventory->close)
             return 1;
         return 0;
     }

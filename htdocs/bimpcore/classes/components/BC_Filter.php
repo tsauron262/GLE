@@ -8,6 +8,7 @@ class BC_Filter extends BimpComponent
     public static $config_required = false;
     public $identifier = '';
     public $values = array();
+    public $is_default = false;
     public $data = array();
     public static $type_params_def = array(
         'value'      => array(),
@@ -25,7 +26,7 @@ class BC_Filter extends BimpComponent
         $this->params_def['type'] = array();
         $this->params_def['label'] = array();
         $this->params_def['open'] = array('data_type' => 'bool', 'default' => 0);
-        $this->params_def['show'] = array('data_type' => 'bool', 'default' => 1);
+        $this->params_def['default_values'] = array('data_type' => 'array', 'compile' => true, 'default' => array());
         $this->values = $values;
 
         global $current_bc;
@@ -36,6 +37,11 @@ class BC_Filter extends BimpComponent
         $current_bc = $this;
 
         parent::__construct($object, $params['name'], $path);
+
+        if (empty($values) && !empty($this->params['default_values'])) {
+            $this->values = $this->params['default_values'];
+            $this->is_default = true;
+        }
 
         if (isset($params['open'])) {
             $this->params['open'] = (int) $params['open'];
@@ -194,12 +200,19 @@ class BC_Filter extends BimpComponent
                 $value = json_encode($value);
             }
 
-            $html .= '<div class="bimp_filter_value" data-value="' . htmlentities($value) . '" onclick="editBimpFilterValue($(this))">';
-            $html .= '<span class="bimp_filter_value_remove_btn" onclick="removeBimpFilterValue(event, $(this));">';
-            $html .= BimpRender::renderIcon('fas_times');
-            $html .= '</span>';
-            $html .= $label;
-            $html .= '</div>';
+            if ($this->is_default) {
+                $html .= '<div class="bimp_filter_value_default">';
+                $html .= 'Par défaut: <br/>';
+                $html .= $label;
+                $html .= '</div>';
+            } else {
+                $html .= '<div class="bimp_filter_value" data-value="' . htmlentities($value) . '" onclick="editBimpFilterValue($(this))">';
+                $html .= '<span class="bimp_filter_value_remove_btn" onclick="removeBimpFilterValue(event, $(this));">';
+                $html .= BimpRender::renderIcon('fas_times');
+                $html .= '</span>';
+                $html .= $label;
+                $html .= '</div>';
+            }
         }
 
         $current_bc = $prev_bc;

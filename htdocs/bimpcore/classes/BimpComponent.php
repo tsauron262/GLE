@@ -141,7 +141,7 @@ abstract class BimpComponent
         return $param;
     }
 
-    public static function fetchParamsStatic(BimpConfig $config, $path, $definitions, &$errors)
+    public static function fetchParamsStatic(BimpConfig $config, $path, $definitions, &$errors = array())
     {
         $params = array();
         if (is_null($definitions) || is_null($config)) {
@@ -154,7 +154,7 @@ abstract class BimpComponent
         return $params;
     }
 
-    protected static function fetchParamStatic(BimpConfig $config, $name, $definitions, $path, &$errors)
+    protected static function fetchParamStatic(BimpConfig $config, $name, $definitions, $path, &$errors = array())
     {
         if (!isset($definitions[$name])) {
             $errors[] = 'Paramètre de configuration invalide: "' . $name . '" (définitions absentes)';
@@ -317,6 +317,21 @@ abstract class BimpComponent
                         $params[$name] = self::getDefaultParams(BimpConfigDefinitions::${$defs_type});
                     }
                     break;
+            }
+        }
+
+        return $params;
+    }
+
+    public static function override_params($params, BimpConfig $config, $path, $definitions, &$errors = array())
+    {
+        $override_params = self::fetchParamsStatic($config, $path, $definitions);
+
+        foreach ($definitions as $name => $defs) {
+            $default = isset($defs['default']) ? $defs['default'] : null;
+            if (isset($override_params[$name]) &&
+                    (!isset($params[$name]) || is_null($default) || ($override_params[$name] != $default))) {
+                $params[$name] = $override_params[$name];
             }
         }
 

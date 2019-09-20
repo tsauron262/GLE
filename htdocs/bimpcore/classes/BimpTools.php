@@ -636,13 +636,20 @@ class BimpTools
 
     public static function getNextRef($table, $field, $prefix = '')
     {
+        
+        $prefix = str_replace("{AA}", date('y'), $prefix);
+        $prefix = str_replace("{MM}", date('m'), $prefix);
+        
+        
         if ($prefix) {
             $where = '`' . $field . '` LIKE \'' . $prefix . '%\'';
         } else {
             $where = '1';
         }
 
-        $max = BimpCache::getBdb()->getMax($table, $field, $where);
+        
+//        $max = BimpCache::getBdb()->getMax($table, $field, $where);
+        $max = BimpCache::getBdb()->getMax($table, $field, $where."  AND LENGTH(ref) = (SELECT MAX(LENGTH(ref)) as max FROM `". MAIN_DB_PREFIX . $table."`   WHERE ".$where.")");
 
         if ((string) $max) {
             if (preg_match('/^' . $prefix . '([0-9]+)$/', $max, $matches)) {

@@ -250,6 +250,10 @@ lists_cols:
     entrepot: 
         field: entrepot
         child: facture
+    client_facture: 
+        field: fk_soc
+        child: facture
+        display: nom_url
     
 lists: 
     default: 
@@ -288,6 +292,7 @@ lists:
             commissions: 
         
     commission: 
+        configurable: 1
         enable_search: 0
         pagination: 1
         n: 20

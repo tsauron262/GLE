@@ -81,6 +81,7 @@ forms:
                   type: search_entrepot
                   include_empty: 1
               value: 0
+              required: 1
               
     remove_equipment: 
         rows: 
@@ -147,6 +148,9 @@ filters_panel:
             position_place: 
                 field: position
                 child: places
+#                default_values: 
+#                    - min: ''
+#                      max: 1
             type_place: 
                 field: type
                 child: places
@@ -165,6 +169,7 @@ filters_panel:
             place_date:
                 field: date
                 child: places
+                
 lists:
     default: 
         checkboxes: 1

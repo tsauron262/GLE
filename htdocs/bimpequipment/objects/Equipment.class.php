@@ -891,7 +891,7 @@ class Equipment extends BimpObject
             $new_place = BimpCache::getBimpObjectInstance($this->module, 'BE_Place', $items[0]['id']);
 
             if (!(string) $this->getData('ref_immo') && in_array((int) $new_place->getData('type'), BE_Place::$immos_types)) {
-                $ref_immo = BimpTools::getNextRef('be_equipment', 'ref_immo', 'IMMO-');
+                $ref_immo = BimpTools::getNextRef('be_equipment', 'ref_immo', 'IMMO{AA}{MM}-');
                 if (!(string) $ref_immo) {
                     $ref_immo = 'IMMO-1';
                 }

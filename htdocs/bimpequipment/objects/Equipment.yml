@@ -449,6 +449,9 @@ filters_panel:
             place_position: 
                 field: position
                 child: places
+#                default_values:
+#                    - min: ''
+#                      max: 1
             place_type: 
                 field: type
                 child: places

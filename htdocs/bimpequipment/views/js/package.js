@@ -81,8 +81,6 @@ function addPackageProduct($button) {
                 bimp_msg('Veuillez sélectionner un produit', 'warning', $resultContainer);
                 return;
             }
-            $input.val(0).change();
-            $container.find('input[name="search_id_product"]').val('');
         } else {
             bimp_msg('Erreur: champ "produit" non trouvé', 'danger');
             return;
@@ -95,7 +93,6 @@ function addPackageProduct($button) {
                 bimp_msg('Veuillez indiquer une quantité supérieure à 0', 'warning', $resultContainer);
                 return;
             }
-            $input.val(1).change();
         } else {
             bimp_msg('Erreur: champ "quantité" non trouvé', 'danger');
             return;
@@ -104,6 +101,11 @@ function addPackageProduct($button) {
         $input = $container.find('[name="id_entrepot_src"]');
         if ($input.length) {
             id_entrepot = parseInt($input.val());
+        }
+        
+        if (!id_entrepot) {
+            bimp_msg('Veuillez sélectionner un entrepôt d\'origine', 'warning', null, true);
+            return;
         }
 
         var id_package = parseInt($container.data('id_package'));
@@ -121,6 +123,9 @@ function addPackageProduct($button) {
             if ($.isOk($list)) {
                 reloadObjectList($list.attr('id'));
             }
+            $container.find('input[name="id_product"]').val(0).change();
+            $container.find('input[name="search_id_product"]').val('');
+            $container.find('input[name="qty_product"]').val(1).change();;
         }, null, null, true);
 
         return;

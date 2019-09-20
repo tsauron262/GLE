@@ -236,6 +236,42 @@ class BimpComm extends BimpDolObject
         return array();
     }
 
+    public function getMailsToArray()
+    {
+        global $user, $langs;
+
+        $client = $this->getChildObject('client');
+
+        $emails = array(
+            ""           => "",
+            $user->email => $user->getFullName($langs) . " (" . $user->email . ")"
+        );
+
+        if ($this->isLoaded()) {
+            $contacts = $this->dol_object->liste_contact(-1, 'external');
+            foreach ($contacts as $item) {
+                if (!isset($emails[(int) $item['id']])) {
+                    $emails[(int) $item['id']] = $item['libelle'] . ': ' . $item['firstname'] . ' ' . $item['lastname'] . ' (' . $item['email'] . ')';
+                }
+            }
+        }
+
+        if (BimpObject::objectLoaded($client)) {
+            $client_emails = self::getSocieteEmails($client->dol_object);
+            if (is_array($client_emails)) {
+                foreach ($client_emails as $value => $label) {
+                    if (!isset($emails[$value])) {
+                        $emails[$value] = $label;
+                    }
+                }
+            }
+        }
+
+        $emails['custom'] = 'Autre';
+
+        return $emails;
+    }
+
     // Getters paramètres: 
 
     public static function getInstanceByType($type, $id_object = null)
@@ -1112,12 +1148,12 @@ class BimpComm extends BimpDolObject
 
         return 0;
     }
-    
+
     public function getDefaultMailTo()
     {
         return array();
     }
-    
+
     // Getters - Overrides BimpObject
 
     public function getName($with_generic = true)
@@ -2075,37 +2111,9 @@ class BimpComm extends BimpDolObject
 
     public function renderMailToInputs($input_name)
     {
-        global $user, $langs;
+        $emails = $this->getMailsToArray();
+
         $html = '';
-
-        $client = $this->getChildObject('client');
-
-        $emails = array(
-            ""           => "",
-            $user->email => $user->getFullName($langs) . " (" . $user->email . ")"
-        );
-
-        if ($this->isLoaded()) {
-            $contacts = $this->dol_object->liste_contact(-1, 'external');
-            foreach ($contacts as $item) {
-                if (!isset($emails[(int) $item['id']])) {
-                    $emails[(int) $item['id']] = $item['libelle'] . ': ' . $item['firstname'] . ' ' . $item['lastname'] . ' (' . $item['email'] . ')';
-                }
-            }
-        }
-
-        if (BimpObject::objectLoaded($client)) {
-            $client_emails = self::getSocieteEmails($client->dol_object);
-            if (is_array($client_emails)) {
-                foreach ($client_emails as $value => $label) {
-                    if (!isset($emails[$value])) {
-                        $emails[$value] = $label;
-                    }
-                }
-            }
-        }
-
-        $emails['custom'] = 'Autre';
 
         $html .= BimpInput::renderInput('select', $input_name . '_add_value', '', array(
                     'options'     => $emails,
@@ -2988,9 +2996,6 @@ class BimpComm extends BimpDolObject
         $errors = array();
         $warnings = array();
         $success = 'Email envoyé avec succès';
-
-        global $user, $langs, $conf;
-        $langs->load('errors');
 
         if (!isset($data['from']) || !(string) $data['from']) {
             $errors[] = 'Emetteur absent';

@@ -1179,10 +1179,10 @@ class Bimp_Facture extends BimpComm
             $contacts = $this->dol_object->liste_contact(-1, 'external', 0, 'BILLING');
             $emails = array();
             foreach ($contacts as $item) {
-                if ((string) $item['email'] && !in_array($item['email'], $emails) 
-                        && (int) $item['id'] && !isset($items[(int) $item['id']])) {
+                if ((string) $item['email'] && (int) $item['id'] && !in_array($item['id'], $items)) {
                     $emails[] = $item['email'];
-                    $items[(string) $item['id']] = $item['libelle'] . ': ' . $item['firstname'] . ' ' . $item['lastname'] . ' (' . $item['email'] . ')';
+//                    $items[(int) $item['id']] = $item['libelle'] . ': ' . $item['firstname'] . ' ' . $item['lastname'] . ' (' . $item['email'] . ')';
+                    $items[] = $item['id'];
                 }
             }
         }

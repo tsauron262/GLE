@@ -544,7 +544,7 @@ class BC_Input extends BimpComponent
                         $this->value = array();
                     }
                 }
-
+                
                 foreach ($this->value as $value) {
                     if (isset($this->field_params['values'][$value])) {
                         if (is_array($this->field_params['values'][$value])) {

@@ -560,6 +560,13 @@ filters_panels:
             - field: date_commande
               child: parent
             - field: id_facture
+            - custom: 1
+              label: Facturée
+              field: billed
+              type: check_list
+              items: 
+                  1: OUI
+                  0: NON
             
 lists: 
     default: 

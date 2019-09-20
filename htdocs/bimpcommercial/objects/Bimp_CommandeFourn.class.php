@@ -9,7 +9,7 @@ class Bimp_CommandeFourn extends BimpComm
     const DELIV_ENTREPOT = 0;
     const DELIV_SIEGE = 1;
     const DELIV_CUSTOM = 2;
-    
+
     public $redirectMode = 4; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
     public static $dol_module = 'commande_fournisseur';
     public static $email_type = 'order_supplier_send';
@@ -43,9 +43,10 @@ class Bimp_CommandeFourn extends BimpComm
     public static $logistique_active_status = array(3, 4, 5, 7);
     public static $delivery_types = array(
         self::DELIV_ENTREPOT => 'Entrepôt de la commande',
-        self::DELIV_SIEGE => 'Siège social',
-        self::DELIV_CUSTOM => 'Personnalisée'
+        self::DELIV_SIEGE    => 'Siège social',
+        self::DELIV_CUSTOM   => 'Personnalisée'
     );
+    protected static $types_entrepot = array();
 
     // Gestion des autorisations objet: 
 
@@ -807,6 +808,20 @@ class Bimp_CommandeFourn extends BimpComm
         }
 
         return $array;
+    }
+
+    public static function getTypesEntrepot()
+    {
+        if (empty(static::$types_entrepot)) {
+            self::loadClass('bimpequipment', 'BE_Place');
+            foreach (BE_Place::$types as $key => $label) {
+                if (in_array($key, BE_Place::$entrepot_types)) {
+                    static::$types_entrepot[$key] = $label;
+                }
+            }
+        }
+
+        return static::$types_entrepot;
     }
 
     // Rendus HTML - overrides BimpObject:

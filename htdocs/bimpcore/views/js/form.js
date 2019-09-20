@@ -530,7 +530,7 @@ function validateForm($form) {
                         var $input = $(this).find('[name="' + field_name + '"]');
                         if ($input.length) {
                             var data_type = $(this).data('data_type');
-                            if (data_type && (data_type === 'id_object')) {
+                            if (data_type && ((data_type === 'id_object') || (data_type === 'id'))) {
                                 if (!parseInt($input.val()) || parseInt($input.val()) <= 0) {
 //                                    bimp_msg($input.tagName() + $input.attr('name') + ': ' + $input.val());
                                     data_missing = true;
@@ -2524,7 +2524,7 @@ function calcTotalCompteurCaisse($container) {
             total += val * parseFloat($(this).data('value'));
         }
     });
-    
+
     total = Math.round10(total, -2);
 
     $container.find('.compteur_caisse_total').text(total);

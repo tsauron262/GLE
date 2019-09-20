@@ -188,6 +188,11 @@ fields:
         values: 
             array: delivery_types
         default_value: 0
+#    type_entrepot: 
+#        label: Type entrepôt
+#        type: int
+#        values: 
+#            array: types_entrepot
         
     custom_delivery: 
         label: Adresse de livraison personnalisée

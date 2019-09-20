@@ -402,6 +402,11 @@ class BE_Package extends BimpObject
             return $errors;
         }
 
+        if (!$id_entrepot) {
+            $errors[] = 'Aucun entrepôt d\'origine spécifié';
+            return $errors;
+        }
+
         $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $id_product);
 
         if (!BimpObject::objectLoaded($product)) {
@@ -959,6 +964,8 @@ class BE_Package extends BimpObject
             $errors[] = 'Aucun produit sélectionné';
         } elseif (!isset($data['qty']) || (int) $data['qty'] <= 0) {
             $errors[] = 'Veillez indiquer une quantité supérieure à 0';
+        } elseif (!isset($data['id_entrepot']) || !(int) $data['id_entrepot']) {
+            $errors[] = 'Veuillez sélectionner un entrepôt d\'origine';
         } else {
             $errors = $this->addProduct((int) $data['id_product'], (int) $data['qty'], (isset($data['id_entrepot']) ? (int) $data['id_entrepot'] : 0), $warnings);
         }
@@ -1046,7 +1053,9 @@ class BE_Package extends BimpObject
 
         if (empty($pps)) {
             $errors[] = 'Aucun produit à retirer spécifié';
-        } else {
+        }
+
+        if (!count($errors)) {
             $nDone = 0;
             foreach ($pps as $id_pp) {
                 $pp = BimpCache::getBimpObjectInstance('bimpequipment', 'BE_PackageProduct', (int) $id_pp);
@@ -1115,55 +1124,75 @@ class BE_Package extends BimpObject
                 $post_temp = $_POST;
                 $_POST = $data;
 
-                unset($_POST['keep_place']);
-                unset($_POST['equipments']);
+                // Vérif de l'emplacement: 
+                $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
+                $place_errors = $place->validatePost();
+                if (!count($place_errors)) {
+                    foreach ($equipments as $id_equipment) {
+                        $place->set('id_equipment', (int) $id_equipment);
+                        break;
+                    }
+
+                    $place_errors = $place->validate();
+                }
+
+                if (count($place_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($place_errors, 'Erreurs concernant le nouvel emlacement');
+                } else {
+                    unset($_POST['keep_place']);
+                    unset($_POST['equipments']);
+                }
+
+                unset($place);
             }
 
-            $nDone = 0;
-            foreach ($equipments as $id_equipment) {
-                $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $id_equipment);
+            if (!count($errors)) {
+                $nDone = 0;
+                foreach ($equipments as $id_equipment) {
+                    $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $id_equipment);
 
-                if (!BimpObject::objectLoaded($equipment)) {
-                    $errors[] = 'L\'équipement d\'ID ' . $id_equipment . ' n\'existe pas';
-                } else {
-                    if ((int) $equipment->getData('id_package') !== (int) $this->id) {
-                        $errors[] = 'L\'équipement ' . $equipment->getNomUrl(0, 1, 1, 'default') . ' n\'est pas inclus dans ce package';
+                    if (!BimpObject::objectLoaded($equipment)) {
+                        $errors[] = 'L\'équipement d\'ID ' . $id_equipment . ' n\'existe pas';
                     } else {
-                        $up_errors = $equipment->updateField('id_package', 0);
-
-                        if (count($up_errors)) {
-                            $errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec du retrait de l\'équipement ' . $equipment->getRef());
+                        if ((int) $equipment->getData('id_package') !== (int) $this->id) {
+                            $errors[] = 'L\'équipement ' . $equipment->getNomUrl(0, 1, 1, 'default') . ' n\'est pas inclus dans ce package';
                         } else {
-                            $nDone++;
+                            $up_errors = $equipment->updateField('id_package', 0);
 
-                            if ($set_place) {
-                                $_POST['id_equipment'] = $equipment->id;
+                            if (count($up_errors)) {
+                                $errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec du retrait de l\'équipement ' . $equipment->getRef());
+                            } else {
+                                $nDone++;
 
-                                $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
+                                if ($set_place) {
+                                    $_POST['id_equipment'] = $equipment->id;
 
-                                $place_errors = $place->validatePost();
-                                if (!count($place_errors)) {
-                                    $place_warnings = array();
-                                    $place_errors = $place->create($place_warnings, true);
+                                    $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
 
-                                    if (count($place_warnings)) {
-                                        $warnings[] = BimpTools::getMsgFromArray($place_warnings, 'Erreurs lors de la création du nouvel emplacement pour l\'équipement ' . $equipment->getRef());
+                                    $place_errors = $place->validatePost();
+                                    if (!count($place_errors)) {
+                                        $place_warnings = array();
+                                        $place_errors = $place->create($place_warnings, true);
+
+                                        if (count($place_warnings)) {
+                                            $warnings[] = BimpTools::getMsgFromArray($place_warnings, 'Erreurs lors de la création du nouvel emplacement pour l\'équipement ' . $equipment->getRef());
+                                        }
                                     }
-                                }
 
-                                if (count($place_errors)) {
-                                    $warnings[] = BimpTools::getMsgFromArray($place_errors, 'Echec de la création du nouvel emplacement pour l\'équipement ' . $equipment->getRef());
+                                    if (count($place_errors)) {
+                                        $warnings[] = BimpTools::getMsgFromArray($place_errors, 'Echec de la création du nouvel emplacement pour l\'équipement ' . $equipment->getRef());
+                                    }
                                 }
                             }
                         }
                     }
                 }
-            }
 
-            if ($nDone > 1) {
-                $success = $nDone . ' équipement retirés avec succès';
-            } elseif ($nDone > 0) {
-                $success = 'Equipement retiré avec succès';
+                if ($nDone > 1) {
+                    $success = $nDone . ' équipement retirés avec succès';
+                } elseif ($nDone > 0) {
+                    $success = 'Equipement retiré avec succès';
+                }
             }
 
             if ($set_place) {

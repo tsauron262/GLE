@@ -256,6 +256,28 @@ class BL_CommandeFournReception extends BimpObject
         return $buttons;
     }
 
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array())
+    {
+        switch ($field_name) {
+            case 'billed':
+                if (is_array($values) && !empty($values)) {
+                    if (in_array(0, $values) && in_array(1, $values)) {
+                        break;
+                    }
+                    if (in_array(0, $values)) {
+                        $filters['a.id_facture'] = 0;
+                    }
+                    if (in_array(1, $values)) {
+                        $filters['a.id_facture'] = array(
+                            'operator' => '>',
+                            'value'    => 0
+                        );
+                    }
+                }
+                break;
+        }
+    }
+
     // Rendus HTML: 
 
     public function renderCommandeFournLinesForm()
@@ -1357,7 +1379,6 @@ class BL_CommandeFournReception extends BimpObject
         $errors = array();
         $warnings = array();
         $success = 'Validation de la réception effectuée avec succès';
-        $success_callback = '';
 
         if (!$this->isLoaded()) {
             $errors[] = 'ID de la réception absent';
@@ -1371,6 +1392,15 @@ class BL_CommandeFournReception extends BimpObject
                     $errors = $this->saveLinesData($lines_data);
 
                     if (!count($errors)) {
+                        $is_sept = (isset($data['is_sept']) ? $data['is_sept'] : '');
+
+                        // Temporaire :
+                        if ($is_sept === 'oui') {
+                            $info = $this->getData('info');
+                            $this->updateField('info', 'SEPTEMBRE 2019' . ($info ? "\n\n" . $info : ''));
+                        }
+                        // ************
+
                         $date_received = isset($data['date_received']) ? $data['date_received'] : date('Y-m-d');
                         $errors = $this->validateReception($date_received, false);
                     }

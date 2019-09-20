@@ -643,6 +643,14 @@ lists_cols:
         label: Client Fact.
         value: 
             callback: displayClientFact
+    tx_marge: 
+        label: Tx marge
+        value: 
+            callback: displayTxMarge
+    tx_marque: 
+        label: Tx marque
+        value: 
+            callback: displayTxMarque
         
 lists: 
     default: 

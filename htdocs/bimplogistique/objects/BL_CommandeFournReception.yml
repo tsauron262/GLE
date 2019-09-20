@@ -151,6 +151,21 @@ forms:
     validate: 
         rows: 
             - field: date_received
+            
+#           *** Temporaire: 
+            - custom: 1
+              label: S'agit-il d'une réception de Septembre? 
+              input_type: string
+              input_name: is_sept
+              input: 
+                  type: select
+                  options:
+                      '': ''
+                      oui: OUI
+                      non: NON
+              required: 1
+#          ****************
+
             - custom: 1
               label: Unités réceptionnées
               input_name: lines
@@ -210,6 +225,15 @@ filters_panel:
             - field: id_commande_fourn
             - field: status
             - field: date_received
+            - custom: 1
+              label: Facturée
+              field: billed
+              type: check_list
+              items: 
+                  1: OUI
+                  0: NON
+            - field: id_facture
+              label: Facture fournisseur
             - field: total_ht
             - field: total_ttc
             - field: info

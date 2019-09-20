@@ -51,6 +51,12 @@ class Inventory extends BimpDolObject
 
         return 1;
     }
+    
+    
+    public function canDelete()
+    {
+        return $this->isAdmin();
+    }
 
     public function update(&$warnings = array(), $force_update = false)
     {
@@ -642,8 +648,15 @@ class Inventory extends BimpDolObject
         }
         
         if($qty_input > 0) {
-            $inv_det = BimpCache::getBimpObjectInstance($this->module, 'InventoryLine', $id_inventory_det);
-            $inv_det->updateField('qty', ($inv_det->getData('qty') + $qty_input));
+            if($id_inventory_det > 0){
+                $inv_det = BimpCache::getBimpObjectInstance($this->module, 'InventoryLine', $id_inventory_det);
+                $inv_det->updateField('qty', ($inv_det->getData('qty') + $qty_input));
+            }
+            else{
+                $out = $this->createLine($id_product, 0, $qty_input);
+                $id_inventory_det = $out['id_inventory_det'];
+                $errors = array_merge($errors, $out['errors']);
+            }
             $msg .= $this->getMessageAdd($qty_input);
         }
 

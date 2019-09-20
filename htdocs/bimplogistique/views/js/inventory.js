@@ -24,34 +24,41 @@ function insertProduct(input, quantity) {
  */
 
 function initEvents() {
-    $("input[name=insert_quantity]").css('border', 'SOLID 2px white');
-    var $inputs_selector = $("input[name*=insert_]");
-    $inputs_selector.on('keydown', function (event) {
-        var key = event.which;
-        if (key === 9 || key === 13) {
-            event.preventDefault(event);
-            var input = $("input[name=search_insert_line]").val();
-            var quantity = $("input[name=insert_quantity]").val();
-            
-            if(-1000 < Number(input) && Number(input) < 1000) {
-                $("input[name=search_insert_line]").val('');
-                $("input[name=insert_quantity]").val(input);
-                var time=0.6;
-                $("input[name=insert_quantity]").css({
-                    transition : 'border-color ' + time + 's ease-in-out',
-                    "border-color": "orange"
-                });
-                setTimeout(function(){
-                    $("input[name=insert_quantity]").css({
-                        transition : 'border-color ' + time + 's ease-in-out',
-                        "border-color": "white"
-                    });
-                }, time * 1000);
+    
+    waitForElement('input[name=search_insert_line]', function () {
+        waitForElement('input[name=insert_quantity]', function () {
+            $("input[name=insert_quantity]").css('border', 'SOLID 2px white');
+            var $inputs_selector = $("input[name*=insert_]");
+            $inputs_selector.on('keydown', function (event) {
+                event.stopPropagation();
+                var key = event.which;
+                if (key === 9 || key === 13) {
+                    event.preventDefault(event);
+                    var input = $("input[name=search_insert_line]").val();
+                    var quantity = $("input[name=insert_quantity]").val();
 
-                return;
-            }
-            insertProduct(input, quantity);
-        }
+                    if(-1000 < Number(input) && Number(input) < 1000) {
+                        $("input[name=search_insert_line]").val('');
+                        $("input[name=insert_quantity]").val(input);
+                        var time=0.6;
+                        $("input[name=insert_quantity]").css({
+                            transition : 'border-color ' + time + 's ease-in-out',
+                            "border-color": "orange"
+                        });
+                        setTimeout(function(){
+                            $("input[name=insert_quantity]").css({
+                                transition : 'border-color ' + time + 's ease-in-out',
+                                "border-color": "white"
+                            });
+                        }, time * 1000);
+
+                        return;
+                    }
+                    else
+                        insertProduct(input, quantity);
+                }
+            });
+        });
     });
 }
 
@@ -84,13 +91,8 @@ $(document).ready(function () {
         var audio_error = new Audio(DOL_URL_ROOT + '/bimplogistique/views/sound/bip_error.mp3');
         audio_error.play();
     });
-    
-    waitForElement('input[name=search_insert_line]', function () {
-        waitForElement('input[name=insert_quantity]', function () {
-            initEvents();
-            $('input[name=search_insert_line]').focus();
-        });
-    });
+   
+    initEvents()
 
 });
 
@@ -103,3 +105,14 @@ function playBipError() {
     var audio_error = new Audio(DOL_URL_ROOT + '/bimplogistique/views/sound/bip_error.mp3');
     audio_error.play();
 }
+
+
+
+$(document).ready(function () {
+    $('body').on('urlHashChange', function (e) {
+        if(e.tab_name == 'scan')
+        setTimeout(function(){
+            initEvents();
+        },500);
+    });
+});

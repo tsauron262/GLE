@@ -15,18 +15,15 @@ class inventoryController extends BimpController {
 
         $errors = $inventory_line->checkInput($input, $id_product, $id_equipment);
         
-        if((int) $id_equipment > 0)
-            $tab = $inventory->createLinesEquipment($id_product, $id_equipment);
-        else {
-//            if($quantity_input < 0)
-//                $sign = -1;
-//            else
-//                $sign = 1;
-            $tab = $inventory->createLinesProduct($id_product, $quantity_input);
+        if(!count($errors)){
+            if((int) $id_equipment > 0)
+                $tab = $inventory->createLinesEquipment($id_product, $id_equipment);
+            else
+                $tab = $inventory->createLinesProduct($id_product, $id_equipment, $quantity_input);
+            $id_inventory_det = $tab['id_inventory_det'];
+            $errors = array_merge($errors, $tab['errors']);
+            $msg = $tab['msg'];
         }
-        $id_inventory_det = $tab['id_inventory_det'];
-        $errors = array_merge($errors, $tab['errors']);
-        $msg = $tab['msg'];
 
         $data = array(
             'id_inventory_det' => $id_inventory_det,

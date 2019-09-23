@@ -15,22 +15,25 @@ BimpCore::displayHeaderFiles();
 global $db;
 $bdb = new BimpDb($db);
 
-$commandes = BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_Commande', array(
-            'fk_statut'         => array(
-                'in' => array(1, 2, 3)
-            ),
-            'logistique_status' => array(
-                'operator' => '!=',
-                'value'    => 6
-            )
-        ));
+$where = '`fk_statut` IN (1,2,3) AND `logistique_status` != 6';
 
-foreach ($commandes as $commande) {
-    if (!BimpObject::objectLoaded($commande)) {
-        continue;
+$rows = $bdb->getRows('commande', $where, null, 'array', array('rowid', 'fk_statut', 'logistique_status', 'shipment_status', 'invoice_status'));
+
+if (is_array($rows)) {
+    foreach ($rows as $r) {
+        if (in_array((int) $r['logistique_status'], array(3, 5, 6)) &&
+                (int) $r['shipment_status'] === 2 && (int) $r['invoice_status'] === 2) {
+            if (in_array((int) $r['fk_statut'], array(1, 2))) {
+                $bdb->update('commande', array(
+                    'fk_statut' => 3
+                        ), '`rowid` = ' . (int) $r['rowid']);
+            }
+        } elseif ((int) $r['fk_statut'] === 3) {
+            $bdb->update('commande', array(
+                'fk_statut' => 1
+                    ), '`rowid` = ' . (int) $r['rowid']);
+        }
     }
-
-    $commande->checkStatus();
 }
 
 echo '<br/>FIN';

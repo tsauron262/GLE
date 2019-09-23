@@ -150,6 +150,12 @@ class Interfacevalidate extends DolibarrTriggers
                 $bimp_object->onUnValidate();
             }
         }
+        if ($action == 'BILL_SUPPLIER_DELETE') {
+            $bimp_object = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureFourn', $object->id);
+            if (BimpObject::objectLoaded($bimp_object)) {
+                $bimp_object->onDelete();
+            }
+        }
 
         //Classé facturé
         if ($action == "BILL_VALIDATE") {

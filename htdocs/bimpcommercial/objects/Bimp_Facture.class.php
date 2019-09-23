@@ -1172,6 +1172,24 @@ class Bimp_Facture extends BimpComm
         return $totals;
     }
 
+    public function getDefaultMailTo()
+    {
+        $items = array();
+        if ($this->isLoaded()) {
+            $contacts = $this->dol_object->liste_contact(-1, 'external', 0, 'BILLING');
+            $emails = array();
+            foreach ($contacts as $item) {
+                if ((string) $item['email'] && (int) $item['id'] && !in_array($item['id'], $items)) {
+                    $emails[] = $item['email'];
+//                    $items[(int) $item['id']] = $item['libelle'] . ': ' . $item['firstname'] . ' ' . $item['lastname'] . ' (' . $item['email'] . ')';
+                    $items[] = $item['id'];
+                }
+            }
+        }
+
+        return $items;
+    }
+
     // Affichages: 
 
     public function displayPaid()
@@ -2266,6 +2284,14 @@ class Bimp_Facture extends BimpComm
                 if (BimpObject::objectLoaded($commande_line)) {
                     $commande_line->onFactureDelete($this->id);
                 }
+            }
+
+            $shipments = BimpCache::getBimpObjectObjects('bimplogistique', 'BL_CommandeShipment', array(
+                        'id_facture' => (int) $this->id
+            ));
+
+            foreach ($shipments as $shipment) {
+                $shipment->updateField('id_facture', 0);
             }
         }
         $this->majStatusOtherPiece();

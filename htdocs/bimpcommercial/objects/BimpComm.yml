@@ -356,6 +356,10 @@ forms:
                           params: 
                               - mail_to
                   multiple: 1
+              values: 
+                  array: mailsTo
+              value: 
+                  callback: getDefaultMailTo
               required: 1
               
             - custom: 1
@@ -643,6 +647,14 @@ lists_cols:
         label: Client Fact.
         value: 
             callback: displayClientFact
+    tx_marge: 
+        label: Tx marge
+        value: 
+            callback: displayTxMarge
+    tx_marque: 
+        label: Tx marque
+        value: 
+            callback: displayTxMarque
         
 lists: 
     default: 

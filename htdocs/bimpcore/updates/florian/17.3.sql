@@ -1,0 +1,1 @@
+ALTER TABLE `llx_commande_fournisseur` ADD `type_entrepot` INT NOT NULL DEFAULT '2';

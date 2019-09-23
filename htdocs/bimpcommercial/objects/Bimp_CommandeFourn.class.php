@@ -810,7 +810,7 @@ class Bimp_CommandeFourn extends BimpComm
         return $array;
     }
 
-    public static function getTypesEntrepot()
+    public static function getTypesEntrepotArray()
     {
         if (empty(static::$types_entrepot)) {
             self::loadClass('bimpequipment', 'BE_Place');

@@ -79,4 +79,37 @@ class Bimp_Product_Entrepot extends BimpObject
 
         parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors);
     }
+    
+    public function displayLastBuyPrice()
+    {
+        $product = $this->getChildObject('product');
+        
+        $lignes = array();
+        
+        if (BimpObject::objectLoaded($product)) {
+            $sql = 'SELECT unitprice, rowid';
+            $sql .= ' FROM ' . MAIN_DB_PREFIX . 'product_fournisseur_price';
+            $sql .= ' WHERE fk_product=' . $product->getData('id');
+
+            $result = $this->db->db->query($sql);
+            if ($result and mysqli_num_rows($result) > 0) {
+                while ($obj = $this->db->db->fetch_object($result)) {
+                    $lignes[$obj->rowid] = $obj->unitprice;
+                }
+            }
+        }
+        $good_price = 0;
+        $good_id = 0;
+        foreach($lignes as $rowid => $unitprice) {
+            if($good_id < $rowid) {
+                $good_id = $rowid;
+                $good_price = $unitprice;
+            }
+        }
+
+        if($good_price != 0)
+            return $good_price;
+        
+        return "Non renseigné";
+    }
 }

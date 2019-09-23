@@ -104,6 +104,10 @@ lists:
                 field: ventes_qty
             ventes_ht:
                 field: ventes_ht
+            custom: 
+              label: Dernier PA
+              value:
+                callback: displayLastBuyPrice
         
 filters_panels: 
     default: 

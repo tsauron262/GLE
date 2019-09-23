@@ -54,16 +54,22 @@ fields:
         label: Stock ShowRoom
         extra: 1
         type: int
+        sortable: 0
+        searchable: 0
         
     ventes_qty:
         label: Nb Ventes
         extra: 1
         type: int
+        sortable: 0
+        searchable: 0
         
     ventes_ht:
         label: Ventes Ht
         extra: 1
         type: money
+        sortable: 0
+        searchable: 0
    
     product_categories: 
         label: Catégories produit
@@ -71,7 +77,40 @@ fields:
         type: items_list
         items_data_type: id_object
         object: category
+        
+    cur_pa: 
+        label: Prix d'achat actuel
+        extra: 1
+        type: money
+        sortable: 0
+        searchable: 0
 
+lists_cols: 
+    fk_entrepot: 
+        field: fk_entrepot
+        display: nom_url
+    fk_product: 
+        field: fk_product
+        display: nom_url_libelle
+    reel: 
+        field: reel
+    stockShowRoom:
+        field: stockShowRoom
+    ventes_qty:
+        field: ventes_qty
+    ventes_ht:
+        field: ventes_ht
+    cur_pa: 
+        field: cur_pa
+    date_last_vente: 
+        label: Date dernière vente
+        value: 
+            callback: displayLastVenteDate
+    date_last_achat:
+        label: Date dernier achat
+        value: 
+            callback: displayLastAchatDate
+                
 lists: 
     default: 
         title: Produits/Entrepots
@@ -91,19 +130,11 @@ lists:
         n: 50
         cols: 
             fk_entrepot: 
-                field: fk_entrepot
-                display: nom_url
             fk_product: 
-                field: fk_product
-                display: nom_url_libelle
             reel: 
-                field: reel
             stockShowRoom:
-                field: stockShowRoom
             ventes_qty:
-                field: ventes_qty
             ventes_ht:
-                field: ventes_ht
         
 filters_panels: 
     default: 

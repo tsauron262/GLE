@@ -2011,6 +2011,10 @@ class Bimp_Commande extends BimpComm
     }
 
     // Checks status: 
+    
+    public function checkStatus() {
+        
+    }
 
     public function checkLogistiqueStatus()
     {

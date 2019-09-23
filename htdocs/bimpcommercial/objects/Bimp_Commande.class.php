@@ -155,7 +155,7 @@ class Bimp_Commande extends BimpComm
                     $errors[] = 'ID de la commande absent';
                     return 0;
                 }
-                
+
                 if (!in_array($status, array(1, 2, 3))) {
                     $errors[] = $invalide_error;
                     return 0;
@@ -2011,9 +2011,20 @@ class Bimp_Commande extends BimpComm
     }
 
     // Checks status: 
-    
-    public function checkStatus() {
-        
+
+    public function checkStatus()
+    {
+        if ($this->isLoaded()) {
+            if (in_array((int) $this->getData('logistique_status'), array(3, 5, 6)) &&
+                    (int) $this->getData('shipment_status') === 2 &&
+                    (int) $this->getData('invoice_status') === 2) {
+                if (in_array((int) $this->getData('fk_statut'), array(Commande::STATUS_VALIDATED, Commande::STATUS_ACCEPTED))) {
+                    $this->updateField('fk_statut', Commande::STATUS_CLOSED);
+                }
+            } elseif ((int) $this->getData('fk_statut') === Commande::STATUS_CLOSED) {
+                $this->updateField('fk_statut', Commande::STATUS_VALIDATED);
+            }
+        }
     }
 
     public function checkLogistiqueStatus()
@@ -2022,6 +2033,7 @@ class Bimp_Commande extends BimpComm
             $status_forced = $this->getData('status_forced');
 
             if (isset($status_forced['logistique']) && (int) $status_forced['logistique']) {
+                $this->checkStatus();
                 return;
             }
 
@@ -2056,6 +2068,7 @@ class Bimp_Commande extends BimpComm
                     $this->updateField('logistique_status', $new_status);
                 }
             }
+            $this->checkStatus();
         }
     }
 
@@ -2065,6 +2078,7 @@ class Bimp_Commande extends BimpComm
             $status_forced = $this->getData('status_forced');
 
             if (isset($status_forced['shipment']) && (int) $status_forced['shipment']) {
+                $this->checkStatus();
                 return;
             }
 
@@ -2100,6 +2114,8 @@ class Bimp_Commande extends BimpComm
             if ($new_status !== $current_status) {
                 $this->updateField('shipment_status', $new_status);
             }
+
+            $this->checkStatus();
         }
     }
 
@@ -2109,6 +2125,7 @@ class Bimp_Commande extends BimpComm
             $status_forced = $this->getData('status_forced');
 
             if (isset($status_forced['invoice']) && (int) $status_forced['invoice']) {
+                $this->checkStatus();
                 return;
             }
 
@@ -2144,6 +2161,8 @@ class Bimp_Commande extends BimpComm
             if ($new_status !== $current_status) {
                 $this->updateField('invoice_status', $new_status);
             }
+
+            $this->checkStatus();
         }
     }
 

@@ -1354,7 +1354,7 @@ class BimpInput
         foreach ($data as $data_name => $data_value) {
             $html .= ' data-' . $data_name . '="' . $data_value . '"';
         }
-        
+
         if ($disabled) {
             $html .= ' disabled';
         }

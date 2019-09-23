@@ -26,8 +26,7 @@ labels:
 objects: 
     lines: 
         instance: 
-            bimp_object: Bimp_FactureFournLine
-            
+            bimp_object: Bimp_FactureFournLine 
     files:
         list: 
             filters:
@@ -138,6 +137,8 @@ fields:
     total: unset
     remise_globale: unset
     remise_globale_label: unset
+    tx_marge: unset
+    tx_marque: unset
     
 forms:
     default: 

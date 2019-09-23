@@ -724,6 +724,9 @@ class BC_Form extends BC_Panel
                 $field_params = BimpComponent::fetchParams($row_path, BC_Field::$type_params_def[$params['data_type']]);
             }
             $field_params['required'] = (int) $params['required'];
+            if ($this->object->config->isDefined($row_path . '/values')) {
+                $field_params['values'] = $this->object->config->get($row_path . '/values', array(), false, 'array');
+            }
             $input = new BC_Input($this->object, $params['data_type'], $params['input_name'], $row_path . '/input', $params['value'], $field_params);
             $input->display_card_mode = 'visible';
             $input->setNamePrefix($this->fields_prefix);

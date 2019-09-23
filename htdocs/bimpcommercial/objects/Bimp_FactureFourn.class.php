@@ -389,7 +389,7 @@ class Bimp_FactureFourn extends BimpComm
                     'icon'    => 'fas_copy',
                     'onclick' => $this->getJsActionOnclick('duplicate', array(), array(
                         'confirm_msg' => 'Etes-vous sûr de vouloir cloner ' . $this->getLabel('this'),
-                        'form_name' => 'duplicate_propal'
+                        'form_name'   => 'duplicate_propal'
                     ))
                 );
             }
@@ -933,6 +933,19 @@ class Bimp_FactureFourn extends BimpComm
                 }
 
                 $product->setCurrentPaHt($pa_ht, $id_fp, 'commande_fourn', (int) $this->id);
+            }
+        }
+    }
+
+    public function onDelete()
+    {
+        if ($this->isLoaded()) {
+            $receptions = BimpCache::getBimpObjectObjects('bimplogistique', 'BL_CommandeFournReception', array(
+                        'id_facture' => (int) $this->id
+            ));
+
+            foreach ($receptions as $reception) {
+                $reception->updateField('id_facture', 0);
             }
         }
     }

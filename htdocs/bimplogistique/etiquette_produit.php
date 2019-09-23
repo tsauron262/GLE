@@ -15,21 +15,22 @@ if (!$type) {
 
 $id_product = (int) BimpTools::getValue('id_product', 0);
 $id_products = array();
-if(BimpTools::getValue('id_products', 0) != '')
-    explode(',', BimpTools::getValue('id_products', 0));
 
-if (!$id_product && count($id_products) == 0) {
-    die('Erreur: ID du produit');
+if (BimpTools::getValue('id_products', '') != '') {
+    $id_products = explode(',', BimpTools::getValue('id_products', ''));
 }
 
-if(count($id_products) == 0){
+if (!$id_product && count($id_products) == 0) {
+    die('Erreur: ID du produit absent');
+}
+
+if (count($id_products) == 0) {
     $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $id_product);
 
     if (!BimpObject::objectLoaded($product)) {
         die('Erreur: Le produit d\'ID ' . $id_product . ' n\'existe pas');
     }
-}
- else {
+} else {
     $product = BimpObject::getInstance('bimpcore', 'Bimp_Product');
 }
 
@@ -52,11 +53,11 @@ switch ($type) {
 }
 
 $pdf->qty_etiquettes = $qty;
-if(count($id_products) == 0)
+if (count($id_products) == 0)
     $pdf->init($product->dol_object);
 else
     $pdf->init($id_products);
-    
+
 
 if ($pdf->render('etiquette_prod_' . $type . '_' . $id_product . '.pdf', true, true)) {
     exit;

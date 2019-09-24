@@ -5,11 +5,10 @@ objects:
     inventory:
         instance: 
             bimp_object: Inventory
-            
-    inventoryline:
+    inventorysr:
         instance: 
-            bimp_object: inventoryLine
-            
+            bimp_object: InventorySR
+        
 sections:
     - type: tabs
       tabs: 
@@ -20,3 +19,10 @@ sections:
                   list: 
                       panel: 1
                       object: inventory
+        inventory_sr:
+            label: Inventaires Show Room
+            sections:
+                - type: list
+                  list: 
+                      panel: 1
+                      object: inventorysr

@@ -224,6 +224,9 @@ filters_panels:
                 field: id_entrepot
             secteur: 
                 field: secteur
+            status: 
+                field: fk_statut
+                child: parent
             user: 
                 field: id_user
 #            client: 

@@ -31,11 +31,17 @@ class InterfaceBimpbimp extends DolibarrTriggers {
         
         
         if($action == "USER_CREATE" && $object->array_options['options_mail_bienvenue']){
-            $msg = "Bonjour, un nouveau collaborateur : ".$object->getFullName($langs)." viens de rejoindre l'équipe";
+//            $msg = "Bonjour, un nouveau collaborateur : ".$object->getFullName($langs)." viens de rejoindre l'équipe";
+            
+            $genre = ($object->gender == "man"? "Mr " : ($object->gender == "woman" ? "Mme " : ""));
+            $msg = "Bonjour à tous, <br/><br/>Un nouveau collaborateur «  ".$genre.$object->getFullName($langs)." »   vient d'intégrer les équipes";
+            
             if($object->getFullAddress() != "")
-                $msg .= "<br/>à ".$object->getFullAddress();
+                $msg .= " de ".$object->getFullAddress();
             if($object->job != "")
-                $msg .= "<br/>en tant que ".$object->job;
+                $msg .= " en qualité de ".$object->job;
+            
+            $msg .= "<br/>Nous lui souhaitons la bienvenue.<br/><br/>Bien cordialement";
             
             mailSyn2("Nouveau Collaborateur", "go@bimp.fr", "admin@bimp.fr", $msg);
         }

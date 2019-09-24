@@ -26,6 +26,21 @@ objects:
                 module: categories
                 file: categorie
                 
+    marque: 
+        extends: category
+        relation: hasOne
+        instance: 
+            id_object: 
+                field_value: marque
+                
+    gamme: 
+        extends: category
+        relation: hasOne
+        instance: 
+            id_object: 
+                field_value: gamme
+        
+                
 fields: 
     fk_entrepot: 
         label: Entrepot
@@ -84,6 +99,28 @@ fields:
         type: money
         sortable: 0
         searchable: 0
+        
+
+    marque: 
+        label: Marque
+        extra: 1
+        type: id_object
+        object: marque
+        values: 
+            array: marques
+            
+    gamme: 
+        label: Gamme matériel
+        extra: 1
+        type: id_object
+        object: gamme
+        values: 
+            array: gammesMateriel
+        
+    type_materiel: 
+        label: Type matériel
+        value: 
+            callback: displayTypeMateriel
 
 lists_cols: 
     fk_entrepot: 
@@ -110,6 +147,15 @@ lists_cols:
         label: Date dernier achat
         value: 
             callback: displayLastAchatDate
+            
+    marque: 
+        field: marque
+    gamme: 
+        field: gamme
+    type_materiel: 
+        label: Type matériel
+        value: 
+            callback: displayTypeMateriel
                 
 lists: 
     default: 
@@ -141,6 +187,9 @@ lists:
               value:
                 callback: displayLastBuyPrice
             cur_pa:
+            marque: 
+            gamme:
+            type_materiel:
         
 filters_panels: 
     default: 

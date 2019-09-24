@@ -189,6 +189,27 @@ class Bimp_Product_Entrepot extends BimpObject
             $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $this->getData('fk_product'));
             if (BimpObject::objectLoaded($prod)) {
                 $fields['cur_pa'] = $prod->getCurrentPaHt(null, true);
+
+                $categories = BimpCache::getProductCategoriesArray((int) $this->getData('fk_product'));
+                foreach ($categories as $id_category => $label) {
+                    $fields['product_categories'][] = (int) $id_category;
+                }
+
+                $marques_categories = BimpCache::getMarquesList();
+                foreach ($fields['product_categories'] as $id_category) {
+                    if (in_array((int) $id_category, $marques_categories)) {
+                        $fields['marque'] = $id_category;
+                        break;
+                    }
+                }
+
+                $gammes_materiel_categories = BimpCache::getGammesMaterielList();
+                foreach ($fields['product_categories'] as $id_category) {
+                    if (in_array((int) $id_category, $gammes_materiel_categories)) {
+                        $fields['gamme'] = $id_category;
+                        break;
+                    }
+                }
             }
         }
 
@@ -226,5 +247,23 @@ class Bimp_Product_Entrepot extends BimpObject
             return $good_price;
         
         return "Aucun";
+    }
+    
+    public function displayTypeMateriel()
+    {
+        if ($this->isLoaded()) {
+            $cats = $this->getData('product_categories');
+            if (!is_array($cats)) {
+                $cats = array();
+            }
+
+            if (in_array((int) BimpCore::getConf('desktop_id_categorie'), $cats)) {
+                return 'desktop';
+            } elseif (in_array((int) BimpCore::getConf('notebook_id_categorie'), $cats)) {
+                return 'notebook';
+            }
+        }
+
+        return '';
     }
 }

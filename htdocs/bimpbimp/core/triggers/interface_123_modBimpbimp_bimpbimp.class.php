@@ -43,7 +43,7 @@ class InterfaceBimpbimp extends DolibarrTriggers {
             
             $msg .= "<br/>Nous lui souhaitons la bienvenue.<br/><br/>Bien cordialement";
             
-            mailSyn2("Nouveau Collaborateur", "go@bimp.fr", "admin@bimp.fr", $msg);
+            mailSyn2("Nouveau Collaborateur", "go@bimp.fr", "rh@bimp.fr", $msg);
         }
     }
 

@@ -225,6 +225,6 @@ class Bimp_Product_Entrepot extends BimpObject
         if($good_price != 0)
             return $good_price;
         
-        return "Non renseigné";
+        return "Aucun";
     }
 }

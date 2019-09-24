@@ -124,6 +124,26 @@ class Bimp_Product_Entrepot extends BimpObject
 
         return 0;
     }
+    
+    public function displayNbMonthVentesQty($nb_month, $data = 'qty')
+    {
+        if ($this->isLoaded() && (int) $nb_month) {
+            $dt = new DateTime();
+            $dt->sub(new DateInterval('P' . $nb_month . 'M'));
+            $dateMin = $dt->format('Y-m-d') . ' 00:00:00';
+            $dateMax = date('Y-m-d') . ' 23:59:59';
+            $id_product = (int) $this->getData('fk_product');
+            $id_entrepot = ((int) $this->getData('fk_entrepot') ? (int) $this->getData('fk_entrepot') : null);
+
+            $ventes = static::$product_instance->getVentes($dateMin, $dateMax, $id_entrepot, $id_product);
+            if (isset($ventes[$data])) {
+                return $ventes[$data];
+            }
+        }
+
+
+        return 0;
+    }
 
     // Actions:
 
@@ -152,6 +172,20 @@ class Bimp_Product_Entrepot extends BimpObject
                 'value' => array(
                     'callback' => array(
                         'method' => 'displayNbMonthVentes',
+                        'params' => array(
+                            $nb_month
+                        )
+                    )
+                )
+            );
+        }
+        
+        foreach (array(1, 3, 6, 12) as $nb_month) {
+            $cols['ventes_' . $nb_month . '_mois'] = array(
+                'label' => 'Vente à ' . $nb_month . ' mois',
+                'value' => array(
+                    'callback' => array(
+                        'method' => 'displayNbMonthVentesQty',
                         'params' => array(
                             $nb_month
                         )

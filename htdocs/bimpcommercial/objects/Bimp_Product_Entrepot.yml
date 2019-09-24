@@ -180,6 +180,7 @@ lists:
             reel: 
             stockShowRoom:
             ventes_qty:
+                field: ventes_qty
             ventes_ht:
                 field: ventes_ht
             custom: 

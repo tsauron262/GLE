@@ -140,6 +140,7 @@ lists:
               label: Dernier PA
               value:
                 callback: displayLastBuyPrice
+            cur_pa:
         
 filters_panels: 
     default: 

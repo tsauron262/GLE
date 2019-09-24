@@ -138,7 +138,6 @@ lists:
                 field: ventes_ht
             custom: 
               label: Dernier PA
-              type: float
               value:
                 callback: displayLastBuyPrice
         

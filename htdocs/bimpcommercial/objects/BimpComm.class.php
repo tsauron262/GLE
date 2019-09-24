@@ -1164,6 +1164,36 @@ class BimpComm extends BimpDolObject
         return array();
     }
 
+    public function getTotal_paListTotal($filters = array(), $joins = array())
+    {
+        $return = array(
+            'data_type' => 'money',
+            'value'     => 0
+        );
+        
+        $line = $this->getLineInstance();
+
+        if (is_a($line, 'ObjectLine')) {
+            $joins['det'] = array(
+                'table' => $line::$dol_line_table,
+                'alias' => 'det',
+                'on'    => 'a.rowid = det.' . $line::$dol_line_parent_field
+            );
+
+            $sql = 'SELECT SUM(det.qty * det.buy_price_ht) as total';
+            $sql .= BimpTools::getSqlFrom($this->getTable(), $joins, 'a');
+            $sql .= BimpTools::getSqlWhere($filters);
+
+            $result = $this->db->executeS($sql, 'array');
+
+            if (isset($result[0]['total'])) {
+                $return['value'] = (float) $result[0]['total'];
+            }
+        }
+
+        return $return;
+    }
+
     // Getters - Overrides BimpObject
 
     public function getName($with_generic = true)
@@ -2287,7 +2317,7 @@ class BimpComm extends BimpDolObject
         } else {
             // Copie des contacts: 
             $new_object->copyContactsFromOrigin($this, $errors);
-            
+
             // Copie des lignes: 
             $lines_errors = $new_object->createLinesFromOrigin($this);
 

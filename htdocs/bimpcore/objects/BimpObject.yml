@@ -375,6 +375,12 @@ forms:
               show: 
                   callback: showListConfigSort
             - custom: 1
+              label: Afficher les totaux
+              input_name: total_row
+              data_type: bool
+              input: 
+                  type: toggle
+            - custom: 1
               label: Colonnes
               input_name: cols
               no_container: 1

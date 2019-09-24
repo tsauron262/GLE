@@ -150,7 +150,6 @@ fields:
         type: id_object
         object: entrepot_commission
         default_value: 0
-        
     ref: unset
     fk_availability: unset
     fk_input_reason: unset
@@ -593,7 +592,6 @@ filters_panels:
 lists_cols: 
     ref: 
         field: facnumber
-        has_total: 1
     type: 
         field: type
     centre: 
@@ -632,7 +630,11 @@ lists_cols:
     secteur_comm_check: 
         label: Secteur
         value: 
-            callback: displaySecteurWithCommercialCheck        
+            callback: displaySecteurWithCommercialCheck     
+    remain_to_pay: 
+        label: Reste à payer
+        value: 
+            callback: displayRemainToPay
     
 lists: 
     default: 

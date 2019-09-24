@@ -1419,6 +1419,15 @@ class Bimp_Facture extends BimpComm
         return '';
     }
 
+    public function displayRemainToPay()
+    {
+        if ($this->isLoaded()) {
+            return BimpTools::displayMoneyValue((float) $this->getRemainToPay());
+        }
+
+        return '';
+    }
+
     //Rendus HTML: 
 
     public function renderContentExtraLeft()

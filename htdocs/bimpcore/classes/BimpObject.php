@@ -6323,6 +6323,10 @@ class BimpObject extends BimpCache
                 $config->set('sort_option', '');
             }
 
+            if (isset($data['total_row'])) {
+                $config->set('total_row', (int) $data['total_row']);
+            }
+
             if (isset($data['cols'])) {
                 $config->set('cols', implode(',', $data['cols']));
             }

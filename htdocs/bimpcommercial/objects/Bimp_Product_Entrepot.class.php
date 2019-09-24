@@ -181,7 +181,7 @@ class Bimp_Product_Entrepot extends BimpObject
         }
         
         foreach (array(1, 3, 6, 12) as $nb_month) {
-            $cols['ventes_' . $nb_month . '_mois'] = array(
+            $cols['ventes_' . $nb_month . '_mois_qty'] = array(
                 'label' => 'Vente à ' . $nb_month . ' mois',
                 'value' => array(
                     'callback' => array(

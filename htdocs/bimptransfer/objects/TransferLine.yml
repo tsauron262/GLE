@@ -74,6 +74,9 @@ lists:
            status:
                field: status
                child: parent
+           date_create:
+               field: date_create
+               child: parent
            id_product: 
                field: id_product
                display: nom_url
@@ -124,6 +127,9 @@ filters_panels:
                field: quantity_transfered
             date_opening: 
                 field: date_opening
+                child: parent
+            date_create:
+                field: date_create
                 child: parent
             categ1:
                 custom: 1

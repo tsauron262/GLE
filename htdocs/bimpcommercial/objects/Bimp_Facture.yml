@@ -118,6 +118,12 @@ fields:
         label: Paye
         type: bool
         default_value: 0
+    pdf_hide_pu: 
+        label: Masquer les prix unitaires dans le PDF
+        dol_extra_field: 1
+        type: bool
+        default_value: 0
+        sortable: 0
     pdf_hide_reduc: 
         label: Masquer les remises dans le PDF
         dol_extra_field: 1
@@ -299,6 +305,8 @@ forms:
                 field: fk_account
                 show: 
                     callback: isEditable
+            pdf_hide_pu: 
+                field: pdf_hide_pu 
             pdf_hide_reduc: 
                 field: pdf_hide_reduc
             pdf_hide_total: 
@@ -541,6 +549,8 @@ fields_tables:
                 
     pdf: 
         rows: 
+            - field: pdf_hide_pu
+              edit: 1
             - field: pdf_hide_reduc
               edit: 1
             - field: pdf_hide_total

@@ -1589,6 +1589,8 @@ class Bimp_Facture extends BimpComm
             }
 
             // Reste à payer: 
+            $remainToPay_final = round($remainToPay_final, 2);
+
             $paye = (int) $this->getData('paye');
             if ($paye) {
                 $class = 'success';

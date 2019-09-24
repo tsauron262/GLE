@@ -19,6 +19,7 @@ class BimpDocumentPDF extends BimpModelPDF
     public $acompteTva20 = 0;
     public $tva = array();
     public $ht = array();
+    public $hide_pu = false;
     public $hideReduc = false;
     public $hideTtc = false;
     public $hideTotal = false;
@@ -51,6 +52,9 @@ class BimpDocumentPDF extends BimpModelPDF
                     $this->hidePrice = true;
                     if ($this->typeObject != 'invoice')
                         $this->hideTotal = true;
+                }
+                if (isset($this->object->array_options['options_pdf_hide_pu'])) {
+                    $this->hide_pu = (int) $this->object->array_options['options_pdf_hide_pu'];
                 }
                 if (isset($this->object->array_options['options_pdf_hide_reduc'])) {
                     $this->hideReduc = (int) $this->object->array_options['options_pdf_hide_reduc'];
@@ -781,6 +785,10 @@ class BimpDocumentPDF extends BimpModelPDF
 
             $row = $this->traitePeriodicity($row, array('pu_ht', 'pu_remise', 'total_ht', 'total_ttc'));
 
+            if ($this->hide_pu) {
+                unset($row['pu_ht']);
+            }
+
             $table->rows[] = $row;
         }
 
@@ -804,6 +812,10 @@ class BimpDocumentPDF extends BimpModelPDF
                 $row['total_ttc'] = BimpTools::displayMoneyValue(-$remise_infos['remise_globale_amount_ttc'], '');
             elseif (!$this->hideReduc)
                 $row['pu_remise'] = BimpTools::displayMoneyValue(-$remise_infos['remise_globale_amount_ht'], '');
+
+            if ($this->hide_pu) {
+                unset($row['pu_ht']);
+            }
 
             $table->rows[] = $row;
         }

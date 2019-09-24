@@ -303,7 +303,7 @@ class Bimp_Propal extends BimpComm
 
     public function getActionsButtons()
     {
-        global $conf, $langs, $user;
+        global $langs;
         $langs->load('propal');
 
         $buttons = parent::getActionsButtons();
@@ -319,7 +319,6 @@ class Bimp_Propal extends BimpComm
 
             if (!is_null($status)) {
                 $status = (int) $status;
-                $soc = $this->getChildObject('client');
 
                 // Valider:
                 if ($this->isActionAllowed('validate')) {
@@ -416,6 +415,7 @@ class Bimp_Propal extends BimpComm
                                 'date_commande'      => date('Y-m-d'),
                                 'date_livraison'     => $this->getData('date_livraison'),
                                 'libelle'            => $this->getData('libelle'),
+                                'pdf_hide_pu'        => $this->getData('pdf_hide_pu'),
                                 'pdf_hide_reduc'     => $this->getData('pdf_hide_reduc'),
                                 'pdf_hide_total'     => $this->getData('pdf_hide_total'),
                                 'pdf_hide_ttc'       => $this->getData('pdf_hide_ttc'),

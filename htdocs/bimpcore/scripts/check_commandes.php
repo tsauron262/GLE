@@ -27,7 +27,6 @@ foreach ($commandes as $id_c) {
     }
 
     unset($comm);
-    unset(BimpCache::$cache);
     BimpCache::$cache = array();
 }
 

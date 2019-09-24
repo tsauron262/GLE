@@ -1837,6 +1837,8 @@ class Bimp_CommandeFourn extends BimpComm
         $new_data['fk_user_approve2'] = 0;
         $new_data['fk_user_resp'] = 0;
 
+        $new_data['status_forced'] = array();
+        
         return parent::duplicate($new_data, $warnings, $force_create);
     }
 

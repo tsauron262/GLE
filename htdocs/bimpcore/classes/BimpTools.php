@@ -649,7 +649,7 @@ class BimpTools
 
         
 //        $max = BimpCache::getBdb()->getMax($table, $field, $where);
-        $max = BimpCache::getBdb()->getMax($table, $field, $where."  AND LENGTH(ref) = (SELECT MAX(LENGTH(ref)) as max FROM `". MAIN_DB_PREFIX . $table."`   WHERE ".$where.")");
+        $max = BimpCache::getBdb()->getMax($table, $field, $where."  AND LENGTH(ref) = (SELECT MAX(LENGTH(".$field.")) as max FROM `". MAIN_DB_PREFIX . $table."`   WHERE ".$where.")");
 
         if ((string) $max) {
             if (preg_match('/^' . $prefix . '([0-9]+)$/', $max, $matches)) {

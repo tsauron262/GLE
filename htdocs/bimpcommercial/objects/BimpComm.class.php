@@ -630,6 +630,15 @@ class BimpComm extends BimpDolObject
 
         return $id_client;
     }
+    
+    public function getDefaultSecteur(){
+        global $user;
+        if(isset($user->array_options['options_secteur']) && $user->array_options['options_secteur'] != "")
+            return $user->array_options['options_secteur'];
+        if(userInGroupe(43, $user->id))
+                return "M";
+        return "";
+    }
 
     public function getEmailUsersFromArray()
     {

@@ -75,6 +75,8 @@ fields:
         dol_extra_field: 1
         values: 
             array: secteurs
+        default_value: 
+            callback: getDefaultSecteur
         required: 1
     ref: 
         label: Référence

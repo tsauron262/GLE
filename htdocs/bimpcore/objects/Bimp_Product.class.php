@@ -2,7 +2,7 @@
 
 ini_set('max_execution_time', 6000);
 
-//ini_set('memory_limit','512M');
+ini_set('memory_limit','512M');
 
 class Bimp_Product extends BimpObject
 {

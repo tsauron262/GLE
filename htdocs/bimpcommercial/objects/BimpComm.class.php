@@ -630,13 +630,14 @@ class BimpComm extends BimpDolObject
 
         return $id_client;
     }
-    
-    public function getDefaultSecteur(){
+
+    public function getDefaultSecteur()
+    {
         global $user;
-        if(isset($user->array_options['options_secteur']) && $user->array_options['options_secteur'] != "")
+        if (isset($user->array_options['options_secteur']) && $user->array_options['options_secteur'] != "")
             return $user->array_options['options_secteur'];
-        if(userInGroupe(43, $user->id))
-                return "M";
+        if (userInGroupe(43, $user->id))
+            return "M";
         return "";
     }
 
@@ -2284,16 +2285,10 @@ class BimpComm extends BimpDolObject
         if (count($copy_errors)) {
             $errors[] = BimpTools::getMsgFromArray($copy_errors, 'Echec de la copie ' . $this->getLabel('of_the'));
         } else {
-            BimpTools::resetDolObjectErrors($this->dol_object);
-            if ($new_object->dol_object->copy_linked_contact($this->dol_object, 'internal') < 0) {
-                $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($new_object->dol_object), 'Echec de la copie des contacts internes');
-            }
-            if (!$new_soc) {
-                BimpTools::resetDolObjectErrors($this->dol_object);
-                if ($new_object->dol_object->copy_linked_contact($this->dol_object, 'external') < 0) {
-                    $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($new_object->dol_object), 'Echec de la copie des contacts externes');
-                }
-            }
+            // Copie des contacts: 
+            $new_object->copyContactsFromOrigin($this, $errors);
+            
+            // Copie des lignes: 
             $lines_errors = $new_object->createLinesFromOrigin($this);
 
             if (count($lines_errors)) {
@@ -2458,6 +2453,22 @@ class BimpComm extends BimpDolObject
             }
         }
         return $errors;
+    }
+
+    public function copyContactsFromOrigin($origin, &$errors = array())
+    {
+        if ($this->isLoaded() && BimpObject::objectLoaded($origin) && is_a($origin, 'BimpComm')) {
+            BimpTools::resetDolObjectErrors($this->dol_object);
+            if ($this->dol_object->copy_linked_contact($origin->dol_object, 'internal') < 0) {
+                $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de la copie des contacts internes');
+            }
+            if ((int) $this->getData('fk_soc') === (int) $origin->getData('fk_soc')) {
+                BimpTools::resetDolObjectErrors($this->dol_object);
+                if ($this->dol_object->copy_linked_contact($origin->dol_object, 'external') < 0) {
+                    $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de la copie des contacts externes');
+                }
+            }
+        }
     }
 
     public function onChildSave($child)

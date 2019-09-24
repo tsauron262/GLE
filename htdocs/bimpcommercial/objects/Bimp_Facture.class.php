@@ -3300,6 +3300,8 @@ class Bimp_Facture extends BimpComm
         $type = (int) $this->getData('type');
         $avoir_to_refacture = null;
 
+        $linked_objects = array();
+
         switch ($type) {
             case Facture::TYPE_REPLACEMENT:
                 $id_facture_replaced = (int) BimpTools::getValue('id_facture_replaced', 0);
@@ -3354,6 +3356,18 @@ class Bimp_Facture extends BimpComm
                 }
 
                 if (!count($errors)) {
+                    $linked_objects = BimpTools::getDolObjectLinkedObjectsList($facture->dol_object, $this->db);
+
+                    foreach ($linked_objects as $item) {
+                        if (!isset($this->dol_object->linked_objects[$item['type']])) {
+                            $this->dol_object->linked_objects[$item['type']] = array();
+                        }
+
+                        if (!in_array((int) $item['id_object'], $this->dol_object->linked_objects[$item['type']])) {
+                            $this->dol_object->linked_objects[$item['type']] = (int) $item['id_object'];
+                        }
+                    }
+
                     $errors = parent::create($warnings, true);
                 }
 
@@ -3387,6 +3401,18 @@ class Bimp_Facture extends BimpComm
                             return $errors;
                         }
                         $this->dol_object->linked_objects['facture'] = array($id_avoir_to_refacture);
+
+                        $linked_objects = BimpTools::getDolObjectLinkedObjectsList($avoir_to_refacture->dol_object, $this->db);
+
+                        foreach ($linked_objects as $item) {
+                            if (!isset($this->dol_object->linked_objects[$item['type']])) {
+                                $this->dol_object->linked_objects[$item['type']] = array();
+                            }
+
+                            if (!in_array((int) $item['id_object'], $this->dol_object->linked_objects[$item['type']])) {
+                                $this->dol_object->linked_objects[$item['type']] = (int) $item['id_object'];
+                            }
+                        }
                     }
                 }
             case Facture::TYPE_DEPOSIT:
@@ -3410,6 +3436,20 @@ class Bimp_Facture extends BimpComm
 
         if (!count($errors)) {
             $this->fetch($this->id);
+
+            // Asso avec commandes: 
+            if (!empty($linked_objects)) {
+                foreach ($linked_objects as $item) {
+                    if ($item['type'] === 'commande') {
+                        $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $item['id_object']);
+                        if (BimpObject::objectLoaded($commande)) {
+                            $asso = new BimpAssociation($commande, 'factures');
+                            $asso->addObjectAssociation((int) $this->id);
+                            unset($asso);
+                        }
+                    }
+                }
+            }
         }
 
         return $errors;

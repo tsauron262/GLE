@@ -2318,6 +2318,7 @@ class Bimp_Commande extends BimpComm
         $errors = array();
         $warnings = array();
         $success = '';
+        $success_callback = '';
 
         if (!isset($data['id_facture'])) {
             $errors[] = 'Aucune facture spécifiée';
@@ -2364,12 +2365,17 @@ class Bimp_Commande extends BimpComm
                         }
                     }
                 }
+
+                if ($id_facture) {
+                    $success_callback = 'window.open(\'' . DOL_URL_ROOT . '/bimpcommercial/index.php?fc=facture&id=' . $id_facture . '\');';
+                }
             }
         }
 
         return array(
-            'errors'   => $errors,
-            'warnings' => $warnings
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $success_callback
         );
     }
 
@@ -2509,10 +2515,12 @@ class Bimp_Commande extends BimpComm
             $errors = $this->update($warnings);
         }
 
+        $url = DOL_URL_ROOT . '/bimplogistique/index.php?fc=commande&id=' . $this->id;
+
         return array(
             'errors'           => $errors,
             'warnings'         => $warnings,
-            'success_callback' => 'bimp_reloadPage();'
+            'success_callback' => 'window.location = \'' . $url . '\';'
         );
     }
 

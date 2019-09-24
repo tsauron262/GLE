@@ -1461,6 +1461,9 @@ class Bimp_Product extends BimpObject
         // COMMAND
         $commandes_c = $this->getCommandes();
         foreach ($commandes_c as $commande) {
+            if((int) $commande->statut != (int) Commande::STATUS_DRAFT)
+                continue;
+            
             $email_sent = false;
             $list_contact = $commande->liste_contact(-1, 'internal');
 
@@ -1496,6 +1499,9 @@ class Bimp_Product extends BimpObject
         // PROPALS
         $propals = $this->getPropals();
         foreach ($propals as $propal) {
+            if((int) $propal->statut != (int) Propal::STATUS_DRAFT)
+                continue;
+            
             $email_sent = false;
             $list_contact = $propal->liste_contact(-1, 'internal');
 
@@ -1533,6 +1539,9 @@ class Bimp_Product extends BimpObject
 
         foreach ($ventes as $id_vente) {
             $vente = BimpCache::getBimpObjectInstance('bimpcaisse', 'BC_Vente', (int) $id_vente);
+            if((int) $vente->getData('status') != BC_Vente::BC_VENTE_BROUILLON)
+                continue;
+            
             if (BimpObject::objectLoaded($vente)) {
                 $user = new User($this->db->db);
                 $user->fetch((int) $vente->getData('id_user_resp'));

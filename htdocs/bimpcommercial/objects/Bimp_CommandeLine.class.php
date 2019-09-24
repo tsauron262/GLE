@@ -469,7 +469,7 @@ class Bimp_CommandeLine extends ObjectLine
                             $qties['status'][(int) $r['status']] = 0;
                         }
                         $qties['status'][(int) $r['status']] += (float) $r['qty'];
-                        if (in_array((int) $r['status'], BR_Reservation::$unavailable_status)) {
+                    if ((int) $r['status'] === 300 || in_array((int) $r['status'], BR_Reservation::$unavailable_status)) {
                             $qties['reserved'] += (float) $r['qty'];
                         } else {
                             $qties['not_reserved'] += (float) $r['qty'];

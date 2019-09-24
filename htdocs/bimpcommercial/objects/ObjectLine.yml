@@ -577,6 +577,9 @@ filters_panels:
             parent: 
                 label: Objet parent
                 field: id_obj
+            entrepot: 
+                field: entrepot
+                child: parent
             fk_soc:
                 field: fk_soc
                 child: parent

@@ -37,12 +37,40 @@ objects:
             bimp_object: 
                 name: FactureDolLine
        
+    facture: 
+        instance: 
+            id_object: 
+                field_value: id_obj
+        
+fields: 
+    id_obj: 
+        label: Facture
+        search: 
+            input: 
+                type: search_list
+                search_list: 
+                    table: facture
+                    fields_search: rowid,facnumber
+                    field_return_label: facnumber
+                    field_return_value: rowid
+                    
+filters_panels: 
+    default: 
+        filters: 
+            parent: 
+                label: Facture
+            date_valid: 
+                field: date_valid
+                child: parent
+                
 lists_cols: 
     reval: 
         label: Revalorisations
         value: 
             callback: displayRevalorisations
-        
+    date_valid: 
+        field: date_valid
+        child: parent
         
 lists: 
     default: 

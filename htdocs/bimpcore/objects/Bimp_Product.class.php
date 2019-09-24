@@ -1,8 +1,8 @@
 <?php
 
 ini_set('max_execution_time', 6000);
-//ini_set('memory_limit','512M');
 
+//ini_set('memory_limit','512M');
 
 class Bimp_Product extends BimpObject
 {
@@ -90,10 +90,10 @@ class Bimp_Product extends BimpObject
 
     // Droits user: 
 
-
     /*
      * Exeptionnelement les droit dans les isCre.. et isEdi... pour la creation des prod par les commerciaux
      */
+
     public function canCreate()
     {
         return 1;
@@ -104,16 +104,12 @@ class Bimp_Product extends BimpObject
         return 1;
     }
 
-    public function isCreatable($force_create = false, &$errors = array())
-    {
-        return $this->isEditable($force_create, $errors);
-    }
-
-    public function isEditable($force_edit = false, &$errors = array())
+    public function canViewStock()
     {
         global $user;
-        if ($force_edit || $user->rights->admin or $user->rights->produit->creer)
+        if ($user->rights->bimpequipment->inventory->close)
             return 1;
+        return 0;
     }
 
     public function canEditField($field_name)
@@ -164,6 +160,18 @@ class Bimp_Product extends BimpObject
     }
 
     // Getters booléens
+
+    public function isCreatable($force_create = false, &$errors = array())
+    {
+        return $this->isEditable($force_create, $errors);
+    }
+
+    public function isEditable($force_edit = false, &$errors = array())
+    {
+        global $user;
+        if ($force_edit || $user->rights->admin or $user->rights->produit->creer)
+            return 1;
+    }
 
     public function isSerialisable()
     {
@@ -336,6 +344,22 @@ class Bimp_Product extends BimpObject
         return (count($errors) ? 0 : 1);
     }
 
+    public function isVentesInit($dateMin = null, $dateMax = null)
+    {
+        if (is_null($dateMin)) {
+            $dateMin = '0000-00-00 00:00:00';
+        }
+        if (preg_match('/^\d{4}\-\d{2}\-\d{2}$/', $dateMin)) {
+            $dateMin .= ' 00:00:00';
+        }
+
+        if (is_null($dateMax)) {
+            $dateMax = date('Y-m-d') . ' 23:59:59';
+        }
+
+        return (int) isset(static::$ventes[$dateMin . '-' . $dateMax]);
+    }
+
     // Getters params: 
 
     public function getDolObjectUpdateParams()
@@ -453,13 +477,27 @@ class Bimp_Product extends BimpObject
             $id_product = $this->id;
         }
 
+        if (is_null($dateMin)) {
+            $dateMin = '0000-00-00 00:00:00';
+        }
+
+        if (preg_match('/^\d{4}\-\d{2}\-\d{2}$/', $dateMin)) {
+            $dateMin .= ' 00:00:00';
+        }
+
+        if (is_null($dateMax)) {
+            $dateMax = date('Y-m-d H:i:s');
+        }
+
+        $cache_key = $dateMin . '-' . $dateMax;
+
         if ((int) $id_product) {
-            if (!isset(self::$ventes[$id_product])) {
+            if (!isset(self::$ventes[$cache_key])) {
                 self::initVentes($dateMin, $dateMax);
             }
 
-            if (isset(self::$ventes[$dateMin . "-" . $dateMax][$id_product][$id_entrepot])) {
-                return self::$ventes[$dateMin . "-" . $dateMax][$id_product][$id_entrepot];
+            if (isset(self::$ventes[$cache_key][$id_product][$id_entrepot])) {
+                return self::$ventes[$cache_key][$id_product][$id_entrepot];
             }
         }
 
@@ -558,6 +596,67 @@ class Bimp_Product extends BimpObject
         }
 
         return $ventes;
+    }
+
+    public function getCategories($edit = 0)
+    {
+
+        global $conf;
+        if ($conf->categorie->enabled) {
+            require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
+            if ($edit == 1) {
+                $form = new Form($this->db->db);
+                $cate_arbo = $form->select_all_categories(Categorie::TYPE_PRODUCT, '', 'parent', 64, 0, 1);
+                return $form->multiselectarray('categories', $cate_arbo, GETPOST('categories', 'array'), '', 0, '', 0, '100%');
+            } else {
+                $form = new Form($this->db->db);
+                return $form->showCategories($this->getData('id'), 'product', 1);
+            }
+        } else {
+            return "L'utilisation de catégorie est inactive";
+        }
+    }
+
+    public function getNbScanned()
+    {
+        global $cache_scann;
+
+        $id_inventory = BimpTools::getValue('id');
+
+        if (!isset($cache_scann[$id_inventory])) {
+            $sql = 'SELECT SUM(qty) as qty, fk_product';
+            $sql .= ' FROM ' . MAIN_DB_PREFIX . 'bl_inventory_det';
+            $sql .= ' WHERE fk_inventory=' . $id_inventory;
+            $sql .= ' GROUP BY fk_product';
+            $result = $this->db->db->query($sql);
+            if ($result) {
+                while ($obj = $this->db->db->fetch_object($result)) {
+                    $cache_scann[$id_inventory][$obj->fk_product] = $obj->qty;
+                }
+            }
+        }
+        if (isset($cache_scann[$id_inventory][$this->getData('id')]))
+            return $cache_scann[$id_inventory][$this->getData('id')];
+        else
+            return 0;
+    }
+
+    public function getLastMouvement()
+    {
+        $html = '';
+        // Last movement
+        $sql = "SELECT MAX(datem) as datem";
+        $sql .= " FROM " . MAIN_DB_PREFIX . "stock_mouvement";
+        $sql .= " WHERE fk_product=" . $this->getData('id');
+        $result = $this->db->db->query($sql);
+        if ($result) {
+            $obj = $this->db->db->fetch_object($result);
+            $html .= $obj->datem;
+        }
+
+        $html .= ' (<a href="' . DOL_URL_ROOT . '/product/stock/mouvement.php?idproduct=' .
+                $this->getData('id') . '">Liste complète</a>)';
+        return $html;
     }
 
     // Getters stocks: 
@@ -988,6 +1087,14 @@ class Bimp_Product extends BimpObject
         return $ref;
     }
 
+    public function displayStockInventory()
+    {
+        $id_inventory = BimpTools::getValue('id');
+        $inventory = BimpCache::getBimpObjectInstance('bimplogistique', 'Inventory', $id_inventory);
+        $stock = $this->getStocksForEntrepot($inventory->getData('fk_warehouse'));
+        return $stock['reel'];
+    }
+
     // Rendus HTML: 
 
     public function renderHeaderExtraLeft()
@@ -1185,7 +1292,7 @@ class Bimp_Product extends BimpObject
                     'foldable' => false,
                     'type'     => 'secondary'
         ));
-        
+
         $html .= '<p>Cliquez sur un lien de la colonne Objets référents pour obtenir une vue détaillée... </p>';
 
         $html .= '<div id="selected_object"></div>';
@@ -1226,11 +1333,6 @@ class Bimp_Product extends BimpObject
         return $html;
     }
 
-    public function getTimeValidation()
-    {
-        
-    }
-
     public function renderMergeKeptProductInput()
     {
         $errors = array();
@@ -1263,6 +1365,18 @@ class Bimp_Product extends BimpObject
         return BimpInput::renderInput('select', 'id_kept_product', BimpTools::getPostFieldValue('id_kept_product', $this->id), array(
                     'options' => $options
         ));
+    }
+
+    public function renderCountry()
+    {
+        // Devrait s'appeller displayCountry (display = afficher une donnée, render = générer un bloc HTML => Important pour s'y retrouver rapidement) 
+
+        global $langs;
+        $id = $this->getData('fk_country');
+        if (!is_null($id) && $id) {
+            return $langs->trans('Country' . $this->db->getValue('c_country', 'code', '`rowid` = ' . (int) $id));
+        }
+        return '';
     }
 
     // Traitements: 
@@ -1347,6 +1461,9 @@ class Bimp_Product extends BimpObject
         // COMMAND
         $commandes_c = $this->getCommandes();
         foreach ($commandes_c as $commande) {
+            if((int) $commande->statut != (int) Commande::STATUS_DRAFT or (int) $commande->statut != (int) Commande::STATUS_CANCELED)
+                continue;
+            
             $email_sent = false;
             $list_contact = $commande->liste_contact(-1, 'internal');
 
@@ -1382,6 +1499,9 @@ class Bimp_Product extends BimpObject
         // PROPALS
         $propals = $this->getPropals();
         foreach ($propals as $propal) {
+            if((int) $propal->statut != (int) Propal::STATUS_DRAFT or (int) $propal->statut != (int) Propal::STATUS_NOTSIGNED)
+                continue;
+            
             $email_sent = false;
             $list_contact = $propal->liste_contact(-1, 'internal');
 
@@ -1419,6 +1539,9 @@ class Bimp_Product extends BimpObject
 
         foreach ($ventes as $id_vente) {
             $vente = BimpCache::getBimpObjectInstance('bimpcaisse', 'BC_Vente', (int) $id_vente);
+            if((int) $vente->getData('status') <= BC_Vente::BC_VENTE_BROUILLON)
+                continue;
+            
             if (BimpObject::objectLoaded($vente)) {
                 $user = new User($this->db->db);
                 $user->fetch((int) $vente->getData('id_user_resp'));
@@ -1797,285 +1920,7 @@ class Bimp_Product extends BimpObject
         return $errors;
     }
 
-    // Actions: 
-
-    public function actionGenerateEtiquettes($data, &$success)
-    {
-        $errors = array();
-        $warnings = array();
-        $success = '';
-        $success_callback = '';
-
-        if (!$this->isLoaded()) {
-            $errors[] = 'ID du produit absent';
-        } else {
-            $type = isset($data['type']) ? (string) $data['type'] : '';
-
-            if (!$type) {
-                $errors[] = 'Type d\'étiquette à générer absent';
-            } else {
-                $qty = isset($data['qty']) ? (int) $data['qty'] : 1;
-
-                $url = DOL_URL_ROOT . '/bimplogistique/etiquette_produit.php?id_product=' . $this->id . '&qty=' . $qty . '&type=' . $type;
-
-                $success_callback = 'window.open(\'' . $url . '\')';
-            }
-        }
-
-
-        return array(
-            'errors'           => $errors,
-            'warnings'         => $warnings,
-            'success_callback' => $success_callback
-        );
-    }
-
-    public function actionPrintEtiquettes($data, &$success)
-    {
-        $errors = array();
-        $warnings = array();
-        $success = '';
-        $success_callback = '';
-
-        $ids = $data['id_objects'];
-
-        if (!count($ids)) {
-            $errors[] = 'ID des produits absent';
-        } else {
-            $type = isset($data['type']) ? (string) $data['type'] : '';
-
-            if (!$type) {
-                $errors[] = 'Type d\'étiquette à générer absent';
-            } else {
-                $qty = isset($data['qty']) ? (int) $data['qty'] : 1;
-
-                $url = DOL_URL_ROOT . '/bimplogistique/etiquette_produit.php?id_products=' . implode(',', $ids) . '&qty=1&type=' . $type;
-
-                $success_callback = 'window.open(\'' . $url . '\')';
-            }
-        }
-
-
-        return array(
-            'errors'           => $errors,
-            'warnings'         => $warnings,
-            'success_callback' => $success_callback
-        );
-    }
-
-    public function actionValidate($data = array(), &$success = '')
-    {
-        $errors = $this->validateProduct();
-        return $errors;
-    }
-
-    public function actionMerge($data, &$success)
-    {
-        $errors = array();
-        $warnings = array();
-        $success = 'Fusion effectuée avec succès';
-        $success_callback = '';
-
-        $id_merged_product = (int) (isset($data['id_merged_product']) ? $data['id_merged_product'] : 0);
-        $id_kept_product = (int) (isset($data['id_kept_product']) ? $data['id_kept_product'] : 0);
-
-        if (!$id_merged_product) {
-            $errors[] = 'Aucun produit à fusionner sélectionné';
-        } elseif (!$id_kept_product) {
-            $errors[] = 'Information manquante: produit à conserver';
-        } elseif ($id_merged_product === (int) $this->id) {
-            $errors[] = 'Un produit ne peut pas être fusionné avec lui-même';
-        } elseif ($id_kept_product !== (int) $this->id && $id_kept_product !== (int) $id_merged_product) {
-            $errors[] = 'Erreur: produit à conserver invalide, ' . $id_kept_product . ', ' . $this->id;
-        }
-
-        if (!count($errors)) {
-            if ($id_kept_product !== (int) $this->id) {
-                $merged_product = $this;
-                $product = BimpCache::getBimpObjectInstance($this->module, $this->object_name, (int) $id_merged_product);
-                if (!BimpObject::objectLoaded($product)) {
-                    $errors[] = 'Le produit d\'ID ' . $id_merged_product . ' n\'existe pas';
-                }
-                $success_callback = 'window.location = \'' . DOL_URL_ROOT . '/bimpcore/index.php?fc=product&id=' . $id_merged_product . '\';';
-            } else {
-                $merged_product = BimpCache::getBimpObjectInstance($this->module, $this->object_name, (int) $id_merged_product);
-                if (!BimpObject::objectLoaded($merged_product)) {
-                    $errors[] = 'Le produit d\'ID ' . $id_merged_product . ' n\'existe pas';
-                }
-                $product = $this;
-            }
-
-            if (!count($errors)) {
-                $errors = $product->mergeProduct($merged_product, $warnings);
-            }
-        }
-
-        return array(
-            'errors'           => $errors,
-            'warnings'         => $warnings,
-            'success_callback' => $success_callback
-        );
-    }
-
-    public function actionRefuse($data = array(), &$success = '')
-    {
-        $errors = $this->refuseProduct();
-        return $errors;
-    }
-
-    // Overrides:
-
-    public function validatePost()
-    {
-        $marque = BimpTools::getValue('marque', '');
-        $ref_const = BimpTools::getValue('ref_constructeur', '');
-
-        if ($marque && $ref_const) {
-            $ref = strtoupper(substr($marque, 0, 3));
-            $ref .= '-' . $ref_const;
-            $this->set('ref', $ref);
-        }
-
-        return parent::validatePost();
-    }
-
-    public function insertExtraFields()
-    {
-        return array();
-    }
-
-    public function updateExtraFields()
-    {
-        return array();
-    }
-
-    // Méthodes statiques : 
-
-    private static function initStockDate($date)
-    {
-        global $db;
-        self::$stockDate = array();
-        $sql = $db->query("SELECT `fk_product`,`fk_entrepot`,reel FROM `llx_product_stock`");
-        while ($ln = $db->fetch_object($sql)) {
-            self::$stockDate[$date][$ln->fk_product][$ln->fk_entrepot]['now'] = $ln->reel;
-            self::$stockDate[$date][$ln->fk_product][$ln->fk_entrepot]['stock'] = $ln->reel;
-            self::$stockDate[$date][$ln->fk_product][null]['now'] += $ln->reel;
-            self::$stockDate[$date][$ln->fk_product][null]['stock'] += $ln->reel;
-        }
-
-//        $sql = $db->query("SELECT `fk_product`, `fk_entrepot`, SUM(`value`) as nb FROM `llx_stock_mouvement` WHERE `tms` > STR_TO_DATE('" . $date . "', '%Y-%m-%d') GROUP BY `fk_product`, `fk_entrepot`");
-        $sql = $db->query("SELECT `fk_product`, `fk_entrepot`, SUM(`value`) as nb FROM `llx_stock_mouvement` WHERE `tms` > '" . $date . "' GROUP BY `fk_product`, `fk_entrepot`");
-        while ($ln = $db->fetch_object($sql)) {
-            if (!isset(self::$stockDate[$date][$ln->fk_product][$ln->fk_entrepot]['stock']))
-                self::$stockDate[$date][$ln->fk_product][$ln->fk_entrepot]['stock'] = 0;
-            if (!isset(self::$stockDate[$date][$ln->fk_product][null]['stock']))
-                self::$stockDate[$date][$ln->fk_product][null]['stock'] = 0;
-
-            self::$stockDate[$date][$ln->fk_product][$ln->fk_entrepot]['stock'] -= $ln->nb;
-            self::$stockDate[$date][$ln->fk_product][null]['stock'] -= $ln->nb;
-        }
-    }
-
-    private static function initStockShowRoom()
-    {
-        global $db;
-        self::$stockShowRoom = array();
-//        $sql = $db->query("SELECT `id_product`, `id_entrepot`, COUNT(*)as nb FROM `llx_be_equipment_place` p, llx_be_equipment e WHERE position = 1 AND p.id_equipment = e.id AND p.`type` = 5 GROUP BY `id_entrepot`, `id_product`");
-//        while ($ln = $db->fetch_object($sql)) {
-//            self::$stockShowRoom[$ln->id_product][$ln->id_entrepot] = $ln->nb;
-//            self::$stockShowRoom[$ln->id_product][null] += $ln->nb;
-//        }
-    }
-
-    private static function initLienShowRoomEntrepot()
-    {
-        global $db;
-        self::$lienShowRoomEntrepot = array();
-        $sql = $db->query("SELECT e.rowid as id1, e2.rowid as id2 FROM `llx_entrepot` e,`llx_entrepot` e2 WHERE e2.ref = CONCAT('D',e.ref)");
-        while ($ln = $db->fetch_object($sql)) {
-            self::$lienShowRoomEntrepot[$ln->id1] = $ln->id2;
-        }
-
-        //
-    }
-
-    private static function initVentes($dateMin, $dateMax)
-    {
-        global $db;
-        self::$ventes = array();
-        $query = "SELECT `fk_product`, entrepot, sum(qty) as qty, sum(l.total_ht) as total_ht, sum(l.total_ttc) as total_ttc";
-//        $query .= ", sum(l.qty * l.buy_price_ht) as total_achats";
-        $query .= " FROM `llx_facturedet` l, llx_facture f, llx_facture_extrafields e";
-        $query .= " WHERE `fk_facture` = f.rowid AND e.fk_object = f.rowid AND fk_product > 0";
-        if ($dateMin)
-//            $query .= " AND date_valid > STR_TO_DATE('" . $dateMin . "', '%Y-%m-%d')";
-            $query .= " AND date_valid >= '" . $dateMin . "'";
-        if ($dateMax)
-            $query .= " AND date_valid <= '" . $dateMax . "'";
-//            $query .= " AND date_valid > STR_TO_DATE('" . $dateMax . "', '%Y-%m-%d')";
-
-        $group_by .= " GROUP BY `fk_product`, entrepot";
-
-        $sql = $db->query($query . " AND `subprice` >= 0" . $group_by);
-
-        while ($ln = $db->fetch_object($sql)) {
-            self::$ventes[$dateMin . "-" . $dateMax][$ln->fk_product][$ln->entrepot]['qty'] = $ln->qty;
-            self::$ventes[$dateMin . "-" . $dateMax][$ln->fk_product][$ln->entrepot]['total_ht'] = $ln->total_ht;
-            self::$ventes[$dateMin . "-" . $dateMax][$ln->fk_product][$ln->entrepot]['total_ttc'] = $ln->total_ttc;
-//            self::$ventes[$dateMin . "-" . $dateMax][$ln->fk_product][$ln->entrepot]['total_achats'] = $ln->total_achats;
-//            if(!isset(self::$ventes[$dateMin."-".$dateMax][$ln->fk_product][null]))
-//                    self::$ventes[$dateMin."-".$dateMax][$ln->fk_product][null] = array();
-            self::$ventes[$dateMin . "-" . $dateMax][$ln->fk_product][null]['qty'] += $ln->qty;
-            self::$ventes[$dateMin . "-" . $dateMax][$ln->fk_product][null]['total_ht'] += $ln->total_ht;
-            self::$ventes[$dateMin . "-" . $dateMax][$ln->fk_product][null]['total_ttc'] += $ln->total_ttc;
-//            self::$ventes[$dateMin . "-" . $dateMax][$ln->fk_product][null]['total_achats'] += $ln->total_achats;
-        }
-
-        $sql2 = $db->query($query . " AND `subprice` < 0" . $group_by);
-
-        while ($ln = $db->fetch_object($sql2)) {
-            self::$ventes[$dateMin . "-" . $dateMax][$ln->fk_product][$ln->entrepot]['qty'] = ($ln->qty * -1);
-            self::$ventes[$dateMin . "-" . $dateMax][$ln->fk_product][$ln->entrepot]['total_ht'] = $ln->total_ht;
-            self::$ventes[$dateMin . "-" . $dateMax][$ln->fk_product][$ln->entrepot]['total_ttc'] = $ln->total_ttc;
-//            self::$ventes[$dateMin . "-" . $dateMax][$ln->fk_product][$ln->entrepot]['total_achats'] = $ln->total_achats;
-
-            self::$ventes[$dateMin . "-" . $dateMax][$ln->fk_product][null]['qty'] += ($ln->qty * -1);
-            self::$ventes[$dateMin . "-" . $dateMax][$ln->fk_product][null]['total_ht'] += $ln->total_ht;
-            self::$ventes[$dateMin . "-" . $dateMax][$ln->fk_product][null]['total_ttc'] += $ln->total_ttc;
-//            self::$ventes[$dateMin . "-" . $dateMax][$ln->fk_product][null]['total_achats'] += $ln->total_achats;
-        }
-    }
-
-    // A classer. 
-
-    public function getCategories($edit = 0)
-    {
-
-        global $conf;
-        if ($conf->categorie->enabled) {
-            require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
-            if ($edit == 1) {
-                $form = new Form($this->db->db);
-                $cate_arbo = $form->select_all_categories(Categorie::TYPE_PRODUCT, '', 'parent', 64, 0, 1);
-                return $form->multiselectarray('categories', $cate_arbo, GETPOST('categories', 'array'), '', 0, '', 0, '100%');
-            } else {
-                $form = new Form($this->db->db);
-                return $form->showCategories($this->getData('id'), 'product', 1);
-            }
-        } else {
-            return "L'utilisation de catégorie est inactive";
-        }
-    }
-
-    public function renderCountry()
-    {
-        global $langs;
-        $id = $this->getData('fk_country');
-        if (!is_null($id) && $id) {
-            return $langs->trans('Country' . $this->db->getValue('c_country', 'code', '`rowid` = ' . (int) $id));
-        }
-        return '';
-    }
+    // Stats
 
     function load_stats_propale($socid = 0)
     {
@@ -2398,60 +2243,277 @@ class Bimp_Product extends BimpObject
         }
     }
 
-    public function displayStockInventory()
+    // Actions: 
+
+    public function actionGenerateEtiquettes($data, &$success)
     {
-        $id_inventory = BimpTools::getValue('id');
-        $inventory = BimpCache::getBimpObjectInstance('bimplogistique', 'Inventory', $id_inventory);
-        $stock = $this->getStocksForEntrepot($inventory->getData('fk_warehouse'));
-        return $stock['reel'];
-    }
+        $errors = array();
+        $warnings = array();
+        $success = '';
+        $success_callback = '';
 
-    public function canViewStock()
-    {
-        global $user;
-        if ($user->rights->bimpequipment->inventory->close)
-            return 1;
-        return 0;
-    }
+        if (!$this->isLoaded()) {
+            $errors[] = 'ID du produit absent';
+        } else {
+            $type = isset($data['type']) ? (string) $data['type'] : '';
 
-    public function getNbScanned()
-    {
-        global $cache_scann;
+            if (!$type) {
+                $errors[] = 'Type d\'étiquette à générer absent';
+            } else {
+                $qty = isset($data['qty']) ? (int) $data['qty'] : 1;
 
-        $id_inventory = BimpTools::getValue('id');
+                $url = DOL_URL_ROOT . '/bimplogistique/etiquette_produit.php?id_product=' . $this->id . '&qty=' . $qty . '&type=' . $type;
 
-        if (!isset($cache_scann[$id_inventory])) {
-            $sql = 'SELECT SUM(qty) as qty, fk_product';
-            $sql .= ' FROM ' . MAIN_DB_PREFIX . 'bl_inventory_det';
-            $sql .= ' WHERE fk_inventory=' . $id_inventory;
-            $sql .= ' GROUP BY fk_product';
-            $result = $this->db->db->query($sql);
-            if ($result) {
-                while ($obj = $this->db->db->fetch_object($result)) {
-                    $cache_scann[$id_inventory][$obj->fk_product] = $obj->qty;
-                }
+                $success_callback = 'window.open(\'' . $url . '\')';
             }
         }
-        if (isset($cache_scann[$id_inventory][$this->getData('id')]))
-            return $cache_scann[$id_inventory][$this->getData('id')];
-        else
-            return 0;
+
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $success_callback
+        );
     }
-    
-    public function getLastMouvement() {
-        $html = '';
-        // Last movement
-        $sql = "SELECT MAX(datem) as datem";
-        $sql.= " FROM ".MAIN_DB_PREFIX."stock_mouvement";
-        $sql.= " WHERE fk_product=" . $this->getData('id');
-        $result = $this->db->db->query($sql);
-        if ($result) {
-                $obj = $this->db->db->fetch_object($result);
-                $html .= $obj->datem;
+
+    public function actionPrintEtiquettes($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+        $success_callback = '';
+
+        $ids = $data['id_objects'];
+
+        if (!count($ids)) {
+            $errors[] = 'ID des produits absent';
+        } else {
+            $type = isset($data['type']) ? (string) $data['type'] : '';
+
+            if (!$type) {
+                $errors[] = 'Type d\'étiquette à générer absent';
+            } else {
+                $qty = isset($data['qty']) ? (int) $data['qty'] : 1;
+
+                $url = DOL_URL_ROOT . '/bimplogistique/etiquette_produit.php?id_products=' . implode(',', $ids) . '&qty=1&type=' . $type;
+
+                $success_callback = 'window.open(\'' . $url . '\')';
+            }
         }
-        
-        $html .= ' (<a href="' . DOL_URL_ROOT . '/product/stock/mouvement.php?idproduct=' . 
-                $this->getData('id') . '">Liste complète</a>)';
-        return $html;
+
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $success_callback
+        );
+    }
+
+    public function actionValidate($data = array(), &$success = '')
+    {
+        $errors = $this->validateProduct();
+        return $errors;
+    }
+
+    public function actionMerge($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Fusion effectuée avec succès';
+        $success_callback = '';
+
+        $id_merged_product = (int) (isset($data['id_merged_product']) ? $data['id_merged_product'] : 0);
+        $id_kept_product = (int) (isset($data['id_kept_product']) ? $data['id_kept_product'] : 0);
+
+        if (!$id_merged_product) {
+            $errors[] = 'Aucun produit à fusionner sélectionné';
+        } elseif (!$id_kept_product) {
+            $errors[] = 'Information manquante: produit à conserver';
+        } elseif ($id_merged_product === (int) $this->id) {
+            $errors[] = 'Un produit ne peut pas être fusionné avec lui-même';
+        } elseif ($id_kept_product !== (int) $this->id && $id_kept_product !== (int) $id_merged_product) {
+            $errors[] = 'Erreur: produit à conserver invalide, ' . $id_kept_product . ', ' . $this->id;
+        }
+
+        if (!count($errors)) {
+            if ($id_kept_product !== (int) $this->id) {
+                $merged_product = $this;
+                $product = BimpCache::getBimpObjectInstance($this->module, $this->object_name, (int) $id_merged_product);
+                if (!BimpObject::objectLoaded($product)) {
+                    $errors[] = 'Le produit d\'ID ' . $id_merged_product . ' n\'existe pas';
+                }
+                $success_callback = 'window.location = \'' . DOL_URL_ROOT . '/bimpcore/index.php?fc=product&id=' . $id_merged_product . '\';';
+            } else {
+                $merged_product = BimpCache::getBimpObjectInstance($this->module, $this->object_name, (int) $id_merged_product);
+                if (!BimpObject::objectLoaded($merged_product)) {
+                    $errors[] = 'Le produit d\'ID ' . $id_merged_product . ' n\'existe pas';
+                }
+                $product = $this;
+            }
+
+            if (!count($errors)) {
+                $errors = $product->mergeProduct($merged_product, $warnings);
+            }
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $success_callback
+        );
+    }
+
+    public function actionRefuse($data = array(), &$success = '')
+    {
+        $errors = $this->refuseProduct();
+        return $errors;
+    }
+
+    // Overrides:
+
+    public function validatePost()
+    {
+        $marque = BimpTools::getValue('marque', '');
+        $ref_const = BimpTools::getValue('ref_constructeur', '');
+
+        if ($marque && $ref_const) {
+            $ref = strtoupper(substr($marque, 0, 3));
+            $ref .= '-' . $ref_const;
+            $this->set('ref', $ref);
+        }
+
+        return parent::validatePost();
+    }
+
+    public function insertExtraFields()
+    {
+        return array();
+    }
+
+    public function updateExtraFields()
+    {
+        return array();
+    }
+
+    // Méthodes statiques : 
+
+    private static function initStockDate($date)
+    {
+        global $db;
+        self::$stockDate = array();
+        $sql = $db->query("SELECT `fk_product`,`fk_entrepot`,reel FROM `llx_product_stock`");
+        while ($ln = $db->fetch_object($sql)) {
+            self::$stockDate[$date][$ln->fk_product][$ln->fk_entrepot]['now'] = $ln->reel;
+            self::$stockDate[$date][$ln->fk_product][$ln->fk_entrepot]['stock'] = $ln->reel;
+            self::$stockDate[$date][$ln->fk_product][null]['now'] += $ln->reel;
+            self::$stockDate[$date][$ln->fk_product][null]['stock'] += $ln->reel;
+        }
+
+//        $sql = $db->query("SELECT `fk_product`, `fk_entrepot`, SUM(`value`) as nb FROM `llx_stock_mouvement` WHERE `tms` > STR_TO_DATE('" . $date . "', '%Y-%m-%d') GROUP BY `fk_product`, `fk_entrepot`");
+        $sql = $db->query("SELECT `fk_product`, `fk_entrepot`, SUM(`value`) as nb FROM `llx_stock_mouvement` WHERE `tms` > '" . $date . "' GROUP BY `fk_product`, `fk_entrepot`");
+        while ($ln = $db->fetch_object($sql)) {
+            if (!isset(self::$stockDate[$date][$ln->fk_product][$ln->fk_entrepot]['stock']))
+                self::$stockDate[$date][$ln->fk_product][$ln->fk_entrepot]['stock'] = 0;
+            if (!isset(self::$stockDate[$date][$ln->fk_product][null]['stock']))
+                self::$stockDate[$date][$ln->fk_product][null]['stock'] = 0;
+
+            self::$stockDate[$date][$ln->fk_product][$ln->fk_entrepot]['stock'] -= $ln->nb;
+            self::$stockDate[$date][$ln->fk_product][null]['stock'] -= $ln->nb;
+        }
+    }
+
+    private static function initStockShowRoom()
+    {
+        global $db;
+        self::$stockShowRoom = array();
+//        $sql = $db->query("SELECT `id_product`, `id_entrepot`, COUNT(*)as nb FROM `llx_be_equipment_place` p, llx_be_equipment e WHERE position = 1 AND p.id_equipment = e.id AND p.`type` = 5 GROUP BY `id_entrepot`, `id_product`");
+//        while ($ln = $db->fetch_object($sql)) {
+//            self::$stockShowRoom[$ln->id_product][$ln->id_entrepot] = $ln->nb;
+//            self::$stockShowRoom[$ln->id_product][null] += $ln->nb;
+//        }
+    }
+
+    private static function initLienShowRoomEntrepot()
+    {
+        global $db;
+        self::$lienShowRoomEntrepot = array();
+        $sql = $db->query("SELECT e.rowid as id1, e2.rowid as id2 FROM `llx_entrepot` e,`llx_entrepot` e2 WHERE e2.ref = CONCAT('D',e.ref)");
+        while ($ln = $db->fetch_object($sql)) {
+            self::$lienShowRoomEntrepot[$ln->id1] = $ln->id2;
+        }
+
+        //
+    }
+
+    private static function initVentes($dateMin, $dateMax)
+    {
+        global $db;
+//        self::$ventes = array(); // Ne pas déco ça effacerait d'autres données en cache pour d'autres dates. 
+
+        $query = "SELECT `fk_product`, entrepot, sum(qty) as qty, sum(l.total_ht) as total_ht, sum(l.total_ttc) as total_ttc";
+        $query .= " FROM `llx_facturedet` l, llx_facture f, llx_facture_extrafields e";
+        $query .= " WHERE `fk_facture` = f.rowid AND e.fk_object = f.rowid AND fk_product > 0";
+        $query .= " AND f.fk_statut > 0";
+
+        if ($dateMin)
+            $query .= " AND date_valid >= '" . $dateMin . "'";
+
+        if ($dateMax)
+            $query .= " AND date_valid <= '" . $dateMax . "'";
+
+        $group_by .= " GROUP BY `fk_product`, entrepot";
+
+        $sql = $db->query($query . " AND `subprice` >= 0" . $group_by);
+
+        $cache_key = $dateMin . "-" . $dateMax;
+
+        while ($ln = $db->fetch_object($sql)) {
+            self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['qty'] = $ln->qty;
+            self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['total_ht'] = $ln->total_ht;
+            self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['total_ttc'] = $ln->total_ttc;
+//            self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['total_achats'] = $ln->total_achats;
+
+            if (!isset(self::$ventes[$cache_key][$ln->fk_product][null])) {
+                self::$ventes[$cache_key][$ln->fk_product][null] = array(
+                    'qty'       => 0,
+                    'total_ht'  => 0,
+                    'total_ttc' => 0
+                );
+            }
+
+            self::$ventes[$cache_key][$ln->fk_product][null]['qty'] += $ln->qty;
+            self::$ventes[$cache_key][$ln->fk_product][null]['total_ht'] += $ln->total_ht;
+            self::$ventes[$cache_key][$ln->fk_product][null]['total_ttc'] += $ln->total_ttc;
+//            self::$ventes[$cache_key][$ln->fk_product][null]['total_achats'] += $ln->total_achats;
+        }
+
+        $sql2 = $db->query($query . " AND `subprice` < 0" . $group_by);
+
+        while ($ln = $db->fetch_object($sql2)) {
+            if (!isset(self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot])) {
+                self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot] = array(
+                    'qty'       => 0,
+                    'total_ht'  => 0,
+                    'total_ttc' => 0
+                );
+            }
+
+            self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['qty'] += ($ln->qty * -1);
+            self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['total_ht'] += $ln->total_ht;
+            self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['total_ttc'] += $ln->total_ttc;
+//            self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['total_achats'] = $ln->total_achats;
+
+            if (!isset(self::$ventes[$cache_key][$ln->fk_product][null])) {
+                self::$ventes[$cache_key][$ln->fk_product][null] = array(
+                    'qty'       => 0,
+                    'total_ht'  => 0,
+                    'total_ttc' => 0
+                );
+            }
+            self::$ventes[$cache_key][$ln->fk_product][null]['qty'] += ($ln->qty * -1);
+            self::$ventes[$cache_key][$ln->fk_product][null]['total_ht'] += $ln->total_ht;
+            self::$ventes[$cache_key][$ln->fk_product][null]['total_ttc'] += $ln->total_ttc;
+//            self::$ventes[$cache_key][$ln->fk_product][null]['total_achats'] += $ln->total_achats;
+        }
     }
 }

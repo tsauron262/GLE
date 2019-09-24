@@ -132,6 +132,8 @@ class BimpProductBrowser extends CommonObject {
         $sql = 'SELECT rowid';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'categorie';
         $sql .= ' WHERE fk_parent = ' . $id_cat;
+        
+//        echo $sql;
 
         $tabResult = array();
         $result = $this->db->query($sql);

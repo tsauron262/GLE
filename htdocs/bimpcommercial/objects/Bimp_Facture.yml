@@ -315,8 +315,6 @@ forms:
                 field: pdf_hide_ttc
             model_pdf: 
                 field: model_pdf
-                show: 
-                    callback: isNotLoaded
             zone_vente: 
                 field: zone_vente
                 show: 

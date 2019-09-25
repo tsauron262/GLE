@@ -1943,8 +1943,8 @@ class BL_CommandeShipment extends BimpObject
                     $id_cond_reglement = isset($data['cond_reglement']) ? (int) $data['cond_reglement'] : null;
                     $id_account = isset($data['id_account']) ? (int) $data['id_account'] : null;
                     $remises = isset($data['id_remises_list']) ? (int) $data['id_remises_list'] : array();
-                    $note_public = isset($data['note_public']) ? (int) $data['note_public'] : '';
-                    $note_private = isset($data['note_private']) ? (int) $data['note_private'] : '';
+                    $note_public = isset($data['note_public']) ? $data['note_public'] : '';
+                    $note_private = isset($data['note_private']) ? $data['note_private'] : '';
 
                     // Création de la facture: 
                     $fac_errors = array();
@@ -1999,8 +1999,8 @@ class BL_CommandeShipment extends BimpObject
         $id_cond_reglement = isset($data['cond_reglement']) ? (int) $data['cond_reglement'] : null;
         $id_account = isset($data['id_account']) ? (int) $data['id_account'] : null;
         $remises = isset($data['id_remises_list']) ? (int) $data['id_remises_list'] : array();
-        $note_public = isset($data['note_public']) ? (int) $data['note_public'] : '';
-        $note_private = isset($data['note_private']) ? (int) $data['note_private'] : '';
+        $note_public = isset($data['note_public']) ? $data['note_public'] : '';
+        $note_private = isset($data['note_private']) ? $data['note_private'] : '';
 
         if (!is_array($shipments_list) || empty($shipments_list)) {
             $errors[] = 'Liste des expéditions absente';

@@ -578,6 +578,7 @@ fields_tables:
 #            - field: price_min_ttc
 #            - field: cost_price
             - field: cur_pa_ht
+              edit: 1
             - field: pmp
             - custom: 1
               label: Meilleur prix d'achat

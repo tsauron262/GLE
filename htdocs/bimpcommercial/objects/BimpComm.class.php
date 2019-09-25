@@ -1170,7 +1170,7 @@ class BimpComm extends BimpDolObject
             'data_type' => 'money',
             'value'     => 0
         );
-        
+
         $line = $this->getLineInstance();
 
         if (is_a($line, 'ObjectLine')) {
@@ -3055,8 +3055,6 @@ class BimpComm extends BimpDolObject
 
         if (!isset($data['mail_to']) || !is_array($data['mail_to']) || !count($data['mail_to'])) {
             $errors[] = 'Liste des destinataires absente';
-        } else {
-            
         }
 
         if (!isset($data['mail_object']) || !(string) $data['mail_object']) {
@@ -3075,14 +3073,16 @@ class BimpComm extends BimpDolObject
             foreach (array('mail_to', 'copy_to') as $type) {
                 if (isset($data[$type]) && is_array($data[$type])) {
                     foreach ($data[$type] as $mail_to) {
-                        $email = '';
+                        $name = '';
+                        $emails = '';
                         if (preg_match('/^[0-9]+$/', '' . $mail_to)) {
                             $contact = BimpObject::getInstance('bimpcore', 'Bimp_Contact', (int) $mail_to);
                             if ($contact->isLoaded()) {
                                 if (!(string) $contact->getData('email')) {
                                     $errors[] = 'Aucune adresse e-mail enregistrée pour le contact "' . $contact->getData('firstname') . ' ' . $contact->getData('lastname') . '"';
                                 } else {
-                                    $email = $contact->getData('firstname') . ' ' . $contact->getData('lastname') . ' <' . $contact->getData('email') . '>';
+                                    $emails = $contact->getData('email');
+                                    $name = $contact->getData('firstname') . ' ' . $contact->getData('lastname');
                                 }
                             } else {
                                 $errors[] = 'Le contact d\'ID ' . $mail_to . ' n\'existe pas';
@@ -3093,30 +3093,42 @@ class BimpComm extends BimpDolObject
                                 if (!(string) $client->getData('email')) {
                                     $errors[] = 'Aucune adresse e-mail enregistrée pour le client';
                                 } else {
-                                    if ($client->getData('nom')) {
-                                        $email = $client->getData('nom') . ' <' . $client->getData('email') . '>';
-                                    } else {
-                                        $email = $client->getData('email');
-                                    }
+                                    $name = $client->getData('nom');
+                                    $emails = $client->getData('email');
                                 }
                             } else {
                                 $errors[] = 'Aucun client enregistré pour ' . $this->getLabel('this');
                             }
                         } elseif (is_string($mail_to)) {
                             if (BimpValidate::isEmail($mail_to)) {
-                                $email = $mail_to;
+                                $emails = $mail_to;
                             } else {
                                 $errors[] = '"' . $mail_to . '" n\'est pas une adresse e-mail valide';
                             }
                         }
 
-                        if ($email) {
-                            switch ($type) {
-                                case 'mail_to': $to .= ($to ? ', ' : '') . $email;
-                                    break;
+                        if ($emails) {
+                            $emails = str_replace(' ', '', $emails);
+                            $emails = str_replace(';', ',', $emails);
 
-                                case 'copy_to': $cc .= ($cc ? ', ' : '') . $email;
-                                    break;
+                            foreach (explode(',', $emails) as $email) {
+                                if ($name) {
+                                    switch ($type) {
+                                        case 'mail_to': $to .= ($to ? ', ' : '') . $name . ' <' . $email . '>';
+                                            break;
+
+                                        case 'copy_to': $cc .= ($cc ? ', ' : '') . $name . ' <' . $email . '>';
+                                            break;
+                                    }
+                                } else {
+                                    switch ($type) {
+                                        case 'mail_to': $to .= ($to ? ', ' : '') . $email;
+                                            break;
+
+                                        case 'copy_to': $cc .= ($cc ? ', ' : '') . $email;
+                                            break;
+                                    }
+                                }
                             }
                         }
                     }

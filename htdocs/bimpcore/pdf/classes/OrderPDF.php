@@ -172,7 +172,7 @@ class OrderPDF extends BimpDocumentPDF
         }
 
 //        $this->pdf->topMargin = 40;
-        
+
         if (strlen($docRef) > 20) {
             $this->pdf->topMargin = 57;
         }
@@ -189,7 +189,7 @@ class OrderPDF extends BimpDocumentPDF
         $html .= '<tr>';
         $html .= '<td>';
         $html .= '<table cellpadding="2px">';
-        
+
         // Réf client: 
         if ($this->commande->ref_client) {
             $html .= '<tr>';
@@ -199,8 +199,8 @@ class OrderPDF extends BimpDocumentPDF
             $html .= '</td>';
             $html .= '</tr>';
         }
-        
-        
+
+
         if (!is_null($this->user_suivi)) {
             $html .= '<tr>';
             $html .= '<td colspan="2" style="font-size: 7px">';
@@ -320,8 +320,13 @@ class OrderPDF extends BimpDocumentPDF
         }
 
         if ($town) {
+            if ($this->doc_type === 'bl' && isset($this->shipment) && BimpObject::objectLoaded($this->shipment)) {
+                $date = BimpTools::getDateForDolDate($this->shipment->getData('date_shipped'));
+            } else {
+                $date = dol_now();
+            }
             $html .= '<div style="text-align: right; font-size: 9px;">';
-            $html .= BimpTools::ucfirst($town) . ', le ' . dol_print_date(dol_now());
+            $html .= BimpTools::ucfirst($town) . ', le ' . dol_print_date($date);
             $html .= '</div>';
         }
 
@@ -522,7 +527,7 @@ class BLPDF extends OrderPDF
         $this->typeObject = "commande";
 
         parent::__construct($db, $doc_type);
-        
+
         $this->pdf->addCgvPages = false;
 
         if (BimpObject::objectLoaded($shipment)) {
@@ -562,9 +567,9 @@ class BLPDF extends OrderPDF
         $qties = $this->shipment->getPDFQtiesAndSerials();
 
         $i = 0;
-        
+
         $bimpLines = array();
-        
+
         if (BimpObject::objectLoaded($this->bimpCommObject) && is_a($this->bimpCommObject, 'BimpComm')) {
             foreach ($this->bimpCommObject->getLines() as $bimpLine) {
                 $bimpLines[(int) $bimpLine->getData('id_line')] = $bimpLine;
@@ -573,9 +578,9 @@ class BLPDF extends OrderPDF
 
         foreach ($this->object->lines as &$line) {
             $bimpLine = isset($bimpLines[(int) $line->id]) ? $bimpLines[(int) $line->id] : null;
-            
-            
-            
+
+
+
             if ($this->object->type != 3 && ($line->desc == "(DEPOSIT)" || stripos($line->desc, 'Acompte') === 0)) {
 //                $acompteHt = $line->subprice * (float) $line->qty;
 //                $acompteTtc = BimpTools::calculatePriceTaxIn($acompteHt, (float) $line->tva_tx);
@@ -588,7 +593,7 @@ class BLPDF extends OrderPDF
                 $this->acompteTva20 -= $line->total_tva;
                 continue;
             }
-            
+
             $product = null;
             if (!is_null($line->fk_product) && $line->fk_product) {
                 $product = new Product($this->db);
@@ -600,7 +605,7 @@ class BLPDF extends OrderPDF
 
             $desc = $this->getLineDesc($line, $product);
 
-            
+
             if ((BimpObject::objectLoaded($bimpLine) && (int) $bimpLine->getData('type') === ObjectLine::LINE_TEXT) ||
                     (!BimpObject::objectLoaded($bimpLine) && $line->subprice == 0 && !(int) $line->fk_product)) {
                 if (!$desc) {
@@ -638,7 +643,7 @@ class BLPDF extends OrderPDF
                     'desc'         => $desc,
                     'pu_ht'        => pdf_getlineupexcltax($this->object, $i, $this->langs),
                 );
-                
+
 
                 if ($this->hideReduc && $line->remise_percent) {
                     $pu_ht = (float) ($line->subprice - ($line->subprice * ($line->remise_percent / 100)));
@@ -658,9 +663,9 @@ class BLPDF extends OrderPDF
                 $row['dl'] = isset($qties[(int) $line->id]['shipped_qty']) ? $qties[(int) $line->id]['shipped_qty'] : 0;
                 $row['ral'] = isset($qties[(int) $line->id]['to_ship_qty']) ? $qties[(int) $line->id]['to_ship_qty'] : 0;
 
-                if($qty > 0)
-                $row['row_style'] = "font-weight: bold;";
-                
+                if ($qty > 0)
+                    $row['row_style'] = "font-weight: bold;";
+
                 $total_ht = (float) $qty * (float) $pu_ht;
 
                 $row['total_ht'] = price($total_ht);

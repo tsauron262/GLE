@@ -1419,6 +1419,15 @@ class Bimp_Facture extends BimpComm
         return '';
     }
 
+    public function displayRemainToPay()
+    {
+        if ($this->isLoaded()) {
+            return BimpTools::displayMoneyValue((float) $this->getRemainToPay());
+        }
+
+        return '';
+    }
+
     //Rendus HTML: 
 
     public function renderContentExtraLeft()
@@ -1580,6 +1589,8 @@ class Bimp_Facture extends BimpComm
             }
 
             // Reste à payer: 
+            $remainToPay_final = round($remainToPay_final, 2);
+
             $paye = (int) $this->getData('paye');
             if ($paye) {
                 $class = 'success';
@@ -3383,6 +3394,9 @@ class Bimp_Facture extends BimpComm
                 } elseif ($avoir_remain_to_pay) {
                     $this->dol_object->addline($langs->trans('invoiceAvoirLineWithPaymentRestAmount'), (float) $facture->getRemainToPay() * -1, 1, 0, 0, 0, 0, 0, '', '', 'TTC');
                 }
+
+                // Copie des contacts: 
+                $this->copyContactsFromOrigin($facture, $warnings);
                 break;
 
             case Facture::TYPE_STANDARD:
@@ -3421,10 +3435,14 @@ class Bimp_Facture extends BimpComm
 
                 if (!count($errors)) {
                     if (BimpObject::objectLoaded($avoir_to_refacture)) {
+                        // copie des lignes: 
                         $lines_errors = $this->createLinesFromOrigin($avoir_to_refacture, true);
                         if (count($lines_errors)) {
                             $warnings[] = BimpTools::getMsgFromArray($lines_errors);
                         }
+
+                        // Copie des contacts: 
+                        $this->copyContactsFromOrigin($avoir_to_refacture, $warnings);
                     }
                 }
                 break;

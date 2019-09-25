@@ -125,6 +125,57 @@ class Bimp_Product_Entrepot extends BimpObject
         return 0;
     }
 
+    public function displayLastBuyPrice()
+    {
+        $product = $this->getChildObject('product');
+
+        $lignes = array();
+
+        if (BimpObject::objectLoaded($product)) {
+            $sql = 'SELECT unitprice, rowid';
+            $sql .= ' FROM ' . MAIN_DB_PREFIX . 'product_fournisseur_price';
+            $sql .= ' WHERE fk_product=' . $product->getData('id');
+
+            $result = $this->db->db->query($sql);
+            if ($result and mysqli_num_rows($result) > 0) {
+                while ($obj = $this->db->db->fetch_object($result)) {
+                    $lignes[$obj->rowid] = $obj->unitprice;
+                }
+            }
+        }
+        $good_price = 0;
+        $good_id = 0;
+        foreach ($lignes as $rowid => $unitprice) {
+            if ($good_id < $rowid) {
+                $good_id = $rowid;
+                $good_price = $unitprice;
+            }
+        }
+
+        if ($good_price != 0)
+            return $good_price;
+
+        return "Aucun";
+    }
+
+    public function displayTypeMateriel()
+    {
+        if ($this->isLoaded()) {
+            $cats = $this->getData('product_categories');
+            if (!is_array($cats)) {
+                $cats = array();
+            }
+
+            if (in_array((int) BimpCore::getConf('desktop_id_categorie'), $cats)) {
+                return 'desktop';
+            } elseif (in_array((int) BimpCore::getConf('notebook_id_categorie'), $cats)) {
+                return 'notebook';
+            }
+        }
+
+        return '';
+    }
+
     // Actions:
 
     function actionPrintEtiquettes($data, &$success)
@@ -148,12 +199,27 @@ class Bimp_Product_Entrepot extends BimpObject
 
         foreach (array(1, 3, 6, 12) as $nb_month) {
             $cols['ventes_' . $nb_month . '_mois'] = array(
-                'label' => 'Vente à ' . $nb_month . ' mois',
+                'label' => 'Vente à ' . $nb_month . ' mois (€)',
                 'value' => array(
                     'callback' => array(
                         'method' => 'displayNbMonthVentes',
                         'params' => array(
                             $nb_month
+                        )
+                    )
+                )
+            );
+        }
+
+        foreach (array(1, 3, 6, 12) as $nb_month) {
+            $cols['ventes_' . $nb_month . '_mois_qty'] = array(
+                'label' => 'Vente à ' . $nb_month . ' mois (qté)',
+                'value' => array(
+                    'callback' => array(
+                        'method' => 'displayNbMonthVentes',
+                        'params' => array(
+                            $nb_month,
+                            'qty'
                         )
                     )
                 )
@@ -214,56 +280,5 @@ class Bimp_Product_Entrepot extends BimpObject
         }
 
         return $fields;
-    }
-    
-   public function displayLastBuyPrice()
-    {
-        $product = $this->getChildObject('product');
-        
-        $lignes = array();
-        
-        if (BimpObject::objectLoaded($product)) {
-            $sql = 'SELECT unitprice, rowid';
-            $sql .= ' FROM ' . MAIN_DB_PREFIX . 'product_fournisseur_price';
-            $sql .= ' WHERE fk_product=' . $product->getData('id');
-
-            $result = $this->db->db->query($sql);
-            if ($result and mysqli_num_rows($result) > 0) {
-                while ($obj = $this->db->db->fetch_object($result)) {
-                    $lignes[$obj->rowid] = $obj->unitprice;
-                }
-            }
-        }
-        $good_price = 0;
-        $good_id = 0;
-        foreach($lignes as $rowid => $unitprice) {
-            if($good_id < $rowid) {
-                $good_id = $rowid;
-                $good_price = $unitprice;
-            }
-        }
-
-        if($good_price != 0)
-            return $good_price;
-        
-        return "Aucun";
-    }
-    
-    public function displayTypeMateriel()
-    {
-        if ($this->isLoaded()) {
-            $cats = $this->getData('product_categories');
-            if (!is_array($cats)) {
-                $cats = array();
-            }
-
-            if (in_array((int) BimpCore::getConf('desktop_id_categorie'), $cats)) {
-                return 'desktop';
-            } elseif (in_array((int) BimpCore::getConf('notebook_id_categorie'), $cats)) {
-                return 'notebook';
-            }
-        }
-
-        return '';
     }
 }

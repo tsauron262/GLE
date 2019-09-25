@@ -139,6 +139,10 @@ lists_cols:
         field: ventes_ht
     cur_pa: 
         field: cur_pa
+    last_pa: 
+        label: Dernier PA
+        value:
+          callback: displayLastBuyPrice
     date_last_vente: 
         label: Date dernière vente
         value: 
@@ -147,7 +151,6 @@ lists_cols:
         label: Date dernier achat
         value: 
             callback: displayLastAchatDate
-            
     marque: 
         field: marque
     gamme: 
@@ -181,11 +184,7 @@ lists:
             stockShowRoom:
             ventes_qty:
             ventes_ht:
-                field: ventes_ht
-            custom: 
-              label: Dernier PA
-              value:
-                callback: displayLastBuyPrice
+            last_pa: 
             cur_pa:
             marque: 
             gamme:

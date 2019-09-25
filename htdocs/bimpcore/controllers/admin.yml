@@ -104,3 +104,10 @@ sections:
                       panel: 1
                       object: vente
                       name: default
+                      
+        scripts: 
+            label: Scripts
+            sections: 
+                - type: custom
+                  custom: 
+                      callback: renderScriptsTabContent

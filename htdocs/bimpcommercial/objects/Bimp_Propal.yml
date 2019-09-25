@@ -63,6 +63,12 @@ fields:
         type: date
     model_pdf: 
         default_value: bimpdevis
+    pdf_hide_pu: 
+        label: Masquer les prix unitaires dans le PDF
+        dol_extra_field: 1
+        type: bool
+        default_value: 0
+        sortable: 0
     pdf_hide_reduc: 
         label: Masquer les remises dans le PDF
         dol_extra_field: 1
@@ -86,7 +92,7 @@ fields:
         dol_extra_field: 1
         type: bool
         default_value: 0
-        sortable: 0
+        sortable: 0    
     pdf_periodicity: 
         label: Périodicité
         dol_extra_field: 1
@@ -163,6 +169,7 @@ forms:
                   callback: isEditable
             - field: date_livraison
             - field: model_pdf
+            - field: pdf_hide_pu
             - field: pdf_hide_reduc
             - field: pdf_hide_total
             - field: pdf_hide_ref
@@ -260,6 +267,8 @@ fields_tables:
                 
     pdf: 
         rows: 
+            - field: pdf_hide_pu
+              edit: 1
             - field: pdf_hide_reduc
               edit: 1
             - field: pdf_hide_total

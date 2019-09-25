@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bimpcore_list_config` ADD `total_row` BOOLEAN NOT NULL DEFAULT FALSE; 

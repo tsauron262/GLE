@@ -335,6 +335,25 @@ class BimpTools
         return $list;
     }
 
+    public static function getDolObjectLinkedObjectsListByTypes($dol_object, BimpDb $bdb)
+    {
+        $list = self::getDolObjectLinkedObjectsList($dol_object, $bdb);
+
+        $items = array();
+
+        foreach ($list as $item) {
+            if (!isset($items[$item['type']])) {
+                $items[$item['type']] = array();
+            }
+
+            if (!in_array((int) $item['id_object'], $items[$item['type']])) {
+                $items[$item['type']][] = (int) $item['id_object'];
+            }
+        }
+
+        return $items;
+    }
+
     public static function resetDolObjectErrors($object)
     {
         if (is_object($object)) {
@@ -636,20 +655,20 @@ class BimpTools
 
     public static function getNextRef($table, $field, $prefix = '')
     {
-        
+
         $prefix = str_replace("{AA}", date('y'), $prefix);
         $prefix = str_replace("{MM}", date('m'), $prefix);
-        
-        
+
+
         if ($prefix) {
             $where = '`' . $field . '` LIKE \'' . $prefix . '%\'';
         } else {
             $where = '1';
         }
 
-        
+
 //        $max = BimpCache::getBdb()->getMax($table, $field, $where);
-        $max = BimpCache::getBdb()->getMax($table, $field, $where."  AND LENGTH(ref) = (SELECT MAX(LENGTH(".$field.")) as max FROM `". MAIN_DB_PREFIX . $table."`   WHERE ".$where.")");
+        $max = BimpCache::getBdb()->getMax($table, $field, $where . "  AND LENGTH(ref) = (SELECT MAX(LENGTH(" . $field . ")) as max FROM `" . MAIN_DB_PREFIX . $table . "`   WHERE " . $where . ")");
 
         if ((string) $max) {
             if (preg_match('/^' . $prefix . '([0-9]+)$/', $max, $matches)) {

@@ -54,6 +54,7 @@ class BC_Field extends BimpComponent
     public static $missing_if_empty_types = array(
         'string', 'text', 'password', 'html', 'id', 'id_object', 'id_parent', 'time', 'date', 'datetime', 'color'
     );
+    public static $has_total_types = array('qty', 'money');
 
     public function __construct(BimpObject $object, $name, $edit = false, $path = 'fields', $force_edit = false)
     {
@@ -77,6 +78,7 @@ class BC_Field extends BimpComponent
         $this->params_def['display_if'] = array('data_type' => 'array', 'compile' => true);
         $this->params_def['history'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['extra'] = array('data_type' => 'bool', 'default' => 0);
+        $this->params_def['has_total'] = array('data_type' => 'bool', 'default' => 0);
 
         $this->edit = $edit;
         $this->force_edit = $force_edit;
@@ -96,20 +98,18 @@ class BC_Field extends BimpComponent
             $this->value = $this->params['default_value'];
         }
 
-        // Ces paramètres ne sont plus définis ici, car dans certains cas, la variable $this->force_edit peut être ajustée après le __construc(). 
-//        if ($this->isObjectValid()) {
-//            if (!$this->force_edit) {
-//                $this->params['editable'] = (int) ($this->object->canEditField($name) && $this->object->isFieldEditable($name, $this->force_edit));
-//            }
-//            $this->params['viewable'] = (int) $this->object->canViewField($name);
-//        }
-
         if (in_array($this->params['type'], array('qty', 'int', 'float', 'money', 'percent'))) {
             $this->params = array_merge($this->params, parent::fetchParams($this->config_path, self::$type_params_def['number']));
         } elseif ($this->params['type'] === 'items_list') {
             if (isset($this->params['items_data_type']) && $this->params['items_data_type'] === 'id_object') {
                 $this->params = array_merge($this->params, parent::fetchParams($this->config_path, self::$type_params_def['id_object']));
             }
+        }
+
+        // Le paramètre "has_total" est défini à 1 par défaut pour les types présents dans self::$has_total_types
+        if (!(int) $this->params['has_total'] && in_array($this->params['type'], self::$has_total_types) &&
+                !$this->object->config->isDefined($this->config_path . '/has_total')) {
+            $this->params['has_total'] = 1;
         }
 
         $current_bc = $prev_bc;

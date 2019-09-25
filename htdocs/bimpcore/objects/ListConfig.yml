@@ -63,6 +63,11 @@ fields:
             type: switch_options
         default_value: 10
         
+    total_row: 
+        label: Afficher les totaux
+        type: bool
+        default_value: 0
+        
 #    filters: 
 #        label: Filtres
 #        type: json

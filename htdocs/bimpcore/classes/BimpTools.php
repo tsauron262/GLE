@@ -1497,6 +1497,8 @@ class BimpTools
             $value = 0;
         }
 
+        $base_price = $value;
+
         if ($truncate) {
             $code = '';
             if ($value > 1000000000) {
@@ -1527,7 +1529,18 @@ class BimpTools
             $html .= '">';
         }
 
+        if ($truncate) {
+            $base_price = price($base_price, 1, '', 1, -1, -1, $currency);
+            $html .= '<span class="bs-popover"';
+            $html .= BimpRender::renderPopoverData($base_price, 'top', 'true');
+            $html .= '>';
+        }
+
         $html .= $price;
+
+        if ($truncate) {
+            $html .= '</span>';
+        }
 
         if ($with_styles) {
             $html .= '</span>';

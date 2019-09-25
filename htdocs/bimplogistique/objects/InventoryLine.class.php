@@ -16,8 +16,9 @@ class InventoryLine extends BimpObject {
         $is_equipment = $this->isEquipment($input, $id_equipment, $id_product);
         if (!$is_equipment and ! $is_product)
             $errors[] = "Produit inconnu";
-        else if (!$is_equipment and $this->isSerialisable($id_product))
-            $errors[] = "Veuillez scanner le numéro de série au lieu de la référence.";
+        else if (!$is_equipment and $this->isSerialisable($id_product)) {
+            $errors[1000] = "Veuillez scanner le numéro de série au lieu de la référence.";
+        }
         return $errors;
     }
 

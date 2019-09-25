@@ -15,7 +15,16 @@ class inventoryController extends BimpController {
 
         $errors = $inventory_line->checkInput($input, $id_product, $id_equipment);
         
-        if(!count($errors)){
+        if(isset($errors[1000]) and $quantity_input > 1) {
+            $tab = $inventory->createMultipleEquipment($id_product, $quantity_input);
+            $id_inventory_det = $tab['id_inventory_det'];
+            $errors = array_merge($errors, $tab['errors']);
+            $msg = $tab['msg'];
+            if(count($errors) == 1) // une seule erreur
+                unset($errors[1000]);
+        }
+        
+        if(!count($errors) and $id_inventory_det == NULL){
             if((int) $id_equipment > 0)
                 $tab = $inventory->createLinesEquipment($id_product, $id_equipment);
             else

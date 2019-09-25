@@ -804,4 +804,73 @@ class Inventory extends BimpDolObject
 
         return $html;
     }
+    
+    /**
+     * @return tous les id d'équipements qui doivent être dans l'entrepôt de l'inventaire
+     */
+    public function getEquipmentExpectedByProduct($id_product) {
+        $ids_equipment = array();
+
+        $sql = 'SELECT e.id AS id_equipment';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_equipment AS e';
+        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'be_equipment_place AS epl ON e.id=epl.id_equipment';
+        $sql .= ' WHERE epl.id_entrepot=' . $this->getData('fk_warehouse');
+        $sql .= ' AND epl.position=1 AND epl.type=2';
+        $sql .= ' AND e.id_product=' . $id_product;
+
+        $result = $this->db->db->query($sql);
+        if ($result and mysqli_num_rows($result) > 0) {
+            while ($obj = $this->db->db->fetch_object($result)) {
+                $ids_equipment[$obj->id_equipment] = $obj->id_equipment;
+            }
+        }
+        
+        return $ids_equipment;
+    }
+    
+    public function createMultipleEquipment($id_product, $qty) {
+        global $user;
+        $errors = array();
+        $ids_inventory_det = array();
+        $msg = '';
+        
+        if(0 < (int) self::equipmentIsScannedByProduct($id_product, $this->getData('id'))) {
+            if ($user->rights->bimpequipment->inventory->create)
+                $errors[] = "Au moins un équipement de ce produit à déjà été scanné. "
+                        . "Pour faire un scan d'équipement en masse, merci de supprimer"
+                        . " les lignes de ce produit, puis réessayez.(quantité normale :"
+                        . sizeof($this->getEquipmentExpectedByProduct($id_product)) . ')';
+            else
+                $errors[] = "Au moins un équipement de ce produit à déjà été scanné. "
+                        . "Pour faire un scan d'équipement en masse, merci de demander au responsable"
+                        . " de supprimer les lignes de ce produit, puis réessayez.";
+        } else {
+            $ids_equipment = $this->getEquipmentExpectedByProduct($id_product);
+
+            if($qty == sizeof($ids_equipment)) {
+                foreach($ids_equipment as $id_equipment) {
+                    $tab = $this->createLine($id_product, $id_equipment, 1);
+                    $errors = array_merge($errors, $tab[$errors]);
+                    $ids_inventory_det = $tab['id_inventory_det'];
+                }
+            }
+
+            if(!count($errors))
+                $msg .= 'Ajout de <strong>' . $qty . '</strong> équipement';
+        }
+        
+        return array('id_inventory_det' => $ids_inventory_det, 'errors' => $errors, 'msg' => $msg);
+    }
+    
+    public static function equipmentIsScannedByProduct($id_product, $id_inventory) {
+        $filters = array(
+            'fk_product'   => $id_product,
+            'fk_inventory' => $id_inventory
+        );
+        
+        $inventory_lines_obj = BimpObject::getInstance('bimplogistique', 'InventoryLine');
+        $list = $inventory_lines_obj->getList($filters, 1, 1, 'id', 'desc', 'array', array());
+        return count($list);
+    }
+
 }

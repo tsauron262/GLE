@@ -11,7 +11,7 @@ function insertProduct(input, quantity) {
             $("input[name=search_insert_line]").focus();
             $("input[name=insert_quantity]").val(1);
             playBipOk();
-            triggerObjectChange('bimplogistique', 'InventoryLine', result.data.id_inventory_det);
+            triggerObjectChange('bimplogistique', 'InventoryLine', /*result.data.id_inventory_det*/);
         }, error: function(result, bimpAjax) {
             playBipError();
         }

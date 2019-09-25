@@ -299,8 +299,8 @@ forms:
                 field: fk_mode_reglement
                 show: 
                     callback: isEditable
-            date_lim_reglement: 
-                field: date_lim_reglement
+#            date_lim_reglement: 
+#                field: date_lim_reglement
             account: 
                 field: fk_account
                 show: 
@@ -407,13 +407,11 @@ forms:
                 field: libelle
             3: 
                 field: ef_type
-            4:
-                field: date_lim_reglement
-            5: 
+            4: 
                 field: datef
-            6:
+            5:
                 field: fk_account
-            7:
+            6:
                 field: fk_cond_reglement
                 
     validate: 

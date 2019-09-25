@@ -1698,6 +1698,7 @@ class Bimp_Commande extends BimpComm
         $facture->dol_object->ref_client = $this->dol_object->ref_client;
         $facture->dol_object->note_private = $private_note;
         $facture->dol_object->note_public = $public_note;
+        $facture->dol_object->modelpdf = 'bimpfact';
 
         $facture->dol_object->origin = $this->dol_object->element;
         $facture->dol_object->origin_id = $this->dol_object->id;

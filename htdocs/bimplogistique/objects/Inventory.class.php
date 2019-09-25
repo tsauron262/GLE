@@ -829,14 +829,21 @@ class Inventory extends BimpDolObject
     }
     
     public function createMultipleEquipment($id_product, $qty) {
+        global $user;
         $errors = array();
         $ids_inventory_det = array();
         $msg = '';
         
         if(0 < (int) self::equipmentIsScannedByProduct($id_product, $this->getData('id'))) {
-            $errors[] = "Au moins un équipement de ce produit à déjà été scanné. "
-                    . "Pour faire un scan d'équipement en masse, merci de demander au responsable"
-                    . " de supprimer les lignes de ce produit, puis réessayez.";
+            if ($user->rights->bimpequipment->inventory->create)
+                $errors[] = "Au moins un équipement de ce produit à déjà été scanné. "
+                        . "Pour faire un scan d'équipement en masse, merci de supprimer"
+                        . " les lignes de ce produit, puis réessayez.(quantité normale :"
+                        . sizeof($this->getEquipmentExpectedByProduct($id_product)) . ')';
+            else
+                $errors[] = "Au moins un équipement de ce produit à déjà été scanné. "
+                        . "Pour faire un scan d'équipement en masse, merci de demander au responsable"
+                        . " de supprimer les lignes de ce produit, puis réessayez.";
         } else {
             $ids_equipment = $this->getEquipmentExpectedByProduct($id_product);
 

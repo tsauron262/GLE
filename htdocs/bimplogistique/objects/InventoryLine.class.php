@@ -6,7 +6,7 @@ require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
 
 class InventoryLine extends BimpObject {
 
-    public function checkInput($input, &$id_product, &$id_equipment) {
+    public function checkInput($input, &$id_product, &$id_equipment, &$err_serializable) {
         $errors = array();
         if($input == '') {
             $errors[] = "Entrée vide";
@@ -17,7 +17,8 @@ class InventoryLine extends BimpObject {
         if (!$is_equipment and ! $is_product)
             $errors[] = "Produit inconnu";
         else if (!$is_equipment and $this->isSerialisable($id_product)) {
-            $errors[1000] = "Veuillez scanner le numéro de série au lieu de la référence.";
+            $err_serializable = 1;
+            $errors[] = "Veuillez scanner le numéro de série au lieu de la référence.";
         }
         return $errors;
     }

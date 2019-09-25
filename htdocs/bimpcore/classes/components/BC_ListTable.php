@@ -289,8 +289,9 @@ class BC_ListTable extends BC_List
                         continue;
                     }
 
-                    $current_value = null;
                     $field = null;
+
+                    $has_total = (int) $col_params['has_total'];
 
                     if ($col_params['field']) {
                         if ($col_params['child']) {
@@ -313,20 +314,17 @@ class BC_ListTable extends BC_List
                             $field->new_value = $new_values[$col_params['field']];
                         }
 
-                        $current_value = $field->value;
-
                         $row['cols'][$col_name]['content'] = $field->renderHtml();
+
+                        if (!$has_total) {
+                            $has_total = (int) $field->params['has_total'];
+                        }
                     } elseif (isset($col_params['value'])) {
                         $row['cols'][$col_name]['content'] .= $col_params['value'];
-                        if (!is_null($col_params['true_value'])) {
-                            $current_value = $col_params['true_value'];
-                        } else {
-                            $current_value = $col_params['value'];
-                        }
                     }
 
-                    if ((int) $this->params['total_row'] && (int) $col_params['has_total'] && BimpTools::isNumericType($current_value)) {
-                        if (!isset($this->totals[$col_name])) {
+                    if (!isset($this->totals[$col_name])) {
+                        if ((int) $this->params['total_row'] && $has_total) {
                             $this->totals[$col_name] = array(
                                 'data_type' => '',
                                 'sql_key'   => '',
@@ -376,6 +374,13 @@ class BC_ListTable extends BC_List
         $fields = array();
 
         foreach ($this->totals as $col_name => $params) {
+            $method_name = 'get' . ucfirst($col_name) . 'ListTotal';
+
+            if (method_exists($this->object, $method_name)) {
+                $this->totals[$col_name] = $this->object->{$method_name}($this->final_filters, $this->final_joins);
+                continue;
+            }
+
             $col_params = $this->getColParams($col_name);
             if (isset($col_params['field']) && $col_params['field']) {
                 $child_name = ((isset($col_params['child']) && $col_params['child']) ? $col_params['child'] : null);
@@ -1145,6 +1150,7 @@ class BC_ListTable extends BC_List
                 $values['sort_way'] = $this->userConfig->getData('sort_way');
                 $values['sort_option'] = $this->userConfig->getData('sort_option');
                 $values['nb_items'] = $this->userConfig->getData('nb_items');
+                $values['total_row'] = $this->userConfig->getData('total_row');
 
                 $content .= '<div style="font-weight: normal; font-size: 11px">';
 
@@ -1162,12 +1168,14 @@ class BC_ListTable extends BC_List
                     }
                 }
                 $content .= 'Ordre de tri: <span class="bold">' . $this->userConfig->displayData('sort_way') . '</span><br/>';
+                $content .= 'Afficher les totaux: <span class="bold">' . ((int) $values['total_row'] ? 'OUI' : 'NON') . '</span>';
                 $content .= '</div>';
             } else {
                 $values['sort_field'] = $this->params['sort_field'];
                 $values['sort_way'] = $this->params['sort_way'];
                 $values['sort_option'] = $this->params['sort_option'];
                 $values['nb_items'] = $this->params['n'];
+                $values['total_row'] = (int) $this->params['total_row'];
             }
 
             $content .= '<div style="margin-bottom: 15px; text-align: center">';

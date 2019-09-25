@@ -380,6 +380,10 @@ class modBimpCommercial extends DolibarrModules
                 $extrafields->addExtraField('zone_vente', 'Zone de vente', 'int', 1, 255, 'commande_fournisseur', 0, 0, 1);
                 $extrafields->addExtraField('zone_vente', 'Zone de vente', 'int', 1, 255, 'facture_fourn', 0, 0, 1);
                 
+                $extrafields->addExtraField('pdf_hide_pu', 'Masquer les prix unitaires dans le PDF', 'boolean', 1, 1, 'propal', 0, 0, 0);
+                $extrafields->addExtraField('pdf_hide_pu', 'Masquer les prix unitaires dans le PDF', 'boolean', 1, 1, 'commande', 0, 0, 0);
+                $extrafields->addExtraField('pdf_hide_pu', 'Masquer les prix unitaires dans le PDF', 'boolean', 1, 1, 'facture', 0, 0, 0);
+                
                 $extrafields->addExtraField('pdf_hide_reduc', 'Masquer les réductions dans le PDF', 'boolean', 1, 1, 'propal', 0, 0, 0);
                 $extrafields->addExtraField('pdf_hide_reduc', 'Masquer les réductions dans le PDF', 'boolean', 1, 1, 'commande', 0, 0, 0);
                 $extrafields->addExtraField('pdf_hide_reduc', 'Masquer les réductions dans le PDF', 'boolean', 1, 1, 'facture', 0, 0, 0);

@@ -242,6 +242,13 @@ fields:
             array: revalorisations
         default_value: 0
         
+    pdf_hide_pu: 
+        label: Masquer les prix unitaires dans le PDF
+        dol_extra_field: 1
+        type: bool
+        default_value: 0
+        sortable: 0
+        
     pdf_hide_reduc: 
         label: Masquer les remises dans le PDF
         dol_extra_field: 1
@@ -337,6 +344,8 @@ fields_tables:
                   
     pdf: 
         rows: 
+            - field: pdf_hide_pu
+              edit: 1
             - field: pdf_hide_reduc
               edit: 1
             - field: pdf_hide_total
@@ -406,6 +415,7 @@ forms:
             - field: date_commande
             - field: date_livraison
             - field: fk_availability
+            - field: pdf_hide_pu
             - field: pdf_hide_reduc
             - field: pdf_hide_total
             - field: pdf_hide_ttc

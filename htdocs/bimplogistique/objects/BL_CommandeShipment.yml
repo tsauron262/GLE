@@ -513,6 +513,8 @@ lists_cols:
         max_width: 45px
     user_create:
         field: user_create
+    info:
+        field: info
                     
 filters_panels: 
     default: 

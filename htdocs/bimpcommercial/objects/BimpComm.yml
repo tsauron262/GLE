@@ -627,6 +627,7 @@ lists_cols:
         label: Total achats
         value: 
             callback: displayTotalPA
+        has_total: 1
     cond_reglement: 
         field: fk_cond_reglement
     mode_reglement: 

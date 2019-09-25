@@ -115,6 +115,8 @@ class BC_List extends BC_Panel
                             $this->params['n'] = $n;
                         }
                     }
+
+                    $this->params['total_row'] = (int) $this->userConfig->getData('total_row');
                 }
             }
         }
@@ -155,7 +157,7 @@ class BC_List extends BC_Panel
             $this->params['add_form_values']['fields'][$field_name] = $value;
         }
     }
-    
+
     public function addJoin($table, $on, $alias)
     {
         if (!isset($this->params['joins'][$alias])) {

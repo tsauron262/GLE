@@ -1539,7 +1539,7 @@ class Bimp_Product extends BimpObject
 
         foreach ($ventes as $id_vente) {
             $vente = BimpCache::getBimpObjectInstance('bimpcaisse', 'BC_Vente', (int) $id_vente);
-            if((int) $vente->getData('status') <= BC_Vente::BC_VENTE_BROUILLON)
+            if((int) $vente->getData('status') != BC_Vente::BC_VENTE_BROUILLON)
                 continue;
             
             if (BimpObject::objectLoaded($vente)) {

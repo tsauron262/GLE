@@ -9,12 +9,14 @@ class Inventory extends BimpDolObject
 
     CONST STATUS_DRAFT = 0;
     CONST STATUS_OPEN = 1;
-    CONST STATUS_CLOSED = 2;
+    CONST STATUS_PARTIALLY_CLOSED = 2;
+    CONST STATUS_CLOSED = 3;
 
     public static $status_list = Array(
-        self::STATUS_DRAFT  => Array('label' => 'Brouillon', 'classes' => Array('success'), 'icon' => 'fas_cogs'),
-        self::STATUS_OPEN   => Array('label' => 'Ouvert', 'classes' => Array('warning'), 'icon' => 'fas_arrow-alt-circle-down'),
-        self::STATUS_CLOSED => Array('label' => 'Fermé', 'classes' => Array('danger'), 'icon' => 'fas_times')
+        self::STATUS_DRAFT            => Array('label' => 'Brouillon', 'classes'           => Array('success'), 'icon' => 'fas_cogs'),
+        self::STATUS_OPEN             => Array('label' => 'Ouvert', 'classes'              => Array('warning'), 'icon' => 'fas_arrow-alt-circle-down'),
+        self::STATUS_PARTIALLY_CLOSED => Array('label' => 'Partiellement fermé', 'classes' => Array('warning'), 'icon' => 'fas_arrow-alt-circle-down'),
+        self::STATUS_CLOSED           => Array('label' => 'Fermé', 'classes'               => Array('danger'),  'icon' => 'fas_times')
     );
 
     public function getAllInventories() {
@@ -71,7 +73,7 @@ class Inventory extends BimpDolObject
             $this->updateField("date_opening", date("Y-m-d H:i:s"));
             $this->updateField("date_closing", '');
             // Close
-        } elseif ($status == self::STATUS_CLOSED) {
+        } elseif ($status == self::STATUS_PARTIALLY_CLOSED or $status == self::STATUS_CLOSED) {
             $this->updateField("date_closing", date("Y-m-d H:i:s"));
         } else {
             $warnings[] = "Statut non reconnu, valeur = " . $status;
@@ -103,7 +105,20 @@ class Inventory extends BimpDolObject
         }
 
         if ($this->getData('status') == self::STATUS_OPEN) {
-            if ($user->rights->bimpequipment->inventory->close) { // read et create
+            if ($user->rights->bimpequipment->inventory->close) {
+                $buttons[] = array(
+                    'label'   => 'Fermer partiellement l\'inventaire',
+                    'icon'    => 'fas_window-close',
+                    'onclick' => $this->getJsActionOnclick('setSatus', array("status" => self::STATUS_PARTIALLY_CLOSED), array(
+                        'form_name'        => 'confirm_close_partially',
+                        'success_callback' => 'function(result) {bimp_reloadPage();}'
+                    ))
+                );
+            }
+        }
+        
+        if ($this->getData('status') == self::STATUS_PARTIALLY_CLOSED) {
+            if ($user->rights->bimpequipment->inventory->close) {
                 $buttons[] = array(
                     'label'   => 'Fermer l\'inventaire',
                     'icon'    => 'fas_window-close',
@@ -122,14 +137,16 @@ class Inventory extends BimpDolObject
     {
         $errors = array();
 
-        $date_mouvement = BimpTools::getPostFieldValue('date_mouvement');
-
+        if ((int) $data['status'] == self::STATUS_PARTIALLY_CLOSED) {
+            $errors = array_merge($errors, $this->closePartially());
+            $date_mouvement = BimpTools::getPostFieldValue('date_mouvement');
+            if (!$this->setDateMouvement($date_mouvement))
+                $errors[] = "Erreur lors de la définition de la date du mouvement";
+        }
+        
         if ((int) $data['status'] == self::STATUS_CLOSED) {
             $errors = array_merge($errors, $this->close());
         }
-
-        if (!$this->setDateMouvement($date_mouvement))
-            $errors[] = "Erreur lors de la définition de la date du mouvement";
 
         if (!count($errors)) {
             $this->updateField("status", $data['status']);
@@ -196,7 +213,7 @@ class Inventory extends BimpDolObject
             ),
             'status'       => array(
                 'operator' => '<',
-                'value'    => self::STATUS_CLOSED
+                'value'    => self::STATUS_PARTIALLY_CLOSED
             ),
         );
 
@@ -217,18 +234,20 @@ class Inventory extends BimpDolObject
         return parent::create($warnings, $force_create);
     }
 
+    
+    public function closePartially()
+    {
+        $errors = array_merge($errors, $this->correctProducts());
+
+        return $errors;
+    }
+    
     public function close()
     {
         $errors = array();
 
-        if ($this->equipmentIsOk()) {
-            $errors = array_merge($errors, $this->correctProducts());
-        } else {
+        if (!$this->equipmentIsOk())
             $errors = array_merge($errors, $this->getErrorsEquipment());
-        }
-
-        if (!count($errors))
-            $errors = $this->correctProducts();
 
         return $errors;
     }
@@ -258,7 +277,7 @@ class Inventory extends BimpDolObject
     {
         $errors = array();
 
-        $diff = $this->getDiffStock();
+        $diff = $this->getDiffStock(0);
         foreach ($diff as $id => $data) {
             $doli_prod = new Product($this->db->db);
             $doli_prod->fetch($id);
@@ -283,8 +302,15 @@ class Inventory extends BimpDolObject
         global $user;
         $errors = array();
 
-        $tab_diff = $this->getDiffStock();
-
+        $tab_diff = $this->getDiffStock(0);
+        $id_main_warehouse = $this->getWarehouseInventories();
+        if($id_main_warehouse < 0) {
+            $errors[] = "L'entrepôt par défault des inventaires n'est pas définit "
+                    . "(celui dans lequel on renseigne tous les mouvements de "
+                    . "tou les inventaires.";
+            return $errors;
+        }
+        
         $codemove = 'inventory-id-' . $this->getData('id');
         foreach ($tab_diff as $id => $data) {
             $diff = $data['diff'];
@@ -295,8 +321,10 @@ class Inventory extends BimpDolObject
 
                 if ($diff < 0) { // remove
                     $result = $doli_prod->correct_stock($user, $this->getData('fk_warehouse'), -$diff, 1, $label, 0, $codemove, 'entrepot', $this->getData('fk_warehouse'));
+                    $result = $doli_prod->correct_stock($user, $id_main_warehouse, -$diff, 0, $label, 0, $codemove, 'entrepot', $id_main_warehouse);
                 } else { // add
                     $result = $doli_prod->correct_stock($user, $this->getData('fk_warehouse'), $diff, 0, $label, 0, $codemove, 'entrepot', $this->getData('fk_warehouse'));
+                    $result = $doli_prod->correct_stock($user, $id_main_warehouse, $diff, 1, $label, 0, $codemove, 'entrepot', $id_main_warehouse);
                 }
                 if ($result == -1)
                     $errors = array_merge($errors, $doli_prod->errors);
@@ -327,7 +355,6 @@ class Inventory extends BimpDolObject
         $list->addFieldFilterValue('rien', $filters);
         $list->addJoin('bl_inventory_det', 'a.rowid = inv_det.fk_product AND inv_det.fk_inventory = ' . $this->getData('id'), 'inv_det');
         $list->addJoin('product_stock', 'a.rowid = ps.fk_product AND ps.fk_entrepot = ' . $this->getData('fk_warehouse'), 'ps');
-//        print_r($list);
         $html .= $list->renderHtml();
 
 
@@ -348,7 +375,7 @@ class Inventory extends BimpDolObject
 
         $product = BimpObject::getInstance('bimpcore', 'Bimp_Product');
         $list = new BC_ListTable($product, 'inventory');
-        $list->addFieldFilterValue('(ps.reel != (' . $sql . ') OR (ps.reel IS NULL AND  (' . $sql . ') > 0 ) OR (ps.reel != 0 AND  (' . $sql . ') IS NULL)) AND pe.serialisable IS NULL AND 1', $filters);
+        $list->addFieldFilterValue('(ps.reel != (' . $sql . ') OR (ps.reel IS NULL AND  (' . $sql . ') > 0 ) OR (ps.reel != 0 AND  (' . $sql . ') IS NULL))  AND 1', $filters);
         $list->addJoin('product_stock', 'a.rowid = ps.fk_product AND ps.fk_entrepot = ' . $this->getData('fk_warehouse'), 'ps');
         $list->addJoin('product_extrafields', 'a.rowid = pe.fk_object', 'pe');
         $html .= $list->renderHtml();
@@ -375,17 +402,24 @@ class Inventory extends BimpDolObject
         return $html;
     }
 
-    public function renderDifference()
+    public function renderDifferenceProduct()
+    {
+        $html = '';
+
+        foreach ($this->getErrorsProduct() as $error) {
+            $html .= BimpRender::renderAlerts($error, 'warning');
+        }
+
+        return $html;
+    }
+    
+    public function renderDifferenceEquipment()
     {
         $html = '';
         if (!$this->equipmentIsOk()) {
             foreach ($this->getErrorsEquipment() as $error) {
                 $html .= BimpRender::renderAlerts($error);
             }
-        }
-
-        foreach ($this->getErrorsProduct() as $error) {
-            $html .= BimpRender::renderAlerts($error, 'warning');
         }
 
         return $html;
@@ -399,14 +433,23 @@ class Inventory extends BimpDolObject
         return true;
     }
 
-    public function getDiffStock()
+    public function getDiffStock($with_serialisable = 1)
     { // non sérialisé
         $ids_stock = array();
         $ids_scanned = array();
 
-        $sql1 = 'SELECT reel, fk_product';
-        $sql1 .= ' FROM ' . MAIN_DB_PREFIX . 'product_stock';
-        $sql1 .= ' WHERE fk_entrepot=' . $this->getData('fk_warehouse');
+        if($with_serialisable) {
+            $sql1 = 'SELECT reel, fk_product';
+            $sql1 .= ' FROM ' . MAIN_DB_PREFIX . 'product_stock';
+            $sql1 .= ' WHERE fk_entrepot=' . $this->getData('fk_warehouse');
+        } else {        
+            $sql1 = 'SELECT ps.reel AS reel, ps.fk_product AS fk_product';
+            $sql1 .= ' FROM ' . MAIN_DB_PREFIX . 'product_stock AS ps';
+            $sql1 .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'product_extrafields AS pe ON pe.fk_object=ps.fk_product';
+            $sql1 .= ' WHERE ps.fk_entrepot=' . $this->getData('fk_warehouse');
+            $sql1 .= ' AND (serialisable=0 OR serialisable IS NULL)';
+        }
+        
 
         $result1 = $this->db->db->query($sql1);
         if ($result1 and mysqli_num_rows($result1) > 0) {
@@ -418,7 +461,10 @@ class Inventory extends BimpDolObject
         $sql2 = 'SELECT SUM(qty) as sum, fk_product';
         $sql2 .= ' FROM ' . MAIN_DB_PREFIX . 'bl_inventory_det';
         $sql2 .= ' WHERE fk_inventory=' . $this->getData('id');
+        if(!$with_serialisable)
+            $sql2 .= ' AND fk_equipment=0';
         $sql2 .= ' GROUP BY (fk_product)';
+
 
         $result2 = $this->db->db->query($sql2);
         if ($result2 and mysqli_num_rows($result2) > 0) {
@@ -442,7 +488,7 @@ class Inventory extends BimpDolObject
                 $diff[$id_prod] = array('stock' => 0, 'nb_scan' => $qty_scan, 'diff' => $qty_scan);
             }
         }
-
+        
         return $diff;
     }
     
@@ -513,7 +559,7 @@ class Inventory extends BimpDolObject
         $html = '';
 
         if ($this->isLoaded()) {
-            if ((int) $this->getData('status') != (int) self::STATUS_OPEN) {
+            if ((int) $this->getData('status') != (int) self::STATUS_OPEN and (int) $this->getData('status') != (int) self::STATUS_PARTIALLY_CLOSED) {
                 $html = BimpRender::renderAlerts('Le statut de l\'inventaire ne permet pas d\'ajouter des lignes', 'info');
             } else {
                 $header_table = '<span style="margin-left: 100px">Ajouter</span>';
@@ -538,12 +584,12 @@ class Inventory extends BimpDolObject
     public function displayMouvementTrace()
     {
 
-        if ($this->getData('status') == self::STATUS_CLOSED) {
-            $url = DOL_URL_ROOT . '/product/stock/mouvement.php?search_inventorycode=inventory-id-' . $this->getData('id');
+        if (self::STATUS_PARTIALLY_CLOSED <= $this->getData('status')) {
+            $url = DOL_URL_ROOT . '/product/stock/mouvement.php?search_movement=Inventaire-' . $this->getData('id') . '-&search_warehouse=' . $this->getData('fk_warehouse');
             return '<a href="' . $url . '">Voir</a>';
         }
 
-        return "Disponible à la fermeture de l'inventaire";
+        return "Disponible à la fermeture partielle de l'inventaire";
     }
     
     public function hasChildren() {
@@ -871,6 +917,22 @@ class Inventory extends BimpDolObject
         $inventory_lines_obj = BimpObject::getInstance('bimplogistique', 'InventoryLine');
         $list = $inventory_lines_obj->getList($filters, 1, 1, 'id', 'desc', 'array', array());
         return count($list);
+    }
+    
+    public function getWarehouseInventories() {
+        
+        $sql = 'SELECT rowid';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'entrepot';
+        $sql .= ' WHERE ref="INV"';
+
+        $result = $this->db->db->query($sql);
+        if ($result and mysqli_num_rows($result) > 0) {
+            while ($obj = $this->db->db->fetch_object($result)) {
+                return $obj->rowid;
+            }
+        }
+        
+        return -1;
     }
 
 }

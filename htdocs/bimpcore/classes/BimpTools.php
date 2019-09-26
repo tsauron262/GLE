@@ -383,6 +383,15 @@ class BimpTools
         return '';
     }
 
+    public static function getTypeContactCodeById($id_type_contact)
+    {
+        if ((int) $id_type_contact) {
+            return BimpCache::getBdb()->getValue('c_type_contact', 'code', '`rowid` = ' . (int) $id_type_contact);
+        }
+
+        return '';
+    }
+
     // Gestion générique des objets: 
 
     public static function getObjectTable(BimpObject $parent, $id_object_field, $object = null)

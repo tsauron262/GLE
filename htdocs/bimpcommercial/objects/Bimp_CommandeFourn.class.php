@@ -9,6 +9,7 @@ class Bimp_CommandeFourn extends BimpComm
     const DELIV_ENTREPOT = 0;
     const DELIV_SIEGE = 1;
     const DELIV_CUSTOM = 2;
+    const DELIV_DIRECT = 3;
 
     public $redirectMode = 4; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
     public static $dol_module = 'commande_fournisseur';
@@ -44,7 +45,8 @@ class Bimp_CommandeFourn extends BimpComm
     public static $delivery_types = array(
         self::DELIV_ENTREPOT => 'Entrepôt de la commande',
         self::DELIV_SIEGE    => 'Siège social',
-        self::DELIV_CUSTOM   => 'Personnalisée'
+        self::DELIV_CUSTOM   => 'Personnalisée',
+        self::DELIV_DIRECT   => 'Contact livraison directe'
     );
     protected static $types_entrepot = array();
 
@@ -822,6 +824,21 @@ class Bimp_CommandeFourn extends BimpComm
         }
 
         return static::$types_entrepot;
+    }
+
+    // Getters données: 
+
+    public function getIdContactLivraison()
+    {
+        if ($this->isLoaded()) {
+            $contacts = $this->dol_object->getIdContact('external', 'SHIPPING');
+
+            if (isset($contacts[0])) {
+                return (int) $contacts[0];
+            }
+        }
+
+        return 0;
     }
 
     // Rendus HTML - overrides BimpObject:
@@ -1810,6 +1827,29 @@ class Bimp_CommandeFourn extends BimpComm
         );
     }
 
+    public function actionAddContact($data, &$success)
+    {
+        $errors = array();
+
+        if (isset($data['type']) && (int) $data['type'] === 1) {
+            if (isset($data['tiers_type_contact']) && (int) $data['tiers_type_contact'] &&
+                    BimpTools::getTypeContactCodeById((int) $data['tiers_type_contact']) === 'SHIPPING') {
+                if ((int) $this->getIdContactLivraison()) {
+                    $errors[] = 'Un contact livraison a déjà été ajouté';
+                }
+            }
+        }
+
+        if (count($errors)) {
+            return array(
+                'errors'   => $errors,
+                'warnings' => array()
+            );
+        }
+
+        return parent::actionAddContact($data, $success);
+    }
+
     // Overrides - BimpComm: 
 
     public function checkObject($context = '', $field = '')
@@ -1817,6 +1857,24 @@ class Bimp_CommandeFourn extends BimpComm
         if ($context === 'fetch') {
             $this->checkReceptionStatus();
             $this->checkInvoiceStatus();
+        }
+
+        if ($context === 'render_msgs') {
+            $this->msgs['warnings'] = array();
+
+            switch ((int) $this->getData('delivery_type')) {
+                case self::DELIV_CUSTOM:
+                    if (!(string) $this->getData('custom_delivery')) {
+                        $this->msgs['warnings'][] = 'Attention: adresse personnalisée non spécifiée';
+                    }
+                    break;
+
+                case self::DELIV_DIRECT:
+                    if (!(int) $this->getIdContactLivraison()) {
+                        $this->msgs['warnings'][] = 'Veullez ajouter un contact livraison';
+                    }
+                    break;
+            }
         }
     }
 
@@ -1838,7 +1896,7 @@ class Bimp_CommandeFourn extends BimpComm
         $new_data['fk_user_resp'] = 0;
 
         $new_data['status_forced'] = array();
-        
+
         return parent::duplicate($new_data, $warnings, $force_create);
     }
 

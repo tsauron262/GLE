@@ -131,6 +131,23 @@ class OrderFournPDF extends BimpDocumentPDF
                         $html .= '<span style="color: #A00000; font-weight: bold">Adresse non renseignée</span>';
                     }
                     break;
+
+                case Bimp_CommandeFourn::DELIV_DIRECT:
+                    $id_contact = (int) $this->bimpCommObject->getIdContactLivraison();
+                    if ($id_contact) {
+                        $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $id_contact);
+                        if (BimpObject::objectLoaded($contact)) {
+                            $html .= '<span style="font-weight: bold">' . $contact->getData('firstname') . ' ' . $contact->getData('lastname') . '</span><br/>';
+                            $html .= $contact->getData('address') . '<br/>';
+                            $html .= $contact->getData('zip') . ' ' . $contact->getData('town') . '<br/>';
+                            $html .= $contact->displayCountry();
+                        } else {
+                            $html .= '<span style="color: #A00000; font-weight: bold">Le contact d\'ID ' . $id_contact . ' n\'existe pas</span>';
+                        }
+                    } else {
+                        $html .= '<span style="color: #A00000; font-weight: bold">Contact livraison directe absent</span>';
+                    }
+                    break;
             }
         }
 

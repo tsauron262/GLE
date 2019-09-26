@@ -4893,6 +4893,8 @@ class BimpObject extends BimpCache
 
     public function renderMsgs()
     {
+        $this->checkObject('render_msgs');
+        
         $html = '';
 
         if (count($this->msgs['errors'])) {

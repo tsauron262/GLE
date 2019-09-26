@@ -60,6 +60,113 @@ class Bimp_Paiement extends BimpObject
         return $this->facs_amounts;
     }
 
+    public function getListsExtraButtons()
+    {
+        $buttons = array();
+        if ($this->isLoaded()) {
+            $buttons[] = array(
+                'label'   => 'Afficher dans un nouvel onglet',
+                'icon'    => 'fas_external-link-alt',
+                'onclick' => 'window.open(\'' . DOL_URL_ROOT . '/compta/paiement/card.php?id=' . $this->id . '\')'
+            );
+        }
+        return $buttons;
+    }
+
+    public function getFacturesSearchFilters(&$filters, $value, &$joins = array(), $main_alias = 'a')
+    {
+        if (!isset($joins['pf'])) {
+            $joins['pf'] = array(
+                'alias' => 'pf',
+                'table' => 'paiement_facture',
+                'on'    => 'pf.fk_paiement = ' . $main_alias . '.rowid'
+            );
+        }
+
+        $filters['pf.fk_facture'] = $value;
+    }
+
+    public function getClientSearchFilters(&$filters, $value, &$joins = array(), $main_alias = 'a')
+    {
+        if (!isset($joins['pf'])) {
+            $joins['pf'] = array(
+                'alias' => 'pf',
+                'table' => 'paiement_facture',
+                'on'    => 'pf.fk_paiement = ' . $main_alias . '.rowid'
+            );
+        }
+        if (!isset($joins['facture'])) {
+            $joins['facture'] = array(
+                'alias' => 'facture',
+                'table' => 'facture',
+                'on'    => 'facture.rowid = pf.fk_facture'
+            );
+        }
+
+        $filters['facture.fk_soc'] = $value;
+    }
+
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array())
+    {
+        switch ($field_name) {
+            case 'id_facture':
+                if (!isset($joins['pf'])) {
+                    $joins['pf'] = array(
+                        'alias' => 'pf',
+                        'table' => 'paiement_facture',
+                        'on'    => 'pf.fk_paiement = a.rowid'
+                    );
+                }
+                $filters['pf.fk_facture'] = array(
+                    'in' => $values
+                );
+                break;
+
+            case 'id_client';
+                if (!isset($joins['pf'])) {
+                    $joins['pf'] = array(
+                        'alias' => 'pf',
+                        'table' => 'paiement_facture',
+                        'on'    => 'pf.fk_paiement = a.rowid'
+                    );
+                }
+                if (!isset($joins['facture'])) {
+                    $joins['facture'] = array(
+                        'alias' => 'facture',
+                        'table' => 'facture',
+                        'on'    => 'facture.rowid = pf.fk_facture'
+                    );
+                }
+                $filters['facture.fk_soc'] = array(
+                    'in' => $values
+                );
+                break;
+        }
+
+        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors);
+    }
+
+    public function getCustomFilterValueLabel($field_name, $value)
+    {
+        switch ($field_name) {
+            case 'id_facture':
+                $fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $value);
+                if (BimpObject::objectLoaded($fac)) {
+                    return $fac->getRef();
+                }
+                break;
+
+            case 'id_client';
+                $cli = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', (int) $value);
+                if (BimpObject::objectLoaded($cli)) {
+                    return $cli->getRef() . ' - ' . $cli->getName();
+                }
+                break;
+        }
+
+        return parent::getCustomFilterValueLabel($field_name, $value);
+    }
+
     // Affichages: 
 
     public function displayType()
@@ -99,6 +206,73 @@ class Bimp_Paiement extends BimpObject
         }
 
         return '';
+    }
+
+    public function displayFactures()
+    {
+        $html = '';
+
+        if ($this->isLoaded()) {
+            $rows = $this->db->getRows('paiement_facture', '`fk_paiement` = ' . (int) $this->id, null, 'array', array(
+                'fk_facture',
+                'amount'
+            ));
+
+            if (is_array($rows)) {
+                foreach ($rows as $r) {
+                    if ($html) {
+                        $html .= '<br/>';
+                    }
+                    $fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $r['fk_facture']);
+                    if (BimpObject::objectLoaded($fac)) {
+                        $html .= $fac->getNomUrl(1, 1, 1, 'full');
+                    } else {
+                        $html .= '<span class="danger">';
+                        $html .= 'La facture d\'ID ' . $r['fk_facture'] . ' n\'existe plus';
+                        $html .= '</span>';
+                    }
+
+                    $html .= '<span style="display: inline-block; margin-left: 15px">';
+                    $html .= '  (' . BimpTools::displayMoneyValue((float) $r['amount']) . ')';
+                    $html .= '</span>';
+                }
+            }
+        }
+
+        return $html;
+    }
+
+    public function displayClient()
+    {
+        $html = '';
+
+        if ($this->isLoaded()) {
+            $sql = 'SELECT f.fk_soc FROM ' . MAIN_DB_PREFIX . 'facture f';
+            $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'paiement_facture pf on pf.fk_facture = f.rowid';
+            $sql .= ' WHERE pf.fk_paiement = ' . (int) $this->id;
+
+            $result = $this->db->executeS($sql, 'array');
+
+            if (!empty($result)) {
+                $clients = array();
+
+                foreach ($result as $r) {
+                    if ((int) $r['fk_soc'] && !in_array((int) $r['fk_soc'], $clients)) {
+                        $clients[] = (int) $r['fk_soc'];
+
+                        $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', (int) $r['fk_soc']);
+                        if (BimpObject::objectLoaded($soc)) {
+                            if ($html) {
+                                $html .= '<br/>';
+                            }
+                            $html .= BimpObject::getInstanceNomUrlWithIcons($soc->dol_object);
+                        }
+                    }
+                }
+            }
+        }
+
+        return $html;
     }
 
     // Rendus: 
@@ -341,6 +515,60 @@ class Bimp_Paiement extends BimpObject
         $html .= '</div>';
 
         return $html;
+    }
+
+    // Gestion extra fields: 
+
+    public function fetchExtraFields()
+    {
+        $fields = array(
+            'type' => ''
+        );
+
+        if ($this->isLoaded()) {
+            $fields['type'] = (int) $this->db->getValue($this->getTable(), 'fk_paiement', 'rowid = ' . (int) $this->id);
+        }
+
+        return $fields;
+    }
+
+    public function getExtraFieldFilterKey($field, &$joins, $main_alias = '')
+    {
+        switch ($field) {
+            case 'type':
+                return $main_alias . '.fk_paiement';
+        }
+        return '';
+    }
+
+    public function insertExtraFields()
+    {
+        return array();
+    }
+
+    public function updateExtraFields()
+    {
+        return array();
+    }
+
+    public function updateExtraField($field_name, $value, $id_object)
+    {
+        return array();
+    }
+
+    public function deleteExtraFields()
+    {
+        return array();
+    }
+
+    public function getExtraFieldSavedValue($field, $id_object)
+    {
+        switch ($field) {
+            case 'type':
+                return (int) $this->db->getValue($this->getTable(), 'fk_paiement', 'rowid = ' . (int) $id_object);
+        }
+
+        return null;
     }
 
     // Overrides: 

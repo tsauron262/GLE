@@ -11,6 +11,12 @@ objects:
             bimp_object: 
                 module: bimpcommercial
                 name: Bimp_FactureLine
+                
+    paiement:
+        instance: 
+            bimp_object: 
+                module: bimpcommercial
+                name: Bimp_Paiement       
             
 sections: 
     - type: tabs
@@ -27,4 +33,10 @@ sections:
                 - type: custom
                   custom: 
                       callback: renderProdsTabs
+        paiements: 
+            label: Paiements
+            sections: 
+                - type: custom
+                  custom: 
+                      callback: renderPaiementsTab
             

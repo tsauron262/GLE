@@ -116,6 +116,9 @@ class BC_Input extends BimpComponent
         'search_entrepot'             => array(
             'include_empty'        => array('data_type' => 'bool', 'default' => 0),
             'has_commissions_only' => array('data_type' => 'bool', 'default' => 0)
+        ),
+        'search_object'               => array(
+            'object' => array('default' => '')
         )
     );
 
@@ -339,8 +342,16 @@ class BC_Input extends BimpComponent
 
             case 'search_object':
                 $options['object'] = null;
-                if (isset($this->field_params['object'])) {
-                    $object = $this->object->config->getObject('', $this->field_params['object']);
+                $obj_name = '';
+
+                if (isset($this->params['object']) && $this->params['object']) {
+                    $obj_name = $this->params['object'];
+                } elseif (isset($this->field_params['object'])) {
+                    $obj_name = $this->field_params['object'];
+                }
+
+                if ($obj_name) {
+                    $object = $this->object->config->getObject('', $obj_name);
                     if (!is_null($object) && is_a($object, 'BimpObject')) {
                         $options['object'] = $object;
                     }
@@ -544,7 +555,7 @@ class BC_Input extends BimpComponent
                         $this->value = array();
                     }
                 }
-                
+
                 foreach ($this->value as $value) {
                     if (isset($this->field_params['values'][$value])) {
                         if (is_array($this->field_params['values'][$value])) {
@@ -578,7 +589,6 @@ class BC_Input extends BimpComponent
                     $object_name = $instance->object_name;
                 }
             }
-
 
             if ($module && $object_name) {
                 $extra_data['object_module'] = $module;

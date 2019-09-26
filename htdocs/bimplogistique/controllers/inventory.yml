@@ -22,6 +22,9 @@ sections:
       tabs: 
         default:
           label: Fiche
+          url_params: 
+            id: 
+                request: id
           sections:
            - type: object_header
              object_header:
@@ -40,6 +43,9 @@ sections:
 
         scan:
           label: Scan
+          url_params: 
+            id: 
+                request: id
           sections:
                - type: object_header
                  object_header:
@@ -57,6 +63,9 @@ sections:
                       object: inventory
         stock:
           label: Stock
+          url_params: 
+            id: 
+                request: id
           sections:
                - type: object_header
                  object_header:
@@ -75,7 +84,9 @@ sections:
             callback: 
               method: isAdmin
               object: inventory
-
+          url_params: 
+            id: 
+                request: id
           label: Différence
           sections:
                - type: object_header

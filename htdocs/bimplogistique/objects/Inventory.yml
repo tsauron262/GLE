@@ -136,6 +136,7 @@ lists:
         add_form_name: default
         view_btn: 1
         page_btn: 1
+        delete_btn: 1
         modal_view: default
         cols:
             id:

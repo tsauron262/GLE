@@ -1170,7 +1170,7 @@ class BimpDocumentPDF extends BimpModelPDF
             }
             $html .= '<tr>';
             $html .= '<td style="background-color: #F0F0F0;">Total remises HT</td>';
-            $html .= '<td style="text-align: right; background-color: #F0F0F0;">' . price($total_remises, 0, $this->langs);
+            $html .= '<td style="text-align: right; background-color: #F0F0F0;">' . BimpTools::displayMoneyValue($total_remises, '');
             if ((int) $this->periodicity) {
                 $html .= ' / ' . BimpComm::$pdf_periodicity_label_masc[(int) $this->periodicity];
             }
@@ -1191,7 +1191,7 @@ class BimpDocumentPDF extends BimpModelPDF
         $html .= '<tr>';
         $html .= '<td style="">' . $this->langs->transnoentities("TotalHT") . '</td>';
         $html .= '<td style="text-align: right;">';
-        $html .= price($total_ht, 0, $this->langs);
+        $html .= BimpTools::displayMoneyValue($total_ht, '');
 
         if ((int) $this->periodicity) {
             $html .= ' / ' . BimpComm::$pdf_periodicity_label_masc[(int) $this->periodicity];
@@ -1211,7 +1211,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
             $html .= '<tr>';
             $html .= '<td style="background-color: #DCDCDC;">' . $this->langs->transnoentities("Dont éco-participation HT") . '</td>';
-            $html .= '<td style="background-color: #DCDCDC;text-align: right;">' . price($total_deee, 0, $this->langs);
+            $html .= '<td style="background-color: #DCDCDC;text-align: right;">' . BimpTools::displayMoneyValue($total_deee, '');
             if ((int) $this->periodicity) {
                 $html .= ' / ' . BimpComm::$pdf_periodicity_label_masc[(int) $this->periodicity];
             }
@@ -1244,7 +1244,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
                             $html .= '<tr>';
                             $html .= '<td style="background-color: #F0F0F0;">' . $totalvat . '</td>';
-                            $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . price($tvaval, 0, $this->langs);
+                            $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . BimpTools::displayMoneyValue($tvaval, '');
                             if ((int) $this->periodicity) {
                                 $html .= ' / ' . BimpComm::$pdf_periodicity_label_masc[(int) $this->periodicity];
                             }
@@ -1276,7 +1276,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
                             $html .= '<tr>';
                             $html .= '<td style="background-color: #F0F0F0;">' . $totalvat . '</td>';
-                            $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . price($tvaval, 0, $this->langs);
+                            $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . BimpTools::displayMoneyValue($tvaval, '');
                             if ((int) $this->periodicity) {
                                 $html .= ' / ' . BimpComm::$pdf_periodicity_label_masc[(int) $this->periodicity];
                             }
@@ -1303,8 +1303,8 @@ class BimpDocumentPDF extends BimpModelPDF
                             }
 
                             $html .= '<tr>';
-                            $html .= '<td style="background-color: #F0F0F0;">' . $totalvat . ' (' . price($this->ht[$tvakey]) . ' €)</td>';
-                            $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . price($tvaval, 0, $this->langs);
+                            $html .= '<td style="background-color: #F0F0F0;">' . $totalvat . ' (' . BimpTools::displayMoneyValue($this->ht[$tvakey], '') . ' €)</td>';
+                            $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . BimpTools::displayMoneyValue($tvaval, '');
                             if ((int) $this->periodicity) {
                                 $html .= ' / ' . BimpComm::$pdf_periodicity_label_masc[(int) $this->periodicity];
                             }
@@ -1336,7 +1336,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
                             $html .= '<tr>';
                             $html .= '<td style="background-color: #F0F0F0;">' . $totalvat . '</td>';
-                            $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . price($tvaval, 0, $this->langs);
+                            $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . BimpTools::displayMoneyValue($tvaval, '');
                             if ((int) $this->periodicity) {
                                 $html .= ' / ' . BimpComm::$pdf_periodicity_label_masc[(int) $this->periodicity];
                             }
@@ -1368,7 +1368,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
                             $html .= '<tr>';
                             $html .= '<td style="background-color: #F0F0F0;">' . $totalvat . '</td>';
-                            $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . price($tvaval, 0, $this->langs);
+                            $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . BimpTools::displayMoneyValue($tvaval, '');
                             if ((int) $this->periodicity) {
                                 $html .= ' / ' . BimpComm::$pdf_periodicity_label_masc[(int) $this->periodicity];
                             }
@@ -1388,7 +1388,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
                 $html .= '<tr>';
                 $html .= '<td style="background-color: #DCDCDC;">' . $this->langs->transnoentities("TotalTTC") . '</td>';
-                $html .= '<td style="background-color: #DCDCDC; text-align: right;">' . price($total_ttc, 0, $this->langs);
+                $html .= '<td style="background-color: #DCDCDC; text-align: right;">' . BimpTools::displayMoneyValue($total_ttc, '');
                 if ((int) $this->periodicity) {
                     $html .= ' / ' . BimpComm::$pdf_periodicity_label_masc[(int) $this->periodicity];
                 }
@@ -1424,13 +1424,13 @@ class BimpDocumentPDF extends BimpModelPDF
         if ($deja_regle > 0 || $creditnoteamount > 0 || $depositsamount > 0) {
             $html .= '<tr>';
             $html .= '<td style="">' . $this->langs->transnoentities("Paid") . '</td>';
-            $html .= '<td style="text-align: right;">' . price($deja_regle + $depositsamount, 0, $this->langs) . '</td>';
+            $html .= '<td style="text-align: right;">' . BimpTools::displayMoneyValue($deja_regle + $depositsamount, '') . '</td>';
             $html .= '</tr>';
 
             if ($creditnoteamount) {
                 $html .= '<tr>';
                 $html .= '<td style="background-color: #F0F0F0;">' . $this->langs->transnoentities("CreditNotes") . '</td>';
-                $html .= '<td style="text-align: right; background-color: #F0F0F0;">' . price($creditnoteamount, 0, $this->langs) . '</td>';
+                $html .= '<td style="text-align: right; background-color: #F0F0F0;">' . BimpTools::displayMoneyValue($creditnoteamount, '') . '</td>';
                 $html .= '</tr>';
             }
 
@@ -1438,7 +1438,7 @@ class BimpDocumentPDF extends BimpModelPDF
             if (isset($this->object->close_code) && $this->object->close_code == Facture::CLOSECODE_DISCOUNTVAT) {
                 $html .= '<tr>';
                 $html .= '<td style="background-color: #F0F0F0;">' . $this->langs->transnoentities("EscompteOfferedShort") . '</td>';
-                $html .= '<td style="text-align: right; background-color: #F0F0F0;">' . price($this->object->total_ttc - $deja_regle - $creditnoteamount - $depositsamount, 0, $this->langs) . '</td>';
+                $html .= '<td style="text-align: right; background-color: #F0F0F0;">' . BimpTools::displayMoneyValue($this->object->total_ttc - $deja_regle - $creditnoteamount - $depositsamount, '') . '</td>';
                 $html .= '</tr>';
                 $resteapayer = 0;
             }
@@ -1447,14 +1447,14 @@ class BimpDocumentPDF extends BimpModelPDF
         if ($this->acompteHt > 0) {
             $html .= '<tr>';
             $html .= '<td style="background-color: #F0F0F0;">' . $this->langs->transnoentities("Acompte") . '</td>';
-            $html .= '<td style="text-align: right; background-color: #F0F0F0;">' . price($this->acompteTtc, 0, $this->langs) . '</td>';
+            $html .= '<td style="text-align: right; background-color: #F0F0F0;">' . BimpTools::displayMoneyValue($this->acompteTtc, '') . '</td>';
             $html .= '</tr>';
         }
 
         if ($deja_regle > 0 || $creditnoteamount > 0 || $depositsamount > 0 || $this->acompteHt > 0) {
             $html .= '<tr>';
             $html .= '<td style="background-color: #DCDCDC;">' . $this->langs->transnoentities("RemainderToPay") . '</td>';
-            $html .= '<td style="text-align: right; background-color: #DCDCDC;">' . price($resteapayer, 0, $this->langs) . '</td>';
+            $html .= '<td style="text-align: right; background-color: #DCDCDC;">' . BimpTools::displayMoneyValue($resteapayer, '') . '</td>';
             $html .= '</tr>';
         }
 

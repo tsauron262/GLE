@@ -19,10 +19,10 @@ sections:
                   list: 
                       panel: 1
                       object: inventory
-        inventory_sr:
-            label: Inventaires Show Room
-            sections:
-                - type: list
-                  list: 
-                      panel: 1
-                      object: inventorysr
+#        inventory_sr:
+#            label: Inventaires Show Room
+#            sections:
+#                - type: list
+#                  list: 
+#                      panel: 1
+#                      object: inventorysr

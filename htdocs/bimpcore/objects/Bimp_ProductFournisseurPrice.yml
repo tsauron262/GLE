@@ -76,8 +76,22 @@ fields:
         default_value: 0
         input: 
             type: hidden
-
     
+forms: 
+    default: 
+        rows: 
+            - field: fk_soc
+            - field: ref_fourn
+            - field: price
+            - field: tva_tx
+            - custom: 1
+              label: Définir comme prix d'achat actuel du produit
+              input_name: is_cur_pa
+              data_type: bool
+              input: 
+                  type: toggle
+              value: 0
+        
 lists: 
     default: 
         title: Liste des fournisseurs du produit
@@ -87,8 +101,8 @@ lists:
         n: 50
         page_btn: 1
         edit_btn: 1
-        edit_form: light
-        add_form_name: light
+        edit_form: default
+        add_form_name: default
         cols: 
             - field: fk_soc
               display: nom_url
@@ -96,8 +110,7 @@ lists:
             - field: quantity
             - field: tva_tx
             - field: price
-            - field: remise_percent
-            
+            - field: remise_percent           
             
 fields_tables:
     prices_buy:

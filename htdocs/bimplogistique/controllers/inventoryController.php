@@ -26,8 +26,12 @@ class inventoryController extends BimpController {
         } elseif(!count($errors)){
             if((int) $id_equipment > 0)
                 $tab = $inventory->createLinesEquipment($id_product, $id_equipment);
-            else
+            elseif ((int) $inventory::STATUS_PARTIALLY_CLOSED <= (int) $inventory->getData('status')){
+                $tab = array('id_inventory_det' => NULL, 'msg' => '', 'errors' => array("Le "
+                    . "statut de l'inventaire ne permet pas d'ajouter d'autre produits non sérialisé."));
+            } else {
                 $tab = $inventory->createLinesProduct($id_product, $quantity_input);
+            }
             $id_inventory_det = $tab['id_inventory_det'];
             $errors = array_merge($errors, $tab['errors']);
             $msg = $tab['msg'];

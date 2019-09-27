@@ -6,11 +6,13 @@ dol_object:
             
 table: paiement
 primary: rowid
+icon: fas_euro-sign
 
 labels: 
     name: paiement
 
 fields: 
+#    Champs en base
     ref: 
         label: Référence
     statut: 
@@ -39,6 +41,13 @@ fields:
     note: 
         label: Note
         type: text
+        
+#    Champs extra: 
+    type: 
+        label: Type
+        values: 
+            array: modeReglements
+        extra: 1    
     
 forms: 
     default: 
@@ -181,5 +190,83 @@ forms:
                 decimals: 2
                 input: 
                     type: text
-                  
-        
+            
+filters_panels: 
+    default: 
+        filters: 
+            ref: 
+                field: ref
+            datep: 
+                field: datep
+            type: 
+                field: type
+            amount: 
+                field: amount
+            facture: 
+                custom: 1
+                data_type: id_object
+                field: id_facture
+                label: Facture
+                type: value
+                input: 
+                    object: facture
+            client: 
+                custom: 1
+                data_type: id_object
+                field: id_client
+                label: Client
+                type: value
+                input: 
+                    type: search_societe
+                    
+lists_cols: 
+    ref: 
+        field: ref
+    date: 
+        field: datep
+    type: 
+        field: type
+    amount: 
+        field: amount
+    factures: 
+        label: Factures
+        value: 
+            callback: displayFactures
+        search: 
+            type: values
+            input: 
+                type: search_object
+                options: 
+                    object: facture
+    client: 
+        label: Client
+        value: 
+            callback: displayClient
+        search: 
+            type: values
+            input: 
+                type: search_societe
+    
+lists: 
+    default: 
+        configurable: 1
+        checkboxes: 0
+        sort_field: id
+        sort_way: desc
+        n: 10
+        extra_btn: 
+            callback: getListsExtraButtons
+        filters_panel: default
+        cols: 
+            ref: 
+            client: 
+            type: 
+            date:  
+            amount: 
+            factures: 
+                
+    client: 
+        extends: default
+        cols: 
+            client: 
+                

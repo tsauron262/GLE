@@ -109,7 +109,7 @@ forms:
             - field: fk_warehouse
             - field: parent
             
-    confirm_close: 
+    confirm_close_partially: 
         rows: 
             - custom: 1
               label: Date du mouvement de stock
@@ -122,7 +122,15 @@ forms:
               label: Opérations
               input_name: inut
               content: 
-                callback: renderDifference
+                callback: renderDifferenceProduct
+                
+    confirm_close: 
+        rows: 
+            - custom: 1
+              label: Remarques
+              input_name: inut
+              content: 
+                callback: renderDifferenceEquipment
             
 lists:
     default:

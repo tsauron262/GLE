@@ -53,6 +53,10 @@ sections:
                     name: stock
 #            show: 0
           - id: Categoriser
+            show:
+                callback: 
+                    object: produit
+                    method: productBrowserIsActif
             title: Catégoriser
             struct:
                 type: view

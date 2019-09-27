@@ -109,10 +109,10 @@ class Bimp_ProductFournisseurPrice extends BimpObject
                 $errors[] = $msg;
             } else {
                 $prod = $this->getChildObject('product');
-                if($prod->getData('cur_pa_ht') == 0){
+                if ($prod->getData('cur_pa_ht') == 0 || (int) BimpTools::getValue('is_cur_pa', 0)) {
                     $prod->updateField('cur_pa_ht', $this->getData('price'));
                 }
-                
+
                 if (!$this->isLoaded()) {
                     $this->id = $result;
                     $this->fetch($this->id);

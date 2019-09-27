@@ -617,6 +617,9 @@ class BimpDocumentPDF extends BimpModelPDF
         $total_ht_without_remises = 0;
         $total_ttc_without_remises = 0;
 
+        $lines_remise_global_amount_ht = 0;
+        $lines_remise_global_amount_ttc = 0;
+
         foreach ($this->object->lines as $line) {
             $i++;
 
@@ -650,8 +653,9 @@ class BimpDocumentPDF extends BimpModelPDF
             $hide_product_label = isset($bimpLines[(int) $line->id]) ? (int) $bimpLines[(int) $line->id]->getData('hide_product_label') : 0;
 
             $desc = $this->getLineDesc($line, $product, $hide_product_label);
+            $line_remise_global_percent = 0;
 
-            if (!is_null($bimpLine)) {
+            if (BimpObject::objectLoaded($bimpLine)) {
                 if ($bimpLine->equipment_required && $bimpLine->isProductSerialisable()) {
                     $equipment_lines = $bimpLine->getEquipmentLines();
                     if (count($equipment_lines)) {
@@ -683,6 +687,23 @@ class BimpDocumentPDF extends BimpModelPDF
                         }
                     }
                 }
+
+                if ($bimpLine->isRemisable()) {
+                    $remises = BimpCache::getBimpObjectObjects('bimpcommercial', 'ObjectLineRemise', array(
+                                'id_object_line'    => (int) $bimpLine->id,
+                                'object_type'       => $bimpLine::$parent_comm_type,
+                                'is_remise_globale' => 1
+                    ));
+
+                    foreach ($remises as $rem) {
+                        $line_remise_global_percent += (float) $rem->getData('percent');
+                    }
+
+                    if ($line_remise_global_percent) {
+                        $lines_remise_global_amount_ht += ((float) ($line->subprice * ($line_remise_global_percent / 100)) * $line->qty);
+                        $lines_remise_global_amount_ttc += (BimpTools::calculatePriceTaxIn((float) $line->subprice, $line->tva_tx) * ($line_remise_global_percent / 100) * $line->qty);
+                    }
+                }
             }
 
             if ((BimpObject::objectLoaded($bimpLine) && (int) $bimpLine->getData('type') === ObjectLine::LINE_TEXT) ||
@@ -695,8 +716,9 @@ class BimpDocumentPDF extends BimpModelPDF
             } else {
                 $line_remise = $line->remise_percent;
 
-                if (!is_null($bimpLine)) {
+                if (BimpObject::objectLoaded($bimpLine)) {
                     if ($bimpLine->isRemisable()) {
+                        $line_remise -= $line_remise_global_percent;
                         $line_remise -= $remise_globale_line_rate;
                     } else {
                         $line_remise = 0;
@@ -792,6 +814,7 @@ class BimpDocumentPDF extends BimpModelPDF
             $table->rows[] = $row;
         }
 
+        // Remise globale
         if (/* !$this->hideReduc && */$remise_globale) {
             $remise_infos = $this->bimpCommObject->getRemisesInfos();
 
@@ -812,6 +835,34 @@ class BimpDocumentPDF extends BimpModelPDF
                 $row['total_ttc'] = BimpTools::displayMoneyValue(-$remise_infos['remise_globale_amount_ttc'], '');
             elseif (!$this->hideReduc)
                 $row['pu_remise'] = BimpTools::displayMoneyValue(-$remise_infos['remise_globale_amount_ht'], '');
+
+            if ($this->hide_pu) {
+                unset($row['pu_ht']);
+            }
+
+            $table->rows[] = $row;
+        }
+
+        // Remise globale répartie sur les lignes
+        if ($lines_remise_global_amount_ht) {
+            $remise_label = $this->bimpCommObject->getData('remise_globale_label');
+
+            if (!$remise_label) {
+                $remise_label = 'Remise exceptionnelle sur l\'intégralité ' . $this->bimpCommObject->getLabel('of_the');
+            }
+
+
+            $row = array(
+                'desc'     => $remise_label,
+                'qte'      => 1,
+                'tva'      => '',
+                'pu_ht'    => BimpTools::displayMoneyValue(-$lines_remise_global_amount_ht, ''),
+                'total_ht' => BimpTools::displayMoneyValue(-$lines_remise_global_amount_ht, '')
+            );
+            if (!$this->hideTtc)
+                $row['total_ttc'] = BimpTools::displayMoneyValue(-$lines_remise_global_amount_ttc, '');
+            elseif (!$this->hideReduc)
+                $row['pu_remise'] = BimpTools::displayMoneyValue(-$lines_remise_global_amount_ttc, '');
 
             if ($this->hide_pu) {
                 unset($row['pu_ht']);

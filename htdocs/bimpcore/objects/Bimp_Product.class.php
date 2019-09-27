@@ -902,16 +902,16 @@ class Bimp_Product extends BimpObject
         if ($this->isLoaded()) {
             if ((float) $this->getData('cur_pa_ht')) {
                 $pa_ht = (float) $this->getData('cur_pa_ht');
-            } elseif ((float) $this->getData('pmp')) {
-                $pa_ht = (float) $this->getData('pmp');
             } else {
                 $pa_ht = (float) $this->getCurrentFournPriceAmount($id_fourn, $with_default);
-            }
 
-            return $pa_ht;
+                if (!$pa_ht && (float) $this->getData('pmp')) {
+                    $pa_ht = (float) $this->getData('pmp');
+                }
+            }
         }
 
-        return 0;
+        return $pa_ht;
     }
 
     public function getCurrentFournPriceId($id_fourn = null, $with_default = false)
@@ -926,8 +926,6 @@ class Bimp_Product extends BimpObject
             $pa_ht = 0;
             if ((float) $this->getData('cur_pa_ht')) {
                 $pa_ht = (float) $this->getData('cur_pa_ht');
-            } elseif ((float) $this->getData('pmp')) {
-                $pa_ht = (float) $this->getData('pmp');
             }
 
             if ($pa_ht) {

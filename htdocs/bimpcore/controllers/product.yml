@@ -13,8 +13,9 @@ objects:
                 request: id
 
 js: 
-    - /bimpcore/views/js/categorize.js
-    - /bimpcore/views/js/history.js
+    callback: 
+        object: produit
+        method: getJs
 css: 
     - /bimpcore/views/css/product.css
     

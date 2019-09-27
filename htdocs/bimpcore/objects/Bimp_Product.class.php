@@ -1095,6 +1095,14 @@ class Bimp_Product extends BimpObject
     }
 
     // Rendus HTML: 
+    
+    public function getJs(){
+        $js  = array();
+        $js[] = "/bimpcore/views/js/history.js";
+        if($this->productBrowserIsActif())
+            $js[] = "/bimpcore/views/js/categorize.js";
+        return $js;
+    }
 
     public function renderHeaderExtraLeft()
     {

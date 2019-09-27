@@ -618,26 +618,27 @@ class Bimp_Product extends BimpObject
         }
     }
 
-    public function getNbScanned()
+    public function getNbScanned($is_show_room = 0)
     {
         global $cache_scann;
 
         $id_inventory = BimpTools::getValue('id');
+        $key = $id_inventory . ($is_show_room ? '_sr' : '');
 
-        if (!isset($cache_scann[$id_inventory])) {
+        if (!isset($cache_scann[$key])) {
             $sql = 'SELECT SUM(qty) as qty, fk_product';
-            $sql .= ' FROM ' . MAIN_DB_PREFIX . 'bl_inventory_det';
+            $sql .= ' FROM ' . MAIN_DB_PREFIX . 'bl_inventory_' . ($is_show_room ? 'sr_det' : 'det');
             $sql .= ' WHERE fk_inventory=' . $id_inventory;
             $sql .= ' GROUP BY fk_product';
             $result = $this->db->db->query($sql);
             if ($result) {
                 while ($obj = $this->db->db->fetch_object($result)) {
-                    $cache_scann[$id_inventory][$obj->fk_product] = $obj->qty;
+                    $cache_scann[$key][(int) $obj->fk_product] = $obj->qty;
                 }
             }
         }
-        if (isset($cache_scann[$id_inventory][$this->getData('id')]))
-            return $cache_scann[$id_inventory][$this->getData('id')];
+        if (isset($cache_scann[$key][(int) $this->getData('id')]))
+            return $cache_scann[$key][(int) $this->getData('id')];
         else
             return 0;
     }
@@ -1094,6 +1095,17 @@ class Bimp_Product extends BimpObject
         $inventory = BimpCache::getBimpObjectInstance('bimplogistique', 'Inventory', $id_inventory);
         $stock = $this->getStocksForEntrepot($inventory->getData('fk_warehouse'));
         return $stock['reel'];
+    }
+    
+    public function displayStockInventorySr()
+    {
+        $id_inventory = BimpTools::getValue('id');
+        $inventory = BimpCache::getBimpObjectInstance('bimplogistique', 'InventorySr', $id_inventory);
+        $stock = $this->getStockShoowRoom('2019-09-26 16:47:19', (int) $inventory->getData('fk_warehouse'));
+//        echo '444';
+//        print_r($stock);
+//        die();
+        return $stock;
     }
 
     // Rendus HTML: 

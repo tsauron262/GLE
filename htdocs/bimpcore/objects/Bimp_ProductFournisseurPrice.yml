@@ -80,6 +80,7 @@ fields:
 forms: 
     default: 
         rows: 
+            - field: fk_product
             - field: fk_soc
             - field: ref_fourn
             - field: price

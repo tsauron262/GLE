@@ -2192,7 +2192,7 @@ class BimpObject extends BimpCache
                     $return_fields[$key] = 'ef.' . $field;
                     $has_extrafields = true;
                 } elseif ($this->isExtraField($field)) {
-                    $field_key = $this->getExtraFieldFilterKey($field, $joins);
+                    $field_key = $this->getExtraFieldFilterKey($field, $joins, 'a');
                     if ($field_key) {
                         $return_fields[$key] = $field_key;
                     } else {
@@ -2211,7 +2211,7 @@ class BimpObject extends BimpCache
                 $has_extrafields = true;
                 $order_by = 'ef.' . $order_by;
             } elseif ($this->isExtraField($order_by)) {
-                $order_by = $this->getExtraFieldFilterKey($order_by, $joins);
+                $order_by = $this->getExtraFieldFilterKey($order_by, $joins, 'a');
             }
         }
 

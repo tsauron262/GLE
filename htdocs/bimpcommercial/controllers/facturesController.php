@@ -2,20 +2,21 @@
 
 class facturesController extends BimpController
 {
+
     var $socid = "";
 
     public function displayHead()
     {
         global $db, $langs, $user;
-        
-        if(BimpTools::getValue("socid") > 0){
+
+        if (BimpTools::getValue("socid") > 0) {
             $this->socid = BimpTools::getValue("socid");
             require_once DOL_DOCUMENT_ROOT . '/core/lib/company.lib.php';
             $soc = new Societe($db);
             $soc->fetch($this->socid);
             $head = societe_prepare_head($soc);
             dol_fiche_head($head, 'bimpcomm', '');
-            
+
             $linkback = '<a href="' . DOL_URL_ROOT . '/societe/list.php?restore_lastsearch_values=1">' . $langs->trans("BackToList") . '</a>';
 
             dol_banner_tab($soc, 'id', $linkback, ($user->societe_id ? 0 : 1), 'rowid', 'nom', '', '&fc=factures');
@@ -26,7 +27,7 @@ class facturesController extends BimpController
     {
         $list = 'default';
         $titre = 'Factures';
-        if($this->socid){
+        if ($this->socid) {
             $societe = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $this->socid);
 
             if (!BimpObject::objectLoaded($societe)) {
@@ -36,20 +37,18 @@ class facturesController extends BimpController
             $titre .= ' du client "' . $societe->getData('code_client') . ' - ' . $societe->getData('nom');
         }
 
-        $propal = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
+        $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
 
-        $list = new BC_ListTable($propal, $list, 1, null, $titre);
-        
-        
-        if($this->socid){
+        $list = new BC_ListTable($facture, $list, 1, null, $titre);
+
+
+        if ($this->socid) {
             $list->addFieldFilterValue('fk_soc', (int) $societe->id);
             $list->params['add_form_values']['fields']['fk_soc'] = (int) $societe->id;
         }
-            return $list->renderHtml();
+        return $list->renderHtml();
     }
-    
-    
-    
+
     public function renderProdsTabs()
     {
 //        $id_entrepot = (int) BimpTools::getValue('id_entrepot', 0);
@@ -62,12 +61,36 @@ class facturesController extends BimpController
 //            'operator' => '>',
 //            'value'    => 0
 //        ));
-        
 //        if ($id_entrepot) {
 //            $bc_list->addJoin('commande_extrafields', 'a.id_obj = cef.fk_object', 'cef');
 //            $bc_list->addFieldFilterValue('cef.entrepot', $id_entrepot);
 //        }
 
         return $bc_list->renderHtml();
+    }
+
+    public function renderPaiementsTab()
+    {
+        $list = 'default';
+        $titre = 'Paiements';
+        if ($this->socid) {
+            $societe = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $this->socid);
+
+            if (!BimpObject::objectLoaded($societe)) {
+                return BimpRender::renderAlerts('ID du client invalide');
+            }
+            $list = 'client';
+            $titre .= ' du client "' . $societe->getData('code_client') . ' - ' . $societe->getData('nom');
+        }
+
+        $paiement = BimpObject::getInstance('bimpcommercial', 'Bimp_Paiement');
+
+        $list = new BC_ListTable($paiement, $list, 1, null, $titre);
+        
+        if ($this->socid) {
+            $list->addFieldFilterValue('client', (int) $societe->id);
+        }
+        
+        return $list->renderHtml();
     }
 }

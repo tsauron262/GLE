@@ -4,7 +4,7 @@ extends:
     
 objects: 
     bimp_comm: 
-        instance: 
+        instance:
             bimp_object: Bimp_Commande
             id_object: 
                 request: id

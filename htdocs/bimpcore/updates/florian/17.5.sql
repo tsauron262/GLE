@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bimp_revalorisation` ADD `note` TEXT NOT NULL DEFAULT '';

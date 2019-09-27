@@ -903,16 +903,16 @@ class Bimp_Product extends BimpObject
         if ($this->isLoaded()) {
             if ((float) $this->getData('cur_pa_ht')) {
                 $pa_ht = (float) $this->getData('cur_pa_ht');
-            } elseif ((float) $this->getData('pmp')) {
-                $pa_ht = (float) $this->getData('pmp');
             } else {
                 $pa_ht = (float) $this->getCurrentFournPriceAmount($id_fourn, $with_default);
-            }
 
-            return $pa_ht;
+                if (!$pa_ht && (float) $this->getData('pmp')) {
+                    $pa_ht = (float) $this->getData('pmp');
+                }
+            }
         }
 
-        return 0;
+        return $pa_ht;
     }
 
     public function getCurrentFournPriceId($id_fourn = null, $with_default = false)
@@ -927,8 +927,6 @@ class Bimp_Product extends BimpObject
             $pa_ht = 0;
             if ((float) $this->getData('cur_pa_ht')) {
                 $pa_ht = (float) $this->getData('cur_pa_ht');
-            } elseif ((float) $this->getData('pmp')) {
-                $pa_ht = (float) $this->getData('pmp');
             }
 
             if ($pa_ht) {
@@ -1109,6 +1107,14 @@ class Bimp_Product extends BimpObject
     }
 
     // Rendus HTML: 
+    
+    public function getJs(){
+        $js  = array();
+        $js[] = "/bimpcore/views/js/history.js";
+        if($this->productBrowserIsActif())
+            $js[] = "/bimpcore/views/js/categorize.js";
+        return $js;
+    }
 
     public function renderHeaderExtraLeft()
     {
@@ -2456,6 +2462,11 @@ class Bimp_Product extends BimpObject
         }
 
         //
+    }
+    
+    public function productBrowserIsActif(){
+        global $conf;
+        return (isset($conf->global->MAIN_MODULE_BIMPPRODUCTBROWSER)? 1 : 0);
     }
 
     private static function initVentes($dateMin, $dateMax)

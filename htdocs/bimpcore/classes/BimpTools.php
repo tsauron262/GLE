@@ -1092,6 +1092,8 @@ class BimpTools
                 $sql .= ' IS NULL';
             } elseif ($filter === 'IS_NOT_NULL') {
                 $sql .= ' IS NOT NULL';
+            } elseif (is_string($filter) && preg_match('/^ *([<>!=]{1,2}) *(.+)$/', $filter, $matches)) {
+                $sql .= ' ' . $matches[1] . ' \'' . $matches[2] . '\'';
             } else {
                 $sql .= ' = ' . (BimpTools::isString($filter) ? '\'' . $filter . '\'' : $filter);
             }

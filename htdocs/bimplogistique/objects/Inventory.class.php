@@ -237,7 +237,7 @@ class Inventory extends BimpDolObject
     
     public function closePartially()
     {
-        $errors = array_merge($errors, $this->correctProducts());
+        $errors = $this->correctProducts();
 
         return $errors;
     }
@@ -304,10 +304,10 @@ class Inventory extends BimpDolObject
 
         $tab_diff = $this->getDiffStock(0);
         $id_main_warehouse = $this->getWarehouseInventories();
-        if($id_main_warehouse < 0) {
+        if($id_main_warehouse < 1) {
             $errors[] = "L'entrepôt par défault des inventaires n'est pas définit "
                     . "(celui dans lequel on renseigne tous les mouvements de "
-                    . "tou les inventaires.";
+                    . "tou les inventaires. (il doit avoir comme ref \"INV\")";
             return $errors;
         }
         

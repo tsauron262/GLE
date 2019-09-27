@@ -220,7 +220,7 @@ class Interfacevalidate extends DolibarrTriggers
 //                setEventMessages($msg, null, 'errors');
                 return -2;
             }
-            if($action == 'ORDER_VALIDATE' && $object->array_options['options_type'] != "E"  && !BimpDebug::isActive('bimpcommercial/no_validate')){
+            if($action == 'ORDER_VALIDATE' && $object->array_options['options_type'] != "M"  && !BimpDebug::isActive('bimpcommercial/no_validate')){
                 //contact facturation
                 $tabConatact = $object->getIdContact('external', 'BILLING');
                 if (count($tabConatact) < 1) {

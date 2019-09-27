@@ -9,8 +9,9 @@ class BimpRevalorisation extends BimpObject
         2 => array('label' => 'Refusée', 'icon' => 'fas_times', 'classes' => array('danger')),
     );
     public static $types = array(
-        'crt' => 'Remise CRT',
-        'oth' => 'Autre'
+        'crt'           => 'Remise CRT',
+        'correction_pa' => 'Correction du prix d\'achat',
+        'oth'           => 'Autre'
     );
 
     // Gestion des droits user: 
@@ -39,8 +40,7 @@ class BimpRevalorisation extends BimpObject
 
         return (int) parent::canSetAction($action);
     }
-    
-    
+
     public function getCommercialSearchFilters(&$filters, $value, &$joins = array(), $main_alias = 'a')
     {
         if ((int) $value) {

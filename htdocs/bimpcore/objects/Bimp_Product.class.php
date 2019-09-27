@@ -2443,6 +2443,11 @@ class Bimp_Product extends BimpObject
 
         //
     }
+    
+    public function productBrowserIsActif(){
+        global $conf;
+        return (isset($conf->global->MAIN_MODULE_BIMPPRODUCTBROWSER)? 1 : 0);
+    }
 
     private static function initVentes($dateMin, $dateMax)
     {

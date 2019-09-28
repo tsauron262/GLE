@@ -1203,6 +1203,45 @@ class Equipment extends BimpObject
             'success_callback' => $success_callback
         );
     }
+    
+    public function actionMoveToVol($data, &$success) {
+        $success = "Déplacé dans Vol";
+        $errors = array();
+        foreach($data['id_objects'] as $id){
+            $obj = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $id);
+            $errors = array_merge($errors, $obj->moveToVol());
+        }
+        $success_callback = 'bimp_reloadPage();';
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $success_callback
+        );
+    }
+    
+    public function moveToVol(){
+        $errors = array();
+        $current_place = $this->getCurrentPlace();
+        if($current_place->getData('type') != BE_Place::BE_PLACE_ENTREPOT){
+            $errors[] = "Pas en stock";
+        }
+        if(!count($errors)){
+             // Correction de l'emplacement initial en cas d'erreur: 
+            $place = BimpObject::getInstance($this->module, 'BE_Place');
+            $errors = array_merge($errors, $place->validateArray(array(
+                'id_equipment' => (int) $this->id,
+                'type'         => BE_Place::BE_PLACE_VOL,
+                'id_entrepot'  => (int) $current_place->getData('id_entrepot'),
+                'infos'        => 'Transfert dans Vol via un',
+                'date'         => date('Y-m-d H:i:s'),
+            )));
+            if (!count($errors)) {
+                $errors = array_merge($errors, $place->create());
+            }
+        }
+        
+        return $errors;
+    }
 
     // Overrides
 

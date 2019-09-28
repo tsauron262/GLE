@@ -93,7 +93,7 @@ class Inventory extends BimpDolObject
             return $buttons;
 
         if ($this->getData('status') == self::STATUS_DRAFT) {
-            if ($user->rights->bimpequipment->inventory->open) {
+            if (1/*$user->rights->bimpequipment->inventory->open*/) {
                 $buttons[] = array(
                     'label'   => 'Commencer l\'inventaire',
                     'icon'    => 'fas_box',

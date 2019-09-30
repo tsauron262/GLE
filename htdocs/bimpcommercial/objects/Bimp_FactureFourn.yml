@@ -130,6 +130,9 @@ fields:
         object: account
         values: 
             array: comptes
+    exported:
+        label: Comptabilisée
+        type: int
         
     fk_availability: unset
     fk_input_reason: unset

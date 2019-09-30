@@ -165,6 +165,9 @@ fields:
             default: 
                 type: callback
                 method: displayJuridicalStatus
+    exported:
+        label: Exporté en compta
+        type: int
 #    remise_client: 
 #        label: Remise
 #        type: int

@@ -47,7 +47,10 @@ fields:
         label: Type
         values: 
             array: modeReglements
-        extra: 1    
+        extra: 1   
+    exported:
+        label: Comptabilisée
+        type: int
     
 forms: 
     default: 

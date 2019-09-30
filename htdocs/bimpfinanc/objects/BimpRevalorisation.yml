@@ -336,6 +336,7 @@ lists:
                     - 2
                 
     facture: 
+        objects_change_reload: Bimp_Facture,Bimp_FactureLine
         pagination: 1
         n: 20
         sort_field: id

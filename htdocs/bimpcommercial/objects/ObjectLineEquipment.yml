@@ -30,23 +30,6 @@ fields:
         type: id_object
         object: equipment
         
-    pu_ht: 
-        label: Prix unitaire HT
-        type: money
-        
-    tva_tx: 
-        label: Taux de TVA
-        type: percent
-        
-    pa_ht: 
-        label: Prix d'achat HT
-        type: money
-        
-    id_fourn_price: 
-        label: Prix fournisseur
-        type: id_object
-        object: fournisseur_price
-        
 lists:
     default: 
         enable_search: 0
@@ -64,10 +47,13 @@ lists:
                 label: Equipement
                 value: 
                     callback: displayEquipment
-#            pu: 
-#                field: pu_ht
-#            tva: 
-#                field: tva_tx
-#            pa:
-#                field: pa_ht
+            prix_achat: 
+                label: Prix d'achat
+                value: 
+                    callback: displayPa
+            pa_tva_tx:
+                label: Tx Tva achat
+                value: 
+                    callback: displayPaTvatx
+            
             

@@ -658,10 +658,6 @@ lists:
                 fk_soc:
                     request: id_client
         delete_btn: 0
-        bulk_actions:
-              icon: fas_trash-alt
-              onclick: deleteSelectedObjects('list_id', $(this))
-        n: 500
         cols: 
             ref: 
             type: 
@@ -676,6 +672,10 @@ lists:
         extends: default
         cols: 
             soc: unset
+        bulk_actions:
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this))
+        n: 500
             
     commission: 
         total_row: 1

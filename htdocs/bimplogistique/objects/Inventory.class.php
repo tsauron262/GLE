@@ -271,9 +271,9 @@ class Inventory extends BimpDolObject
         // Manque
         $nb_manquant = count($diff_eq['ids_manquant']);
         if ($nb_manquant == 1)
-            $errors[] = 'Merci de traiter le cas du produit sérialisé manquant.';
+            $errors[] = 'Merci de traiter le cas du produit sérialisé manquant.'.print_r($diff_eq['ids_manquant'],1);
         if ($nb_manquant > 1)
-            $errors[] = 'Merci de traiter le cas des ' . $nb_manquant . ' produits sérialisés manquants.';
+            $errors[] = 'Merci de traiter le cas des ' . $nb_manquant . ' produits sérialisés manquants.'.print_r($diff_eq['ids_manquant'],1);
         return $errors;
     }
 

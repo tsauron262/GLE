@@ -401,6 +401,12 @@ class Inventory extends BimpDolObject
         else
             $list->addFieldFilterValue('id = 0 AND 1', $filters);
         $html .= $list->renderHtml();
+        
+        
+        $equipment = BimpObject::getInstance('bimpequipment', 'Equipment');
+        $list = new BC_ListTable($equipment, 'inventaire', 1, null, 'Équipements deplacé dans vols');
+        $list->addFieldFilterValue('id IN (SELECT id_equipment FROM ' . MAIN_DB_PREFIX . 'be_equipment_place p WHERE id_entrepot=' . $this->getData('fk_warehouse').' AND infos LIKE "%INV'.$this->id.'%" AND  p.position=1 AND p.type=6) AND 1', $filters);
+        $html .= $list->renderHtml();
 
 
         return $html;
@@ -503,9 +509,9 @@ class Inventory extends BimpDolObject
         $ids_place = array();
 
         $sql = 'SELECT id_equipment';
-        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_equipment_place';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_equipment_place p, ' . MAIN_DB_PREFIX . 'be_equipment e';
         $sql .= ' WHERE id_entrepot=' . $this->getData('fk_warehouse');
-        $sql .= ' AND position=1 AND type=2';
+        $sql .= ' AND p.id_equipment = e.id AND p.position=1 AND p.type=2';
 
         $result = $this->db->db->query($sql);
         if ($result and mysqli_num_rows($result) > 0) {

@@ -401,6 +401,12 @@ class Inventory extends BimpDolObject
         else
             $list->addFieldFilterValue('id = 0 AND 1', $filters);
         $html .= $list->renderHtml();
+        
+        
+        $equipment = BimpObject::getInstance('bimpequipment', 'Equipment');
+        $list = new BC_ListTable($equipment, 'inventaire', 1, null, 'Équipements deplacé dans vols');
+        $list->addFieldFilterValue('id IN (SELECT id_equipment FROM ' . MAIN_DB_PREFIX . 'be_equipment_place p WHERE id_entrepot=' . $this->getData('fk_warehouse').' AND infos LIKE "%INV'.$this->id.'%" AND  p.position=1 AND p.type=6) AND 1', $filters);
+        $html .= $list->renderHtml();
 
 
         return $html;

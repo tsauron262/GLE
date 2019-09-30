@@ -35,7 +35,7 @@ class BimpValidateOrder {
         "M" => array(
             "comm_mini" => 30,
             "fi_mini" => 10000000,
-            "comm" => array(89 => 100, 283 => 100, 65 => 100),
+            "comm" => array(89 => 100, 283 => 100, 62 => 100, 65 => 100),
             "fi" => array(89 => array(0, 1000000000000), 283 => array(0000, 100000000000), 65 => array(100000, 100000000000)),
         )
     );
@@ -225,26 +225,14 @@ class BimpValidateOrder {
         return $max_price;
     }
 
-    private function checkRemise($order, $user) {
-        $ok = true;
-        if (in_array($order->array_options['options_type'], $this->tabSecteurEduc)) {
-            if (!in_array($user->id, $this->tabValideRemise)) {
-                foreach ($order->lines as $line)
-                    if ($line->remise_percent > 6) {
-                        $this->extraMail[] = "Ligne " . $line->desc . " avec un réduction de " . $line->remise_percent . "%";
-                        $ok = false;
-                    }
+    private function checkRemise($order, $user, $maxValid = 5) {
+        $ko = 0;
+        foreach ($order->lines as $line)
+            if ($line->remise_percent > $maxValid) {
+                $this->extraMail[] = "Ligne " . $line->desc . " avec un réduction de " . $line->remise_percent . "%";
+                $ko = $line->remise_percent;
             }
-        } else {
-            if (!in_array($user->id, $this->tabValideRemise)) {
-                foreach ($order->lines as $line)
-                    if ($line->remise_percent > 5) {
-                        $this->extraMail[] = "Ligne " . $line->desc . " avec un réduction de " . $line->remise_percent . "%";
-                        $ok = false;
-                    }
-            }
-        }
-        return $ok;
+        return $ko;
     }
 
     private function checkAutorisationFinanciere($user, $order) {
@@ -277,21 +265,30 @@ class BimpValidateOrder {
     private function checkAutorisationCommmerciale($user, $order) {
         $price = $order->total_ht;
         $tabUserOk = array();
-        $okRemise = ($order->array_options['options_type'] != "P" ? $this->checkRemise($order, $user) : 1);
-        if (!$okRemise) {
-            if (isset($this->tabValidation[$order->array_options['options_type']]["comm"]))
-                $tabValidation = $this->tabValidation[$order->array_options['options_type']];
-            else
-                $tabValidation = $this->tabValidation["C"];
+        $maxValid = 5;
+        
+        
+        
+        if (isset($this->tabValidation[$order->array_options['options_type']]["comm"]))
+            $tabValidation = $this->tabValidation[$order->array_options['options_type']];
+        else
+            $tabValidation = $this->tabValidation["C"];
+            
+            
+        if(isset($tabValidation['comm_mini']))
+            $maxValid = $tabValidation['comm_mini'];
+        
+        $remiseRefu = $this->checkRemise($order, $user, $maxValid);
+        
+        if ($remiseRefu > 0) {
 
-            if(isset($tabValidation['comm_mini']))
-                if($price > $tabValidation['comm_mini'])
-                    return array();//on peut validé
 
             foreach ($tabValidation["comm"] as $idUser => $tabMont) {
-                $tabUserOk[] = $idUser;
-                if ($idUser == $user->id)//on peut validé
-                    return array();
+                if($tabMont > $remiseRefu){
+                    $tabUserOk[] = $idUser;
+                    if ($idUser == $user->id)//on peut validé
+                        return array();
+                }
             }
         }
         return $tabUserOk;

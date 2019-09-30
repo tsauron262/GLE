@@ -672,6 +672,11 @@ lists:
         extends: default
         cols: 
             soc: unset
+        bulk_actions:
+            - label: supprimer les commandes sélectionnées
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this))
+        n: 500
             
     commission: 
         total_row: 1

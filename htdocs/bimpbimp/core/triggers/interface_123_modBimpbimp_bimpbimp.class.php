@@ -34,10 +34,10 @@ class InterfaceBimpbimp extends DolibarrTriggers {
 //            $msg = "Bonjour, un nouveau collaborateur : ".$object->getFullName($langs)." viens de rejoindre l'équipe";
             
             $genre = ($object->gender == "man"? "Mr " : ($object->gender == "woman" ? "Mme " : ""));
-            $msg = "Bonjour à tous, <br/><br/>Un nouveau collaborateur «  ".$genre.$object->getFullName($langs)." »   vient d'intégrer les équipes";
+            $msg = "Bonjour à tous, <br/><br/>Un nouveau collaborateur  ".$genre.$object->getFullName($langs)." vient d'intégrer les équipes";
             
-            if($object->getFullAddress() != "")
-                $msg .= " de ".$object->getFullAddress();
+            if($object->town != "")
+                $msg .= " de ".$object->town;
             if($object->job != "")
                 $msg .= " en qualité de ".$object->job;
             

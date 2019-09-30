@@ -1491,8 +1491,8 @@ class BC_ListTable extends BC_List
 
         if (is_null($this->items)) {
             $this->fetchItems();
-        }
-
+        }        
+        
         $this->setConfPath();
 
         $object_instance = $this->object;
@@ -1535,6 +1535,8 @@ class BC_ListTable extends BC_List
             $current_bc = $prev_bc;
             return $rows;
         }
+        
+        $cache_mem = BimpCache::$cache;
 
         foreach ($this->items as $item) {
             $line = '';
@@ -1586,6 +1588,8 @@ class BC_ListTable extends BC_List
 
                 $rows .= $line . "\n";
             }
+            
+            BimpCache::$cache = $cache_mem;
         }
 
         $this->object = $object_instance;

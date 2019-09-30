@@ -44,6 +44,20 @@ class Bimp_FactureLine extends ObjectLine
         return parent::isFieldEditable($field, $force_edit);
     }
 
+    public function isActionAllowed($action, &$errors = array())
+    {
+//        switch ($action) {
+//            case 'attributeEquipment':
+//                if ($this->getData('linked_object_name') === 'commande_line') {
+//                    $errors[] = 'L\'attribution d\'équipement doit être faite depuis la page logistique de la commande';
+//                    return 0;
+//                }
+//                break;
+//        }
+
+        return (int) parent::isActionAllowed($action, $errors);
+    }
+
     // Getters params: 
 
     public function getListExtraBtn()
@@ -146,32 +160,11 @@ class Bimp_FactureLine extends ObjectLine
                     $equipment = $eq_line->getChildObject('equipment');
 
                     if (BimpObject::ObjectLoaded($equipment)) {
-                        $pu_ht = $eq_line->getData('pu_ht');
-                        $pa_ht = $eq_line->getData('pa_ht');
-                        $tva_tx = $eq_line->getData('tva_tx');
-
-                        if (is_null($pu_ht)) {
-                            $pu_ht = (float) $this->pu_ht;
-                        }
-
-                        if (is_null($tva_tx)) {
-                            $tva_tx = (float) $this->tva_tx;
-                        }
-
-                        if (is_null($pa_ht)) {
-                            $pa_ht = (float) $this->pa_ht;
-                        }
-
-                        if (!is_null($this->remise) && (float) $this->remise > 0) {
-                            $pu_ht -= ($pu_ht * ((float) $this->remise / 100));
-                        }
-
-                        $pu_ttc = BimpTools::calculatePriceTaxIn($pu_ht, $tva_tx);
+                        $pu_ht = (float) $this->getUnitPriceHTWithRemises();
+                        $pu_ttc = BimpTools::calculatePriceTaxIn($pu_ht, (float) $this->tva_tx);
 
                         $equipment->set('prix_vente', $pu_ttc);
-                        $equipment->set('vente_tva_tx', $tva_tx);
-//                        $equipment->set('prix_achat', $pa_ht);
-//                        $equipment->set('achat_tva_tx', $tva_tx);
+                        $equipment->set('vente_tva_tx', (float) $this->tva_tx);
                         $equipment->set('date_vente', date('Y-m-d H:i:s'));
                         $equipment->set('id_facture', (int) $this->getData('id_obj'));
 
@@ -179,6 +172,8 @@ class Bimp_FactureLine extends ObjectLine
                         $equipment->update($warnings, true);
                     }
                 }
+
+                $this->calcPaByEquipments();
             }
         }
     }
@@ -254,6 +249,99 @@ class Bimp_FactureLine extends ObjectLine
         }
 
         parent::onSave($errors, $warnings);
+    }
+
+    public function updatePrixAchat($new_pa_ht)
+    {
+        $errors = array();
+
+        if ($this->isLoaded($errors)) {
+            $qty = (float) $this->getFullQty();
+            if ($qty && (float) $new_pa_ht !== (float) $this->pa_ht) {
+                $facture = $this->getParentInstance();
+
+                if (!BimpObject::objectLoaded($facture)) {
+                    $errors[] = 'ID de la facture absent';
+                } else {
+                    // Création de revalorisations si facture commissionnée / Màj directe en base sinon. 
+                    if ((int) $facture->getData('id_user_commission') || (int) $facture->getData('id_entrepot_commission')) {
+                        $total_reval = ((float) $this->pa_ht - (float) $new_pa_ht) * $qty;
+
+                        // Check des revals existantes: 
+                        $revals = BimpCache::getBimpObjectObjects('bimpfinanc', 'BimpRevalorisation', array(
+                                    'id_facture'      => (int) $facture->id,
+                                    'id_facture_line' => (int) $this->id,
+                                    'type'            => 'correction_pa'
+                        ));
+
+                        foreach ($revals as $reval) {
+                            // Déduction du montant des revals validées / suppr. des autres. 
+                            if ((int) $reval->getData('status') === 1) {
+                                $total_reval -= (float) $reval->getTotal();
+                            } else {
+                                $w = array();
+                                $del_errors = $reval->delete($w, true);
+                                if (count($del_errors)) {
+                                    $total_reval -= (float) $reval->getTotal();
+                                }
+                            }
+                        }
+
+                        if ($total_reval) {
+                            $reval_amount = ($total_reval / $qty);
+
+                            // Créa nouvelle revalorisation: 
+                            $reval = BimpObject::getInstance('bimpfinanc', 'BimpRevalorisation');
+                            $reval_errors = $reval->validateArray(array(
+                                'id_facture'      => (int) $facture->id,
+                                'id_facture_line' => (int) $this->id,
+                                'type'            => 'correction_pa',
+                                'qty'             => (float) $qty,
+                                'amount'          => (float) $reval_amount,
+                                'date'            => date('Y-m-d'),
+                                'note'            => 'Correction du prix d\'achat après ajout de la facture à une commission (Nouveau prix d\'achat: ' . $new_pa_ht . ')'
+                            ));
+
+                            if (!count($reval_errors)) {
+                                $reval_warnings = array();
+                                $reval_errors = $reval->create($reval_warnings, true);
+                            }
+
+                            if (count($reval_errors)) {
+                                $errors[] = BimpTools::getMsgFromArray($reval_errors, 'Echec de la création ' . $reval->getLabel('of_the'));
+                            }
+                        }
+                    } else {
+                        return parent::updatePrixAchat($new_pa_ht);
+                    }
+                }
+            }
+        }
+
+        return $errors;
+    }
+
+    public function onEquipmentAttributed($id_equipment)
+    {
+        if ($this->isLoaded()) {
+            $facture = $this->getParentInstance();
+
+            if (BimpObject::objectLoaded($facture) && (int) $facture->getData('fk_statut') > 0) {
+                $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+                if (BimpObject::objectLoaded($equipment)) {
+                    $pu_ht = (float) $this->getUnitPriceHTWithRemises();
+                    $pu_ttc = BimpTools::calculatePriceTaxIn($pu_ht, (float) $this->tva_tx);
+
+                    $equipment->set('prix_vente', $pu_ttc);
+                    $equipment->set('vente_tva_tx', (float) $this->tva_tx);
+                    $equipment->set('date_vente', date('Y-m-d H:i:s'));
+                    $equipment->set('id_facture', (int) $this->getData('id_obj'));
+
+                    $warnings = array();
+                    $equipment->update($warnings, true);
+                }
+            }
+        }
     }
 
     // Overrides: 

@@ -673,6 +673,7 @@ lists:
         cols: 
             soc: unset
         bulk_actions:
+            - label: supprimer les commandes sélectionnées
               icon: fas_trash-alt
               onclick: deleteSelectedObjects('list_id', $(this))
         n: 500

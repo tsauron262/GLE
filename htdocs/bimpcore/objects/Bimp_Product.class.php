@@ -941,12 +941,7 @@ class Bimp_Product extends BimpObject
 
                 $sql = 'SELECT rowid as id, price FROM ' . MAIN_DB_PREFIX . 'product_fournisseur_price WHERE ' . $where;
 
-                echo $sql;
-
                 $result = $this->db->executeS($sql);
-                echo '<pre>';
-                print_r($result);
-                echo '</pre>';
 
                 if (isset($result[0]->id)) {
                     $id_fp = (int) $result[0]->id;

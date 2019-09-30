@@ -38,8 +38,6 @@ foreach ($list as $id_p) {
             continue;
         }
 
-        echo 'CUR PA: ' . $cur_pa . '<br/>';
-
         $txt = 'PRODUIT #' . $id_p . ' "' . $prod->getRef() . '"' . "\n";
         $dates = array();
         $id_pfp = $prod->findFournPriceIdForPaHt($cur_pa);
@@ -67,10 +65,6 @@ foreach ($list as $id_p) {
 
                     $result = $bdb->executeS($sql, 'array');
 
-                    echo 'Res: <pre>';
-                    print_r($result);
-                    echo '</pre>';
-
                     if (isset($result[0]['price']) && (float) $result[0]['price']) {
                         $date = $result[0]['datec'];
                         $dates[] = array(
@@ -93,10 +87,6 @@ foreach ($list as $id_p) {
 //        }
 
         $date_max = date('Y-m-d H:i:s');
-
-        echo '<pre>';
-        print_r($dates);
-        echo '</pre>';
 
         foreach ($dates as $date_data) {
             $new_pa = $date_data['pa'];
@@ -146,8 +136,6 @@ foreach ($list as $id_p) {
 
             if (isset($res[0]['nb']) && (int) $res[0]['nb']) {
                 $txt .= $res[0]['nb'] . ' fac non comm - ';
-            } else {
-                echo $db->lasterror();
             }
 
             $sql = 'SELECT COUNT(DISTINCT a.rowid) as nb FROM llx_facture a';
@@ -161,8 +149,6 @@ foreach ($list as $id_p) {
 
             if (isset($res[0]['nb']) && (int) $res[0]['nb']) {
                 $txt .= $res[0]['nb'] . ' fac commissionnées';
-            } else {
-                echo $db->lasterror();
             }
 
             $date_max = $date_min;
@@ -171,8 +157,6 @@ foreach ($list as $id_p) {
         $txt .= "\n";
 
         fwrite($h_file, $txt);
-
-        echo str_replace("\n", '<br/>', $txt);
 
 //        // Màj des propales: 
 //        $sql = BimpTools::getSqlSelect(array('rowid', 'buy_price_ht', 'fk_propal'));

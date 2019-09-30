@@ -895,7 +895,7 @@ class Bimp_Product extends BimpObject
         }
     }
 
-    public function getCurrentPaHt($id_fourn = null, $with_default = false)
+    public function getCurrentPaHt($id_fourn = null, $with_default = true)
     {
         $pa_ht = 0;
 
@@ -916,10 +916,6 @@ class Bimp_Product extends BimpObject
 
     public function getCurrentFournPriceId($id_fourn = null, $with_default = false)
     {
-        if ((int) $this->getData('id_cur_fp')) {
-            return (int) $this->getData('id_cur_fp');
-        }
-
         $id_fp = 0;
 
         if ($this->isLoaded()) {
@@ -945,7 +941,13 @@ class Bimp_Product extends BimpObject
 
                 $sql = 'SELECT rowid as id, price FROM ' . MAIN_DB_PREFIX . 'product_fournisseur_price WHERE ' . $where;
 
+                echo $sql;
+
                 $result = $this->db->executeS($sql);
+                echo '<pre>';
+                print_r($result);
+                echo '</pre>';
+
                 if (isset($result[0]->id)) {
                     $id_fp = (int) $result[0]->id;
                 }
@@ -1095,11 +1097,12 @@ class Bimp_Product extends BimpObject
     }
 
     // Rendus HTML: 
-    
-    public function getJs(){
-        $js  = array();
+
+    public function getJs()
+    {
+        $js = array();
         $js[] = "/bimpcore/views/js/history.js";
-        if($this->productBrowserIsActif())
+        if ($this->productBrowserIsActif())
             $js[] = "/bimpcore/views/js/categorize.js";
         return $js;
     }
@@ -2451,10 +2454,11 @@ class Bimp_Product extends BimpObject
 
         //
     }
-    
-    public function productBrowserIsActif(){
+
+    public function productBrowserIsActif()
+    {
         global $conf;
-        return (isset($conf->global->MAIN_MODULE_BIMPPRODUCTBROWSER)? 1 : 0);
+        return (isset($conf->global->MAIN_MODULE_BIMPPRODUCTBROWSER) ? 1 : 0);
     }
 
     private static function initVentes($dateMin, $dateMax)

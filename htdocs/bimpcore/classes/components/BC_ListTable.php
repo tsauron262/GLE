@@ -1539,6 +1539,7 @@ class BC_ListTable extends BC_List
         $cache_mem = BimpCache::$cache;
 
         foreach ($this->items as $item) {
+            BimpCache::$cache = $cache_mem;
             $line = '';
             $object = BimpCache::getBimpObjectInstance($this->object->module, $this->object->object_name, (int) $item[$primary], $this->parent);
             if (BimpObject::objectLoaded($object)) {
@@ -1588,9 +1589,9 @@ class BC_ListTable extends BC_List
 
                 $rows .= $line . "\n";
             }
-            
-            BimpCache::$cache = $cache_mem;
         }
+        
+        BimpCache::$cache = $cache_mem;
 
         $this->object = $object_instance;
 

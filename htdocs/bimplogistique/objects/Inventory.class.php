@@ -54,6 +54,10 @@ class Inventory extends BimpDolObject
         return 1;
     }
     
+    public function canEdit(){
+        return 1;
+    }
+    
     
     public function canDelete()
     {

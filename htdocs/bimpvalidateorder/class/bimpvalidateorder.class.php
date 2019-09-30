@@ -280,7 +280,7 @@ class BimpValidateOrder {
         
         $remiseRefu = $this->checkRemise($order, $user, $maxValid);
         
-        if ($remiseRefu == 0) {
+        if ($remiseRefu > 0) {
 
 
             foreach ($tabValidation["comm"] as $idUser => $tabMont) {

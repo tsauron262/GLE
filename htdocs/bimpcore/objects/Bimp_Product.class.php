@@ -754,19 +754,19 @@ class Bimp_Product extends BimpObject
         $stock = 0;
 
         if ((int) $id_product) {
-//            if (!isset(self::$stockShowRoom[$id_product]))
-//                self::initStockShowRoom();
+            if (!isset(self::$stockShowRoom[$id_product]))
+                self::initStockShowRoom();
+
+            if (isset(self::$stockShowRoom[$id_product][$id_entrepot])) {
+                return self::$stockShowRoom[$id_product][$id_entrepot];
+            }
+
+//            if (!count(self::$lienShowRoomEntrepot))
+//                self::initLienShowRoomEntrepot();
 //
-//            if (isset(self::$stockShowRoom[$id_product][$id_entrepot])) {
-//                return self::$stockShowRoom[$id_product][$id_entrepot];
-//            }
-
-            if (!count(self::$lienShowRoomEntrepot))
-                self::initLienShowRoomEntrepot();
-
-
-            if (isset(self::$lienShowRoomEntrepot[$id_entrepot]))
-                $stock = $this->getStockDate($date, self::$lienShowRoomEntrepot[$id_entrepot], $id_product);
+//
+//            if (isset(self::$lienShowRoomEntrepot[$id_entrepot]))
+//                $stock = $this->getStockDate($date, self::$lienShowRoomEntrepot[$id_entrepot], $id_product);
         }
 
         return $stock;
@@ -2433,11 +2433,11 @@ class Bimp_Product extends BimpObject
     {
         global $db;
         self::$stockShowRoom = array();
-//        $sql = $db->query("SELECT `id_product`, `id_entrepot`, COUNT(*)as nb FROM `llx_be_equipment_place` p, llx_be_equipment e WHERE position = 1 AND p.id_equipment = e.id AND p.`type` = 5 GROUP BY `id_entrepot`, `id_product`");
-//        while ($ln = $db->fetch_object($sql)) {
-//            self::$stockShowRoom[$ln->id_product][$ln->id_entrepot] = $ln->nb;
-//            self::$stockShowRoom[$ln->id_product][null] += $ln->nb;
-//        }
+        $sql = $db->query("SELECT `id_product`, `id_entrepot`, COUNT(*)as nb FROM `llx_be_equipment_place` p, llx_be_equipment e WHERE position = 1 AND p.id_equipment = e.id AND p.`type` = 5 GROUP BY `id_entrepot`, `id_product`");
+        while ($ln = $db->fetch_object($sql)) {
+            self::$stockShowRoom[$ln->id_product][$ln->id_entrepot] = $ln->nb;
+            self::$stockShowRoom[$ln->id_product][null] += $ln->nb;
+        }
     }
 
     private static function initLienShowRoomEntrepot()

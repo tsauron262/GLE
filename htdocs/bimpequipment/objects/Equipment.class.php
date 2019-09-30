@@ -1227,12 +1227,15 @@ class Equipment extends BimpObject
         }
         if(!count($errors)){
              // Correction de l'emplacement initial en cas d'erreur: 
+            $text = "Transfert dans Vol via inventaire";
+            if(GETPOST('id') > 0)
+                $text .= ' INV'.GETPOST('id');
             $place = BimpObject::getInstance($this->module, 'BE_Place');
             $errors = array_merge($errors, $place->validateArray(array(
                 'id_equipment' => (int) $this->id,
                 'type'         => BE_Place::BE_PLACE_VOL,
                 'id_entrepot'  => (int) $current_place->getData('id_entrepot'),
-                'infos'        => 'Transfert dans Vol via un',
+                'infos'        => $text,
                 'date'         => date('Y-m-d H:i:s'),
             )));
             if (!count($errors)) {

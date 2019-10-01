@@ -561,7 +561,20 @@ class Inventory extends BimpDolObject
                 $ids_en_trop[] = $id_scanned;
             }
         }
-
+        
+        foreach($ids_en_trop as $i => $id_equipment) {
+            $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
+            $filters = array(
+                'position'     => 1,
+                'id_equipment' => $id_equipment
+            );
+            $list = $place->getList($filters, 1, 1, 'id', 'desc', 'array', array(
+                'type',
+                'date'
+            ));
+            if($list[0]['type'] == BE_Place::BE_PLACE_CLIENT and $this->getData('date_create') < $list[0]['date'])
+                unset($ids_en_trop[$i]);
+        }
         return array('ids_en_trop' => $ids_en_trop, 'ids_manquant' => $ids_manquant);
     }
 

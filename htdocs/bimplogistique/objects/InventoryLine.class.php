@@ -54,10 +54,12 @@ class InventoryLine extends BimpObject {
         $result = $this->db->db->query($sql);
         if ($result and $this->db->db->num_rows($result) > 0) {
             while ($obj = $this->db->db->fetch_object($result)) {
-                $id_product = $obj->id_product;
-                $id_equipment = $obj->id;
-//                die($id_product.' aaa '.$sql);
-                return true;
+                if($id_product > 0 && $id_equipment > 0){
+                    $id_product = $obj->id_product;
+                    $id_equipment = $obj->id;
+    //                die($id_product.' aaa '.$sql);
+                    return true;
+                }
             }
         }
         return false;

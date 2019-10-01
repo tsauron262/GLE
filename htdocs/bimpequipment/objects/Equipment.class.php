@@ -1236,7 +1236,8 @@ class Equipment extends BimpObject
              // Correction de l'emplacement initial en cas d'erreur: 
             $text = "Transfert dans Vol via Inventaire";
             if($idI > 0)
-                $text .= '-'.$idI.'-SN:'.$this->getData('serial');
+                $text .= '-'.$idI;
+            $text .= '-SN:'.$this->getData('serial');
             $place = BimpObject::getInstance($this->module, 'BE_Place');
             $errors = array_merge($errors, $place->validateArray(array(
                 'id_equipment' => (int) $this->id,

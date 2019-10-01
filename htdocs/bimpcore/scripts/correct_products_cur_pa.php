@@ -18,14 +18,14 @@ global $db;
 $bdb = new BimpDb($db);
 
 $list = BimpCache::getBimpObjectList('bimpcore', 'Bimp_Product', array(
-//            'cur_pa_ht' => 0
-            'rowid' => 131312
+            'cur_pa_ht' => 0
+//            'rowid' => 131312
         ));
 
 $h_file = fopen(DOL_DATA_ROOT . '/bimpcore/cur_pa_correction_test10.txt', 'w');
 
 if (!$h_file) {
-    echo BimpRender::renderAlerts('Echec de la création du fichier "cur_pa_correction_test10.txt"');
+    echo BimpRender::renderAlerts('Echec de la création du fichier "cur_pa_corrections.txt"');
     exit;
 }
 
@@ -37,8 +37,7 @@ foreach ($list as $id_p) {
         if (!$cur_pa) {
             continue;
         }
-
-        $txt = 'PRODUIT #' . $id_p . ' "' . $prod->getRef() . '"' . "\n";
+        
         $dates = array();
         $id_pfp = $prod->findFournPriceIdForPaHt($cur_pa);
 
@@ -50,8 +49,6 @@ foreach ($list as $id_p) {
             }
 
             if (!is_null($date) && (string) $date) {
-                echo $id_pfp . ': ' . $cur_pa . ' - ' . $date . '<br/>';
-
                 $dates[] = array(
                     'pa'  => $cur_pa,
                     'min' => $date
@@ -76,10 +73,10 @@ foreach ($list as $id_p) {
                     break;
                 }
             }
-        } else {
-            $txt .= ' Aucun PA fournisseur trouvé - pas de correction de pièces' . "\n";
         }
-
+//        else {
+//            $txt .= ' Aucun PA fournisseur trouvé - pas de correction de pièces' . "\n";
+//        }
 //        $err = $prod->updateField('cur_pa_ht', $cur_pa);
 //        if (count($err)) {
 //            echo BimpRender::renderAlerts(BimpTools::getMsgFromArray($err, 'Echec màj cur pa pour prod #' . $id_p));
@@ -88,6 +85,7 @@ foreach ($list as $id_p) {
 
         $date_max = date('Y-m-d H:i:s');
 
+        $rows = '';
         foreach ($dates as $date_data) {
             $new_pa = $date_data['pa'];
             $date_min = $date_data['min'];
@@ -99,7 +97,7 @@ foreach ($list as $id_p) {
             $dt_min = new DateTime($date_min);
             $dt_max = new DateTime($date_max);
 
-            $txt .= 'PA du ' . $dt_min->format('d / m / Y') . ' au ' . $dt_max->format('d / m / Y') . ' (' . BimpTools::displayMoneyValue($new_pa, '') . '): ';
+            $counts = '';
 
             $sql = 'SELECT COUNT(DISTINCT a.rowid) as nb FROM llx_propal a';
             $sql .= ' LEFT JOIN llx_propaldet l ON a.rowid = l.fk_propal';
@@ -110,8 +108,8 @@ foreach ($list as $id_p) {
             $res = $bdb->executeS($sql, 'array');
 
             if (isset($res[0]['nb']) && (int) $res[0]['nb']) {
-                $txt .= $res[0]['nb'] . ' prop - ';
-            } 
+                $counts .= $res[0]['nb'] . ' prop - ';
+            }
 
             $sql = 'SELECT COUNT(DISTINCT a.rowid) as nb FROM llx_commande a';
             $sql .= ' LEFT JOIN llx_commandedet l ON a.rowid = l.fk_commande';
@@ -122,7 +120,7 @@ foreach ($list as $id_p) {
             $res = $bdb->executeS($sql, 'array');
 
             if (isset($res[0]['nb']) && (int) $res[0]['nb']) {
-                $txt .= $res[0]['nb'] . ' cmdes - ';
+                $counts .= $res[0]['nb'] . ' cmdes - ';
             }
 
             $sql = 'SELECT COUNT(DISTINCT a.rowid) as nb FROM llx_facture a';
@@ -135,7 +133,7 @@ foreach ($list as $id_p) {
             $res = $bdb->executeS($sql, 'array');
 
             if (isset($res[0]['nb']) && (int) $res[0]['nb']) {
-                $txt .= $res[0]['nb'] . ' fac non comm - ';
+                $counts .= $res[0]['nb'] . ' fac non comm - ';
             }
 
             $sql = 'SELECT COUNT(DISTINCT a.rowid) as nb FROM llx_facture a';
@@ -148,15 +146,20 @@ foreach ($list as $id_p) {
             $res = $bdb->executeS($sql, 'array');
 
             if (isset($res[0]['nb']) && (int) $res[0]['nb']) {
-                $txt .= $res[0]['nb'] . ' fac commissionnées';
+                $counts .= $res[0]['nb'] . ' fac commissionnées';
             }
 
+            if ($counts) {
+                $rows .= 'PA du ' . $dt_min->format('d / m / Y') . ' au ' . $dt_max->format('d / m / Y') . ' (' . BimpTools::displayMoneyValue($new_pa, '') . '): ' . $counts . "\n";
+            }
             $date_max = $date_min;
-            $txt .= "\n";
         }
-        $txt .= "\n";
 
-        fwrite($h_file, $txt);
+        if ($rows) {
+            $txt = 'PRODUIT #' . $id_p . ' "' . $prod->getRef() . '" (Nouveau PA courant: ' . BimpTools::displayMoneyValue($cur_pa, '') . ')' . "\n";
+            $txt .= $rows . "\n";
+            fwrite($h_file, $txt);
+        }
 
 //        // Màj des propales: 
 //        $sql = BimpTools::getSqlSelect(array('rowid', 'buy_price_ht', 'fk_propal'));

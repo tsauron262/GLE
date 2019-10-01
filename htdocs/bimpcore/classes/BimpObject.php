@@ -3905,8 +3905,10 @@ class BimpObject extends BimpCache
 
             if ((int) $this->params['force_extrafields_update']) {
                 foreach ($this->dol_object->array_options as $key => $value) {
-                    if ($this->dol_object->updateExtraField(str_replace('options_', '', $key)) <= 0) {
-                        $warnings[] = 'Echec de l\'enregistrement de l\'attribut supplémentaire "' . str_replace('options_', '', $key) . '"';
+                    if ($this->dol_field_exists(str_replace('options_', '', $key))) {
+                        if ($this->dol_object->updateExtraField(str_replace('options_', '', $key)) <= 0) {
+                            $warnings[] = 'Echec de l\'enregistrement de l\'attribut supplémentaire "' . str_replace('options_', '', $key) . '"';
+                        }
                     }
                 }
             }
@@ -4894,7 +4896,7 @@ class BimpObject extends BimpCache
     public function renderMsgs()
     {
         $this->checkObject('render_msgs');
-        
+
         $html = '';
 
         if (count($this->msgs['errors'])) {

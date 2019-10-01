@@ -527,8 +527,9 @@ class Inventory extends BimpDolObject
         $ids_scanned = array();
 
         $sql2 = 'SELECT fk_equipment';
-        $sql2 .= ' FROM ' . MAIN_DB_PREFIX . 'bl_inventory_det';
+        $sql2 .= ' FROM ' . MAIN_DB_PREFIX . 'bl_inventory_det id, ' . MAIN_DB_PREFIX . 'be_equipment e';
         $sql2 .= ' WHERE fk_inventory=' . $this->getData('id');
+        $sql2 .= ' AND e.id = id.fk_equipment';
         $sql2 .= ' AND fk_equipment > 0';
 
         $result2 = $this->db->db->query($sql2);

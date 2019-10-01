@@ -2429,7 +2429,7 @@ class BimpComm extends BimpDolObject
             $lines_new[(int) $line->id] = (int) $line_instance->id;
 
             // Attribution des équipements si nécessaire: 
-            if ($line->equipment_required && $line_instance->equipment_required && $line->isProductSerialisable()) {
+            if (!$isClone && $line->equipment_required && $line_instance->equipment_required && $line->isProductSerialisable()) {
                 $equipmentlines = $line->getEquipmentLines();
 
                 foreach ($equipmentlines as $equipmentLine) {
@@ -2441,7 +2441,7 @@ class BimpComm extends BimpDolObject
                         $data['pa_ht'] *= -1;
                     }
 
-                    $line_instance->attributeEquipment($data['id_equipment'], $data['pu_ht'], $data['tva_tx'], $data['id_fourn_price'], null, $data['pa_ht']);
+                    $line_instance->attributeEquipment($data['id_equipment']);
                 }
             }
 

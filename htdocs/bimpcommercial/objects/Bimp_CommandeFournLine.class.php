@@ -2255,6 +2255,11 @@ class Bimp_CommandeFournLine extends FournObjectLine
         return $errors;
     }
 
+    public function updatePrixAchat()
+    {
+        return array();
+    }
+
     // Méthodes statiques: 
 
     public static function checkAllQties()

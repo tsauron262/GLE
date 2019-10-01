@@ -2461,7 +2461,7 @@ class BC_Vente extends BimpObject
 
                 // Ajout de l\'équipement: 
                 if (BimpObject::ObjectLoaded($equipment)) {
-                    $eq_errors = $line->attributeEquipment((int) $equipment->id, $line->pu_ht, $line->tva_tx, $line->id_fourn_price);
+                    $eq_errors = $line->attributeEquipment((int) $equipment->id);
                     if (count($eq_errors)) {
                         $warnings[] = BimpTools::getMsgFromArray($eq_errors, 'Article #' . $article->id . ': échec de l\'attribution de l\'équipement "' . $equipment->getData('serial') . '" à la facture');
                     }

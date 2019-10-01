@@ -375,7 +375,7 @@ class BC_List extends BC_Panel
                     }
                 }
             }
-
+            
             $this->bc_filtersPanel->setFiltersValues($values);
         } elseif (!empty($this->params['filters_panel_values'])) {
             $this->bc_filtersPanel->setFiltersValues($this->params['filters_panel_values']);

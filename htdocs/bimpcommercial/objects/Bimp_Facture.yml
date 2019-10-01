@@ -63,6 +63,10 @@ fields:
     exported:
         label: Comptabilisée
         type: int
+    ignore_compta:
+        label: Ignorée
+        type: bool
+        dol_extra_field: 1
     type: 
         label: Type
         type: int
@@ -592,6 +596,8 @@ filters_panels:
                 field: total
             total_ttc: 
                 field: total_ttc
+            igonre_compta:
+                field: ignore_compta
                 
             availability: unset
             
@@ -672,6 +678,11 @@ lists:
         extends: default
         cols: 
             soc: unset
+        bulk_actions:
+            - label: supprimer les commandes sélectionnées
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this))
+        n: 500
             
     commission: 
         total_row: 1

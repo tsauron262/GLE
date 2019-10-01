@@ -68,4 +68,9 @@ class Bimp_FactureFournLine extends FournObjectLine
             }
         }
     }
+    
+    public function updatePrixAchat()
+    {
+        return array();
+    }
 }

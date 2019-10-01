@@ -54,6 +54,10 @@ class Inventory extends BimpDolObject
         return 1;
     }
     
+    public function canEdit(){
+        return 1;
+    }
+    
     
     public function canDelete()
     {
@@ -93,7 +97,7 @@ class Inventory extends BimpDolObject
             return $buttons;
 
         if ($this->getData('status') == self::STATUS_DRAFT) {
-            if ($user->rights->bimpequipment->inventory->open) {
+            if (1/*$user->rights->bimpequipment->inventory->open*/) {
                 $buttons[] = array(
                     'label'   => 'Commencer l\'inventaire',
                     'icon'    => 'fas_box',
@@ -261,15 +265,15 @@ class Inventory extends BimpDolObject
         $nb_en_trop = count($diff_eq['ids_en_trop']);
 
         if ($nb_en_trop == 1)
-            $errors[] = 'Merci de traiter le cas du produit sérialisé en excès.';
+            $errors[] = 'Merci de traiter le cas du produit sérialisé en excès.'.print_r($diff_eq['ids_en_trop'],1);
         if ($nb_en_trop > 1)
-            $errors[] = 'Merci de traiter le cas des ' . $nb_en_trop . ' produits sérialisés en excès.';
+            $errors[] = 'Merci de traiter le cas des ' . $nb_en_trop . ' produits sérialisés en excès.'.print_r($diff_eq['ids_en_trop'],1);
         // Manque
         $nb_manquant = count($diff_eq['ids_manquant']);
         if ($nb_manquant == 1)
-            $errors[] = 'Merci de traiter le cas du produit sérialisé manquant.';
+            $errors[] = 'Merci de traiter le cas du produit sérialisé manquant.'.print_r($diff_eq['ids_manquant'],1);
         if ($nb_manquant > 1)
-            $errors[] = 'Merci de traiter le cas des ' . $nb_manquant . ' produits sérialisés manquants.';
+            $errors[] = 'Merci de traiter le cas des ' . $nb_manquant . ' produits sérialisés manquants.'.print_r($diff_eq['ids_manquant'],1);
         return $errors;
     }
 
@@ -383,7 +387,7 @@ class Inventory extends BimpDolObject
         $diff = $this->getDiffEquipment();
 
         $equipment = BimpObject::getInstance('bimpequipment', 'Equipment');
-        $list = new BC_ListTable($equipment, 'default', 1, null, 'Équipements manquants');
+        $list = new BC_ListTable($equipment, 'inventaireManquant', 1, null, 'Équipements manquants');
         if (!empty($diff['ids_manquant']))
             $list->addFieldFilterValue('id IN(' . implode(',', $diff['ids_manquant']) . ') AND 1', $filters);
         else
@@ -391,11 +395,17 @@ class Inventory extends BimpDolObject
         $html .= $list->renderHtml();
 
         $equipment = BimpObject::getInstance('bimpequipment', 'Equipment');
-        $list = new BC_ListTable($equipment, 'default', 1, null, 'Équipements en trop');
+        $list = new BC_ListTable($equipment, 'inventaire', 1, null, 'Équipements en trop');
         if (!empty($diff['ids_en_trop']))
             $list->addFieldFilterValue('id IN(' . implode(',', $diff['ids_en_trop']) . ') AND 1', $filters);
         else
             $list->addFieldFilterValue('id = 0 AND 1', $filters);
+        $html .= $list->renderHtml();
+        
+        
+        $equipment = BimpObject::getInstance('bimpequipment', 'Equipment');
+        $list = new BC_ListTable($equipment, 'inventaire', 1, null, 'Équipements deplacé dans vols');
+        $list->addFieldFilterValue('id IN (SELECT id_equipment FROM ' . MAIN_DB_PREFIX . 'be_equipment_place p WHERE id_entrepot=' . $this->getData('fk_warehouse').' AND infos LIKE "%INV'.$this->id.'%" AND  p.position=1 AND p.type=6) AND 1', $filters);
         $html .= $list->renderHtml();
 
 
@@ -499,9 +509,9 @@ class Inventory extends BimpDolObject
         $ids_place = array();
 
         $sql = 'SELECT id_equipment';
-        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_equipment_place';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_equipment_place p, ' . MAIN_DB_PREFIX . 'be_equipment e';
         $sql .= ' WHERE id_entrepot=' . $this->getData('fk_warehouse');
-        $sql .= ' AND position=1 AND type=2';
+        $sql .= ' AND p.id_equipment = e.id AND p.position=1 AND p.type=2';
 
         $result = $this->db->db->query($sql);
         if ($result and mysqli_num_rows($result) > 0) {
@@ -517,8 +527,9 @@ class Inventory extends BimpDolObject
         $ids_scanned = array();
 
         $sql2 = 'SELECT fk_equipment';
-        $sql2 .= ' FROM ' . MAIN_DB_PREFIX . 'bl_inventory_det';
+        $sql2 .= ' FROM ' . MAIN_DB_PREFIX . 'bl_inventory_det id, ' . MAIN_DB_PREFIX . 'be_equipment e';
         $sql2 .= ' WHERE fk_inventory=' . $this->getData('id');
+        $sql2 .= ' AND e.id = id.fk_equipment';
         $sql2 .= ' AND fk_equipment > 0';
 
         $result2 = $this->db->db->query($sql2);

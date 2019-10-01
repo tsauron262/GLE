@@ -13,11 +13,7 @@ class ObjectLineEquipment extends BimpObject
                 if (BimpObject::objectLoaded($objectLine) && $objectLine->isActionAllowed('attributeEquipment')) {
                     $onclick = $objectLine->getJsActionOnclick('attributeEquipment', array(
                         'id_line_equipment' => (int) $this->id,
-                        'id_equipment'      => (int) $this->getData('id_equipment'),
-                        'pu_ht'             => (float) $this->getData('pu_ht'),
-                        'tva_tx'            => (float) $this->getData('tva_tx'),
-                        'id_fourn_price'    => (float) $this->getData('id_fourn_price'),
-                        'pu_ht'             => (float) $this->getData('pu_ht'),
+                        'id_equipment'      => (int) $this->getData('id_equipment')
                             ), array(
                         'form_name' => 'equipment'
                     ));
@@ -42,6 +38,29 @@ class ObjectLineEquipment extends BimpObject
         return '<span class="warning">Non attribué</span>';
     }
 
+    public function displayPa()
+    {
+        if ($this->isLoaded()) {
+            $equipment = $this->getChildObject('equipment');
+            if (BimpObject::objectLoaded($equipment)) {
+                return $equipment->displayData('prix_achat');
+            }
+        }
+        
+        return '';
+    }
+    
+    public function displayPaTvatx()
+    {
+        if ($this->isLoaded()) {
+            $equipment = $this->getChildObject('equipment');
+            if (BimpObject::objectLoaded($equipment)) {
+                return $equipment->displayData('achat_tva_tx');
+            }
+        }
+        
+        return '';
+    }
     // Traitements: 
 
     public function setEquipment($id_equipment, $check_availability = true)

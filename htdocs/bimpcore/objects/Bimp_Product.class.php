@@ -1098,12 +1098,8 @@ class Bimp_Product extends BimpObject
     public function displayStockInventorySr()
     {
         $id_inventory = BimpTools::getValue('id');
-        $inventory = BimpCache::getBimpObjectInstance('bimplogistique', 'InventorySr', $id_inventory);
-        $stock = $this->getStockShoowRoom('2019-09-26 16:47:19', (int) $inventory->getData('fk_warehouse'));
-//        echo '444';
-//        print_r($stock);
-//        die();
-        return $stock;
+        $inventory_sr = BimpCache::getBimpObjectInstance('bimplogistique', 'InventorySR', $id_inventory);
+        return $inventory_sr->getStockProduct((int) $this->getData('id'));
     }
 
     // Rendus HTML: 
@@ -1480,7 +1476,7 @@ class Bimp_Product extends BimpObject
         // COMMAND
         $commandes_c = $this->getCommandes();
         foreach ($commandes_c as $commande) {
-            if ((int) $commande->statut != (int) Commande::STATUS_DRAFT or (int) $commande->statut != (int) Commande::STATUS_CANCELED)
+            if ((int) $commande->statut != (int) Commande::STATUS_DRAFT and (int) $commande->statut != (int) Commande::STATUS_CANCELED)
                 continue;
 
             $email_sent = false;
@@ -1518,7 +1514,7 @@ class Bimp_Product extends BimpObject
         // PROPALS
         $propals = $this->getPropals();
         foreach ($propals as $propal) {
-            if ((int) $propal->statut != (int) Propal::STATUS_DRAFT or (int) $propal->statut != (int) Propal::STATUS_NOTSIGNED)
+            if ((int) $propal->statut != (int) Propal::STATUS_DRAFT and (int) $propal->statut != (int) Propal::STATUS_NOTSIGNED)
                 continue;
 
             $email_sent = false;

@@ -618,26 +618,27 @@ class Bimp_Product extends BimpObject
         }
     }
 
-    public function getNbScanned()
+    public function getNbScanned($is_show_room = 0)
     {
         global $cache_scann;
 
         $id_inventory = BimpTools::getValue('id');
+        $key = $id_inventory . ($is_show_room ? '_sr' : '');
 
-        if (!isset($cache_scann[$id_inventory])) {
+        if (!isset($cache_scann[$key])) {
             $sql = 'SELECT SUM(qty) as qty, fk_product';
-            $sql .= ' FROM ' . MAIN_DB_PREFIX . 'bl_inventory_det';
+            $sql .= ' FROM ' . MAIN_DB_PREFIX . 'bl_inventory_' . ($is_show_room ? 'sr_det' : 'det');
             $sql .= ' WHERE fk_inventory=' . $id_inventory;
             $sql .= ' GROUP BY fk_product';
             $result = $this->db->db->query($sql);
             if ($result) {
                 while ($obj = $this->db->db->fetch_object($result)) {
-                    $cache_scann[$id_inventory][$obj->fk_product] = $obj->qty;
+                    $cache_scann[$key][(int) $obj->fk_product] = $obj->qty;
                 }
             }
         }
-        if (isset($cache_scann[$id_inventory][$this->getData('id')]))
-            return $cache_scann[$id_inventory][$this->getData('id')];
+        if (isset($cache_scann[$key][(int) $this->getData('id')]))
+            return $cache_scann[$key][(int) $this->getData('id')];
         else
             return 0;
     }
@@ -1090,6 +1091,13 @@ class Bimp_Product extends BimpObject
         $stock = $this->getStocksForEntrepot($inventory->getData('fk_warehouse'));
         return $stock['reel'];
     }
+    
+    public function displayStockInventorySr()
+    {
+        $id_inventory = BimpTools::getValue('id');
+        $inventory_sr = BimpCache::getBimpObjectInstance('bimplogistique', 'InventorySR', $id_inventory);
+        return $inventory_sr->getStockProduct((int) $this->getData('id'));
+    }
 
     // Rendus HTML: 
 
@@ -1466,7 +1474,7 @@ class Bimp_Product extends BimpObject
         // COMMAND
         $commandes_c = $this->getCommandes();
         foreach ($commandes_c as $commande) {
-            if ((int) $commande->statut != (int) Commande::STATUS_DRAFT or (int) $commande->statut != (int) Commande::STATUS_CANCELED)
+            if ((int) $commande->statut != (int) Commande::STATUS_DRAFT and (int) $commande->statut != (int) Commande::STATUS_CANCELED)
                 continue;
 
             $email_sent = false;
@@ -1504,7 +1512,7 @@ class Bimp_Product extends BimpObject
         // PROPALS
         $propals = $this->getPropals();
         foreach ($propals as $propal) {
-            if ((int) $propal->statut != (int) Propal::STATUS_DRAFT or (int) $propal->statut != (int) Propal::STATUS_NOTSIGNED)
+            if ((int) $propal->statut != (int) Propal::STATUS_DRAFT and (int) $propal->statut != (int) Propal::STATUS_NOTSIGNED)
                 continue;
 
             $email_sent = false;

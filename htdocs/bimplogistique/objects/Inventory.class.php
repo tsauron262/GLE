@@ -395,7 +395,7 @@ class Inventory extends BimpDolObject
         $html .= $list->renderHtml();
 
         $equipment = BimpObject::getInstance('bimpequipment', 'Equipment');
-        $list = new BC_ListTable($equipment, 'inventaire', 1, null, 'Équipements en trop');
+        $list = new BC_ListTable($equipment, 'inventaireEnTrop', 1, null, 'Équipements en trop');
         if (!empty($diff['ids_en_trop']))
             $list->addFieldFilterValue('id IN(' . implode(',', $diff['ids_en_trop']) . ') AND 1', $filters);
         else

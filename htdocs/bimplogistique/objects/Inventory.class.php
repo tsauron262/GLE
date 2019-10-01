@@ -395,7 +395,7 @@ class Inventory extends BimpDolObject
         $html .= $list->renderHtml();
 
         $equipment = BimpObject::getInstance('bimpequipment', 'Equipment');
-        $list = new BC_ListTable($equipment, 'inventaire', 1, null, 'Équipements en trop');
+        $list = new BC_ListTable($equipment, 'inventaireEnTrop', 1, null, 'Équipements en trop');
         if (!empty($diff['ids_en_trop']))
             $list->addFieldFilterValue('id IN(' . implode(',', $diff['ids_en_trop']) . ') AND 1', $filters);
         else
@@ -512,6 +512,7 @@ class Inventory extends BimpDolObject
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_equipment_place p, ' . MAIN_DB_PREFIX . 'be_equipment e';
         $sql .= ' WHERE id_entrepot=' . $this->getData('fk_warehouse');
         $sql .= ' AND p.id_equipment = e.id AND p.position=1 AND p.type=2';
+        $sql .= ' AND p.date < "'.$this->getData('date_opening').'"';
 
         $result = $this->db->db->query($sql);
         if ($result and mysqli_num_rows($result) > 0) {

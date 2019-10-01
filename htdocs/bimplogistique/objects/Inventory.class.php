@@ -265,15 +265,15 @@ class Inventory extends BimpDolObject
         $nb_en_trop = count($diff_eq['ids_en_trop']);
 
         if ($nb_en_trop == 1)
-            $errors[] = 'Merci de traiter le cas du produit sérialisé en excès.';
+            $errors[] = 'Merci de traiter le cas du produit sérialisé en excès.'.print_r($diff_eq['ids_en_trop'],1);
         if ($nb_en_trop > 1)
-            $errors[] = 'Merci de traiter le cas des ' . $nb_en_trop . ' produits sérialisés en excès.';
+            $errors[] = 'Merci de traiter le cas des ' . $nb_en_trop . ' produits sérialisés en excès.'.print_r($diff_eq['ids_en_trop'],1);
         // Manque
         $nb_manquant = count($diff_eq['ids_manquant']);
         if ($nb_manquant == 1)
-            $errors[] = 'Merci de traiter le cas du produit sérialisé manquant.';
+            $errors[] = 'Merci de traiter le cas du produit sérialisé manquant.'.print_r($diff_eq['ids_manquant'],1);
         if ($nb_manquant > 1)
-            $errors[] = 'Merci de traiter le cas des ' . $nb_manquant . ' produits sérialisés manquants.';
+            $errors[] = 'Merci de traiter le cas des ' . $nb_manquant . ' produits sérialisés manquants.'.print_r($diff_eq['ids_manquant'],1);
         return $errors;
     }
 

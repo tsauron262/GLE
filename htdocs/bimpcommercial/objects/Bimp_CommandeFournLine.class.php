@@ -1379,7 +1379,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
         $receptions[(int) $id_reception] = $data;
 
         $this->set('receptions', $receptions);
-        $errors = $this->update($warnings, true);
+        $errors = $this->updateField('receptions', $receptions);
 
         if (!count($errors)) {
             $reception->onLinesChange();
@@ -1666,11 +1666,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
 
         $receptions[(int) $reception->id] = $reception_data;
 
-        $this->set('receptions', $receptions);
-        $up_warnings = array();
-        $up_errors = $this->update($up_warnings, true);
-
-        $up_errors = array_merge($up_errors, $up_warnings);
+        $up_errors = $this->updateField('receptions', $receptions);
 
         if (count($up_errors)) {
             $errors[] = BimpTools::getMsgFromArray($up_errors, 'Erreurs lors de la mise à jour de la ligne de commande fournisseur');
@@ -1905,13 +1901,8 @@ class Bimp_CommandeFournLine extends FournObjectLine
 
         if (isset($receptions[(int) $id_reception])) {
             unset($receptions[(int) $id_reception]);
-
-            $this->set('receptions', $receptions);
-            $warnings = array();
-            $errors = $this->update($warnings, true);
-            $errors = array_merge($errors, $warnings);
+            $errors = $this->updateField('receptions', $receptions);
         }
-
 
         $this->checkQties();
 

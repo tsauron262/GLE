@@ -603,8 +603,10 @@ class RemiseCheque extends CommonObject
 			$sql.= " FROM ".MAIN_DB_PREFIX."bank as b";
 			$sql.= ", ".MAIN_DB_PREFIX."bank_account as ba";
 			$sql.= ", ".MAIN_DB_PREFIX."bordereau_cheque as bc";
+			$sql.= ", ".MAIN_DB_PREFIX."paiement as pa";
 			$sql.= " WHERE b.fk_account = ba.rowid";
 			$sql.= " AND b.fk_bordereau = bc.rowid";
+			$sql.= " AND pa.fk_bank = b.rowid";
 			$sql.= " AND bc.rowid = ".$this->id;
 			$sql.= " AND bc.entity = ".$conf->entity;
 			$sql.= " ORDER BY b.dateo ASC, b.rowid ASC";
@@ -621,6 +623,7 @@ class RemiseCheque extends CommonObject
 					$docmodel->lines[$i]->emetteur_chq = $objp->emetteur;
 					$docmodel->lines[$i]->amount_chq = $objp->amount;
 					$docmodel->lines[$i]->num_chq = $objp->num_chq;
+					$docmodel->lines[$i]->ref_fact = $objp->num_chq;
 					$i++;
 				}
 			}

@@ -311,7 +311,7 @@ class Inventory extends BimpDolObject
         if($id_main_warehouse < 1) {
             $errors[] = "L'entrepôt par défault des inventaires n'est pas définit "
                     . "(celui dans lequel on renseigne tous les mouvements de "
-                    . "tou les inventaires. (il doit avoir comme ref \"INV\")";
+                    . "tous les inventaires. (il doit avoir comme ref \"INV\"))";
             return $errors;
         }
         

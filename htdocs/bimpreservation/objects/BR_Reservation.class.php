@@ -931,7 +931,7 @@ class BR_Reservation extends BimpObject
                     $content = '<div style="display: ' . ($hidden ? 'none' : 'inline-block') . '; margin-right: 15px;">';
                     $content .= '<span class="small">Numéro de série: </span><br/>';
                     $content .= BimpInput::renderInput('text', 'search_serial', '', array(
-                                'style'       => 'border: 1px solid #DCDCDC',
+                                'style' => 'border: 1px solid #DCDCDC',
 //                                'extra_class' => 'auto_focus'
                     ));
                     $content .= '</div>';
@@ -1226,6 +1226,14 @@ class BR_Reservation extends BimpObject
             }
         }
 
+        $commande = null;
+        if ((int) $this->getData('id_commande_client')) {
+            $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $this->getData('id_commande_client'));
+            if (BimpObject::objectLoaded($commande)) {
+                $commande->no_check_reservations = true;
+            }
+        }
+
         $current_qty = (int) $this->getSavedData('qty');
 
         if (is_null($qty) || !$qty) {
@@ -1294,7 +1302,7 @@ class BR_Reservation extends BimpObject
                         $errors = array_merge($errors, $new_errors);
                     } else {
                         $this->set('status', $current_status);
-                        $this->set('qty', $current_qty - 1);
+                        $this->set('qty', (int) $current_qty - 1);
                         $this->set('id_equipment', 0);
                         $this->update();
                     }
@@ -1311,8 +1319,8 @@ class BR_Reservation extends BimpObject
                 $errors[] = 'Produit invalide';
             }
 
-            if ($qty > $current_qty) {
-                $qty = $current_qty;
+            if ((int) $qty > (int) $current_qty) {
+                $qty = (int) $current_qty;
             }
 
             $old_reservation = BimpObject::getInstance($this->module, $this->object_name);
@@ -1322,8 +1330,8 @@ class BR_Reservation extends BimpObject
                         'status'       => (int) $status,
                         'id_equipment' => 0
                     ))) {
-                if ($qty < $current_qty) {
-                    $old_reservation->set('qty', ((int) $old_reservation->getData('qty') + $qty));
+                if ((int) $qty < (int) $current_qty) {
+                    $old_reservation->set('qty', ((int) $old_reservation->getData('qty') + (int) $qty));
                     $update_errors = $old_reservation->update();
 
                     if (count($update_errors)) {
@@ -1335,7 +1343,7 @@ class BR_Reservation extends BimpObject
                         $this->update();
                     }
                 } else {
-                    $new_qty = (int) ($qty + (int) $old_reservation->getData('qty'));
+                    $new_qty = (int) $qty + (int) $old_reservation->getData('qty');
                     $id_old_reservation = $old_reservation->id;
                     $delete_warnings = array();
                     $delete_errors = $old_reservation->delete($delete_warnings, true);
@@ -1343,16 +1351,16 @@ class BR_Reservation extends BimpObject
                         $errors[] = 'Echec de la suppression de la réservation ' . $id_old_reservation;
                         $errors = array_merge($errors, $delete_errors);
                     } else {
-                        $this->set('qty', $new_qty);
+                        $this->set('qty', (int) $new_qty);
                         $this->set('id_equipment', 0);
                         $this->update();
                     }
                 }
-            } elseif ($qty < $current_qty) {
+            } elseif ((int) $qty < (int) $current_qty) {
                 $new_reservation = BimpObject::getInstance($this->module, $this->object_name, $this->id);
                 $new_reservation->id = null;
                 $new_reservation->set('id', null);
-                $new_reservation->set('qty', $qty);
+                $new_reservation->set('qty', (int) $qty);
                 $new_reservation->set('status', $status);
                 $new_reservation->set('ref', $ref);
                 $new_errors = $new_reservation->create();
@@ -1363,14 +1371,14 @@ class BR_Reservation extends BimpObject
                 } else {
                     $this->set('id_equipment', 0);
                     $this->set('status', $current_status);
-                    $this->set('qty', ($current_qty - $qty));
+                    $this->set('qty', ((int) $current_qty - (int) $qty));
                     $up_errors = $this->update();
                     if (count($up_errors)) {
                         $errors[] = BimpTools::getMsgFromArray($up_errors, 'Erreurs lors de la mise à jour de la réservation actuelle');
                     }
                 }
             } else {
-                $this->set('qty', $qty);
+                $this->set('qty', (int) $qty);
                 $this->set('status', $status);
                 $up_errors = $this->update();
                 if (count($up_errors)) {
@@ -1379,6 +1387,9 @@ class BR_Reservation extends BimpObject
             }
         }
 
+        if (BimpObject::objectLoaded($commande)) {
+            $commande->no_check_reservations = false;
+        }
         return $errors;
     }
 

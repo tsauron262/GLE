@@ -386,7 +386,7 @@ class Inventory extends BimpDolObject
 
         $diff = $this->getDiffEquipment();
 
-        $equipment = BimpObject::getInstance('bimplogistique', 'InventoryEquipment');
+        $equipment = BimpObject::getInstance('bimpequipment', 'Equipment');
         $list = new BC_ListTable($equipment, 'inventaireManquant', 1, null, 'Équipements manquants');
         if (!empty($diff['ids_manquant']))
             $list->addFieldFilterValue('id IN(' . implode(',', $diff['ids_manquant']) . ') AND 1', $filters);
@@ -394,7 +394,7 @@ class Inventory extends BimpDolObject
             $list->addFieldFilterValue('id = 0 AND 1', $filters);
         $html .= $list->renderHtml();
 
-        $equipment = BimpObject::getInstance('bimplogistique', 'InventoryEquipment');
+        $equipment = BimpObject::getInstance('bimpequipment', 'Equipment');
         $list = new BC_ListTable($equipment, 'inventaireEnTrop', 1, null, 'Équipements en trop');
         if (!empty($diff['ids_en_trop']))
             $list->addFieldFilterValue('id IN(' . implode(',', $diff['ids_en_trop']) . ') AND 1', $filters);
@@ -403,7 +403,7 @@ class Inventory extends BimpDolObject
         $html .= $list->renderHtml();
         
         
-        $equipment = BimpObject::getInstance('bimplogistique', 'InventoryEquipment');
+        $equipment = BimpObject::getInstance('bimpequipment', 'Equipment');
         $list = new BC_ListTable($equipment, 'inventaire', 1, null, 'Équipements deplacé dans vols');
         $list->addFieldFilterValue('id IN (SELECT id_equipment FROM ' . MAIN_DB_PREFIX . 'be_equipment_place p WHERE id_entrepot=' . $this->getData('fk_warehouse').' AND infos LIKE "%INV'.$this->id.'%" AND  p.position=1 AND p.type=6) AND 1', $filters);
         $html .= $list->renderHtml();

@@ -1172,7 +1172,7 @@ class BL_CommandeFournReception extends BimpObject
         if (count($errors)) {
             return $errors;
         }
-
+        
         foreach ($lines_data as $id_line => $line_data) {
             $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFournLine', (int) $id_line);
             if (BimpObject::objectLoaded($line)) {

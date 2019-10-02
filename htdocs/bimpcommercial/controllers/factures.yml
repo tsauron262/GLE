@@ -26,17 +26,29 @@ sections:
             sections:
                 - type: custom
                   custom: 
-                      callback: renderFacturesTab
+                      callback: 
+                        method: renderTabs
+                        params: 
+                            - renderFacturesTab
+                            - default
         prods: 
             label: Produits en factures
             sections: 
                 - type: custom
                   custom: 
-                      callback: renderProdsTabs
+                      callback: 
+                        method: renderTabs
+                        params: 
+                            - renderProdsTabs
+                            - prods
         paiements: 
             label: Paiements
             sections: 
                 - type: custom
                   custom: 
-                      callback: renderPaiementsTab
+                      callback: 
+                        method: renderTabs
+                        params: 
+                            - renderPaiementsTab
+                            - paiements
             

@@ -461,7 +461,7 @@ class Bimp_CommandeLine extends ObjectLine
                     'id_commande_client'      => (int) $commande->id,
                     'id_commande_client_line' => $this->id
                         ), null, null, 'id', 'asc', 'array', array('qty', 'status'));
-
+                
                 if (is_array($rows)) {
                     foreach ($rows as $r) {
                         $qties['total'] += (float) $r['qty'];
@@ -469,7 +469,7 @@ class Bimp_CommandeLine extends ObjectLine
                             $qties['status'][(int) $r['status']] = 0;
                         }
                         $qties['status'][(int) $r['status']] += (float) $r['qty'];
-                    if ((int) $r['status'] === 300 || in_array((int) $r['status'], BR_Reservation::$unavailable_status)) {
+                        if ((int) $r['status'] === 300 || in_array((int) $r['status'], BR_Reservation::$unavailable_status)) {
                             $qties['reserved'] += (float) $r['qty'];
                         } else {
                             $qties['not_reserved'] += (float) $r['qty'];
@@ -2490,6 +2490,10 @@ class Bimp_CommandeLine extends ObjectLine
             if (!BimpObject::objectLoaded($commande)) {
                 $errors[] = 'ID de la commande absent';
             } else {
+                if ($commande->no_check_reservations) {
+                    return array();
+                }
+
                 if ((int) $this->getData('type') === self::LINE_PRODUCT) {
                     $product = $this->getProduct();
                     if (!BimpObject::objectLoaded($product)) {

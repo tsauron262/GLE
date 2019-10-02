@@ -386,7 +386,7 @@ class Inventory extends BimpDolObject
 
         $diff = $this->getDiffEquipment();
 
-        $equipment = BimpObject::getInstance('bimpequipment', 'Equipment');
+        $equipment = BimpObject::getInstance('bimplogistique', 'InventoryEquipment');
         $list = new BC_ListTable($equipment, 'inventaireManquant', 1, null, 'Équipements manquants');
         if (!empty($diff['ids_manquant']))
             $list->addFieldFilterValue('id IN(' . implode(',', $diff['ids_manquant']) . ') AND 1', $filters);
@@ -394,7 +394,7 @@ class Inventory extends BimpDolObject
             $list->addFieldFilterValue('id = 0 AND 1', $filters);
         $html .= $list->renderHtml();
 
-        $equipment = BimpObject::getInstance('bimpequipment', 'Equipment');
+        $equipment = BimpObject::getInstance('bimplogistique', 'InventoryEquipment');
         $list = new BC_ListTable($equipment, 'inventaireEnTrop', 1, null, 'Équipements en trop');
         if (!empty($diff['ids_en_trop']))
             $list->addFieldFilterValue('id IN(' . implode(',', $diff['ids_en_trop']) . ') AND 1', $filters);
@@ -403,7 +403,7 @@ class Inventory extends BimpDolObject
         $html .= $list->renderHtml();
         
         
-        $equipment = BimpObject::getInstance('bimpequipment', 'Equipment');
+        $equipment = BimpObject::getInstance('bimplogistique', 'InventoryEquipment');
         $list = new BC_ListTable($equipment, 'inventaire', 1, null, 'Équipements deplacé dans vols');
         $list->addFieldFilterValue('id IN (SELECT id_equipment FROM ' . MAIN_DB_PREFIX . 'be_equipment_place p WHERE id_entrepot=' . $this->getData('fk_warehouse').' AND infos LIKE "%INV'.$this->id.'%" AND  p.position=1 AND p.type=6) AND 1', $filters);
         $html .= $list->renderHtml();
@@ -512,7 +512,8 @@ class Inventory extends BimpDolObject
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_equipment_place p, ' . MAIN_DB_PREFIX . 'be_equipment e';
         $sql .= ' WHERE id_entrepot=' . $this->getData('fk_warehouse');
         $sql .= ' AND p.id_equipment = e.id AND p.position=1 AND p.type=2';
-        $sql .= ' AND p.date < "'.$this->getData('date_opening').'"';
+        if($this->getData('date_opening'))
+            $sql .= ' AND p.date < "'.$this->getData('date_opening').'"';
 
         $result = $this->db->db->query($sql);
         if ($result and mysqli_num_rows($result) > 0) {
@@ -618,14 +619,16 @@ class Inventory extends BimpDolObject
     }
     
     public function hasChildren() {
-        $sql = 'SELECT id';
-        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'bl_inventory';
-        $sql .= ' WHERE parent=' . $this->getData('id');
+        if($this->isLoaded()){
+            $sql = 'SELECT id';
+            $sql .= ' FROM ' . MAIN_DB_PREFIX . 'bl_inventory';
+            $sql .= ' WHERE parent=' . $this->getData('id');
 
-        $result = $this->db->db->query($sql);
-        if ($result and mysqli_num_rows($result) > 0) {
-            while ($obj = $this->db->db->fetch_object($result)) {
-                return true;
+            $result = $this->db->db->query($sql);
+            if ($result and mysqli_num_rows($result) > 0) {
+                while ($obj = $this->db->db->fetch_object($result)) {
+                    return true;
+                }
             }
         }
         

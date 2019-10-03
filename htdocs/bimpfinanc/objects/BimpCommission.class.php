@@ -29,6 +29,11 @@ class BimpCommission extends BimpObject
         // todo
         return 1;
     }
+    
+    public function canView() {
+        global $user;
+        return $user->rights->bimpequipment->inventory->close;
+    }
 
     public function canSetAction($action)
     {

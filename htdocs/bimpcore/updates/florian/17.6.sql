@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS `llx_bimp_product_cur_pa` (
-  `id` int(11) NOT NULL PRIMARY AUTO_INCREMENT,
+  `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `id_product` int(11) NOT NULL DEFAULT 0,
   `amount` decimal(24,8) NOT NULL DEFAULT 0.00000000,
   `date_from` datetime DEFAULT NULL,

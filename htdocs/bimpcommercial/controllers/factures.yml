@@ -16,7 +16,22 @@ objects:
         instance: 
             bimp_object: 
                 module: bimpcommercial
-                name: Bimp_Paiement       
+                name: Bimp_Paiement  
+    PaiementInc: 
+        instance: 
+            bimp_object:  
+                module: bimpfinanc
+                name: Bimp_PaiementInc 
+    commission:
+        instance:
+            bimp_object:  
+                module: bimpfinanc
+                name: BimpCommission
+    revalorisation: 
+        instance:
+            bimp_object:  
+                module: bimpfinanc
+                name: BimpRevalorisation     
             
 sections: 
     - type: tabs
@@ -51,4 +66,26 @@ sections:
                         params: 
                             - renderPaiementsTab
                             - paiements
+        comm:
+            label: Commissions
+            icon: fas_comment-dollar
+            sections:
+                - type: list
+                  list: 
+                      object: commission
+        sav:
+            label: Revalorisations
+            icon: fas_search-dollar
+            sections:
+                - type: list
+                  list: 
+                      object: revalorisation
+        paiements_inc:
+            label: Paiements non identifiés
+            icon: fas_ambulance
+            sections:
+                - type: list
+                  list: 
+                      panel: 1
+                      object: PaiementInc
             

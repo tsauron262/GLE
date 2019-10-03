@@ -577,7 +577,7 @@ class Inventory extends BimpDolObject
                 'type',
                 'date'
             ));
-            if($list[0]['type'] == BE_Place::BE_PLACE_CLIENT and $this->getData('date_create') < $list[0]['date'])
+            if(/*$list[0]['type'] == BE_Place::BE_PLACE_CLIENT and*/ $this->getData('date_create') < $list[0]['date'])
                 unset($ids_en_trop[$i]);
         }
         return array('ids_en_trop' => $ids_en_trop, 'ids_manquant' => $ids_manquant);

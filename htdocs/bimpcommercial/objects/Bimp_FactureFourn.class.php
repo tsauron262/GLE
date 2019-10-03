@@ -10,7 +10,9 @@ class Bimp_FactureFourn extends BimpComm
     public $redirectMode = 4; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
     public static $dol_module = 'facture_fourn';
     public static $files_module_part = 'facture_fournisseur';
-    public static $email_type = 'invoice_supplier_send'; // A checker
+    public static $email_type = 'invoice_supplier_send';
+    public static $mail_event_code = 'AC_BILL_SUPPLIER_SENTBYMAIL';
+    public static $element_name = 'invoice_supplier';
     public static $status_list = array(
         0 => array('label' => 'Brouillon', 'icon' => 'fas_file-alt', 'classes' => array('warning')),
         1 => array('label' => 'Validée', 'icon' => 'check', 'classes' => array('info')),
@@ -932,7 +934,7 @@ class Bimp_FactureFourn extends BimpComm
                     $id_fp = (int) $product->findFournPriceIdForPaHt($pa_ht, $fk_soc);
                 }
 
-                $product->setCurrentPaHt($pa_ht, $id_fp, 'commande_fourn', (int) $this->id);
+                $product->setCurrentPaHt($pa_ht, $id_fp, 'facture_fourn', (int) $this->id);
             }
         }
     }

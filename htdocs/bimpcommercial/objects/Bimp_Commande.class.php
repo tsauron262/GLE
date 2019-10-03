@@ -10,6 +10,8 @@ class Bimp_Commande extends BimpComm
     public $redirectMode = 4; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
     public static $dol_module = 'commande';
     public static $email_type = 'order_send';
+    public static $mail_event_code = 'AC_ORDER_SENTBYMAIL';
+    public static $element_name = 'order';
     public static $status_list = array(
 //        -3 => array('label' => 'Stock insuffisant', 'icon' => 'fas_exclamation-triangle', 'classes' => array('warning')),
         -1 => array('label' => 'Abandonnée', 'icon' => 'fas_times-circle', 'classes' => array('danger')),

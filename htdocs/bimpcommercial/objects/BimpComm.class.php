@@ -10,6 +10,8 @@ class BimpComm extends BimpDolObject
     const BC_ZONE_HORS_UE = 3;
 
     public static $email_type = '';
+    public static $element_name = '';
+    public static $mail_event_code = '';
     public static $external_contact_type_required = true;
     public static $internal_contact_type_required = true;
     public $acomptes_allowed = false;
@@ -3167,18 +3169,48 @@ class BimpComm extends BimpDolObject
             }
 
             if (!count($errors)) {
-                // todo: loguer l'échec de l'envoi du mail
-
-                $mail_object = '';
-//
-//                if ($this->isLoaded()) {
-//                    $mail_object = BimpTools::ucfirst($this->getLabel()) . ' ' . $this->getRef();
-//                }
-
                 $mail_object .= $data['mail_object'];
 
                 $deliveryreceipt = (isset($data['confirm_reception']) ? (int) $data['confirm_reception'] : 0);
-                mailSyn2($mail_object, $to, $from, $data['msg_html'], $filename_list, $mimetype_list, $mimefilename_list, $cc, '', $deliveryreceipt);
+                if (mailSyn2($mail_object, $to, $from, $data['msg_html'], $filename_list, $mimetype_list, $mimefilename_list, $cc, '', $deliveryreceipt)) {
+//                    if (static::$mail_event_code) {
+//                        global $user;
+//                        BimpTools::loadDolClass('comm/action', 'actioncomm', 'ActionComm');
+//                        $ac = new ActionComm($this->db->db);
+//                        $ac->code = static::$mail_event_code;
+//                        $ac->datep = dol_now();
+//                        $ac->authorid = (int) $user->id;
+//                        $ac->userownerid = (int) $user->id;
+//                        $ac->socid = (int) $this->getData('fk_soc');
+//                        $ac->label = BimpTools::ucfirst($this->getLabel()) . ' envoyé' . $this->e() . ' par e-mail';
+//                        $ac->elementid = (int) $this->id;
+//                        $ac->elementtype = static::$element_name;
+//
+//                        $note = 'Emetteur: ' . $from . '<br/>';
+//                        $note .= 'Destinataire: ' . $to . '<br/>';
+//                        if ($cc) {
+//                            $note .= 'Copie: ' . $cc . '<br/>';
+//                        }
+//                        $note .= '<br/>';
+//
+//                        $note .= 'Objet: ' . $mail_object . '<br/>';
+//                        $note .= 'Corps du message: <br/>';
+//                        $note .= $data['msg_html'] . '<br/>';
+//
+//                        if (!empty($mimefilename_list)) {
+//                            $note .= 'Fichiers joints: <br/>';
+//                            foreach ($mimefilename_list as $file_name) {
+//                                $note .= $file_name . '<br/>';
+//                            }
+//                        }
+//                        $ac->note = $note;
+//                        if ($ac->create($user) <= 0) {
+//                            $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($ac), 'Echec de l\'enregistrement de l\'envoi dans la liste des événements');
+//                        }
+//                    }
+                } else {
+                    $errors[] = 'Echec de l\'envoi du mail';
+                }
             }
         }
 

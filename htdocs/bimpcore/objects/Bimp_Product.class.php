@@ -361,6 +361,21 @@ class Bimp_Product extends BimpObject
         return (int) isset(static::$ventes[$dateMin . '-' . $dateMax]);
     }
 
+    public function hasFixePrices()
+    {
+        return ((int) $this->getData('no_fixe_prices') ? 0 : 1);
+    }
+
+    public function hasFixePu()
+    {
+        return $this->hasFixePrices();
+    }
+
+    public function hasFixePa()
+    {
+        return $this->hasFixePrices();
+    }
+
     // Getters params: 
 
     public function getDolObjectUpdateParams()
@@ -896,24 +911,132 @@ class Bimp_Product extends BimpObject
         }
     }
 
+    // Gestion Prix d'achat courant: 
+
     public function getCurrentPaHt($id_fourn = null, $with_default = true)
     {
         $pa_ht = 0;
 
         if ($this->isLoaded()) {
-            if ((float) $this->getData('cur_pa_ht')) {
-                $pa_ht = (float) $this->getData('cur_pa_ht');
+            if ((int) BimpCore::getConf('use_new_cur_pa_method')) {
+                // Nouvelle méthode: 
+                self::loadClass('bimpcore', 'BimpProductCurPa');
+                $curPa = $this->getCurrentPaObject();
+                if (BimpObject::objectLoaded($curPa)) {
+                    $pa_ht = (float) $curPa->getData('amount');
+                }
             } else {
-                $pa_ht = (float) $this->getCurrentFournPriceAmount($id_fourn, $with_default);
+                // Ancienne méthode: 
+                if ((float) $this->getData('cur_pa_ht')) {
+                    $pa_ht = (float) $this->getData('cur_pa_ht');
+                } else {
+                    $pa_ht = (float) $this->getCurrentFournPriceAmount($id_fourn, $with_default);
 
-                if (!$pa_ht && (float) $this->getData('pmp')) {
-                    $pa_ht = (float) $this->getData('pmp');
+                    if (!$pa_ht && (float) $this->getData('pmp')) {
+                        $pa_ht = (float) $this->getData('pmp');
+                    }
                 }
             }
         }
 
         return $pa_ht;
     }
+
+    public function getCurrentPaObject($create_if_no_exists = true)
+    {
+        if (BimpCore::getConf('use_new_cur_pa_method')) {
+            self::loadClass('bimpcore', 'BimpProductCurPa');
+            $curPa = BimpProductCurPa::getProductCurPa($this->id);
+
+            if (BimpObject::objectLoaded($curPa)) {
+                return $curPa;
+            }
+
+            if ($create_if_no_exists) {
+                $pfp = $this->getLastFournPrice();
+                if (BimpObject::objectLoaded($pfp)) {
+                    $pa_ht = (float) $pfp->getData('price');
+                    if ($pa_ht) {
+                        $curPa = BimpObject::getInstance('bimpcore', 'BimpProductCurPa');
+                        $curPa->validateArray(array(
+                            'id_product'     => (int) $this->id,
+                            'date_from'      => $pfp->getData('datec'),
+                            'amount'         => $pa_ht,
+                            'origin'         => 'fourn_price',
+                            'id_origin'      => (int) $pfp->id,
+                            'id_fourn_price' => (int) $pfp->id
+                        ));
+                        $warnings = array();
+                        $errors = $curPa->create($warnings, true);
+
+                        if (!count($errors)) {
+                            return $curPa;
+                        }
+
+                        return null;
+                    }
+                }
+
+                $pa_ht = (float) $this->getData('pmp');
+                if ($pa_ht) {
+                    $curPa = BimpObject::getInstance('bimpcore', 'BimpProductCurPa');
+                    $curPa->validateArray(array(
+                        'id_product' => (int) $this->id,
+                        'amount'     => $pa_ht,
+                        'origin'     => 'pmp'
+                    ));
+                    $warnings = array();
+                    $errors = $curPa->create($warnings, true);
+
+                    if (!count($errors)) {
+                        return $curPa;
+                    }
+
+                    return null;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    //**** Nouvelles fonctions ****
+
+    public function getLastFournPriceId($id_fourn = null)
+    {
+        if ($this->isLoaded()) {
+            $where1 = 'fk_product = ' . (int) $this->id;
+
+            if (!is_null($id_fourn) && (int) $id_fourn) {
+                $where1 .= ' AND `fk_soc` = ' . (int) $id_fourn;
+            }
+
+            $where = $where1 . ' AND tms = (SELECT MAX(tms) FROM ' . MAIN_DB_PREFIX . 'product_fournisseur_price WHERE ' . $where1 . ')';
+
+            $sql = 'SELECT rowid as id, price FROM ' . MAIN_DB_PREFIX . 'product_fournisseur_price WHERE ' . $where;
+
+            $result = $this->db->executeS($sql);
+
+            if (isset($result[0]->id)) {
+                return (int) $result[0]->id;
+            }
+        }
+
+        return 0;
+    }
+
+    public function getLastFournPrice($id_fourn = null)
+    {
+        $id_pfp = (int) $this->getLastFournPriceId($id_fourn);
+
+        if ($id_pfp) {
+            return BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ProductFournisseurPrice', $id_pfp);
+        }
+
+        return null;
+    }
+
+    //****  Anciennes fonctions ****
 
     public function getCurrentFournPriceId($id_fourn = null, $with_default = false)
     {
@@ -978,6 +1101,8 @@ class Bimp_Product extends BimpObject
         return 0;
     }
 
+    //******************************
+
     public function findFournPriceIdForPaHt($pa_ht, $id_fourn = null)
     {
         if ($this->isLoaded()) {
@@ -997,14 +1122,40 @@ class Bimp_Product extends BimpObject
     public function setCurrentPaHt($pa_ht, $id_fourn_price = 0, $origin = '', $id_origin = 0)
     {
         $errors = array();
-
         if ($this->isLoaded($errors)) {
-            if ((float) $this->getData('cur_pa_ht') !== (float) $pa_ht) {
-                $this->set('cur_pa_ht', (float) $pa_ht);
-                $this->set('id_cur_fp', (int) $id_fourn_price);
-                $this->set('cur_pa_origin', $origin);
-                $this->set('cur_pa_id_origin', (int) $id_origin);
-                $errors = $this->update($w, true);
+            if (BimpCore::getConf('use_new_cur_pa_method')) {
+                $curPa = $this->getCurrentPaObject(false);
+                if (BimpObject::objectLoaded($curPa)) {
+                    if ((float) $curPa->getData('amount') === (float) $pa_ht &&
+                            (int) $curPa->getData('id_fourn_price') === (int) $id_fourn_price) {
+                        return array();
+                    }
+                }
+
+                $curPa = BimpObject::getInstance('bimpcore', 'BimpProductCurPa');
+                $pa_errors = $curPa->validateArray(array(
+                    'id_product'     => (int) $this->id,
+                    'amount'         => (float) $pa_ht,
+                    'origin'         => $origin,
+                    'id_origin'      => (int) $id_origin,
+                    'id_fourn_price' => (int) $id_fourn_price
+                ));
+
+                if (!count($pa_errors)) {
+                    $pa_errors = $curPa->create($w, true);
+                }
+
+                if (count($pa_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($pa_errors, 'Echec de la création du nouveau prix d\'achat courant');
+                }
+            } else {
+                if ((float) $this->getData('cur_pa_ht') !== (float) $pa_ht) {
+                    $this->set('cur_pa_ht', (float) $pa_ht);
+                    $this->set('id_cur_fp', (int) $id_fourn_price);
+                    $this->set('cur_pa_origin', $origin);
+                    $this->set('cur_pa_id_origin', (int) $id_origin);
+                    $errors = $this->update($w, true);
+                }
             }
         }
 
@@ -1091,12 +1242,36 @@ class Bimp_Product extends BimpObject
         $stock = $this->getStocksForEntrepot($inventory->getData('fk_warehouse'));
         return $stock['reel'];
     }
-    
+
     public function displayStockInventorySr()
     {
         $id_inventory = BimpTools::getValue('id');
         $inventory_sr = BimpCache::getBimpObjectInstance('bimplogistique', 'InventorySR', $id_inventory);
         return $inventory_sr->getStockProduct((int) $this->getData('id'));
+    }
+
+    public function displayCurrentPaHt()
+    {
+        $html = '';
+
+        if ($this->isLoaded()) {
+            if (BimpCore::getConf('use_new_cur_pa_method')) {
+                $curPa = $this->getCurrentPaObject();
+                if (BimpObject::objectLoaded($curPa)) {
+                    $html .= '<span style="font-size: 16px; font-style: bold">' . BimpTools::displayMoneyValue((float) $curPa->getData('amount')) . '</span><br/>';
+                    $html .= 'Appliqué depuis le ' . $curPa->displayData('date_from') . '<br/>';
+                    $html .= 'Origine: <strong>' . $curPa->displayOrigine() . '</strong>';
+                } else {
+                    $html .= '<span class="danger">Aucun</span>';
+                }
+            } else {
+                $html .= '<span style="font-size: 16px; font-style: bold">';
+                $html .= BimpTools::displayMoneyValue((float) $this->getData('cur_pa_ht'));
+                $html .= '</span><br/>';
+            }
+        }
+
+        return $html;
     }
 
     // Rendus HTML: 

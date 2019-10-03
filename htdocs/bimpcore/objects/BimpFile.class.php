@@ -504,7 +504,7 @@ class BimpFile extends BimpObject
                     if (!count($errors)) {
                         $errors = parent::create($warnings, $force_create);
                     }
-
+                    
                     if (count($errors) && !$this->dontRemove) {
                         $this->removeFile();
                     }
@@ -513,6 +513,17 @@ class BimpFile extends BimpObject
         }
 
         return $errors;
+    }
+    
+    public function getCreateJsCallback(){
+//        return '$("#openForm").trigger("click");';
+        
+        if(BimpTools::getValue('taskFact',0) == 1) {
+            $note = BimpObject::getInstance("bimpcore", "BimpNote");
+            $parent = $this->getParentInstance();
+            $onclick = $note->getJsActionOnclick('repondre', array('obj_type' => 'bimp_object', 'obj_module' => $parent->module, 'obj_name' => $parent->object_name, 'id_obj' => $parent->id, 'type_dest' => $note::BN_DEST_GROUP, 'fk_group_dest' => $note::BN_GROUPID_FACT, 'content' => 'Bonjour, vous trouverez pour ce/cette '.$parent->getLabel().' : '.$parent->getRef().' le document signée suivant : '.$this->getData('file_name').'.'.$this->getData('file_ext')), array('form_name' => 'rep', 'no_button' => 1));
+            return $onclick;//"<a onclick=\"".$onclick."\">Cliquer ici pour envopyé un mail au service facturation.</a>";
+        }
     }
 
     public function update(&$warnings = array(), $force_update = false)

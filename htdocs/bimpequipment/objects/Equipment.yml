@@ -618,17 +618,19 @@ lists:
             place2:
             place:
             prix_achat:
+                
     inventaire:
         extends: default
         delete_btn: 0
         add_btn: 0
         bulk_actions: unset
+        
     inventaireManquant:
         extends: inventaire
         cols:
             place: unset
             place2: unset
-        bulk_actions: 
+        bulk_actions:
             - label: Déplacer dans Vols
               icon: fas_trash-alt
               onclick: setSelectedObjectsAction($(this), 'list_id', 'moveToPlaceType', {'place_type':6}, '', 'Déplacer dans vol ?', true)
@@ -641,9 +643,7 @@ lists:
             - label: Retirer de l'inventaire
               icon: fas_trash-alt
               onclick: setSelectedObjectsAction($(this), 'list_id', 'removeInventaire', {}, '', 'Retirer de l\'inventaire ?', true)
-        
-            
-        
+              
 searches:
     default: 
         has_serial: 1

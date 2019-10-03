@@ -3,6 +3,10 @@ common_fields: 0
 
 primary: rowid
 
+parent_module: bimpcore
+parent_object: Bimp_Product
+parent_id_property: fk_product
+
 labels: 
     name: prix d'achat fournisseur
     name_plur: prix d'achat fournisseur
@@ -20,7 +24,8 @@ objects:
 fields: 
     fk_product: 
         label: Produit
-        type: id
+        type: id_parent
+        object: product
         input: 
             type: hidden
         required: 1
@@ -76,6 +81,10 @@ fields:
         default_value: 0
         input: 
             type: hidden
+            
+    datec: 
+        label: Créé le
+        type: detetime
     
 forms: 
     default: 
@@ -92,11 +101,31 @@ forms:
               input: 
                   type: toggle
               value: 0
+              
+fields_table: 
+    default: 
+        panel: 0
+        rows: 
+            - field: fk_product
+              display: nom_url
+            - field: ref_fourn
+            - field: fk_soc
+              display: nom_url
+            - field: price
+            - field: tva_tx
+            
+views: 
+    default: 
+        modal_format: small
+        rows: 
+            - cols: 
+                - type: fields_table
+                  fields_table: 
+                      name: default
         
 lists: 
     default: 
-        title: Liste des fournisseurs du produit
-        icon: fas_box
+        title: Liste des prix d'achat fournisseur
         sort_field: id
         sort_way: desc
         n: 50
@@ -113,7 +142,12 @@ lists:
             - field: price
             - field: remise_percent           
             
-fields_tables:
-    prices_buy:
-        title: Prix d'achat
-        rows:
+cards: 
+    default: 
+        fields: 
+            - field: fk_product
+              display: nom_url
+            - field: fk_soc
+              display: nom_url
+            - field: price
+            - field: tva_tx

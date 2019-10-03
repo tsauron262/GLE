@@ -59,7 +59,7 @@ sections:
                       panel: 1
                       object: equipment
         productentrepot: 
-            label: Stock par Entrepot
+            label: Stock / Entrepot
             sections: 
                 - type: list
                   list: 
@@ -67,7 +67,7 @@ sections:
                       object: productentrepot
                       name: default
         ventes: 
-              label: Liste des ventes de produits
+              label: Stats ventes
               sections: 
                   - type: list
                     list: 
@@ -80,7 +80,7 @@ sections:
                   list: 
                       object: package  
         immos: 
-            label: Totaux équipements
+            label: Equipements + Package
             sections: 
                 - type: list
                   list: 

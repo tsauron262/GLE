@@ -849,7 +849,13 @@ class Bimp_CommandeFourn extends BimpComm
 
         if ($this->isLoaded()) {
             $user = new User($this->db->db);
+            
 
+            $html .= '<div class="object_header_infos">';
+            $fourn = $this->getChildObject("fournisseur");
+            $html .= $fourn->getNomUrl();
+            $html .= '</div>';
+            
             $html .= '<div class="object_header_infos">';
             $html .= 'Créée le <strong>' . $this->displayData('date_creation', 'default', false, true) . '</strong>';
 

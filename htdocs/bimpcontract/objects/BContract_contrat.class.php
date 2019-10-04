@@ -746,18 +746,18 @@ class BContract_contrat extends BimpDolObject {
         }
         return $return; 
     }
-    
+
     public function reste_periode() {
         $instance = $this->getInstance('bimpcontract', 'BContract_echeancier');
         $instance->find(array('id_contrat' => $this->id));
         $date_1 = new DateTime($instance->getData('next_facture_date'));
         $date_2 = $this->getEndDate();
         if($date_1->format('Y-m-d') == $this->getData('date_start')) {
-            $return = 12 / $this->getData('periodicity');
+            $return = $this->getData('duree_mois') / $this->getData('periodicity');
         } else {
             $date_1->sub(new DateInterval('P1D'));
             $interval = $date_1->diff($date_2);
-            $return = $interval->m / $this->getData('periodicity');
+            $return = (($interval->m + $interval->y * 12) / $this->getData('periodicity'));
         }
         return $return;
     }

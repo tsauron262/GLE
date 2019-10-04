@@ -744,8 +744,12 @@ class Bimp_Product extends BimpObject
         return $stocks;
     }
 
-    public function getStockDate($date, $id_entrepot = null, $id_product = null)
+    public function getStockDate($date = null, $id_entrepot = null, $id_product = null)
     {
+        if(is_null($date))
+            return 'N/C';
+        
+        
         if (is_null($id_product) && $this->isLoaded()) {
             $id_product = $this->id;
         }

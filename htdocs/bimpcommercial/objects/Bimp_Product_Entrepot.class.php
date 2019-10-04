@@ -2,11 +2,14 @@
 
 class Bimp_Product_Entrepot extends BimpObject
 {
+    
+    public $dateBilan = null;
 
     public static $product_instance = null;
 
     public function __construct($module, $object_name)
     {
+        $this->dateBilan = date('2019-10-01 00:00:01');
         if (is_null(static::$product_instance)) {
             static::$product_instance = BimpObject::getInstance('bimpcore', 'Bimp_Product');
         }
@@ -102,12 +105,13 @@ class Bimp_Product_Entrepot extends BimpObject
     public function displayNbMonthVentes($nb_month, $data = 'total_ht')
     {
         if ($this->isLoaded() && (int) $nb_month) {
-            $dt = new DateTime();
+            $dt = $this->dateBilan;
             $dt->sub(new DateInterval('P' . $nb_month . 'M'));
             $dateMin = $dt->format('Y-m-d') . ' 00:00:00';
             $dateMax = date('Y-m-d') . ' 23:59:59';
             $id_product = (int) $this->getData('fk_product');
             $id_entrepot = ((int) $this->getData('fk_entrepot') ? (int) $this->getData('fk_entrepot') : null);
+            $id_entrepot = null;//avoir toute les ventes de tous les depot
 
             $ventes = static::$product_instance->getVentes($dateMin, $dateMax, $id_entrepot, $id_product);
             if (isset($ventes[$data])) {
@@ -252,10 +256,7 @@ class Bimp_Product_Entrepot extends BimpObject
             if ($stockShowRoom > 0)
                 $fields['stockShowRoom'] = $stockShowRoom;
             
-            $dateStock = null;
-            //$dateStock = date('Y-m-d H:i:s');
-            $dateStock = date('2019-10-01 00:00:01');
-            $stockDate = static::$product_instance->getStockDate($dateStock, (int) $this->getData('fk_entrepot'), (int) $this->getData('fk_product'));
+            $stockDate = static::$product_instance->getStockDate($this->dateBilan, (int) $this->getData('fk_entrepot'), (int) $this->getData('fk_product'));
             $fields['stockDate'] = $stockDate;
 
             $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $this->getData('fk_product'));

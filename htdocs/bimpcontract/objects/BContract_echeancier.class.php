@@ -58,7 +58,7 @@ class BContract_echeancier extends BimpObject {
             $this->actionCreateFacture($data = Array('date_start' => BimpTools::getValue('next_facture_date'), 'date_end' => BimpTools::getValue('fin_periode'), 'total_ht' => $montant));
             $new_next_date = new DateTime(BimpTools::getValue('fin_periode'));
             $new_next_date->add(new dateInterval('P1D'));
-            $this->updateField('next_facture_date', $new_next_date->format('Y-m-d H:i:s'));
+            $this->updateField('next_facture_date', $new_next_date->format('Y-m-d 00:00:00'));
             $parent->renderEcheancier();
             
         } else {
@@ -251,7 +251,7 @@ class BContract_echeancier extends BimpObject {
         $new_next_date->setTimestamp($dateDebutFacture);
 
         if($instance->dol_object->delete($user) > 0) {
-            $this->updateField('next_facture_date', $new_next_date->format('Y-m-d H:i:s'));
+            $this->updateField('next_facture_date', $new_next_date->format('Y-m-d 00:00:00'));
             $success = "Facture " . $instance->getData('facnumber') . ' supprimée avec succès';
         } else {
             $errors = "Facture " . $instance->getData('facnumber') . ' n\'à pas été supprimée'; ;

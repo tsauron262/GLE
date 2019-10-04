@@ -14,6 +14,8 @@ class Bimp_CommandeFourn extends BimpComm
     public $redirectMode = 4; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
     public static $dol_module = 'commande_fournisseur';
     public static $email_type = 'order_supplier_send';
+    public static $mail_event_code = 'AC_ORDER_SUPPLIER_SENTBYMAIL';
+    public static $element_name = 'order_supplier';
     public static $external_contact_type_required = false;
     public static $internal_contact_type_required = false;
     public static $discount_lines_allowed = false;
@@ -849,7 +851,13 @@ class Bimp_CommandeFourn extends BimpComm
 
         if ($this->isLoaded()) {
             $user = new User($this->db->db);
+            
 
+            $html .= '<div class="object_header_infos">';
+            $fourn = $this->getChildObject("fournisseur");
+            $html .= $fourn->getNomUrl();
+            $html .= '</div>';
+            
             $html .= '<div class="object_header_infos">';
             $html .= 'Créée le <strong>' . $this->displayData('date_creation', 'default', false, true) . '</strong>';
 
@@ -1147,7 +1155,6 @@ class Bimp_CommandeFourn extends BimpComm
                     $products[(int) $line->id_product] = (float) $line->pu_ht;
                 }
             }
-
             $fk_soc = (int) $this->getData('fk_soc');
 
             foreach ($products as $id_product => $pa_ht) {
@@ -1163,7 +1170,7 @@ class Bimp_CommandeFourn extends BimpComm
                     $id_fp = (int) $product->findFournPriceIdForPaHt($pa_ht, $fk_soc);
                 }
 
-                $errors = $product->setCurrentPaHt($pa_ht, $id_fp, 'commande_fourn', (int) $this->id);
+                $product->setCurrentPaHt($pa_ht, $id_fp, 'commande_fourn', (int) $this->id);
             }
         }
     }

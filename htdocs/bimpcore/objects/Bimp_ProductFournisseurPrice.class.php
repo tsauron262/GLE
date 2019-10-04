@@ -51,7 +51,7 @@ class Bimp_ProductFournisseurPrice extends BimpObject
         return $errors;
     }
 
-    public function createOrUpdate()
+    public function createOrUpdate(&$warnings = array())
     {
         $errors = $this->validate();
 
@@ -108,9 +108,12 @@ class Bimp_ProductFournisseurPrice extends BimpObject
                 }
                 $errors[] = $msg;
             } else {
-                $prod = $this->getChildObject('product');
-                if ($prod->getData('cur_pa_ht') == 0 || (int) BimpTools::getValue('is_cur_pa', 0)) {
-                    $prod->updateField('cur_pa_ht', $this->getData('price'));
+                if ((int) BimpTools::getValue('is_cur_pa', 0)) {
+                    $prod = $this->getChildObject('product');
+                    $curpa_errors = $prod->setCurrentPaHt($buyprice, (int) $this->id, 'fourn_price', (int) $this->id);
+                    if (count($curpa_errors)) {
+                        $warnings[] = BimpTools::getMsgFromArray($curpa_errors);
+                    }
                 }
 
                 if (!$this->isLoaded()) {
@@ -126,14 +129,15 @@ class Bimp_ProductFournisseurPrice extends BimpObject
         return $errors;
     }
 
-    public function create()
+    public function create(&$warnings = array(), $force_create = false)
     {
-        return $this->createOrUpdate();
+        $this->set('datec', date('Y-m-d H:i:s'));
+        return $this->createOrUpdate($warnings);
     }
 
-    public function update()
+    public function update(&$warnings = array(), $force_update = false)
     {
-        return $this->createOrUpdate();
+        return $this->createOrUpdate($warnings);
     }
 
     protected function deleteProcess()

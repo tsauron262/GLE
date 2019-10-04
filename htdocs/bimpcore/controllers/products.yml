@@ -23,6 +23,22 @@ objects:
             bimp_object: 
                 module: bimpcommercial
                 name: Bimp_Vente
+    package: 
+        instance: 
+            bimp_object: 
+                module: bimpequipment
+                name: BE_Package
+            
+    immos: 
+        instance: 
+            bimp_object: 
+                module: bimpequipment
+                name: BE_ProductImmos
+    inventory:
+        instance: 
+            bimp_object:
+                module: bimplogistique
+                name: Inventory
             
 sections:
     - type: tabs
@@ -43,7 +59,7 @@ sections:
                       panel: 1
                       object: equipment
         productentrepot: 
-            label: Stock par Entrepot
+            label: Stock / Entrepot
             sections: 
                 - type: list
                   list: 
@@ -51,9 +67,29 @@ sections:
                       object: productentrepot
                       name: default
         ventes: 
-              label: Liste des ventes de produits
+              label: Stats ventes
               sections: 
                   - type: list
                     list: 
-                        name: default
+                        panel: 1
                         object: vente
+        packages: 
+            label: Packages
+            sections: 
+                - type: list
+                  list: 
+                      object: package  
+        immos: 
+            label: Equipements + Package
+            sections: 
+                - type: list
+                  list: 
+                      object: immos
+                      name: immos
+        inventory:
+            label: Inventaires
+            sections:
+                - type: list
+                  list: 
+                      panel: 1
+                      object: inventory

@@ -93,7 +93,7 @@ class ObjectLine extends BimpObject
         }
         $product = $this->getProduct();
         if (BimpObject::objectLoaded($product)) {
-            if ($product->getData("price") == 1 || $product->getData("price") == 0)
+            if ($product->getData("price") == 1 || $product->getData("price") == 0 || !$product->hasFixePa())
                 return 1;
         }
         return 0;
@@ -114,7 +114,7 @@ class ObjectLine extends BimpObject
         $product = $this->getProduct();
 
         if (BimpObject::objectLoaded($product)) {
-            if ($product->getData("price") == 1 || $product->getData("price") == 0)
+            if ($product->getData("price") == 1 || $product->getData("price") == 0 || !$product->hasFixePu())
                 return 1;
         }
 
@@ -473,7 +473,7 @@ class ObjectLine extends BimpObject
 
         $product = $this->getProduct();
 
-        if (!BimpObject::objectLoaded($product)) {
+        if (!BimpObject::objectLoaded($product) || !$product->hasFixePu()) {
             return array();
         }
 
@@ -890,10 +890,10 @@ class ObjectLine extends BimpObject
 //                    if ($this->isLoaded() && $this->field_exists('def_pu_ht')) {
 //                        $pu_ht = $this->getData('def_pu_ht');
 //                    }
-                    if ($id_product && (is_null($pu_ht) || (int) $this->id_product !== $id_product)) {
+                    if ($id_product && (is_null($pu_ht) || (int) $this->id_product !== $id_product) && $product->hasFixePu()) {
                         return $product->getData('price');
                     }
-                    return $pu_ht;
+                    return (float) $pu_ht;
 
                 case 'tva_tx':
                     $tva_tx = $this->tva_tx;
@@ -914,7 +914,11 @@ class ObjectLine extends BimpObject
 //                        $id_fourn_price = $this->getData('def_id_fourn_price');
 //                    }
                     if ($id_product && (is_null($id_fourn_price) || (int) $this->id_product !== $id_product)) {
-                        $id_fourn_price = (int) $product->getCurrentFournPriceId();
+                        if (!$product->hasFixePa()) {
+                            $id_fourn_price = 0;
+                        } else {
+                            $id_fourn_price = (int) $product->getCurrentFournPriceId();
+                        }
                     }
 
                     return (int) $id_fourn_price;
@@ -922,7 +926,7 @@ class ObjectLine extends BimpObject
                 case 'pa_ht':
                     $pa_ht = $this->pa_ht;
 
-                    if ($id_product && (is_null($pa_ht) || (int) $this->id_product !== $id_product)) {
+                    if ($id_product && (is_null($pa_ht) || (int) $this->id_product !== $id_product) && $product->hasFixePa()) {
                         $pa_ht = (float) $product->getCurrentPaHt();
                     }
 
@@ -2191,7 +2195,7 @@ class ObjectLine extends BimpObject
                             if ($recal_line_pa) {
                                 $this->calcPaByEquipments();
                             }
-                            
+
                             if (method_exists($this, 'onEquipmentAttributed')) {
                                 $this->onEquipmentAttributed((int) $id_equipment);
                             }
@@ -2207,7 +2211,7 @@ class ObjectLine extends BimpObject
     public function calcPaByEquipments()
     {
         $errors = array();
-        
+
         if ($this->isLoaded()) {
             $qty = $this->getFullQty();
 
@@ -2250,7 +2254,7 @@ class ObjectLine extends BimpObject
                 }
             }
         }
-        
+
         return $errors;
     }
 

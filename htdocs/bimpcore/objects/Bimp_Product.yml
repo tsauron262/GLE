@@ -30,6 +30,14 @@ objects:
             id_object: 
                 field_value: id_cur_fp
 
+    fourn_prices: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_ProductFournisseurPrice
+        
     files:
         relation: hasMany
         delete: 1
@@ -57,6 +65,17 @@ objects:
                 
     default_entrepot:
         extends: entrepot
+        instance:
+            id_object: 
+                field_value: fk_default_warehouse
+        
+    cur_prix_achats: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: BimpProductCurPa
         
 fields: 
     fk_user_modif:
@@ -106,29 +125,19 @@ fields:
         type: int
         
     price: 
-        label: Prix
+        label: Prix HT
         type: money
+        default_value: 0
+        display_if: 
+            field_name: no_fixe_prices
+            show_values: 0
         
     price_ttc: 
         label: Prix TTC
         type: money
-        
-    price_min: 
-        label: Prix minimum
-        type: money
-        
-    price_min_ttc: 
-        label: Prix minimum TTC
-        type: money
-        
-    price_base_type: 
-        label: Base du prix
-        values: 
-            array: price_base_types
-        
-#    cost_price: 
-#        label: Prix de revient
-#        type: money
+        display_if: 
+            field_name: no_fixe_prices
+            show_values: 0
         
     pmp: 
         label: Prix d'achat moyen pondéré
@@ -158,11 +167,17 @@ fields:
         dol_extra_field: 1
         type: money
         default_value: 0
+        display_if: 
+            field_name: no_fixe_prices
+            show_values: 0
         
     infos_pa: 
         label: Informations prix d'achat
         dol_extra_field: 1
         type: text
+        display_if: 
+            field_name: no_fixe_prices
+            show_values: 0
         
     default_vat_code: 
         label: Code TVA par défaut
@@ -379,13 +394,6 @@ fields:
         type: int
         dol_extra_field: 1
 
-
-#    ref_constructeur:
-#        label: Réf. constructeur
-#        type: string
-#        dol_extra_field: 1
-
-        
     fk_default_warehouse:
         label: Entrepôt par défaut
         type: id_object
@@ -414,6 +422,11 @@ fields:
         type: datetime
         label: Date demande validation
         dol_extra_field: 1
+        
+    no_fixe_prices: 
+        label: Pas de prix fixes
+        type: bool 
+        default_value: 0
 
 forms: 
     light: 
@@ -440,7 +453,8 @@ forms:
             - field: description  
             - field: fk_product_type
             - field: type2
-            - field: price
+            - field: no_fixe_prices
+            - field: price                  
             - field: tva_tx
             - field: pa_prevu
             - field: infos_pa
@@ -544,73 +558,37 @@ fields_tables:
         rows:  
             - field: ref
             - field: label
-            - field: description
             - field: fk_product_type
             - field: type2
+              edit: 1
             - field: barcode
             - field: customcode
             - field: accountancy_code_buy
             - field: accountancy_code_sell
+            - field: description
             - field: note
-            - field: fk_default_warehouse
-              display: nom_url
             
-    prices: 
-        title: Prix de vente
-        icon: fas_euro-sign
-        rows:  
-            - field: price
-              label: Prix HT
-            - field: tva_tx
-            - field: deee
-            - field: rpcp
-            - field: price_ttc
-            - field: price_min_ttc
-    
-    prices_buy: 
-        title: Prix d'achat
-        icon: fas_euro-sign
-        rows:  
-#            - field: price
-#              label: Prix HT
-#            - field: tva_tx
-#            - field: price_ttc
-#            - field: price_min_ttc
-#            - field: cost_price
-            - field: cur_pa_ht
-              edit: 1
-            - field: pmp
-            - custom: 1
-              label: Meilleur prix d'achat
-              value:
-                  callback: renderBestBuyPrice
-                
-    status: 
-        title: Statuts
+    options: 
+        title: Options
         icon: fas_check-square
         rows: 
             - field: validate
               edit: 0
             - field: serialisable
               edit: 1
-            - field: type2
-              edit: 1
             - field: tosell
               edit: 1
             - field: tobuy
               edit: 1
-            - custom: 1
-              label: Refusé
-              value:
-                callback: renderStatusRefuse
+            - field: no_fixe_prices
+              edit: 1
             - custom: 1
               label: Durée validation
               value:
                 callback: renderValidationDuration
-            - field: stock
             - field: zone_pr
               edit: 1
-    
+            
     infos_complementaires:
         title: Informations complémentaires
         icon: plus
@@ -645,23 +623,34 @@ fields_tables:
             - field: surface_units
             - field: volume
             - field: volume_units
+            
+    prices: 
+        title: Prix de vente
+        icon: fas_euro-sign
+        rows:  
+            - field: no_fixe_prices
+              edit: 1
+            - field: price
+            - field: price_ttc
+            - field: tva_tx
+            - field: deee
+            - field: rpcp
+            
+    prices_buy: 
+        title: Prix d'achat
+        icon: fas_euro-sign
+        rows:  
+            - label: Prix d'achat actuel
+              show: 
+                  callback: hasFixePa
+              value: 
+                  callback: displayCurrentPaHt
+            - field: pmp
         
     stock:
         title: Vue globale
-        icon: fas_check-square
+        icon: fas_box-open
         rows:
-            - custom: 1
-              label: Prix d'achat moyen pondéré
-              type: money
-              value:
-                 callback: renderBestBuyPrice
-            - custom: 1
-              label: Meilleur prix d'achat
-              type: money
-              value:
-                 callback: renderBestBuyPrice
-            - field: price
-            - field: price_min
             - field: seuil_stock_alerte
             - field: desiredstock
             - field: stock
@@ -699,7 +688,7 @@ views:
                   col_md: 6
                   col_sm: 12
                   fields_table: 
-                      name: status
+                      name: options
     
     fiche:
         edit_btn: 1
@@ -716,7 +705,7 @@ views:
                   col_lg: 5
                   col_md: 5
                   fields_table: 
-                      name: status
+                      name: options
                 - type: fields_table
                   col_lg: 7
                   col_md: 7
@@ -746,16 +735,24 @@ views:
                   col_sm: 12
                   fields_table: 
                       name: prices_buy
-                - type: custom
-                  col_lg: 12
-                  col_md: 12
-                  custom:
-                      callback: renderListeFournisseur
-                - type: custom
-                  col_lg: 12
-                  col_md: 12
-                  custom:
-                      callback: renderListeVente
+                     
+            - cols: 
+                - type: list
+                  show: 
+                      callback: hasFixePa
+                  list: 
+                      children: cur_prix_achats
+                      name: product
+            - cols: 
+                - type: list
+                  list: 
+                      children: fourn_prices
+                      name: default
+#                - type: custom
+#                  col_lg: 12
+#                  col_md: 12
+#                  custom:
+#                      callback: renderListeVente
                       
     product_note:
         rows:
@@ -802,13 +799,7 @@ filters_panels:
             - field: remisable
             - field: tosell
             - field: tobuy
-#            - custom: 1
-#              field: fk_user_modif
-#              label: User modif
-#              data_type: id_object
-#              type: value
-#              input: 
-#                    type: search_user
+            - field: no_fixe_prices
             - field: datec
             - custom: 1
               label: Catégorie (1)

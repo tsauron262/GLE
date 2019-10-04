@@ -655,8 +655,11 @@ class BimpRender
             }
         }
         if ($modal_view && is_a($object, 'BimpObject')) {
-            $title = str_replace('"', '\\\'\\\'', ($object->getInstanceName()));
-            $onclick = 'loadModalView(\'' . $object->module . '\', \'' . $object->object_name . '\', ' . $object->id . ', \'' . $modal_view . '\', $(this), \'' . $title . '\')';
+
+            $title = $object->getInstanceName();
+            $title = str_replace('\'', '\\\'', $title);
+            $title = str_replace('"', '\\\'\\\'', $title);
+            $onclick = 'loadModalView(\'' . $object->module . '\', \'' . $object->object_name . '\', ' . $object->id . ', \'' . $modal_view . '\', $(this), \'' . htmlentities($title) . '\')';
             $html .= '<span class="objectIcon" onclick="' . $onclick . '">';
             $html .= '<i class="far fa5-eye"></i>';
             $html .= '</span>';

@@ -103,6 +103,12 @@ forms:
             - field: visibility
               edit:
                   callback: currentContext
+            - label: Notifier le service facturation ?   
+              custom: 1
+              input_name: taskFact
+              data_type: bool
+              input: 
+                  type: toggle
                   
                           
     edit:

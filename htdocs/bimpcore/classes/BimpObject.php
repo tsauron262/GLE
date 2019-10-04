@@ -5508,7 +5508,12 @@ class BimpObject extends BimpCache
     public function getJsActionOnclick($action, $data = array(), $params = array())
     {
         $js = 'setObjectAction(';
-        $js .= '$(this), ' . $this->getJsObjectData();
+        if (!isset($params['no_button']) || !$params['no_button']) {
+            $js .= '$(this), ';
+        } else {
+            $js .= 'null, ';
+        }
+        $js .= $this->getJsObjectData();
         $js .= ', \'' . $action . '\', {';
         $fl = true;
         foreach ($data as $key => $value) {

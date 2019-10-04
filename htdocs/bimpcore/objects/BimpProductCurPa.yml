@@ -1,0 +1,86 @@
+table: bimp_product_cur_pa
+common_fields: 0
+
+labels: 
+    name: Prix d'achat courant
+    name_plur: Prix d'achat courants
+
+parent_module: bimpcore
+parent_object: Bimp_Product
+parent_id_property: id_product
+
+fields: 
+    id_product: 
+        label: Produit
+        type: id_parent
+        object: product
+
+    amount: 
+        label: Montant
+        type: money
+
+    date_from: 
+        label: Du
+        type: datetime
+
+    date_to: 
+        label: Au
+        type: datetime
+
+    origin: 
+        label: Origine
+        values: 
+            array: origin_types
+
+    id_origin: 
+        label: ID Origine
+        type: id
+
+    id_fourn_price: 
+        label: PA Fournisseur
+        type: id_object
+        object: fourn_price
+        
+fields_tables: 
+    default: 
+        panel: 0
+        rows: 
+            - field: id_product
+              display: nom_url
+            - field: amount
+            - field: date_from
+            - field: date_to
+            - label: Origine
+              value: 
+                  callback: displayOrigine
+            - field: id_fourn_price
+              display: card
+              
+views: 
+    default: 
+        modal_format: medium
+        rows: 
+            - cols: 
+                - type: fields_table
+                  fields_table: 
+                      name: default
+                      
+lists: 
+    product: 
+        enable_sort: 0
+        enable_search: 0
+        checkboxes: 0
+        n: 10
+        modal_view: default
+        sort_field: date_from
+        sort_way: desc
+        cols: 
+            - field: date_from
+            - field: date_to
+            - field: amount
+            - label: Origine
+              value: 
+                  callback: displayOrigine
+            
+        
+            

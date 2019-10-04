@@ -1258,7 +1258,7 @@ function dol_get_fiche_head($links=array(), $active='', $title='', $notab=0, $pi
 	}
 	if ($popuptab) $outmore.='</div>';
 
-	if ($displaytab > $limittoshow)
+	if ($displaytab > $limittoshow-1)
 	{
 		$left=($langs->trans("DIRECTION") == 'rtl'?'right':'left');
 		$right=($langs->trans("DIRECTION") == 'rtl'?'left':'right');

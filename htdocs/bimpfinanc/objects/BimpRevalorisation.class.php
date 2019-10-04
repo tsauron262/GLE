@@ -2,6 +2,10 @@
 
 class BimpRevalorisation extends BimpObject
 {
+    public function canView() {
+        global $user;
+        return $user->rights->bimpequipment->inventory->close;
+    }
 
     public static $status_list = array(
         0 => array('label' => 'En Attente', 'icon' => 'fas_hourglass-start', 'classes' => array('warning')),

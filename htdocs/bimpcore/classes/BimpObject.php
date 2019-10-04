@@ -5509,9 +5509,9 @@ class BimpObject extends BimpCache
     {
         $js = 'setObjectAction(';
         if (!isset($params['no_button']) || !$params['no_button']) {
-            $js .= 'null, ';
-        } else {
             $js .= '$(this), ';
+        } else {
+            $js .= 'null, ';
         }
         $js .= $this->getJsObjectData();
         $js .= ', \'' . $action . '\', {';

@@ -53,7 +53,7 @@ class Bimp_Product_Entrepot extends BimpObject
             case 'stockDateDifZero':
                 if(count($this->exludeIdDifZero))
                 $filters['a.rowid'] = array(
-                    'notin' => implode(",",$this->exludeIdDifZero)
+                    'not_in' => implode(",",$this->exludeIdDifZero)
                 );
                 return;
         }

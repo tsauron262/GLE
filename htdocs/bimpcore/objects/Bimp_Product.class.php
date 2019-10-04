@@ -2616,7 +2616,7 @@ class Bimp_Product extends BimpObject
         }
 
 //        $sql = $db->query("SELECT `fk_product`, `fk_entrepot`, SUM(`value`) as nb FROM `llx_stock_mouvement` WHERE `tms` > STR_TO_DATE('" . $date . "', '%Y-%m-%d') GROUP BY `fk_product`, `fk_entrepot`");
-        die("SELECT `fk_product`, `fk_entrepot`, SUM(`value`) as nb FROM `llx_stock_mouvement` WHERE `datem` > '" . $date . "' GROUP BY `fk_product`, `fk_entrepot`");
+        $sql = $db->query("SELECT `fk_product`, `fk_entrepot`, SUM(`value`) as nb FROM `llx_stock_mouvement` WHERE `datem` > '" . $date . "' GROUP BY `fk_product`, `fk_entrepot`");
         while ($ln = $db->fetch_object($sql)) {
             if (!isset(self::$stockDate[$date][$ln->fk_product][$ln->fk_entrepot]['stock']))
                 self::$stockDate[$date][$ln->fk_product][$ln->fk_entrepot]['stock'] = 0;

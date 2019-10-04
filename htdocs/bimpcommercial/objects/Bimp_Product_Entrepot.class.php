@@ -251,6 +251,12 @@ class Bimp_Product_Entrepot extends BimpObject
 
             if ($stockShowRoom > 0)
                 $fields['stockShowRoom'] = $stockShowRoom;
+            
+            $dateStock = null;
+            //$dateStock = date('Y-m-d H:i:s');
+            $dateStock = date('2019-10-01 00:00:01');
+            $stockDate = static::$product_instance->getStockDate($dateStock, (int) $this->getData('fk_entrepot'), (int) $this->getData('fk_product'));
+            $fields['stockDate'] = $stockDate;
 
             $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $this->getData('fk_product'));
             if (BimpObject::objectLoaded($prod)) {

@@ -101,6 +101,16 @@ class Bimp_Product_Entrepot extends BimpObject
 
         return '';
     }
+    
+    
+    public function displayTitre()
+    {
+        $html = '';
+        $html .= 'Produits/Entrepot';
+        if($this->dateBilan)
+            $html .= ' date de valeur  < '.dol_print_date ($this->dateBilan). ' (Stock Date, Stock show room, Nb Ventes, Ventes a NB mois)';
+        return $html;
+    }
 
     public function displayNbMonthVentes($nb_month, $data = 'total_ht')
     {
@@ -108,12 +118,11 @@ class Bimp_Product_Entrepot extends BimpObject
             $dt = new DateTime($this->dateBilan);
             $dt->sub(new DateInterval('P' . $nb_month . 'M'));
             $dateMin = $dt->format('Y-m-d') . ' 00:00:00';
-            $dateMax = date('Y-m-d') . ' 23:59:59';
             $id_product = (int) $this->getData('fk_product');
             $id_entrepot = ((int) $this->getData('fk_entrepot') ? (int) $this->getData('fk_entrepot') : null);
             $id_entrepot = null;//avoir toute les ventes de tous les depot
 
-            $ventes = static::$product_instance->getVentes($dateMin, $dateMax, $id_entrepot, $id_product);
+            $ventes = static::$product_instance->getVentes($dateMin, $this->dateBilan, $id_entrepot, $id_product);
             if (isset($ventes[$data])) {
                 if (in_array($data, array('total_ht', 'total_ttc'))) {
                     return BimpTools::displayMoneyValue($ventes[$data]);
@@ -243,7 +252,7 @@ class Bimp_Product_Entrepot extends BimpObject
         );
 
         if ((int) $this->getData('fk_product')) {
-            $tabVentes = static::$product_instance->getVentes(null, date('Y-m-d') . ' 23:59:59', (int) $this->getData('fk_entrepot'), (int) $this->getData('fk_product'));
+            $tabVentes = static::$product_instance->getVentes(null, $this->dateBilan, (int) $this->getData('fk_entrepot'), (int) $this->getData('fk_product'));
 
             if ($tabVentes['qty'] > 0)
                 $fields['ventes_qty'] = $tabVentes['qty'];
@@ -251,7 +260,7 @@ class Bimp_Product_Entrepot extends BimpObject
             if ($tabVentes['total_ht'] > 0)
                 $fields['ventes_ht'] = $tabVentes['total_ht'];
 
-            $stockShowRoom = static::$product_instance->getStockShoowRoom(date('Y-m-d H:i:s'), (int) $this->getData('fk_entrepot'), (int) $this->getData('fk_product'));
+            $stockShowRoom = static::$product_instance->getStockShoowRoom($this->dateBilan, (int) $this->getData('fk_entrepot'), (int) $this->getData('fk_product'));
 
             if ($stockShowRoom > 0)
                 $fields['stockShowRoom'] = $stockShowRoom;

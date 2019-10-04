@@ -1155,7 +1155,6 @@ class Bimp_CommandeFourn extends BimpComm
                     $products[(int) $line->id_product] = (float) $line->pu_ht;
                 }
             }
-
             $fk_soc = (int) $this->getData('fk_soc');
 
             foreach ($products as $id_product => $pa_ht) {

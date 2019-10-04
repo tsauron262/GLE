@@ -105,7 +105,7 @@ class Bimp_Product_Entrepot extends BimpObject
     public function displayNbMonthVentes($nb_month, $data = 'total_ht')
     {
         if ($this->isLoaded() && (int) $nb_month) {
-            $dt = $this->dateBilan;
+            $dt = new DateTime($this->dateBilan);
             $dt->sub(new DateInterval('P' . $nb_month . 'M'));
             $dateMin = $dt->format('Y-m-d') . ' 00:00:00';
             $dateMax = date('Y-m-d') . ' 23:59:59';

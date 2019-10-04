@@ -184,7 +184,7 @@ lists:
               icon: fas_trash-alt
               onclick: setSelectedObjectsAction($(this), 'list_id', 'printEtiquettes', {'type':'magasin'}, '', 'Générer les étiquettes ?', true)
         filters_panel: default
-        sort_field: id
+        sort_field: fk_entrepot
         sort_way: desc
         n: 50
         cols: 
@@ -237,3 +237,10 @@ filters_panels:
                     type: select
                     options: 
                         callback: getCategoriesArray
+            stockDateDifZero:
+                custom: 1
+                label: Stock a date <> 0
+                field: stockDateDifZero
+                type: check_list
+                items: 
+                  1: OUI

@@ -4,6 +4,7 @@ class Bimp_Product_Entrepot extends BimpObject
 {
     
     public $dateBilan = null;
+    public $stockDateDifZero = false;
 
     public static $product_instance = null;
 
@@ -15,6 +16,29 @@ class Bimp_Product_Entrepot extends BimpObject
         }
 
         parent::__construct($module, $object_name);
+    }
+    
+   
+    
+    
+    public function getList($filters = array(), $n = null, $p = null, $order_by = 'id', $order_way = 'DESC', $return = 'array', $return_fields = null, $joins = array(), $extra_order_by = null, $extra_order_way = 'ASC') {
+        $prod = BimpObject::getInstance("bimpcore", "Bimp_Product");
+        $prod::initStockDate($this->dateBilan);
+        $data = $prod::insertStockDateNotZeroProductStock($this->dateBilan);
+        $rows = parent::getList($filters, $n, $p, $order_by, $order_way, $return, $return_fields, $joins, $extra_order_by, $extra_order_way);
+         
+        //print_r($filters);die;
+        
+        if($this->stockDateDifZero){
+            $rowsT = $rows;
+            $rows = array();
+            foreach ($rowsT as $idT => $ln){
+            if(!in_array($ln['rowid'], $data['stockDateZero']))
+                        $rows[] = $ln;
+            }
+        }
+        
+        return $rows;
     }
 
     // Getters: 
@@ -40,6 +64,8 @@ class Bimp_Product_Entrepot extends BimpObject
                     'in' => $values
                 );
                 return;
+            case 'stockDateDifZero':
+                $this->stockDateDifZero = true;
         }
 
         parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors);

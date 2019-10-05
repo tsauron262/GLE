@@ -7,7 +7,7 @@ class Bimp_Propal extends BimpComm
 
     public static $dol_module = 'propal';
     public static $email_type = 'propal_send';
-    public static $mail_event_code = 'AC_PROPAL_SENTBYMAIL';
+    public static $mail_event_code = 'PROPAL_SENTBYMAIL';
     public static $element_name = 'propal';
     public $id_sav = null;
     public $sav = null;

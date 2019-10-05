@@ -12084,8 +12084,11 @@ button.list-group-item-danger {
   border-radius: 0;
   -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
   box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05); }
+  /* line 14, ../scss/bootstrap/_panels.scss */
+  .panel.no-borders {
+    border: none; }
 
-/* line 16, ../scss/bootstrap/_panels.scss */
+/* line 20, ../scss/bootstrap/_panels.scss */
 .panel-body {
   padding: 8px; }
   /* line 14, ../scss/bootstrap/mixins/_clearfix.scss */
@@ -12096,31 +12099,31 @@ button.list-group-item-danger {
   .panel-body:after {
     clear: both; }
 
-/* line 22, ../scss/bootstrap/_panels.scss */
+/* line 26, ../scss/bootstrap/_panels.scss */
 .panel-heading {
   padding: 10px 15px;
   border-bottom: 1px solid transparent;
   border-top-right-radius: -1;
   border-top-left-radius: -1; }
-  /* line 27, ../scss/bootstrap/_panels.scss */
+  /* line 31, ../scss/bootstrap/_panels.scss */
   .panel-heading > .dropdown .dropdown-toggle {
     color: inherit; }
-  /* line 31, ../scss/bootstrap/_panels.scss */
+  /* line 35, ../scss/bootstrap/_panels.scss */
   .panel-heading .header_buttons {
     float: right;
     margin-top: -7px; }
 
-/* line 38, ../scss/bootstrap/_panels.scss */
+/* line 42, ../scss/bootstrap/_panels.scss */
 .panel-title {
   display: inline-block;
   margin-top: 0;
   margin-bottom: 0;
   font-size: 15px;
   color: inherit; }
-  /* line 45, ../scss/bootstrap/_panels.scss */
+  /* line 49, ../scss/bootstrap/_panels.scss */
   .panel-title i {
     margin-right: 12px; }
-  /* line 49, ../scss/bootstrap/_panels.scss */
+  /* line 53, ../scss/bootstrap/_panels.scss */
   .panel-title > a,
   .panel-title > small,
   .panel-title > .small,
@@ -12128,7 +12131,7 @@ button.list-group-item-danger {
   .panel-title > .small > a {
     color: inherit; }
 
-/* line 59, ../scss/bootstrap/_panels.scss */
+/* line 63, ../scss/bootstrap/_panels.scss */
 .panel-footer {
   padding: 10px 15px;
   background-color: #f5f5f5;
@@ -12136,64 +12139,64 @@ button.list-group-item-danger {
   border-bottom-right-radius: -1;
   border-bottom-left-radius: -1; }
 
-/* line 73, ../scss/bootstrap/_panels.scss */
+/* line 77, ../scss/bootstrap/_panels.scss */
 .panel > .list-group,
 .panel > .panel-collapse > .list-group {
   margin-bottom: 0; }
-  /* line 77, ../scss/bootstrap/_panels.scss */
+  /* line 81, ../scss/bootstrap/_panels.scss */
   .panel > .list-group .list-group-item,
   .panel > .panel-collapse > .list-group .list-group-item {
     border-width: 1px 0;
     border-radius: 0; }
-  /* line 84, ../scss/bootstrap/_panels.scss */
+  /* line 88, ../scss/bootstrap/_panels.scss */
   .panel > .list-group:first-child .list-group-item:first-child,
   .panel > .panel-collapse > .list-group:first-child .list-group-item:first-child {
     border-top: 0;
     border-top-right-radius: -1;
     border-top-left-radius: -1; }
-  /* line 92, ../scss/bootstrap/_panels.scss */
+  /* line 96, ../scss/bootstrap/_panels.scss */
   .panel > .list-group:last-child .list-group-item:last-child,
   .panel > .panel-collapse > .list-group:last-child .list-group-item:last-child {
     border-bottom: 0;
     border-bottom-right-radius: -1;
     border-bottom-left-radius: -1; }
-/* line 99, ../scss/bootstrap/_panels.scss */
+/* line 103, ../scss/bootstrap/_panels.scss */
 .panel > .panel-heading + .panel-collapse > .list-group .list-group-item:first-child {
   border-top-right-radius: 0;
   border-top-left-radius: 0; }
 
-/* line 106, ../scss/bootstrap/_panels.scss */
+/* line 110, ../scss/bootstrap/_panels.scss */
 .panel-heading + .list-group .list-group-item:first-child {
   border-top-width: 0; }
 
-/* line 110, ../scss/bootstrap/_panels.scss */
+/* line 114, ../scss/bootstrap/_panels.scss */
 .list-group + .panel-footer {
   border-top-width: 0; }
 
-/* line 120, ../scss/bootstrap/_panels.scss */
+/* line 124, ../scss/bootstrap/_panels.scss */
 .panel > .table,
 .panel > .table-responsive > .table,
 .panel > .panel-collapse > .table {
   margin-bottom: 0; }
-  /* line 125, ../scss/bootstrap/_panels.scss */
+  /* line 129, ../scss/bootstrap/_panels.scss */
   .panel > .table caption,
   .panel > .table-responsive > .table caption,
   .panel > .panel-collapse > .table caption {
     padding-left: 8px;
     padding-right: 8px; }
-/* line 131, ../scss/bootstrap/_panels.scss */
+/* line 135, ../scss/bootstrap/_panels.scss */
 .panel > .table:first-child,
 .panel > .table-responsive:first-child > .table:first-child {
   border-top-right-radius: -1;
   border-top-left-radius: -1; }
-  /* line 137, ../scss/bootstrap/_panels.scss */
+  /* line 141, ../scss/bootstrap/_panels.scss */
   .panel > .table:first-child > thead:first-child > tr:first-child,
   .panel > .table:first-child > tbody:first-child > tr:first-child,
   .panel > .table-responsive:first-child > .table:first-child > thead:first-child > tr:first-child,
   .panel > .table-responsive:first-child > .table:first-child > tbody:first-child > tr:first-child {
     border-top-left-radius: -1;
     border-top-right-radius: -1; }
-    /* line 141, ../scss/bootstrap/_panels.scss */
+    /* line 145, ../scss/bootstrap/_panels.scss */
     .panel > .table:first-child > thead:first-child > tr:first-child td:first-child,
     .panel > .table:first-child > thead:first-child > tr:first-child th:first-child,
     .panel > .table:first-child > tbody:first-child > tr:first-child td:first-child,
@@ -12203,7 +12206,7 @@ button.list-group-item-danger {
     .panel > .table-responsive:first-child > .table:first-child > tbody:first-child > tr:first-child td:first-child,
     .panel > .table-responsive:first-child > .table:first-child > tbody:first-child > tr:first-child th:first-child {
       border-top-left-radius: -1; }
-    /* line 145, ../scss/bootstrap/_panels.scss */
+    /* line 149, ../scss/bootstrap/_panels.scss */
     .panel > .table:first-child > thead:first-child > tr:first-child td:last-child,
     .panel > .table:first-child > thead:first-child > tr:first-child th:last-child,
     .panel > .table:first-child > tbody:first-child > tr:first-child td:last-child,
@@ -12213,19 +12216,19 @@ button.list-group-item-danger {
     .panel > .table-responsive:first-child > .table:first-child > tbody:first-child > tr:first-child td:last-child,
     .panel > .table-responsive:first-child > .table:first-child > tbody:first-child > tr:first-child th:last-child {
       border-top-right-radius: -1; }
-/* line 153, ../scss/bootstrap/_panels.scss */
+/* line 157, ../scss/bootstrap/_panels.scss */
 .panel > .table:last-child,
 .panel > .table-responsive:last-child > .table:last-child {
   border-bottom-right-radius: -1;
   border-bottom-left-radius: -1; }
-  /* line 159, ../scss/bootstrap/_panels.scss */
+  /* line 163, ../scss/bootstrap/_panels.scss */
   .panel > .table:last-child > tbody:last-child > tr:last-child,
   .panel > .table:last-child > tfoot:last-child > tr:last-child,
   .panel > .table-responsive:last-child > .table:last-child > tbody:last-child > tr:last-child,
   .panel > .table-responsive:last-child > .table:last-child > tfoot:last-child > tr:last-child {
     border-bottom-left-radius: -1;
     border-bottom-right-radius: -1; }
-    /* line 163, ../scss/bootstrap/_panels.scss */
+    /* line 167, ../scss/bootstrap/_panels.scss */
     .panel > .table:last-child > tbody:last-child > tr:last-child td:first-child,
     .panel > .table:last-child > tbody:last-child > tr:last-child th:first-child,
     .panel > .table:last-child > tfoot:last-child > tr:last-child td:first-child,
@@ -12235,7 +12238,7 @@ button.list-group-item-danger {
     .panel > .table-responsive:last-child > .table:last-child > tfoot:last-child > tr:last-child td:first-child,
     .panel > .table-responsive:last-child > .table:last-child > tfoot:last-child > tr:last-child th:first-child {
       border-bottom-left-radius: -1; }
-    /* line 167, ../scss/bootstrap/_panels.scss */
+    /* line 171, ../scss/bootstrap/_panels.scss */
     .panel > .table:last-child > tbody:last-child > tr:last-child td:last-child,
     .panel > .table:last-child > tbody:last-child > tr:last-child th:last-child,
     .panel > .table:last-child > tfoot:last-child > tr:last-child td:last-child,
@@ -12245,21 +12248,21 @@ button.list-group-item-danger {
     .panel > .table-responsive:last-child > .table:last-child > tfoot:last-child > tr:last-child td:last-child,
     .panel > .table-responsive:last-child > .table:last-child > tfoot:last-child > tr:last-child th:last-child {
       border-bottom-right-radius: -1; }
-/* line 174, ../scss/bootstrap/_panels.scss */
+/* line 178, ../scss/bootstrap/_panels.scss */
 .panel > .panel-body + .table,
 .panel > .panel-body + .table-responsive,
 .panel > .table + .panel-body,
 .panel > .table-responsive + .panel-body {
   border-top: 1px solid #ddd; }
-/* line 180, ../scss/bootstrap/_panels.scss */
+/* line 184, ../scss/bootstrap/_panels.scss */
 .panel > .table > tbody:first-child > tr:first-child th,
 .panel > .table > tbody:first-child > tr:first-child td {
   border-top: 0; }
-/* line 184, ../scss/bootstrap/_panels.scss */
+/* line 188, ../scss/bootstrap/_panels.scss */
 .panel > .table-bordered,
 .panel > .table-responsive > .table-bordered {
   border: 0; }
-  /* line 191, ../scss/bootstrap/_panels.scss */
+  /* line 195, ../scss/bootstrap/_panels.scss */
   .panel > .table-bordered > thead > tr > th:first-child,
   .panel > .table-bordered > thead > tr > td:first-child,
   .panel > .table-bordered > tbody > tr > th:first-child,
@@ -12273,7 +12276,7 @@ button.list-group-item-danger {
   .panel > .table-responsive > .table-bordered > tfoot > tr > th:first-child,
   .panel > .table-responsive > .table-bordered > tfoot > tr > td:first-child {
     border-left: 0; }
-  /* line 195, ../scss/bootstrap/_panels.scss */
+  /* line 199, ../scss/bootstrap/_panels.scss */
   .panel > .table-bordered > thead > tr > th:last-child,
   .panel > .table-bordered > thead > tr > td:last-child,
   .panel > .table-bordered > tbody > tr > th:last-child,
@@ -12287,7 +12290,7 @@ button.list-group-item-danger {
   .panel > .table-responsive > .table-bordered > tfoot > tr > th:last-child,
   .panel > .table-responsive > .table-bordered > tfoot > tr > td:last-child {
     border-right: 0; }
-  /* line 204, ../scss/bootstrap/_panels.scss */
+  /* line 208, ../scss/bootstrap/_panels.scss */
   .panel > .table-bordered > thead > tr:first-child > td,
   .panel > .table-bordered > thead > tr:first-child > th,
   .panel > .table-bordered > tbody > tr:first-child > td,
@@ -12297,7 +12300,7 @@ button.list-group-item-danger {
   .panel > .table-responsive > .table-bordered > tbody > tr:first-child > td,
   .panel > .table-responsive > .table-bordered > tbody > tr:first-child > th {
     border-bottom: 0; }
-  /* line 213, ../scss/bootstrap/_panels.scss */
+  /* line 217, ../scss/bootstrap/_panels.scss */
   .panel > .table-bordered > tbody > tr:last-child > td,
   .panel > .table-bordered > tbody > tr:last-child > th,
   .panel > .table-bordered > tfoot > tr:last-child > td,
@@ -12307,36 +12310,36 @@ button.list-group-item-danger {
   .panel > .table-responsive > .table-bordered > tfoot > tr:last-child > td,
   .panel > .table-responsive > .table-bordered > tfoot > tr:last-child > th {
     border-bottom: 0; }
-/* line 220, ../scss/bootstrap/_panels.scss */
+/* line 224, ../scss/bootstrap/_panels.scss */
 .panel > .table-responsive {
   border: 0;
   margin-bottom: 0; }
 
-/* line 232, ../scss/bootstrap/_panels.scss */
+/* line 236, ../scss/bootstrap/_panels.scss */
 .panel-group {
   margin-bottom: 18px; }
-  /* line 236, ../scss/bootstrap/_panels.scss */
+  /* line 240, ../scss/bootstrap/_panels.scss */
   .panel-group .panel {
     margin-bottom: 0;
     border-radius: 0; }
-    /* line 240, ../scss/bootstrap/_panels.scss */
+    /* line 244, ../scss/bootstrap/_panels.scss */
     .panel-group .panel + .panel {
       margin-top: 5px; }
-  /* line 245, ../scss/bootstrap/_panels.scss */
+  /* line 249, ../scss/bootstrap/_panels.scss */
   .panel-group .panel-heading {
     border-bottom: 0; }
-    /* line 248, ../scss/bootstrap/_panels.scss */
+    /* line 252, ../scss/bootstrap/_panels.scss */
     .panel-group .panel-heading + .panel-collapse > .panel-body,
     .panel-group .panel-heading + .panel-collapse > .list-group {
       border-top: 1px solid #ddd; }
-  /* line 254, ../scss/bootstrap/_panels.scss */
+  /* line 258, ../scss/bootstrap/_panels.scss */
   .panel-group .panel-footer {
     border-top: 0; }
-    /* line 256, ../scss/bootstrap/_panels.scss */
+    /* line 260, ../scss/bootstrap/_panels.scss */
     .panel-group .panel-footer + .panel-collapse .panel-body {
       border-bottom: 1px solid #ddd; }
 
-/* line 264, ../scss/bootstrap/_panels.scss */
+/* line 269, ../scss/bootstrap/_panels.scss */
 .panel-default {
   border-color: #ddd; }
   /* line 6, ../scss/bootstrap/mixins/_panels.scss */
@@ -12355,26 +12358,31 @@ button.list-group-item-danger {
   .panel-default > .panel-footer + .panel-collapse > .panel-body {
     border-bottom-color: #ddd; }
 
-/* line 267, ../scss/bootstrap/_panels.scss */
-.panel-secondary {
+/* line 272, ../scss/bootstrap/_panels.scss */
+.panel-secondary,
+.panel-secondary-forced {
   border-color: #636363; }
   /* line 6, ../scss/bootstrap/mixins/_panels.scss */
-  .panel-secondary > .panel-heading {
+  .panel-secondary > .panel-heading,
+  .panel-secondary-forced > .panel-heading {
     color: #fff;
     background-color: #636363;
     border-color: #636363; }
     /* line 11, ../scss/bootstrap/mixins/_panels.scss */
-    .panel-secondary > .panel-heading + .panel-collapse > .panel-body {
+    .panel-secondary > .panel-heading + .panel-collapse > .panel-body,
+    .panel-secondary-forced > .panel-heading + .panel-collapse > .panel-body {
       border-top-color: #636363; }
     /* line 14, ../scss/bootstrap/mixins/_panels.scss */
-    .panel-secondary > .panel-heading .badge {
+    .panel-secondary > .panel-heading .badge,
+    .panel-secondary-forced > .panel-heading .badge {
       color: #636363;
       background-color: #fff; }
   /* line 20, ../scss/bootstrap/mixins/_panels.scss */
-  .panel-secondary > .panel-footer + .panel-collapse > .panel-body {
+  .panel-secondary > .panel-footer + .panel-collapse > .panel-body,
+  .panel-secondary-forced > .panel-footer + .panel-collapse > .panel-body {
     border-bottom-color: #636363; }
 
-/* line 270, ../scss/bootstrap/_panels.scss */
+/* line 276, ../scss/bootstrap/_panels.scss */
 .panel-primary {
   border-color: #EF7D00; }
   /* line 6, ../scss/bootstrap/mixins/_panels.scss */
@@ -12393,7 +12401,7 @@ button.list-group-item-danger {
   .panel-primary > .panel-footer + .panel-collapse > .panel-body {
     border-bottom-color: #EF7D00; }
 
-/* line 273, ../scss/bootstrap/_panels.scss */
+/* line 279, ../scss/bootstrap/_panels.scss */
 .panel-success {
   border-color: #d6e9c6; }
   /* line 6, ../scss/bootstrap/mixins/_panels.scss */
@@ -12412,7 +12420,7 @@ button.list-group-item-danger {
   .panel-success > .panel-footer + .panel-collapse > .panel-body {
     border-bottom-color: #d6e9c6; }
 
-/* line 276, ../scss/bootstrap/_panels.scss */
+/* line 282, ../scss/bootstrap/_panels.scss */
 .panel-info {
   border-color: #bce8f1; }
   /* line 6, ../scss/bootstrap/mixins/_panels.scss */
@@ -12431,7 +12439,7 @@ button.list-group-item-danger {
   .panel-info > .panel-footer + .panel-collapse > .panel-body {
     border-bottom-color: #bce8f1; }
 
-/* line 279, ../scss/bootstrap/_panels.scss */
+/* line 285, ../scss/bootstrap/_panels.scss */
 .panel-warning {
   border-color: #faebcc; }
   /* line 6, ../scss/bootstrap/mixins/_panels.scss */
@@ -12450,7 +12458,7 @@ button.list-group-item-danger {
   .panel-warning > .panel-footer + .panel-collapse > .panel-body {
     border-bottom-color: #faebcc; }
 
-/* line 282, ../scss/bootstrap/_panels.scss */
+/* line 288, ../scss/bootstrap/_panels.scss */
 .panel-danger {
   border-color: #ebccd1; }
   /* line 6, ../scss/bootstrap/mixins/_panels.scss */
@@ -12470,7 +12478,7 @@ button.list-group-item-danger {
     border-bottom-color: #ebccd1; }
 
 /*Ajouts Bimp*/
-/* line 287, ../scss/bootstrap/_panels.scss */
+/* line 293, ../scss/bootstrap/_panels.scss */
 .panel.panel-secondary {
   margin-bottom: 10px; }
 

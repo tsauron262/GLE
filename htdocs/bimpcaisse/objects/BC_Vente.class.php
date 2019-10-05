@@ -1520,22 +1520,22 @@ class BC_Vente extends BimpObject
         }
 
         // Check validation du produit: 
-//        if (!(int) $product->getData('validate')) {
-//            $html .= '<div style="margin: 10px 0">';
-//            $msg = 'Attention: ce produit n\'est pas validé. La vente ne pourra pas être validée.<br/>';
-//            $msg .= 'Un e-mail a été envoyé pour validation d\'urgence.<br/>';
-//            $userResp = new User($this->db->db);
-//            if (!(int) $this->getData('id_user_resp')) {
-//                global $user;
-//                $this->updateField('id_user_resp', (int) $user->id);
-//            }
-//            $userResp->fetch((int) $this->getData('id_user_resp'));
-//            if (BimpObject::objectLoaded($userResp)) {
-//                $msg .= 'Un email sera envoyé à ' . $userResp->email . ' lorsque le produit aura été validé.';
-//            }
-//            $html .= BimpRender::renderAlerts($msg);
-//            $html .= '</div>';
-//        }
+        if (!(int) $product->getData('validate')) {
+            $html .= '<div style="margin: 10px 0">';
+            $msg = 'Attention: ce produit n\'est pas validé. La vente ne pourra pas être validée.<br/>';
+            $msg .= 'Un e-mail a été envoyé pour validation d\'urgence.<br/>';
+            $userResp = new User($this->db->db);
+            if (!(int) $this->getData('id_user_resp')) {
+                global $user;
+                $this->updateField('id_user_resp', (int) $user->id);
+            }
+            $userResp->fetch((int) $this->getData('id_user_resp'));
+            if (BimpObject::objectLoaded($userResp)) {
+                $msg .= 'Un email sera envoyé à ' . $userResp->email . ' lorsque le produit aura été validé.';
+            }
+            $html .= BimpRender::renderAlerts($msg);
+            $html .= '</div>';
+        }
 
         $html .= '</div>';
 

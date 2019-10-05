@@ -25,6 +25,7 @@ class BC_Panel extends BimpComponent
         $this->params_def['panel'] = array('data_type' => 'bool', 'default' => 1);
         $this->params_def['panel_header'] = array('data_type' => 'bool', 'default' => 1);
         $this->params_def['panel_footer'] = array('data_type' => 'bool', 'default' => 1);
+        $this->params_def['no_borders'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['objects_change_reload'] = array('data_type' => 'array', 'default' => array());
         $this->params_def['no_reload'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['header_buttons'] = array('data_type' => 'array', 'compile' => true);
@@ -35,6 +36,7 @@ class BC_Panel extends BimpComponent
         $this->params_def['before_content'] = array('default' => '');
         $this->params_def['after_content'] = array('default' => '');
         $this->params_def['modal_format'] = array('default' => $this->default_modal_format);
+
 
         global $current_bc;
         if (!is_object($current_bc)) {
@@ -90,7 +92,7 @@ class BC_Panel extends BimpComponent
         if ((int) !$this->params['show']) {
             return '';
         }
-        
+
         global $current_bc;
         if (!is_object($current_bc)) {
             $current_bc = null;
@@ -187,7 +189,8 @@ class BC_Panel extends BimpComponent
                             'header_buttons' => $this->getHeaderButtons(),
                             'header_icons'   => $this->getHeaderIcons(),
                             'no_header'      => (int) !$this->params['panel_header'],
-                            'no_footer'      => (int) !$this->params['panel_footer']
+                            'no_footer'      => (int) !$this->params['panel_footer'],
+                            'no_borders'     => (int) $this->params['no_borders']
                 ));
             } else {
                 $html .= $content;

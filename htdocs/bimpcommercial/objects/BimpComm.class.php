@@ -1829,7 +1829,7 @@ class BimpComm extends BimpDolObject
                     foreach ($list as $action) {
                         $html .= '<tr>';
                         $html .= '<td>' . $action->getNomUrl(1, -1) . '</td>';
-                        $html .= '<td>' . $action->getNomUrl(0, 38) . '</td>';
+                        $html .= '<td>' . $action->getNomUrl(0, 0) . '</td>';
                         $html .= '<td>';
                         if (!empty($conf->global->AGENDA_USE_EVENT_TYPE)) {
                             if ($action->type_picto) {
@@ -1896,7 +1896,7 @@ class BimpComm extends BimpDolObject
 
                 $html = BimpRender::renderPanel('Evénements', $html, '', array(
                             'foldable'       => true,
-                            'type'           => 'secondary',
+                            'type'           => 'secondary-forced',
                             'icon'           => 'fas_clock',
                             'header_buttons' => array(
                                 array(
@@ -2042,7 +2042,7 @@ class BimpComm extends BimpDolObject
 
             $html = BimpRender::renderPanel('Objets liés', $html, '', array(
                         'foldable' => true,
-                        'type'     => 'secondary',
+                        'type'     => 'secondary-forced',
                         'icon'     => 'fas_link',
 //                        'header_buttons' => array(
 //                            array(
@@ -3204,7 +3204,13 @@ class BimpComm extends BimpDolObject
 
                 $deliveryreceipt = (isset($data['confirm_reception']) ? (int) $data['confirm_reception'] : 0);
                 if (mailSyn2($mail_object, $to, $from, $data['msg_html'], $filename_list, $mimetype_list, $mimefilename_list, $cc, '', $deliveryreceipt)) {
-//                    if (static::$mail_event_code) {
+                    if (static::$mail_event_code) {
+                        include_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
+                        global $user, $langs, $conf;
+                        $interface = new Interfaces($this->db->db);
+                        if ($interface->run_triggers(static::$mail_event_code, $this->dol_object, $user, $langs, $conf) < 0) {
+                            $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($interface), 'Echec de l\'enregistrement de l\'envoi du mail dans la liste des événements');
+                        }
 //                        global $user;
 //                        BimpTools::loadDolClass('comm/action', 'actioncomm', 'ActionComm');
 //                        $ac = new ActionComm($this->db->db);
@@ -3238,7 +3244,7 @@ class BimpComm extends BimpDolObject
 //                        if ($ac->create($user) <= 0) {
 //                            $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($ac), 'Echec de l\'enregistrement de l\'envoi dans la liste des événements');
 //                        }
-//                    }
+                    }
                 } else {
                     $errors[] = 'Echec de l\'envoi du mail';
                 }

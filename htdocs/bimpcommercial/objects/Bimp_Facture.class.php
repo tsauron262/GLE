@@ -15,7 +15,7 @@ class Bimp_Facture extends BimpComm
     public static $dol_module = 'facture';
     public static $email_type = 'facture_send';
     public static $element_name = 'invoice';
-    public static $mail_event_code = 'AC_BILL_SENTBYMAIL';
+    public static $mail_event_code = 'BILL_SENTBYMAIL';
     public $avoir = null;
     public static $status_list = array(
         0 => array('label' => 'Brouillon', 'icon' => 'fas_file-alt', 'classes' => array('warning')),

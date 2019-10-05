@@ -215,7 +215,15 @@ class BimpRender
             $params['panel_class'] = '';
         }
 
-        $html .= '<div class="panel panel-' . $params['type'] . ($params['foldable'] ? ' foldable ' . ($params['open'] ? 'open' : 'closed') : '') . ($params['panel_class'] ? ' ' . $params['panel_class'] : '') . '"';
+        if (!isset($params['no_borders'])) {
+            $params['no_borders'] = 0;
+        }
+
+        $html .= '<div class="panel panel-' . $params['type'];
+        $html .= ($params['foldable'] ? ' foldable ' . ($params['open'] ? 'open' : 'closed') : '');
+        $html .= ($params['panel_class'] ? ' ' . $params['panel_class'] : '');
+        $html .= ($params['no_borders'] ? ' no-borders' : '');
+        $html .= '"';
         if (isset($params['panel_id']) && $params['panel_id']) {
             $html .= ' id="' . $params['panel_id'] . '"';
         }

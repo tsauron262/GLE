@@ -914,6 +914,8 @@ lists:
                 value:
                     callback:
                         method: getNbScanned
+                        params:
+                            - 0
             stock_entrepot:
                 show: 
                     callback:
@@ -922,7 +924,27 @@ lists:
                 value: 
                     callback: 
                         method: displayStockInventory
-        
+                        
+    inventory_sr:
+        extends: inventory
+        cols:
+            stock_entrepot: unset
+            nb_scanned: unset
+            nb_scanned_sr:
+                label: Nombre scanné
+                value:
+                    callback:
+                        method: getNbScanned
+                        params:
+                            - 1
+            stock_sr:
+                show: 
+                    callback:
+                        method: canViewStock
+                label: Stock
+                value: 
+                    callback: 
+                        method: displayStockInventorySr      
 cards: 
     default: 
         view_btn: 1

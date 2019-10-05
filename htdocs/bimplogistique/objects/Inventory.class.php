@@ -142,7 +142,8 @@ class Inventory extends BimpDolObject
         $errors = array();
 
         if ((int) $data['status'] == self::STATUS_PARTIALLY_CLOSED) {
-            $errors = array_merge($errors, $this->closePartially());
+            $only_scanned = BimpTools::getPostFieldValue('only_scanned');
+            $errors = array_merge($errors, $this->closePartially($only_scanned));
             $date_mouvement = BimpTools::getPostFieldValue('date_mouvement');
             if (!$this->setDateMouvement($date_mouvement))
                 $errors[] = "Erreur lors de la définition de la date du mouvement";
@@ -239,9 +240,9 @@ class Inventory extends BimpDolObject
     }
 
     
-    public function closePartially()
+    public function closePartially($only_scanned = 0)
     {
-        $errors = $this->correctProducts();
+        $errors = $this->correctProducts($only_scanned);
 
         return $errors;
     }
@@ -301,12 +302,12 @@ class Inventory extends BimpDolObject
         return 0;
     }
 
-    private function correctProducts()
+    private function correctProducts($only_scanned = 0)
     {
         global $user;
         $errors = array();
 
-        $tab_diff = $this->getDiffStock(0);
+        $tab_diff = $this->getDiffStock(0, $only_scanned);
         $id_main_warehouse = $this->getWarehouseInventories();
         if($id_main_warehouse < 1) {
             $errors[] = "L'entrepôt par défault des inventaires n'est pas définit "
@@ -446,30 +447,11 @@ class Inventory extends BimpDolObject
         return true;
     }
 
-    public function getDiffStock($with_serialisable = 1)
+    public function getDiffStock($with_serialisable = 1, $only_scanned = 0)
     { // non sérialisé
-        $ids_stock = array();
         $ids_scanned = array();
-
-        if($with_serialisable) {
-            $sql1 = 'SELECT reel, fk_product';
-            $sql1 .= ' FROM ' . MAIN_DB_PREFIX . 'product_stock';
-            $sql1 .= ' WHERE fk_entrepot=' . $this->getData('fk_warehouse');
-        } else {        
-            $sql1 = 'SELECT ps.reel AS reel, ps.fk_product AS fk_product';
-            $sql1 .= ' FROM ' . MAIN_DB_PREFIX . 'product_stock AS ps';
-            $sql1 .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'product_extrafields AS pe ON pe.fk_object=ps.fk_product';
-            $sql1 .= ' WHERE ps.fk_entrepot=' . $this->getData('fk_warehouse');
-            $sql1 .= ' AND (serialisable=0 OR serialisable IS NULL)';
-        }
+        $ids_stock = array();
         
-
-        $result1 = $this->db->db->query($sql1);
-        if ($result1 and mysqli_num_rows($result1) > 0) {
-            while ($obj1 = $this->db->db->fetch_object($result1)) {
-                $ids_stock[$obj1->fk_product] = $obj1->reel;
-            }
-        }
 
         $sql2 = 'SELECT SUM(qty) as sum, fk_product';
         $sql2 .= ' FROM ' . MAIN_DB_PREFIX . 'bl_inventory_det';
@@ -483,6 +465,29 @@ class Inventory extends BimpDolObject
         if ($result2 and mysqli_num_rows($result2) > 0) {
             while ($obj2 = $this->db->db->fetch_object($result2)) {
                 $ids_scanned[$obj2->fk_product] = $obj2->sum;
+            }
+        }
+
+        if($with_serialisable) {
+            $sql1 = 'SELECT reel, fk_product';
+            $sql1 .= ' FROM ' . MAIN_DB_PREFIX . 'product_stock';
+            $sql1 .= ' WHERE fk_entrepot=' . $this->getData('fk_warehouse');
+            if($only_scanned)
+                $sql1 .= ' AND fk_product IN(' . implode(',', array_keys($ids_scanned)) . ')';
+        } else {        
+            $sql1 = 'SELECT ps.reel AS reel, ps.fk_product AS fk_product';
+            $sql1 .= ' FROM ' . MAIN_DB_PREFIX . 'product_stock AS ps';
+            $sql1 .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'product_extrafields AS pe ON pe.fk_object=ps.fk_product';
+            $sql1 .= ' WHERE ps.fk_entrepot=' . $this->getData('fk_warehouse');
+            $sql1 .= ' AND (serialisable=0 OR serialisable IS NULL)';
+            if($only_scanned)
+                $sql1 .= ' AND ps.fk_product IN(' . implode(',', array_keys($ids_scanned)) . ')';
+        }
+        
+        $result1 = $this->db->db->query($sql1);
+        if ($result1 and mysqli_num_rows($result1) > 0) {
+            while ($obj1 = $this->db->db->fetch_object($result1)) {
+                $ids_stock[$obj1->fk_product] = $obj1->reel;
             }
         }
 

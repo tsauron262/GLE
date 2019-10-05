@@ -1400,8 +1400,29 @@ class BC_Vente extends BimpObject
         $html .= '</div>';
 
         if (!$article->checkPlace((int) $this->getData('id_entrepot'))) {
+            $cur_place = $equipment->getCurrentPlace();
+
             $html .= '<div class="placeAlert">';
-            $html .= BimpRender::renderAlerts('Attention, L\'équipement ' . $equipment->getNomUrl(0, 1, 1, 'default') . ' n\'est pas enregistré comme étant situé dans votre centre', 'warning');
+            $msg = 'Attention, L\'équipement ' . $equipment->getNomUrl(0, 1, 1, 'default') . ' n\'est pas enregistré comme étant situé dans votre centre';
+            $class = 'warning';
+
+            if (BimpObject::objectLoaded($cur_place)) {
+                if ((int) $cur_place->getData('type') === BE_Place::BE_PLACE_CLIENT) {
+                    $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', (int) $cur_place->getData('id_client'));
+                    $class = 'danger';
+                    $msg = '<span style="font-size: 14px; font-weight: bold">ATTENTION, l\'équipement ' . $equipment->getNomUrl(0, 1, 1, 'default') . ' est enregistré comme vendu ';
+                    if (BimpObject::objectLoaded($client)) {
+                        $msg .= 'au client ' . $client->getNomUrl(1, 0, 1, 'default');
+                    } else {
+                        $msg .= 'à un client';
+                    }
+                    $msg .= ' </span>';
+                } else {
+                    $msg .= '<br/><br/>Emplacement actuel de cet équipement: ' . $cur_place->displayPlace(true);
+                }
+            }
+
+            $html .= BimpRender::renderAlerts($msg, $class);
             $html .= '</div>';
         }
         $html .= '</div>';
@@ -1507,7 +1528,7 @@ class BC_Vente extends BimpObject
             if (!(int) $this->getData('id_user_resp')) {
                 global $user;
                 $this->updateField('id_user_resp', (int) $user->id);
-            } 
+            }
             $userResp->fetch((int) $this->getData('id_user_resp'));
             if (BimpObject::objectLoaded($userResp)) {
                 $msg .= 'Un email sera envoyé à ' . $userResp->email . ' lorsque le produit aura été validé.';

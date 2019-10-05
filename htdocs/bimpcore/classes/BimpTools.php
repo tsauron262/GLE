@@ -1640,7 +1640,7 @@ class BimpTools
 
     public static function cleanStringForUrl($text, $separator = '_', $charset = 'utf-8')
     {
-        // Commenté car apparemment ça converti les undescore en "n" => pose problème dans le cas des propales révisées. 
+        // Commenter car apparemment ça converti les undescore en "n" => pose problème dans le cas des propales révisées. 
 //        $text = mb_convert_encoding($text, 'HTML-ENTITIES', $charset);
 
         // On vire les accents

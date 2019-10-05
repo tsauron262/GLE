@@ -4,6 +4,7 @@ class BimpCore
 {
 
     public static $conf_cache = null;
+    public static $conf_cache_not_exist = array();
     public static $files = array(
         'js'  => array(
             '/includes/jquery/plugins/jpicker/jpicker-1.1.6.js',
@@ -79,6 +80,9 @@ class BimpCore
     public static function getConf($name)
     {
         $cache = self::getConfCache();
+        
+        if(isset(self::$conf_cache_not_exist[$name]))
+            return null;
 
         if (!isset($cache[$name])) {
             $value = BimpCache::getBdb()->getValue('bimpcore_conf', 'value', '`name` = \'' . $name . '\'');
@@ -86,6 +90,8 @@ class BimpCore
                 self::$conf_cache[$name] = $value;
                 return $value;
             }
+            else
+                self::$conf_cache_not_exist[$name] = $name;
 
             return null;
         }

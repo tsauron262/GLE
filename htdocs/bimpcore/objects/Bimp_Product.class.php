@@ -774,11 +774,11 @@ class Bimp_Product extends BimpObject
         $stock = 0;
 
         if ((int) $id_product) {
-            if (!isset(self::$stockShowRoom[$id_product]))
+            if (!count(self::$stockShowRoom))
                 self::initStockShowRoom();
 
             if (isset(self::$stockShowRoom[$id_product][$id_entrepot])) {
-                return self::$stockShowRoom[$id_product][$id_entrepot];
+                $stock = self::$stockShowRoom[$id_product][$id_entrepot];
             }
 
 //            if (!count(self::$lienShowRoomEntrepot))

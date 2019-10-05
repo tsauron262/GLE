@@ -750,6 +750,11 @@ class ExtraFields
 	function fetch_name_optionals_label($elementtype,$forceload=false)
 	{
 		global $conf;
+                
+                require_once(DOL_DOCUMENT_ROOT."/bimpcore/classes/BimpCache.php");
+                $cache_key = "fetch_name_optionals_label_".$elementtype;
+                if(!$forceload && isset(BimpCache::$cache[$cache_key]))
+                    return BimpCache::$cache[$cache_key];
 
 		if (empty($elementtype)) return array();
 
@@ -848,6 +853,7 @@ class ExtraFields
 			dol_syslog(get_class($this)."::fetch_name_optionals_label ".$this->error, LOG_ERR);
 		}
 
+                BimpCache::$cache[$cache_key] = $array_name_label;
 		return $array_name_label;
 	}
 

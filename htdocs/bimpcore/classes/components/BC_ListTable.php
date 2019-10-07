@@ -1536,10 +1536,19 @@ class BC_ListTable extends BC_List
             return $rows;
         }
         
-        $cache_mem = BimpCache::$cache;
-
+        
+        $nb = 0;
         foreach ($this->items as $item) {
-            BimpCache::$cache = $cache_mem;
+            $nb++;
+            if($nb == 2){
+                $cache_mem = BimpCache::$cache;
+            }
+            elseif($nb > 2){
+                BimpCache::$cache = $cache_mem;
+            }
+            
+            
+            
             $line = '';
             $object = BimpCache::getBimpObjectInstance($this->object->module, $this->object->object_name, (int) $item[$primary], $this->parent);
             if (BimpObject::objectLoaded($object)) {

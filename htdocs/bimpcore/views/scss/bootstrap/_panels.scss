@@ -10,6 +10,10 @@
     border: 1px solid transparent;
     border-radius: $panel-border-radius;
     @include box-shadow(0 1px 1px rgba(0,0,0,.05));
+
+    &.no-borders {
+        border: none;
+    }
 }
 
 // Panel contents
@@ -27,7 +31,7 @@
     > .dropdown .dropdown-toggle {
         color: inherit;
     }
-    
+
     .header_buttons {
         float: right;
         margin-top: -7px;
@@ -261,10 +265,12 @@
 
 
 // Contextual variations
+
 .panel-default {
     @include panel-variant($panel-default-border, $panel-default-text, $panel-default-heading-bg, $panel-default-border);
 }
-.panel-secondary {
+.panel-secondary,
+.panel-secondary-forced {
     @include panel-variant($panel-secondary-border, $panel-secondary-text, $panel-secondary-heading-bg, $panel-secondary-border);
 }
 .panel-primary {

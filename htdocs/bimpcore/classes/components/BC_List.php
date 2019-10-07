@@ -386,6 +386,10 @@ class BC_List extends BC_Panel
 
     protected function fetchItems()
     {
+        if(method_exists($this->object, "beforeListFetchItems"))
+                $this->object->beforeListFetchItems($this);
+        
+        
         $this->fetchFiltersPanelValues();
 
         if (!$this->isOk()) {

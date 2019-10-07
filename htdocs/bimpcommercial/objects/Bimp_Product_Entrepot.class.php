@@ -4,6 +4,7 @@ class Bimp_Product_Entrepot extends BimpObject
 {
     
     public $dateBilan = null;
+    public $exludeIdDifZero = array();
 
     public static $product_instance = null;
 
@@ -16,6 +17,15 @@ class Bimp_Product_Entrepot extends BimpObject
 
         parent::__construct($module, $object_name);
     }
+    
+   public function beforeListFetchItems(BC_List $list){
+        $prod = BimpObject::getInstance("bimpcore", "Bimp_Product");
+        $prod::initStockDate($this->dateBilan);
+        $data = $prod::insertStockDateNotZeroProductStock($this->dateBilan);
+        foreach($data['stockDateZero'] as $tmp)
+            $this->exludeIdDifZero[] = $tmp;
+        $this->isInitSpecial = true;
+   }
 
     // Getters: 
 
@@ -38,6 +48,12 @@ class Bimp_Product_Entrepot extends BimpObject
                 );
                 $filters[$alias . '.fk_categorie'] = array(
                     'in' => $values
+                );
+                return;
+            case 'stockDateDifZero':
+                if(count($this->exludeIdDifZero))
+                $filters['a.rowid'] = array(
+                    'not_in' => implode(",",$this->exludeIdDifZero)
                 );
                 return;
         }

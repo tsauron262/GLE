@@ -133,6 +133,31 @@ class BimpComm extends BimpDolObject
 
             case 'useRemise':
                 if ($this->object_name === 'Bimp_Facture') {
+                    if ((int) $this->getData('fk_statut') === 0) {
+                        return 1;
+                    } elseif ((int) $this->getData('fk_statut') !== 1) {
+                        $errors[] = 'Le statut actuel ' . $this->getLabel('of_this') . ' ne permet pas d\'appliquer un avoir';
+                        return 0;
+                    }
+
+                    if (!in_array($this->getData('type'), array(Facture::TYPE_STANDARD, Facture::TYPE_CREDIT_NOTE, Facture::TYPE_DEPOSIT, Facture::TYPE_REPLACEMENT))) {
+                        $errors[] = 'il n\'est pas possible d\'appliquer un avoir sur ce type de facture';
+                        return 0;
+                    }
+
+                    if ((int) $this->getData('paye')) {
+                        $errors[] = ucfirst($this->getLabel('this')) . ' est marqué' . $this->e() . ' "payé' . $this->e() . '"';
+                        return 0;
+                    }
+
+                    if ((int) $this->getData('type') === Facture::TYPE_CREDIT_NOTE) {
+                        $remain_to_pay = (float) $this->getRemainToPay();
+                        if ($remain_to_pay <= 0) {
+                            $errors[] = 'Il n\'y a aucun montant à payer par le client pour cet avoir';
+                            return 0;
+                        }
+                    }
+
                     return 1;
                 }
 
@@ -348,7 +373,7 @@ class BimpComm extends BimpDolObject
             'icon'    => 'far fa-paper-plane',
             'onclick' => $note->getJsActionOnclick('repondre', array("obj_type" => "bimp_object", "obj_module" => $this->module, "obj_name" => $this->object_name, "id_obj" => $this->id, "type_dest" => $note::BN_DEST_GROUP, "fk_group_dest" => $note::BN_GROUPID_LOGISTIQUE, "content" => ""), array('form_name' => 'rep'))
         );
-        
+
         $buttons[] = array(
             'label'   => 'Message facturation ',
             'icon'    => 'far fa-paper-plane',
@@ -1804,7 +1829,7 @@ class BimpComm extends BimpDolObject
                     foreach ($list as $action) {
                         $html .= '<tr>';
                         $html .= '<td>' . $action->getNomUrl(1, -1) . '</td>';
-                        $html .= '<td>' . $action->getNomUrl(0, 38) . '</td>';
+                        $html .= '<td>' . $action->getNomUrl(0, 0) . '</td>';
                         $html .= '<td>';
                         if (!empty($conf->global->AGENDA_USE_EVENT_TYPE)) {
                             if ($action->type_picto) {
@@ -1871,7 +1896,7 @@ class BimpComm extends BimpDolObject
 
                 $html = BimpRender::renderPanel('Evénements', $html, '', array(
                             'foldable'       => true,
-                            'type'           => 'secondary',
+                            'type'           => 'secondary-forced',
                             'icon'           => 'fas_clock',
                             'header_buttons' => array(
                                 array(
@@ -2017,7 +2042,7 @@ class BimpComm extends BimpDolObject
 
             $html = BimpRender::renderPanel('Objets liés', $html, '', array(
                         'foldable' => true,
-                        'type'     => 'secondary',
+                        'type'     => 'secondary-forced',
                         'icon'     => 'fas_link',
 //                        'header_buttons' => array(
 //                            array(
@@ -3179,7 +3204,13 @@ class BimpComm extends BimpDolObject
 
                 $deliveryreceipt = (isset($data['confirm_reception']) ? (int) $data['confirm_reception'] : 0);
                 if (mailSyn2($mail_object, $to, $from, $data['msg_html'], $filename_list, $mimetype_list, $mimefilename_list, $cc, '', $deliveryreceipt)) {
-//                    if (static::$mail_event_code) {
+                    if (static::$mail_event_code) {
+                        include_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
+                        global $user, $langs, $conf;
+                        $interface = new Interfaces($this->db->db);
+                        if ($interface->run_triggers(static::$mail_event_code, $this->dol_object, $user, $langs, $conf) < 0) {
+                            $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($interface), 'Echec de l\'enregistrement de l\'envoi du mail dans la liste des événements');
+                        }
 //                        global $user;
 //                        BimpTools::loadDolClass('comm/action', 'actioncomm', 'ActionComm');
 //                        $ac = new ActionComm($this->db->db);
@@ -3213,7 +3244,7 @@ class BimpComm extends BimpDolObject
 //                        if ($ac->create($user) <= 0) {
 //                            $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($ac), 'Echec de l\'enregistrement de l\'envoi dans la liste des événements');
 //                        }
-//                    }
+                    }
                 } else {
                     $errors[] = 'Echec de l\'envoi du mail';
                 }

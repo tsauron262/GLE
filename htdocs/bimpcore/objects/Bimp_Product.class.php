@@ -774,11 +774,11 @@ class Bimp_Product extends BimpObject
         $stock = 0;
 
         if ((int) $id_product) {
-            if (!isset(self::$stockShowRoom[$id_product]))
+            if (!count(self::$stockShowRoom))
                 self::initStockShowRoom();
 
             if (isset(self::$stockShowRoom[$id_product][$id_entrepot])) {
-                return self::$stockShowRoom[$id_product][$id_entrepot];
+                $stock = self::$stockShowRoom[$id_product][$id_entrepot];
             }
 
 //            if (!count(self::$lienShowRoomEntrepot))
@@ -2599,15 +2599,16 @@ class Bimp_Product extends BimpObject
     {
         return array();
     }
-
+    
     // Méthodes statiques : 
 
-    private static function initStockDate($date)
+    public static function initStockDate($date)
     {
         global $db;
         self::$stockDate = array();
-        $sql = $db->query("SELECT `fk_product`,`fk_entrepot`,reel FROM `llx_product_stock`");
+        $sql = $db->query("SELECT `fk_product`,`fk_entrepot`,reel, rowid FROM `llx_product_stock`");
         while ($ln = $db->fetch_object($sql)) {
+            self::$stockDate[$date][$ln->fk_product][$ln->fk_entrepot]['rowid'] = $ln->rowid;
             self::$stockDate[$date][$ln->fk_product][$ln->fk_entrepot]['now'] = $ln->reel;
             self::$stockDate[$date][$ln->fk_product][$ln->fk_entrepot]['stock'] = $ln->reel;
             self::$stockDate[$date][$ln->fk_product][null]['now'] += $ln->reel;
@@ -2615,7 +2616,7 @@ class Bimp_Product extends BimpObject
         }
 
 //        $sql = $db->query("SELECT `fk_product`, `fk_entrepot`, SUM(`value`) as nb FROM `llx_stock_mouvement` WHERE `tms` > STR_TO_DATE('" . $date . "', '%Y-%m-%d') GROUP BY `fk_product`, `fk_entrepot`");
-        $sql = $db->query("SELECT `fk_product`, `fk_entrepot`, SUM(`value`) as nb FROM `llx_stock_mouvement` WHERE `tms` > '" . $date . "' GROUP BY `fk_product`, `fk_entrepot`");
+        $sql = $db->query("SELECT `fk_product`, `fk_entrepot`, SUM(`value`) as nb FROM `llx_stock_mouvement` WHERE `datem` > '" . $date . "' GROUP BY `fk_product`, `fk_entrepot`");
         while ($ln = $db->fetch_object($sql)) {
             if (!isset(self::$stockDate[$date][$ln->fk_product][$ln->fk_entrepot]['stock']))
                 self::$stockDate[$date][$ln->fk_product][$ln->fk_entrepot]['stock'] = 0;
@@ -2625,7 +2626,29 @@ class Bimp_Product extends BimpObject
             self::$stockDate[$date][$ln->fk_product][$ln->fk_entrepot]['stock'] -= $ln->nb;
             self::$stockDate[$date][$ln->fk_product][null]['stock'] -= $ln->nb;
         }
+        
     }
+    
+    public static function insertStockDateNotZeroProductStock($date){
+        global $db;
+        $stockDateZero = array();
+        foreach(self::$stockDate[$date] as $idP => $list){
+            foreach($list as $idE => $data){
+                if($idE > 0){
+                    if($data['stock'] > 0 && !isset($data['rowid']))
+                        $db->query("INSERT INTO ".MAIN_DB_PREFIX."product_stock (`fk_product`, `fk_entrepot`, `reel`) VALUES (".$idP.",".$idE.",0)");
+                    if($data['stock'] == 0 && isset($data['rowid']) && $data['rowid'] > 0){
+                        if($data['now'] == 0)//on supprime l'entré
+                            $db->query("DELETE FROM ".MAIN_DB_PREFIX."product_stock WHERE `rowid` = ".$data['rowid']);
+                        $stockDateZero[] = $data['rowid'];
+
+                    }
+                }
+            }
+        }
+        return array("stockDateZero" => $stockDateZero);
+    }
+    
 
     private static function initStockShowRoom()
     {

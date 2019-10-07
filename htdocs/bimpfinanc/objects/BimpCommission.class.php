@@ -32,7 +32,7 @@ class BimpCommission extends BimpObject
     
     public function canView() {
         global $user;
-        return $user->rights->bimpequipment->inventory->close;
+        return $user->rights->bimpcommercial->commission;
     }
 
     public function canSetAction($action)

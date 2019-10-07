@@ -914,4 +914,11 @@ class BContract_contrat extends BimpDolObject {
         return $extra;
     }
     
+    public function actionCreateAvenant() {
+        
+        $avenant = clone $this;
+        
+        
+    }
+    
 }

@@ -1261,6 +1261,7 @@ class ObjectLine extends BimpObject
             $html .= $this->renderLineInput($field);
             $html .= '</div>';
         } else {
+            $format = "";
             switch ($field) {
                 case 'id_product':
                     $product = $this->getProduct();
@@ -1412,6 +1413,8 @@ class ObjectLine extends BimpObject
                     break;
 
                 case 'pu_ht':
+                    $format = 'price';
+                    $value = (float) $this->pu_ht;
                     if ($no_html) {
                         $html = price((float) $this->pu_ht) . ' €';
                     } else {
@@ -1420,6 +1423,8 @@ class ObjectLine extends BimpObject
                     break;
 
                 case 'pu_ttc':
+                    $format = 'price';
+                    $value = (float) $this->getUnitPriceTTC();
                     if ($no_html) {
                         $html = price((float) $this->getUnitPriceTTC()) . ' €';
                     } else {
@@ -1432,6 +1437,8 @@ class ObjectLine extends BimpObject
                     break;
 
                 case 'pa_ht':
+                    $format = 'price';
+                    $value = (float) $this->pa_ht;
                     $pa_ht = (float) $this->pa_ht;
                     $remise_pa = 0;
 
@@ -1479,6 +1486,8 @@ class ObjectLine extends BimpObject
                     break;
 
                 case 'total_ht':
+                    $format = 'price';
+                    $value = (float) $this->getTotalHT();
                     if ($no_html) {
                         $html = price((float) $this->getTotalHT()) . ' €';
                     } else {
@@ -1487,6 +1496,8 @@ class ObjectLine extends BimpObject
                     break;
 
                 case 'total_ht_w_remises':
+                    $format = 'price';
+                    $value = (float) $this->getTotalHTWithRemises();
                     if ($no_html) {
                         $html = price((float) $this->getTotalHTWithRemises()) . ' €';
                     } else {
@@ -1495,6 +1506,8 @@ class ObjectLine extends BimpObject
                     break;
 
                 case 'total_ttc':
+                    $format = 'price';
+                    $value = (float) $this->getTotalTTC();
                     if ($no_html) {
                         $html = price((float) $this->getTotalTTC()) . ' €';
                     } else {
@@ -1504,6 +1517,8 @@ class ObjectLine extends BimpObject
 
                 case 'margin':
                     $margin = (float) $this->getMargin();
+                    $format = 'price';
+                    $value = (float) $margin;
                     $margin_rate = 0;
                     if ($margin !== 0.0) {
                         $margin_rate = round($this->getMarginRate(), 4);
@@ -1538,7 +1553,15 @@ class ObjectLine extends BimpObject
                     }
                     break;
             }
+            
+            global $modeCSV;
+            if($format == 'price' && $modeCSV){
+                
+                    $html = str_replace(".", ",", $value);
+            }
+            
         }
+        
 
         return $html;
     }

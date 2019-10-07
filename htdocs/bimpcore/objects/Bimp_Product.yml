@@ -635,7 +635,6 @@ fields_tables:
             - field: tva_tx
             - field: deee
             - field: rpcp
-            - field: pa_prevu
             
     prices_buy: 
         title: Prix d'achat
@@ -647,6 +646,7 @@ fields_tables:
               value: 
                   callback: displayCurrentPaHt
             - field: pmp
+            - field: pa_prevu
         
     stock:
         title: Vue globale

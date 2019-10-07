@@ -19,20 +19,23 @@ class BimpCommission extends BimpObject
 
     public function canDelete()
     {
-        global $user;
 
-        return (int) 1;//($user->admin ? 1 : 0);
+        return (int) $this->canCreate();
     }
 
     public function canCreate()
     {
-        // todo
-        return 1;
+        global $user;
+        return $user->rights->bimpcommercial->commission->write;
+    }
+    public function canEdit()
+    {
+        return (int) $this->canCreate();
     }
     
     public function canView() {
         global $user;
-        return $user->rights->bimpcommercial->commission;
+        return $user->rights->bimpcommercial->commission->read;
     }
 
     public function canSetAction($action)

@@ -46,4 +46,9 @@ forms:
                 display_if: 
                     field_name: id_fourn
                 content: 
-                    callback: renderFacturesAmountsInputs
+                    callback: renderFacturesAmountsInputs       
+lists_cols: 
+    client: 
+        label: Fournisseur
+        value: 
+            callback: displayFourn

@@ -635,6 +635,7 @@ fields_tables:
             - field: tva_tx
             - field: deee
             - field: rpcp
+            - field: pa_prevu
             
     prices_buy: 
         title: Prix d'achat

@@ -561,6 +561,7 @@ class Bimp_FactureFourn extends BimpComm
                 $user->fetch((int) $this->getData('fk_user_valid'));
                 $html .= '<div class="object_header_infos">';
                 $html .= 'Validée par ' . $user->getNomUrl(1);
+                $html .= ' le '.$this->displayData('date_valid', 'default', false, true);
                 $html .= '</div>';
             }
         }

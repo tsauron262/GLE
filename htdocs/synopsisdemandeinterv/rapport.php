@@ -167,7 +167,7 @@ $sql .= " ORDER BY $sortfield $sortorder ";
 //}
 //$selSoc .= "</select>";
 $form = new Form($db);
-$selSoc .= $form->select_thirdparty($socid, 'socid');
+$selSoc .= $form->select_company($socid, 'socid');
 
 //TODO si selection société filtrer
 //print $sql;

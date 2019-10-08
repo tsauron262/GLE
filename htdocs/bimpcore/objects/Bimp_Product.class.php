@@ -486,6 +486,67 @@ class Bimp_Product extends BimpObject
 
         return 0;
     }
+    
+    public function getDerPv($dateMin, $dateMax = null, $id_product = null){
+        
+        if (is_null($id_product) && $this->isLoaded()) {
+            $id_product = $this->id;
+        }
+
+        if (is_null($dateMin)) {
+            $dateMin = '0000-00-00 00:00:00';
+        }
+
+        if (preg_match('/^\d{4}\-\d{2}\-\d{2}$/', $dateMin)) {
+            $dateMin .= ' 00:00:00';
+        }
+
+        if (is_null($dateMax)) {
+            $dateMax = date('Y-m-d H:i:s');
+        }
+
+        $cache_key = $dateMin . '-' . $dateMax.'derPv';
+
+        if ((int) $id_product) {
+            if (!isset(self::$ventes[$cache_key])) {
+                self::initDerPv($dateMin, $dateMax);
+            }
+
+            if (isset(self::$ventes[$cache_key][$id_product])) {
+                return self::$ventes[$cache_key][$id_product];
+            }
+        }
+
+        return 0;
+    }
+    
+    public function initDerPv($dateMin, $dateMax)
+    {
+        global $db;
+//        self::$ventes = array(); // Ne pas déco ça effacerait d'autres données en cache pour d'autres dates. 
+        
+        $query = 'SELECT MAX(l.rowid) as rowid , fk_product FROM `'.MAIN_DB_PREFIX.'facturedet` l, `'.MAIN_DB_PREFIX.'facture` f WHERE f.rowid = l.fk_facture AND qty > 0 ';
+        if ($dateMin)
+            $query .= " AND date_valid >= '" . $dateMin . "'";
+
+        if ($dateMax)
+            $query .= " AND date_valid <= '" . $dateMax . "'";
+        $sql = $db->query($query." GROUP BY fk_product");
+        while ($ln = $db->fetch_object($sql)) {
+            $tabT[] = $ln->rowid;
+        }
+        $query = 'SELECT (total_ht / qty) as derPv, fk_product FROM `'.MAIN_DB_PREFIX.'facturedet` l WHERE rowid IN ('.implode(",", $tabT).')';
+        $sql = $db->query($query);
+
+       
+        $cache_key = $dateMin . "-" . $dateMax.'derPv';
+
+        while ($ln = $db->fetch_object($sql)) {
+            self::$ventes[$cache_key][$ln->fk_product] = $ln->derPv;
+//            self::$ventes[$cache_key][$ln->fk_product][null]['total_achats'] += $ln->total_achats;
+        }
+        
+    }
 
     public function getVentes($dateMin, $dateMax = null, $id_entrepot = null, $id_product = null)
     {
@@ -2635,7 +2696,7 @@ class Bimp_Product extends BimpObject
         foreach(self::$stockDate[$date] as $idP => $list){
             foreach($list as $idE => $data){
                 if($idE > 0){
-                    if($data['stock'] > 0 && !isset($data['rowid']))
+                    if($data['stock'] != 0 && !isset($data['rowid']))
                         $db->query("INSERT INTO ".MAIN_DB_PREFIX."product_stock (`fk_product`, `fk_entrepot`, `reel`) VALUES (".$idP.",".$idE.",0)");
                     if($data['stock'] == 0 && isset($data['rowid']) && $data['rowid'] > 0){
                         if($data['now'] == 0)//on supprime l'entré

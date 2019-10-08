@@ -455,6 +455,15 @@ class Bimp_Product extends BimpObject
             );
         }
 
+        if ($this->isActionAllowed('validate')) {
+            $buttons[] = array(
+                'label'   => 'Demande de validation',
+                'icon'    => 'fas_check-circle',
+                'onclick' => $this->getJsActionOnclick('mailValidate', array(), array(
+                ))
+            );
+        }
+
         if ($this->isActionAllowed('merge') && $this->canSetAction('merge')) {
             $buttons[] = array(
                 'label'   => 'Fusionner',
@@ -2581,6 +2590,12 @@ class Bimp_Product extends BimpObject
         return $errors;
     }
 
+    public function actionMailValidate($data = array(), &$success = '')
+    {
+        $this->mailValidation();
+        return $errors;
+    }
+
     public function actionMerge($data, &$success)
     {
         $errors = array();
@@ -2641,12 +2656,15 @@ class Bimp_Product extends BimpObject
     {
         $marque = BimpTools::getValue('marque', '');
         $ref_const = BimpTools::getValue('ref_constructeur', '');
+        $mailValid = BimpTools::getValue('mailValid', 0);
 
         if ($marque && $ref_const) {
             $ref = strtoupper(substr($marque, 0, 3));
             $ref .= '-' . $ref_const;
             $this->set('ref', $ref);
         }
+        if($mailValid)
+            $this->mailValidation();
 
         return parent::validatePost();
     }
@@ -2710,32 +2728,38 @@ class Bimp_Product extends BimpObject
         return array("stockDateZero" => $stockDateZero);
     }
     
+    public function mailValidation($urgent = false){
+        global $user;
+        if($urgent){
+            $mail = "XX_Achats@bimp.fr,dev@bimp.fr";
+            $msg = 'Bonjour, ' . "\n\n";
+            $msg .= 'Le produit ' . $this->getNomUrl(0) . ' a été ajouté à une vente en caisse alors qu\'il n\'est pas validé.' . "\n";
+            $msg .= 'Une validation d\'urgence est nécessaire pour finaliser la vente' . "\n\n";
+            $msg .= 'Cordialement.';
+        }
+        else{
+            $mail = "XX_Achats@bimp.fr";
+            $msg = "Bonjour " . $user->getNomUrl(0) . "souhaite que vous validiez " . $this->getNomUrl(0) . "<br/>Cordialement";
+        }
+        if (mailSyn2("Validation produit", $mail, null, $msg)) {
+            if ($this->getData('date_ask_valid') == null or $this->getData('date_ask_valid') == '') {
+                $datetime = new DateTime();
+                $this->updateField('date_ask_valid', $datetime->format('Y-m-d H:i:s'));
+            }
+            return true;
+        }
+        return false;
+    }
+    
     public function isVendable(&$errors, $urgent = false, $mail = true){
         if ($this->dol_field_exists('validate')) {
             if (!(int) $this->getData('validate')) {
-                global $user;
                 $errors[] = 'Le produit "' . $this->getRef() . ' - ' . $this->getData('label') . '" n\'est pas validé';
                 if($mail){
-                    if($urgent){
-                        $mail = "XX_Achats@bimp.fr,dev@bimp.fr";
-                        $msg = 'Bonjour, ' . "\n\n";
-                        $msg .= 'Le produit ' . $this->getNomUrl(0) . ' a été ajouté à une vente en caisse alors qu\'il n\'est pas validé.' . "\n";
-                        $msg .= 'Une validation d\'urgence est nécessaire pour finaliser la vente' . "\n\n";
-                        $msg .= 'Cordialement.';
-                    }
-                    else{
-                        $mail = "XX_Achats@bimp.fr";
-                        $msg = "Bonjour " . $user->getNomUrl(0) . "souhaite que vous validiez " . $this->getNomUrl(0) . "<br/>Cordialement";
-                    }
-                    if (mailSyn2("Validation produit", $mail, null, $msg)) {
+                    $this->db->db->rollback();
+                    if($this->mailValidation($urgent))
                         $errors[] = "Un e-mail a été envoyé pour validation du produit.";
-                        if ($this->getData('date_ask_valid') == null or $this->getData('date_ask_valid') == '') {
-                            $datetime = new DateTime();
-                            $this->db->db->rollback();
-                            $this->updateField('date_ask_valid', $datetime->format('Y-m-d H:i:s'));
-                            $this->db->db->begin();
-                        }
-                    }
+                    $this->db->db->begin();
                 }
                 return 0;
             }

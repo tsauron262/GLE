@@ -168,6 +168,9 @@ lists_cols:
         label: Type matériel
         value: 
             callback: displayTypeMateriel
+    price:
+        child: product
+        field: price
                 
 lists: 
     default: 

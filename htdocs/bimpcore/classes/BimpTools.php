@@ -1701,6 +1701,25 @@ class BimpTools
         return $n;
     }
 
+    public static function utf8_encode($value)
+    {
+        // Encodage récursif si $value = array() 
+        
+        if (is_array($value)) {
+            foreach ($value as $key => $subValue) {
+                $value[$key] = self::utf8_encode($subValue);
+            }
+
+            return $value;
+        }
+
+        if (is_string($value)) {
+            $value = utf8_encode($value);
+        }
+
+        return $value;
+    }
+
     // Traitements sur des array: 
 
     public static function getMsgFromArray($msgs, $title = '', $no_html = false)

@@ -2319,6 +2319,8 @@ class Bimp_Facture extends BimpComm
 
     public function createFromCommande(Commande $commande, $id_account = 0, $public_note = '', $private_note = '')
     {
+        // En principe: obsolète... 
+        
         global $user, $hookmanager;
         $this->reset();
         $error = 0;

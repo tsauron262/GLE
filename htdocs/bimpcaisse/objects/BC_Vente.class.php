@@ -729,7 +729,7 @@ class BC_Vente extends BimpObject
             $html .= '<h3>Client: </h3>';
             $html .= '<div class="media object_card">';
             $html .= '<div class="media-body">';
-            $html .= '<h4 class="media-heading"><span>' . $client->getData('code_client') . ' -</span> ' . $client->getData('nom') . '</h4>';
+            $html .= '<h4 class="media-heading"><span>' . $client->getData('code_client') . ' -</span> ' . addslashes($client->getData('nom')) . '</h4>';
             $html .= '<div class="client_infos">';
             $address = $client->getData('address');
             $zip = $client->getData('zip');
@@ -744,7 +744,7 @@ class BC_Vente extends BimpObject
                 $html .= $address . '<br/>';
                 $html .= $zip . ' ' . $town . '<br/>';
                 if (!is_null($country) && $country !== 1) {
-                    $html .= $client->displayCountry() . '<br/>';
+//                    $html .= $client->displayCountry() . '<br/>';
                 }
                 $html .= '</div>';
             }

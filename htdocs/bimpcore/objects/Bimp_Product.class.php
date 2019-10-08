@@ -2709,6 +2709,39 @@ class Bimp_Product extends BimpObject
         }
         return array("stockDateZero" => $stockDateZero);
     }
+    
+    public function isVendable(&$errors, $urgent = false, $mail = true){
+        if ($this->dol_field_exists('validate')) {
+            if (!(int) $this->getData('validate')) {
+                global $user;
+                $errors[] = 'Le produit "' . $this->getRef() . ' - ' . $this->getData('label') . '" n\'est pas validé';
+                if($mail){
+                    if($urgent){
+                        $mail = "XX_Achats@bimp.fr,dev@bimp.fr";
+                        $msg = 'Bonjour, ' . "\n\n";
+                        $msg .= 'Le produit ' . $this->getNomUrl(0) . ' a été ajouté à une vente en caisse alors qu\'il n\'est pas validé.' . "\n";
+                        $msg .= 'Une validation d\'urgence est nécessaire pour finaliser la vente' . "\n\n";
+                        $msg .= 'Cordialement.';
+                    }
+                    else{
+                        $mail = "XX_Achats@bimp.fr";
+                        $msg = "Bonjour " . $user->getNomUrl(0) . "souhaite que vous validiez " . $this->getNomUrl(0) . "<br/>Cordialement";
+                    }
+                    if (mailSyn2("Validation produit", $mail, null, $msg)) {
+                        $errors[] = "Un e-mail a été envoyé pour validation du produit.";
+                        if ($this->getData('date_ask_valid') == null or $this->getData('date_ask_valid') == '') {
+                            $datetime = new DateTime();
+                            $this->db->db->rollback();
+                            $this->updateField('date_ask_valid', $datetime->format('Y-m-d H:i:s'));
+                            $this->db->db->begin();
+                        }
+                    }
+                }
+                return 0;
+            }
+        }
+        return 1;
+    }
 
     private static function initStockShowRoom()
     {

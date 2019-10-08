@@ -1203,7 +1203,7 @@ class BE_Package extends BimpObject
         return array(
             'errors'           => $errors,
             'warnings'         => $warnings,
-            'success_callback' => 'triggerObjectChange(\'bimpequipment\', \'Eequipment\', 0)'
+            'success_callback' => 'triggerObjectChange(\'bimpequipment\', \'Equipment\', 0)'
         );
     }
 

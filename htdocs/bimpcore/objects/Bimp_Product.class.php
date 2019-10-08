@@ -746,10 +746,10 @@ class Bimp_Product extends BimpObject
 
     public function getStockDate($date = null, $id_entrepot = null, $id_product = null)
     {
-        if(is_null($date))
+        if (is_null($date))
             return 'N/C';
-        
-        
+
+
         if (is_null($id_product) && $this->isLoaded()) {
             $id_product = $this->id;
         }
@@ -2599,7 +2599,7 @@ class Bimp_Product extends BimpObject
     {
         return array();
     }
-    
+
     // Méthodes statiques : 
 
     public static function initStockDate($date)
@@ -2626,10 +2626,10 @@ class Bimp_Product extends BimpObject
             self::$stockDate[$date][$ln->fk_product][$ln->fk_entrepot]['stock'] -= $ln->nb;
             self::$stockDate[$date][$ln->fk_product][null]['stock'] -= $ln->nb;
         }
-        
     }
-    
-    public static function insertStockDateNotZeroProductStock($date){
+
+    public static function insertStockDateNotZeroProductStock($date)
+    {
         global $db;
         $stockDateZero = array();
         foreach(self::$stockDate[$date] as $idP => $list){
@@ -2648,7 +2648,6 @@ class Bimp_Product extends BimpObject
         }
         return array("stockDateZero" => $stockDateZero);
     }
-    
 
     private static function initStockShowRoom()
     {

@@ -2448,6 +2448,10 @@ class BimpComm extends BimpDolObject
                 $line_instance->set('remise_pa', $remise_pa);
             }
 
+            if ($line->field_exists('force_qty_1') && $line_instance->field_exists('force_qty_1')) {
+                $line_instance->set('force_qty_1', (int) $line->getData('force_qty_1'));
+            }
+
             $line_errors = $line_instance->create($warnings, true);
             if (count($line_errors)) {
                 $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec de la création de la ligne n°' . $i);
@@ -3547,6 +3551,7 @@ class BimpComm extends BimpDolObject
             );
         }
     }
+    
 //    public function displayData($field) {
 //    
 //    Petite astuce pour affichage custom d'un champ: 

@@ -895,16 +895,24 @@ class BL_CommandeShipment extends BimpObject
                     $html .= '<td>' . $line->getData('position') . '</td>';
                     $html .= '<td>' . $line->displayLineData('desc') . '</td>';
                     $html .= '<td>';
-                    $html .= BimpInput::renderInput('qty', 'line_' . $line->id . '_qty', $val, array(
-                                'data'      => array(
-                                    'data_type' => 'number',
-                                    'decimals'  => $decimals,
-                                    'min'       => $min,
-                                    'max'       => $max
-                                ),
-                                'min_label' => $min_label,
-                                'max_label' => $max_label
-                    ));
+                    if ($line->field_exists('force_qty_1') && (int) $line->getData('force_qty_1')) {
+                        $html .= '<input type="hidden" name="line_' . $line->id . '_qty" value="' . $val . '"/>';
+                        $html .= $val . '<br/>';
+                        $msg = 'L\'option "Forcer les qtés à 1" est activée pour cette ligne de commande. Il n\'est donc pas possible de répartir les unités de cette ligne en plusieurs expéditions';
+                        $html .= '<span class="warning bs-popover"' . BimpRender::renderPopoverData($msg) . '>(Forcée à 1)</span>';
+                    } else {
+                        $html .= BimpInput::renderInput('qty', 'line_' . $line->id . '_qty', $val, array(
+                                    'data'      => array(
+                                        'data_type' => 'number',
+                                        'decimals'  => $decimals,
+                                        'min'       => $min,
+                                        'max'       => $max
+                                    ),
+                                    'min_label' => $min_label,
+                                    'max_label' => $max_label
+                        ));
+                    }
+
                     $html .= '</td>';
                     $html .= '<td>';
                     if (BimpObject::objectLoaded($product) && (int) $product->getData('fk_product_type') === 0) {
@@ -1029,16 +1037,25 @@ class BL_CommandeShipment extends BimpObject
                                 }
                             }
 
-                            $html .= BimpInput::renderInput('qty', 'line_' . $line->id . '_qty', (float) $shipment_data['qty'], array(
-                                        'data'      => array(
-                                            'data_type' => 'number',
-                                            'min'       => $min,
-                                            'max'       => $max,
-                                            'decimals'  => $decimals
-                                        ),
-                                        'min_label' => $min_label,
-                                        'max_label' => $max_label
-                            ));
+                            $options = array(
+                                'data'      => array(
+                                    'data_type' => 'number',
+                                    'min'       => $min,
+                                    'max'       => $max,
+                                    'decimals'  => $decimals
+                                ),
+                                'min_label' => $min_label,
+                                'max_label' => $max_label
+                            );
+
+                            if ($line->field_exists('force_qty_1') && (int) $line->getData('force_qty_1')) {
+                                $html .= '<input type="hidden" name="line_' . $line->id . '_qty" value="' . (float) $shipment_data['qty'] . '"/>';
+                                $html .= $shipment_data['qty'] . '<br/>';
+                                $msg = 'L\'option "Forcer les qtés à 1" est activée pour cette ligne de commande. Il n\'est donc pas possible de répartir les unités de cette ligne en plusieurs expéditions';
+                                $html .= '<span class="warning bs-popover"' . BimpRender::renderPopoverData($msg) . '>(Forcée à 1)</span>';
+                            } else {
+                                $html .= BimpInput::renderInput('qty', 'line_' . $line->id . '_qty', (float) $shipment_data['qty'], $options);
+                            }
                         } else {
                             $html .= $shipment_data['qty'];
                         }

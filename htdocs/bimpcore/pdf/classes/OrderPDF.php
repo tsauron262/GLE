@@ -647,7 +647,6 @@ class BLPDF extends OrderPDF
 
                 if ($this->hideReduc && $line->remise_percent) {
                     $pu_ht = (float) ($line->subprice - ($line->subprice * ($line->remise_percent / 100)));
-
                     $row['pu_ht'] = price($pu_ht, 0, $this->langs);
                 } else {
                     $pu_ht = (float) $line->subprice;
@@ -718,6 +717,20 @@ class BLPDF extends OrderPDF
                 }
 
                 $this->tva[$line->tva_tx] += $tva_line;
+
+                if (BimpObject::objectLoaded($bimpLine)) {
+                    if ((int) $bimpLine->getData('force_qty_1')) {
+                        if ((float) $row['qte'] > 1) {
+                            $row['pu_ht'] = price($pu_ht * $qty, 0, $this->langs);
+                            $row['qte'] = 1;
+                        } elseif ((float) $row['qte'] < 1) {
+                            $row['pu_ht'] = price($pu_ht * ($qty * -1), 0, $this->langs);
+                            $row['qte'] = -1;
+                        }
+                        $row['dl'] = 0;
+                        $row['ral'] = 0;
+                    }
+                }
             }
 
             $table->rows[] = $row;

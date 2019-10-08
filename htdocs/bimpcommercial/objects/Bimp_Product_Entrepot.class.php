@@ -269,7 +269,8 @@ class Bimp_Product_Entrepot extends BimpObject
 
         if ((int) $this->getData('fk_product')) {
             $tabVentes = static::$product_instance->getVentes(null, $this->dateBilan, (int) $this->getData('fk_entrepot'), (int) $this->getData('fk_product'));
-
+            $derPv = static::$product_instance->getDerPv(null, $this->dateBilan, (int) $this->getData('fk_product'));
+            $fields['derPv'] = $derPv;
             if ($tabVentes['qty'] > 0)
                 $fields['ventes_qty'] = $tabVentes['qty'];
 

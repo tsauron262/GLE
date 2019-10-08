@@ -1397,6 +1397,11 @@ class ObjectLine extends BimpObject
 
                 case 'qty':
                     $html .= (float) $this->qty;
+                    if ($this->field_exists('force_qty_1') && (int) $this->getData('force_qty_1')) {
+                        $html .= '<br/>';
+                        $msg = 'L\'option "Forcer qté à 1" est activée. Une seule unité sera inscrite dans le PDF et le total de la ligne sera utilisé comme prix unitaire';
+                        $html .= '<span class="warning bs-popover"' . BimpRender::renderPopoverData($msg) . '>(Forcée à 1)</span>';
+                    }
                     break;
 
                 case 'pu_ht':
@@ -1540,15 +1545,14 @@ class ObjectLine extends BimpObject
                     }
                     break;
             }
-            
+
             global $modeCSV;
-            if($format == 'price' && $modeCSV){
-                
-                    $html = str_replace(".", ",", $value);
+            if ($format == 'price' && $modeCSV) {
+
+                $html = str_replace(".", ",", $value);
             }
-            
         }
-        
+
 
         return $html;
     }
@@ -2806,6 +2810,12 @@ class ObjectLine extends BimpObject
                                         'decimals'  => $decimals
                                     )
                         ));
+                    }
+
+                    if ($this->field_exists('force_qty_1') && (int) $this->getData('force_qty_1')) {
+                        $html .= '<br/>';
+                        $msg = 'L\'option "Forcer qté à 1" est activée. Une seule unité sera inscrite dans le PDF et le total de la ligne sera utilisé comme prix unitaire';
+                        $html .= '<span class="warning bs-popover"' . BimpRender::renderPopoverData($msg) . '>(Forcée à 1)</span>';
                     }
                 }
 

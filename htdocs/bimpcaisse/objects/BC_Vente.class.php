@@ -2105,6 +2105,12 @@ class BC_Vente extends BimpObject
             foreach ($articles as $article) {
                 $equipment = $article->getChildObject('equipment');
                 if (BimpObject::objectLoaded($equipment)) {
+
+                    // Retrait du package si nécessaire: 
+                    if ((int) $equipment->getData('id_package')) {
+                        $equipment->updateField('id_package', 0);
+                    }
+
                     $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
                     if (!$article->checkPlace($id_entrepot)) {
                         // Correction de l'emplacement initial en cas d'erreur: 

@@ -415,7 +415,7 @@ class BimpComm extends BimpDolObject
                 'icon_before' => 'fas_box',
                 'classes'     => array('btn', 'btn-default'),
                 'attr'        => array(
-                    'onclick' => $product->getJsLoadModalForm('light', 'Nouveau produit')
+                    'onclick' => $product->getJsLoadModalForm('lightFourn', 'Nouveau produit')
                 )
             );
 

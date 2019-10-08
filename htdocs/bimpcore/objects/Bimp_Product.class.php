@@ -774,11 +774,11 @@ class Bimp_Product extends BimpObject
         $stock = 0;
 
         if ((int) $id_product) {
-            if (!isset(self::$stockShowRoom[$id_product]))
+            if (!count(self::$stockShowRoom))
                 self::initStockShowRoom();
 
             if (isset(self::$stockShowRoom[$id_product][$id_entrepot])) {
-                return self::$stockShowRoom[$id_product][$id_entrepot];
+                $stock = self::$stockShowRoom[$id_product][$id_entrepot];
             }
 
 //            if (!count(self::$lienShowRoomEntrepot))
@@ -2632,14 +2632,17 @@ class Bimp_Product extends BimpObject
     {
         global $db;
         $stockDateZero = array();
-        foreach (self::$stockDate[$date] as $idP => $list) {
-            foreach ($list as $idE => $data) {
-                if ($data['stock'] > 0 && !isset($data['rowid']))
-                    $db->query("INSERT INTO " . MAIN_DB_PREFIX . "product_stock (`fk_product`, `fk_entrepot`, `reel`) VALUES (" . $idP . "," . $idE . ",0)");
-                if ($data['stock'] == 0 && isset($data['rowid']) && $data['rowid'] > 0) {
-                    if ($data['now'] == 0)//on supprime l'entré
-                        $db->query("DELETE FROM " . MAIN_DB_PREFIX . "product_stock WHERE `rowid` = " . $data['rowid']);
-                    $stockDateZero[] = $data['rowid'];
+        foreach(self::$stockDate[$date] as $idP => $list){
+            foreach($list as $idE => $data){
+                if($idE > 0){
+                    if($data['stock'] > 0 && !isset($data['rowid']))
+                        $db->query("INSERT INTO ".MAIN_DB_PREFIX."product_stock (`fk_product`, `fk_entrepot`, `reel`) VALUES (".$idP.",".$idE.",0)");
+                    if($data['stock'] == 0 && isset($data['rowid']) && $data['rowid'] > 0){
+                        if($data['now'] == 0)//on supprime l'entré
+                            $db->query("DELETE FROM ".MAIN_DB_PREFIX."product_stock WHERE `rowid` = ".$data['rowid']);
+                        $stockDateZero[] = $data['rowid'];
+
+                    }
                 }
             }
         }

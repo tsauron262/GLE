@@ -28,3 +28,11 @@ objects:
         instance: 
             bimp_object: 
                 name: FactureFournDolLine
+                
+                
+filters_panels: 
+    default: 
+        filters: 
+            date_valid: 
+                field: date_valid
+                child: parent

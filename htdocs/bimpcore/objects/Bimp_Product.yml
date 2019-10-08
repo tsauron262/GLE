@@ -646,6 +646,7 @@ fields_tables:
               value: 
                   callback: displayCurrentPaHt
             - field: pmp
+            - field: pa_prevu
         
     stock:
         title: Vue globale

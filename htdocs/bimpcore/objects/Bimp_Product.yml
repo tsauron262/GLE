@@ -429,6 +429,15 @@ fields:
         default_value: 0
 
 forms: 
+    lightFourn:
+        extends: light
+        rows:
+            mailValid:
+              custom: 1
+              label: Demande de validation
+              input_name: mailValid
+              input: 
+                  type: toggle
     light: 
         force_edit: 1
         rows: 

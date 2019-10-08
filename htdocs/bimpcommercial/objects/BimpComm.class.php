@@ -562,11 +562,6 @@ class BimpComm extends BimpDolObject
         return array();
     }
 
-    public function getContacts()
-    {
-        
-    }
-
     public function getTotalHt()
     {
         if ($this->isDolObject()) {

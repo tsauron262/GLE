@@ -300,7 +300,7 @@ class BimpTools
         return unserialize($value);
     }
 
-    public static function getDolObjectLinkedObjectsList($dol_object, BimpDb $bdb = null)
+    public static function getDolObjectLinkedObjectsList($dol_object, BimpDb $bdb = null, $type_filters = array())
     {
         $list = array();
 
@@ -317,12 +317,18 @@ class BimpTools
                 foreach ($rows as $r) {
                     if ((int) $r['fk_source'] === (int) $dol_object->id &&
                             $r['sourcetype'] === $dol_object->element) {
+                        if (!empty($type_filters) && !in_array($r['targettype'], $type_filters)) {
+                            continue;
+                        }
                         $list[] = array(
                             'id_object' => (int) $r['fk_target'],
                             'type'      => $r['targettype']
                         );
                     } elseif ((int) $r['fk_target'] === (int) $dol_object->id &&
                             $r['targettype'] === $dol_object->element) {
+                        if (!empty($type_filters) && !in_array($r['sourcetype'], $type_filters)) {
+                            continue;
+                        }
                         $list[] = array(
                             'id_object' => (int) $r['fk_source'],
                             'type'      => $r['sourcetype']
@@ -335,9 +341,9 @@ class BimpTools
         return $list;
     }
 
-    public static function getDolObjectLinkedObjectsListByTypes($dol_object, BimpDb $bdb)
+    public static function getDolObjectLinkedObjectsListByTypes($dol_object, BimpDb $bdb = null, $type_filters = array())
     {
-        $list = self::getDolObjectLinkedObjectsList($dol_object, $bdb);
+        $list = self::getDolObjectLinkedObjectsList($dol_object, $bdb, $type_filters);
 
         $items = array();
 
@@ -1642,7 +1648,6 @@ class BimpTools
     {
         // Commenter car apparemment ça converti les undescore en "n" => pose problème dans le cas des propales révisées. 
 //        $text = mb_convert_encoding($text, 'HTML-ENTITIES', $charset);
-
         // On vire les accents
         $text = preg_replace(array('/ß/', '/&(..)lig;/', '/&([aouAOU])uml;/', '/&(.)[^;]*;/'), array('ss', "$1", "$1" . 'e', "$1"), $text);
 

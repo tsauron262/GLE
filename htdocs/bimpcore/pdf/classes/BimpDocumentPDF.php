@@ -32,9 +32,11 @@ class BimpDocumentPDF extends BimpModelPDF
     public $totals = array("DEEE" => 0, "RPCP" => 0);
     public $target_label = '';
     public $after_totaux_label = '';
+    public $primary = '000000';
 
     public function __construct($db)
     {
+        $this->primary = BimpCore::getParam('pdf/primary', '000000');
         parent::__construct($db, 'P', 'A4');
         BimpObject::loadClass('bimpcommercial', 'BimpComm');
 
@@ -194,7 +196,7 @@ class BimpDocumentPDF extends BimpModelPDF
             'logo_height'   => $logo_height,
             'header_infos'  => $this->getSenderInfosHtml(),
             'header_right'  => $header_right,
-            'primary_color' => BimpCore::getParam('pdf/primary', '000000')
+            'primary_color' => $this->primary
         );
     }
 
@@ -311,6 +313,7 @@ class BimpDocumentPDF extends BimpModelPDF
         $this->renderAfterLines();
         $this->renderBottom();
         $this->renderAfterBottom();
+        $this->renderAnnexes();
 
         $cur_page = (int) $this->pdf->getPage();
         $num_pages = (int) $this->pdf->getNumPages();
@@ -341,8 +344,6 @@ class BimpDocumentPDF extends BimpModelPDF
             }
         }
 
-        $primary = BimpCore::getParam('pdf/primary', '000000');
-
         $label = 'Interlocuteur';
         $usertmp = null;
 
@@ -354,8 +355,8 @@ class BimpDocumentPDF extends BimpModelPDF
             $usertmp->fetch($comm1);
 
             if (BimpObject::objectLoaded($usertmp)) {
-                $html .= '<div class="row" style="border-top: solid 1px #' . $primary . '">';
-                $html .= '<span style="font-weight: bold; color: #' . $primary . ';">';
+                $html .= '<div class="row" style="border-top: solid 1px #' . $this->primary . '">';
+                $html .= '<span style="font-weight: bold; color: #' . $this->primary . ';">';
                 $html .= $label . ' :</span>';
                 $html .= '<br/>' . $usertmp->getFullName($this->langs, 0, -1, 20);
                 if ($usertmp->email) {
@@ -380,8 +381,8 @@ class BimpDocumentPDF extends BimpModelPDF
                 $usertmp->fetch($comm2);
 
                 if (BimpObject::objectLoaded($usertmp)) {
-                    $html .= '<div class="row" style="border-top: solid 1px #' . $primary . '">';
-                    $html .= '<span style="font-weight: bold; color: #' . $primary . ';">';
+                    $html .= '<div class="row" style="border-top: solid 1px #' . $this->primary . '">';
+                    $html .= '<span style="font-weight: bold; color: #' . $this->primary . ';">';
                     $html .= $label . ' :</span>';
                     $html .= '<br/>' . $usertmp->getFullName($this->langs, 0, -1, 20);
                     if ($usertmp->email) {
@@ -418,13 +419,13 @@ class BimpDocumentPDF extends BimpModelPDF
 
     public function getSenderInfosHtml()
     {
-        $html = '<br/><span style="font-size: 16px; color: #' . BimpCore::getParam('pdf/primary', '000000') . ';">' . $this->fromCompany->name . '</span><br/>';
+        $html = '<br/><span style="font-size: 16px; color: #' . $this->primary. ';">' . $this->fromCompany->name . '</span><br/>';
         $html .= '<span style="font-size: 9px">' . $this->fromCompany->address . '<br/>' . $this->fromCompany->zip . ' ' . $this->fromCompany->town . '<br/>';
         if ($this->fromCompany->phone) {
             $html .= 'Tél. : ' . $this->fromCompany->phone . '<br/>';
         }
         $html .= '</span>';
-        $html .= '<span style="color: #' . BimpCore::getParam('pdf/primary', '000000') . '; font-size: 8px;">';
+        $html .= '<span style="color: #' . $this->primary. '; font-size: 8px;">';
         if ($this->fromCompany->url) {
             $html .= $this->fromCompany->url . ($this->fromCompany->email ? ' - ' : '');
         }
@@ -454,6 +455,14 @@ class BimpDocumentPDF extends BimpModelPDF
 //        }
 
         $html .= pdf_build_address($this->langs, $this->fromCompany, $this->thirdparty, $this->contact, !is_null($this->contact) ? 1 : 0, 'target');
+
+        if (isset($this->contactFinal) && is_object($this->contactFinal)) {
+            $html .= '<br/><div class="section_title" style="width: 40%; border-top: solid 1px #' . $this->primary . '; ">';
+            $html .= '<span style="color: #' . $this->primary . '">' . ('Client Final :') . '</span></div>';
+            $html .= '';
+            $html .= pdf_build_address($this->langs, $this->fromCompany, $this->thirdparty, $this->contactFinal, !is_null($this->contactFinal) ? 1 : 0, 'target');
+        }
+
         $html = str_replace("\n", '<br/>', $html);
 
         return $html;
@@ -469,15 +478,13 @@ class BimpDocumentPDF extends BimpModelPDF
 //            $thirdparty = $object->thirdparty;
 //        }
 
-        $primary = BimpCore::getParam('pdf/primary', '000000');
-
         $html .= '<div class="section addresses_section">';
         $html .= '<table style="width: 100%" cellspacing="0" cellpadding="3px">';
         $html .= '<tr>';
         $html .= '<td style="width: 55%"></td>';
         $html .= '<td style="width: 5%"></td>';
-        $html .= '<td class="section_title" style="width: 40%; border-top: solid 1px #' . $primary . '; border-bottom: solid 1px #' . $primary . '">';
-        $html .= '<span style="color: #' . $primary . '">' . strtoupper($this->target_label) . '</span></td>';
+        $html .= '<td class="section_title" style="width: 40%; border-top: solid 1px #' . $this->primary . '; border-bottom: solid 1px #' . $this->primary . '">';
+        $html .= '<span style="color: #' . $this->primary . '">' . strtoupper($this->target_label) . '</span></td>';
         $html .= '</tr>';
         $html .= '</table>';
 
@@ -490,13 +497,6 @@ class BimpDocumentPDF extends BimpModelPDF
         $html .= '<td style="width: 40%">';
 
         $html .= $this->getTargetInfosHtml();
-
-        if (isset($this->contactFinal) && is_object($this->contactFinal)) {
-            $html .= '<br/><div class="section_title" style="width: 40%; border-top: solid 1px #' . $primary . '; ">';
-            $html .= '<span style="color: #' . $primary . '">' . ('Client Final :') . '</span></div>';
-            $html .= '';
-            $html .= str_replace("\n", '<br/>', pdf_build_address($this->langs, $this->fromCompany, $this->thirdparty, $this->contactFinal, !is_null($this->contactFinal) ? 1 : 0, 'target'));
-        }
 
         $html .= '</td>';
         $html .= '</tr>';
@@ -1177,9 +1177,7 @@ class BimpDocumentPDF extends BimpModelPDF
             $html .= '</td>';
             $html .= '</tr>';
         }
-
-
-
+        
         // Total HT:
         $total_ht = ($conf->multicurrency->enabled && $this->object->mylticurrency_tx != 1 ? $this->object->multicurrency_total_ht : $this->object->total_ht);
         $total_ht += (!empty($this->object->remise) ? $this->object->remise : 0) + $this->acompteHt;
@@ -1512,6 +1510,11 @@ class BimpDocumentPDF extends BimpModelPDF
     }
 
     public function renderAfterBottom()
+    {
+        
+    }
+    
+    public function renderAnnexes()
     {
         
     }

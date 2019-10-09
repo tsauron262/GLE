@@ -763,7 +763,8 @@ class Bimp_Product extends BimpObject
         if ($this->isLoaded()) {
             $product = $this->dol_object;
 
-            $product->load_stock('novirtual');
+            if(!count($product->stock_warehouse))
+                $product->load_stock('novirtual');
             if (isset($product->stock_warehouse[(int) $id_entrepot])) {
                 $stocks['id_stock'] = $product->stock_warehouse[(int) $id_entrepot]->id;
                 $stocks['reel'] = $product->stock_warehouse[(int) $id_entrepot]->real;
@@ -1463,13 +1464,17 @@ class Bimp_Product extends BimpObject
             $htmlT .= '<td>' . $stocks['dispo'] . '</td>';
             $htmlT .= '<td>' . $stocks['virtuel'] . '</td>';
             $htmlT .= '</tr>';
-            if ($stocks['reel'] <= 0) {//stok > 0 au debut
-                $html2 .= $htmlT;
-            } else {
+            if ($stocks['reel'] != 0 ) {//stok > 0 au debut
                 $html1 .= $htmlT;
+            } elseif ($stocks['dispo'] != 0 ) {//dispo > 0 au millieu
+                $html2 .= $htmlT;
+            } elseif ($stocks['virtuel'] != 0 ) {//virtuel > 0 au millieu
+                $html3 .= $htmlT;
+            } else {
+                $html4 .= $htmlT;
             }
         }
-        $html .= $html1 . $html2;
+        $html .= $html1 . $html2. $html3. $html4;
 
         $html .= '</tbody>';
         $html .= '</table>';

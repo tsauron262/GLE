@@ -151,6 +151,7 @@ class BimpTools
         switch (get_class($object)) {
             case 'CommandeFournisseur':
                 return DOL_URL_ROOT . '/fourn/commande/card.php?id=' . $id_object;
+                
             case 'FactureFournisseur':
                 return DOL_URL_ROOT . '/fourn/facture/card.php?facid=' . $id_object;
 

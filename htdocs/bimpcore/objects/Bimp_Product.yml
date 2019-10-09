@@ -438,6 +438,7 @@ forms:
               input_name: mailValid
               input: 
                   type: toggle
+                  
     light: 
         force_edit: 1
         rows: 
@@ -955,6 +956,7 @@ lists:
                 value: 
                     callback: 
                         method: displayStockInventorySr      
+                        
 cards: 
     default: 
         view_btn: 1

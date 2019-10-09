@@ -139,15 +139,15 @@ $(window).on("load", function () {
 
 
 
-    //Cacher prix quand ligne de text
-    $("#select_type").change(function () {
-        elems = $(this).parent().parent().parent().find("#tva_tx, input[name|='price_ht'], input[name|='qty'],  input[name|='remise_percent']");
-        if ($(this).val() >= 100) {
-            $("input[name|='price_ht']").val("0");
-            elems.hide();
-        } else
-            elems.show();
-    });
+//    //Cacher prix quand ligne de text
+//    $("#select_type").change(function () {
+//        elems = $(this).parent().parent().parent().find("#tva_tx, input[name|='price_ht'], input[name|='qty'],  input[name|='remise_percent']");
+//        if ($(this).val() >= 100) {
+//            $("input[name|='price_ht']").val("0");
+//            elems.hide();
+//        } else
+//            elems.show();
+//    });
 
 
 
@@ -1173,12 +1173,12 @@ function afficherMargeReduc() {
     });
     
     //CACHER prix
-    $(".liste_titre_create #price_ht").val(0);
-    $(".liste_titre_create  #price_ht").css("display", "none");
-    $(".liste_titre_create  #price_ht").css("height", "0");
-    $(".liste_titre_create  #price_ht").css("width", "0");
-    $("#select_type option").html("infos");
-    $("#select_type option").first().html("");
+//    $(".liste_titre_create #price_ht").val(0);
+//    $(".liste_titre_create  #price_ht").css("display", "none");
+//    $(".liste_titre_create  #price_ht").css("height", "0");
+//    $(".liste_titre_create  #price_ht").css("width", "0");
+//    $("#select_type option").html("infos");
+//    $("#select_type option").first().html("");
 }
 
 function autoClickSearch() {

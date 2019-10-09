@@ -239,6 +239,12 @@ class InvoicePDF extends BimpDocumentPDF
             $html .= '<span style="font-weight: bold;">' . $this->langs->transnoentities('CustomerCode') . ' : </span>' . $this->langs->transnoentities($soc->code_client) . '<br/>';
         }
 
+        // Num TVA Client: 
+        if ($soc->tva_intra) {
+            $html .= '<span style="font-weight: bold;">N° TVA client: </span>' . $this->langs->transnoentities($soc->tva_intra) . '<br/>';
+        }
+
+        // Commercial
         if (!empty($conf->global->DOC_SHOW_FIRST_SALES_REP)) {
             $contacts = $this->facture->getIdContact('internal', 'SALESREPFOLL');
             if (count($contacts)) {
@@ -284,7 +290,14 @@ class InvoicePDF extends BimpDocumentPDF
                 foreach ($this->shipments as $shipment) {
                     $commande = $shipment->getParentInstance();
                     if (BimpObject::objectLoaded($commande)) {
-                        $html .= 'LIV-' . $commande->getRef() . '-' . $shipment->getData('num_livraison') . '<br/>';
+                        if ($shipment->getData('date_shipped')) {
+                            $dt = new DateTime($shipment->getData('date_shipped'));
+                            $date_label = ' / ' . $dt->format('d/m/Y');
+                        } else {
+                            $date_label = '';
+                        }
+
+                        $html .= 'LIV-' . $commande->getRef() . '-' . $shipment->getData('num_livraison') . $date_label . '<br/>';
                     } else {
                         $html .= '<span class="danger">Erreur: la commande rattachée à l\'expédition #' . $shipment->id . ' n\'existe plus</span><br/>';
                     }
@@ -595,7 +608,14 @@ class InvoicePDF extends BimpDocumentPDF
             foreach ($this->shipments as $shipment) {
                 $commande = $shipment->getParentInstance();
                 if (BimpObject::objectLoaded($commande)) {
-                    $html .= 'LIV-' . $commande->getRef() . '-' . $shipment->getData('num_livraison') . '<br/>';
+                    if ($shipment->getData('date_shipped')) {
+                        $dt = new DateTime($shipment->getData('date_shipped'));
+                        $date_label = ' / ' . $dt->format('d/m/Y');
+                    } else {
+                        $date_label = '';
+                    }
+
+                    $html .= 'LIV-' . $commande->getRef() . '-' . $shipment->getData('num_livraison') . $date_label . '<br/>';
                 } else {
                     $html .= '<span class="danger">Erreur: la commande rattachée à l\'expédition #' . $shipment->id . ' n\'existe plus</span><br/>';
                 }

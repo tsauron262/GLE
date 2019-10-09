@@ -550,10 +550,10 @@ class BLPDF extends OrderPDF
         global $conf;
 
         $table = new BimpPDF_AmountsTable($this->pdf);
-        $table->addColDef('code_article', 'Code article', 30);
+//        $table->addColDef('code_article', 'Code article', 30);
         $table->addColDef('dl', 'DL', 10, 'text-align: center;', '', 'text-align: center;');
         $table->addColDef('ral', 'RAL', 10, 'text-align: center;', '', 'text-align: center;');
-        $table->cols_def['desc']['width_mm'] = 75;
+        $table->cols_def['desc']['width_mm'] = 105;
         $table->cols_def['tva']['width_mm'] = 15;
         $table->cols_def['qte']['width_mm'] = 10;
         $table->cols_def['qte']['style'] = 'text-align: center;';
@@ -579,8 +579,6 @@ class BLPDF extends OrderPDF
         foreach ($this->object->lines as &$line) {
             $bimpLine = isset($bimpLines[(int) $line->id]) ? $bimpLines[(int) $line->id] : null;
 
-
-
             if ($this->object->type != 3 && ($line->desc == "(DEPOSIT)" || stripos($line->desc, 'Acompte') === 0)) {
 //                $acompteHt = $line->subprice * (float) $line->qty;
 //                $acompteTtc = BimpTools::calculatePriceTaxIn($acompteHt, (float) $line->tva_tx);
@@ -603,8 +601,10 @@ class BLPDF extends OrderPDF
                 }
             }
 
-            $desc = $this->getLineDesc($line, $product);
 
+            $hide_product_label = BimpObject::objectLoaded($bimpLine) ? (int) $bimpLine->getData('hide_product_label') : 0;
+
+            $desc = $this->getLineDesc($line, $product, $hide_product_label);
 
             if ((BimpObject::objectLoaded($bimpLine) && (int) $bimpLine->getData('type') === ObjectLine::LINE_TEXT) ||
                     (!BimpObject::objectLoaded($bimpLine) && $line->subprice == 0 && !(int) $line->fk_product)) {
@@ -614,7 +614,7 @@ class BLPDF extends OrderPDF
                     $product = null;
                     continue;
                 } else {
-                    $row['code_article'] = array(
+                    $row['desc'] = array(
                         'colspan' => 99,
                         'content' => $desc,
                         'style'   => 'font-weight: bold; background-color: #F5F5F5;'
@@ -639,7 +639,7 @@ class BLPDF extends OrderPDF
                     }
                 }
                 $row = array(
-                    'code_article' => (!is_null($product) ? $product->ref : ''),
+//                    'code_article' => (!is_null($product) ? $product->ref : ''),
                     'desc'         => $desc,
                     'pu_ht'        => pdf_getlineupexcltax($this->object, $i, $this->langs),
                 );

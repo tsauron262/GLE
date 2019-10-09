@@ -402,15 +402,15 @@ class modBimpCommercial extends DolibarrModules
                 
                 $extrafields->addExtraField('pdf_hide_reduc', 'Masquer les réductions dans le PDF', 'boolean', 1, 1, 'propal', 0, 0, 0);
                 $extrafields->addExtraField('pdf_hide_reduc', 'Masquer les réductions dans le PDF', 'boolean', 1, 1, 'commande', 0, 0, 0);
-                $extrafields->addExtraField('pdf_hide_reduc', 'Masquer les réductions dans le PDF', 'boolean', 1, 1, 'facture', 0, 0, 0);
+//                $extrafields->addExtraField('pdf_hide_reduc', 'Masquer les réductions dans le PDF', 'boolean', 1, 1, 'facture', 0, 0, 0);
                 
                 $extrafields->addExtraField('pdf_hide_total', 'Masquer les totaux dans le PDF', 'boolean', 1, 1, 'propal', 0, 0, 0);
                 $extrafields->addExtraField('pdf_hide_total', 'Masquer les totaux dans le PDF', 'boolean', 1, 1, 'commande', 0, 0, 0);
-                $extrafields->addExtraField('pdf_hide_total', 'Masquer les totaux dans le PDF', 'boolean', 1, 1, 'facture', 0, 0, 0);
+//                $extrafields->addExtraField('pdf_hide_total', 'Masquer les totaux dans le PDF', 'boolean', 1, 1, 'facture', 0, 0, 0);
                 
                 $extrafields->addExtraField('pdf_hide_ttc', 'Masquer la colonne total TTC dans le PDF', 'boolean', 1, 1, 'propal', 0, 0, 0);
                 $extrafields->addExtraField('pdf_hide_ttc', 'Masquer la colonne total TTC dans le PDF', 'boolean', 1, 1, 'commande', 0, 0, 0);
-                $extrafields->addExtraField('pdf_hide_ttc', 'Masquer la colonne total TTC dans le PDF', 'boolean', 1, 1, 'facture', 0, 0, 0);
+//                $extrafields->addExtraField('pdf_hide_ttc', 'Masquer la colonne total TTC dans le PDF', 'boolean', 1, 1, 'facture', 0, 0, 0);
                 
                 $extrafields->addExtraField('ignore_compta', 'Ignorer', 'boolean', 1, 1, 'facture', 0, 0, 0);
                 

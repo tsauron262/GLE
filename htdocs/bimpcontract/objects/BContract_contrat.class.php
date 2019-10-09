@@ -91,9 +91,13 @@ class BContract_contrat extends BimpDolObject {
     public static $dol_module = 'contract';
     
     function __construct($module, $object_name) {
+        //global $user;
         if(BimpTools::getContext() == 'public') {
             $this->redirectMode = 4;
         }
+//        if($user->id == 460 || $user->id == 512 || $user->admin) {
+//            $this->redirectMode = 4;
+//        }
         return parent::__construct($module, $object_name);
     }
 
@@ -120,6 +124,22 @@ class BContract_contrat extends BimpDolObject {
         return $fin;
         }
         return '';
+    }
+    
+    public function displayDateNextFacture() {
+        
+        $echeancier = $this->getInstance('bimpcontract', "BContract_echeancier");
+        if($echeancier->find(['id_contrat' => $this->id])) {
+            $return = $echeancier->getData('next_facture_date');
+        } else {
+            $return = $this->getData('date_start');
+        }
+        
+        $return = new DateTime($return);
+        $return = $return->format('d / m / Y');
+        
+        return $return;
+        
     }
     
     public function displayRef() {

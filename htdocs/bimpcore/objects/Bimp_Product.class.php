@@ -1329,6 +1329,10 @@ class Bimp_Product extends BimpObject
         $stock = $this->getStocksForEntrepot($inventory->getData('fk_warehouse'));
         return $stock['reel'];
     }
+    
+    public function displayStock_picto(){
+        return $this->getStockIconStatic($this->id);
+    }
 
     public function displayStockInventorySr()
     {

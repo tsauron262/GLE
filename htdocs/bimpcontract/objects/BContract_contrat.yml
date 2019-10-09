@@ -203,6 +203,9 @@ fields_tables:
               edit: 0
             - field: date_start
               edit: 0
+            - label: Date prochaine facture
+              value:
+                  callback: getDateNextFacture
             - field: duree_mois
               edit: 0
             - label: Date de fin du contrat

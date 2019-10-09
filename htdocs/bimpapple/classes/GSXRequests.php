@@ -411,8 +411,8 @@ class GSX_Request
 
                         if ((int) $this->id_sav) {
                             $sql = 'SELECT `label` as nom, product_label as nom2
-                                FROM llx_bs_sav s, llx_be_equipment e
-                                LEFT JOIN llx_product p ON p.rowid = e.id_product AND e.id_product != 0
+                                FROM '.MAIN_DB_PREFIX.'bs_sav s, '.MAIN_DB_PREFIX.'be_equipment e
+                                LEFT JOIN '.MAIN_DB_PREFIX.'product p ON p.rowid = e.id_product AND e.id_product != 0
                                 WHERE s.id = ' . (int) $this->id_sav . ' AND s.id_equipment = e.id';
 
 

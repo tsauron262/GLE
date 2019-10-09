@@ -1,7 +1,14 @@
 <?php
 
 class BContract_echeancier extends BimpObject {
+    
+    
+    public function cronEcheancier() {
         
+        
+        
+    }
+
     public function canViewObject($object) {
         if (is_object($object))
             return true;

@@ -487,7 +487,7 @@ else
                                         //Todo recup des transferer depuis date
                                         //
                                         if($objp->rowid > 0 && isset($_REQUEST['dateStock'])){
-                                            $sql2 = $db->query("SELECT SUM(`value`) as nb FROM `llx_stock_mouvement` WHERE `tms` > STR_TO_DATE('".$_REQUEST['dateStock']."', '%Y-%m-%d') AND `fk_product` = ".$objp->rowid." AND `fk_entrepot` = ".$object->id);
+                                            $sql2 = $db->query("SELECT SUM(`value`) as nb FROM `".MAIN_DB_PREFIX."stock_mouvement` WHERE `tms` > STR_TO_DATE('".$_REQUEST['dateStock']."', '%Y-%m-%d') AND `fk_product` = ".$objp->rowid." AND `fk_entrepot` = ".$object->id);
                                             if($db->num_rows($sql2) > 0){
                                                 $ligne = $db->fetch_object($sql2);
                                                 $objp->value -= $ligne->nb;
@@ -563,7 +563,7 @@ else
                     }
                     
                     /*mod drsi*/
-                        $sql = $db->query("SELECT SUM(qty) as nb FROM `llx_facturedet` fd, `llx_facture` f WHERE f.rowid = fd.`fk_facture` AND fk_statut > 0 ".(isset($_REQUEST['dateStock'])? "AND f.datef < '".$_REQUEST['dateStock']."'" : "")." AND `fk_product` = ".$productstatic->id);
+                        $sql = $db->query("SELECT SUM(qty) as nb FROM `".MAIN_DB_PREFIX."facturedet` fd, `".MAIN_DB_PREFIX."facture` f WHERE f.rowid = fd.`fk_facture` AND fk_statut > 0 ".(isset($_REQUEST['dateStock'])? "AND f.datef < '".$_REQUEST['dateStock']."'" : "")." AND `fk_product` = ".$productstatic->id);
                             $ln = $db->fetch_object($sql);
                             $nb = $ln->nb;
                         
@@ -573,7 +573,7 @@ else
                         
                         
                     $date = "";
-                        $sql = $db->query("SELECT datef FROM `llx_facture_fourn_det` fd, `llx_facture_fourn` f WHERE fk_statut > 0 AND `fk_product` = ".$productstatic->id." AND fd.`fk_facture_fourn` = f.rowid ORDER BY datef DESC");
+                        $sql = $db->query("SELECT datef FROM `".MAIN_DB_PREFIX."facture_fourn_det` fd, `".MAIN_DB_PREFIX."facture_fourn` f WHERE fk_statut > 0 AND `fk_product` = ".$productstatic->id." AND fd.`fk_facture_fourn` = f.rowid ORDER BY datef DESC");
                         if($db->num_rows($sql) > 0){
                             $ln = $db->fetch_object($sql);
                             $date = dol_print_date($ln->datef, "%d/%m/%Y");
@@ -585,7 +585,7 @@ else
                         
                         
                     $date2 = "";
-                        $sql = $db->query("SELECT datef FROM `llx_facturedet` fd, `llx_facture` f WHERE fk_statut > 0 AND `fk_product` = ".$productstatic->id." AND fd.`fk_facture` = f.rowid ORDER BY datef DESC");
+                        $sql = $db->query("SELECT datef FROM `".MAIN_DB_PREFIX."facturedet` fd, `".MAIN_DB_PREFIX."facture` f WHERE fk_statut > 0 AND `fk_product` = ".$productstatic->id." AND fd.`fk_facture` = f.rowid ORDER BY datef DESC");
                         if($db->num_rows($sql) > 0){
                             $ln = $db->fetch_object($sql);
                             $date2 = dol_print_date($ln->datef, "%d/%m/%Y");
@@ -593,7 +593,7 @@ else
                         
                         
                         $prix = "";
-                        $sql = $db->query("SELECT price, tms FROM llx_product_fournisseur_price  WHERE `fk_product` = ".$productstatic->id." ORDER BY tms DESC");
+                        $sql = $db->query("SELECT price, tms FROM ".MAIN_DB_PREFIX."product_fournisseur_price  WHERE `fk_product` = ".$productstatic->id." ORDER BY tms DESC");
                         if($db->num_rows($sql) > 0){
                             $ln = $db->fetch_object($sql);
                             $prix = price($ln->price);
@@ -602,7 +602,7 @@ else
                         
                         $tabVente = array(3=>"",6=>"",12=>"", 'tot1An'=> 0);
                         foreach(array(3=>array(1,2,3), 6=>array(4,5,6), 12=>array(7,8,9,10,11,12)) as $id => $tab){
-                            $req = "SELECT SUM(facturedet_prodqty) as nb FROM `llx_mat_view_facturedet_months` WHERE  prod_ref = '".$productstatic->ref."' AND ( 0 ";
+                            $req = "SELECT SUM(facturedet_prodqty) as nb FROM `".MAIN_DB_PREFIX."mat_view_facturedet_months` WHERE  prod_ref = '".$productstatic->ref."' AND ( 0 ";
                             foreach($tab as $nb){
                                 $newDate = strtotime($_REQUEST['dateStock'] . "-".$nb.' month');
                                 $month = dol_print_date($newDate, "%m");
@@ -644,9 +644,9 @@ else
                         
                         
 //                        foreach(array(1,2,3,4) as $month)
-//                                $db->query("call update_llx_mat_view_facturedet_months(2019, ".$month.")");
+//                                $db->query("call update_".MAIN_DB_PREFIX."mat_view_facturedet_months(2019, ".$month.")");
 //                        foreach(array(1,2,3,4,5,6,7,8,9,10,11,12) as $month)
-//                                $db->query("call update_llx_mat_view_facturedet_months(2018, ".$month.")");
+//                                $db->query("call update_".MAIN_DB_PREFIX."mat_view_facturedet_months(2018, ".$month.")");
 //                        die;
                     
                     

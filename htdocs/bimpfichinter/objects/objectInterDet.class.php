@@ -72,8 +72,8 @@ class ObjectInterDet extends extraFI{
     public function traitePriceProd(&$warnings){
         if($this->getData("fk_commandedet") > 0){//on est en mode commande
             if($this->getData("fk_commandedet") != $this->getInitData("fk_commandedet")){//on a changé de ligne commande
-                $sql = $this->db->db->query("SELECT subprice FROM `llx_commandedet` WHERE `rowid` = ".$this->getData("fk_commandedet"));
-//                die("SELECT subprice FROM `llx_commandedet` WHERE `rowid` = ".$this->getData("fk_commandedet"));
+                $sql = $this->db->db->query("SELECT subprice FROM `".MAIN_DB_PREFIX."commandedet` WHERE `rowid` = ".$this->getData("fk_commandedet"));
+//                die("SELECT subprice FROM `".MAIN_DB_PREFIX."commandedet` WHERE `rowid` = ".$this->getData("fk_commandedet"));
                 while($ln = $this->db->db->fetch_object($sql)){
                     $this->set("pu_ht", $ln->subprice); 
                     $warnings[] = "Prix de la ligne maj avec prix commande";
@@ -82,8 +82,8 @@ class ObjectInterDet extends extraFI{
         }
         elseif($this->getData("fk_contratdet") > 0){//on est en mode contrat
             if($this->getData("fk_contratdet") != $this->getInitData("fk_contratdet") || $this->getData("fk_commandedet") != $this->getInitData("fk_commandedet")){//on a changé de ligne commande
-                $sql = $this->db->db->query("SELECT subprice FROM `llx_contratdet` WHERE `rowid` = ".$this->getData("fk_contratdet"));
-//                die("SELECT subprice FROM `llx_commandedet` WHERE `rowid` = ".$this->getData("fk_commandedet"));
+                $sql = $this->db->db->query("SELECT subprice FROM `".MAIN_DB_PREFIX."contratdet` WHERE `rowid` = ".$this->getData("fk_contratdet"));
+//                die("SELECT subprice FROM `".MAIN_DB_PREFIX."commandedet` WHERE `rowid` = ".$this->getData("fk_commandedet"));
                 while($ln = $this->db->db->fetch_object($sql)){
                     $this->set("pu_ht", $ln->subprice);
                     $warnings[] = "Prix de la ligne maj avec prix contrat";

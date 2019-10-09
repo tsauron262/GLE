@@ -840,6 +840,10 @@ filters_panels:
 lists_cols: 
     ref: 
         field: ref
+    stock_picto: 
+        label: Stock Picto
+        value:
+            callback: displayStock_picto
     ref_short: 
         label: Réf. fabricant
         value: 

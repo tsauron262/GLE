@@ -316,8 +316,8 @@ class securLogSms {
     }
 
     public function createWhiteList() {
-//        $sql = $this->db->query("SELECT count(DISTINCT(fk_user)) as nb, `ip` FROM `llx_events` WHERE `type` = 'USER_LOGIN' GROUP BY `ip` ORDER BY `nb` DESC");
-        $sql = $this->db->query("SELECT COUNT(DISTINCT(id_user)) as nb, IP as ip FROM `llx_bimp_secure_log` WHERE 1 GROUP BY IP ORDER BY `nb` DESC");
+//        $sql = $this->db->query("SELECT count(DISTINCT(fk_user)) as nb, `ip` FROM `".MAIN_DB_PREFIX."events` WHERE `type` = 'USER_LOGIN' GROUP BY `ip` ORDER BY `nb` DESC");
+        $sql = $this->db->query("SELECT COUNT(DISTINCT(id_user)) as nb, IP as ip FROM `".MAIN_DB_PREFIX."bimp_secure_log` WHERE 1 GROUP BY IP ORDER BY `nb` DESC");
         $tabIp = array("78.195.193.207//flo");
         while ($ln = $this->db->fetch_object($sql))
             if ($ln->nb > 1)

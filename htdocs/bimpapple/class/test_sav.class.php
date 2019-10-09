@@ -64,7 +64,7 @@ class test_sav {
 
         $req = "SELECT DATEDIFF(now(), s.date_update) as nbJ, id_user_tech as Technicien, r.id as rid, `serial`, s.id as cid,
 
-s.ref FROM `llx_bs_sav` s, `llx_bimp_gsx_repair` r
+s.ref FROM `".MAIN_DB_PREFIX."bs_sav` s, `".MAIN_DB_PREFIX."bimp_gsx_repair` r
 
 WHERE r.`id_sav` = s.`id` AND `" . ($statut == "closed" ? "repair_complete" : "ready_for_pick_up") . "` = 0
 AND serial is not null
@@ -274,7 +274,7 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
         $nbJ = (isset($_GET['nbJ'])) ? $_GET['nbJ'] : 60;
         $sql = $db->query("SELECT DATEDIFF(now(), c.tms) as nbJ, c.id as cid, Etat, `fk_user_modif` as user, fk_user_author as user2,
 
-c.ref FROM `llx_synopsischrono` c, llx_synopsischrono_chrono_105 cs
+c.ref FROM `".MAIN_DB_PREFIX."synopsischrono` c, ".MAIN_DB_PREFIX."synopsischrono_chrono_105 cs
 
 WHERE c.id = cs.id AND cs.Etat != 999 AND cs.Etat != 2 AND cs.Etat != 9 AND DATEDIFF(now(), c.tms) > " . $nbJ . " ORDER BY user");
         $user = new User($db);

@@ -616,12 +616,12 @@ class indexController extends BimpController
             }
         }
 
-        die(json_encode(array(
+        return array(
             'errors'             => $errors,
             'html'               => $html,
             'need_confirm_fonds' => $need_confirm_fonds,
             'request_id'         => BimpTools::getValue('request_id', 0),
-        )));
+        );
     }
 
     protected function ajaxProcessCloseCaisse()
@@ -707,7 +707,7 @@ class indexController extends BimpController
             }
         }
 
-        die(json_encode(array(
+        return array(
             'errors'             => $errors,
             'html'               => $html,
             'need_confirm_fonds' => $need_confirm_fonds,
@@ -715,7 +715,7 @@ class indexController extends BimpController
             'request_id'         => BimpTools::getValue('request_id', 0),
             'recap_url'          => $recap_url,
             'recap_width'        => $recap_width
-        )));
+        );
     }
 
     public function ajaxProcessLoadNewVente()
@@ -756,12 +756,12 @@ class indexController extends BimpController
             }
         }
 
-        die(json_encode(array(
+        return array(
             'errors'     => $errors,
             'html'       => $html,
             'request_id' => BimpTools::getValue('request_id', 0),
             'vente_data' => $data
-        )));
+        );
     }
 
     public function ajaxProcessLoadVenteData()
@@ -782,11 +782,11 @@ class indexController extends BimpController
             }
         }
 
-        die(json_encode(array(
+        return array(
             'errors'     => $errors,
             'vente_data' => $data,
             'request_id' => BimpTools::getValue('request_id', 0)
-        )));
+        );
     }
 
     public function ajaxProcessLoadVente()
@@ -832,12 +832,12 @@ class indexController extends BimpController
             }
         }
 
-        die(json_encode(array(
+        return array(
             'errors'     => $errors,
             'html'       => $html,
             'request_id' => BimpTools::getValue('request_id', 0),
             'vente_data' => $data
-        )));
+        );
     }
 
     protected function ajaxProcessSaveVenteStatus()
@@ -902,7 +902,7 @@ class indexController extends BimpController
             }
         }
 
-        die(json_encode(array(
+        return array(
             'errors'          => $errors,
             'validate_errors' => $validate_errors,
             'validate'        => $validate,
@@ -910,7 +910,7 @@ class indexController extends BimpController
             'ticket_html'     => $ticket_html,
             'ticket_errors'   => $ticket_errors,
             'request_id'      => BimpTools::getValue('request_id', 0),
-        )));
+        );
     }
 
     protected function ajaxProcessSaveCommercial()
@@ -942,11 +942,11 @@ class indexController extends BimpController
             }
         }
 
-        die(json_encode(array(
+        return array(
             'errors'     => $errors,
             'success'    => 'Commercial de la vente enregistré avec succès',
             'request_id' => BimpTools::getValue('request_id', 0),
-        )));
+        );
     }
 
     protected function ajaxProcessSaveNotePlus()
@@ -974,11 +974,11 @@ class indexController extends BimpController
             }
         }
 
-        die(json_encode(array(
+        return array(
             'errors'     => $errors,
             'success'    => 'Note de la vente enregistrée avec succès',
             'request_id' => BimpTools::getValue('request_id', 0),
-        )));
+        );
     }
 
     protected function ajaxProcessSaveCondReglement()
@@ -1013,12 +1013,12 @@ class indexController extends BimpController
             }
         }
 
-        die(json_encode(array(
+        return array(
             'errors'     => $errors,
             'success'    => 'Conditions de réglement mises à jour avec succès',
             'vente_data' => $vente_data,
             'request_id' => BimpTools::getValue('request_id', 0),
-        )));
+        );
     }
 
     protected function ajaxProcessSaveVenteHt()
@@ -1055,12 +1055,12 @@ class indexController extends BimpController
             }
         }
 
-        die(json_encode(array(
+        return array(
             'errors'     => $errors,
             'success'    => 'Mise à jour des conditions de vente effectuée avec succès',
             'vente_data' => $vente_data,
             'request_id' => BimpTools::getValue('request_id', 0),
-        )));
+        );
     }
 
     public function ajaxProcessSaveClient()
@@ -1103,12 +1103,12 @@ class indexController extends BimpController
             }
         }
 
-        die(json_encode(array(
+        return array(
             'errors'         => $errors,
             'html'           => $html,
             'discounts_html' => $discounts_html,
             'request_id'     => BimpTools::getValue('request_id', 0),
-        )));
+        );
     }
 
     public function ajaxProcessSaveContact()
@@ -1141,11 +1141,11 @@ class indexController extends BimpController
             }
         }
 
-        die(json_encode(array(
+        return array(
             'errors'     => $errors,
             'html'       => $html,
             'request_id' => BimpTools::getValue('request_id', 0),
-        )));
+        );
     }
 
     public function ajaxProcessFindProduct()
@@ -1180,13 +1180,13 @@ class indexController extends BimpController
             }
         }
 
-        die(json_encode(array(
+        return array(
             'errors'      => $errors,
             'request_id'  => BimpTools::getValue('request_id', 0),
             'cart_html'   => $result['cart_html'],
             'result_html' => $result['result_html'],
             'vente_data'  => $vente_data
-        )));
+        );
     }
 
     public function ajaxProcessSelectArticle()
@@ -1226,12 +1226,12 @@ class indexController extends BimpController
             }
         }
 
-        die(json_encode(array(
+        return array(
             'errors'     => $errors,
             'request_id' => BimpTools::getValue('request_id', 0),
             'html'       => $html,
             'vente_data' => $vente_data
-        )));
+        );
     }
 
     public function ajaxProcessSaveArticleQty()
@@ -1281,13 +1281,13 @@ class indexController extends BimpController
             }
         }
 
-        die(json_encode(array(
+        return array(
             'errors'     => $errors,
             'vente_data' => $vente_data,
             'total_ttc'  => $total_ttc,
             'stock'      => $stock,
             'request_id' => BimpTools::getValue('request_id', 0),
-        )));
+        );
     }
 
     public function ajaxProcessRemoveArticle()
@@ -1326,11 +1326,11 @@ class indexController extends BimpController
             }
         }
 
-        die(json_encode(array(
+        return array(
             'errors'     => $errors,
             'vente_data' => $vente_data,
             'request_id' => BimpTools::getValue('request_id', 0),
-        )));
+        );
     }
 
     public function ajaxProcessDeleteRemise()
@@ -1366,11 +1366,11 @@ class indexController extends BimpController
             }
         }
 
-        die(json_encode(array(
+        return array(
             'errors'     => $errors,
             'request_id' => BimpTools::getValue('request_id', 0),
             'vente_data' => $vente_data
-        )));
+        );
     }
 
     public function ajaxProcessAddPaiement()
@@ -1410,12 +1410,12 @@ class indexController extends BimpController
             }
         }
 
-        die(json_encode(array(
+        return array(
             'errors'     => $errors,
             'request_id' => BimpTools::getValue('request_id', 0),
             'html'       => $html,
             'vente_data' => $vente_data
-        )));
+        );
     }
 
     public function ajaxProcessDeletePaiement()
@@ -1452,20 +1452,20 @@ class indexController extends BimpController
             }
         }
 
-        die(json_encode(array(
+        return array(
             'errors'     => $errors,
             'request_id' => BimpTools::getValue('request_id', 0),
             'html'       => $html,
             'vente_data' => $vente_data
-        )));
+        );
     }
 
     protected function ajaxProcessLoadCaisseSelect()
     {
-        die(json_encode(array(
+        return array(
             'html'       => $this->renderCaisseSelect(),
             'request_id' => BimpTools::getValue('request_id', 0)
-        )));
+        );
     }
 
     protected function ajaxProcessSearchEquipmentToReturn()
@@ -1547,12 +1547,12 @@ class indexController extends BimpController
             }
         }
 
-        die(json_encode(array(
+        return array(
             'errors'     => $errors,
             'warnings'   => $warnings,
             'equipments' => $equipments,
             'request_id' => BimpTools::getValue('request_id', 0)
-        )));
+        );
     }
 
     protected function ajaxProcessRemoveReturn()
@@ -1591,10 +1591,10 @@ class indexController extends BimpController
             }
         }
 
-        die(json_encode(array(
+        return array(
             'errors'     => $errors,
             'vente_data' => $vente_data,
             'request_id' => BimpTools::getValue('request_id', 0),
-        )));
+        );
     }
 }

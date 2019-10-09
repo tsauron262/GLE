@@ -753,8 +753,10 @@ class ExtraFields
                 
 //                require_once(DOL_DOCUMENT_ROOT."/bimpcore/classes/BimpCache.php");
 //                $cache_key = "fetch_name_optionals_label_".$elementtype;
-//                if(!$forceload && isset(BimpCache::$cache[$cache_key]))
+//                if(!$forceload && isset(BimpCache::$cache[$cache_key])){
+//                    $this->attributes = BimpCache::$cache[$cache_key."_2"];
 //                    return BimpCache::$cache[$cache_key];
+//                }
 
 		if (empty($elementtype)) return array();
 
@@ -854,6 +856,7 @@ class ExtraFields
 		}
 
 //                BimpCache::$cache[$cache_key] = $array_name_label;
+//                BimpCache::$cache[$cache_key."_2"] = $this->attributes;
 		return $array_name_label;
 	}
 

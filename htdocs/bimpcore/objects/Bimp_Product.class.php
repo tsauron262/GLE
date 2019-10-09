@@ -455,6 +455,15 @@ class Bimp_Product extends BimpObject
             );
         }
 
+        if ($this->isActionAllowed('validate')) {
+            $buttons[] = array(
+                'label'   => 'Demande de validation',
+                'icon'    => 'fas_check-circle',
+                'onclick' => $this->getJsActionOnclick('mailValidate', array(), array(
+                ))
+            );
+        }
+
         if ($this->isActionAllowed('merge') && $this->canSetAction('merge')) {
             $buttons[] = array(
                 'label'   => 'Fusionner',
@@ -485,6 +494,67 @@ class Bimp_Product extends BimpObject
         }
 
         return 0;
+    }
+    
+    public function getDerPv($dateMin, $dateMax = null, $id_product = null){
+        
+        if (is_null($id_product) && $this->isLoaded()) {
+            $id_product = $this->id;
+        }
+
+        if (is_null($dateMin)) {
+            $dateMin = '0000-00-00 00:00:00';
+        }
+
+        if (preg_match('/^\d{4}\-\d{2}\-\d{2}$/', $dateMin)) {
+            $dateMin .= ' 00:00:00';
+        }
+
+        if (is_null($dateMax)) {
+            $dateMax = date('Y-m-d H:i:s');
+        }
+
+        $cache_key = $dateMin . '-' . $dateMax.'derPv';
+
+        if ((int) $id_product) {
+            if (!isset(self::$ventes[$cache_key])) {
+                self::initDerPv($dateMin, $dateMax);
+            }
+
+            if (isset(self::$ventes[$cache_key][$id_product])) {
+                return self::$ventes[$cache_key][$id_product];
+            }
+        }
+
+        return 0;
+    }
+    
+    public function initDerPv($dateMin, $dateMax)
+    {
+        global $db;
+//        self::$ventes = array(); // Ne pas déco ça effacerait d'autres données en cache pour d'autres dates. 
+        
+        $query = 'SELECT MAX(l.rowid) as rowid , fk_product FROM `'.MAIN_DB_PREFIX.'facturedet` l, `'.MAIN_DB_PREFIX.'facture` f WHERE f.rowid = l.fk_facture AND qty > 0 ';
+        if ($dateMin)
+            $query .= " AND date_valid >= '" . $dateMin . "'";
+
+        if ($dateMax)
+            $query .= " AND date_valid <= '" . $dateMax . "'";
+        $sql = $db->query($query." GROUP BY fk_product");
+        while ($ln = $db->fetch_object($sql)) {
+            $tabT[] = $ln->rowid;
+        }
+        $query = 'SELECT (total_ht / qty) as derPv, fk_product FROM `'.MAIN_DB_PREFIX.'facturedet` l WHERE rowid IN ('.implode(",", $tabT).')';
+        $sql = $db->query($query);
+
+       
+        $cache_key = $dateMin . "-" . $dateMax.'derPv';
+
+        while ($ln = $db->fetch_object($sql)) {
+            self::$ventes[$cache_key][$ln->fk_product] = $ln->derPv;
+//            self::$ventes[$cache_key][$ln->fk_product][null]['total_achats'] += $ln->total_achats;
+        }
+        
     }
 
     public function getVentes($dateMin, $dateMax = null, $id_entrepot = null, $id_product = null)
@@ -746,10 +816,10 @@ class Bimp_Product extends BimpObject
 
     public function getStockDate($date = null, $id_entrepot = null, $id_product = null)
     {
-        if(is_null($date))
+        if (is_null($date))
             return 'N/C';
-        
-        
+
+
         if (is_null($id_product) && $this->isLoaded()) {
             $id_product = $this->id;
         }
@@ -2520,6 +2590,12 @@ class Bimp_Product extends BimpObject
         return $errors;
     }
 
+    public function actionMailValidate($data = array(), &$success = '')
+    {
+        $this->mailValidation();
+        return $errors;
+    }
+
     public function actionMerge($data, &$success)
     {
         $errors = array();
@@ -2580,12 +2656,15 @@ class Bimp_Product extends BimpObject
     {
         $marque = BimpTools::getValue('marque', '');
         $ref_const = BimpTools::getValue('ref_constructeur', '');
+        $mailValid = BimpTools::getValue('mailValid', 0);
 
         if ($marque && $ref_const) {
             $ref = strtoupper(substr($marque, 0, 3));
             $ref .= '-' . $ref_const;
             $this->set('ref', $ref);
         }
+        if($mailValid)
+            $this->mailValidation();
 
         return parent::validatePost();
     }
@@ -2599,7 +2678,7 @@ class Bimp_Product extends BimpObject
     {
         return array();
     }
-    
+
     // Méthodes statiques : 
 
     public static function initStockDate($date)
@@ -2626,18 +2705,18 @@ class Bimp_Product extends BimpObject
             self::$stockDate[$date][$ln->fk_product][$ln->fk_entrepot]['stock'] -= $ln->nb;
             self::$stockDate[$date][$ln->fk_product][null]['stock'] -= $ln->nb;
         }
-        
     }
-    
-    public static function insertStockDateNotZeroProductStock($date){
+
+    public static function insertStockDateNotZeroProductStock($date)
+    {
         global $db;
         $stockDateZero = array();
         foreach(self::$stockDate[$date] as $idP => $list){
             foreach($list as $idE => $data){
                 if($idE > 0){
-                    if($data['stock'] > 0 && !isset($data['rowid']))
+                    if($data['stock'] != 0 && !isset($data['rowid']))//On a un stock a date et pas dentre, on ajoute
                         $db->query("INSERT INTO ".MAIN_DB_PREFIX."product_stock (`fk_product`, `fk_entrepot`, `reel`) VALUES (".$idP.",".$idE.",0)");
-                    if($data['stock'] == 0 && isset($data['rowid']) && $data['rowid'] > 0){
+                    if($data['stock'] == 0 && isset($data['rowid']) && $data['rowid'] > 0){//On a pas de stock a date est une entre
                         if($data['now'] == 0)//on supprime l'entré
                             $db->query("DELETE FROM ".MAIN_DB_PREFIX."product_stock WHERE `rowid` = ".$data['rowid']);
                         $stockDateZero[] = $data['rowid'];
@@ -2649,6 +2728,44 @@ class Bimp_Product extends BimpObject
         return array("stockDateZero" => $stockDateZero);
     }
     
+    public function mailValidation($urgent = false){
+        global $user;
+        if($urgent){
+            $mail = "XX_Achats@bimp.fr,dev@bimp.fr";
+            $msg = 'Bonjour, ' . "\n\n";
+            $msg .= 'Le produit ' . $this->getNomUrl(0) . ' a été ajouté à une vente en caisse alors qu\'il n\'est pas validé.' . "\n";
+            $msg .= 'Une validation d\'urgence est nécessaire pour finaliser la vente' . "\n\n";
+            $msg .= 'Cordialement.';
+        }
+        else{
+            $mail = "XX_Achats@bimp.fr";
+            $msg = "Bonjour " . $user->getNomUrl(0) . "souhaite que vous validiez " . $this->getNomUrl(0) . "<br/>Cordialement";
+        }
+        if (mailSyn2("Validation produit", $mail, null, $msg)) {
+            if ($this->getData('date_ask_valid') == null or $this->getData('date_ask_valid') == '') {
+                $datetime = new DateTime();
+                $this->updateField('date_ask_valid', $datetime->format('Y-m-d H:i:s'));
+            }
+            return true;
+        }
+        return false;
+    }
+    
+    public function isVendable(&$errors, $urgent = false, $mail = true){
+        if ($this->dol_field_exists('validate')) {
+            if (!(int) $this->getData('validate')) {
+                $errors[] = 'Le produit "' . $this->getRef() . ' - ' . $this->getData('label') . '" n\'est pas validé';
+                if($mail){
+                    $this->db->db->rollback();
+                    if($this->mailValidation($urgent))
+                        $errors[] = "Un e-mail a été envoyé pour validation du produit.";
+                    $this->db->db->begin();
+                }
+                return 0;
+            }
+        }
+        return 1;
+    }
 
     private static function initStockShowRoom()
     {

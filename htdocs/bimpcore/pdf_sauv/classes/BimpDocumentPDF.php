@@ -316,7 +316,7 @@ class BimpDocumentPDF extends BimpModelPDF
     public function getTargetInfosHtml()
     {
         global $conf;
-        if ($this->contact < 1)
+        if (is_null($this->contact))
             $html = '<div class="bold">' . pdfBuildThirdpartyName($this->thirdparty, $this->langs) . '</div>';
         elseif (!empty($conf->global->MAIN_USE_COMPANY_NAME_OF_CONTACT))
             $this->contact->firstname .= '<br/>' . pdfBuildThirdpartyName($this->thirdparty, $this->langs) . '';

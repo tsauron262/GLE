@@ -128,24 +128,24 @@ fields:
         type: bool
         default_value: 0
         sortable: 0
-    pdf_hide_reduc: 
-        label: Masquer les remises dans le PDF
-        dol_extra_field: 1
-        type: bool
-        default_value: 0
-        sortable: 0
-    pdf_hide_total: 
-        label: Masquer les totaux dans le PDF
-        dol_extra_field: 1
-        type: bool
-        default_value: 0 
-        sortable: 0
-    pdf_hide_ttc:
-        label: Masquer le TTC dans le PDF
-        dol_extra_field: 1
-        type: bool
-        default_value: 0
-        sortable: 0
+#    pdf_hide_reduc: 
+#        label: Masquer les remises dans le PDF
+#        dol_extra_field: 1
+#        type: bool
+#        default_value: 0
+#        sortable: 0
+#    pdf_hide_total: 
+#        label: Masquer les totaux dans le PDF
+#        dol_extra_field: 1
+#        type: bool
+#        default_value: 0 
+#        sortable: 0
+#    pdf_hide_ttc:
+#        label: Masquer le TTC dans le PDF
+#        dol_extra_field: 1
+#        type: bool
+#        default_value: 0
+#        sortable: 0
     marge: 
         label: Marge
         type: money
@@ -311,12 +311,12 @@ forms:
                     callback: isEditable
             pdf_hide_pu: 
                 field: pdf_hide_pu 
-            pdf_hide_reduc: 
-                field: pdf_hide_reduc
-            pdf_hide_total: 
-                field: pdf_hide_total
-            pdf_hide_ttc: 
-                field: pdf_hide_ttc
+#            pdf_hide_reduc: 
+#                field: pdf_hide_reduc
+#            pdf_hide_total: 
+#                field: pdf_hide_total
+#            pdf_hide_ttc: 
+#                field: pdf_hide_ttc
             model_pdf: 
                 field: model_pdf
             zone_vente: 
@@ -551,12 +551,12 @@ fields_tables:
         rows: 
             - field: pdf_hide_pu
               edit: 1
-            - field: pdf_hide_reduc
-              edit: 1
-            - field: pdf_hide_total
-              edit: 1
-            - field: pdf_hide_ttc
-              edit: 1
+#            - field: pdf_hide_reduc
+#              edit: 1
+#            - field: pdf_hide_total
+#              edit: 1
+#            - field: pdf_hide_ttc
+#              edit: 1
             - field: remise_globale_label
               edit: 1
               show: 

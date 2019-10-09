@@ -1102,7 +1102,7 @@ class Bimp_Facture extends BimpComm
     public function getRemainToPay($true_value = false)
     {
         // $true_value: ne pas tenir compte du statut "payé". 
-        
+
         if ($this->isLoaded()) {
             if (!$true_value && $this->dol_object->paye) {
                 return 0;
@@ -2319,6 +2319,8 @@ class Bimp_Facture extends BimpComm
 
     public function createFromCommande(Commande $commande, $id_account = 0, $public_note = '', $private_note = '')
     {
+        // En principe: obsolète... 
+
         global $user, $hookmanager;
         $this->reset();
         $error = 0;

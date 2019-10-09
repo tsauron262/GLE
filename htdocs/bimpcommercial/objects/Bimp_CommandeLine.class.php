@@ -461,7 +461,7 @@ class Bimp_CommandeLine extends ObjectLine
                     'id_commande_client'      => (int) $commande->id,
                     'id_commande_client_line' => $this->id
                         ), null, null, 'id', 'asc', 'array', array('qty', 'status'));
-                
+
                 if (is_array($rows)) {
                     foreach ($rows as $r) {
                         $qties['total'] += (float) $r['qty'];
@@ -1466,6 +1466,9 @@ class Bimp_CommandeLine extends ObjectLine
             $value = (!$with_total_max && !(float) $shipment_qty && !(int) $id_shipment ? $min : $shipment_qty);
         }
 
+        if (is_null($input_name)) {
+            $input_name = 'line_' . $this->id . '_shipment_' . $id_shipment . '_qty';
+        }
 
         if (!$decimals) {
             $max = (int) floor($max);
@@ -1498,21 +1501,29 @@ class Bimp_CommandeLine extends ObjectLine
             }
         }
 
-        if (is_null($input_name)) {
-            $input_name = 'line_' . $this->id . '_shipment_' . $id_shipment . '_qty';
-        }
-
-        $html .= BimpInput::renderInput('qty', $input_name, $value, $options);
-
-        if (abs($shipment_qty) > 0) {
-            if ($shipment_qty === 1) {
-                $msg = $shipment_qty . ' unité a déjà été assignée à cette expédition.';
-            } else {
-                $msg = $shipment_qty . ' unités ont déjà été assignées à cette expédition.';
+        if ($this->field_exists('force_qty_1') && (int) $this->getData('force_qty_1')) {
+            $html .= '<input type="hidden" name="' . $input_name . '" value="' . $value . '"';
+            $html .= BimpRender::displayTagData($options['data']);
+            if (isset($options['extra_class'])) {
+                $html .= ' class="' . $options['extra_class'] . '"';
             }
+            $html .= '/>';
+            $html .= $value . '<br/>';
+            $msg = 'L\'option "Forcer les qtés à 1" est activée pour cette ligne de commande. Il n\'est donc pas possible de répartir les unités de cette ligne en plusieurs expéditions';
+            $html .= '<span class="warning bs-popover"' . BimpRender::renderPopoverData($msg) . '>(Forcée à 1)</span>';
+        } else {
+            $html .= BimpInput::renderInput('qty', $input_name, $value, $options);
 
-            $msg .= '<br/>Indiquez ici le nombre total d\'unités à assigner.';
-            $html .= BimpRender::renderAlerts($msg, 'info');
+            if (abs($shipment_qty) > 0) {
+                if ($shipment_qty === 1) {
+                    $msg = $shipment_qty . ' unité a déjà été assignée à cette expédition.';
+                } else {
+                    $msg = $shipment_qty . ' unités ont déjà été assignées à cette expédition.';
+                }
+
+                $msg .= '<br/>Indiquez ici le nombre total d\'unités à assigner.';
+                $html .= BimpRender::renderAlerts($msg, 'info');
+            }
         }
 
         return $html;
@@ -1568,8 +1579,16 @@ class Bimp_CommandeLine extends ObjectLine
             }
         }
 
-        if (!$canEdit) {
-            return '<input type="hidden" class="line_facture_qty" name="line_' . $this->id . '_facture_' . $id_facture . '_qty" value="' . $value . '"/>' . $value;
+        $force_qty_1 = ($this->field_exists('force_qty_1') && (int) $this->getData('force_qty_1'));
+
+        if (!$canEdit || $force_qty_1) {
+            $html = '<input type="hidden" class="line_facture_qty" name="line_' . $this->id . '_facture_' . $id_facture . '_qty" value="' . $value . '"/>' . $value;
+            if ($force_qty_1) {
+                $html .= '<br/>';
+                $msg = 'L\'option "Forcer les qtés à 1" est activée pour cette ligne de commande. Il n\'est donc pas possible de répartir les unités de cette ligne en plusieurs factures';
+                $html .= '<span class="warning bs-popover"' . BimpRender::renderPopoverData($msg) . '>(Forcée à 1)</span>';
+            }
+            return $html;
         }
 
         if (!$decimals) {

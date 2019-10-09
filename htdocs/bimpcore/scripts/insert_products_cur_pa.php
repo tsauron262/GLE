@@ -164,11 +164,12 @@ foreach ($list as $id_product) {
                     echo BimpRender::renderAlerts(BimpTools::getMsgFromArray($err, 'PROD #' . $id_prod));
                     break;
                 }
+                
+                $date_to = $data['datec'];
 
                 if ($data['datec'] < '2019-07-01 23:59:59') {
                     break;
                 }
-                $date_to = $data['datec'];
             }
             break;
         }

@@ -218,7 +218,7 @@ $sql1 = $sql1 . $sql . " ORDER BY $sortfield $sortorder  LIMIT $offset, $limit "
 //$selSoc .= "</select>";
 
 $form = new Form($db);
-$selSoc .= $form->select_thirdparty($socid, 'socid');
+$selSoc .= $form->select_company($socid, 'socid');
 
 
 $req = "SELECT * FROM `" . MAIN_DB_PREFIX . "synopsisfichinter_c_typeInterv` WHERE `active` = 1";

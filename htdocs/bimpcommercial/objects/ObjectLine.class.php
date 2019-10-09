@@ -391,23 +391,10 @@ class ObjectLine extends BimpObject
             }
 
             if (is_object($product) && $product->id > 0) {
-                if ($product->dol_field_exists('validate')) {
-                    if (!(int) $product->getData('validate')) {
-                        $this->db->db->rollback();
-                        global $user;
-                        $errors[] = 'Le produit "' . $product->getRef() . ' - ' . $product->getData('label') . '" n\'est pas validé';
-                        if (mailSyn2("Validation produit", "XX_Achats@bimp.fr", null, "Bonjour " . $user->getNomUrl(0) . "souhaite que vous validiez " . $product->getNomUrl(0) . "<br/>Cordialement")) {
-                            $errors[] = "Un e-mail a été envoyé pour validation du produit.";
-                            if ($product->getData('date_ask_valid') == null or $product->getData('date_ask_valid') == '') {
-                                $datetime = new DateTime();
-                                $product->updateField('date_ask_valid', $datetime->format('Y-m-d H:i:s'));
-                            }
-                        }
-                        $this->db->db->begin();
-                        return 0;
-                    }
-                }
+                if(!$product->isVendable($errors))
+                    return 0;
             }
+            
         }
 
         return 1;
@@ -1261,6 +1248,7 @@ class ObjectLine extends BimpObject
             $html .= $this->renderLineInput($field);
             $html .= '</div>';
         } else {
+            $format = "";
             switch ($field) {
                 case 'id_product':
                     $product = $this->getProduct();
@@ -1409,9 +1397,16 @@ class ObjectLine extends BimpObject
 
                 case 'qty':
                     $html .= (float) $this->qty;
+                    if ($this->field_exists('force_qty_1') && (int) $this->getData('force_qty_1')) {
+                        $html .= '<br/>';
+                        $msg = 'L\'option "Forcer qté à 1" est activée. Une seule unité sera inscrite dans le PDF et le total de la ligne sera utilisé comme prix unitaire';
+                        $html .= '<span class="warning bs-popover"' . BimpRender::renderPopoverData($msg) . '>(Forcée à 1)</span>';
+                    }
                     break;
 
                 case 'pu_ht':
+                    $format = 'price';
+                    $value = (float) $this->pu_ht;
                     if ($no_html) {
                         $html = price((float) $this->pu_ht) . ' €';
                     } else {
@@ -1420,6 +1415,8 @@ class ObjectLine extends BimpObject
                     break;
 
                 case 'pu_ttc':
+                    $format = 'price';
+                    $value = (float) $this->getUnitPriceTTC();
                     if ($no_html) {
                         $html = price((float) $this->getUnitPriceTTC()) . ' €';
                     } else {
@@ -1432,6 +1429,8 @@ class ObjectLine extends BimpObject
                     break;
 
                 case 'pa_ht':
+                    $format = 'price';
+                    $value = (float) $this->pa_ht;
                     $pa_ht = (float) $this->pa_ht;
                     $remise_pa = 0;
 
@@ -1479,6 +1478,8 @@ class ObjectLine extends BimpObject
                     break;
 
                 case 'total_ht':
+                    $format = 'price';
+                    $value = (float) $this->getTotalHT();
                     if ($no_html) {
                         $html = price((float) $this->getTotalHT()) . ' €';
                     } else {
@@ -1487,6 +1488,8 @@ class ObjectLine extends BimpObject
                     break;
 
                 case 'total_ht_w_remises':
+                    $format = 'price';
+                    $value = (float) $this->getTotalHTWithRemises();
                     if ($no_html) {
                         $html = price((float) $this->getTotalHTWithRemises()) . ' €';
                     } else {
@@ -1495,6 +1498,8 @@ class ObjectLine extends BimpObject
                     break;
 
                 case 'total_ttc':
+                    $format = 'price';
+                    $value = (float) $this->getTotalTTC();
                     if ($no_html) {
                         $html = price((float) $this->getTotalTTC()) . ' €';
                     } else {
@@ -1504,6 +1509,8 @@ class ObjectLine extends BimpObject
 
                 case 'margin':
                     $margin = (float) $this->getMargin();
+                    $format = 'price';
+                    $value = (float) $margin;
                     $margin_rate = 0;
                     if ($margin !== 0.0) {
                         $margin_rate = round($this->getMarginRate(), 4);
@@ -1538,7 +1545,14 @@ class ObjectLine extends BimpObject
                     }
                     break;
             }
+
+            global $modeCSV;
+            if ($format == 'price' && $modeCSV) {
+
+                $html = str_replace(".", ",", $value);
+            }
         }
+
 
         return $html;
     }
@@ -2734,7 +2748,7 @@ class ObjectLine extends BimpObject
                 break;
 
             case 'desc':
-                $html = BimpInput::renderInput('html', 'desc', (string) $value);
+                $html = BimpInput::renderInput('textarea', 'desc', (string) $value);
                 break;
 
             case 'qty':
@@ -2796,6 +2810,12 @@ class ObjectLine extends BimpObject
                                         'decimals'  => $decimals
                                     )
                         ));
+                    }
+
+                    if ($this->field_exists('force_qty_1') && (int) $this->getData('force_qty_1')) {
+                        $html .= '<br/>';
+                        $msg = 'L\'option "Forcer qté à 1" est activée. Une seule unité sera inscrite dans le PDF et le total de la ligne sera utilisé comme prix unitaire';
+                        $html .= '<span class="warning bs-popover"' . BimpRender::renderPopoverData($msg) . '>(Forcée à 1)</span>';
                     }
                 }
 

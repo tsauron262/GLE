@@ -9,6 +9,8 @@ class BimpRender
         foreach ($data as $name => $value) {
             $html .= ' data-' . $name . '="' . $value . '"';
         }
+        
+        return $html;
     }
 
     public static function renderIcon($icon, $class = '')

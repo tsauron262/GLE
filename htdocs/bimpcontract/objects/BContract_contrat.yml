@@ -131,6 +131,10 @@ fields:
         display_if:
             field_name: use_syntec
             show_values: 1
+    contrat_source:
+        label: Contrat Initial
+        type: int
+        dol_extra_field: 1
     tacite:
         label: Renouvellement
         type: int
@@ -194,6 +198,10 @@ fields_tables:
         rows:
             - field: ref
               label: Référence du contrat
+              edit: 0
+            - label: Contrat initial
+              value:
+                  callback: getContratSource
               edit: 0
             - field: objet_contrat
               edit: 0

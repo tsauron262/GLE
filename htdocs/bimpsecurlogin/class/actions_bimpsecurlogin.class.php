@@ -41,7 +41,8 @@ class securLogSms {
         $this->db = $db;
         $this->filename = DOL_DATA_ROOT . "/white-ip.txt";
         
-        if(BimpCore::getConf('mode_securlogin')!= "")
+        
+        if(class_exists("BimpCore") && BimpCore::getConf('mode_securlogin')!= "")
             $this->debug = BimpCore::getConf('mode_securlogin');
         
         

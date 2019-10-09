@@ -2689,7 +2689,7 @@ class Bimp_Product extends BimpObject
     {
         global $db;
         self::$stockDate = array();
-        $sql = $db->query("SELECT `fk_product`,`fk_entrepot`,reel, rowid FROM `llx_product_stock`");
+        $sql = $db->query("SELECT `fk_product`,`fk_entrepot`,reel, rowid FROM `".MAIN_DB_PREFIX."product_stock`");
         while ($ln = $db->fetch_object($sql)) {
             self::$stockDate[$date][$ln->fk_product][$ln->fk_entrepot]['rowid'] = $ln->rowid;
             self::$stockDate[$date][$ln->fk_product][$ln->fk_entrepot]['now'] = $ln->reel;
@@ -2698,8 +2698,8 @@ class Bimp_Product extends BimpObject
             self::$stockDate[$date][$ln->fk_product][null]['stock'] += $ln->reel;
         }
 
-//        $sql = $db->query("SELECT `fk_product`, `fk_entrepot`, SUM(`value`) as nb FROM `llx_stock_mouvement` WHERE `tms` > STR_TO_DATE('" . $date . "', '%Y-%m-%d') GROUP BY `fk_product`, `fk_entrepot`");
-        $sql = $db->query("SELECT `fk_product`, `fk_entrepot`, SUM(`value`) as nb FROM `llx_stock_mouvement` WHERE `datem` > '" . $date . "' GROUP BY `fk_product`, `fk_entrepot`");
+//        $sql = $db->query("SELECT `fk_product`, `fk_entrepot`, SUM(`value`) as nb FROM `".MAIN_DB_PREFIX."stock_mouvement` WHERE `tms` > STR_TO_DATE('" . $date . "', '%Y-%m-%d') GROUP BY `fk_product`, `fk_entrepot`");
+        $sql = $db->query("SELECT `fk_product`, `fk_entrepot`, SUM(`value`) as nb FROM `".MAIN_DB_PREFIX."stock_mouvement` WHERE `datem` > '" . $date . "' GROUP BY `fk_product`, `fk_entrepot`");
         while ($ln = $db->fetch_object($sql)) {
             if (!isset(self::$stockDate[$date][$ln->fk_product][$ln->fk_entrepot]['stock']))
                 self::$stockDate[$date][$ln->fk_product][$ln->fk_entrepot]['stock'] = 0;
@@ -2775,7 +2775,7 @@ class Bimp_Product extends BimpObject
     {
         global $db;
         self::$stockShowRoom = array();
-        $sql = $db->query("SELECT `id_product`, `id_entrepot`, COUNT(*)as nb FROM `llx_be_equipment_place` p, llx_be_equipment e WHERE position = 1 AND p.id_equipment = e.id AND p.`type` = 5 GROUP BY `id_entrepot`, `id_product`");
+        $sql = $db->query("SELECT `id_product`, `id_entrepot`, COUNT(*)as nb FROM `".MAIN_DB_PREFIX."be_equipment_place` p, ".MAIN_DB_PREFIX."be_equipment e WHERE position = 1 AND p.id_equipment = e.id AND p.`type` = 5 GROUP BY `id_entrepot`, `id_product`");
         while ($ln = $db->fetch_object($sql)) {
             self::$stockShowRoom[$ln->id_product][$ln->id_entrepot] = $ln->nb;
             self::$stockShowRoom[$ln->id_product][null] += $ln->nb;
@@ -2786,7 +2786,7 @@ class Bimp_Product extends BimpObject
     {
         global $db;
         self::$lienShowRoomEntrepot = array();
-        $sql = $db->query("SELECT e.rowid as id1, e2.rowid as id2 FROM `llx_entrepot` e,`llx_entrepot` e2 WHERE e2.ref = CONCAT('D',e.ref)");
+        $sql = $db->query("SELECT e.rowid as id1, e2.rowid as id2 FROM `".MAIN_DB_PREFIX."entrepot` e,`".MAIN_DB_PREFIX."entrepot` e2 WHERE e2.ref = CONCAT('D',e.ref)");
         while ($ln = $db->fetch_object($sql)) {
             self::$lienShowRoomEntrepot[$ln->id1] = $ln->id2;
         }
@@ -2806,7 +2806,7 @@ class Bimp_Product extends BimpObject
 //        self::$ventes = array(); // Ne pas déco ça effacerait d'autres données en cache pour d'autres dates. 
 
         $query = "SELECT `fk_product`, entrepot, sum(qty) as qty, sum(l.total_ht) as total_ht, sum(l.total_ttc) as total_ttc";
-        $query .= " FROM `llx_facturedet` l, llx_facture f, llx_facture_extrafields e";
+        $query .= " FROM `".MAIN_DB_PREFIX."facturedet` l, ".MAIN_DB_PREFIX."facture f, ".MAIN_DB_PREFIX."facture_extrafields e";
         $query .= " WHERE `fk_facture` = f.rowid AND e.fk_object = f.rowid AND fk_product > 0";
         $query .= " AND f.fk_statut > 0";
 

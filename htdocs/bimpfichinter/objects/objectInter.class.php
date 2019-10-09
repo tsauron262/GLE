@@ -19,7 +19,7 @@ class ObjectInter extends extraFI{
             $clef = 'getList_commandeArray_user_'.$this->getData("fk_soc");
             if(!isset(self::$cache[$clef])){
                 self::$cache[$clef] = array(0=>array('label'=>''));
-                $sql = $this->db->db->query("SELECT ref, rowid FROM llx_commande WHERE fk_soc = ".$this->getData("fk_soc"));
+                $sql = $this->db->db->query("SELECT ref, rowid FROM ".MAIN_DB_PREFIX."commande WHERE fk_soc = ".$this->getData("fk_soc"));
                 while($ln = $this->db->db->fetch_object($sql))
                         self::$cache[$clef][$ln->rowid] = array('label' => $ln->ref, 'icon' => '', 'classes' => array('info'));
             }
@@ -56,7 +56,7 @@ class ObjectInter extends extraFI{
             $clef = 'getList_contratArray_user_'.$this->getData("fk_soc");
             if(!isset(self::$cache[$clef])){
                 self::$cache[$clef] = array(0=>array('label'=>''));
-                $sql = $this->db->db->query("SELECT ref, rowid FROM llx_contrat WHERE fk_soc = ".$this->getData("fk_soc")." AND (statut = 1 || rowid = '".$this->getData("fk_contrat")."')");
+                $sql = $this->db->db->query("SELECT ref, rowid FROM ".MAIN_DB_PREFIX."contrat WHERE fk_soc = ".$this->getData("fk_soc")." AND (statut = 1 || rowid = '".$this->getData("fk_contrat")."')");
                 while($ln = $this->db->db->fetch_object($sql))
                         self::$cache[$clef][$ln->rowid] = array('label' => $ln->ref, 'icon' => '', 'classes' => array('info'));
             }
@@ -70,7 +70,7 @@ class ObjectInter extends extraFI{
             $clef = 'getList_factureArray_user_'.$this->getData("fk_soc");
             if(!isset(self::$cache[$clef])){
                 self::$cache[$clef] = array(0=>array('label'=>''));
-                $sql = $this->db->db->query("SELECT facnumber, rowid FROM llx_facture WHERE fk_soc = ".$this->getData("fk_soc"));
+                $sql = $this->db->db->query("SELECT facnumber, rowid FROM ".MAIN_DB_PREFIX."facture WHERE fk_soc = ".$this->getData("fk_soc"));
                 while($ln = $this->db->db->fetch_object($sql))
                         self::$cache[$clef][$ln->rowid] = array('label' => $ln->facnumber, 'icon' => '', 'classes' => array('info'));
             }

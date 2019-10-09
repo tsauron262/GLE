@@ -637,14 +637,7 @@ class Equipment extends BimpObject
             );
 
             $filters['placeType.position'] = 1;
-            $filters['or_placeType'] = array(
-                'or' => array(
-                    'placeType.type' => array(
-                        'part_type' => 'middle',
-                        'part'      => $value
-                    )
-                )
-            );
+            $filters['placeType.type'] = $value;
         }
     }
 

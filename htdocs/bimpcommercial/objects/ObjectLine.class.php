@@ -44,10 +44,18 @@ class ObjectLine extends BimpObject
         'desc'           => array('label' => 'Description', 'type' => 'html', 'required' => 0, 'default' => ''),
         'id_parent_line' => array('label' => 'Ligne parente', 'type' => 'int', 'required' => 0, 'default' => null)
     );
-    public static $types = array(
-        self::LINE_PRODUCT => 'Produit / Service',
-        self::LINE_TEXT    => 'Texte libre'
-    );
+    
+    public function getTypes(){
+        $types = array(
+            self::LINE_PRODUCT => 'Produit / Service',
+            self::LINE_TEXT    => 'Texte libre'
+        );
+        if(BimpCore::getConf('LINE_FREE_ACTIVE'))
+            $types[self::LINE_FREE] = 'Ligne libre';
+        
+        return $types;
+    }
+    
     protected $product = null;
     protected $post_id_product = null;
     protected $post_equipment = null;

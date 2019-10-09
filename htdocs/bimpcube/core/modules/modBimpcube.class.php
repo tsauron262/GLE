@@ -152,9 +152,9 @@ class modBimpcube extends DolibarrModules
                     $this->_load_tables('/bimpcube/sql/');
                 }
                 
-                $sql[] = "DELETE FROM `llx_cronjob` WHERE `methodename` LIKE 'callTrigerPeter'";
+                $sql[] = "DELETE FROM `".MAIN_DB_PREFIX."cronjob` WHERE `methodename` LIKE 'callTrigerPeter'";
                 
-                $sql[] = "INSERT INTO `llx_cronjob` (`jobtype`, `label`, `command`, `classesname`, `objectname`, `methodename`, `params`, `md5params`, `module_name`, `priority`, `datelastrun`, `datenextrun`, `datestart`, `dateend`, `datelastresult`, `lastresult`, `lastoutput`, `unitfrequency`, `frequency`, `nbrun`, `status`, `fk_user_author`, `fk_user_mod`, `note`, `libname`, `entity`, `maxrun`, `autodelete`, `fk_mailing`, `test`, `processing`) VALUES
+                $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."cronjob` (`jobtype`, `label`, `command`, `classesname`, `objectname`, `methodename`, `params`, `md5params`, `module_name`, `priority`, `datelastrun`, `datenextrun`, `datestart`, `dateend`, `datelastresult`, `lastresult`, `lastoutput`, `unitfrequency`, `frequency`, `nbrun`, `status`, `fk_user_author`, `fk_user_mod`, `note`, `libname`, `entity`, `maxrun`, `autodelete`, `fk_mailing`, `test`, `processing`) VALUES
 ('method', 'Refresh view cube', '', 'bimpcube/class/bimpCube.class.php', 'BimpCube', 'callTrigerRefresh', '', '', 'bimpcube', 0, '2019-04-08 00:00:01', '2019-04-09 00:00:00', '2018-09-25 00:00:00', NULL, '2019-04-08 00:02:44', 'NULL', '', '86400', 1, 219, 1, 1, 1, '', NULL, 0, 0, 0, NULL, NULL, 0);";
                 
                 
@@ -165,7 +165,7 @@ class modBimpcube extends DolibarrModules
 	{
 		$sql = array();
                 
-                $sql[] = "DELETE FROM `llx_cronjob` WHERE `methodename` LIKE 'callTrigerRefresh'";
+                $sql[] = "DELETE FROM `".MAIN_DB_PREFIX."cronjob` WHERE `methodename` LIKE 'callTrigerRefresh'";
 
 		return $this->_remove($sql, $options);
 	}

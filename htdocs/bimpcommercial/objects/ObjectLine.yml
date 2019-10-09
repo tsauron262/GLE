@@ -75,7 +75,7 @@ fields:
         label: Type
         type: int
         values: 
-            array: types
+            callback: getTypes
         required: 1
         
 #    label: 
@@ -586,6 +586,12 @@ filters_panels:
             product: 
                 field: fk_product
                 child: dol_line
+            description: 
+                field: description
+                child: dol_line
+#            product_label:
+#                field: label
+#                child: product
             remise_crt:
                 field: remise_crt
             categ1:
@@ -734,6 +740,10 @@ lists_cols:
         label: S/N
         value:
             callback: displaySerials
+    fk_soc:
+        field: fk_soc
+        child: parent
+        display: nom_url
                         
 lists:      
     global:

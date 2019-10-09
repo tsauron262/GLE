@@ -34,14 +34,19 @@ class Actionsbimpsecurlogin {
 class securLogSms {
 
     var $max_tentative = 3;
-    var $debug = 2; //0 pas de auth mail sur ip //1 pas de sms code ecran //2 normal
+    var $debug = 2; //0 pas de verif //1 pas de sms code ecran //2 normal
     var $message = array();
 
     public function __construct($db) {
         $this->db = $db;
         $this->filename = DOL_DATA_ROOT . "/white-ip.txt";
         
-        if (defined('MOD_DEV')) {
+        
+        if(class_exists("BimpCore") && BimpCore::getConf('mode_securlogin')!= "")
+            $this->debug = BimpCore::getConf('mode_securlogin');
+        
+        
+        if (defined('MOD_DEV') && $this->debug > 1) {
             $this->debug = 1;
         }
     }
@@ -125,6 +130,9 @@ class securLogSms {
     }
 
     function isSecur() {
+        if($this->debug == 0)
+            return 1;
+        
         $this->traiteMessageUser();
 
         if (isset($_SESSION['sucur']) && $_SESSION['sucur'] == $this->nomCookie)//session deja securise
@@ -139,16 +147,16 @@ class securLogSms {
 
 
 
-        if (!$this->debug) {//provisoir a viré
-            $to = $this->traitePhone();
-            $toM = $this->traiteMail();
-            if (!$this->isPhoneMobile($to) && !$this->isMAil($toM))
-                mailSyn2("ATTENTION Ip Inconnue phone KO MAIL ko ATTENTION", "tommy@bimp.fr, j.belhocine@bimp.fr, peter@bimp.fr, g.faure@bimp-pro.fr", "admin@bimp.fr", "Ip inconnue : " . $_SERVER['REMOTE_ADDR'] . " user " . $this->user->login . " phone : " . $to . " mail :" . $toM);
-            //                else
-            //                    mailSyn2("Ip Inconnue phone OK", "tommy@bimp.fr", "admin@bimp.fr", "Ip inconnue : ".$_SERVER['REMOTE_ADDR']." user ".$this->user->login. " phone : ".$to);
-            $this->setSecure(2);
-            return 1;
-        }
+//        if (!$this->debug) {//provisoir a viré
+//            $to = $this->traitePhone();
+//            $toM = $this->traiteMail();
+//            if (!$this->isPhoneMobile($to) && !$this->isMAil($toM))
+//                mailSyn2("ATTENTION Ip Inconnue phone KO MAIL ko ATTENTION", "tommy@bimp.fr, j.belhocine@bimp.fr, peter@bimp.fr, g.faure@bimp-pro.fr", "admin@bimp.fr", "Ip inconnue : " . $_SERVER['REMOTE_ADDR'] . " user " . $this->user->login . " phone : " . $to . " mail :" . $toM);
+//            //                else
+//            //                    mailSyn2("Ip Inconnue phone OK", "tommy@bimp.fr", "admin@bimp.fr", "Ip inconnue : ".$_SERVER['REMOTE_ADDR']." user ".$this->user->login. " phone : ".$to);
+//            $this->setSecure(2);
+//            return 1;
+//        }
 
 
         return 0;
@@ -316,8 +324,8 @@ class securLogSms {
     }
 
     public function createWhiteList() {
-//        $sql = $this->db->query("SELECT count(DISTINCT(fk_user)) as nb, `ip` FROM `llx_events` WHERE `type` = 'USER_LOGIN' GROUP BY `ip` ORDER BY `nb` DESC");
-        $sql = $this->db->query("SELECT COUNT(DISTINCT(id_user)) as nb, IP as ip FROM `llx_bimp_secure_log` WHERE 1 GROUP BY IP ORDER BY `nb` DESC");
+//        $sql = $this->db->query("SELECT count(DISTINCT(fk_user)) as nb, `ip` FROM `".MAIN_DB_PREFIX."events` WHERE `type` = 'USER_LOGIN' GROUP BY `ip` ORDER BY `nb` DESC");
+        $sql = $this->db->query("SELECT COUNT(DISTINCT(id_user)) as nb, IP as ip FROM `".MAIN_DB_PREFIX."bimp_secure_log` WHERE 1 GROUP BY IP ORDER BY `nb` DESC");
         $tabIp = array("78.195.193.207//flo");
         while ($ln = $this->db->fetch_object($sql))
             if ($ln->nb > 1)

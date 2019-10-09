@@ -69,7 +69,7 @@ class modBimpnotesfrais extends DolibarrModules
 		
                 
                                     $this->version = '1.0';
-		// Key used in llx_const table to save module status enabled/disabled (where MYMODULE is value of property name of module in uppercase)
+		// Key used in const table to save module status enabled/disabled (where MYMODULE is value of property name of module in uppercase)
 		$this->const_name = 'MAIN_MODULE_'.strtoupper($this->name);
 		// Where to store the module in setup page (0=common,1=interface,2=others,3=very specific)
 		$this->special = 0;
@@ -284,7 +284,7 @@ class modBimpnotesfrais extends DolibarrModules
 		global $conf;
 		$sql = array();
                 
-                $sql[] = "CREATE TABLE IF NOT EXISTS `llx_bnf_bareme` (
+                $sql[] = "CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."bnf_bareme` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `label` varchar(12) COLLATE utf8_unicode_ci NOT NULL,
   `cv` int(11) NOT NULL,
@@ -300,7 +300,7 @@ class modBimpnotesfrais extends DolibarrModules
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 "
                     ;
-                $sql[] = "CREATE TABLE IF NOT EXISTS `llx_bnf_carburant` (
+                $sql[] = "CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."bnf_carburant` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `id_frais` int(11) NOT NULL,
   `motif` varchar(12) COLLATE utf8_unicode_ci NOT NULL,
@@ -310,7 +310,7 @@ class modBimpnotesfrais extends DolibarrModules
   `montant` double NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-                $sql[] = "CREATE TABLE IF NOT EXISTS `llx_bnf_comment` (
+                $sql[] = "CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."bnf_comment` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `label` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   `id_frais` int(11) DEFAULT NULL,
@@ -321,7 +321,7 @@ class modBimpnotesfrais extends DolibarrModules
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
                 
-                $sql[] = "CREATE TABLE IF NOT EXISTS `llx_bnf_period` (
+                $sql[] = "CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."bnf_period` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `id_user` int(10) unsigned NOT NULL DEFAULT '0',
   `date_from` date DEFAULT NULL,
@@ -329,7 +329,7 @@ class modBimpnotesfrais extends DolibarrModules
   `status` int(2) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;";
-                $sql[] = "CREATE TABLE IF NOT EXISTS `llx_bnf_frais_personne` (
+                $sql[] = "CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."bnf_frais_personne` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `id_frais` int(11) DEFAULT NULL,
   `id_montant` int(11) DEFAULT NULL,
@@ -342,7 +342,7 @@ class modBimpnotesfrais extends DolibarrModules
   `user_update` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-                $sql[] = "CREATE TABLE IF NOT EXISTS `llx_bnf_frais_montant` (
+                $sql[] = "CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."bnf_frais_montant` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `id_frais` int(10) unsigned NOT NULL DEFAULT '0',
   `tva_tx` float NOT NULL DEFAULT '0',
@@ -352,7 +352,7 @@ class modBimpnotesfrais extends DolibarrModules
   `validate` int(11) DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;";
-                $sql[] = "CREATE TABLE IF NOT EXISTS `llx_bnf_frais` (
+                $sql[] = "CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."bnf_frais` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `id_user` int(10) unsigned NOT NULL DEFAULT '0',
   `type` int(10) unsigned NOT NULL DEFAULT '0',
@@ -368,7 +368,7 @@ class modBimpnotesfrais extends DolibarrModules
   `s_type` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;";
-                $sql[] = "CREATE TABLE IF NOT EXISTS `llx_bnf_frais_kilometers` (
+                $sql[] = "CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."bnf_frais_kilometers` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `id_frais` int(11) DEFAULT NULL,
   `chevaux` int(11) DEFAULT NULL,

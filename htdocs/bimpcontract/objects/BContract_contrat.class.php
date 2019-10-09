@@ -462,7 +462,7 @@ class BContract_contrat extends BimpDolObject {
     
     public function autoClose(){//passer les contrat au statut clos quand toutes les enssiéne ligne sont close
         if($this->id > 0 && $this->getData("statut") == 1 && $this->getEndDate() < new DateTime()){
-            $sql = $this->db->db->query("SELECT * FROM `llx_contratdet` WHERE statut != 5 AND `fk_contrat` = ".$this->id);
+            $sql = $this->db->db->query("SELECT * FROM `".MAIN_DB_PREFIX."contratdet` WHERE statut != 5 AND `fk_contrat` = ".$this->id);
             if($this->db->db->num_rows($sql) == 0){
                 $this->updateField("statut", 2);
             }

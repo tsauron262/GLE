@@ -309,7 +309,7 @@ class BimpInventory {
             }
 
             foreach ($this->equipments as $id_equipment => $equipment) {
-                if (!isset($allEqui[$id_equipment])) { // is in inventory_det but not in llx_beequipment_place
+                if (!isset($allEqui[$id_equipment])) { // is in inventory_det but not in bequipment_place
                     $doliProd = new Product($this->db);
                     $doliProd->fetch($equipment['id_product']);
                     $allEqui[$id_equipment] = array('serial' => $equipment['serial'],

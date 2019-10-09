@@ -591,6 +591,9 @@ filters_panels:
                 field: note_private
             note_public: 
                 field: note_public
+            origine:
+                child: client
+                field: origine
                     
 lists_cols: 
     commercial: 
@@ -658,6 +661,9 @@ lists_cols:
         label: Tx marque
         value: 
             callback: displayTxMarque
+    origine:
+        child: client
+        field: origine
         
 lists: 
     default: 

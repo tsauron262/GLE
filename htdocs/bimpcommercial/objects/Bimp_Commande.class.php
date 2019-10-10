@@ -24,7 +24,7 @@ class Bimp_Commande extends BimpComm
         0 => array('label' => 'A traiter', 'icon' => 'fas_exclamation-circle', 'classes' => array('important')),
         1 => array('label' => 'En cours de traitement', 'icon' => 'fas_cogs', 'classes' => array('info')),
         2 => array('label' => 'Traitée', 'icon' => 'fas_check', 'classes' => array('success')),
-        3 => array('label' => 'Compléte', 'icon' => 'fas_check', 'classes' => array('success')),
+        3 => array('label' => 'Compléte', 'icon' => 'fas_crown', 'classes' => array('success')),
         4 => array('label' => 'En attente', 'icon' => 'fas_hourglass-start', 'classes' => array('warning')),
         5 => array('label' => 'A supprimer', 'icon' => 'fas_exclamation-triangle', 'classes' => array('danger')),
         6 => array('label' => 'Clôturée', 'icon' => 'fas_times', 'classes' => array('danger'))

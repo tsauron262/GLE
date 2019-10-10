@@ -31,7 +31,6 @@ class GSX_Request
         $this->comptiaCodes = $comptiaCodes;
         $this->symptomesCodes = $symptomesCodes;
 
-
         // Chargement des définitions:
         $fileName = DOL_DOCUMENT_ROOT . '/bimpapple/views/xml/datas_definitions.xml';
         if (!file_exists($fileName)) {

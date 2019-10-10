@@ -151,6 +151,7 @@ class BimpTools
         switch (get_class($object)) {
             case 'CommandeFournisseur':
                 return DOL_URL_ROOT . '/fourn/commande/card.php?id=' . $id_object;
+
             case 'FactureFournisseur':
                 return DOL_URL_ROOT . '/fourn/facture/card.php?facid=' . $id_object;
 
@@ -1704,7 +1705,7 @@ class BimpTools
     public static function utf8_encode($value)
     {
         // Encodage récursif si $value = array() 
-        
+
         if (is_array($value)) {
             foreach ($value as $key => $subValue) {
                 $value[$key] = self::utf8_encode($subValue);
@@ -1718,6 +1719,20 @@ class BimpTools
         }
 
         return $value;
+    }
+
+    public static function addZeros($str, $nbCarac)
+    {
+        // Ajoute des zéros en début de chaîne de manière à obtenir $nbCarac caractères. 
+        $str = '' . $str;
+        if (strlen($str) < $nbCarac) {
+            $n = ($nbCarac - strlen($str));
+            while ($n > 0) {
+                $str = '0' . $str;
+                $n--;
+            }
+        }
+        return $str;
     }
 
     // Traitements sur des array: 

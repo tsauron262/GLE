@@ -1,0 +1,106 @@
+bootstrap: 1
+
+title: 
+    callback: getPageTitle
+js:
+    - /bimplogistique/views/js/inventory_sr.js
+    
+objects:
+    inventory_sr:
+        instance: 
+            bimp_object: InventorySR
+            id_object:
+                request: id
+    inventory_line_sr: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: InventoryLineSR
+
+sections:
+    - type: tabs
+      tabs: 
+        default:
+          label: Fiche
+          sections:
+           - type: object_header
+             object_header:
+                object: inventory_sr
+           - type: view
+             view:
+                panel: 1
+                object: inventory_sr
+           - type: custom
+             custom: 
+                  callback: 
+                      method: renderNotesList
+                      object: inventory_sr
+                      params:
+                          - 1
+
+        scan:
+          label: Scan
+          sections:
+               - type: object_header
+                 object_header:
+                    object: inventory_sr
+               - type: custom
+                 custom: 
+                      callback:
+                          method: renderInputs
+                          object: inventory_sr
+               - type: list
+                 list: 
+                      name: default
+                      children: lines
+                      title: Ligne d'inventaire
+                      object: inventory_sr
+#               - type: list
+#                 list: 
+#                      name: default
+#                      children: lines
+#                      title: Ligne d'inventaire
+#                      object: inventory
+        stock:
+          label: Stock
+          sections:
+               - type: object_header
+                 object_header:
+                    object: inventory_sr
+               - type: custom
+                 custom: 
+                      callback:
+                          object: inventory_sr
+                          method: renderTabs
+                          params:
+                            - renderStock
+                            - stock
+
+        diff:
+          show:
+            callback: 
+              method: isAdmin
+              object: inventory_sr
+
+          label: Différence
+          sections:
+               - type: object_header
+                 object_header:
+                    object: inventory_sr
+               - type: custom
+                 custom: 
+                      callback:
+                          method: renderTabs
+                          object: inventory_sr
+                          params:
+                            - renderDiff
+                            - diff
+                          
+    - type: buttons
+      buttons:
+          - label: Liste d'inventaire show room
+            url:
+                controller: index
+            icon_before: chevron-left
+            classes: 
+                array: btn,btn-primary

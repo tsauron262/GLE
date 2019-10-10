@@ -346,6 +346,7 @@ class GSX_Repair extends BimpObject
             if (in_array($this->repairLookUp['repairStatus'], array(
                         'Closed',
                         'Fermée et complétée',
+                        'Fermé et terminé',
                         'Réparation marquée comme complète',
                         'Refusée - réparation annulée',
                         'Refusé - Refusé par Apple',

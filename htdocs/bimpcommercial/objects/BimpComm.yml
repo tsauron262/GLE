@@ -591,6 +591,9 @@ filters_panels:
                 field: note_private
             note_public: 
                 field: note_public
+            origine:
+                child: client
+                field: origine
                     
 lists_cols: 
     commercial: 
@@ -658,6 +661,9 @@ lists_cols:
         label: Tx marque
         value: 
             callback: displayTxMarque
+    origine:
+        child: client
+        field: origine
         
 lists: 
     default: 
@@ -726,27 +732,6 @@ views:
                             - type: fields_table
                               fields_table: 
                                   name: notes
-                            
-    full: 
-        objects_change_reload: Bimp_File
-        rows: 
-            - cols: 
-                - type: object_header
-            - cols: 
-                - type: view
-                  view: 
-                      name: default
-            - cols: 
-                - type: view
-                  view: 
-                      name: content
-            - cols:
-                - type: custom
-                  custom: 
-                      callback: 
-                          method: renderNotesList
-                          params:
-                              - 1
         
     content_infos: 
         rows: 
@@ -797,3 +782,48 @@ views:
                       name: default
                       children: lines
                       title: Lignes
+
+    extra: 
+        panel_header: 0
+        panel_footer: 0
+        no_borders: 1
+        rows: 
+            - cols: 
+                - type: custom
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  custom: 
+                      callback: renderLinkedObjectsTable
+
+                - type: custom
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  custom: 
+                      callback: renderEventsTable
+                          
+    full: 
+        objects_change_reload: Bimp_File
+        rows: 
+            - cols: 
+                - type: object_header
+            - cols: 
+                - type: view
+                  view: 
+                      name: default
+            - cols: 
+                - type: view
+                  view: 
+                      name: extra
+            - cols: 
+                - type: view
+                  view: 
+                      name: content
+            - cols:
+                - type: custom
+                  custom: 
+                      callback: 
+                          method: renderNotesList
+                          params:
+                              - 1

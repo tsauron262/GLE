@@ -26,6 +26,15 @@ fields:
                 0: Clos
                 1: Ouvert
         default_value: 1
+        
+    origine:
+        label: Origine
+        dol_extra_field: 1
+        type: int
+        values: 
+            array: demandReasons
+        input: 
+            type: select_input_reasons
     client: 
         label: Prospect / Client
         type: int
@@ -389,6 +398,8 @@ lists:
                 field: town
             code:
                 field: code_client
+            origine:
+                field: origine
                 
 cards: 
     default: 

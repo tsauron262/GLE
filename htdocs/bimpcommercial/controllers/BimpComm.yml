@@ -41,23 +41,11 @@ sections:
                                               object: bimp_comm
                                               name: default
                                     - cols: 
-                                        - type: custom
-                                          col_lg: 6
-                                          col_md: 6
-                                          col_sm: 12
-                                          custom: 
-                                              callback:
-                                                  method: renderLinkedObjectsTable
-                                                  object: bimp_comm
-                                        
-                                        - type: custom
-                                          col_lg: 6
-                                          col_md: 6
-                                          col_sm: 12
-                                          custom: 
-                                              callback:
-                                                  method: renderEventsTable
-                                                  object: bimp_comm
+                                        - type: view
+                                          view: 
+                                              panel: 1
+                                              object: bimp_comm
+                                              name: extra
                                                   
                           - id: content
                             title: Contenu

@@ -12,7 +12,7 @@ require_once DOL_DOCUMENT_ROOT . '/bimpticketrestaurant/class/BimpTicketRestaura
 $btr = new BimpTicketRestaurant($db);
 
 
-$sql = $db->query("SELECT rowid, login FROM llx_user WHERE statut = 1");
+$sql = $db->query("SELECT rowid, login FROM ".MAIN_DB_PREFIX."user WHERE statut = 1");
 while($ln = $db->fetch_object($sql)){
     echo "<br/><br/>".$ln->login."<br/>";
     $btr->getTicket($ln->rowid);

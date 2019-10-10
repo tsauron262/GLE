@@ -15,7 +15,7 @@ class Bimp_Facture extends BimpComm
     public static $dol_module = 'facture';
     public static $email_type = 'facture_send';
     public static $element_name = 'invoice';
-    public static $mail_event_code = 'AC_BILL_SENTBYMAIL';
+    public static $mail_event_code = 'BILL_SENTBYMAIL';
     public $avoir = null;
     public static $status_list = array(
         0 => array('label' => 'Brouillon', 'icon' => 'fas_file-alt', 'classes' => array('warning')),
@@ -132,7 +132,7 @@ class Bimp_Facture extends BimpComm
 
     public function isActionAllowed($action, &$errors = array())
     {
-        if (in_array($action, array('validate', 'modify', 'reopen', 'sendMail', 'addAcompte', 'removeFromUserCommission', 'removeFromEntrepotCommission', 'addToCommission', 'convertToReduc'))) {
+        if (in_array($action, array('validate', 'modify', 'reopen', 'sendMail', 'addAcompte', 'useRemise', 'removeFromUserCommission', 'removeFromEntrepotCommission', 'addToCommission', 'convertToReduc'))) {
             if (!$this->isLoaded()) {
                 $errors[] = 'ID de la facture absent';
                 return 0;
@@ -1099,10 +1099,12 @@ class Bimp_Facture extends BimpComm
         }
     }
 
-    public function getRemainToPay()
+    public function getRemainToPay($true_value = false)
     {
+        // $true_value: ne pas tenir compte du statut "payé". 
+
         if ($this->isLoaded()) {
-            if ($this->dol_object->paye) {
+            if (!$true_value && $this->dol_object->paye) {
                 return 0;
             }
 
@@ -1646,6 +1648,17 @@ class Bimp_Facture extends BimpComm
             // Boutons 
 
             $html .= '<div class="buttonsContainer align-center">';
+            if ($this->isActionAllowed('useRemise') && $this->canSetAction('useRemise')) {
+                $discount_amount = (float) $this->getSocAvailableDiscountsAmounts();
+                if ($discount_amount) {
+                    $html .= '<button class="btn btn-default" onclick="' . $this->getJsActionOnclick('useRemise', array(), array(
+                                'form_name' => 'use_remise'
+                            )) . '">';
+                    $html .= BimpRender::renderIcon('fas_file-import', 'iconLeft') . 'Appliquer un avoir disponible';
+                    $html .= '</button>';
+                }
+            }
+
             if ($this->isActionAllowed('convertToReduc') && $this->canSetAction('convertToReduc')) {
                 $label = '';
                 $confirm_msg = '';
@@ -1766,22 +1779,6 @@ class Bimp_Facture extends BimpComm
             if (!(int) $this->getData('paye') && in_array($type, array(Facture::TYPE_STANDARD, Facture::TYPE_REPLACEMENT, Facture::TYPE_DEPOSIT, Facture::TYPE_CREDIT_NOTE))) {
                 if ($user->rights->facture->paiement && in_array((int) $this->getData('fk_statut'), array(1, 2))) {
                     $is_avoir = ($type === Facture::TYPE_CREDIT_NOTE ? 1 : 0);
-
-                    if (!$is_avoir) {
-                        $discount_amount = (float) $this->getSocAvailableDiscountsAmounts();
-                        if ($discount_amount) {
-                            $buttons[] = array(
-                                'label'       => 'Appliquer un avoir disponible',
-                                'icon_before' => 'fas_file-import',
-                                'classes'     => array('btn', 'btn-default'),
-                                'attr'        => array(
-                                    'onclick' => $this->getJsActionOnclick('useRemise', array(), array(
-                                        'form_name' => 'use_remise'
-                                    ))
-                                )
-                            );
-                        }
-                    }
 
                     $paiement = BimpObject::getInstance('bimpcommercial', 'Bimp_Paiement');
                     $id_mode_paiement = ((int) $this->getData('fk_mode_reglement') ? (int) $this->getData('fk_mode_reglement') : (int) BimpCore::getConf('default_id_mode_paiement'));
@@ -2322,6 +2319,8 @@ class Bimp_Facture extends BimpComm
 
     public function createFromCommande(Commande $commande, $id_account = 0, $public_note = '', $private_note = '')
     {
+        // En principe: obsolète... 
+
         global $user, $hookmanager;
         $this->reset();
         $error = 0;
@@ -2740,7 +2739,7 @@ class Bimp_Facture extends BimpComm
     public function checkIsPaid()
     {
         if ($this->isLoaded() && (int) $this->getData('fk_statut') > 0) {
-            $remain_to_pay = (float) $this->getRemainToPay();
+            $remain_to_pay = (float) $this->getRemainToPay(true);
             $paye = (int) $this->getData('paye');
 
             if ($remain_to_pay > -0.01 && $remain_to_pay < 0.01) {
@@ -2748,7 +2747,7 @@ class Bimp_Facture extends BimpComm
                     $this->setObjectAction('classifyPaid');
                 }
             } elseif ($paye) {
-                $this->setObjectAction('reopen');
+                $res = $this->setObjectAction('reopen');
             }
         }
     }

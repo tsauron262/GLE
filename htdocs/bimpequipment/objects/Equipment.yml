@@ -567,6 +567,7 @@ lists:
             prix_achat:
 
     package: 
+        objects_change_reload: BE_Package
         enable_search: 0
         enable_sort: 0
         checkboxes: 1
@@ -637,6 +638,7 @@ lists:
             - label: Déplacer dans Enquête
               icon: fas_trash-alt
               onclick: setSelectedObjectsAction($(this), 'list_id', 'moveToPlaceType', {'place_type':90}, '', 'Déplacer dans enquête ?', true)
+              
     inventaireEnTrop:
         extends: inventaire
         bulk_actions: 

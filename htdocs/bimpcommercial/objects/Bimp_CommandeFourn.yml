@@ -13,6 +13,7 @@ dol_object:
 table: commande_fournisseur
 controller: commandeFourn
 icon: fas_cart-arrow-down
+
 list_page_url: 
     controller: commandesFourn
 
@@ -497,6 +498,7 @@ fields_tables:
               show: 
                   field_value: fk_input_method
             - field: entrepot
+              display: nom_url
             - field: zone_vente
               edit: 1
     

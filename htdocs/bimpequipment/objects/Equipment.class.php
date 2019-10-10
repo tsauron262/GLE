@@ -637,14 +637,7 @@ class Equipment extends BimpObject
             );
 
             $filters['placeType.position'] = 1;
-            $filters['or_placeType'] = array(
-                'or' => array(
-                    'placeType.type' => array(
-                        'part_type' => 'middle',
-                        'part'      => $value
-                    )
-                )
-            );
+            $filters['placeType.type'] = $value;
         }
     }
 
@@ -1156,6 +1149,55 @@ class Equipment extends BimpObject
         return $errors;
     }
 
+    public function removeInventaire($idI)
+    {
+        $line = BimpObject::getInstance('bimplogistique', 'InventoryLine');
+        $rows = $line->getList(array(
+            'fk_equipment' => (int) $this->id,
+            'fk_inventory' => $idI
+                ), null, null, 'id', 'desc', 'array', array('id'));
+
+
+        if (!is_null($rows) && count($rows)) {
+            foreach ($rows as $r) {
+                $obj = BimpCache::getBimpObjectInstance('bimplogistique', 'InventoryLine', $r['id']);
+                $obj->delete();
+            }
+        }
+    }
+
+    public function moveToPlaceType($type, $idI)
+    {
+        $errors = array();
+        $current_place = $this->getCurrentPlace();
+        if ($current_place->getData('type') != BE_Place::BE_PLACE_ENTREPOT) {
+            $errors[] = "Pas en stock";
+        }
+        if (!isset($type) || $type < 1) {
+            $errors[] = "Pas de type";
+        }
+        if (!count($errors)) {
+            // Correction de l'emplacement initial en cas d'erreur: 
+            $text = "Transfert auto via Inventaire";
+            if ($idI > 0)
+                $text .= '-' . $idI;
+            $text .= '-SN:' . $this->getData('serial');
+            $place = BimpObject::getInstance($this->module, 'BE_Place');
+            $errors = array_merge($errors, $place->validateArray(array(
+                        'id_equipment' => (int) $this->id,
+                        'type'         => $type,
+                        'id_entrepot'  => (int) $current_place->getData('id_entrepot'),
+                        'infos'        => $text,
+                        'date'         => date('Y-m-d H:i:s'),
+            )));
+            if (!count($errors)) {
+                $errors = array_merge($errors, $place->create());
+            }
+        }
+
+        return $errors;
+    }
+
     // Renders: 
 
     public function renderReservationsList()
@@ -1174,6 +1216,8 @@ class Equipment extends BimpObject
         return $html;
     }
 
+    // Actions: 
+    
     public function actionGenerateEtiquette($data, &$success)
     {
         $errors = array();
@@ -1203,17 +1247,18 @@ class Equipment extends BimpObject
             'success_callback' => $success_callback
         );
     }
-    
-    public function actionMoveToPlaceType($data, &$success) {
-        $success = "Déplacé dans type ".$data['place_type'];
+
+    public function actionMoveToPlaceType($data, &$success)
+    {
+        $success = "Déplacé dans type " . $data['place_type'];
         $errors = array();
-        
+
         $idI = GETPOST('id');
-        if(!isset($idI) || $idI < 1)
+        if (!isset($idI) || $idI < 1)
             $errors[] = 'Pas d\'id inventaire';
-        
-        if(!count($errors)){
-            foreach($data['id_objects'] as $id){
+
+        if (!count($errors)) {
+            foreach ($data['id_objects'] as $id) {
                 $obj = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $id);
                 $errors = array_merge($errors, $obj->moveToPlaceType($data['place_type'], $idI));
             }
@@ -1225,48 +1270,18 @@ class Equipment extends BimpObject
             'success_callback' => $success_callback
         );
     }
-    
-    public function moveToPlaceType($type, $idI){
+
+    public function actionRemoveInventaire($data, &$success)
+    {
         $errors = array();
-        $current_place = $this->getCurrentPlace();
-        if($current_place->getData('type') != BE_Place::BE_PLACE_ENTREPOT){
-            $errors[] = "Pas en stock";
-        }
-        if(!isset($type) || $type < 1){
-            $errors[] = "Pas de type";
-        }
-        if(!count($errors)){
-             // Correction de l'emplacement initial en cas d'erreur: 
-            $text = "Transfert auto via Inventaire";
-            if($idI > 0)
-                $text .= '-'.$idI;
-            $text .= '-SN:'.$this->getData('serial');
-            $place = BimpObject::getInstance($this->module, 'BE_Place');
-            $errors = array_merge($errors, $place->validateArray(array(
-                'id_equipment' => (int) $this->id,
-                'type'         => $type,
-                'id_entrepot'  => (int) $current_place->getData('id_entrepot'),
-                'infos'        => $text,
-                'date'         => date('Y-m-d H:i:s'),
-            )));
-            if (!count($errors)) {
-                $errors = array_merge($errors, $place->create());
-            }
-        }
-        
-        return $errors;
-    }
-    
-    public function actionRemoveInventaire($data, &$success) {
-        $errors = array();
-        
+
         $idI = GETPOST('id');
-        if(!isset($idI) || $idI < 1)
+        if (!isset($idI) || $idI < 1)
             $errors[] = 'Pas d\'id inventaire';
-        
-        if(!count($errors)){
-            $success = "Retiré de l'inventaire ".$idI;
-            foreach($data['id_objects'] as $id){
+
+        if (!count($errors)) {
+            $success = "Retiré de l'inventaire " . $idI;
+            foreach ($data['id_objects'] as $id) {
                 $obj = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $id);
                 $errors = array_merge($errors, $obj->removeInventaire($idI));
             }
@@ -1277,22 +1292,6 @@ class Equipment extends BimpObject
             'warnings'         => $warnings,
             'success_callback' => $success_callback
         );
-    }
-    
-    public function removeInventaire($idI){
-        $line = BimpObject::getInstance('bimplogistique', 'InventoryLine');
-        $rows = $line->getList(array(
-            'fk_equipment' => (int) $this->id,
-            'fk_inventory'       => $idI
-                ), null, null, 'id', 'desc', 'array', array('id'));
-
-
-        if (!is_null($rows) && count($rows)) {
-            foreach ($rows as $r) {
-                $obj = BimpCache::getBimpObjectInstance('bimplogistique', 'InventoryLine', $r['id']);
-                $obj->delete();
-            }
-        }
     }
 
     // Overrides

@@ -361,6 +361,23 @@ class Bimp_Product extends BimpObject
         return (int) isset(static::$ventes[$dateMin . '-' . $dateMax]);
     }
 
+    public function isVendable(&$errors, $urgent = false, $mail = true)
+    {
+        if ($this->dol_field_exists('validate')) {
+            if (!(int) $this->getData('validate')) {
+                $errors[] = 'Le produit "' . $this->getRef() . ' - ' . $this->getData('label') . '" n\'est pas validé';
+                if ($mail) {
+                    $this->db->db->rollback();
+                    if ($this->mailValidation($urgent))
+                        $errors[] = "Un e-mail a été envoyé pour validation du produit.";
+                    $this->db->db->begin();
+                }
+                return 0;
+            }
+        }
+        return 1;
+    }
+
     public function hasFixePrices()
     {
         return ((int) $this->getData('no_fixe_prices') ? 0 : 1);
@@ -374,6 +391,12 @@ class Bimp_Product extends BimpObject
     public function hasFixePa()
     {
         return $this->hasFixePrices();
+    }
+
+    public function productBrowserIsActif()
+    {
+        global $conf;
+        return (isset($conf->global->MAIN_MODULE_BIMPPRODUCTBROWSER) ? 1 : 0);
     }
 
     // Getters params: 
@@ -455,6 +478,15 @@ class Bimp_Product extends BimpObject
             );
         }
 
+        if ($this->isActionAllowed('validate')) {
+            $buttons[] = array(
+                'label'   => 'Demande de validation',
+                'icon'    => 'fas_check-circle',
+                'onclick' => $this->getJsActionOnclick('mailValidate', array(), array(
+                ))
+            );
+        }
+
         if ($this->isActionAllowed('merge') && $this->canSetAction('merge')) {
             $buttons[] = array(
                 'label'   => 'Fusionner',
@@ -476,6 +508,15 @@ class Bimp_Product extends BimpObject
         return $buttons;
     }
 
+    public function getJs()
+    {
+        $js = array();
+        $js[] = "/bimpcore/views/js/history.js";
+        if ($this->productBrowserIsActif())
+            $js[] = "/bimpcore/views/js/categorize.js";
+        return $js;
+    }
+
     // Getters données: 
 
     public function getRemiseCrt()
@@ -485,6 +526,67 @@ class Bimp_Product extends BimpObject
         }
 
         return 0;
+    }
+
+    public function getDerPv($dateMin, $dateMax = null, $id_product = null)
+    {
+
+        if (is_null($id_product) && $this->isLoaded()) {
+            $id_product = $this->id;
+        }
+
+        if (is_null($dateMin)) {
+            $dateMin = '0000-00-00 00:00:00';
+        }
+
+        if (preg_match('/^\d{4}\-\d{2}\-\d{2}$/', $dateMin)) {
+            $dateMin .= ' 00:00:00';
+        }
+
+        if (is_null($dateMax)) {
+            $dateMax = date('Y-m-d H:i:s');
+        }
+
+        $cache_key = $dateMin . '-' . $dateMax . 'derPv';
+
+        if ((int) $id_product) {
+            if (!isset(self::$ventes[$cache_key])) {
+                self::initDerPv($dateMin, $dateMax);
+            }
+
+            if (isset(self::$ventes[$cache_key][$id_product])) {
+                return self::$ventes[$cache_key][$id_product];
+            }
+        }
+
+        return 0;
+    }
+
+    public function initDerPv($dateMin, $dateMax)
+    {
+        global $db;
+//        self::$ventes = array(); // Ne pas déco ça effacerait d'autres données en cache pour d'autres dates. 
+
+        $query = 'SELECT MAX(l.rowid) as rowid , fk_product FROM `' . MAIN_DB_PREFIX . 'facturedet` l, `' . MAIN_DB_PREFIX . 'facture` f WHERE f.rowid = l.fk_facture AND qty > 0 ';
+        if ($dateMin)
+            $query .= " AND date_valid >= '" . $dateMin . "'";
+
+        if ($dateMax)
+            $query .= " AND date_valid <= '" . $dateMax . "'";
+        $sql = $db->query($query . " GROUP BY fk_product");
+        while ($ln = $db->fetch_object($sql)) {
+            $tabT[] = $ln->rowid;
+        }
+        $query = 'SELECT (total_ht / qty) as derPv, fk_product FROM `' . MAIN_DB_PREFIX . 'facturedet` l WHERE rowid IN (' . implode(",", $tabT) . ')';
+        $sql = $db->query($query);
+
+
+        $cache_key = $dateMin . "-" . $dateMax . 'derPv';
+
+        while ($ln = $db->fetch_object($sql)) {
+            self::$ventes[$cache_key][$ln->fk_product] = $ln->derPv;
+//            self::$ventes[$cache_key][$ln->fk_product][null]['total_achats'] += $ln->total_achats;
+        }
     }
 
     public function getVentes($dateMin, $dateMax = null, $id_entrepot = null, $id_product = null)
@@ -676,7 +778,7 @@ class Bimp_Product extends BimpObject
         return $html;
     }
 
-    // Getters stocks: 
+    // Getters stocks:
 
     public function getStocksForEntrepot($id_entrepot, $type = 'virtuel') // $type : 'reel' / 'dispo' / 'virtuel'
     {
@@ -693,7 +795,8 @@ class Bimp_Product extends BimpObject
         if ($this->isLoaded()) {
             $product = $this->dol_object;
 
-            $product->load_stock('novirtual');
+            if (!count($product->stock_warehouse))
+                $product->load_stock('novirtual');
             if (isset($product->stock_warehouse[(int) $id_entrepot])) {
                 $stocks['id_stock'] = $product->stock_warehouse[(int) $id_entrepot]->id;
                 $stocks['reel'] = $product->stock_warehouse[(int) $id_entrepot]->real;
@@ -709,30 +812,57 @@ class Bimp_Product extends BimpObject
                 $stocks['dispo'] = $stocks['reel'] - $stocks['reel_reserves'];
 
                 if (in_array($type, array('virtuel'))) {
-                    $sql = 'SELECT line.rowid as id_line, c.rowid as id_commande FROM ' . MAIN_DB_PREFIX . 'commande_fournisseurdet line';
+                    $sql = 'SELECT line.rowid as id_line, c.rowid as id_commande, (line.qty + bline.qty_modif) as full_qty, bline.receptions FROM ' . MAIN_DB_PREFIX . 'commande_fournisseurdet line';
+                    $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'bimp_commande_fourn_line bline ON bline.id_line = line.rowid';
                     $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commande_fournisseur c ON c.rowid = line.fk_commande';
                     $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commande_fournisseur_extrafields cef ON c.rowid = cef.fk_object';
                     $sql .= ' WHERE line.fk_product = ' . (int) $this->id;
-                    $sql .= ' AND c.fk_statut < 5';
+                    $sql .= ' AND c.fk_statut > 0 AND c.fk_statut < 5';
                     $sql .= ' AND cef.entrepot = ' . (int) $id_entrepot;
 
                     $rows = $this->db->executeS($sql, 'array');
 
                     if (!is_null($rows)) {
                         foreach ($rows as $r) {
+                            $received_qty = 0;
+
+                            if ((string) $r['receptions']) {
+                                $receptions = json_decode($r['receptions'], true);
+                                $recep_list = array();
+
+                                if (!empty($receptions)) {
+                                    foreach ($receptions as $id_reception => $reception_data) {
+                                        $recep_list[] = (int) $id_reception;
+                                    }
+
+                                    $sql = 'SELECT `id` FROM ' . MAIN_DB_PREFIX . 'bl_commande_fourn_reception ';
+                                    $sql .= 'WHERE `id` IN(' . implode(',', $recep_list) . ') AND `status` = 1';
+
+                                    $valid_receptions = $this->db->executeS($sql, 'array');
+
+                                    if (is_array($valid_receptions)) {
+                                        foreach ($valid_receptions as $reception) {
+                                            $received_qty += (float) $receptions[(int) $reception['id']]['qty'];
+                                        }
+                                    }
+                                }
+                            }
+
+                            $stocks['commandes'] += ((float) $r['full_qty'] - $received_qty);
+
+                            // Vielle méthode trop bourrine: 
                             // Pour être sûr que les BimpLines existent: 
-                            $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn', (int) $r['id_commande']);
-                            if (BimpObject::ObjectLoaded($commande)) {
-                                $commande->checkLines();
-                            }
-
-                            $bimp_line = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFournLine', array(
-                                        'id_line' => (int) $r['id_line']
-                                            ), true);
-
-                            if (BimpObject::ObjectLoaded($bimp_line)) {
-                                $stocks['commandes'] += ((float) $bimp_line->getFullQty() - $bimp_line->getReceivedQty(null, true));
-                            }
+//                            $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn', (int) $r['id_commande']);
+//                            if (BimpObject::ObjectLoaded($commande)) {
+//                                $commande->checkLines();
+//                            }
+//                            $bimp_line = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFournLine', array(
+//                                        'id_line' => (int) $r['id_line']
+//                                            ), true);
+//
+//                            if (BimpObject::ObjectLoaded($bimp_line)) {
+//                                $stocks['commandes'] += ((float) $bimp_line->getFullQty() - $bimp_line->getReceivedQty(null, true));
+//                            }
                         }
                     }
 
@@ -744,8 +874,12 @@ class Bimp_Product extends BimpObject
         return $stocks;
     }
 
-    public function getStockDate($date, $id_entrepot = null, $id_product = null)
+    public function getStockDate($date = null, $id_entrepot = null, $id_product = null)
     {
+        if (is_null($date))
+            return 'N/C';
+
+
         if (is_null($id_product) && $this->isLoaded()) {
             $id_product = $this->id;
         }
@@ -770,11 +904,11 @@ class Bimp_Product extends BimpObject
         $stock = 0;
 
         if ((int) $id_product) {
-            if (!isset(self::$stockShowRoom[$id_product]))
+            if (!count(self::$stockShowRoom))
                 self::initStockShowRoom();
 
             if (isset(self::$stockShowRoom[$id_product][$id_entrepot])) {
-                return self::$stockShowRoom[$id_product][$id_entrepot];
+                $stock = self::$stockShowRoom[$id_product][$id_entrepot];
             }
 
 //            if (!count(self::$lienShowRoomEntrepot))
@@ -816,7 +950,7 @@ class Bimp_Product extends BimpObject
         return $html;
     }
 
-    // Getters Catégories: 
+    // Getters Catégories:
 
     public function getCategoriesList()
     {
@@ -1177,6 +1311,8 @@ class Bimp_Product extends BimpObject
 
     public function renderBestBuyPrice()
     {
+        // Devrait s'appeller displayBestBuyPrice ! 
+
         $sql = 'SELECT price FROM `' . MAIN_DB_PREFIX . 'product_fournisseur_price`';
         $sql .= ' WHERE fk_product=' . $this->getData('id');
         $sql .= ' GROUP BY fk_product';
@@ -1256,6 +1392,11 @@ class Bimp_Product extends BimpObject
         return $stock['reel'];
     }
 
+    public function displayStock_picto()
+    {
+        return $this->getStockIconStatic($this->id);
+    }
+
     public function displayStockInventorySr()
     {
         $id_inventory = BimpTools::getValue('id');
@@ -1288,15 +1429,6 @@ class Bimp_Product extends BimpObject
     }
 
     // Rendus HTML: 
-
-    public function getJs()
-    {
-        $js = array();
-        $js[] = "/bimpcore/views/js/history.js";
-        if ($this->productBrowserIsActif())
-            $js[] = "/bimpcore/views/js/categorize.js";
-        return $js;
-    }
 
     public function renderHeaderExtraLeft()
     {
@@ -1385,13 +1517,17 @@ class Bimp_Product extends BimpObject
             $htmlT .= '<td>' . $stocks['dispo'] . '</td>';
             $htmlT .= '<td>' . $stocks['virtuel'] . '</td>';
             $htmlT .= '</tr>';
-            if ($stocks['reel'] <= 0) {//stok > 0 au debut
-                $html2 .= $htmlT;
-            } else {
+            if ($stocks['reel'] != 0) {//stok > 0 au debut
                 $html1 .= $htmlT;
+            } elseif ($stocks['dispo'] != 0) {//dispo > 0 au millieu
+                $html2 .= $htmlT;
+            } elseif ($stocks['virtuel'] != 0) {//virtuel > 0 au millieu
+                $html3 .= $htmlT;
+            } else {
+                $html4 .= $htmlT;
             }
         }
-        $html .= $html1 . $html2;
+        $html .= $html1 . $html2 . $html3 . $html4;
 
         $html .= '</tbody>';
         $html .= '</table>';
@@ -1937,6 +2073,29 @@ class Bimp_Product extends BimpObject
         if (!mailSyn2($subject, $to, $from, $msg))
             $errors[] = "Envoi email vers " . $to . " pour la propale " . $propal->getNomUrl() . " impossible.";
         return $errors;
+    }
+
+    public function mailValidation($urgent = false)
+    {
+        global $user;
+        if ($urgent) {
+            $mail = "XX_Achats@bimp.fr,dev@bimp.fr";
+            $msg = 'Bonjour, ' . "\n\n";
+            $msg .= 'Le produit ' . $this->getNomUrl(0) . ' a été ajouté à une vente en caisse alors qu\'il n\'est pas validé.' . "\n";
+            $msg .= 'Une validation d\'urgence est nécessaire pour finaliser la vente' . "\n\n";
+            $msg .= 'Cordialement.';
+        } else {
+            $mail = "XX_Achats@bimp.fr";
+            $msg = "Bonjour " . $user->getNomUrl(0) . "souhaite que vous validiez " . $this->getNomUrl(0) . "<br/>Cordialement";
+        }
+        if (mailSyn2("Validation produit", $mail, null, $msg)) {
+            if ($this->getData('date_ask_valid') == null or $this->getData('date_ask_valid') == '') {
+                $datetime = new DateTime();
+                $this->updateField('date_ask_valid', $datetime->format('Y-m-d H:i:s'));
+            }
+            return true;
+        }
+        return false;
     }
 
     public function mergeProduct(Bimp_Product $merged_product, &$warnings = array())
@@ -2516,6 +2675,12 @@ class Bimp_Product extends BimpObject
         return $errors;
     }
 
+    public function actionMailValidate($data = array(), &$success = '')
+    {
+        $this->mailValidation();
+        return $errors;
+    }
+
     public function actionMerge($data, &$success)
     {
         $errors = array();
@@ -2576,12 +2741,15 @@ class Bimp_Product extends BimpObject
     {
         $marque = BimpTools::getValue('marque', '');
         $ref_const = BimpTools::getValue('ref_constructeur', '');
+        $mailValid = BimpTools::getValue('mailValid', 0);
 
         if ($marque && $ref_const) {
             $ref = strtoupper(substr($marque, 0, 3));
             $ref .= '-' . $ref_const;
             $this->set('ref', $ref);
         }
+        if ($mailValid)
+            $this->mailValidation();
 
         return parent::validatePost();
     }
@@ -2598,20 +2766,21 @@ class Bimp_Product extends BimpObject
 
     // Méthodes statiques : 
 
-    private static function initStockDate($date)
+    public static function initStockDate($date)
     {
         global $db;
         self::$stockDate = array();
-        $sql = $db->query("SELECT `fk_product`,`fk_entrepot`,reel FROM `llx_product_stock`");
+        $sql = $db->query("SELECT `fk_product`,`fk_entrepot`,reel, rowid FROM `" . MAIN_DB_PREFIX . "product_stock`");
         while ($ln = $db->fetch_object($sql)) {
+            self::$stockDate[$date][$ln->fk_product][$ln->fk_entrepot]['rowid'] = $ln->rowid;
             self::$stockDate[$date][$ln->fk_product][$ln->fk_entrepot]['now'] = $ln->reel;
             self::$stockDate[$date][$ln->fk_product][$ln->fk_entrepot]['stock'] = $ln->reel;
             self::$stockDate[$date][$ln->fk_product][null]['now'] += $ln->reel;
             self::$stockDate[$date][$ln->fk_product][null]['stock'] += $ln->reel;
         }
 
-//        $sql = $db->query("SELECT `fk_product`, `fk_entrepot`, SUM(`value`) as nb FROM `llx_stock_mouvement` WHERE `tms` > STR_TO_DATE('" . $date . "', '%Y-%m-%d') GROUP BY `fk_product`, `fk_entrepot`");
-        $sql = $db->query("SELECT `fk_product`, `fk_entrepot`, SUM(`value`) as nb FROM `llx_stock_mouvement` WHERE `tms` > '" . $date . "' GROUP BY `fk_product`, `fk_entrepot`");
+//        $sql = $db->query("SELECT `fk_product`, `fk_entrepot`, SUM(`value`) as nb FROM `".MAIN_DB_PREFIX."stock_mouvement` WHERE `tms` > STR_TO_DATE('" . $date . "', '%Y-%m-%d') GROUP BY `fk_product`, `fk_entrepot`");
+        $sql = $db->query("SELECT `fk_product`, `fk_entrepot`, SUM(`value`) as nb FROM `" . MAIN_DB_PREFIX . "stock_mouvement` WHERE `datem` > '" . $date . "' GROUP BY `fk_product`, `fk_entrepot`");
         while ($ln = $db->fetch_object($sql)) {
             if (!isset(self::$stockDate[$date][$ln->fk_product][$ln->fk_entrepot]['stock']))
                 self::$stockDate[$date][$ln->fk_product][$ln->fk_entrepot]['stock'] = 0;
@@ -2623,11 +2792,31 @@ class Bimp_Product extends BimpObject
         }
     }
 
+    public static function insertStockDateNotZeroProductStock($date)
+    {
+        global $db;
+        $stockDateZero = array();
+        foreach (self::$stockDate[$date] as $idP => $list) {
+            foreach ($list as $idE => $data) {
+                if ($idE > 0) {
+                    if ($data['stock'] != 0 && !isset($data['rowid']))//On a un stock a date et pas dentre, on ajoute
+                        $db->query("INSERT INTO " . MAIN_DB_PREFIX . "product_stock (`fk_product`, `fk_entrepot`, `reel`) VALUES (" . $idP . "," . $idE . ",0)");
+                    if ($data['stock'] == 0 && isset($data['rowid']) && $data['rowid'] > 0) {//On a pas de stock a date est une entre
+                        if ($data['now'] == 0)//on supprime l'entré
+                            $db->query("DELETE FROM " . MAIN_DB_PREFIX . "product_stock WHERE `rowid` = " . $data['rowid']);
+                        $stockDateZero[] = $data['rowid'];
+                    }
+                }
+            }
+        }
+        return array("stockDateZero" => $stockDateZero);
+    }
+
     private static function initStockShowRoom()
     {
         global $db;
         self::$stockShowRoom = array();
-        $sql = $db->query("SELECT `id_product`, `id_entrepot`, COUNT(*)as nb FROM `llx_be_equipment_place` p, llx_be_equipment e WHERE position = 1 AND p.id_equipment = e.id AND p.`type` = 5 GROUP BY `id_entrepot`, `id_product`");
+        $sql = $db->query("SELECT `id_product`, `id_entrepot`, COUNT(*)as nb FROM `" . MAIN_DB_PREFIX . "be_equipment_place` p, " . MAIN_DB_PREFIX . "be_equipment e WHERE position = 1 AND p.id_equipment = e.id AND p.`type` = 5 GROUP BY `id_entrepot`, `id_product`");
         while ($ln = $db->fetch_object($sql)) {
             self::$stockShowRoom[$ln->id_product][$ln->id_entrepot] = $ln->nb;
             self::$stockShowRoom[$ln->id_product][null] += $ln->nb;
@@ -2638,18 +2827,12 @@ class Bimp_Product extends BimpObject
     {
         global $db;
         self::$lienShowRoomEntrepot = array();
-        $sql = $db->query("SELECT e.rowid as id1, e2.rowid as id2 FROM `llx_entrepot` e,`llx_entrepot` e2 WHERE e2.ref = CONCAT('D',e.ref)");
+        $sql = $db->query("SELECT e.rowid as id1, e2.rowid as id2 FROM `" . MAIN_DB_PREFIX . "entrepot` e,`" . MAIN_DB_PREFIX . "entrepot` e2 WHERE e2.ref = CONCAT('D',e.ref)");
         while ($ln = $db->fetch_object($sql)) {
             self::$lienShowRoomEntrepot[$ln->id1] = $ln->id2;
         }
 
         //
-    }
-
-    public function productBrowserIsActif()
-    {
-        global $conf;
-        return (isset($conf->global->MAIN_MODULE_BIMPPRODUCTBROWSER) ? 1 : 0);
     }
 
     private static function initVentes($dateMin, $dateMax)
@@ -2658,7 +2841,7 @@ class Bimp_Product extends BimpObject
 //        self::$ventes = array(); // Ne pas déco ça effacerait d'autres données en cache pour d'autres dates. 
 
         $query = "SELECT `fk_product`, entrepot, sum(qty) as qty, sum(l.total_ht) as total_ht, sum(l.total_ttc) as total_ttc";
-        $query .= " FROM `llx_facturedet` l, llx_facture f, llx_facture_extrafields e";
+        $query .= " FROM `" . MAIN_DB_PREFIX . "facturedet` l, " . MAIN_DB_PREFIX . "facture f, " . MAIN_DB_PREFIX . "facture_extrafields e";
         $query .= " WHERE `fk_facture` = f.rowid AND e.fk_object = f.rowid AND fk_product > 0";
         $query .= " AND f.fk_statut > 0";
 

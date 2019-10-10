@@ -2,17 +2,30 @@
 
 class Bimp_Product_Entrepot extends BimpObject
 {
+    
+    public $dateBilan = null;
+    public $exludeIdDifZero = array();
 
     public static $product_instance = null;
 
     public function __construct($module, $object_name)
     {
+        $this->dateBilan = date('2019-10-01 00:00:01');
         if (is_null(static::$product_instance)) {
             static::$product_instance = BimpObject::getInstance('bimpcore', 'Bimp_Product');
         }
 
         parent::__construct($module, $object_name);
     }
+    
+   public function beforeListFetchItems(BC_List $list){
+        $prod = BimpObject::getInstance("bimpcore", "Bimp_Product");
+        $prod::initStockDate($this->dateBilan);
+        $data = $prod::insertStockDateNotZeroProductStock($this->dateBilan);
+        foreach($data['stockDateZero'] as $tmp)
+            $this->exludeIdDifZero[] = $tmp;
+        $this->isInitSpecial = true;
+   }
 
     // Getters: 
 
@@ -35,6 +48,12 @@ class Bimp_Product_Entrepot extends BimpObject
                 );
                 $filters[$alias . '.fk_categorie'] = array(
                     'in' => $values
+                );
+                return;
+            case 'stockDateDifZero':
+                if(count($this->exludeIdDifZero))
+                $filters['a.rowid'] = array(
+                    'not_in' => implode(",",$this->exludeIdDifZero)
                 );
                 return;
         }
@@ -98,18 +117,28 @@ class Bimp_Product_Entrepot extends BimpObject
 
         return '';
     }
+    
+    
+    public function displayTitre()
+    {
+        $html = '';
+        $html .= 'Produits/Entrepot';
+        if($this->dateBilan)
+            $html .= ' date de valeur  < '.dol_print_date ($this->dateBilan). ' (Stock Date, Stock show room, Nb Ventes, Ventes a NB mois)';
+        return $html;
+    }
 
     public function displayNbMonthVentes($nb_month, $data = 'total_ht')
     {
         if ($this->isLoaded() && (int) $nb_month) {
-            $dt = new DateTime();
+            $dt = new DateTime($this->dateBilan);
             $dt->sub(new DateInterval('P' . $nb_month . 'M'));
             $dateMin = $dt->format('Y-m-d') . ' 00:00:00';
-            $dateMax = date('Y-m-d') . ' 23:59:59';
             $id_product = (int) $this->getData('fk_product');
             $id_entrepot = ((int) $this->getData('fk_entrepot') ? (int) $this->getData('fk_entrepot') : null);
+            $id_entrepot = null;//avoir toute les ventes de tous les depot
 
-            $ventes = static::$product_instance->getVentes($dateMin, $dateMax, $id_entrepot, $id_product);
+            $ventes = static::$product_instance->getVentes($dateMin, $this->dateBilan, $id_entrepot, $id_product);
             if (isset($ventes[$data])) {
                 if (in_array($data, array('total_ht', 'total_ttc'))) {
                     return BimpTools::displayMoneyValue($ventes[$data]);
@@ -239,18 +268,22 @@ class Bimp_Product_Entrepot extends BimpObject
         );
 
         if ((int) $this->getData('fk_product')) {
-            $tabVentes = static::$product_instance->getVentes(null, date('Y-m-d') . ' 23:59:59', (int) $this->getData('fk_entrepot'), (int) $this->getData('fk_product'));
-
+            $tabVentes = static::$product_instance->getVentes(null, $this->dateBilan, (int) $this->getData('fk_entrepot'), (int) $this->getData('fk_product'));
+            $derPv = static::$product_instance->getDerPv(null, $this->dateBilan, (int) $this->getData('fk_product'));
+            $fields['derPv'] = $derPv;
             if ($tabVentes['qty'] > 0)
                 $fields['ventes_qty'] = $tabVentes['qty'];
 
             if ($tabVentes['total_ht'] > 0)
                 $fields['ventes_ht'] = $tabVentes['total_ht'];
 
-            $stockShowRoom = static::$product_instance->getStockShoowRoom(date('Y-m-d H:i:s'), (int) $this->getData('fk_entrepot'), (int) $this->getData('fk_product'));
+            $stockShowRoom = static::$product_instance->getStockShoowRoom($this->dateBilan, (int) $this->getData('fk_entrepot'), (int) $this->getData('fk_product'));
 
             if ($stockShowRoom > 0)
                 $fields['stockShowRoom'] = $stockShowRoom;
+            
+            $stockDate = static::$product_instance->getStockDate($this->dateBilan, (int) $this->getData('fk_entrepot'), (int) $this->getData('fk_product'));
+            $fields['stockDate'] = $stockDate;
 
             $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $this->getData('fk_product'));
             if (BimpObject::objectLoaded($prod)) {

@@ -55,12 +55,16 @@ class BimpProductCurPa extends BimpObject
     public function displayOrigine()
     {
         if ($this->isLoaded()) {
-            if ($this->getData('origin') && (int) $this->getData('id_origin'))
+            if ($this->getData('origin'))
                 switch ($this->getData('origin')) {
                     case 'commande_fourn':
                         $comm = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn', (int) $this->getData('id_origin'));
                         if (BimpObject::objectLoaded($comm)) {
                             return 'Commande fournisseur: ' . $comm->getNomUrl(0, 1, 1, 'full');
+                        } elseif ((int) $this->getData('id_origin')) {
+                            return '<span class="warning">La commande fournisseur d\'ID ' . (int) $this->getData('id_origin') . ' n\'existe plus</span>';
+                        } else {
+                            return '<span class="danger">ID de la commande fournisseur absent</span>';
                         }
                         break;
 
@@ -68,6 +72,10 @@ class BimpProductCurPa extends BimpObject
                         $fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureFourn', (int) $this->getData('id_origin'));
                         if (BimpObject::objectLoaded($fac)) {
                             return 'Facture fournisseur: ' . $fac->getNomUrl(0, 1, 1, 'full');
+                        } elseif ((int) $this->getData('id_origin')) {
+                            return '<span class="warning">La facture fournisseur d\'ID ' . (int) $this->getData('id_origin') . ' n\'existe plus</span>';
+                        } else {
+                            return '<span class="danger">ID de la facture fournisseur absent</span>';
                         }
                         break;
 
@@ -75,6 +83,10 @@ class BimpProductCurPa extends BimpObject
                         $pfp = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ProductFournisseurPrice', (int) $this->getData('id_origin'));
                         if (BimpObject::objectLoaded($pfp)) {
                             return $pfp->getNomUrl(0, 0, 0, 'default');
+                        } elseif ((int) $this->getData('id_origin')) {
+                            return '<span class="warning">Le prix d\'achat fournisseur d\'ID ' . (int) $this->getData('id_origin') . ' n\'existe plus</span>';
+                        } else {
+                            return '<span class="danger">ID du prix d\'achat fournisseur absent</span>';
                         }
                         break;
 

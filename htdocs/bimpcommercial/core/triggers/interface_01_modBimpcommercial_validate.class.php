@@ -224,7 +224,7 @@ class Interfacevalidate extends DolibarrTriggers
                 //contact facturation
                 $tabConatact = $object->getIdContact('external', 'BILLING');
                 if (count($tabConatact) < 1) {
-                        setEventMessages("Merci de precisé le contact facturation", null, 'errors');
+                        setEventMessages("Merci de preciser le contact facturation", null, 'errors');
                         return -2;
                 }else{
                     foreach($tabConatact as $contactId){

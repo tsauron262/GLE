@@ -10,7 +10,7 @@ class Bimp_Commande extends BimpComm
     public $redirectMode = 4; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
     public static $dol_module = 'commande';
     public static $email_type = 'order_send';
-    public static $mail_event_code = 'AC_ORDER_SENTBYMAIL';
+    public static $mail_event_code = 'ORDER_SENTBYMAIL';
     public static $element_name = 'order';
     public static $status_list = array(
 //        -3 => array('label' => 'Stock insuffisant', 'icon' => 'fas_exclamation-triangle', 'classes' => array('warning')),
@@ -24,7 +24,7 @@ class Bimp_Commande extends BimpComm
         0 => array('label' => 'A traiter', 'icon' => 'fas_exclamation-circle', 'classes' => array('important')),
         1 => array('label' => 'En cours de traitement', 'icon' => 'fas_cogs', 'classes' => array('info')),
         2 => array('label' => 'Traitée', 'icon' => 'fas_check', 'classes' => array('success')),
-        3 => array('label' => 'Compléte', 'icon' => 'fas_check', 'classes' => array('success')),
+        3 => array('label' => 'Compléte', 'icon' => 'fas_crown', 'classes' => array('success')),
         4 => array('label' => 'En attente', 'icon' => 'fas_hourglass-start', 'classes' => array('warning')),
         5 => array('label' => 'A supprimer', 'icon' => 'fas_exclamation-triangle', 'classes' => array('danger')),
         6 => array('label' => 'Clôturée', 'icon' => 'fas_times', 'classes' => array('danger'))
@@ -650,6 +650,18 @@ class Bimp_Commande extends BimpComm
         }
 
         return self::getSocieteContactsArray($id_client_facture);
+    }
+
+    public function getIdContactLivraison()
+    {
+        if ($this->isLoaded()) {
+            $contacts = $this->dol_object->getIdContact('external', 'SHIPPING');
+            if (isset($contacts[0]) && $contacts[0]) {
+                return (int) $contacts[0];
+            }
+        }
+
+        return 0;
     }
 
     // Rendus HTML: 

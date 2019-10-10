@@ -7,7 +7,7 @@ class Bimp_Propal extends BimpComm
 
     public static $dol_module = 'propal';
     public static $email_type = 'propal_send';
-    public static $mail_event_code = 'AC_PROPAL_SENTBYMAIL';
+    public static $mail_event_code = 'PROPAL_SENTBYMAIL';
     public static $element_name = 'propal';
     public $id_sav = null;
     public $sav = null;
@@ -20,6 +20,8 @@ class Bimp_Propal extends BimpComm
     );
     public $redirectMode = 4; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
 
+    public $acomptes_allowed = true;
+    
     // Gestion des droits users
 
     public function canCreate()

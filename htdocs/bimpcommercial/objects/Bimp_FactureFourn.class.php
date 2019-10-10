@@ -2,6 +2,7 @@
 
 require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/objects/BimpComm.class.php';
 require_once DOL_DOCUMENT_ROOT . '/fourn/class/fournisseur.product.class.php';
+require_once DOL_DOCUMENT_ROOT . '/fourn/class/fournisseur.facture.class.php';
 
 class Bimp_FactureFourn extends BimpComm
 {
@@ -11,7 +12,7 @@ class Bimp_FactureFourn extends BimpComm
     public static $dol_module = 'facture_fourn';
     public static $files_module_part = 'facture_fournisseur';
     public static $email_type = 'invoice_supplier_send';
-    public static $mail_event_code = 'AC_BILL_SUPPLIER_SENTBYMAIL';
+    public static $mail_event_code = 'BILL_SUPPLIER_SENTBYMAIL';
     public static $element_name = 'invoice_supplier';
     public static $status_list = array(
         0 => array('label' => 'Brouillon', 'icon' => 'fas_file-alt', 'classes' => array('warning')),
@@ -560,6 +561,7 @@ class Bimp_FactureFourn extends BimpComm
                 $user->fetch((int) $this->getData('fk_user_valid'));
                 $html .= '<div class="object_header_infos">';
                 $html .= 'Validée par ' . $user->getNomUrl(1);
+                $html .= ' le '.$this->displayData('date_valid', 'default', false, true);
                 $html .= '</div>';
             }
         }

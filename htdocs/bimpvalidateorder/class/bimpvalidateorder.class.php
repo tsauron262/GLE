@@ -30,7 +30,7 @@ class BimpValidateOrder {
         ),
         "C" => array(
             "comm" => array(62 => 100, 201 => 100, 65 => 100),
-            "fi" => array(81 => array(0, 1000000000000), 68 => array(0000, 100000000000), 284 => array(0000, 100000000000), 65 => array(100000, 100000000000), /*285 => array(0000, 100000000000)*/),
+            "fi" => array(81 => array(0, 1000000000000), 68 => array(0000, 100000000000), 284 => array(0000, 100000000000), 65 => array(100000, 100000000000), 285 => array(0000, 100000000000)),
         ),
         "M" => array(
             "comm_mini" => 30,
@@ -66,7 +66,7 @@ class BimpValidateOrder {
         $updateValFin = $updateValComm = false;
         $ok = true;
         $id_responsiblesFin = $id_responsiblesComm = array();
-        $sql = $this->db->query("SELECT `validFin`, `validComm` FROM `llx_commande` WHERE `rowid` = " . $order->id);
+        $sql = $this->db->query("SELECT `validFin`, `validComm` FROM `".MAIN_DB_PREFIX."commande` WHERE `rowid` = " . $order->id);
         $result = $this->db->fetch_object($sql);
 
         if ($result->validFin < 1) {
@@ -135,11 +135,11 @@ class BimpValidateOrder {
             }
         }
         if ($updateValFin) {
-            $this->db->query("UPDATE llx_commande SET validFin = 1 WHERE rowid = " . $order->id);
+            $this->db->query("UPDATE ".MAIN_DB_PREFIX."commande SET validFin = 1 WHERE rowid = " . $order->id);
             setEventMessages('Validation Financiére OK', array(), 'mesgs');
         }
         if ($updateValComm) {
-            $this->db->query("UPDATE llx_commande SET validComm = 1 WHERE rowid = " . $order->id);
+            $this->db->query("UPDATE ".MAIN_DB_PREFIX."commande SET validComm = 1 WHERE rowid = " . $order->id);
             setEventMessages('Validation Commerciale OK', array(), 'mesgs');
         }
         if (!$ok)

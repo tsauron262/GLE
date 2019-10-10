@@ -1,6 +1,7 @@
 <?php
 
 require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/objects/Bimp_Paiement.class.php';
+require_once DOL_DOCUMENT_ROOT . '/fourn/class/fournisseur.facture.class.php';
 
 class Bimp_PaiementFourn extends Bimp_Paiement
 {
@@ -19,6 +20,52 @@ class Bimp_PaiementFourn extends Bimp_Paiement
     public function getFourn()
     {
         return BimpTools::getPostFieldValue('id_fourn', 0);
+    }
+    
+        public function getListsExtraButtons()
+    {
+        $buttons = array();
+        if ($this->isLoaded()) {
+            $buttons[] = array(
+                'label'   => 'Afficher dans un nouvel onglet',
+                'icon'    => 'fas_external-link-alt',
+                'onclick' => 'window.open(\'' . DOL_URL_ROOT . '/fourn/paiement/card.php?id=' . $this->id . '\')'
+            );
+        }
+        return $buttons;
+    }
+
+    public function displayFourn()
+    {
+        $html = '';
+
+        if ($this->isLoaded()) {
+            $sql = 'SELECT f.fk_soc FROM ' . MAIN_DB_PREFIX . 'facture_fourn f';
+            $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'paiementfourn_facturefourn pf on pf.fk_facturefourn = f.rowid';
+            $sql .= ' WHERE pf.fk_paiementfourn = ' . (int) $this->id;
+
+            $result = $this->db->executeS($sql, 'array');
+
+            if (!empty($result)) {
+                $clients = array();
+
+                foreach ($result as $r) {
+                    if ((int) $r['fk_soc'] && !in_array((int) $r['fk_soc'], $clients)) {
+                        $clients[] = (int) $r['fk_soc'];
+
+                        $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', (int) $r['fk_soc']);
+                        if (BimpObject::objectLoaded($soc)) {
+                            if ($html) {
+                                $html .= '<br/>';
+                            }
+                            $html .= BimpObject::getInstanceNomUrlWithIcons($soc->dol_object);
+                        }
+                    }
+                }
+            }
+        }
+
+        return $html;
     }
 
     public function getAmountFromFacture()

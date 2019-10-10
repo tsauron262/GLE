@@ -100,7 +100,7 @@ forms:
               data_type: bool
               input: 
                   type: toggle
-              value: 0
+              value: 1
               
 fields_table: 
     default: 

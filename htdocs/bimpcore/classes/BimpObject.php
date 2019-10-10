@@ -6561,6 +6561,7 @@ class BimpObject extends BimpCache
 
     public function actionGenerateListCsv($data, &$success)
     {
+        $timestamp_debut = microtime(true);
         $errors = array();
         $warnings = array();
         $success = 'Fichier généré avec succès';
@@ -6632,6 +6633,9 @@ class BimpObject extends BimpCache
             $_POST = $post_temp;
         }
 
+        $timestamp_fin = microtime(true);
+        $difference_ms = $timestamp_fin - $timestamp_debut;
+        dol_syslog("File : ".$difference_ms, 3, 0, "_csv");
         return array(
             'errors'           => $errors,
             'warnings'         => $warnings,

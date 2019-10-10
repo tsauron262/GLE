@@ -429,6 +429,16 @@ fields:
         default_value: 0
 
 forms: 
+    lightFourn:
+        extends: light
+        rows:
+            mailValid:
+              custom: 1
+              label: Demande de validation
+              input_name: mailValid
+              input: 
+                  type: toggle
+                  
     light: 
         force_edit: 1
         rows: 
@@ -646,6 +656,7 @@ fields_tables:
               value: 
                   callback: displayCurrentPaHt
             - field: pmp
+            - field: pa_prevu
         
     stock:
         title: Vue globale
@@ -829,6 +840,10 @@ filters_panels:
 lists_cols: 
     ref: 
         field: ref
+    stock_picto: 
+        label: Stock Picto
+        value:
+            callback: displayStock_picto
     ref_short: 
         label: Réf. fabricant
         value: 
@@ -945,6 +960,7 @@ lists:
                 value: 
                     callback: 
                         method: displayStockInventorySr      
+                        
 cards: 
     default: 
         view_btn: 1

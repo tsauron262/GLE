@@ -1400,8 +1400,29 @@ class BC_Vente extends BimpObject
         $html .= '</div>';
 
         if (!$article->checkPlace((int) $this->getData('id_entrepot'))) {
+            $cur_place = $equipment->getCurrentPlace();
+
             $html .= '<div class="placeAlert">';
-            $html .= BimpRender::renderAlerts('Attention, L\'équipement ' . $equipment->getNomUrl(0, 1, 1, 'default') . ' n\'est pas enregistré comme étant situé dans votre centre', 'warning');
+            $msg = 'Attention, L\'équipement ' . $equipment->getNomUrl(0, 1, 1, 'default') . ' n\'est pas enregistré comme étant situé dans votre centre';
+            $class = 'warning';
+
+            if (BimpObject::objectLoaded($cur_place)) {
+                if ((int) $cur_place->getData('type') === BE_Place::BE_PLACE_CLIENT) {
+                    $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', (int) $cur_place->getData('id_client'));
+                    $class = 'danger';
+                    $msg = '<span style="font-size: 14px; font-weight: bold">ATTENTION, l\'équipement ' . $equipment->getNomUrl(0, 1, 1, 'default') . ' est enregistré comme vendu ';
+                    if (BimpObject::objectLoaded($client)) {
+                        $msg .= 'au client ' . $client->getNomUrl(1, 0, 1, 'default');
+                    } else {
+                        $msg .= 'à un client';
+                    }
+                    $msg .= ' </span>';
+                } else {
+                    $msg .= '<br/><br/>Emplacement actuel de cet équipement: ' . $cur_place->displayPlace(true);
+                }
+            }
+
+            $html .= BimpRender::renderAlerts($msg, $class);
             $html .= '</div>';
         }
         $html .= '</div>';
@@ -1499,7 +1520,8 @@ class BC_Vente extends BimpObject
         }
 
         // Check validation du produit: 
-        if (!(int) $product->getData('validate')) {
+        $errors2 = array();
+        if (!(int) $product->isVendable($errors2, true, false)) {
             $html .= '<div style="margin: 10px 0">';
             $msg = 'Attention: ce produit n\'est pas validé. La vente ne pourra pas être validée.<br/>';
             $msg .= 'Un e-mail a été envoyé pour validation d\'urgence.<br/>';
@@ -1507,7 +1529,7 @@ class BC_Vente extends BimpObject
             if (!(int) $this->getData('id_user_resp')) {
                 global $user;
                 $this->updateField('id_user_resp', (int) $user->id);
-            } 
+            }
             $userResp->fetch((int) $this->getData('id_user_resp'));
             if (BimpObject::objectLoaded($userResp)) {
                 $msg .= 'Un email sera envoyé à ' . $userResp->email . ' lorsque le produit aura été validé.';
@@ -1676,18 +1698,8 @@ class BC_Vente extends BimpObject
                 if (!count($article_errors)) {
                     $html .= $this->renderCartProductLine($article, $product);
 
-                    if (!(int) $product->getData('validate')) {
-                        $msg = 'Bonjour, ' . "\n\n";
-                        $msg .= 'Le produit ' . $product->getNomUrl(0) . ' a été ajouté à une vente en caisse alors qu\'il n\'est pas validé.' . "\n";
-                        $msg .= 'Une validation d\'urgence est nécessaire pour finaliser la vente' . "\n\n";
-                        $msg .= 'Cordialement.';
-                        if (mailSyn2("[URGENT] Demande de validation de produit en urgence", "achat@bimp.fr", null, $msg, array(), array(), array(), 'dev@bimp.fr')) {
-                            if ($product->getData('date_ask_valid') == null or $product->getData('date_ask_valid') == '') {
-                                $datetime = new DateTime();
-                                $product->updateField('date_ask_valid', $datetime->format('Y-m-d H:i:s'));
-                            }
-                        }
-                    }
+                    $errors2 = array();
+                    $product->isVendable($errors2, true);
                 }
             }
             if (count($article_errors)) {
@@ -2084,6 +2096,12 @@ class BC_Vente extends BimpObject
             foreach ($articles as $article) {
                 $equipment = $article->getChildObject('equipment');
                 if (BimpObject::objectLoaded($equipment)) {
+
+                    // Retrait du package si nécessaire: 
+                    if ((int) $equipment->getData('id_package')) {
+                        $equipment->updateField('id_package', 0);
+                    }
+
                     $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
                     if (!$article->checkPlace($id_entrepot)) {
                         // Correction de l'emplacement initial en cas d'erreur: 

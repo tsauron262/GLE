@@ -151,6 +151,7 @@ class BimpTools
         switch (get_class($object)) {
             case 'CommandeFournisseur':
                 return DOL_URL_ROOT . '/fourn/commande/card.php?id=' . $id_object;
+
             case 'FactureFournisseur':
                 return DOL_URL_ROOT . '/fourn/facture/card.php?facid=' . $id_object;
 
@@ -300,7 +301,7 @@ class BimpTools
         return unserialize($value);
     }
 
-    public static function getDolObjectLinkedObjectsList($dol_object, BimpDb $bdb = null)
+    public static function getDolObjectLinkedObjectsList($dol_object, BimpDb $bdb = null, $type_filters = array())
     {
         $list = array();
 
@@ -317,12 +318,18 @@ class BimpTools
                 foreach ($rows as $r) {
                     if ((int) $r['fk_source'] === (int) $dol_object->id &&
                             $r['sourcetype'] === $dol_object->element) {
+                        if (!empty($type_filters) && !in_array($r['targettype'], $type_filters)) {
+                            continue;
+                        }
                         $list[] = array(
                             'id_object' => (int) $r['fk_target'],
                             'type'      => $r['targettype']
                         );
                     } elseif ((int) $r['fk_target'] === (int) $dol_object->id &&
                             $r['targettype'] === $dol_object->element) {
+                        if (!empty($type_filters) && !in_array($r['sourcetype'], $type_filters)) {
+                            continue;
+                        }
                         $list[] = array(
                             'id_object' => (int) $r['fk_source'],
                             'type'      => $r['sourcetype']
@@ -335,9 +342,9 @@ class BimpTools
         return $list;
     }
 
-    public static function getDolObjectLinkedObjectsListByTypes($dol_object, BimpDb $bdb)
+    public static function getDolObjectLinkedObjectsListByTypes($dol_object, BimpDb $bdb = null, $type_filters = array())
     {
-        $list = self::getDolObjectLinkedObjectsList($dol_object, $bdb);
+        $list = self::getDolObjectLinkedObjectsList($dol_object, $bdb, $type_filters);
 
         $items = array();
 
@@ -677,7 +684,7 @@ class BimpTools
 
 
 //        $max = BimpCache::getBdb()->getMax($table, $field, $where);
-        $max = BimpCache::getBdb()->getMax($table, $field, $where . "  AND LENGTH(ref) = (SELECT MAX(LENGTH(" . $field . ")) as max FROM `" . MAIN_DB_PREFIX . $table . "`   WHERE " . $where . ")");
+        $max = BimpCache::getBdb()->getMax($table, $field, $where . "  AND LENGTH(" . $field . ") = (SELECT MAX(LENGTH(" . $field . ")) as max FROM `" . MAIN_DB_PREFIX . $table . "`   WHERE " . $where . ")");
 
         if ((string) $max) {
             if (preg_match('/^' . $prefix . '([0-9]+)$/', $max, $matches)) {
@@ -1640,8 +1647,8 @@ class BimpTools
 
     public static function cleanStringForUrl($text, $separator = '_', $charset = 'utf-8')
     {
-        $text = mb_convert_encoding($text, 'HTML-ENTITIES', $charset);
-
+        // Commenter car apparemment ça converti les undescore en "n" => pose problème dans le cas des propales révisées. 
+//        $text = mb_convert_encoding($text, 'HTML-ENTITIES', $charset);
         // On vire les accents
         $text = preg_replace(array('/ß/', '/&(..)lig;/', '/&([aouAOU])uml;/', '/&(.)[^;]*;/'), array('ss', "$1", "$1" . 'e', "$1"), $text);
 
@@ -1693,6 +1700,39 @@ class BimpTools
         }
 
         return $n;
+    }
+
+    public static function utf8_encode($value)
+    {
+        // Encodage récursif si $value = array() 
+
+        if (is_array($value)) {
+            foreach ($value as $key => $subValue) {
+                $value[$key] = self::utf8_encode($subValue);
+            }
+
+            return $value;
+        }
+
+        if (is_string($value)) {
+            $value = utf8_encode($value);
+        }
+
+        return $value;
+    }
+
+    public static function addZeros($str, $nbCarac)
+    {
+        // Ajoute des zéros en début de chaîne de manière à obtenir $nbCarac caractères. 
+        $str = '' . $str;
+        if (strlen($str) < $nbCarac) {
+            $n = ($nbCarac - strlen($str));
+            while ($n > 0) {
+                $str = '0' . $str;
+                $n--;
+            }
+        }
+        return $str;
     }
 
     // Traitements sur des array: 

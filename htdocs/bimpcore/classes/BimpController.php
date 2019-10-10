@@ -574,6 +574,19 @@ class BimpController
 
                 if ($json === false) {
                     $msg = 'Echec de l\'encodage JSON - ' . json_last_error_msg();
+                    $err_code = json_last_error();
+
+                    if ($err_code == JSON_ERROR_UTF8) {
+                        // On tente un encodage utf-8. 
+                        $result = BimpTools::utf8_encode($result);
+                        
+                        $json = json_encode($result);
+
+                        if ($json !== false) {
+                            die($json);
+                        }
+                    }
+
                     dol_syslog('AjaxProcess "' . $action . '" - controller: ' . $this->module . ' ' . $this->controller . ' - ' . $msg . '<pre>' . print_r($result, 1), LOG_ERR);
                     die(json_encode(array(
                         'errors'     => array($msg),

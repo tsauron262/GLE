@@ -2117,7 +2117,7 @@ class BS_SAV extends BimpObject
                     $where = " (SELECT `fk_usergroup` FROM `" . MAIN_DB_PREFIX . "usergroup_user` WHERE `fk_user` = " . $id_user_tech . ") AND `nom` REGEXP 'Sav([0-9])'";
 //                    $rows = $this->db->getRows(array('usergroup_extrafields ge', ), "fk_object IN ".$where, null, 'object', array('mail'));
 
-                    $sql = $this->db->db->query("SELECT `mail` FROM llx_usergroup_extrafields ge, llx_usergroup g WHERE fk_object IN  (SELECT `fk_usergroup` FROM `llx_usergroup_user` WHERE ge.fk_object = g.rowid AND `fk_user` = " . $id_user_tech . ") AND `nom` REGEXP 'Sav([0-9])'");
+                    $sql = $this->db->db->query("SELECT `mail` FROM ".MAIN_DB_PREFIX."usergroup_extrafields ge, ".MAIN_DB_PREFIX."usergroup g WHERE fk_object IN  (SELECT `fk_usergroup` FROM `".MAIN_DB_PREFIX."usergroup_user` WHERE ge.fk_object = g.rowid AND `fk_user` = " . $id_user_tech . ") AND `nom` REGEXP 'Sav([0-9])'");
 
                     $mailOk = false;
                     if ($this->db->db->num_rows($sql) > 0) {

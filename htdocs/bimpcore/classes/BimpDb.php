@@ -143,6 +143,8 @@ class BimpDb
     {
         if (file_exists($file)) {
             $sql = file_get_contents($file);
+            $sql = str_replace("llx_", MAIN_DB_PREFIX, $sql);
+            $sql = str_replace("MAIN_DB_PREFIX", MAIN_DB_PREFIX, $sql);
             if ($sql) {
                 $tabSql = explode(";", $sql);
                 foreach ($tabSql as $req) {

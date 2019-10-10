@@ -131,6 +131,10 @@ fields:
         display_if:
             field_name: use_syntec
             show_values: 1
+    contrat_source:
+        label: Contrat Initial
+        type: int
+        dol_extra_field: 1
     tacite:
         label: Renouvellement
         type: int
@@ -195,6 +199,10 @@ fields_tables:
             - field: ref
               label: Référence du contrat
               edit: 0
+            - label: Contrat initial
+              value:
+                  callback: getContratSource
+              edit: 0
             - field: objet_contrat
               edit: 0
             - field: datec
@@ -203,6 +211,9 @@ fields_tables:
               edit: 0
             - field: date_start
               edit: 0
+            - label: Date prochaine facture
+              value:
+                  callback: displayDateNextFacture
             - field: duree_mois
               edit: 0
             - label: Date de fin du contrat

@@ -7,6 +7,36 @@ objects:
             bimp_object: Bimp_FactureFourn
             
 sections: 
-    - type: list
-      list: 
-          object: facture_fourn
+          
+    - type: tabs
+      tabs: 
+        default:
+            label: Factures
+            sections:
+                - type: custom
+                  custom: 
+                      callback: 
+                        method: renderTabs
+                        params: 
+                            - renderFacturesTab
+                            - default
+        prods: 
+            label: Produits en factures
+            sections: 
+                - type: custom
+                  custom: 
+                      callback: 
+                        method: renderTabs
+                        params: 
+                            - renderProdsTabs
+                            - prods
+        paiements: 
+            label: Paiements
+            sections: 
+                - type: custom
+                  custom: 
+                      callback: 
+                        method: renderTabs
+                        params: 
+                            - renderPaiementsTab
+                            - paiements

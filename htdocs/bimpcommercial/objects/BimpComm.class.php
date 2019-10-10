@@ -625,6 +625,8 @@ class BimpComm extends BimpDolObject
     public function getRemiseGlobaleLineRate($recalculate = false)
     {
         if ($recalculate || is_null($this->remise_globale_line_rate)) {
+
+
             $this->remise_globale_line_rate = 0;
 
             $remise_globale = (float) $this->getData('remise_globale');
@@ -639,6 +641,14 @@ class BimpComm extends BimpDolObject
                         $total_lines += (float) $line->getTotalTtcWithoutRemises();
                     }
                 }
+
+//            global $user;
+//                if ($user->admin) {
+//                 echo 'RG: ' . $remise_globale . '<br/>';
+//                    echo 'tot ttc: ' . $ttc . '<br/>';
+//                    echo 'RG amount: ' . $remise_amount . '<br/>';
+//                    echo 'tot lines: ' . $total_lines . '<br/>';
+//                }
 
                 if ($total_lines) {
                     $this->remise_globale_line_rate = ($remise_amount / $total_lines) * 100;
@@ -3551,7 +3561,6 @@ class BimpComm extends BimpDolObject
             );
         }
     }
-    
 //    public function displayData($field) {
 //    
 //    Petite astuce pour affichage custom d'un champ: 

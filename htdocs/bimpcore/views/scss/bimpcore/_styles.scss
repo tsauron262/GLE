@@ -48,7 +48,8 @@
             z-index: 10100!important;
         }
     }
-    .side-nav {
+    .side-nav,
+    .side-nav-vert {
         z-index: 9960!important;
     }
 
@@ -66,6 +67,7 @@
 
         #tmenu_tooltip,
         .side-nav,
+        .side-nav-vert,
         #but-menu,
         #id-top .login_block {
             display: none;

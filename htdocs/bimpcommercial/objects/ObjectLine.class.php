@@ -1137,12 +1137,12 @@ class ObjectLine extends BimpObject
             $this->remises_total_infos['total_amount_ttc'] = $this->remises_total_infos['line_amount_ttc'] + $this->remises_total_infos['remise_globale_amount_ttc'];
         }
         
-        global $user;
-        if ($user->admin && $this->getData('id_line') == 609228) {
-            echo 'Remises infos<pre>';
-            print_r($this->remises_total_infos);
-            echo '</pre>';
-        }
+//        global $user;
+//        if ($user->admin && $this->getData('id_line') == 609228) {
+//            echo 'Remises infos<pre>';
+//            print_r($this->remises_total_infos);
+//            echo '</pre>';
+//        }
 
         return $this->remises_total_infos;
     }

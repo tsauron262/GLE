@@ -142,6 +142,7 @@ class BC_Field extends BimpComponent
         }
 
         if ($this->edit) {
+            
             if ($this->params['editable'] && $this->object->canEditField($this->name) && $this->object->isFieldEditable($this->name, $this->force_edit)) {
                 $html .= $this->renderInput();
             } else {

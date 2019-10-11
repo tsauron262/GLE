@@ -86,6 +86,24 @@ class FournObjectLine extends ObjectLine
 
         $html = '';
         switch ($field) {
+            case 'id_fourn_price':
+                $html = '<input type="hidden" name="' . $field . '" value="' . (int) $this->id_fourn_price . '"/>';
+                if (!(int) $this->id_fourn_price) {
+                    $html .= 'Prix d\'achat personnalisé';
+                } else {
+                    $pfp = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ProductFournPrice', (int) $this->id_fourn_price);
+                    if (BimpObject::objectLoaded($pfp)) {
+                        $html .= $pfp->getNomUrl(1, 1, 1, 'default') . ' : ' . $pfp->displayData('price');
+                    } else {
+                        $html .= BimpRender::renderAlerts('Le prix d\'achat d\'ID ' . $this->id_fourn_price . ' n\'existe plus');
+                    }
+                }
+                break;
+
+            case 'pa_except':
+                $html .= BimpTools::displayMoneyValue((float) $this->pu_ht);
+                break;
+
             case 'ref_supplier':
                 $html .= (string) $this->ref_supplier;
                 break;
@@ -99,9 +117,22 @@ class FournObjectLine extends ObjectLine
 
     public function renderLineInput($field, $attribute_equipment = false, $prefixe = '', $force_edit = false)
     {
+        if (!$this->isFieldEditable($field, $force_edit)) {
+            return $this->displayLineData($field);
+        }
+
         $html = '';
 
         switch ($field) {
+            case 'pa_except':
+                $value = $this->pu_ht;
+                return BimpInput::renderInput('text', $prefixe . 'pa_except', (float) $value, array(
+                            'data' => array(
+                                'data_type' => 'number',
+                                'decimals'  => 4
+                            )
+                ));
+
             case 'id_fourn_price':
                 $value = $this->getValueByProduct('id_fourn_price');
                 $values = $this->getProductFournisseursPricesArray(true, 'Prix d\'achat exceptionnel');

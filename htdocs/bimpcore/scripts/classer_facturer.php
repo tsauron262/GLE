@@ -23,9 +23,12 @@ $tabRef = array('CFOLD8CF-1907005','CFOLD8CF-1904219','CFOLD8CF-1904270','CF1909
 $sql = $db->query("SELECT rowid FROM llx_commande_fournisseur WHERE ref IN ('".implode("','", $tabRef)."')");
 
 while ($ln = $db->fetch_object($sql)){
-    $commFourn = BimpCache::getBimpObjectInstance("bimcommercial", 'Bimp_commandeFourn', $ln->rowid);
+    echo 'll';
+    $commFourn = BimpCache::getBimpObjectInstance("bimpcommercial", 'Bimp_CommandeFourn', $ln->rowid);
     $result = $commFourn->setObjectAction('forceStatus', 0, array(
            'status_type' => 'invoice',
            'invoice_status' => 2
        ));
 }
+
+echo 'fin';

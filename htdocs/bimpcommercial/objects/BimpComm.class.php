@@ -43,6 +43,10 @@ class BimpComm extends BimpDolObject
         $this->useCaisseForPayments = BimpCore::getConf('use_caisse_for_payments');
         parent::__construct($module, $object_name);
     }
+    
+    public function useEntrepot(){
+        return !BimpCore::getConf("NOT_USE_ENTREPOT");
+    }
 
     // Gestion des droits: 
 

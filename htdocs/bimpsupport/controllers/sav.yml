@@ -106,6 +106,18 @@ sections:
             title: <i class="fa fa-apple iconLeft"></i>GSX
             content: 
                 callback: renderGsx
+                
+                
+          - id: files
+            title: Fichiers
+            struct: 
+                type: custom
+                custom: 
+                    callback: 
+                        method: renderPropalFilesView
+                        object: sav
+                    
+                    
     - type: buttons
       buttons:
           - label: Liste des SAV

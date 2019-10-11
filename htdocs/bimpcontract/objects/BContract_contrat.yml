@@ -14,7 +14,7 @@ dol_object:
         dol_object: 
             module: contrat
             file: contrat
-
+force_extrafields_update: 1
 objects:
     client:
         instance:
@@ -51,7 +51,6 @@ objects:
         instance:
             bimp_object: BContract_echeancier
           
-force_extrafields_update: 1
 
 table: contrat
 controller: contrat
@@ -324,7 +323,56 @@ forms:
             - field: moderegl
             - field: fk_commercial_signature
             - field: fk_commercial_suivi
-            
+    
+    add_linked_object:
+        force_edit: 1
+        rows:
+            - custom: 1
+              label: Type de pièce
+              input_name: type_piece
+              input: 
+                type: select
+              values: 
+                array: true_objects_for_link
+            - custom: 1
+              label: Liste des commandes client
+              input_name: commande_client
+              input: 
+                  type: select
+              values:
+                   callback: 
+                       method: getListClient
+                       params:
+                           - commande
+              display_if:
+                  field_name: type_piece
+                  show_values: commande
+            - custom: 1
+              label: Liste des factures fournisseur client
+              input_name: facture_fourn_client
+              input: 
+                  type: select
+              values:
+                   callback: 
+                       method: getListClient
+                       params:
+                           - facture_fourn
+              display_if:
+                  field_name: type_piece
+                  show_values: facture_fourn
+            - custom: 1
+              label: Liste des propositions commercial client
+              input_name: propal_client
+              input: 
+                  type: select
+              values:
+                   callback: 
+                       method: getListClient
+                       params:
+                           - propal
+              display_if:
+                  field_name: type_piece
+                  show_values: propal
     clone_contrat:
         edit: 1
         msgs:

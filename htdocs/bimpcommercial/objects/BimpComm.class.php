@@ -2462,6 +2462,10 @@ class BimpComm extends BimpDolObject
                 $line_instance->set('force_qty_1', (int) $line->getData('force_qty_1'));
             }
 
+            if ($line->field_exists('hide_product_label') && $line_instance->field_exists('hide_product_label')) {
+                $line_instance->set('hide_product_label', (int) $line->getData('hide_product_label'));
+            }
+
             $line_errors = $line_instance->create($warnings, true);
             if (count($line_errors)) {
                 $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec de la création de la ligne n°' . $i);

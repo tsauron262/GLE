@@ -44,18 +44,19 @@ class ObjectLine extends BimpObject
         'desc'           => array('label' => 'Description', 'type' => 'html', 'required' => 0, 'default' => ''),
         'id_parent_line' => array('label' => 'Ligne parente', 'type' => 'int', 'required' => 0, 'default' => null)
     );
-    
-    public function getTypes(){
+
+    public function getTypes()
+    {
         $types = array(
             self::LINE_PRODUCT => 'Produit / Service',
             self::LINE_TEXT    => 'Texte libre'
         );
-        if(BimpCore::getConf('LINE_FREE_ACTIVE'))
+        if (BimpCore::getConf('LINE_FREE_ACTIVE'))
             $types[self::LINE_FREE] = 'Ligne libre';
-        
+
         return $types;
     }
-    
+
     protected $product = null;
     protected $post_id_product = null;
     protected $post_equipment = null;
@@ -151,17 +152,19 @@ class ObjectLine extends BimpObject
             return 0;
         }
 
-        if (!$force_edit && !(int) $this->getData('editable')) {//  || !$this->canEditPrixAchat() || !$this->canEditPrixVente())) {
-            return 0;
-        }
-
         $parent = $this->getParentInstance();
         if (!BimpObject::objectLoaded($parent)) {
             return 0;
         }
 
-        if ($force_edit) {
-            return 1;
+        return 1;
+    }
+
+    public function isParentDraft()
+    {
+        $parent = $this->getParentInstance();
+        if (!BimpObject::objectLoaded($parent)) {
+            return 0;
         }
 
         if ($parent->field_exists('fk_statut') && (int) $parent->getData('fk_statut') === 0) {
@@ -201,23 +204,40 @@ class ObjectLine extends BimpObject
 
     public function isFieldEditable($field, $force_edit = false)
     {
-        switch ($field) {
-            case 'remisable':
-                $product = $this->getProduct();
-                if (BimpObject::objectLoaded($product)) {
-                    if (!(int) $product->getData('remisable')) {
-                        return 0;
-                    }
-                }
+        if (!(int) $this->isEditable()) {
+            return 0;
+        }
 
-                if ((float) $this->getTotalHT() < 0) {
+        if (!in_array($field, array('remise_crt', 'remise_crt_percent', 'force_qty_1', 'hide_product_label', 'date_from', 'date_to', 'desc', 'ref_supplier'))) {
+            if (!$force_edit) {
+                if (!$this->isParentDraft()) {
                     return 0;
                 }
 
-                return 1;
+                if (!(int) $this->getData('editable')) {
+                    return 0;
+                }
+            }
+
+            switch ($field) {
+                case 'remisable':
+                    $product = $this->getProduct();
+                    if (BimpObject::objectLoaded($product)) {
+                        if (!(int) $product->getData('remisable')) {
+                            return 0;
+                        }
+                    }
+
+                    if ((float) $this->getTotalHT() < 0) {
+                        return 0;
+                    }
+                    return 1;
+            }
         }
 
-        return parent::isFieldEditable($field, $force_edit);
+
+
+        return (int) parent::isFieldEditable($field, $force_edit);
     }
 
     public function isActionAllowed($action, &$errors = array())
@@ -230,7 +250,7 @@ class ObjectLine extends BimpObject
         return (int) parent::isActionAllowed($action, $errors);
     }
 
-    public function isRemisable()
+    public function isProductRemisable()
     {
         $product = $this->getProduct();
         if (BimpObject::objectLoaded($product)) {
@@ -239,7 +259,12 @@ class ObjectLine extends BimpObject
             }
         }
 
-        return (int) $this->getData('remisable');
+        return 1;
+    }
+
+    public function isRemisable()
+    {
+        return $this->isProductRemisable() && (int) $this->getData('remisable');
     }
 
     public function isParentEditable()
@@ -399,10 +424,9 @@ class ObjectLine extends BimpObject
             }
 
             if (is_object($product) && $product->id > 0) {
-                if(!$product->isVendable($errors))
+                if (!$product->isVendable($errors))
                     return 0;
             }
-            
         }
 
         return 1;
@@ -1136,7 +1160,7 @@ class ObjectLine extends BimpObject
             $this->remises_total_infos['total_amount_ht'] = $this->remises_total_infos['line_amount_ht'] + $this->remises_total_infos['remise_globale_amount_ht'];
             $this->remises_total_infos['total_amount_ttc'] = $this->remises_total_infos['line_amount_ttc'] + $this->remises_total_infos['remise_globale_amount_ttc'];
         }
-        
+
 //        global $user;
 //        if ($user->admin && $this->getData('id_line') == 609228) {
 //            echo 'Remises infos<pre>';
@@ -1559,6 +1583,18 @@ class ObjectLine extends BimpObject
                         }
                     }
                     break;
+
+                case 'remisable':
+                    if ((int) $this->isRemisable()) {
+                        $html .= '<span class="success">OUI</span>';
+                    } else {
+                        $html .= '<span class="danger">NON</span>';
+                    }
+                    break;
+
+                case 'remise_crt':
+                case 'remise_crt_percent':
+                    return $this->displayData($field);
             }
 
             global $modeCSV;
@@ -2679,6 +2715,10 @@ class ObjectLine extends BimpObject
 
     public function renderLineInput($field, $attribute_equipment = false, $prefixe = '', $force_edit = false)
     {
+        if (!$this->isFieldEditable($field, $force_edit)) {
+            return $this->displayLineData($field);
+        }
+
         $html = '';
 
         $value = null;
@@ -2767,9 +2807,9 @@ class ObjectLine extends BimpObject
                 break;
 
             case 'qty':
-                if (!$force_edit && !$this->isFieldEditable('qty')) {
-                    return $value;
-                }
+//                if (!$force_edit && !$this->isFieldEditable('qty')) {
+//                    return $value;
+//                }
 
                 $product_type = null;
                 if ((int) $this->id_product) {
@@ -2924,7 +2964,7 @@ class ObjectLine extends BimpObject
                 break;
 
             case 'remisable':
-                if (!$this->isFieldEditable('remisable')) {
+                if (!$this->isProductRemisable()) {
                     $html .= '<input type="hidden" value="0" name="' . $prefixe . 'remisable"/>';
                     $html .= '<span class="danger">NON</span>';
                     break;
@@ -3943,6 +3983,7 @@ class ObjectLine extends BimpObject
             $errors[] = 'Impossible de mettre à jour une ligne depuis une instance de la classe de base "ObjectLine"';
             return $errors;
         }
+
         $parent = $this->getParentInstance();
 
         if (!BimpObject::objectLoaded($parent)) {
@@ -3950,181 +3991,136 @@ class ObjectLine extends BimpObject
         }
 
         if (!$this->isEditable(true)) {
-            return array(BimpTools::ucfirst($parent->getLabel('the')) . ' n\'a pas le statut "brouillon". Mise à jour de la ligne impossible');
+            return array(BimpTools::ucfirst($parent->getLabel('the')) . ' n\'est pas éditable');
         }
+
+        // (Mise à jour possible pour certains champs sans màj de la dolLine) 
+        $isParentEditable = ($force_update || $this->isParentEditable());
 
         $line = $this->getChildObject('line');
 
-        if ((int) $this->id_product) {
-            $product = $this->getProduct();
-            if ($this->equipment_required && BimpObject::objectLoaded($product) && $product->isSerialisable()) {
-                if (!BimpObject::objectLoaded($line)) {
-                    return array('ID de la ligne correspondante absent');
-                }
+        if ($isParentEditable) {
+            if ((int) $this->id_product) {
+                $product = $this->getProduct();
+                if ($this->equipment_required && BimpObject::objectLoaded($product) && $product->isSerialisable()) {
+                    if (!BimpObject::objectLoaded($line)) {
+                        return array('ID de la ligne correspondante absent');
+                    }
 
-                $sql = 'SELECT COUNT(`id`) as nRows FROM ' . MAIN_DB_PREFIX . 'object_line_equipment ';
-                $sql .= 'WHERE `id_object_line` = ' . (int) $this->id . ' AND `object_type` = \'' . static::$parent_comm_type . '\'';
+                    $sql = 'SELECT COUNT(`id`) as nRows FROM ' . MAIN_DB_PREFIX . 'object_line_equipment ';
+                    $sql .= 'WHERE `id_object_line` = ' . (int) $this->id . ' AND `object_type` = \'' . static::$parent_comm_type . '\'';
 
-                $result = $this->db->executeS($sql);
+                    $result = $this->db->executeS($sql);
 
-                $prev_qty = 0;
+                    $prev_qty = 0;
 
-                if (!is_null($result) && isset($result[0]->nRows)) {
-                    $prev_qty = (int) $result[0]->nRows;
-                }
+                    if (!is_null($result) && isset($result[0]->nRows)) {
+                        $prev_qty = (int) $result[0]->nRows;
+                    }
 
-                // Vérification de la quantité de lignes d'équipement et création/suppression si nécessaire: 
-                $eq_lines = $this->getEquipmentLines();
-                $eq_qty = abs($this->qty);
-                if ((int) $eq_qty !== $prev_qty) {
-                    $diff = $eq_qty - $prev_qty;
+                    // Vérification de la quantité des lignes d'équipement et création/suppression si nécessaire: 
+                    $eq_lines = $this->getEquipmentLines();
+                    $eq_qty = abs($this->qty);
+                    if ((int) $eq_qty !== $prev_qty) {
+                        $diff = $eq_qty - $prev_qty;
 
-                    if ($diff > 0) {
-                        $this->createEquipmentsLines($diff);
-                    } else {
-                        $deletable = 0;
-                        $diff = -$diff;
-                        foreach ($eq_lines as $eq_line) {
-                            if (!(int) $eq_line->getData('id_equipment')) {
-                                $deletable++;
-                            }
-                        }
-
-                        if ($deletable < $diff) {
-                            $errors[] = 'Quantité minimum: ' . ($line->qty - $deletable);
+                        if ($diff > 0) {
+                            $this->createEquipmentsLines($diff);
                         } else {
+                            $deletable = 0;
+                            $diff = -$diff;
                             foreach ($eq_lines as $eq_line) {
-                                if ($diff <= 0) {
-                                    break;
-                                }
                                 if (!(int) $eq_line->getData('id_equipment')) {
-                                    $del_warnings = array();
-                                    $eq_line->delete($del_warnings, true);
-                                    $diff--;
+                                    $deletable++;
+                                }
+                            }
+
+                            if ($deletable < $diff) {
+                                $errors[] = 'Quantité minimum: ' . ($line->qty - $deletable);
+                            } else {
+                                foreach ($eq_lines as $eq_line) {
+                                    if ($diff <= 0) {
+                                        break;
+                                    }
+                                    if (!(int) $eq_line->getData('id_equipment')) {
+                                        $del_warnings = array();
+                                        $eq_line->delete($del_warnings, true);
+                                        $diff--;
+                                    }
                                 }
                             }
                         }
                     }
-                }
 
-                // Valeurs par défaut pour les lignes d'équipement: 
-//                $pu_ht = (float) $this->pu_ht;
-//                if ($this->field_exists('def_pu_ht')) {
-//                    $pu_ht = (float) $this->getData('def_pu_ht');
-//                }
-//                $tva_tx = (float) $this->tva_tx;
-//                if ($this->field_exists('def_tva_tx')) {
-//                    $tva_tx = (float) $this->getData('def_tva_tx');
-//                }
-//                $id_fourn_price = (int) $this->id_fourn_price;
-//                if ($this->field_exists('def_id_fourn_price')) {
-//                    $id_fourn_price = (float) $this->getData('def_id_fourn_price');
-//                }
-//                $pa_ht = (float) $this->db->getValue('product_fournisseur_price', 'price', '`rowid` = ' . (int) $id_fourn_price);
-//
-////                 Vérification des valeurs des lignes d'équipement et mise à jour si nécessaire: 
-//                $eq_lines = $this->getEquipmentLines();
-//                foreach ($eq_lines as $eq_line) {
-//                    $update_line = false;
-//                    $equipment = null;
-//
-//                    if ((int) $eq_line->getData('id_equipment')) {
-//                        $equipment = $eq_line->getChildObject('equipment');
-//                        if (!BimpObject::objectLoaded($equipment)) {
-//                            $eq_line->set('id_equipment', 0);
-//                            $update_line = true;
-//                            unset($equipment);
-//                            $equipment = null;
-//                        }
-//                    }
-//
-//                    if (is_null($equipment) || (!is_null($equipment) && !(float) $equipment->getData('prix_vente_except'))) {
-//                        if ($pu_ht !== (float) $eq_line->getData('pu_ht')) {
-//                            $eq_line->set('pu_ht', $pu_ht);
-//                            $update_line = true;
-//                        }
-//                    }
-//
-//                    if ($tva_tx !== (float) $eq_line->getData('tva_tx')) {
-//                        $eq_line->set('tva_tx', $tva_tx);
-//                        $update_line = true;
-//                    }
-//
-//                    if (is_null($equipment) || (!is_null($equipment) && !(float) $equipment->getData('prix_achat'))) {
-//                        if ($pa_ht !== (float) $eq_line->getData('pa_ht')) {
-//                            $eq_line->set('pa_ht', $pa_ht);
-//                            $update_line = true;
-//                        }
-//                        if ($id_fourn_price !== (int) $eq_line->getData('id_fourn_price')) {
-//                            $eq_line->set('id_fourn_price', $id_fourn_price);
-//                            $update_line = true;
-//                        }
-//                    }
-//
-//                    if ($update_line) {
-//                        $update_warnings = array();
-//                        $update_errors = $eq_line->update($update_warnings, true);
-//                        $update_errors = array_merge($update_errors, $update_warnings);
-//                        if (count($update_errors)) {
-//                            $warnings[] = BimpTools::getMsgFromArray($update_errors, 'Des erreurs sont survenues lors de la mise à jour de la ligne d\'équipement d\'ID ' . $eq_line->id);
-//                        }
-//                    }
-//                }
-
-                if (count($errors)) {
-                    return $errors;
+                    if (count($errors)) {
+                        return $errors;
+                    }
                 }
             }
-        }
 
-        if (!$this->isRemisable()) {
-            $remises = $this->getRemises();
-            foreach ($remises as $remise) {
-                $del_warnings = array();
-                $remise->delete($del_warnings, true);
+            if (!$this->isRemisable()) {
+                $remises = $this->getRemises();
+                foreach ($remises as $remise) {
+                    $del_warnings = array();
+                    $remise->delete($del_warnings, true);
+                }
+                unset($this->remises);
+                $this->remises = null;
             }
-            unset($this->remises);
-            $this->remises = null;
-        }
 
-        $initial_remise = (float) $this->getData('remise');
-        $this->remise = $initial_remise;
+            $initial_remise = (float) $this->getData('remise');
+            $this->remise = $initial_remise;
 
-        // Forçage de la mise à jour: 
-        $prev_parent_status = null;
-        if ($force_update) {
-            if (BimpObject::objectLoaded($parent)) {
-                if ((int) $parent->getData('fk_statut') !== 0) {
-                    $prev_parent_status = (int) $parent->getData('fk_statut');
-                    $parent->dol_object->statut = 0;
-                    $parent->dol_object->brouillon = 1;
+            // Forçage de la mise à jour: 
+            $prev_parent_status = null;
+            if ($force_update) {
+                if (BimpObject::objectLoaded($parent)) {
+                    if ((int) $parent->getData('fk_statut') !== 0) {
+                        $prev_parent_status = (int) $parent->getData('fk_statut');
+                        $parent->dol_object->statut = 0;
+                        $parent->dol_object->brouillon = 1;
+                    }
                 }
             }
         }
 
         $errors = parent::update($warnings, $force_update);
-        $errors = array_merge($errors, $this->updateLine(false));
 
-        if (!is_null($prev_parent_status)) {
-            $parent->dol_object->statut = $prev_parent_status;
-            $parent->dol_object->brouillon = 0;
-        }
-
-        if (!count($errors)) {
-            $remises = $this->getRemiseTotalInfos(true);
-            if ($initial_remise !== (float) $remises['total_percent']) {
-                $this->remise = (float) $remises['total_percent'];
-                $this->set('remise', (float) $remises['total_percent']);
-                $new_warnings = array();
-                $errors = $this->update($new_warnings, $force_update);
+        if (!$isParentEditable) {
+            if ((int) $this->getData('id_line')) {
+                if ($this->db->update(static::$dol_line_table, array(
+                            'description' => (string) $this->desc,
+                            'date_start'  => (string) $this->date_from,
+                            'date_end'    => (string) $this->date_to
+                                ), '`' . static::$dol_line_primary . '` = ' . (int) $this->getData('id_line')) <= 0) {
+                    echo $this->db->db->lasterror() . '<br/>';
+                }
             }
-            if (!$force_update && BimpObject::objectLoaded($parent)) {
-                if ($parent->field_exists('remise_globale') &&
-                        (float) $parent->getData('remise_globale')) {
-                    $warnings[] = 'Attention: le montant de la remise globale a pu être modifié. Veuillez vérifier.';
+        } else {
+            $errors = array_merge($errors, $this->updateLine(false));
+
+            if (!is_null($prev_parent_status)) {
+                $parent->dol_object->statut = $prev_parent_status;
+                $parent->dol_object->brouillon = 0;
+            }
+
+            if (!count($errors)) {
+                $remises = $this->getRemiseTotalInfos(true);
+                if ($initial_remise !== (float) $remises['total_percent']) {
+                    $this->remise = (float) $remises['total_percent'];
+                    $this->set('remise', (float) $remises['total_percent']);
+                    $new_warnings = array();
+                    $errors = $this->update($new_warnings, $force_update);
+                }
+                if (!$force_update && BimpObject::objectLoaded($parent)) {
+                    if ($parent->field_exists('remise_globale') &&
+                            (float) $parent->getData('remise_globale')) {
+                        $warnings[] = 'Attention: le montant de la remise globale a pu être modifié. Veuillez vérifier.';
+                    }
                 }
             }
         }
+
         return $errors;
     }
 

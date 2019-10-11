@@ -789,16 +789,13 @@ lists:
             filters:
                 type: 2
             col: desc
-        add_btn: 
-            callback: isParentEditable
+#        add_btn: 
+#            callback: isParentEditable
         add_form_name: default
         add_btn_label: Ajouter une ligne
-        edit_btn: 
-            callback: isEditable
-        update_btn: 
-            callback: isEditable
-        delete_btn: 
-            callback: isDeletable
+        edit_btn: 1
+        update_btn: 1
+        delete_btn: 1
         item_checkbox: 
             callback: isDeletable
         extra_btn: 

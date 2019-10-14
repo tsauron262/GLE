@@ -2614,7 +2614,7 @@ class User extends CommonObject
                 else
                     $info['hireDate'] = "20000101000000Z";
                 
-                if($this->salary)
+                if($this->employee)
                     $info['employeeType'] = 'SALARIE';
                 else
                     $info['employeeType'] = 'NONE';

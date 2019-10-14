@@ -168,6 +168,10 @@ lists:
         extra_btn: 
             callback: getListExtraButtons
         cols:
+            entrepot: 
+                field: id_entrepot
+                display: nom_url
+                child: parent
             centre: 
                 field: id_caisse
                 display: nom

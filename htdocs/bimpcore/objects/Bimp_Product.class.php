@@ -1767,7 +1767,7 @@ class Bimp_Product extends BimpObject
         }
     }
 
-    public function validateProduct()
+    public function validateProduct(&$warnings = array())
     {
         global $user;
 
@@ -1783,17 +1783,24 @@ class Bimp_Product extends BimpObject
         if ((int) $this->getData('tosell') != 1)
             $errors[] = "Ce produit n'est pas disponible à la vente";
 
-        if (sizeof($errors) > 0)
+        if (count($errors)) {
             return $errors;
+        }
 
         $cur_pa_ht = $this->getCurrentPaHt(null, true);
         $datetime = new DateTime();
 
-        $this->updateField('fk_user_valid', (int) $user->id);
-        $this->updateField('date_valid', $datetime->format('Y-m-d H:i:s'));
-        $this->updateField('cur_pa_ht', $cur_pa_ht);
-        $this->updateField('validate', 1);
+        $this->set('fk_user_valid', (int) $user->id);
+        $this->set('date_valid', $datetime->format('Y-m-d H:i:s'));
+        $this->set('cur_pa_ht', $cur_pa_ht);
+        $this->set('validate', 1);
 
+        $up_errors = $this->update($warnings, true);
+
+        if (count($up_errors)) {
+            $errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec de la mise à jour du produit');
+            return $errors;
+        }
 
         // COMMAND
         $commandes_c = $this->getCommandes();
@@ -1807,7 +1814,7 @@ class Bimp_Product extends BimpObject
             // Search responsible
             foreach ($list_contact as $contact) {
                 if ($contact['code'] == 'SALESREPFOLL' and ! $email_sent) {
-                    $errors = array_merge($errors, $this->sendEmailCommandeValid($commande, $contact['email']));
+                    $warnings = array_merge($warnings, $this->sendEmailCommandeValid($commande, $contact['email']));
                     $email_sent = true;
                     break;
                 }
@@ -1816,7 +1823,7 @@ class Bimp_Product extends BimpObject
             // Search signatory
             if (!$email_sent) {
                 foreach ($list_contact as $contact) {
-                    $errors = array_merge($errors, $this->sendEmailCommandeValid($commande, $contact['email']));
+                    $warnings = array_merge($warnings, $this->sendEmailCommandeValid($commande, $contact['email']));
                     $email_sent = true;
                     break;
                 }
@@ -1827,7 +1834,7 @@ class Bimp_Product extends BimpObject
                 require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
                 $user = new User($this->db->db);
                 $user->fetch((int) 62);
-                $errors = array_merge($errors, $this->sendEmailCommandeValid($commande, $user->email));
+                $warnings = array_merge($warnings, $this->sendEmailCommandeValid($commande, $user->email));
                 $email_sent = true;
                 continue;
             }
@@ -1845,7 +1852,7 @@ class Bimp_Product extends BimpObject
             // Search responsible
             foreach ($list_contact as $contact) {
                 if ($contact['code'] == 'SALESREPFOLL' and ! $email_sent) {
-                    $errors = array_merge($errors, $this->sendEmailPropalValid($propal, $contact['email']));
+                    $warnings = array_merge($warnings, $this->sendEmailPropalValid($propal, $contact['email']));
                     $email_sent = true;
                     break;
                 }
@@ -1854,7 +1861,7 @@ class Bimp_Product extends BimpObject
             // Search signatory
             if (!$email_sent) {
                 foreach ($list_contact as $contact) {
-                    $errors = array_merge($errors, $this->sendEmailPropalValid($propal, $contact['email']));
+                    $warnings = array_merge($warnings, $this->sendEmailPropalValid($propal, $contact['email']));
                     $email_sent = true;
                     break;
                 }
@@ -1865,8 +1872,10 @@ class Bimp_Product extends BimpObject
                 require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
                 $user = new User($this->db->db);
                 $user->fetch((int) 62);
-                $errors = array_merge($errors, $this->sendEmailCommandeValid($commande, $user->email));
-                $email_sent = true;
+                if (BimpObject::objectLoaded($user)) {
+                    $errors = array_merge($warnings, $this->sendEmailPropalValid($propal, $user->email));
+                    $email_sent = true;
+                }
                 continue;
             }
         }
@@ -1884,7 +1893,7 @@ class Bimp_Product extends BimpObject
                 $user->fetch((int) $vente->getData('id_user_resp'));
 
                 if (BimpObject::objectLoaded($user)) {
-                    $errors = array_merge($errors, $this->sendEmailVenteCaisseValid($vente, $user->email));
+                    $warnings = array_merge($warnings, $this->sendEmailVenteCaisseValid($vente, $user->email));
                 }
             }
         }
@@ -2005,6 +2014,10 @@ class Bimp_Product extends BimpObject
 
     private function sendEmailCommandeValid($commande, $to)
     {
+        if (!$to) {
+            return;
+        }
+
         $errors = array();
         $subject = 'Produit validé pour la commande ' . $commande->ref;
         $from = 'gle@bimp.fr';
@@ -2017,6 +2030,9 @@ class Bimp_Product extends BimpObject
 
     private function sendEmailPropalValid($propal, $to)
     {
+        if (!$to) {
+            return array();
+        }
         $errors = array();
         $subject = 'Produit validé pour la propale ' . $propal->ref;
         $from = 'gle@bimp.fr';
@@ -2029,6 +2045,10 @@ class Bimp_Product extends BimpObject
 
     private function sendEmailCommandeRefuse($commande, $to)
     {
+        if (!$to) {
+            return array();
+        }
+
         $errors = array();
         $subject = 'Produit refusé pour la commande ' . $commande->ref;
         $from = 'gle@bimp.fr';
@@ -2041,6 +2061,10 @@ class Bimp_Product extends BimpObject
 
     private function sendEmailVenteCaisseValid($vente, $to)
     {
+        if (!$to) {
+            return array();
+        }
+
         $errors = array();
         $subject = 'Produit validé pour la vente #' . $vente->id;
         $from = 'gle@bimp.fr';
@@ -2053,6 +2077,10 @@ class Bimp_Product extends BimpObject
 
     private function sendEmailVenteCaisseRefuse($vente, $to)
     {
+        if (!$to) {
+            return array();
+        }
+
         $errors = array();
         $subject = 'Produit refusé pour la vente #' . $vente->id;
         $from = 'gle@bimp.fr';
@@ -2065,6 +2093,10 @@ class Bimp_Product extends BimpObject
 
     private function sendEmailPropalRefuse($propal, $to)
     {
+        if (!$to) {
+            return array();
+        }
+
         $errors = array();
         $subject = 'Produit refusé pour la propale ' . $propal->ref;
         $from = 'gle@bimp.fr';
@@ -2671,8 +2703,15 @@ class Bimp_Product extends BimpObject
 
     public function actionValidate($data = array(), &$success = '')
     {
-        $errors = $this->validateProduct();
-        return $errors;
+        $warnings = array();
+        $success = 'Produit validé avec succès';
+
+        $errors = $this->validateProduct($warnings);
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
     }
 
     public function actionMailValidate($data = array(), &$success = '')

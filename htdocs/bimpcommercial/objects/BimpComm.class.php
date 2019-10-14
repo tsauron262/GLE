@@ -43,6 +43,10 @@ class BimpComm extends BimpDolObject
         $this->useCaisseForPayments = BimpCore::getConf('use_caisse_for_payments');
         parent::__construct($module, $object_name);
     }
+    
+    public function useEntrepot(){
+        return !BimpCore::getConf("NOT_USE_ENTREPOT");
+    }
 
     // Gestion des droits: 
 
@@ -2460,6 +2464,10 @@ class BimpComm extends BimpDolObject
 
             if ($line->field_exists('force_qty_1') && $line_instance->field_exists('force_qty_1')) {
                 $line_instance->set('force_qty_1', (int) $line->getData('force_qty_1'));
+            }
+
+            if ($line->field_exists('hide_product_label') && $line_instance->field_exists('hide_product_label')) {
+                $line_instance->set('hide_product_label', (int) $line->getData('hide_product_label'));
             }
 
             $line_errors = $line_instance->create($warnings, true);

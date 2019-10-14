@@ -61,7 +61,8 @@ fields:
         dol_extra_field: 1
         type: id_object
         object: entrepot
-        required: 1
+        required: 
+            callback: useEntrepot
         input: 
             type: search_entrepot
         default_value: 

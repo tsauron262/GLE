@@ -2,9 +2,20 @@
 
 class BimpRevalorisation extends BimpObject
 {
+
+    public function canCreate()
+    {
+        global $user;
+        return $user->rights->bimpcommercial->commission->write;
+    }
+    public function canEdit()
+    {
+        return (int) $this->canCreate();
+    }
+    
     public function canView() {
         global $user;
-        return $user->rights->bimpequipment->inventory->close;
+        return $user->rights->bimpcommercial->commission->read;
     }
 
     public static $status_list = array(

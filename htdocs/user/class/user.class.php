@@ -2621,8 +2621,8 @@ class User extends CommonObject
                 if($this->fk_user > 0){
                     $userR = new User($this->db);
                     $userR->fetch($this->fk_user);
-                    $info = $userR->_load_ldap_info();
-                    $info['manager'] = $userR->_load_ldap_dn($info);
+                    $infoT = $userR->_load_ldap_info();
+                    $info['manager'] = $userR->_load_ldap_dn($infoT);
                     
                 }
                 

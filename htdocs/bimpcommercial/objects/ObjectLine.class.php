@@ -45,13 +45,13 @@ class ObjectLine extends BimpObject
         'id_parent_line' => array('label' => 'Ligne parente', 'type' => 'int', 'required' => 0, 'default' => null)
     );
 
-    public function getTypes()
+    public static function getTypes()
     {
         $types = array(
             self::LINE_PRODUCT => 'Produit / Service',
             self::LINE_TEXT    => 'Texte libre'
         );
-        if (BimpCore::getConf('LINE_FREE_ACTIVE'))
+        if (BimpCore::getConf('LINE_FREE_ACTIVE') || BimpCore::getConf("use_freeline"))
             $types[self::LINE_FREE] = 'Ligne libre';
 
         return $types;
@@ -70,12 +70,12 @@ class ObjectLine extends BimpObject
         global $use_freeline;
         global $use_freelineOK;
         if (!isset($use_freelineOK) || $use_freelineOK != true) {
-            $use_freeline = BimpCore::getConf("use_freeline");
+            $use_freeline = (BimpCore::getConf("use_freeline") || BimpCore::getConf("LINE_FREE_ACTIVE"));
             $use_freelineOK = true;
         }
 
-        if ($use_freeline)
-            self::$types[self::LINE_FREE] = 'Ligne libre';
+//        if ($use_freeline)
+//            self::$types[self::LINE_FREE] = 'Ligne libre';
         return parent::__construct($module, $object_name);
     }
 

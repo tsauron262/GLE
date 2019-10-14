@@ -1639,31 +1639,37 @@ class BL_CommandeFournReception extends BimpObject
     public function create(&$warnings = array(), $force_create = false)
     {
         $errors = array();
+        
+        $dateMAx = '2019-10-01';
+        if($this->getData('date_received') < $dateMAx)
+            $errors[] = 'Date inférieur au '.$dateMAx.' creation impossible'; 
 
-        $commande = $this->getParentInstance();
+        if(!count($errors)){
+            $commande = $this->getParentInstance();
 
-        if (!BimpObject::objectLoaded($commande)) {
-            $errors[] = 'ID de la commande fournisseur absent';
-        } else {
-            $sql = 'SELECT MAX(num_reception) as num FROM ' . MAIN_DB_PREFIX . 'bl_commande_fourn_reception ';
-            $sql .= 'WHERE `id_commande_fourn` = ' . (int) $commande->id;
-
-            $result = $this->db->execute($sql);
-            $result = $this->db->db->fetch_object($result);
-
-            if (is_null($result) || !isset($result->num)) {
-                $num = 0;
+            if (!BimpObject::objectLoaded($commande)) {
+                $errors[] = 'ID de la commande fournisseur absent';
             } else {
-                $num = (int) $result->num;
+                $sql = 'SELECT MAX(num_reception) as num FROM ' . MAIN_DB_PREFIX . 'bl_commande_fourn_reception ';
+                $sql .= 'WHERE `id_commande_fourn` = ' . (int) $commande->id;
+
+                $result = $this->db->execute($sql);
+                $result = $this->db->db->fetch_object($result);
+
+                if (is_null($result) || !isset($result->num)) {
+                    $num = 0;
+                } else {
+                    $num = (int) $result->num;
+                }
+
+                $num++;
+
+                if (!(int) $this->getData('id_entrepot')) {
+                    $this->set('id_entrepot', (int) $commande->getData('entrepot'));
+                }
+
+                $this->set('num_reception', $num);
             }
-
-            $num++;
-
-            if (!(int) $this->getData('id_entrepot')) {
-                $this->set('id_entrepot', (int) $commande->getData('entrepot'));
-            }
-
-            $this->set('num_reception', $num);
         }
 
         if (count($errors)) {

@@ -3501,7 +3501,7 @@ class Bimp_Facture extends BimpComm
     public static function sendInvoiceDraftWhithMail(){
         $date = new DateTime();
         $date->sub(new DateInterval('P15D'));
-        $sql = $this->db->db->query("SELECT rowid FROM `".MAIN_DB_PREFIX."facture` WHERE `datec` > '".$date->format('Y-m-d')."' AND `fk_statut` = 0");
+        $sql = $this->db->db->query("SELECT rowid FROM `".MAIN_DB_PREFIX."facture` WHERE `datec` < '".$date->format('Y-m-d')."' AND `fk_statut` = 0");
         $i = 0;
         while($ln = $this->db->db->fetch_object($sql)){
             $obj = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $ln->rowid);

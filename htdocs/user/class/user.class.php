@@ -2609,8 +2609,27 @@ class User extends CommonObject
                 $info['postalCode'] = ($this->zip != "")? $this->zip : "00000";
                 $info['street'] = ($this->town != "")? $this->town : "nc";
                 
+                if($this->array_options['options_date_e'] > 0)
+                    $info['hireDate'] = dol_print_date($this->array_options['options_date_e'], '%Y%m%d')."000000Z";
+                else
+                    $info['hireDate'] = "19800101000000Z";
+               //$info['hireDate'] = "";
+                if($this->employee)
+                    $info['employeeType'] = 'SALARIE';
+                else
+                    $info['employeeType'] = 'NONE';
                 
-                $info['objectclass'] = array_merge($info['objectclass'], array("shadowAccount", "amavisAccount", "mailUser"));
+                $info['manager'] = "";
+                if($this->fk_user > 0){
+                    $userR = new User($this->db);
+                    $userR->fetch($this->fk_user);
+                    if($userR->email != ''){
+                        $infoT = $userR->_load_ldap_info();
+                        $info['manager'] = $userR->_load_ldap_dn($infoT);
+                    }
+                }
+                
+                $info['objectclass'] = array_merge($info['objectclass'], array("shadowAccount", "amavisAccount", "mailUser", "erpUser"));
                 $info ['accountstatus'] = ($this->statut == 1)? "active" : "disabled";
                 $info ['enabledservice'] = array();
                 

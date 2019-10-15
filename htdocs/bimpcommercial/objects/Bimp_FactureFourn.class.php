@@ -46,6 +46,15 @@ class Bimp_FactureFourn extends BimpComm
     {
         return parent::isFieldEditable($field, $force_edit);
     }
+    
+    public function create(&$warnings = array(), $force_create = false) {
+        $dateMAx = '2019-10-01';
+        if($this->getData('datef') < $dateMAx)
+            $errors[] = 'Date inférieur au '.$dateMAx.' creation impossible'; 
+        if(count($errors))
+            return $errors;
+        return parent::create($warnings, $force_create);
+    }
 
     public function isActionAllowed($action, &$errors = array())
     {

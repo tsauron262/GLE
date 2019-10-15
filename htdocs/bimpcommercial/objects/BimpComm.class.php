@@ -1489,24 +1489,31 @@ class BimpComm extends BimpDolObject
 
         return $html;
     }
-
-    public function displayCommercial()
-    {
+    
+    public function getIdCommercial(){
         if ($this->isLoaded()) {
             $contacts = $this->dol_object->getIdContact('internal', 'SALESREPFOLL');
             if (isset($contacts[0]) && $contacts[0]) {
-                BimpTools::loadDolClass('contact');
-                $user = new User($this->db->db);
-                if ($user->fetch((int) $contacts[0]) > 0) {
-                    global $modeCSV, $langs;
-                    if ($modeCSV)
-                        return $user->getFullName($langs);
-                    else
-                        return $user->getNomUrl(1) . BimpRender::renderObjectIcons($user);
-                }
+                return $contacts[0];
             }
         }
+        return 0;
+    }
 
+    public function displayCommercial()
+    {
+        $id = $this->getIdCommercial();
+        if($id > 0){
+            BimpTools::loadDolClass('contact');
+            $user = new User($this->db->db);
+            if ($user->fetch((int) $id) > 0) {
+                global $modeCSV, $langs;
+                if ($modeCSV)
+                    return $user->getFullName($langs);
+                else
+                    return $user->getNomUrl(1) . BimpRender::renderObjectIcons($user);
+            }
+        }
         return '';
     }
 

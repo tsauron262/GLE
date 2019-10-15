@@ -1020,4 +1020,10 @@ class BContract_contrat extends BimpDolObject {
         
     }
     
+    public function createFromCommande(Bimp_Commande $commande) {
+        
+        
+        
+    }
+    
 }

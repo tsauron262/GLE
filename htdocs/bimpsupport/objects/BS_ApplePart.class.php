@@ -5,12 +5,14 @@ class BS_ApplePart extends BimpObject
 
     private static $tabRefCommenceIos = array("661-05511", "DN661", "FD661", "NF661", "RA", "RB", "RC", "RD", "RE", "RG", "SA", "SB", "SC", "SD", "SE", "X661", "XB", "XC", "XD", "XE", "XF", "XG", "ZD661", "ZK661", "ZP661");
     private static $tabDescCommenceIos = array("SVC,IPOD", "Ipod nano");
-    private static $tabRefCommenceIosDouble = array("661", "Z661");
+    private static $tabRefCommenceIosDouble = array("661", "Z661", "B661");
     private static $tabDescCommenceIosDouble = array("iphone", "BAT,IPHONE", "SVC,IPHONE"); //design commence par
     private static $tabDescContientIosDouble = array("Ipad", "Ipad Pro", "Ipad mini", "Apple Watc", "Ipad Air", "iPhone 7"); //design contient
     private static $tabRefCommenceBatterie = array("661-04577", "661-04576", "661-08917", "661-02909", "661-04479", "661-04579", "661-04580", "661-04581", "661-04582", "661-05421", "661-05755", "661-08935", "661-8216", "661-04578"); //Prix a 59
-    private static $tabRefCommenceBatterieX = array("661-08932", "661-10565", "661-10850", "661-11035"); //Prix a 84
-    private static $tabRefCommencePrixEcran = array("661-11232" => array("184,25"), "661-07285" => array("142,58"), "661-07286" => array("142,58"), "661-07287" => array("142,58"), "661-07288" => array("142,58"), "661-07289" => array("159,25"), "661-07290" => array("159,25"), "661-07291" => array("159,25"), "661-07292" => array("159,25"), "661-07293" => array("142,58"), "661-07294" => array("142,58"), "661-07295" => array("142,58"), "661-07296" => array("142,58"), "661-07297" => array("159,25"), "661-07298" => array("159,25"), "661-07299" => array("159,25"), "661-07300" => array("159,25"), "661-08933" => array("142,58"), "661-08934" => array("142,58"), "661-09081" => array("142,58"), "661-10102" => array("142,58"), "661-09032" => array("159,25"), "661-09033" => array("159,25"), "661-09034" => array("159,25"), "661-10103" => array("159,25"), "661-09294" => array("259,25"), "661-13114" => array("259,25"), "661-10608" => array("259,25"), "661-11037" => array("300,91"));
+    private static $tabRefCommenceBatterieX = array("661-08932", "661-10565", "661-10850", "661-11035",//X
+                                            "661-13574", "661-13569", "661-13624"); //11   Prix a 84
+    private static $tabRefCommencePrixEcran = array("661-11232" => array("184,25"), "661-07285" => array("142,58"), "661-07286" => array("142,58"), "661-07287" => array("142,58"), "661-07288" => array("142,58"), "661-07289" => array("159,25"), "661-07290" => array("159,25"), "661-07291" => array("159,25"), "661-07292" => array("159,25"), "661-07293" => array("142,58"), "661-07294" => array("142,58"), "661-07295" => array("142,58"), "661-07296" => array("142,58"), "661-07297" => array("159,25"), "661-07298" => array("159,25"), "661-07299" => array("159,25"), "661-07300" => array("159,25"), "661-08933" => array("142,58"), "661-08934" => array("142,58"), "661-09081" => array("142,58"), "661-10102" => array("142,58"), "661-09032" => array("159,25"), "661-09033" => array("159,25"), "661-09034" => array("159,25"), "661-10103" => array("159,25"), "661-09294" => array("259,25"), "661-13114" => array("259,25"), "661-10608" => array("259,25"), "661-11037" => array("300,91"),
+            /*new */"661-14098"=> array("184,25"),"661-14096"=> array("259,25"), "661-14099"=> array("300.9166666666"));
     public static $componentsTypes = array(
         0   => 'Général',
         1   => 'Visuel',

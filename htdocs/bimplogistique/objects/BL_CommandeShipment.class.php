@@ -187,7 +187,16 @@ class BL_CommandeShipment extends BimpObject
                         break;
                     }
                     if (in_array(0, $values)) {
+                        $joins['parent2'] = array(
+                            'alias' => 'parent2',
+                            'table' => 'commande',
+                            'on'    => 'parent2.rowid = a.id_commande_client'
+                        );
                         $filters['a.id_facture'] = 0;
+                        $filters['parent2.invoice_status'] = array(
+                            'operator' => '<',
+                            'value'    => 2
+                        );
                     }
                     if (in_array(1, $values)) {
                         $filters['a.id_facture'] = array(

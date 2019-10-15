@@ -3495,4 +3495,32 @@ class Bimp_Facture extends BimpComm
             }
         }
     }
+    
+    
+    
+    public static function sendInvoiceDraftWhithMail(){
+        $date = new DateTime();
+        $nbDay = 5;
+        $date->sub(new DateInterval('P'.$nbDay.'D'));
+        $sql = $this->db->db->query("SELECT rowid FROM `".MAIN_DB_PREFIX."facture` WHERE `datec` < '".$date->format('Y-m-d')."' AND `fk_statut` = 0");
+        $i = 0;
+        while($ln = $this->db->db->fetch_object($sql)){
+            $obj = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $ln->rowid);
+//            $idC = $obj->getIdCommercial();
+//            if($idC < 1)
+//                $idC = 1;
+//            $userC = new User($this->db->db);
+//            $userC->fetch($idC);
+//            $mail = $userC->email;
+            $userCreate = new User($this->db->db);
+            $userCreate->fetch((int) $obj->getData('fk_user_author'));;
+            $mail = $userCreate->email;
+            if($mail == '')
+                $mail = "tommy@bimp.fr";
+            if(mailSyn2('Facture brouillon à régulariser', $mail, 'admin@bimp.fr', 'Bonjour, vous avez laissé une facture en l’état de brouillon depuis plus de '.$nbDay.' jour(s) : '.$obj->getNomUrl().' <br/>Merci de bien vouloir la régulariser au plus vite.'))
+                    $i++;
+        }
+        $this->resprints = "OK ".$i.' mails';
+        return "OK ".$i.' mails';
+    }
 }

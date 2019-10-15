@@ -2612,18 +2612,21 @@ class User extends CommonObject
                 if($this->array_options['options_date_e'] > 0)
                     $info['hireDate'] = dol_print_date($this->array_options['options_date_e'], '%Y%m%d')."000000Z";
                 else
-                    $info['hireDate'] = "20000101000000Z";
-                
+                    $info['hireDate'] = "19800101000000Z";
+               //$info['hireDate'] = "";
                 if($this->employee)
                     $info['employeeType'] = 'SALARIE';
                 else
                     $info['employeeType'] = 'NONE';
+                
+                $info['manager'] = "";
                 if($this->fk_user > 0){
                     $userR = new User($this->db);
                     $userR->fetch($this->fk_user);
-                    $infoT = $userR->_load_ldap_info();
-                    $info['manager'] = $userR->_load_ldap_dn($infoT);
-                    
+                    if($userR->email != ''){
+                        $infoT = $userR->_load_ldap_info();
+                        $info['manager'] = $userR->_load_ldap_dn($infoT);
+                    }
                 }
                 
                 $info['objectclass'] = array_merge($info['objectclass'], array("shadowAccount", "amavisAccount", "mailUser", "erpUser"));

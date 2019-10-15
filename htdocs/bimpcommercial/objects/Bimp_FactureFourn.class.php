@@ -105,7 +105,7 @@ class Bimp_FactureFourn extends BimpComm
                 if ($this->dol_object->getSommePaiement() != 0) {
                     $errors[] = 'Un paiement a déjà été effectué';
                 }
-                if ($this->isEditable() != 0) {
+                if ($this->isEditable() != 1) {
                     $errors[] = 'Inmodifiable';
                 }
                 break;

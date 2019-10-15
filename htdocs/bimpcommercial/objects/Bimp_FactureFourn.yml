@@ -132,7 +132,7 @@ fields:
             array: comptes
     exported:
         label: Comptabilisée
-        type: int
+        type: bool
         
     fk_availability: unset
     fk_input_reason: unset
@@ -201,6 +201,7 @@ fields_tables:
                   field_value: fk_facture_source
             - field: zone_vente
               edit: 1
+            - field: exported
                   
     client: 
         title: Fournisseur

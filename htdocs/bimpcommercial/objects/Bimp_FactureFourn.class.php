@@ -31,6 +31,8 @@ class Bimp_FactureFourn extends BimpComm
 
     public function isDeletable($force_delete = false)
     {
+        if(!$this->isEditable())
+            return 0;
         if ($this->isLoaded()) {
             if ((int) $this->getData('fk_statut') === 0) {
                 return 1;
@@ -40,6 +42,14 @@ class Bimp_FactureFourn extends BimpComm
         }
 
         return 1;
+    }
+    
+    public function isEditable($force_edit = false, &$errors = array()) {
+        if($this->getData('exported') == 1)
+            return 0;
+        
+        
+        return parent::isEditable($force_edit, $errors);
     }
 
     public function isFieldEditable($field, $force_edit = false)

@@ -3495,4 +3495,28 @@ class Bimp_Facture extends BimpComm
             }
         }
     }
+    
+    
+    
+    public static function sendInvoiceDraftWhithMail(){
+        $date = new DateTime();
+        $date->sub(new DateInterval('P15D'));
+        $sql = $this->db->db->query("SELECT rowid FROM `".MAIN_DB_PREFIX."facture` WHERE `datec` > '".$date->format('Y-m-d')."' AND `fk_statut` = 0");
+        while($ln = $this->db->db->fetch_object($sql)){
+            $obj = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $ln->rowid);
+//            $idC = $obj->getIdCommercial();
+//            if($idC < 1)
+//                $idC = 1;
+//            $userC = new User($this->db->db);
+//            $userC->fetch($idC);
+//            $mail = $userC->email;
+            $userCreate = new User($this->db->db);
+            $userCreate->fetch((int) $obj->getData('fk_user_author'));;
+            $mail = $userCreate->email;
+            if($mail == '')
+                $mail = "tommy@bimp.fr";
+            mailSyn2('Facture brouillon', $mail, null, 'Bonjour vous avez créer une facture qui est encore en brouillon depuis plus de 15 jours : '.$obj->getNomUrl());
+        }
+        die("pp");
+    }
 }

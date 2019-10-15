@@ -3500,7 +3500,7 @@ class Bimp_Facture extends BimpComm
     
     public static function sendInvoiceDraftWhithMail(){
         $date = new DateTime();
-        $nbDay = 15;
+        $nbDay = 5;
         $date->sub(new DateInterval('P'.$nbDay.'D'));
         $sql = $this->db->db->query("SELECT rowid FROM `".MAIN_DB_PREFIX."facture` WHERE `datec` < '".$date->format('Y-m-d')."' AND `fk_statut` = 0");
         $i = 0;

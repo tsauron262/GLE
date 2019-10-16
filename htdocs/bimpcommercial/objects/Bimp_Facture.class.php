@@ -40,6 +40,14 @@ class Bimp_Facture extends BimpComm
         parent::iAmAdminRedirect();
     }
 
+    public function isEditable($force_edit = false, &$errors = array()) {
+        if($this->getData('exported') == 1)
+            return 0;
+
+        return parent::isEditable($force_edit, $errors);
+    }
+    
+    
     // Gestion des droits: 
 
     public function canCreate()

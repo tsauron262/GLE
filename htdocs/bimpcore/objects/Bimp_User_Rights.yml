@@ -1,0 +1,53 @@
+
+table: user_rights
+primary: rowid
+icon: fas_box-open
+
+labels: 
+    name: droit user
+    name_plur: droits users
+    
+#objects: 
+                
+fields: 
+    fk_user: 
+        label: Utilisateur
+        type: id_object
+        object: user
+    fk_id: 
+        label: Droit
+        type: int
+        values:
+            callback: getTabRights
+        
+#filters_panels: 
+#    default: 
+#        filters: 
+#            product: 
+#                field: fk_product
+#            entrepot: 
+#                field: fk_entrepot
+#            stock_reel: 
+#                field: reel
+            
+lists: 
+    default:
+        title: Droits user
+        icon: fas_box-open
+        configurable: 1
+        filters_panel: default
+        n: 10
+        sort_field: rowid
+        sort_way: desc
+        cols: 
+            fk_user:
+                field: fk_user
+                display: nom_url
+            fk_id:
+                field: fk_id
+            
+                
+        
+    
+    
+    

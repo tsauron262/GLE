@@ -16,7 +16,7 @@ objects:
                 
 fields: 
     fk_usergroup: 
-        label: Utilisateur
+        label: Group
         type: id_object
         object: usergroup
     fk_id: 
@@ -25,15 +25,13 @@ fields:
         values:
             callback: getTabRights
         
-#filters_panels: 
-#    default: 
-#        filters: 
-#            product: 
-#                field: fk_product
-#            entrepot: 
-#                field: fk_entrepot
-#            stock_reel: 
-#                field: reel
+filters_panels: 
+    default: 
+        filters: 
+            group: 
+                field: fk_usergroup
+            droit: 
+                field: fk_id
             
 lists: 
     default:

@@ -56,10 +56,10 @@ class Bimp_Facture extends BimpComm
         return $user->rights->facture->creer;
     }
     
-//    public function canDelete() {
-//        global $user;
-//        return $user->rights->facture->supprimer;
-//    }
+    public function canDelete() {
+        global $user;
+        return $user->rights->facture->supprimer;
+    }
 
     protected function canEdit()
     {

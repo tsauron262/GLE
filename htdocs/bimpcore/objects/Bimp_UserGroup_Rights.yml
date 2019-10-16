@@ -45,9 +45,8 @@ lists:
         sort_field: rowid
         sort_way: desc
         cols: 
-            fk_usergroup:
+            nom_usergroup:
                 field: fk_usergroup
-                display: nom
             fk_id:
                 field: fk_id
             

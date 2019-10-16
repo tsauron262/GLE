@@ -62,7 +62,7 @@ fields:
         dol_prop: ref
     exported:
         label: Comptabilisée
-        type: int
+        type: bool
     ignore_compta:
         label: Ignorée
         type: bool
@@ -524,6 +524,7 @@ fields_tables:
               display: nom_url
               show: 
                   callback: showEntrepotCommission
+            - field: exported
     
     client: 
         rows: 

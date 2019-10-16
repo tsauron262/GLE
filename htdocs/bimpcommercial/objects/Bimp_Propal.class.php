@@ -30,7 +30,7 @@ class Bimp_Propal extends BimpComm
         if (isset($user->rights->propal->creer)) {
             return (int) $user->rights->propal->creer;
         }
-        return 1;
+        return 0;
     }
 
     public function canEdit()

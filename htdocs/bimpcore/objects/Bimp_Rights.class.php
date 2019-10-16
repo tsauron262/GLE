@@ -23,6 +23,11 @@ class Bimp_Rights extends BimpObject
         }
         return $tabR;
     }
+    
+    public function canDelete() {
+        global $user;
+        return $user->admin;
+    }
 }
 
 

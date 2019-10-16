@@ -40,6 +40,7 @@ lists:
         filters_panel: default
         n: 10
         sort_field: rowid
+        delete_btn: 1
         sort_way: desc
         cols: 
             fk_user:

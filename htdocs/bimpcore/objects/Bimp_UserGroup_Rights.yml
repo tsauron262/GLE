@@ -37,6 +37,7 @@ lists:
     default:
         title: Droits user
         icon: fas_box-open
+        delete_btn: 1
         configurable: 1
         filters_panel: default
         n: 10

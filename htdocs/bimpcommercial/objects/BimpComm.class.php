@@ -8,6 +8,7 @@ class BimpComm extends BimpDolObject
     const BC_ZONE_FR = 1;
     const BC_ZONE_UE = 2;
     const BC_ZONE_HORS_UE = 3;
+    const BC_ZONE_UE_SANS_TVA = 4;
 
     public static $email_type = '';
     public static $element_name = '';
@@ -33,7 +34,8 @@ class BimpComm extends BimpDolObject
     );
     public static $zones_vente = array(
         self::BC_ZONE_FR      => 'France',
-        self::BC_ZONE_UE      => 'Union Européenne',
+        self::BC_ZONE_UE      => 'Union Européenne avec TVA',
+        self::BC_ZONE_UE_SANS_TVA => 'Union Européenne sans TVA',
         self::BC_ZONE_HORS_UE => 'Hors UE'
     );
     protected $margins_infos = null;
@@ -218,7 +220,7 @@ class BimpComm extends BimpDolObject
     public function isTvaActive()
     {
         if ($this->field_exists('zone_vente') && $this->dol_field_exists('zone_vente')) {
-            if ((int) $this->getData('zone_vente') === self::BC_ZONE_HORS_UE) {
+            if ((int) $this->getData('zone_vente') === self::BC_ZONE_HORS_UE || (int) $this->getData('zone_vente') === self::BC_ZONE_UE_SANS_TVA) {
                 return 0;
             }
         }
@@ -1108,9 +1110,11 @@ class BimpComm extends BimpDolObject
         return BimpCore::getConf('default_id_mode_paiement');
     }
 
-    public static function getZoneByCountry($id_country)
+    public static function getZoneByCountry(Bimp_Societe $client)
     {
         $zone = self::BC_ZONE_FR;
+        $id_country = $client->getData('fk_pays');
+        
         if (!(int) $id_country) {
             $id_country = BimpCore::getConf('default_id_country');
         }
@@ -1121,7 +1125,11 @@ class BimpComm extends BimpDolObject
                 if ($country->code === 'FR') {
                     $zone = self::BC_ZONE_FR;
                 } elseif ((int) $country->in_ue) {
-                    $zone = self::BC_ZONE_UE;
+                    if($client->getData('tva_intra')) {
+                        $zone = self::BC_ZONE_UE_SANS_TVA;
+                    } else {
+                        $zone = self::BC_ZONE_UE;
+                    }
                 } else {
                     $zone = self::BC_ZONE_HORS_UE;
                 }
@@ -3431,7 +3439,6 @@ class BimpComm extends BimpDolObject
         $origin = BimpTools::getValue('origin', '');
         $origin_id = BimpTools::getValue('origin_id', 0);
         $origin_object = null;
-
         if ($this->field_exists('fk_user_author')) {
             if (is_null($this->data['fk_user_author']) || !(int) $this->data['fk_user_author']) {
                 global $user;
@@ -3465,7 +3472,14 @@ class BimpComm extends BimpDolObject
             if ($this->field_exists('remise_globale')) {
                 $this->set('remise_globale', 0);
             }
+            
         }
+        if($this->field_exists('zone_vente')) {
+                $client = $this->getInstance('bimpcore', 'Bimp_Societe', BimpTools::getValue('fk_soc'));
+                if($client->isLoaded()) {
+                   $this->set('zone_vente', $this->getZoneByCountry($client));
+                }
+            }
 
         $errors = parent::create($warnings, $force_create);
 

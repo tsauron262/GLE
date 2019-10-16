@@ -16,7 +16,7 @@ objects:
                 
 fields: 
     fk_usergroup: 
-        label: Utilisateur
+        label: Group
         type: id_object
         object: usergroup
     fk_id: 
@@ -25,29 +25,27 @@ fields:
         values:
             callback: getTabRights
         
-#filters_panels: 
-#    default: 
-#        filters: 
-#            product: 
-#                field: fk_product
-#            entrepot: 
-#                field: fk_entrepot
-#            stock_reel: 
-#                field: reel
+filters_panels: 
+    default: 
+        filters: 
+            group: 
+                field: fk_usergroup
+            droit: 
+                field: fk_id
             
 lists: 
     default:
         title: Droits user
         icon: fas_box-open
+        delete_btn: 1
         configurable: 1
         filters_panel: default
         n: 10
         sort_field: rowid
         sort_way: desc
         cols: 
-            fk_usergroup:
+            nom_usergroup:
                 field: fk_usergroup
-                display: nom
             fk_id:
                 field: fk_id
             

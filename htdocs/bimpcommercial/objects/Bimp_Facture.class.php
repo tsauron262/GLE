@@ -55,6 +55,11 @@ class Bimp_Facture extends BimpComm
         global $user;
         return $user->rights->facture->creer;
     }
+    
+    public function canDelete() {
+        global $user;
+        return $user->rights->facture->supprimer;
+    }
 
     protected function canEdit()
     {
@@ -86,7 +91,7 @@ class Bimp_Facture extends BimpComm
 
             case 'addContact':
             case 'cancel':
-                return $this->can("create");
+                return $this->can("delete");
 
             case 'classifyPaid':
             case 'convertToReduc':

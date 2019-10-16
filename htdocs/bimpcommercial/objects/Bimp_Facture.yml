@@ -160,6 +160,18 @@ fields:
         type: id_object
         object: entrepot_commission
         default_value: 0
+    multicurrency_total_ht:
+        label: TOTAL HT (compta)
+        type: money
+    multicurrency_total_ttc:
+        label: TOTAL TTC (compta)
+        type: money
+    multicurrency_total_tva:
+        label: TOTAL TVA (compta)
+        type: money
+    fk_facture_source:
+        label: Facture source
+        type: int
     ref: unset
     fk_availability: unset
     fk_input_reason: unset

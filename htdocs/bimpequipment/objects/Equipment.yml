@@ -528,6 +528,13 @@ lists_cols:
     prix_achat:
         field: prix_achat
         has_total: 1
+    oldSn:
+        custom: 1
+        label: Ancien SN
+        value: 
+            callback:  displayOldSn
+    date_purchase:
+        field: date_purchase
 
 lists:
     default: 

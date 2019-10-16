@@ -370,6 +370,15 @@ class Equipment extends BimpObject
 
         return $buttons;
     }
+    
+    public function displayOldSn(){
+        $tabT = array();
+        $sql = $this->db->db->query("SELECT * FROM `".MAIN_DB_PREFIX."bimp_gsx_repair` WHERE `new_serial` LIKE '".$this->getData('serial')."'");
+        while($ln = $this->db->db->fetch_object($sql)){
+            $tabT[] = $ln->serial;
+        }
+        return implode(" ", $tabT);
+    }
 
     public function getPackageListExtraBtn()
     {

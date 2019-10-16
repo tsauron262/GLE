@@ -28,6 +28,12 @@ objects:
             bimp_object: 
                 module: bimpcommercial
                 name: Bimp_Vente
+    droitUser:
+        instance: 
+            bimp_object: Bimp_User_Rights
+    droitGroupUser:
+        instance: 
+            bimp_object: Bimp_UserGroup_Rights
             
 sections:
     - type: tabs
@@ -86,3 +92,20 @@ sections:
                 - type: custom
                   custom: 
                       callback: renderScriptsTabContent
+                      
+        droitUser:
+            label: Droits Utilisateurs
+            sections: 
+                - type: list
+                  list: 
+                      panel: 1
+                      object: droitUser
+                      name: default
+        droitGroupUser:
+            label: Droits Group
+            sections: 
+                - type: list
+                  list: 
+                      panel: 1
+                      object: droitGroupUser
+                      name: default

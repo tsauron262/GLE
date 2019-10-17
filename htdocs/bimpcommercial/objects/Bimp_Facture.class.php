@@ -1214,25 +1214,35 @@ class Bimp_Facture extends BimpComm
     
       public function displayZoneVenteField() {
         $zone_vente = $this->getData('zone_vente');
-        
-        $html = "";
+        $popover = "";
         
         switch($zone_vente) {
             case self::BC_ZONE_FR:
-                $html .= "<span class='bs-popover' ". BimpRender::renderPopoverData("Le matériel est récupérer sur le sol Français")." >France</<span>";
+                $text = "France";
                 break;
             case self::BC_ZONE_UE:
-                //$html .= "<span class='bs-popover' ". BimpRender::renderPopoverData("Si livraison par nos soins sur Union Européenne, mais que le client ne nous à pas fourni de numéro de TVA intracommunautaire").">Union Européenne avec TVA</span>";
-                $html .= '<span>Union Européenne avec TVA</span>';
+                $text = "Union Européenne avec TVA";
                 break;
             case self::BC_ZONE_UE_SANS_TVA:
-                //$html .= "<span class='bs-popover' ". BimpRender::renderPopoverData("Si livraison par nos soins sur Union Européenneet que le client nous a fourni son numéro de TVA intracommunautaire").">Union Européenne sans TVA</span>";
-               $html .= '<span>Union Européenne sans TVA</span>';
+                $text = "Union Européenne sans TVA";
+                $popover = "Si livraison par nos soins sur Union Européenne et que le client nous a fourni son numéro de TVA intracommunautaire";
                 break;
             case self::BC_ZONE_HORS_UE:
-                $html .= "<span class='bs-popover' ". BimpRender::renderPopoverData("Si livraison par nos soins Hors Union Européenne")." >Hors UE</<span>";
+                $text = "Hors UE";
+                $popover = "Si livraison par nos soins Hors Union Européenne";
                 break;
         }
+        $html = "";
+        $html .= "<span";
+        if(empty($popover)) {
+            $html .= ">";
+        } else {
+            $html .= " class='bs-popover' ";
+            $html .= BimpRender::renderPopoverData($popover) . ">";
+        }
+        $html .= $text;
+        $html .= "</span>";
+        
         return $html;
     }
 

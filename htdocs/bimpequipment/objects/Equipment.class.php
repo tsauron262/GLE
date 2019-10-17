@@ -387,6 +387,18 @@ class Equipment extends BimpObject
         if ($this->isLoaded()) {
             $package = $this->getChildObject('package');
             if (BimpObject::objectLoaded($package)) {
+                if ($package->isActionAllowed('moveEquipment') && $package->canSetAction('moveEquipment')) {
+                    $buttons[] = array(
+                        'label'   => 'Changer de package',
+                        'icon'    => 'arrow-circle-right',
+                        'onclick' => $package->getJsActionOnclick('moveEquipment', array(
+                            'id_equipment' => (int) $this->id
+                                ), array(
+                            'form_name'   => 'move_equipment',
+                            'no_triggers' => true
+                        ))
+                    );
+                }
                 if ($package->isActionAllowed('removeEquipment') && $package->canSetAction('removeEquipment')) {
                     $buttons[] = array(
                         'label'   => 'Retirer',
@@ -1219,9 +1231,9 @@ class Equipment extends BimpObject
                     'infos'        => $label_mvt,
                     'date'         => date('Y-m-d H:i:s'),
         )));
-        if (!count($errors)) {
+        if (!count($errors))
             $errors = array_merge($errors, $place->create());
-        }
+        return $errors;
     }
 
     // Renders: 

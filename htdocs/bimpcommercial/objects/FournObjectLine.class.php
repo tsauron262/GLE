@@ -18,6 +18,17 @@ class FournObjectLine extends ObjectLine
         'date_to'        => array('label' => 'Date fin', 'type' => 'date', 'required' => 0, 'default' => null),
         'ref_supplier'   => array('label' => 'Référence fournisseur', 'type' => 'string', 'required' => 0, 'default' => '')
     );
+    
+    public function create(&$warnings = array(), $force_create = false) {
+        $errors = array();
+        if($this->getData('type') == self::LINE_PRODUCT){
+            $prod = $this->getChildObject('product');
+            if(!$prod->isAchetable($errors,false,false))
+                    return $errors;
+        }
+        
+        return parent::create($warnings, $force_create);
+    }
 
     // Getters - overrides ObjectLine: 
 

@@ -370,6 +370,15 @@ class Equipment extends BimpObject
 
         return $buttons;
     }
+    
+    public function displayOldSn(){
+        $tabT = array();
+        $sql = $this->db->db->query("SELECT * FROM `".MAIN_DB_PREFIX."bimp_gsx_repair` WHERE `new_serial` LIKE '".$this->getData('serial')."'");
+        while($ln = $this->db->db->fetch_object($sql)){
+            $tabT[] = $ln->serial;
+        }
+        return implode(" ", $tabT);
+    }
 
     public function getPackageListExtraBtn()
     {
@@ -863,7 +872,13 @@ class Equipment extends BimpObject
         if (count($errors)) {
             $html .= BimpRender::renderAlerts($errors, 'warning');
         } else {
-            $html .= BimpRender::renderAlerts('Equipement disponible', 'success');
+            $place = $this->getCurrentPlace();
+            if($place->getData('type') == BE_Place::BE_PLACE_ENTREPOT)
+                $html .= BimpRender::renderAlerts('Equipement disponible en stock', 'success');
+            elseif($place->getData('type') == BE_Place::BE_PLACE_CLIENT)
+                $html .= BimpRender::renderAlerts('Equipement disponible pour un retour', 'success');
+            else
+                $html .= BimpRender::renderAlerts('Equipement non reservé', 'success');
         }
 
         return $html;

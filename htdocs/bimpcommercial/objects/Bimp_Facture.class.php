@@ -40,12 +40,25 @@ class Bimp_Facture extends BimpComm
         parent::iAmAdminRedirect();
     }
 
+    public function isEditable($force_edit = false, &$errors = array()) {
+        if($this->getData('exported') == 1)
+            return 0;
+
+        return parent::isEditable($force_edit, $errors);
+    }
+    
+    
     // Gestion des droits: 
 
     public function canCreate()
     {
         global $user;
         return $user->rights->facture->creer;
+    }
+    
+    public function canDelete() {
+        global $user;
+        return $user->rights->facture->supprimer;
     }
 
     protected function canEdit()
@@ -78,7 +91,7 @@ class Bimp_Facture extends BimpComm
 
             case 'addContact':
             case 'cancel':
-                return $this->can("create");
+                return $this->can("delete");
 
             case 'classifyPaid':
             case 'convertToReduc':

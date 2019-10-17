@@ -830,6 +830,7 @@ class FactureFournisseur extends CommonInvoice
         $sql.= " fk_facture_source=".(isset($this->fk_facture_source)?$this->fk_facture_source:"null").",";
         $sql.= " fk_projet=".(isset($this->fk_project)?$this->fk_project:"null").",";
         $sql.= " fk_cond_reglement=".(isset($this->cond_reglement_id)?$this->cond_reglement_id:"null").",";
+        $sql.= " fk_mode_reglement=".(isset($this->mode_reglement_id)?$this->mode_reglement_id:"null").",";
         $sql.= " date_lim_reglement=".(dol_strlen($this->date_echeance)!=0 ? "'".$this->db->idate($this->date_echeance)."'" : 'null').",";
         $sql.= " note_private=".(isset($this->note_private)?"'".$this->db->escape($this->note_private)."'":"null").",";
         $sql.= " note_public=".(isset($this->note_public)?"'".$this->db->escape($this->note_public)."'":"null").",";

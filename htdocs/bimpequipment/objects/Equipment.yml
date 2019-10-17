@@ -635,9 +635,9 @@ lists:
         
     inventaireManquant:
         extends: inventaire
-        cols:
-            place: unset
-            place2: unset
+#        cols:
+#            place: unset
+#            place2: unset
         bulk_actions:
             - label: Déplacer dans Vols
               icon: fas_trash-alt

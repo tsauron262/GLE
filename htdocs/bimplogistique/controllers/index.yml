@@ -8,6 +8,9 @@ objects:
     inventorysr:
         instance: 
             bimp_object: InventorySR
+    inventory2:
+        instance: 
+            bimp_object: Inventory2
         
 sections:
     - type: tabs
@@ -19,10 +22,17 @@ sections:
                   list: 
                       panel: 1
                       object: inventory
-#        inventory_sr:
-#            label: Inventaires Show Room
-#            sections:
-#                - type: list
-#                  list: 
-#                      panel: 1
-#                      object: inventorysr
+        inventory_sr:
+            label: Inventaires Show Room
+            sections:
+                - type: list
+                  list: 
+                      panel: 1
+                      object: inventorysr
+        inventory2:
+            label: Inventaires 2
+            sections:
+                - type: list
+                  list: 
+                      panel: 1
+                      object: inventory2

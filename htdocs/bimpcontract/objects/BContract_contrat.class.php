@@ -1004,6 +1004,7 @@ class BContract_contrat extends BimpDolObject {
             $next_contrat = $this->getInstance('bimpcontract', 'BContract_contrat', $clone);
             addElementElement('contrat', 'contrat', $this->id, $next_contrat->id);
             $next_contrat->updateField('contrat_source', $first_contrat->id);
+            $next_contrat->updateField('date_contrat', NULL);
             $next_contrat->updateField('ref', $first_contrat->getData('ref') . "-" . $avLetters[$numero_next]);
             
         }

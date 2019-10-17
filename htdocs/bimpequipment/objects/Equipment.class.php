@@ -387,6 +387,18 @@ class Equipment extends BimpObject
         if ($this->isLoaded()) {
             $package = $this->getChildObject('package');
             if (BimpObject::objectLoaded($package)) {
+                if ($package->isActionAllowed('moveEquipment') && $package->canSetAction('moveEquipment')) {
+                    $buttons[] = array(
+                        'label'   => 'Changer de package',
+                        'icon'    => 'arrow-circle-right',
+                        'onclick' => $package->getJsActionOnclick('moveEquipment', array(
+                            'id_equipment' => (int) $this->id
+                                ), array(
+                            'form_name'   => 'move_equipment',
+                            'no_triggers' => true
+                        ))
+                    );
+                }
                 if ($package->isActionAllowed('removeEquipment') && $package->canSetAction('removeEquipment')) {
                     $buttons[] = array(
                         'label'   => 'Retirer',
@@ -1181,12 +1193,12 @@ class Equipment extends BimpObject
         }
     }
 
-    public function moveToPlaceType($type, $idI)
+    public function moveToPlaceType($type, $idI = 0, $force = 0)
     {
         $errors = array();
         $current_place = $this->getCurrentPlace();
-        if ($current_place->getData('type') != BE_Place::BE_PLACE_ENTREPOT) {
-            $errors[] = "Pas en stock";
+        if (!in_array($current_place->getData('type'), BE_Place::$entrepot_types)) {
+            $errors[] = "Pas en entrepôt";
         }
         if (!isset($type) || $type < 1) {
             $errors[] = "Pas de type";
@@ -1197,19 +1209,30 @@ class Equipment extends BimpObject
             if ($idI > 0)
                 $text .= '-' . $idI;
             $text .= '-SN:' . $this->getData('serial');
-            $place = BimpObject::getInstance($this->module, 'BE_Place');
-            $errors = array_merge($errors, $place->validateArray(array(
-                        'id_equipment' => (int) $this->id,
-                        'type'         => $type,
-                        'id_entrepot'  => (int) $current_place->getData('id_entrepot'),
-                        'infos'        => $text,
-                        'date'         => date('Y-m-d H:i:s'),
-            )));
-            if (!count($errors)) {
-                $errors = array_merge($errors, $place->create());
-            }
+            $this->moveToPlace($type, (int) $current_place->getData('id_entrepot'), $text, $force);
         }
 
+        return $errors;
+    }
+    
+    public function moveToPlace($type, $id, $label_mvt, $force = 0)
+    {
+        if ($force == 1 and $this->getData('id_package')) {
+            $this->updateField('id_package', 0);
+            $this->addNote('Sortie du package pour déplacement automatique');
+            $label_mvt .= ' Sortie du package pour déplacement automatique';
+        }
+        
+        $place = BimpObject::getInstance($this->module, 'BE_Place');
+        $errors = array_merge($errors, $place->validateArray(array(
+                    'id_equipment' => (int) $this->id,
+                    'type'         => $type,
+                    'id_entrepot'  => $id,
+                    'infos'        => $label_mvt,
+                    'date'         => date('Y-m-d H:i:s'),
+        )));
+        if (!count($errors))
+            $errors = array_merge($errors, $place->create());
         return $errors;
     }
 
@@ -1275,7 +1298,7 @@ class Equipment extends BimpObject
         if (!count($errors)) {
             foreach ($data['id_objects'] as $id) {
                 $obj = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $id);
-                $errors = array_merge($errors, $obj->moveToPlaceType($data['place_type'], $idI));
+                $errors = array_merge($errors, $obj->moveToPlaceType($data['place_type'], $idI, 1));
             }
             $success_callback = 'bimp_reloadPage();';
         }

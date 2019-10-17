@@ -481,10 +481,7 @@ class InventorySR extends BimpDolObject
 
         $sql = 'SELECT DISTINCT (e.id) as e_id FROM ' . MAIN_DB_PREFIX . 'be_equipment e 
 LEFT JOIN ' . MAIN_DB_PREFIX . 'be_equipment_place AS epl ON epl.id_equipment = e.id
-LEFT JOIN ' . MAIN_DB_PREFIX . 'be_package_place AS ppl ON ppl.id_package = e.id_package
-WHERE (ppl.position = 1 AND ppl.type IN (5))
-AND (ppl.id_entrepot=' . $this->getData('fk_warehouse') . '
-    OR (epl.position = 1 AND epl.id_entrepot=' . $this->getData('fk_warehouse') . '))';
+WHERE  epl.position = 1 AND epl.id_entrepot=' . $this->getData('fk_warehouse') . ' AND epl.type=5';
 
         $result = $this->db->db->query($sql);
         if ($result and mysqli_num_rows($result) > 0) {

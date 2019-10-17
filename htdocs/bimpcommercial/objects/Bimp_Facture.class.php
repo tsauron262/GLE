@@ -1210,6 +1210,30 @@ class Bimp_Facture extends BimpComm
     }
 
     // Affichages: 
+    
+      public function displayZoneVenteField() {
+        $zone_vente = $this->getData('zone_vente');
+        
+        $html = "";
+        
+        switch($zone_vente) {
+            case self::BC_ZONE_FR:
+                $html .= "<span class='bs-popover' ". BimpRender::renderPopoverData("Le matériel est récupérer sur le sol Français")." >France</<span>";
+                break;
+            case self::BC_ZONE_UE:
+                //$html .= "<span class='bs-popover' ". BimpRender::renderPopoverData("Si livraison par nos soins sur Union Européenne, mais que le client ne nous à pas fourni de numéro de TVA intracommunautaire").">Union Européenne avec TVA</span>";
+                $html .= '<span>Union Européenne avec TVA</span>';
+                break;
+            case self::BC_ZONE_UE_SANS_TVA:
+                //$html .= "<span class='bs-popover' ". BimpRender::renderPopoverData("Si livraison par nos soins sur Union Européenneet que le client nous a fourni son numéro de TVA intracommunautaire").">Union Européenne sans TVA</span>";
+               $html .= '<span>Union Européenne sans TVA</span>';
+                break;
+            case self::BC_ZONE_HORS_UE:
+                $html .= "<span class='bs-popover' ". BimpRender::renderPopoverData("Si livraison par nos soins Hors Union Européenne")." >Hors UE</<span>";
+                break;
+        }
+        return $html;
+    }
 
     public function displayPaid()
     {

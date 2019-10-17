@@ -4,18 +4,27 @@
 class Bimp_Rights extends BimpObject
 {
 
-    public function getTabRights(){
+    public static function getTabRights(){
         $cacheKey = 'listLabelRights';
         if(!isset(BimpCache::$cache[$cacheKey])){
-            BimpCache::$cache[$cacheKey] = $this->initTabRights();
+            BimpCache::$cache[$cacheKey] = self::initTabRights();
         }
         return BimpCache::$cache[$cacheKey];
     }
     
-    public function initTabRights(){
+    public static function getRightName($id){
+        $tabRight = self::getTabRights();
+        if(isset($tabRight[$id]))
+            return $tabRight[$id];
+        else
+            return "";
+    }
+    
+    public static function initTabRights(){
+        global $db;
         $tabR = array();
-        $sql = $this->db->db->query("SELECT * FROM `".MAIN_DB_PREFIX."rights_def` ORDER BY `id` DESC");
-        while($ln = $this->db->db->fetch_object($sql)){
+        $sql = $db->query("SELECT * FROM `".MAIN_DB_PREFIX."rights_def` ORDER BY `id` DESC");
+        while($ln = $db->fetch_object($sql)){
             $nom = $ln->module.'->'.$ln->perms;
             if($ln->subperms != '')
                 $nom .= '->'.$ln->subperms;

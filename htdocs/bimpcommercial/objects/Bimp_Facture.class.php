@@ -90,8 +90,9 @@ class Bimp_Facture extends BimpComm
 
 
             case 'addContact':
+                return 1;
             case 'cancel':
-                return $this->can("delete");
+                return $user->admin;
 
             case 'classifyPaid':
             case 'convertToReduc':

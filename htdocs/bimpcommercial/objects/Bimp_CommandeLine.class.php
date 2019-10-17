@@ -2999,21 +2999,23 @@ class Bimp_CommandeLine extends ObjectLine
                                         $reservation->set('id_origin', (int) $shipment->id);
                                         $reservation->update();
 
-                                        // Mise à jour de l'emplacement de l'équipement:  
-                                        $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
-                                        $place_errors = $place->validateArray(array(
-                                            'id_equipment' => $id_equipment,
-                                            'type'         => BE_Place::BE_PLACE_CLIENT,
-                                            'id_client'    => (int) $id_client,
-                                            'id_contact'   => (int) $id_contact,
-                                            'infos'        => $stock_label,
-                                            'date'         => date('Y-m-d H:i:s'),
-                                            'code_mvt'     => $codemove
-                                        ));
+                                        // Mise à jour de l'emplacement de l'équipement: 
+                                        $equipment->moveToPlace(BE_Place::BE_PLACE_CLIENT, $id_client, $codemove, $stock_label, 1);
+                                        
+//                                        $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
+//                                        $place_errors = $place->validateArray(array(
+//                                            'id_equipment' => $id_equipment,
+//                                            'type'         => BE_Place::BE_PLACE_CLIENT,
+//                                            'id_client'    => (int) $id_client,
+//                                            'id_contact'   => (int) $id_contact,
+//                                            'infos'        => $stock_label,
+//                                            'date'         => date('Y-m-d H:i:s'),
+//                                            'code_mvt'     => $codemove
+//                                        ));
 
-                                        if (!count($place_errors)) {
-                                            $place_errors = $place->create();
-                                        }
+//                                        if (!count($place_errors)) {
+//                                            $place_errors = $place->create();
+//                                        }
 
                                         if (count($place_errors)) {
                                             $errors[] = BimpTools::getMsgFromArray($place_errors, 'Echec de la création du nouvel emplacement pour l\'équipement ' . $equipment->getData('serial') . ' (ID ' . $id_equipment . ')');

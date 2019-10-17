@@ -1,6 +1,6 @@
 <?php
 
-class inventoryController extends BimpController {
+class inventory_srController extends BimpController {
 
     protected function ajaxProcessInsertInventoryLine() {
         global $user;
@@ -8,31 +8,18 @@ class inventoryController extends BimpController {
         $input = BimpTools::getValue('input');
         $id_inventory = (int) BimpTools::getValue('id');
         $quantity_input = BimpTools::getValue('quantity');
-        $inventory = BimpCache::getBimpObjectInstance($this->module, 'Inventory', $id_inventory);
-        $inventory_line = BimpObject::getInstance($this->module, 'InventoryLine');
+        $inventory = BimpCache::getBimpObjectInstance($this->module, 'InventorySR', $id_inventory);
+        $inventory_line = BimpObject::getInstance($this->module, 'InventoryLineSR');
         $id_product = 0;
-        
         $id_equipment = 0;
-        $err_serializable = 0;
 
-        $errors = $inventory_line->checkInput($input, $id_product, $id_equipment, $err_serializable);
-
-        if($err_serializable and 1 < $quantity_input) {
-            $tab = $inventory->createMultipleEquipment($id_product, $quantity_input);
-            $errors = array_merge($errors, $tab['errors']);
-            $msg = $tab['msg'];
-            if(count($errors) == 1 and !count($tab['id_inventory_det'])) // une seule erreur et ajout de lignes
-                unset($errors[0]);
-            
-        } elseif(!count($errors)){
+        $errors = $inventory_line->checkInput($input, $id_product, $id_equipment);
+        
+        if(!count($errors)){
             if((int) $id_equipment > 0)
                 $tab = $inventory->createLinesEquipment($id_product, $id_equipment);
-            elseif ((int) $inventory::STATUS_PARTIALLY_CLOSED <= (int) $inventory->getData('status')){
-                $tab = array('id_inventory_det' => NULL, 'msg' => '', 'errors' => array("Le "
-                    . "statut de l'inventaire ne permet pas d'ajouter d'autre produits non sérialisé."));
-            } else {
+            else
                 $tab = $inventory->createLinesProduct($id_product, $quantity_input);
-            }
             $id_inventory_det = $tab['id_inventory_det'];
             $errors = array_merge($errors, $tab['errors']);
             $msg = $tab['msg'];
@@ -54,9 +41,10 @@ class inventoryController extends BimpController {
         )));
     }
 
+    
     public function getPageTitle() {
-        $title = 'Inv.';
-        $inventory = $this->config->getObject('', 'inventory');
+        $title = 'Inv.SR';
+        $inventory = $this->config->getObject('', 'inventory_sr');
         $warehouse = '';
 
         if (BimpObject::objectLoaded($inventory)) {

@@ -97,7 +97,7 @@ class BContract_contrat extends BimpDolObject {
     public static $dol_module = 'contract';
     
     function __construct($module, $object_name) {
-        //global $user;
+//        global $user;
         if(BimpTools::getContext() == 'public') {
             $this->redirectMode = 4;
         }
@@ -107,12 +107,32 @@ class BContract_contrat extends BimpDolObject {
         return parent::__construct($module, $object_name);
     }
 
-    
     public function update(&$warnings = array(), $force_update = false) {
         
         if(BimpTools::getValue('type_piece')) {
-            //return 'OK je suis au bon endroit';
-            
+            $id = 0;
+            switch(BimpTools::getValue('type_piece')) {
+                case 'propal':
+                    $id = BimpTools::getValue('propal_client');
+                    break;
+                case 'commande':
+                    $id = BimpTools::getValue('propal_client');
+                    break;
+                case 'propal':
+                    $id = BimpTools::getValue('propal_client');
+                    break;
+            }
+            if($id === 0) {
+                return "Il n'y à pas de pièce " . self::$true_objects_for_link[BimpTools::getValue('type_piece')] . ' pour ce client';
+            } else {
+                if(getElementElement(BimpTools::getValue('type_piece'), 'contrat', $id, $this->id)) {
+                    return "La piece " . self::$true_objects_for_link[BimpTools::getValue('type_piece')] . ' que vous avez choisi est déjà liée à ce contrat';
+                } else {
+                    addElementElement(BimpTools::getValue('type_piece'), 'contrat', $id, $this->id);
+                    $success = "La " . self::$true_objects_for_link[BimpTools::getValue('type_piece')] . " à été liée au contrat avec succès" ;
+                }
+            }
+            return ['success' => $success, 'warnings' => $warnings, 'errors' => $errors];
         }
     }
     

@@ -1209,7 +1209,7 @@ class Equipment extends BimpObject
             if ($idI > 0)
                 $text .= '-' . $idI;
             $text .= '-SN:' . $this->getData('serial');
-            $this->moveToPlace($type, (int) $current_place->getData('id_entrepot'), $text, $force);
+            $this->moveToPlace($type, (int) $current_place->getData('id_entrepot'), '', $text, $force);
         }
 
         return $errors;

@@ -566,7 +566,7 @@ class BLPDF extends OrderPDF
         BimpObject::loadClass('bimpreservation', 'BR_Reservation');
         $qties = $this->shipment->getPDFQtiesAndSerials();
 
-        $i = 0;
+        $i = -1;
 
         $bimpLines = array();
 
@@ -577,6 +577,7 @@ class BLPDF extends OrderPDF
         }
 
         foreach ($this->object->lines as &$line) {
+            $i++;
             $bimpLine = isset($bimpLines[(int) $line->id]) ? $bimpLines[(int) $line->id] : null;
 
             if ($this->object->type != 3 && ($line->desc == "(DEPOSIT)" || stripos($line->desc, 'Acompte') === 0)) {
@@ -609,7 +610,6 @@ class BLPDF extends OrderPDF
             if ((BimpObject::objectLoaded($bimpLine) && (int) $bimpLine->getData('type') === ObjectLine::LINE_TEXT) ||
                     (!BimpObject::objectLoaded($bimpLine) && $line->subprice == 0 && !(int) $line->fk_product)) {
                 if (!$desc) {
-                    $i++;
                     unset($product);
                     $product = null;
                     continue;
@@ -734,8 +734,7 @@ class BLPDF extends OrderPDF
             }
 
             $table->rows[] = $row;
-
-            $i++;
+            
             unset($product);
             $product = null;
         }

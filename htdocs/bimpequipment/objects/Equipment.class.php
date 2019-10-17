@@ -1215,22 +1215,32 @@ class Equipment extends BimpObject
         return $errors;
     }
     
-    public function moveToPlace($type, $id, $label_mvt, $force = 0)
+    public function moveToPlace($type, $id, $code_mvt, $stock_label, $force = 0, $date = null)
     {
         if ($force == 1 and $this->getData('id_package')) {
             $this->updateField('id_package', 0);
             $this->addNote('Sortie du package pour déplacement automatique');
-            $label_mvt .= ' Sortie du package pour déplacement automatique';
+            $stock_label .= ' Sortie du package pour déplacement automatique';
         }
         
+        if($date == null)
+            $date = date('Y-m-d H:i:s');
+        
         $place = BimpObject::getInstance($this->module, 'BE_Place');
-        $errors = array_merge($errors, $place->validateArray(array(
+        
+        $data = array(
                     'id_equipment' => (int) $this->id,
                     'type'         => $type,
-                    'id_entrepot'  => $id,
-                    'infos'        => $label_mvt,
-                    'date'         => date('Y-m-d H:i:s'),
-        )));
+                    'date'         => $date,
+                    'infos'        => $stock_label,
+                    'code_mvt'     => $code_mvt
+        );
+        if(in_array($type, BE_Place::$entrepot_types))
+                $data['id_entrepot'] = $id;
+        elseif($type == BE_Place::BE_PLACE_CLIENT)
+                $data['id_client'] = $id;
+        
+        $errors = array_merge($errors, $place->validateArray($data));
         if (!count($errors))
             $errors = array_merge($errors, $place->create());
         return $errors;

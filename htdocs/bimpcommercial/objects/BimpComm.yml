@@ -217,7 +217,7 @@ fields:
         dol_extra_field: 1
         default_value: 1
         input: 
-            help: Si vous indiquez "Hors-UE", tous les taux de TVA des lignes actuelles seront mis à 0 de manière irréversible.
+            help: Si vous indiquez "Hors-UE" ou "Union Européenne sans TVA", tous les taux de TVA des lignes actuelles seront mis à 0 de manière irréversible.
     
 forms: 
     contact:

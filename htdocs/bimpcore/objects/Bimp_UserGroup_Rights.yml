@@ -48,6 +48,10 @@ lists:
                 field: fk_usergroup
             fk_id:
                 field: fk_id
+    right:
+        extends: default
+        cols:
+            fk_id: unset
             
                 
         

@@ -93,19 +93,13 @@ sections:
                   custom: 
                       callback: renderScriptsTabContent
                       
-        droitUser:
-            label: Droits Utilisateurs
-            sections: 
-                - type: list
-                  list: 
-                      panel: 1
-                      object: droitUser
-                      name: default
-        droitGroupUser:
-            label: Droits Group
-            sections: 
-                - type: list
-                  list: 
-                      panel: 1
-                      object: droitGroupUser
-                      name: default
+        droit:
+            label: Droits
+            sections:
+                - type: custom
+                  custom: 
+                      callback: 
+                          method: renderTabs
+                          params: 
+                            - renderRightsTab
+                            - droit

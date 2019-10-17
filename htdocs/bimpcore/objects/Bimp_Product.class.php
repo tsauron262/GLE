@@ -377,6 +377,10 @@ class Bimp_Product extends BimpObject
         }
         return 1;
     }
+    public function isAchetable(&$errors, $urgent = false, $mail = true)
+    {
+        return $this->isVendable($errors, $urgent, $mail);
+    }
 
     public function hasFixePrices()
     {

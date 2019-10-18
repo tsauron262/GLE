@@ -828,20 +828,7 @@ class Bimp_CommandeFourn extends BimpComm
         return static::$types_entrepot;
     }
 
-    // Getters données: 
 
-    public function getIdContactLivraison()
-    {
-        if ($this->isLoaded()) {
-            $contacts = $this->dol_object->getIdContact('external', 'SHIPPING');
-
-            if (isset($contacts[0])) {
-                return (int) $contacts[0];
-            }
-        }
-
-        return 0;
-    }
 
     // Rendus HTML - overrides BimpObject:
 
@@ -1841,7 +1828,7 @@ class Bimp_CommandeFourn extends BimpComm
         if (isset($data['type']) && (int) $data['type'] === 1) {
             if (isset($data['tiers_type_contact']) && (int) $data['tiers_type_contact'] &&
                     BimpTools::getTypeContactCodeById((int) $data['tiers_type_contact']) === 'SHIPPING') {
-                if ((int) $this->getIdContactLivraison()) {
+                if ((int) $this->getIdContact()) {
                     $errors[] = 'Un contact livraison a déjà été ajouté';
                 }
             }
@@ -1877,7 +1864,7 @@ class Bimp_CommandeFourn extends BimpComm
                     break;
 
                 case self::DELIV_DIRECT:
-                    if (!(int) $this->getIdContactLivraison()) {
+                    if (!(int) $this->getIdContact()) {
                         $this->msgs['warnings'][] = 'Veullez ajouter un contact livraison';
                     }
                     break;

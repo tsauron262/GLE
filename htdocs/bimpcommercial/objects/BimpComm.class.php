@@ -50,6 +50,18 @@ class BimpComm extends BimpDolObject
         return !BimpCore::getConf("NOT_USE_ENTREPOT");
     }
 
+    public function getIdContact($type = 'external', $code = 'SHIPPING')
+    {
+        if ($this->isLoaded()) {
+            $contacts = $this->dol_object->getIdContact($type, $code);
+            if (isset($contacts[0]) && $contacts[0]) {
+                return (int) $contacts[0];
+            }
+        }
+
+        return 0;
+    }
+
     // Gestion des droits: 
 
     protected function canView()
@@ -2988,7 +3000,7 @@ class BimpComm extends BimpDolObject
     {
         $errors = array();
         $warnings = array();
-        $success = 'Ajout du contact effectué avec succès';
+        $success = 'Ajout du contact effectué avec succès'.$success;
 
         if (!$this->isLoaded()) {
             $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';

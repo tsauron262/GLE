@@ -652,18 +652,6 @@ class Bimp_Commande extends BimpComm
         return self::getSocieteContactsArray($id_client_facture);
     }
 
-    public function getIdContactLivraison()
-    {
-        if ($this->isLoaded()) {
-            $contacts = $this->dol_object->getIdContact('external', 'SHIPPING');
-            if (isset($contacts[0]) && $contacts[0]) {
-                return (int) $contacts[0];
-            }
-        }
-
-        return 0;
-    }
-
     // Rendus HTML: 
 
     public function renderHeaderExtraLeft()

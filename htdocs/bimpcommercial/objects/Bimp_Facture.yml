@@ -523,8 +523,8 @@ fields_tables:
             - field: datef
               edit: 
                   callback: isEditable
-#            - field: zone_vente
-#              edit: 1
+            - field: zone_vente
+              edit: 1
             - label: Commercial
               value: 
                   callback: displayCommercial
@@ -536,9 +536,9 @@ fields_tables:
               display: nom_url
               show: 
                   callback: showEntrepotCommission
-            - label: Zone de vente
-              value:
-                  callback: displayZoneVenteField
+#            - label: Zone de vente
+#              value:
+#                  callback: displayZoneVenteField
             - field: exported
     
     client: 

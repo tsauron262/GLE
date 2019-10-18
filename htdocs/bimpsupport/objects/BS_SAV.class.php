@@ -1171,7 +1171,8 @@ class BS_SAV extends BimpObject
                     }
 
                     if ($update) {
-                        $prop_errors = $propal->update();
+                        $warnings = array();
+                        $prop_errors = $propal->update($warnings, true);
                         if (count($prop_errors)) {
                             dol_syslog(BimpTools::getMsgFromArray($prop_errors, 'Echec de la réparation automatique de la propale pour le SAV "' . $this->getRef() . '"'), LOG_ERR);
                         } else {

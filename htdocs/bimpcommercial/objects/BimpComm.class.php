@@ -1709,6 +1709,57 @@ class BimpComm extends BimpDolObject
         }
         return $html;
     }
+    
+    public function renderExtraFile(){
+        $html = "";
+        $obj = BimpObject::getBimpObjectInstance('bimpcore', 'BimpFile');
+        
+        
+        if ($this->isLoaded()) {
+            if ($this->isDolObject()) {
+                foreach (BimpTools::getDolObjectLinkedObjectsList($this->dol_object, $this->db) as $item) {
+                    $id = $item['id_object'];
+                    $class = "";
+                    $label = "";
+                    $module = "bimpcommercial";
+                    switch ($item['type']) {
+                        case 'propal':
+                            $class = "Bimp_Propal";
+                            break;
+                        case 'facture':
+                            $class = "Bimp_Facture";
+                            break;
+                        case 'commande':
+                            $class = "Bimp_Commande";
+                            break;
+                        case 'order_supplier':
+                            $class = "Bimp_CommandeFourn";
+                            break;
+                        case 'invoice_supplier':
+                            $class = "Bimp_FactureFourn";
+                            break;
+                        default:
+                            break;
+                    }
+                    if($class != ""){
+                        $objT = BimpCache::getBimpObjectInstance($module, $class, $id);
+                        if($objT->isLoaded()){
+                            $bc_list = new BC_ListTable($obj, 'default', 1, null, 'Liste des fichiers '.$objT->getNomUrl(), 'fas_bars');
+
+                            $bc_list->addFieldFilterValue('a.parent_object_name', $class);
+                            $bc_list->addFieldFilterValue('a.id_parent', $id);
+                            $bc_list->addFieldFilterValue('a.deleted', 0);
+
+                            $html .= $bc_list->renderHtml();
+                        }
+                    }
+                }
+            }
+        }
+        
+        
+        return $html;
+    }
 
     public function renderFilesTable()
     {

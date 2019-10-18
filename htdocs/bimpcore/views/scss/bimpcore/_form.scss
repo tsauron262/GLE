@@ -711,7 +711,7 @@ input[type=text].large_input {
         padding: 10px 0;
         border-bottom: 1px solid $gray;
     }
-
+    
     .freeFormLabel {
         font-size: 15px;
         font-weight: bold;
@@ -767,6 +767,10 @@ input[type=text].large_input {
 }
 
 .bimp_form {
+    label {
+        font-weight: bold;
+    }
+    
     .bimp_form_row {
         width: 100%;
         margin-bottom: 10px;

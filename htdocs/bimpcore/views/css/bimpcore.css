@@ -8892,7 +8892,7 @@ label {
   display: inline-block;
   max-width: 100%;
   margin-bottom: 5px;
-  font-weight: bold; }
+  /*font-weight: bold;*/ }
 
 /* line 47, ../scss/bootstrap/_forms.scss */
 input[type="search"] {
@@ -15551,49 +15551,52 @@ input[type=text].large_input {
         margin-left: 15px; }
 
 /* line 770, ../scss/bimpcore/_form.scss */
+.bimp_form label {
+  font-weight: bold; }
+/* line 774, ../scss/bimpcore/_form.scss */
 .bimp_form .bimp_form_row {
   width: 100%;
   margin-bottom: 10px; }
-/* line 776, ../scss/bimpcore/_form.scss */
+/* line 780, ../scss/bimpcore/_form.scss */
 .bimp_form.labels_up label {
   display: block; }
-/* line 781, ../scss/bimpcore/_form.scss */
+/* line 785, ../scss/bimpcore/_form.scss */
 .bimp_form .select2 {
   width: 100% !important;
   max-width: 100% !important; }
 
-/* line 787, ../scss/bimpcore/_form.scss */
+/* line 791, ../scss/bimpcore/_form.scss */
 .ui-menu .ui-menu-item a {
   padding: 0.12em 0.4em !important; }
 
-/* line 791, ../scss/bimpcore/_form.scss */
+/* line 795, ../scss/bimpcore/_form.scss */
 .ui-menu .ui-menu-item:last-child a {
   padding-bottom: 1em !important; }
 
 /*Single Line Forms:*/
-/* line 797, ../scss/bimpcore/_form.scss */
+/* line 801, ../scss/bimpcore/_form.scss */
 .singleLineForm {
   display: inline-block;
   background-color: #fff;
   border: 1px solid #787878; }
-  /* line 802, ../scss/bimpcore/_form.scss */
+  /* line 806, ../scss/bimpcore/_form.scss */
   .singleLineForm .singleLineFormCaption {
     padding: 5px 12px;
     background-color: #F0F0F0; }
-  /* line 807, ../scss/bimpcore/_form.scss */
+  /* line 811, ../scss/bimpcore/_form.scss */
   .singleLineForm .singleLineFormContent {
     padding: 5px 12px; }
-    /* line 810, ../scss/bimpcore/_form.scss */
+    /* line 814, ../scss/bimpcore/_form.scss */
     .singleLineForm .singleLineFormContent select,
     .singleLineForm .singleLineFormContent .select2-container {
       width: 250px !important;
       max-width: 100% !important; }
-  /* line 817, ../scss/bimpcore/_form.scss */
+  /* line 821, ../scss/bimpcore/_form.scss */
   .singleLineForm .inputContainer {
     display: inline-block;
     padding: 4px 0;
     margin-right: 20px; }
-    /* line 822, ../scss/bimpcore/_form.scss */
+    /* line 826, ../scss/bimpcore/_form.scss */
     .singleLineForm .inputContainer .inputHelp {
       display: none; }
 

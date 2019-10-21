@@ -112,8 +112,9 @@ class Bimp_Commande extends BimpComm
                 return 0;
 
             case 'linesFactureQties':
-                $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
-                return (int) $facture->can('create');
+//                $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
+//                return (int) $facture->can('create');
+                return $user->rights->bimpcommercial->factureAnticipe;
         }
         return parent::canSetAction($action);
     }

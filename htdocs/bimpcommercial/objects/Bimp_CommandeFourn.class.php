@@ -1819,6 +1819,11 @@ class Bimp_CommandeFourn extends BimpComm
                             } else {
                                 $errors = $this->updateField('status_forced', $status_forced);
                             }
+                            if($data['invoice_status'] == 2){
+                                $this->updateField("billed", 1);
+                            }
+                            else
+                                $this->updateField("billed", 0);
                         }
                     }
                     break;

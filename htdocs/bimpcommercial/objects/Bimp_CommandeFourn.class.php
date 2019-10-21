@@ -1194,6 +1194,17 @@ class Bimp_CommandeFourn extends BimpComm
         $success = BimpTools::ucfirst($this->getLabel()) . ' approuvé' . ($this->isLabelFemale() ? 'e' : '') . ' avec succès';
 
         global $user, $conf, $langs;
+        
+        
+        
+        $lines = $this->getLines('not_text');
+        foreach ($lines as $line) {
+            $prod = $line->getChildObject('product');
+            if($prod->isLoaded())
+                if(!$prod->isAchetable($errors,false,false))
+                     return array('errors' => $errors);
+            
+        }
 
         $result = $this->dol_object->approve($user, (int) $this->getData('entrepot'), 0);
         if ($result > 0) {
@@ -1204,6 +1215,10 @@ class Bimp_CommandeFourn extends BimpComm
         } else {
             $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object, null, null, $warnings), 'Des erreurs sont survenues lors de l\'approbation ' . $this->getLabel('of_this'));
         }
+        
+        
+        
+        
         return array(
             'errors'           => $errors,
             'warnings'         => $warnings,

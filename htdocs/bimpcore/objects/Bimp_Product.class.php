@@ -652,8 +652,6 @@ class Bimp_Product extends BimpObject
                     $data[$ship_to]['ventes'] += $ventes['qty'];
                     $data[$ship_to]['stock'] += 0;
                     $data[$ship_to]['stock_showroom'] += 0;
-                    print_r($data);
-                    die('oo');
                 }
                 else{
                     $tab_secteur = array("S", "M", "CO", "BP", "C");//tous sauf E

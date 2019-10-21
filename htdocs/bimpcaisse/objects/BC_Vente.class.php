@@ -2373,7 +2373,7 @@ class BC_Vente extends BimpObject
             $line->tva_tx = (float) $return->getData('tva_tx');
             $line->pu_ht = (float) BimpTools::calculatePriceTaxEx((float) $return->getData('unit_price_tax_in'), $line->tva_tx);
 
-            $line_errors = $line->create();
+            $line_errors = $line->create($warnings, true);
 
             if (count($line_errors)) {
                 $warnings[] = BimpTools::getMsgFromArray($line_errors, 'Echec de l\'ajout du retour #' . $return->id . ' à la facture');

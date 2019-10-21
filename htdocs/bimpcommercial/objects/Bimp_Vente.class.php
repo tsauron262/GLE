@@ -383,7 +383,8 @@ VQ - Collège
 ";' . "\n";
 
         $entrepots = BimpCache::getEntrepotsShipTos();
-
+        
+        $entrepots[-9999] = "1683245";
         foreach ($products_list as $p) {
             $entrepots_data = $product->getAppleCsvData($dateFrom, $dateTo, $entrepots, $p['rowid']);
 

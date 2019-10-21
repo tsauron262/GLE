@@ -2459,7 +2459,7 @@ class BC_Vente extends BimpObject
             }
 
             $line_warnings = array();
-            $line_errors = $line->create($line_warnings);
+            $line_errors = $line->create($line_warnings, true);
 
             if (count($line_warnings)) {
                 $warnings[] = BimpTools::getMsgFromArray($line_warnings, 'Article #' . $article->id . ': erreurs suite à la création de la ligne de facture');

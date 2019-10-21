@@ -589,6 +589,7 @@ class Bimp_FactureFourn extends BimpComm
             }
             $html .= '<div class="object_header_infos">';
             $html .= 'Date facture <strong>' . $this->displayData('datef', 'default', false, true) . '</strong>';
+            $html .= '</div>';
         }
 
         return $html;

@@ -195,6 +195,7 @@ filters_panel:
     default: 
         filters: 
             - field: id_user
+            - field: id_entrepot
             - field: date
             - field: status
 
@@ -209,10 +210,10 @@ lists_cols:
         field: total_marges
     status: 
         field: status
-    ecarts: 
-        label: Ecarts secteurs
-        value: 
-            callback: displaySecteursErrors
+#    ecarts: 
+#        label: Ecarts secteurs
+#        value: 
+#            callback: displaySecteursErrors
 #    amounts:
 #        label: CA
 #        value:

@@ -593,7 +593,7 @@ class Bimp_Product extends BimpObject
         }
     }
 
-    public function getVentes($dateMin, $dateMax = null, $id_entrepot = null, $id_product = null)
+    public function getVentes($dateMin, $dateMax = null, $id_entrepot = null, $id_product = null, $tab_secteur = array())
     {
         if (is_null($id_product) && $this->isLoaded()) {
             $id_product = $this->id;
@@ -611,11 +611,11 @@ class Bimp_Product extends BimpObject
             $dateMax = date('Y-m-d H:i:s');
         }
 
-        $cache_key = $dateMin . '-' . $dateMax;
+        $cache_key = $dateMin . '-' . $dateMax. "-". implode("/", $tab_secteur);
 
         if ((int) $id_product) {
             if (!isset(self::$ventes[$cache_key])) {
-                self::initVentes($dateMin, $dateMax);
+                self::initVentes($dateMin, $dateMax, $tab_secteur);
             }
 
             if (isset(self::$ventes[$cache_key][$id_product][$id_entrepot])) {
@@ -647,10 +647,19 @@ class Bimp_Product extends BimpObject
                         'stock_showroom' => 0
                     );
                 }
-                $ventes = $this->getVentes($dateMin, $dateMax, $id_entrepot, $id_product);
-                $data[$ship_to]['ventes'] += $ventes['qty'];
-                $data[$ship_to]['stock'] += $this->getStockDate($dateMax, $id_entrepot, $id_product);
-                $data[$ship_to]['stock_showroom'] += $this->getStockShoowRoom($dateMax, $id_entrepot, $id_product);
+                if($id_entrepot == -9999){
+                    $ventes = $this->getVentes($dateMin, $dateMax, null, $id_product, array("E"));
+                    $data[$ship_to]['ventes'] += $ventes['qty'];
+                    $data[$ship_to]['stock'] += 0;
+                    $data[$ship_to]['stock_showroom'] += 0;
+                }
+                else{
+                    $tab_secteur = array("S", "M", "CO", "BP", "C");//tous sauf E
+                    $ventes = $this->getVentes($dateMin, $dateMax, $id_entrepot, $id_product, $tab_secteur);
+                    $data[$ship_to]['ventes'] += $ventes['qty'];
+                    $data[$ship_to]['stock'] += $this->getStockDate($dateMax, $id_entrepot, $id_product);
+                    $data[$ship_to]['stock_showroom'] += $this->getStockShoowRoom($dateMax, $id_entrepot, $id_product);
+                }
             }
         }
 
@@ -2878,7 +2887,7 @@ class Bimp_Product extends BimpObject
         //
     }
 
-    private static function initVentes($dateMin, $dateMax)
+    private static function initVentes($dateMin, $dateMax, $tab_secteur = array())
     {
         global $db;
 //        self::$ventes = array(); // Ne pas déco ça effacerait d'autres données en cache pour d'autres dates. 
@@ -2893,12 +2902,15 @@ class Bimp_Product extends BimpObject
 
         if ($dateMax)
             $query .= " AND date_valid <= '" . $dateMax . "'";
+        
+        if(count($tab_secteur) > 0)
+            $query .= " AND e.type IN ('".implode("','", $tab_secteur)."')";
 
         $group_by .= " GROUP BY `fk_product`, entrepot";
 
         $sql = $db->query($query . " AND `subprice` >= 0" . $group_by);
 
-        $cache_key = $dateMin . "-" . $dateMax;
+        $cache_key = $dateMin . "-" . $dateMax. "-". implode("/", $tab_secteur);
 
         while ($ln = $db->fetch_object($sql)) {
             self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['qty'] = $ln->qty;

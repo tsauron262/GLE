@@ -1296,7 +1296,7 @@ class BimpComm extends BimpDolObject
                 } else {
                     $module_part = static::$dol_module;
                 }
-                return DOL_URL_ROOT . '/document.php?modulepart=' . $module_part . '&file=' . htmlentities(dol_sanitizeFileName($this->getRef()) . '/' . $file_name);
+                return DOL_URL_ROOT . '/document.php?modulepart=' . $module_part . '&file=' . urlencode($this->getRef()) . '/' . urlencode($file_name);
             }
         }
 
@@ -1712,9 +1712,6 @@ class BimpComm extends BimpDolObject
     
     public function renderExtraFile(){
         $html = "";
-        $obj = BimpObject::getBimpObjectInstance('bimpcore', 'BimpFile');
-        
-        
         if ($this->isLoaded()) {
             if ($this->isDolObject()) {
                 foreach (BimpTools::getDolObjectLinkedObjectsList($this->dol_object, $this->db) as $item) {
@@ -1744,13 +1741,7 @@ class BimpComm extends BimpDolObject
                     if($class != ""){
                         $objT = BimpCache::getBimpObjectInstance($module, $class, $id);
                         if($objT->isLoaded()){
-                            $bc_list = new BC_ListTable($obj, 'default', 1, null, 'Liste des fichiers '.$objT->getNomUrl(), 'fas_bars');
-
-                            $bc_list->addFieldFilterValue('a.parent_object_name', $class);
-                            $bc_list->addFieldFilterValue('a.id_parent', $id);
-                            $bc_list->addFieldFilterValue('a.deleted', 0);
-
-                            $html .= $bc_list->renderHtml();
+                            $html .= $this->renderListFileForObject($objT);
                         }
                     }
                 }
@@ -2002,10 +1993,9 @@ class BimpComm extends BimpDolObject
         return $html;
     }
 
-    public function renderLinkedObjectsTable()
+    public function renderLinkedObjectsTable($htmlP = "")
     {
-        $html = '';
-
+        $html = "";
         if ($this->isLoaded()) {
             $objects = array();
 
@@ -2105,25 +2095,27 @@ class BimpComm extends BimpDolObject
 
             if (count($objects)) {
                 foreach ($objects as $data) {
-                    $html .= '<tr>';
-                    $html .= '<td><strong>' . $data['type'] . '</strong></td>';
-                    $html .= '<td>' . $data['ref'] . '</td>';
-                    $html .= '<td>' . $data['date'] . '</td>';
-                    $html .= '<td>' . $data['total_ht'] . '</td>';
-                    $html .= '<td>' . $data['status'] . '</td>';
+                    $htmlP .= '<tr>';
+                    $htmlP .= '<td><strong>' . $data['type'] . '</strong></td>';
+                    $htmlP .= '<td>' . $data['ref'] . '</td>';
+                    $htmlP .= '<td>' . $data['date'] . '</td>';
+                    $htmlP .= '<td>' . $data['total_ht'] . '</td>';
+                    $htmlP .= '<td>' . $data['status'] . '</td>';
 //                    $html .= '<td style="text-align: right">';
 //                    
 //                    $html .= BimpRender::renderRowButton('Supprimer le lien', 'trash', '');
 //
 //                    $html .= '</td>';
-                    $html .= '</tr>';
+                    $htmlP .= '</tr>';
                 }
-            } else {
-                $html .= '<tr>';
-                $html .= '<td colspan="5">' . BimpRender::renderAlerts('Aucun objet lié', 'info') . '</td>';
-                $html .= '</tr>';
+            } 
+            if($htmlP == "") {
+                $htmlP .= '<tr>';
+                $htmlP .= '<td colspan="5">' . BimpRender::renderAlerts('Aucun objet lié', 'info') . '</td>';
+                $htmlP .= '</tr>';
             }
 
+            $html .= $htmlP;
             $html .= '</tbody>';
             $html .= '</table>';
 

@@ -21,11 +21,11 @@ class FournObjectLine extends ObjectLine
     
     public function create(&$warnings = array(), $force_create = false) {
         $errors = array();
-        if($this->getData('type') == self::LINE_PRODUCT){
-            $prod = $this->getChildObject('product');
-            if(!$prod->isAchetable($errors,false,false))
-                    return $errors;
-        }
+//        if($this->getData('type') == self::LINE_PRODUCT){
+//            $prod = $this->getChildObject('product');
+//            if(!$prod->isAchetable($errors,false,false))
+//                    return $errors;
+//        }
         
         return parent::create($warnings, $force_create);
     }

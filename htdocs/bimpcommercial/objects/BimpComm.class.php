@@ -1712,9 +1712,6 @@ class BimpComm extends BimpDolObject
     
     public function renderExtraFile(){
         $html = "";
-        $obj = BimpObject::getBimpObjectInstance('bimpcore', 'BimpFile');
-        
-        
         if ($this->isLoaded()) {
             if ($this->isDolObject()) {
                 foreach (BimpTools::getDolObjectLinkedObjectsList($this->dol_object, $this->db) as $item) {
@@ -1744,13 +1741,7 @@ class BimpComm extends BimpDolObject
                     if($class != ""){
                         $objT = BimpCache::getBimpObjectInstance($module, $class, $id);
                         if($objT->isLoaded()){
-                            $bc_list = new BC_ListTable($obj, 'default', 1, null, 'Liste des fichiers '.$objT->getNomUrl(), 'fas_bars');
-
-                            $bc_list->addFieldFilterValue('a.parent_object_name', $class);
-                            $bc_list->addFieldFilterValue('a.id_parent', $id);
-                            $bc_list->addFieldFilterValue('a.deleted', 0);
-
-                            $html .= $bc_list->renderHtml();
+                            $html .= $this->renderListFileForObject($objT);
                         }
                     }
                 }

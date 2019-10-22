@@ -2065,7 +2065,7 @@ class Bimp_Commande extends BimpComm
                         $fac_line->desc = $line->desc;
                         $fac_line_warnings = array();
 
-                        $fac_line_errors = $fac_line->create($fac_line_warnings);
+                        $fac_line_errors = $fac_line->create($fac_line_warnings, true);
 
                         $fac_line_errors = array_merge($fac_line_errors, $fac_line_warnings);
 

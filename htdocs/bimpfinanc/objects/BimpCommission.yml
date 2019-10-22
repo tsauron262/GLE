@@ -213,28 +213,28 @@ lists_cols:
         label: Ecarts secteurs
         value: 
             callback: displaySecteursErrors
-    amounts:
-        label: CA
-        value:
-            callback: 
-                method: displayAmount
-                params: 
-                    - total_ca
-    amounts:
-        label: CA
-        value:
-            callback: 
-                method: displayAmount
-                params: 
-                    - total_ca
-                    
-    tx_marque:               
-        label: Taux de marque
-        value: 
-          callback: 
-              method: displayAmount
-              params: 
-                  - tx_marque
+#    amounts:
+#        label: CA
+#        value:
+#            callback: 
+#                method: displayAmount
+#                params: 
+#                    - total_ca
+#    amounts:
+#        label: CA
+#        value:
+#            callback: 
+#                method: displayAmount
+#                params: 
+#                    - total_ca
+#                    
+#    tx_marque:               
+#        label: Taux de marque
+#        value: 
+#          callback: 
+#              method: displayAmount
+#              params: 
+#                  - tx_marque
 
 lists: 
     default: 

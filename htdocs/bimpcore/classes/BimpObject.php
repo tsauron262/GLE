@@ -6762,7 +6762,7 @@ class BimpObject extends BimpCache
     }
     
     
-    public static function renderListFileForObject($objT){
+    public static function renderListFileForObject($objT, $with_delete = 0){
         $obj = BimpObject::getBimpObjectInstance('bimpcore', 'BimpFile');
         $bc_list = new BC_ListTable($obj, 'default', 1, null, 'Liste des fichiers '.$objT->getNomUrl(), 'fas_bars');
 
@@ -6772,7 +6772,8 @@ class BimpObject extends BimpCache
         $bc_list->params['add_form_values']['fields']['parent_module'] = $objT->module;
         $bc_list->addFieldFilterValue('a.id_parent', $objT->id);
         $bc_list->params['add_form_values']['fields']['id_parent'] = $objT->id;
-        $bc_list->addFieldFilterValue('a.deleted', 0);
+        if(!$with_delete)
+            $bc_list->addFieldFilterValue('a.deleted', 0);
         $bc_list->identifier .= get_class($objT)."-".$objT->id;
 
         return $bc_list->renderHtml();

@@ -60,6 +60,14 @@ fields:
         label: Total marges
         type: money
         default_value: 0
+    total_pa:
+        label: Total Achat
+        type: money
+        default_value: 0
+    total_ca:
+        label: Total CA
+        type: money
+        default_value: 0
     status: 
         label: Statut
         type: int
@@ -221,13 +229,18 @@ lists_cols:
 #                method: displayAmount
 #                params: 
 #                    - total_ca
-#    amounts:
-#        label: CA
-#        value:
-#            callback: 
-#                method: displayAmount
-#                params: 
-#                    - total_ca
+    amounts:
+        field: total_ca
+    total_pa:
+        field: total_pa
+    tx_marque:
+        label: Taux de marque
+        value: 
+          callback:
+              method: displayTaux
+              params: 
+                  -  marque
+                
 #                    
 #    tx_marque:               
 #        label: Taux de marque

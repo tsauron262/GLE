@@ -445,6 +445,20 @@ class BimpCommission extends BimpObject
     }
 
     // Affichages: 
+    
+    public function displayTaux($type = "marque"){
+        $totM = $this->getData('total_marges');
+        
+        if($totM == 0)
+            $val = 0;
+        elseif ($type == "marque") {
+            $val = ($totM / $this->getData('total_ca')) * 100;
+        }
+        else {
+            $val = ($totM / $this->getData('total_pa')) * 100;
+        }
+        return BimpTools::displayFloatValue((float) $val, 4, ',', true) . ' %';
+    }
 
     public function displayAmount($amount_type)
     {
@@ -844,5 +858,14 @@ class BimpCommission extends BimpObject
         }
 
         return $errors;
+    }
+    
+    
+    //provisoir
+    public function fetch($id, $parent = null) {
+        $return = parent::fetch($id, $parent);
+        if($this->getData('total_ca') == 0)
+            $this->updateAmounts();
+        return $return;
     }
 }

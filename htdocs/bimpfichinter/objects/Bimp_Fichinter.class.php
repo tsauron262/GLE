@@ -218,5 +218,6 @@ class Bimp_Fichinter extends ObjectInter {
             $return[] = $fact->getNomUrl(1);
         return implode("<br/>", $return);
     }
+  
 
 }

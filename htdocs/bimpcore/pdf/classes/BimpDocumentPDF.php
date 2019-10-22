@@ -444,8 +444,8 @@ class BimpDocumentPDF extends BimpModelPDF
         $nomsoc = pdfBuildThirdpartyName($this->thirdparty, $this->langs);
         if (is_null($this->contact) || $this->contact->getFullName($langs) != $nomsoc){
             $html .= $nomsoc . "<br/>";
-            if(is_object($this->object) && is_object($this->object->thirdparty) && $this->object->thirdparty->name_alias != "")
-            $html .= $this->object->thirdparty->name_alias . "<br/>";
+            if(!is_null($this->contact) && is_object($this->object) && is_object($this->object->thirdparty) && $this->object->thirdparty->name_alias != "")
+                $html .= $this->object->thirdparty->name_alias . "<br/>";
         }
 
 //        if ($this->contact < 1)

@@ -859,13 +859,4 @@ class BimpCommission extends BimpObject
 
         return $errors;
     }
-    
-    
-    //provisoir
-    public function fetch($id, $parent = null) {
-        $return = parent::fetch($id, $parent);
-        if($this->getData('total_ca') == 0)
-            $this->updateAmounts();
-        return $return;
-    }
 }

@@ -1502,15 +1502,38 @@ class Bimp_CommandeLine extends ObjectLine
         }
 
         if ($this->field_exists('force_qty_1') && (int) $this->getData('force_qty_1')) {
+            if ($is_return) {
+                $max_value = $min;
+            } else {
+                $max_value = $max;
+            }
+            $html .= '<div class="line_qty_forced_to_1">';
             $html .= '<input type="hidden" name="' . $input_name . '" value="' . $value . '"';
             $html .= BimpRender::displayTagData($options['data']);
             if (isset($options['extra_class'])) {
                 $html .= ' class="' . $options['extra_class'] . '"';
             }
             $html .= '/>';
-            $html .= $value . '<br/>';
+
+            $html .= '<div class="qty_label"' . ((float) $value == 0 ? ' style="display: none"' : '') . '>';
+            $html .= $max_value . ' ';
             $msg = 'L\'option "Forcer les qtés à 1" est activée pour cette ligne de commande. Il n\'est donc pas possible de répartir les unités de cette ligne en plusieurs expéditions';
             $html .= '<span class="warning bs-popover"' . BimpRender::renderPopoverData($msg) . '>(Forcée à 1)</span>';
+            $html .= '</div>';
+            $include_input_name = 'line_' . $this->id . '_shipment_' . $id_shipment . '_include';
+            $html .= '<div>' . BimpInput::renderInput('toggle', $include_input_name, ((float) $value == 0 ? 0 : 1)) . '</div>';
+            $html .= '<script type="text/javascript">';
+            $html .= '$(\'[name="' . $include_input_name . '"]\').change(function() {';
+            $html .= 'var parent = $(this).findParentByClass(\'line_qty_forced_to_1\');';
+            $html .= 'if (parseInt($(this).val())){';
+            $html .= 'parent.find(\'.qty_label\').slideDown(250);';
+            $html .= 'parent.find(\'[name="' . $input_name . '"]\').val(' . $max_value . ');';
+            $html .= '} else {';
+            $html .= 'parent.find(\'.qty_label\').slideUp(250);';
+            $html .= 'parent.find(\'[name="' . $input_name . '"]\').val(0);';
+            $html .= '}});';
+            $html .= '</script>';
+            $html .= '</div>';
         } else {
             $html .= BimpInput::renderInput('qty', $input_name, $value, $options);
 
@@ -3001,7 +3024,7 @@ class Bimp_CommandeLine extends ObjectLine
 
                                         // Mise à jour de l'emplacement de l'équipement: 
                                         $equipment->moveToPlace(BE_Place::BE_PLACE_CLIENT, $id_client, $codemove, $stock_label, 1);
-                                        
+
 //                                        $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
 //                                        $place_errors = $place->validateArray(array(
 //                                            'id_equipment' => $id_equipment,
@@ -3012,7 +3035,6 @@ class Bimp_CommandeLine extends ObjectLine
 //                                            'date'         => date('Y-m-d H:i:s'),
 //                                            'code_mvt'     => $codemove
 //                                        ));
-
 //                                        if (!count($place_errors)) {
 //                                            $place_errors = $place->create();
 //                                        }

@@ -640,8 +640,8 @@ class BLPDF extends OrderPDF
                 }
                 $row = array(
 //                    'code_article' => (!is_null($product) ? $product->ref : ''),
-                    'desc'         => $desc,
-                    'pu_ht'        => pdf_getlineupexcltax($this->object, $i, $this->langs),
+                    'desc'  => $desc,
+                    'pu_ht' => pdf_getlineupexcltax($this->object, $i, $this->langs),
                 );
 
 
@@ -720,12 +720,14 @@ class BLPDF extends OrderPDF
 
                 if (BimpObject::objectLoaded($bimpLine)) {
                     if ((int) $bimpLine->getData('force_qty_1')) {
-                        if ((float) $row['qte'] > 1) {
+                        if ((float) $qty > 0) {
                             $row['pu_ht'] = price($pu_ht * $qty, 0, $this->langs);
                             $row['qte'] = 1;
-                        } elseif ((float) $row['qte'] < 1) {
+                        } elseif ((float) $qty < 0) {
                             $row['pu_ht'] = price($pu_ht * ($qty * -1), 0, $this->langs);
                             $row['qte'] = -1;
+                        } else {
+                            continue;
                         }
                         $row['dl'] = 0;
                         $row['ral'] = 0;
@@ -734,7 +736,7 @@ class BLPDF extends OrderPDF
             }
 
             $table->rows[] = $row;
-            
+
             unset($product);
             $product = null;
         }

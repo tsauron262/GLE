@@ -329,11 +329,16 @@ class BL_CommandeShipment extends BimpObject
 
             if ($this->isActionAllowed('createFacture') && $this->canSetAction('createFacture')) {
                 if (BimpObject::objectLoaded($commande)) {
+                    $cliFact = $commande->getClientFacture();
+                    if(!is_null($cliFact) && $cliFact->isLoaded())
+                        $idCliFact = $cliFact->id;
+                    else
+                        $idCliFact = $this->getIdClient();
                     $buttons[] = array(
                         'label'   => 'Créer une facture',
                         'icon'    => 'fas_file-medical',
                         'onclick' => $this->getJsActionOnclick('createFacture', array(
-                            'id_client'      => (int) $this->getIdClient(),
+                            'id_client' => (int) $idCliFact,
                             'id_contact'     => (int) $this->getcontact(),
                             'libelle'        => addslashes(htmlentities($commande->getData('libelle'))),
                             'cond_reglement' => (int) $commande->getData('fk_cond_reglement')

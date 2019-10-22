@@ -2002,10 +2002,9 @@ class BimpComm extends BimpDolObject
         return $html;
     }
 
-    public function renderLinkedObjectsTable()
+    public function renderLinkedObjectsTable($htmlP = "")
     {
-        $html = '';
-
+        $html = "";
         if ($this->isLoaded()) {
             $objects = array();
 
@@ -2105,25 +2104,27 @@ class BimpComm extends BimpDolObject
 
             if (count($objects)) {
                 foreach ($objects as $data) {
-                    $html .= '<tr>';
-                    $html .= '<td><strong>' . $data['type'] . '</strong></td>';
-                    $html .= '<td>' . $data['ref'] . '</td>';
-                    $html .= '<td>' . $data['date'] . '</td>';
-                    $html .= '<td>' . $data['total_ht'] . '</td>';
-                    $html .= '<td>' . $data['status'] . '</td>';
+                    $htmlP .= '<tr>';
+                    $htmlP .= '<td><strong>' . $data['type'] . '</strong></td>';
+                    $htmlP .= '<td>' . $data['ref'] . '</td>';
+                    $htmlP .= '<td>' . $data['date'] . '</td>';
+                    $htmlP .= '<td>' . $data['total_ht'] . '</td>';
+                    $htmlP .= '<td>' . $data['status'] . '</td>';
 //                    $html .= '<td style="text-align: right">';
 //                    
 //                    $html .= BimpRender::renderRowButton('Supprimer le lien', 'trash', '');
 //
 //                    $html .= '</td>';
-                    $html .= '</tr>';
+                    $htmlP .= '</tr>';
                 }
-            } else {
-                $html .= '<tr>';
-                $html .= '<td colspan="5">' . BimpRender::renderAlerts('Aucun objet lié', 'info') . '</td>';
-                $html .= '</tr>';
+            } 
+            if($htmlP == "") {
+                $htmlP .= '<tr>';
+                $htmlP .= '<td colspan="5">' . BimpRender::renderAlerts('Aucun objet lié', 'info') . '</td>';
+                $htmlP .= '</tr>';
             }
 
+            $html .= $htmlP;
             $html .= '</tbody>';
             $html .= '</table>';
 

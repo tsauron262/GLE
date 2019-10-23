@@ -43,7 +43,9 @@ while($ln = $db->fetch_object($sql)){
 
 
 //toute les lignes restant
-$sql = $db->query("SELECT p.* FROM `llx_product_extrafields` pe, llx_product p WHERE `categorie` IS NULL AND `nature` is null AND `collection` is null AND famille is null AND pe.fk_object = p.rowid AND validate = 1 AND tosell = 1 ORDER BY `p`.`rowid` DESC");
-echo $db->num_rows($sql)." probléme restant.<br/>";
+$sql = $db->query("SELECT p.* FROM `llx_product_extrafields` pe, llx_product p WHERE (`categorie` IS NULL && `nature` is null && `collection` is null && famille is null) AND pe.fk_object = p.rowid AND validate = 1 AND tosell = 1 ORDER BY `p`.`rowid` DESC");
+echo $db->num_rows($sql)." problémes restant en tout. (aucune infos)<br/>";
+$sql = $db->query("SELECT p.* FROM `llx_product_extrafields` pe, llx_product p WHERE (`categorie` IS NULL || `nature` is null || `collection` is null || famille is null) AND pe.fk_object = p.rowid AND validate = 1 AND tosell = 1 ORDER BY `p`.`rowid` DESC");
+echo $db->num_rows($sql)." problémes restant en tout. (manque 1 infos)<br/>";
 
 echo $ok." probléme resolu.";

@@ -427,6 +427,24 @@ fields:
         label: Pas de prix fixes
         type: bool 
         default_value: 0
+        
+    categorie:
+        label: Categorie
+        type: text
+        dol_extra_field: 1
+    collection:
+        label: Collection
+        type: text
+        dol_extra_field: 1
+    nature:
+        label: Nature
+        type: text
+        dol_extra_field: 1
+    famille:
+        label: Famille
+        type: text
+        dol_extra_field: 1
+        
 
 forms: 
     lightFourn:
@@ -560,6 +578,10 @@ forms:
             - field: surface_units
             - field: volume
             - field: volume_units
+            - field: categorie
+            - field: collection
+            - field: nature
+            - field: famille
         
 fields_tables: 
     infos: 
@@ -604,6 +626,10 @@ fields_tables:
         icon: plus
         edit: 1
         rows:
+            - field: categorie
+            - field: collection
+            - field: nature
+            - field: famille
             - field: url
             - field: stock
             - field: fk_country
@@ -836,6 +862,10 @@ filters_panels:
                   type: select
                   options: 
                       callback: getCategoriesArray
+            - field: categorie
+            - field: collection
+            - field: nature
+            - field: famille
       
 lists_cols: 
     ref: 
@@ -880,6 +910,14 @@ lists_cols:
         field: cur_pa_ht
     tosell:
         field: tosell
+    categorie:
+        field: categorie
+    collection:
+        field: collection
+    nature:
+        field: nature
+    famille:
+        field: famille
                 
 lists: 
     default: 

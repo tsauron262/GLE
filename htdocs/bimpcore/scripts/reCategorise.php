@@ -24,14 +24,13 @@ BimpCore::displayHeaderFiles();
 global $db;
 $bdb = new BimpDb($db);
 
-$idCatMereMarqueExt = 9564;
-$idCatMereMarqueExt = 9693;
+$idCatMereMarqueExt = array(9564, 9693);
 $ok = 0;
 //pas de collection mais une marque
-$sql = $db->query("SELECT fk_object FROM `llx_product_extrafields` WHERE `collection` is null AND fk_object IN (SELECT `fk_product` FROM `llx_categorie_product` WHERE `fk_categorie` IN(SELECT `rowid` FROM `llx_categorie` WHERE `fk_parent` = ".$idCatMereMarqueExt."))");
+$sql = $db->query("SELECT fk_object FROM `llx_product_extrafields` WHERE `collection` is null AND fk_object IN (SELECT `fk_product` FROM `llx_categorie_product` WHERE `fk_categorie` IN(SELECT `rowid` FROM `llx_categorie` WHERE `fk_parent` IN ( ".implode(",",$idCatMereMarqueExt).")))");
 while($ln = $db->fetch_object($sql)){
     $idProd = $ln->fk_object;
-    $sql2 = $db->query("SELECT c.label FROM `llx_categorie_product` cp, `llx_categorie` c WHERE `fk_parent` = ".$idCatMereMarqueExt." AND cp.`fk_categorie` = c.rowid AND `fk_product` = ".$idProd);
+    $sql2 = $db->query("SELECT c.label FROM `llx_categorie_product` cp, `llx_categorie` c WHERE `fk_parent` IN ( ".implode(",",$idCatMereMarqueExt).") AND cp.`fk_categorie` = c.rowid AND `fk_product` = ".$idProd);
     $ln2 = $db->fetch_object($sql2);
     $nomCat = $ln2->label;
     if($nomCat != "A catégoriser"){

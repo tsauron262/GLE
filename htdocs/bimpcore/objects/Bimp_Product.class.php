@@ -363,7 +363,7 @@ class Bimp_Product extends BimpObject
 
     public function isVendable(&$errors, $urgent = false, $mail = true)
     {
-        if ($this->dol_field_exists('validate')) {
+        if (BimpCore::getConf('use_valid_product') && $this->dol_field_exists('validate')) {
             if (!(int) $this->getData('validate')) {
                 $errors[] = 'Le produit "' . $this->getRef() . ' - ' . $this->getData('label') . '" n\'est pas validé';
                 if ($mail) {

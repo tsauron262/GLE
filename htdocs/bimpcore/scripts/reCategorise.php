@@ -49,3 +49,30 @@ $sql = $db->query("SELECT p.* FROM `llx_product_extrafields` pe, llx_product p W
 echo $db->num_rows($sql)." problémes restant en tout. (manque 1 infos)<br/>";
 
 echo $ok." probléme resolu.";
+
+
+
+foreach(array('collection', 'categorie', 'nature', 'famille') as $type){
+    $sql = $db->query('SELECT DISTINCT(`'.$type.'`) as label FROM `llx_product_extrafields` WHERE 1');
+    while($ln = $db->fetch_object($sql)){
+        $label = $ln->label;
+        if($label != '' && filter_var($label, FILTER_VALIDATE_INT) === false){
+            $sql2 = $db->query('SELECT * FROM `llx_bimp_c_values8sens` WHERE type="'.$type.'" AND label LIKE "'.$label.'"');
+            $idC = null;
+            while($ln2 = $db->fetch_object($sql2)){
+                $idC = $ln2->id;
+            }
+            if(is_null($idC)){
+                $db->query("INSERT INTO llx_bimp_c_values8sens( `label`, `type`) VALUES ('".addslashes($label)."', '".$type."')");
+                $idC = $db->last_insert_id('llx_bimp_c_values8sens');
+                echo "<br/>creation de ".$label." new id : ".$idC."<br/>";
+            }
+            
+            if(!is_null($idC)){
+                $db->query('UPDATE `llx_product_extrafields` SET '.$type.'='.$idC.' WHERE '.$type.' LIKE "'.$label.'"');
+            }
+        }
+    }
+}
+
+

@@ -2803,8 +2803,11 @@ class ObjectLine extends BimpObject
                 break;
 
             case 'desc':
-//                $html = BimpInput::renderInput('html', 'desc', (string) $value);
-                $html = BimpInput::renderInput('textarea', 'desc', (string) $value);
+                global $user;
+                if($user->rights->bimpcommercial->editHtml)
+                    $html = BimpInput::renderInput('html', 'desc', (string) $value);
+                else
+                    $html = BimpInput::renderInput('textarea', 'desc', (string) $value);
                 break;
 
             case 'qty':

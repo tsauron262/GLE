@@ -854,6 +854,7 @@ filters_panels:
             - field: barcode
             - field: serialisable
             - field: remisable
+            - field: validate
             - field: tosell
             - field: tobuy
             - field: no_fixe_prices

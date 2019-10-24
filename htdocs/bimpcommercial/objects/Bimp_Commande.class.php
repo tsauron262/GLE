@@ -122,19 +122,22 @@ class Bimp_Commande extends BimpComm
     public function renderExtraFile(){
         $html = parent::renderExtraFile();
         
-        $sql = $this->db->db->query("SELECT rowid FROM `llx_synopsisdemandeinterv` WHERE `fk_commande` = ".$this->id);
-        while ($ln = $this->db->db->fetch_object($sql)){
-            $objT = BimpCache::getBimpObjectInstance("bimpfichinter", 'Bimp_Demandinter', $ln->rowid);
-            if($objT->isLoaded()){
-                $html .= $this->renderListFileForObject($objT);
-            }
-        }
         
-        $sql = $this->db->db->query("SELECT rowid FROM `llx_synopsis_fichinter` WHERE `fk_commande` = ".$this->id);
-        while ($ln = $this->db->db->fetch_object($sql)){
-            $objT = BimpCache::getBimpObjectInstance("bimpfichinter", 'Bimp_Fichinter', $ln->rowid);
-            if($objT->isLoaded()){
-                $html .= $this->renderListFileForObject($objT);
+        if ($this->isLoaded()) {
+            $sql = $this->db->db->query("SELECT rowid FROM `llx_synopsisdemandeinterv` WHERE `fk_commande` = ".$this->id);
+            while ($ln = $this->db->db->fetch_object($sql)){
+                $objT = BimpCache::getBimpObjectInstance("bimpfichinter", 'Bimp_Demandinter', $ln->rowid);
+                if($objT->isLoaded()){
+                    $html .= $this->renderListFileForObject($objT);
+                }
+            }
+
+            $sql = $this->db->db->query("SELECT rowid FROM `llx_synopsis_fichinter` WHERE `fk_commande` = ".$this->id);
+            while ($ln = $this->db->db->fetch_object($sql)){
+                $objT = BimpCache::getBimpObjectInstance("bimpfichinter", 'Bimp_Fichinter', $ln->rowid);
+                if($objT->isLoaded()){
+                    $html .= $this->renderListFileForObject($objT);
+                }
             }
         }
         

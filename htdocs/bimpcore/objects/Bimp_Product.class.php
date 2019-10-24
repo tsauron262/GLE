@@ -144,7 +144,7 @@ class Bimp_Product extends BimpObject
     
     public function getValues8sens($type){
         $return = array();
-        $sql = $this->db->db->query("SELECT * FROM ".MAIN_DB_PREFIX."bimp_c_values8sens WHERE type ='".$type."'");
+        $sql = $this->db->db->query("SELECT * FROM ".MAIN_DB_PREFIX."bimp_c_values8sens WHERE type ='".$type."'ORDER BY label ASC");
         while($ln = $this->db->db->fetch_object($sql)){
             $return[$ln->id] = $ln->label;
         }
@@ -384,7 +384,24 @@ class Bimp_Product extends BimpObject
                 }
                 return 0;
             }
+        
+            //provioir pour categorie
+            $null = array(); 
+            foreach(array('categorie','collection','nature','famille') as $type){
+                if(is_null($this->getData($type)) || $this->getData($type) == "" || $this->getData($type) === 0){
+                    $null[] = $type;
+                }
+            }
+            if(count($null) > 1){
+                mailSyn2("Prod non catagorisé", "tommy@bimp.fr, a.delauzun@bimp.fr", "admin@bimp.fr", "Bonjour le produit ".$this->getNomUrl(1)." n'est pas categorisé comme il faud, il manque :  ".implode(", ", $null));
+            }
         }
+
+        
+        
+        
+        
+        
         return 1;
     }
     public function isAchetable(&$errors, $urgent = false, $mail = true)

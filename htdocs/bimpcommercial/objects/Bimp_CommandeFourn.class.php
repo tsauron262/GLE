@@ -828,20 +828,7 @@ class Bimp_CommandeFourn extends BimpComm
         return static::$types_entrepot;
     }
 
-    // Getters données: 
 
-    public function getIdContactLivraison()
-    {
-        if ($this->isLoaded()) {
-            $contacts = $this->dol_object->getIdContact('external', 'SHIPPING');
-
-            if (isset($contacts[0])) {
-                return (int) $contacts[0];
-            }
-        }
-
-        return 0;
-    }
 
     // Rendus HTML - overrides BimpObject:
 
@@ -1207,6 +1194,17 @@ class Bimp_CommandeFourn extends BimpComm
         $success = BimpTools::ucfirst($this->getLabel()) . ' approuvé' . ($this->isLabelFemale() ? 'e' : '') . ' avec succès';
 
         global $user, $conf, $langs;
+        
+        
+        
+        $lines = $this->getLines('not_text');
+        foreach ($lines as $line) {
+            $prod = $line->getChildObject('product');
+            if($prod->isLoaded())
+                if(!$prod->isAchetable($errors,false,false))
+                     return array('errors' => $errors);
+            
+        }
 
         $result = $this->dol_object->approve($user, (int) $this->getData('entrepot'), 0);
         if ($result > 0) {
@@ -1217,6 +1215,10 @@ class Bimp_CommandeFourn extends BimpComm
         } else {
             $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object, null, null, $warnings), 'Des erreurs sont survenues lors de l\'approbation ' . $this->getLabel('of_this'));
         }
+        
+        
+        
+        
         return array(
             'errors'           => $errors,
             'warnings'         => $warnings,
@@ -1817,6 +1819,11 @@ class Bimp_CommandeFourn extends BimpComm
                             } else {
                                 $errors = $this->updateField('status_forced', $status_forced);
                             }
+                            if($data['invoice_status'] == 2){
+                                $this->updateField("billed", 1);
+                            }
+                            else
+                                $this->updateField("billed", 0);
                         }
                     }
                     break;
@@ -1841,7 +1848,7 @@ class Bimp_CommandeFourn extends BimpComm
         if (isset($data['type']) && (int) $data['type'] === 1) {
             if (isset($data['tiers_type_contact']) && (int) $data['tiers_type_contact'] &&
                     BimpTools::getTypeContactCodeById((int) $data['tiers_type_contact']) === 'SHIPPING') {
-                if ((int) $this->getIdContactLivraison()) {
+                if ((int) $this->getIdContact()) {
                     $errors[] = 'Un contact livraison a déjà été ajouté';
                 }
             }
@@ -1877,7 +1884,7 @@ class Bimp_CommandeFourn extends BimpComm
                     break;
 
                 case self::DELIV_DIRECT:
-                    if (!(int) $this->getIdContactLivraison()) {
+                    if (!(int) $this->getIdContact()) {
                         $this->msgs['warnings'][] = 'Veullez ajouter un contact livraison';
                     }
                     break;

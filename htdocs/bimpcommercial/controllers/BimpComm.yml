@@ -75,7 +75,13 @@ sections:
                                               name: default
                                               panel: 1
                                               object: bimp_comm
-                                              children: files
+                                              children: files                                  
+                                    - cols: 
+                                        - type: custom
+                                          custom:
+                                            callback: 
+                                              method: renderExtraFile
+                                              object: bimp_comm
                                               
                     - type: custom
                       custom: 

@@ -112,10 +112,210 @@ class Bimp_Commande extends BimpComm
                 return 0;
 
             case 'linesFactureQties':
-                $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
-                return (int) $facture->can('create');
+//                $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
+//                return (int) $facture->can('create');
+                return $user->rights->bimpcommercial->factureAnticipe;
         }
         return parent::canSetAction($action);
+    }
+    
+    public function renderExtraFile(){
+        $html = parent::renderExtraFile();
+        
+        $sql = $this->db->db->query("SELECT rowid FROM `llx_synopsisdemandeinterv` WHERE `fk_commande` = ".$this->id);
+        while ($ln = $this->db->db->fetch_object($sql)){
+            $objT = BimpCache::getBimpObjectInstance("bimpfichinter", 'Bimp_Demandinter', $ln->rowid);
+            if($objT->isLoaded()){
+                $html .= $this->renderListFileForObject($objT);
+            }
+        }
+        
+        $sql = $this->db->db->query("SELECT rowid FROM `llx_synopsis_fichinter` WHERE `fk_commande` = ".$this->id);
+        while ($ln = $this->db->db->fetch_object($sql)){
+            $objT = BimpCache::getBimpObjectInstance("bimpfichinter", 'Bimp_Fichinter', $ln->rowid);
+            if($objT->isLoaded()){
+                $html .= $this->renderListFileForObject($objT);
+            }
+        }
+        
+        
+        return $html;
+    }
+    
+    
+    public function renderLinkedObjectsTable()
+    {
+        $htmlP = "";
+        $db = $this->db->db;
+        
+        
+        $sql = $db->query("SELECT rowid FROM `llx_synopsisdemandeinterv` WHERE `fk_commande` = ".$this->id);
+        while ($ln = $db->fetch_object($sql)){
+            $inter = BimpCache::getBimpObjectInstance("bimpfichinter", 'Bimp_Demandinter', $ln->rowid);
+            $icon = $inter->params['icon'];
+            $htmlP .= '<tr>';
+            $htmlP .= '<td><strong>'.BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($inter->getLabel()).'</strong></td>';
+            $htmlP .= '<td>' . $inter->getNomUrl(0) . '</td>';
+            $htmlP .= '<td>' . $inter->displayData("date_valid"). '</td>';
+            $htmlP .= '<td>' . $inter->displayData("total_ht") . '</td>';
+            $htmlP .= '<td>' . $inter->displayData("fk_statut") . '</td>';
+            $htmlP .= '</tr>';
+        }
+        
+        $sql = $db->query("SELECT rowid FROM `llx_synopsis_fichinter` WHERE `fk_commande` = ".$this->id);
+        while ($ln = $db->fetch_object($sql)){
+            $inter = BimpCache::getBimpObjectInstance("bimpfichinter", 'Bimp_Fichinter', $ln->rowid);
+            $icon = $inter->params['icon'];
+            $htmlP .= '<tr>';
+            $htmlP .= '<td><strong>'.BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($inter->getLabel()).'</strong></td>';
+            $htmlP .= '<td>' . $inter->getNomUrl(0) . '</td>';
+            $htmlP .= '<td>' . $inter->displayData("date_valid"). '</td>';
+            $htmlP .= '<td>' . $inter->displayData("total_ht") . '</td>';
+            $htmlP .= '<td>' . $inter->displayData("fk_statut") . '</td>';
+            $htmlP .= '</tr>';
+        }
+        
+        $html = parent::renderLinkedObjectsTable($htmlP);
+
+//        if ($this->isLoaded()) {
+//            $objects = array();
+//
+//            if ($this->isDolObject()) {
+//                $propal_instance = null;
+//                $facture_instance = null;
+//                $commande_instance = null;
+//                $commande_fourn_instance = null;
+//                foreach (BimpTools::getDolObjectLinkedObjectsList($this->dol_object, $this->db) as $item) {
+//                    switch ($item['type']) {
+//                        case 'propal':
+//                            $propal_instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', (int) $item['id_object']);
+//                            if ($propal_instance->isLoaded()) {
+//                                $icon = $propal_instance->params['icon'];
+//                                $objects[] = array(
+//                                    'type'     => BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($propal_instance->getLabel()),
+//                                    'ref'      => $propal_instance->getNomUrl(0, true, true, 'full'),
+//                                    'date'     => $propal_instance->displayData('datep'),
+//                                    'total_ht' => $propal_instance->displayData('total_ht'),
+//                                    'status'   => $propal_instance->displayData('fk_statut')
+//                                );
+//                            }
+//                            break;
+//
+//                        case 'facture':
+//                            $facture_instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $item['id_object']);
+//                            if ($facture_instance->isLoaded()) {
+//                                $icon = $facture_instance->params['icon'];
+//                                $objects[] = array(
+//                                    'type'     => BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($facture_instance->getLabel()),
+//                                    'ref'      => $facture_instance->getNomUrl(0, true, true, 'full'),
+//                                    'date'     => $facture_instance->displayData('datef'),
+//                                    'total_ht' => $facture_instance->displayData('total'),
+//                                    'status'   => $facture_instance->displayData('fk_statut')
+//                                );
+//                            }
+//                            break;
+//
+//                        case 'commande':
+//                            $commande_instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $item['id_object']);
+//                            if ($commande_instance->isLoaded()) {
+//                                $icon = $commande_instance->params['icon'];
+//                                $objects[] = array(
+//                                    'type'     => BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($commande_instance->getLabel()),
+//                                    'ref'      => $commande_instance->getNomUrl(0, true, true, 'full'),
+//                                    'date'     => $commande_instance->displayData('date_commande'),
+//                                    'total_ht' => $commande_instance->displayData('total_ht'),
+//                                    'status'   => $commande_instance->displayData('fk_statut')
+//                                );
+//                            }
+//                            break;
+//
+//                        case 'order_supplier':
+//                            $commande_fourn_instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn', (int) $item['id_object']);
+//                            if ($commande_fourn_instance->isLoaded()) {
+//                                $icon = $commande_fourn_instance->params['icon'];
+//                                $objects[] = array(
+//                                    'type'     => BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($commande_fourn_instance->getLabel()),
+//                                    'ref'      => $commande_fourn_instance->getNomUrl(0, true, true, 'full'),
+//                                    'date'     => $commande_fourn_instance->displayData('date_commande'),
+//                                    'total_ht' => $commande_fourn_instance->displayData('total_ht'),
+//                                    'status'   => $commande_fourn_instance->displayData('fk_statut')
+//                                );
+//                            }
+//                            break;
+//
+//                        case 'invoice_supplier':
+//                            $facture_fourn_instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureFourn', (int) $item['id_object']);
+//                            if (BimpObject::objectLoaded($facture_fourn_instance)) {
+//                                $icon = $facture_fourn_instance->params['icon'];
+//                                $objects[] = array(
+//                                    'type'     => BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($facture_fourn_instance->getLabel()),
+//                                    'ref'      => $facture_fourn_instance->getNomUrl(0, true, true, 'full'),
+//                                    'date'     => $facture_fourn_instance->displayData('datef'),
+//                                    'total_ht' => $facture_fourn_instance->displayData('total_ht'),
+//                                    'status'   => $facture_fourn_instance->displayData('fk_statut')
+//                                );
+//                            }
+//                            break;
+//                    }
+//                }
+//            }
+//
+//            $html .= '<table class="bimp_list_table">';
+//            $html .= '<thead>';
+//            $html .= '<tr>';
+//            $html .= '<th>Type</th>';
+//            $html .= '<th>Réf.</th>';
+//            $html .= '<th>Date</th>';
+//            $html .= '<th>Montant HT</th>';
+//            $html .= '<th>Statut</th>';
+////            $html .= '<th></th>';
+//            $html .= '</tr>';
+//            $html .= '</thead>';
+//
+//            $html .= '<tbody>';
+//
+//            if (count($objects)) {
+//                foreach ($objects as $data) {
+//                    $html .= '<tr>';
+//                    $html .= '<td><strong>' . $data['type'] . '</strong></td>';
+//                    $html .= '<td>' . $data['ref'] . '</td>';
+//                    $html .= '<td>' . $data['date'] . '</td>';
+//                    $html .= '<td>' . $data['total_ht'] . '</td>';
+//                    $html .= '<td>' . $data['status'] . '</td>';
+////                    $html .= '<td style="text-align: right">';
+////                    
+////                    $html .= BimpRender::renderRowButton('Supprimer le lien', 'trash', '');
+////
+////                    $html .= '</td>';
+//                    $html .= '</tr>';
+//                }
+//            } else {
+//                $html .= '<tr>';
+//                $html .= '<td colspan="5">' . BimpRender::renderAlerts('Aucun objet lié', 'info') . '</td>';
+//                $html .= '</tr>';
+//            }
+//
+//            $html .= '</tbody>';
+//            $html .= '</table>';
+//
+//            $htmlF = BimpRender::renderPanel('Objets liés', $html, '', array(
+//                        'foldable' => true,
+//                        'type'     => 'secondary-forced',
+//                        'icon'     => 'fas_link',
+////                        'header_buttons' => array(
+////                            array(
+////                                'label'       => 'Lier à...',
+////                                'icon_before' => 'plus-circle',
+////                                'classes'     => array('btn', 'btn-default'),
+////                                'attr'        => array(
+////                                    'onclick' => ''
+////                                )
+////                            )
+////                        )
+//            ));
+//        }
+
+        return $html;
     }
 
     public function isActionAllowed($action, &$errors = array())
@@ -650,18 +850,6 @@ class Bimp_Commande extends BimpComm
         }
 
         return self::getSocieteContactsArray($id_client_facture);
-    }
-
-    public function getIdContactLivraison()
-    {
-        if ($this->isLoaded()) {
-            $contacts = $this->dol_object->getIdContact('external', 'SHIPPING');
-            if (isset($contacts[0]) && $contacts[0]) {
-                return (int) $contacts[0];
-            }
-        }
-
-        return 0;
     }
 
     // Rendus HTML: 
@@ -1877,7 +2065,7 @@ class Bimp_Commande extends BimpComm
                         $fac_line->desc = $line->desc;
                         $fac_line_warnings = array();
 
-                        $fac_line_errors = $fac_line->create($fac_line_warnings);
+                        $fac_line_errors = $fac_line->create($fac_line_warnings, true);
 
                         $fac_line_errors = array_merge($fac_line_errors, $fac_line_warnings);
 

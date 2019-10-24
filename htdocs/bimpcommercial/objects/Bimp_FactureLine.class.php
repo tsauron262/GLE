@@ -16,7 +16,7 @@ class Bimp_FactureLine extends ObjectLine
     public function canCreate()
     {
         global $user;
-        if ($user->rights->facture->paiement) {
+        if (/*$user->rights->facture->paiement*/$user->rights->bimpcommercial->factureAnticipe) {
             return 1;
         }
 

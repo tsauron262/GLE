@@ -133,7 +133,7 @@ class OrderFournPDF extends BimpDocumentPDF
                     break;
 
                 case Bimp_CommandeFourn::DELIV_DIRECT:
-                    $id_contact = (int) $this->bimpCommObject->getIdContactLivraison();
+                    $id_contact = (int) $this->bimpCommObject->getIdContact();
                     if ($id_contact) {
                         $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $id_contact);
                         if (BimpObject::objectLoaded($contact)) {

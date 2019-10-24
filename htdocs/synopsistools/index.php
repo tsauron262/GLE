@@ -1,4 +1,5 @@
 <?php
+echo "av fus";
 
 /*
  * * BIMP-ERP by Synopsis et DRSI

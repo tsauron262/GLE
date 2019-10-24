@@ -109,7 +109,7 @@ class InvoicePDF extends BimpDocumentPDF
                     }
                 } elseif (!empty($this->commandes)) {
                     foreach ($this->commandes as $commande) {
-                        $id_contact = (int) $commande->getIdContactLivraison();
+                        $id_contact = (int) $commande->getIdContact();
                         if ($id_contact) {
                             $id_client = (int) BimpCache::getBdb()->getValue('socpeople', 'fk_soc', '`rowid` = ' . (int) $id_contact);
                         } else {
@@ -346,7 +346,7 @@ class InvoicePDF extends BimpDocumentPDF
                             $contact = null;
                         }
 
-                        $html .= pdf_build_address($this->langs, $this->fromCompany, $client->dol_object, $contact->dol_object, !is_null($contact) ? 1 : 0, 'target');
+                        $html .= str_replace("\n", "<br/>", pdf_build_address($this->langs, $this->fromCompany, $client->dol_object, $contact->dol_object, !is_null($contact) ? 1 : 0, 'target'));
                         break 2;
                     }
                 }

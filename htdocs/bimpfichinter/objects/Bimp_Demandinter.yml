@@ -18,7 +18,18 @@ labels:
     
    
      
-objects:  
+objects: 
+    files:
+        relation: hasMany
+        delete: 1
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: BimpFile
+        list: 
+            filters:
+                parent_module: bimpfichinter
+                parent_object_name: Bimp_Demandinter 
     lines: 
         relation: hasMany
         delete: 1

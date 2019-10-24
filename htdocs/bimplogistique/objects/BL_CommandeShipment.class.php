@@ -329,11 +329,16 @@ class BL_CommandeShipment extends BimpObject
 
             if ($this->isActionAllowed('createFacture') && $this->canSetAction('createFacture')) {
                 if (BimpObject::objectLoaded($commande)) {
+                    $cliFact = $commande->getClientFacture();
+                    if(!is_null($cliFact) && $cliFact->isLoaded())
+                        $idCliFact = $cliFact->id;
+                    else
+                        $idCliFact = $this->getIdClient();
                     $buttons[] = array(
                         'label'   => 'Créer une facture',
                         'icon'    => 'fas_file-medical',
                         'onclick' => $this->getJsActionOnclick('createFacture', array(
-                            'id_client'      => (int) $this->getIdClient(),
+                            'id_client' => (int) $idCliFact,
                             'id_contact'     => (int) $this->getcontact(),
                             'libelle'        => addslashes(htmlentities($commande->getData('libelle'))),
                             'cond_reglement' => (int) $commande->getData('fk_cond_reglement')
@@ -905,10 +910,30 @@ class BL_CommandeShipment extends BimpObject
                     $html .= '<td>' . $line->displayLineData('desc') . '</td>';
                     $html .= '<td>';
                     if ($line->field_exists('force_qty_1') && (int) $line->getData('force_qty_1')) {
-                        $html .= '<input type="hidden" name="line_' . $line->id . '_qty" value="' . $val . '"/>';
-                        $html .= $val . '<br/>';
+                        $input_name = 'line_' . $line->id . '_qty';
+                        $html .= '<div class="line_qty_forced_to_1">';
+                        $html .= '<input type="hidden" name="' . $input_name . '" value="' . $val . '"/>';
+
+                        $html .= '<div class="qty_label">';
+                        $html .= $val . ' ';
                         $msg = 'L\'option "Forcer les qtés à 1" est activée pour cette ligne de commande. Il n\'est donc pas possible de répartir les unités de cette ligne en plusieurs expéditions';
                         $html .= '<span class="warning bs-popover"' . BimpRender::renderPopoverData($msg) . '>(Forcée à 1)</span>';
+                        $html .= '</div>';
+
+                        $include_input_name = 'line_' . $this->id . '_include';
+                        $html .= '<div>' . BimpInput::renderInput('toggle', $include_input_name, 1) . '</div>';
+                        $html .= '<script type="text/javascript">';
+                        $html .= '$(\'[name="' . $include_input_name . '"]\').change(function() {';
+                        $html .= 'var parent = $(this).findParentByClass(\'line_qty_forced_to_1\');';
+                        $html .= 'if (parseInt($(this).val())){';
+                        $html .= 'parent.find(\'.qty_label\').slideDown(250);';
+                        $html .= 'parent.find(\'[name="' . $input_name . '"]\').val(' . $val . ');';
+                        $html .= '} else {';
+                        $html .= 'parent.find(\'.qty_label\').slideUp(250);';
+                        $html .= 'parent.find(\'[name="' . $input_name . '"]\').val(0);';
+                        $html .= '}});';
+                        $html .= '</script>';
+                        $html .= '</div>';
                     } else {
                         $html .= BimpInput::renderInput('qty', 'line_' . $line->id . '_qty', $val, array(
                                     'data'      => array(
@@ -1058,10 +1083,38 @@ class BL_CommandeShipment extends BimpObject
                             );
 
                             if ($line->field_exists('force_qty_1') && (int) $line->getData('force_qty_1')) {
-                                $html .= '<input type="hidden" name="line_' . $line->id . '_qty" value="' . (float) $shipment_data['qty'] . '"/>';
-                                $html .= $shipment_data['qty'] . '<br/>';
+                                $input_name = 'line_' . $line->id . '_qty';
+                                $value = (float) $shipment_data['qty'];
+                                
+                                $html .= '<div class="line_qty_forced_to_1">';
+                                $html .= '<input type="hidden" name="' . $input_name . '" value="' . $value . '"/>';
+
+                                if ((float) $shipment_data['qty'] >= 0) {
+                                    $max_value = $max;
+                                } else {
+                                    $max_value = $min;
+                                }
+
+                                $html .= '<div class="qty_label"' . ((float) $value == 0 ? ' style="display: none"' : '') . '>';
+                                $html .= $max_value . ' ';
                                 $msg = 'L\'option "Forcer les qtés à 1" est activée pour cette ligne de commande. Il n\'est donc pas possible de répartir les unités de cette ligne en plusieurs expéditions';
                                 $html .= '<span class="warning bs-popover"' . BimpRender::renderPopoverData($msg) . '>(Forcée à 1)</span>';
+                                $html .= '</div>';
+                                
+                                $include_input_name = 'line_' . $this->id . '_include';
+                                $html .= '<div>' . BimpInput::renderInput('toggle', $include_input_name, ((float) $value == 0 ? 0 : 1)) . '</div>';
+                                $html .= '<script type="text/javascript">';
+                                $html .= '$(\'[name="' . $include_input_name . '"]\').change(function() {';
+                                $html .= 'var parent = $(this).findParentByClass(\'line_qty_forced_to_1\');';
+                                $html .= 'if (parseInt($(this).val())){';
+                                $html .= 'parent.find(\'.qty_label\').slideDown(250);';
+                                $html .= 'parent.find(\'[name="' . $input_name . '"]\').val(' . $max_value . ');';
+                                $html .= '} else {';
+                                $html .= 'parent.find(\'.qty_label\').slideUp(250);';
+                                $html .= 'parent.find(\'[name="' . $input_name . '"]\').val(0);';
+                                $html .= '}});';
+                                $html .= '</script>';
+                                $html .= '</div>';
                             } else {
                                 $html .= BimpInput::renderInput('qty', 'line_' . $line->id . '_qty', (float) $shipment_data['qty'], $options);
                             }

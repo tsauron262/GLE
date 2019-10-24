@@ -430,20 +430,40 @@ fields:
         
     categorie:
         label: Categorie
-        type: text
         dol_extra_field: 1
+        type: int
+        values:
+            callback: 
+                method: getValues8sens
+                params:
+                    - categorie
     collection:
         label: Collection
-        type: text
         dol_extra_field: 1
+        type: int
+        values:
+            callback: 
+                method: getValues8sens
+                params:
+                    - collection
     nature:
         label: Nature
-        type: text
         dol_extra_field: 1
+        type: int
+        values:
+            callback: 
+                method: getValues8sens
+                params:
+                    - nature
     famille:
         label: Famille
-        type: text
         dol_extra_field: 1
+        type: int
+        values:
+            callback: 
+                method: getValues8sens
+                params:
+                    - famille
         
 
 forms: 

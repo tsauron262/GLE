@@ -141,6 +141,16 @@ class Bimp_Product extends BimpObject
 
         return parent::canSetAction($action);
     }
+    
+    public function getValues8sens($type){
+        $return = array();
+        $sql = $this->db->db->query("SELECT * FROM ".MAIN_DB_PREFIX."bimp_c_values8sens WHERE type ='".$type."'");
+        while($ln = $this->db->db->fetch_object($sql)){
+            $return[$ln->id] = $ln->label;
+        }
+        
+        return $return;
+    }
 
     public function canValidate()
     {

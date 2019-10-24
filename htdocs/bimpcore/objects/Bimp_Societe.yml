@@ -18,23 +18,22 @@ fields:
         required: 1
     name_alias: 
         label: Nom alternatif
-# TODO à décommenter quand le module sera initialiser
-#    is_subsidiary:
-#        label: Filliale du groupe
-#        type: bool
-#        dol_extra_field: 1
-#    accounting_account:
-#        label: Compte comptable client de la filliale
-#        type: int
-#        dol_extra_field: 1
-#    is_salarie:
-#        label: Client salarié
-#        type: bool
-#        dol_extra_field: 1
-#    accounting_account_fournisseur:
-#        label: Compte comptable fournisseur de la filliale
-#        type: int
-#        dol_extra_field: 1       
+    is_subsidiary:
+        label: Filliale du groupe
+        type: bool
+        dol_extra_field: 1
+    accounting_account:
+        label: Compte comptable client de la filliale
+        type: int
+        dol_extra_field: 1
+    is_salarie:
+        label: Client salarié
+        type: bool
+        dol_extra_field: 1
+    accounting_account_fournisseur:
+        label: Compte comptable fournisseur de la filliale
+        type: int
+        dol_extra_field: 1       
     status:
         label: Etat
         type: int

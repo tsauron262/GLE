@@ -35,8 +35,6 @@ class BTC_export extends BimpObject {
         } else {
             echo BimpRender::renderAlerts("L'origine <b>".$origin."</b> n'existe pas", 'danger', false);
         }
-        
-        
     }
     
     /**
@@ -54,8 +52,7 @@ class BTC_export extends BimpObject {
         ];
         if(is_null($element)){
             foreach($daily_files as $element => $file) {
-                if(!file_exists($this->export_directory . $file)) {
-                    
+                if(!file_exists($this->export_directory . "BIMPtoCEGID/" . $file)) {
                     if(!file_exists($this->export_directory . "BIMPtoCEGID/")){
                         mkdir($this->export_directory . "BIMPtoCEGID/", 0777, true);
                         mkdir($this->export_directory . "exported/", 0777, true);

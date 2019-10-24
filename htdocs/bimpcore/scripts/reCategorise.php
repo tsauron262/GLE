@@ -36,7 +36,7 @@ while($ln = $db->fetch_object($sql)){
     if($nomCat != "A catégoriser"){
         $ok++;
         echo 'prod '.$idProd.' ajout Collection '.$nomCat."<br/><br/>";
-       // $db->query('UPDATE llx_product_extrafields SET collection ="'.$nomCat.'" WHERE fk_object = '.$idProd);
+        $db->query('UPDATE llx_product_extrafields SET collection ="'.$nomCat.'" WHERE fk_object = '.$idProd);
     }
 }
 
@@ -74,5 +74,9 @@ foreach(array('collection', 'categorie', 'nature', 'famille') as $type){
         }
     }
 }
+
+
+
+
 
 

@@ -141,6 +141,16 @@ class Bimp_Product extends BimpObject
 
         return parent::canSetAction($action);
     }
+    
+    public function getValues8sens($type){
+        $return = array();
+        $sql = $this->db->db->query("SELECT * FROM ".MAIN_DB_PREFIX."bimp_c_values8sens WHERE type ='".$type."'");
+        while($ln = $this->db->db->fetch_object($sql)){
+            $return[$ln->id] = $ln->label;
+        }
+        
+        return $return;
+    }
 
     public function canValidate()
     {
@@ -363,7 +373,7 @@ class Bimp_Product extends BimpObject
 
     public function isVendable(&$errors, $urgent = false, $mail = true)
     {
-        if ($this->dol_field_exists('validate')) {
+        if (BimpCore::getConf('use_valid_product') && $this->dol_field_exists('validate')) {
             if (!(int) $this->getData('validate')) {
                 $errors[] = 'Le produit "' . $this->getRef() . ' - ' . $this->getData('label') . '" n\'est pas validé';
                 if ($mail) {

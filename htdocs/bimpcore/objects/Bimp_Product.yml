@@ -427,6 +427,44 @@ fields:
         label: Pas de prix fixes
         type: bool 
         default_value: 0
+        
+    categorie:
+        label: Categorie
+        dol_extra_field: 1
+        type: int
+        values:
+            callback: 
+                method: getValues8sens
+                params:
+                    - categorie
+    collection:
+        label: Collection
+        dol_extra_field: 1
+        type: int
+        values:
+            callback: 
+                method: getValues8sens
+                params:
+                    - collection
+    nature:
+        label: Nature
+        dol_extra_field: 1
+        type: int
+        values:
+            callback: 
+                method: getValues8sens
+                params:
+                    - nature
+    famille:
+        label: Famille
+        dol_extra_field: 1
+        type: int
+        values:
+            callback: 
+                method: getValues8sens
+                params:
+                    - famille
+        
 
 forms: 
     lightFourn:
@@ -560,6 +598,10 @@ forms:
             - field: surface_units
             - field: volume
             - field: volume_units
+            - field: categorie
+            - field: collection
+            - field: nature
+            - field: famille
         
 fields_tables: 
     infos: 
@@ -604,6 +646,10 @@ fields_tables:
         icon: plus
         edit: 1
         rows:
+            - field: categorie
+            - field: collection
+            - field: nature
+            - field: famille
             - field: url
             - field: stock
             - field: fk_country
@@ -836,6 +882,10 @@ filters_panels:
                   type: select
                   options: 
                       callback: getCategoriesArray
+            - field: categorie
+            - field: collection
+            - field: nature
+            - field: famille
       
 lists_cols: 
     ref: 
@@ -880,6 +930,14 @@ lists_cols:
         field: cur_pa_ht
     tosell:
         field: tosell
+    categorie:
+        field: categorie
+    collection:
+        field: collection
+    nature:
+        field: nature
+    famille:
+        field: famille
                 
 lists: 
     default: 

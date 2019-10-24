@@ -116,13 +116,13 @@ class BContract_contrat extends BimpDolObject {
                     $id = BimpTools::getValue('propal_client');
                     break;
                 case 'commande':
-                    $id = BimpTools::getValue('propal_client');
+                    $id = BimpTools::getValue('commande_client');
                     break;
-                case 'propal':
-                    $id = BimpTools::getValue('propal_client');
+                case 'facture_fourn':
+                    $id = BimpTools::getValue('facture_fourn_client');
                     break;
             }
-            if($id === 0) {
+            if($id == 0) {
                 return "Il n'y à pas de pièce " . self::$true_objects_for_link[BimpTools::getValue('type_piece')] . ' pour ce client';
             } else {
                 if(getElementElement(BimpTools::getValue('type_piece'), 'contrat', $id, $this->id)) {
@@ -140,10 +140,12 @@ class BContract_contrat extends BimpDolObject {
         
         $list = $this->db->getRows($object, 'fk_soc = ' . $this->getData('fk_soc'));
         $return = [];
-        foreach($list as $l) {
-            $return[$l->rowid] = $l->ref;
-        }
         
+        foreach($list as $l) {
+            $instance = $this->getInstance('bimpcommercial', 'Bimp_' . ucfirst($object), $l->rowid);
+            $return[$instance->id] = $instance->getData('ref') . " - " . $instance->getData('libelle');
+        }
+        //print_r($return);
         return $return;
         
     }

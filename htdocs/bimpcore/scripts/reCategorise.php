@@ -52,7 +52,7 @@ echo $ok." probléme resolu.";
 
 
 
-foreach(array('collection', 'categorie', 'nature', 'famille') as $type){
+foreach(array('collection', 'categorie', 'nature', 'famille', 'gamme') as $type){
     $sql = $db->query('SELECT DISTINCT(`'.$type.'`) as label FROM `llx_product_extrafields` WHERE 1');
     while($ln = $db->fetch_object($sql)){
         $label = $ln->label;

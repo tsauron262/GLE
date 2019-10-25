@@ -1,7 +1,7 @@
 <?php
 BimpTools::loadDolClass('compta/facture', 'facture');
 
-require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/objects/BimpComm.class.php';
+//require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/objects/BimpComm.class.php';
 class Bimp_Paiement extends BimpObject
 {
 

@@ -1,5 +1,6 @@
 <?php
 
+require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/objects/BimpComm.class.php';
 class Bimp_Paiement extends BimpComm
 {
 

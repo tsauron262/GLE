@@ -1,8 +1,6 @@
 <?php
 
-BimpTools::loadDolClass('compta/facture', 'facture');
-
-class Bimp_Paiement extends BimpObject
+class Bimp_Paiement extends BimpComm
 {
 
     public $useCaisse = false;
@@ -10,13 +8,30 @@ class Bimp_Paiement extends BimpObject
     public static $paiement_factures_types = array(Facture::TYPE_STANDARD, Facture::TYPE_DEPOSIT, Facture::TYPE_REPLACEMENT, Facture::TYPE_SITUATION);
     public static $rbt_factures_type = array(Facture::TYPE_CREDIT_NOTE);
 
+    const STATUS_COMMENCER = 1;
+
+    public static $status_list = [
+        self::STATUS_COMMENCER => ['label' => 'Commencer', 'classes' => ['warning'], 'icon' => 'hourglass-start']
+    ];
+    
+    
     public function __construct($module, $object_name)
     {
         $this->useCaisse = (int) BimpCore::getConf('use_caisse_for_payments');
 
         parent::__construct($module, $object_name);
     }
-
+    
+    public function canEdit() {
+        if($this->getData('exported') == 1) {
+            return 0;
+        }
+        return 1;
+    }
+    
+    public function canDelete() {
+        return $this->canEdit();
+    }
     // Getters: 
 
     public function getAmountFromFacture()

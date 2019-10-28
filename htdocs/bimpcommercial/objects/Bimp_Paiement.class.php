@@ -1,6 +1,8 @@
 <?php
+BimpTools::loadDolClass('compta/facture', 'facture');
 
-class Bimp_Paiement extends BimpComm
+//require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/objects/BimpComm.class.php';
+class Bimp_Paiement extends BimpObject
 {
 
     public $useCaisse = false;

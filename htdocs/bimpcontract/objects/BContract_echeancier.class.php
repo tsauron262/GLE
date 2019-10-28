@@ -154,9 +154,12 @@ class BContract_echeancier extends BimpObject {
         $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}';
         if($data->factures_send) {
             $current_number_facture = 1;
-            foreach($data->factures_send as $element_element) {
+            foreach($data->factures_send as $element_element) {   
                 $facture = $this->getInstance('bimpcommercial', 'Bimp_Facture', $element_element['d']);
-                
+                $can_create_next_facture = true;
+                if($facture->getData('fk_statut') == 0) {
+                    $can_create_next_facture = false;
+                }
                 $paye = ($facture->getData('paye') == 1) ? '<b class="success" >Payer</b>' : '<b class="danger" >Impayer</b>';
                 $html .= '<tr class="objectListItemRow" >';
                 $dateDebut = New DateTime();
@@ -208,7 +211,8 @@ class BContract_echeancier extends BimpObject {
                     . '<td style="text-align:center"><b style="color:grey">Période non facturée</b></td>'
                     . '<td style="text-align:center"><b class="important" >Période non facturée</b></td>'
                     . '<td style="text-align:center; margin-right:10%">';
-                if($firstDinamycLine){
+                if($firstDinamycLine && $can_create_next_facture){
+                    // ICI NE PAS AFFICHER QUAND LA FACTURE EST PAS VALIDER 
                     $html .= '<span class="rowButton bs-popover" data-trigger="hover" data-placement="top"  data-content="Facturer la période" onclick="' . $this->getJsActionOnclick("createFacture", array('date_start' => $startedDate->format('Y-m-d'), 'date_end' => $enderDate->format('Y-m-d'), 'total_ht' => $amount), array("success_callback" => $callback)) . '")"><i class="fa fa-plus" ></i></span>';
                     $firstDinamycLine = false;
                 }

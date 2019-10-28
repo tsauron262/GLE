@@ -2705,7 +2705,8 @@ class User extends CommonObject
                 
                 foreach(array('telephonenumber', 'mobile') as $nom)
                         if($info[$nom] == "" || $info[$nom] == " ")
-                            unset($info[$nom]);
+                            $info[$nom] = "N/C";
+                            //unset($info[$nom]);
                 
 		return $info;
 	}

@@ -372,7 +372,7 @@ class BimpDocumentPDF extends BimpModelPDF
         if ($comm2 > 0) {
             if (!$comm1 || ($comm1 > 0 && $comm1 != $comm2)) {
                 if ($comm1 > 0) {
-                    $label = 'Emetteur devis';
+                    $label = 'Emetteur';
                 } else {
                     $label = 'Interlocuteur';
                 }

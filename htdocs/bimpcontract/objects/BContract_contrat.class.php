@@ -140,10 +140,12 @@ class BContract_contrat extends BimpDolObject {
         
         $list = $this->db->getRows($object, 'fk_soc = ' . $this->getData('fk_soc'));
         $return = [];
-        foreach($list as $l) {
-            $return[$l->rowid] = $l->ref;
-        }
         
+        foreach($list as $l) {
+            $instance = $this->getInstance('bimpcommercial', 'Bimp_' . ucfirst($object), $l->rowid);
+            $return[$instance->id] = $instance->getData('ref') . " - " . $instance->getData('libelle');
+        }
+        //print_r($return);
         return $return;
         
     }

@@ -15,6 +15,13 @@ dol_object:
             module: contrat
             file: contrat
 force_extrafields_update: 1
+
+filters_panels: 
+    default: 
+        filters:
+            ref:
+                field: ref
+                show: 1
 objects:
     client:
         instance:
@@ -256,7 +263,9 @@ fields_tables:
 lists: 
     default:
         title: Contrat
+        configurable: 1
         icon: fas_file-contract
+        filters_panel: default
         list_filters: 
             callback: getListFilters
         sort_field: datec

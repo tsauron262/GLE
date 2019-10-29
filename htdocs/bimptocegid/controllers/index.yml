@@ -1,0 +1,10 @@
+bootstrap: 1
+
+            
+
+sections:
+    - type: nav_tabs
+      nav_tabs:
+          - id: liste_exported_paiements
+            title: Liste des paiements exportées
+            

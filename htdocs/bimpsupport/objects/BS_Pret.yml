@@ -115,10 +115,13 @@ forms:
         rows: 
             - field: id_sav
               hidden: 1
+            - field: id_entrepot
+              hidden: 1
             - field: date_begin
             - field: date_end
             - field: caution
             - association: equipments
+              depends_on: id_entrepot
             - object: products
               multiple: 1
 

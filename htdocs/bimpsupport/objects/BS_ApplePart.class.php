@@ -30,7 +30,19 @@ class BS_ApplePart extends BimpObject
     );
     protected static $compTIACodes = null;
 
-    // Getters: 
+    // Getters booléens: 
+
+    public function isCartEditable()
+    {
+//        $sav = $this->getParentInstance();
+//        if (!is_null($sav) && $sav->isLoaded()) {
+//            return (int) $sav->isPropalEditable();
+//        }
+//        return 0;
+        return 1;
+    }
+
+    // Getters array: 
 
     public static function getCompTIACodes()
     {
@@ -96,6 +108,17 @@ class BS_ApplePart extends BimpObject
         return GSX_CompTIA::getCompTIAModifiers();
     }
 
+    public function getReproducibiliesArray()
+    {
+        if (!class_exists('GSX_v2')) {
+            require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_v2.php';
+        }
+
+        return GSX_v2::$reproducibilities;
+    }
+
+    // Getters données
+
     public static function getCategProdApple($ref, $desc)
     {
         $type = "autre";
@@ -141,15 +164,27 @@ class BS_ApplePart extends BimpObject
         return $type;
     }
 
-    public function isCartEditable()
+    public function getPrice()
     {
-//        $sav = $this->getParentInstance();
-//        if (!is_null($sav) && $sav->isLoaded()) {
-//            return (int) $sav->isPropalEditable();
-//        }
-//        return 0;
-        return 1;
+        $type = $this->getData('price_type');
+
+        switch ($type) {
+            case 'EXCHANGE':
+                return (float) $this->getData('exchange_price');
+
+            case 'STOCK':
+                return (float) $this->getData('stock_price');
+
+            default:
+                $priceOptions = $this->getData('price_options');
+                if (isset($priceOptions[$type]['price'])) {
+                    return (float) $priceOptions[$type]['price'];
+                }
+                return 0;
+        }
     }
+
+    // Traitements: 
 
     public function checkPrice($no_update = false)
     {
@@ -198,28 +233,6 @@ class BS_ApplePart extends BimpObject
         }
     }
 
-    public function getPrice()
-    {
-        $type = $this->getData('price_type');
-
-        switch ($type) {
-            case 'EXCHANGE':
-                return (float) $this->getData('exchange_price');
-
-            case 'STOCK':
-                return (float) $this->getData('stock_price');
-
-            default:
-                $priceOptions = $this->getData('price_options');
-                if (isset($priceOptions[$type]['price'])) {
-                    return (float) $priceOptions[$type]['price'];
-                }
-                return 0;
-        }
-    }
-
-    // Traitements: 
-
     public function convertPrix($type, $prix, $ref, $desc)
     {
         $coefPrix = 1;
@@ -261,8 +274,6 @@ class BS_ApplePart extends BimpObject
 
         return $prix;
     }
-
-    // Overrides: 
 
     public function create(&$warnings = array(), $force_create = false)
     {

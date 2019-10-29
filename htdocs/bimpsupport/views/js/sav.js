@@ -93,10 +93,7 @@ function loadGSXView($button, id_sav) {
     var $container = $('#gsxResultContainer');
     var serial = $gsxForm.find('#gsx_equipment_serial').val();
     if (/^S?[A-Z0-9]{11,12}$/.test(serial) || /^S?[0-9]{15}$/.test(serial)) {
-        BimpAjax('loadGSXView', {
-            serial: serial,
-            id_sav: id_sav
-        }, $container, {
+        var params = {
             append_html: true,
             display_processing: true,
             processing_msg: 'Chargement en cours',
@@ -108,7 +105,19 @@ function loadGSXView($button, id_sav) {
                     $container: bimpAjax.$resultContainer
                 }));
             }
-        });
+        };
+
+        if (typeof (use_gsx_v2) !== 'undefined' && use_gsx_v2) {
+            GsxAjax('gsxLoadSavGsxView', {
+                serial: serial,
+                id_sav: id_sav
+            }, $container, params);
+        } else {
+            BimpAjax('loadGSXView', {
+                serial: serial,
+                id_sav: id_sav
+            }, $container, params);
+        }
     } else {
         $container.html('<p class="alert alert-danger">Numéro de série invalide</p>');
     }
@@ -124,10 +133,8 @@ function onSavFormLoaded($form) {
                 $container.find('div.equipmentAjaxInfos').remove();
                 var html = '<div class="equipmentAjaxInfos" style="display: none"></div>';
                 $container.append(html);
-                BimpAjax('getEquipmentGsxInfos', {
-                    id_equipment: $input.val()
-                }, $container.find('.equipmentAjaxInfos'), {
-                    url: dol_url_root + '/bimpequipment/index.php',
+
+                var params = {
                     $container: $container,
                     display_success: false,
                     display_errors: false,
@@ -135,7 +142,18 @@ function onSavFormLoaded($form) {
                     processing_padding: 0,
                     append_html: true,
                     processing_msg: ''
-                });
+                };
+
+                if (typeof (use_gsx_v2) !== 'undefined' && use_gsx_v2) {
+                    GsxAjax('gsxGetEquipmentWarrantyInfos', {
+                        id_equipment: $input.val()
+                    }, $container.find('.equipmentAjaxInfos'), params);
+                } else {
+                    params.url = dol_url_root + '/bimpequipment/index.php';
+                    BimpAjax('getEquipmentGsxInfos', {
+                        id_equipment: $input.val()
+                    }, $container.find('.equipmentAjaxInfos'), params);
+                }
             }
         });
     }

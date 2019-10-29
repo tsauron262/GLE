@@ -1122,6 +1122,7 @@ function saveArticleRemiseCrtPercent($input) {
         saveObjectField('bimpcaisse', 'BC_VenteArticle', id_article, 'remise_crt_percent', remise_crt_percent);
     }
 }
+
 // Retours vente: 
 
 function loadReturnForm($button) {

@@ -182,13 +182,14 @@ class BimpController
     public function display()
     {
         global $user;
-        if ($user->id < 1) {
-            die("Pas de User <a href='" . DOL_URL_ROOT . "'> Allez à la page de login</a>");
-        }
 
         if (BimpTools::isSubmit('ajax')) {
             $this->ajaxProcess();
             return;
+        }
+
+        if ($user->id < 1) {
+            die("Pas de User <a href='" . DOL_URL_ROOT . "'> Allez à la page de login</a>");
         }
 
         global $main_controller;
@@ -236,12 +237,6 @@ class BimpController
             if (method_exists($this, 'displayHead')) {
                 $this->displayHead();
             }
-//            else {
-//                $title = $this->getConf('title', '');
-//                if ($title) {
-//                    print load_fiche_titre($title, '', 'title_generic.png');
-//                }
-//            }
 
             if (count($this->msgs)) {
                 foreach ($this->msgs as $msg) {
@@ -276,6 +271,11 @@ class BimpController
 
     protected function renderSections($sections_path)
     {
+        if (BimpDebug::isActive('bimpcore/controller/display_errors')) {
+            ini_set('display_errors', 1);
+            error_reporting(E_ERROR);
+        }
+
         $html = '';
         $sections = $this->getConf($sections_path, null, false, 'array');
 
@@ -579,7 +579,7 @@ class BimpController
                     if ($err_code == JSON_ERROR_UTF8) {
                         // On tente un encodage utf-8. 
                         $result = BimpTools::utf8_encode($result);
-                        
+
                         $json = json_encode($result);
 
                         if ($json !== false) {

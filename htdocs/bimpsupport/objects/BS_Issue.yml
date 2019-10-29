@@ -1,0 +1,144 @@
+table: bs_sav_issue
+common_fields: 0
+positions: 1
+position_insert: after
+
+parent_object: BS_SAV
+parent_id_property: id_sav
+
+labels: 
+    name: problème composant
+    name_plur: problèmes composants
+    
+objects: 
+    parts: 
+        relation: hasMany
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpsupport
+                name: BS_ApplePart
+            
+fields: 
+    id_sav: 
+        label: SAV
+        type: id_parent
+    
+    type: 
+        label: Type
+        values: 
+            array: types
+        required: 1
+            
+    category_code: 
+        label: Code catégorie
+        input: 
+            type: custom
+            content: 
+                callback: renderCategoryCodeInput
+        required: 1
+        
+    category_label: 
+        label: Catégorie
+        depends_on: serial
+    
+    issue_code: 
+        label: Code problème
+        input: 
+            type: custom
+            content: 
+                callback: renderIssueCodeInput
+        display_if:
+            field_name: category_code
+            hide_values: ''
+        depends_on: category_code
+        required: 1
+        
+    issue_label: 
+        label: Problème
+        
+    reproducibility: 
+        label: Récurrence
+        values: 
+            array: reproducibilities
+        
+    priority: 
+        label: Priorité
+        values: 
+            array: priorities
+        required: 1
+            
+forms: 
+    default: 
+        rows: 
+            - custom: 1
+              hidden: 1
+              label: Serial
+              input_name: serial
+              input: 
+                  type: hidden 
+            - field: type
+            - field: priority
+            - field: category_code
+            - field: issue_code
+            - field: reproducibility
+            
+fields_tables: 
+    default:
+        panel_header: 0
+        rows: 
+            - field: type
+              edit: 1
+            - field: category_code
+            - field: category_label
+            - field: issue_code
+            - field: issue_label
+            - field: reproducibility
+            - field: priority
+            
+views: 
+    default: 
+        modal_format: small
+        rows: 
+            - cols: 
+                - type: fields_table
+                  fields_table: 
+                      name: default
+                      
+lists: 
+    default: 
+        objects_change_reload: BS_ApplePart
+        title: Liste des problèmes composants
+        icon: fas_exclamation-circle
+        positions: 1
+        positions_open: 1
+        checkboxes: 1
+        item_checkbox: 
+            callback: isDeletable
+        bulk_actions:
+            - label: supprimer les problèmes composants sélectionnés
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this))
+        enable_search: 0
+        enable_sort: 0
+        n: 0
+        header_buttons:
+            callback: 
+                method: getListHeaderButtons
+        delete_btn: 1
+        modal_view: default
+        extra_btn: 
+            callback: getListExtraButtons
+        cols: 
+            categ: 
+                field: category_label
+            issue: 
+                label: Problème
+                value: 
+                    callback: displayIssue
+            repro: 
+                field: reproducibility
+            parts: 
+                label: Composants
+                value: 
+                    callback: displayParts

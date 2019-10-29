@@ -4717,7 +4717,7 @@ class BimpObject extends BimpCache
                     $label = isset($header_btn['label']) ? $header_btn['label'] : '';
                     $onclick = isset($header_btn['onclick']) ? $header_btn['onclick'] : '';
                     $icon = isset($header_btn['icon']) ? $header_btn['icon'] : '';
-                    $onclick = str_replace('component_id', $this->identifier, $onclick);
+//                    $onclick = str_replace('component_id', $this->identifier, $onclick);
                     $disabled = isset($header_btn['disabled']) ? (int) $header_btn['disabled'] : 0;
                     $popover = isset($header_btn['popover']) ? (string) $header_btn['popover'] : '';
                     $classes = array('btn', 'btn-light-default');

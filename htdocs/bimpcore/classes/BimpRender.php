@@ -9,7 +9,7 @@ class BimpRender
         foreach ($data as $name => $value) {
             $html .= ' data-' . $name . '="' . $value . '"';
         }
-        
+
         return $html;
     }
 
@@ -802,6 +802,120 @@ class BimpRender
         $html .= '<span class="compteur_caisse_total">0</span> &euro;';
         $html .= '</div>';
         $html .= '</div>';
+
+        return $html;
+    }
+
+    // Form elements: 
+
+    public static function renderFormGroupMultiple($items_contents, $inputName, $title, $params = array())
+    {
+        // params: 
+        // item_label (string, fac.)
+        // max_items (int, fac.)
+        // required (bool, fac.)
+        // display_if (array, fac.) 
+
+        $html = '';
+
+        $html .= '<div class="formInputGroup' . (isset($params['display_if']) ? ' display_if' : '') . '" data-field_name="' . $inputName . '" data-multiple="1"';
+        if (isset($params['max_items'])) {
+            $html .= ' data-max_items="' . $params['max_items'] . '"';
+        }
+        if (isset($params['display_if'])) {
+            $html .= BC_Field::renderDisplayifDataStatic($params['display_if']);
+        }
+        $html .= '>';
+
+        // En-tête: 
+        $html .= '<div class="formGroupHeading">';
+        $html .= '<div class="formGroupTitle">';
+        $html .= '<h3>' . $title . ((isset($params['required']) && (int) $params['required']) ? '<sup>*</sup>' : '') . '</h3>';
+        if (isset($params['max_items'])) {
+            $html .= '<span class="small">&nbsp;&nbsp;' . $params['max_items'] . ' élément(s) max</span>';
+        }
+        $html .= '</div>';
+        $html .= '</div>';
+
+        // Template: 
+        if (isset($items_contents['tpl'])) {
+            $html .= '<div class="dataInputTemplate">';
+            $html .= '<div class="formGroupMultipleItem">';
+            $html .= '<div class="formGroupHeading">';
+            $html .= '<div class="formGroupTitle">';
+            $html .= '<h4>' . (isset($params['item_label']) ? $params['item_label'] . ' ' : '') . '#idx</h4>';
+            $html .= '</div>';
+            $html .= '<div class="formGroupButtons">';
+            $html .= '<button class="btn btn-danger" onclick="removeFormGroupMultipleItem($(this))">';
+            $html .= BimpRender::renderIcon('fas_trash-alt');
+            $html .= '</button>';
+            $html .= '</div>';
+            $html .= '</div>';
+            $html .= $items_contents['tpl'];
+            $html .= '</div>';
+            $html .= '</div>';
+        }
+
+        // Liste des items: 
+        $html .= '<div class="formGroupMultipleItems">';
+        $i = 0;
+        foreach ($items_contents as $idx => $item_content) {
+            if ($idx === 'tpl') {
+                continue;
+            }
+
+            $i++;
+            $html .= '<div class="formGroupMultipleItem">';
+            $html .= '<div class="formGroupHeading">';
+            $html .= '<div class="formGroupTitle">';
+            $html .= '<h4>' . (isset($params['item_label']) ? $params['item_label'] . ' ' : '') . '#' . $i . '</h4>';
+            $html .= '</div>';
+            $html .= '<div class="formGroupButtons">';
+            $html .= '<button class="btn btn-danger" onclick="removeFormGroupMultipleItem($(this))">';
+            $html .= BimpRender::renderIcon('fas_trash-alt');
+            $html .= '</button>';
+            $html .= '</div>';
+            $html .= '</div>';
+
+            $html .= str_replace('idx', $i, $item_content);
+
+            $html .= '</div>';
+        }
+
+        // Bouton ajout: 
+        $html .= '</div>';
+        $html .= '<div class="buttonsContainer align-right">';
+        $html .= '<span class="btn btn-default" onclick="addFormGroupMultipleItem($(this), \'' . $inputName . '\')"><i class="fa fa-plus-circle iconLeft"></i>Ajouter</span>';
+        $html .= '</div>';
+
+        $html .= '<input type="hidden" name="' . $inputName . '_nextIdx" value="' . ($i + 1) . '"/>';
+
+        $html .= '</div>';
+        return $html;
+    }
+
+    public static function renderFormInputsGroup($title, $inputName, $inputs_content, $params = array())
+    {
+        // params: 
+        // required (bool, fac.)
+        // display_if (array, fac.) 
+
+        $html = '';
+
+        $html .= '<div class="formInputGroup' . (isset($params['display_if']) ? ' display_if' : '') . '" data-multiple="0" data-field_name="' . $inputName . '"';
+        if (isset($params['display_if'])) {
+            $html .= BC_Field::renderDisplayifDataStatic($params['display_if']);
+        }
+        $html .= '>';
+
+        $html .= '<div class="formGroupHeading">';
+        $html .= '<div class="formGroupTitle"><h3>' . $title . (isset($params['required']) && (int) $params['required'] ? '<sup>*</sup>' : '') . '</h3></div>';
+        $html .= '</div>';
+
+        $html .= $inputs_content;
+
+        $html .= '</div>';
+
 
         return $html;
     }

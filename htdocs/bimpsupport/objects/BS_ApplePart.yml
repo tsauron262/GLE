@@ -9,10 +9,25 @@ labels:
     name_plur: pièces Apple
     is_female: 1
     
+objects: 
+    issue: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpsupport
+                name: BS_Issue
+            id_object: 
+                field_value: id_issue
+            
 fields: 
     id_sav: 
         label: SAV
         type: id_parent
+    id_issue: 
+        label: Problème
+        type: id_object
+        objec: issue
     label: 
         label: Libellé
     part_number:
@@ -58,7 +73,94 @@ fields:
         values: 
             array: price_types
         default_value: EXCHANGE
+#    issue_category: 
+#        label: Catégorie problème
+#    issue_code: 
+#        label: Code problème
+#    reproducibility: 
+#        label: Récurrence
+#        values: 
+#            array: reproducibilies
+#        default_value: A
+#    issue_label: 
+#        label: Code problème
+
+#forms: 
+#    add_parts: 
+#        title: Ajout de composants Apple
+#        rows: 
+#            - custom: 1
+#              hidden: 1
+#              label: Serial
+#              input_name: serial
+#              input: 
+#                  type: hidden
+#            - custom: 1
+#              label: Catégorie
+#              input_name: issue_category
+#              content: 
+#                  callback: renderIssueCategoryInput
+#            - custom: 1
+#              label: Code problème
+#              input_name: issue_code
+#              content: 
+#                  callback: renderIssueCodeInput
+#              display_if: 
+#                  field_name: issue_category
+#                  hide_values: ''
+#              depends_on: serial,issue_category
+#            - custom: 1
+#              label: Composants compatibles
+#              input_name: parts
+#              content: 
+#                  callback: renderPartsList
+#              display_if: 
+#                  field_name: issue_code
+#                  hide_values: ''
+#              depends_on: serial,issue_category,issue_code
             
+#    issue: 
+#        title: Codes problèmes
+#        rows: 
+#            - custom: 1
+#              label: Catégorie
+#              input_name: issue_category
+#              content: 
+#                  callback: renderIssueCategoryInput
+#            - custom: 1
+#              label: Code problème
+#              input_name: issue_code
+#              content: 
+#                  callback: renderIssueCodeInput
+#              display_if: 
+#                  field_name: issue_category
+#                  hide_values: ''
+#              depends_on: serial,issue_category
+#            - field: reproducibility
+
+fields_tables: 
+    default: 
+        panel: 1
+        panel_header: 0
+        rows: 
+            - field: part_number
+            - field: label
+            - field: qty
+              edit: 1
+            - field: price_type
+              edit: 1
+            - field: out_of_warranty
+              edit: 1
+            - field: no_order
+              edit: 1
+
+views: 
+    default: 
+        modal_format: small
+        rows: 
+            - cols: 
+                - type: fields_table
+                  fields_table: default
 lists: 
     default: 
         title: Panier de composants Apple
@@ -109,4 +211,46 @@ lists:
                 field: no_order
                 edit: 
                     callback: isCartEditable
+                    
+    gsx_v2:
+        title: Composants Apple
+        icon: shopping-basket
+        checkboxes:
+            callback: isCartEditable
+        bulk_actions:
+            - label: supprimer les composants sélectionnés
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this))
+        enable_search: 0
+        sort_field: id
+        sort_way: asc
+        n: 25
+        delete_btn: 
+            callback: isCartEditable
+        update_btn: 1
+        cols: 
+            label: 
+                label: Nom
+                field: label
+            num: 
+                label: Réf.
+                field: part_number
+            qty: 
+                label: Qté
+                field: qty
+                edit: 
+                    callback: isCartEditable
+            out_of_warranty: 
+                field: out_of_warranty
+                edit: 
+                    callback: isCartEditable
+            price: 
+                field: price_type
+                edit: 
+                    callback: isCartEditable
+            no_order: 
+                field: no_order
+                edit: 
+                    callback: isCartEditable
+        
                 

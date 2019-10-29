@@ -84,10 +84,11 @@ sections:
                                   object: sav
                                   
                     - cols: 
-                        - type: list
-                          list: 
-                              object: sav
-                              children: apple_parts
+                        - type: custom
+                          custom: 
+                              callback: 
+                                  method: renderApplePartsList
+                                  object: sav
                     - cols: 
                         - type: custom
                           custom: 

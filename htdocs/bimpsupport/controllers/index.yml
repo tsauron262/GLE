@@ -3,6 +3,7 @@ bootstrap: 1
 js:
     - /bimpcore/views/js/BimpTimer.js
     - /bimpsupport/views/js/ticket.js
+    - /bimpapple/views/js/gsx.js
     - /bimpsupport/views/js/sav.js
     - /bimpequipment/views/js/equipment.js
     - /bimpcommercial/views/js/paiement.js

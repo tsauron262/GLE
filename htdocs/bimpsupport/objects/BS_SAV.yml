@@ -77,6 +77,12 @@ objects:
         instance: 
             bimp_object: BS_Pret
             
+    issues: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: BS_Issue
+            
 associations: 
     propales:
         object: propal
@@ -557,6 +563,19 @@ forms:
                   field_name: acompte
                   hide_values: 0,
               value: 6
+              
+    gsx_token: 
+        title: Authentification GSX
+        rows: 
+            - custom: 1
+              label: GSX API Token 
+              input_name: token
+              input: 
+                  type: text
+                  help: Veuillez vous athentifier sur le site Apple GSX puis copier-coller le token obtenu. 
+                  extra_content: 
+                      callback: renderGsxTokenInputExtraContent
+              required: 1          
               
 fields_tables: 
     infos: 

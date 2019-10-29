@@ -82,8 +82,6 @@ filters_panels:
                 data_type: date
                 type: date_range
                 
-                
-                    
 lists_cols: 
     qty_immos: 
         field: qty

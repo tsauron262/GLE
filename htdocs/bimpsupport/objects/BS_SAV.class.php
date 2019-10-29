@@ -95,7 +95,7 @@ class BS_SAV extends BimpObject
         return $soc->dol_object->getNomUrl(1);
     }
 
-    // Getters:
+    // Getters booléens:
 
     public function isPropalEditable()
     {
@@ -107,300 +107,6 @@ class BS_SAV extends BimpObject
             }
         }
         return 1;
-    }
-
-    public function needEquipmentAttribution()
-    {
-        if ($this->isLoaded()) {
-            BimpObject::loadClass('bimpsupport', 'BS_SavPropalLine');
-            $lines = $this->getChildrenObjects('propal_lines', array(
-                'type'               => BS_SavPropalLine::LINE_PRODUCT,
-                'linked_object_name' => ''
-            ));
-            foreach ($lines as $line) {
-                if ($line->hasEquipmentToAttribute()) {
-                    return 1;
-                }
-            }
-        }
-
-        return 0;
-    }
-
-    public function getNomUrl($withpicto = true)
-    {
-        if (!$this->isLoaded()) {
-            return '';
-        }
-
-        $statut = self::$status_list[$this->data["status"]];
-        return "<a href='" . $this->getUrl() . "'>" . '<span class="' . implode(" ", $statut['classes']) . '"><i class="' . BimpRender::renderIconClass($statut['icon']) . ' iconLeft"></i>' . $this->ref . '</span></a>';
-    }
-
-    protected function getNextNumRef()
-    {
-        require_once(DOL_DOCUMENT_ROOT . "/bimpsupport/classes/SAV_ModelNumRef.php");
-        $tmp = new SAV_ModelNumRef($this->db->db);
-        $objsoc = false;
-        $id_soc = (int) $this->getData('id_client');
-        if (!$id_soc) {
-            $id_soc = (int) BimpTools::getValue('id_client', 0);
-        }
-        if ($id_soc > 0) {
-            $objsoc = new Societe($this->db->db);
-            $objsoc->fetch($id_soc);
-        }
-
-        $mask = self::$ref_model;
-
-        $mask = str_replace('{CENTRE}', (string) $this->getData('code_centre'), $mask);
-
-        return($tmp->getNextValue($objsoc, $this, $mask));
-    }
-
-    public function getDefaultCodeCentre()
-    {
-        if (BimpTools::isSubmit('code_centre')) {
-            return BimpTools::getValue('code_centre');
-        } else {
-            global $user;
-            $userCentres = explode(' ', $user->array_options['options_apple_centre']);
-            foreach ($userCentres as $code) {
-                if (preg_match('/^ ?([A-Z]+) ?$/', $code, $matches)) {
-                    return $matches[1];
-                }
-            }
-
-            $id_entrepot = (int) $this->getData('id_entrepot');
-            if (!$id_entrepot) {
-                $id_entrepot = BimpTools::getValue('id_entrepot', 0);
-            }
-            if ($id_entrepot) {
-                global $tabCentre;
-                foreach ($tabCentre as $code_centre => $centre) {
-                    if ((int) $centre[8] === $id_entrepot) {
-                        return $code_centre;
-                    }
-                }
-            }
-        }
-
-        return '';
-    }
-
-    public function getClient_contactsArray()
-    {
-        return $this->getSocieteContactsArray((int) $this->getData('id_client'));
-    }
-
-    public function getContratsArray()
-    {
-        return $this->getSocieteContratsArray((int) $this->getData('id_client'));
-    }
-
-    public function getPropalsArray()
-    {
-        return $this->getSocietePropalsArray((int) $this->getData('id_client'));
-    }
-
-    public function getCreateJsCallback()
-    {
-        $js = '';
-        $ref = 'PC-' . $this->getData('ref');
-        if (file_exists(DOL_DATA_ROOT . '/bimpcore/sav/' . $this->id . '/' . $ref . '.pdf')) {
-            $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . htmlentities('sav/' . $this->id . '/' . $ref . '.pdf');
-            $js .= 'window.open("' . $url . '");';
-        }
-
-        $id_facture_account = (int) $this->getData('id_facture_acompte');
-        if ($id_facture_account) {
-            $facture = $this->getChildObject('facture_acompte');
-            if (BimpObject::objectLoaded($facture)) {
-                $ref = $facture->getData('facnumber');
-                if (file_exists(DOL_DATA_ROOT . '/facture/' . $ref . '/' . $ref . '.pdf')) {
-                    $url = DOL_URL_ROOT . '/document.php?modulepart=facture&file=' . htmlentities('/' . $ref . '/' . $ref . '.pdf');
-                    $js .= 'window.open("' . $url . '");';
-                }
-            }
-        }
-        return $js;
-    }
-
-    public function getClientExtraBtn()
-    {
-        $buttons = array();
-
-        if ($this->isLoaded()) {
-//            $data = '{module: \'' . $this->module . '\', object_name: \'' . $this->object_name . '\', id_object: ' . $this->id . ', form_name: \'contact\'}';
-//            $onclick = 'loadModalForm($(this), ' . $data . ', \'Recontacter\');';
-            $buttons[] = array(
-                'label'   => 'Recontacter',
-                'icon'    => 'envelope',
-                'onclick' => $this->getJsActionOnclick('recontact', array(), array(
-                    'form_name' => 'contact'
-                ))
-            );
-        }
-
-        return $buttons;
-    }
-
-    public function getInfosExtraBtn()
-    {
-        $buttons = array();
-
-        $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}';
-
-        if ($this->isLoaded()) {
-            $buttons[] = array(
-                'label'   => 'Générer Bon de prise en charge',
-                'icon'    => 'fas_file-pdf',
-                'onclick' => $this->getJsActionOnclick('generatePDF', array(
-                    'file_type' => 'pc'
-                        ), array(
-                    'success_callback' => $callback
-                ))
-            );
-
-            $onclick = 'generatePDFFile($(this), ' . $this->id . ', \'destruction\');';
-            $buttons[] = array(
-                'label'   => 'Générer Bon de destruction client',
-                'icon'    => 'fas_file-pdf',
-                'onclick' => $this->getJsActionOnclick('generatePDF', array(
-                    'file_type' => 'destruction'
-                        ), array(
-                    'success_callback' => $callback
-                ))
-            );
-
-            $onclick = 'generatePDFFile($(this), ' . $this->id . ', \'destruction2\');';
-            $buttons[] = array(
-                'label'   => 'Générer Bon de destruction tribunal',
-                'icon'    => 'fas_file-pdf',
-                'onclick' => $this->getJsActionOnclick('generatePDF', array(
-                    'file_type' => 'destruction2'
-                        ), array(
-                    'success_callback' => $callback
-                ))
-            );
-
-            $onclick = 'generatePDFFile($(this), ' . $this->id . ', \'europe\');';
-            $buttons[] = array(
-                'label'   => 'Générer Doc Loi Européenne',
-                'icon'    => 'fas_file-pdf',
-                'onclick' => $this->getJsActionOnclick('generatePDF', array(
-                    'file_type' => 'europe'
-                        ), array(
-                    'success_callback' => $callback
-                ))
-            );
-        }
-
-        return $buttons;
-    }
-
-    public function getCentreData()
-    {
-        if ($code_centre = (string) $this->getData('code_centre')) {
-            global $tabCentre;
-
-            if (isset($tabCentre[$code_centre])) {
-                return array(
-                    'tel'         => $tabCentre[$code_centre][0],
-                    'mail'        => $tabCentre[$code_centre][1],
-                    'label'       => $tabCentre[$code_centre][2],
-                    'zip'         => $tabCentre[$code_centre][5],
-                    'town'        => $tabCentre[$code_centre][6],
-                    'address'     => $tabCentre[$code_centre][7],
-                    'id_entrepot' => $tabCentre[$code_centre][8]
-                );
-            }
-        }
-
-        return null;
-    }
-
-    public function getNomMachine()
-    {
-        if ($this->isLoaded()) {
-            $equipment = $this->getChildObject('equipment');
-            if (!is_null($equipment) && $equipment->isLoaded()) {
-                return $equipment->displayProduct('nom', true);
-            }
-        }
-
-        return '';
-    }
-
-    public function getFactureAmountToPay()
-    {
-        if ((int) $this->getData('id_facture')) {
-            $facture = $this->getChildObject('facture');
-            if (BimpObject::objectLoaded($facture)) {
-                return (float) round((float) $facture->getRemainToPay(), 2);
-            }
-        }
-
-        if ((int) $this->getData('id_propal')) {
-            $propal = $this->getChildObject('propal');
-            if (BimpObject::objectLoaded($propal)) {
-                return (float) round($propal->dol_object->total_ttc, 2);
-            }
-        }
-
-        return 0;
-    }
-
-    public function displayFactureAmountToPay()
-    {
-        return $this->getFactureAmountToPay() . " €";
-    }
-
-    public function getListFilters()
-    {
-        $filters = array();
-        if (BimpTools::isSubmit('id_entrepot')) {
-            $entrepots = explode('-', BimpTools::getValue('id_entrepot'));
-
-            $filters[] = array('name'   => 'id_entrepot', 'filter' => array(
-                    'IN' => implode(',', $entrepots)
-            ));
-        }
-
-        if (BimpTools::isSubmit('code_centre')) {
-            $codes = explode('-', BimpTools::getValue('code_centre'));
-            foreach ($codes as &$code) {
-                $code = "'" . $code . "'";
-            }
-            $filters[] = array('name'   => 'code_centre', 'filter' => array(
-                    'IN' => implode(',', $codes)
-            ));
-        }
-
-        if (BimpTools::isSubmit('status')) {
-            $filters[] = array('name' => 'status', 'filter' => (int) BimpTools::getValue('status'));
-        }
-
-        return $filters;
-    }
-
-    public function getListExtraBtn()
-    {
-        $buttons = array();
-
-        if ($this->isLoaded()) {
-            $ref = 'PC-' . $this->getData('ref');
-            if (file_exists(DOL_DATA_ROOT . '/bimpcore/sav/' . $this->id . '/' . $ref . '.pdf')) {
-                $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . htmlentities('sav/' . $this->id . '/' . $ref . '.pdf');
-                $buttons[] = array(
-                    'label'   => 'Bon de prise en charge',
-                    'icon'    => 'fas_file-pdf',
-                    'onclick' => 'window.open(\'' . $url . '\')'
-                );
-            }
-        }
-
-        return $buttons;
     }
 
     public function isActionAllowed($action, &$errors = array())
@@ -537,6 +243,169 @@ class BS_SAV extends BimpObject
                 return 1;
         }
         return parent::isActionAllowed($action, $errors);
+    }
+
+    public function needEquipmentAttribution()
+    {
+        if ($this->isLoaded()) {
+            BimpObject::loadClass('bimpsupport', 'BS_SavPropalLine');
+            $lines = $this->getChildrenObjects('propal_lines', array(
+                'type'               => BS_SavPropalLine::LINE_PRODUCT,
+                'linked_object_name' => ''
+            ));
+            foreach ($lines as $line) {
+                if ($line->hasEquipmentToAttribute()) {
+                    return 1;
+                }
+            }
+        }
+
+        return 0;
+    }
+
+    // Getters params: 
+
+    public function getCreateJsCallback()
+    {
+        $js = '';
+        $ref = 'PC-' . $this->getData('ref');
+        if (file_exists(DOL_DATA_ROOT . '/bimpcore/sav/' . $this->id . '/' . $ref . '.pdf')) {
+            $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . htmlentities('sav/' . $this->id . '/' . $ref . '.pdf');
+            $js .= 'window.open("' . $url . '");';
+        }
+
+        $id_facture_account = (int) $this->getData('id_facture_acompte');
+        if ($id_facture_account) {
+            $facture = $this->getChildObject('facture_acompte');
+            if (BimpObject::objectLoaded($facture)) {
+                $ref = $facture->getData('facnumber');
+                if (file_exists(DOL_DATA_ROOT . '/facture/' . $ref . '/' . $ref . '.pdf')) {
+                    $url = DOL_URL_ROOT . '/document.php?modulepart=facture&file=' . htmlentities('/' . $ref . '/' . $ref . '.pdf');
+                    $js .= 'window.open("' . $url . '");';
+                }
+            }
+        }
+        return $js;
+    }
+
+    public function getClientExtraBtn()
+    {
+        $buttons = array();
+
+        if ($this->isLoaded()) {
+//            $data = '{module: \'' . $this->module . '\', object_name: \'' . $this->object_name . '\', id_object: ' . $this->id . ', form_name: \'contact\'}';
+//            $onclick = 'loadModalForm($(this), ' . $data . ', \'Recontacter\');';
+            $buttons[] = array(
+                'label'   => 'Recontacter',
+                'icon'    => 'envelope',
+                'onclick' => $this->getJsActionOnclick('recontact', array(), array(
+                    'form_name' => 'contact'
+                ))
+            );
+        }
+
+        return $buttons;
+    }
+
+    public function getInfosExtraBtn()
+    {
+        $buttons = array();
+
+        $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}';
+
+        if ($this->isLoaded()) {
+            $buttons[] = array(
+                'label'   => 'Générer Bon de prise en charge',
+                'icon'    => 'fas_file-pdf',
+                'onclick' => $this->getJsActionOnclick('generatePDF', array(
+                    'file_type' => 'pc'
+                        ), array(
+                    'success_callback' => $callback
+                ))
+            );
+
+            $onclick = 'generatePDFFile($(this), ' . $this->id . ', \'destruction\');';
+            $buttons[] = array(
+                'label'   => 'Générer Bon de destruction client',
+                'icon'    => 'fas_file-pdf',
+                'onclick' => $this->getJsActionOnclick('generatePDF', array(
+                    'file_type' => 'destruction'
+                        ), array(
+                    'success_callback' => $callback
+                ))
+            );
+
+            $onclick = 'generatePDFFile($(this), ' . $this->id . ', \'destruction2\');';
+            $buttons[] = array(
+                'label'   => 'Générer Bon de destruction tribunal',
+                'icon'    => 'fas_file-pdf',
+                'onclick' => $this->getJsActionOnclick('generatePDF', array(
+                    'file_type' => 'destruction2'
+                        ), array(
+                    'success_callback' => $callback
+                ))
+            );
+
+            $onclick = 'generatePDFFile($(this), ' . $this->id . ', \'europe\');';
+            $buttons[] = array(
+                'label'   => 'Générer Doc Loi Européenne',
+                'icon'    => 'fas_file-pdf',
+                'onclick' => $this->getJsActionOnclick('generatePDF', array(
+                    'file_type' => 'europe'
+                        ), array(
+                    'success_callback' => $callback
+                ))
+            );
+        }
+
+        return $buttons;
+    }
+
+    public function getListFilters()
+    {
+        $filters = array();
+        if (BimpTools::isSubmit('id_entrepot')) {
+            $entrepots = explode('-', BimpTools::getValue('id_entrepot'));
+
+            $filters[] = array('name'   => 'id_entrepot', 'filter' => array(
+                    'IN' => implode(',', $entrepots)
+            ));
+        }
+
+        if (BimpTools::isSubmit('code_centre')) {
+            $codes = explode('-', BimpTools::getValue('code_centre'));
+            foreach ($codes as &$code) {
+                $code = "'" . $code . "'";
+            }
+            $filters[] = array('name'   => 'code_centre', 'filter' => array(
+                    'IN' => implode(',', $codes)
+            ));
+        }
+
+        if (BimpTools::isSubmit('status')) {
+            $filters[] = array('name' => 'status', 'filter' => (int) BimpTools::getValue('status'));
+        }
+
+        return $filters;
+    }
+
+    public function getListExtraBtn()
+    {
+        $buttons = array();
+
+        if ($this->isLoaded()) {
+            $ref = 'PC-' . $this->getData('ref');
+            if (file_exists(DOL_DATA_ROOT . '/bimpcore/sav/' . $this->id . '/' . $ref . '.pdf')) {
+                $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . htmlentities('sav/' . $this->id . '/' . $ref . '.pdf');
+                $buttons[] = array(
+                    'label'   => 'Bon de prise en charge',
+                    'icon'    => 'fas_file-pdf',
+                    'onclick' => 'window.open(\'' . $url . '\')'
+                );
+            }
+        }
+
+        return $buttons;
     }
 
     public function getViewExtraBtn()
@@ -833,7 +702,154 @@ class BS_SAV extends BimpObject
         );
     }
 
+    // Getters array: 
+
+    public function getClient_contactsArray()
+    {
+        return $this->getSocieteContactsArray((int) $this->getData('id_client'));
+    }
+
+    public function getContratsArray()
+    {
+        return $this->getSocieteContratsArray((int) $this->getData('id_client'));
+    }
+
+    public function getPropalsArray()
+    {
+        return $this->getSocietePropalsArray((int) $this->getData('id_client'));
+    }
+
+    // Getters données: 
+
+    public function getNomUrl($withpicto = true)
+    {
+        if (!$this->isLoaded()) {
+            return '';
+        }
+
+        $statut = self::$status_list[$this->data["status"]];
+        return "<a href='" . $this->getUrl() . "'>" . '<span class="' . implode(" ", $statut['classes']) . '"><i class="' . BimpRender::renderIconClass($statut['icon']) . ' iconLeft"></i>' . $this->ref . '</span></a>';
+    }
+
+    protected function getNextNumRef()
+    {
+        require_once(DOL_DOCUMENT_ROOT . "/bimpsupport/classes/SAV_ModelNumRef.php");
+        $tmp = new SAV_ModelNumRef($this->db->db);
+        $objsoc = false;
+        $id_soc = (int) $this->getData('id_client');
+        if (!$id_soc) {
+            $id_soc = (int) BimpTools::getValue('id_client', 0);
+        }
+        if ($id_soc > 0) {
+            $objsoc = new Societe($this->db->db);
+            $objsoc->fetch($id_soc);
+        }
+
+        $mask = self::$ref_model;
+
+        $mask = str_replace('{CENTRE}', (string) $this->getData('code_centre'), $mask);
+
+        return($tmp->getNextValue($objsoc, $this, $mask));
+    }
+
+    public function getDefaultCodeCentre()
+    {
+        if (BimpTools::isSubmit('code_centre')) {
+            return BimpTools::getValue('code_centre');
+        } else {
+            global $user;
+            $userCentres = explode(' ', $user->array_options['options_apple_centre']);
+            foreach ($userCentres as $code) {
+                if (preg_match('/^ ?([A-Z]+) ?$/', $code, $matches)) {
+                    return $matches[1];
+                }
+            }
+
+            $id_entrepot = (int) $this->getData('id_entrepot');
+            if (!$id_entrepot) {
+                $id_entrepot = BimpTools::getValue('id_entrepot', 0);
+            }
+            if ($id_entrepot) {
+                global $tabCentre;
+                foreach ($tabCentre as $code_centre => $centre) {
+                    if ((int) $centre[8] === $id_entrepot) {
+                        return $code_centre;
+                    }
+                }
+            }
+        }
+
+        return '';
+    }
+
+    public function getCentreData()
+    {
+        if ($code_centre = (string) $this->getData('code_centre')) {
+            global $tabCentre;
+
+            if (isset($tabCentre[$code_centre])) {
+                return array(
+                    'tel'         => $tabCentre[$code_centre][0],
+                    'mail'        => $tabCentre[$code_centre][1],
+                    'label'       => $tabCentre[$code_centre][2],
+                    'zip'         => $tabCentre[$code_centre][5],
+                    'town'        => $tabCentre[$code_centre][6],
+                    'address'     => $tabCentre[$code_centre][7],
+                    'id_entrepot' => $tabCentre[$code_centre][8]
+                );
+            }
+        }
+
+        return null;
+    }
+
+    public function getNomMachine()
+    {
+        if ($this->isLoaded()) {
+            $equipment = $this->getChildObject('equipment');
+            if (!is_null($equipment) && $equipment->isLoaded()) {
+                return $equipment->displayProduct('nom', true);
+            }
+        }
+
+        return '';
+    }
+
+    public function getFactureAmountToPay()
+    {
+        if ((int) $this->getData('id_facture')) {
+            $facture = $this->getChildObject('facture');
+            if (BimpObject::objectLoaded($facture)) {
+                return (float) round((float) $facture->getRemainToPay(), 2);
+            }
+        }
+
+        if ((int) $this->getData('id_propal')) {
+            $propal = $this->getChildObject('propal');
+            if (BimpObject::objectLoaded($propal)) {
+                return (float) round($propal->dol_object->total_ttc, 2);
+            }
+        }
+
+        return 0;
+    }
+
+    public function getSerial()
+    {
+        $equipment = $this->getChildObject('equipment');
+        if (BimpObject::objectLoaded($equipment)) {
+            return (string) $equipment->getData('serial');
+        }
+
+        return '';
+    }
+
     // Affichage:
+
+    public function displayFactureAmountToPay()
+    {
+        return $this->getFactureAmountToPay() . " €";
+    }
 
     public function displayStatusWithActions()
     {
@@ -1103,6 +1119,46 @@ class BS_SAV extends BimpObject
         }
 
         return $html;
+    }
+
+    public function renderGsxTokenInputExtraContent()
+    {
+        $html = '';
+
+        if (!class_exists('GSX_v2')) {
+            require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_v2.php';
+        }
+
+        $html .= '<div style="margin: 15px 0">';
+
+//        $onclick = '$(this).findParentByClass(\'inputContainer\').find(\'[name=token]\').val(navigator.clipboard.readText());';
+////        $onclick .= 'document.execCommand(\'paste\');';
+//        $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+//        $html .= BimpRender::renderIcon('fas_paste', 'iconLeft') . 'Coller token';
+//        $html .= '</span>';
+
+        $onclick = 'window.open(\'' . GSX_v2::$urls['login'][GSX_v2::$mode] . '\', \'Authentification GSX\', \'menubar=no, status=no, width=800, height=600\')';
+        $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+        $html .= 'Réouvrir fenêtre d\'authentification' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');
+        $html .= '</span>';
+
+        $html .= '</div>';
+
+        return $html;
+    }
+
+    public function renderApplePartsList($suffixe = '')
+    {
+        if (BimpCore::getConf('use_gsx_v2')) {
+            $obj = BimpObject::getInstance('bimpsupport', 'BS_Issue');
+        } else {
+            $obj = BimpObject::getInstance('bimpsupport', 'BS_ApplePart');
+        }
+        $list = new BC_ListTable($obj, 'default', 1, $this->id);
+        if ($suffixe) {
+            $list->addIdentifierSuffix($suffixe);
+        }
+        return $list->renderHtml();
     }
 
     // Traitements:
@@ -2117,7 +2173,7 @@ class BS_SAV extends BimpObject
                     $where = " (SELECT `fk_usergroup` FROM `" . MAIN_DB_PREFIX . "usergroup_user` WHERE `fk_user` = " . $id_user_tech . ") AND `nom` REGEXP 'Sav([0-9])'";
 //                    $rows = $this->db->getRows(array('usergroup_extrafields ge', ), "fk_object IN ".$where, null, 'object', array('mail'));
 
-                    $sql = $this->db->db->query("SELECT `mail` FROM ".MAIN_DB_PREFIX."usergroup_extrafields ge, ".MAIN_DB_PREFIX."usergroup g WHERE fk_object IN  (SELECT `fk_usergroup` FROM `".MAIN_DB_PREFIX."usergroup_user` WHERE ge.fk_object = g.rowid AND `fk_user` = " . $id_user_tech . ") AND `nom` REGEXP 'Sav([0-9])'");
+                    $sql = $this->db->db->query("SELECT `mail` FROM " . MAIN_DB_PREFIX . "usergroup_extrafields ge, " . MAIN_DB_PREFIX . "usergroup g WHERE fk_object IN  (SELECT `fk_usergroup` FROM `" . MAIN_DB_PREFIX . "usergroup_user` WHERE ge.fk_object = g.rowid AND `fk_user` = " . $id_user_tech . ") AND `nom` REGEXP 'Sav([0-9])'");
 
                     $mailOk = false;
                     if ($this->db->db->num_rows($sql) > 0) {
@@ -3740,6 +3796,30 @@ class BS_SAV extends BimpObject
         }
 
 
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionSetGsxActiToken($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Authentification effectuée avec succès';
+
+        $token = (isset($data['token']) ? $data['token'] : '');
+
+        if (!$token) {
+            $errors[] = 'Token absent';
+        } else {
+            require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_v2.php';
+
+            $gsx = new GSX_v2();
+
+            $errors = $gsx->setActivationToken($token);
+        }
 
         return array(
             'errors'   => $errors,

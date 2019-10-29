@@ -1,8 +1,11 @@
-#createRepairForm {
+#createRepairForm,
+#findRepairsToImportForm,
+{
     display: none;
     text-align: center;
 
-    .createRepairFormContent {
+    .createRepairFormContent,
+    .findRepairsToImportFormContent {
         text-align: left;
         max-width: 600px;
         margin: auto;

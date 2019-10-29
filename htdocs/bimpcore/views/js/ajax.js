@@ -36,7 +36,6 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
     this.type = 'POST';
     this.dataType = 'json';
 
-
     this.display_success = true;
     this.display_errors = true;
     this.display_warnings = true;
@@ -283,7 +282,9 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
                             modal_title = result.modal_title;
                         }
 
-                        bimpModal.newContent(modal_title, result.modal_html, false, '', null);
+                        setTimeout(function() {
+                            bimpModal.newContent(modal_title, result.modal_html, false, '', null);
+                        }, 750);
                     }
 
                     if (!no_callbacks) {

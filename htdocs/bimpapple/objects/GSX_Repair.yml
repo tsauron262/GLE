@@ -1,4 +1,6 @@
 table: bimp_gsx_repair
+icon: fas_tools
+header_delete_btn: 0
 
 labels: 
     name: réparation GSX
@@ -78,9 +80,14 @@ fields_tables:
         title: Informations
         icon: info-circle
         rows: 
-            - field: date_create
-            - field: repair_number
+#            - field: date_create
+#            - field: repair_number
+            - label: type
+              value: 
+                  callback: displayRepairType
             - field: repair_confirm_number
+              show: 
+                  callback: is_v1
             - field: serial
               label: N° de série initial
             - field: new_serial
@@ -100,8 +107,15 @@ fields_tables:
             
 views: 
     default:
+        panel: 0
         title: nom
         rows:
+            - cols: 
+                  - type: object_header
+            - cols: 
+                  - type: custom
+                    custom: 
+                        callback: displayViewMsgs
             - cols: 
                   - type: fields_table
                     col_lg: 6

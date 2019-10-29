@@ -3,6 +3,15 @@
 class indexController extends BimpController
 {
 
+    public function displayHead()
+    {
+        if (!class_exists('GSX_v2')) {
+            require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_v2.php';
+        }
+
+        echo GSX_v2::renderJsVars();
+    }
+
     public function renderTestAssos()
     {
         $equipment = BimpObject::getInstance('bimpsupport', 'Equipment');

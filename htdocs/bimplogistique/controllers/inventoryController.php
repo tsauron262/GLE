@@ -11,6 +11,7 @@ class inventoryController extends BimpController {
         $inventory = BimpCache::getBimpObjectInstance($this->module, 'Inventory', $id_inventory);
         $inventory_line = BimpObject::getInstance($this->module, 'InventoryLine');
         $id_product = 0;
+        
         $id_equipment = 0;
         $err_serializable = 0;
 

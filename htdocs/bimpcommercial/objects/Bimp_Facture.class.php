@@ -40,12 +40,25 @@ class Bimp_Facture extends BimpComm
         parent::iAmAdminRedirect();
     }
 
+    public function isEditable($force_edit = false, &$errors = array()) {
+        if($this->getData('exported') == 1)
+            return 0;
+
+        return parent::isEditable($force_edit, $errors);
+    }
+    
+    
     // Gestion des droits: 
 
     public function canCreate()
     {
         global $user;
         return $user->rights->facture->creer;
+    }
+    
+    public function canDelete() {
+        global $user;
+        return $user->rights->facture->supprimer;
     }
 
     protected function canEdit()
@@ -77,8 +90,9 @@ class Bimp_Facture extends BimpComm
 
 
             case 'addContact':
+                return 1;
             case 'cancel':
-                return $this->can("create");
+                return $user->admin;
 
             case 'classifyPaid':
             case 'convertToReduc':
@@ -101,6 +115,36 @@ class Bimp_Facture extends BimpComm
         }
 
         return parent::canSetAction($action);
+    }
+    
+    
+    public function actionAddContact($data, &$success)
+    {
+        $errors = array();
+        
+        if (isset($data['type']) && (int) $data['type'] === 1) {
+            if (isset($data['tiers_type_contact']) && (int) $data['tiers_type_contact'] &&
+                    BimpTools::getTypeContactCodeById((int) $data['tiers_type_contact']) === 'BILLING' && $data['id_client'] != $this->getData('fk_soc')) {
+                if ((int) $this->getIdContact('external', 'BILLING')) {
+                    $errors[] = 'Un contact facturation a déjà été ajouté';
+                }
+                elseif ((int) $this->getData("fk_statut") != 0) {
+                    $errors[] = 'Facture validé, on ne peut plus ajouté un contact externe.';
+                }
+                else{
+                    $this->updateField('fk_soc', $data['id_client']);
+                    $success .=  " Attention client Changée.";
+                }
+            }
+        }
+        if (count($errors)) {
+            return array(
+                'errors'   => $errors,
+                'warnings' => array()
+            );
+        }
+
+        return parent::actionAddContact($data, $success);
     }
 
     // Getters booléens:
@@ -1197,6 +1241,40 @@ class Bimp_Facture extends BimpComm
     }
 
     // Affichages: 
+    
+      public function displayZoneVenteField() {
+        $zone_vente = $this->getData('zone_vente');
+        $popover = "";
+        
+        switch($zone_vente) {
+            case self::BC_ZONE_FR:
+                $text = "France";
+                break;
+            case self::BC_ZONE_UE:
+                $text = "Union Européenne avec TVA";
+                break;
+            case self::BC_ZONE_UE_SANS_TVA:
+                $text = "Union Européenne sans TVA";
+                $popover = "Si livraison par nos soins sur Union Européenne et que le client nous a fourni son numéro de TVA intracommunautaire";
+                break;
+            case self::BC_ZONE_HORS_UE:
+                $text = "Hors UE";
+                $popover = "Si livraison par nos soins Hors Union Européenne";
+                break;
+        }
+        $html = "";
+        $html .= "<span";
+        if(empty($popover)) {
+            $html .= ">";
+        } else {
+            $html .= " class='bs-popover' ";
+            $html .= BimpRender::renderPopoverData($popover) . ">";
+        }
+        $html .= $text;
+        $html .= "</span>";
+        
+        return $html;
+    }
 
     public function displayPaid()
     {
@@ -2837,6 +2915,12 @@ class Bimp_Facture extends BimpComm
                 $errors[] = BimpTools::getMsgFromArray($lines_errors);
             }
         }
+        
+        $contacts = $this->dol_object->liste_contact(-1, 'external', 0, 'BILLING');
+        foreach($contacts as $contact){
+            if($contact['socid'] != $this->getData("fk_soc"))
+                $errors[] =  'Validation impossible, contact Facturatin client diférente du client de la facture';
+        }
 
         if (!count($errors)) {
             $success = BimpTools::ucfirst($this->getLabel('')) . ' validé';
@@ -3494,5 +3578,33 @@ class Bimp_Facture extends BimpComm
                 $this->updateField('fk_account', $fk_account);
             }
         }
+    }
+    
+    
+    
+    public static function sendInvoiceDraftWhithMail(){
+        $date = new DateTime();
+        $nbDay = 5;
+        $date->sub(new DateInterval('P'.$nbDay.'D'));
+        $sql = $this->db->db->query("SELECT rowid FROM `".MAIN_DB_PREFIX."facture` WHERE `datec` < '".$date->format('Y-m-d')."' AND `fk_statut` = 0");
+        $i = 0;
+        while($ln = $this->db->db->fetch_object($sql)){
+            $obj = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $ln->rowid);
+//            $idC = $obj->getIdCommercial();
+//            if($idC < 1)
+//                $idC = 1;
+//            $userC = new User($this->db->db);
+//            $userC->fetch($idC);
+//            $mail = $userC->email;
+            $userCreate = new User($this->db->db);
+            $userCreate->fetch((int) $obj->getData('fk_user_author'));;
+            $mail = $userCreate->email;
+            if($mail == '')
+                $mail = "tommy@bimp.fr";
+            if(mailSyn2('Facture brouillon à régulariser', $mail, 'admin@bimp.fr', 'Bonjour, vous avez laissé une facture en l’état de brouillon depuis plus de '.$nbDay.' jour(s) : '.$obj->getNomUrl().' <br/>Merci de bien vouloir la régulariser au plus vite.'))
+                    $i++;
+        }
+        $this->resprints = "OK ".$i.' mails';
+        return "OK ".$i.' mails';
     }
 }

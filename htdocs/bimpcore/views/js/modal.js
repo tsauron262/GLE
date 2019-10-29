@@ -263,7 +263,7 @@ function BimpModal($modal) {
     };
 
     this.loadAjaxContent = function ($button, ajax_action, ajax_data, title, loading_text, success_callback, ajax_params, modal_format) {
-        if ($button.hasClass('disabled')) {
+        if ($button != null && $button.hasClass('disabled')) {
             return;
         }
 

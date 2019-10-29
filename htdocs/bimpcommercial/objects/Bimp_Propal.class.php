@@ -30,7 +30,7 @@ class Bimp_Propal extends BimpComm
         if (isset($user->rights->propal->creer)) {
             return (int) $user->rights->propal->creer;
         }
-        return 1;
+        return 0;
     }
 
     public function canEdit()
@@ -430,7 +430,16 @@ class Bimp_Propal extends BimpComm
                                 'close_propal'       => 1
                             )
                         );
-                        $onclick = $commande->getJsLoadModalForm('default', 'Création d\\\'une commande (Signature préalable de la proposition commerciale)', $values, '', 'redirect');
+                        $onclick = "";
+                        $msg = "";
+                        $files = $this->getFilesArray();
+                        if(count($files) < 2)
+                            $msg = addslashes("Il semblerait qu'il n'y est pas de devis signé dans la section documents. Etes-vous sûr de vouloir continuer ?");
+                        if($msg != "")
+                            $onclick .= "if ( confirm( '".$msg."' ) ) {";
+                        $onclick .= $commande->getJsLoadModalForm('default', 'Création d\\\'une commande (Signature préalable de la proposition commerciale)', $values, '', 'redirect');
+                        if($msg != "")
+                            $onclick .= "}";
 
                         $buttons[] = array(
                             'label'   => BimpRender::renderIcon('fas_dolly', 'iconLeft') . 'Accepter et créer commande',
@@ -502,7 +511,17 @@ class Bimp_Propal extends BimpComm
                             'origin_id'         => (int) $this->id,
                         )
                     );
-                    $onclick = $commande->getJsLoadModalForm('default', 'Création d\\\'une commande', $values, '', 'redirect');
+                    $onclick = "";
+                    $msg = "";
+                    $files = $this->getFilesArray();
+                    if(count($files) < 2)
+                        $msg = addslashes("Il semblerait qu'il n'y est pas de devis signé dans la section documents. Etes-vous sûr de vouloir continuer ?");
+                    if($msg != "")
+                        $onclick .= "if ( confirm( '".$msg."' ) ) {";
+                    $onclick .= $commande->getJsLoadModalForm('default', 'Création d\\\'une commande', $values, '', 'redirect');
+                    if($msg != "")
+                        $onclick .= "}";
+                    
                     $buttons[] = array(
                         'label'   => 'Créer une commande',
                         'icon'    => 'fas_dolly',

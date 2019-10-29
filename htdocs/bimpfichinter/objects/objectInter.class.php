@@ -170,5 +170,29 @@ class ObjectInter extends extraFI{
         if(in_array($user->id, array(1, 375, 35, 446, 277, 242, 42, 330, 62)))
             return true;
         parent::iAmAdminRedirect();
+    }  
+    
+    public function getFileFolder(){
+        $folder = static::$dirDol;
+        if($folder == "synopsisfichinter")
+            $folder = "ficheinter";
+        return $folder;
+    }
+    
+    public function getFilesDir()
+    {
+        return DOL_DATA_ROOT . '/'.$this->getFileFolder().'/' . dol_sanitizeFileName($this->getRef()) . '/';
+    }
+
+    public function getFileUrl($file_name)
+    {
+        $dir = $this->getFilesDir();
+        if ($dir) {
+            if (file_exists($dir . $file_name)) {
+                return DOL_URL_ROOT . '/document.php?modulepart='.$this->getFileFolder().'&file=' . htmlentities(dol_sanitizeFileName($this->getRef()) . '/' . $file_name);
+            }
+        }
+
+        return '';
     }
 }

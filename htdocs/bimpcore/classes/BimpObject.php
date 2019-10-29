@@ -1312,7 +1312,7 @@ class BimpObject extends BimpCache
 
         if (!count($errors)) {
             if (!$this->canSetAction($action)) {
-                $errors[] = 'Vous n\'avez pas la permission d\'effectuer cette action';
+                $errors[] = 'Vous n\'avez pas la permission d\'effectuer cette action ('.$action.')';
             } elseif (!$this->isActionAllowed($action, $errors)) {
                 $errors[] = BimpTools::getMsgFromArray($errors, 'Action impossible');
             }
@@ -6759,5 +6759,23 @@ class BimpObject extends BimpCache
     public static function priceToCsv($price)
     {
         return str_replace(array(" ", 'EUR', '€'), "", str_replace(".", ",", $price));
+    }
+    
+    
+    public static function renderListFileForObject($objT, $with_delete = 0){
+        $obj = BimpObject::getBimpObjectInstance('bimpcore', 'BimpFile');
+        $bc_list = new BC_ListTable($obj, 'default', 1, null, 'Liste des fichiers '.$objT->getNomUrl(), 'fas_bars');
+
+        $bc_list->addFieldFilterValue('a.parent_object_name', get_class($objT));
+        $bc_list->params['add_form_values']['fields']['parent_object_name'] = get_class($objT);
+        $bc_list->addFieldFilterValue('a.parent_module', $objT->module);
+        $bc_list->params['add_form_values']['fields']['parent_module'] = $objT->module;
+        $bc_list->addFieldFilterValue('a.id_parent', $objT->id);
+        $bc_list->params['add_form_values']['fields']['id_parent'] = $objT->id;
+        if(!$with_delete)
+            $bc_list->addFieldFilterValue('a.deleted', 0);
+        $bc_list->identifier .= get_class($objT)."-".$objT->id;
+
+        return $bc_list->renderHtml();
     }
 }

@@ -26,7 +26,17 @@ class BimpDolObject extends BimpObject
                     $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Des erreurs sont survenues lors de la génération du PDF');
                 } else {
                     $ref = dol_sanitizeFileName($this->getRef());
-                    $url = DOL_URL_ROOT . '/document.php?modulepart=' . static::$dol_module . '&file=' . $ref . '/' . $ref . '.pdf';
+                    
+                    if (isset(static::$files_module_part)) {
+                        $module_part = static::$files_module_part;
+                    } else {
+                        $module_part = static::$dol_module;
+                    }
+                    $file = DOL_URL_ROOT . '/document.php?modulepart=' . $module_part . '&file='.$ref . '/' . $ref.".pdf";
+                    if(method_exists($this, 'getFileUrl'))
+                            $file = $this->getFileUrl($ref.'.pdf');
+                    
+                    $url = $file ;
                     $success_callback = 'window.open(\'' . $url . '\');';
                 }
             }

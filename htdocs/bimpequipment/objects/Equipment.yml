@@ -528,6 +528,13 @@ lists_cols:
     prix_achat:
         field: prix_achat
         has_total: 1
+    oldSn:
+        custom: 1
+        label: Ancien SN
+        value: 
+            callback:  displayOldSn
+    date_purchase:
+        field: date_purchase
 
 lists:
     default: 
@@ -628,9 +635,9 @@ lists:
         
     inventaireManquant:
         extends: inventaire
-        cols:
-            place: unset
-            place2: unset
+#        cols:
+#            place: unset
+#            place2: unset
         bulk_actions:
             - label: Déplacer dans Vols
               icon: fas_trash-alt

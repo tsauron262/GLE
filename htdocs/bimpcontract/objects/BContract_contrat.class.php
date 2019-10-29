@@ -88,10 +88,16 @@ class BContract_contrat extends BimpDolObject {
         self::CONTRAT_REGLEMENT_AMERICAN_EXPRESS => 'American Express'
     );
     
+    public static $true_objects_for_link = [
+        'commande' => 'Commande',
+        'facture_fourn' => 'Facture fournisseur',
+        'propal' => 'Proposition commercial'
+    ];
+    
     public static $dol_module = 'contract';
     
     function __construct($module, $object_name) {
-        //global $user;
+//        global $user;
         if(BimpTools::getContext() == 'public') {
             $this->redirectMode = 4;
         }
@@ -101,7 +107,49 @@ class BContract_contrat extends BimpDolObject {
         return parent::__construct($module, $object_name);
     }
 
-
+    public function update(&$warnings = array(), $force_update = false) {
+        
+        if(BimpTools::getValue('type_piece')) {
+            $id = 0;
+            switch(BimpTools::getValue('type_piece')) {
+                case 'propal':
+                    $id = BimpTools::getValue('propal_client');
+                    break;
+                case 'commande':
+                    $id = BimpTools::getValue('commande_client');
+                    break;
+                case 'facture_fourn':
+                    $id = BimpTools::getValue('facture_fourn_client');
+                    break;
+            }
+            if($id == 0) {
+                return "Il n'y à pas de pièce " . self::$true_objects_for_link[BimpTools::getValue('type_piece')] . ' pour ce client';
+            } else {
+                if(getElementElement(BimpTools::getValue('type_piece'), 'contrat', $id, $this->id)) {
+                    return "La piece " . self::$true_objects_for_link[BimpTools::getValue('type_piece')] . ' que vous avez choisi est déjà liée à ce contrat';
+                } else {
+                    addElementElement(BimpTools::getValue('type_piece'), 'contrat', $id, $this->id);
+                    $success = "La " . self::$true_objects_for_link[BimpTools::getValue('type_piece')] . " à été liée au contrat avec succès" ;
+                }
+            }
+            return ['success' => $success, 'warnings' => $warnings, 'errors' => $errors];
+        }
+    }
+    
+    public function getListClient($object) {
+        
+        $list = $this->db->getRows($object, 'fk_soc = ' . $this->getData('fk_soc'));
+        $return = [];
+        
+        foreach($list as $l) {
+            $instance = $this->getInstance('bimpcommercial', 'Bimp_' . ucfirst($object), $l->rowid);
+            $return[$instance->id] = $instance->getData('ref') . " - " . $instance->getData('libelle');
+        }
+        //print_r($return);
+        return $return;
+        
+    }
+    
     /* GETTERS */  
     public function getModeReglementClient() {
         global $db;
@@ -139,7 +187,6 @@ class BContract_contrat extends BimpDolObject {
         $return = $return->format('d / m / Y');
         
         return $return;
-        
     }
     
     public function displayRef() {
@@ -182,7 +229,8 @@ class BContract_contrat extends BimpDolObject {
         $buttons = Array();
         if ($this->isLoaded() && BimpTools::getContext() != 'public') {
             $status = $this->getData('statut');
-            $buttons[] = array(
+            if($status == self::CONTRAT_STATUS_VALIDE) {
+                $buttons[] = array(
                 'label'   => 'Générer le PDF du contrat',
                 'icon'    => 'fas_sync',
                 'onclick' => $this->getJsActionOnclick('generatePdf', array(), array())
@@ -192,6 +240,8 @@ class BContract_contrat extends BimpDolObject {
                 'icon'    => 'fas_sync',
                 'onclick' => $this->getJsActionOnclick('generatePdfCourrier', array(), array())
             );
+            }
+            
             $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}';
             if ($this->getData('statut') == self::CONTRAT_STATUS_BROUILLON) {
                 $buttons[] = array(
@@ -212,7 +262,7 @@ class BContract_contrat extends BimpDolObject {
                 );
             }
             
-            if($status == self::CONTRAT_STATUS_VALIDE && $this->getData('date_contrat')) {
+            if($status == self::CONTRAT_STATUS_VALIDE && $this->getData('date_contrat') && !getElementElement('contrat', 'contrat', $this->id)) {
                 $buttons[] = array(
                     'label' => 'Créer un avenant',
                     'icon' => 'fas_plus',
@@ -626,6 +676,7 @@ class BContract_contrat extends BimpDolObject {
 
             $html .= '</tbody>';
             $html .= '</table>';
+            $html .= '<br /><div class="btn-group"><button type="button" class="btn btn-default" aria-haspopup="true" aria-expanded="false" onclick="'. $this->getJsLoadModalForm('add_linked_object', "Lier une pièce au contrat") .'"><i class="fa fa-link iconLeft"></i>Lier une pièce au contrat</button></div>';
 
             $html = BimpRender::renderPanel('Objets liés', $html, '', array(
                         'foldable' => true,
@@ -973,9 +1024,11 @@ class BContract_contrat extends BimpDolObject {
         
         if($clone = $this->dol_object->createFromClone($this->getData('fk_soc'))) {
             $next_contrat = $this->getInstance('bimpcontract', 'BContract_contrat', $clone);
-            $next_contrat->updateField('contrat_source', $first_contrat->id);
-            $next_contrat->updateField('ref', $first_contrat->getData('ref') . "-" . $avLetters[$numero_next]);
             addElementElement('contrat', 'contrat', $this->id, $next_contrat->id);
+            $next_contrat->updateField('contrat_source', $first_contrat->id);
+            $next_contrat->updateField('date_contrat', NULL);
+            $next_contrat->updateField('ref', $first_contrat->getData('ref') . "-" . $avLetters[$numero_next]);
+            
         }
     }
     
@@ -987,6 +1040,12 @@ class BContract_contrat extends BimpDolObject {
         }
         
         return 'Ce contrat est le contrat initial';
+        
+    }
+    
+    public function createFromCommande(Bimp_Commande $commande) {
+        
+        
         
     }
     

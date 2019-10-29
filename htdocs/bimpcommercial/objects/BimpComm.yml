@@ -61,7 +61,8 @@ fields:
         dol_extra_field: 1
         type: id_object
         object: entrepot
-        required: 1
+        required: 
+            callback: useEntrepot
         input: 
             type: search_entrepot
         default_value: 
@@ -71,7 +72,7 @@ fields:
         dol_extra_field: 1
 #        required: 1 (Vraiment requis?)
     ef_type: 
-        label: Secteur
+        label: Secteur (Canal de Vente)
         dol_extra_field: 1
         values: 
             array: secteurs
@@ -216,7 +217,7 @@ fields:
         dol_extra_field: 1
         default_value: 1
         input: 
-            help: Si vous indiquez "Hors-UE", tous les taux de TVA des lignes actuelles seront mis à 0 de manière irréversible.
+            help: Si vous indiquez "Hors-UE" ou "Union Européenne sans TVA", tous les taux de TVA des lignes actuelles seront mis à 0 de manière irréversible.
     
 forms: 
     contact:

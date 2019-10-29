@@ -359,6 +359,11 @@ class modBimpCommercial extends DolibarrModules
                     $this->_load_tables('/'.strtolower($this->name).'/sql/');
                 }
                 
+                //contact commercial
+                $sql[]="INSERT INTO `".MAIN_DB_PREFIX."c_type_contact`(`element`, `source`, `code`, `libelle`, `active`) VALUES ('propal', 'internal','SALESREPSIGN','Commercial', '1');";
+                $sql[]="INSERT INTO `".MAIN_DB_PREFIX."c_type_contact`(`element`, `source`, `code`, `libelle`, `active`) VALUES ('commande', 'internal','SALESREPSIGN','Commercial', '1');";
+                $sql[]="INSERT INTO `".MAIN_DB_PREFIX."c_type_contact`(`element`, `source`, `code`, `libelle`, `active`) VALUES ('facture', 'internal','SALESREPSIGN','Commercial', '1');";
+                
 
                 // Propales: 
                 //$sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'einstein';";

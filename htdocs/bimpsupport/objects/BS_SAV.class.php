@@ -1013,6 +1013,23 @@ class BS_SAV extends BimpObject
         return $html;
     }
 
+    public function renderPropalFilesView()
+    {
+        $html = '';
+        if ((int) $this->isLoaded()) {
+            if ((int) $this->getData('id_propal')) {
+//                $list = new BC_ListTable(BimpObject::getInstance('bimpsupport', 'BS_SavPropalLine'), 'default', 1, (int) $this->getData('id_propal'), 'Lignes du devis');
+//                $html .= $list->renderHtml();
+                $list = new BC_ListTable(BimpObject::getInstance('bimpcore', 'BimpFile'), 'default', 1, null, 'fichiers joint');
+                $list->addFieldFilterValue('parent_module', 'bimpcommercial');
+                $list->addFieldFilterValue('parent_object_name', 'Bimp_Propal');
+                $list->addFieldFilterValue('id_parent', $this->getData('id_propal'));
+                $html .= $list->renderHtml();
+            }
+        }
+        return $html;
+    }
+
     public function renderPropalView()
     {
         $html = '';
@@ -1210,7 +1227,8 @@ class BS_SAV extends BimpObject
                     }
 
                     if ($update) {
-                        $prop_errors = $propal->update();
+                        $warnings = array();
+                        $prop_errors = $propal->update($warnings, true);
                         if (count($prop_errors)) {
                             dol_syslog(BimpTools::getMsgFromArray($prop_errors, 'Echec de la réparation automatique de la propale pour le SAV "' . $this->getRef() . '"'), LOG_ERR);
                         } else {

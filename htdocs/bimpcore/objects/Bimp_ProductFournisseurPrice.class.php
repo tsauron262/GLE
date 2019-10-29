@@ -110,7 +110,7 @@ class Bimp_ProductFournisseurPrice extends BimpObject
             } else {
                 if ((int) BimpTools::getValue('is_cur_pa', 0)) {
                     $prod = $this->getChildObject('product');
-                    $curpa_errors = $prod->setCurrentPaHt($buyprice, (int) $this->id, 'fourn_price', (int) $this->id);
+                    $curpa_errors = $prod->setCurrentPaHt($buyprice, (int) $this->id, 'fourn_price', (int) $result);
                     if (count($curpa_errors)) {
                         $warnings[] = BimpTools::getMsgFromArray($curpa_errors);
                     }

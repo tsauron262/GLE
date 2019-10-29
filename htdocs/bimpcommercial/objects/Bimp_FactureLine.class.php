@@ -16,7 +16,7 @@ class Bimp_FactureLine extends ObjectLine
     public function canCreate()
     {
         global $user;
-        if (/*$user->rights->facture->paiement*/$user->rights->bimpcommercial->factureAnticipe) {
+        if (/* $user->rights->facture->paiement */$user->rights->bimpcommercial->factureAnticipe) {
             return 1;
         }
 
@@ -357,7 +357,7 @@ class Bimp_FactureLine extends ObjectLine
     {
         $errors = array();
 
-        if ((int) $this->getData('type') === self::LINE_PRODUCT) {
+        if ((int) $this->getData('type') === self::LINE_PRODUCT && (int) $this->getData('pa_editable')) {
             $product = $this->getProduct();
             if (!BimpObject::objectLoaded($product)) {
                 $errors[] = 'Produit absent';

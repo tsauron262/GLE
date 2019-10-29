@@ -1486,7 +1486,7 @@ class BL_CommandeFournReception extends BimpObject
                 }
 
                 if (count($rec_errors)) {
-                    $errors[] = BimpTools::getMsgFromArray($rec_warnings, 'Echec de la création de la nouvelle réception');
+                    $errors[] = BimpTools::getMsgFromArray(array_merge($rec_errors,$rec_warnings), 'Echec de la création de la nouvelle réception');
                 }
             }
 

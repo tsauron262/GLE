@@ -33,10 +33,10 @@ class BimpComm extends BimpDolObject
         12 => 'an'
     );
     public static $zones_vente = array(
-        self::BC_ZONE_FR      => 'France',
-        self::BC_ZONE_UE      => 'Union Européenne avec TVA',
+        self::BC_ZONE_FR          => 'France',
+        self::BC_ZONE_UE          => 'Union Européenne avec TVA',
         self::BC_ZONE_UE_SANS_TVA => 'Union Européenne sans TVA',
-        self::BC_ZONE_HORS_UE => 'Hors UE'
+        self::BC_ZONE_HORS_UE     => 'Hors UE'
     );
     protected $margins_infos = null;
 
@@ -44,22 +44,6 @@ class BimpComm extends BimpDolObject
     {
         $this->useCaisseForPayments = BimpCore::getConf('use_caisse_for_payments');
         parent::__construct($module, $object_name);
-    }
-    
-    public function useEntrepot(){
-        return !BimpCore::getConf("NOT_USE_ENTREPOT");
-    }
-
-    public function getIdContact($type = 'external', $code = 'SHIPPING')
-    {
-        if ($this->isLoaded()) {
-            $contacts = $this->dol_object->getIdContact($type, $code);
-            if (isset($contacts[0]) && $contacts[0]) {
-                return (int) $contacts[0];
-            }
-        }
-
-        return 0;
     }
 
     // Gestion des droits: 
@@ -73,6 +57,11 @@ class BimpComm extends BimpDolObject
         }
 
         return 0;
+    }
+
+    public function useEntrepot()
+    {
+        return !BimpCore::getConf("NOT_USE_ENTREPOT");
     }
 
     // Getters booléens: 
@@ -1126,7 +1115,7 @@ class BimpComm extends BimpDolObject
     {
         $zone = self::BC_ZONE_FR;
         $id_country = $client->getData('fk_pays');
-        
+
         if (!(int) $id_country) {
             $id_country = BimpCore::getConf('default_id_country');
         }
@@ -1137,7 +1126,7 @@ class BimpComm extends BimpDolObject
                 if ($country->code === 'FR') {
                     $zone = self::BC_ZONE_FR;
                 } elseif ((int) $country->in_ue) {
-                    if($client->getData('tva_intra')) {
+                    if ($client->getData('tva_intra')) {
                         $zone = self::BC_ZONE_UE_SANS_TVA;
                     } else {
                         $zone = self::BC_ZONE_UE;
@@ -1254,6 +1243,18 @@ class BimpComm extends BimpDolObject
         }
 
         return $return;
+    }
+
+    public function getIdContact($type = 'external', $code = 'SHIPPING')
+    {
+        if ($this->isLoaded()) {
+            $contacts = $this->dol_object->getIdContact($type, $code);
+            if (isset($contacts[0]) && $contacts[0]) {
+                return (int) $contacts[0];
+            }
+        }
+
+        return 0;
     }
 
     // Getters - Overrides BimpObject
@@ -1509,8 +1510,9 @@ class BimpComm extends BimpDolObject
 
         return $html;
     }
-    
-    public function getIdCommercial(){
+
+    public function getIdCommercial()
+    {
         if ($this->isLoaded()) {
             $contacts = $this->dol_object->getIdContact('internal', 'SALESREPFOLL');
             if (isset($contacts[0]) && $contacts[0]) {
@@ -1523,7 +1525,7 @@ class BimpComm extends BimpDolObject
     public function displayCommercial()
     {
         $id = $this->getIdCommercial();
-        if($id > 0){
+        if ($id > 0) {
             BimpTools::loadDolClass('contact');
             $user = new User($this->db->db);
             if ($user->fetch((int) $id) > 0) {
@@ -1709,8 +1711,9 @@ class BimpComm extends BimpDolObject
         }
         return $html;
     }
-    
-    public function renderExtraFile(){
+
+    public function renderExtraFile()
+    {
         $html = "";
         if ($this->isLoaded()) {
             if ($this->isDolObject()) {
@@ -1738,17 +1741,17 @@ class BimpComm extends BimpDolObject
                         default:
                             break;
                     }
-                    if($class != ""){
+                    if ($class != "") {
                         $objT = BimpCache::getBimpObjectInstance($module, $class, $id);
-                        if($objT->isLoaded()){
+                        if ($objT->isLoaded()) {
                             $html .= $this->renderListFileForObject($objT);
                         }
                     }
                 }
             }
         }
-        
-        
+
+
         return $html;
     }
 
@@ -2108,8 +2111,8 @@ class BimpComm extends BimpDolObject
 //                    $html .= '</td>';
                     $htmlP .= '</tr>';
                 }
-            } 
-            if($htmlP == "") {
+            }
+            if ($htmlP == "") {
                 $htmlP .= '<tr>';
                 $htmlP .= '<td colspan="5">' . BimpRender::renderAlerts('Aucun objet lié', 'info') . '</td>';
                 $htmlP .= '</tr>';
@@ -2460,7 +2463,7 @@ class BimpComm extends BimpDolObject
         return $errors;
     }
 
-    public function createLinesFromOrigin($origin, $inverse_prices = false)
+    public function createLinesFromOrigin($origin, $inverse_prices = false, $pa_editable = true)
     {
         $errors = array();
 
@@ -2495,6 +2498,10 @@ class BimpComm extends BimpDolObject
                 'editable'  => $line->getData('Editable'),
                 'remisable' => $line->getData('remisable'),
             ));
+
+            if ($line_instance->field_exists('pa_editable')) {
+                $line_instance->set('pa_editable', (int) $pa_editable);
+            }
 
             if ($line->getData('linked_object_name')) {
                 $line_instance->set('deletable', 1);
@@ -3043,7 +3050,7 @@ class BimpComm extends BimpDolObject
     {
         $errors = array();
         $warnings = array();
-        $success = 'Ajout du contact effectué avec succès'.$success;
+        $success = 'Ajout du contact effectué avec succès' . $success;
 
         if (!$this->isLoaded()) {
             $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
@@ -3527,14 +3534,13 @@ class BimpComm extends BimpDolObject
             if ($this->field_exists('remise_globale')) {
                 $this->set('remise_globale', 0);
             }
-            
         }
-        if($this->field_exists('zone_vente')) {
-                $client = $this->getInstance('bimpcore', 'Bimp_Societe', BimpTools::getValue('fk_soc'));
-                if($client->isLoaded()) {
-                   $this->set('zone_vente', $this->getZoneByCountry($client));
-                }
+        if ($this->field_exists('zone_vente')) {
+            $client = $this->getInstance('bimpcore', 'Bimp_Societe', BimpTools::getValue('fk_soc'));
+            if ($client->isLoaded()) {
+                $this->set('zone_vente', $this->getZoneByCountry($client));
             }
+        }
 
         $errors = parent::create($warnings, $force_create);
 

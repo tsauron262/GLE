@@ -33,6 +33,7 @@ class Interfacevalidate extends DolibarrTriggers
     public function runTrigger($action, $object, User $user, Translate $langs, Conf $conf)
     {
         global $conf;
+        $errors = array();
         
         
         if ($action == 'ORDER_VALIDATE' || $action == 'PROPAL_VALIDATE' || $action == 'BILL_VALIDATE') {
@@ -64,14 +65,24 @@ class Interfacevalidate extends DolibarrTriggers
         if ($action == 'ORDER_VALIDATE' || $action == 'BILL_VALIDATE') {
             if ($action == 'ORDER_VALIDATE')
                 $bimp_object = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $object->id);
+            
+                $client = $bimp_object->getChildObject('client');
+                if(is_object($client) && $client->isLoaded()){
+                    if(!$client->canBuy($errors)){
+                        $object->errors = array_merge($object->errors, $errors);
+                        return -1;
+                    }
+                }
+            
             else {
                 $bimp_object = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $object->id);
                 $bimp_object->onValidate();
             }
+            
+            
 
             if (BimpObject::objectLoaded($bimp_object)) {
                 // Véfication de la validité des lignes: 
-                $errors = array();
                 if (!$bimp_object->areLinesValid($errors)) {
                     $object->errors = array_merge($object->errors, $errors);
                     return -1;

@@ -196,12 +196,12 @@ fields:
 #    remise_client: 
 #        label: Remise
 #        type: int
-#    mode_reglement: 
-#        label: Mode de réglement
-#        type: int
-#    cond_reglement: 
-#        label: Conditions de réglement
-#        type: int
+    mode_reglement: 
+        label: Mode de réglement
+        type: int
+    cond_reglement_id: 
+        label: Conditions de réglement
+        type: int
 #    mode_reglement_supplier:
 #        label: Mode de réglement fournisseur
 #        type: int

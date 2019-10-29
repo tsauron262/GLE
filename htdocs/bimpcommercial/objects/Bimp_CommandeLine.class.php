@@ -2249,21 +2249,23 @@ class Bimp_CommandeLine extends ObjectLine
                 $html .= '</div>';
             } else {
                 $html .= BimpRender::renderAlerts('Aucune facture créée pour cette commande');
-                $html .= '<div class="buttonsContainer align-center">';
-                $onclick = $commande->getJsActionOnclick('linesFactureQties', array(
-                    'new_facture'       => 1,
-                    'id_client'         => (int) $commande->getData('fk_soc'),
-                    'id_contact'        => (int) $commande->dol_object->contactid,
-                    'id_cond_reglement' => (int) $commande->getData('fk_cond_reglement')
-                        ), array(
-                    'form_name'      => 'invoice',
-                    'on_form_submit' => 'function ($form, extra_data) { return onFactureFormSubmit($form, extra_data); }'
-                ));
+                if($commande->isActionAllowed('linesFactureQties') && $commande->canSetAction('linesFactureQties')){
+                    $html .= '<div class="buttonsContainer align-center">';
+                    $onclick = $commande->getJsActionOnclick('linesFactureQties', array(
+                        'new_facture'       => 1,
+                        'id_client'         => (int) $commande->getData('fk_soc'),
+                        'id_contact'        => (int) $commande->dol_object->contactid,
+                        'id_cond_reglement' => (int) $commande->getData('fk_cond_reglement')
+                            ), array(
+                        'form_name'      => 'invoice',
+                        'on_form_submit' => 'function ($form, extra_data) { return onFactureFormSubmit($form, extra_data); }'
+                    ));
 
-                $html .= '<button class="btn btn-default btn-large" onclick="' . $onclick . '">';
-                $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Nouvelle facture';
-                $html .= '</button>';
-                $html .= '</div>';
+                    $html .= '<button class="btn btn-default btn-large" onclick="' . $onclick . '">';
+                    $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Nouvelle facture';
+                    $html .= '</button>';
+                    $html .= '</div>';
+                } 
             }
         }
 

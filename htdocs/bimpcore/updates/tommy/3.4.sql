@@ -1,0 +1,1 @@
+ALTER TABLE `llx_facture` ADD `marge` double(24,8);

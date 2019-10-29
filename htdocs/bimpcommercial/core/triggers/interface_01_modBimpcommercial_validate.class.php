@@ -63,7 +63,7 @@ class Interfacevalidate extends DolibarrTriggers
         }
 
         if ($action == 'ORDER_VALIDATE' || $action == 'BILL_VALIDATE') {
-            if ($action == 'ORDER_VALIDATE')
+            if ($action == 'ORDER_VALIDATE'){
                 $bimp_object = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $object->id);
             
                 if(is_object($bimp_object) && $bimp_object->isLoaded()){
@@ -75,6 +75,7 @@ class Interfacevalidate extends DolibarrTriggers
                         }
                     }
                 }
+            }
             
             else {
                 $bimp_object = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $object->id);

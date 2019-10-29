@@ -273,6 +273,18 @@ filters_panels:
                     type: select
                     options: 
                         callback: getCategoriesArray
+            categorie:
+                field: categorie
+                child: product
+            collection:
+                field: collection
+                child: product
+            nature:
+                field: nature
+                child: product
+            famille:
+                field: famille
+                child: product
         
 lists_cols: 
     facture: 
@@ -331,6 +343,18 @@ lists_cols:
         label: Type matériel
         value: 
             callback: displayTypeMateriel
+    categorie:
+        field: categorie
+        child: product
+    collection:
+        field: collection
+        child: product
+    nature:
+        field: nature
+        child: product
+    famille:
+        field: famille
+        child: product
     
 lists: 
     default: 

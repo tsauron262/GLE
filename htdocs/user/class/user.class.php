@@ -2701,7 +2701,13 @@ class User extends CommonObject
                 
                 $info['telephonenumber'] = $this->office_phone != "" ? $this->office_phone  : "n/c";
                 $info['mobile'] = $this->user_mobile != "" ? $this->user_mobile  : "n/c";
-
+                
+                
+                foreach(array('telephonenumber', 'mobile') as $nom)
+                        if($info[$nom] == "" || $info[$nom] == " ")
+                            $info[$nom] = "N/C";
+                            //unset($info[$nom]);
+                
 		return $info;
 	}
 

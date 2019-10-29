@@ -1112,6 +1112,7 @@ class BS_SAV extends BimpObject
 
             $list = new BC_ListTable($pret, 'sav');
             $list->addFieldFilterValue('id_sav', $this->id);
+            $list->addFieldFilterValue('id_entrepot', $this->getData('id_entrepot'));
 
             $html = $list->renderHtml();
         }

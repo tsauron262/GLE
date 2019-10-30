@@ -21,7 +21,9 @@ class BTC_export extends BimpObject {
     
     public function export($element, $origin) {
         //mkdir($this->export_directory . "BIMPtoCEGID/", 0777, true);
-        //rmdir($this->export_directory . "BIMPtoCEGID/");
+        //rmdir($this->export_directory . "BIMPtoCEGID/"); die();
+        //unlink($this->export_directory . 'BIMPtoCEGID/1_BIMPtoCEGID_(VENTES)_28|10|2019.TRA');
+        //unlink($this->export_directory . 'BIMPtoCEGID/1_BIMPtoCEGID_(VENTES)_30|10|2019.TRA'); die();
         if($origin == 'cronJob') {
             $function_name = 'export_' . $element;
         
@@ -55,7 +57,7 @@ class BTC_export extends BimpObject {
                 if(!file_exists($this->export_directory . "BIMPtoCEGID/" . $file)) {
                     if(!file_exists($this->export_directory . "BIMPtoCEGID/")){
                         mkdir($this->export_directory . "BIMPtoCEGID/", 0777, true);
-                        mkdir($this->export_directory . "exported/", 0777, true);
+                        mkdir($this->export_directory . "BIMPtoCEGID/exported/", 0777, true);
                     }
                     $create_file = fopen($this->export_directory . "BIMPtoCEGID/" . $file, 'a+');
                     fwrite($create_file, $this->head_tra());
@@ -63,9 +65,8 @@ class BTC_export extends BimpObject {
                 }
             }
         }
-
         if(!is_null($element)) {
-            return $daily_files[$element];
+            return 'BIMPtoCEGID/' . $daily_files[$element];
         }
     }
     
@@ -102,7 +103,7 @@ class BTC_export extends BimpObject {
      * @param type $ref
      */
     
-    private function export_paiement($ref = null) {
+    private function export_paiement($ref = 'PAY1909-70596') {
         $liste = $this->get_paiements_for_export($ref);
         $forced = (is_null($ref)) ? false : true;
         if(count($liste)) {
@@ -110,9 +111,9 @@ class BTC_export extends BimpObject {
             foreach ($liste as $paiement) {
                 $error = $instance->export($paiement->rowid, $paiement->fk_paiement, $forced);
                 if($error <= 0) {
-                    
-                } else {
                     $this->addTaskAlert($error, $paiement->rowid);
+                } else {
+                    
                 }
             }
         } else {
@@ -127,6 +128,11 @@ class BTC_export extends BimpObject {
             $instance = $this->getInstance('bimptocegid', 'BTC_export_facture_fourn');
             foreach($liste as $facture_fourn) {
                 $error = $instance->export($facture_fourn->rowid, $forced);
+                if($error <= 0) {
+                    
+                } else {
+                    
+                }
             }
         } else {
             echo BimpRender::renderAlerts("Il n'y à plus de factures fournisseur à exporté", 'warning', false);
@@ -145,6 +151,12 @@ class BTC_export extends BimpObject {
             return $this->db->getRows('facture_fourn', 'ref="'.$ref.'"');
         }
         return $this->db->getRows('facture_fourn', 'exported = 0 AND fk_statut IN(1,2) AND datec BETWEEN "'.$this->date_export.' 00:00:00" AND "'.$this->date_export.' 23:59:59"', $this->sql_limit);
+    }
+    
+    protected function get_facture_client_for_export($ref) {
+        if(!is_null($ref)) {
+            return $this->db->getRows('facture_fourn', 'facnumber="'.$ref.'"');
+        }
     }
     
     /**
@@ -277,9 +289,9 @@ class BTC_export extends BimpObject {
     protected function write_tra($ecriture, $file) {
         $opened_file = fopen($this->export_directory . $file, 'a+');
         if(fwrite($opened_file, $ecriture)) {
-            return 1;
+            return true;
         } else {
-            return 0;
+            return false;
         }
     }
     
@@ -290,13 +302,27 @@ class BTC_export extends BimpObject {
         return false;
     }
     
-    protected function rectifications_ecarts($lignes_facture, $ecart) {
+    protected function rectifications_ecarts($lignes_facture, $ecart, $type_ecriture) {
+        $comptes_reatribuable = 
+            [
+                'achat' => ["607", "604"],
+                'vente' => ["707","706"]
+            ];
+        
         $reactribution_faite = false;
         foreach($lignes_facture as $compte_comptable => $infos) {
-            var_dump($compte_comptable);
-            if(strstr($compte_comptable, 607)) {
-                echo 'Trouver pour reatribution';
+            $compte_general = substr($compte_comptable, 0, 3);
+            if(in_array($compte_general, $comptes_reatribuable[$type_ecriture]) && !$reactribution_faite) {
+                echo $ecart;
+                $lignes_facture[$compte_comptable]['HT'] += $ecart;
+                
+                $reactribution_faite = true;
+            } else {
+                echo 'pas OK';
             }
+            
+            print_r($lignes_facture);
+            
         }
         
         return [];

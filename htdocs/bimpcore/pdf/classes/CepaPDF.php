@@ -39,7 +39,7 @@ class CepaPDF extends BimpDocumentPDF
         $tplidx = $this->pdf2->importPage(1, "/MediaBox");
         $size = $this->pdf2->getTemplateSize($tplIdx);
         $this->pdf2->useTemplate($tplidx, null, null, $size['w'], $size['h'], true);
-        $file = $this->getFilePath() . $this->getFileName().'_cepa.pdf';
+        $file = $this->getFilePath() . $this->getFileName().'_sepa.pdf';
         
         $soc = BimpCache::getBimpObjectInstance("bimpcore", "Bimp_Societe", $this->object->id);
         

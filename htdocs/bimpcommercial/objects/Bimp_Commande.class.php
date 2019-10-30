@@ -118,66 +118,66 @@ class Bimp_Commande extends BimpComm
         }
         return parent::canSetAction($action);
     }
-    
-    public function renderExtraFile(){
+
+    public function renderExtraFile()
+    {
         $html = parent::renderExtraFile();
-        
-        
+
+
         if ($this->isLoaded()) {
-            $sql = $this->db->db->query("SELECT rowid FROM `llx_synopsisdemandeinterv` WHERE `fk_commande` = ".$this->id);
-            while ($ln = $this->db->db->fetch_object($sql)){
+            $sql = $this->db->db->query("SELECT rowid FROM `llx_synopsisdemandeinterv` WHERE `fk_commande` = " . $this->id);
+            while ($ln = $this->db->db->fetch_object($sql)) {
                 $objT = BimpCache::getBimpObjectInstance("bimpfichinter", 'Bimp_Demandinter', $ln->rowid);
-                if($objT->isLoaded()){
+                if ($objT->isLoaded()) {
                     $html .= $this->renderListFileForObject($objT);
                 }
             }
 
-            $sql = $this->db->db->query("SELECT rowid FROM `llx_synopsis_fichinter` WHERE `fk_commande` = ".$this->id);
-            while ($ln = $this->db->db->fetch_object($sql)){
+            $sql = $this->db->db->query("SELECT rowid FROM `llx_synopsis_fichinter` WHERE `fk_commande` = " . $this->id);
+            while ($ln = $this->db->db->fetch_object($sql)) {
                 $objT = BimpCache::getBimpObjectInstance("bimpfichinter", 'Bimp_Fichinter', $ln->rowid);
-                if($objT->isLoaded()){
+                if ($objT->isLoaded()) {
                     $html .= $this->renderListFileForObject($objT);
                 }
             }
         }
-        
-        
+
+
         return $html;
     }
-    
-    
+
     public function renderLinkedObjectsTable()
     {
         $htmlP = "";
         $db = $this->db->db;
-        
-        
-        $sql = $db->query("SELECT rowid FROM `llx_synopsisdemandeinterv` WHERE `fk_commande` = ".$this->id);
-        while ($ln = $db->fetch_object($sql)){
+
+
+        $sql = $db->query("SELECT rowid FROM `llx_synopsisdemandeinterv` WHERE `fk_commande` = " . $this->id);
+        while ($ln = $db->fetch_object($sql)) {
             $inter = BimpCache::getBimpObjectInstance("bimpfichinter", 'Bimp_Demandinter', $ln->rowid);
             $icon = $inter->params['icon'];
             $htmlP .= '<tr>';
-            $htmlP .= '<td><strong>'.BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($inter->getLabel()).'</strong></td>';
+            $htmlP .= '<td><strong>' . BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($inter->getLabel()) . '</strong></td>';
             $htmlP .= '<td>' . $inter->getNomUrl(0) . '</td>';
-            $htmlP .= '<td>' . $inter->displayData("date_valid"). '</td>';
+            $htmlP .= '<td>' . $inter->displayData("date_valid") . '</td>';
             $htmlP .= '<td>' . $inter->displayData("total_ht") . '</td>';
             $htmlP .= '<td>' . $inter->displayData("fk_statut") . '</td>';
             $htmlP .= '</tr>';
         }
-        
-        $sql = $db->query("SELECT rowid FROM `llx_synopsis_fichinter` WHERE `fk_commande` = ".$this->id);
-        while ($ln = $db->fetch_object($sql)){
+
+        $sql = $db->query("SELECT rowid FROM `llx_synopsis_fichinter` WHERE `fk_commande` = " . $this->id);
+        while ($ln = $db->fetch_object($sql)) {
             $inter = BimpCache::getBimpObjectInstance("bimpfichinter", 'Bimp_Fichinter', $ln->rowid);
             $icon = $inter->params['icon'];
             $htmlP .= '<tr>';
-            $htmlP .= '<td><strong>'.BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($inter->getLabel()).'</strong></td>';
+            $htmlP .= '<td><strong>' . BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($inter->getLabel()) . '</strong></td>';
             $htmlP .= '<td>' . $inter->getNomUrl(0) . '</td>';
-            $htmlP .= '<td>' . $inter->displayData("date_valid"). '</td>';
+            $htmlP .= '<td>' . $inter->displayData("date_valid") . '</td>';
             $htmlP .= '<td>' . $inter->displayData("total_ht") . '</td>';
             $htmlP .= '<td>' . $inter->displayData("fk_statut") . '</td>';
             $htmlP .= '</tr>';
         }
-        
+
         $html = parent::renderLinkedObjectsTable($htmlP);
 
 //        if ($this->isLoaded()) {
@@ -2898,12 +2898,13 @@ class Bimp_Commande extends BimpComm
     public function create(&$warnings = array(), $force_create = false)
     {
         $errors = array();
+        $propal = null;
+
+        $origin = BimpTools::getValue('origin', '');
+        $origin_id = (int) BimpTools::getValue('origin_id', 0);
 
         // Fermeture de la propale si nécessaire
         if ((int) BimpTools::getValue('close_propal', 0)) {
-            $origin = BimpTools::getValue('origin', '');
-            $origin_id = (int) BimpTools::getValue('origin_id', 0);
-
             if ($origin === 'propal') {
                 if (!$origin_id) {
                     $errors[] = 'ID de la proposition commerciale d\'origine absent';
@@ -2938,7 +2939,23 @@ class Bimp_Commande extends BimpComm
 
         $this->set('date_creation', date('Y-m-d H:i:s'));
 
-        return parent::create($warnings, $force_create);
+        $errors = parent::create($warnings, $force_create);
+
+        if (!count($errors)) {
+            if ($origin === 'propal' && (int) $origin_id) {
+                if (!BimpObject::objectLoaded($propal)) {
+                    $propal = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $origin_id);
+                }
+                if (BimpObject::objectLoaded($propal)) {
+                    BimpObject::loadClass('bimpcore', 'BimpNote');
+                    $note_errors = BimpNote::copyObjectNotes($propal, $this);
+
+                    if (count($note_errors)) {
+                        $warnings[] = BimpTools::getMsgFromArray($note_errors, 'Erreurs lors de la copie des notes de la propales');
+                    }
+                }
+            }
+        }
     }
 
     public function update(&$warnings = array(), $force_update = false)

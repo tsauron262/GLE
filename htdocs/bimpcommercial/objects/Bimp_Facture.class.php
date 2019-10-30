@@ -1197,13 +1197,24 @@ class Bimp_Facture extends BimpComm
     {
         $items = array();
         if ($this->isLoaded()) {
-            $contacts = $this->dol_object->liste_contact(-1, 'external', 0, 'BILLING');
+            $contacts = $this->dol_object->liste_contact(-1, 'external', 0, 'BILLING2');
             $emails = array();
             foreach ($contacts as $item) {
                 if ((string) $item['email'] && (int) $item['id'] && !in_array($item['id'], $items)) {
                     $emails[] = $item['email'];
 //                    $items[(int) $item['id']] = $item['libelle'] . ': ' . $item['firstname'] . ' ' . $item['lastname'] . ' (' . $item['email'] . ')';
                     $items[] = $item['id'];
+                }
+            }
+            if(count($items == 0)){
+                $contacts = $this->dol_object->liste_contact(-1, 'external', 0, 'BILLING');
+                $emails = array();
+                foreach ($contacts as $item) {
+                    if ((string) $item['email'] && (int) $item['id'] && !in_array($item['id'], $items)) {
+                        $emails[] = $item['email'];
+    //                    $items[(int) $item['id']] = $item['libelle'] . ': ' . $item['firstname'] . ' ' . $item['lastname'] . ' (' . $item['email'] . ')';
+                        $items[] = $item['id'];
+                    }
                 }
             }
         }
@@ -2891,7 +2902,7 @@ class Bimp_Facture extends BimpComm
         $contacts = $this->dol_object->liste_contact(-1, 'external', 0, 'BILLING');
         foreach ($contacts as $contact) {
             if ($contact['socid'] != $this->getData("fk_soc"))
-                $errors[] = 'Validation impossible, contact Facturatin client diférente du client de la facture';
+                $errors[] = 'Validation impossible, contact client adresse de facturation diférente du client de la facture';
         }
 
         if (!count($errors)) {
@@ -3068,7 +3079,7 @@ class Bimp_Facture extends BimpComm
             if (isset($data['tiers_type_contact']) && (int) $data['tiers_type_contact'] &&
                     BimpTools::getTypeContactCodeById((int) $data['tiers_type_contact']) === 'BILLING' && $data['id_client'] != $this->getData('fk_soc')) {
                 if ((int) $this->getIdContact('external', 'BILLING')) {
-                    $errors[] = 'Un contact facturation a déjà été ajouté';
+                    $errors[] = 'Une adresse de facturation a déjà été ajouté';
                 } elseif ((int) $this->getData("fk_statut") != 0) {
                     $errors[] = 'Facture validée, on ne peut plus ajouter un contact externe';
                 } else {

@@ -94,7 +94,7 @@
                     <data name="issueCode" required="1"></data>
                     <data name="reproducibility" required="0"></data>
                     <data name="priority" required="1"></data>
-                    <data name="type" required="1">
+                    <data name="type" required="1" default="CUST">
                         <label>Problème</label>
                         <values>
                             <val val="TECH">Constaté et vérifié par le technicien</val>
@@ -113,16 +113,18 @@
                     <data name="coverageOption" required="0"></data>
                     <data name="pricingOption" required="0"></data>
                     <data name="fromConsignedStock" required="0"></data>
+                    <data name="kgbDeviceDetail" required="0">
+                        <datas>
+                            <data name="id" required="1">
+                                <label>Nouveau numéro de série</label>
+                            </data>
+                        </datas>
+                    </data>
                     <data name="componentIssue" required="0">
                         <datas>
                             <data name="componentCode" required="1"></data>
                             <data name="issueCode" required="1"></data>
                             <data name="reproducibility" required="1"></data>
-                        </datas>
-                    </data>
-                    <data name="kgbDeviceDetail" required="0">
-                        <datas>
-                            <data name="id" required="1"></data>
                         </datas>
                     </data>
                 </datas>
@@ -153,7 +155,13 @@
             
             <data name="attachments" required="0" multiple="1" maxitems="3">
                 <datas>
-                    <data name="file" donotprocess="1"></data>
+                    <data name="fileOrigin" donotprocess="1" default="sav"></data>
+                    <data name="savFile" donotprocess="1">
+                        <display_if input_name="attachments_fileOrigin_idx" show_values="sav"></display_if>
+                    </data>
+                    <data name="file" donotprocess="1">
+                        <display_if input_name="attachments_fileOrigin_idx" show_values="user"></display_if>
+                    </data>
                     <data name="type" required="1">
                         <values>
                             <val val="POP">POP</val>

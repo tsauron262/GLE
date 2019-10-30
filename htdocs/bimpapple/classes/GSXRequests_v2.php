@@ -287,14 +287,12 @@ class GSX_Request_v2
                 $html .= BC_Field::renderDisplayifDataStatic($display_if);
             }
             $html .= '>';
-            if (isset($defs['label'])) {
-                $html .= '<div class="inputLabel col-xs-12 col-sm-4 col-md-3">';
-                $html .= $defs['label'];
-                if ($required) {
-                    $html .= '<sup>*</sup>';
-                }
-                $html .= '</div>';
+            $html .= '<div class="inputLabel col-xs-12 col-sm-4 col-md-3">';
+            $html .= $label;
+            if ($required) {
+                $html .= '<sup>*</sup>';
             }
+            $html .= '</div>';
 
             $inputValue = (isset($values[$valuesName]) ? $values[$valuesName] : $default);
 
@@ -440,6 +438,7 @@ class GSX_Request_v2
                             } else {
                                 $inputValue = 0;
                             }
+                            
                         case 'bool':
                             $html .= BimpInput::renderInput('toggle', $inputName, $inputValue, array());
                             break;

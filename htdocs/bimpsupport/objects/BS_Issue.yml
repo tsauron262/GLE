@@ -28,6 +28,7 @@ fields:
         label: Type
         values: 
             array: types
+        default_value: CUST
         required: 1
             
     category_code: 

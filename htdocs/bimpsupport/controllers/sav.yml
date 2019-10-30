@@ -95,20 +95,11 @@ sections:
                               callback: 
                                   method: renderLoadPartsButton
                                   params:
-                                      object: sav
-          - id: notes
-            title: Notes
-            struct:
-                type: notes
-                notes: 
-                    object: sav
-                    visibility: 4
+                                      object: sav                    
           - id: gsx
             title: <i class="fa fa-apple iconLeft"></i>GSX
             content: 
                 callback: renderGsx
-                
-                
           - id: files
             title: Fichiers
             struct: 
@@ -117,6 +108,13 @@ sections:
                     callback: 
                         method: renderPropalFilesView
                         object: sav
+          - id: notes
+            title: Notes
+            struct:
+                type: notes
+                notes: 
+                    object: sav
+                    visibility: 4
                     
                     
     - type: buttons

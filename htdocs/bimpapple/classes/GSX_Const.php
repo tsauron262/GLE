@@ -8,6 +8,9 @@ class GSX_Const
     public static $debug_mode = false;
     public static $log_errors = true;
     public static $numbersNumChars = 10;
+    public static $sav_files = array(
+        'test' => 'TEST'
+    );
     public static $urls = array(
         'login'            => array(
             'test' => 'https://gsx2-uat.apple.com/gsx/api/login',
@@ -34,7 +37,7 @@ class GSX_Const
             'repairDetails'  => 'repair/details',
             'repairCreate'   => 'repair/create',
             'repairUpdate'   => 'repair/update',
-            'filesUpload'     => 'attachment/upload-access',
+            'filesUpload'    => 'attachment/upload-access',
             'articleLookup'  => 'content/article/lookup',
         )
     );
@@ -52,7 +55,8 @@ class GSX_Const
         )
     );
     public static $test_ids = array(
-        'apple_id'    => 'olys_tech_aprvlreqrd@olys.com',
+//        'apple_id'    => 'olys_tech_aprvlreqrd@olys.com',
+        'apple_id'    => 'olys_tech_aprvlnotreqrd@olys.com',
         'apple_pword' => 'Apple@214',
         'sold_to'     => '897316',
         'ship_to'     => '897316'
@@ -68,13 +72,13 @@ class GSX_Const
         'CRBR' => 'Carry-In Return Before Replace',
         'CINR' => 'Carry-In Non-Replenishment',
         'MINS' => 'Mail-In Return to Service Location',
-        'MINC' => 'Mail-In Return to Customer',
-        'DION' => 'Onsite Service Direct',
-        'INON' => 'Onsite Service Indirect',
-        'OSR'  => 'Onsite Service Facilitated',
-        'OSCR' => 'Onsite Service Pickup',
+//        'MINC' => 'Mail-In Return to Customer',
+//        'DION' => 'Onsite Service Direct',
+//        'INON' => 'Onsite Service Indirect',
+//        'OSR'  => 'Onsite Service Facilitated',
+//        'OSCR' => 'Onsite Service Pickup',
         'WUMS' => 'Whole Unit Mail-In Return to Service Location',
-        'WUMC' => 'Whole Unit Mail-In Return to Customer',
+//        'WUMC' => 'Whole Unit Mail-In Return to Customer',
         'SVNR' => 'service Non-Repair'
     );
     public static $service_types = array(
@@ -124,12 +128,12 @@ class GSX_Const
     );
     public static $coverage_options = array(
         ''               => '',
-        'BATTERY'        => 'Billable battery repair',
-        'DISPLAY'        => 'Billable display repair',
-        'VMI_YELLOW'     => 'VMI Yellow, service price',
-        'APPLECARE_PLUS' => 'AppleCare+ covered incident',
-        'VMI_RED'        => 'VMI Red, full price',
-        'VMI_GREEN'      => 'VMI Green'
+        'BATTERY'        => array('label' => 'Billable battery repair', 'classes' => array('success')),
+        'DISPLAY'        => array('label' => 'Billable display repair', 'classes' => array('success')),
+        'VMI_YELLOW'     => array('label' => 'VMI Yellow, service price', 'classes' => array('warning')),
+        'APPLECARE_PLUS' => array('label' => 'AppleCare+ covered incident', 'classes' => array('success')),
+        'VMI_RED'        => array('label' => 'VMI Red, full price', 'classes' => array('danger')),
+        'VMI_GREEN'      => array('label' => 'VMI Green', 'classes' => array('success'))
     );
     public static $loaner_return_dispositions = array(
         ''     => '',

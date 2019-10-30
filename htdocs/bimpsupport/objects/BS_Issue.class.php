@@ -12,8 +12,8 @@ class BS_Issue extends BimpObject
         3 => array('label' => 'Faible', 'classes' => array('info'))
     );
     public static $types = array(
-        'TECH' => 'Constaté et vérifié par le technicien',
-        'CUST' => 'Rapporté par le client'
+        'CUST' => 'Rapporté par le client',
+        'TECH' => 'Constaté et vérifié par le technicien'
     );
 
     // Getters booléens: 

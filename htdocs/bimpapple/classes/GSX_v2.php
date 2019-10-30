@@ -58,20 +58,14 @@ class GSX_v2 extends GSX_Const
         $this->certPathKey = $certInfo['pathKey'];
         $this->certPword = $certInfo['pass'];
 
-        if (isset($_SESSION['gsx_acti_token']) && (string) $_SESSION['gsx_acti_token']) {
-            $this->acti_token = $_SESSION['gsx_acti_token'];
-        } elseif (isset($user->array_options['options_gsx_acti_token']) && (string) $user->array_options['options_gsx_acti_token']) {
+        if (isset($user->array_options['options_gsx_acti_token']) && (string) $user->array_options['options_gsx_acti_token']) {
             $this->acti_token = $user->array_options['options_gsx_acti_token'];
-            $_SESSION['gsx_acti_token'] = $this->acti_token;
         }
 
-        if (isset($_SESSION['gsx_auth_token']) && $_SESSION['gsx_auth_token'] != '') {
-            $this->auth_token = $_SESSION['gsx_auth_token'];
-        } elseif (isset($_REQUEST['gsx_auth_token']) && $_REQUEST['gsx_auth_token'] != '') {
+        if (isset($_REQUEST['gsx_auth_token']) && $_REQUEST['gsx_auth_token'] != '') {
             $this->auth_token = $_REQUEST['gsx_auth_token'];
         } elseif (isset($user->array_options['options_gsx_auth_token']) && (string) $user->array_options['options_gsx_auth_token']) {
             $this->auth_token = $user->array_options['options_gsx_auth_token'];
-            $_SESSION['gsx_acti_token'] = $this->auth_token;
         }
 
         // On considère qu'on est loggé si un athentication token est en cours.
@@ -117,7 +111,6 @@ class GSX_v2 extends GSX_Const
                     'gsx_acti_token' => $token
                         ), '`fk_object` = ' . (int) $user->id);
             }
-            $_SESSION['gsx_acti_token'] = $token;
             return array();
         }
 
@@ -145,7 +138,6 @@ class GSX_v2 extends GSX_Const
         if (isset($result['authToken'])) {
             $this->displayDebug('OK (Auth token ' . $result['authToken'] . ')');
             $this->auth_token = $result['authToken'];
-            $_SESSION['gsx_auth_token'] = $this->auth_token;
             global $user;
             if (BimpObject::objectLoaded($user)) {
                 BimpCache::getBdb()->update('user_extrafields', array(
@@ -161,7 +153,6 @@ class GSX_v2 extends GSX_Const
 
         $this->logged = false;
         $this->acti_token = '';
-        $_SESSION['gsx_acti_token'] = '';
         global $user;
         if (BimpObject::objectLoaded($user)) {
             BimpCache::getBdb()->update('user_extrafields', array(
@@ -178,7 +169,6 @@ class GSX_v2 extends GSX_Const
 
         if ($this->auth_token) {
             $this->auth_token = '';
-            $_SESSION['gsx_auth_token'] = '';
             if (BimpObject::objectLoaded($user)) {
                 BimpCache::getBdb()->update('user_extrafields', array(
                     'gsx_auth_token' => ''
@@ -450,13 +440,11 @@ class GSX_v2 extends GSX_Const
             )
         );
 
-        foreach ($files as $fileInputName) {
-            if (isset($_FILES[$fileInputName])) {
-                $params['attachments'][] = array(
-                    'name'        => $_FILES[$fileInputName]['name'],
-                    'sizeInBytes' => $_FILES[$fileInputName]['size']
-                );
-            }
+        foreach ($files as $file_data) {
+            $params['attachments'][] = array(
+                'name'        => $file_data['name'],
+                'sizeInBytes' => $file_data['size']
+            );
         }
 
         $headers = array();
@@ -481,7 +469,7 @@ class GSX_v2 extends GSX_Const
         $result = array();
 
         foreach ($data['attachments'] as $attachment) {
-            $fileInputName = array_shift($files);
+            $file_data = array_shift($files);
 
             $ch = curl_init($attachment['uploadUrl']);
 //            
@@ -490,10 +478,10 @@ class GSX_v2 extends GSX_Const
                 'X-Apple-Gigafiles-Cid: ' . $headers['X-Apple-Gigafiles-Cid']
             ));
 
-            curl_setopt($ch, CURLOPT_POSTFIELDS, file_get_contents($_FILES[$fileInputName]['tmp_name']));
+            curl_setopt($ch, CURLOPT_POSTFIELDS, file_get_contents($file_data['path']));
 
             if (curl_exec($ch) && (int) curl_getinfo($ch, CURLINFO_RESPONSE_CODE) === 200) {
-                $result[$fileInputName] = array(
+                $result[] = array(
                     'name' => $attachment['name'],
                     'id'   => $attachment['id']
                 );

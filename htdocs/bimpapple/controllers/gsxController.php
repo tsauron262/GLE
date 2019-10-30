@@ -144,6 +144,10 @@ class gsxController extends BimpController
                 }
 
                 if (!count($errors)) {
+                    if ((int) $sav->getData('id_propal')) {
+                        GSX_Const::$sav_files = BimpCache::getObjectFilesArray('bimpcommercial', 'Bimp_Propal', (int) $sav->getData('id_propal'), false, true);
+                    }
+
                     $note = '';
 
                     if ($sav->getData('symptomes')) {
@@ -279,6 +283,7 @@ class gsxController extends BimpController
                                     $values['parts'][] = array(
                                         'part_label'     => $part->getData('label'),
                                         'number'         => $part->getData('part_number'),
+                                        'partUsed'       => $part->getData('part_number'),
                                         'pricingOption'  => $pricingOption,
                                         'componentIssue' => array(
                                             'componentCode'   => $issue->getData('category_code'),
@@ -345,22 +350,69 @@ class gsxController extends BimpController
     {
         $errors = array();
 
+        $sav = null;
+        if (isset($params['id_sav'])) {
+            $sav = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SAV', (int) $params['id_sav']);
+        }
+
+        // Traitement des fichiers: 
         $idx = BimpTools::getValue('attachments_nextIdx', 0);
         if ($idx) {
             $files = array();
-            for ($i = 1; $i < $idx; $i++) {
-                if (isset($_FILES['attachments_file_' . $i])) {
-                    $files[] = 'attachments_file_' . $i;
+            $sav_files_dir = '';
+            if (BimpObject::objectLoaded($sav)) {
+                $propal = $sav->getChildObject('propal');
+                if (BimpObject::objectLoaded($propal)) {
+                    $sav_files_dir = $propal->getFilesDir();
                 }
             }
+
+            for ($i = 1; $i < $idx; $i++) {
+                if (isset($_POST['attachments_fileOrigin_' . $i]) && $_POST['attachments_fileOrigin_' . $i] === 'sav') {
+                    // Fichier de la propale du SAV: 
+                    if (!$sav_files_dir) {
+                        return array('Impossible de déterminer le dossier pour les fichiers du SAV (SAV ou devis invalide)');
+                    }
+
+                    $id_file = (int) BimpTools::getValue('attachments_savFile_' . $i, 0);
+                    if ($id_file) {
+                        $fileObj = BimpCache::getBimpObjectInstance('bimpcore', 'BimpFile', $id_file);
+                        if (BimpObject::objectLoaded($fileObj)) {
+                            $file_name = $fileObj->getData('file_name') . '.' . $fileObj->getData('file_ext');
+                            $file_path = $sav_files_dir . $file_name;
+                            if (!file_exists($file_path)) {
+                                $errors[] = 'Le fichier "' . $file_name . '" n\'existe pas';
+                                continue;
+                            }
+                            $files[] = array(
+                                'name' => $file_name,
+                                'size' => filesize($file_path),
+                                'path' => $file_path
+                            );
+                        } else {
+                            $errors[] = 'Le fichier d\'ID ' . $id_file . ' n\'existe plus (Ajout de fichier #' . $i . ')';
+                        }
+                    } else {
+                        $errors[] = 'Aucun fichier du SAV sélectionné pour l\'ajout de fichier #' . $i;
+                    }
+                } elseif (isset($_FILES['attachments_file_' . $i])) {
+                    // Fichier uploadé: 
+                    $files[] = array(
+                        'name' => $_FILES['attachments_file_' . $i]['name'],
+                        'size' => $_FILES['attachments_file_' . $i]['size'],
+                        'path' => $_FILES['attachments_file_' . $i]['tmp_name']
+                    );
+                } else {
+                    $errors[] = 'Aucun fichier sélectionné pour l\'ajout de fichier #' . $i;
+                }
+            }
+
             if (!empty($files)) {
                 $serial = (isset($params['serial']) ? $params['serial'] : '');
-                if (!$serial && isset($params['id_sav']) && (int) $params['id_sav']) {
-                    $sav = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SAV', (int) $params['id_sav']);
-                    if (BimpObject::objectLoaded($sav)) {
-                        $serial = $sav->getSerial();
-                    }
+                if (!$serial && BimpObject::objectLoaded($sav)) {
+                    $serial = $sav->getSerial();
                 }
+
                 $uploadResult = $this->gsx_v2->filesUpload($serial, $files);
                 if (!is_array($uploadResult) || empty($uploadResult)) {
                     return $this->gsx_v2->getErrors();
@@ -370,7 +422,7 @@ class gsxController extends BimpController
                     }
 
                     $i = 0;
-                    foreach ($uploadResult as $fileInputName => $file_data) {
+                    foreach ($uploadResult as $file_data) {
                         if (!isset($result['attachments'][$i])) {
                             $result['attachments'][$i] = array(
                                 'id'   => '',

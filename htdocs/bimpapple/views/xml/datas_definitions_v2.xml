@@ -127,6 +127,16 @@
     <def name="attachments" type="datasGroup" itemLabel="Fichier joint">
         <label>Fichiers joints</label>
     </def>
+    <def name="fileOrigin" type="select">
+        <label>Origine</label>
+        <values>
+            <val val="sav">Fichier du SAV</val>
+            <val val="user">Fichier utilisateur</val>
+        </values>
+    </def>
+    <def name="savFile" type="select" values="sav_files">
+        <label>Fichier</label>
+    </def>
     
     <!--repairFlags-->
     <def name="repairFlags" type="datasGroup">

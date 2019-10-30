@@ -258,37 +258,47 @@ class BimpCache
         return null;
     }
 
-    public static function getObjectFilesArray($object, $with_deleted = false)
+    public static function getObjectFilesArray($module, $object_name, $id_object, $with_deleted = false, $with_icons = false)
     {
-        if (BimpObject::objectLoaded($object)) {
-            if (is_a($object, 'BimpObject')) {
-                $cache_key = $object->module . '_' . $object->object_name . '_' . $object->id . '_files';
-                if ($with_deleted) {
-                    $cache_key .= '_with_deleted';
+        if ((int) $id_object) {
+            $cache_key = $module . '_' . $object_name . '_' . $id_object . '_files';
+            if ($with_deleted) {
+                $cache_key .= '_with_deleted';
+            }
+            if ($with_icons) {
+                $cache_key .= '_with_icons';
+            }
+
+            if (!isset(self::$cache[$cache_key])) {
+                self::$cache[$cache_key] = array();
+
+                $where = '`parent_module` = \'' . $module . '\'';
+                $where .= ' AND `parent_object_name` = \'' . $object_name . '\'';
+                $where .= ' AND `id_parent` = ' . (int) $id_object;
+
+                if (!$with_deleted) {
+                    $where .= ' AND `deleted` = 0';
                 }
-                if (!isset(self::$cache[$cache_key])) {
-                    self::$cache[$cache_key] = array();
 
-                    $where = '`parent_module` = \'' . $object->module . '\'';
-                    $where .= ' AND `parent_object_name` = \'' . $object->object_name . '\'';
-                    $where .= ' AND `id_parent` = ' . (int) $object->id;
+                $rows = self::getBdb()->getRows('bimpcore_file', $where, null, 'array', array('id', 'file_name', 'file_ext'), 'id', 'asc');
 
-                    if (!$with_deleted) {
-                        $where .= ' AND `deleted` = 0';
-                    }
+                if (!is_null($rows)) {
+                    foreach ($rows as $r) {
+                        $file_name = $r['file_name'] . '.' . $r['file_ext'];
 
-                    $rows = self::getBdb()->getRows('bimpcore_file', $where, null, 'array', array('id', 'file_name', 'file_ext'), 'id', 'asc');
-
-                    if (!is_null($rows)) {
-                        foreach ($rows as $r) {
-                            $file_name = $r['file_name'] . '.' . $r['file_ext'];
-                            self::$cache[$cache_key][(int) $r['id']] = BimpRender::renderIcon(BimpTools::getFileIcon($file_name), 'iconLeft') . BimpTools::getFileType($file_name) . ' - ' . $file_name;
+                        if ($with_icons) {
+                            self::$cache[$cache_key][(int) $r['id']] = array(
+                                'label' => $file_name,
+                                'icon'  => BimpTools::getFileIcon($file_name)
+                            );
+                        } else {
+                            self::$cache[$cache_key][(int) $r['id']] = BimpTools::getFileType($file_name) . ' - ' . $file_name;
                         }
                     }
                 }
-
-                return self::$cache[$cache_key];
             }
+
+            return self::$cache[$cache_key];
         }
 
         return array();
@@ -1725,6 +1735,4 @@ class BimpCache
 
         return self::$cache[$cache_key];
     }
-    
-    
 }

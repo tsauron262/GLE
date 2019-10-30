@@ -1013,7 +1013,7 @@ class BimpObject extends BimpCache
 //                    }
 
                 if ($nom == "files") {
-                    $value = $this->getObjectFilesArray($this);
+                    $value = $this->getFilesArray();
                 }
 //                 elseif($nom == "contact"){
 ////                    $value = $this->($name);
@@ -1312,7 +1312,7 @@ class BimpObject extends BimpCache
 
         if (!count($errors)) {
             if (!$this->canSetAction($action)) {
-                $errors[] = 'Vous n\'avez pas la permission d\'effectuer cette action ('.$action.')';
+                $errors[] = 'Vous n\'avez pas la permission d\'effectuer cette action (' . $action . ')';
             } elseif (!$this->isActionAllowed($action, $errors)) {
                 $errors[] = BimpTools::getMsgFromArray($errors, 'Action impossible');
             }
@@ -6188,7 +6188,7 @@ class BimpObject extends BimpCache
     public function getFilesArray($with_deleted = 0)
     {
         if ($this->isLoaded()) {
-            return self::getObjectFilesArray($this, $with_deleted);
+            return self::getObjectFilesArray($this->module, $this->object_name, $this->id, $with_deleted);
         }
 
         return array();
@@ -6635,7 +6635,7 @@ class BimpObject extends BimpCache
 
         $timestamp_fin = microtime(true);
         $difference_ms = $timestamp_fin - $timestamp_debut;
-        dol_syslog("File : ".$difference_ms, 3, 0, "_csv");
+        dol_syslog("File : " . $difference_ms, 3, 0, "_csv");
         return array(
             'errors'           => $errors,
             'warnings'         => $warnings,
@@ -6760,11 +6760,11 @@ class BimpObject extends BimpCache
     {
         return str_replace(array(" ", 'EUR', '€'), "", str_replace(".", ",", $price));
     }
-    
-    
-    public static function renderListFileForObject($objT, $with_delete = 0){
+
+    public static function renderListFileForObject($objT, $with_delete = 0)
+    {
         $obj = BimpObject::getBimpObjectInstance('bimpcore', 'BimpFile');
-        $bc_list = new BC_ListTable($obj, 'default', 1, null, 'Liste des fichiers '.$objT->getNomUrl(), 'fas_bars');
+        $bc_list = new BC_ListTable($obj, 'default', 1, null, 'Liste des fichiers ' . $objT->getNomUrl(), 'fas_bars');
 
         $bc_list->addFieldFilterValue('a.parent_object_name', get_class($objT));
         $bc_list->params['add_form_values']['fields']['parent_object_name'] = get_class($objT);
@@ -6772,9 +6772,9 @@ class BimpObject extends BimpCache
         $bc_list->params['add_form_values']['fields']['parent_module'] = $objT->module;
         $bc_list->addFieldFilterValue('a.id_parent', $objT->id);
         $bc_list->params['add_form_values']['fields']['id_parent'] = $objT->id;
-        if(!$with_delete)
+        if (!$with_delete)
             $bc_list->addFieldFilterValue('a.deleted', 0);
-        $bc_list->identifier .= get_class($objT)."-".$objT->id;
+        $bc_list->identifier .= get_class($objT) . "-" . $objT->id;
 
         return $bc_list->renderHtml();
     }

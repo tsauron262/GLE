@@ -89,12 +89,6 @@ class BS_SAV extends BimpObject
         $this->useCaisseForPayments = BimpCore::getConf('use_caisse_for_payments');
     }
 
-    public function renderHeaderExtraLeft()
-    {
-        $soc = $this->getChildObject("client");
-        return $soc->dol_object->getNomUrl(1);
-    }
-
     // Getters booléens:
 
     public function isPropalEditable()
@@ -981,6 +975,12 @@ class BS_SAV extends BimpObject
     }
 
     // Rendus HTML: 
+
+    public function renderHeaderExtraLeft()
+    {
+        $soc = $this->getChildObject("client");
+        return $soc->dol_object->getNomUrl(1);
+    }
 
     public function renderSavCheckup()
     {

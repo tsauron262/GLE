@@ -79,10 +79,10 @@ class Bimp_Societe extends BimpObject
         }
         if(self::$types_ent_list_code[$this->getData("fk_typent")] != "TE_PRIVATE"){
             if($this->getData("mode_reglement") < 1){
-                $errors[] = "Mode réglement client invalide ";
+                $errors[] = "Mode réglement fiche client invalide ";
             }
             if($this->getData("cond_reglement_id") < 1){
-                $errors[] = "Condition réglement client invalide ";
+                $errors[] = "Condition réglement fiche client invalide ";
             }
         }
         

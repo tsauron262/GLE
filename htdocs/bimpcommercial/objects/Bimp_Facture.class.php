@@ -3567,7 +3567,11 @@ class Bimp_Facture extends BimpComm
 
         $id_cond_reglement = (int) $this->getData('fk_cond_reglement');
 
-        if ($id_cond_reglement !== (int) $this->getInitData('fk_cond_reglement')) {
+        $changeCondRegl = $id_cond_reglement !== (int) $this->getInitData('fk_cond_reglement');
+        $changeDateF = $this->getData('datef') != $this->getInitData('datef');
+        
+        if ($changeCondRegl || $changeDateF) {
+            $this->dol_object->date = strtotime($this->getData('datef'));
             $this->set('date_lim_reglement', BimpTools::getDateFromDolDate($this->dol_object->calculate_date_lim_reglement($id_cond_reglement)));
         }
 

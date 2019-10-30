@@ -150,7 +150,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
         return $dernier_id;
     }
 
-    public function display_total($pdf, $lines) {
+    public function display_total($pdf, $lines, $contrat = null) {
         $pdf->SetFont(''/* 'Arial' */, '', 7);
         $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 13;
         $total = $this->get_totaux($lines);
@@ -181,6 +181,18 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 7, "", 0, 'C');
             }
         }
+        $pdf->setColor('fill', 255, 255, 255);
+        $pdf->Cell($W * 5, 7, "", 1, null, 'L', true);
+        $pdf->Cell($W, 7, "", 1, null, 'C', true);
+        $pdf->Cell($W * 2, 7, "", 1, null, 'C', true);
+        $pdf->Cell($W, 7, "", 1, null, 'C', true);
+        $pdf->setColor('fill', 235, 235, 235);
+        $pdf->setFont('', 'B', 6);
+        $liste_mode_reglement = BimpObject::getModeReglementsArray();
+       
+        $pdf->Cell($W * 4, 6, "Mode de règlement : " . $liste_mode_reglement[$contrat->array_options['options_moderegl']], 1, null, 'L', true);
+        
+        $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 7, "", 0, 'C');
     }
 
     public function get_totaux($lines) {
@@ -559,7 +571,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                     $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 50, '', 0, 'C');
                 } else {
                     $this->display_lines($pdf, $contrat->lines);
-                    $this->display_total($pdf, $contrat->lines);
+                    $this->display_total($pdf, $contrat->lines, $contrat);
                 }
 
                 $pdf->setY(225);

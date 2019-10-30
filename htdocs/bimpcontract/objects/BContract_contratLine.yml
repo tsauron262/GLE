@@ -78,9 +78,9 @@ fields:
     serials:
         label: Numéros de série
         dol_extra_field: 1
-        type: string
+        type: text
         input:
-            help: Merci de séparer les numéros de série par une virgule (,)
+            help: Merci de séparer les numéros de série par (,), (;),(:) ou un retour à la ligne
     nb_materiel:
         label: Qté matériel
         dol_extra_field: 1

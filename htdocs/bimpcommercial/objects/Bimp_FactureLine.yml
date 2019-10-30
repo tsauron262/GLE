@@ -54,6 +54,11 @@ fields:
                     field_return_label: facnumber
                     field_return_value: rowid
                     
+    pa_editable: 
+        label: Prix d'achat éditable
+        type: bool
+        default_value: 1
+        
 filters_panels: 
     default: 
         filters: 

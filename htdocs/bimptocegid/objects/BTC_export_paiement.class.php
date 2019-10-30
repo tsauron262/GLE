@@ -11,7 +11,6 @@ class BTC_export_paiement extends BTC_export {
         $success = [];
         $liste_transactions = $this->db->getRows('paiement_facture', 'fk_paiement = ' . $id);
         $paiement = $this->getInstance('bimpcommercial', 'Bimp_Paiement', $id);
-        echo '<pre>';
         foreach ($liste_transactions as $transaction) {
             $is_vente_ticket = false;
             $is_client_interco = false;
@@ -21,7 +20,7 @@ class BTC_export_paiement extends BTC_export {
             $bc_paiement = $this->getInstance('bimpcaisse', 'BC_Paiement');
 
             if ($bc_paiement->find(['id_paiement' => $paiement->id])) {
-                if($bc_paiement->id_vente > 0){
+                if($bc_paiement->getData('id_vente') > 0){
                     $vente = $this->getInstance('bimpcaisse', 'BC_Vente', $bc_paiement->getData('id_vente'));
                     $id_entrepot = $vente->getData('id_entrepot');
                     if ($vente->getData('id_client') == 0) {

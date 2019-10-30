@@ -4083,6 +4083,8 @@ class BS_SAV extends BimpObject
 
         $errors = parent::delete($warnings, $force_delete);
 
+        require_once(DOL_DOCUMENT_ROOT."/bimpreservation/objects/BR_Reservation.class.php");
+        
         if (!count($errors)) {
             $reservations = BimpCache::getBimpObjectObjects('bimpreservation', 'BR_Reservation', array(
                         'type'   => BR_Reservation::BR_RESERVATION_SAV,

@@ -669,7 +669,7 @@ class BimpTools
         }
     }
 
-    public static function getNextRef($table, $field, $prefix = '')
+    public static function getNextRef($table, $field, $prefix = '', $numCaractere = null)
     {
 
         $prefix = str_replace("{AA}", date('y'), $prefix);
@@ -694,6 +694,17 @@ class BimpTools
             }
         } else {
             $num = 1;
+        }
+        
+        if($numCaractere > 0){
+            $diff = $numCaractere - strlen($num);
+            if($diff < 0)
+                die("impossible trop de caractére BimpTools::GetNextRef");
+            else{
+                for($i=0;$i<$diff;$i++){
+                    $num = "0".$num;
+                }
+            }
         }
 
         return $prefix . $num;

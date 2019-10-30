@@ -221,6 +221,11 @@ fields:
         type: text
         input: 
             note: 1
+            
+    num_sepa:
+        label: Numéro SEPA
+        type: string
+        dol_extra_field: 1
         
 #    *** Champs non gérés: ***
 #    entity
@@ -259,6 +264,7 @@ fields_tables:
             - field: code_client
             - field: barcode
             - field: code_compta
+            - field: num_sepa
             
     contact: 
         title: Informations de contact

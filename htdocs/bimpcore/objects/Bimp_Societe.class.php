@@ -55,6 +55,24 @@ class Bimp_Societe extends BimpObject
         return 1;
     }
     
+    public function getNumSepa(){
+        $extrafields = new ExtraFields($this->db->db);
+        $extrafields->addExtraField('num_sepa', 'Numéro de SEPA', 'varchar', 1, 20, 'societe');
+        
+        
+        if($this->getData('num_sepa') == ""){
+            $new = BimpTools::getNextRef('societe', 'num_sepa', 'FR02ZZZ008801-', 7);
+            $this->updateField('num_sepa', $new);
+            
+            die($new);
+        }
+        
+        
+        $numSepa = "FR02ZZZ008801-0000001";
+        return 'kkjlkjlj';
+        return $this->getData('num_sepa');
+    }
+    
     public function canBuy(&$errors = array(), $msgToError = true){
         self::getTypes_entArray();
         $type_ent_sans_verif = array("TE_PRIVATE","TE_ADMIN");
@@ -66,7 +84,7 @@ class Bimp_Societe extends BimpObject
                 $errors[] = "Siren/siret client invalide :".$this->getData("siren")."/".$this->getData("siret");
             }
         }
-        if($this->getData("fk_typent") != "TE_PRIVATE"){
+        if(self::$types_ent_list_code[$this->getData("fk_typent")] != "TE_PRIVATE"){
             if($this->getData("mode_reglement") < 1){
                 $errors[] = "Mode réglement client invalide ";
             }

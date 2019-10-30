@@ -56,20 +56,13 @@ class Bimp_Societe extends BimpObject
     }
     
     public function getNumSepa(){
-        $extrafields = new ExtraFields($this->db->db);
-        $extrafields->addExtraField('num_sepa', 'Numéro de SEPA', 'varchar', 1, 20, 'societe');
         
         
         if($this->getData('num_sepa') == ""){
-            $new = BimpTools::getNextRef('societe', 'num_sepa', 'FR02ZZZ008801-', 7);
+            $new = BimpTools::getNextRef('societe_extrafields', 'num_sepa', 'FR02ZZZ008801-', 7);
             $this->updateField('num_sepa', $new);
-            
-            die($new);
+            $this->update();
         }
-        
-        
-        $numSepa = "FR02ZZZ008801-0000001";
-        return 'kkjlkjlj';
         return $this->getData('num_sepa');
     }
     

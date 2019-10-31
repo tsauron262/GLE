@@ -434,7 +434,7 @@ class Bimp_Propal extends BimpComm
                         $msg = "";
                         $files = $this->getFilesArray();
                         if(count($files) < 2)
-                            $msg = addslashes("Il semblerait qu'il n'y est pas de devis signé dans la section documents. Etes-vous sûr de vouloir continuer ?");
+                            $msg = addslashes("Il semblerait qu'il n'y ait pas de devis signé dans la section documents. Etes-vous sûr de vouloir continuer ?");
                         if($msg != "")
                             $onclick .= "if ( confirm( '".$msg."' ) ) {";
                         $onclick .= $commande->getJsLoadModalForm('default', 'Création d\\\'une commande (Signature préalable de la proposition commerciale)', $values, '', 'redirect');
@@ -515,7 +515,7 @@ class Bimp_Propal extends BimpComm
                     $msg = "";
                     $files = $this->getFilesArray();
                     if(count($files) < 2)
-                        $msg = addslashes("Il semblerait qu'il n'y est pas de devis signé dans la section documents. Etes-vous sûr de vouloir continuer ?");
+                        $msg = addslashes("Il semblerait qu'il n'y ait pas de devis signé dans la section documents. Etes-vous sûr de vouloir continuer ?");
                     if($msg != "")
                         $onclick .= "if ( confirm( '".$msg."' ) ) {";
                     $onclick .= $commande->getJsLoadModalForm('default', 'Création d\\\'une commande', $values, '', 'redirect');

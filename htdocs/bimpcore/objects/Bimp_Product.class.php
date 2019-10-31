@@ -1810,7 +1810,7 @@ class Bimp_Product extends BimpObject
         global $user;
 
         $errors = array();
-        if ($this->getData("fk_product_type") == 0 && !(int) $this->getCurrentFournPriceId(null, true)) {
+        if ($this->getData("fk_product_type") == 0 && !(int) $this->getCurrentFournPriceId(null, true) && !$this->getData('no_fixe_prices')) {
             $errors[] = "Veuillez enregistrer au moins un prix d'achat fournisseur";
         }
 
@@ -2074,7 +2074,16 @@ class Bimp_Product extends BimpObject
         $errors = array();
         $subject = 'Produit validé pour la propale ' . $propal->ref;
         $from = 'gle@bimp.fr';
-        $msg = 'Bonjour,<br/>Le produit ' . $this->getData('ref') . ' a été validé, la propale ' . $propal->getNomUrl();
+        
+        $infoClient = "";
+        
+        if(isset($propal->socid)){ 
+            $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $propal->socid);
+            if(is_object($client) && $client->isLoaded())                
+                $infoClient = " du client ".$client->getNomUrl(1);
+        }
+        
+        $msg = 'Bonjour,<br/>Le produit ' . $this->getData('ref') . ' a été validé, la propale ' . $propal->getNomUrl().$infoClient;
         $msg .= ' est peut-être validable.';
         if (!mailSyn2($subject, $to, $from, $msg))
             $errors[] = "Envoi email vers " . $to . " pour la propale " . $propal->getNomUrl() . " impossible.";

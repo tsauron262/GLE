@@ -1783,18 +1783,18 @@ class ObjectLine extends BimpObject
                     $html .= BimpTools::displayMoneyValue($remises['total_amount_ht'], 'EUR');
                     $html .= ' / ' . BimpTools::displayMoneyValue($remises['total_amount_ttc'], 'EUR');
                     $html .= ' (' . round($remises['total_percent'], 4) . '%)';
-                }
 
-                if ($this->field_exists('qty_modif')) {
-                    $qty_modif = (float) $this->getData('qty_modif');
-                    if ($qty_modif) {
-                        $html .= '<br/>';
-                        $html .= '<span class="important">';
-                        $remises = $this->getRemiseTotalInfosFullQty();
-                        $html .= BimpTools::displayMoneyValue($remises['amount_ht'], 'EUR');
-                        $html .= ' / ' . BimpTools::displayMoneyValue($remises['amount_ttc'], 'EUR');
-                        $html .= ' (' . round($remises['percent'], 4) . '%)';
-                        $html .= '</span>';
+                    if ($this->field_exists('qty_modif')) {
+                        $qty_modif = (float) $this->getData('qty_modif');
+                        if ($qty_modif) {
+                            $html .= '<br/>';
+                            $html .= '<span class="important">';
+                            $remises = $this->getRemiseTotalInfosFullQty();
+                            $html .= BimpTools::displayMoneyValue($remises['amount_ht'], 'EUR');
+                            $html .= ' / ' . BimpTools::displayMoneyValue($remises['amount_ttc'], 'EUR');
+                            $html .= ' (' . round($remises['percent'], 4) . '%)';
+                            $html .= '</span>';
+                        }
                     }
                 }
             } else {

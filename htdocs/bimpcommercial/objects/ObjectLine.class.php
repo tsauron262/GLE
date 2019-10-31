@@ -725,58 +725,84 @@ class ObjectLine extends BimpObject
         return $value;
     }
 
-    public function getTotalHT()
+    public function getTotalHT($full_qty = false)
     {
-        if (!is_null($this->pu_ht) && !is_null($this->qty)) {
-            return (float) ((float) $this->pu_ht * (float) $this->qty);
+        if ($full_qty) {
+            $qty = (float) $this->getFullQty();
+        } else {
+            $qty = (float) $this->qty;
         }
-
-        return 0;
+        return (float) ((float) $this->pu_ht * $qty);
     }
 
-    public function getTotalHTWithRemises()
+    public function getTotalHTWithRemises($full_qty = false)
     {
         if (!is_null($this->pu_ht)) {
+            if ($full_qty) {
+                $qty = (float) $this->getFullQty();
+            } else {
+                $qty = (float) $this->qty;
+            }
+
             $pu_ht = $this->pu_ht;
 
             if (!is_null($this->remise) && $this->remise > 0) {
                 $pu_ht -= (float) ($pu_ht * ($this->remise / 100));
             }
 
-            return (float) ($pu_ht * (float) $this->qty);
+            return (float) ($pu_ht * $qty);
         }
 
         return 0;
     }
 
-    public function getTotalTTC()
+    public function getTotalTTC($full_qty = false)
     {
         $pu_ttc = (float) $this->getUnitPriceTTC();
 
-        if ($pu_ttc && !is_null($this->qty)) {
-            return (float) ($pu_ttc * (float) $this->qty);
+        if ($full_qty) {
+            $qty = (float) $this->getFullQty();
+        } else {
+            $qty = (float) $this->qty;
         }
-        return 0;
+
+        return ($pu_ttc * $qty);
     }
 
-    public function getTotalTtcWithoutRemises()
+    public function getTotalTtcWithoutRemises($full_qty = false)
     {
-        return round(BimpTools::calculatePriceTaxIn((float) $this->pu_ht, (float) $this->tva_tx) * (float) $this->qty, 8);
+        if ($full_qty) {
+            $qty = (float) $this->getFullQty();
+        } else {
+            $qty = (float) $this->qty;
+        }
+        return round(BimpTools::calculatePriceTaxIn((float) $this->pu_ht, (float) $this->tva_tx) * $qty, 8);
     }
 
-    public function getTotalPA()
+    public function getTotalPA($full_qty = false)
     {
-        return (float) $this->pa_ht * (float) $this->qty;
+        if ($full_qty) {
+            $qty = (float) $this->getFullQty();
+        } else {
+            $qty = (float) $this->qty;
+        }
+        return (float) $this->pa_ht * $qty;
     }
 
-    public function getMargin()
+    public function getMargin($full_qty = false)
     {
+        if ($full_qty) {
+            $qty = (float) $this->getFullQty();
+        } else {
+            $qty = (float) $this->qty;
+        }
+
         $pu = (float) $this->pu_ht;
         if (!is_null($this->remise) && $this->remise > 0) {
             $pu -= ($pu * ((float) $this->remise / 100));
         }
 
-        $margin = ($pu * (float) $this->qty) - ((float) $this->pa_ht * (float) $this->qty);
+        $margin = ($pu * $qty) - ((float) $this->pa_ht * $qty);
         return $margin;
     }
 
@@ -1171,6 +1197,63 @@ class ObjectLine extends BimpObject
         return $this->remises_total_infos;
     }
 
+    public function getRemiseTotalInfosFullQty()
+    {
+        $infos = array(
+            'percent'                   => 0,
+            'amount_ht'                 => 0,
+            'amount_ttc'                => 0,
+            'total_ht_without_remises'  => 0,
+            'total_ttc_without_remises' => 0
+        );
+
+        if (!$this->isLoaded()) {
+            return $infos;
+        }
+
+        $qty = (float) $this->getFullQty();
+
+        $total_ht = $this->getTotalHT(true);
+        $total_ttc = $this->getTotalTtcWithoutRemises(true);
+        $infos['total_ht_without_remises'] = $total_ht;
+        $infos['total_ttc_without_remises'] = $total_ttc;
+
+        if (!$this->isRemisable()) {
+            return $infos;
+        }
+
+        $remises = $this->getRemises();
+
+        $total_line_amounts = 0;
+
+        foreach ($remises as $remise) {
+            switch ((int) $remise->getData('type')) {
+                case ObjectLineRemise::OL_REMISE_PERCENT:
+                    $infos['percent'] += (float) $remise->getData('percent');
+                    break;
+
+                case ObjectLineRemise::OL_REMISE_AMOUNT:
+                    if ((int) $remise->getData('per_unit')) {
+                        $total_line_amounts += ((float) $remise->getData('montant') * $qty);
+                    } else {
+                        $total_line_amounts += (float) $remise->getData('montant');
+                    }
+                    break;
+            }
+        }
+
+        if ($total_line_amounts) {
+            $infos['percent'] += (float) (($total_line_amounts / $total_ttc) * 100);
+        }
+
+        if ($infos['percent']) {
+            $infos['amount_ht'] = (float) ($total_ht * ($infos['percent'] / 100));
+            $infos['amount_ttc'] = (float) ($total_ttc * ($infos['percent'] / 100));
+        }
+
+        return $infos;
+    }
+
     public function getClientDefaultRemiseFormValues()
     {
         $parent = $this->getParentInstance();
@@ -1441,6 +1524,18 @@ class ObjectLine extends BimpObject
                         $msg = 'L\'option "Forcer qté à 1" est activée. Une seule unité sera inscrite dans le PDF et le total de la ligne sera utilisé comme prix unitaire';
                         $html .= '<span class="warning bs-popover"' . BimpRender::renderPopoverData($msg) . '>(Forcée à 1)</span>';
                     }
+                    if ($this->field_exists('qty_modif')) {
+                        $qty_modif = (float) $this->getData('qty_modif');
+                        if ($qty_modif) {
+                            if (!$no_html) {
+                                $html .= '<span class="important">';
+                            }
+                            $html .= ' (' . ($qty_modif > 0 ? '+' : '' ) . $qty_modif . ')';
+                            if (!$no_html) {
+                                $html .= '</span>';
+                            }
+                        }
+                    }
                     break;
 
                 case 'pu_ht':
@@ -1524,6 +1619,18 @@ class ObjectLine extends BimpObject
                     } else {
                         $html .= BimpTools::displayMoneyValue((float) $this->getTotalHT(), 'EUR');
                     }
+                    if ($this->field_exists('qty_modif')) {
+                        $qty_modif = (float) $this->getData('qty_modif');
+                        if ($qty_modif) {
+                            if ($no_html) {
+                                $html .= "\n(" . price((float) $this->getTotalHT(true)) . ' €)';
+                            } else {
+                                $html .= '<br/><span class="important">';
+                                $html .= BimpTools::displayMoneyValue((float) $this->getTotalHT(true));
+                                $html .= '</span>';
+                            }
+                        }
+                    }
                     break;
 
                 case 'total_ht_w_remises':
@@ -1533,6 +1640,18 @@ class ObjectLine extends BimpObject
                         $html = price((float) $this->getTotalHTWithRemises()) . ' €';
                     } else {
                         $html .= BimpTools::displayMoneyValue((float) $this->getTotalHTWithRemises(), 'EUR');
+                    }
+                    if ($this->field_exists('qty_modif')) {
+                        $qty_modif = (float) $this->getData('qty_modif');
+                        if ($qty_modif) {
+                            if ($no_html) {
+                                $html .= "\n(" . price((float) $this->getTotalHTWithRemises(true)) . ' €)';
+                            } else {
+                                $html .= '<br/><span class="important">';
+                                $html .= '(' . BimpTools::displayMoneyValue((float) $this->getTotalHTWithRemises(true)) . ')';
+                                $html .= '</span>';
+                            }
+                        }
                     }
                     break;
 
@@ -1544,10 +1663,24 @@ class ObjectLine extends BimpObject
                     } else {
                         $html .= BimpTools::displayMoneyValue((float) $this->getTotalTTC(), 'EUR');
                     }
+                    if ($this->field_exists('qty_modif')) {
+                        $qty_modif = (float) $this->getData('qty_modif');
+                        if ($qty_modif) {
+                            if ($no_html) {
+                                $html .= "\n(" . price((float) $this->getTotalTTC(true)) . ' €)';
+                            } else {
+                                $html .= '<br/><span class="important">';
+                                $html .= '(' . BimpTools::displayMoneyValue((float) $this->getTotalTTC(true)) . ')';
+                                $html .= '</span>';
+                            }
+                        }
+                    }
                     break;
 
                 case 'margin':
                     $margin = (float) $this->getMargin();
+                    $margin_full_qty = (float) $this->getMargin(true);
+
                     $format = 'price';
                     $value = (float) $margin;
                     $margin_rate = 0;
@@ -1556,10 +1689,14 @@ class ObjectLine extends BimpObject
                     }
 
                     if ($no_html) {
+                        $html = price($margin) . ' € ';
+                        if ($margin !== $margin_full_qty) {
+                            $html .= ' (' . $margin_full_qty . ' €)';
+                        }
                         if (!$margin_rate && !(float) $this->pa_ht) {
-                            $html = price($margin) . ' € (' . $margin_rate . ' %)';
+                            $html .= '(∞)';
                         } else {
-                            $html = price($margin) . ' € (∞)';
+                            $html .= '(' . $margin_rate . ' %)';
                         }
                     } else {
                         if ($margin <= 0) {
@@ -1579,6 +1716,12 @@ class ObjectLine extends BimpObject
                             } elseif (!(float) $this->pa_ht) {
                                 $html .= ' (&infin;)';
                             }
+                            $html .= '</span>';
+                        }
+
+                        if ($margin !== $margin_full_qty) {
+                            $html .= '<br/><span class="important">';
+                            $html .= BimpTools::displayMoneyValue($margin_full_qty);
                             $html .= '</span>';
                         }
                     }
@@ -1636,10 +1779,23 @@ class ObjectLine extends BimpObject
         if ($this->isLoaded()) {
             if ($this->isRemisable()) {
                 $remises = $this->getRemiseTotalInfos();
-                if ((float) $remises['total_amount_ttc']) {
+                if ((float) $remises['total_percent']) {
                     $html .= BimpTools::displayMoneyValue($remises['total_amount_ht'], 'EUR');
                     $html .= ' / ' . BimpTools::displayMoneyValue($remises['total_amount_ttc'], 'EUR');
                     $html .= ' (' . round($remises['total_percent'], 4) . '%)';
+
+                    if ($this->field_exists('qty_modif')) {
+                        $qty_modif = (float) $this->getData('qty_modif');
+                        if ($qty_modif) {
+                            $html .= '<br/>';
+                            $html .= '<span class="important">';
+                            $remises = $this->getRemiseTotalInfosFullQty();
+                            $html .= BimpTools::displayMoneyValue($remises['amount_ht'], 'EUR');
+                            $html .= ' / ' . BimpTools::displayMoneyValue($remises['amount_ttc'], 'EUR');
+                            $html .= ' (' . round($remises['percent'], 4) . '%)';
+                            $html .= '</span>';
+                        }
+                    }
                 }
             } else {
                 $html = '<span class="warning">Non remisable</span>';
@@ -2804,7 +2960,7 @@ class ObjectLine extends BimpObject
 
             case 'desc':
                 global $user;
-                if($user->rights->bimpcommercial->editHtml)
+                if ($user->rights->bimpcommercial->editHtml)
                     $html = BimpInput::renderInput('html', 'desc', (string) $value);
                 else
                     $html = BimpInput::renderInput('textarea', 'desc', (string) $value);

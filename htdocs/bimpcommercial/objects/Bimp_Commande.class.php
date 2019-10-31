@@ -2279,8 +2279,16 @@ class Bimp_Commande extends BimpComm
                         $userT = new User($this->db->db);
                         $userT->fetch($idComm);
                         $mail = $userT->email;
+                        
+                        $infoClient = "";
+                        $client = $this->getChildObject('client');
+                        if(is_object($client) && $client->isLoaded()){                
+                            $infoClient = " du client ".$client->getNomUrl(1);
+                        }
+                        
+                        
                         if(isset($mail) && $mail != "")
-                            mailSyn2("Logistique commande OK", $mail, 'admin@bimp.fr', 'Bonjour la logistique de votre commande '.$this->getNomUrl (1). ' est compléte ');
+                            mailSyn2("Logistique commande OK", $mail, 'admin@bimp.fr', 'Bonjour la logistique de votre commande '.$this->getNomUrl (1).$infoClient. ' est compléte ');
                     }
                 }
             }

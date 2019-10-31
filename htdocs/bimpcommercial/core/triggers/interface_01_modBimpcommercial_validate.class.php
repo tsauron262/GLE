@@ -236,9 +236,9 @@ class Interfacevalidate extends DolibarrTriggers
             }
             if($action == 'ORDER_VALIDATE' && $object->array_options['options_type'] != "M"  && !BimpDebug::isActive('bimpcommercial/no_validate')){
                 //contact facturation
-                $tabConatact = $object->getIdContact('external', 'BILLING');
+                $tabConatact = $object->getIdContact('external', 'BILLING2');
                 if (count($tabConatact) < 1) {
-                        setEventMessages("Merci de preciser le contact facturation", null, 'errors');
+                        setEventMessages("Merci de preciser le contact facturation EMail", null, 'errors');
                         return -2;
                 }else{
                     foreach($tabConatact as $contactId){

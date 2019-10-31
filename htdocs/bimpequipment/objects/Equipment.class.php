@@ -370,15 +370,6 @@ class Equipment extends BimpObject
 
         return $buttons;
     }
-    
-    public function displayOldSn(){
-        $tabT = array();
-        $sql = $this->db->db->query("SELECT * FROM `".MAIN_DB_PREFIX."bimp_gsx_repair` WHERE `new_serial` LIKE '".$this->getData('serial')."'");
-        while($ln = $this->db->db->fetch_object($sql)){
-            $tabT[] = $ln->serial;
-        }
-        return implode(" ", $tabT);
-    }
 
     public function getPackageListExtraBtn()
     {
@@ -885,15 +876,25 @@ class Equipment extends BimpObject
             $html .= BimpRender::renderAlerts($errors, 'warning');
         } else {
             $place = $this->getCurrentPlace();
-            if($place->getData('type') == BE_Place::BE_PLACE_ENTREPOT)
+            if ($place->getData('type') == BE_Place::BE_PLACE_ENTREPOT)
                 $html .= BimpRender::renderAlerts('Equipement disponible en stock', 'success');
-            elseif($place->getData('type') == BE_Place::BE_PLACE_CLIENT)
+            elseif ($place->getData('type') == BE_Place::BE_PLACE_CLIENT)
                 $html .= BimpRender::renderAlerts('Equipement disponible pour un retour', 'success');
             else
                 $html .= BimpRender::renderAlerts('Equipement non reservé', 'success');
         }
 
         return $html;
+    }
+
+    public function displayOldSn()
+    {
+        $tabT = array();
+        $sql = $this->db->db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "bimp_gsx_repair` WHERE `new_serial` LIKE '" . $this->getData('serial') . "'");
+        while ($ln = $this->db->db->fetch_object($sql)) {
+            $tabT[] = $ln->serial;
+        }
+        return implode(" ", $tabT);
     }
 
     // Traitements: 
@@ -1214,7 +1215,7 @@ class Equipment extends BimpObject
 
         return $errors;
     }
-    
+
     public function moveToPlace($type, $id, $code_mvt, $stock_label, $force = 0, $date = null)
     {
         if ($force == 1 and $this->getData('id_package')) {
@@ -1222,24 +1223,24 @@ class Equipment extends BimpObject
             $this->addNote('Sortie du package pour déplacement automatique');
             $stock_label .= ' Sortie du package pour déplacement automatique';
         }
-        
-        if($date == null)
+
+        if ($date == null)
             $date = date('Y-m-d H:i:s');
-        
+
         $place = BimpObject::getInstance($this->module, 'BE_Place');
-        
+
         $data = array(
-                    'id_equipment' => (int) $this->id,
-                    'type'         => $type,
-                    'date'         => $date,
-                    'infos'        => $stock_label,
-                    'code_mvt'     => $code_mvt
+            'id_equipment' => (int) $this->id,
+            'type'         => $type,
+            'date'         => $date,
+            'infos'        => $stock_label,
+            'code_mvt'     => $code_mvt
         );
-        if(in_array($type, BE_Place::$entrepot_types))
-                $data['id_entrepot'] = $id;
-        elseif($type == BE_Place::BE_PLACE_CLIENT)
-                $data['id_client'] = $id;
-        
+        if (in_array($type, BE_Place::$entrepot_types))
+            $data['id_entrepot'] = $id;
+        elseif ($type == BE_Place::BE_PLACE_CLIENT)
+            $data['id_client'] = $id;
+
         $errors = array_merge($errors, $place->validateArray($data));
         if (!count($errors))
             $errors = array_merge($errors, $place->create());
@@ -1265,7 +1266,7 @@ class Equipment extends BimpObject
     }
 
     // Actions: 
-    
+
     public function actionGenerateEtiquette($data, &$success)
     {
         $errors = array();

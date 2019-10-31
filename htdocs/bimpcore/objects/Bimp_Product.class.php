@@ -1,7 +1,6 @@
 <?php
 
 ini_set('max_execution_time', 6000);
-
 ini_set('memory_limit', '512M');
 
 class Bimp_Product extends BimpObject
@@ -1097,7 +1096,6 @@ class Bimp_Product extends BimpObject
             }
             if ((int) BimpCore::getConf('use_new_cur_pa_method')) {
                 // Nouvelle méthode: 
-                self::loadClass('bimpcore', 'BimpProductCurPa');
                 $curPa = $this->getCurrentPaObject();
                 if (BimpObject::objectLoaded($curPa)) {
                     $pa_ht = (float) $curPa->getData('amount');

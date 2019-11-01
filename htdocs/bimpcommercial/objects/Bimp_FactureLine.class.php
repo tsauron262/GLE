@@ -361,7 +361,7 @@ class Bimp_FactureLine extends ObjectLine
             $product = $this->getProduct();
             if (!BimpObject::objectLoaded($product)) {
                 $errors[] = 'Produit absent';
-            } else {
+            } elseif (!(int) $product->getData('no_fixe_prices')) {
                 $new_pa = (float) $product->getCurrentPaHt();
 
                 if ($new_pa) {

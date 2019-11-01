@@ -286,14 +286,17 @@ class Bimp_Vente extends BimpObject
 
         $product = BimpObject::getInstance('bimpcore', 'Bimp_Product');
         $products_list = $product->getList(array(
-            'cp.fk_categorie' => (int) $id_category
+            'ef.collection' => (int) $id_category
                 ), null, null, 'id', 'asc', 'array', array('rowid', 'ref', 'cur_pa_ht', 'pmp'), array(
-            'cp' => array(
-                'alias' => 'cp',
-                'table' => 'categorie_product',
-                'on'    => 'a.rowid = cp.fk_product'
+            'ef' => array(
+                'alias' => 'ef',
+                'table' => 'product_extrafields',
+                'on'    => 'a.rowid = ef.fk_object'
             )
         ));
+
+        echo 'NB: ' . count($products_list);
+        exit;
 
 //        $product = BimpObject::getInstance('bimpcore', 'Bimp_Product');
 //        $products_list = $product->getList(array(
@@ -383,7 +386,7 @@ VQ - Collège
 ";' . "\n";
 
         $entrepots = BimpCache::getEntrepotsShipTos();
-        
+
         $entrepots[-9999] = "1683245";
         foreach ($products_list as $p) {
             $entrepots_data = $product->getAppleCsvData($dateFrom, $dateTo, $entrepots, $p['rowid']);

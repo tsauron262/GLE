@@ -295,9 +295,6 @@ class Bimp_Vente extends BimpObject
             )
         ));
 
-        echo 'NB: ' . count($products_list);
-        exit;
-
 //        $product = BimpObject::getInstance('bimpcore', 'Bimp_Product');
 //        $products_list = $product->getList(array(
 //            'ref' => array(

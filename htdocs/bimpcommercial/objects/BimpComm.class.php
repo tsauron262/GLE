@@ -3038,7 +3038,17 @@ class BimpComm extends BimpDolObject
         $societe->fetch($this->getData('fk_soc'));
         $societe->borne_debut = $data['date_debut'];
         $societe->borne_fin = $data['date_fin'];
-        $societe->generateDocument('invoiceStatement', $langs);
+        if($societe->generateDocument('invoiceStatement', $langs) > 0) {
+            $success = "Relevé de facturation généré avec succès";
+        } else {
+            $errors = "Echec de la génération du relevé de facturation";
+        }
+        
+        return [
+            'success' => $success,
+            'errors' => $errors,
+            'warnings' => $warnings
+        ];
     }
     
     public function actionValidate($data, &$success)

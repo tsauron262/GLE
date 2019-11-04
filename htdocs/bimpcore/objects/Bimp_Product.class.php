@@ -1092,7 +1092,7 @@ class Bimp_Product extends BimpObject
         if ((int) $this->getData('no_fixe_prices')) {
             return 0;
         }
-        
+
         $pa_ht = 0;
 
         if ($this->isLoaded()) {
@@ -1189,15 +1189,14 @@ class Bimp_Product extends BimpObject
     public function getLastFournPriceId($id_fourn = null)
     {
         if ($this->isLoaded()) {
-            $where1 = 'fk_product = ' . (int) $this->id;
+            $sql = 'SELECT rowid as id FROM ' . MAIN_DB_PREFIX . 'product_fournisseur_price';
+            $sql .= ' WHERE fk_product = ' . (int) $this->id;
 
             if (!is_null($id_fourn) && (int) $id_fourn) {
-                $where1 .= ' AND `fk_soc` = ' . (int) $id_fourn;
+                $sql .= ' AND `fk_soc` = ' . (int) $id_fourn;
             }
 
-            $where = $where1 . ' AND tms = (SELECT MAX(tms) FROM ' . MAIN_DB_PREFIX . 'product_fournisseur_price WHERE ' . $where1 . ')';
-
-            $sql = 'SELECT rowid as id, price FROM ' . MAIN_DB_PREFIX . 'product_fournisseur_price WHERE ' . $where;
+            $sql .= ' ORDER BY `tms` DESC LIMIT 1';
 
             $result = $this->db->executeS($sql);
 
@@ -1231,11 +1230,7 @@ class Bimp_Product extends BimpObject
                 return 0;
             }
             if (BimpCore::getConf('use_new_cur_pa_method')) {
-                $curPa = $this->getCurrentPaObject();
-                if (BimpObject::objectLoaded($curPa)) {
-                    return (int) $curPa->getData('id_fourn_price');
-                }
-                return 0;
+                return (int) $this->getLastFournPriceId($id_fourn);
             } else {
                 $pa_ht = 0;
                 if ((float) $this->getData('cur_pa_ht')) {

@@ -171,7 +171,7 @@ fields:
         type: money
     fk_facture_source:
         label: Facture source
-        type: int
+        type: id
     ref: unset
     fk_availability: unset
     fk_input_reason: unset

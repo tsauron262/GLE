@@ -1369,9 +1369,10 @@ class Bimp_Facture extends BimpComm
 
             switch ($type) {
                 case Facture::TYPE_REPLACEMENT:
-                    if ((int) $this->dol_object->fk_facture_source) {
+                    $id_fac_src = (int) $this->getData('fk_facture_source');
+                    if ($id_fac_src) {
                         $facture = new Facture($this->db->db);
-                        $facture->fetch((int) $this->dol_object->fk_facture_source);
+                        $facture->fetch((int) $id_fac_src);
                         if (!BimpObject::objectLoaded($facture)) {
                             $html .= BimpRender::renderAlerts('La facture remplacée n\'existe plus');
                         } else {
@@ -1383,9 +1384,10 @@ class Bimp_Facture extends BimpComm
                     break;
 
                 case Facture::TYPE_CREDIT_NOTE:
-                    if ((int) $this->dol_object->fk_facture_source) {
+                    $id_fac_src = (int) $this->getData('fk_facture_source');
+                    if ((int) $id_fac_src) {
                         $facture = new Facture($this->db->db);
-                        $facture->fetch((int) $this->dol_object->fk_facture_source);
+                        $facture->fetch((int) $id_fac_src);
                         if (!BimpObject::objectLoaded($facture)) {
                             $html .= BimpRender::renderAlerts('La facture corrigée n\'existe plus');
                         } else {
@@ -2235,7 +2237,7 @@ class Bimp_Facture extends BimpComm
                         $html .= '<td>';
                         $html .= $line->displayLineData('desc_light');
                         if (!(int) $line->getData('pa_editable')) {
-                            $html .= '<span class="warning">La ligne est marquée "prix d\'achat non éditable"</span>';
+                            $html .= '<br/><span class="warning">Attention: la ligne est marquée "prix d\'achat non éditable"</span>';
                         }
                         $html .= '</td>';
                         $html .= '<td>';
@@ -3596,7 +3598,7 @@ class Bimp_Facture extends BimpComm
 
                         $facture->hydrateDolObject();
 
-                        $facture->dol_object->fk_facture_source = (int) $id_facture_replaced;
+                        $facture->set('fk_facture_source', $id_facture_replaced);
                         $facture->set('type', (int) $type);
 
                         $id = $facture->dol_object->createFromCurrent($user);
@@ -3613,7 +3615,7 @@ class Bimp_Facture extends BimpComm
             case Facture::TYPE_CREDIT_NOTE:
                 $facture = null;
 
-                $this->dol_object->fk_facture_source = (int) BimpTools::getPostFieldValue('id_facture_to_correct', 0);
+                $id_fac_src = (int) BimpTools::getPostFieldValue('id_facture_to_correct', 0);
                 $avoir_same_lines = (int) BimpTools::getPostFieldValue('avoir_same_lines', 0);
                 $avoir_remain_to_pay = (int) BimpTools::getPostFieldValue('avoir_remain_to_pay', 0);
 
@@ -3621,12 +3623,14 @@ class Bimp_Facture extends BimpComm
                     $errors[] = 'Il n\'est pas possible de choisir l\'option "Créer l\'avoir avec les même lignes que la factures dont il est issu" et "Créer l\'avoir avec le montant restant à payer de la facture dont il est issu" en même temps. Veuillez choisir l\'une ou l\'autre';
                 }
 
-                if (!$this->dol_object->fk_facture_source && (empty($conf->global->INVOICE_CREDIT_NOTE_STANDALONE) || $avoir_same_lines || $avoir_remain_to_pay)) {
+                if (!$id_fac_src && (empty($conf->global->INVOICE_CREDIT_NOTE_STANDALONE) || $avoir_same_lines || $avoir_remain_to_pay)) {
                     $errors[] = 'Facture à corriger absente';
-                } elseif ($this->dol_object->fk_facture_source) {
-                    $facture = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $this->dol_object->fk_facture_source);
+                } elseif ($id_fac_src) {
+                    $facture = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $id_fac_src);
                     if (!$facture->isLoaded()) {
                         $errors[] = 'Facture à corriger invalide';
+                    } else {
+                        $this->set('fk_facture_source', $id_fac_src);
                     }
                 }
 

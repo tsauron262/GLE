@@ -559,7 +559,12 @@ class BLPDF extends OrderPDF
         $table->cols_def['qte']['style'] = 'text-align: center;';
         $table->cols_def['qte']['head_style'] = 'text-align: center;';
 
-        $table->setCols(array('code_article', 'desc', 'pu_ht', 'tva', 'total_ht', 'qte', 'dl', 'ral'));
+        if(!isset($_GET['chiffre']) || $_GET['chiffre'] == 1)
+            $table->setCols(array('code_article', 'desc', 'pu_ht', 'tva', 'total_ht', 'qte', 'dl', 'ral'));
+        else{
+            $table->setCols(array('code_article', 'desc', 'qte', 'dl', 'ral'));
+            $this->hideTotal = 1;
+        }
 
         BimpTools::loadDolClass('product');
 
@@ -735,7 +740,8 @@ class BLPDF extends OrderPDF
                 }
             }
 
-            $table->rows[] = $row;
+            if(!isset($_GET['detail']) || $_GET['detail'] == 1 || $row['qte'] > 0)
+                $table->rows[] = $row;
 
             unset($product);
             $product = null;

@@ -128,7 +128,7 @@ class BimpValidateOrder {
                 $test = "commande:rowid=" . $order->id . " && fk_statut>0";
                 $tasks = $task->getList(array('test_ferme' => $test));
                 if (count($tasks) == 0) {
-                    $tab = array("src" => $user->email, "dst" => "validationcommande@bimp.fr", "subj" => "Validation commande " . $order->ref, "txt" => "Merci de validé la commande " . $order->getNomUrl(1), "test_ferme" => $test);
+                    $tab = array("src" => $user->email, "dst" => "validationcommande@bimp.fr", "subj" => "Validation commande " . $order->ref, "txt" => "Merci de valider la commande " . $order->getNomUrl(1), "test_ferme" => $test);
                     $this->errors = array_merge($this->errors, $task->validateArray($tab));
                     $this->errors = array_merge($this->errors, $task->create());
                 }

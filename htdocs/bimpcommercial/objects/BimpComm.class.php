@@ -783,9 +783,38 @@ class BimpComm extends BimpDolObject
         if (!in_array($id_main_pdf_file, $values)) {
             $values[] = $id_main_pdf_file;
         }
+        
+        $list = $this->getAllFiles();
+        $idSepa = 0;
+        $idSepaSigne = 0;
+        foreach($list as $id => $elem)
+            if(stripos($elem, "sepa")){
+                    $idSepa = $id;
+                    if(stripos($elem, "signe"))
+                            $idSepaSigne = $id;
+            }
+
+
+        if($idSepa > 0 && $idSepaSigne < 1)            
+            $values[] = $idSepa;
+        
+
+
 
         return $values;
     }
+    
+    public function getAllFiles($withLink = true){
+        $objects = $this->getBimpObjectsLinked();
+        $list = $this->getFilesArray(0);
+        if($withLink){
+            foreach($objects as $object){
+                $list = $list + $object->getFilesArray(0);
+            }
+        }
+        return $list;
+    }
+    
 
     public function getEmailTopicByModel()
     {
@@ -1712,9 +1741,9 @@ class BimpComm extends BimpDolObject
         return $html;
     }
 
-    public function renderExtraFile()
+    public function getBimpObjectsLinked()
     {
-        $html = "";
+        $objects = array();
         if ($this->isLoaded()) {
             if ($this->isDolObject()) {
                 foreach (BimpTools::getDolObjectLinkedObjectsList($this->dol_object, $this->db) as $item) {
@@ -1744,14 +1773,28 @@ class BimpComm extends BimpDolObject
                     if ($class != "") {
                         $objT = BimpCache::getBimpObjectInstance($module, $class, $id);
                         if ($objT->isLoaded()) {
-                            $html .= $this->renderListFileForObject($objT);
+                            $objects[] = $objT;
                         }
                     }
                 }
             }
+            
+            $client = $this->getChildObject('client');
+
+            if($client->isLoaded()){
+                $objects[] = $client;
+            }
         }
 
 
+        return $objects;
+    }
+    
+    public function renderExtraFile(){
+        $html = "";
+        $objects = $this->getBimpObjectsLinked();
+        foreach($objects as $obj)
+            $html .= $this->renderListFileForObject($obj);
         return $html;
     }
 
@@ -3265,7 +3308,7 @@ class BimpComm extends BimpDolObject
             $filename_list = array();
             $mimetype_list = array();
             $mimefilename_list = array();
-
+            
             if (isset($data['join_files']) && is_array($data['join_files'])) {
                 foreach ($data['join_files'] as $id_file) {
                     $file = BimpCache::getBimpObjectInstance('bimpcore', 'BimpFile', (int) $id_file);

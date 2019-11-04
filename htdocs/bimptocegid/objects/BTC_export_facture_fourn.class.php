@@ -258,9 +258,8 @@ class BTC_export_facture_fourn extends BTC_export {
                 }
                 
                 if(!$writing_ligne_fournisseur){
-                    echo '<pre>';
                     $structure['contre_partie'] = [$contre_partie_ligne_fournisseur, 17];
-                    $ecriture = $this->struct($structure);
+                    $ecritures = $this->struct($structure);
                     echo $ecriture;
                     $writing_ligne_fournisseur = true;
                 }
@@ -268,12 +267,11 @@ class BTC_export_facture_fourn extends BTC_export {
             }
         }
         
-        $montant_ecart = 1;
+        
         if(round($total_ttc_facture) == round($total_lignes_facture)) {
-            //$montant_ecart = round($total_ttc_facture) - round($total_lignes_facture);
-            //$this->rectifications_ecarts($lignes, $montant_ecart);
-            //$this->send_mail_module(['cause' => self::CAUSE_ECART, 'element' => $facture->getNomUrl(1,1), 'ecart' => $montant_ecart, 'correction' => true]);
-            
+            echo '<pre>';
+            $montant_ecart = round($total_ttc_facture) - round($total_lignes_facture);
+            $this->rectifications_ecarts($lignes, $montant_ecart, 'achat');            
         }
 
         foreach($lignes as $l => $infos) {
@@ -301,8 +299,12 @@ class BTC_export_facture_fourn extends BTC_export {
             
         }
         
-        echo $ecritures;
-        echo '</pre>';
+        if($this->write_tra($ecritures, $this->create_daily_file('achat'))) {
+            $facture->updateField('exported', 1);
+            return 1;
+        } else {
+            return -3;
+        }
         
         
     }

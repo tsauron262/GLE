@@ -386,6 +386,14 @@ class BimpComm extends BimpDolObject
             'icon'    => 'far fa-paper-plane',
             'onclick' => $note->getJsActionOnclick('repondre', array("obj_type" => "bimp_object", "obj_module" => $this->module, "obj_name" => $this->object_name, "id_obj" => $this->id, "type_dest" => $note::BN_DEST_GROUP, "fk_group_dest" => $note::BN_GROUPID_FACT, "content" => "Bonjour, vous trouverez pour cette piéce le document signée."), array('form_name' => 'rep'))
         );
+        
+        $buttons[] = array(
+                'label'   => 'Relevé facturation client',
+                'icon'    => 'fas fa-ticket',
+                'onclick' => $this->getJsActionOnclick('releverFacturation', array(), array(
+                    'form_name' => 'releverFacturation'
+                ))
+            );
 
         return $buttons;
     }
@@ -3022,7 +3030,27 @@ class BimpComm extends BimpDolObject
     }
 
     // Actions:
-
+    
+    public function actionReleverFacturation($data, &$success) {
+        global $langs;
+        BimpTools::loadDolClass('societe');
+        $societe = new Societe($this->db->db);
+        $societe->fetch($this->getData('fk_soc'));
+        $societe->borne_debut = $data['date_debut'];
+        $societe->borne_fin = $data['date_fin'];
+        if($societe->generateDocument('invoiceStatement', $langs) > 0) {
+            $success = "Relevé de facturation généré avec succès";
+        } else {
+            $errors = "Echec de la génération du relevé de facturation";
+        }
+        
+        return [
+            'success' => $success,
+            'errors' => $errors,
+            'warnings' => $warnings
+        ];
+    }
+    
     public function actionValidate($data, &$success)
     {
         $errors = array();

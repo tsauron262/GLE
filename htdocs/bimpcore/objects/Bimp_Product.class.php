@@ -1229,36 +1229,24 @@ class Bimp_Product extends BimpObject
             if (!$this->hasFixePa()) {
                 return 0;
             }
+
+            $pa_ht = 0;
+
             if (BimpCore::getConf('use_new_cur_pa_method')) {
-                return (int) $this->getLastFournPriceId($id_fourn);
+                $pa_ht = (float) $this->getCurrentPaHt();
             } else {
-                $pa_ht = 0;
                 if ((float) $this->getData('cur_pa_ht')) {
                     $pa_ht = (float) $this->getData('cur_pa_ht');
                 }
+            }
 
-                if ($pa_ht) {
-                    $id_fp = (int) $this->findFournPriceIdForPaHt($pa_ht, $id_fourn);
-                }
+            if ($pa_ht) {
+                $id_fp = (int) $this->findFournPriceIdForPaHt($pa_ht, $id_fourn);
+            }
 
-                if (!$id_fp && $with_default) {
-//            $sql = 'SELECT MAX(fp.rowid) as id FROM ' . MAIN_DB_PREFIX . 'product_fournisseur_price fp WHERE fp.fk_product = ' . $this->id;
-                    // On retourne le dernier PA fournisseur modifié ou enregistré: 
-                    $where1 = 'fk_product = ' . (int) $this->id;
-
-                    if (!is_null($id_fourn) && (int) $id_fourn) {
-                        $where1 .= ' AND `fk_soc` = ' . (int) $id_fourn;
-                    }
-                    $where = $where1 . ' AND tms = (SELECT MAX(tms) FROM ' . MAIN_DB_PREFIX . 'product_fournisseur_price WHERE ' . $where1 . ')';
-
-                    $sql = 'SELECT rowid as id, price FROM ' . MAIN_DB_PREFIX . 'product_fournisseur_price WHERE ' . $where;
-
-                    $result = $this->db->executeS($sql);
-
-                    if (isset($result[0]->id)) {
-                        $id_fp = (int) $result[0]->id;
-                    }
-                }
+            if (!$id_fp && $with_default) {
+                // On retourne le dernier PA fournisseur modifié ou enregistré:                     
+                $id_fp = (int) $this->getLastFournPriceId($id_fourn);
             }
         }
 

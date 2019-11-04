@@ -321,7 +321,16 @@ if ($selectedFile) {
                     $email = implode(",", $emails);
             }
             
-            mailSyn2("FI Signé", $email, null, "Bonjour la FI " . $object->getNomUrl(1) . " est signée", array(), array(), array());
+            $infoClient = "";
+            
+            if(isset($object->socid)){                
+                require_once DOL_DOCUMENT_ROOT . '/core/lib/company.lib.php';
+                $societe = new Societe($db);
+                $societe->fetch($object->socid);
+                $infoClient = " du client ".$societe->getNomUrl(1);
+            }
+            
+            mailSyn2("FI Signé", $email, null, "Bonjour la FI " . $object->getNomUrl(1) . " ".$infoClient." est signée", array(), array(), array());
         } elseif (stripos($signeFile, 'SH') === 0) {
             $pdf->setXY(25, 240);
             $pdf->image($nomSign, 25, 245, 40);

@@ -62,7 +62,7 @@ class InterfaceLdapsynchro extends DolibarrTriggers
 		require_once DOL_DOCUMENT_ROOT."/user/class/usergroup.class.php";
 
 		$result=0;
-dol_syslog($action,3);
+                
 		// Users
 		if ($action == 'USER_CREATE')
 		{

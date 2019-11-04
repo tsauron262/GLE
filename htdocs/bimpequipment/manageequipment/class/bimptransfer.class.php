@@ -423,7 +423,7 @@ class BimpTransfer {
                 'id_equipment' => $equipment['fk_equipment'],
                 'type' => 2,
                 'id_entrepot' => $this->fk_warehouse_dest,
-                'infos' => 'Transfert de stock',
+                'infos' => 'Transfert de stock '.$this->id,
                 'code_mvt' => $codemove,
                 'date' => dol_print_date($now, '%Y-%m-%d %H:%M:%S')
             ));

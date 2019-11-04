@@ -203,6 +203,7 @@ if ($object->id) {
         'facture',
         'commande',
         array('synopsiscontrat', 'contrat', 'synopsiscontrat', 'au contrat'),
+        array('synopsiscontrat', 'contrat', 'contract', 'au contrat'),
         array('synopsisdemandeinterv', 'synopsisdemandeinterv', 'synopsisdemandeinterv', 'Demande Inter'),
         'fichinter',
         array('ficheinter', 'fichinter', 'ficheinter', 'Fiche Inter'),

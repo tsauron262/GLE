@@ -31,7 +31,7 @@ class Bimp_FactureFourn extends BimpComm
 
     public function isDeletable($force_delete = false)
     {
-        if(!$this->isEditable())
+        if (!$this->isEditable())
             return 0;
         if ($this->isLoaded()) {
             if ((int) $this->getData('fk_statut') === 0) {
@@ -43,12 +43,13 @@ class Bimp_FactureFourn extends BimpComm
 
         return 1;
     }
-    
-    public function isEditable($force_edit = false, &$errors = array()) {
-        if($this->getData('exported') == 1)
+
+    public function isEditable($force_edit = false, &$errors = array())
+    {
+        if ($this->getData('exported') == 1)
             return 0;
-        
-        
+
+
         return parent::isEditable($force_edit, $errors);
     }
 
@@ -56,12 +57,13 @@ class Bimp_FactureFourn extends BimpComm
     {
         return parent::isFieldEditable($field, $force_edit);
     }
-    
-    public function create(&$warnings = array(), $force_create = false) {
+
+    public function create(&$warnings = array(), $force_create = false)
+    {
         $dateMAx = '2019-10-01';
-        if($this->getData('datef') < $dateMAx)
-            $errors[] = 'Date inférieur au '.$dateMAx.' creation impossible'; 
-        if(count($errors))
+        if ($this->getData('datef') < $dateMAx)
+            $errors[] = 'Date inférieur au ' . $dateMAx . ' creation impossible';
+        if (count($errors))
             return $errors;
         return parent::create($warnings, $force_create);
     }
@@ -583,7 +585,7 @@ class Bimp_FactureFourn extends BimpComm
                 $user->fetch((int) $this->getData('fk_user_valid'));
                 $html .= '<div class="object_header_infos">';
                 $html .= 'Validée';
-                $html .= ' le '.$this->displayData('date_valid', 'default', false, true);
+                $html .= ' le ' . $this->displayData('date_valid', 'default', false, true);
                 $html .= ' par ' . $user->getNomUrl(1);
                 $html .= '</div>';
             }
@@ -955,6 +957,10 @@ class Bimp_FactureFourn extends BimpComm
                 }
 
                 $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $id_product);
+
+                if ((int) $product->getData('no_fixe_prices')) {
+                    continue;
+                }
 
                 $id_fp = 0;
 

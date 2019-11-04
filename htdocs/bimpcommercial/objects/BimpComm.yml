@@ -438,7 +438,8 @@ forms:
               input: 
                   type: check_list
                   items: 
-                      array: files
+                      callback: getAllFiles
+#                      array: files
               value: 
                   callback: getJoinFilesValues
               object: files

@@ -164,7 +164,7 @@ foreach ($list as $id_product) {
                     echo BimpRender::renderAlerts(BimpTools::getMsgFromArray($err, 'PROD #' . $id_prod));
                     break;
                 }
-                
+
                 $date_to = $data['datec'];
 
                 if ($data['datec'] < '2019-07-01 23:59:59') {
@@ -176,12 +176,15 @@ foreach ($list as $id_product) {
     }
 
     if (is_null($date_to) || $date_to > '2019-07-01 23:59:59') {
-        $pmp = (float) $product->getData('pmp');
-        if ($pmp) {
+        $pa = (float) $product->getData('cur_pa_ht');
+        if (!$pa) {
+            $pa = (float) $product->getData('pmp');
+        }
+        if ($pa) {
             $curPa = BimpObject::getInstance('bimpcore', 'BimpProductCurPa');
             $err = $curPa->validateArray(array(
                 'id_product' => (int) $id_product,
-                'amount'     => $pmp,
+                'amount'     => $pa,
                 'date_from'  => '2019-07-01 00:00:00',
                 'origin'     => 'pmp'
             ));

@@ -260,6 +260,8 @@ class BimpCache
 
     public static function getObjectFilesArray($object, $with_deleted = false)
     {
+        $file = BimpObject::getInstance("bimpcore", "BimpFile");
+        $file->checkObjectFiles($object->module, $object->object_name, $object->id);
         if (BimpObject::objectLoaded($object)) {
             if (is_a($object, 'BimpObject')) {
                 $cache_key = $object->module . '_' . $object->object_name . '_' . $object->id . '_files';

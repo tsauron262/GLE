@@ -1,1 +1,1 @@
-INSERT INTO `llx_document_model`(`nom`, `type`, `libelle`, `description`) VALUES ('cepa', 'company', 'CEPA', '');
+INSERT INTO `llx_document_model`(`nom`, `type`, `libelle`, `description`) VALUES ('cepa', 'company', 'SEPA', '');

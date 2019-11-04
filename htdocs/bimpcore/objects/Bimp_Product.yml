@@ -78,13 +78,6 @@ objects:
                 name: BimpProductCurPa
         
 fields: 
-    fk_user_modif:
-        label: Utilisateur modification
-        type: id_object
-        object: user
-    datec:
-        type: date
-        label: Date Création
     ref: 
         label: Réf.
         
@@ -335,11 +328,6 @@ fields:
         type: text
         dol_extra_field: 1
         
-#    best_buy_price:
-#        label: Meilleur prix d'achat
-#        type: money
-#        extra: 1
-        
     seuil_stock_alerte:
         label: Limite stock pour alerte
         type: int
@@ -369,25 +357,21 @@ fields:
         type: items_list
         items_data_type: id_object
         object: category
-
         
     localtax1_tx:
         label: Taxe locale 1
         type: money
         dol_extra_field: 1
-
         
     localtax1_type:
         label: Type de taxe locale 1
         type: int
         dol_extra_field: 1
-
         
     localtax2_tx:
         label: Taxe locale 2
         type: money
         dol_extra_field: 1
-
         
     localtax2_type:
         label: Type de taxe locale 2
@@ -437,6 +421,7 @@ fields:
                 method: getValues8sens
                 params:
                     - categorie
+                    
     collection:
         label: Collection
         dol_extra_field: 1
@@ -446,6 +431,7 @@ fields:
                 method: getValues8sens
                 params:
                     - collection
+                    
     nature:
         label: Nature
         dol_extra_field: 1
@@ -455,6 +441,7 @@ fields:
                 method: getValues8sens
                 params:
                     - nature
+                    
     famille:
         label: Famille
         dol_extra_field: 1
@@ -464,6 +451,7 @@ fields:
                 method: getValues8sens
                 params:
                     - famille
+                    
     gamme:
         label: Gamme
         dol_extra_field: 1
@@ -473,8 +461,16 @@ fields:
                 method: getValues8sens
                 params:
                     - gamme
+                    
+    fk_user_modif:
+        label: Utilisateur modification
+        type: id_object
+        object: user
         
-
+    datec:
+        type: date
+        label: Date Création
+        
 forms: 
     lightFourn:
         extends: light

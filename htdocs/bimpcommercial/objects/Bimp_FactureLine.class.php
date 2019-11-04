@@ -93,6 +93,29 @@ class Bimp_FactureLine extends ObjectLine
         return $buttons;
     }
 
+    // Getters données: 
+
+    public function getPaWithRevalorisations()
+    {
+        $pa = $this->pa_ht;
+
+        if ($this->isLoaded()) {
+            $revals = BimpCache::getBimpObjectObjects('bimpfinanc', 'BimpRevalorisation', array(
+                        'id_facture_line' => (int) $this->id,
+                        'type'            => 'correction_pa',
+                        'status'          => array(
+                            'in' => array(0, 1)
+                        )
+            ));
+
+            foreach ($revals as $reval) {
+                $pa -= (float) $reval->getData('amount');
+            }
+        }
+
+        return $pa;
+    }
+
     // Affichages: 
 
     public function displayRevalorisations()
@@ -264,7 +287,7 @@ class Bimp_FactureLine extends ObjectLine
 
         if ($this->isLoaded($errors)) {
             $qty = (float) $this->getFullQty();
-            if ($qty && (float) $new_pa_ht !== (float) $this->pa_ht) {
+            if ($qty) {
                 $facture = $this->getParentInstance();
 
                 if (!BimpObject::objectLoaded($facture)) {

@@ -2429,12 +2429,12 @@ class ObjectLine extends BimpObject
         return $errors;
     }
 
-    public function calcPaByEquipments()
+    public function calcPaByEquipments($update = true, $date_cur_pa = null, &$new_pa = null, &$default_cur_pa = null)
     {
         $errors = array();
 
         if ($this->isLoaded()) {
-            $qty = $this->getFullQty();
+            $qty = abs((float) $this->getFullQty());
 
             if ($qty > 0) {
                 $lines = $this->getEquipmentLines();
@@ -2459,18 +2459,28 @@ class ObjectLine extends BimpObject
                 $diff = $qty - $nDone;
 
                 if ($diff > 0) {
-                    $cur_pa = 0;
+                    $cur_pa = null;
+                    $cur_pa_amount = 0;
                     $prod = $this->getProduct();
                     if (BimpObject::objectLoaded($prod)) {
-                        $cur_pa = $prod->getCurrentPaHt();
+//                        $cur_pa = $prod->getCurrentPaHt(null, true, $date_cur_pa);
+                        $cur_pa = $prod->getCurrentPaObject(true, $date_cur_pa);
+                        if (BimpObject::objectLoaded($cur_pa)) {
+                            $cur_pa_amount = (float) $cur_pa->getData('amount');
+                            $default_cur_pa = $cur_pa;
+                        }
                     }
 
-                    $total_achats += ($cur_pa * $diff);
+                    $total_achats += ($cur_pa_amount * $diff);
                 }
 
                 $new_pa = $total_achats / $qty;
 
-                if ($new_pa != (float) $this->pa_ht) {
+                if ((float) $this->pu_ht < 0) {
+                    $new_pa *= -1;
+                }
+
+                if ($update && $new_pa != (float) $this->pa_ht) {
                     $errors = $this->updatePrixAchat($new_pa);
                 }
             }
@@ -2865,6 +2875,49 @@ class ObjectLine extends BimpObject
             }
         }
         return $position;
+    }
+
+    public function findValidPrixAchat($date = '')
+    {
+        if ($this->isLoaded() && (int) $this->getData('type') === self::LINE_PRODUCT) {
+            $product = $this->getProduct();
+
+            if (BimpObject::objectLoaded($product)) {
+                $mult = ((float) $this->pu_ht < 0 ? -1 : 1);
+                $pa_ht = 0;
+                $origin = '';
+
+                if ($product->isSerialisable()) {
+                    $default_cur_pa = null;
+                    $this->calcPaByEquipments(false, $date, $pa_ht, $default_cur_pa);
+                    $origin = 'Prix d\'achat moyen des équipements';
+                    if (BimpObject::objectLoaded($default_cur_pa)) {
+                        $origin .= '<br/>Prix d\'achat par défaut: ' . $default_cur_pa->getNomUrl(0, 1, 0, 'default') . ' (' . BimpTools::displayMoneyValue($default_cur_pa->getData('amount')) . ')';
+                    }
+                } elseif ((int) $product->getData('no_fixe_prices')) {
+                    $pa_ht = (float) $this->pa_ht;
+                    $origin = 'Prix d\'achat enregistré dans la ligne';
+                    $origin .= '<br/><span class="warning">(Le produit n\'a pas de prix d\'achat fixe)</span>';
+                } else {
+                    $cur_pa = $product->getCurrentPaObject(true, $date);
+                    if (BimpObject::objectLoaded($cur_pa)) {
+                        $pa_ht = (float) $cur_pa->getData('amount');
+                        $origin = 'Prix d\'achat ' . $cur_pa->getNomUrl(0, 1, 0, 'default');
+                    }
+                    $pa_ht *= $mult;
+                }
+
+                return array(
+                    'pa_ht'  => $pa_ht,
+                    'origin' => $origin
+                );
+            }
+        }
+
+        return array(
+            'pa_ht'  => (float) $this->pa_ht,
+            'origin' => 'Prix d\'achat enregistré dans la ligne'
+        );
     }
 
     // Rendus HTML: 

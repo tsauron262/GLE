@@ -113,6 +113,16 @@ class Bimp_Facture extends BimpComm
             case 'addToCommission':
                 $commission = BimpObject::getInstance('bimpfinanc', 'BimpCommission');
                 return (int) $commission->can('create');
+
+            case 'checkPa':
+                if (!$user->admin) {
+                    return 0; // A suppr
+                }
+                $line_instance = $this->getLineInstance();
+                if (is_a($line_instance, 'ObjectLine')) {
+                    return (int) $line_instance->canEditPrixAchat();
+                }
+                return 0;
         }
 
         return parent::canSetAction($action);
@@ -147,7 +157,7 @@ class Bimp_Facture extends BimpComm
 
     public function isActionAllowed($action, &$errors = array())
     {
-        if (in_array($action, array('validate', 'modify', 'reopen', 'sendMail', 'addAcompte', 'useRemise', 'removeFromUserCommission', 'removeFromEntrepotCommission', 'addToCommission', 'convertToReduc'))) {
+        if (in_array($action, array('validate', 'modify', 'reopen', 'sendMail', 'addAcompte', 'useRemise', 'removeFromUserCommission', 'removeFromEntrepotCommission', 'addToCommission', 'convertToReduc', 'checkPa'))) {
             if (!$this->isLoaded()) {
                 $errors[] = 'ID de la facture absent';
                 return 0;
@@ -433,6 +443,13 @@ class Bimp_Facture extends BimpComm
                 }
                 if ((int) $this->getData('id_user_commission') && (int) $this->getData('id_entrepot_commission')) {
                     $errors[] = 'Cette facture n\'est attribuable à aucune commission';
+                    return 0;
+                }
+                return 1;
+
+            case 'checkPa':
+                if (!in_array($type, array(0, 1, 2))) {
+                    $errors[] = 'Ce type de facture n\'est pas élligible pour le processus de vérification des prix d\'achat';
                     return 0;
                 }
                 return 1;
@@ -797,6 +814,18 @@ class Bimp_Facture extends BimpComm
                 'icon'    => 'fas_comment-dollar',
                 'onclick' => $this->getJsActionOnclick('addToCommission', array(), array(
                     'form_name' => 'add_to_commission'
+                ))
+            );
+        }
+
+        // Vérifier les prix d'achat:
+        if ($this->isActionAllowed('checkcPa') && $this->canSetAction('checkPa')) {
+            $buttons[] = array(
+                'label'   => 'Vérifier les prix d\'achat',
+                'icon'    => 'fas_search-dollar',
+                'onclick' => $this->getJsActionOnclick('checkPa', array(), array(
+                    'form_name'      => 'check_pa',
+                    'on_form_submit' => 'function($form, extra_data) { return onCheckPaFactureFormSubmit($form, extra_data); }'
                 ))
             );
         }
@@ -1206,13 +1235,13 @@ class Bimp_Facture extends BimpComm
                     $items[] = $item['id'];
                 }
             }
-            if(count($items == 0)){
+            if (count($items == 0)) {
                 $contacts = $this->dol_object->liste_contact(-1, 'external', 0, 'BILLING');
                 $emails = array();
                 foreach ($contacts as $item) {
                     if ((string) $item['email'] && (int) $item['id'] && !in_array($item['id'], $items)) {
                         $emails[] = $item['email'];
-    //                    $items[(int) $item['id']] = $item['libelle'] . ': ' . $item['firstname'] . ' ' . $item['lastname'] . ' (' . $item['email'] . ')';
+                        //                    $items[(int) $item['id']] = $item['libelle'] . ': ' . $item['firstname'] . ' ' . $item['lastname'] . ' (' . $item['email'] . ')';
                         $items[] = $item['id'];
                     }
                 }
@@ -2096,7 +2125,7 @@ class Bimp_Facture extends BimpComm
             $html .= '<tr>';
             $html .= '<td>Revalorisations acceptées</td>';
             $html .= '<td></td>';
-            $html .= '<td><span class="danger">-' . BimpTools::displayMoneyValue($revals['accepted'], '') . '</span></td>';
+            $html .= '<td><span class="danger">' . ((float) $revals['accepted'] < 0 ? '+' : '-') . BimpTools::displayMoneyValue(abs((float) $revals['accepted']), '') . '</span></td>';
             $html .= '<td></td>';
             $html .= '</tr>';
 
@@ -2107,7 +2136,7 @@ class Bimp_Facture extends BimpComm
             $html .= '<tr>';
             $html .= '<td>Revalorisations en attente</td>';
             $html .= '<td></td>';
-            $html .= '<td><span class="danger">-' . BimpTools::displayMoneyValue($revals['attente'], '') . '</span></td>';
+            $html .= '<td><span class="danger">' . ((float) $revals['attente'] < 0 ? '+' : '-') . BimpTools::displayMoneyValue(abs((float) $revals['attente']), '') . '</span></td>';
             $html .= '<td></td>';
             $html .= '</tr>';
 
@@ -2135,6 +2164,108 @@ class Bimp_Facture extends BimpComm
             $html .= '<td>' . BimpTools::displayMoneyValue($total_pa, '') . '</td>';
             $html .= '<td>' . BimpTools::displayMoneyValue($total_marge, '') . ' (' . BimpTools::displayFloatValue($tx, 4) . ' %)</td>';
             $html .= '</tr>';
+        }
+
+        return $html;
+    }
+
+    public function renderCheckPaForm()
+    {
+        $html = '';
+
+        $errors = array();
+        $has_checked = false;
+
+        if ($this->isLoaded($errors)) {
+            $type_check = BimpTools::getPostFieldValue('type_check', '');
+            if (!$type_check) {
+                $errors[] = 'Type de prix d\'achat des produits à récupérer absent';
+            } else {
+                $lines = $this->getLines('product');
+
+                if (empty($lines)) {
+                    return BimpRender::renderAlerts('Aucune ligne produit trouvée', 'warning');
+                } else {
+                    $date = '';
+                    switch ($type_check) {
+                        case 'create':
+                            $date = $this->getData('datec');
+                            break;
+
+                        case 'validate':
+                            if ((int) $this->getData('status') < 1) {
+                                $date = $this->getData('datec');
+                            } else {
+                                $date = $this->getData('date_valid') . ' 00:00:00';
+                            }
+                            break;
+                    }
+                    $html .= '<table class="bimp_list_table">';
+                    $html .= '<thead>';
+                    $html .= '<tr>';
+                    $html .= '<th style="text-align: center; width: 30px;"></th>';
+                    $html .= '<th style="text-align: center; width: 45px;">Ligne n°</th>';
+                    $html .= '<th>Produit</th>';
+                    $html .= '<th>PA enregistré</th>';
+                    $html .= '<th>PA attendu</th>';
+                    $html .= '<th>Orgine du PA attendu</th>';
+                    $html .= '</tr>';
+                    $html .= '</thead>';
+
+                    $html .= '<tbody>';
+
+                    foreach ($lines as $line) {
+                        $line_pa_ht = (float) $line->getPaWithRevalorisations();
+                        $infos = $line->findValidPrixAchat($date);
+                        $is_ok = (round($line_pa_ht, 2) === round((float) $infos['pa_ht'], 2));
+                        $check = (!$is_ok && (int) $line->getData('pa_editable'));
+
+                        $html .= '<tr class="lineRow" data-id_line="' . $line->id . '" data-new_pa="' . $infos['pa_ht'] . '">';
+                        $html .= '<td style="text-align: center; width: 30px;">';
+                        if (!$is_ok) {
+                            $html .= '<input type="checkbox" value="' . $line->id . '" name="lines[]"';
+                            if ($check) {
+                                $has_checked = true;
+                                $html .= ' checked';
+                            }
+                            $html .= '/>';
+                        }
+                        $html .= '</td>';
+                        $html .= '<td style="text-align: center; width: 45px;">' . $line->getData('position') . '</td>';
+                        $html .= '<td>';
+                        $html .= $line->displayLineData('desc_light');
+                        if (!(int) $line->getData('pa_editable')) {
+                            $html .= '<span class="warning">La ligne est marquée "prix d\'achat non éditable"</span>';
+                        }
+                        $html .= '</td>';
+                        $html .= '<td>';
+                        $html .= BimpTools::displayMoneyValue((float) $line->pa_ht);
+                        if ((float) $line->pa_ht !== $line_pa_ht) {
+                            $html .= '<br/>';
+                            $html .= 'Corrections incluses: ' . BimpTools::displayMoneyValue($line_pa_ht);
+                        }
+                        $html .= '</td>';
+                        $html .= '<td>';
+                        $html .= '<span class="' . ($is_ok ? 'success' : ($check ? 'danger' : 'warning')) . '">' . BimpTools::displayMoneyValue((float) $infos['pa_ht']) . '</span>';
+                        $html .= '</td>';
+                        $html .= '<td>' . $infos['origin'] . '</td>';
+                        $html .= '</tr>';
+                    }
+
+                    $html .= '</tbody>';
+                    $html .= '</table>';
+                }
+            }
+        }
+
+        if (count($errors)) {
+            $html .= BimpRender::renderAlerts($errors);
+        } elseif ($has_checked) {
+            $msg = 'Veuillez sélectionner les lignes à corriger et cliquer sur "Valider" pour lancer la correction automatique';
+            $html = BimpRender::renderAlerts($msg, 'info') . $html;
+        } else {
+            $msg = 'Il n\'y a aucun prix d\'achat à corriger';
+            $html = BimpRender::renderAlerts($msg, 'success') . $html;
         }
 
         return $html;
@@ -3321,6 +3452,41 @@ class Bimp_Facture extends BimpComm
         );
     }
 
+    public function actionCheckPa($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+
+        $lines = (isset($data['lines']) ? $data['lines'] : array());
+
+        if (empty($lines)) {
+            $errors[] = 'Aucune ligne sélectionnée pour la correction du prix d\'achat';
+        } else {
+            foreach ($lines as $line_data) {
+                $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureLine', (int) $line_data['id_line']);
+                if (!BimpObject::objectLoaded($line)) {
+                    $errors[] = 'La ligne d\'ID ' . $line_data['id_line'] . ' n\'existe pas';
+                } else {
+                    $line_pa_ht = $line->getPaWithRevalorisations();
+                    if ((float) $line_pa_ht !== (float) $line_data['new_pa']) {
+                        $line_errors = $line->updatePrixAchat((float) $line_data['new_pa']);
+                        if (count($line_errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n°' . $line->getData('position'));
+                        } else {
+                            $success .= ($success ? '<br/>' : '') . 'PA de la ligne n°' . $line->getData('position') . ' mis à jour avec succès';
+                        }
+                    }
+                }
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
     // Overrides BimpObject:
 
     public function validate()
@@ -3580,7 +3746,7 @@ class Bimp_Facture extends BimpComm
 
         $changeCondRegl = $id_cond_reglement !== (int) $this->getInitData('fk_cond_reglement');
         $changeDateF = $this->getData('datef') != $this->getInitData('datef');
-        
+
         if ($changeCondRegl || $changeDateF) {
             $this->dol_object->date = strtotime($this->getData('datef'));
             $this->set('date_lim_reglement', BimpTools::getDateFromDolDate($this->dol_object->calculate_date_lim_reglement($id_cond_reglement)));

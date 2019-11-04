@@ -2,22 +2,6 @@
 
 class BimpRevalorisation extends BimpObject
 {
-
-    public function canCreate()
-    {
-        global $user;
-        return $user->rights->bimpcommercial->commission->write;
-    }
-    public function canEdit()
-    {
-        return (int) $this->canCreate();
-    }
-    
-    public function canView() {
-        global $user;
-        return $user->rights->bimpcommercial->commission->read;
-    }
-
     public static $status_list = array(
         0 => array('label' => 'En Attente', 'icon' => 'fas_hourglass-start', 'classes' => array('warning')),
         1 => array('label' => 'Acceptée', 'icon' => 'fas_check', 'classes' => array('success')),
@@ -31,6 +15,23 @@ class BimpRevalorisation extends BimpObject
 
     // Gestion des droits user: 
 
+    public function canCreate()
+    {
+        global $user;
+        return ($user->admin || $user->rights->bimpcommercial->commission->write);
+    }
+
+    public function canEdit()
+    {
+        return (int) $this->canCreate();
+    }
+
+    public function canView()
+    {
+        global $user;
+        return ($user->admin || $user->rights->bimpcommercial->commission->read);
+    }
+    
     public function canDelete()
     {
         global $user;

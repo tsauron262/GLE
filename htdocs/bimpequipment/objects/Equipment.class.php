@@ -876,12 +876,16 @@ class Equipment extends BimpObject
             $html .= BimpRender::renderAlerts($errors, 'warning');
         } else {
             $place = $this->getCurrentPlace();
-            if ($place->getData('type') == BE_Place::BE_PLACE_ENTREPOT)
-                $html .= BimpRender::renderAlerts('Equipement disponible en stock', 'success');
-            elseif ($place->getData('type') == BE_Place::BE_PLACE_CLIENT)
-                $html .= BimpRender::renderAlerts('Equipement disponible pour un retour', 'success');
-            else
-                $html .= BimpRender::renderAlerts('Equipement non reservé', 'success');
+            if (BimpObject::objectLoaded($place)) {
+                if ($place->getData('type') == BE_Place::BE_PLACE_ENTREPOT)
+                    $html .= BimpRender::renderAlerts('Equipement disponible en stock', 'success');
+                elseif ($place->getData('type') == BE_Place::BE_PLACE_CLIENT)
+                    $html .= BimpRender::renderAlerts('Equipement disponible pour un retour', 'success');
+                else
+                    $html .= BimpRender::renderAlerts('Equipement non reservé', 'success');
+            } else {
+                $html .= BimpRender::renderAlerts('Aucun emplacement défini', 'warning');
+            }
         }
 
         return $html;

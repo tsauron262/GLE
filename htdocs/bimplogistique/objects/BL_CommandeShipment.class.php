@@ -657,9 +657,22 @@ class BL_CommandeShipment extends BimpObject
         $html = '';
 
         if ($this->isLoaded()) {
+//            if ((int) $this->getData('status') > 0) {
+//                $url = DOL_URL_ROOT . '/bimplogistique/bl.php?id_shipment=' . $this->id;
+//                $onclick = 'window.open(\'' . $url . '\')';
+//                $html .= '<button type="button" class="btn btn-default" onclick="' . htmlentities($onclick) . '">';
+//                $html .= '<i class="' . BimpRender::renderIconClass('fas_file-pdf') . ' iconLeft"></i>';
+//                if ((int) $this->getData('status') === self::BLCS_BROUILLON) {
+//                    $html .= 'Bon de préparation';
+//                } else {
+//                    $html .= 'Bon de livraison';
+//                }
+//                $html .= '</button>';
+//            }
             if ((int) $this->getData('status') > 0) {
-                $url = DOL_URL_ROOT . '/bimplogistique/bl.php?id_shipment=' . $this->id;
-                $onclick = 'window.open(\'' . $url . '\')';
+                $onclick = $this->getJsActionOnclick('viewPdfExpe', array(), array(
+                            'form_name'        => 'pdf'
+                        ));
                 $html .= '<button type="button" class="btn btn-default" onclick="' . htmlentities($onclick) . '">';
                 $html .= '<i class="' . BimpRender::renderIconClass('fas_file-pdf') . ' iconLeft"></i>';
                 if ((int) $this->getData('status') === self::BLCS_BROUILLON) {
@@ -710,6 +723,16 @@ class BL_CommandeShipment extends BimpObject
         }
 
         return $html;
+    }
+    
+    public function actionViewPdfExpe($data){
+        $url = DOL_URL_ROOT . '/bimplogistique/bl.php?id_shipment=' . $this->id.'&chiffre='.$data['chiffre'].'&detail='.$data['detail'];
+        
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => 'window.open(\'' . $url . '\')'
+        );
     }
 
     public function displayCommercial()

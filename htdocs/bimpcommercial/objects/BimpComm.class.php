@@ -3651,13 +3651,15 @@ class BimpComm extends BimpDolObject
                 // Get id of the default contact
                 global $db;
                 $id_client = $this->getAddContactIdClient();
-                $soc = new Societe($db);
-                $soc->fetch_optionals($id_client);
-                $contact_default = (int) $soc->array_options['options_contact_default'];
+                if($id_client > 0){
+                    $soc = new Societe($db);
+                    $soc->fetch_optionals($id_client);
+                    $contact_default = (int) $soc->array_options['options_contact_default'];
 
-                if (!count($errors) && $contact_default > 0) {
-                    if ($this->dol_object->add_contact($contact_default, 'BILLING2', 'external') <= 0) 
-                        $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'ajout du contact');
+                    if (!count($errors) && $contact_default > 0) {
+                        if ($this->dol_object->add_contact($contact_default, 'BILLING2', 'external') <= 0) 
+                            $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'ajout du contact');
+                    }
                 }
 
             }

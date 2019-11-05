@@ -37,14 +37,14 @@ class inventory2Controller extends BimpController {
 
     
     public function getPageTitle() {
-        $title = 'Inventaire';
+        $title = 'Inv.';
         $inventory = $this->config->getObject('', 'inventory2');
-//        $warehouse = '';
 
         if (BimpObject::objectLoaded($inventory)) {
-//            $warehouse = $inventory->getEntrepotRef();
-            $title .= '#' . $inventory->getData('id');// . ' ' . $warehouse;
+            $warehouse = $inventory->getEntrepotRef();
+            $title .= '#' . $inventory->getData('id') . ' ' . $warehouse;
         }
+        
         return $title;
     }
     

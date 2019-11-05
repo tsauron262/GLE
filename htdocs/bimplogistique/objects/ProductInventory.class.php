@@ -1,7 +1,7 @@
 <?php
 
 if(!class_exists(Bimp_Product))
-require_once DOL_DOCUMENT_ROOT . '/bimpcore/objects/Bimp_Product.class.php';
+    require_once DOL_DOCUMENT_ROOT . '/bimpcore/objects/Bimp_Product.class.php';
 
 
 class ProductInventory extends Bimp_Product {
@@ -20,11 +20,5 @@ class ProductInventory extends Bimp_Product {
         $inventory = BimpCache::getBimpObjectInstance('bimplogistique', 'Inventory2', $id_inventory);
         $diff = $inventory->getDiffProduct($inventory->current_wt, $this->getData('id'));
         return $diff['nb_scan'];
-        
-//        $id_inventory = (int) BimpTools::getValue('id');
-//        $inventory = BimpCache::getBimpObjectInstance('bimplogistique', 'Inventory2', $id_inventory);
-//        $wt = BimpCache::getBimpObjectInstance('bimplogistique', 'InventoryWarehouse', $inventory->current_wt);
-//        $prod_qty = $wt->getProductScanned(array($this->getData('id')));
-//        return $prod_qty[$this->getData('id')];
     }
 }

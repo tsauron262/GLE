@@ -361,7 +361,7 @@ class BE_Package extends BimpObject
         }
     }
 
-    public function addEquipment($id_equipment, $code_mouv, $label_mouv, $date_mouv = '', &$warnings = array())
+    public function addEquipment($id_equipment, $code_mouv, $label_mouv, $date_mouv = '', &$warnings = array(), $force = 0)
     {
         $errors = array();
         
@@ -377,10 +377,10 @@ class BE_Package extends BimpObject
             if ((int) $equipment->getData('id_package')) {
                 $package = BimpCache::getBimpObjectInstance('bimpequipment', 'BE_Package', (int) $equipment->getData('id_package'));
             }
-            if (BimpObject::objectLoaded($package)) {
+            if (BimpObject::objectLoaded($package) and ! $force) {
                 $errors[] = 'L\'équipement ' . $equipment->getNomUrl(0, 1, 1, 'default') . ' est déjà attribué au package ' . $package->getNomUrl(0, 1, 1, 'default');
             } else {
-                if (!$equipment->isAvailable(0, $errors)) {
+                if (!$equipment->isAvailable(0, $errors) and ! $force) {
                     return $errors;
                 }
 
@@ -391,7 +391,7 @@ class BE_Package extends BimpObject
                 }
             }
         }
-
+        
         return $errors;
     }
 
@@ -1302,7 +1302,7 @@ class BE_Package extends BimpObject
         $qty = (isset($data['id_package_product']) ? $data['qty'] : 0);
         
         if (!count($errors))
-            $errors = array_merge($errors, self::moveProduct($id_package_product, $id_package_dest, $qty));
+            $errors = array_merge($errors, self::moveProduct($id_package_product, $id_package_dest, $qty, -1));
 
         return array(
             'errors'           => $errors,
@@ -1343,66 +1343,28 @@ class BE_Package extends BimpObject
         
         if ($id_package_dest < 1)
             $errors[] = 'Le package de destination n\'est pas définit.';
-        
-        $package_src = BimpCache::getBimpObjectInstance('bimpequipment', 'Be_Package', $id_package_src);
+
+        $package_src = BimpCache::getBimpObjectInstance('bimpequipment', 'BE_Package', (int) $id_package_src);
        
         if(!count($errors) and BimpObject::objectLoaded($package_src)) {
             $p_products = $package_src->getPackageProducts();
-            
+
             // Vérification des produits et de leurs quantité
             foreach ($products as $id_product => $qty) {
-//                $found = false;
                 foreach ($p_products as $p_product) {
-                    $errors = array_merge($errors, self::moveProduct($id_package_src, $id_package_dest, $qty));
-//                    if((int) $id_product == (int) $p_product->id) {
-//                        if((int) $p_product->getData('qty') < (int) $qty) {
-//                            $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $p_product->getData('id_product'));
-//                            $errors[] = 'Vous souhaitez déplacer ' . $qty . ' ' .
-//                                    $product->getData('ref') . ', or il n\'y en a que ' . 
-//                                    $p_product->getData('qty') . ' dans ce package.';
-//                        }
-//                        $found = true;
-//                        break;
-//                        
-//                    }
+                    if((int) $id_product == (int) $p_product->getData('id_product'))
+                        $errors = array_merge($errors, self::moveProduct($p_product->id, $id_package_dest, $qty));
                 }
-//                
-//                // Produit non trouvé dans le package
-//                if(!$found) {
-//                    $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $id_product);
-//                    $errors[] = 'Vous souhaitez déplacer ' . $qty . ' ' .
-//                            $product->getData('ref') . ', or il n\'y en pas dans ce package.';
-//                }
             }
             
-            $code_mvt = $this->getData('ref') . '-' . $id_package_dest;
-            $stock_label = 'Déplacement de ' . $this->getData('ref') . ' au package n°' .$id_package_dest;
+            $code_mvt = $package_src->getData('ref') . '-' . $id_package_dest;
+            $stock_label = 'Déplacement de ' . $package_src->getData('ref') . ' au package n°' .$id_package_dest;
         
             // Vérification des équipements
             foreach($equipments as $id_equipment) {
                 $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $id_equipment);
                 $errors = array_merge($errors, $equipment->moveToPackage($id_package_dest, $code_mvt, $stock_label, 1));
-//                $found = false;
-//                foreach($p_equipments as $p_equipment) {
-//                    if((int) $id_equipment == (int) $p_equipment->id)
-//                        $found = true;
-//                }
-//                
-//                // Equipement non trouvé dans le package
-//                if(!$found) {
-//                    $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $id_equipment);
-//                    $errors[] = 'Vous souhaitez déplacer ' . $equipment->getData('serial') .
-//                            ', or il n\'est pas dans ce package.';
-//                }
             }
-            
-//            if(!count($errors)) {
-//
-//                foreach($products as $id_product) {
-//                    moveProduct($id_package_product_src, $id_package_dest, $qty);
-//                }
-//                
-//            }
             
         }
         
@@ -1432,7 +1394,7 @@ class BE_Package extends BimpObject
         return $package_product->getData('qty');
     }
     
-    public static function moveProduct($id_package_product_src, $id_package_dest, $qty) {
+    public static function moveProduct($id_package_product_src, $id_package_dest, $qty, $id_entrepot) {
         $errors = array();
         
         
@@ -1455,7 +1417,7 @@ class BE_Package extends BimpObject
         
         if (BimpObject::objectLoaded($package_product_src) and BimpObject::objectLoaded($package_dest)) {
         // Ajout dans $package_dest
-            $errors = array_merge($errors, $package_dest->addProduct($id_product, $qty, -1));
+            $errors = array_merge($errors, $package_dest->addProduct($id_product, $qty, $id_entrepot));
             
         // Retrait dans $package_product_src
             $new_qty = $package_product_src->getData('qty') - $qty;
@@ -1463,6 +1425,25 @@ class BE_Package extends BimpObject
             
         } else 
             $errors[] = 'Erreur lors du chargement des objets, merci de réessayer.';
+        
+        return $errors;
+    }
+    
+    public function addPlace($entrepot, $type, $date, $infos, $code_mvt) {
+        
+        $errors = array();
+                
+        $place = BimpObject::getInstance('bimpequipment', 'BE_PackagePlace');
+        $errors = array_merge($errors, $place->validateArray(array(
+                    'id_package'  => (int) $this->id,
+                    'id_entrepot' => (int) $entrepot,
+                    'type'        => (int) $type,
+                    'date'        => $date,
+                    'infos'       => $infos,
+                    'code_mvt'    => $code_mvt
+        )));
+        
+        $errors = array_merge($errors, $place->create());
         
         return $errors;
     }

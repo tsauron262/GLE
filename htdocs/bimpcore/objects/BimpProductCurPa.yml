@@ -58,7 +58,7 @@ fields_tables:
               
 views: 
     default: 
-        modal_format: medium
+        modal_format: small
         rows: 
             - cols: 
                 - type: fields_table
@@ -67,6 +67,8 @@ views:
                       
 lists: 
     product: 
+        title: Historique des prix d'achat courants
+        objects_change_reload: Bimp_ProductFournisseurPrice
         enable_sort: 0
         enable_search: 0
         checkboxes: 0

@@ -4,6 +4,7 @@ class Bimp_Societe extends BimpObject
 {
 
     public static $types_ent_list = null;
+    public static $types_ent_list_code = null;
     public static $effectifs_list = null;
     public $soc_type = "";
 
@@ -53,20 +54,59 @@ class Bimp_Societe extends BimpObject
 
         return 1;
     }
+    
+    public function getNumSepa(){
+        
+        
+        if($this->getData('num_sepa') == ""){
+            $new = BimpTools::getNextRef('societe_extrafields', 'num_sepa', 'FR02ZZZ008801-', 7);
+            $this->updateField('num_sepa', $new);
+            $this->update();
+        }
+        return $this->getData('num_sepa');
+    }
+    
+    public function canBuy(&$errors = array(), $msgToError = true){
+        self::getTypes_entArray();
+        $type_ent_sans_verif = array("TE_PRIVATE","TE_ADMIN");
+        if(!isset(self::$types_ent_list_code[$this->getData("fk_typent")]) || !in_array(self::$types_ent_list_code[$this->getData("fk_typent")], $type_ent_sans_verif)){
+            /*
+             * Entreprise onf fait les verifs...
+             */
+            if(strlen($this->getData("siret")) != 14 && strlen($this->getData("siren")) != 9){
+                $errors[] = "Siren/siret client invalide :".$this->getData("siren")."/".$this->getData("siret");
+            }
+        }
+        if(self::$types_ent_list_code[$this->getData("fk_typent")] != "TE_PRIVATE"){
+            if($this->getData("mode_reglement") < 1){
+                $errors[] = "Mode réglement fiche client invalide ";
+            }
+            if($this->getData("cond_reglement_id") < 1){
+                $errors[] = "Condition réglement fiche client invalide ";
+            }
+        }
+        
+        if(count($errors))
+            return false;
+        return true;
+    }
 
     public function getTypes_entArray()
     {
         if (is_null(self::$types_ent_list)) {
-            $sql = 'SELECT `id`, `libelle` FROM ' . MAIN_DB_PREFIX . 'c_typent WHERE `active` = 1';
+            $sql = 'SELECT `id`, `libelle`, `code` FROM ' . MAIN_DB_PREFIX . 'c_typent WHERE `active` = 1';
             $rows = $this->db->executeS($sql, 'array');
 
             $types = array();
+            $typesCode = array();
             if (!is_null($rows)) {
                 foreach ($rows as $r) {
                     $types[(int) $r['id']] = $r['libelle'];
+                    $typesCode[(int) $r['id']] = $r['code'];
                 }
             }
             self::$types_ent_list = $types;
+            self::$types_ent_list_code = $typesCode;
         }
 
         return self::$types_ent_list;

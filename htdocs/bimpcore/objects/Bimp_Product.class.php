@@ -1,7 +1,6 @@
 <?php
 
 ini_set('max_execution_time', 6000);
-
 ini_set('memory_limit', '512M');
 
 class Bimp_Product extends BimpObject
@@ -141,14 +140,15 @@ class Bimp_Product extends BimpObject
 
         return parent::canSetAction($action);
     }
-    
-    public function getValues8sens($type){
+
+    public function getValues8sens($type)
+    {
         $return = array();
-        $sql = $this->db->db->query("SELECT * FROM ".MAIN_DB_PREFIX."bimp_c_values8sens WHERE type ='".$type."'ORDER BY label ASC");
-        while($ln = $this->db->db->fetch_object($sql)){
+        $sql = $this->db->db->query("SELECT * FROM " . MAIN_DB_PREFIX . "bimp_c_values8sens WHERE type ='" . $type . "'ORDER BY label ASC");
+        while ($ln = $this->db->db->fetch_object($sql)) {
             $return[$ln->id] = $ln->label;
         }
-        
+
         return $return;
     }
 
@@ -384,26 +384,27 @@ class Bimp_Product extends BimpObject
                 }
                 return 0;
             }
-        
+
             //provioir pour categorie
-            $null = array(); 
-            foreach(array('categorie','collection','nature','famille', 'gamme') as $type){
-                if(is_null($this->getData($type)) || $this->getData($type) == "" || $this->getData($type) === 0){
+            $null = array();
+            foreach (array('categorie', 'collection', 'nature', 'famille', 'gamme') as $type) {
+                if (is_null($this->getData($type)) || $this->getData($type) == "" || $this->getData($type) === 0) {
                     $null[] = $type;
                 }
             }
-            if(count($null) > 2){
-                mailSyn2("Prod non catagorisé", "tommy@bimp.fr, a.delauzun@bimp.fr, f.poirier@bimp.fr", "admin@bimp.fr", "Bonjour le produit ".$this->getNomUrl(1)." n'est pas categorisé comme il faut, il manque :  ".implode(", ", $null));
+            if (count($null) > 2) {
+                mailSyn2("Prod non catagorisé", "tommy@bimp.fr, a.delauzun@bimp.fr, f.poirier@bimp.fr", "admin@bimp.fr", "Bonjour le produit " . $this->getNomUrl(1) . " n'est pas categorisé comme il faut, il manque :  " . implode(", ", $null));
             }
         }
 
-        
-        
-        
-        
-        
+
+
+
+
+
         return 1;
     }
+
     public function isAchetable(&$errors, $urgent = false, $mail = true)
     {
         return $this->isVendable($errors, $urgent, $mail);
@@ -638,7 +639,7 @@ class Bimp_Product extends BimpObject
             $dateMax = date('Y-m-d H:i:s');
         }
 
-        $cache_key = $dateMin . '-' . $dateMax. "-". implode("/", $tab_secteur);
+        $cache_key = $dateMin . '-' . $dateMax . "-" . implode("/", $tab_secteur);
 
         if ((int) $id_product) {
             if (!isset(self::$ventes[$cache_key])) {
@@ -674,14 +675,13 @@ class Bimp_Product extends BimpObject
                         'stock_showroom' => 0
                     );
                 }
-                if($id_entrepot == -9999){
+                if ($id_entrepot == -9999) {
                     $ventes = $this->getVentes($dateMin, $dateMax, null, $id_product, array("E"));
                     $data[$ship_to]['ventes'] += $ventes['qty'];
                     $data[$ship_to]['stock'] += 0;
                     $data[$ship_to]['stock_showroom'] += 0;
-                }
-                else{
-                    $tab_secteur = array("S", "M", "CO", "BP", "C");//tous sauf E
+                } else {
+                    $tab_secteur = array("S", "M", "CO", "BP", "C"); //tous sauf E
                     $ventes = $this->getVentes($dateMin, $dateMax, $id_entrepot, $id_product, $tab_secteur);
                     $data[$ship_to]['ventes'] += $ventes['qty'];
                     $data[$ship_to]['stock'] += $this->getStockDate($dateMax, $id_entrepot, $id_product);
@@ -1087,8 +1087,12 @@ class Bimp_Product extends BimpObject
 
     // Gestion Prix d'achat courant: 
 
-    public function getCurrentPaHt($id_fourn = null, $with_default = true)
+    public function getCurrentPaHt($id_fourn = null, $with_default = true, $date = '')
     {
+        if ((int) $this->getData('no_fixe_prices')) {
+            return 0;
+        }
+        
         $pa_ht = 0;
 
         if ($this->isLoaded()) {
@@ -1097,8 +1101,7 @@ class Bimp_Product extends BimpObject
             }
             if ((int) BimpCore::getConf('use_new_cur_pa_method')) {
                 // Nouvelle méthode: 
-                self::loadClass('bimpcore', 'BimpProductCurPa');
-                $curPa = $this->getCurrentPaObject();
+                $curPa = $this->getCurrentPaObject(true, $date);
                 if (BimpObject::objectLoaded($curPa)) {
                     $pa_ht = (float) $curPa->getData('amount');
                 }
@@ -1119,11 +1122,15 @@ class Bimp_Product extends BimpObject
         return $pa_ht;
     }
 
-    public function getCurrentPaObject($create_if_no_exists = true)
+    public function getCurrentPaObject($create_if_no_exists = true, $date = '')
     {
+        if ((int) $this->getData('no_fixe_prices')) {
+            return 0;
+        }
+
         if (BimpCore::getConf('use_new_cur_pa_method')) {
             self::loadClass('bimpcore', 'BimpProductCurPa');
-            $curPa = BimpProductCurPa::getProductCurPa($this->id);
+            $curPa = BimpProductCurPa::getProductCurPa($this->id, (string) $date);
 
             if (BimpObject::objectLoaded($curPa)) {
                 return $curPa;
@@ -1812,7 +1819,7 @@ class Bimp_Product extends BimpObject
         global $user;
 
         $errors = array();
-        if ($this->getData("fk_product_type") == 0 && !(int) $this->getCurrentFournPriceId(null, true)) {
+        if ($this->getData("fk_product_type") == 0 && !(int) $this->getCurrentFournPriceId(null, true) && !$this->getData('no_fixe_prices')) {
             $errors[] = "Veuillez enregistrer au moins un prix d'achat fournisseur";
         }
 
@@ -2076,7 +2083,16 @@ class Bimp_Product extends BimpObject
         $errors = array();
         $subject = 'Produit validé pour la propale ' . $propal->ref;
         $from = 'gle@bimp.fr';
-        $msg = 'Bonjour,<br/>Le produit ' . $this->getData('ref') . ' a été validé, la propale ' . $propal->getNomUrl();
+
+        $infoClient = "";
+
+        if (isset($propal->socid)) {
+            $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $propal->socid);
+            if (is_object($client) && $client->isLoaded())
+                $infoClient = " du client " . $client->getNomUrl(1);
+        }
+
+        $msg = 'Bonjour,<br/>Le produit ' . $this->getData('ref') . ' a été validé, la propale ' . $propal->getNomUrl() . $infoClient;
         $msg .= ' est peut-être validable.';
         if (!mailSyn2($subject, $to, $from, $msg))
             $errors[] = "Envoi email vers " . $to . " pour la propale " . $propal->getNomUrl() . " impossible.";
@@ -2929,15 +2945,15 @@ class Bimp_Product extends BimpObject
 
         if ($dateMax)
             $query .= " AND date_valid <= '" . $dateMax . "'";
-        
-        if(count($tab_secteur) > 0)
-            $query .= " AND e.type IN ('".implode("','", $tab_secteur)."')";
+
+        if (count($tab_secteur) > 0)
+            $query .= " AND e.type IN ('" . implode("','", $tab_secteur) . "')";
 
         $group_by .= " GROUP BY `fk_product`, entrepot";
 
         $sql = $db->query($query . " AND `subprice` >= 0" . $group_by);
 
-        $cache_key = $dateMin . "-" . $dateMax. "-". implode("/", $tab_secteur);
+        $cache_key = $dateMin . "-" . $dateMax . "-" . implode("/", $tab_secteur);
 
         while ($ln = $db->fetch_object($sql)) {
             self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['qty'] = $ln->qty;

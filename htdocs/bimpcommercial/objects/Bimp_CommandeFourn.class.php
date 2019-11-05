@@ -1150,6 +1150,10 @@ class Bimp_CommandeFourn extends BimpComm
                 }
 
                 $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $id_product);
+                
+                if ((int) $product->getData('no_fixe_prices')) {
+                    continue;
+                }
 
                 $id_fp = 0;
 

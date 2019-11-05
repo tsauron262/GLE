@@ -1181,7 +1181,7 @@ class BL_CommandeFournReception extends BimpObject
         if (count($errors)) {
             return $errors;
         }
-        
+
         foreach ($lines_data as $id_line => $line_data) {
             $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFournLine', (int) $id_line);
             if (BimpObject::objectLoaded($line)) {
@@ -1486,7 +1486,7 @@ class BL_CommandeFournReception extends BimpObject
                 }
 
                 if (count($rec_errors)) {
-                    $errors[] = BimpTools::getMsgFromArray($rec_warnings, 'Echec de la création de la nouvelle réception');
+                    $errors[] = BimpTools::getMsgFromArray(array_merge($rec_errors,$rec_warnings), 'Echec de la création de la nouvelle réception');
                 }
             }
 
@@ -1510,11 +1510,17 @@ class BL_CommandeFournReception extends BimpObject
                         if (isset($line_data['items'])) {
                             foreach ($line_data['items'] as $item_value) {
                                 if (!$isReturn) {
+                                    $serial = '';
                                     if ((int) $this->getData('status') === self::BLCFR_RECEPTIONNEE) {
                                         // Equipements: 
                                         if (isset($reception_data['equipments'][(int) $item_value])) {
                                             $new_reception_data['equipments'][(int) $item_value] = $reception_data['equipments'][(int) $item_value];
                                             unset($reception_data['equipments'][(int) $item_value]);
+
+                                            $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $item_value);
+                                            if (BimpObject::objectLoaded($equipment)) {
+                                                $serial = $equipment->getData('serial');
+                                            }
                                         } else {
                                             $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $item_value);
                                             if (!BimpObject::objectLoaded($equipment)) {
@@ -1524,11 +1530,16 @@ class BL_CommandeFournReception extends BimpObject
                                             }
                                         }
                                     } else {
+                                        $serial = $item_value;
+                                    }
+
+                                    if ($serial) {
                                         // Serials: 
                                         foreach ($reception_data['serials'] as $key => $serial_data) {
-                                            if ($serial_data['serial'] === $item_value) {
+                                            if ($serial_data['serial'] === $serial) {
                                                 $new_reception_data['serials'][] = $reception_data['serials'][$key];
                                                 unset($reception_data['serials'][$key]);
+                                                break;
                                             }
                                         }
                                     }
@@ -1648,12 +1659,12 @@ class BL_CommandeFournReception extends BimpObject
     public function create(&$warnings = array(), $force_create = false)
     {
         $errors = array();
-        
-        $dateMAx = '2019-10-01';
-        if($this->getData('date_received') < $dateMAx)
-            $errors[] = 'Date inférieur au '.$dateMAx.' creation impossible'; 
 
-        if(!count($errors)){
+        $dateMAx = '2019-10-01';
+        if ($this->getData('date_received') < $dateMAx)
+            $errors[] = 'Date inférieur au ' . $dateMAx . ' creation impossible';
+
+        if (!count($errors)) {
             $commande = $this->getParentInstance();
 
             if (!BimpObject::objectLoaded($commande)) {

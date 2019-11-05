@@ -90,12 +90,16 @@ fields_tables:
             - field: date_closing_partially
             - field: date_closing
             - field: user_create
-#            - label: Mouvements
-#              value: 
-#                  callback: renderMouvementTrace
+            - label: Mouvements
+              value: 
+                  callback: renderMouvementTrace
+            - label: Package vol
+              value: 
+                  callback: renderPackageInventory
             
 views:
     default:
+        edit_form: Aucun
         objects_change_reload: lines
         edit_form: default
         delete_btn: 1
@@ -117,10 +121,6 @@ views:
                             - type: object_common_fields
             
 forms:
-    add:
-        rows: 
-            - field: fk_warehouse
-            
     default:
         title: Création inventaire
         rows: 

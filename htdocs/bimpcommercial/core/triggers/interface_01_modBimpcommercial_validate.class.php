@@ -33,8 +33,9 @@ class Interfacevalidate extends DolibarrTriggers
     public function runTrigger($action, $object, User $user, Translate $langs, Conf $conf)
     {
         global $conf;
-        
-        
+        $errors = array();
+
+
         if ($action == 'ORDER_VALIDATE' || $action == 'PROPAL_VALIDATE' || $action == 'BILL_VALIDATE') {
             if (!is_object($object->thirdparty)) {
                 $object->thirdparty = new Societe($this->db);
@@ -62,16 +63,27 @@ class Interfacevalidate extends DolibarrTriggers
         }
 
         if ($action == 'ORDER_VALIDATE' || $action == 'BILL_VALIDATE') {
-            if ($action == 'ORDER_VALIDATE')
+            if ($action == 'ORDER_VALIDATE') {
                 $bimp_object = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $object->id);
-            else {
+
+                if (is_object($bimp_object) && $bimp_object->isLoaded()) {
+                    $client = $bimp_object->getChildObject('client');
+                    if (is_object($client) && $client->isLoaded()) {
+                        if (!$client->canBuy($errors)) {
+                            $object->errors = array_merge($object->errors, $errors);
+                            return -1;
+                        }
+                    }
+                }
+            } else {
                 $bimp_object = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $object->id);
                 $bimp_object->onValidate();
             }
 
+
+
             if (BimpObject::objectLoaded($bimp_object)) {
                 // Véfication de la validité des lignes: 
-                $errors = array();
                 if (!$bimp_object->areLinesValid($errors)) {
                     $object->errors = array_merge($object->errors, $errors);
                     return -1;
@@ -208,39 +220,37 @@ class Interfacevalidate extends DolibarrTriggers
 
 
         if ($action == 'ORDER_VALIDATE' || $action == 'PROPAL_VALIDATE' || $action == 'BILL_VALIDATE') {
-            
+
             $actuel = $object->thirdparty->get_OutstandingBill();
-            if($action == 'BILL_VALIDATE')
+            if ($action == 'BILL_VALIDATE')
                 $actuel = $actuel - $object->total_ttc;
             $max = $object->thirdparty->outstanding_limit;
             $futur = $actuel + $object->total_ttc;
-            if($max > 0 && $object->total_ttc > 0 && $max < $futur){
-                $msg = "Impossible de valider, montant encours dépassé. Montant Maximum : ".price($max)." € montant actuel :".price($actuel)." € montant necessaire : ".price($futur)." €.";
+            if ($max > 0 && $object->total_ttc > 0 && $max < $futur) {
+                $msg = "Impossible de valider, montant encours dépassé. Montant Maximum : " . price($max) . " € montant actuel :" . price($actuel) . " € montant necessaire : " . price($futur) . " €.";
                 $this->errors[] = $msg;
 //                setEventMessages($msg, null, 'errors');
                 return -2;
             }
-            if($action == 'ORDER_VALIDATE' && $object->array_options['options_type'] != "M"  && !BimpDebug::isActive('bimpcommercial/no_validate')){
+            if ($action == 'ORDER_VALIDATE' && $object->array_options['options_type'] != "M" && !BimpDebug::isActive('bimpcommercial/no_validate') && !defined('NOT_VERIF')) {
                 //contact facturation
-                $tabConatact = $object->getIdContact('external', 'BILLING');
+                $tabConatact = $object->getIdContact('external', 'BILLING2');
                 if (count($tabConatact) < 1) {
-                        setEventMessages("Merci de preciser le contact facturation", null, 'errors');
-                        return -2;
-                }else{
-                    foreach($tabConatact as $contactId){
-                        require_once(DOL_DOCUMENT_ROOT.'/contact/class/contact.class.php');
+                    setEventMessages("Merci de preciser le contact facturation EMail", null, 'errors');
+                    return -2;
+                } else {
+                    foreach ($tabConatact as $contactId) {
+                        require_once(DOL_DOCUMENT_ROOT . '/contact/class/contact.class.php');
                         $contactObj = new Contact($this->db);
                         $contactObj->fetch($contactId);
-                        if(stripos($contactObj->email, "@") < 1){
+                        if (stripos($contactObj->email, "@") < 1) {
                             setEventMessages("Le contact facturation na pas d'email", null, 'errors');
                             return -2;
                         }
                     }
                 }
             }
-            
-            
-            
+
             $tabConatact = $object->getIdContact('internal', 'SALESREPFOLL');
             if (count($tabConatact) < 1) {
                 $tabComm = $object->thirdparty->getSalesRepresentatives($user);
@@ -268,7 +278,7 @@ class Interfacevalidate extends DolibarrTriggers
                 }
             }
         }
-        
+
         if (!defined("NOT_VERIF") && !BimpDebug::isActive('bimpcommercial/no_validate')) {
             if ($action == 'ORDER_VALIDATE') {
                 $bvo = new BimpValidateOrder($user->db);

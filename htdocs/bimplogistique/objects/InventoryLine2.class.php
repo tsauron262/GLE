@@ -16,10 +16,8 @@ class InventoryLine2 extends BimpObject {
         $is_equipment = $this->isEquipment($input, $id_equipment, $id_product);
         if (!$is_equipment and ! $is_product)
             $errors[] = "Produit inconnu";
-        else if (!$is_equipment and $this->isSerialisable($id_product)) {
-//            $err_serializable = 1;
+        else if (!$is_equipment and $this->isSerialisable($id_product))
             $errors[] = "Veuillez scanner le numéro de série au lieu de la référence.";
-        }
         return $errors;
     }
 
@@ -93,6 +91,9 @@ class InventoryLine2 extends BimpObject {
         return 0;
     }
         
-        
+    public function renderWarehouseTypeName() {
+        $wt = BimpCache::getBimpObjectInstance($this->module, 'InventoryWarehouse', $this->getData('fk_warehouse_type'));
+        return $wt->renderName();
+    }
 
 }

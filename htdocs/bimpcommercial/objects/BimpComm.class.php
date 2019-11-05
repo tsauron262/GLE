@@ -238,8 +238,26 @@ class BimpComm extends BimpDolObject
 
     public function getClientContactsArray()
     {
+        global $db;
+        
         $id_client = $this->getAddContactIdClient();
-        return self::getSocieteContactsArray($id_client, false);
+        $contacts = self::getSocieteContactsArray($id_client, false);
+        $soc = new Societe($db);
+        $soc->fetch_optionals($id_client);
+        $contact_default = $soc->array_options['options_contact_default'];
+        
+        // Remove empty option
+        unset($contacts['']);
+        
+        // If there is a default contact
+        if(0 < (int) $contact_default) {
+            $label_default = $contacts[$contact_default];
+            unset($contacts[$contact_default]);
+            $contacts = array($contact_default => $label_default . ' (Contact facturation email par défaut)') + $contacts;
+        }
+
+        
+        return $contacts;
     }
 
     public function getEmailModelsArray()
@@ -3543,6 +3561,33 @@ class BimpComm extends BimpDolObject
         }
 
         $errors = parent::create($warnings, $force_create);
+        
+        
+        switch ($this->object_name) {
+            case 'Bimp_Propal':
+            case 'Bimp_Facture':
+            case 'Bimp_Commande':
+            // Billing2
+            $contacts_suivi = $this->dol_object->liste_contact(-1, 'external', 0, 'BILLING2');
+
+            if (count($contacts_suivi) == 0) {
+                // Get id of the default contact
+                global $db;
+                $id_client = $this->getAddContactIdClient();
+                $soc = new Societe($db);
+                $soc->fetch_optionals($id_client);
+                $contact_default = (int) $soc->array_options['options_contact_default'];
+
+                if (!count($errors)) {
+                    if ($this->dol_object->add_contact($contact_default, 'BILLING2', 'external') <= 0) 
+                        $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'ajout du contact');
+                }
+
+            }
+            break;
+        }
+        
+
 
         if (!count($errors)) {
             if (method_exists($this->dol_object, 'fetch_lines')) {

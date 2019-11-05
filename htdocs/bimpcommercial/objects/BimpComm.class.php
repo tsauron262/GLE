@@ -3655,7 +3655,7 @@ class BimpComm extends BimpDolObject
                 $soc->fetch_optionals($id_client);
                 $contact_default = (int) $soc->array_options['options_contact_default'];
 
-                if (!count($errors)) {
+                if (!count($errors) && $contact_default > 0) {
                     if ($this->dol_object->add_contact($contact_default, 'BILLING2', 'external') <= 0) 
                         $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'ajout du contact');
                 }

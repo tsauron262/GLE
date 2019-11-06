@@ -260,7 +260,6 @@ class BTC_export_facture_fourn extends BTC_export {
                 if(!$writing_ligne_fournisseur){
                     $structure['contre_partie'] = [$contre_partie_ligne_fournisseur, 17];
                     $ecritures = $this->struct($structure);
-                    echo $ecriture;
                     $writing_ligne_fournisseur = true;
                 }
 
@@ -268,8 +267,7 @@ class BTC_export_facture_fourn extends BTC_export {
         }
         
         
-        if(round($total_ttc_facture) == round($total_lignes_facture)) {
-            echo '<pre>';
+        if(round($total_ttc_facture) != round($total_lignes_facture)) {
             $montant_ecart = round($total_ttc_facture) - round($total_lignes_facture);
             $this->rectifications_ecarts($lignes, $montant_ecart, 'achat');            
         }

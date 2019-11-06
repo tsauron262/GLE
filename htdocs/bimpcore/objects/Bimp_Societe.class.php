@@ -73,9 +73,10 @@ class Bimp_Societe extends BimpObject
             /*
              * Entreprise onf fait les verifs...
              */
-            if(strlen($this->getData("siret")) != 14 && strlen($this->getData("siren")) != 9){
-                $errors[] = "Siren/siret client invalide :".$this->getData("siren")."/".$this->getData("siret");
-            }
+            if($this->getData('fk_pays') == 1 || $this->getData('fk_pays') < 1)
+                if(strlen($this->getData("siret")) != 14 && strlen($this->getData("siren")) != 9){
+                    $errors[] = "Siren/siret client invalide :".$this->getData("siren")."/".$this->getData("siret");
+                }
         }
         if(self::$types_ent_list_code[$this->getData("fk_typent")] != "TE_PRIVATE"){
             if($this->getData("mode_reglement") < 1){

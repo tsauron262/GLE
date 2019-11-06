@@ -23,6 +23,19 @@ class BE_PackageProduct extends BimpObject
                         ))
                     );
                 }
+                
+                if ($package->isActionAllowed('moveProduct') && $package->canSetAction('moveProduct')) {
+                    $buttons[] = array(
+                        'label'   => 'Changer de package',
+                        'icon'    => 'arrow-circle-right',
+                        'onclick' => $package->getJsActionOnclick('moveProduct', array(
+                            'id_package_product' => (int) $this->id
+                                ), array(
+                            'form_name'   => 'move_product',
+                            'no_triggers' => true
+                        ))
+                    );
+                }
 
                 if ($package->isActionAllowed('removeProduct') && $package->canSetAction('removeProduct')) {
                     $buttons[] = array(

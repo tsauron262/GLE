@@ -341,7 +341,9 @@ class BL_CommandeShipment extends BimpObject
                             'id_client' => (int) $idCliFact,
                             'id_contact'     => (int) $this->getcontact(),
                             'libelle'        => addslashes(htmlentities($commande->getData('libelle'))),
-                            'cond_reglement' => (int) $commande->getData('fk_cond_reglement')
+                            'cond_reglement' => (int) $commande->getData('fk_cond_reglement'),
+                            'note_public' => $commande->getData('note_public'),
+                            'note_private' => $commande->getData('note_private').'rrrrr'
                                 ), array(
                             'form_name'        => 'facture',
                             'on_form_submit'   => 'function($form, extra_data) { return onShipmentFactureFormSubmit($form, extra_data); } ',

@@ -107,7 +107,7 @@ class BTC_export extends BimpObject {
      * @param type $ref
      */
     
-    private function export_paiement($ref = 'PAY1909-70596') {
+    private function export_paiement($ref = null) {
         $liste = $this->get_paiements_for_export($ref);
         $forced = (is_null($ref)) ? false : true;
         if(count($liste)) {

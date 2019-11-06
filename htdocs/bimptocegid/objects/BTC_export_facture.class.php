@@ -1,0 +1,209 @@
+<?php
+
+class BTC_export_facture extends BTC_export {
+    
+    public function export($id_facture, $forced) {
+        
+        $facture = $this->getInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
+        $societe = $this->getInstance('bimpcore', 'Bimp_Societe', $facture->getData('fk_soc'));
+        
+        $is_client_interco = false;
+        $is_vente_ticket = false;
+        $compte_general_411 = '41100000';
+        $total_ttc_facture = round($facture->getData('multicurrency_total_ttc'), 2);
+        $date_facture = new DateTime($facture->getData('datef'));
+        $date_creation = new dateTime($facture->getData('datec'));
+        $date_echeance = new DateTime($facture->getData('date_lim_reglement'));
+        $id_reglement = ($facture->getData('fk_mode_reglement') > 0) ? $facture->getData('fk_mode_reglement') : 6;
+        $reglement = $this->db->getRow('c_paiement', 'id = ' . $id_reglement);
+        $inverse = false;
+        
+        $use_tva = true;
+        $use_d3e = true;
+        
+        $compte_general_tva_null = BimpCore::getConf('BIMPTOCEGID_vente_tva_null');
+        
+        if ($societe->getData('is_subsidiary')) {
+            $compte_general_411 = $societe->getData('accounting_account');
+            $is_client_interco = true;
+        }
+        
+        switch($facture->getData('zone_vente')) {
+            case 1:
+                $compte_general_produit = $this->convertion_to_interco_code(BimpCore::getConf('BIMPTOCEGID_vente_produit_fr'), $compte_general_411);
+                $compte_general_service = $this->convertion_to_interco_code(BimpCore::getConf('BIMPTOCEGID_vente_service_fr'), $compte_general_411);
+                $compte_general_tva = BimpCore::getConf('BIMPTOCEGID_vente_tva_fr');
+                $compte_general_d3e = BimpCore::getConf('BIMPTOCEGID_vente_dee_fr');
+                break;
+            case 2: case 4:
+                $use_d3e = false;
+                $use_tva = ($societe->getData('tva_intra')) ? false : true;
+                $compte_general_produit = BimpCore::getConf('BIMPTOCEGID_vente_produit_ue');
+                $compte_general_service = BimpCore::getConf('BIMPTOCEGID_vente_service_ue');
+                $compte_general_tva = BimpCore::getConf('BIMPTOCEGID_vente_tva_ue');
+                $compte_general_d3e = BimpCore::getConf('BIMPTOCEGID_vente_dee_ue');
+                break;
+            case 3:
+                $use_d3e = false;
+                $use_tva = false;
+                $compte_general_produit = BimpCore::getConf('BIMPTOCEGID_vente_produit_ex');
+                $compte_general_service = BimpCore::getConf('BIMPTOCEGID_vente_service_ex');
+                break;
+        }
+        
+        if($total_ttc_facture < 0) {
+            $inverse = true;
+        }
+        $sens_parent = $this->get_sens($total_ttc_facture, 'facture', $inverse);
+        
+        if($societe->getData('exported') == 1) {
+            $code_auxiliaire = $societe->getData('code_compta');
+        } else {
+            $export_societe = $this->getInstance('bimptocegid', 'BTC_export_societe');
+            $code_auxiliaire = $export_societe->export($societe);
+        }
+        
+        $label = strtoupper($this->suppr_accents($societe->getData('nom')));
+        $bc_vente = $this->getInstance('bimpcaisse', 'BC_Vente');
+        if($bc_vente->find(['id_facture' => $facture->id])) {
+            if($bc_vente->getData('id_client') == 0) {
+                $is_vente_ticket = true;                
+            }
+            $id_entrepot = $bc_vente->getData('id_entrepot');
+        } else {
+            $id_entrepot = 50;
+        }
+        $entrepot = $this->db->getRow('entrepot', 'rowid = ' . $id_entrepot);
+        if($is_vente_ticket) {
+            $code_auxiliaire = $entrepot->compte_aux;
+            $label = strtoupper("vente ticket " . $code_auxiliaire);
+        }
+        
+        
+        $structure = [
+            'journal' => [($is_client_interco) ? 'VI' : "VTE", 3],
+            'date' => [$date_facture->format('dmY'), 8],
+            'type_piece' => ['FC', 2],
+            'compte_general' => [$compte_general_411, 17],
+            'type_de_compte' => ["X", 1],
+            'code_auxiliaire' => [$code_auxiliaire, 16],
+            'next' => ['', 1],
+            'ref_interne' => [$facture->getData('facnumber'), 35],
+            'label' => [$label, 35],
+            'reglement' => [($reglement->code == 'LIQ') ? 'ESP' : $reglement->code, 3],
+            'echeance' => [$date_echeance->format('dmY'), 8],
+            'sens' => [$sens_parent, 1],
+            'montant' => [abs($total_ttc_facture), 20, true],
+            'type_ecriture' => [$this->type_ecriture, 1],
+            'numero_piece' => [$facture->id, 8, true],
+            'devise' => ['EUR', 3],
+            'taux_dev' => ['1', 10],
+            'code_montant' => ['E--', 3],
+            'montant_2' => ['', 20],
+            'montant_3' => ['', 20],
+            'etablissement' => ['001', 3],
+            'axe' => ['A1', 2],
+            'numero_echeance' => ['1', 2],
+            'ref_externe' => [$facture->getData('facnumber'), 35],
+            'date_ref_externe' => ['01011900', 8],
+            'date_creation' => [$date_creation->format('dmY'), 8],
+            'societe' => ['', 3],
+            'affaire' => ['', 17],
+            'date_taux_dev' => ['01011900', 8],
+            'nouveau_ecran' => ['N', 3],
+            'quantite_1' => ['', 20],
+            'quantite_2' => ['', 20],
+            'qualif_quantite_1' => ['', 3],
+            'qualif_quantite_2' => ['', 3],
+            'ref_libre' => ['Export automatique BIMP ERP', 35],
+            'tva_encaissement' => ['-', 1],
+            'regime_tva' => ['CEE', 3],
+            'tva' => ['T', 3],
+            'tpf' => ['N', 3],
+            'contre_partie' => ['', 17],
+            'vide' => ['', 606],
+            'lettrage_dev' => ['-', 1],
+            'lettrage_euro' => ['X', 1],
+            'etat_lettrage' => ['AL', 2],
+            'vide_2' => ['', 153],
+            'valide' => ['-', 1],
+            'before' => ['', 1],
+            'date_debut' => ['', 8],
+            'date_fin' => ['', 8]
+        ];
+        
+        $writing_ligne_client = false;
+        $total_lignes_facture = 0;
+        $d3e  = 0;
+        $lignes = [];
+        $total_ht_lignes = 0;
+        $ignore = false;
+        for ($i = 0; $i < count($facture->dol_object->lines); $i++) {
+            if ($facture->dol_object->lines[$i]->desc == "Acompte" && $facture->dol_object->lines[$i]->multicurrency_total_ht == $facture->getData('total')) {
+                $ignore = true;
+            } elseif($facture->dol_object->lines[$i]->desc == "Garantie" && $facture->dol_object->lines[$i]->multicurrency_total_ht == $facture->getData('total')) {
+                $ignore = true;
+            }
+        }
+        
+        foreach($facture->dol_object->lines as $line) {
+            if(is_null($facture->getData('ignore_compta')) || $facture->getData('ignore_compta') == 0) { // Si la facture n'est pas ignorée en compta
+                if(round($line->multicurrency_total_ht, 2) != 0 && !$ignore) {
+                    if($line->fk_product) {
+                        $produit = $this->getInstance('bimpcore', 'Bimp_Product', $line->fk_product);
+                        $type_produit = $produit->getData('fk_product_type');
+                        $d3e += $produit->getData('deee') * $line->qty;
+                    } else {
+                        $type_produit = $line->product_type;
+                    }
+                    $use_compte_general = ($type_produit == 0) ? $compte_general_produit : $compte_general_service;
+                    $total_ht_lignes += $line->multicurrency_total_ht;
+                    if(!$writing_ligne_client) {
+                        $structure['contre_partie'] = [$use_compte_general, 17];
+                        $ecritures = $this->struct($structure);
+                    }
+                    
+                    $lignes[$use_compte_general]['HT'] += $line->multicurrency_total_ht - ($produit->getData('deee') * $line->qty);
+                    if($use_tva && $line->tva_tx > 0) {
+                        $lignes[$compte_general_tva]['HT'] += $line->multicurrency_total_tva;
+                        $total_ht_lignes += $line->multicurrency_total_tva;
+                    } elseif($use_tva && $line->tva_tx == 0) {
+                        $lignes[$compte_general_tva_null]['HT'] += $line->multicurrency_total_tva;
+                        $total_ht_lignes += $line->multicurrency_total_tva;
+                    }
+                }
+            } 
+        }
+        
+        if($use_d3e && $d3e != 0) {
+            $lignes[$compte_general_d3e]['HT'] = $d3e;
+        }        
+        
+        if(round(($total_ht_lignes), 2) != round($total_ttc_facture,2)) {
+            $montant_ecart = ($total_ht_lignes + $d3e) != $total_ttc_facture;
+            $lignes = $this->rectifications_ecarts($lignes, $montant_ecart, 'vente');
+        }
+                
+        foreach($lignes as $l => $infos) {
+            $structure['compte_general'] = [$l, 17];
+            $structure['type_de_compte'] = ['-', 1];
+            $structure['code_auxiliaire'] = ['', 16];
+            $structure['montant'] = [abs(round($infos['HT'], 2)), 20, true];
+            $structure['sens'] = [$this->get_sens($total_ttc_facture, 'facture', true, $sens_parent), 1];
+            $structure['contre_partie'] = [$compte_general_411, 17];
+            $structure['vide'] = [$code_auxiliaire, 606];
+            $ecritures .= $this->struct($structure);
+        }
+        
+         if($this->write_tra($ecritures, $this->create_daily_file('vente'))) {
+            $facture->updateField('exported', 1);
+            return 1;
+        } else {
+            return -3;
+        }
+        
+    }
+    
+    
+}
+

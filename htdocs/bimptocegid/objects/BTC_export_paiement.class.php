@@ -111,6 +111,10 @@ class BTC_export_paiement extends BTC_export {
                     $journal = "OD";
                     $affiche_code_reglement = "FIN";
                     break;
+                case "CG":
+                    $compte_g = "41199200";
+                    $journal = "OD";
+                    $affiche_code_reglement = 'CHQ';
 
                 default:
                     $compte_g = $entrepot->compte_comptable;

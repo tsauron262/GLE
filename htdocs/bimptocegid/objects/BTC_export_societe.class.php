@@ -53,7 +53,7 @@ class BTC_export_societe extends BTC_export {
             }
             $auxiliaire_client = $this->sizing($auxiliaire_client, 14, false, true);
         } else {
-            $auxiliaire_client .= $this->sizing(str_replace(' ', '', $nom_societe),10);
+            $auxiliaire_client .= $this->sizing(str_replace(' ', '', $nom_societe),10, false, true);
         }
         
         $auxiliaire_client = $this->sizing($auxiliaire_client, 14, false, true);

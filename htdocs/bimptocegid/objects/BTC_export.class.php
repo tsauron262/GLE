@@ -139,7 +139,7 @@ class BTC_export extends BimpObject {
         }
     }
     
-    private function export_facture($ref = "FAS1907-0516") {
+    private function export_facture($ref = null) {
         $liste = $this->get_facture_client_for_export($ref);
         $forced = (is_null($ref)) ? false : true;
         if(count($liste)) {

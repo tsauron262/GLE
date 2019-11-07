@@ -173,8 +173,7 @@ class BTC_export extends BimpObject {
         if(!is_null($ref)) {
             return $this->db->getRows('facture', 'facnumber="'.$ref.'"');
         } else {
-            echo 'exported = 0 AND fk_statut IN(1,2) AND type != 3 AND datef BETWEEN "'.$this->date_export.'" AND "'.$this->date_export.'"';
-            return $this->db->getRows('facture', 'exported = 0 AND fk_statut IN(1,2) AND datef BETWEEN "'.$this->date_export.'" AND "'.$this->date_export.'"', $this->sql_limit);
+            return $this->db->getRows('facture', 'exported = 0 AND fk_statut IN(1,2) AND type != 3 AND datef BETWEEN "'.$this->date_export.'" AND "'.$this->date_export.'"', $this->sql_limit);
         }
     }
     

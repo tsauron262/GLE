@@ -3069,9 +3069,9 @@ class BimpComm extends BimpDolObject
         } else {
             $errors = "Echec de la génération du relevé de facturation";
         }
-        
+        $callback = "window.open('".DOL_URL_ROOT."/document.php?modulepart=company&file=".$societe->id."%2FRelevé_facturation.pdf&entity=1', '_blank');";
         return [
-            'success' => $success,
+            'success_callback' => $callback,
             'errors' => $errors,
             'warnings' => $warnings
         ];

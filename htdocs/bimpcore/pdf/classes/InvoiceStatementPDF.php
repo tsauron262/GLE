@@ -31,7 +31,7 @@ class InvoiceStatementPDF extends BimpDocumentPDF
         
         parent::initData();
     }
-
+    
     protected function initHeader()
     {
         parent::initHeader();
@@ -42,6 +42,10 @@ class InvoiceStatementPDF extends BimpDocumentPDF
         //$this->getDocInfosHtml();
         $this->header_vars['doc_name'] = $docName;
         $this->header_vars['doc_ref'] = $docRef;
+    }
+    
+    public function getFileName() {
+        return 'Relevé_facturation';
     }
     
     public function renderContent() {

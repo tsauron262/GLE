@@ -9,9 +9,9 @@ class BTC_export extends BimpObject {
     const TYPE_RETURN_OK = 1; // Succès de l'export
 
     private $sql_limit = 1; // Nombre de résultats dans la requete SQL: null = unlimited
-    private $date_export = '2019-07-01'; // Date a laquel ont veux faire débuter l'export l'export : null = date du jours : 2019-07-01 => date de la bascule
+    private $date_export = null;
     private $export_directory = "/data/synchro/bimp/"; // Dossier d'écriture des fichiers
-    
+    public $type_ecriture = "S"; // S: Simulation, N: Normal
     /**
      *  Sert à lancer l'export en fonction de l'élément demander et l'origine d'exécution de l'export
      *  @param string $element
@@ -20,11 +20,15 @@ class BTC_export extends BimpObject {
      */
     
     public function export($element, $origin) {
-        //mkdir($this->export_directory . "BIMPtoCEGID/", 0777, true);
-        //rmdir($this->export_directory . "BIMPtoCEGID/"); die();
-        //unlink($this->export_directory . 'BIMPtoCEGID/1_BIMPtoCEGID_(VENTES)_28|10|2019.TRA');
-        //unlink($this->export_directory . 'BIMPtoCEGID/1_BIMPtoCEGID_(VENTES)_30|10|2019.TRA'); die();
         if($origin == 'cronJob') {
+            
+            if(isset($_REQUEST['date'])) {
+                $this->date_export = $_REQUEST['date'];
+            }
+            if(isset($_REQUEST['sql_limit'])){
+                $this->sql_limit = $_REQUEST['sql_limit'];
+            }
+
             $function_name = 'export_' . $element;
         
             if(is_null($this->date_export)) {
@@ -46,11 +50,18 @@ class BTC_export extends BimpObject {
      */
     
     protected function create_daily_file($element = null) {
+        
+        if($_REQUEST['date']) {
+            $date = $_REQUEST['date'];
+        } else {
+            $date = $this->date_export;
+        }
+        
         $daily_files = [
-            'tier' => '0_BIMPtoCEGID_(TIERS)_' . date('d|m|Y') . ".TRA",
-            'vente' => '1_BIMPtoCEGID_(VENTES)_' . date('d|m|Y') . ".TRA",
-            'paiement' => '2_BIMPtoCEGID_(PAIEMENTS)_' . date('d|m|Y') . ".TRA",
-            'achat' => '3_BIMPtoCEGID_(ACHATS)_' . date('d|m|Y') . ".TRA",
+            'tier' => '0_BIMPtoCEGID_(TIERS)_' . $date . ".TRA",
+            'vente' => '1_BIMPtoCEGID_(VENTES)_' . $date . ".TRA",
+            'paiement' => '2_BIMPtoCEGID_(PAIEMENTS)_' . $date . ".TRA",
+            'achat' => '3_BIMPtoCEGID_(ACHATS)_' . $date . ".TRA",
         ];
         if(is_null($element)){
             foreach($daily_files as $element => $file) {
@@ -103,7 +114,7 @@ class BTC_export extends BimpObject {
      * @param type $ref
      */
     
-    private function export_paiement($ref = 'PAY1909-70596') {
+    private function export_paiement($ref = null) {
         $liste = $this->get_paiements_for_export($ref);
         $forced = (is_null($ref)) ? false : true;
         if(count($liste)) {
@@ -112,8 +123,6 @@ class BTC_export extends BimpObject {
                 $error = $instance->export($paiement->rowid, $paiement->fk_paiement, $forced);
                 if($error <= 0) {
                     $this->addTaskAlert($error, $paiement->rowid);
-                } else {
-                    
                 }
             }
         } else {
@@ -121,7 +130,7 @@ class BTC_export extends BimpObject {
         }
     }
     
-    private function export_facture_fourn($ref = "SI1909-4930") {
+    private function export_facture_fourn($ref = null) {
         $liste = $this->get_facture_fourn_for_export($ref);
         $forced = (is_null($ref)) ? false : true;
         if(count($liste)) {
@@ -130,12 +139,26 @@ class BTC_export extends BimpObject {
                 $error = $instance->export($facture_fourn->rowid, $forced);
                 if($error <= 0) {
                     
-                } else {
-                    
                 }
             }
         } else {
             echo BimpRender::renderAlerts("Il n'y à plus de factures fournisseur à exporté", 'warning', false);
+        }
+    }
+    
+    private function export_facture($ref = null) {
+        $liste = $this->get_facture_client_for_export($ref);
+        $forced = (is_null($ref)) ? false : true;
+        if(count($liste)) {
+            $instance = $this->getInstance('bimptocegid', 'BTC_export_facture');
+            foreach($liste as $facture) {
+                $error = $instance->export($facture->rowid, $forced);
+                if($error <= 0) {
+                    
+                }
+            }
+        } else {
+            echo BimpRender::renderAlerts("Il n'y à plus de facture client à exporté", 'warning', false);
         }
     }
     
@@ -155,7 +178,9 @@ class BTC_export extends BimpObject {
     
     protected function get_facture_client_for_export($ref) {
         if(!is_null($ref)) {
-            return $this->db->getRows('facture_fourn', 'facnumber="'.$ref.'"');
+            return $this->db->getRows('facture', 'facnumber="'.$ref.'"');
+        } else {
+            return $this->db->getRows('facture', 'exported = 0 AND fk_statut IN(1,2) AND type != 3 AND datef BETWEEN "'.$this->date_export.'" AND "'.$this->date_export.'"', $this->sql_limit);
         }
     }
     
@@ -221,7 +246,6 @@ class BTC_export extends BimpObject {
     
     public function get_sens($amount, $element, $inverse = false, $sens_parent = 'D') {
         switch($element) {
-            
             case 'paiement':
                 if($inverse){
                     return ($amount > 0) ? 'C' : 'D';
@@ -234,12 +258,20 @@ class BTC_export extends BimpObject {
                      $sens = ($sens_parent == 'D') ? 'D' : 'C';
                 }
                 break;
+            case 'facture': 
+                $sens = ($sens_parent == 'D') ? 'D' : 'C';
+                if($inverse) {
+                    $sens = ($sens_parent == 'D') ? 'C' : "D";
+                } 
+                break;
         }
         return $sens;
     }
     
     protected function convertion_to_interco_code($compte_a_convertir, $compte_interco) {
-        echo substr($compte_a_convertir, 6, 7);
+        $start_compte = substr($compte_a_convertir, 0,6);
+        $end_compte =  substr($compte_interco, 6, 7);
+        return $start_compte . $end_compte;
     }
     
     public function loadEntrepot($id_entrepot) {
@@ -315,17 +347,13 @@ class BTC_export extends BimpObject {
             if(in_array($compte_general, $comptes_reatribuable[$type_ecriture]) && !$reactribution_faite) {
                 echo $ecart;
                 $lignes_facture[$compte_comptable]['HT'] += $ecart;
-                
                 $reactribution_faite = true;
             } else {
-                echo 'pas OK';
-            }
-            
-            print_r($lignes_facture);
-            
+                
+            }            
         }
         
-        return [];
+        return $lignes_facture;
     }
     
     protected function send_mail_module($data) {

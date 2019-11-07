@@ -167,16 +167,27 @@ class BTC_export_facture extends BTC_export {
                         $structure['contre_partie'] = [$use_compte_general, 17];
                         $ecritures = $this->struct($structure);
                     }
-                    if(is_object($produit))
+                    if(is_object($produit)){
                         $lignes[$use_compte_general]['HT'] += $line->multicurrency_total_ht - ($produit->getData('deee') * $line->qty);
-                    else
+                    } else {
                         $lignes[$use_compte_general]['HT'] += $line->multicurrency_total_ht;
+                    }
+                        
                     if($use_tva && $line->tva_tx > 0) {
                         $lignes[$compte_general_tva]['HT'] += $line->multicurrency_total_tva;
                         $total_ht_lignes += $line->multicurrency_total_tva;
-                    } elseif($use_tva && $line->tva_tx == 0) {
-                        $lignes[$compte_general_tva_null]['HT'] += $line->multicurrency_total_ht;
-                        $total_ht_lignes += $line->multicurrency_total_ht;
+                    } 
+                    if($use_tva && $line->tva_tx == 0) {
+                        $is_remise = false;
+                        if(is_object($produit)) {
+                            if($produit->getData('ref') == 'REMISE') {
+                                $is_remise = true;
+                            }
+                        }
+                        if($is_remise) {
+                            $lignes[$compte_general_tva_null]['HT'] += $line->multicurrency_total_ht;
+                            $total_ht_lignes += $line->multicurrency_total_ht;
+                        }
                     }
                 }
             } 

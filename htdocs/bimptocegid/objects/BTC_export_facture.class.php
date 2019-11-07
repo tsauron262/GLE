@@ -5,7 +5,12 @@ class BTC_export_facture extends BTC_export {
     public function export($id_facture, $forced) {
         
         $facture = $this->getInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
-        $societe = $this->getInstance('bimpcore', 'Bimp_Societe', $facture->getData('fk_soc'));
+        if($contact = $this->db->getRow('element_contact', 'element_id = ' . $facture->getData('fk_soc') . ' AND fk_c_type_contact = 60')) {
+            $id_client_facturation = $contact->fk_socpeople;
+        } else {
+            $id_client_facturation = $facture->getData('fk_soc');
+        }
+        $societe = $this->getInstance('bimpcore', 'Bimp_Societe', $id_client_facturaton);
         
         $is_client_interco = false;
         $is_vente_ticket = false;

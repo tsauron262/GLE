@@ -50,11 +50,18 @@ class BTC_export extends BimpObject {
      */
     
     protected function create_daily_file($element = null) {
+        
+        if($_REQUEST['date']) {
+            $date = $_REQUEST['date'];
+        } else {
+            $date = $this->date_export;
+        }
+        
         $daily_files = [
-            'tier' => '0_BIMPtoCEGID_(TIERS)_' . $this->date_export . ".TRA",
-            'vente' => '1_BIMPtoCEGID_(VENTES)_' . $this->date_export . ".TRA",
-            'paiement' => '2_BIMPtoCEGID_(PAIEMENTS)_' . $this->date_export . ".TRA",
-            'achat' => '3_BIMPtoCEGID_(ACHATS)_' . $this->date_export . ".TRA",
+            'tier' => '0_BIMPtoCEGID_(TIERS)_' . $date . ".TRA",
+            'vente' => '1_BIMPtoCEGID_(VENTES)_' . $date . ".TRA",
+            'paiement' => '2_BIMPtoCEGID_(PAIEMENTS)_' . $date . ".TRA",
+            'achat' => '3_BIMPtoCEGID_(ACHATS)_' . $date . ".TRA",
         ];
         if(is_null($element)){
             foreach($daily_files as $element => $file) {

@@ -215,8 +215,8 @@ Abstract class BimpModelPDF
 
         if (isset($this->object) && isset($this->object->ref))
             $path .= dol_sanitizeFileName($this->object->ref) . "/";
-        if(!is_dir($path))
-            dol_mkdir ($path);
+        if (!is_dir($path))
+            dol_mkdir($path);
 
         return $path;
     }
@@ -244,7 +244,7 @@ Abstract class BimpModelPDF
     }
 
     // Affichages erreurs: 
-    
+
     public function displayErrors()
     {
         if (count($this->errors)) {

@@ -10,7 +10,7 @@ class BTC_export_facture extends BTC_export {
         } else {
             $id_client_facturation = $facture->getData('fk_soc');
         }
-        $societe = $this->getInstance('bimpcore', 'Bimp_Societe', $id_client_facturaton);
+        $societe = $this->getInstance('bimpcore', 'Bimp_Societe', $facture->getData('fk_soc'));
         
         $is_client_interco = false;
         $is_vente_ticket = false;

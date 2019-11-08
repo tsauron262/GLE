@@ -150,6 +150,9 @@ class BTC_export_facture extends BTC_export {
                 $ignore = true;
             }
         }
+        if($ignore) {
+            $facture->updateField('ignore_compta', 1);
+        }
         
         foreach($facture->dol_object->lines as $line) {
             if(is_null($facture->getData('ignore_compta')) || $facture->getData('ignore_compta') == 0) { // Si la facture n'est pas ignorée en compta

@@ -63,7 +63,8 @@ class BTC_export_paiement extends BTC_export {
                 $compte_bancaire = $this->db->getRow('bank_account', 'rowid = ' . $compte_num);
 
                 $affiche_code_reglement = $reglement->code;
-
+                $label = ($transaction->amount > 0) ? "Pay" : "Rem";
+                $label .= ' clt ' . $auxiliaire_client . ' ' . $date->format('dmY');
                 switch ($reglement->code) {
 
                     case 'LIQ':
@@ -116,7 +117,7 @@ class BTC_export_paiement extends BTC_export {
                         $compte_g = "41199200";
                         $journal = "OD";
                         $affiche_code_reglement = 'CHQ';
-
+                        $label = "Pay clt CG " . $entrepot->town;
                     default:
                         $compte_g = $entrepot->compte_comptable;
                         $journal = $entrepot->code_journal_compta;
@@ -124,7 +125,6 @@ class BTC_export_paiement extends BTC_export {
                 }
 
                 $date = new DateTime($paiement->getData('datep'));
-                $label = ($transaction->amount > 0) ? "Pay" : "Rem";
                 $numero_unique = preg_replace('~\D~', '', $paiement->getData('ref'));
                 $numero_unique = substr($numero_unique, 1, 8);
 
@@ -137,7 +137,7 @@ class BTC_export_paiement extends BTC_export {
                     'code_compta' => ['', 16],
                     'next' => ['', 1],
                     'ref' => [$paiement->getData('ref'), 35],
-                    'label' => [$label . ' clt ' . $auxiliaire_client . ' ' . $date->format('dmY'), 35],
+                    'label' => [$label, 35],
                     'mode_reglement' => [$affiche_code_reglement, 3, true],
                     'date_reglement' => [$date->format('dmY'), 8],
                     'sens' => [$this->get_sens($transaction->amount, 'paiement'), 1],

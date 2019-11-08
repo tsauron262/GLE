@@ -74,8 +74,8 @@ class BTC_export_facture_fourn extends BTC_export {
                         $use_tva = false;
                         $use_d3e = false;
                         $use_autoliquidation = true;
-                        $compte_achat_produit = $this->convertion_to_interco_code(BimpCore::getConf('BIMPTOCEGID_achat_produit_ue'), $compte_general_401);
-                        $compte_achat_service = $this->convertion_to_interco_code(BimpCore::getConf('BIMPTOCEGID_achat_service_ue'), $compte_general_401);
+                        $compte_achat_produit = BimpCore::getConf('BIMPTOCEGID_achat_produit_ue');
+                        $compte_achat_service = BimpCore::getConf('BIMPTOCEGID_achat_service_ue');
                         $compte_achat_deee = null;
                         $compte_achat_tva_null = null;
                         $compte_achat_tva = null;
@@ -104,11 +104,11 @@ class BTC_export_facture_fourn extends BTC_export {
                         $use_d3e = true;
                         $use_tva = true;
                         $use_autoliquidation = false;
-                        $compte_achat_produit = BimpCore::getConf('BIMPTOCEGID_achat_produit_fr');
-                        $compte_achat_service = BimpCore::getConf('BIMPTOCEGID_achat_service_fr');
+                        $compte_achat_produit = $this->convertion_to_interco_code(BimpCore::getConf('BIMPTOCEGID_achat_produit_fr'), $compte_general_401);
+                        $compte_achat_service = $this->convertion_to_interco_code(BimpCore::getConf('BIMPTOCEGID_achat_service_fr'), $compte_general_401);
                         $compte_achat_tva_null = BimpCore::getConf('BIMPTOCEGID_achat_tva_null');
                         $compte_achat_tva = BimpCore::getConf('BIMPTOCEGID_vente_tva_fr');
-                        $compte_achat_deee = BimpCore::getConf('BIMPTOCEGID_achat_dee_fr');
+                        $compte_achat_deee = $this->convertion_to_interco_code(BimpCore::getConf('BIMPTOCEGID_achat_dee_fr'), $compte_general_401);
                         break;
                 }
         
@@ -172,8 +172,8 @@ class BTC_export_facture_fourn extends BTC_export {
                 if ($ligne->fk_product) {
                     $is_frais_de_port = false;
                     $produit = $this->getInstance('bimpcore', 'Bimp_Product', $ligne->fk_product);
-                    $frais_de_port = $this->db->getRow('categorie_product', 'fk_categorie = 9705 AND fk_product = ' . $produit->id);
-                    if (count($frais_de_port) || $produit->id = 129950) { // ID du produit à enlever quand il sera categoriser (FRAIS DE PORT LDLC
+                    //$frais_de_port = $this->db->getRow('categorie_product', 'fk_categorie = 9705 AND fk_product = ' . $produit->id);
+                    if ($frais_de_port = $this->db->getRow('categorie_product', 'fk_categorie = 9705 AND fk_product = ' . $produit->id) || $produit->id = 129950) { // ID du produit à enlever quand il sera categoriser (FRAIS DE PORT LDLC
                         if (!$use_tva || $ligne->tva_tx == 0) {
                             $use_compte_general = $this->convertion_to_interco_code('60480000', $compte_general_401);
                         } else {
@@ -197,9 +197,8 @@ class BTC_export_facture_fourn extends BTC_export {
                         } else {
                             $lignes[$use_compte_general]['HT'] += $ligne->total_ht;
                         }
-
-                        $contre_partie_ligne_fournisseur = $use_compte_general;
                     }
+                    $contre_partie_ligne_fournisseur = $use_compte_general;
                     $is_frais_de_port = false;
                     if ($use_d3e) {
                         if ($produit->isLoaded()) {

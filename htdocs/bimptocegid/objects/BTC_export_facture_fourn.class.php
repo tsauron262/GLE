@@ -186,8 +186,8 @@ class BTC_export_facture_fourn extends BTC_export {
                             if($facture->getData('fk_soc') == 261968) {
                                 $use_compte_general = '60793000';
                             }
-                            if($use_d3e && $produit->getData('deee') > 0){
-                                $lignes[$use_compte_general]['HT'] += $ligne->total_ht - $produit->getData('deee') * $ligne->qty;
+                            if($use_d3e){
+                                $lignes[$use_compte_general]['HT'] += $ligne->total_ht - ($produit->getData('deee') * $ligne->qty);
                             } else {
                                 $lignes[$use_compte_general]['HT'] += $ligne->total_ht;
                             }

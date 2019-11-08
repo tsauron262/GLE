@@ -168,7 +168,10 @@ class BTC_export_facture extends BTC_export {
                         $ecritures = $this->struct($structure);
                     }
                     if(is_object($produit)){
-                        $lignes[$use_compte_general]['HT'] += $line->multicurrency_total_ht - ($produit->getData('deee') * $line->qty);
+                        if($use_d3e)
+                            $lignes[$use_compte_general]['HT'] += $line->multicurrency_total_ht - ($produit->getData('deee') * $line->qty);
+                        else
+                            $lignes[$use_compte_general]['HT'] += $line->multicurrency_total_ht;
                     } else {
                         $lignes[$use_compte_general]['HT'] += $line->multicurrency_total_ht;
                     }

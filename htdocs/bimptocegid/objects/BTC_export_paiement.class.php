@@ -63,6 +63,7 @@ class BTC_export_paiement extends BTC_export {
                 $compte_bancaire = $this->db->getRow('bank_account', 'rowid = ' . $compte_num);
 
                 $affiche_code_reglement = $reglement->code;
+                $date = new DateTime($paiement->getData('datep'));
                 $label = ($transaction->amount > 0) ? "Pay" : "Rem";
                 $label .= ' clt ' . $auxiliaire_client . ' ' . $date->format('dmY');
                 switch ($reglement->code) {
@@ -124,7 +125,7 @@ class BTC_export_paiement extends BTC_export {
                         break;
                 }
 
-                $date = new DateTime($paiement->getData('datep'));
+                
                 $numero_unique = preg_replace('~\D~', '', $paiement->getData('ref'));
                 $numero_unique = substr($numero_unique, 1, 8);
 

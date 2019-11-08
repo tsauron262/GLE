@@ -141,7 +141,7 @@ class BTC_export_paiement extends BTC_export {
                     'mode_reglement' => [$affiche_code_reglement, 3, true],
                     'date_reglement' => [$date->format('dmY'), 8],
                     'sens' => [$this->get_sens($transaction->amount, 'paiement'), 1],
-                    'montant' => [round($transaction->amount), 20, true],
+                    'montant' => [abs(round($transaction->amount)), 20, true],
                     'type_ecriture' => ['N', 1],
                     'numero_piece' => [$numero_unique, 8, true],
                     'devise' => ['EUR', 3],

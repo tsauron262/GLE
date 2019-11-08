@@ -152,6 +152,7 @@ class BTC_export_facture extends BTC_export {
         }
         if($ignore) {
             $facture->updateField('ignore_compta', 1);
+            $facture->updateField('exported', 204);
         }
         
         foreach($facture->dol_object->lines as $line) {

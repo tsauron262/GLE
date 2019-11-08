@@ -27,7 +27,7 @@ class BTC_export_paiement extends BTC_export {
                         if ($vente->getData('id_client') == 0) {
                             $is_vente_ticket = true;
                         } else {
-                            $id_client_paiement = $vente->getData('id_client');
+                            $id_client = $vente->getData('id_client'); 
                         }
                     } else {
                         $caisse = $this->getInstance('bimpcaisse', 'BC_Caisse', $bc_paiement->getData('id_caisse'));

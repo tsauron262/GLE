@@ -172,7 +172,7 @@ class BTC_export_facture_fourn extends BTC_export {
                     $is_frais_de_port = false;
                     $produit = $this->getInstance('bimpcore', 'Bimp_Product', $ligne->fk_product);
                     if($produit->getData('fk_product_type') == 0) {
-                        if($this->db->getRow('categorie_product', 'fk_categorie = 9705 AND fk_product = ' . $produit->id)) {
+                        if($this->db->getRow('categorie_product', 'fk_categorie = 9705 AND fk_product = ' . $produit->id) || $produit->id = 129950) { // ID du produit à enlever quand il sera categoriser (FRAIS DE PORT LDLC
                             if(!$use_tva || $ligne->tva_tva == 0) {
                                 $use_compte_general = '60480000';
                             } else {

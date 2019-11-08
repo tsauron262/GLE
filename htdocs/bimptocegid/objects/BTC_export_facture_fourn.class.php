@@ -186,7 +186,7 @@ class BTC_export_facture_fourn extends BTC_export {
                             if($facture->getData('fk_soc') == 261968) {
                                 $use_compte_general = '60793000';
                             }
-                            if($use_d3e){
+                            if($use_d3e && $produit->getData('deee') > 0){
                                 $lignes[$use_compte_general]['HT'] += $ligne->total_ht - $produit->getData('deee') * $ligne->qty;
                             } else {
                                 $lignes[$use_compte_general]['HT'] += $ligne->total_ht;
@@ -197,7 +197,9 @@ class BTC_export_facture_fourn extends BTC_export {
                         if($use_d3e) {
                            if($produit->isLoaded()){
                                $use_compte_general = $compte_achat_deee;
-                               $lignes[$use_compte_general]['HT'] += $produit->getData('deee') * $ligne->qty;
+                               if($produit->getData('deee') > 0) {
+                                   $lignes[$use_compte_general]['HT'] += $produit->getData('deee') * $ligne->qty;
+                               }
                            }
                         }
                     } else {

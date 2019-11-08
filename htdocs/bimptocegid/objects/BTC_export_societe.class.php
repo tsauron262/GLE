@@ -49,7 +49,7 @@ class BTC_export_societe extends BTC_export {
                 $auxiliaire_client .= substr($array_for_client[1], 0, 3);
                 
             } else {
-                
+                $auxiliaire_client .= $array_for_client[0];
             }
             $auxiliaire_client = $this->sizing($auxiliaire_client, 14, false, true);
         } else {

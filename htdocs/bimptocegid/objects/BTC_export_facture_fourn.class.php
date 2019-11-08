@@ -67,6 +67,51 @@ class BTC_export_facture_fourn extends BTC_export {
         if ($total_ttc_facture < 0) {
             $inverse = true;
         }
+        
+        $zone_achat = $facture->getData('zone_vente');
+                switch ($zone_achat) {
+                    case 2: // Achat en UE
+                        $use_tva = false;
+                        $use_d3e = false;
+                        $use_autoliquidation = true;
+                        $compte_achat_produit = $this->convertion_to_interco_code(BimpCore::getConf('BIMPTOCEGID_achat_produit_ue'), $compte_general_401);
+                        $compte_achat_service = $this->convertion_to_interco_code(BimpCore::getConf('BIMPTOCEGID_achat_service_ue'), $compte_general_401);
+                        $compte_achat_deee = null;
+                        $compte_achat_tva_null = null;
+                        $compte_achat_tva = null;
+                        break;
+                    case 4: // Achat en UE
+                        $use_tva = false;
+                        $use_d3e = false;
+                        $use_autoliquidation = true;
+                        $compte_achat_produit = BimpCore::getConf('BIMPTOCEGID_achat_produit_ue');
+                        $compte_achat_service = BimpCore::getConf('BIMPTOCEGID_achat_service_ue');
+                        $compte_achat_deee = null;
+                        $compte_achat_tva_null = null;
+                        $compte_achat_tva = null;
+                        break;
+                    case 3: // Achat export
+                        $use_tva = false;
+                        $use_d3e = false;
+                        $use_autoliquidation = false;
+                        $compte_achat_produit = BimpCore::getConf('BIMPTOCEGID_achat_produit_ex');
+                        $compte_achat_service = BimpCore::getConf('BIMPTOCEGID_achat_service_ex');
+                        $compte_achat_deee = null;
+                        $compte_achat_tva_null = null;
+                        $compte_achat_tva = null;
+                        break;
+                    default:
+                        $use_d3e = true;
+                        $use_tva = true;
+                        $use_autoliquidation = false;
+                        $compte_achat_produit = BimpCore::getConf('BIMPTOCEGID_achat_produit_fr');
+                        $compte_achat_service = BimpCore::getConf('BIMPTOCEGID_achat_service_fr');
+                        $compte_achat_tva_null = BimpCore::getConf('BIMPTOCEGID_achat_tva_null');
+                        $compte_achat_tva = BimpCore::getConf('BIMPTOCEGID_vente_tva_fr');
+                        $compte_achat_deee = BimpCore::getConf('BIMPTOCEGID_achat_dee_fr');
+                        break;
+                }
+        
         $sens_parent = $this->get_sens($total_ttc_facture, 'facture_fourn', $inverse);
         $structure = [
             'journal' => [($is_fournisseur_interco) ? 'AI' : 'ACM', 3],
@@ -124,58 +169,15 @@ class BTC_export_facture_fourn extends BTC_export {
         foreach ($liste_des_lignes_facture as $ligne) {
             if ($ligne->total_ttc != doubleval(0)) {
                 $total_lignes_facture += $ligne->total_ht;
-                $zone_achat = $facture->getData('zone_vente');
-                switch ($zone_achat) {
-                    case 2: // Achat en UE
-                        $use_tva = false;
-                        $use_d3e = false;
-                        $use_autoliquidation = true;
-                        $compte_achat_produit = $this->convertion_to_interco_code(BimpCore::getConf('BIMPTOCEGID_achat_produit_ue'), $compte_general_401);
-                        $compte_achat_service = $this->convertion_to_interco_code(BimpCore::getConf('BIMPTOCEGID_achat_service_ue'), $compte_general_401);
-                        $compte_achat_deee = null;
-                        $compte_achat_tva_null = null;
-                        $compte_achat_tva = null;
-                        break;
-                    case 4: // Achat en UE
-                        $use_tva = false;
-                        $use_d3e = false;
-                        $use_autoliquidation = true;
-                        $compte_achat_produit = BimpCore::getConf('BIMPTOCEGID_achat_produit_ue');
-                        $compte_achat_service = BimpCore::getConf('BIMPTOCEGID_achat_service_ue');
-                        $compte_achat_deee = null;
-                        $compte_achat_tva_null = null;
-                        $compte_achat_tva = null;
-                        break;
-                    case 3: // Achat export
-                        $use_tva = false;
-                        $use_d3e = false;
-                        $use_autoliquidation = false;
-                        $compte_achat_produit = BimpCore::getConf('BIMPTOCEGID_achat_produit_ex');
-                        $compte_achat_service = BimpCore::getConf('BIMPTOCEGID_achat_service_ex');
-                        $compte_achat_deee = null;
-                        $compte_achat_tva_null = null;
-                        $compte_achat_tva = null;
-                        break;
-                    default:
-                        $use_d3e = true;
-                        $use_tva = true;
-                        $use_autoliquidation = false;
-                        $compte_achat_produit = BimpCore::getConf('BIMPTOCEGID_achat_produit_fr');
-                        $compte_achat_service = BimpCore::getConf('BIMPTOCEGID_achat_service_fr');
-                        $compte_achat_tva_null = BimpCore::getConf('BIMPTOCEGID_achat_tva_null');
-                        $compte_achat_tva = BimpCore::getConf('BIMPTOCEGID_vente_tva_fr');
-                        $compte_achat_deee = BimpCore::getConf('BIMPTOCEGID_achat_dee_fr');
-                        break;
-                }
-
                 if ($ligne->fk_product) {
                     $is_frais_de_port = false;
                     $produit = $this->getInstance('bimpcore', 'Bimp_Product', $ligne->fk_product);
-                    if ($this->db->getRow('categorie_product', 'fk_categorie = 9705 AND fk_product = ' . $produit->id) || $produit->id = 129950) { // ID du produit à enlever quand il sera categoriser (FRAIS DE PORT LDLC
+                    $frais_de_port = $this->db->getRow('categorie_product', 'fk_categorie = 9705 AND fk_product = ' . $produit->id);
+                    if (count($frais_de_port) || $produit->id = 129950) { // ID du produit à enlever quand il sera categoriser (FRAIS DE PORT LDLC
                         if (!$use_tva || $ligne->tva_tx == 0) {
-                            $use_compte_general = '60480000';
+                            $use_compte_general = $this->convertion_to_interco_code('60480000', $compte_general_401);
                         } else {
-                            $use_compte_general = '60450000';
+                            $use_compte_general = $this->convertion_to_interco_code('60450000', $compte_general_401);
                         }
                         $lignes[$use_compte_general]['HT'] += $ligne->total_ht;
                         $is_frais_de_port = true;

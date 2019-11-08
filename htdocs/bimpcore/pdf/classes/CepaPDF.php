@@ -37,7 +37,7 @@ class CepaPDF extends BimpDocumentPDF
                 $this->pdf2 = pdf_getInstance($this->format);
         $this->pdf2->addPage();
         $this->pdf2->SetFont('Times');
-        $pagecountTpl = $this->pdf2->setSourceFile(DOL_DOCUMENT_ROOT . '/bimpcore/pdf/templates/SEPA-2.pdf');
+        $pagecountTpl = $this->pdf2->setSourceFile(DOL_DOCUMENT_ROOT . '/bimpcore/pdf/templates/SEPA.pdf');
         $tplidx = $this->pdf2->importPage(1, "/MediaBox");
                 $this->pdf2->useTemplate($tplidx, 0, 0, 0, 0, true);
 //        $size = $this->pdf2->getTemplateSize($tplidx);
@@ -46,8 +46,12 @@ class CepaPDF extends BimpDocumentPDF
         
         $soc = BimpCache::getBimpObjectInstance("bimpcore", "Bimp_Societe", $this->object->id);
         
-        $this->pdf2->setXY(105,118.7);
+        $this->pdf2->setXY(120,107.3);
         $this->pdf2->Cell(70,8, $soc->getNumSepa(), 0);
+        
+        
+        $this->pdf2->setXY(60,40);
+        $this->pdf2->Cell(70,8, $soc->getData('code_client'), 0);
         
         
         $this->pdf2->Close();

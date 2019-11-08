@@ -181,13 +181,11 @@ class BTC_export_facture_fourn extends BTC_export {
                         $is_frais_de_port = true;
                     }
                     if (!$is_frais_de_port) {
-
                         if ($produit->getData('fk_product_type') == 0) {
                             $use_compte_general = ($use_tva && $ligne->tva_tx == 0) ? $compte_achat_tva_null : $compte_achat_produit;
                         } elseif ($produit->getData('fk_product_type') == 1) {
                             $use_compte_general = ($use_tva && $ligne->tva_tx == 0) ? $compte_achat_tva_null : $compte_achat_service;
                         }
-
 
                         if ($facture->getData('fk_soc') == 261968) {
                             $use_compte_general = '60793000';
@@ -209,7 +207,7 @@ class BTC_export_facture_fourn extends BTC_export {
                             }
                         }
                     }
-                    $total_hors_taxe_ligne = $ligne->total_ht;
+                    $total_hors_taxe_ligne += $ligne->total_ht;
                     if ($facture->getData('fk_soc') == 261968) {
                         $use_compte_general = '60793000';
                     }

@@ -36,6 +36,8 @@ class BTC_export_societe extends BTC_export {
         
         $nom_societe = strtoupper($this->suppr_accents($client->getData('nom')));
         
+        $specials_characters_for_replace = ["'", '"', "-", "(", ")", ".", ";", "/", "!", "_", "+", "="];
+        
         foreach ($specials_characters_for_replace as $char) {
             $nom_societe = str_replace($char, "", $nom_societe);
         }

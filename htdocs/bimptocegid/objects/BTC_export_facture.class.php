@@ -165,28 +165,37 @@ class BTC_export_facture extends BTC_export {
                     } else {
                         $type_produit = $line->product_type;
                     }
-                    $use_compte_general = ($type_produit == 0) ? $compte_general_produit : $compte_general_service;
-                    $total_ht_lignes += $line->multicurrency_total_ht;
+                    
+                    $use_compte_general = ($type_produit == 0) ? $compte_general_produit : $compte_general_service;           
+                    
                     if(!$writing_ligne_client) {
                         $structure['contre_partie'] = [$use_compte_general, 17];
                         $ecritures = $this->struct($structure);
                     }
                     if(is_object($produit)){
                         if($use_d3e)
-                            $lignes[$use_compte_general]['HT'] += $line->multicurrency_total_ht - ($produit->getData('deee') * $line->qty);
-                        else
-                            $lignes[$use_compte_general]['HT'] += $line->multicurrency_total_ht;
+                            if(($facture->getData('zone_vente') == 1 && $line->tva_tx > 0) || $facture->getData('zone_vente') != 1){
+                                $lignes[$use_compte_general]['HT'] += $line->multicurrency_total_ht - ($produit->getData('deee') * $line->qty);
+                                $total_ht_lignes += $line->multicurrency_total_ht;
+                            }
+                        else {
+                            if(($facture->getData('zone_vente') == 1 && $line->tva_tx > 0) || $facture->getData('zone_vente') != 1){
+                                $lignes[$use_compte_general]['HT'] += $line->multicurrency_total_ht;
+                                $total_ht_lignes += $line->multicurrency_total_ht;
+                            }
+                        }
                     } else {
                         $lignes[$use_compte_general]['HT'] += $line->multicurrency_total_ht;
+                        $total_ht_lignes += $line->multicurrency_total_ht;
                     }
                         
-                    if($use_tva && $line->tva_tx > 0) {
+                    if($use_tva && $line->tva_tx > 0) {                        
                         $lignes[$compte_general_tva]['HT'] += $line->multicurrency_total_tva;
                         $total_ht_lignes += $line->multicurrency_total_tva;
                     } elseif($use_tva && $line->tva_tx == 0) {
                         $is_remise = false;
                         if(is_object($produit)) {
-                            if($produit->getData('ref') == 'REMISE') {
+                            if($produit->getData('ref') == 'REMISE' || $produit->getData('ref') == 'TEX') {
                                 $is_remise = true;
                             }
                         }
@@ -201,13 +210,17 @@ class BTC_export_facture extends BTC_export {
         
         if($use_d3e && $d3e != 0) {
             $lignes[$compte_general_d3e]['HT'] = $d3e;
-        }        
+        }      
+        
+        echo '<pre>';
+        echo $total_ht_lignes;
+        print_r($lignes);
+        
         
         if(round(($total_ht_lignes), 2) != round($total_ttc_facture,2)) {
             $montant_ecart = ($total_ht_lignes + $d3e) != $total_ttc_facture;
             $lignes = $this->rectifications_ecarts($lignes, $montant_ecart, 'vente');
         }
-                
         foreach($lignes as $l => $infos) {
             $structure['compte_general'] = [$l, 17];
             $structure['type_de_compte'] = ['-', 1];

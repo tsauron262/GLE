@@ -173,11 +173,12 @@ class BTC_export_facture extends BTC_export {
                         $ecritures = $this->struct($structure);
                     }
                     if(is_object($produit)){
-                        if($use_d3e)
+                        if($use_d3e){
                             if(($facture->getData('zone_vente') == 1 && $line->tva_tx > 0) || $facture->getData('zone_vente') != 1){
                                 $lignes[$use_compte_general]['HT'] += $line->multicurrency_total_ht - ($produit->getData('deee') * $line->qty);
                                 $total_ht_lignes += $line->multicurrency_total_ht;
                             }
+                        }
                         else {
                             if(($facture->getData('zone_vente') == 1 && $line->tva_tx > 0) || $facture->getData('zone_vente') != 1){
                                 $lignes[$use_compte_general]['HT'] += $line->multicurrency_total_ht;

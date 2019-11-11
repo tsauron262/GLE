@@ -219,7 +219,7 @@ class BTC_export_facture extends BTC_export {
         
         
         if(round(($total_ht_lignes), 2) != round($total_ttc_facture,2)) {
-            $montant_ecart = ($total_ht_lignes + $d3e) != $total_ttc_facture;
+            $montant_ecart = ($total_ht_lignes + $d3e) - $total_ttc_facture;
             $lignes = $this->rectifications_ecarts($lignes, $montant_ecart, 'vente');
         }
         foreach($lignes as $l => $infos) {

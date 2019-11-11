@@ -196,7 +196,7 @@ class BTC_export_facture extends BTC_export {
                     } elseif($use_tva && $line->tva_tx == 0) {
                         $is_remise = false;
                         if(is_object($produit)) {
-                            if($produit->getData('ref') == 'REMISE' || $produit->getData('ref') == 'TEX') {
+                            if($produit->getData('ref') == 'REMISE' || $produit->getData('ref') == 'TEX' || $produit->getData('ref') == 'REMISE-01' || $produit->getData('ref') == 'REMISECRT') {
                                 $is_remise = true;
                             }
                         }
@@ -218,7 +218,7 @@ class BTC_export_facture extends BTC_export {
         print_r($lignes);
         
         
-        if(round(($total_ht_lignes), 2) != round($total_ttc_facture,2)) {
+        if(round(($total_ht_lignes), 2) != round($total_ttc_facture,2) && !$is_remise) {
             $montant_ecart = ($total_ht_lignes + $d3e) - $total_ttc_facture;
             $lignes = $this->rectifications_ecarts($lignes, $montant_ecart, 'vente');
         }

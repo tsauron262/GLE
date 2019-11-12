@@ -504,6 +504,8 @@ class Bimp_Propal extends BimpComm
                             'fk_mode_reglement' => (int) $this->getData('fk_mode_reglement'),
                             'fk_availability'   => (int) $this->getData('fk_availability'),
                             'fk_input_reason'   => (int) $this->getData('fk_input_reason'),
+                            'note_public'   => $this->getData('note_public'),
+                            'note_private'   => $this->getData('note_private'),
                             'date_commande'     => date('Y-m-d'),
                             'date_livraison'    => $this->getData('date_livraison'),
                             'libelle'           => $this->getData('libelle'),

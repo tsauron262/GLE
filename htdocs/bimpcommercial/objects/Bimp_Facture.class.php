@@ -31,6 +31,12 @@ class Bimp_Facture extends BimpComm
         4 => array('label' => 'Facture proforma'),
         5 => array('label' => 'Facture de situation')
     );
+    
+    public static $exportedStatut = [
+        0 => ['label' => 'Non traitée en compta', 'classes' => ['danger'], 'icon' => 'times'],
+        1 => ['label' => 'Comptabilisée', 'classes' => ['success'], 'icon' => 'check'],
+        204 => ['label' => 'Non comptabilisable', 'classes' => ['warning'], 'icon' => 'times'],
+    ];
 
     public function iAmAdminRedirect()
     {
@@ -39,7 +45,7 @@ class Bimp_Facture extends BimpComm
             return true;
         parent::iAmAdminRedirect();
     }
-
+    
     public function isEditable($force_edit = false, &$errors = array())
     {
         if ($this->getData('exported') == 1)

@@ -271,17 +271,26 @@ class BC_Input extends BimpComponent
                 $decimals = 0;
                 switch ($this->data_type) {
                     case 'percent':
-                        $min = '0';
-                        $max = '100';
-
                     case 'money':
                     case 'float':
-                        $decimals = isset($this->field_params['decimals']) ? $this->field_params['decimals'] : 2;
-
                     case 'qty':
-                        $decimals = isset($this->field_params['decimals']) ? $this->field_params['decimals'] : 0;
-
                     case 'int':
+                        switch ($this->data_type) {
+                            case 'percent':
+                                $min = '0';
+                                $max = '100';
+                                $decimals = isset($this->field_params['decimals']) ? $this->field_params['decimals'] : 2;
+                                break;
+
+                            case 'money':
+                            case 'float':
+                                $decimals = isset($this->field_params['decimals']) ? $this->field_params['decimals'] : 2;
+                                break;
+
+                            case 'qty':
+                                $decimals = isset($this->field_params['decimals']) ? $this->field_params['decimals'] : 0;
+                                break;
+                        }
                         $options['data']['data_type'] = 'number';
                         $options['data']['decimals'] = $decimals;
                         $options['data']['min'] = isset($this->field_params['min']) ? $this->field_params['min'] : $min;

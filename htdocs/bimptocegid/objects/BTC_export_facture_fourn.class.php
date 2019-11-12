@@ -15,7 +15,7 @@ class BTC_export_facture_fourn extends BTC_export {
         $societe = $this->getInstance('bimpcore', 'Bimp_Societe', $facture->getData('fk_soc'));
         $is_fournisseur_interco = false;
 
-        $compte_general_401 = '41100000';
+        $compte_general_401 = '40100000';
 
         if ($societe->getData('is_subsidiary')) {
             $compte_general_401 = $societe->getData('accounting_account_fournisseur');
@@ -177,7 +177,7 @@ class BTC_export_facture_fourn extends BTC_export {
                         if (!$use_tva || $ligne->tva_tx == 0) {
                             $use_compte_general = $this->convertion_to_interco_code('60480000', $compte_general_401);
                         } else {
-                            $use_compte_general = $this->convertion_to_interco_code('60450000', $compte_general_401);
+                            $use_compte_general = $this->convertion_to_interco_code('62410000', $compte_general_401);
                         }
                         $lignes[$use_compte_general]['HT'] += $ligne->total_ht;
                         $is_frais_de_port = true;

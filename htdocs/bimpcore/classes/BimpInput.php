@@ -628,15 +628,23 @@ class BimpInput
                     $html .= ' data-max_input_name="' . (isset($options['max_input_name']) ? $options['max_input_name'] : '') . '"';
                     $html .= ' data-max_input_abs="' . (isset($options['max_input_abs']) ? $options['max_input_abs'] : 0) . '"';
                     $html .= '>';
-                    if (count($options['items']) > 1 && (!isset($options['select_all_buttons']) || (int) $options['select_all_buttons'])) {
-                        $html .= '<div class="smallActionsContainer">';
-                        $html .= '<span class="small-action" onclick="checkAll($(this).parent().parent(), \'.' . $field_name . '_check\');">';
-                        $html .= BimpRender::renderIcon('fas_check-square', 'iconLeft') . 'Tout sélectionner';
-                        $html .= '</span>';
-                        $html .= '<span class="small-action" onclick="uncheckAll($(this).parent().parent(), \'.' . $field_name . '_check\');">';
-                        $html .= BimpRender::renderIcon('far_square', 'iconLeft') . 'Tout désélectionner';
-                        $html .= '</span>';
-                        $html .= '</div>';
+                    if (count($options['items']) > 1) {
+                        if (!isset($options['search_input']) || (int) $options['search_input']) {
+                            $html .= '<div class="check_list_search_input">';
+                            $html .= '<span class="searchIcon">' . BimpRender::renderIcon('fas_search', 'iconLeft') . '</span>';
+                            $html .= self::renderInput('text', $field_name . '_search_input');
+                            $html .= '</div>';
+                        }
+                        if (!isset($options['select_all_buttons']) || (int) $options['select_all_buttons']) {
+                            $html .= '<div class="smallActionsContainer">';
+                            $html .= '<span class="small-action" onclick="checkAll($(this).parent().parent(), \'.' . $field_name . '_check\');">';
+                            $html .= BimpRender::renderIcon('fas_check-square', 'iconLeft') . 'Tout sélectionner';
+                            $html .= '</span>';
+                            $html .= '<span class="small-action" onclick="uncheckAll($(this).parent().parent(), \'.' . $field_name . '_check\');">';
+                            $html .= BimpRender::renderIcon('far_square', 'iconLeft') . 'Tout désélectionner';
+                            $html .= '</span>';
+                            $html .= '</div>';
+                        }
                     }
                     $i = 1;
                     foreach ($options['items'] as $idx => $item) {

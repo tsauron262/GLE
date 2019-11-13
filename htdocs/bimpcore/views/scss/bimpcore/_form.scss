@@ -374,7 +374,8 @@ select.switch {
         }
     }
 }
-.search_input_results {
+.search_input_results,
+.input_choices {
     position: absolute;
     z-index: 99999;
     background-color: #fff;
@@ -382,12 +383,22 @@ select.switch {
     box-shadow: 4px 4px 4px #505050;
     padding: 0 15px;
 
-    button {
+    button,
+    .btn {
         display: block;
         width: 100%;
         text-align: left;
     }
 }
+.search_input_selected_label {
+    font-weight: bold;
+    color: $gray-dark;
+
+    i.fa-check {
+        color: $success;
+    }
+}
+
 .switchOption {
     &.selected {
         color: #fff!important;
@@ -522,14 +533,7 @@ select.switch {
     display: none;
     margin: 10px 0;
 }
-.search_input_selected_label {
-    font-weight: bold;
-    color: $gray-dark;
 
-    i.fa-check {
-        color: $success;
-    }
-}
 
 .texarea_values {
     padding-left: 10px;
@@ -589,6 +593,20 @@ input[type=text].large_input {
     max-height: 450px;
     overflow-y: auto;
     margin: 10px;
+
+    & > .check_list_search_input {
+        padding: 5px;
+        background-color: #DCDCDC;
+
+        & > span.searchIcon {
+            display: inline-block;
+            width: 10%;
+        }
+
+        & > input {
+            width: 85%!important;
+        }
+    }
 }
 .check_list_item,
 .check_list_group_caption {
@@ -711,7 +729,7 @@ input[type=text].large_input {
         padding: 10px 0;
         border-bottom: 1px solid $gray;
     }
-    
+
     .freeFormLabel {
         font-size: 15px;
         font-weight: bold;
@@ -770,7 +788,7 @@ input[type=text].large_input {
     label {
         font-weight: bold;
     }
-    
+
     .bimp_form_row {
         width: 100%;
         margin-bottom: 10px;

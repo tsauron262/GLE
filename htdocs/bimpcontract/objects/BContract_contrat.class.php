@@ -22,8 +22,8 @@ class BContract_contrat extends BimpDolObject {
     // Les renouvellements
     CONST CONTRAT_RENOUVELLEMENT_NON = 0;
     CONST CONTRAT_RENOUVELLEMENT_1_FOIS = 1;
-    CONST CONTRAT_RENOUVELLEMENT_2_FOIS = 3;
-    CONST CONTRAT_RENOUVELLEMENT_3_FOIS = 6;
+    CONST CONTRAT_RENOUVELLEMENT_2_FOIS = 2;
+    CONST CONTRAT_RENOUVELLEMENT_3_FOIS = 3;
     CONST CONTRAT_RENOUVELLEMENT_SUR_PROPOSITION = 12;
     // Contrat dénoncé
     CONST CONTRAT_DENOUNCE_NON = 0;
@@ -491,6 +491,12 @@ class BContract_contrat extends BimpDolObject {
         
         if(BimpTools::getValue('use_syntec') && !BimpTools::getValue('syntec')) {
             return 'Vous devez rensseigner un indice syntec';
+        }
+        
+        if((BimpTools::getValue('tacite') == 1 || BimpTools::getValue('tacite') == 1 || BimpTools::getValue('tacite') == 3)) {
+            if(BimpTools::getValue('duree_mois') != 12 && BimpTools::getValue('duree_mois') != 24 && BimpTools::getValue('duree_mois') != 36) {
+                return 'Vous ne pouvez pas demander un renouvellement TACITE pour des périodes différentes de (12, 24 ou 36 mois)';
+            }
         }
 
         parent::create($warnings, $force_create);

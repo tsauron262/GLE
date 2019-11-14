@@ -8,7 +8,7 @@ class Bimp_FactureFourn extends BimpComm
 {
 
     public static $discount_lines_allowed = false;
-    public static $use_zone_vente_for_tva = true;
+    public static $cant_edit_zone_vente_secteurs = array();
     public $redirectMode = 4; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
     public static $dol_module = 'facture_fourn';
     public static $files_module_part = 'facture_fournisseur';

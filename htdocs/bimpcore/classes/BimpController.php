@@ -15,7 +15,7 @@ class BimpController
     public $extends = array();
     private $nbBouclePush = 2;
 //    private $maxBouclePush = 40;
-    private $maxBouclePush = 4;
+    private $maxBouclePush = 1;
 
     public static function getInstance($module, $controller = null)
     {

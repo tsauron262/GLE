@@ -15,7 +15,7 @@ class BTC_export_facture extends BTC_export {
         $is_client_interco = false;
         $is_vente_ticket = false;
         $compte_general_411 = '41100000';
-        $total_ttc_facture = round($facture->getData('multicurrency_total_ttc'), 2);
+        $total_ttc_facture = $facture->getData('multicurrency_total_ttc');
         $date_facture = new DateTime($facture->getData('datef'));
         $date_creation = new dateTime($facture->getData('datec'));
         $date_echeance = new DateTime($facture->getData('date_lim_reglement'));
@@ -39,6 +39,7 @@ class BTC_export_facture extends BTC_export {
                 $compte_general_service = $this->convertion_to_interco_code(BimpCore::getConf('BIMPTOCEGID_vente_service_fr'), $compte_general_411);
                 $compte_general_tva = BimpCore::getConf('BIMPTOCEGID_vente_tva_fr');
                 $compte_general_d3e = BimpCore::getConf('BIMPTOCEGID_vente_dee_fr');
+                $compte_general_port = $this->convertion_to_interco_code('70850000', $compte_general_411);
                 break;
             case 2: case 4:
                 $use_d3e = false;
@@ -150,6 +151,10 @@ class BTC_export_facture extends BTC_export {
                 $ignore = true;
             }
         }
+        if($ignore) {
+            $facture->updateField('ignore_compta', 1);
+            $facture->updateField('exported', 204);
+        }
         
         foreach($facture->dol_object->lines as $line) {
             if(is_null($facture->getData('ignore_compta')) || $facture->getData('ignore_compta') == 0) { // Si la facture n'est pas ignorée en compta
@@ -161,25 +166,46 @@ class BTC_export_facture extends BTC_export {
                     } else {
                         $type_produit = $line->product_type;
                     }
-                    $use_compte_general = ($type_produit == 0) ? $compte_general_produit : $compte_general_service;
-                    $total_ht_lignes += $line->multicurrency_total_ht;
+                    
+                    $use_compte_general = ($type_produit == 0) ? $compte_general_produit : $compte_general_service;           
+                    
                     if(!$writing_ligne_client) {
                         $structure['contre_partie'] = [$use_compte_general, 17];
                         $ecritures = $this->struct($structure);
                     }
-                    if(is_object($produit)){
-                        $lignes[$use_compte_general]['HT'] += $line->multicurrency_total_ht - ($produit->getData('deee') * $line->qty);
+                    if($line->fk_product){
+                        if($use_d3e){
+                            if(($facture->getData('zone_vente') == 1 && $line->tva_tx > 0) || $facture->getData('zone_vente') != 1){
+                                $lignes[$use_compte_general]['HT'] += $line->multicurrency_total_ht - ($produit->getData('deee') * $line->qty);
+                                $total_ht_lignes += $line->multicurrency_total_ht;
+                            }
+                        }
+                        else {
+                            if(($facture->getData('zone_vente') == 1 && $line->tva_tx > 0) || $facture->getData('zone_vente') != 1){
+                                $lignes[$use_compte_general]['HT'] += $line->multicurrency_total_ht;
+                                $total_ht_lignes += $line->multicurrency_total_ht;
+                            }
+                        }
                     } else {
                         $lignes[$use_compte_general]['HT'] += $line->multicurrency_total_ht;
+                        $total_ht_lignes += $line->multicurrency_total_ht;
                     }
                         
                     if($use_tva && $line->tva_tx > 0) {
-                        $lignes[$compte_general_tva]['HT'] += $line->multicurrency_total_tva;
-                        $total_ht_lignes += $line->multicurrency_total_tva;
+                        if(is_object($produit)) {
+                            if($produit->getData('ref') == 'REMISE' || $produit->getData('ref') == 'TEX' || $produit->getData('ref') == 'REMISE-01' || $produit->getData('ref') == 'REMISECRT') {
+                                $is_remise = true;
+                            }
+                            if(!$remise) {
+                                $lignes[$compte_general_tva]['HT'] += $line->multicurrency_total_tva;
+                                $total_ht_lignes += $line->multicurrency_total_tva;
+                            }
+                        }
+                        
                     } elseif($use_tva && $line->tva_tx == 0) {
                         $is_remise = false;
                         if(is_object($produit)) {
-                            if($produit->getData('ref') == 'REMISE') {
+                            if($produit->getData('ref') == 'REMISE' || $produit->getData('ref') == 'TEX' || $produit->getData('ref') == 'REMISE-01' || $produit->getData('ref') == 'REMISECRT') {
                                 $is_remise = true;
                             }
                         }
@@ -194,13 +220,12 @@ class BTC_export_facture extends BTC_export {
         
         if($use_d3e && $d3e != 0) {
             $lignes[$compte_general_d3e]['HT'] = $d3e;
-        }        
-        
+        }      
+
         if(round(($total_ht_lignes), 2) != round($total_ttc_facture,2)) {
-            $montant_ecart = ($total_ht_lignes + $d3e) != $total_ttc_facture;
+            $montant_ecart = ($total_ht_lignes + $d3e) - $total_ttc_facture;
             $lignes = $this->rectifications_ecarts($lignes, $montant_ecart, 'vente');
         }
-                
         foreach($lignes as $l => $infos) {
             $structure['compte_general'] = [$l, 17];
             $structure['type_de_compte'] = ['-', 1];

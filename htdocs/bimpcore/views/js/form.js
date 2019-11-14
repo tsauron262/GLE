@@ -1502,6 +1502,117 @@ function onCheckListMaxInputChange($container, $input) {
     }
 }
 
+function calcTotalCompteurCaisse($container) {
+    if (!$.isOk($container)) {
+        return;
+    }
+
+    var total = 0;
+    var $inputs = $container.find('input.compteur_caisse_input');
+    $inputs.each(function () {
+        var val = parseInt($(this).val());
+        if (!isNaN(val)) {
+            total += val * parseFloat($(this).data('value'));
+        }
+    });
+
+    total = Math.round10(total, -2);
+
+    $container.find('.compteur_caisse_total').text(total);
+    $container.find('.compteur_caisse_total_input').val(total).change();
+}
+
+function selectChecklistItem($container, label) {
+    if (!$.isOk($container)) {
+        bimp_msg('Erreur: liste de choix non trouvée', 'danger');
+        return;
+    }
+
+    var check = false;
+
+    $container.find('.check_list_item').each(function () {
+        var $item = $(this);
+        if (label === $item.find('label').text()) {
+            if (!check) {
+                var $cb = $item.find('input[type=checkbox]');
+                if ($cb.length) {
+                    if ($cb.prop('checked')) {
+                        bimp_msg('L\'option "' + label + '" est déjà sélectionnée', 'warning', null, true);
+                    } else {
+                        $cb.prop('checked', true);
+                        $container.children('.check_list_search_input').children('input').change();
+                    }
+                }
+                check = true;
+            }
+        }
+    });
+
+    if (!check) {
+        bimp_msg('Option "' + label + '" non trouvée', 'warning', null, true);
+    }
+}
+
+function onChecklistSearchInputChange($input) {
+    if ($.isOk($input)) {
+        var val = $input.val();
+        var $container = $input.findParentByClass('check_list_search_input');
+        var choices = [];
+        if (typeof (val) === 'string' && val !== '') {
+            if ($.isOk($container)) {
+
+                var regex = new RegExp('^(.*)(' + val + ')(.*)$', 'i');
+                $container.findParentByClass('check_list_container').find('.check_list_item').each(function () {
+                    if (!$(this).children('input[type=checkbox]').prop('checked')) {
+                        var text = $(this).children('label').text();
+                        if (text && regex.test(text)) {
+                            choices.push(text.replace(regex, '$1<strong>$2</strong>$3'));
+                        }
+                    }
+                });
+                if (choices.length) {
+                    displayInputChoices($input, choices, function ($btn) {
+                        if ($.isOk($btn)) {
+                            var label = $btn.html();
+                            label = label.replace('<strong>', '');
+                            label = label.replace('</strong>', '');
+                            var $checkList = $btn.findParentByClass('check_list_container');
+                            $input.addClass('noEnterCheck');
+                            selectChecklistItem($checkList, label);
+                        }
+                    });
+                }
+            }
+        }
+
+        if (!choices.length) {
+            $container.find('.input_choices').remove();
+        }
+    }
+}
+
+function displayInputChoices($input, choices, onItemSelected) {
+    if (!$.isOk($input)) {
+        return;
+    }
+
+    if (typeof (choices) !== 'undefined' && choices.length) {
+        var input_name = $input.attr('name');
+        var container_id = input_name + '_input_choices';
+        var html = '<div class="input_choices hideOnClickOut" id="' + container_id + '">';
+
+        for (var i in choices) {
+            html += '<span class="btn btn-light-primary input_choice">' + choices[i] + '</span>';
+        }
+
+        html += '</div>';
+
+        $input.parent().find('#' + container_id).remove();
+        $input.after(html);
+        setInputChoicesEvents($input, onItemSelected);
+    }
+}
+
 // Gestion de l'affichage conditionnel des champs: 
 
 function toggleInputDisplay($container, $input) {
@@ -2205,6 +2316,32 @@ function setInputsEvents($container) {
                 });
             });
 
+            var $input = $checkListContainer.find('.check_list_search_input').find('input');
+
+            if ($input.length) {
+                $input.change(function () {
+                    onChecklistSearchInputChange($(this));
+                });
+
+                $input.click(function (e) {
+                    e.stopPropagation();
+                    $input.change();
+                });
+
+                $input.keyup(function (e) {
+                    if ($(this).hasClass('noEnterCheck')) {
+                        $(this).removeClass('noEnterCheck');
+                    } else {
+                        if (e.key === 'Enter' || e.key === 'Tab') {
+                            selectChecklistItem($(this).findParentByClass('check_list_container'), $(this).val());
+                            $(this).val('').change();
+                        } else if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') {
+                            onChecklistSearchInputChange($(this));
+                        }
+                    }
+                });
+            }
+
             checkCheckList($checkListContainer);
             $(this).data('check_list_events_init', 1);
         }
@@ -2511,24 +2648,83 @@ function setSortableMultipleValuesHandlesEvents($container) {
     }
 }
 
-function calcTotalCompteurCaisse($container) {
-    if (!$.isOk($container)) {
-        return;
-    }
+function setInputChoicesEvents($input, onItemSelected) {
+    if ($.isOk($input)) {
+        if (!parseInt($input.data('input_choices_events_init'))) {
+            $input.keydown(function (e) {
+                var $choices = $input.parent().find('.input_choices');
+                if ($.isOk($choices)) {
+                    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
 
-    var total = 0;
-    var $inputs = $container.find('input.compteur_caisse_input');
-    $inputs.each(function () {
-        var val = parseInt($(this).val());
-        if (!isNaN(val)) {
-            total += val * parseFloat($(this).data('value'));
+                        var $btn = $choices.find('.btn');
+                        if ($btn.length) {
+                            var n = 0;
+                            var i = 1;
+                            $btn.each(function () {
+                                if (!n) {
+                                    if ($(this).hasClass('selected')) {
+                                        n = i;
+                                    }
+                                }
+                                i++;
+                            });
+                            if (e.key === 'ArrowDown') {
+                                if (!n) {
+                                    n = 1;
+                                } else {
+                                    n++;
+                                }
+                                if (n > $btn.length) {
+                                    n = 1;
+                                }
+                            } else {
+                                if (n) {
+                                    n--;
+                                }
+                                if (!n) {
+                                    n = $btn.length;
+                                }
+                            }
+                            var $new = $choices.find('.btn').eq(n - 1);
+                            if ($new.length) {
+                                $btn.removeClass('selected');
+                                $new.addClass('selected');
+                            }
+                        }
+                    } else if (e.key === 'Enter') {
+                        e.stopPropagation();
+                        var $btn = $choices.find('.btn.selected');
+                        if ($btn.length === 1) {
+                            $btn.click();
+                            $choices.remove();
+                        }
+                    }
+                }
+            });
+            $input.data('input_choices_events_init', 1);
         }
-    });
 
-    total = Math.round10(total, -2);
+        var $choices = $input.parent().find('.input_choices');
+        if ($choices.length) {
+            if (!parseInt($choices.data('input_choices_events_init'))) {
+                $choices.find('.btn').each(function () {
+                    $(this).click(function (e) {
+                        e.stopPropagation();
 
-    $container.find('.compteur_caisse_total').text(total);
-    $container.find('.compteur_caisse_total_input').val(total).change();
+                        if (typeof (onItemSelected) === 'function') {
+                            onItemSelected($(this));
+                        } else {
+                            $input.val($(this).html());
+                        }
+                        $choices.remove();
+                    });
+                });
+
+                setCommonEvents($choices.parent());
+                $choices.data('input_choices_events_init', 1);
+            }
+        }
+    }
 }
 
 $(document).ready(function () {

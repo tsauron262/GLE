@@ -120,10 +120,7 @@ class BTC_export extends BimpObject {
         if(count($liste)) {
             $instance = $this->getInstance('bimptocegid', 'BTC_export_paiement');
             foreach ($liste as $paiement) {
-                $error = $instance->export($paiement->rowid, $paiement->fk_paiement, $forced);
-                if($error <= 0) {
-                    $this->addTaskAlert($error, $paiement->rowid);
-                }
+                $instance->export($paiement->rowid, 23, $forced);
             }
         } else {
             echo BimpRender::renderAlerts("Il n'y à plus de paiement à exporté", 'warning', false);

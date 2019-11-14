@@ -61,8 +61,10 @@ fields:
         label: Référence
         dol_prop: ref
     exported:
-        label: Comptabilisée
-        type: bool
+        label: Etat comptable
+        type: int
+        values: 
+            array: exportedStatut
     ignore_compta:
         label: Ignorée
         type: bool

@@ -15,7 +15,7 @@ class BTC_export_societe extends BTC_export {
         $attached_commercial = $this->db->getValue('societe_commerciaux', 'fk_user', 'fk_soc = ' . $client->id);
         $country = $this->db->getRow('c_country', '`rowid` = ' . $client->getData('fk_pays'));
         $i_dont_want_this_in_auxiliary_code = ["-", "'", ".", "(", ")", "_", '#', '@', ',', ':', '/', '+', '!', '?', '='];
-        $is_client = ($client->getData('client') == 1) ? true : false;
+        $is_client = ($client->getData('client') == 1 || $client->getData('client') == 3) ? true : false;
         $is_fournisseur = ($client->getData('fournisseur') == 1) ? true : false;
         if($attached_commercial) {
             $commercial = $this->getInstance('bimpcore', 'Bimp_User', $attached_commercial);
@@ -36,6 +36,8 @@ class BTC_export_societe extends BTC_export {
         
         $nom_societe = strtoupper($this->suppr_accents($client->getData('nom')));
         
+        $specials_characters_for_replace = ["'", '"', "-", "(", ")", ".", ";", "/", "!", "_", "+", "="];
+        
         foreach ($specials_characters_for_replace as $char) {
             $nom_societe = str_replace($char, "", $nom_societe);
         }
@@ -49,7 +51,7 @@ class BTC_export_societe extends BTC_export {
                 $auxiliaire_client .= substr($array_for_client[1], 0, 3);
                 
             } else {
-                
+                $auxiliaire_client .= $array_for_client[0];
             }
             $auxiliaire_client = $this->sizing($auxiliaire_client, 14, false, true);
         } else {

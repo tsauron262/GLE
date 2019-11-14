@@ -17,7 +17,6 @@ class BTC_export_paiement extends BTC_export {
             $compte_general_411 = '41100000';
 
             $facture = $this->getInstance('bimpcommercial', 'Bimp_Facture', $transaction->fk_facture);
-            if ($facture->getData('ignore_compta') != 1) {
                 $bc_paiement = $this->getInstance('bimpcaisse', 'BC_Paiement');
 
                 if ($bc_paiement->find(['id_paiement' => $paiement->id])) {
@@ -27,7 +26,7 @@ class BTC_export_paiement extends BTC_export {
                         if ($vente->getData('id_client') == 0) {
                             $is_vente_ticket = true;
                         } else {
-                            $id_client_paiement = $vente->getData('id_client');
+                            $id_client = $vente->getData('id_client'); 
                         }
                     } else {
                         $caisse = $this->getInstance('bimpcaisse', 'BC_Caisse', $bc_paiement->getData('id_caisse'));
@@ -63,7 +62,9 @@ class BTC_export_paiement extends BTC_export {
                 $compte_bancaire = $this->db->getRow('bank_account', 'rowid = ' . $compte_num);
 
                 $affiche_code_reglement = $reglement->code;
-
+                $date = new DateTime($paiement->getData('datep'));
+                $label = ($transaction->amount > 0) ? "Pay" : "Rem";
+                $label .= ' clt ' . $auxiliaire_client . ' ' . $date->format('dmY');
                 switch ($reglement->code) {
 
                     case 'LIQ':
@@ -116,15 +117,14 @@ class BTC_export_paiement extends BTC_export {
                         $compte_g = "41199200";
                         $journal = "OD";
                         $affiche_code_reglement = 'CHQ';
-
+                        $label = "Pay clt CG " . $entrepot->town;
                     default:
                         $compte_g = $entrepot->compte_comptable;
                         $journal = $entrepot->code_journal_compta;
                         break;
                 }
 
-                $date = new DateTime($paiement->getData('datep'));
-                $label = ($transaction->amount > 0) ? "Pay" : "Rem";
+                
                 $numero_unique = preg_replace('~\D~', '', $paiement->getData('ref'));
                 $numero_unique = substr($numero_unique, 1, 8);
 
@@ -137,12 +137,12 @@ class BTC_export_paiement extends BTC_export {
                     'code_compta' => ['', 16],
                     'next' => ['', 1],
                     'ref' => [$paiement->getData('ref'), 35],
-                    'label' => [$label . ' clt ' . $auxiliaire_client . ' ' . $date->format('dmY'), 35],
+                    'label' => [$label, 35],
                     'mode_reglement' => [$affiche_code_reglement, 3, true],
                     'date_reglement' => [$date->format('dmY'), 8],
                     'sens' => [$this->get_sens($transaction->amount, 'paiement'), 1],
-                    'montant' => [round($transaction->amount), 20, true],
-                    'type_ecriture' => ['N', 1],
+                    'montant' => [abs(round($transaction->amount, 2)), 20, true],
+                    'type_ecriture' => [$this->type_ecriture, 1],
                     'numero_piece' => [$numero_unique, 8, true],
                     'devise' => ['EUR', 3],
                     'taux_dev' => ['1', 10, true],
@@ -195,22 +195,10 @@ class BTC_export_paiement extends BTC_export {
                 $structure['lettrage'] = ['-XAL', 4];
                 $ecritures .= $this->struct($structure);
 
-                // Gestions des erreurs
-                if (!$compte_bancaire) {
-                    return -1;
-                }
-                if (!$compte_g) {
-                    return -2;
-                }
+                $this->write_tra($ecritures, $this->create_daily_file('paiement'));
 
-                if ($this->write_tra($ecritures, $this->create_daily_file('paiement'))) {
-                    $paiement->updateField('exported', self::RETURNED_STATUS_OK);
-                    return 1;
-                } else {
-                    return -3;
-                }
-            }
         }
+        $paiement->updateField('exported', self::RETURNED_STATUS_OK);
     }
 
 }

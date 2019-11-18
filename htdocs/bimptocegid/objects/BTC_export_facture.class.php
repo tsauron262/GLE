@@ -147,9 +147,10 @@ class BTC_export_facture extends BTC_export {
         for ($i = 0; $i < count($facture->dol_object->lines); $i++) {
             if ($facture->dol_object->lines[$i]->desc == "Acompte" && $facture->dol_object->lines[$i]->multicurrency_total_ht == $facture->getData('total')) {
                 $ignore = true;
-            } elseif($facture->dol_object->lines[$i]->desc == "Garantie" && $facture->dol_object->lines[$i]->multicurrency_total_ht == $facture->getData('total')) {
-                $ignore = true;
-            }
+            } 
+//            elseif($facture->dol_object->lines[$i]->desc == "Garantie" && $facture->dol_object->lines[$i]->multicurrency_total_ht == $facture->getData('total')) {
+//                $ignore = true;
+//            }
         }
         if($ignore) {
             $facture->updateField('ignore_compta', 1);
@@ -222,7 +223,7 @@ class BTC_export_facture extends BTC_export {
             $lignes[$compte_general_d3e]['HT'] = $d3e;
         }      
 
-        if(round(($total_ht_lignes), 2) != round($total_ttc_facture,2)) {
+        if($total_ht_lignes != $total_ttc_facture) {
             $montant_ecart = ($total_ht_lignes + $d3e) - $total_ttc_facture;
             $lignes = $this->rectifications_ecarts($lignes, $montant_ecart, 'vente');
         }

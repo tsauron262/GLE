@@ -99,7 +99,7 @@ class BTC_export_facture extends BTC_export {
             'reglement' => [($reglement->code == 'LIQ') ? 'ESP' : $reglement->code, 3],
             'echeance' => [$date_echeance->format('dmY'), 8],
             'sens' => [$sens_parent, 1],
-            'montant' => [abs($total_ttc_facture), 20, true],
+            'montant' => [abs(round($total_ttc_facture),2), 20, true],
             'type_ecriture' => [$this->type_ecriture, 1],
             'numero_piece' => [$facture->id, 8, true],
             'devise' => ['EUR', 3],

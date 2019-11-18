@@ -271,12 +271,7 @@ class BimpConfig
     public function getCompiledParams($full_path)
     {
         $params = $this->getParams($full_path);
-        if ($full_path === 'fitlers_panel/default/filters/place_position/default_values') {
-            echo '<pre>';
-            print_r($params);
-            echo '</pre>';
-        }
-        
+
         return $this->compileParams($params, $full_path);
     }
 
@@ -940,7 +935,7 @@ class BimpConfig
             if (is_null($params)) {
                 $params = array();
             }
-            
+
             if ($is_static) {
                 return forward_static_call_array(array(
                     $instance, $method
@@ -1065,13 +1060,13 @@ class BimpConfig
                 break;
             }
         }
-        
+
 //        if ($object_name === 'parent') {
 //            echo '<pre>';
 //            print_r($params);
 //            exit;
 //        }
-        
+
         if (!is_null($params)) {
             return $this->getInstance($params, $instance_path, $id_object);
         }

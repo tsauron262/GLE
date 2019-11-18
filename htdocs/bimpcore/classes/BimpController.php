@@ -579,7 +579,7 @@ class BimpController
                     if ($err_code == JSON_ERROR_UTF8) {
                         // On tente un encodage utf-8. 
                         $result = BimpTools::utf8_encode($result);
-                        
+
                         $json = json_encode($result);
 
                         if ($json !== false) {
@@ -1719,6 +1719,32 @@ class BimpController
         return array(
             'errors'     => array(),
             'list'       => $list,
+            'request_id' => BimpTools::getValue('request_id', 0)
+        );
+    }
+
+    protected function ajaxProcessGetSearchObjectResults()
+    {
+        $results = array();
+
+        $module = BimpTools::getValue('module', '');
+        $object_name = BimpTools::getValue('object_name', '');
+        $search_name = BimpTools::getValue('search_name', 'default');
+        $search_value = BimpTools::getValue('search_value', '');
+        $max_results = (int) BimpTools::getValue('max_results', 15);
+        $card = BimpTools::getValue('card', '');
+
+        if ($module && $object_name && $search_value) {
+            $instance = BimpObject::getInstance($module, $object_name);
+
+            $results = $instance->getSearchResults($search_name, $search_value, array(
+                'max_results' => $max_results,
+                'card'        => $card
+            ));
+        }
+
+        return array(
+            'results'    => $results,
             'request_id' => BimpTools::getValue('request_id', 0)
         );
     }

@@ -9,11 +9,11 @@ function bimp_msg(msg, className, $container, auto_hide) {
     if (!bimp_msg_enable) {
         return;
     }
-    
+
     if (typeof (className) === 'undefined') {
         className = 'info';
     }
-    
+
     if (typeof (auto_hide) === 'undefined') {
         auto_hide = false;
     }
@@ -112,14 +112,14 @@ function bimp_notify(content) {
 }
 
 function bimp_notify_error(content) {
-        var html = '<div class="danger" style="text-align: center; font-size: 18px; margin: 30px 0">';
-        html += '<i class="fas fa5-exclamation-triangle iconLeft"></i>Une erreur inattendue est survenue';
-        html += '</div>';
-        html += '<h3>Informations reçues: </h3>';
-        html += '<div>';
-        html += content;
-        html += '</div>';
-        bimp_notify(html);
+    var html = '<div class="danger" style="text-align: center; font-size: 18px; margin: 30px 0">';
+    html += '<i class="fas fa5-exclamation-triangle iconLeft"></i>Une erreur inattendue est survenue';
+    html += '</div>';
+    html += '<h3>Informations reçues: </h3>';
+    html += '<div>';
+    html += content;
+    html += '</div>';
+    bimp_notify(html);
 }
 
 // Notifications: 
@@ -986,6 +986,7 @@ $(document).ready(function () {
     $('body').click(function (e) {
         $(this).find('.hideOnClickOut').hide();
         $(this).find('.bs-popover').popover('hide');
+        $(this).find('.popover.fade').remove();
     });
 
     // Notifications: 

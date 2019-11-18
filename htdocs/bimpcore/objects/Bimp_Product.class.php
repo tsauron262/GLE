@@ -139,18 +139,7 @@ class Bimp_Product extends BimpObject
         }
 
         return parent::canSetAction($action);
-    }
-
-    public function getValues8sens($type)
-    {
-        $return = array();
-        $sql = $this->db->db->query("SELECT * FROM " . MAIN_DB_PREFIX . "bimp_c_values8sens WHERE type ='" . $type . "'ORDER BY label ASC");
-        while ($ln = $this->db->db->fetch_object($sql)) {
-            $return[$ln->id] = $ln->label;
-        }
-
-        return $return;
-    }
+    }   
 
     public function canValidate()
     {
@@ -816,6 +805,12 @@ class Bimp_Product extends BimpObject
         $html .= ' (<a href="' . DOL_URL_ROOT . '/product/stock/mouvement.php?idproduct=' .
                 $this->getData('id') . '">Liste complète</a>)';
         return $html;
+    }
+    
+    public function getValues8sens($type, $include_empty = true)
+    {
+        // Utiliser ***impérativement*** le cache pour ce genre de requêtes         
+        return self::getProductsTagsByTypeArray($type, $include_empty);
     }
 
     // Getters stocks:

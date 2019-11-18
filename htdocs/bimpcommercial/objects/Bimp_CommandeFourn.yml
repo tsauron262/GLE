@@ -680,17 +680,24 @@ cards:
               field: entrepot
               display: nom_url
         view_btn: 1
-        
+
 searches:
     default: 
         fields_search: 
             - a.ref
             - ef.libelle
             - s.nom
+            - a.ref_supplier
         joins:
-            - table: propal_extrafields
-              on: a.rowid = ef.fk_object
-              alias: ef
-            - table: societe
-              on: a.fk_soc = s.rowid
-              alias: s
+            ef: 
+                table: commande_fournisseur_extrafields
+                on: a.rowid = ef.fk_object
+                alias: ef
+            s: 
+                table: societe
+                on: a.fk_soc = s.rowid
+                alias: s
+        fields_return: 
+            - a.ref
+            - s.nom
+        label_syntaxe: '<a.ref> (Fourn: <s.nom>)'

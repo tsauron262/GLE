@@ -216,25 +216,25 @@ class pdf_bimpsupport_europe extends ModeleBimpSupport {
 //                $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 12);
 //                $pdf->MultiCell(300, 6, $address . "\n" . $tel . "\n" . $mail, 0, 'L');
                 
-                $pdf->SetXY('40', '53');//60
+                $pdf->SetXY('50', '69.7');//60
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 12);
                 $pdf->MultiCell(300, 6, $client->name, 0, 'L');
-                $pdf->SetXY('30', '60.1');
+                $pdf->SetXY('51', '77.3');
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 12);
                 $pdf->MultiCell(300, 6, str_replace("\n", " ", $client->address), 0, 'L');
-                $pdf->SetXY('30', '66.9');
+                $pdf->SetXY('36', '84.9');
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 12);
                 $pdf->MultiCell(300, 6, str_replace("\n", " ", $client->town), 0, 'L');
-                $pdf->SetXY('140', '66.9');
+                $pdf->SetXY('117', '84.9');
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 12);
                 $pdf->MultiCell(300, 6, str_replace("\n", " ", $client->country), 0, 'L');
-                $pdf->SetXY('38', '73.2');
+                $pdf->SetXY('47', '92.5');
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 12);
                 $pdf->MultiCell(300, 6, str_replace("\n", " ", $client->zip), 0, 'L');
-                $pdf->SetXY('130', '73.2');
+                $pdf->SetXY('95', '92.5');
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 12);
                 $pdf->MultiCell(300, 6, str_replace("\n", " ", $client->email), 0, 'L');
-                $pdf->SetXY('64', '79.8');
+                $pdf->SetXY('77', '100.2');
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 12);
                 $pdf->MultiCell(300, 6, str_replace("\n", " ", $client->phone), 0, 'L');
                 
@@ -242,29 +242,30 @@ class pdf_bimpsupport_europe extends ModeleBimpSupport {
                 
                 $product_label = $equipment->displayProduct('nom', true);
                 //le prod
-                $pdf->SetXY('134', '93.7');
+                $pdf->SetXY('140', '116.39');
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 9);
                 $pdf->MultiCell(100, 6, $product_label, 0, 'L');
 //
-                $pdf->SetXY('50', '93.7');
+                $pdf->SetXY('53', '116.39');
                 $pdf->MultiCell(100, 6, $equipment->getData('serial'), 0, 'L');
                 
-                $pdf->SetXY('50', '100');
+                $pdf->SetXY('64', '124.2');
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 9);
-                $pdf->MultiCell(300, 6, str_replace("\n", " ", $equipment->getData("date_purchase")), 0, 'L');
+                $date_purchase = new DateTime($equipment->getData("date_purchase"));
+                $pdf->MultiCell(300, 6, str_replace("\n", " ", $date_purchase->format('d-m-Y')), 0, 'L');
                 
                 
-                $pdf->SetXY('62', '137.5');
+                $pdf->SetXY('76', '162');
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 9);
                 $pdf->MultiCell(300, 6, str_replace("\n", " ", $sav->getData("diagnostic")), 0, 'L');
                 
-                $pdf->SetXY('90', '144');
+                $pdf->SetXY('94', '169.7');
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 9);
                 $pdf->MultiCell(300, 6, str_replace("\n", " ", $sav->getData("date_create")), 0, 'L');
-                $pdf->SetXY('115', '150');
+                $pdf->SetXY('129', '177.2');
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 9);
                 $pdf->MultiCell(300, 6, str_replace("\n", " ", $sav->getData("symptomes")), 0, 'L');
-                $pdf->SetXY('90', '162.8');
+                $pdf->SetXY('96', '188.4');
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 9);
                 $pdf->MultiCell(300, 6, str_replace("\n", " ", $sav->getData("diagnostic")), 0, 'L');
 //$s = new Societe();
@@ -275,12 +276,12 @@ class pdf_bimpsupport_europe extends ModeleBimpSupport {
                     $tech = $sav->getChildObject('user_tech')->dol_object;
                     $tech->fetch_optionals();
 //                    print_r($tech);die;
-                    $pdf->SetXY('33', '182');
+                    $pdf->SetXY('28', '207.4');
                     $pdf->MultiCell(100, 6, $tech->getFullName($langs), 0, 'L');
-                    $pdf->SetXY('160', '182');
+                    $pdf->SetXY('132.5', '207.4');
                     $pdf->MultiCell(100, 6, $tech->array_options["options_apple_techid"], 0, 'L');
                 }
-                $pdf->SetXY('140', '191.5');
+                $pdf->SetXY('132.5', '214.2');
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 9);
                 $pdf->MultiCell(300, 6, dol_print_date(dol_now()), 0, 'L');
 

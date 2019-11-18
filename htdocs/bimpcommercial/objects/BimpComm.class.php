@@ -15,8 +15,10 @@ class BimpComm extends BimpDolObject
     public static $mail_event_code = '';
     public static $external_contact_type_required = true;
     public static $internal_contact_type_required = true;
-    public $acomptes_allowed = false;
     public static $discount_lines_allowed = true;
+    public static $use_zone_vente_for_tva = true;
+    public static $cant_edit_zone_vente_secteurs = array('M');
+    public $acomptes_allowed = false;
     public $remise_globale_line_rate = null;
     public $lines_locked = 0;
     public $useCaisseForPayments = false;
@@ -84,7 +86,20 @@ class BimpComm extends BimpDolObject
                 break;
 
             case 'zone_vente':
-                return (int) $this->areLinesEditable();
+                if (!$this->isLoaded()) {
+                    return 0;
+                }
+
+                if (static::$use_zone_vente_for_tva) {
+                    if (in_array($this->getData('ef_type'), static::$cant_edit_zone_vente_secteurs)) {
+                        return 0;
+                    }
+
+                    if (!(int) $this->areLinesEditable()) {
+                        return 0;
+                    }
+                }
+                break;
         }
 
         if ($force_edit) {
@@ -220,7 +235,7 @@ class BimpComm extends BimpDolObject
 
     public function isTvaActive()
     {
-        if ($this->field_exists('zone_vente') && $this->dol_field_exists('zone_vente')) {
+        if (static::$use_zone_vente_for_tva && $this->dol_field_exists('zone_vente')) {
             if ((int) $this->getData('zone_vente') === self::BC_ZONE_HORS_UE || (int) $this->getData('zone_vente') === self::BC_ZONE_UE_SANS_TVA) {
                 return 0;
             }
@@ -239,9 +254,9 @@ class BimpComm extends BimpDolObject
     public function getClientContactsArray()
     {
         global $db;
-        
+
         $id_client = $this->getAddContactIdClient();
-        if($id_client > 0){
+        if ($id_client > 0) {
             $contacts = self::getSocieteContactsArray($id_client, false);
             $soc = new Societe($db);
             $soc->fetch_optionals($id_client);
@@ -251,14 +266,14 @@ class BimpComm extends BimpDolObject
             unset($contacts['']);
 
             // If there is a default contact
-            if(0 < (int) $contact_default) {
+            if (0 < (int) $contact_default) {
                 $label_default = $contacts[$contact_default];
                 unset($contacts[$contact_default]);
                 $contacts = array($contact_default => $label_default . ' (Contact facturation email par défaut)') + $contacts;
             }
         }
 
-        
+
         return $contacts;
     }
 
@@ -406,14 +421,14 @@ class BimpComm extends BimpDolObject
             'icon'    => 'far fa-paper-plane',
             'onclick' => $note->getJsActionOnclick('repondre', array("obj_type" => "bimp_object", "obj_module" => $this->module, "obj_name" => $this->object_name, "id_obj" => $this->id, "type_dest" => $note::BN_DEST_GROUP, "fk_group_dest" => $note::BN_GROUPID_FACT, "content" => "Bonjour, vous trouverez pour cette piéce le document signée."), array('form_name' => 'rep'))
         );
-        
+
         $buttons[] = array(
-                'label'   => 'Relevé facturation client',
-                'icon'    => 'fas fa-ticket',
-                'onclick' => $this->getJsActionOnclick('releverFacturation', array(), array(
-                    'form_name' => 'releverFacturation'
-                ))
-            );
+            'label'   => 'Relevé facturation client',
+            'icon'    => 'fas fa-ticket',
+            'onclick' => $this->getJsActionOnclick('releverFacturation', array(), array(
+                'form_name' => 'releverFacturation'
+            ))
+        );
 
         return $buttons;
     }
@@ -811,38 +826,38 @@ class BimpComm extends BimpDolObject
         if (!in_array($id_main_pdf_file, $values)) {
             $values[] = $id_main_pdf_file;
         }
-        
+
         $list = $this->getAllFiles();
         $idSepa = 0;
         $idSepaSigne = 0;
-        foreach($list as $id => $elem)
-            if(stripos($elem, "sepa")){
-                    $idSepa = $id;
-                    if(stripos($elem, "signe"))
-                            $idSepaSigne = $id;
+        foreach ($list as $id => $elem)
+            if (stripos($elem, "sepa")) {
+                $idSepa = $id;
+                if (stripos($elem, "signe"))
+                    $idSepaSigne = $id;
             }
 
 
-        if($idSepa > 0 && $idSepaSigne < 1)            
+        if ($idSepa > 0 && $idSepaSigne < 1)
             $values[] = $idSepa;
-        
+
 
 
 
         return $values;
     }
-    
-    public function getAllFiles($withLink = true){
+
+    public function getAllFiles($withLink = true)
+    {
         $objects = $this->getBimpObjectsLinked();
         $list = $this->getFilesArray(0);
-        if($withLink){
-            foreach($objects as $object){
+        if ($withLink) {
+            foreach ($objects as $object) {
                 $list = $list + $object->getFilesArray(0);
             }
         }
         return $list;
     }
-    
 
     public function getEmailTopicByModel()
     {
@@ -1812,10 +1827,10 @@ class BimpComm extends BimpDolObject
                     }
                 }
             }
-            
+
             $client = $this->getChildObject('client');
 
-            if($client->isLoaded()){
+            if ($client->isLoaded()) {
                 $objects[] = $client;
             }
         }
@@ -1823,11 +1838,12 @@ class BimpComm extends BimpDolObject
 
         return $objects;
     }
-    
-    public function renderExtraFile(){
+
+    public function renderExtraFile()
+    {
         $html = "";
         $objects = $this->getBimpObjectsLinked();
-        foreach($objects as $obj)
+        foreach ($objects as $obj)
             $html .= $this->renderListFileForObject($obj);
         return $html;
     }
@@ -3056,27 +3072,28 @@ class BimpComm extends BimpDolObject
     }
 
     // Actions:
-    
-    public function actionReleverFacturation($data, &$success) {
+
+    public function actionReleverFacturation($data, &$success)
+    {
         global $langs;
         BimpTools::loadDolClass('societe');
         $societe = new Societe($this->db->db);
         $societe->fetch($this->getData('fk_soc'));
         $societe->borne_debut = $data['date_debut'];
         $societe->borne_fin = $data['date_fin'];
-        if($societe->generateDocument('invoiceStatement', $langs) > 0) {
+        if ($societe->generateDocument('invoiceStatement', $langs) > 0) {
             $success = "Relevé de facturation généré avec succès";
         } else {
             $errors = "Echec de la génération du relevé de facturation";
         }
-        $callback = "window.open('".DOL_URL_ROOT."/document.php?modulepart=company&file=".$societe->id."%2FRelevé_facturation.pdf&entity=1', '_blank');";
+        $callback = "window.open('" . DOL_URL_ROOT . "/document.php?modulepart=company&file=" . $societe->id . "%2FRelevé_facturation.pdf&entity=1', '_blank');";
         return [
             'success_callback' => $callback,
-            'errors' => $errors,
-            'warnings' => $warnings
+            'errors'           => $errors,
+            'warnings'         => $warnings
         ];
     }
-    
+
     public function actionValidate($data, &$success)
     {
         $errors = array();
@@ -3362,7 +3379,7 @@ class BimpComm extends BimpDolObject
             $filename_list = array();
             $mimetype_list = array();
             $mimefilename_list = array();
-            
+
             if (isset($data['join_files']) && is_array($data['join_files'])) {
                 foreach ($data['join_files'] as $id_file) {
                     $file = BimpCache::getBimpObjectInstance('bimpcore', 'BimpFile', (int) $id_file);
@@ -3578,14 +3595,14 @@ class BimpComm extends BimpDolObject
 
     public function validate()
     {
-        if ($this->field_exists('zone_vente') && $this->dol_field_exists('zone_vente')) {
+        if (static::$use_zone_vente_for_tva && $this->dol_field_exists('zone_vente')) {
             $zone = self::BC_ZONE_FR;
 
-            if ((int) $this->getData('fk_soc') !== (int) $this->getInitData('fk_soc')) {
+            if (in_array($this->object_name, array('Bimp_CommandeFourn', 'Bimp_FactureFourn')) && (int) $this->getData('fk_soc') !== (int) $this->getInitData('fk_soc')) {
                 $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', (int) $this->getData('fk_soc'));
                 if (BimpObject::objectLoaded($soc)) {
-//                    $zone = $this->getZoneByCountry((int) $soc->getData('fk_pays'));
-//                    $this->set('zone_vente', $zone);
+                    $zone = $this->getZoneByCountry($soc);
+                    $this->set('zone_vente', $zone);
                 }
             }
         }
@@ -3632,42 +3649,35 @@ class BimpComm extends BimpDolObject
                 $this->set('remise_globale', 0);
             }
         }
-        if ($this->field_exists('zone_vente')) {
-            $client = $this->getInstance('bimpcore', 'Bimp_Societe', BimpTools::getValue('fk_soc'));
-            if ($client->isLoaded()) {
-                $this->set('zone_vente', $this->getZoneByCountry($client));
-            }
-        }
 
         $errors = parent::create($warnings, $force_create);
-        
-        
+
+
         switch ($this->object_name) {
             case 'Bimp_Propal':
             case 'Bimp_Facture':
             case 'Bimp_Commande':
-            // Billing2
-            $contacts_suivi = $this->dol_object->liste_contact(-1, 'external', 0, 'BILLING2');
+                // Billing2
+                $contacts_suivi = $this->dol_object->liste_contact(-1, 'external', 0, 'BILLING2');
 
-            if (count($contacts_suivi) == 0) {
-                // Get id of the default contact
-                global $db;
-                $id_client = $this->getAddContactIdClient();
-                if($id_client > 0){
-                    $soc = new Societe($db);
-                    $soc->fetch_optionals($id_client);
-                    $contact_default = (int) $soc->array_options['options_contact_default'];
+                if (count($contacts_suivi) == 0) {
+                    // Get id of the default contact
+                    global $db;
+                    $id_client = $this->getAddContactIdClient();
+                    if ($id_client > 0) {
+                        $soc = new Societe($db);
+                        $soc->fetch_optionals($id_client);
+                        $contact_default = (int) $soc->array_options['options_contact_default'];
 
-                    if (!count($errors) && $contact_default > 0) {
-                        if ($this->dol_object->add_contact($contact_default, 'BILLING2', 'external') <= 0) 
-                            $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'ajout du contact');
+                        if (!count($errors) && $contact_default > 0) {
+                            if ($this->dol_object->add_contact($contact_default, 'BILLING2', 'external') <= 0)
+                                $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'ajout du contact');
+                        }
                     }
                 }
-
-            }
-            break;
+                break;
         }
-        
+
 
 
         if (!count($errors)) {
@@ -3687,17 +3697,16 @@ class BimpComm extends BimpDolObject
                 }
             }
         }
+
         $this->hydrateFromDolObject();
-
-
 
         //ajout des exterafileds du parent qui ne sont pas envoyé   
         if (!count($errors) && $origin_object && isset($origin_object->dol_object)) {
             $update = false;
             foreach ($origin_object->dol_object->array_options as $options_key => $value) {
-                if (!isset($this->data[$options_key]))
-                    ;
-                $options_key = str_replace("options_", "", $options_key);
+                if (!isset($this->data[$options_key])) {
+                    $options_key = str_replace("options_", "", $options_key);
+                }
 
                 if (isset($this->data[$options_key]) && !BimpTools::isSubmit($options_key)) {
                     $update = true;
@@ -3714,15 +3723,18 @@ class BimpComm extends BimpDolObject
 
     public function update(&$warnings = array(), $force_update = false)
     {
-        $init_zone = (int) $this->getInitData('zone_vente');
+        $init_zone = '';
+        if ($this->dol_field_exists('zone_vente')) {
+            $init_zone = (int) $this->getInitData('zone_vente');
+        }
 
         $errors = parent::update($warnings, $force_update);
 
         if (!count($errors)) {
-            if ($this->areLinesEditable()) {
+            if (static::$use_zone_vente_for_tva && $init_zone && $this->areLinesEditable()) {
                 $cur_zone = (int) $this->getData('zone_vente');
 
-                if ($cur_zone !== $init_zone && $cur_zone === self::BC_ZONE_HORS_UE) {
+                if ($cur_zone !== $init_zone && in_array($cur_zone, array(self::BC_ZONE_HORS_UE, self::BC_ZONE_UE_SANS_TVA))) {
                     $lines_errors = $this->removeLinesTvaTx();
                     if (count($lines_errors)) {
                         $warnings[] = BimpTools::getMsgFromArray($lines_errors, 'Des erreurs sont survenues lors de la suppression des taux de TVA');

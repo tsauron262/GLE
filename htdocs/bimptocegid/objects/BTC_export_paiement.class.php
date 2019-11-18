@@ -17,7 +17,6 @@ class BTC_export_paiement extends BTC_export {
             $compte_general_411 = '41100000';
 
             $facture = $this->getInstance('bimpcommercial', 'Bimp_Facture', $transaction->fk_facture);
-            if ($facture->getData('ignore_compta') != 1) {
                 $bc_paiement = $this->getInstance('bimpcaisse', 'BC_Paiement');
 
                 if ($bc_paiement->find(['id_paiement' => $paiement->id])) {
@@ -143,7 +142,7 @@ class BTC_export_paiement extends BTC_export {
                     'date_reglement' => [$date->format('dmY'), 8],
                     'sens' => [$this->get_sens($transaction->amount, 'paiement'), 1],
                     'montant' => [abs(round($transaction->amount, 2)), 20, true],
-                    'type_ecriture' => ['N', 1],
+                    'type_ecriture' => [$this->type_ecriture, 1],
                     'numero_piece' => [$numero_unique, 8, true],
                     'devise' => ['EUR', 3],
                     'taux_dev' => ['1', 10, true],
@@ -196,22 +195,10 @@ class BTC_export_paiement extends BTC_export {
                 $structure['lettrage'] = ['-XAL', 4];
                 $ecritures .= $this->struct($structure);
 
-                // Gestions des erreurs
-                if (!$compte_bancaire) {
-                    return -1;
-                }
-                if (!$compte_g) {
-                    return -2;
-                }
+                $this->write_tra($ecritures, $this->create_daily_file('paiement'));
 
-                if ($this->write_tra($ecritures, $this->create_daily_file('paiement'))) {
-                    $paiement->updateField('exported', self::RETURNED_STATUS_OK);
-                    return 1;
-                } else {
-                    return -3;
-                }
-            }
         }
+        $paiement->updateField('exported', self::RETURNED_STATUS_OK);
     }
 
 }

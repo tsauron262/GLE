@@ -159,8 +159,7 @@ fields:
         label: Mode de règlement
         type: int
         dol_extra_field: 1
-        default_value: 
-            callback: getModeReglementClient
+        default_value: 3
         values:
             array: mode_reglement
 
@@ -210,8 +209,6 @@ fields_tables:
                   callback: getContratSource
               edit: 0
             - field: objet_contrat
-              edit: 0
-            - field: datec
               edit: 0
             - field: date_contrat
               edit: 0
@@ -314,6 +311,12 @@ forms:
               edit: 0
               show: 0
             - field: objet_contrat
+#            - custom: 1
+#              label: Site du contrat
+#              input_name: site_contrat
+#              input:
+#                  type: text
+#              required: 1
             - field: fk_soc
             - field: date_start
             - field: duree_mois

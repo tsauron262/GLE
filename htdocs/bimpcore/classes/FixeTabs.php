@@ -52,7 +52,7 @@ class FixeTabs
     public function displayHead($echo = true)
     {
         $html =  '<link type="text/css" rel="stylesheet" href="' . DOL_URL_ROOT . '/bimpcore/views/css/fixeTabs.css"/>';
-        $html .= '<script type="text/javascript" src="' . DOL_URL_ROOT . '/bimpcore/views/js/fixeTabs.js"></script>';
+        $html .= '<script type="text/javascript" src="' . DOL_URL_ROOT . '/bimpcore/views/js/fixeTabs.js?gg=kk"></script>';
         foreach($this->objs as $obj)
             $html .= $obj->displayHead();
         

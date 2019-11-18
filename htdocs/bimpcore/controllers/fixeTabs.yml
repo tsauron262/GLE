@@ -1,6 +1,6 @@
 bootstrap: 1
 js:
-    - /bimpcore/views/js/fixeTabs.js
+    - /bimpcore/views/js/fixeTabs.js?ff=kk
     - /bimpcore/views/js/BimpTimer.js
 css:
     - /bimpcore/views/css/fixeTabs.css

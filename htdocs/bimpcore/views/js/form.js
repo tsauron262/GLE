@@ -1660,6 +1660,8 @@ function loadSearchObjectResults($input, idx) {
                     display_results = false;
                 } else if ($.isOk($input.findParentByClass('bimp_filter_input_container'))) {
                     display_results = false;
+                } else if ($.isOk($input.findParentByClass('singleLineForm'))) {
+                    display_results = false;
                 } else if (!parseInt($input.data('display_results'))) {
                     display_results = false;
                 }

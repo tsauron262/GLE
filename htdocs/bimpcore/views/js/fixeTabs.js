@@ -9,7 +9,7 @@ function reloadFixeTabs(iterate, reload_fixe_tabs_delay) {
     }
  
     if (!reload_fixe_tabs_delay) {
-        reload_fixe_tabs_delay = 1000;
+        reload_fixe_tabs_delay = 10000;
     }
 //    if (reload_fixe_tabs_hold) {
 //        setTimeout(function () {

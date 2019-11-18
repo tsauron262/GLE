@@ -472,16 +472,51 @@ fields:
         label: Date Création
         
 forms: 
-    lightFourn:
-        extends: light
+    # Utiliser plutôt "default" que "card" pour le formulaire principal 
+    # Important car tout objet doit avoir un formulaire par défaut s'il est éditable.
+    default: 
         rows:
-            mailValid:
-              custom: 1
-              label: Demande de validation
-              input_name: mailValid
-              input: 
-                  type: toggle
-                  
+            - field: ref
+            - field: label
+            - field: description
+            - field: fk_product_type
+            - field: type2
+            - field: barcode
+            - field: customcode
+            - field: accountancy_code_buy
+            - field: accountancy_code_sell
+            - field: price
+            - field: tva_tx
+            - field: deee
+            - field: rpcp
+            - field: crt
+            - field: gamme
+            - field: categorie
+            - field: collection
+            - field: nature
+            - field: famille
+            - field: note
+            - field: fk_country
+            - field: url
+            - field: seuil_stock_alerte
+            - field: desiredstock
+            # Measure
+#            - field: weight
+#            - field: weight_units
+#            - field: length
+#            - field: length_units
+#            - field: width
+#            - field: width_units
+#            - field: height
+#            - field: height_units
+#            - field: surface
+#            - field: surface_units
+#            - field: volume
+#            - field: volume_units
+
+    card:
+        extends: default
+        
     light: 
         force_edit: 1
         rows: 
@@ -514,6 +549,16 @@ forms:
             - field: serialisable
             - field: note
             - field: zone_pr
+            
+    lightFourn:
+        extends: light
+        rows:
+            mailValid:
+              custom: 1
+              label: Demande de validation
+              input_name: mailValid
+              input: 
+                  type: toggle
             
     etiquettes: 
         title: Générer des etiquettes
@@ -557,57 +602,7 @@ forms:
               content: 
                   callback: renderMergeKeptProductInput
               depends_on: id_merged_product                  
-              
-    card:
-        rows:
-            # Infos
-            - field: ref
-            - field: label
-            - field: description
-            - field: fk_product_type
-            - field: type2
-            - field: barcode
-            - field: customcode
-            - field: accountancy_code_buy
-            - field: accountancy_code_sell
-            - field: note
-            - field: fk_default_warehouse
-              display: nom_url
-            - field: deee
-            - field: cur_pa_ht
-            # Infos +
-            - field: url
-#            - field: stock
-            - field: fk_country
-            - field: product_categories
-            - field: localtax1_tx
-            - field: localtax1_type
-            - field: localtax2_tx
-            - field: localtax2_type
-#            - field: ref_constructeur
-            - field: crt
-            - field: rpcp
-            - field: price
-            - field: seuil_stock_alerte
-            - field: desiredstock
-            # Measure
-            - field: weight
-            - field: weight_units
-            - field: length
-            - field: length_units
-            - field: width
-            - field: width_units
-            - field: height
-            - field: height_units
-            - field: surface
-            - field: surface_units
-            - field: volume
-            - field: volume_units
-            - field: gamme
-            - field: categorie
-            - field: collection
-            - field: nature
-            - field: famille
+            
         
 fields_tables: 
     infos: 

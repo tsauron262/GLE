@@ -197,10 +197,10 @@ class BTC_export_facture extends BTC_export {
                             if($produit->getData('ref') == 'REMISE' || $produit->getData('ref') == 'TEX' || $produit->getData('ref') == 'REMISE-01' || $produit->getData('ref') == 'REMISECRT') {
                                 $is_remise = true;
                             }
-                            if(!$remise) {
-                                $lignes[$compte_general_tva]['HT'] += $line->multicurrency_total_tva;
-                                $total_ht_lignes += $line->multicurrency_total_tva;
-                            }
+                        }
+                        if(!$remise) {
+                            $lignes[$compte_general_tva]['HT'] += $line->multicurrency_total_tva;
+                            $total_ht_lignes += $line->multicurrency_total_tva;
                         }
                         
                     } elseif($use_tva && $line->tva_tx == 0) {

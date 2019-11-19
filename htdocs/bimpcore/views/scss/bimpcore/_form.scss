@@ -115,6 +115,8 @@
         .select2 {
             min-width: 160px;
         }
+
+
     }
 }
 
@@ -374,6 +376,7 @@ select.switch {
         }
     }
 }
+
 .search_input_results,
 .input_choices {
     position: absolute;
@@ -388,6 +391,12 @@ select.switch {
         display: block;
         width: 100%;
         text-align: left;
+    }
+}
+
+.search_object_input {
+    .input_choices {
+        min-width: 320px;
     }
 }
 .search_input_selected_label {
@@ -534,7 +543,6 @@ select.switch {
     margin: 10px 0;
 }
 
-
 .texarea_values {
     padding-left: 10px;
     max-height: 60px;
@@ -587,6 +595,26 @@ input[type=text].large_input {
     }
 }
 
+.search_object_input_container {
+    .search_object_input {
+        & > .search_icon {
+            margin-left: 6px;
+        }
+        & > .spinner {
+            opacity: 0;
+
+            i {
+                font-size: 16px;
+                color: $info;
+            }
+        } 
+    }
+
+    .search_object_result {
+        margin-top: 15px;
+    }
+}
+
 /*Check lists:*/ 
 
 .check_list_container {
@@ -597,6 +625,7 @@ input[type=text].large_input {
     & > .check_list_search_input {
         padding: 5px;
         background-color: #DCDCDC;
+        max-width: 320px;
 
         & > span.searchIcon {
             display: inline-block;
@@ -701,6 +730,7 @@ input[type=text].large_input {
 
     border-left: 1px dotted #B4B4B4;
 }
+
 /*Free Forms*/
 
 .freeForm {
@@ -834,6 +864,20 @@ input[type=text].large_input {
             width: 250px !important;
             max-width: 100%!important;
         }
+
+        .search_object_input_container {
+            display: inline-block;
+
+            input {
+                min-width: 220px;
+            }
+
+            .search_icon,
+            .search_object_result,
+            .no_item_selected {
+                display: none!important;
+            }
+        }
     }
 
     .inputContainer {
@@ -845,4 +889,22 @@ input[type=text].large_input {
             display: none;
         }
     }
+}
+
+/*Eléments masqués*/
+
+.searchInputContainer,
+.bimp_filter_input_container {
+    .search_object_input_container {
+        .search_icon,
+        .spinner,
+        .search_object_result,
+        .no_item_selected {
+            display: none!important;
+        }
+    }
+
+    .check_list_search_input {
+        display: none!important;
+    }   
 }

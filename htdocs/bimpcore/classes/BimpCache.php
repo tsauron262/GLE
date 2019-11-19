@@ -1241,6 +1241,22 @@ class BimpCache
         return self::$cache[$cache_key];
     }
 
+    public static function getProductsTagsByTypeArray($type, $include_empty = true)
+    {
+        $cache_key = 'products_tags_' . $type;
+
+        if (!isset(self::$cache[$cache_key])) {
+            $rows = self::getBdb()->getRows('bimp_c_values8sens', '`type` = \'' . $type . '\'', null, 'array', array('id', 'label'), 'label', 'ASC');
+            if (is_array($rows)) {
+                foreach ($rows as $r) {
+                    self::$cache[$cache_key][$r['id']] = $r['label'];
+                }
+            }
+        }
+
+        return self::getCacheArray($cache_key, $include_empty);
+    }
+
     // Emails: 
 
     public static function getEmailTemplatesArray($email_type, $include_empty = false)
@@ -1727,6 +1743,4 @@ class BimpCache
 
         return self::$cache[$cache_key];
     }
-    
-    
 }

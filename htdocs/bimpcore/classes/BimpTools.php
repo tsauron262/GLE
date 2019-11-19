@@ -695,14 +695,14 @@ class BimpTools
         } else {
             $num = 1;
         }
-        
-        if($numCaractere > 0){
+
+        if ($numCaractere > 0) {
             $diff = $numCaractere - strlen($num);
-            if($diff < 0)
+            if ($diff < 0)
                 die("impossible trop de caractére BimpTools::GetNextRef");
-            else{
-                for($i=0;$i<$diff;$i++){
-                    $num = "0".$num;
+            else {
+                for ($i = 0; $i < $diff; $i++) {
+                    $num = "0" . $num;
                 }
             }
         }
@@ -1054,8 +1054,9 @@ class BimpTools
                 $sql .= '`' . $field . '`';
             }
 
-            if (isset($filter['IN']))
+            if (isset($filter['IN'])) {
                 $filter['in'] = $filter['IN'];
+            }
 
             if (is_array($filter)) {
                 if (isset($filter['min']) || isset($filter['max'])) {

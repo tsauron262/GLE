@@ -500,58 +500,179 @@ class BimpObject extends BimpCache
         return array();
     }
 
-    public function getSearchData($search_name = 'default')
+    public function getSearchParams($search_name = 'default')
     {
+        $fields_search = array();
+        $fields_return = array();
+        $joins = array();
+        $filters = array();
         $syntaxe = '';
-        $has_extrafields = false;
-        $fields_seach = array($this->getPrimary());
-        $fields_return_label = array();
-        $ref_prop = $this->getRefProperty();
+        $primary = $this->getPrimary();
 
-        $n = 0;
-        if ($ref_prop) {
-            if ($this->isDolObject() && (int) $this->getConf('fields/' . $ref_prop . '/dol_extra_field', 0, false, 'bool')) {
-                if (preg_match('/^ef_(.*)$/', $ref_prop, $matches)) {
-                    $ref_prop = $matches[1];
-                }
-                $ref_prop = 'ef.' . $ref_prop;
-                $has_extrafields = true;
-            } else {
-                $ref_prop = $ref_prop;
-            }
-            $n++;
-            $fields_seach[] = $ref_prop;
-            $fields_return_label[] = $ref_prop;
-            $syntaxe .= '<label_' . $n . '>';
+        if ($search_name === '') {
+            $search_name = 'default';
         }
 
-        $name_prop = $this->getNameProperty();
-        if ($name_prop) {
-            if ($this->isDolObject() && (int) $this->getConf('fields/' . $name_prop . '/dol_extra_field', 0, false, 'bool')) {
-                if (preg_match('/^ef_(.*)$/', $name_prop, $matches)) {
-                    $name_prop = $matches[1];
+        $path = 'searches/' . $search_name;
+        if ($this->config->isDefined($path)) {
+            $fields_search = $this->getConf($path . '/fields_search', array(), true, 'array');
+            $fields_return = $this->getConf($path . '/fields_return', array(), true, 'array');
+            $syntaxe = $this->getConf($path . '/label_syntaxe', '');
+            $joins = $this->config->getCompiledParams($path . '/joins');
+            $filters = $this->config->getCompiledParams($path . '/filters');
+
+            foreach ($fields_search as $key => $field) {
+                if (!preg_match('/^(.+)\.(.+)/', $field)) {
+                    $fields_search[$key] = 'a.' . $field;
                 }
-                $name_prop = 'ef.' . $name_prop;
-                $has_extrafields = true;
-            }
-            $n++;
-            $fields_seach[] = $name_prop;
-            $fields_return_label[] = $name_prop;
-
-            if ($syntaxe) {
-                $syntaxe .= ' - ';
             }
 
-            $syntaxe .= '<label_' . $n . '>';
+            foreach ($fields_return as $key => $field) {
+                if (!preg_match('/^(.+)\.(.+)/', $field)) {
+                    $fields_return[$key] = 'a.' . $field;
+                }
+            }
+
+            if (!in_array($fields_return, 'a.' . $primary)) {
+                $fields_return[] = 'a.' . $primary;
+            }
+        } else {
+            $has_extrafields = false;
+            $fields_search[] = 'a.' . $primary;
+            $fields_return[] = 'a.' . $primary;
+            $ref_prop = $this->getRefProperty();
+
+            if ($ref_prop) {
+                if ($this->isDolObject() && (int) $this->getConf('fields/' . $ref_prop . '/dol_extra_field', 0, false, 'bool')) {
+                    if (preg_match('/^ef_(.*)$/', $ref_prop, $matches)) {
+                        $ref_prop = $matches[1];
+                    }
+                    $ref_prop = 'ef.' . $ref_prop;
+                    $has_extrafields = true;
+                } else {
+                    $ref_prop = 'a.' . $ref_prop;
+                }
+                $fields_search[] = $ref_prop;
+                $fields_return[] = $ref_prop;
+                $syntaxe .= '<' . $ref_prop . '>';
+            }
+
+            $name_prop = $this->getNameProperty();
+            if ($name_prop) {
+                if ($this->isDolObject() && (int) $this->getConf('fields/' . $name_prop . '/dol_extra_field', 0, false, 'bool')) {
+                    if (preg_match('/^ef_(.*)$/', $name_prop, $matches)) {
+                        $name_prop = $matches[1];
+                    }
+                    $name_prop = 'ef.' . $name_prop;
+                    $has_extrafields = true;
+                } else {
+                    $name_prop = 'a.' . $name_prop;
+                }
+                $fields_search[] = $name_prop;
+                $fields_return[] = $name_prop;
+
+                $syntaxe .= ($syntaxe ? ' - ' : '') . '<' . $name_prop . '>';
+            }
+
+            if ($has_extrafields) {
+                $joins['ef'] = array(
+                    'alias' => 'ef',
+                    'table' => $this->getTable() . '_extrafields',
+                    'on'    => 'a.rowid = ef.fk_object'
+                );
+            }
+
+            $filters = $this->getSearchListFilters($joins);
         }
 
         return array(
-            'fields_search'      => $fields_seach,
-            'field_return_label' => $fields_return_label,
-            'label_syntaxe'      => $syntaxe,
-            'filters'            => $this->getSearchListFilters(),
-            'has_extrafields'    => $has_extrafields
+            'fields_search' => $fields_search,
+            'fields_return' => $fields_return,
+            'filters'       => $filters,
+            'joins'         => $joins,
+            'label_syntaxe' => $syntaxe
         );
+    }
+
+    public function getSearchResults($search_name, $search_value, $options = array())
+    {
+        $results = array();
+
+        if ((string) $search_value) {
+            $search_value = $this->db->db->escape(strtolower($search_value));
+
+            $params = $this->getSearchParams($search_name);
+
+            $card = (isset($options['card']) ? $options['card'] : '');
+            $filters = (isset($params['filters']) && is_array($params['filters']) ? $params['filters'] : array());
+            $joins = (isset($params['joins']) && is_array($params['joins']) ? $params['joins'] : array());
+            $primary = $this->getPrimary();
+
+            $search_filter = '';
+
+            foreach ($params['fields_search'] as $field) {
+                $and_sql = '';
+                foreach (explode(' ', $search_value) as $search) {
+                    $and_sql .= ($and_sql ? ' AND ' : '') . 'LOWER(' . $field . ') LIKE \'%' . $search . '%\'';
+                }
+
+                if ($and_sql) {
+                    $search_filter .= ($search_filter ? ' OR ' : '') . '(' . $and_sql . ')';
+                }
+            }
+
+            if ($search_filter) {
+                $filters['search_custom'] = array(
+                    'custom' => '(' . $search_filter . ')'
+                );
+            }
+
+            $max_results = (isset($options['max_results']) ? (int) $options['max_results'] : 15);
+
+            $rows = $this->getList($filters, $max_results, 1, 'id', 'desc', 'array', $params['fields_return'], $joins);
+
+            if (is_array($rows)) {
+                foreach ($rows as $r) {
+                    $label = $params['label_syntaxe'];
+                    $card_html = '';
+
+                    foreach ($params['fields_return'] as $field) {
+                        $field_name = $field;
+                        if (preg_match('/^.+\.(.+)$/', $field, $matches)) {
+                            $field_name = $matches[1];
+                        }
+                        if ($params['label_syntaxe']) {
+                            if (isset($r[$field_name])) {
+                                $label = str_replace('<' . $field . '>', $r[$field_name], $label);
+                            } else {
+                                $label = str_replace('<' . $field . '>', '', $label);
+                            }
+                        } else {
+                            if (isset($r[$field_name])) {
+                                $label .= ($label ? ' - ' : '') . $r[$field_name];
+                            }
+                        }
+                    }
+
+                    if ($card) {
+                        $instance = BimpCache::getBimpObjectInstance($this->module, $this->object_name, (int) $r[$primary]);
+                        if (BimpObject::objectLoaded($instance)) {
+                            $bc_card = new BC_Card($instance, null, $card);
+                            $bc_card->setParam('view_btn', 0);
+                            $card_html = addslashes(htmlentities($bc_card->renderHtml()));
+                        }
+                    }
+
+                    $results[(int) $r[$primary]] = array(
+                        'id'    => (int) $r[$primary],
+                        'label' => $label,
+                        'card'  => $card_html
+                    );
+                }
+            }
+        }
+
+        return $results;
     }
 
     public function getListPageUrl($list_name = 'default')
@@ -1312,7 +1433,7 @@ class BimpObject extends BimpCache
 
         if (!count($errors)) {
             if (!$this->canSetAction($action)) {
-                $errors[] = 'Vous n\'avez pas la permission d\'effectuer cette action ('.$action.')';
+                $errors[] = 'Vous n\'avez pas la permission d\'effectuer cette action (' . $action . ')';
             } elseif (!$this->isActionAllowed($action, $errors)) {
                 $errors[] = BimpTools::getMsgFromArray($errors, 'Action impossible');
             }
@@ -1687,8 +1808,8 @@ class BimpObject extends BimpCache
     public function checkObject($context = '', $field = '')
     {
         // Attention au risque de boucle infinie lors de la redéfinition de cette fonction en cas 
-        // de déclenchement de $this->update(), $this->create(), $this->updateField() ou $this->fetch(). 
-        // Utiliser $context pour connaître l'origine de l'appel de cette fonction (create, update, updateField, fetch (via BimpCache::getBimpObjectInstance()). 
+        // d'appel à $this->update(), $this->create(), $this->updateField() ou $this->fetch(). 
+        // Utiliser $context pour connaître l'origine de l'appel à cette fonction (create, update, updateField, fetch (uniquement via BimpCache::getBimpObjectInstance())). 
     }
 
     public function checkFieldValueType($field, &$value)
@@ -5228,26 +5349,9 @@ class BimpObject extends BimpCache
         }
     }
 
-    public function renderSearchInput($input_name, $value = null)
+    public function renderSearchInput($input_name, $value = null, $options = array())
     {
-        $search_data = $this->getSearchData();
-
-        $params = array(
-            'table'              => $this->getTable(),
-            'field_return_label' => $this->getNameProperty(),
-            'field_return_value' => $this->getPrimary(),
-            'fields_search'      => $search_data['fields_search'],
-            'field_return_label' => $search_data['field_return_label'],
-            'label_syntaxe'      => $search_data['label_syntaxe'],
-            'filters'            => $search_data['filters']
-        );
-
-        if ($search_data['has_extrafields']) {
-            $params['join'] = $this->getTable() . '_extrafields ef';
-            $params['join_on'] = 'a.' . $this->getPrimary() . ' = ef.fk_object';
-        }
-
-        $html = BimpInput::renderSearchListInput($input_name, $params, $value, 'default');
+        $html = BimpInput::renderSearchListInput($input_name, $options, $value, 'default');
         $html .= '<p class="inputHelp">Rechercher ' . $this->getLabel('a') . '</p>';
         return $html;
     }
@@ -6635,7 +6739,7 @@ class BimpObject extends BimpCache
 
         $timestamp_fin = microtime(true);
         $difference_ms = $timestamp_fin - $timestamp_debut;
-        dol_syslog("File : ".$difference_ms, 3, 0, "_csv");
+        dol_syslog("File : " . $difference_ms, 3, 0, "_csv");
         return array(
             'errors'           => $errors,
             'warnings'         => $warnings,
@@ -6760,11 +6864,11 @@ class BimpObject extends BimpCache
     {
         return str_replace(array(" ", 'EUR', '€'), "", str_replace(".", ",", $price));
     }
-    
-    
-    public static function renderListFileForObject($objT, $with_delete = 0){
+
+    public static function renderListFileForObject($objT, $with_delete = 0)
+    {
         $obj = BimpObject::getBimpObjectInstance('bimpcore', 'BimpFile');
-        $bc_list = new BC_ListTable($obj, 'default', 1, null, 'Liste des fichiers '.$objT->getNomUrl(), 'fas_bars');
+        $bc_list = new BC_ListTable($obj, 'default', 1, null, 'Liste des fichiers ' . $objT->getNomUrl(), 'fas_bars');
 
         $bc_list->addFieldFilterValue('a.parent_object_name', get_class($objT));
         $bc_list->params['add_form_values']['fields']['parent_object_name'] = get_class($objT);
@@ -6772,9 +6876,9 @@ class BimpObject extends BimpCache
         $bc_list->params['add_form_values']['fields']['parent_module'] = $objT->module;
         $bc_list->addFieldFilterValue('a.id_parent', $objT->id);
         $bc_list->params['add_form_values']['fields']['id_parent'] = $objT->id;
-        if(!$with_delete)
+        if (!$with_delete)
             $bc_list->addFieldFilterValue('a.deleted', 0);
-        $bc_list->identifier .= get_class($objT)."-".$objT->id;
+        $bc_list->identifier .= get_class($objT) . "-" . $objT->id;
 
         return $bc_list->renderHtml();
     }

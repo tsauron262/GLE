@@ -96,8 +96,6 @@ fields:
         type: id_object
         object: client
         input: 
-            type: search_societe
-            societe_type: customer
             card: default
         required: 1
         create_form: light

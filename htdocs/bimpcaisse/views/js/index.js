@@ -822,6 +822,7 @@ function saveClient() {
         display_success: false,
         success: function (result, bimpAjax) {
             if (typeof (result.html) !== 'undefined' && result.html) {
+                $('#venteClientFormContainer').find('[name="id_client_search"]').val('');
                 $('#venteClientViewContainer').html(result.html).slideDown(250);
                 bimpAjax.$container.slideUp(250);
             }

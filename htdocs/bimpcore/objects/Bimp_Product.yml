@@ -132,6 +132,13 @@ fields:
             field_name: no_fixe_prices
             show_values: 0
         
+    deee: 
+        label: ecotaxe
+        dol_extra_field: 1
+        type: money
+        decimals: 4
+        default_value: 4
+        
     pmp: 
         label: Prix d'achat moyen pondéré
         type: money
@@ -342,22 +349,7 @@ fields:
         label: Stock physique
         type: int
         extra: 1
-        
-    doli_search_prod:
-        label: Produit
-        input: 
-            type: search_product
-            filter_type: product
-            help: Entrez la référence ou l'id du produit à faire fusionner dans celui-ci. (celui que vous voulez supprimer)
-        extra: 1
-        
-    product_categories: 
-        label: Catégories produit
-        extra: 1
-        type: items_list
-        items_data_type: id_object
-        object: category
-        
+                        
     localtax1_tx:
         label: Taxe locale 1
         type: money
@@ -470,6 +462,10 @@ fields:
     datec:
         type: date
         label: Date Création
+        
+    cto: 
+        label: CTO
+        dol_extra_field: 1
         
 forms: 
     # Utiliser plutôt "default" que "card" pour le formulaire principal 
@@ -602,7 +598,6 @@ forms:
               content: 
                   callback: renderMergeKeptProductInput
               depends_on: id_merged_product                  
-            
         
 fields_tables: 
     infos: 
@@ -1030,10 +1025,28 @@ cards:
         view_btn: 1
         fields: 
             - field: ref
+            - field: fk_product_type
+            - field: price
+            - field: tva_tx
+            
+    detailed: 
+        view_btn: 1
+        fields: 
+            - field: ref
+            - field: fk_product_type
             - field: barcode
+            - field: price
+            - field: tva_tx
+            - field: serialisable
+            - field: validate
             
 searches:
     default: 
         fields_search: 
-            - label
-            - ref
+            - a.label
+            - a.ref
+            - a.barcode
+        fields_return: 
+            - a.label
+            - a.ref
+        label_syntaxe: '<a.ref> - <a.label>'

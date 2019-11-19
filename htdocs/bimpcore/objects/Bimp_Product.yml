@@ -1050,3 +1050,4 @@ searches:
             - a.label
             - a.ref
         label_syntaxe: '<a.ref> - <a.label>'
+#        search_mode: or

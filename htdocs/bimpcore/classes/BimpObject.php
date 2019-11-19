@@ -518,6 +518,7 @@ class BimpObject extends BimpCache
             $fields_search = $this->getConf($path . '/fields_search', array(), true, 'array');
             $fields_return = $this->getConf($path . '/fields_return', array(), true, 'array');
             $syntaxe = $this->getConf($path . '/label_syntaxe', '');
+            $search_mode = $this->getConf($path . '/search_mode', 'or');
             $joins = $this->config->getCompiledParams($path . '/joins');
             $filters = $this->config->getCompiledParams($path . '/filters');
 
@@ -583,6 +584,7 @@ class BimpObject extends BimpCache
             }
 
             $filters = $this->getSearchListFilters($joins);
+            $search_mode = 'or';
         }
 
         return array(
@@ -590,7 +592,8 @@ class BimpObject extends BimpCache
             'fields_return' => $fields_return,
             'filters'       => $filters,
             'joins'         => $joins,
-            'label_syntaxe' => $syntaxe
+            'label_syntaxe' => $syntaxe,
+            'search_mode'   => $search_mode
         );
     }
 
@@ -606,18 +609,20 @@ class BimpObject extends BimpCache
             $card = (isset($options['card']) ? $options['card'] : '');
             $filters = (isset($params['filters']) && is_array($params['filters']) ? $params['filters'] : array());
             $joins = (isset($params['joins']) && is_array($params['joins']) ? $params['joins'] : array());
+            $search_mode = (isset($params['search_mode']) ? $params['search_mode'] : 'or');
             $primary = $this->getPrimary();
 
             $search_filter = '';
 
             foreach ($params['fields_search'] as $field) {
-                $and_sql = '';
+                $fields_sql = '';
+                
                 foreach (explode(' ', $search_value) as $search) {
-                    $and_sql .= ($and_sql ? ' AND ' : '') . 'LOWER(' . $field . ') LIKE \'%' . $search . '%\'';
+                    $fields_sql .= ($fields_sql ? ' AND ' : '') . 'LOWER(' . $field . ') LIKE \'%' . $search . '%\'';
                 }
 
-                if ($and_sql) {
-                    $search_filter .= ($search_filter ? ' OR ' : '') . '(' . $and_sql . ')';
+                if ($fields_sql) {
+                    $search_filter .= ($search_filter ? ' OR ' : '') . '(' . $fields_sql . ')';
                 }
             }
 

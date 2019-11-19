@@ -518,7 +518,6 @@ class BimpObject extends BimpCache
             $fields_search = $this->getConf($path . '/fields_search', array(), true, 'array');
             $fields_return = $this->getConf($path . '/fields_return', array(), true, 'array');
             $syntaxe = $this->getConf($path . '/label_syntaxe', '');
-            $search_mode = $this->getConf($path . '/search_mode', 'or');
             $joins = $this->config->getCompiledParams($path . '/joins');
             $filters = $this->config->getCompiledParams($path . '/filters');
 
@@ -584,7 +583,6 @@ class BimpObject extends BimpCache
             }
 
             $filters = $this->getSearchListFilters($joins);
-            $search_mode = 'or';
         }
 
         return array(
@@ -592,8 +590,7 @@ class BimpObject extends BimpCache
             'fields_return' => $fields_return,
             'filters'       => $filters,
             'joins'         => $joins,
-            'label_syntaxe' => $syntaxe,
-            'search_mode'   => $search_mode
+            'label_syntaxe' => $syntaxe
         );
     }
 
@@ -609,20 +606,19 @@ class BimpObject extends BimpCache
             $card = (isset($options['card']) ? $options['card'] : '');
             $filters = (isset($params['filters']) && is_array($params['filters']) ? $params['filters'] : array());
             $joins = (isset($params['joins']) && is_array($params['joins']) ? $params['joins'] : array());
-            $search_mode = (isset($params['search_mode']) ? $params['search_mode'] : 'or');
             $primary = $this->getPrimary();
 
             $search_filter = '';
 
-            foreach ($params['fields_search'] as $field) {
-                $fields_sql = '';
-                
-                foreach (explode(' ', $search_value) as $search) {
-                    $fields_sql .= ($fields_sql ? ' AND ' : '') . 'LOWER(' . $field . ') LIKE \'%' . $search . '%\'';
+            foreach (explode(' ', $search_value) as $search) {
+                $or_sql = '';
+
+                foreach ($params['fields_search'] as $field) {
+                    $or_sql .= ($or_sql ? ' OR ' : '') . 'LOWER(' . $field . ') LIKE \'%' . $search . '%\'';
                 }
 
-                if ($fields_sql) {
-                    $search_filter .= ($search_filter ? ' OR ' : '') . '(' . $fields_sql . ')';
+                if ($or_sql) {
+                    $search_filter .= ($search_filter ? ' AND ' : '') . '(' . $or_sql . ')';
                 }
             }
 
@@ -632,7 +628,7 @@ class BimpObject extends BimpCache
                 );
             }
 
-            $max_results = (isset($options['max_results']) ? (int) $options['max_results'] : 15);
+            $max_results = (isset($options['max_results']) ? (int) $options['max_results'] : 200);
 
             $rows = $this->getList($filters, $max_results, 1, 'id', 'desc', 'array', $params['fields_return'], $joins);
 
@@ -643,14 +639,24 @@ class BimpObject extends BimpCache
 
                     foreach ($params['fields_return'] as $field) {
                         $field_name = $field;
-                        if (preg_match('/^.+\.(.+)$/', $field, $matches)) {
+                        if (preg_match('/^.* as (.*)$/', $field, $matches)) {
+                            $field_name = $matches[1];
+                        } elseif (preg_match('/^.+\.(.+)$/', $field, $matches)) {
                             $field_name = $matches[1];
                         }
                         if ($params['label_syntaxe']) {
-                            if (isset($r[$field_name])) {
-                                $label = str_replace('<' . $field . '>', $r[$field_name], $label);
-                            } else {
-                                $label = str_replace('<' . $field . '>', '', $label);
+                            if (strpos($label, '<' . $field . '>') !== false) {
+                                if (isset($r[$field_name])) {
+                                    $label = str_replace('<' . $field . '>', $r[$field_name], $label);
+                                } else {
+                                    $label = str_replace('<' . $field . '>', '', $label);
+                                }
+                            } elseif (strpos($label, '<' . $field_name . '>') !== false) {
+                                if (isset($r[$field_name])) {
+                                    $label = str_replace('<' . $field_name . '>', $r[$field_name], $label);
+                                } else {
+                                    $label = str_replace('<' . $field_name . '>', '', $label);
+                                }
                             }
                         } else {
                             if (isset($r[$field_name])) {

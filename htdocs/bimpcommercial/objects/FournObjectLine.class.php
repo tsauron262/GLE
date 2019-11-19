@@ -6,6 +6,7 @@ class FournObjectLine extends ObjectLine
 {
 
     public $ref_supplier = '';
+    public static $product_search_name = 'tobuy';
     public static $product_line_data = array(
         'id_product'     => array('label' => 'Produit / Service', 'type' => 'int', 'required' => 1, 'default' => null),
         'id_fourn_price' => array('label' => 'Prix d\'achat fournisseur', 'type' => 'int', 'required' => 0, 'default' => null),

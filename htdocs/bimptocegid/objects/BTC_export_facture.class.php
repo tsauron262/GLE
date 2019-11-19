@@ -184,7 +184,12 @@ class BTC_export_facture extends BTC_export {
                             $total_ht_lignes += $line->multicurrency_total_ht;
                         }
                         
-                        if(!$is_frais_de_port) {
+                        $is_remise = false;
+                        if($produit->getData('ref') == 'REMISE' || $produit->getData('ref') == 'TEX' || $produit->getData('ref') == 'REMISE-01' || $produit->getData('ref') == 'REMISECRT') {
+                            $is_remise = true;
+                        }
+                        
+                        if(!$is_frais_de_port && !$is_remise) {
                             if($use_d3e){
                                 if(($facture->getData('zone_vente') == 1 && $line->tva_tx > 0) || $facture->getData('zone_vente') != 1){
                                     $lignes[$use_compte_general]['HT'] += $line->multicurrency_total_ht - ($produit->getData('deee') * $line->qty);
@@ -196,33 +201,19 @@ class BTC_export_facture extends BTC_export {
                                     $total_ht_lignes += $line->multicurrency_total_ht;
                                 }
                             }
+                            
+                            if($use_tva && $line->tva_tx > 0) {
+                                $lignes[$compte_general_tva]['HT'] += $line->multicurrency_total_tva;
+                                $total_ht_lignes += $line->multicurrency_total_tva;
+                            } elseif($use_tva && $line->tva_tx == 0) {
+                                $lignes[$compte_general_tva_null]['HT'] += $line->multicurrency_total_ht;
+                                $total_ht_lignes += $line->multicurrency_total_ht;
+                            }
+                            
                         }
                     } else {
                         $lignes[$use_compte_general]['HT'] += $line->multicurrency_total_ht;
                         $total_ht_lignes += $line->multicurrency_total_ht;
-                    }
-                    $is_remise = false;
-                    if($use_tva && $line->tva_tx > 0) {
-                        if(is_object($produit)) {
-                            if($produit->getData('ref') == 'REMISE' || $produit->getData('ref') == 'TEX' || $produit->getData('ref') == 'REMISE-01' || $produit->getData('ref') == 'REMISECRT') {
-                                $is_remise = true;
-                            }
-                        }
-                        if(!$remise) {
-                            $lignes[$compte_general_tva]['HT'] += $line->multicurrency_total_tva;
-                            $total_ht_lignes += $line->multicurrency_total_tva;
-                        }
-                        
-                    } elseif($use_tva && $line->tva_tx == 0) {
-                        if(is_object($produit)) {
-                            if($produit->getData('ref') == 'REMISE' || $produit->getData('ref') == 'TEX' || $produit->getData('ref') == 'REMISE-01' || $produit->getData('ref') == 'REMISECRT') {
-                                $is_remise = true;
-                            }
-                        }
-                        if(!$is_remise) {
-                            $lignes[$compte_general_tva_null]['HT'] += $line->multicurrency_total_ht;
-                            $total_ht_lignes += $line->multicurrency_total_ht;
-                        }
                     }
                 }
             } 

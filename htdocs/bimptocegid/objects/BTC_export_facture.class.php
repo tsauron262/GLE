@@ -183,6 +183,7 @@ class BTC_export_facture extends BTC_export {
                             $lignes[$compte_general_port]['HT'] += $line->multicurrency_total_ht;
                             $total_ht_lignes += $line->multicurrency_total_ht;
                         }
+                        
                         if(!$is_frais_de_port) {
                             if($use_d3e){
                                 if(($facture->getData('zone_vente') == 1 && $line->tva_tx > 0) || $facture->getData('zone_vente') != 1){
@@ -231,8 +232,8 @@ class BTC_export_facture extends BTC_export {
             $lignes[$compte_general_d3e]['HT'] = $d3e;
         }      
 
-        if(round($total_ht_lignes,2) != round($total_ttc_facture,2)) {
-            $montant_ecart = ($total_ht_lignes) - $total_ttc_facture;
+        if(round(($total_ht_lignes), 2) != round($total_ttc_facture,2)) {
+            $montant_ecart = ($total_ht_lignes + $d3e) - $total_ttc_facture;
             $lignes = $this->rectifications_ecarts($lignes, $montant_ecart, 'vente');
         }
         foreach($lignes as $l => $infos) {

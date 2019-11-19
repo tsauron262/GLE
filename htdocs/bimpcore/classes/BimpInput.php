@@ -1103,7 +1103,7 @@ class BimpInput
 
         $search_name = (isset($params['search_name']) ? $params['search_name'] : 'default');
         $card = (isset($params['card']) ? $params['card'] : '');
-        $max_results = (isset($params['max_results']) ? $params['max_results'] : 15);
+        $max_results = (isset($params['max_results']) ? $params['max_results'] : 500);
         $display_results = (isset($params['display_results']) ? (int) $params['display_results'] : 1);
 
         $html .= '<div class="search_object_input_container" data-input_name="' . $input_name . '">';

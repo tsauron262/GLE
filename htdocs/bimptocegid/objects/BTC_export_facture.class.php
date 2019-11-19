@@ -39,7 +39,8 @@ class BTC_export_facture extends BTC_export {
                 $compte_general_service = $this->convertion_to_interco_code(BimpCore::getConf('BIMPTOCEGID_vente_service_fr'), $compte_general_411);
                 $compte_general_tva = BimpCore::getConf('BIMPTOCEGID_vente_tva_fr');
                 $compte_general_d3e = BimpCore::getConf('BIMPTOCEGID_vente_dee_fr');
-                $compte_general_port = $this->convertion_to_interco_code('70850000', $compte_general_411);
+                $compte_general_port = $this->convertion_to_interco_code(BimpCore::getConf('BIMPTOCEGID_frais_de_port_vente_fr'), $compte_general_411);
+                $compte_general_comissions = $this->convertion_to_interco_code(BimpCore::getConf('BIMPTOCEGID_comissions_fr'), $compte_general_411);
                 break;
             case 2: case 4:
                 $use_d3e = false;
@@ -48,12 +49,16 @@ class BTC_export_facture extends BTC_export {
                 $compte_general_service = BimpCore::getConf('BIMPTOCEGID_vente_service_ue');
                 $compte_general_tva = BimpCore::getConf('BIMPTOCEGID_vente_tva_ue');
                 $compte_general_d3e = BimpCore::getConf('BIMPTOCEGID_vente_dee_ue');
+                $compte_general_port = $this->convertion_to_interco_code(BimpCore::getConf('BIMPTOCEGID_frais_de_port_vente_ue'), $compte_general_411);
+                $compte_general_comissions = $this->convertion_to_interco_code(BimpCore::getConf('BIMPTOCEGID_comissions_ue'), $compte_general_411);
                 break;
             case 3:
                 $use_d3e = false;
                 $use_tva = false;
                 $compte_general_produit = BimpCore::getConf('BIMPTOCEGID_vente_produit_ex');
                 $compte_general_service = BimpCore::getConf('BIMPTOCEGID_vente_service_ex');
+                $compte_general_port = $this->convertion_to_interco_code(BimpCore::getConf('BIMPTOCEGID_frais_de_port_vente_ex'), $compte_general_411);
+                $compte_general_comissions = $this->convertion_to_interco_code(BimpCore::getConf('BIMPTOCEGID_comissions_ex'), $compte_general_411);
                 break;
         }
         
@@ -148,9 +153,6 @@ class BTC_export_facture extends BTC_export {
             if ($facture->dol_object->lines[$i]->desc == "Acompte" && $facture->dol_object->lines[$i]->multicurrency_total_ht == $facture->getData('total')) {
                 $ignore = true;
             } 
-//            elseif($facture->dol_object->lines[$i]->desc == "Garantie" && $facture->dol_object->lines[$i]->multicurrency_total_ht == $facture->getData('total')) {
-//                $ignore = true;
-//            }
         }
         if($ignore) {
             $facture->updateField('ignore_compta', 1);
@@ -175,16 +177,23 @@ class BTC_export_facture extends BTC_export {
                         $ecritures = $this->struct($structure);
                     }
                     if($line->fk_product){
-                        if($use_d3e){
-                            if(($facture->getData('zone_vente') == 1 && $line->tva_tx > 0) || $facture->getData('zone_vente') != 1){
-                                $lignes[$use_compte_general]['HT'] += $line->multicurrency_total_ht - ($produit->getData('deee') * $line->qty);
-                                $total_ht_lignes += $line->multicurrency_total_ht;
-                            }
+                        $is_frais_de_port = false;
+                        if($frais_de_port = $this->db->getRow('categorie_product', 'fk_categorie = 9705 AND fk_product = ' . $produit->id) || $produit->id == 129950) {
+                            $is_frais_de_port = true;
+                            $lignes[$compte_general_port]['HT'] += $line->multicurrency_total_ht;
+                            $total_ht_lignes += $line->multicurrency_total_ht;
                         }
-                        else {
-                            if(($facture->getData('zone_vente') == 1 && $line->tva_tx > 0) || $facture->getData('zone_vente') != 1){
-                                $lignes[$use_compte_general]['HT'] += $line->multicurrency_total_ht;
-                                $total_ht_lignes += $line->multicurrency_total_ht;
+                        if(!$is_frais_de_port) {
+                            if($use_d3e){
+                                if(($facture->getData('zone_vente') == 1 && $line->tva_tx > 0) || $facture->getData('zone_vente') != 1){
+                                    $lignes[$use_compte_general]['HT'] += $line->multicurrency_total_ht - ($produit->getData('deee') * $line->qty);
+                                    $total_ht_lignes += $line->multicurrency_total_ht;
+                                }
+                            } else {
+                                if(($facture->getData('zone_vente') == 1 && $line->tva_tx > 0) || $facture->getData('zone_vente') != 1){
+                                    $lignes[$use_compte_general]['HT'] += $line->multicurrency_total_ht;
+                                    $total_ht_lignes += $line->multicurrency_total_ht;
+                                }
                             }
                         }
                     } else {
@@ -222,8 +231,8 @@ class BTC_export_facture extends BTC_export {
             $lignes[$compte_general_d3e]['HT'] = $d3e;
         }      
 
-        if(round(($total_ht_lignes), 2) != round($total_ttc_facture,2)) {
-            $montant_ecart = ($total_ht_lignes + $d3e) - $total_ttc_facture;
+        if($total_ht_lignes != $total_ttc_facture) {
+            $montant_ecart = ($total_ht_lignes) - $total_ttc_facture;
             $lignes = $this->rectifications_ecarts($lignes, $montant_ecart, 'vente');
         }
         foreach($lignes as $l => $infos) {

@@ -108,6 +108,18 @@ class modBimptocegid extends DolibarrModules {
         $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_achat_fournisseur_apple", 60793000)';
         $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_avoir_fournisseur_apple", 60793000)';
         $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_rfa_fournisseur_apple", 60973000)';
+        // Frais de port achat
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_frais_de_port_achat_fr", 62410000)';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_frais_de_port_achat_ue", 62413000)';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_frais_de_port_achat_ex", 62419000)';
+        // Frais de port vente
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_frais_de_port_vente_fr", 70850000)';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_frais_de_port_vente_ue", 70859000)';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_frais_de_port_vente_ex", 70859300)';
+        // Commissions
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_comissions_fr", 70820000)';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_comissions_ue", 70829100)';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_comissions_ex", 70829000)';
         
         require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
         $name = 'module_version_' . strtolower($this->name);

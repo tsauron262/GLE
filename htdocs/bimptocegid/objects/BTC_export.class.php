@@ -345,9 +345,7 @@ class BTC_export extends BimpObject {
                 echo $ecart;
                 $lignes_facture[$compte_comptable]['HT'] += $ecart;
                 $reactribution_faite = true;
-            } else {
-                
-            }            
+            }           
         }
         
         return $lignes_facture;

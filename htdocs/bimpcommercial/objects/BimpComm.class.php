@@ -2564,7 +2564,7 @@ class BimpComm extends BimpDolObject
             return array('Element d\'origine absent ou invalide');
         }
 
-        $isClone = ($this->object_name === $origin->object_name);
+        $isClone = (($this->object_name === $origin->object_name) && !$inverse_prices);
 
         $lines = $origin->getChildrenObjects('lines', array(), 'position', 'asc');
 

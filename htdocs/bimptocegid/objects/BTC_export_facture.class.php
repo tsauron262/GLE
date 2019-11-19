@@ -185,8 +185,11 @@ class BTC_export_facture extends BTC_export {
                         }
                         
                         $is_remise = false;
+                        $montant_remise = 0;
                         if($produit->getData('ref') == 'REMISE' || $produit->getData('ref') == 'TEX' || $produit->getData('ref') == 'REMISE-01' || $produit->getData('ref') == 'REMISECRT') {
                             $is_remise = true;
+                            $lignes['REMISE']['HT'] += $line->multicurrency_total_ht;
+                            $lignes['REMISE']['COMPTE'] = $use_compte_general;
                         }
                         
                         if(!$is_frais_de_port && !$is_remise) {
@@ -221,18 +224,28 @@ class BTC_export_facture extends BTC_export {
         
         if($use_d3e && $d3e != 0) {
             $lignes[$compte_general_d3e]['HT'] = $d3e;
-        }      
+        }
 
         if(round(($total_ht_lignes), 2) != round($total_ttc_facture,2)) {
             $montant_ecart = ($total_ht_lignes + $d3e) - $total_ttc_facture;
             $lignes = $this->rectifications_ecarts($lignes, $montant_ecart, 'vente');
         }
         foreach($lignes as $l => $infos) {
-            $structure['compte_general'] = [$l, 17];
+            if($l != 'REMISE') {
+                $structure['compte_general'] = [$l, 17];
+            } else {
+                $structure['compte_general'] = [$info['COMPTE'], 17];
+            }
+            
             $structure['type_de_compte'] = ['-', 1];
             $structure['code_auxiliaire'] = ['', 16];
             $structure['montant'] = [abs(round($infos['HT'], 2)), 20, true];
-            $structure['sens'] = [$this->get_sens($total_ttc_facture, 'facture', true, $sens_parent), 1];
+            if($l != 'REMISE') {
+                $structure['sens'] = [$this->get_sens($total_ttc_facture, 'facture', true, $sens_parent), 1];
+            } else {
+                $structure['sens'] = [$this->get_sens($total_ttc_facture, 'facture', false, $sens_parent), 1];
+            }
+            
             $structure['contre_partie'] = [$compte_general_411, 17];
             $structure['vide'] = [$code_auxiliaire, 606];
             $ecritures .= $this->struct($structure);

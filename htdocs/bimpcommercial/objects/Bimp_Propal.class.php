@@ -19,9 +19,8 @@ class Bimp_Propal extends BimpComm
         4 => array('label' => 'Facturée (fermée)', 'icon' => 'check', 'classes' => array('success')),
     );
     public $redirectMode = 4; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
-
     public $acomptes_allowed = true;
-    
+
     // Gestion des droits users
 
     public function canCreate()
@@ -425,6 +424,8 @@ class Bimp_Propal extends BimpComm
                                 'pdf_hide_ttc'       => $this->getData('pdf_hide_ttc'),
                                 'pdf_periodicity'    => $this->getData('pdf_periodicity'),
                                 'pdf_periods_number' => $this->getData('pdf_periods_number'),
+                                'note_public'        => addslashes(htmlentities($this->getData('note_public'))),
+                                'note_private'       => addslashes(htmlentities($this->getData('note_private'))),
                                 'origin'             => 'propal',
                                 'origin_id'          => (int) $this->id,
                                 'close_propal'       => 1
@@ -433,12 +434,12 @@ class Bimp_Propal extends BimpComm
                         $onclick = "";
                         $msg = "";
                         $files = $this->getFilesArray();
-                        if(count($files) < 2)
+                        if (count($files) < 2)
                             $msg = addslashes("Il semblerait qu'il n'y ait pas de devis signé dans la section documents. Etes-vous sûr de vouloir continuer ?");
-                        if($msg != "")
-                            $onclick .= "if ( confirm( '".$msg."' ) ) {";
+                        if ($msg != "")
+                            $onclick .= "if ( confirm( '" . $msg . "' ) ) {";
                         $onclick .= $commande->getJsLoadModalForm('default', 'Création d\\\'une commande (Signature préalable de la proposition commerciale)', $values, '', 'redirect');
-                        if($msg != "")
+                        if ($msg != "")
                             $onclick .= "}";
 
                         $buttons[] = array(
@@ -504,8 +505,8 @@ class Bimp_Propal extends BimpComm
                             'fk_mode_reglement' => (int) $this->getData('fk_mode_reglement'),
                             'fk_availability'   => (int) $this->getData('fk_availability'),
                             'fk_input_reason'   => (int) $this->getData('fk_input_reason'),
-                            'note_public'   => $this->getData('note_public'),
-                            'note_private'   => $this->getData('note_private'),
+                            'note_public'       => $this->getData('note_public'),
+                            'note_private'      => $this->getData('note_private'),
                             'date_commande'     => date('Y-m-d'),
                             'date_livraison'    => $this->getData('date_livraison'),
                             'libelle'           => $this->getData('libelle'),
@@ -516,14 +517,14 @@ class Bimp_Propal extends BimpComm
                     $onclick = "";
                     $msg = "";
                     $files = $this->getFilesArray();
-                    if(count($files) < 2)
+                    if (count($files) < 2)
                         $msg = addslashes("Il semblerait qu'il n'y ait pas de devis signé dans la section documents. Etes-vous sûr de vouloir continuer ?");
-                    if($msg != "")
-                        $onclick .= "if ( confirm( '".$msg."' ) ) {";
+                    if ($msg != "")
+                        $onclick .= "if ( confirm( '" . $msg . "' ) ) {";
                     $onclick .= $commande->getJsLoadModalForm('default', 'Création d\\\'une commande', $values, '', 'redirect');
-                    if($msg != "")
+                    if ($msg != "")
                         $onclick .= "}";
-                    
+
                     $buttons[] = array(
                         'label'   => 'Créer une commande',
                         'icon'    => 'fas_dolly',

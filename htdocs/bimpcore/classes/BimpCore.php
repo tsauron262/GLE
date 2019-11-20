@@ -83,7 +83,7 @@ class BimpCore
             if ($use_tms && (int) BimpCore::getConf('use_files_tms')) {
                 $pathinfo = pathinfo($file_path);
 
-                if (strpos($pathinfo['dirname'], '/views/')) {
+                if (strpos($pathinfo['dirname'], '/views/') !== false) {
                     $tms = filemtime(DOL_DOCUMENT_ROOT . '/' . $file_path);
 
                     if ($tms !== false) {

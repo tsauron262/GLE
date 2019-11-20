@@ -2130,6 +2130,15 @@ function setInputContainerEvents($inputContainer) {
 
 function setInputsEvents($container) {
     var in_modal = $.isOk($container.findParentByClass('modal'));
+    $container.find('input').add($container.find('textarea')).focus(function () {
+        if (typeof (text_input_focused) !== 'undefined') {
+            text_input_focused = true;
+        }
+    }).blur(function () {
+        if (typeof (text_input_focused) !== 'undefined') {
+            text_input_focused = false;
+        }
+    });
     $container.find('select').each(function () {
         if (!$(this).data('select_2_converted')) {
             if (!$.isOk($(this).findParentByClass('subObjectFormTemplate')) &&

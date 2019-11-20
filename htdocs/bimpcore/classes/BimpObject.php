@@ -368,12 +368,6 @@ class BimpObject extends BimpCache
     public function getParentIdProperty()
     {
         $property = $this->params['parent_id_property'];
-//        if ($this->object_name === 'BE_Place') {
-////            echo $this->object_name . ': ' . $property . '<br/>';
-////            echo '<pre>';
-////            print_r($this->params);
-////            echo '</pre>';
-////        }
         if (is_null($property)) {
             if ($this->field_exists('id_parent')) {
                 $property = 'id_parent';
@@ -725,6 +719,10 @@ class BimpObject extends BimpCache
 
     public function field_exists($field_name)
     {
+        if (!isset($this->params['fields'])) {
+            return 0;
+        }
+        
         return ($this->use_commom_fields && in_array($field_name, self::$common_fields)) ||
                 in_array($field_name, $this->params['fields']);
     }
@@ -1924,6 +1922,7 @@ class BimpObject extends BimpCache
                 } else {
                     $field_name = $field;
                 }
+
                 if ($this->field_exists($field_name)) {
                     if ($this->isExtraField($field_name)) {
                         $key = $this->getExtraFieldFilterKey($field_name, $joins, $main_alias);

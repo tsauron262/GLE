@@ -131,8 +131,10 @@ fields:
         values: 
             array: comptes
     exported:
-        label: Comptabilisée
-        type: bool
+        label: Etat comptable
+        type: int
+        values:
+            array: exportedStatut
         
     fk_availability: unset
     fk_input_reason: unset

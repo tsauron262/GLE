@@ -158,6 +158,7 @@ class BimpController
             $prefixe = "";
         elseif ($prefixe != "")
             $prefixe .= "/";
+
         $html .= '<script type="text/javascript">';
         $html .= 'ajaxRequestsUrl = \'' . $prefixe . "/" . $this->module . '/index.php?fc=' . $this->controller . (!is_null($id_object) ? '&id=' . $id_object : '') . '\';';
         $html .= '</script>';
@@ -165,11 +166,11 @@ class BimpController
         $html .= BimpCore::displayHeaderFiles(false);
 
         foreach ($this->cssFiles as $css_file) {
-            $html .= '<link type="text/css" rel="stylesheet" href="' . $prefixe . $css_file . '"/>';
+            $html .= '<link type="text/css" rel="stylesheet" href="' . BimpCore::getFileUrl($css_file) . '"/>';
         }
 
         foreach ($this->jsFiles as $js_file) {
-            $html .= '<script type="text/javascript" src="' . $prefixe . $js_file . '"></script>';
+            $html .= '<script type="text/javascript" src="' . BimpCore::getFileUrl($js_file) . '"></script>';
         }
 
         $html .= '<script type="text/javascript">';
@@ -211,7 +212,7 @@ class BimpController
                         continue;
                     }
                 }
-                echo '<link type="text/css" rel="stylesheet" href="' . DOL_URL_ROOT . '/' . $cssFile . '"/>';
+                echo '<link type="text/css" rel="stylesheet" href="' . BimpCore::getFileUrl($cssFile) . '"/>';
             }
 
             $jsFiles = $this->getConf('js', array(), false, 'array');
@@ -221,7 +222,7 @@ class BimpController
                         continue;
                     }
                 }
-                echo '<script type="text/javascript" src="' . DOL_URL_ROOT . '/' . $jsFile . '"></script>';
+                echo '<script type="text/javascript" src="' . BimpCore::getFileUrl($jsFile) . '"></script>';
             }
         }
 

@@ -724,6 +724,23 @@ class BimpTools
             }
         }
 
+        if (is_string($dir_tree)) {
+            $array = explode('/', $dir_tree);
+            $dir_tree = array();
+
+            foreach ($array as $key => $value) {
+                if (!(string) $value) {
+                    unset($array[$key]);
+                }
+            }
+
+            while ($dirname = array_pop($array)) {
+                $dir_tree = array(
+                    $dirname => $dir_tree
+                );
+            }
+        }
+
         foreach ($dir_tree as $dir => $sub_dir_tree) {
             if (!file_exists($root_dir . '/' . $dir)) {
                 if (!mkdir($root_dir . '/' . $dir, 0777)) {

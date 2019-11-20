@@ -30,21 +30,21 @@ class fixeTabsController extends BimpController
             define('BIMP_CONTROLLER_INIT', 1);
             global $main_controller;
             $main_controller = $this;
-            
-            BimpCore::displayHeaderFiles();
-            
-            foreach ($this->cssFiles as $url) {
-                echo '<link type="text/css" rel="stylesheet" href="' . DOL_URL_ROOT . '/' . $url . '"/>';
+
+            BimpCore::displayHeaderFiles(true);
+
+            foreach ($this->cssFiles as $cssFile) {
+                echo '<link type="text/css" rel="stylesheet" href="' . BimpCore::getFileUrl($cssFile) . '"/>';
             }
-            
+
             foreach ($this->jsFiles as $jsFile) {
-                echo '<script type="text/javascript" src="' . DOL_URL_ROOT . $jsFile . '"></script>';
+                echo '<script type="text/javascript" src="' . BimpCore::getFileUrl($jsFile) . '"></script>';
             }
 
             echo '<script type="text/javascript">';
             echo 'ajaxRequestsUrl = \'' . DOL_URL_ROOT . '/' . $this->module . '/index.php?fc=' . $this->controller . '\';';
             echo '</script>';
-            
+
             echo $this->render();
         } else {
             global $main_controller;
@@ -55,7 +55,7 @@ class fixeTabsController extends BimpController
                         continue;
                     }
                 }
-                echo '<link type="text/css" rel="stylesheet" href="' . DOL_URL_ROOT . '/' . $cssFile . '"/>';
+                echo '<link type="text/css" rel="stylesheet" href="' . BimpCore::getFileUrl($cssFile) . '"/>';
             }
 
             $jsFiles = $this->getConf('js', array(), false, 'array');
@@ -65,7 +65,7 @@ class fixeTabsController extends BimpController
                         continue;
                     }
                 }
-                echo '<script type="text/javascript" src="' . DOL_URL_ROOT . $jsFile . '"></script>';
+                echo '<script type="text/javascript" src="' . BimpCore::getFileUrl($jsFile) . '"></script>';
             }
             echo $this->render();
         }
@@ -79,7 +79,7 @@ class fixeTabsController extends BimpController
         $html = '';
 
         $html .= '<div id="bimp_fixe_tabs">';
-        
+
         $html .= '<div id="bimp_fixe_tabs_captions">';
         foreach ($this->tabs as $tab) {
             $html .= '<div class="fixe_tab_caption';
@@ -102,7 +102,7 @@ class fixeTabsController extends BimpController
             $html .= '</div>';
         }
         $html .= '</div>';
-        
+
         $html .= '</div>';
         return $html;
     }

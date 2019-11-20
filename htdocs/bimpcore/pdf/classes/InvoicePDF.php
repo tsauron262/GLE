@@ -400,7 +400,7 @@ class InvoicePDF extends BimpDocumentPDF
         }
 
         // Mode de paiement: 
-        if ($this->object->mode_reglement_code && $this->object->mode_reglement_code != 'CHQ' && $this->object->mode_reglement_code != 'VIR') {
+        if ($this->object->mode_reglement_code) { // && $this->object->mode_reglement_code != 'CHQ' && $this->object->mode_reglement_code != 'VIR') {
             $html .= '<tr><td>';
             $html .= '<strong>' . $this->langs->transnoentities("PaymentMode") . '</strong>:<br/>';
             $html .= $this->langs->transnoentities("PaymentType" . $this->object->mode_reglement_code) != ('PaymentType' . $this->object->mode_reglement_code) ? $this->langs->transnoentities("PaymentType" . $this->object->mode_reglement_code) : $this->langs->convToOutputCharset($this->object->mode_reglement);
@@ -410,6 +410,8 @@ class InvoicePDF extends BimpDocumentPDF
         if (empty($this->object->mode_reglement_code) || $this->object->mode_reglement_code == 'CHQ') {
 
             if (!empty($conf->global->FACTURE_CHQ_NUMBER)) {
+                echo $conf->global->FACTURE_CHQ_NUMBER;
+                exit;
                 if ($conf->global->FACTURE_CHQ_NUMBER > 0) {
                     $html .= '<tr><td>';
                     if (!class_exists('Account')) {
@@ -444,10 +446,15 @@ class InvoicePDF extends BimpDocumentPDF
                 $bankid = $this->object->fk_bank;
             }
 
+            $only_number = false;
+            if (!empty($this->object->mode_reglement_code) && $this->object->mode_reglement_code !== 'VIR') {
+                $only_number = true;
+            }
+
             require_once(DOL_DOCUMENT_ROOT . "/compta/bank/class/account.class.php");
             $account = new Account($this->db);
             $account->fetch($bankid);
-            $html .= $this->getBankHtml($account);
+            $html .= $this->getBankHtml($account, $only_number);
             $html .= '</td></tr>';
         }
 //        }

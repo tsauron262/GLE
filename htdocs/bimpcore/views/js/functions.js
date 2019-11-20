@@ -1,6 +1,7 @@
 // Notifications:
 var bimp_msg_enable = true;
 var ctrl_down = false;
+var text_input_focused = false;
 var bimp_decode_textarea = null;
 
 var notifications_remove_delay = 3000;
@@ -456,15 +457,24 @@ function setCommonEvents($container) {
                     var $prevLi = $('a[href="#' + prev + '"]').parent('li');
                     $prevLi.data('scrollTop', parseInt(wndScrollTop));
 
-                    if (wndScrollTop > $li.position().top) {
-                        $(window).scrollTop($li.position().top);
+//                    if (wndScrollTop > $li.position().top) {
+//                        $(window).scrollTop($li.position().top);
+//                    }
+                    var scrollTop = parseInt($li.data('scrollTop'));
+//                    bimp_msg(scrollTop);
+                    if (isNaN(scrollTop)) {
+                        if (wndScrollTop > $li.position().top) {
+                            scrollTop = $li.position().top;
+                        } else {
+                            scrollTop = wndScrollTop;
+                        }
+                        $li.data('scrollTop', scrollTop);
                     }
-//                    var scrollTop = parseInt($li.data('scrollTop'));
-////                    bimp_msg(scrollTop);
-//                    if (!isNaN(scrollTop)) {
-//                        $(window).scrollTop(scrollTop);
-//                    } else if (object_header_scroll_trigger && $(window).scrollTop() > object_header_scroll_trigger) {
+
+//                    if (object_header_scroll_trigger && scrollTop < object_header_scroll_trigger) {
 //                        $(window).scrollTop(object_header_scroll_trigger + 1);
+//                    } else {
+//                        $(window).scrollTop(scrollTop);
 //                    }
                 }
 
@@ -1022,7 +1032,7 @@ $(document).ready(function () {
             $(this).find('.object_page_header').each(function () {
                 setObjectHeaderPosition($(this));
             });
-        } else if (ctrl_down) {
+        } else if (ctrl_down && !text_input_focused) {
             if (e.key === 'ArrowRight') {
                 navTabNext('maintabs');
             } else if (e.key === 'ArrowLeft') {

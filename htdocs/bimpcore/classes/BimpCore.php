@@ -39,7 +39,11 @@ class BimpCore
         $html = '';
         if (!self::$filesInit) {
             foreach (self::$files['css'] as $css_file) {
-                $html .= '<link type="text/css" rel="stylesheet" href="' . DOL_URL_ROOT . $css_file . '"/>';
+                $url = self::getFileUrl($css_file);
+
+                if ($url) {
+                    $html .= '<link type="text/css" rel="stylesheet" href="' . $url . '"/>';
+                }
             }
 
             global $user;
@@ -51,29 +55,87 @@ class BimpCore
             $html .= '</script>';
 
             foreach (self::$files['js'] as $js_file) {
-                $html .= '<script type="text/javascript" src="' . DOL_URL_ROOT . $js_file . '"></script>';
-//                self::displayFileUrl($js_file);
+                $url = self::getFileUrl($js_file);
+
+                if ($url) {
+                    $html .= '<script type="text/javascript" src="' . $url . '"></script>';
+                }
             }
 
             self::$filesInit = true;
-//            exit;
         }
+
         if ($echo)
             echo $html;
+
         return $html;
     }
 
-//    public static function displayFileUrl($file_path, $use_tms = true)
-//    {
-//        if (file_exists(DOL_DOCUMENT_ROOT . '/' . $file_path)) {
-//            $file_return = '';
-//            if ($use_tms) {
-//                
-//            }
-//        }
-//
-//        return '';
-//    }
+    public static function getFileUrl($file_path, $use_tms = true)
+    {
+        $url = '';
+
+        if (preg_match('/^\/+(.+)$/', $file_path, $matches)) {
+            $file_path = $matches[1];
+        }
+
+        if (file_exists(DOL_DOCUMENT_ROOT . '/' . $file_path)) {
+            if ($use_tms && (int) BimpCore::getConf('use_files_tms')) {
+                $pathinfo = pathinfo($file_path);
+
+                if (strpos($pathinfo['dirname'], '/views/')) {
+                    $tms = filemtime(DOL_DOCUMENT_ROOT . '/' . $file_path);
+
+                    if ($tms !== false) {
+                        $out_file = $pathinfo['dirname'] . '/' . $pathinfo['filename'] . '_tms_' . $tms . '.' . $pathinfo['extension'];
+
+                        if (preg_match('/^\/+(.+)$/', $out_file, $matches)) {
+                            $out_file = $matches[1];
+                        }
+
+                        if (!file_exists(DOL_DOCUMENT_ROOT . '/' . $out_file)) {
+                            // Suppr du fichier existant: 
+                            $dir = DOL_DOCUMENT_ROOT . '/' . $pathinfo['dirname'];
+                            foreach (scandir($dir) as $f) {
+                                if (in_array($f, array('.', '..'))) {
+                                    continue;
+                                }
+
+                                if (preg_match('/^' . preg_quote($pathinfo['filename']) . '_tms_\d+\.' . preg_quote($pathinfo['extension']) . '$/', $f)) {
+                                    unlink($dir . '/' . $f);
+                                }
+                            }
+
+                            if (!copy(DOL_DOCUMENT_ROOT . '/' . $file_path, DOL_DOCUMENT_ROOT . '/' . $out_file)) {
+                                dol_syslog('Echec création du fichier "' . DOL_DOCUMENT_ROOT . '/' . $out_file . '" - Vérifier les droits', E_ERROR);
+                            }
+                        }
+
+                        if (file_exists(DOL_DOCUMENT_ROOT . '/' . $out_file)) {
+                            $url = $out_file;
+                        }
+                    }
+                }
+            }
+
+            if (!$url) {
+                $url = $file_path;
+            }
+        }
+
+        if ($url) {
+            $prefixe = DOL_URL_ROOT;
+            if ($prefixe == "/")
+                $prefixe = "";
+            elseif ($prefixe != "")
+                $prefixe .= "/";
+
+            return $prefixe . $url;
+        }
+
+        dol_syslog('FICHIER ABSENT: "' . DOL_DOCUMENT_ROOT . '/' . $file_path . '"', E_ERROR);
+        return '';
+    }
 
     public static function getConfCache()
     {

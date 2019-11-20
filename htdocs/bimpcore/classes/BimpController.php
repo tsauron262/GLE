@@ -1732,7 +1732,7 @@ class BimpController
         $object_name = BimpTools::getValue('object_name', '');
         $search_name = BimpTools::getValue('search_name', 'default');
         $search_value = BimpTools::getValue('search_value', '');
-        $max_results = (int) BimpTools::getValue('max_results', 15);
+        $max_results = (int) BimpTools::getValue('max_results', 200);
         $card = BimpTools::getValue('card', '');
 
         if ($module && $object_name && $search_value) {

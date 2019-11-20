@@ -6,6 +6,7 @@ class FournObjectLine extends ObjectLine
 {
 
     public $ref_supplier = '';
+    public static $product_search_name = 'default'; //'tobuy';
     public static $product_line_data = array(
         'id_product'     => array('label' => 'Produit / Service', 'type' => 'int', 'required' => 1, 'default' => null),
         'id_fourn_price' => array('label' => 'Prix d\'achat fournisseur', 'type' => 'int', 'required' => 0, 'default' => null),
@@ -18,17 +19,6 @@ class FournObjectLine extends ObjectLine
         'date_to'        => array('label' => 'Date fin', 'type' => 'date', 'required' => 0, 'default' => null),
         'ref_supplier'   => array('label' => 'Référence fournisseur', 'type' => 'string', 'required' => 0, 'default' => '')
     );
-    
-    public function create(&$warnings = array(), $force_create = false) {
-        $errors = array();
-//        if($this->getData('type') == self::LINE_PRODUCT){
-//            $prod = $this->getChildObject('product');
-//            if(!$prod->isAchetable($errors,false,false))
-//                    return $errors;
-//        }
-        
-        return parent::create($warnings, $force_create);
-    }
 
     // Getters - overrides ObjectLine: 
 
@@ -345,5 +335,17 @@ class FournObjectLine extends ObjectLine
                 $this->pa_ht = $this->force_pa_ht;
         }
         return $errors;
+    }
+
+    public function create(&$warnings = array(), $force_create = false)
+    {
+        $errors = array();
+//        if($this->getData('type') == self::LINE_PRODUCT){
+//            $prod = $this->getChildObject('product');
+//            if(!$prod->isAchetable($errors,false,false))
+//                    return $errors;
+//        }
+
+        return parent::create($warnings, $force_create);
     }
 }

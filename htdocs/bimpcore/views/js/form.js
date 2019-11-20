@@ -1464,6 +1464,9 @@ function resetInputValue($container) {
                     $container.find('.search_list_input').val('');
                     $container.find('.search_input_selected_label').hide().find('span').html('');
                 }
+                if ($container.find('.search_object_input_container').length) {
+                    $container.find('.search_object_input_container').find('.search_object_input').find('input').val('');
+                }
             }
         }
     }
@@ -1671,12 +1674,17 @@ function loadSearchObjectResults($input, idx) {
                         $parent.children('.spinner').animate({'opacity': 1}, {'duration': 50});
                         var ajax_data = $input.data('ajax_data');
                         ajax_data.search_value = val;
+                        $input.data('last_results_idx', idx);
                         BimpAjax('getSearchObjectResults', ajax_data, null, {
+                            results_idx: idx,
                             $input: $input,
                             $parent: $parent,
                             display_success: false,
                             display_results: display_results,
                             success: function (result, bimpAjax) {
+                                if (parseInt(bimpAjax.results_idx) !== parseInt($input.data('last_results_idx'))) {
+                                    return;
+                                }
                                 $parent.children('.spinner').animate({'opacity': 0}, {'duration': 50});
                                 bimpAjax.$parent.find('.input_choices').remove();
 

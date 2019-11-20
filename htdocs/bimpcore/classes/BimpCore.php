@@ -25,7 +25,6 @@ class BimpCore
             '/bimpcore/views/js/statsList.js',
             '/bimpcore/views/js/page.js',
             '/bimpcore/views/js/table2csv.js'
-
         ),
         'css' => array(
             '/includes/jquery/plugins/jpicker/css/jPicker-1.1.6.css',
@@ -40,7 +39,7 @@ class BimpCore
         $html = '';
         if (!self::$filesInit) {
             foreach (self::$files['css'] as $css_file) {
-                $html .= '<link type="text/css" rel="stylesheet" href="' . DOL_URL_ROOT   . $css_file . '"/>';
+                $html .= '<link type="text/css" rel="stylesheet" href="' . DOL_URL_ROOT . $css_file . '"/>';
             }
 
             global $user;
@@ -52,15 +51,29 @@ class BimpCore
             $html .= '</script>';
 
             foreach (self::$files['js'] as $js_file) {
-                $html .= '<script type="text/javascript" src="' . DOL_URL_ROOT  . $js_file . '"></script>';
+                $html .= '<script type="text/javascript" src="' . DOL_URL_ROOT . $js_file . '"></script>';
+//                self::displayFileUrl($js_file);
             }
 
             self::$filesInit = true;
+//            exit;
         }
         if ($echo)
             echo $html;
         return $html;
     }
+
+//    public static function displayFileUrl($file_path, $use_tms = true)
+//    {
+//        if (file_exists(DOL_DOCUMENT_ROOT . '/' . $file_path)) {
+//            $file_return = '';
+//            if ($use_tms) {
+//                
+//            }
+//        }
+//
+//        return '';
+//    }
 
     public static function getConfCache()
     {
@@ -80,8 +93,8 @@ class BimpCore
     public static function getConf($name)
     {
         $cache = self::getConfCache();
-        
-        if(isset(self::$conf_cache_not_exist[$name]))
+
+        if (isset(self::$conf_cache_not_exist[$name]))
             return null;
 
         if (!isset($cache[$name])) {
@@ -89,8 +102,7 @@ class BimpCore
             if (!is_null($value)) {
                 self::$conf_cache[$name] = $value;
                 return $value;
-            }
-            else
+            } else
                 self::$conf_cache_not_exist[$name] = $name;
 
             return null;
@@ -149,7 +161,7 @@ class BimpCore
                     'value' => json_encode($versions)
                         ), '`name` = \'bimpcore_version\'');
             }
-                        
+
 
             self::$conf_cache['bimpcore_version'] = $versions;
         }
@@ -184,8 +196,8 @@ class BimpCore
     public static function getParam($full_path, $default_value = '', $type = 'string')
     {
         if (is_null(self::$config)) {
-            if (!file_exists(DOL_DATA_ROOT. '/bimpcore/config.yml')) {
-                copy(DOL_DOCUMENT_ROOT.'/bimpcore/default_config.yml', DOL_DATA_ROOT.'/bimpcore/config.yml');
+            if (!file_exists(DOL_DATA_ROOT . '/bimpcore/config.yml')) {
+                copy(DOL_DOCUMENT_ROOT . '/bimpcore/default_config.yml', DOL_DATA_ROOT . '/bimpcore/config.yml');
             }
             if (file_exists(DOL_DATA_ROOT . '/bimpcore/config.yml')) {
                 self::$config = new BimpConfig(DOL_DATA_ROOT . '/bimpcore/', 'config.yml', new BimpObject('', ''));
@@ -204,20 +216,20 @@ class BimpCore
         $updates = array();
 
         $cache = self::getConfCache();
-        
+
         foreach ($cache as $name => $value) {
             if (preg_match('/^module_version_(.+)$/', $name, $matches)) {
                 $module = $matches[1];
-                
-                $dir = DOL_DOCUMENT_ROOT.'/'.$module.'/sql';
+
+                $dir = DOL_DOCUMENT_ROOT . '/' . $module . '/sql';
                 if (file_exists($dir) && is_dir($dir)) {
                     $files = scandir($dir);
-                    
+
                     foreach ($files as $f) {
                         if (in_array($f, array('.', '..'))) {
                             continue;
                         }
-                        
+
                         if (preg_match('/^(\d+\.\d)\.sql$/', $f, $matches2)) {
                             if ((float) $matches2[1] > (float) $value) {
                                 if (!isset($updates[$module])) {

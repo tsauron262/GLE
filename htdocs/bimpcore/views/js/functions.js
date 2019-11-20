@@ -452,15 +452,20 @@ function setCommonEvents($container) {
                 if ($li.length && $li.parent('ul').data('navtabs_id') === 'maintabs') {
                     var prev = '' + e.relatedTarget;
                     prev = prev.replace(/^.*#(.*)$/, '$1');
-
+                    var wndScrollTop = $(window).scrollTop();
                     var $prevLi = $('a[href="#' + prev + '"]').parent('li');
-                    $prevLi.data('scrollTop', parseInt($(window).scrollTop()));
-                    var scrollTop = parseInt($li.data('scrollTop'));
-                    if (!isNaN(scrollTop)) {
-                        $(window).scrollTop(scrollTop);
-                    } else if (object_header_scroll_trigger && $(window).scrollTop() > object_header_scroll_trigger) {
-                        $(window).scrollTop(object_header_scroll_trigger + 1);
+                    $prevLi.data('scrollTop', parseInt(wndScrollTop));
+
+                    if (wndScrollTop > $li.position().top) {
+                        $(window).scrollTop($li.position().top);
                     }
+//                    var scrollTop = parseInt($li.data('scrollTop'));
+////                    bimp_msg(scrollTop);
+//                    if (!isNaN(scrollTop)) {
+//                        $(window).scrollTop(scrollTop);
+//                    } else if (object_header_scroll_trigger && $(window).scrollTop() > object_header_scroll_trigger) {
+//                        $(window).scrollTop(object_header_scroll_trigger + 1);
+//                    }
                 }
 
                 var $content = $('#' + tab_id);
@@ -1012,7 +1017,7 @@ $(document).ready(function () {
     });
 
     $('body').keydown(function (e) {
-        if (e.key === 'Control') {
+        if (e.key === 'Alt') {
             ctrl_down = true;
             $(this).find('.object_page_header').each(function () {
                 setObjectHeaderPosition($(this));
@@ -1022,11 +1027,16 @@ $(document).ready(function () {
                 navTabNext('maintabs');
             } else if (e.key === 'ArrowLeft') {
                 navTabPrev('maintabs');
+            } else if (e.key === 'ArrowUp') {
+                $(window).scrollTop(0);
+            } else if (e.key === 'ArrowDown') {
+                var maxScroll = $('body').height() - $(window).height();
+                $(window).scrollTop(maxScroll);
             }
         }
     });
     $('body').keyup(function (e) {
-        if (e.key === 'Control') {
+        if (e.key === 'Alt') {
             ctrl_down = false;
             $(this).find('.object_page_header').each(function () {
                 setObjectHeaderPosition($(this));

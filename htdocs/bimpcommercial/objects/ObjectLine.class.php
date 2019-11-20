@@ -10,6 +10,7 @@ class ObjectLine extends BimpObject
     public static $check_on_update = false;
     public $equipment_required = false;
     public static $equipment_required_in_entrepot = true;
+    public static $product_search_name = 'tosell';
 
     const LINE_PRODUCT = 1;
     const LINE_TEXT = 2;
@@ -2959,10 +2960,15 @@ class ObjectLine extends BimpObject
             case 'id_product':
                 $html = BimpInput::renderInput('search_object', $prefixe . 'id_product', (int) $value, array(
                             'object'      => BimpObject::getInstance('bimpcore', 'Bimp_Product'),
-                            'search_name' => 'default',
-                            'card'        => 'default',
-                            'help'        => 'Entrez la référence, le nom, ou le code-barre d\'un produit'
+                            'search_name' => static::$product_search_name,
+//                            'card'        => 'default',
+                            'help'        => 'Entrez la référence, le nom, ou le code-barre d\'un produit',
+                            'max_results' => 500
                 ));
+//                $html = BimpInput::renderInput('search_product', $prefixe . 'id_product', (int) $value, array(
+//                            'filter_type' => 'both'
+//                ));
+//                $html .= '<p class="inputHelp">Entrez la référence ou le code-barre d\'un produit.<br/>Laissez vide si vous sélectionnez un équipement.</p>';
                 break;
 
             case 'id_fourn_price':

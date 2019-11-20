@@ -1046,7 +1046,20 @@ searches:
             - a.label
             - a.ref
             - a.barcode
-        fields_return: 
-            - a.label
+        fields_return:
             - a.ref
-        label_syntaxe: '<a.ref> - <a.label>'
+            - a.label
+            - REPLACE(ROUND(a.price,2),'.',',') as price
+        label_syntaxe: <ref> - <label> - <price> € HT
+        
+    tosell: 
+        extends: default
+        filters: 
+            a.tosell: 1
+            
+    tobuy: 
+        extends: default
+        filters: 
+            a.tobuy: 1
+            
+        

@@ -610,14 +610,15 @@ class BimpObject extends BimpCache
 
             $search_filter = '';
 
-            foreach ($params['fields_search'] as $field) {
-                $and_sql = '';
-                foreach (explode(' ', $search_value) as $search) {
-                    $and_sql .= ($and_sql ? ' AND ' : '') . 'LOWER(' . $field . ') LIKE \'%' . $search . '%\'';
+            foreach (explode(' ', $search_value) as $search) {
+                $or_sql = '';
+
+                foreach ($params['fields_search'] as $field) {
+                    $or_sql .= ($or_sql ? ' OR ' : '') . 'LOWER(' . $field . ') LIKE \'%' . $search . '%\'';
                 }
 
-                if ($and_sql) {
-                    $search_filter .= ($search_filter ? ' OR ' : '') . '(' . $and_sql . ')';
+                if ($or_sql) {
+                    $search_filter .= ($search_filter ? ' AND ' : '') . '(' . $or_sql . ')';
                 }
             }
 
@@ -627,7 +628,7 @@ class BimpObject extends BimpCache
                 );
             }
 
-            $max_results = (isset($options['max_results']) ? (int) $options['max_results'] : 15);
+            $max_results = (isset($options['max_results']) ? (int) $options['max_results'] : 200);
 
             $rows = $this->getList($filters, $max_results, 1, 'id', 'desc', 'array', $params['fields_return'], $joins);
 
@@ -638,14 +639,24 @@ class BimpObject extends BimpCache
 
                     foreach ($params['fields_return'] as $field) {
                         $field_name = $field;
-                        if (preg_match('/^.+\.(.+)$/', $field, $matches)) {
+                        if (preg_match('/^.* as (.*)$/', $field, $matches)) {
+                            $field_name = $matches[1];
+                        } elseif (preg_match('/^.+\.(.+)$/', $field, $matches)) {
                             $field_name = $matches[1];
                         }
                         if ($params['label_syntaxe']) {
-                            if (isset($r[$field_name])) {
-                                $label = str_replace('<' . $field . '>', $r[$field_name], $label);
-                            } else {
-                                $label = str_replace('<' . $field . '>', '', $label);
+                            if (strpos($label, '<' . $field . '>') !== false) {
+                                if (isset($r[$field_name])) {
+                                    $label = str_replace('<' . $field . '>', $r[$field_name], $label);
+                                } else {
+                                    $label = str_replace('<' . $field . '>', '', $label);
+                                }
+                            } elseif (strpos($label, '<' . $field_name . '>') !== false) {
+                                if (isset($r[$field_name])) {
+                                    $label = str_replace('<' . $field_name . '>', $r[$field_name], $label);
+                                } else {
+                                    $label = str_replace('<' . $field_name . '>', '', $label);
+                                }
                             }
                         } else {
                             if (isset($r[$field_name])) {

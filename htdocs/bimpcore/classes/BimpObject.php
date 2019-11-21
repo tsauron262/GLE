@@ -661,9 +661,9 @@ class BimpObject extends BimpCache
 
                     if (preg_match('/^(.*)\[REDIFNEG\](.*)\[\/REDIFNEG\](.*)$/U', $label, $matches)) {
                         if ((float) $matches[2] < 0) {
-                            $label = $matches[1] . '<span class="danger">' . $matches[2] . '</span>' . $matches[3];
+                            $label = $matches[1] . '<span class="danger">' . (float) $matches[2] . '</span>' . $matches[3];
                         } else {
-                            $label = $matches[1] . $matches[2] . $matches[3];
+                            $label = $matches[1] . (float) $matches[2] . $matches[3];
                         }
                     }
 

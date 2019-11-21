@@ -100,7 +100,7 @@ class BimpComm extends BimpDolObject
 
                 if (static::$use_zone_vente_for_tva) {
                     global $user;
-                    if (!(int) $user->rights->facture->creer && in_array($this->getData('ef_type'), static::$cant_edit_zone_vente_secteurs)) {
+                    if (!(int) $user->rights->bimpcommercial->priceVente && in_array($this->getData('ef_type'), static::$cant_edit_zone_vente_secteurs)) {
                         return 0;
                     }
 

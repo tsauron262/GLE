@@ -61,8 +61,10 @@ fields:
         label: Référence
         dol_prop: ref
     exported:
-        label: Comptabilisée
-        type: bool
+        label: Etat comptable
+        type: int
+        values: 
+            array: exportedStatut
     ignore_compta:
         label: Ignorée
         type: bool
@@ -171,7 +173,7 @@ fields:
         type: money
     fk_facture_source:
         label: Facture source
-        type: int
+        type: id
     ref: unset
     fk_availability: unset
     fk_input_reason: unset
@@ -504,7 +506,29 @@ forms:
                   type: select
                   options: 
                       array: draftCommissions
-                                    
+                      
+    check_pa: 
+        modal_format: large
+        title: Vérification des prix d\'achat
+        rows: 
+            - custom: 1
+              label: Prix d'achat attendus
+              input_name: type_check
+              input: 
+                  type: select
+                  options: 
+                      create: Prix d'achat des produits en cours à la date de création de la facture
+                      validate: Prix d'achat des produits en cours à la date de validation de la facture
+                      current: Prix d'achat actuels des produits
+              value: create
+            
+            - custom: 1
+              label: Résultat
+              input_name: result
+              content: 
+                  callback: renderCheckPaForm
+              depends_on: type_check
+                                  
 fields_tables: 
     infos: 
         rows: 
@@ -757,10 +781,10 @@ cards:
     light: 
         title: 
             field_value: facnumber
+        status: fk_statut
         view_btn: 0
         fields: 
             - field: total_ttc
-            - field: fk_statut
             - label: Payé
               value: 
                   callback: displayPaid
@@ -768,4 +792,19 @@ cards:
 searches:
     default: 
         fields_search: 
-            - facnumber
+            - a.facnumber
+            - ef.libelle
+            - s.nom
+        joins:
+            ef: 
+                table: facture_extrafields
+                on: a.rowid = ef.fk_object
+                alias: ef
+            s: 
+                table: societe
+                on: a.fk_soc = s.rowid
+                alias: s
+        fields_return: 
+            - a.facnumber
+            - s.nom
+        label_syntaxe: '<a.facnumber> (Client: <s.nom>)'

@@ -8,6 +8,7 @@ class Bimp_FactureFourn extends BimpComm
 {
 
     public static $discount_lines_allowed = false;
+    public static $cant_edit_zone_vente_secteurs = array();
     public $redirectMode = 4; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
     public static $dol_module = 'facture_fourn';
     public static $files_module_part = 'facture_fournisseur';
@@ -31,7 +32,7 @@ class Bimp_FactureFourn extends BimpComm
 
     public function isDeletable($force_delete = false)
     {
-        if(!$this->isEditable())
+        if (!$this->isEditable())
             return 0;
         if ($this->isLoaded()) {
             if ((int) $this->getData('fk_statut') === 0) {
@@ -44,11 +45,37 @@ class Bimp_FactureFourn extends BimpComm
         return 1;
     }
     
-    public function isEditable($force_edit = false, &$errors = array()) {
-        if($this->getData('exported') == 1)
+    
+    public function update(&$warnings = array(), $force_update = false)
+    {
+        $init_fk_account = (int) $this->getInitData('fk_account');
+        $fk_account = (int) $this->getData('fk_account');
+
+        $id_cond_reglement = (int) $this->getData('fk_cond_reglement');
+
+        $changeCondRegl = $id_cond_reglement !== (int) $this->getInitData('fk_cond_reglement');
+        $changeDateF = $this->getData('datef') != $this->getInitData('datef');
+
+        if ($changeCondRegl || $changeDateF) {
+            $this->dol_object->date = strtotime($this->getData('datef'));
+            $this->set('date_lim_reglement', BimpTools::getDateFromDolDate($this->dol_object->calculate_date_lim_reglement($id_cond_reglement)));
+        }
+
+        $errors = parent::update($warnings, $force_update);
+
+        if (!count($errors)) {
+            if ($fk_account !== $init_fk_account) {
+                $this->updateField('fk_account', $fk_account);
+            }
+        }
+    }
+
+    public function isEditable($force_edit = false, &$errors = array())
+    {
+        if ($this->getData('exported') == 1)
             return 0;
-        
-        
+
+
         return parent::isEditable($force_edit, $errors);
     }
 
@@ -56,13 +83,18 @@ class Bimp_FactureFourn extends BimpComm
     {
         return parent::isFieldEditable($field, $force_edit);
     }
-    
-    public function create(&$warnings = array(), $force_create = false) {
+
+    public function create(&$warnings = array(), $force_create = false)
+    {
         $dateMAx = '2019-10-01';
-        if($this->getData('datef') < $dateMAx)
-            $errors[] = 'Date inférieur au '.$dateMAx.' creation impossible'; 
-        if(count($errors))
+        if ($this->getData('datef') < $dateMAx)
+            $errors[] = 'Date inférieur au ' . $dateMAx . ' creation impossible';
+        if (count($errors))
             return $errors;
+        
+        $this->dol_object->date = strtotime($this->getData('datef'));
+        $this->set('date_lim_reglement', BimpTools::getDateFromDolDate($this->dol_object->calculate_date_lim_reglement($this->getData('fk_cond_reglement'))));
+        
         return parent::create($warnings, $force_create);
     }
 
@@ -583,7 +615,7 @@ class Bimp_FactureFourn extends BimpComm
                 $user->fetch((int) $this->getData('fk_user_valid'));
                 $html .= '<div class="object_header_infos">';
                 $html .= 'Validée';
-                $html .= ' le '.$this->displayData('date_valid', 'default', false, true);
+                $html .= ' le ' . $this->displayData('date_valid', 'default', false, true);
                 $html .= ' par ' . $user->getNomUrl(1);
                 $html .= '</div>';
             }
@@ -955,6 +987,10 @@ class Bimp_FactureFourn extends BimpComm
                 }
 
                 $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $id_product);
+
+                if ((int) $product->getData('no_fixe_prices')) {
+                    continue;
+                }
 
                 $id_fp = 0;
 

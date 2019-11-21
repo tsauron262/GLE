@@ -136,7 +136,8 @@ class Bimp_CommandeLine extends ObjectLine
                 $onclick = 'addSelectedCommandeLinesToFacture($(this), \'list_id\', ';
                 $onclick .= $commande->id . ', ' . (int) $id_client_facture . ', ';
                 $onclick .= (($id_client_facture === (int) $commande->getData('fk_soc')) ? (int) $commande->dol_object->contactid : 0) . ', ';
-                $onclick .= (int) $commande->getData('fk_cond_reglement') . ')';
+                $onclick .= (int) $commande->getData('fk_cond_reglement') . ',';
+                $onclick .= '\''.$commande->getData('note_public') . '\', \'' . $commande->getData('note_private'). '\');';
 
                 $actions[] = array(
                     'label'   => 'Quantités facture',
@@ -2704,7 +2705,7 @@ class Bimp_CommandeLine extends ObjectLine
                         } else {
                             // Service : on supprime toutes les réservations éventuelles: 
                             if ((float) $reserved_qties['total'] > 0) {
-                                mailSyn2("Suppression reservations", 'dev@bimp.fr', "admin@bimp.fr", "Atgtention une reservation a été supprimé " . $product->getData('ref') . " comm: " . $this->getData("id_obj"));
+//                                mailSyn2("Suppression reservations", 'dev@bimp.fr', "admin@bimp.fr", "Attention une reservation a été supprimé " . $product->getData('ref') . " comm: " . $this->getData("id_obj"));
                                 foreach (BimpCache::getBimpObjectObjects('bimpreservation', 'BR_Reservation', array(
                                     'type'                    => BR_Reservation::BR_RESERVATION_COMMANDE,
                                     'id_commande_client'      => (int) $commande->id,

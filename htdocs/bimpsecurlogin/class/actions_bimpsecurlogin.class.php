@@ -219,14 +219,14 @@ class securLogSms {
             }
 
             $groups = new UserGroup($this->db);
-            $grps = $groups->listGroupsForUser($this->user->id, false);
-            if (!isset($grps[3])) {
+//            $grps = $groups->listGroupsForUser($this->user->id, false);
+//            if (!isset($grps[3])) {
                 $toM = $this->traiteMail();
                 if ($this->isMAil($toM) && mailSyn2("Code BIMP", $toM, "admin@bimp.fr", $text)) {
                     $this->message[] = 'Code envoyé à ' . substr($toM, 0, 4) . "*******" . substr($toM, -7) . "<br/><br/>";
                     $okMail = true;
                 }
-            }
+//            }
 
             mailSyn2("Code envoyé", "admin@bimp.fr", "admin@bimp.fr", "Bonjour un code a été envoyé " . ($okSms ? "par sms " : "") . ($okMail ? "par mail " : "") . " pour l'utilisateur " . $this->user->getNomUrl(1) . " ip " . $_SERVER['REMOTE_ADDR']);
 

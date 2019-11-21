@@ -4,16 +4,16 @@ parent_module: bimplogistique
 parent_object: Inventory
 parent_id_property: fk_inventory
 
-object:
-    warehouse_type: 
-        relation: hasOne
-        delete: 0
-        instance: 
-            bimp_object: 
-                module: bimplogistique
-                name: InventoryWarehouse
-            id_object: 
-                field_value: warehouse_type
+#object:
+#    warehouse_type: 
+#        relation: hasOne
+#        delete: 0
+#        instance: 
+#            bimp_object: 
+#                module: bimplogistique
+#                name: InventoryWarehouse
+#            id_object: 
+#                field_value: fk_warehouse_type
     
 fields: 
     qty:
@@ -37,10 +37,10 @@ fields:
         
     fk_warehouse_type:
         label: Entrepôt/Type
-        type: id_object
-        object: warehouse_type
-        value: 
-            callback: renderName
+#        type: id_object
+#        object: warehouse_type
+#        content: 
+#            callback: renderWarehouseTypeName
         
 lists:
     default:
@@ -60,7 +60,13 @@ lists:
                field: qty
                
            fk_warehouse_type:
-               field: fk_warehouse_type
+               label: Entrepôt/Type
+               value:
+                   callback: renderWarehouseTypeName
+               
+#           fk_warehouse_type:
+#               field: fk_warehouse_type
+#               value: renderWarehouseTypeName
 #              object: warehouse_type
 #              label: Entrepôt/type
 #              callback: renderName

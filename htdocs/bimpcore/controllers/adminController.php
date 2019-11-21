@@ -30,6 +30,34 @@ class adminController extends BimpController
         return $html;
     }
     
+    
+    public function renderTestTab(){
+        $html .= "<div id='retourTestSpeed'></div>";
+        $html .= "<br/><br/>Google : <span id='retourGoogle'></span> s";
+        $html .= "<br/><br/>Php : <span id='retourPhp'></span> s";
+        $html .= "<br/><br/>Mysql : <span id='retourMysql'></span> s";
+        $html .= "<br/><br/>Transfert : <span id='retourTransfert'></span> s";
+        $html .= "<br/><br/>Total : <span id='retourTotal'></span> s";
+        $html .= "<script>";
+        $html .= "timeDeb = new Date().getTime(); ";
+        
+        
+        $html .= "function displayResult(google, php, mysql, total){"
+                . "$('#retourGoogle').html(google);"
+                . "$('#retourPhp').html(php);"
+                . "$('#retourMysql').html(mysql);"
+                . "$('#retourTransfert').html(total - mysql - php - google);"
+                . "$('#retourTotal').html(total);"
+                . "}";
+        
+        
+        $html .= "setObjectAction($(this), {module: 'bimpcore', object_name: 'BimpTest'}, 'testSpeed', {}, null, null, function(){}, null, null, false);";
+        $html .= "</script>";
+        
+        return $html;
+    }
+    
+    
     public function renderRightsTab(){
         $html = "";
         $obj = BimpObject::getInstance('bimpcore', 'Bimp_UserGroup_Rights');

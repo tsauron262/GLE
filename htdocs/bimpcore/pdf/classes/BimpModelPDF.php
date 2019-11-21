@@ -34,6 +34,7 @@ Abstract class BimpModelPDF
 
         $conf->global->MAIN_MAX_DECIMALS_SHOWN = str_replace("...", "", $conf->global->MAIN_MAX_DECIMALS_SHOWN);
 
+        
         $this->db = $db;
         $this->langs = $langs;
 
@@ -143,6 +144,28 @@ Abstract class BimpModelPDF
         $styles .= '</style>' . "\n";
 
         $this->pdf->writeHTML($styles . $content, false, false, true, false, '');
+    }
+    
+    public function renderFullBlock($method)
+    {
+        if (!method_exists($this, $method)) {
+            return;
+        }
+
+        $pdf = clone $this->pdf;
+
+        $page_num = $this->pdf->getPage();
+        $this->{$method}();
+        $cur_page = (int) $this->pdf->getPage();
+
+        if ($cur_page > $page_num) {
+            unset($this->pdf);
+            $this->pdf = $pdf;
+            $this->pdf->newPage();
+            $this->{$method}();
+        } else {
+            unset($pdf);
+        }
     }
 
     // Rendus HTML: 

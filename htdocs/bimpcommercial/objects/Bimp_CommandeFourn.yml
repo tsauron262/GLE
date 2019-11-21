@@ -396,17 +396,17 @@ forms:
                 display_if: 
                     field_name: id_facture
                     show_values: 0
-            date_lim_reglement: 
-                custom: 1
-                label: Date d'échéance
-                data_type: date
-                input_name: date_lim_reglement
-                required: 1
-                input: 
-                    type: date
-                display_if: 
-                    field_name: id_facture
-                    show_values: 0
+#            date_lim_reglement: 
+#                custom: 1
+#                label: Date d'échéance
+#                data_type: date
+#                input_name: date_lim_reglement
+#                required: 1
+#                input: 
+#                    type: date
+#                display_if: 
+#                    field_name: id_facture
+#                    show_values: 0
             cond_reglement: 
                 custom: 1
                 label: Conditions de réglement
@@ -680,17 +680,24 @@ cards:
               field: entrepot
               display: nom_url
         view_btn: 1
-        
+
 searches:
     default: 
         fields_search: 
             - a.ref
             - ef.libelle
             - s.nom
+            - a.ref_supplier
         joins:
-            - table: propal_extrafields
-              on: a.rowid = ef.fk_object
-              alias: ef
-            - table: societe
-              on: a.fk_soc = s.rowid
-              alias: s
+            ef: 
+                table: commande_fournisseur_extrafields
+                on: a.rowid = ef.fk_object
+                alias: ef
+            s: 
+                table: societe
+                on: a.fk_soc = s.rowid
+                alias: s
+        fields_return: 
+            - a.ref
+            - s.nom
+        label_syntaxe: '<a.ref> (Fourn: <s.nom>)'

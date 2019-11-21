@@ -216,8 +216,6 @@ fields:
         default_value: 0
         input: 
             type: search_user
-        
-    total: unset
     
     id_client_facture: 
         label: Client facturation
@@ -285,6 +283,8 @@ fields:
         min: 0
         decimals: 0
         default_value: 0
+        
+    total: unset
         
 fields_tables: 
     infos: 
@@ -816,7 +816,7 @@ cards:
             - label: Fichier PDF
               value: 
                   callback: displayPDFButton
-                  
+
 searches:
     default: 
         fields_search: 
@@ -824,10 +824,15 @@ searches:
             - ef.libelle
             - s.nom
         joins:
-            - table: propal_extrafields
-              on: a.rowid = ef.fk_object
-              alias: ef
-            - table: societe
-              on: a.fk_soc = s.rowid
-              alias: s
-
+            ef: 
+                table: commande_extrafields
+                on: a.rowid = ef.fk_object
+                alias: ef
+            s: 
+                table: societe
+                on: a.fk_soc = s.rowid
+                alias: s
+        fields_return: 
+            - a.ref
+            - s.nom
+        label_syntaxe: '<a.ref> (Client: <s.nom>)'

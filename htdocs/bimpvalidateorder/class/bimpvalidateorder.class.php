@@ -35,8 +35,8 @@ class BimpValidateOrder {
         "M" => array(
             "comm_mini" => 30,
             "fi_mini" => 10000000,
-            "comm" => array(89 => 100, 283 => 100, 62 => 100, 65 => 100),
-            "fi" => array(89 => array(0, 1000000000000), 283 => array(0000, 100000000000), 65 => array(100000, 100000000000)),
+            "comm" => array(171 => 100, 89 => 100, 283 => 100, 62 => 100, 65 => 100),
+            "fi" => array(171 => array(0, 1000000000000), 89 => array(0, 1000000000000), 283 => array(0000, 100000000000), 65 => array(100000, 100000000000)),
         )
     );
 
@@ -128,7 +128,7 @@ class BimpValidateOrder {
                 $test = "commande:rowid=" . $order->id . " && fk_statut>0";
                 $tasks = $task->getList(array('test_ferme' => $test));
                 if (count($tasks) == 0) {
-                    $tab = array("src" => $user->email, "dst" => "validationcommande@bimp.fr", "subj" => "Validation commande " . $order->ref, "txt" => "Merci de validé la commande " . $order->getNomUrl(1), "test_ferme" => $test);
+                    $tab = array("src" => $user->email, "dst" => "validationcommande@bimp.fr", "subj" => "Validation commande " . $order->ref, "txt" => "Merci de valider la commande " . $order->getNomUrl(1), "test_ferme" => $test);
                     $this->errors = array_merge($this->errors, $task->validateArray($tab));
                     $this->errors = array_merge($this->errors, $task->create());
                 }
@@ -155,10 +155,19 @@ class BimpValidateOrder {
 
         if (!$ok)
             return -1;
-
+        
+        $infoClient = "";
+            
+        if(isset($order->socid)){                
+            require_once DOL_DOCUMENT_ROOT . '/core/lib/company.lib.php';
+            $societe = new Societe($this->db);
+            $societe->fetch($order->socid);
+            $infoClient = " du client ".$societe->getNomUrl(1);
+        }
+        
         $contacts = $order->liste_contact(-1, 'internal', 0, 'SALESREPFOLL');
         foreach ($contacts as $contact)
-            mailSyn2("Commande Validée", $contact['email'], "gle@bimp.fr", "Bonjour, votre commande " . $order->getNomUrl(1) . " est validée.");
+            mailSyn2("Commande Validée", $contact['email'], "gle@bimp.fr", "Bonjour, votre commande " . $order->getNomUrl(1) .$infoClient. " est validée.");
 
 
 

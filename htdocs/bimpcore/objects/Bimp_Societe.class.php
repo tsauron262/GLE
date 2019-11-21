@@ -55,6 +55,17 @@ class Bimp_Societe extends BimpObject
         return 1;
     }
     
+    public function getNumSepa(){
+        
+        
+        if($this->getData('num_sepa') == ""){
+            $new = BimpTools::getNextRef('societe_extrafields', 'num_sepa', 'FR02ZZZ008801-', 7);
+            $this->updateField('num_sepa', $new);
+            $this->update();
+        }
+        return $this->getData('num_sepa');
+    }
+    
     public function canBuy(&$errors = array(), $msgToError = true){
         self::getTypes_entArray();
         $type_ent_sans_verif = array("TE_PRIVATE","TE_ADMIN");
@@ -62,16 +73,17 @@ class Bimp_Societe extends BimpObject
             /*
              * Entreprise onf fait les verifs...
              */
-            if(strlen($this->getData("siret")) != 14 && strlen($this->getData("siren")) != 9){
-                $errors[] = "Siren/siret client invalide :".$this->getData("siren")."/".$this->getData("siret");
-            }
+            if($this->getData('fk_pays') == 1 || $this->getData('fk_pays') < 1)
+                if(strlen($this->getData("siret")) != 14 && strlen($this->getData("siren")) != 9){
+                    $errors[] = "Siren/siret client invalide :".$this->getData("siren")."/".$this->getData("siret");
+                }
         }
-        if($this->getData("fk_typent") != "TE_PRIVATE"){
+        if(self::$types_ent_list_code[$this->getData("fk_typent")] != "TE_PRIVATE"){
             if($this->getData("mode_reglement") < 1){
-                $errors[] = "Mode réglement client invalide ";
+                $errors[] = "Mode réglement fiche client invalide ";
             }
             if($this->getData("cond_reglement_id") < 1){
-                $errors[] = "Condition réglement client invalide ";
+                $errors[] = "Condition réglement fiche client invalide ";
             }
         }
         

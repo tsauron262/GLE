@@ -257,11 +257,11 @@ function loadModalList(module, object_name, list_name, id_parent, $button, title
     if (extra_data) {
         data['extra_data'] = extra_data;
     }
-    
+
     if (extra_filters) {
         data['extra_filters'] = extra_filters;
     }
-    
+
     if (extra_joins) {
         data['extra_joins'] = extra_joins;
     }
@@ -1087,6 +1087,7 @@ function resetListSearchInputs(list_id) {
             $(this).parent().find('.datepicker_value').val('');
         });
         $row.find('.search_input_selected_label').html('').hide();
+        $row.find('.search_object_input').find('input').val('');
     }
     reloadObjectList(list_id);
 }

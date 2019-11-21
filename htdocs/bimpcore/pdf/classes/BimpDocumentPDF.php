@@ -36,6 +36,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
     public function __construct($db)
     {
+        
         $this->primary = BimpCore::getParam('pdf/primary', '000000');
         parent::__construct($db, 'P', 'A4');
         BimpObject::loadClass('bimpcommercial', 'BimpComm');
@@ -311,13 +312,12 @@ class BimpDocumentPDF extends BimpModelPDF
         $this->renderBeforeLines();
         $this->renderLines();
         $this->renderAfterLines();
-        $this->renderBottom();
-        $this->renderAfterBottom();
-        $this->renderAnnexes();
-
+        $this->renderFullBlock('renderBottom');
+        $this->renderFullBlock('renderAfterBottom');
+        $this->renderFullBlock('renderAnnexes');
+        
         $cur_page = (int) $this->pdf->getPage();
         $num_pages = (int) $this->pdf->getNumPages();
-
         if (($num_pages - $cur_page) === 1) {
             $this->pdf->deletePage($num_pages);
         }
@@ -419,13 +419,13 @@ class BimpDocumentPDF extends BimpModelPDF
 
     public function getSenderInfosHtml()
     {
-        $html = '<br/><span style="font-size: 16px; color: #' . $this->primary. ';">' . $this->fromCompany->name . '</span><br/>';
+        $html = '<br/><span style="font-size: 16px; color: #' . $this->primary . ';">' . $this->fromCompany->name . '</span><br/>';
         $html .= '<span style="font-size: 9px">' . $this->fromCompany->address . '<br/>' . $this->fromCompany->zip . ' ' . $this->fromCompany->town . '<br/>';
         if ($this->fromCompany->phone) {
             $html .= 'Tél. : ' . $this->fromCompany->phone . '<br/>';
         }
         $html .= '</span>';
-        $html .= '<span style="color: #' . $this->primary. '; font-size: 8px;">';
+        $html .= '<span style="color: #' . $this->primary . '; font-size: 8px;">';
         if ($this->fromCompany->url) {
             $html .= $this->fromCompany->url . ($this->fromCompany->email ? ' - ' : '');
         }
@@ -442,9 +442,9 @@ class BimpDocumentPDF extends BimpModelPDF
 
         $html = "";
         $nomsoc = pdfBuildThirdpartyName($this->thirdparty, $this->langs);
-        if (is_null($this->contact) || $this->contact->getFullName($langs) != $nomsoc){
+        if (is_null($this->contact) || $this->contact->getFullName($langs) != $nomsoc) {
             $html .= $nomsoc . "<br/>";
-            if(!is_null($this->contact) && is_object($this->object) && is_object($this->object->thirdparty) && $this->object->thirdparty->name_alias != "")
+            if (!is_null($this->contact) && is_object($this->object) && is_object($this->object->thirdparty) && $this->object->thirdparty->name_alias != "")
                 $html .= $this->object->thirdparty->name_alias . "<br/>";
         }
 
@@ -1061,11 +1061,14 @@ class BimpDocumentPDF extends BimpModelPDF
     {
         global $conf, $mysoc;
 
+        // /!\ ATTENTION: ne surtout pas oublier de réinitialiser toutes les variables de classe définies ici
+        // La fonction peut être appellée plusieurs fois dans certain cas. 
+        
         $this->total_remises = 0;
-
         $this->localtax1 = array();
         $this->localtax2 = array();
         $this->tva = array();
+        $this->ht = array();
 
         $i = 0;
         foreach ($this->object->lines as $line) {
@@ -1146,6 +1149,10 @@ class BimpDocumentPDF extends BimpModelPDF
             if (!isset($this->tva[$vatrate])) {
                 $this->tva[$vatrate] = 0;
             }
+            
+            if (!isset($this->ht[$vatrate])) {
+                $this->ht[$vatrate] = 0;
+            }
 
             $this->tva[$vatrate] += $tva_line;
             $this->ht[$vatrate] += $line->total_ht;
@@ -1181,7 +1188,7 @@ class BimpDocumentPDF extends BimpModelPDF
             $html .= '</td>';
             $html .= '</tr>';
         }
-        
+
         // Total HT:
         $total_ht = ($conf->multicurrency->enabled && $this->object->mylticurrency_tx != 1 ? $this->object->multicurrency_total_ht : $this->object->total_ht);
         $total_ht += (!empty($this->object->remise) ? $this->object->remise : 0) + $this->acompteHt;
@@ -1517,7 +1524,7 @@ class BimpDocumentPDF extends BimpModelPDF
     {
         
     }
-    
+
     public function renderAnnexes()
     {
         

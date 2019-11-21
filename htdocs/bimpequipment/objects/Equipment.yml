@@ -659,6 +659,9 @@ searches:
         fields_search: 
             - a.product_label
             - a.serial
+        fields_return: 
+            - a.serial
+        label_syntaxe: '<a.serial>'
         
 cards: 
     default: 

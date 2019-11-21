@@ -321,3 +321,18 @@ lists:
             - label: Sélectionner ce client
               icon: arrow-circle-right
               onclick: selectClientFromList($(this))
+
+searches: 
+    default:
+        fields_search: 
+            3: a.code_client
+        fields_return: 
+            1: a.code_client
+        label_syntaxe: <a.code_client> - <a.nom>
+        filters: 
+            a.client: 
+                in: 
+                    array: 
+                        - 1
+                        - 2
+                        - 3

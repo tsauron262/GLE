@@ -330,7 +330,7 @@ class BL_CommandeShipment extends BimpObject
             if ($this->isActionAllowed('createFacture') && $this->canSetAction('createFacture')) {
                 if (BimpObject::objectLoaded($commande)) {
                     $cliFact = $commande->getClientFacture();
-                    if(!is_null($cliFact) && $cliFact->isLoaded())
+                    if (!is_null($cliFact) && $cliFact->isLoaded())
                         $idCliFact = $cliFact->id;
                     else
                         $idCliFact = $this->getIdClient();
@@ -338,10 +338,12 @@ class BL_CommandeShipment extends BimpObject
                         'label'   => 'Créer une facture',
                         'icon'    => 'fas_file-medical',
                         'onclick' => $this->getJsActionOnclick('createFacture', array(
-                            'id_client' => (int) $idCliFact,
+                            'id_client'      => (int) $idCliFact,
                             'id_contact'     => (int) $this->getcontact(),
                             'libelle'        => addslashes(htmlentities($commande->getData('libelle'))),
-                            'cond_reglement' => (int) $commande->getData('fk_cond_reglement')
+                            'cond_reglement' => (int) $commande->getData('fk_cond_reglement'),
+                            'note_public'    => addslashes(htmlentities($commande->getData('note_public'))),
+                            'note_private'   => addslashes(htmlentities($commande->getData('note_private')))
                                 ), array(
                             'form_name'        => 'facture',
                             'on_form_submit'   => 'function($form, extra_data) { return onShipmentFactureFormSubmit($form, extra_data); } ',
@@ -657,9 +659,22 @@ class BL_CommandeShipment extends BimpObject
         $html = '';
 
         if ($this->isLoaded()) {
+//            if ((int) $this->getData('status') > 0) {
+//                $url = DOL_URL_ROOT . '/bimplogistique/bl.php?id_shipment=' . $this->id;
+//                $onclick = 'window.open(\'' . $url . '\')';
+//                $html .= '<button type="button" class="btn btn-default" onclick="' . htmlentities($onclick) . '">';
+//                $html .= '<i class="' . BimpRender::renderIconClass('fas_file-pdf') . ' iconLeft"></i>';
+//                if ((int) $this->getData('status') === self::BLCS_BROUILLON) {
+//                    $html .= 'Bon de préparation';
+//                } else {
+//                    $html .= 'Bon de livraison';
+//                }
+//                $html .= '</button>';
+//            }
             if ((int) $this->getData('status') > 0) {
-                $url = DOL_URL_ROOT . '/bimplogistique/bl.php?id_shipment=' . $this->id;
-                $onclick = 'window.open(\'' . $url . '\')';
+                $onclick = $this->getJsActionOnclick('viewPdfExpe', array(), array(
+                    'form_name' => 'pdf'
+                ));
                 $html .= '<button type="button" class="btn btn-default" onclick="' . htmlentities($onclick) . '">';
                 $html .= '<i class="' . BimpRender::renderIconClass('fas_file-pdf') . ' iconLeft"></i>';
                 if ((int) $this->getData('status') === self::BLCS_BROUILLON) {
@@ -1085,7 +1100,7 @@ class BL_CommandeShipment extends BimpObject
                             if ($line->field_exists('force_qty_1') && (int) $line->getData('force_qty_1')) {
                                 $input_name = 'line_' . $line->id . '_qty';
                                 $value = (float) $shipment_data['qty'];
-                                
+
                                 $html .= '<div class="line_qty_forced_to_1">';
                                 $html .= '<input type="hidden" name="' . $input_name . '" value="' . $value . '"/>';
 
@@ -1100,7 +1115,7 @@ class BL_CommandeShipment extends BimpObject
                                 $msg = 'L\'option "Forcer les qtés à 1" est activée pour cette ligne de commande. Il n\'est donc pas possible de répartir les unités de cette ligne en plusieurs expéditions';
                                 $html .= '<span class="warning bs-popover"' . BimpRender::renderPopoverData($msg) . '>(Forcée à 1)</span>';
                                 $html .= '</div>';
-                                
+
                                 $include_input_name = 'line_' . $this->id . '_include';
                                 $html .= '<div>' . BimpInput::renderInput('toggle', $include_input_name, ((float) $value == 0 ? 0 : 1)) . '</div>';
                                 $html .= '<script type="text/javascript">';
@@ -2293,6 +2308,17 @@ class BL_CommandeShipment extends BimpObject
             'errors'           => $errors,
             'warnings'         => $warnings,
             'success_callback' => $success_callback
+        );
+    }
+
+    public function actionViewPdfExpe($data, &$success)
+    {
+        $url = DOL_URL_ROOT . '/bimplogistique/bl.php?id_shipment=' . $this->id . '&chiffre=' . $data['chiffre'] . '&detail=' . $data['detail'];
+
+        return array(
+            'errors'           => array(),
+            'warnings'         => array(),
+            'success_callback' => 'window.open(\'' . $url . '\')'
         );
     }
 

@@ -121,8 +121,8 @@ fields:
         type: id_object
         object: client
         input: 
-            type: search_societe
-            societe_type: customer
+            card: default
+            display_results: 0
         display: 
             default:
                 type: nom

@@ -257,3 +257,18 @@ filters_panels:
                 type: check_list
                 items: 
                   1: OUI
+            categorie:
+                child: product
+                field: categorie
+            collection:
+                child: product
+                field: collection
+            nature:
+                child: product
+                field: nature
+            famille:
+                child: product
+                field: famille
+            gamme:
+                child: product
+                field: gamme

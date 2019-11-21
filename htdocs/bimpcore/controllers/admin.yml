@@ -103,3 +103,16 @@ sections:
                           params: 
                             - renderRightsTab
                             - droit
+                        
+        testSpeed:
+            label: Test SPEED
+            sections:
+                - type: custom
+                  custom: 
+                      callback: 
+                          method: renderTabs
+                          params: 
+                            - renderTestTab
+                            - testSpeed
+            
+                            

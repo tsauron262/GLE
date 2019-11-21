@@ -618,6 +618,7 @@ class BL_CommandeFournReception extends BimpObject
 
                         if (isset($reception_data['serials']) && !empty($reception_data['serials'])) {
                             // Liste des N° de série déjà ajoutés: 
+                            $html .= '<span class="bold">' . count($reception_data['serials']) . ' numéro(s) de série ajouté(s)</span>';
                             $html .= '<table class="bimp_list_table">';
                             $html .= '<tbody>';
 
@@ -697,6 +698,7 @@ class BL_CommandeFournReception extends BimpObject
                             // Liste des équipements déjà ajoutés: 
                             $id_entrepot = (int) $commandeFourn->getData('entrepot');
 
+                            $html .= '<span class="bold">' . count($reception_data['return_equipments']) . ' équipement(s) à retourner sélectionné(s)</span>';
                             $html .= '<table class="bimp_list_table">';
                             $html .= '<tbody>';
 
@@ -838,6 +840,15 @@ class BL_CommandeFournReception extends BimpObject
                 if ($isSerialisable) {
                     if (!$isReturn) {
                         // *** Affichage équipements reçus: ***
+                        $html .= '<tr>';
+                        $html .= '<td colspan="4">';
+                        if (count($reception_data['equipments'])) {
+                            $html .= '<span class="bold">' . count($reception_data['equipments']) . ' équipements ajouté(s)</span>';
+                        } else {
+                            $html .= BimpRender::renderAlerts('Aucun équipement ajouté', 'info');
+                        }
+                        $html .= '</td>';
+                        $html .= '</tr>';
                         foreach ($reception_data['equipments'] as $id_equipment => $equipment_data) {
                             $html .= '<tr>';
                             $html .= '<td style="width: 220px">';
@@ -856,7 +867,15 @@ class BL_CommandeFournReception extends BimpObject
                         }
                     } else {
                         // *** Affichage équipements retournés: ***
-                        $html .= '<tr><td colspan="4"><span class="danger">Equipements retournés:</span></td></tr>';
+                        $html .= '<tr>';
+                        $html .= '<td colspan="4">';
+                        if (count($reception_data['return_equipments'])) {
+                            $html .= '<tr><td colspan="4"><span class="danger">' . count($reception_data['return_equipments']) . ' équipements retournés</span></td></tr>';
+                        } else {
+                            $html .= BimpRender::renderAlerts('Aucun équipement à retourner ajouté', 'info');
+                        }
+                        $html .= '</td>';
+                        $html .= '</tr>';
                         foreach ($reception_data['return_equipments'] as $id_equipment => $equipment_data) {
                             $html .= '<tr>';
                             $html .= '<td style="width: 220px">';
@@ -1486,7 +1505,7 @@ class BL_CommandeFournReception extends BimpObject
                 }
 
                 if (count($rec_errors)) {
-                    $errors[] = BimpTools::getMsgFromArray(array_merge($rec_errors,$rec_warnings), 'Echec de la création de la nouvelle réception');
+                    $errors[] = BimpTools::getMsgFromArray(array_merge($rec_errors, $rec_warnings), 'Echec de la création de la nouvelle réception');
                 }
             }
 

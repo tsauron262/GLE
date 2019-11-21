@@ -10,6 +10,7 @@ js:
     1: /bimpequipment/views/js/equipment.js
     2: /bimpcommercial/views/js/object_line.js
     3: /bimpcommercial/views/js/paiement.js
+    4: /bimpcommercial/views/js/bimpcomm.js
     
 objects: 
     bimp_comm: 

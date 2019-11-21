@@ -403,7 +403,7 @@ class BimpInput
 
             case 'search_object':
                 if (isset($options['object']) && is_a($options['object'], 'BimpObject')) {
-                    $html = $options['object']->renderSearchInput($field_name, $value);
+                    $html = self::renderSearchObjectInput($options['object'], $field_name, $value, $options);
                 } else {
                     $html .= BimpRender::renderAlerts('Type d\'objet à rechercher invalide');
                 }
@@ -628,15 +628,23 @@ class BimpInput
                     $html .= ' data-max_input_name="' . (isset($options['max_input_name']) ? $options['max_input_name'] : '') . '"';
                     $html .= ' data-max_input_abs="' . (isset($options['max_input_abs']) ? $options['max_input_abs'] : 0) . '"';
                     $html .= '>';
-                    if (count($options['items']) > 1 && (!isset($options['select_all_buttons']) || (int) $options['select_all_buttons'])) {
-                        $html .= '<div class="smallActionsContainer">';
-                        $html .= '<span class="small-action" onclick="checkAll($(this).parent().parent(), \'.' . $field_name . '_check\');">';
-                        $html .= BimpRender::renderIcon('fas_check-square', 'iconLeft') . 'Tout sélectionner';
-                        $html .= '</span>';
-                        $html .= '<span class="small-action" onclick="uncheckAll($(this).parent().parent(), \'.' . $field_name . '_check\');">';
-                        $html .= BimpRender::renderIcon('far_square', 'iconLeft') . 'Tout désélectionner';
-                        $html .= '</span>';
-                        $html .= '</div>';
+                    if (count($options['items']) > 1) {
+                        if (!isset($options['search_input']) || (int) $options['search_input']) {
+                            $html .= '<div class="check_list_search_input">';
+                            $html .= '<span class="searchIcon">' . BimpRender::renderIcon('fas_search', 'iconLeft') . '</span>';
+                            $html .= self::renderInput('text', $field_name . '_search_input');
+                            $html .= '</div>';
+                        }
+                        if (!isset($options['select_all_buttons']) || (int) $options['select_all_buttons']) {
+                            $html .= '<div class="smallActionsContainer">';
+                            $html .= '<span class="small-action" onclick="checkAll($(this).parent().parent(), \'.' . $field_name . '_check\');">';
+                            $html .= BimpRender::renderIcon('fas_check-square', 'iconLeft') . 'Tout sélectionner';
+                            $html .= '</span>';
+                            $html .= '<span class="small-action" onclick="uncheckAll($(this).parent().parent(), \'.' . $field_name . '_check\');">';
+                            $html .= BimpRender::renderIcon('far_square', 'iconLeft') . 'Tout désélectionner';
+                            $html .= '</span>';
+                            $html .= '</div>';
+                        }
                     }
                     $i = 1;
                     foreach ($options['items'] as $idx => $item) {
@@ -1077,6 +1085,75 @@ class BimpInput
         return $html;
     }
 
+    public static function renderSearchObjectInput(BimpObject $object, $input_name, $value, $params)
+    {
+        $html = '';
+
+        if (!is_a($object, 'BimpObject')) {
+            return BimpRender::renderAlerts('Erreur: objet invalide');
+        }
+
+        if (!(int) $value && BimpObject::objectLoaded($object)) {
+            $value = $object->id;
+        }
+
+        if ((int) $value && !BimpObject::objectLoaded($object)) {
+            $object = BimpCache::getBimpObjectInstance($object->module, $object->object_name, (int) $value);
+        }
+
+        $search_name = (isset($params['search_name']) ? $params['search_name'] : 'default');
+        $card = (isset($params['card']) ? $params['card'] : '');
+        $max_results = (isset($params['max_results']) ? $params['max_results'] : 200);
+        $display_results = (isset($params['display_results']) ? (int) $params['display_results'] : 1);
+
+        $html .= '<div class="search_object_input_container" data-input_name="' . $input_name . '">';
+        $html .= '<input type="hidden" name="' . $input_name . '" value="' . $value . '"/>';
+
+        $html .= '<div class="search_object_input">';
+        $html .= '<span class="search_icon">' . BimpRender::renderIcon('fas_search') . '</span>';
+        $html .= '<input type="text" name="' . $input_name . '_search" value=""';
+        $html .= ' data-ajax_data="' . htmlentities(json_encode(array(
+                    'module'      => $object->module,
+                    'object_name' => $object->object_name,
+                    'search_name' => $search_name,
+                    'card'        => $card,
+                    'max_results' => $max_results
+                ))) . '"';
+        $html .= ' data-display_results="' . $display_results . '"';
+        $html .= ' autocomplete="off"/>';
+        $html .= '<span class="spinner"><i class="fa fa-spinner fa-spin"></i></span>';
+        $html .= '</div>';
+
+        if (isset($params['help']) && $params['help']) {
+            $html .= '<p class="inputHelp">';
+            $html .= $params['help'];
+            $html .= '</p>';
+        }
+
+        $html .= '<div class="search_object_result"' . (!$value ? ' style="display: none"' : '') . '>';
+        if ($value) {
+            if (BimpObject::objectLoaded($object)) {
+                if ($card) {
+                    $bc_card = new BC_Card($object, null, $card);
+                    $html .= $bc_card->renderHtml();
+                } else {
+                    $html .= $object->getName();
+                }
+            } else {
+                $html .= BimpRender::renderAlerts(BimpTools::ucfirst($object->getLabel('the')) . ' d\'ID ' . $value . ' n\'existe pas');
+            }
+        }
+        $html .= '</div>';
+
+        $html .= '<div class="no_item_selected" ' . ($value ? ' style="display: none"' : '') . '>';
+        $html .= BimpRender::renderAlerts('Aucun' . $object->e() . ' ' . $object->getLabel() . ' sélectionné' . $object->e(), 'warning');
+        $html .= '</div>';
+
+        $html .= '</div>';
+
+        return $html;
+    }
+
     public static function renderTimerInput($field_name, $value)
     {
         if (is_null($value)) {
@@ -1267,6 +1344,7 @@ class BimpInput
 
     public static function renderSearchInputContainer($input_name, $search_type, $search_on_key_up, $min_chars = 1, $content = '', $extra_data = array())
     {
+        // Utilisé uniquement dans les barres de recherche des listes. 
         $html = '';
         $html .= '<div class="searchInputContainer"';
         $html .= ' data-field_name="' . $input_name . '"';

@@ -19,6 +19,7 @@ class Bimp_CommandeFourn extends BimpComm
     public static $external_contact_type_required = false;
     public static $internal_contact_type_required = false;
     public static $discount_lines_allowed = false;
+    public static $cant_edit_zone_vente_secteurs = array();
     public static $status_list = array(
         0 => array('label' => 'Brouillon', 'icon' => 'fas_file-alt', 'classes' => array('warning')),
         1 => array('label' => 'Validée', 'icon' => 'fas_check', 'classes' => array('info')),
@@ -1150,6 +1151,10 @@ class Bimp_CommandeFourn extends BimpComm
                 }
 
                 $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $id_product);
+                
+                if ((int) $product->getData('no_fixe_prices')) {
+                    continue;
+                }
 
                 $id_fp = 0;
 

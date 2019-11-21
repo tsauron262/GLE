@@ -398,8 +398,8 @@ VarAmountOneLine=Montant variable (%% tot.) - 1 ligne avec le libellé '%s'
 # PaymentType
 PaymentTypeVIR=Virement bancaire
 PaymentTypeShortVIR=Virement bancaire
-PaymentTypePRE=Mandat de prélèvement
-PaymentTypeShortPRE=Mandat de prélèvement
+PaymentTypePRE=Mandat de prélèvement SEPA
+PaymentTypeShortPRE=Mandat de prélèvement SEPA
 PaymentTypeLIQ=Espèces
 PaymentTypeShortLIQ=Espèces
 PaymentTypeCB=Carte bancaire

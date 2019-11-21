@@ -23,7 +23,6 @@ sections:
                     1:
                       nav_tabs: 
                           
-                          
 sections: 
     - type: tabs
       tabs: 

@@ -6,6 +6,8 @@ lists:
     inventory_stock:
         extends: default
         add_btn: 0
+        sort_field: ref
+        sort_way: asc
         cols:
             type: unset
             stock: unset

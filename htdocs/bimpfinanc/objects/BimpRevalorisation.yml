@@ -51,7 +51,7 @@ fields:
         type: id_object
         object: facture
         input: 
-            type: search_object
+            card: light
         required: 1
         
     id_facture_line:
@@ -94,6 +94,7 @@ fields:
     amount: 
         label: Montant unitaire
         type: money
+        unsigned: 0
         required: 1
         
     qty: 
@@ -352,4 +353,4 @@ lists:
             desc: 
             total: 
             status:  
-            commissions: 
+            commissions:

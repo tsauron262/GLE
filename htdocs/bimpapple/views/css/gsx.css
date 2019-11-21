@@ -103,3 +103,25 @@
 /* line 121, ../scss/gsx.scss */
 .subInputsList {
   margin-bottom: 15px; }
+
+/* line 125, ../scss/gsx.scss */
+.rapairFormQuestions {
+  margin: 15px;
+  padding-left: 15px;
+  border-left: 1px dotted #B2B2B2; }
+
+/* line 131, ../scss/gsx.scss */
+.repairFormQuestion {
+  margin-top: 10px; }
+  /* line 134, ../scss/gsx.scss */
+  .repairFormQuestion .repairQuestionLabel {
+    font-weight: bold; }
+  /* line 138, ../scss/gsx.scss */
+  .repairFormQuestion .repairQuestionInput {
+    margin: 5px 15px; }
+    /* line 141, ../scss/gsx.scss */
+    .repairFormQuestion .repairQuestionInput input, .repairFormQuestion .repairQuestionInput select {
+      width: 300px; }
+    /* line 145, ../scss/gsx.scss */
+    .repairFormQuestion .repairQuestionInput textarea {
+      width: 600px; }

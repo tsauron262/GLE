@@ -5,6 +5,12 @@ class BimpRender
 
     public static function displayTagData($data)
     {
+        // Obsolète / A suppr... 
+        return self::renderTagData($data);
+    }
+
+    public static function renderTagData($data)
+    {
         $html = '';
         foreach ($data as $name => $value) {
             $html .= ' data-' . $name . '="' . $value . '"';
@@ -19,6 +25,12 @@ class BimpRender
     }
 
     public static function displayTagAttrs($params)
+    {
+        // Obsolète / A suppr... 
+        return self::renderTagAttrs($params);
+    }
+
+    public static function renderTagAttrs($params)
     {
         $html = '';
 
@@ -193,6 +205,78 @@ class BimpRender
         }
         $html .= '</ul>';
         $html .= '</div>';
+
+        return $html;
+    }
+
+    public static function renderButtonsGroup($buttons, $params)
+    {
+        $html = '';
+        $max = (isset($params['max']) ? (int) $params['max'] : 0);
+
+        $buttons_html = array();
+        foreach ($buttons as $btn) {
+            $label = isset($btn['label']) ? $btn['label'] : '';
+            $icon = isset($btn['icon']) ? $btn['icon'] : '';
+
+            if ($label || $icon) {
+                $onclick = isset($btn['onclick']) ? $btn['onclick'] : '';
+                $disabled = isset($btn['disabled']) ? (int) $btn['disabled'] : 0;
+                $popover = isset($btn['popover']) ? (string) $btn['popover'] : '';
+                $classes = array('btn');
+
+                if ($max && count($buttons) > $max) {
+                    $classes[] = 'btn-light-default';
+                } else {
+                    $classes[] = (isset($btn['type']) ? 'btn-' . $btn['type'] : 'btn-default');
+                }
+
+                if ($disabled) {
+                    $classes[] = 'disabled';
+                }
+
+                if ($popover) {
+                    $classes[] = 'bs-popover';
+                }
+
+                $button = array(
+                    'classes' => $classes,
+                    'label'   => $label,
+                    'attr'    => array(
+                        'type'    => 'button',
+                        'onclick' => $onclick
+                    )
+                );
+                if ($icon) {
+                    $button['icon_before'] = $icon;
+                }
+                if ($popover) {
+                    $button['data']['toggle'] = 'popover';
+                    $button['data']['trigger'] = 'hover';
+                    $button['data']['container'] = 'body';
+                    $button['data']['placement'] = 'top';
+                    $button['data']['html'] = 'true';
+                    $button['data']['content'] = $popover;
+                }
+                
+                $buttons_html[] = BimpRender::renderButton($button, 'button');
+            }
+        }
+
+        if (count($buttons_html)) {
+            if ($max && count($buttons) > $max) {
+                $dp_label = (isset($params['dropdown_label']) ? $params['dropdown_label'] : 'Actions');
+                $dp_icon = (isset($params['dropdown_icon']) ? $params['dropdown_icon'] : 'fas_cogs');
+                $html .= BimpRender::renderDropDownButton($dp_label, $buttons_html, array(
+                            'icon'       => $dp_icon,
+                            'menu_right' => (isset($params['dropdown_menu_right']) ? (int) $params['dropdown_menu_right'] : 0)
+                ));
+            } else {
+                foreach ($buttons_html as $btn_html) {
+                    $html .= $btn_html;
+                }
+            }
+        }
 
         return $html;
     }
@@ -800,6 +884,55 @@ class BimpRender
         $html .= '<div style="margin-top: 10px; padding: 5px 0;font-size: 16px;background-color: #DCDCDC;text-align: center">';
         $html .= 'Total: ';
         $html .= '<span class="compteur_caisse_total">0</span> &euro;';
+        $html .= '</div>';
+        $html .= '</div>';
+
+        return $html;
+    }
+
+    public static function renderRecursiveArrayContent($array, $params)
+    {
+        $html = '';
+
+        $foldable = (isset($params['foldable']) && (int) $params['foldable']);
+        $title = (isset($params['title']) ? (string) $params['title'] : '');
+        $open = (isset($params['open']) ? (int) $params['open'] : 1);
+
+        $html .= '<div class="array_content_container' . (($foldable && $title) ? ' foldable ' . ($open ? 'open' : 'closed') : '') . '">';
+
+        if ($foldable && $title) {
+            $html .= '<div class="folding_buttons">';
+            $html .= '<span class="open_all">' . BimpRender::renderIcon('fas_plus', 'iconLeft') . 'tout déplier</span>';
+            $html .= '<span class="close_all">' . BimpRender::renderIcon('fas_minus', 'iconLeft') . 'tout replier</span>';
+            $html .= '</div>';
+        }
+
+        if ($title) {
+            $html .= '<div class="array_content_caption">';
+            $html .= '<span class="title">' . $title . '</span>';
+            $html .= '</div>';
+        }
+
+        $html .= '<div class="array_content">';
+        if (is_array($array)) {
+            foreach ($array as $label => $value) {
+                if (is_array($value)) {
+                    $html .= self::renderRecursiveArrayContent($value, array(
+                                'foldable' => $foldable,
+                                'title'    => $label,
+                                'open'     => $open
+                    ));
+                } else {
+                    $html .= '<div class="array_content_row">';
+                    $html .= '<span class="array_content_label">' . $label . ': </span>';
+                    $html .= '<span class="array_content_value">' . $value . '</span>';
+                    $html .= '</div>';
+                }
+            }
+        } elseif (is_string($array)) {
+            $html .= $array;
+        }
+
         $html .= '</div>';
         $html .= '</div>';
 

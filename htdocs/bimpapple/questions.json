@@ -1,0 +1,1093 @@
+
+{
+    "questionDetails": [
+        {
+            "templateId": "T603211",
+            "trees": [
+                {
+                    "questions": [
+                        {
+                            "questionPhrase": "Please inform the customer we request they answer a series of questions to better understand the issue.",
+                            "answerType": "INT",
+                            "optional": true,
+                            "questionId": "I65875"
+                        },
+                        {
+                            "questionPhrase": "Document the reported issue and how the issue occurred according to the customer.",
+                            "answerType": "FFB",
+                            "optional": false,
+                            "questionId": "Q65876"
+                        },
+                        {
+                            "questionPhrase": "Was property external to the Apple computer, accessory, or device damaged?",
+                            "answerType": "RAD",
+                            "optional": false,
+                            "questionId": "Q65878",
+                            "answers": [
+                                {
+                                    "answerPhrase": "Yes",
+                                    "questions": [
+                                        {
+                                            "questionPhrase": "Document the damage using the customer's own words.",
+                                            "answerType": "FFB",
+                                            "optional": false,
+                                            "questionId": "Q65877"
+                                        }
+                                    ],
+                                    "answerId": "A20062"
+                                },
+                                {
+                                    "answerPhrase": "No",
+                                    "answerId": "A20063"
+                                }
+                            ]
+                        },
+                        {
+                            "questionPhrase": "Was there discomfort or injury?",
+                            "answerType": "RAD",
+                            "optional": false,
+                            "questionId": "Q65879",
+                            "answers": [
+                                {
+                                    "answerPhrase": "Yes",
+                                    "questions": [
+                                        {
+                                            "questionPhrase": "Document the discomfort or injury using the customer's own words",
+                                            "answerType": "FFB",
+                                            "optional": false,
+                                            "questionId": "Q65880"
+                                        },
+                                        {
+                                            "questionPhrase": "Who is the affected party?",
+                                            "answerType": "FFB",
+                                            "optional": false,
+                                            "questionId": "Q65881"
+                                        },
+                                        {
+                                            "questionPhrase": "Is the affected party a Minor?",
+                                            "answerType": "RAD",
+                                            "optional": false,
+                                            "questionId": "Q65882",
+                                            "answers": [
+                                                {
+                                                    "answerPhrase": "Yes",
+                                                    "questions": [
+                                                        {
+                                                            "questionPhrase": "Is the affected party reporting the issue?",
+                                                            "answerType": "RAD",
+                                                            "optional": false,
+                                                            "questionId": "Q65883",
+                                                            "answers": [
+                                                                {
+                                                                    "answerPhrase": "Yes",
+                                                                    "questions": [
+                                                                        {
+                                                                            "questionPhrase": "Was medical attention required?",
+                                                                            "answerType": "RAD",
+                                                                            "optional": false,
+                                                                            "questionId": "Q65885",
+                                                                            "answers": [
+                                                                                {
+                                                                                    "answerPhrase": "Yes",
+                                                                                    "questions": [
+                                                                                        {
+                                                                                            "questionPhrase": "Document medical attention required using the customer's own words",
+                                                                                            "answerType": "FFB",
+                                                                                            "optional": false,
+                                                                                            "questionId": "Q65886"
+                                                                                        }
+                                                                                    ],
+                                                                                    "answerId": "A20062"
+                                                                                },
+                                                                                {
+                                                                                    "answerPhrase": "No",
+                                                                                    "answerId": "A20063"
+                                                                                }
+                                                                            ]
+                                                                        }
+                                                                    ],
+                                                                    "answerId": "A20062"
+                                                                },
+                                                                {
+                                                                    "answerPhrase": "No",
+                                                                    "questions": [
+                                                                        {
+                                                                            "questionPhrase": "What is the customer's relationship to the affected party?",
+                                                                            "answerType": "FFB",
+                                                                            "optional": false,
+                                                                            "questionId": "Q65884"
+                                                                        },
+                                                                        {
+                                                                            "questionPhrase": "Was medical attention required?",
+                                                                            "answerType": "RAD",
+                                                                            "optional": false,
+                                                                            "questionId": "Q65885",
+                                                                            "answers": [
+                                                                                {
+                                                                                    "answerPhrase": "Yes",
+                                                                                    "questions": [
+                                                                                        {
+                                                                                            "questionPhrase": "Document medical attention required using the customer's own words",
+                                                                                            "answerType": "FFB",
+                                                                                            "optional": false,
+                                                                                            "questionId": "Q65886"
+                                                                                        }
+                                                                                    ],
+                                                                                    "answerId": "A20062"
+                                                                                },
+                                                                                {
+                                                                                    "answerPhrase": "No",
+                                                                                    "answerId": "A20063"
+                                                                                }
+                                                                            ]
+                                                                        }
+                                                                    ],
+                                                                    "answerId": "A20063"
+                                                                }
+                                                            ]
+                                                        }
+                                                    ],
+                                                    "answerId": "A20062"
+                                                },
+                                                {
+                                                    "answerPhrase": "No",
+                                                    "questions": [
+                                                        {
+                                                            "questionPhrase": "Is the affected party reporting the issue?",
+                                                            "answerType": "RAD",
+                                                            "optional": false,
+                                                            "questionId": "Q65883",
+                                                            "answers": [
+                                                                {
+                                                                    "answerPhrase": "Yes",
+                                                                    "questions": [
+                                                                        {
+                                                                            "questionPhrase": "Was medical attention required?",
+                                                                            "answerType": "RAD",
+                                                                            "optional": false,
+                                                                            "questionId": "Q65885",
+                                                                            "answers": [
+                                                                                {
+                                                                                    "answerPhrase": "Yes",
+                                                                                    "questions": [
+                                                                                        {
+                                                                                            "questionPhrase": "Document medical attention required using the customer's own words",
+                                                                                            "answerType": "FFB",
+                                                                                            "optional": false,
+                                                                                            "questionId": "Q65886"
+                                                                                        }
+                                                                                    ],
+                                                                                    "answerId": "A20062"
+                                                                                },
+                                                                                {
+                                                                                    "answerPhrase": "No",
+                                                                                    "answerId": "A20063"
+                                                                                }
+                                                                            ]
+                                                                        }
+                                                                    ],
+                                                                    "answerId": "A20062"
+                                                                },
+                                                                {
+                                                                    "answerPhrase": "No",
+                                                                    "questions": [
+                                                                        {
+                                                                            "questionPhrase": "What is the customer's relationship to the affected party?",
+                                                                            "answerType": "FFB",
+                                                                            "optional": false,
+                                                                            "questionId": "Q65884"
+                                                                        },
+                                                                        {
+                                                                            "questionPhrase": "Was medical attention required?",
+                                                                            "answerType": "RAD",
+                                                                            "optional": false,
+                                                                            "questionId": "Q65885",
+                                                                            "answers": [
+                                                                                {
+                                                                                    "answerPhrase": "Yes",
+                                                                                    "questions": [
+                                                                                        {
+                                                                                            "questionPhrase": "Document medical attention required using the customer's own words",
+                                                                                            "answerType": "FFB",
+                                                                                            "optional": false,
+                                                                                            "questionId": "Q65886"
+                                                                                        }
+                                                                                    ],
+                                                                                    "answerId": "A20062"
+                                                                                },
+                                                                                {
+                                                                                    "answerPhrase": "No",
+                                                                                    "answerId": "A20063"
+                                                                                }
+                                                                            ]
+                                                                        }
+                                                                    ],
+                                                                    "answerId": "A20063"
+                                                                }
+                                                            ]
+                                                        }
+                                                    ],
+                                                    "answerId": "A20063"
+                                                }
+                                            ]
+                                        }
+                                    ],
+                                    "answerId": "A20062"
+                                },
+                                {
+                                    "answerPhrase": "No",
+                                    "answerId": "A20063"
+                                }
+                            ]
+                        },
+                        {
+                            "questionPhrase": "Read but do not ask the customer; Based on the questions asked, documentation reviewed, and any consultation paths available, do you believe this is a potential safety issue?",
+                            "answerType": "DPD",
+                            "optional": false,
+                            "questionId": "Q66009",
+                            "answers": [
+                                {
+                                    "answerPhrase": "Yes",
+                                    "questions": [
+                                        {
+                                            "questionPhrase": "Please inform the customer that to fully investigate their report there are a series of additional questions we are required to ask. These questions may require some time to ask and answer.",
+                                            "answerType": "INT",
+                                            "optional": true,
+                                            "questionId": "I65895"
+                                        },
+                                        {
+                                            "questionPhrase": "Where did the issue occur?\nPlease document the City, State/Province, Setting (home, hotel, etc.), and physical location (desk, table, bed, etc.) the issue occurred.",
+                                            "answerType": "FFB",
+                                            "optional": false,
+                                            "questionId": "Q65890"
+                                        },
+                                        {
+                                            "questionPhrase": "Was the issue related to Heat?",
+                                            "answerType": "RAD",
+                                            "optional": false,
+                                            "questionId": "Q65891",
+                                            "answers": [
+                                                {
+                                                    "answerPhrase": "Yes",
+                                                    "questions": [
+                                                        {
+                                                            "questionPhrase": "Is anything on the device melted or discolored?",
+                                                            "answerType": "RAD",
+                                                            "optional": false,
+                                                            "questionId": "Q65922",
+                                                            "answers": [
+                                                                {
+                                                                    "answerPhrase": "Yes",
+                                                                    "questions": [
+                                                                        {
+                                                                            "questionPhrase": "Is the damage to the device or an accessory?\n(cable, power adapter, etc.)",
+                                                                            "answerType": "RAD",
+                                                                            "optional": false,
+                                                                            "questionId": "Q65923",
+                                                                            "answers": [
+                                                                                {
+                                                                                    "answerPhrase": "Device",
+                                                                                    "questions": [
+                                                                                        {
+                                                                                            "questionPhrase": "Describe what is melted.",
+                                                                                            "answerType": "FFB",
+                                                                                            "optional": false,
+                                                                                            "questionId": "Q65924"
+                                                                                        },
+                                                                                        {
+                                                                                            "questionPhrase": "Did the device show the thermal alert?",
+                                                                                            "answerType": "RAD",
+                                                                                            "optional": false,
+                                                                                            "questionId": "Q65926",
+                                                                                            "answers": [
+                                                                                                {
+                                                                                                    "answerPhrase": "Yes",
+                                                                                                    "answerId": "A20062"
+                                                                                                },
+                                                                                                {
+                                                                                                    "answerPhrase": "No",
+                                                                                                    "answerId": "A20063"
+                                                                                                }
+                                                                                            ]
+                                                                                        }
+                                                                                    ],
+                                                                                    "answerId": "A69231"
+                                                                                },
+                                                                                {
+                                                                                    "answerPhrase": "Accessory",
+                                                                                    "questions": [
+                                                                                        {
+                                                                                            "questionPhrase": "Describe what is melted.",
+                                                                                            "answerType": "FFB",
+                                                                                            "optional": false,
+                                                                                            "questionId": "Q65925"
+                                                                                        }
+                                                                                    ],
+                                                                                    "answerId": "A69232"
+                                                                                }
+                                                                            ]
+                                                                        }
+                                                                    ],
+                                                                    "answerId": "A20062"
+                                                                },
+                                                                {
+                                                                    "answerPhrase": "No",
+                                                                    "answerId": "A20063"
+                                                                }
+                                                            ]
+                                                        }
+                                                    ],
+                                                    "answerId": "A20062"
+                                                },
+                                                {
+                                                    "answerPhrase": "No",
+                                                    "answerId": "A20063"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "questionPhrase": "Were Flames present?",
+                                            "answerType": "RAD",
+                                            "optional": false,
+                                            "questionId": "Q65892",
+                                            "answers": [
+                                                {
+                                                    "answerPhrase": "Yes",
+                                                    "questions": [
+                                                        {
+                                                            "questionPhrase": "Where were the flames coming from? (Headphone port, 30 pin/lightning connector, sides, cable, power adapter, etc.)",
+                                                            "answerType": "FFB",
+                                                            "optional": false,
+                                                            "questionId": "Q65927"
+                                                        },
+                                                        {
+                                                            "questionPhrase": "Were the flames the result of improper use or accidental damage?\n(Disassembly, Tampering, willful destruction, acts of God)",
+                                                            "answerType": "RAD",
+                                                            "optional": false,
+                                                            "questionId": "Q65928",
+                                                            "answers": [
+                                                                {
+                                                                    "answerPhrase": "Yes",
+                                                                    "questions": [
+                                                                        {
+                                                                            "questionPhrase": "How did the accidental damage/improper use occur?",
+                                                                            "answerType": "FFB",
+                                                                            "optional": false,
+                                                                            "questionId": "Q65929"
+                                                                        }
+                                                                    ],
+                                                                    "answerId": "A20062"
+                                                                },
+                                                                {
+                                                                    "answerPhrase": "No",
+                                                                    "answerId": "A20063"
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "questionPhrase": "Did the flames have to be extinguished, or did they die out on their own?",
+                                                            "answerType": "RAD",
+                                                            "optional": false,
+                                                            "questionId": "Q65930",
+                                                            "answers": [
+                                                                {
+                                                                    "answerPhrase": "Extinguished",
+                                                                    "answerId": "A69233"
+                                                                },
+                                                                {
+                                                                    "answerPhrase": "Dies out on its own",
+                                                                    "answerId": "A69234"
+                                                                }
+                                                            ]
+                                                        }
+                                                    ],
+                                                    "answerId": "A20062"
+                                                },
+                                                {
+                                                    "answerPhrase": "No",
+                                                    "answerId": "A20063"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "questionPhrase": "Was Smoke present?",
+                                            "answerType": "RAD",
+                                            "optional": false,
+                                            "questionId": "Q65893",
+                                            "answers": [
+                                                {
+                                                    "answerPhrase": "Yes",
+                                                    "questions": [
+                                                        {
+                                                            "questionPhrase": "Where was smoke emanating from and what color was the smoke?",
+                                                            "answerType": "FFB",
+                                                            "optional": false,
+                                                            "questionId": "Q65903"
+                                                        }
+                                                    ],
+                                                    "answerId": "A20062"
+                                                },
+                                                {
+                                                    "answerPhrase": "No",
+                                                    "answerId": "A20063"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "questionPhrase": "Was the issue related to Electric Shock?",
+                                            "answerType": "RAD",
+                                            "optional": false,
+                                            "questionId": "Q65913",
+                                            "answers": [
+                                                {
+                                                    "answerPhrase": "Yes",
+                                                    "questions": [
+                                                        {
+                                                            "questionPhrase": "Is there a case on the device?",
+                                                            "answerType": "RAD",
+                                                            "optional": false,
+                                                            "questionId": "Q65932",
+                                                            "answers": [
+                                                                {
+                                                                    "answerPhrase": "Yes",
+                                                                    "questions": [
+                                                                        {
+                                                                            "questionPhrase": "What is the make and model of the case?",
+                                                                            "answerType": "FFB",
+                                                                            "optional": false,
+                                                                            "questionId": "Q65933"
+                                                                        },
+                                                                        {
+                                                                            "questionPhrase": "Was the shock continuous or brief?",
+                                                                            "answerType": "RAD",
+                                                                            "optional": false,
+                                                                            "questionId": "Q65934",
+                                                                            "answers": [
+                                                                                {
+                                                                                    "answerPhrase": "Continuous",
+                                                                                    "questions": [
+                                                                                        {
+                                                                                            "questionPhrase": "Does the shock stop when the customer disconnects the USB cable?\n(not connected to the power adapter)",
+                                                                                            "answerType": "RAD",
+                                                                                            "optional": false,
+                                                                                            "questionId": "Q65935",
+                                                                                            "answers": [
+                                                                                                {
+                                                                                                    "answerPhrase": "Yes",
+                                                                                                    "answerId": "A20062"
+                                                                                                },
+                                                                                                {
+                                                                                                    "answerPhrase": "No",
+                                                                                                    "answerId": "A20063"
+                                                                                                }
+                                                                                            ]
+                                                                                        }
+                                                                                    ],
+                                                                                    "answerId": "A69235"
+                                                                                },
+                                                                                {
+                                                                                    "answerPhrase": "Brief",
+                                                                                    "answerId": "A69236"
+                                                                                }
+                                                                            ]
+                                                                        }
+                                                                    ],
+                                                                    "answerId": "A20062"
+                                                                },
+                                                                {
+                                                                    "answerPhrase": "No",
+                                                                    "answerId": "A20063"
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "questionPhrase": "What part of the device shocked the customer?\n(case, cable, power adapter,glass, etc.)",
+                                                            "answerType": "FFB",
+                                                            "optional": false,
+                                                            "questionId": "Q65931"
+                                                        }
+                                                    ],
+                                                    "answerId": "A20062"
+                                                },
+                                                {
+                                                    "answerPhrase": "No",
+                                                    "answerId": "A20063"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "questionPhrase": "Is the issue related to broken glass?",
+                                            "answerType": "RAD",
+                                            "optional": false,
+                                            "questionId": "Q65936",
+                                            "answers": [
+                                                {
+                                                    "answerPhrase": "Yes",
+                                                    "questions": [
+                                                        {
+                                                            "questionPhrase": "How did the glass break?",
+                                                            "answerType": "FFB",
+                                                            "optional": false,
+                                                            "questionId": "Q65937"
+                                                        },
+                                                        {
+                                                            "questionPhrase": "Did the customer knowingly continue to use the device with broken glass?",
+                                                            "answerType": "RAD",
+                                                            "optional": false,
+                                                            "questionId": "Q65938",
+                                                            "answers": [
+                                                                {
+                                                                    "answerPhrase": "Yes",
+                                                                    "answerId": "A20062"
+                                                                },
+                                                                {
+                                                                    "answerPhrase": "No",
+                                                                    "questions": [
+                                                                        {
+                                                                            "questionPhrase": "How did the customer receive the cut?",
+                                                                            "answerType": "FFB",
+                                                                            "optional": false,
+                                                                            "questionId": "Q65939"
+                                                                        }
+                                                                    ],
+                                                                    "answerId": "A20063"
+                                                                }
+                                                            ]
+                                                        }
+                                                    ],
+                                                    "answerId": "A20062"
+                                                },
+                                                {
+                                                    "answerPhrase": "No",
+                                                    "answerId": "A20063"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "questionPhrase": "Was the issue related to fluid leaking from the device?",
+                                            "answerType": "RAD",
+                                            "optional": false,
+                                            "questionId": "Q65940",
+                                            "answers": [
+                                                {
+                                                    "answerPhrase": "Yes",
+                                                    "questions": [
+                                                        {
+                                                            "questionPhrase": "What color is the fluid?",
+                                                            "answerType": "FFB",
+                                                            "optional": false,
+                                                            "questionId": "Q65941"
+                                                        },
+                                                        {
+                                                            "questionPhrase": "How much fluid is leaking from the device?",
+                                                            "answerType": "FFB",
+                                                            "optional": false,
+                                                            "questionId": "Q65942"
+                                                        }
+                                                    ],
+                                                    "answerId": "A20062"
+                                                },
+                                                {
+                                                    "answerPhrase": "No",
+                                                    "answerId": "A20063"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "questionPhrase": "Is the issue related to sparks?",
+                                            "answerType": "RAD",
+                                            "optional": false,
+                                            "questionId": "Q65943",
+                                            "answers": [
+                                                {
+                                                    "answerPhrase": "Yes",
+                                                    "questions": [
+                                                        {
+                                                            "questionPhrase": "Where were the sparks coming from?",
+                                                            "answerType": "FFB",
+                                                            "optional": false,
+                                                            "questionId": "Q65944"
+                                                        }
+                                                    ],
+                                                    "answerId": "A20062"
+                                                },
+                                                {
+                                                    "answerPhrase": "No",
+                                                    "answerId": "A20063"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "questionPhrase": "Are there any additional issues or concerns to report?",
+                                            "answerType": "RAD",
+                                            "optional": false,
+                                            "questionId": "Q65919",
+                                            "answers": [
+                                                {
+                                                    "answerPhrase": "Yes",
+                                                    "questions": [
+                                                        {
+                                                            "questionPhrase": "Please describe the additional issues or concerns.",
+                                                            "answerType": "FFB",
+                                                            "optional": false,
+                                                            "questionId": "Q65920"
+                                                        },
+                                                        {
+                                                            "questionPhrase": "Please gather and include in your escalation any relevant additional documentation, pictures, fire department reports, medical reports, etc., and escalate this potential safety issue.",
+                                                            "answerType": "INT",
+                                                            "optional": true,
+                                                            "questionId": "I65921"
+                                                        }
+                                                    ],
+                                                    "answerId": "A20062"
+                                                },
+                                                {
+                                                    "answerPhrase": "No",
+                                                    "questions": [
+                                                        {
+                                                            "questionPhrase": "Please gather and include in your escalation any relevant additional documentation, pictures, fire department reports, medical reports, etc., and escalate this potential safety issue.",
+                                                            "answerType": "INT",
+                                                            "optional": true,
+                                                            "questionId": "I65921"
+                                                        }
+                                                    ],
+                                                    "answerId": "A20063"
+                                                }
+                                            ]
+                                        }
+                                    ],
+                                    "answerId": "A20062"
+                                },
+                                {
+                                    "answerPhrase": "Not Sure",
+                                    "questions": [
+                                        {
+                                            "questionPhrase": "Please inform the customer that to fully investigate their report there are a series of additional questions we are required to ask. These questions may require some time to ask and answer.",
+                                            "answerType": "INT",
+                                            "optional": true,
+                                            "questionId": "I65895"
+                                        },
+                                        {
+                                            "questionPhrase": "Where did the issue occur?\nPlease document the City, State/Province, Setting (home, hotel, etc.), and physical location (desk, table, bed, etc.) the issue occurred.",
+                                            "answerType": "FFB",
+                                            "optional": false,
+                                            "questionId": "Q65890"
+                                        },
+                                        {
+                                            "questionPhrase": "Was the issue related to Heat?",
+                                            "answerType": "RAD",
+                                            "optional": false,
+                                            "questionId": "Q65891",
+                                            "answers": [
+                                                {
+                                                    "answerPhrase": "Yes",
+                                                    "questions": [
+                                                        {
+                                                            "questionPhrase": "Is anything on the device melted or discolored?",
+                                                            "answerType": "RAD",
+                                                            "optional": false,
+                                                            "questionId": "Q65922",
+                                                            "answers": [
+                                                                {
+                                                                    "answerPhrase": "Yes",
+                                                                    "questions": [
+                                                                        {
+                                                                            "questionPhrase": "Is the damage to the device or an accessory?\n(cable, power adapter, etc.)",
+                                                                            "answerType": "RAD",
+                                                                            "optional": false,
+                                                                            "questionId": "Q65923",
+                                                                            "answers": [
+                                                                                {
+                                                                                    "answerPhrase": "Device",
+                                                                                    "questions": [
+                                                                                        {
+                                                                                            "questionPhrase": "Describe what is melted.",
+                                                                                            "answerType": "FFB",
+                                                                                            "optional": false,
+                                                                                            "questionId": "Q65924"
+                                                                                        },
+                                                                                        {
+                                                                                            "questionPhrase": "Did the device show the thermal alert?",
+                                                                                            "answerType": "RAD",
+                                                                                            "optional": false,
+                                                                                            "questionId": "Q65926",
+                                                                                            "answers": [
+                                                                                                {
+                                                                                                    "answerPhrase": "Yes",
+                                                                                                    "answerId": "A20062"
+                                                                                                },
+                                                                                                {
+                                                                                                    "answerPhrase": "No",
+                                                                                                    "answerId": "A20063"
+                                                                                                }
+                                                                                            ]
+                                                                                        }
+                                                                                    ],
+                                                                                    "answerId": "A69231"
+                                                                                },
+                                                                                {
+                                                                                    "answerPhrase": "Accessory",
+                                                                                    "questions": [
+                                                                                        {
+                                                                                            "questionPhrase": "Describe what is melted.",
+                                                                                            "answerType": "FFB",
+                                                                                            "optional": false,
+                                                                                            "questionId": "Q65925"
+                                                                                        }
+                                                                                    ],
+                                                                                    "answerId": "A69232"
+                                                                                }
+                                                                            ]
+                                                                        }
+                                                                    ],
+                                                                    "answerId": "A20062"
+                                                                },
+                                                                {
+                                                                    "answerPhrase": "No",
+                                                                    "answerId": "A20063"
+                                                                }
+                                                            ]
+                                                        }
+                                                    ],
+                                                    "answerId": "A20062"
+                                                },
+                                                {
+                                                    "answerPhrase": "No",
+                                                    "answerId": "A20063"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "questionPhrase": "Were Flames present?",
+                                            "answerType": "RAD",
+                                            "optional": false,
+                                            "questionId": "Q65892",
+                                            "answers": [
+                                                {
+                                                    "answerPhrase": "Yes",
+                                                    "questions": [
+                                                        {
+                                                            "questionPhrase": "Where were the flames coming from? (Headphone port, 30 pin/lightning connector, sides, cable, power adapter, etc.)",
+                                                            "answerType": "FFB",
+                                                            "optional": false,
+                                                            "questionId": "Q65927"
+                                                        },
+                                                        {
+                                                            "questionPhrase": "Were the flames the result of improper use or accidental damage?\n(Disassembly, Tampering, willful destruction, acts of God)",
+                                                            "answerType": "RAD",
+                                                            "optional": false,
+                                                            "questionId": "Q65928",
+                                                            "answers": [
+                                                                {
+                                                                    "answerPhrase": "Yes",
+                                                                    "questions": [
+                                                                        {
+                                                                            "questionPhrase": "How did the accidental damage/improper use occur?",
+                                                                            "answerType": "FFB",
+                                                                            "optional": false,
+                                                                            "questionId": "Q65929"
+                                                                        }
+                                                                    ],
+                                                                    "answerId": "A20062"
+                                                                },
+                                                                {
+                                                                    "answerPhrase": "No",
+                                                                    "answerId": "A20063"
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "questionPhrase": "Did the flames have to be extinguished, or did they die out on their own?",
+                                                            "answerType": "RAD",
+                                                            "optional": false,
+                                                            "questionId": "Q65930",
+                                                            "answers": [
+                                                                {
+                                                                    "answerPhrase": "Extinguished",
+                                                                    "answerId": "A69233"
+                                                                },
+                                                                {
+                                                                    "answerPhrase": "Dies out on its own",
+                                                                    "answerId": "A69234"
+                                                                }
+                                                            ]
+                                                        }
+                                                    ],
+                                                    "answerId": "A20062"
+                                                },
+                                                {
+                                                    "answerPhrase": "No",
+                                                    "answerId": "A20063"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "questionPhrase": "Was Smoke present?",
+                                            "answerType": "RAD",
+                                            "optional": false,
+                                            "questionId": "Q65893",
+                                            "answers": [
+                                                {
+                                                    "answerPhrase": "Yes",
+                                                    "questions": [
+                                                        {
+                                                            "questionPhrase": "Where was smoke emanating from and what color was the smoke?",
+                                                            "answerType": "FFB",
+                                                            "optional": false,
+                                                            "questionId": "Q65903"
+                                                        }
+                                                    ],
+                                                    "answerId": "A20062"
+                                                },
+                                                {
+                                                    "answerPhrase": "No",
+                                                    "answerId": "A20063"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "questionPhrase": "Was the issue related to Electric Shock?",
+                                            "answerType": "RAD",
+                                            "optional": false,
+                                            "questionId": "Q65913",
+                                            "answers": [
+                                                {
+                                                    "answerPhrase": "Yes",
+                                                    "questions": [
+                                                        {
+                                                            "questionPhrase": "Is there a case on the device?",
+                                                            "answerType": "RAD",
+                                                            "optional": false,
+                                                            "questionId": "Q65932",
+                                                            "answers": [
+                                                                {
+                                                                    "answerPhrase": "Yes",
+                                                                    "questions": [
+                                                                        {
+                                                                            "questionPhrase": "What is the make and model of the case?",
+                                                                            "answerType": "FFB",
+                                                                            "optional": false,
+                                                                            "questionId": "Q65933"
+                                                                        },
+                                                                        {
+                                                                            "questionPhrase": "Was the shock continuous or brief?",
+                                                                            "answerType": "RAD",
+                                                                            "optional": false,
+                                                                            "questionId": "Q65934",
+                                                                            "answers": [
+                                                                                {
+                                                                                    "answerPhrase": "Continuous",
+                                                                                    "questions": [
+                                                                                        {
+                                                                                            "questionPhrase": "Does the shock stop when the customer disconnects the USB cable?\n(not connected to the power adapter)",
+                                                                                            "answerType": "RAD",
+                                                                                            "optional": false,
+                                                                                            "questionId": "Q65935",
+                                                                                            "answers": [
+                                                                                                {
+                                                                                                    "answerPhrase": "Yes",
+                                                                                                    "answerId": "A20062"
+                                                                                                },
+                                                                                                {
+                                                                                                    "answerPhrase": "No",
+                                                                                                    "answerId": "A20063"
+                                                                                                }
+                                                                                            ]
+                                                                                        }
+                                                                                    ],
+                                                                                    "answerId": "A69235"
+                                                                                },
+                                                                                {
+                                                                                    "answerPhrase": "Brief",
+                                                                                    "answerId": "A69236"
+                                                                                }
+                                                                            ]
+                                                                        }
+                                                                    ],
+                                                                    "answerId": "A20062"
+                                                                },
+                                                                {
+                                                                    "answerPhrase": "No",
+                                                                    "answerId": "A20063"
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "questionPhrase": "What part of the device shocked the customer?\n(case, cable, power adapter,glass, etc.)",
+                                                            "answerType": "FFB",
+                                                            "optional": false,
+                                                            "questionId": "Q65931"
+                                                        }
+                                                    ],
+                                                    "answerId": "A20062"
+                                                },
+                                                {
+                                                    "answerPhrase": "No",
+                                                    "answerId": "A20063"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "questionPhrase": "Is the issue related to broken glass?",
+                                            "answerType": "RAD",
+                                            "optional": false,
+                                            "questionId": "Q65936",
+                                            "answers": [
+                                                {
+                                                    "answerPhrase": "Yes",
+                                                    "questions": [
+                                                        {
+                                                            "questionPhrase": "How did the glass break?",
+                                                            "answerType": "FFB",
+                                                            "optional": false,
+                                                            "questionId": "Q65937"
+                                                        },
+                                                        {
+                                                            "questionPhrase": "Did the customer knowingly continue to use the device with broken glass?",
+                                                            "answerType": "RAD",
+                                                            "optional": false,
+                                                            "questionId": "Q65938",
+                                                            "answers": [
+                                                                {
+                                                                    "answerPhrase": "Yes",
+                                                                    "answerId": "A20062"
+                                                                },
+                                                                {
+                                                                    "answerPhrase": "No",
+                                                                    "questions": [
+                                                                        {
+                                                                            "questionPhrase": "How did the customer receive the cut?",
+                                                                            "answerType": "FFB",
+                                                                            "optional": false,
+                                                                            "questionId": "Q65939"
+                                                                        }
+                                                                    ],
+                                                                    "answerId": "A20063"
+                                                                }
+                                                            ]
+                                                        }
+                                                    ],
+                                                    "answerId": "A20062"
+                                                },
+                                                {
+                                                    "answerPhrase": "No",
+                                                    "answerId": "A20063"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "questionPhrase": "Was the issue related to fluid leaking from the device?",
+                                            "answerType": "RAD",
+                                            "optional": false,
+                                            "questionId": "Q65940",
+                                            "answers": [
+                                                {
+                                                    "answerPhrase": "Yes",
+                                                    "questions": [
+                                                        {
+                                                            "questionPhrase": "What color is the fluid?",
+                                                            "answerType": "FFB",
+                                                            "optional": false,
+                                                            "questionId": "Q65941"
+                                                        },
+                                                        {
+                                                            "questionPhrase": "How much fluid is leaking from the device?",
+                                                            "answerType": "FFB",
+                                                            "optional": false,
+                                                            "questionId": "Q65942"
+                                                        }
+                                                    ],
+                                                    "answerId": "A20062"
+                                                },
+                                                {
+                                                    "answerPhrase": "No",
+                                                    "answerId": "A20063"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "questionPhrase": "Is the issue related to sparks?",
+                                            "answerType": "RAD",
+                                            "optional": false,
+                                            "questionId": "Q65943",
+                                            "answers": [
+                                                {
+                                                    "answerPhrase": "Yes",
+                                                    "questions": [
+                                                        {
+                                                            "questionPhrase": "Where were the sparks coming from?",
+                                                            "answerType": "FFB",
+                                                            "optional": false,
+                                                            "questionId": "Q65944"
+                                                        }
+                                                    ],
+                                                    "answerId": "A20062"
+                                                },
+                                                {
+                                                    "answerPhrase": "No",
+                                                    "answerId": "A20063"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "questionPhrase": "Are there any additional issues or concerns to report?",
+                                            "answerType": "RAD",
+                                            "optional": false,
+                                            "questionId": "Q65919",
+                                            "answers": [
+                                                {
+                                                    "answerPhrase": "Yes",
+                                                    "questions": [
+                                                        {
+                                                            "questionPhrase": "Please describe the additional issues or concerns.",
+                                                            "answerType": "FFB",
+                                                            "optional": false,
+                                                            "questionId": "Q65920"
+                                                        },
+                                                        {
+                                                            "questionPhrase": "Please gather and include in your escalation any relevant additional documentation, pictures, fire department reports, medical reports, etc., and escalate this potential safety issue.",
+                                                            "answerType": "INT",
+                                                            "optional": true,
+                                                            "questionId": "I65921"
+                                                        }
+                                                    ],
+                                                    "answerId": "A20062"
+                                                },
+                                                {
+                                                    "answerPhrase": "No",
+                                                    "questions": [
+                                                        {
+                                                            "questionPhrase": "Please gather and include in your escalation any relevant additional documentation, pictures, fire department reports, medical reports, etc., and escalate this potential safety issue.",
+                                                            "answerType": "INT",
+                                                            "optional": true,
+                                                            "questionId": "I65921"
+                                                        }
+                                                    ],
+                                                    "answerId": "A20063"
+                                                }
+                                            ]
+                                        }
+                                    ],
+                                    "answerId": "A41062"
+                                },
+                                {
+                                    "answerPhrase": "No",
+                                    "questions": [
+                                        {
+                                            "questionPhrase": "You have selected \"No\" indicating this is not a safety issue. Please document your reason for selecting \"No\" in your notes, save your case, and then re-classify your case as a hardware issue.",
+                                            "answerType": "INT",
+                                            "optional": true,
+                                            "questionId": "I65889"
+                                        }
+                                    ],
+                                    "answerId": "A20063"
+                                }
+                            ]
+                        }
+                    ],
+                    "treeId": "TREE66872"
+                }
+            ]
+        }
+    ]
+}

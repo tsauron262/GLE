@@ -457,6 +457,22 @@ function BimpModal($modal) {
     this.getContent = function (modal_idx) {
         return modal.$contents.find('#modal_content_' + modal_idx);
     };
+
+    this.scrollTop = function () {
+        bimpScroller.newScrollValue(0, modal.$modal.find('.modal-body'), modal.$modal.$contents);
+    };
+
+    this.scrollBottom = function () {
+        bimpScroller.newScrollToBottom(modal.$modal.find('.modal-body'), modal.$contents);
+    };
+
+    this.scrollUp = function () {
+
+    };
+
+    this.scrollDown = function () {
+
+    };
 }
 
 var bimpModal = null;

@@ -9,7 +9,7 @@
     </def>
     
     <!--Repairs-->
-    <def name="repairType" type="select" values="repair_types">
+    <def name="repairType" type="select" values="repair_types" edit="0">
         <label>Type de réparation</label>
     </def>
     <def name="serviceNonRepairType" type="select" values="service_types">
@@ -248,5 +248,10 @@
     <!--divers-->
     <def name="file" type="file">
         <label>Fichier</label>
+    </def>
+    
+    <!--Questions-->
+    <def name="questions" type="custom_full_content">
+        <label>Questions</label>
     </def>
 </root>

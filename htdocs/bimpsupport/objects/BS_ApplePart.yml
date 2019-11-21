@@ -64,7 +64,7 @@ fields:
     no_order: 
         label: Commande de stock
         type: bool
-        default_value: 
+        default_value: 0
     price_options: 
         label: Prix Spéciaux
         type: json
@@ -73,17 +73,14 @@ fields:
         values: 
             array: price_types
         default_value: EXCHANGE
-#    issue_category: 
-#        label: Catégorie problème
-#    issue_code: 
-#        label: Code problème
-#    reproducibility: 
-#        label: Récurrence
-#        values: 
-#            array: reproducibilies
-#        default_value: A
-#    issue_label: 
-#        label: Code problème
+    is_tier: 
+        label: Composant tiers
+        type: bool
+        default_value: 0
+    not_invoiced: 
+        label: Non facturé
+        type: bool
+        default_value: 0
 
 #forms: 
 #    add_parts: 
@@ -153,6 +150,8 @@ fields_tables:
               edit: 1
             - field: no_order
               edit: 1
+            - field: is_tier
+            - field: not_invoiced
 
 views: 
     default: 

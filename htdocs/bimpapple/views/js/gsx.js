@@ -125,41 +125,58 @@ function gsx_on_login_success() {
     gsx_nologged_requests = [];
 }
 
-function gsx_loadRequestModalForm($button, requestName, data, params) {
+function gsx_loadRequestModalForm($button, title, requestName, data, params) {
     if ($.isOk($button) && $button.hasClass('disabled')) {
         return;
     }
 
     data.requestName = requestName;
+
+    if (requestName === 'repairCreate') {
+        var $repairForm = $('#createRepairForm');
+        if ($.isOk($repairForm)) {
+            data.repairType = $repairForm.find('[name="repairType"]').val();
+            if (!data.repairType) {
+                bimp_msg('Veuillez sélectionner un type de réparation', 'warning', null, true);
+                return;
+            }
+        }
+    }
+
     params.$button = $button;
 
     if (typeof (params.success) === 'function') {
         params.load_request_form_success = params.success;
     }
 
+    bimpModal.newContent(title, '', false, '', null, 'medium');
+    bimpModal.removeComponentContent('repairForm_' + requestName);
+    var modal_idx = bimpModal.idx;
+    var $container = bimpModal.$contents.find('#modal_content_' + modal_idx);
+
     params.success = function (result, bimpAjax) {
-        if (typeof (result.form_html) !== 'undefined' && result.form_html) {
-            bimpModal.newContent(result.title, result.form_html, false, '', $button);
-            var modal_idx = bimpModal.idx;
-            var $content = bimpModal.$contents.find('#modal_content_' + modal_idx);
+        if (typeof (result.html) !== 'undefined' && result.html) {
+            var $content = bimpModal.$contents.find('#modal_content_' + bimpAjax.modal_idx);
             if ($.isOk($content)) {
                 var $form = $content.find('.request_form');
                 if ($form.length) {
                     onFormLoaded($form);
-                    $form.data('modal_idx', modal_idx);
+                    $form.data('modal_idx', bimpAjax.modal_idx);
                     var label = 'Envoyer<i class="fa fa-arrow-circle-right iconRight"></i>';
                     var onclick = 'gsx_processRequestForm($(this))';
-                    bimpModal.addButton(label, onclick, 'primary', 'save_object_button', modal_idx);
+                    bimpModal.addButton(label, onclick, 'primary', 'save_object_button', bimpAjax.modal_idx);
                 }
             }
         }
     };
 
-    params.append_html = false;
-    params.display_processing = false;
+    params.modal_idx = modal_idx;
+    params.append_html = true;
+    params.display_processing = true;
+    params.processing_msg = 'Chargement du formulaire';
     params.display_success = false;
 
-    GsxAjax('gsxLoadRequestForm', data, null, params);
+    GsxAjax('gsxLoadRequestForm', data, $container, params);
 }
 
 function gsx_processRequestForm($button) {
@@ -177,18 +194,17 @@ function gsx_processRequestForm($button) {
                 var $form = $container.find('form.request_form');
                 if ($form.length) {
                     var data = new FormData($form.get(0));
-
                     GsxAjax('gsxProcessRequestForm', data, $form.find('.ajaxResultContainer'), {
                         $button: $button,
                         display_processing: true,
                         processing_padding: 20,
                         append_html: true,
                         processData: false,
-                        contentType: false
-                                // fournir le callback côté PHP. 
+                        contentType: false,
+                        modal_scroll_bottom: true
 //                        success: function (result, bimpAjax) {
-//                            reloadRepairsViews(bimpAjax.id_sav);
-//                        } 
+////                            reloadRepairsViews(bimpAjax.id_sav); // fournir le callback côté PHP. 
+//                        }  
                     });
                     return;
                 }
@@ -389,6 +405,93 @@ function gsx_importRepairs($button, id_sav, modal_idx) {
                 reloadRepairsViews(bimpAjax.id_sav);
             }
         }
+    });
+}
+
+function gsx_diagnosticSuites($button, id_sav) {
+    if ($.isOk($button) && $button.hasClass('disabled')) {
+        return;
+    }
+
+    bimpModal.newContent('Lancer un diagnostic à distance', '', false, '', null, 'medium');
+    bimpModal.removeComponentContent('diagnostic_suites_' + id_sav);
+    var modal_idx = bimpModal.idx;
+    var $container = bimpModal.$contents.find('#modal_content_' + modal_idx);
+
+    GsxAjax('gsxDiagnosticSuites', {
+        id_sav: id_sav
+    }, $container, {
+        $button: $button,
+        modal_idx: modal_idx,
+        id_sav: id_sav,
+        display_success: false,
+        append_html: true,
+        display_processing: true,
+        processing_padding: 20,
+        processing_msg: 'Chargement en cours',
+        success: function (result, bimpAjax) {
+            setCommonEvents(bimpAjax.$resultContainer);
+        }
+    });
+}
+
+function gsx_runDiagnostic($button, id_sav, suite_id) {
+    if ($.isOk($button) && $button.hasClass('disabled')) {
+        return;
+    }
+
+    var $row = $button.parent('td').parent('tr');
+    $row.after('<tr><td colspan="3"></td></tr>');
+
+    var $container = $row.next().find('td');
+
+    GsxAjax('gsxRunDiagnostic', {
+        id_sav: id_sav,
+        suite_id: suite_id
+    }, $container, {
+        $button: $button,
+        id_sav: id_sav,
+        display_success: true,
+        success_msg: 'Diagnostic initié avec succès',
+        display_processing: true,
+        processing_padding: 20,
+        processing_msg: 'Initialisation du diagnostic en cours'
+    });
+}
+
+function gsx_refeshDiagnosticStatus($button, id_sav) {
+    if ($.isOk($button) && $button.hasClass('disabled')) {
+        return;
+    }
+
+    GsxAjax('gsxRefreshDiagnosticStatus', {
+        id_sav: id_sav
+    }, $('#currentDiagnosticStatus'), {
+        $button: $button,
+        id_sav: id_sav,
+        append_html: true,
+        display_success: false,
+        display_processing: true,
+        processing_padding: 0,
+        processing_msg: 'Chargement en cours'
+    });
+}
+
+function gsx_loadDiagnosticsDetails($button, id_sav) {
+    if ($.isOk($button) && $button.hasClass('disabled')) {
+        return;
+    }
+
+    GsxAjax('gsxLoadDiagnosticsDetails', {
+        id_sav: id_sav
+    }, $('#diagnosticsDetails'), {
+        $button: $button,
+        id_sav: id_sav,
+        append_html: true,
+        display_success: false,
+        display_processing: true,
+        processing_padding: 20,
+        processing_msg: 'Chargement en cours'
     });
 }
 

@@ -4710,64 +4710,11 @@ class BimpObject extends BimpCache
                 $this->params['header_btn'] = array();
             }
 
-            $header_buttons = array();
-            if (count($this->params['header_btn'])) {
-                foreach ($this->params['header_btn'] as $header_btn) {
-                    $button = null;
-                    $label = isset($header_btn['label']) ? $header_btn['label'] : '';
-                    $onclick = isset($header_btn['onclick']) ? $header_btn['onclick'] : '';
-                    $icon = isset($header_btn['icon']) ? $header_btn['icon'] : '';
-//                    $onclick = str_replace('component_id', $this->identifier, $onclick);
-                    $disabled = isset($header_btn['disabled']) ? (int) $header_btn['disabled'] : 0;
-                    $popover = isset($header_btn['popover']) ? (string) $header_btn['popover'] : '';
-                    $classes = array('btn', 'btn-light-default');
-                    if ($disabled) {
-                        $classes[] = 'disabled';
-                    }
-                    if ($popover) {
-                        $classes[] = 'bs-popover';
-                    }
-                    if ($label) {
-                        $button = array(
-                            'classes' => $classes,
-                            'label'   => $label,
-                            'attr'    => array(
-                                'type'    => 'button',
-                                'onclick' => $onclick
-                            )
-                        );
-                        if ($icon) {
-                            $button['icon_before'] = $icon;
-                        }
-                        if ($popover) {
-                            $button['data']['toggle'] = 'popover';
-                            $button['data']['trigger'] = 'hover';
-                            $button['data']['container'] = 'body';
-                            $button['data']['placement'] = 'top';
-                            $button['data']['html'] = 'true';
-                            $button['data']['content'] = $popover;
-                        }
-                    }
-
-                    if (!is_null($button)) {
-                        $header_buttons[] = BimpRender::renderButton($button, 'button');
-                    }
-                }
-            }
-
             $html .= '<div class="header_buttons">';
-            if (count($header_buttons)) {
-                if (count($header_buttons) > 6) {
-                    $html .= BimpRender::renderDropDownButton('Actions', $header_buttons, array(
-                                'icon'       => 'fas_cogs',
-                                'menu_right' => 1
-                    ));
-                } else {
-                    foreach ($header_buttons as $btn) {
-                        $html .= str_replace('btn-light-default', 'btn-default', $btn);
-                    }
-                }
-            }
+            $html .= BimpRender::renderButtonsGroup($this->params['header_btn'], array(
+                        'max'                 => 6,
+                        'dropdown_menu_right' => 1
+            ));
 
             $html .= '<div style="display: inline-block">';
             if ($this->params['header_edit_form'] && $this->isEditable() && $this->can('edit')) {
@@ -5357,6 +5304,24 @@ class BimpObject extends BimpCache
     {
         BimpObject::loadClass('bimpcaisse', 'BC_Caisse');
         return BC_Caisse::renderUserCaisseInput();
+    }
+
+    public static function renderListFileForObject($objT, $with_delete = 0)
+    {
+        $obj = BimpObject::getBimpObjectInstance('bimpcore', 'BimpFile');
+        $bc_list = new BC_ListTable($obj, 'default', 1, null, 'Liste des fichiers ' . $objT->getNomUrl(), 'fas_bars');
+
+        $bc_list->addFieldFilterValue('a.parent_object_name', get_class($objT));
+        $bc_list->params['add_form_values']['fields']['parent_object_name'] = get_class($objT);
+        $bc_list->addFieldFilterValue('a.parent_module', $objT->module);
+        $bc_list->params['add_form_values']['fields']['parent_module'] = $objT->module;
+        $bc_list->addFieldFilterValue('a.id_parent', $objT->id);
+        $bc_list->params['add_form_values']['fields']['id_parent'] = $objT->id;
+        if (!$with_delete)
+            $bc_list->addFieldFilterValue('a.deleted', 0);
+        $bc_list->identifier .= get_class($objT) . "-" . $objT->id;
+
+        return $bc_list->renderHtml();
     }
 
     // Générations javascript: 
@@ -6643,6 +6608,35 @@ class BimpObject extends BimpCache
         );
     }
 
+    // Gestion statique des objets:
+
+    public static function createBimpObject($module, $object_name, $data, $force_create = false, &$errors = array(), &$warnings = array())
+    {
+        $instance = static::getInstance($module, $object_name);
+
+        if (is_a($instance, $object_name)) {
+            $create_warnings = array();
+            $create_errors = $instance->validateArray($data);
+
+            if (!count($create_errors)) {
+                $create_errors = $instance->create($create_warnings, $force_create);
+            }
+
+            if (count($create_errors)) {
+                $errors[] = BimpTools::getMsgFromArray($create_errors, 'Echec de la création ' . $instance->getLabel('of_the'));
+            }
+
+            if (count($create_warnings)) {
+                $warnings[] = BimpTools::getMsgFromArray($create_warnings, 'Erreurs suite à la création ' . $instance->getLabel('of_the'));
+            }
+
+            return $instance;
+        }
+
+        $errors[] = 'L\'objet "' . $object_name . '" n\'existe pas dans le module "' . $module . '"';
+        return null;
+    }
+
     // Divers: 
 
     public static function testMail($mail)
@@ -6759,23 +6753,5 @@ class BimpObject extends BimpCache
     public static function priceToCsv($price)
     {
         return str_replace(array(" ", 'EUR', '€'), "", str_replace(".", ",", $price));
-    }
-
-    public static function renderListFileForObject($objT, $with_delete = 0)
-    {
-        $obj = BimpObject::getBimpObjectInstance('bimpcore', 'BimpFile');
-        $bc_list = new BC_ListTable($obj, 'default', 1, null, 'Liste des fichiers ' . $objT->getNomUrl(), 'fas_bars');
-
-        $bc_list->addFieldFilterValue('a.parent_object_name', get_class($objT));
-        $bc_list->params['add_form_values']['fields']['parent_object_name'] = get_class($objT);
-        $bc_list->addFieldFilterValue('a.parent_module', $objT->module);
-        $bc_list->params['add_form_values']['fields']['parent_module'] = $objT->module;
-        $bc_list->addFieldFilterValue('a.id_parent', $objT->id);
-        $bc_list->params['add_form_values']['fields']['id_parent'] = $objT->id;
-        if (!$with_delete)
-            $bc_list->addFieldFilterValue('a.deleted', 0);
-        $bc_list->identifier .= get_class($objT) . "-" . $objT->id;
-
-        return $bc_list->renderHtml();
     }
 }

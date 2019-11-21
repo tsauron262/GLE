@@ -6,6 +6,9 @@
             <data name="repairType" required="1" values="repair_types" default="CIN">
                 <label>Type de réparation</label>
             </data>
+            
+            <data name="questions" donotprocess="1"></data>
+            
             <data name="serviceNonRepairType" required="0">
                 <display_if input_name="repairType" show_values="SVNR"></display_if>
             </data>

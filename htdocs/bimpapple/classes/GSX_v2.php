@@ -24,7 +24,7 @@ class GSX_v2 extends GSX_Const
     );
     public $n = 0;
 
-    public function __construct($soldTo = '')
+    public function __construct()
     {
         global $user;
 
@@ -41,14 +41,21 @@ class GSX_v2 extends GSX_Const
             case 'prod':
                 if (isset($user->array_options['options_apple_id']) && (string) $user->array_options['options_apple_id']) {
                     $this->appleId = BimpTools::addZeros($user->array_options['options_apple_id'], self::$numbersNumChars);
+                } else {
+                    $this->appleId = self::$default_ids['apple_id'];
                 }
                 if (isset($user->array_options['options_apple_pword']) && (string) $user->array_options['options_apple_pword']) {
-                    $this->applePword = BimpTools::addZeros($user->array_options['options_apple_pword'], self::$numbersNumChars);
+                    $this->applePword = $user->array_options['options_apple_pword'];
+                } else {
+                    $this->applePword = self::$default_ids['apple_pword'];
                 }
                 if (isset($user->array_options['options_apple_shipto']) && (string) $user->array_options['options_apple_shipto']) {
                     $this->shipTo = BimpTools::addZeros($user->array_options['options_apple_shipto'], self::$numbersNumChars);
+                } else {
+                    $this->shipTo = self::$default_ids['ship_to'];
                 }
-                $this->soldTo = BimpTools::addZeros($soldTo, self::$numbersNumChars);
+
+                $this->soldTo = self::$default_ids['sold_to'];
                 break;
         }
 
@@ -105,12 +112,7 @@ class GSX_v2 extends GSX_Const
         $this->acti_token = $token;
 
         if ($this->reauthenticate()) {
-            global $user;
-            if (BimpObject::objectLoaded($user)) {
-                BimpCache::getBdb()->update('user_extrafields', array(
-                    'gsx_acti_token' => $token
-                        ), '`fk_object` = ' . (int) $user->id);
-            }
+            $this->saveToken('acti', $token);
             return array();
         }
 
@@ -137,13 +139,7 @@ class GSX_v2 extends GSX_Const
 
         if (isset($result['authToken'])) {
             $this->displayDebug('OK (Auth token ' . $result['authToken'] . ')');
-            $this->auth_token = $result['authToken'];
-            global $user;
-            if (BimpObject::objectLoaded($user)) {
-                BimpCache::getBdb()->update('user_extrafields', array(
-                    'gsx_auth_token' => $this->auth_token
-                        ), '`fk_object` = ' . (int) $user->id);
-            }
+            $this->saveToken('auth', $result['authToken']);
             $this->logged = true;
             return 1;
         }
@@ -152,28 +148,15 @@ class GSX_v2 extends GSX_Const
         $this->initError('Echec authentification (token ' . $this->acti_token . ')');
 
         $this->logged = false;
-        $this->acti_token = '';
-        global $user;
-        if (BimpObject::objectLoaded($user)) {
-            BimpCache::getBdb()->update('user_extrafields', array(
-                'gsx_acti_token' => ''
-                    ), '`fk_object` = ' . (int) $user->id);
-        }
+        $this->saveToken('acti', '');
 
         return 0;
     }
 
     public function reauthenticate()
     {
-        global $user;
-
         if ($this->auth_token) {
-            $this->auth_token = '';
-            if (BimpObject::objectLoaded($user)) {
-                BimpCache::getBdb()->update('user_extrafields', array(
-                    'gsx_auth_token' => ''
-                        ), '`fk_object` = ' . (int) $user->id);
-            }
+            $this->saveToken('auth', '');
         }
 
         $this->logged = false;
@@ -181,9 +164,38 @@ class GSX_v2 extends GSX_Const
         return $this->authenticate();
     }
 
+    public function saveToken($type, $token)
+    {
+        $field = '';
+        switch ($type) {
+            case 'acti':
+                $this->acti_token = $token;
+                $field = 'gsx_acti_token';
+                break;
+
+            case 'auth':
+                $this->auth_token = $token;
+                $field = 'gsx_auth_token';
+                break;
+        }
+
+        if ($field) {
+            if (self::$mode === 'prod') {
+                $is_default = ($this->appleId === self::$default_ids['apple_id']);
+                BimpCache::getBdb()->update('user_extrafields', array(
+                    $field => $token
+                        ), '`apple_id` = \'' . $this->appleId . '\'' . ($is_default ? ' OR `apple_id` IS NULL OR `apple_id` = \'\'' : ''));
+            } else {
+                BimpCache::getBdb()->update('user_extrafields', array(
+                    $field => $token
+                        ), '1');
+            }
+        }
+    }
+
     // Traitements des requêtes CURL: 
 
-    protected function init($request_name, &$error = '', $extra_params = array())
+    protected function init($request_name, &$error = '', $url_params = array())
     {
         if ($this->ch) {
             curl_close($this->ch);
@@ -214,7 +226,22 @@ class GSX_v2 extends GSX_Const
             return 0;
         }
 
-        $this->ch = curl_init($this->baseUrl . self::$urls['req'][$request_name]);
+        $url = $this->baseUrl . self::$urls['req'][$request_name];
+
+        if (!empty($url_params)) {
+            $url .= '?';
+            $fl = true;
+            foreach ($url_params as $name => $value) {
+                if (!$fl) {
+                    $url .= '&';
+                } else {
+                    $fl = false;
+                }
+                $url .= $name . '=' . $value;
+            }
+        }
+
+        $this->ch = curl_init($url);
 
         if (!$this->ch) {
             return 0;
@@ -223,19 +250,13 @@ class GSX_v2 extends GSX_Const
         $headers = array(
             'Accept: application/json',
             'Content-Type: application/json',
-            'Accept-Language: fr_FR',
+//            'Accept-Language: fr_FR',
             'X-Apple-SoldTo: ' . $this->soldTo,
             'X-Apple-ShipTo: ' . $this->shipTo
         );
 
         if ($request_name !== 'authenticate') {
             $headers[] = 'X-Apple-Auth-Token: ' . $this->auth_token;
-        }
-
-        if (!empty($extra_params)) {
-            foreach ($extra_params as $name => $value) {
-                $headers[] = $name . ': ' . $value;
-            }
         }
 
         curl_setopt($this->ch, CURLOPT_HTTPHEADER, $headers);
@@ -247,11 +268,12 @@ class GSX_v2 extends GSX_Const
         curl_setopt($this->ch, CURLINFO_HEADER_OUT, true);
         curl_setopt($this->ch, CURLOPT_CONNECTTIMEOUT, 10);
         curl_setopt($this->ch, CURLOPT_TIMEOUT, 30);
+        curl_setopt($this->ch, CURLOPT_HEADER, true);
 
         return 1;
     }
 
-    public function exec($request_name, $params, &$response_headers = null)
+    public function exec($request_name, $params, &$response_headers = array())
     {
         // Protection boucle infinie: 
         if ($this->n > 50) {
@@ -274,13 +296,14 @@ class GSX_v2 extends GSX_Const
 
         $this->displayDebug('Tentative d\'éxécution de la requête "' . $request_name . '"');
 
-        $extra_params = array();
+        $url_params = array();
         if (in_array($request_name, self::$getRequests)) {
-            $extra_params = $params;
+            $url_params = $params;
+            $params = array();
         }
 
         $error = '';
-        if (!$this->init($request_name, $error, $extra_params)) {
+        if (!$this->init($request_name, $error, $url_params)) {
             $this->curlError($request_name, 'Echec de l\'initialisation de CURL' . ($error ? ' - ' . $error : ''));
             return false;
         }
@@ -289,8 +312,8 @@ class GSX_v2 extends GSX_Const
             curl_setopt($this->ch, CURLOPT_POSTFIELDS, json_encode($params));
         }
 
-        if (!is_null($response_headers)) {
-            curl_setopt($this->ch, CURLOPT_HEADER, true);
+        if (in_array($request_name, self::$getRequests)) {
+            curl_setopt($this->ch, CURLOPT_HTTPGET, true);
         }
 
         $data = curl_exec($this->ch);
@@ -300,19 +323,27 @@ class GSX_v2 extends GSX_Const
             return false;
         }
 
-        if (!is_null($response_headers)) {
-            $header_size = curl_getinfo($this->ch, CURLINFO_HEADER_SIZE);
-            $headers = substr($data, 0, $header_size);
-            $data = substr($data, $header_size);
+        $header_size = curl_getinfo($this->ch, CURLINFO_HEADER_SIZE);
+        $headers = substr($data, 0, $header_size);
+        $data = substr($data, $header_size);
 
-            foreach (explode("\r\n", $headers) as $header) {
-                if (preg_match('/^([a-zA-Z0-9\-]+): (.+)$/', $header, $matches)) {
-                    $response_headers[$matches[1]] = $matches[2];
-                }
+        foreach (explode("\r\n", $headers) as $header) {
+            if (preg_match('/^([a-zA-Z0-9\-]+): (.+)$/', $header, $matches)) {
+                $response_headers[$matches[1]] = $matches[2];
             }
         }
 
         $data = json_decode($data, 1);
+
+        if (self::$log_requests) {
+            $information = curl_getinfo($this->ch);
+
+            $infos = "Header REQUEST : <br/>" . str_replace("\n", "<br/>", $information['request_header']);
+            $infos .= "Body REQUEST : <br/>" . str_replace("\n", "<br/>", print_r($params, 1)) . "<br/><br/>";
+            $infos .= "Header RESPONSE : <br/>" . str_replace("\n", "<br/>", print_r($response_headers, 1)) . "<br/><br/>";
+            $infos .= "Body RESPONSE : <br/>" . str_replace("\n", "<br/>", print_r($data, 1));
+            dol_syslog(str_replace('<br/>', "\n", str_replace('Array', "", $infos)), 3);
+        }
 
         if (isset($data['errors']) && count($data['errors'])) {
             $curl_errors = array();
@@ -367,25 +398,30 @@ class GSX_v2 extends GSX_Const
         ));
     }
 
-    public function partsSummaryBySerialAndIssue($serial, BS_Issue $issue)
+    public function partsSummaryBySerialAndIssue($serial, BS_Issue $issue = null)
     {
-        return $this->exec('partsSummary', array(
-                    'devices'         => array(
-                        array(
-                            'id' => $serial
-                        )
-                    ),
-                    'componentIssues' => array(
-                        array(
-                            'componentCode'   => $issue->getData('category_code'),
-                            'reproducibility' => $issue->getData('reproducibility'),
-                            'priority'        => (int) $issue->getData('priority'),
-                            'type'            => $issue->getData('type'),
-                            'issueCode'       => $issue->getData('issue_code'),
-                            'order'           => $issue->getData('position'),
-                        )
-                    )
-        ));
+        $params = array(
+            'devices' => array(
+                array(
+                    'id' => $serial
+                )
+            )
+        );
+
+        if (BimpObject::objectLoaded($issue) && (string) $issue->getData('category_code')) {
+            $params['componentIssues'] = array(
+                array(
+                    'componentCode'   => $issue->getData('category_code'),
+                    'reproducibility' => $issue->getData('reproducibility'),
+                    'priority'        => (int) $issue->getData('priority'),
+                    'type'            => $issue->getData('type'),
+                    'issueCode'       => $issue->getData('issue_code'),
+                    'order'           => $issue->getData('position')
+                )
+            );
+        }
+
+        return $this->exec('partsSummary', $params);
     }
 
     public function repairSummaryByIdentifier($identifier, $identifier_type)
@@ -420,6 +456,26 @@ class GSX_v2 extends GSX_Const
                     'repairId'     => $repairId,
                     'repairStatus' => $statusCode
         ));
+    }
+
+    public function repairQestions($serial, $repairType, $issues, $parts)
+    {
+        $params = array(
+            'device'     => array(
+                'id' => $serial
+            ),
+            'repairType' => $repairType
+        );
+
+        if (isset($issues) && !empty($issues)) {
+            $params['componentIssues'] = $issues;
+        }
+
+        if (isset($parts) && !empty($parts)) {
+            $params['parts'] = $parts;
+        }
+
+        return $this->exec('repairQuestions', $params);
     }
 
     public function getIssueCodesBySerial($serial)
@@ -493,6 +549,43 @@ class GSX_v2 extends GSX_Const
         }
 
         return $result;
+    }
+
+    public function diagnosticSuites($serial)
+    {
+        return $this->exec('diagnosticSuites', array(
+                    'deviceId' => $serial
+        ));
+    }
+
+    public function runDiagnostic($serial, $suiteId)
+    {
+        return $this->exec('diagnosticTest', array(
+                    'diagnostics' => array(
+                        'suiteId' => $suiteId
+                    ),
+                    'device'      => array(
+                        'id' => $serial
+                    )
+        ));
+    }
+
+    public function diagnosticStatus($serial)
+    {
+        return $this->exec('diagnosticStatus', array(
+                    'device' => array(
+                        'id' => $serial
+                    )
+        ));
+    }
+
+    public function diagnosticsLookup($serial)
+    {
+        return $this->exec('diagnosticsLookup', array(
+                    'device' => array(
+                        'id' => $serial
+                    )
+        ));
     }
 
     // Gestion des erreurs: 

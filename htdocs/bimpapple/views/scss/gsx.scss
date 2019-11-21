@@ -121,3 +121,29 @@
 .subInputsList {
     margin-bottom: 15px;
 }
+
+.rapairFormQuestions {
+    margin: 15px;
+    padding-left: 15px;
+    border-left: 1px dotted #B2B2B2;
+}
+
+.repairFormQuestion {
+    margin-top: 10px;
+
+    .repairQuestionLabel {
+        font-weight: bold;
+    }
+
+    .repairQuestionInput {
+        margin: 5px 15px;
+
+        input,select {
+            width: 300px;
+        }
+
+        textarea {
+            width: 600px;
+        }
+    }
+}

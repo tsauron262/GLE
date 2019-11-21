@@ -198,6 +198,13 @@ class GSX_Request_v2
             $default = $dataNode->getAttribute('default');
         }
 
+        if ($defs['type'] === 'custom_full_content') {
+            if (isset($values[$valuesName]['content'])) {
+                return $values[$valuesName]['content'];
+            }
+            return '';
+        }
+
         $label = '';
         $nodes = XMLDoc::findChildElements($dataNode, 'label', null, null, 1);
         if (count($nodes) == 1) {
@@ -438,7 +445,7 @@ class GSX_Request_v2
                             } else {
                                 $inputValue = 0;
                             }
-                            
+
                         case 'bool':
                             $html .= BimpInput::renderInput('toggle', $inputName, $inputValue, array());
                             break;

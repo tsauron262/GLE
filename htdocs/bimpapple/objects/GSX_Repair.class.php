@@ -26,6 +26,7 @@ class GSX_Repair extends BimpObject
         'AWTP' => 'Awaiting Parts',
         'AWTR' => 'Parts allocated',
         'BEGR' => 'In Repair',
+        'SPCM' => 'Réparation marquée complète'
     );
     public static $repairTypes = array(
         'carry_in', 'repair_or_replace'
@@ -45,11 +46,12 @@ class GSX_Repair extends BimpObject
     {
         if ($this->use_gsx_v2) {
             if (is_null($this->gsx_v2)) {
-                $this->gsx_v2 = new GSX_v2();
+                $this->gsx_v2 = GSX_v2::getInstance();
             }
             $this->gsx_v2->resetErrors();
             if (!$this->gsx_v2->logged) {
                 $errors[] = 'Non authentifié sur GSX';
+                return false;
             }
         } else {
             if (is_null($this->gsx) || $this->isIphone != $this->gsx->isIphone) {
@@ -58,8 +60,11 @@ class GSX_Repair extends BimpObject
 
             if (!$this->gsx->connect) {
                 $errors[] = 'Echec de la connexion à GSX (Version 1)';
+                return false;
             }
         }
+
+        return true;
     }
 
     public function setGSX($gsx)
@@ -112,12 +117,28 @@ class GSX_Repair extends BimpObject
                     foreach ($reason['messages'] as $message) {
                         $msg .= ' - ' . $message . '<br/>';
                     }
+
+                    if ($reason['type'] === 'REPAIR_TYPE' && isset($reason['repairOptions'])) {
+                        $msg .= 'Types de réparation éligibles: <br/>';
+                        if (empty($reason['repairOptions'])) {
+                            $msg .= 'Aucun';
+                        } else {
+                            foreach ($reason['repairOptions'] as $option) {
+                                $msg .= $option['priority'] . ': ' . (isset(GSX_Const::$repair_types[$option['option']]) ? GSX_Const::$repair_types[$option['option']] : $option['option']);
+                                if (isset($option['subOption'])) {
+                                    $msg .= ' (type de service: ' . (isset(GSX_Const::$service_types[$option['subOption']]) ? GSX_Const::$service_types[$option['subOption']] : $option['subOption']) . ')';
+                                }
+                                $msg .= '<br/>';
+                            }
+                        }
+                    }
+
                     $msgs[] = $msgs;
                 }
             }
 
             if (!empty($msgs)) {
-                if ($result['outcome']['action'] === 'MESSAGE') {
+                if (in_array($result['outcome']['action'], array('MESSAGE', 'HOLD', 'WARNING'))) {
                     $warnings[] = BimpTools::getMsgFromArray($msgs, $result['outcome']['action']);
                 } else {
                     $errors[] = BimpTools::getMsgFromArray($msgs, $result['outcome']['action']);
@@ -126,6 +147,53 @@ class GSX_Repair extends BimpObject
         }
 
         return $errors;
+    }
+
+    public function getActionsButtons()
+    {
+        $buttons = array();
+
+        if ($this->isLoaded() && $this->use_gsx_v2) {
+            if (!(int) $this->getData('ready_for_pick_up')) {
+                $confirm = 'Attention, la réparation va être marquée &quote;Ready For Pick up&quote; (prête pour enlèvement) auprès du service GSX d\\\'Apple. Veuillez confirmer';
+                $onclick = $this->getJsGsxAjaxOnClick('gsxRepairAction', array(
+                    'id_repair' => (int) $this->id,
+                    'action'    => 'readyForPickup'
+                        ), array(
+                    'confirm_msg' => $confirm
+                        ), '$(\'#repair_' . $this->id . '_result\')');
+                $buttons[] = array(
+                    'label'   => 'Prête pour enlèvement',
+                    'icon'    => 'fas_check',
+                    'type'    => 'danger',
+                    'onclick' => $onclick
+                );
+            } elseif (!(int) $this->getData('repair_complete')) {
+                $confirm = 'Attention, la réparation va être indiquée comme complète auprès du service GSX d\\\'Apple. Veuillez confirmer';
+                $onclick = $this->getJsGsxAjaxOnClick('gsxRepairAction', array(
+                    'id_repair' => (int) $this->id,
+                    'action'    => 'closeRepair'
+                        ), array(
+                    'confirm_msg' => $confirm
+                        ), '$(\'#repair_' . $this->id . '_result\')');
+                $buttons[] = array(
+                    'label'   => 'Restituer',
+                    'icon'    => 'fas_undo',
+                    'type'    => 'danger',
+                    'onclick' => $onclick
+                );
+            } elseif (!(int) $this->getData('reimbursed')) {
+                $confirm = 'Veuillez confirmer';
+                $onclick = '';
+                $buttons[] = array(
+                    'label'   => 'Marquer comme remboursée',
+                    'icon'    => 'fas_check',
+                    'onclick' => $onclick
+                );
+            }
+        }
+
+        return $buttons;
     }
 
     // Méthodes V1 / V2: 
@@ -167,31 +235,41 @@ class GSX_Repair extends BimpObject
                     if (is_array($data) && !empty($data)) {
                         $this->repairLookUp = $data;
 
+                        // Check type: 
+                        if (!(string) $this->getData('repair_type') && isset($this->repairLookUp['repairTypeCode']) && (string) $this->repairLookUp['repairTypeCode']) {
+                            $this->updateField('repair_type', $this->repairLookUp['repairTypeCode']);
+                        }
+
+                        // Check prix:
+                        if (!(float) $this->getData('total_from_order') && isset($this->repairLookUp['price']['totalAmount']) && (string) $this->repairLookUp['price']['totalAmount']) {
+                            $this->updateField('total_from_order', (float) $this->repairLookUp['price']['totalAmount']);
+                        }
+
                         // Check du statut: 
                         if (isset($this->repairLookUp['repairStatusCode']) && ($this->repairLookUp['repairStatusCode'] != '')) {
                             $ready_for_pick_up = 0;
                             $complete = 0;
                             $cancelled = 0;
 
-                            if (in_array($this->repairLookUp['repairStatusCode'], self::$cancelCodes)) {
-                                $cancelled = 1;
-                                $ready_for_pick_up = 1;
-                            } elseif (in_array($this->repairLookUp['repairStatusCode'], self::$closeCodes)) {
-                                $complete = 1;
-                                $ready_for_pick_up = 1;
-                            } elseif (in_array($this->repairLookUp['repairStatusCode'], self::$readyForPickupCodes)) {
-                                $ready_for_pick_up = 1;
-                            }
-
-                            if ($ready_for_pick_up !== (int) $this->getInitData('ready_for_pick_up')) {
-                                $this->updateField('ready_for_pick_up', $ready_for_pick_up);
-                            }
-                            if ($cancelled !== (int) $this->getInitData('canceled')) {
-                                $this->updateField('canceled', $cancelled);
-                            }
-                            if ($complete !== (int) $this->getInitData('repair_complete')) {
-                                $this->updateField('repair_complete', $complete);
-                            }
+//                            if (in_array($this->repairLookUp['repairStatusCode'], self::$cancelCodes)) {
+//                                $cancelled = 1;
+//                                $ready_for_pick_up = 1;
+//                            } elseif (in_array($this->repairLookUp['repairStatusCode'], self::$closeCodes)) {
+//                                $complete = 1;
+//                                $ready_for_pick_up = 1;
+//                            } elseif (in_array($this->repairLookUp['repairStatusCode'], self::$readyForPickupCodes)) {
+//                                $ready_for_pick_up = 1;
+//                            }
+//
+//                            if ($ready_for_pick_up !== (int) $this->getInitData('ready_for_pick_up')) {
+//                                $this->updateField('ready_for_pick_up', $ready_for_pick_up);
+//                            }
+//                            if ($cancelled !== (int) $this->getInitData('canceled')) {
+//                                $this->updateField('canceled', $cancelled);
+//                            }
+//                            if ($complete !== (int) $this->getInitData('repair_complete')) {
+//                                $this->updateField('repair_complete', $complete);
+//                            }
                         }
                     } else {
                         $errors = $this->gsx_v2->getErrors();
@@ -363,7 +441,7 @@ class GSX_Repair extends BimpObject
         }
     }
 
-    public function updateStatus($status = 'RFPU')
+    public function updateStatus($status = 'RFPU', &$warnings = array())
     {
         $errors = array();
 
@@ -378,12 +456,23 @@ class GSX_Repair extends BimpObject
             return array('Cette réparation a déjà été fermée.');
         }
 
-        if ($status === 'RFPU') {
-            if ((int) $this->getData('ready_for_pick_up')) {
-                return array();
-            }
-        } else if (!array_key_exists($status, self::$repairStatusCodes)) {
-            return array('Statut de la réparation à mettre à jour invalide (' . $status . ')');
+        switch ($status) {
+            case 'RFPU':
+                if ((int) $this->getData('ready_for_pick_up')) {
+                    return array();
+                }
+                break;
+
+            case 'SPCM':
+                if ((int) $this->getData('repair_complete')) {
+                    return array();
+                }
+                break;
+
+            default:
+                if (!array_key_exists($status, self::$repairStatusCodes)) {
+                    return array('Statut de la réparation à mettre à jour invalide (' . $status . ')');
+                }
         }
 
         if ($this->use_gsx_v2) {
@@ -539,12 +628,9 @@ class GSX_Repair extends BimpObject
 
     public function loadPartsPending()
     {
-        if (BimpCore::getConf('use_gsx_v2')) {
-            return;
+        if ($this->use_gsx_v2) {
+            return '';
         }
-
-        // Obsolète pour la v2
-
         if ($this->getData('canceled'))
             return array("Réparation annulée");
         if ($this->getData('closed') || $this->getData('repair_complete'))
@@ -768,91 +854,149 @@ class GSX_Repair extends BimpObject
         return array();
     }
 
-    public function close($sendRequest = true, $checkRepair = 1)
+    public function close($sendRequest = true, $checkRepair = 1, &$warnings = array(), &$modal_html = '')
     {
-        // Obsolète pour la v2
+        if ($this->use_gsx_v2) {
+            $errors = array();
+            $warnings = array();
+            $modal_html = '';
+            if ($this->initGsx($errors)) {
+                if ((int) $this->getData('repair_complete')) {
+                    $errors[] = 'Cette réparation a déjà été fermée';
+                } else {
+                    $check = true;
+                    if ($checkRepair) {
+                        $this->loadPartsPending();
+                        $callback = 'function() {reloadRepairsViews(' . $this->getData('id_sav') . ');}';
+                        $onclick = $this->getJsGsxAjaxOnClick('gsxRepairAction', array(
+                                    'id_repair'    => (int) $this->id,
+                                    'action'       => 'closeRepair',
+                                    'check_repair' => 0
+                                        ), array(
+                                    'success_callback' => $callback
+                                        ), '$(\'#repair_' . $this->id . '_result\')') . ';';
+                        $onclick .= 'bimpModal.clearCurrentContent()';
+                        if (count($this->partsPending) && !(string) $this->getData('new_serial')) {
+                            $msg = 'La réparation ne peut pas être fermée, les numéros de série de certains composants semblent ne pas avoir été mis à jour';
+                            $modal_html .= BimpRender::renderAlerts($msg, 'warning');
+                            $modal_html .= '<p style="text-align: center; padding: 30px">';
+                            $modal_html .= '<span class="btn btn-default closeRepair" onclick="' . $onclick . '">Forcer la fermeture</span></p>';
+                            $check = false;
+                        } elseif (!(string) $this->getData('new_serial')) {
+                            $msg = 'Veuillez confirmer que plus aucune opération n\'est à effectuer sur cette réparation.';
+                            $modal_html .= BimpRender::renderAlerts($msg, 'warning');
+                            $modal_html .= '<p style="text-align: center; padding: 30px">';
+                            $modal_html .= '<span class="btn btn-default closeRepair" onclick="' . $onclick . '">Confirmer la fermeture</span></p>';
+                            $check = false;
+                        }
+                    }
 
-        if (!$this->isLoaded()) {
-            $errors = $this->load();
-            if (count($errors)) {
-                return $errors;
+                    if ($check) {
+                        if ($sendRequest) {
+                            $errors = $this->updateStatus('SPCM', $warnings);
+                        }
+
+                        if (!count($errors)) {
+                            $this->set('repair_complete', 1);
+                            $this->set('closed', 1);
+                            $this->set('date_closed', date('Y-m-d'));
+
+                            $update_errors = $this->update();
+                            if (count($update_errors)) {
+                                $errors[] = BimpTools::getMsgFromArray($update_errors, 'Echec de l\'enregistrement de la fermeture de la réparation en base de données');
+                            }
+                        }
+                    }
+                }
             }
-        }
-
-        if (is_null($this->gsx) || $this->isIphone != $this->gsx->isIphone) {
-            $this->gsx = new GSX($this->isIphone);
-        }
-
-        if (!$this->gsx->connect) {
-            return array('Echec de la connexion à GSX (7)');
-        }
-
-        $repair_confirm_number = $this->getData('repair_confirm_number');
-        if (is_null($repair_confirm_number) || !$repair_confirm_number) {
-            return array('Erreur: n° de confirmation de la réparation absent');
-        }
-
-        if ((int) $this->getData('repair_complete')) {
-            return array('Cette réparation a déjà été fermée.');
-        }
-
-        if ($sendRequest) {
-            $confirm_number = $this->getData('repair_confirm_number');
-            if (is_null($confirm_number) || $confirm_number == '') {
-                $this->addError('Erreur: aucun numéro de confirmation enregistré pour cette réparation.');
-                return false;
-            }
-
-            if ($checkRepair) {
-                $this->loadPartsPending();
-                $callback = 'function() {reloadRepairsViews(' . $this->getData('id_sav') . ');}';
-                $onclick = $this->getJsActionOnclick('closeRepair', array('check_repair' => 0), array(
-                    'result_container' => '$(\'#repair_' . $this->id . '_result\')',
-                    'success_callback' => $callback,
-                ));
-                if (count($this->partsPending) && !(string) $this->getData('new_serial')) {
-                    $html = 'La réparation ne peut pas être fermée, les numéros de série de certains composants semblent ne pas avoir été mis à jour';
-                    $html .= '<p style="text-align: center; padding: 30px">';
-                    $html .= '<span class="btn btn-default closeRepair" onclick="' . $onclick . '">Forcer la fermeture</span></p>';
-                    return array($html);
-                } elseif (!(string) $this->getData('new_serial')) {
-                    $html = 'Veuillez confirmer que plus aucune opération n\'est à effectuer sur cette réparation.';
-                    $html .= '<p style="text-align: center; padding: 30px">';
-                    $html .= '<span class="button redHover closeRepair" onclick="' . $onclick . '">Confirmer la fermeture</span></p>';
-                    $this->gsx->resetSoapErrors();
-                    return array($html);
+            return array(
+                'errors'     => $errors,
+                'warnings'   => $warnings,
+                'modal_html' => $modal_html
+            );
+        } else {
+            if (!$this->isLoaded()) {
+                $errors = $this->load();
+                if (count($errors)) {
+                    return $errors;
                 }
             }
 
-            $client = '';
-            $requestName = '';
-
-            if ($this->isIphone) {
-                $client = 'IPhoneMarkRepairComplete';
-                $requestName = 'IPhoneMarkRepairCompleteRequest';
-            } else {
-                $client = 'MarkRepairComplete';
-                $requestName = 'MarkRepairCompleteRequest';
+            if (is_null($this->gsx) || $this->isIphone != $this->gsx->isIphone) {
+                $this->gsx = new GSX($this->isIphone);
             }
-            $request = $this->gsx->_requestBuilder($requestName, '', array('repairConfirmationNumbers' => $this->getData('repair_confirm_number')));
-            $response = $this->gsx->request($request, $client);
 
-            if (!isset($response[$client . 'Response']['repairConfirmationNumbers'])) {
-                return array_merge($this->gsx->errors['soap'], array('Echec de la requête de fermeture de la réparation'));
+            if (!$this->gsx->connect) {
+                return array('Echec de la connexion à GSX (7)');
             }
+
+            $repair_confirm_number = $this->getData('repair_confirm_number');
+            if (is_null($repair_confirm_number) || !$repair_confirm_number) {
+                return array('Erreur: n° de confirmation de la réparation absent');
+            }
+
+            if ((int) $this->getData('repair_complete')) {
+                return array('Cette réparation a déjà été fermée.');
+            }
+
+            if ($sendRequest) {
+                $confirm_number = $this->getData('repair_confirm_number');
+                if (is_null($confirm_number) || $confirm_number == '') {
+                    $this->addError('Erreur: aucun numéro de confirmation enregistré pour cette réparation.');
+                    return false;
+                }
+
+                if ($checkRepair) {
+                    $this->loadPartsPending();
+                    $callback = 'function() {reloadRepairsViews(' . $this->getData('id_sav') . ');}';
+                    $onclick = $this->getJsActionOnclick('closeRepair', array('check_repair' => 0), array(
+                        'result_container' => '$(\'#repair_' . $this->id . '_result\')',
+                        'success_callback' => $callback,
+                    ));
+                    if (count($this->partsPending) && !(string) $this->getData('new_serial')) {
+                        $html = 'La réparation ne peut pas être fermée, les numéros de série de certains composants semblent ne pas avoir été mis à jour';
+                        $html .= '<p style="text-align: center; padding: 30px">';
+                        $html .= '<span class="btn btn-default closeRepair" onclick="' . $onclick . '">Forcer la fermeture</span></p>';
+                        return array($html);
+                    } elseif (!(string) $this->getData('new_serial')) {
+                        $html = 'Veuillez confirmer que plus aucune opération n\'est à effectuer sur cette réparation.';
+                        $html .= '<p style="text-align: center; padding: 30px">';
+                        $html .= '<span class="button redHover closeRepair" onclick="' . $onclick . '">Confirmer la fermeture</span></p>';
+                        $this->gsx->resetSoapErrors();
+                        return array($html);
+                    }
+                }
+
+                $client = '';
+                $requestName = '';
+
+                if ($this->isIphone) {
+                    $client = 'IPhoneMarkRepairComplete';
+                    $requestName = 'IPhoneMarkRepairCompleteRequest';
+                } else {
+                    $client = 'MarkRepairComplete';
+                    $requestName = 'MarkRepairCompleteRequest';
+                }
+                $request = $this->gsx->_requestBuilder($requestName, '', array('repairConfirmationNumbers' => $this->getData('repair_confirm_number')));
+                $response = $this->gsx->request($request, $client);
+
+                if (!isset($response[$client . 'Response']['repairConfirmationNumbers'])) {
+                    return array_merge($this->gsx->errors['soap'], array('Echec de la requête de fermeture de la réparation'));
+                }
+            }
+
+            $this->set('repair_complete', 1);
+            $this->set('closed', 1);
+            $this->set('date_closed', date('Y-m-d'));
+
+            $update_errors = $this->update();
+            if (count($update_errors)) {
+                $errors[] = 'Echec de l\'enregistrement de la fermeture de la réparation en base de données';
+                return array_merge($errors, $update_errors);
+            }
+
+            return $this->repairDetails();
         }
-
-        $this->set('repair_complete', 1);
-        $this->set('closed', 1);
-        $this->set('data_closed', date('Y-m-d'));
-
-        $update_errors = $this->update();
-        if (count($update_errors)) {
-            $errors[] = 'Echec de l\'enregistrement de la fermeture de la réparation en base de données';
-            return array_merge($errors, $update_errors);
-        }
-
-        return $this->repairDetails();
     }
 
     // Affichages:
@@ -921,6 +1065,13 @@ class GSX_Repair extends BimpObject
         $html = '';
         if (!empty($this->lookupErrors)) {
             $html .= BimpRender::renderAlerts(BimpTools::getMsgFromArray($this->lookupErrors, 'Echec de la récupération des informations depuis GSX'));
+        } elseif (!empty($this->repairLookUp) && $this->use_gsx_v2) {
+            if (isset($this->repairLookUp['messages']) && !empty($this->repairLookUp['messages'])) {
+                foreach ($this->repairLookUp['messages'] as $message) {
+                    $class = 'info';
+                    $html .= BimpRender::renderAlerts($message['type'] . '<br/>' . $message['message'], $class);
+                }
+            }
         }
         return $html;
     }
@@ -941,11 +1092,300 @@ class GSX_Repair extends BimpObject
         return $html;
     }
 
-    // Rendus HTML V1 / V2:
+    // Rendus HTML V2:
+
+    public function renderLookupInfos()
+    {
+        if (!$this->isLoaded()) {
+            return '';
+        }
+
+        $html = '';
+
+        $html .= $this->displayViewMsgs();
+
+        if (!empty($this->repairLookUp)) {
+            $html .= '<table class="bimp_list_table">';
+            $html .= '<tbody class="headers_col">';
+
+            foreach (array(
+        'referenceNumber'           => 'Référence',
+        'purchaseOrderNumber'       => 'N° de commande',
+        'serviceNotificationNumber' => 'N° de notification du service',
+        'repairStatusCode'          => 'Code statut réparation',
+        'repairStatusDescription'   => 'Statut réparation',
+        'slaGroupDescription'       => 'Groupe SLA',
+        'coverageOption'            => 'Option de couverture',
+        'coverageStatusCode'        => 'Code statut couverture',
+        'coverageStatusDescription' => 'Statut couverture',
+        'acPlusIncidentConsumed'    => 'AppleCare+ consommé',
+        'shipment/deviceShipped'    => 'Matériel expédié',
+        'shipment/trackingNumber'   => 'N° de suivi de l\'expédition',
+        'invoiceAvailable'          => 'Facture disponible',
+        'csCode'                    => 'Code satisfaction client'
+            ) as $path => $label) {
+                $value = BimpTools::getArrayValueFromPath($this->repairLookUp, $path, true);
+                if ($value) {
+                    $html .= '<tr>';
+                    $html .= '<th>' . $label . '</th>';
+                    $html .= '<td>' . $value . '</td>';
+                    $html .= '</tr>';
+                }
+            }
+
+            $html .= '</tbody>';
+            $html .= '</table>';
+        }
+
+        $title = BimpRender::renderIcon('fab_apple') . ' Infos GSX';
+        return BimpRender::renderPanel($title, $html, '', array(
+                    'foldable' => 1,
+                    'type'     => 'secondary'
+        ));
+    }
+
+    public function renderRepairParts()
+    {
+
+
+        if ($this->isLoaded()) {
+            if (isset($this->repairLookUp['parts']) && !empty($this->repairLookUp['parts'])) {
+
+                foreach ($this->repairLookUp['parts'] as $part) {
+                    $html = '<table class="bimp_list_table">';
+                    $html .= '<tbody class="header_col">';
+                    foreach (array(
+                'description'            => 'Désignation',
+                'type'                   => 'Type',
+                'kbbDeviceDetail/serial' => 'Numéro de série',
+                'kbbDeviceDetail/imei'   => 'IMEI',
+                'kbbDeviceDetail/imei2'  => 'IMEI2',
+                'kbbDeviceDetail/meid'   => 'MEID',
+                'kgbDeviceDetail/serial' => 'Nouveau Numéro de série (KGB = nouveau : à confirmer)',
+                'kgbDeviceDetail/imei'   => 'Nouveau IMEI (KGB = nouveau : à confirmer)',
+                'kgbDeviceDetail/imei2'  => 'Nouveau IMEI2 (KGB = nouveau : à confirmer)',
+                'kgbDeviceDetail/meid'   => 'Nouveau MEID (KGB = nouveau : à confirmer)',
+                'partUsed'               => 'Réf. composant utilisé',
+                'coverageOption'         => 'Option de couverture',
+                'coverageCode'           => 'Code couverture',
+                'coverageDescription'    => 'Couverture',
+                'fromConsignedStock'     => 'Provient du stock consigné',
+                'netPrice'               => 'Prix net',
+                'currency'               => 'Devise',
+                'pricingOption'          => 'Prix spécial appliqué',
+                'billable'               => 'Facturable'
+                    ) as $path => $label) {
+                        $value = BimpTools::getArrayValueFromPath($part, $path, true);
+                        if ($value) {
+                            $html .= '<tr>';
+                            $html .= '<th>' . $label . '</th>';
+                            $html .= '<td>' . $value . '</td>';
+                            $html .= '</tr>';
+                        }
+                    }
+
+                    $html .= '</tbody>';
+                    $html .= '</table>';
+
+                    $part_html .= '<div class="col-sm-12 sol-md-6 col-lg-6">';
+                    $title = BimpRender::renderIcon('fas_info-circle', 'iconLeft') . 'Infos';
+                    $part_html .= BimpRender::renderPanel($title, $html, '', array(
+                                'foldable' => 1,
+                                'type'     => 'default'
+                    ));
+                    $part_html .= '</div>';
+
+
+                    $part_html .= '<div class="col-sm-12 sol-md-6 col-lg-6">';
+                    // Infos commande:
+                    $has_lines = false;
+                    $html = '<table class="bimp_list_table">';
+                    $html .= '<tbody class="headers_col">';
+                    foreach (array(
+                'orderId'                => 'ID Commande',
+                'orderStatusCode'        => 'Code statut commande',
+                'orderStatusDescription' => 'Statut commande',
+                'orderStatusDate'        => 'Date du statut commande'
+                    ) as $path => $label) {
+                        $value = BimpTools::getArrayValueFromPath($part, $path, true);
+                        if ($value) {
+                            $has_lines = true;
+                            $html .= '<tr>';
+                            $html .= '<th>' . $label . '</th>';
+                            $html .= '<td>' . $value . '</td>';
+                            $html .= '</tr>';
+                        }
+                    }
+
+                    $html .= '</tbody>';
+                    $html .= '</table>';
+
+                    if ($has_lines) {
+                        $title = BimpRender::renderIcon('fas_dolly', 'iconLeft') . 'Infos commande';
+                        $part_html .= BimpRender::renderPanel($title, $html, '', array(
+                                    'foldable' => 1,
+                                    'type'     => 'default'
+                        ));
+                    }
+
+                    // Infos livraison:
+                    $has_lines = false;
+                    $html = '<table class="bimp_list_table">';
+                    $html .= '<tbody class="headers_col">';
+                    foreach (array(
+                'carrierName'            => 'Transporteur',
+                'carrierCode'            => 'Code transporteur',
+                'carrierUrl'             => 'URL Transporteur',
+                'deliveryTrackingNumber' => 'N° de suivi du transport',
+                'deliveryNumber'         => 'N° de livraison',
+                'deliveryDate'           => 'Date de livraison'
+                    ) as $path => $label) {
+                        $value = BimpTools::getArrayValueFromPath($part, $path, true);
+                        if ($value) {
+                            $has_lines = true;
+                            $html .= '<tr>';
+                            $html .= '<th>' . $label . '</th>';
+                            $html .= '<td>' . $value . '</td>';
+                            $html .= '</tr>';
+                        }
+                    }
+
+                    $html .= '</tbody>';
+                    $html .= '</table>';
+
+                    if ($has_lines) {
+                        $title = BimpRender::renderIcon('fas_shipping-fast', 'iconLeft') . 'Infos livraison';
+                        $part_html .= BimpRender::renderPanel($title, $html, '', array(
+                                    'foldable' => 1,
+                                    'type'     => 'default'
+                        ));
+                    }
+
+                    // Infos retour:
+                    $has_lines = false;
+                    $html .= '</div>';
+                    $html = '<table class="bimp_list_table">';
+                    $html .= '<tbody class="headers_col">';
+                    foreach (array(
+                'returnStatusCode'       => 'Code raison du retour',
+                'returnOrderNumber'      => 'N° de retour',
+                'returnTrackingNumber'   => 'N° de suivi du retour',
+                'returnPartReceivedDate' => 'Date de réception du retour'
+                    ) as $path => $label) {
+                        $value = BimpTools::getArrayValueFromPath($part, $path, true);
+                        if ($value) {
+                            $has_lines = true;
+                            $html .= '<tr>';
+                            $html .= '<th>' . $label . '</th>';
+                            $html .= '<td>' . $value . '</td>';
+                            $html .= '</tr>';
+                        }
+                    }
+
+                    $html .= '</tbody>';
+                    $html .= '</table>';
+
+                    if ($has_lines) {
+                        $title = BimpRender::renderIcon('fas_arrow-circle-left', 'iconLeft') . 'Infos retour';
+                        $part_html .= BimpRender::renderPanel($title, $html, '', array(
+                                    'foldable' => 1,
+                                    'type'     => 'default'
+                        ));
+                    }
+
+                    $part_html .= '</div>';
+
+                    $parts_html .= '<div class="row">';
+                    $title = BimpRender::renderIcon('fas_box', 'iconLeft') . 'Composant ' . $part['number'];
+                    $parts_html .= BimpRender::renderPanel($title, $part_html, '', array(
+                                'foldable' => 1,
+                                'type'     => 'secondary'
+                    ));
+                    $parts_html .= '</div>';
+                }
+
+                return $parts_html;
+            }
+        }
+
+        return '';
+    }
+
+    // Rendus HTML V1: 
+    public function renderActions()
+    {
+        if ($this->use_gsx_v2) {
+            return '';
+        }
+
+        $buttons = array();
+
+        $id_sav = (int) $this->getData('id_sav');
+        $callback = 'function() {reloadRepairsViews(' . $id_sav . ');}';
+
+        if (!(int) $this->getData('ready_for_pick_up')) {
+            $confirm = 'Attention, la réparation va être marquée &quote;Ready For Pick up&quote; (prête pour enlèvement) auprès du service GSX d\\\'Apple. Veuillez confirmer';
+            $onclick = $this->getJsActionOnclick('endRepair', array(), array(
+                'result_container' => '$(\'#repair_' . $this->id . '_result\')',
+                'success_callback' => $callback,
+                'confirm_msg'      => $confirm
+            ));
+            $buttons[] = array(
+                'label'   => 'Prête pour enlèvement',
+                'classes' => array('btn', 'btn-danger'),
+                'attr'    => array(
+                    'onclick' => $onclick
+                )
+            );
+        } elseif (!(int) $this->getData('repair_complete')) {
+            $confirm = 'Attention, la réparation va être indiquée comme complète auprès du service GSX d\\\'Apple. Veuillez confirmer';
+            $onclick = $this->getJsActionOnclick('closeRepair', array('check_repair' => 1), array(
+                'result_container' => '$(\'#repair_' . $this->id . '_result\')',
+                'success_callback' => $callback,
+                'confirm_msg'      => $confirm
+            ));
+            $buttons[] = array(
+                'label'   => 'Restituer',
+                'classes' => array('btn', 'btn-danger'),
+                'attr'    => array(
+                    'onclick' => $onclick
+                )
+            );
+        } elseif (!(int) $this->getData('reimbursed')) {
+            $confirm = 'Veuillez confirmer';
+            $onclick = $this->getJsActionOnclick('markRepairAsReimbursed', array(), array(
+                'result_container' => '$(\'#repair_' . $this->id . '_result\')',
+                'success_callback' => $callback,
+                'confirm_msg'      => $confirm
+            ));
+            $buttons[] = array(
+                'label'   => 'Marquer comme remboursée',
+                'classes' => array('btn', 'btn-default'),
+                'attr'    => array(
+                    'onclick' => $onclick
+                )
+            );
+        }
+
+        if (count($buttons)) {
+            $html .= '<div class="buttonsContainer align-right">';
+            foreach ($buttons as $button) {
+                $html .= BimpRender::renderButton($button);
+            }
+            $html .= '</div>';
+            $html .= '<div id="repair_' . $this->id . '_result" class="ajaxResultContainer" style="display: none"></div>';
+        }
+
+        return $html;
+    }
 
     public function renderPartsPendingReturn()
     {
         if (!$this->isLoaded()) {
+            return '';
+        }
+
+        if ($this->use_gsx_v2) {
             return '';
         }
 
@@ -1037,95 +1477,6 @@ class GSX_Repair extends BimpObject
                     'foldable' => true,
                     'icon'     => 'fas_box'
         ));
-    }
-
-    public function renderActions()
-    {
-        // Obsolète pour la v2
-
-        if (!$this->use_gsx_v2) {
-            return '';
-        }
-
-        $buttons = array();
-
-        $id_sav = (int) $this->getData('id_sav');
-        $callback = 'function() {reloadRepairsViews(' . $id_sav . ');}';
-
-        if (!(int) $this->getData('ready_for_pick_up')) {
-            $confirm = 'Attention, la réparation va être marquée &quote;Ready For Pick up&quote; (prête pour enlèvement) auprès du service GSX d\\\'Apple. Veuillez confirmer';
-            $onclick = '';
-            if ($this->use_gsx_v2) {
-                $onclick = $this->getJsGsxAjaxOnClick('gsxRepairAction', array(
-                    'id_repair' => (int) $this->id,
-                    'action'    => 'readyForPickup'
-                        ), array(
-                    'confirm_msg' => $confirm
-                        ), '$(\'#repair_' . $this->id . '_result\')');
-            } else {
-                $onclick = $this->getJsActionOnclick('endRepair', array(), array(
-                    'result_container' => '$(\'#repair_' . $this->id . '_result\')',
-                    'success_callback' => $callback,
-                    'confirm_msg'      => $confirm
-                ));
-            }
-            $buttons[] = array(
-                'label'   => 'Prête pour enlèvement',
-                'classes' => array('btn', 'btn-danger'),
-                'attr'    => array(
-                    'onclick' => $onclick
-                )
-            );
-        } elseif (!(int) $this->getData('repair_complete')) {
-            $confirm = 'Attention, la réparation va être indiquée comme complète auprès du service GSX d\\\'Apple. Veuillez confirmer';
-            $onclick = '';
-            if ($this->use_gsx_v2) {
-                $onclick = '';
-            } else {
-                $onclick = $this->getJsActionOnclick('closeRepair', array('check_repair' => 1), array(
-                    'result_container' => '$(\'#repair_' . $this->id . '_result\')',
-                    'success_callback' => $callback,
-                    'confirm_msg'      => $confirm
-                ));
-            }
-            $buttons[] = array(
-                'label'   => 'Restituer',
-                'classes' => array('btn', 'btn-danger'),
-                'attr'    => array(
-                    'onclick' => $onclick
-                )
-            );
-        } elseif (!(int) $this->getData('reimbursed')) {
-            $confirm = 'Veuillez confirmer';
-            $onclick = '';
-            if ($this->use_gsx_v2) {
-                $onclick = '';
-            } else {
-                $onclick = $this->getJsActionOnclick('markRepairAsReimbursed', array(), array(
-                    'result_container' => '$(\'#repair_' . $this->id . '_result\')',
-                    'success_callback' => $callback,
-                    'confirm_msg'      => $confirm
-                ));
-            }
-            $buttons[] = array(
-                'label'   => 'Marquer comme remboursée',
-                'classes' => array('btn', 'btn-default'),
-                'attr'    => array(
-                    'onclick' => $onclick
-                )
-            );
-        }
-
-        if (count($buttons)) {
-            $html .= '<div class="buttonsContainer align-right">';
-            foreach ($buttons as $button) {
-                $html .= BimpRender::renderButton($button);
-            }
-            $html .= '</div>';
-            $html .= '<div id="repair_' . $this->id . '_result" class="ajaxResultContainer" style="display: none"></div>';
-        }
-
-        return $html;
     }
 
     // Rendus JS: 
@@ -1247,7 +1598,10 @@ class GSX_Repair extends BimpObject
         }
 
         $this->setSerial($serial);
-        $this->set('total_from_order', '1,2'); //Pour qu'il y est forcément un changement aprés
+
+        if (!$this->use_gsx_v2) {
+            $this->set('total_from_order', '1,2'); //Pour qu'il y est forcément un changement aprés
+        }
 
         $errors = parent::create($warnings, $force_create);
 

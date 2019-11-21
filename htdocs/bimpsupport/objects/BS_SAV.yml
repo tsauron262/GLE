@@ -67,7 +67,7 @@ objects:
                     
     apple_parts: 
         relation: hasMany
-        delete: 1
+        delete: 0
         instance: 
             bimp_object: BS_ApplePart       
             
@@ -82,6 +82,14 @@ objects:
         delete: 1
         instance: 
             bimp_object: BS_Issue
+            
+#    diagnostics: 
+#        relation: hasMany
+#        delete: 1
+#        instance: 
+#            bimp_object: 
+#                module: bimpapple
+#                name: GSX_Diagnostic
             
 associations: 
     propales:

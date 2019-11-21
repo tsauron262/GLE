@@ -7,6 +7,7 @@ class GSX_Const
     public static $mode = 'test'; // test ou prod
     public static $debug_mode = false;
     public static $log_errors = true;
+    public static $log_requests = true;
     public static $numbersNumChars = 10;
     public static $sav_files = array(
         'test' => 'TEST'
@@ -29,20 +30,25 @@ class GSX_Const
             'prod' => ''
         ),
         'req'              => array(
-            'authenticate'   => 'authenticate/token',
-            'productDetails' => 'repair/product/details',
-            'componentIssue' => 'repair/product/componentissue',
-            'partsSummary'   => 'parts/summary',
-            'repairSummary'  => 'repair/summary',
-            'repairDetails'  => 'repair/details',
-            'repairCreate'   => 'repair/create',
-            'repairUpdate'   => 'repair/update',
-            'filesUpload'    => 'attachment/upload-access',
-            'articleLookup'  => 'content/article/lookup',
+            'authenticate'      => 'authenticate/token',
+            'productDetails'    => 'repair/product/details',
+            'componentIssue'    => 'repair/product/componentissue',
+            'partsSummary'      => 'parts/summary',
+            'repairSummary'     => 'repair/summary',
+            'repairDetails'     => 'repair/details',
+            'repairCreate'      => 'repair/create',
+            'repairUpdate'      => 'repair/update',
+            'repairQuestions'   => 'repair/questions',
+            'filesUpload'       => 'attachment/upload-access',
+            'articleLookup'     => 'content/article/lookup',
+            'diagnosticSuites'  => 'diagnostics/suites',
+            'diagnosticTest'    => 'diagnostics/initiate-test',
+            'diagnosticStatus'  => 'diagnostics/status',
+            'diagnosticsLookup' => 'diagnostics/lookup'
         )
     );
     public static $getRequests = array(
-        'repairDetails'
+        'repairDetails', 'diagnosticSuites'
     );
     public static $certifs = array(
         897316 => array(
@@ -58,6 +64,12 @@ class GSX_Const
 //        'apple_id'    => 'olys_tech_aprvlreqrd@olys.com',
         'apple_id'    => 'olys_tech_aprvlnotreqrd@olys.com',
         'apple_pword' => 'Apple@214',
+        'sold_to'     => '897316',
+        'ship_to'     => '897316'
+    );
+    public static $default_ids = array(
+        'apple_id'    => 'admin.gle@bimp.fr',
+        'apple_pword' => 'BIMP@gle69#',
         'sold_to'     => '897316',
         'ship_to'     => '897316'
     );

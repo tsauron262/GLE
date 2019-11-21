@@ -12,8 +12,8 @@ class BS_Issue extends BimpObject
         3 => array('label' => 'Faible', 'classes' => array('info'))
     );
     public static $types = array(
-        'CUST' => 'Rapporté par le client',
-        'TECH' => 'Constaté et vérifié par le technicien'
+        'TECH' => 'Constaté et vérifié par le technicien',
+        'CUST' => 'Rapporté par le client'
     );
 
     // Getters booléens: 
@@ -44,6 +44,14 @@ class BS_Issue extends BimpObject
     public function isFieldEditable($field, $force_edit = false)
     {
         switch ($field) {
+            case 'type':
+                if ($this->isLoaded()) {
+                    if ($this->isTierPart()) {
+                        return 0;
+                    }
+                }
+                break;
+
             case 'category_code':
             case 'issue_code':
                 if ($this->isLoaded()) {
@@ -69,6 +77,17 @@ class BS_Issue extends BimpObject
                 return 1;
         }
         return parent::isActionAllowed($action, $errors);
+    }
+
+    public function isTierPart()
+    {
+        if ($this->isLoaded()) {
+            if (!(string) $this->getData('category_code')) {
+                return 1;
+            }
+        }
+
+        return (int) BimpTools::getPostFieldValue('tier_part', 0);
     }
 
     // Getters array: 
@@ -443,24 +462,35 @@ class BS_Issue extends BimpObject
         $errors = parent::validate();
 
         if (!count($errors)) {
-            if ($this->getData('category_code') !== $this->getInitData('category_code')) {
-                $codes = $this->getIssueCodesArray();
-                $cat = (string) $this->getData('category_code');
-                if ($cat && is_array($codes) && isset($codes[$cat]['label'])) {
-                    $this->set('category_label', $codes[$cat]['label']);
-                } else {
-                    $this->set('category_label', $cat);
+            if (!(int) BimpTools::getPostFieldValue('tier_part', 0)) {
+                if (!$this->getData('category_code')) {
+                    $errors[] = 'Veuillez sélectionner un code catégorie';
                 }
-            }
+                if (!$this->getData('issue_code')) {
+                    $errors[] = 'Veuillez sélectionner un code problème';
+                }
 
-            if ($this->getData('issue_code') !== $this->getInitData('issue_code')) {
-                $codes = $this->getIssueCodesArray();
-                $cat = (string) $this->getData('category_code');
-                $code = (string) $this->getData('issue_code');
-                if ($cat && $code && is_array($codes) && isset($codes[$cat]['issues'][$code])) {
-                    $this->set('issue_label', $codes[$cat]['issues'][$code]);
-                } else {
-                    $this->set('issue_label', $code);
+                if (!count($errors)) {
+                    if ($this->getData('category_code') !== $this->getInitData('category_code')) {
+                        $codes = $this->getIssueCodesArray();
+                        $cat = (string) $this->getData('category_code');
+                        if ($cat && is_array($codes) && isset($codes[$cat]['label'])) {
+                            $this->set('category_label', $codes[$cat]['label']);
+                        } else {
+                            $this->set('category_label', $cat);
+                        }
+                    }
+
+                    if ($this->getData('issue_code') !== $this->getInitData('issue_code')) {
+                        $codes = $this->getIssueCodesArray();
+                        $cat = (string) $this->getData('category_code');
+                        $code = (string) $this->getData('issue_code');
+                        if ($cat && $code && is_array($codes) && isset($codes[$cat]['issues'][$code])) {
+                            $this->set('issue_label', $codes[$cat]['issues'][$code]);
+                        } else {
+                            $this->set('issue_label', $code);
+                        }
+                    }
                 }
             }
         }
@@ -472,18 +502,50 @@ class BS_Issue extends BimpObject
     {
         $errors = array();
 
-        $sav = $this->getParentInstance();
-        if (!BimpObject::objectLoaded($sav)) {
-            $errors[] = 'ID du SAV absent';
-            return $errors;
-        }
+        if ((int) BimpTools::getPostFieldValue('tier_part', 0)) {
+            $this->set('category_code', '');
+            $this->set('category_label', 'Composants tiers');
+            $this->set('issue_code', '');
+            $this->set('issue_label', 'Non applicable');
+            $this->set('reproducibility', 'A');
+        } else {
+            $sav = $this->getParentInstance();
+            if (!BimpObject::objectLoaded($sav)) {
+                $errors[] = 'ID du SAV absent';
+                return $errors;
+            }
 
-        $issues = $sav->getChildrenList('issues');
-        if (count($issues) >= 6) {
-            $errors[] = 'Vous ne pouvez ajouter que 6 problèmes pour ce SAV';
-            return $errors;
+            $issues = $sav->getChildrenList('issues');
+            if (count($issues) >= 6) {
+                $errors[] = 'Vous ne pouvez ajouter que 6 problèmes pour ce SAV';
+                return $errors;
+            }
         }
 
         return parent::create($warnings, $force_create);
+    }
+
+    public function delete(&$warnings = array(), $force_delete = false)
+    {
+        $id = $this->id;
+
+        $errors = parent::delete($warnings, $force_delete);
+
+        if (!count($errors)) {
+            $parts = BimpCache::getBimpObjectObjects('bimpsupport', 'BS_ApplePart', array(
+                        'id_issue' => $id
+            ));
+
+            foreach ($parts as $part) {
+                $del_warnings = array();
+                $del_errors = $part->delete($del_warnings, true);
+
+                if (count($del_errors)) {
+                    $warnings[] = BimpTools::getMsgFromArray($del_errors, 'Echec de la suppression du composant "' . $part->getData('part_number') . '"');
+                }
+            }
+        }
+
+        return $errors;
     }
 }

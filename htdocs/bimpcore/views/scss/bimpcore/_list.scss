@@ -175,6 +175,10 @@ table.objectlistTable {
             }
         }
     }
+    
+    & > tbody.headers_col > tr > th {
+        width: 160px;
+    }
 
     & > tfoot > tr > th {
         color: #fff;

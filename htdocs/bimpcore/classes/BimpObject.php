@@ -659,6 +659,14 @@ class BimpObject extends BimpCache
                         }
                     }
 
+                    if (preg_match('/^(.*)\[REDIFNEG\](.*)\[\/REDIFNEG\](.*)$/U', $label, $matches)) {
+                        if ((float) $matches[2] < 0) {
+                            $label = $matches[1] . '<span class="danger">' . (float) $matches[2] . '</span>' . $matches[3];
+                        } else {
+                            $label = $matches[1] . (float) $matches[2] . $matches[3];
+                        }
+                    }
+
                     if ($card) {
                         $instance = BimpCache::getBimpObjectInstance($this->module, $this->object_name, (int) $r[$primary]);
                         if (BimpObject::objectLoaded($instance)) {
@@ -722,7 +730,7 @@ class BimpObject extends BimpCache
         if (!isset($this->params['fields'])) {
             return 0;
         }
-        
+
         return ($this->use_commom_fields && in_array($field_name, self::$common_fields)) ||
                 in_array($field_name, $this->params['fields']);
     }

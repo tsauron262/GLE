@@ -54,7 +54,7 @@ class dashBoardController extends BimpController {
         // TRANSFER
         $transfer = BimpObject::getInstance('bimptransfer', 'Transfer');
         BimpObject::loadClass('bimptransfer', 'Transfer');
-        $list = new BC_ListTable($transfer, 'dash_board_send', 1, null, 'Transfert: envoie');
+        $list = new BC_ListTable($transfer, 'dash_board_send', 1, null, 'Transfert: envoi');
         $list->addFieldFilterValue('id_warehouse_source', $id_warehouse);
         $list->addFieldFilterValue('status', (int) Transfer::STATUS_SENDING);
         $list->setAddFormValues(array());
@@ -63,7 +63,7 @@ class dashBoardController extends BimpController {
         // TRANSFER LINE
         $transfer_line = BimpObject::getInstance('bimptransfer', 'TransferLine');
         BimpObject::loadClass('bimptransfer', 'Transfer');
-        $list = new BC_ListTable($transfer_line, 'dash_board_send', 1, null, 'Ligne de transfert: envoie');
+        $list = new BC_ListTable($transfer_line, 'dash_board_send', 1, null, 'Ligne de transfert: envoi');
         $list->addFieldFilterValue('t.id_warehouse_source', $id_warehouse);
         $list->addFieldFilterValue('t.status', (int) Transfer::STATUS_SENDING);
         $list->addJoin('bt_transfer', 'a.id_transfer = t.id', 't');

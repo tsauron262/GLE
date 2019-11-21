@@ -34,6 +34,7 @@ Abstract class BimpModelPDF
 
         $conf->global->MAIN_MAX_DECIMALS_SHOWN = str_replace("...", "", $conf->global->MAIN_MAX_DECIMALS_SHOWN);
 
+        
         $this->db = $db;
         $this->langs = $langs;
 

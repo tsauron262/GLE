@@ -9,15 +9,15 @@ object:
 
 fields: 
     quantity_sent:
-        label: Quantité envoyé
+        label: Quantité envoyée
         type: int
                 
     quantity_received:
-        label: Quantité reçu
+        label: Quantité reçue
         type: int
         
     quantity_transfered:
-        label: Quantité transféré
+        label: Quantité transférée
         type: int
 
     id_transfer:
@@ -52,7 +52,7 @@ lists:
                edit: 1
            quantity_received: 
                field: quantity_received
-               label: Quantité reçu (brouillon)
+               label: Quantité reçue (brouillon)
                edit: 1
            quantity_transfered: 
                field: quantity_transfered

@@ -400,7 +400,7 @@ class InvoicePDF extends BimpDocumentPDF
         }
 
         // Mode de paiement: 
-        if ($this->object->mode_reglement_code && $this->object->mode_reglement_code != 'CHQ' && $this->object->mode_reglement_code != 'VIR') {
+        if ($this->object->mode_reglement_code) { // && $this->object->mode_reglement_code != 'CHQ' && $this->object->mode_reglement_code != 'VIR') {
             $html .= '<tr><td>';
             $html .= '<strong>' . $this->langs->transnoentities("PaymentMode") . '</strong>:<br/>';
             $html .= $this->langs->transnoentities("PaymentType" . $this->object->mode_reglement_code) != ('PaymentType' . $this->object->mode_reglement_code) ? $this->langs->transnoentities("PaymentType" . $this->object->mode_reglement_code) : $this->langs->convToOutputCharset($this->object->mode_reglement);
@@ -410,6 +410,8 @@ class InvoicePDF extends BimpDocumentPDF
         if (empty($this->object->mode_reglement_code) || $this->object->mode_reglement_code == 'CHQ') {
 
             if (!empty($conf->global->FACTURE_CHQ_NUMBER)) {
+                echo $conf->global->FACTURE_CHQ_NUMBER;
+                exit;
                 if ($conf->global->FACTURE_CHQ_NUMBER > 0) {
                     $html .= '<tr><td>';
                     if (!class_exists('Account')) {
@@ -444,10 +446,15 @@ class InvoicePDF extends BimpDocumentPDF
                 $bankid = $this->object->fk_bank;
             }
 
+            $only_number = false;
+            if (!empty($this->object->mode_reglement_code) && $this->object->mode_reglement_code !== 'VIR') {
+                $only_number = true;
+            }
+
             require_once(DOL_DOCUMENT_ROOT . "/compta/bank/class/account.class.php");
             $account = new Account($this->db);
             $account->fetch($bankid);
-            $html .= $this->getBankHtml($account);
+            $html .= $this->getBankHtml($account, $only_number);
             $html .= '</td></tr>';
         }
 //        }
@@ -590,113 +597,114 @@ class InvoicePDF extends BimpDocumentPDF
 
     public function renderAnnexes()
     {
-        $i = 1;
-        $html = '';
+        if (count($this->shipments) > 3 || $this->nb_deliveries > 1) {
+            $i = 1;
+            $html = '';
 
-        $html .= '<div style="font-size: 8px">';
-        $html .= '<table cellspacing="10px">';
-        $html .= '<tr>';
-
-        // Annexe Réf. livraison: 
-        $html .= '<td style="width: 50%">';
-        if (count($this->shipments) > 3) {
-            $html .= '<table style="width: 100%" cellspacing="0" cellpadding="3px">';
+            $html .= '<div style="font-size: 8px">';
+            $html .= '<table cellspacing="10px">';
             $html .= '<tr>';
-            $html .= '<td class="section_title" style="font-weight: bold; color: #' . $this->primary . '; border-top: solid 1px #' . $this->primary . '; border-bottom: solid 1px #' . $this->primary . '">Annexe ' . $i . ': références livraisons</td>';
-            $html .= '</tr>';
-            $html .= '</table>';
 
-            $html .= '<div>';
-            $html .= '<br/>';
-            foreach ($this->shipments as $shipment) {
-                $commande = $shipment->getParentInstance();
-                if (BimpObject::objectLoaded($commande)) {
-                    if ($shipment->getData('date_shipped')) {
-                        $dt = new DateTime($shipment->getData('date_shipped'));
-                        $date_label = ' / ' . $dt->format('d/m/Y');
+            // Annexe Réf. livraison: 
+            $html .= '<td style="width: 50%">';
+            if (count($this->shipments) > 3) {
+                $html .= '<table style="width: 100%" cellspacing="0" cellpadding="3px">';
+                $html .= '<tr>';
+                $html .= '<td class="section_title" style="font-weight: bold; color: #' . $this->primary . '; border-top: solid 1px #' . $this->primary . '; border-bottom: solid 1px #' . $this->primary . '">Annexe ' . $i . ': références livraisons</td>';
+                $html .= '</tr>';
+                $html .= '</table>';
+
+                $html .= '<div>';
+                $html .= '<br/>';
+                foreach ($this->shipments as $shipment) {
+                    $commande = $shipment->getParentInstance();
+                    if (BimpObject::objectLoaded($commande)) {
+                        if ($shipment->getData('date_shipped')) {
+                            $dt = new DateTime($shipment->getData('date_shipped'));
+                            $date_label = ' / ' . $dt->format('d/m/Y');
+                        } else {
+                            $date_label = '';
+                        }
+
+                        $html .= 'LIV-' . $commande->getRef() . '-' . $shipment->getData('num_livraison') . $date_label . '<br/>';
                     } else {
-                        $date_label = '';
+                        $html .= '<span class="danger">Erreur: la commande rattachée à l\'expédition #' . $shipment->id . ' n\'existe plus</span><br/>';
                     }
-
-                    $html .= 'LIV-' . $commande->getRef() . '-' . $shipment->getData('num_livraison') . $date_label . '<br/>';
-                } else {
-                    $html .= '<span class="danger">Erreur: la commande rattachée à l\'expédition #' . $shipment->id . ' n\'existe plus</span><br/>';
                 }
+                $html .= '</div>';
+                $i++;
             }
-            $html .= '</div>';
-            $i++;
-        }
-        $html .= '</td>';
+            $html .= '</td>';
 
-        // Annexe Adresses livraison:
-        $html .= '<td style="width: 50%">';
-        if ($this->nb_deliveries > 1) {
-            $html .= '<table style="width: 100%" cellspacing="0" cellpadding="3px">';
-            $html .= '<tr>';
-            $html .= '<td class="section_title" style="font-weight: bold; color: #' . $this->primary . '; border-top: solid 1px #' . $this->primary . '; border-bottom: solid 1px #' . $this->primary . '">Annexe ' . $i . ': adresses de livraison</td>';
-            $html .= '</tr>';
-            foreach ($this->deliveries as $id_client => $contacts) {
-                foreach ($contacts as $id_contact => $origins) {
-                    $html .= '<tr>';
-                    $html .= '<td style="border-bottom: solid 1px #3D3D3D">';
+            // Annexe Adresses livraison:
+            $html .= '<td style="width: 50%">';
+            if ($this->nb_deliveries > 1) {
+                $html .= '<table style="width: 100%" cellspacing="0" cellpadding="3px">';
+                $html .= '<tr>';
+                $html .= '<td class="section_title" style="font-weight: bold; color: #' . $this->primary . '; border-top: solid 1px #' . $this->primary . '; border-bottom: solid 1px #' . $this->primary . '">Annexe ' . $i . ': adresses de livraison</td>';
+                $html .= '</tr>';
+                foreach ($this->deliveries as $id_client => $contacts) {
+                    foreach ($contacts as $id_contact => $origins) {
+                        $html .= '<tr>';
+                        $html .= '<td style="border-bottom: solid 1px #3D3D3D">';
 
-                    if (isset($origins['shipments'])) {
-                        foreach ($origins['shipments'] as $id_shipment) {
-                            $shipment = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeShipment', (int) $id_shipment);
-                            if (BimpObject::objectLoaded($shipment)) {
-                                $commande = $shipment->getParentInstance();
-                                if (BimpObject::objectLoaded($commande)) {
-                                    $html .= '- Livraison: LIV-' . $commande->getRef() . '-' . $shipment->getData('num_livraison') . '<br/>';
+                        if (isset($origins['shipments'])) {
+                            foreach ($origins['shipments'] as $id_shipment) {
+                                $shipment = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeShipment', (int) $id_shipment);
+                                if (BimpObject::objectLoaded($shipment)) {
+                                    $commande = $shipment->getParentInstance();
+                                    if (BimpObject::objectLoaded($commande)) {
+                                        $html .= '- Livraison: LIV-' . $commande->getRef() . '-' . $shipment->getData('num_livraison') . '<br/>';
+                                    }
                                 }
                             }
                         }
-                    }
-                    if (isset($origins['commandes'])) {
-                        foreach ($origins['commandes'] as $id_commande) {
-                            $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $id_commande);
-                            if (BimpObject::objectLoaded($commande)) {
-                                $commande = $shipment->getParentInstance();
+                        if (isset($origins['commandes'])) {
+                            foreach ($origins['commandes'] as $id_commande) {
+                                $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $id_commande);
                                 if (BimpObject::objectLoaded($commande)) {
-                                    $html .= '- Commande: ' . $commande->getRef() . '<br/>';
+                                    $commande = $shipment->getParentInstance();
+                                    if (BimpObject::objectLoaded($commande)) {
+                                        $html .= '- Commande: ' . $commande->getRef() . '<br/>';
+                                    }
                                 }
                             }
                         }
-                    }
 
-                    $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', (int) $id_client);
-                    if (!BimpObject::objectLoaded($client)) {
-                        $html .= '<span class="danger">Erreur: la société #' . $id_client . ' n\'existe plus</span>';
-                        continue;
-                    }
-
-                    if ((int) $id_contact) {
-                        $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', (int) $id_contact);
-                        if (!BimpObject::objectLoaded($contact)) {
-                            $html .= '<span class="danger">Erreur: le contact #' . $id_contact . ' n\'existe plus</span>';
+                        $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', (int) $id_client);
+                        if (!BimpObject::objectLoaded($client)) {
+                            $html .= '<span class="danger">Erreur: la société #' . $id_client . ' n\'existe plus</span>';
                             continue;
                         }
-                    } else {
-                        $contact = null;
+
+                        if ((int) $id_contact) {
+                            $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', (int) $id_contact);
+                            if (!BimpObject::objectLoaded($contact)) {
+                                $html .= '<span class="danger">Erreur: le contact #' . $id_contact . ' n\'existe plus</span>';
+                                continue;
+                            }
+                        } else {
+                            $contact = null;
+                        }
+
+                        $html .= '<span style="font-weight: bold">';
+                        $html .= pdf_build_address($this->langs, $this->fromCompany, $client->dol_object, $contact->dol_object, !is_null($contact) ? 1 : 0, 'target');
+                        $html .= '</span>';
+
+                        $html .= '</td>';
+                        $html .= '</tr>';
                     }
-
-                    $html .= '<span style="font-weight: bold">';
-                    $html .= pdf_build_address($this->langs, $this->fromCompany, $client->dol_object, $contact->dol_object, !is_null($contact) ? 1 : 0, 'target');
-                    $html .= '</span>';
-
-                    $html .= '</td>';
-                    $html .= '</tr>';
                 }
+                $html .= '</table>';
             }
+
+            $i++;
+            $html .= '</td>';
+            $html .= '</tr>';
             $html .= '</table>';
+            $html .= '</div>';
+
+            $this->writeContent($html);
         }
-
-
-        $i++;
-        $html .= '</td>';
-        $html .= '</tr>';
-        $html .= '</table>';
-        $html .= '</div>';
-
-        $this->writeContent($html);
     }
 }

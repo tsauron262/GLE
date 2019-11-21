@@ -158,6 +158,7 @@ class BimpController
             $prefixe = "";
         elseif ($prefixe != "")
             $prefixe .= "/";
+
         $html .= '<script type="text/javascript">';
         $html .= 'ajaxRequestsUrl = \'' . $prefixe . "/" . $this->module . '/index.php?fc=' . $this->controller . (!is_null($id_object) ? '&id=' . $id_object : '') . '\';';
         $html .= '</script>';
@@ -165,11 +166,11 @@ class BimpController
         $html .= BimpCore::displayHeaderFiles(false);
 
         foreach ($this->cssFiles as $css_file) {
-            $html .= '<link type="text/css" rel="stylesheet" href="' . $prefixe . $css_file . '"/>';
+            $html .= '<link type="text/css" rel="stylesheet" href="' . BimpCore::getFileUrl($css_file) . '"/>';
         }
 
         foreach ($this->jsFiles as $js_file) {
-            $html .= '<script type="text/javascript" src="' . $prefixe . $js_file . '"></script>';
+            $html .= '<script type="text/javascript" src="' . BimpCore::getFileUrl($js_file) . '"></script>';
         }
 
         $html .= '<script type="text/javascript">';
@@ -211,7 +212,7 @@ class BimpController
                         continue;
                     }
                 }
-                echo '<link type="text/css" rel="stylesheet" href="' . DOL_URL_ROOT . '/' . $cssFile . '"/>';
+                echo '<link type="text/css" rel="stylesheet" href="' . BimpCore::getFileUrl($cssFile) . '"/>';
             }
 
             $jsFiles = $this->getConf('js', array(), false, 'array');
@@ -221,7 +222,7 @@ class BimpController
                         continue;
                     }
                 }
-                echo '<script type="text/javascript" src="' . DOL_URL_ROOT . '/' . $jsFile . '"></script>';
+                echo '<script type="text/javascript" src="' . BimpCore::getFileUrl($jsFile) . '"></script>';
             }
         }
 
@@ -580,7 +581,7 @@ class BimpController
                     if ($err_code == JSON_ERROR_UTF8) {
                         // On tente un encodage utf-8. 
                         $result = BimpTools::utf8_encode($result);
-                        
+
                         $json = json_encode($result);
 
                         if ($json !== false) {
@@ -1720,6 +1721,32 @@ class BimpController
         return array(
             'errors'     => array(),
             'list'       => $list,
+            'request_id' => BimpTools::getValue('request_id', 0)
+        );
+    }
+
+    protected function ajaxProcessGetSearchObjectResults()
+    {
+        $results = array();
+
+        $module = BimpTools::getValue('module', '');
+        $object_name = BimpTools::getValue('object_name', '');
+        $search_name = BimpTools::getValue('search_name', 'default');
+        $search_value = BimpTools::getValue('search_value', '');
+        $max_results = (int) BimpTools::getValue('max_results', 200);
+        $card = BimpTools::getValue('card', '');
+
+        if ($module && $object_name && $search_value) {
+            $instance = BimpObject::getInstance($module, $object_name);
+
+            $results = $instance->getSearchResults($search_name, $search_value, array(
+                'max_results' => $max_results,
+                'card'        => $card
+            ));
+        }
+
+        return array(
+            'results'    => $results,
             'request_id' => BimpTools::getValue('request_id', 0)
         );
     }

@@ -36,6 +36,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
     public function __construct($db)
     {
+        
         $this->primary = BimpCore::getParam('pdf/primary', '000000');
         parent::__construct($db, 'P', 'A4');
         BimpObject::loadClass('bimpcommercial', 'BimpComm');
@@ -1060,11 +1061,14 @@ class BimpDocumentPDF extends BimpModelPDF
     {
         global $conf, $mysoc;
 
+        // /!\ ATTENTION: ne surtout pas oublier de réinitialiser toutes les variables de classe définies ici
+        // La fonction peut être appellée plusieurs fois dans certain cas. 
+        
         $this->total_remises = 0;
-
         $this->localtax1 = array();
         $this->localtax2 = array();
         $this->tva = array();
+        $this->ht = array();
 
         $i = 0;
         foreach ($this->object->lines as $line) {
@@ -1144,6 +1148,10 @@ class BimpDocumentPDF extends BimpModelPDF
 
             if (!isset($this->tva[$vatrate])) {
                 $this->tva[$vatrate] = 0;
+            }
+            
+            if (!isset($this->ht[$vatrate])) {
+                $this->ht[$vatrate] = 0;
             }
 
             $this->tva[$vatrate] += $tva_line;

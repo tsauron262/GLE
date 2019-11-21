@@ -39,8 +39,8 @@ class transferController extends BimpController {
                     $qteAResa = $new_qty_send - $transfert_lineObj->getData("quantity_received");
 
                     if ($quantity_avaible < $qteAResa) {
-                        $errors[] = "Il n'y a que " . $quantity_avaible . " ce produit disponible dans cet entrepôt. "
-                                . "Or vous essayez d'en réserver " . $qteAResa . " pour ce transfert.";
+                        $errors[] = "Il n'y a que " . $quantity_avaible . " unité(s) disponible(s) dans cet entrepôt, "
+                                . "or vous essayez d'en réserver " . $qteAResa . " pour ce transfert.";
                     } else {
                         $errors = array_merge($errors, $transfert_lineObj->set('quantity_sent', (int) $new_qty_send));
                         $errors = array_merge($errors, $transfert_lineObj->update());
@@ -54,7 +54,7 @@ class transferController extends BimpController {
                     $errors = array_merge($errors, $transfert_lineObj->set('quantity_received', (int) $transfert_lineObj->getData('quantity_received') + (int) $quantity_input));
                     $errors = array_merge($errors, $transfert_lineObj->update());
                 } else
-                    $errors[] = "Produit non trouvé dans les envoies.";
+                    $errors[] = "Produit non trouvé dans les envois.";
             }
         }
 

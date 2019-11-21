@@ -131,9 +131,7 @@ fields:
         object: client
         create_form: client_light
         input: 
-            type: search_societe
-            societe_type: customer
-            help: Entrez le nom ou la référence d'un client pour effectuer une recherche
+            card: default
         display_if:
             fields_names: no_contrat,no_client
             no_contrat:

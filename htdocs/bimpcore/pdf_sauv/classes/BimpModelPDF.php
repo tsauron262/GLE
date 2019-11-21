@@ -39,6 +39,7 @@ Abstract class BimpModelPDF
         $this->langs->load("dict");
         $this->langs->load("companies");
 
+        
         $this->pdf = new BimpPDF($orientation, $format);
 
         $this->fromCompany = $mysoc;

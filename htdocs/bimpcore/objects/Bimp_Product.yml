@@ -132,6 +132,13 @@ fields:
             field_name: no_fixe_prices
             show_values: 0
         
+    deee: 
+        label: ecotaxe
+        dol_extra_field: 1
+        type: money
+        decimals: 4
+        default_value: 4
+        
     pmp: 
         label: Prix d'achat moyen pondéré
         type: money
@@ -330,34 +337,23 @@ fields:
         
     seuil_stock_alerte:
         label: Limite stock pour alerte
-        type: int
-        edit: 1
+        type: qty
+        decimals: 4
+        min: none
+        unsigned: 0
 
     desiredstock:
         label: Stock désiré optimal
-        type: int
-        edit: 1
+        type: qty
+        decimals: 4
+        unsigned: 0
+        min: none
         
     physical_stock:
         label: Stock physique
         type: int
         extra: 1
-        
-    doli_search_prod:
-        label: Produit
-        input: 
-            type: search_product
-            filter_type: product
-            help: Entrez la référence ou l'id du produit à faire fusionner dans celui-ci. (celui que vous voulez supprimer)
-        extra: 1
-        
-    product_categories: 
-        label: Catégories produit
-        extra: 1
-        type: items_list
-        items_data_type: id_object
-        object: category
-        
+                        
     localtax1_tx:
         label: Taxe locale 1
         type: money
@@ -470,6 +466,10 @@ fields:
     datec:
         type: date
         label: Date Création
+        
+    cto: 
+        label: CTO
+        dol_extra_field: 1
         
 forms: 
     # Utiliser plutôt "default" que "card" pour le formulaire principal 
@@ -602,7 +602,6 @@ forms:
               content: 
                   callback: renderMergeKeptProductInput
               depends_on: id_merged_product                  
-            
         
 fields_tables: 
     infos: 
@@ -711,7 +710,9 @@ fields_tables:
         icon: fas_box-open
         rows:
             - field: seuil_stock_alerte
+              edit: 1
             - field: desiredstock
+              edit: 1
             - field: stock
             - custom: 1
               label: Stock virtuel
@@ -861,35 +862,36 @@ filters_panels:
             - field: tobuy
             - field: no_fixe_prices
             - field: datec
-            - custom: 1
-              label: Catégorie (1)
-              field: categ1
-              type: value
-              input:
-                  type: select
-                  options: 
-                      callback: getCategoriesArray
-            - custom: 1
-              label: Catégorie (2)
-              field: categ2
-              type: value
-              input:
-                  type: select
-                  options: 
-                      callback: getCategoriesArray
-            - custom: 1
-              label: Catégorie (3)
-              field: categ3
-              type: value
-              input:
-                  type: select
-                  options: 
-                      callback: getCategoriesArray
+#            - custom: 1
+#              label: Catégorie (1)
+#              field: categ1
+#              type: value
+#              input:
+#                  type: select
+#                  options: 
+#                      callback: getCategoriesArray
+#            - custom: 1
+#              label: Catégorie (2)
+#              field: categ2
+#              type: value
+#              input:
+#                  type: select
+#                  options: 
+#                      callback: getCategoriesArray
+#            - custom: 1
+#              label: Catégorie (3)
+#              field: categ3
+#              type: value
+#              input:
+#                  type: select
+#                  options: 
+#                      callback: getCategoriesArray
             - field: gamme
             - field: categorie
             - field: collection
             - field: nature
             - field: famille
+            - field: seuil_stock_alerte
       
 lists_cols: 
     ref: 
@@ -944,6 +946,9 @@ lists_cols:
         field: nature
     famille:
         field: famille
+    seuil_stock: 
+        label: Lim. stock
+        field: seuil_stock_alerte
                 
 lists: 
     default: 
@@ -1030,10 +1035,42 @@ cards:
         view_btn: 1
         fields: 
             - field: ref
+            - field: fk_product_type
+            - field: price
+            - field: tva_tx
+            
+    detailed: 
+        view_btn: 1
+        fields: 
+            - field: ref
+            - field: fk_product_type
             - field: barcode
+            - field: price
+            - field: tva_tx
+            - field: serialisable
+            - field: validate
             
 searches:
     default: 
         fields_search: 
-            - label
-            - ref
+            - a.label
+            - a.ref
+            - a.barcode
+        fields_return:
+            - a.ref
+            - a.label
+            - REPLACE(ROUND(a.price,2),'.',',') as price
+            - a.stock
+        label_syntaxe: '<ref> - <label> - <price> € HT - Stock: [REDIFNEG]<stock>[/REDIFNEG]'
+        
+    tosell: 
+        extends: default
+        filters: 
+            a.tosell: 1
+            
+    tobuy: 
+        extends: default
+        filters: 
+            a.tobuy: 1
+            
+        

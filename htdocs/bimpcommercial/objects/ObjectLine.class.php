@@ -10,6 +10,8 @@ class ObjectLine extends BimpObject
     public static $check_on_update = false;
     public $equipment_required = false;
     public static $equipment_required_in_entrepot = true;
+    public static $product_search_name = 'tosell';
+    public static $tva_free = false;
 
     const LINE_PRODUCT = 1;
     const LINE_TEXT = 2;
@@ -2957,10 +2959,17 @@ class ObjectLine extends BimpObject
 
         switch ($field) {
             case 'id_product':
-                $html = BimpInput::renderInput('search_product', $prefixe . 'id_product', (int) $value, array(
-                            'filter_type' => 'both'
+                $html = BimpInput::renderInput('search_object', $prefixe . 'id_product', (int) $value, array(
+                            'object'      => BimpObject::getInstance('bimpcore', 'Bimp_Product'),
+                            'search_name' => static::$product_search_name,
+//                            'card'        => 'default',
+                            'help'        => 'Entrez la référence, le nom, ou le code-barre d\'un produit',
+                            'max_results' => 500
                 ));
-                $html .= '<p class="inputHelp">Entrez la référence ou le code-barre d\'un produit.<br/>Laissez vide si vous sélectionnez un équipement.</p>';
+//                $html = BimpInput::renderInput('search_product', $prefixe . 'id_product', (int) $value, array(
+//                            'filter_type' => 'both'
+//                ));
+//                $html .= '<p class="inputHelp">Entrez la référence ou le code-barre d\'un produit.<br/>Laissez vide si vous sélectionnez un équipement.</p>';
                 break;
 
             case 'id_fourn_price':
@@ -3134,15 +3143,22 @@ class ObjectLine extends BimpObject
                         $html .= ' <span class="inputInfo warning">(non modifiable)</span>';
                     }
                 } else {
-                    $html = BimpInput::renderInput('text', $prefixe . 'tva_tx', (float) $value, array(
-                                'data'        => array(
-                                    'data_type' => 'number',
-                                    'decimals'  => 2,
-                                    'min'       => 0,
-                                    'max'       => 100
-                                ),
-                                'addon_right' => '<i class="fa fa-percent"></i>'
-                    ));
+                    if (static::$tva_free) {
+                        $html = BimpInput::renderInput('text', $prefixe . 'tva_tx', (float) $value, array(
+                                    'data'        => array(
+                                        'data_type' => 'number',
+                                        'decimals'  => 2,
+                                        'min'       => 0,
+                                        'max'       => 100
+                                    ),
+                                    'addon_right' => '<i class="fa fa-percent"></i>'
+                        ));
+                    } else {
+                        $tva_rates = BimpCache::getTaxesByRates(1);
+                        $html = BimpInput::renderInput('select', $prefixe . 'tva_tx', (float) $value, array(
+                                    'options' => $tva_rates
+                        ));
+                    }
                 }
                 break;
 

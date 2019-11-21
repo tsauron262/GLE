@@ -695,14 +695,14 @@ class BimpTools
         } else {
             $num = 1;
         }
-        
-        if($numCaractere > 0){
+
+        if ($numCaractere > 0) {
             $diff = $numCaractere - strlen($num);
-            if($diff < 0)
+            if ($diff < 0)
                 die("impossible trop de caractére BimpTools::GetNextRef");
-            else{
-                for($i=0;$i<$diff;$i++){
-                    $num = "0".$num;
+            else {
+                for ($i = 0; $i < $diff; $i++) {
+                    $num = "0" . $num;
                 }
             }
         }
@@ -721,6 +721,23 @@ class BimpTools
         if (!file_exists($root_dir)) {
             if (!mkdir($root_dir, 0777)) {
                 return 'Echec de la création du dossier "' . $root_dir . '"';
+            }
+        }
+
+        if (is_string($dir_tree)) {
+            $array = explode('/', $dir_tree);
+            $dir_tree = array();
+
+            foreach ($array as $key => $value) {
+                if (!(string) $value) {
+                    unset($array[$key]);
+                }
+            }
+
+            while ($dirname = array_pop($array)) {
+                $dir_tree = array(
+                    $dirname => $dir_tree
+                );
             }
         }
 
@@ -1054,8 +1071,9 @@ class BimpTools
                 $sql .= '`' . $field . '`';
             }
 
-            if (isset($filter['IN']))
+            if (isset($filter['IN'])) {
                 $filter['in'] = $filter['IN'];
+            }
 
             if (is_array($filter)) {
                 if (isset($filter['min']) || isset($filter['max'])) {

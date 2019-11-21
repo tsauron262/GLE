@@ -323,6 +323,23 @@ $article_color: #004264;
     margin-bottom: 15px;
 }
 
+#venteClientFormContainer {
+    .search_object_input_container {
+        .search_icon,
+        .search_object_result,
+        .no_item_selected,
+        {
+            display: none!important;
+        }
+        
+        .spinner {
+            position: absolute;
+            top: 17px;
+            right: 0;
+        }
+    }
+}
+
 #venteClientViewContainer {
     h3 {
         font-size: 16px;
@@ -725,8 +742,8 @@ $article_color: #004264;
             }
         }
         .product_total_price {
-/*            display: inline-block;
-            float: right;*/
+            /*            display: inline-block;
+                        float: right;*/
             margin-right: -60px;
             text-align: right;
 

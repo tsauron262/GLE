@@ -332,7 +332,7 @@ class TransferLine extends BimpObject
                             'id_equipment' => $id_equipment,
                             'type'         => 2,
                             'id_entrepot'  => $transfer->getData('id_warehouse_dest'),
-                            'infos'        => 'Transfert de stock',
+                            'infos'        => 'Transfert de stock #' . $transfer->id,
                             'code_mvt'     => $codemove,
                             'date'         => dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')
                 )));
@@ -341,8 +341,8 @@ class TransferLine extends BimpObject
                             'id_equipment' => $id_equipment,
                             'type'         => 2,
                             'id_entrepot'  => $transfer->getData('id_warehouse_source'),
-                            'infos'        => 'Annulation transfert de stock',
-                            'code_mvt'     => $codemove,
+                            'infos'        => 'Annulation transfert de stock #' . $transfer->id,
+                            'code_mvt'     => $codemove.'_ANNUL',
                             'date'         => dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')
                 )));
             }

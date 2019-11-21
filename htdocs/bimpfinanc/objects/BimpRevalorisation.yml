@@ -51,7 +51,7 @@ fields:
         type: id_object
         object: facture
         input: 
-            type: search_object
+            card: light
         required: 1
         
     id_facture_line:

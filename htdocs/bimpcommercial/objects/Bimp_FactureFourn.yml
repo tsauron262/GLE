@@ -131,8 +131,10 @@ fields:
         values: 
             array: comptes
     exported:
-        label: Comptabilisée
-        type: bool
+        label: Etat comptable
+        type: int
+        values:
+            array: exportedStatut
         
     fk_availability: unset
     fk_input_reason: unset
@@ -349,4 +351,20 @@ cards:
 searches:
     default: 
         fields_search: 
-            - ref
+            - a.ref
+            - ef.libelle
+            - s.nom
+            - a.ref_supplier
+        joins:
+            ef: 
+                table: commande_fournisseur_extrafields
+                on: a.rowid = ef.fk_object
+                alias: ef
+            s: 
+                table: societe
+                on: a.fk_soc = s.rowid
+                alias: s
+        fields_return: 
+            - a.ref
+            - s.nom
+        label_syntaxe: '<a.ref> (Fourn: <s.nom>)'

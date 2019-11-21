@@ -1,6 +1,7 @@
 // Notifications:
 var bimp_msg_enable = true;
 var ctrl_down = false;
+var text_input_focused = false;
 var bimp_decode_textarea = null;
 
 var notifications_remove_delay = 3000;
@@ -9,11 +10,11 @@ function bimp_msg(msg, className, $container, auto_hide) {
     if (!bimp_msg_enable) {
         return;
     }
-    
+
     if (typeof (className) === 'undefined') {
         className = 'info';
     }
-    
+
     if (typeof (auto_hide) === 'undefined') {
         auto_hide = false;
     }
@@ -112,14 +113,14 @@ function bimp_notify(content) {
 }
 
 function bimp_notify_error(content) {
-        var html = '<div class="danger" style="text-align: center; font-size: 18px; margin: 30px 0">';
-        html += '<i class="fas fa5-exclamation-triangle iconLeft"></i>Une erreur inattendue est survenue';
-        html += '</div>';
-        html += '<h3>Informations reçues: </h3>';
-        html += '<div>';
-        html += content;
-        html += '</div>';
-        bimp_notify(html);
+    var html = '<div class="danger" style="text-align: center; font-size: 18px; margin: 30px 0">';
+    html += '<i class="fas fa5-exclamation-triangle iconLeft"></i>Une erreur inattendue est survenue';
+    html += '</div>';
+    html += '<h3>Informations reçues: </h3>';
+    html += '<div>';
+    html += content;
+    html += '</div>';
+    bimp_notify(html);
 }
 
 // Notifications: 
@@ -452,15 +453,29 @@ function setCommonEvents($container) {
                 if ($li.length && $li.parent('ul').data('navtabs_id') === 'maintabs') {
                     var prev = '' + e.relatedTarget;
                     prev = prev.replace(/^.*#(.*)$/, '$1');
-
+                    var wndScrollTop = $(window).scrollTop();
                     var $prevLi = $('a[href="#' + prev + '"]').parent('li');
-                    $prevLi.data('scrollTop', parseInt($(window).scrollTop()));
+                    $prevLi.data('scrollTop', parseInt(wndScrollTop));
+
+//                    if (wndScrollTop > $li.position().top) {
+//                        $(window).scrollTop($li.position().top);
+//                    }
                     var scrollTop = parseInt($li.data('scrollTop'));
-                    if (!isNaN(scrollTop)) {
-                        $(window).scrollTop(scrollTop);
-                    } else if (object_header_scroll_trigger && $(window).scrollTop() > object_header_scroll_trigger) {
-                        $(window).scrollTop(object_header_scroll_trigger + 1);
+//                    bimp_msg(scrollTop);
+                    if (isNaN(scrollTop)) {
+                        if (wndScrollTop > $li.position().top) {
+                            scrollTop = $li.position().top;
+                        } else {
+                            scrollTop = wndScrollTop;
+                        }
+                        $li.data('scrollTop', scrollTop);
                     }
+
+//                    if (object_header_scroll_trigger && scrollTop < object_header_scroll_trigger) {
+//                        $(window).scrollTop(object_header_scroll_trigger + 1);
+//                    } else {
+//                        $(window).scrollTop(scrollTop);
+//                    }
                 }
 
                 var $content = $('#' + tab_id);
@@ -986,6 +1001,7 @@ $(document).ready(function () {
     $('body').click(function (e) {
         $(this).find('.hideOnClickOut').hide();
         $(this).find('.bs-popover').popover('hide');
+        $(this).find('.popover.fade').remove();
     });
 
     // Notifications: 
@@ -1011,21 +1027,26 @@ $(document).ready(function () {
     });
 
     $('body').keydown(function (e) {
-        if (e.key === 'Control') {
+        if (e.key === 'Alt') {
             ctrl_down = true;
             $(this).find('.object_page_header').each(function () {
                 setObjectHeaderPosition($(this));
             });
-        } else if (ctrl_down) {
+        } else if (ctrl_down && !text_input_focused) {
             if (e.key === 'ArrowRight') {
                 navTabNext('maintabs');
             } else if (e.key === 'ArrowLeft') {
                 navTabPrev('maintabs');
+            } else if (e.key === 'ArrowUp') {
+                $(window).scrollTop(0);
+            } else if (e.key === 'ArrowDown') {
+                var maxScroll = $('body').height() - $(window).height();
+                $(window).scrollTop(maxScroll);
             }
         }
     });
     $('body').keyup(function (e) {
-        if (e.key === 'Control') {
+        if (e.key === 'Alt') {
             ctrl_down = false;
             $(this).find('.object_page_header').each(function () {
                 setObjectHeaderPosition($(this));

@@ -46,6 +46,11 @@ function editBimpFilterValue($value) {
                 if ($input.length) {
                     $input.val(value);
                     check = true;
+
+                    var $search_input = $container.find('.search_object_input').find('input');
+                    if ($search_input.length) {
+                        $search_input.val($value.text());
+                    }
                 }
                 break;
 

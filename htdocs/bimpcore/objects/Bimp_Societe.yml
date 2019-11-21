@@ -428,8 +428,11 @@ cards:
         type: societe_card
         view_btn: 1
         
-searches:
-    default: 
+searches: 
+    default:
         fields_search: 
-            - label
-            - ref
+            - a.rowid
+            - a.nom
+            - a.name_alias
+        fields_return: 
+            - a.nom

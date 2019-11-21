@@ -1341,7 +1341,7 @@ class BimpCache
 
         if (!isset(self::$cache[$cache_key])) {
             self::$cache[$cache_key] = array();
-            $rows = self::getBdb()->getRows('c_tva', '`fk_pays` = ' . $id_country . ($active_only ? ' AND `active` = 1' : ''), null, 'array', array('rowid', 'taux'));
+            $rows = self::getBdb()->getRows('c_tva', '`fk_pays` = ' . $id_country . ($active_only ? ' AND `active` = 1' : ''), null, 'array', array('rowid', 'taux', 'note'));
             if (!is_null($rows)) {
                 foreach ($rows as $r) {
                     self::$cache[$cache_key][$r['taux']] = BimpTools::displayFloatValue((float) $r['taux'], 1) . '% - ' . $r['note'];

@@ -678,8 +678,8 @@ class BimpObject extends BimpCache
                                     $label = str_replace('<' . $field_name . '>', '', $label);
                                 }
                             }
-                        } else {
-                            if (isset($r[$field_name])) {
+                        } elseif ($field_name !== $primary) {
+                            if (isset($r[$field_name]) && !empty($r[$field_name])) {
                                 $label .= ($label ? ' - ' : '') . $r[$field_name];
                             }
                         }

@@ -636,9 +636,8 @@ filters_panels:
                 field: total
             total_ttc: 
                 field: total_ttc
-            igonre_compta:
+            ignore_compta:
                 field: ignore_compta
-                
             availability: unset
             
 lists_cols: 

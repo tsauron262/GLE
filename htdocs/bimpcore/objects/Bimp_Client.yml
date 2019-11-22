@@ -327,8 +327,9 @@ searches:
         fields_search: 
             3: a.code_client
         fields_return: 
-            1: a.code_client
-        label_syntaxe: <a.code_client> - <a.nom>
+            0: a.code_client
+            1: a.nom
+            2: a.name_alias
         filters: 
             a.client: 
                 in: 

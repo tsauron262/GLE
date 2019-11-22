@@ -435,4 +435,5 @@ searches:
             - a.nom
             - a.name_alias
         fields_return: 
-            - a.nom
+            0: a.nom
+            1: a.name_alias

@@ -101,8 +101,11 @@ function InfoSoc(elem,elem2) {
         }
         else{
             if(siren.length == 14)
-                this.elem2.val(siren);
+                siret = this.elem2.val(siren);
+            else
+                siret = siren + "0001X";
             this.elem.val(siren);
+            this.elem2.val(siret);
             this.checkData("siret");
         }
     }

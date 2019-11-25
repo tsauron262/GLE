@@ -75,7 +75,7 @@ class Bimp_Societe extends BimpObject
              */
             if($this->getData('fk_pays') == 1 || $this->getData('fk_pays') < 1)
                 if(strlen($this->getData("siret")) != 14 || !$this->Luhn($this->getData("siret"), 14)){
-                    $errors[] = "Siren/siret client invalide :".$this->getData("siren")."/".$this->getData("siret");
+                    $errors[] = "Siret client invalide :".$this->getData("siret");
                 }
         }
         if(self::$types_ent_list_code[$this->getData("fk_typent")] != "TE_PRIVATE"){

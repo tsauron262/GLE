@@ -34,14 +34,12 @@ class BimpComm extends BimpDolObject
         3  => 'trimestre',
         12 => 'an'
     );
-    
     public static $exportedStatut = [
         0   => ['label' => 'Non traitée en comptabilitée', 'classes' => ['danger'], 'icon' => 'times'],
         1   => ['label' => 'Comptabilisée', 'classes' => ['success'], 'icon' => 'check'],
         102 => ['label' => 'Comptabilisation suspendue', 'classes' => ['important'], 'icon' => 'refresh'],
         204 => ['label' => 'Non comptabilisable', 'classes' => ['warning'], 'icon' => 'times'],
     ];
-    
     public static $zones_vente = array(
         self::BC_ZONE_FR          => 'France',
         self::BC_ZONE_UE          => 'Union Européenne avec TVA',
@@ -99,7 +97,8 @@ class BimpComm extends BimpDolObject
                 }
 
                 if (static::$use_zone_vente_for_tva) {
-                    if (in_array($this->getData('ef_type'), static::$cant_edit_zone_vente_secteurs)) {
+                    global $user;
+                    if (!(int) $user->rights->bimpcommercial->priceVente && in_array($this->getData('ef_type'), static::$cant_edit_zone_vente_secteurs)) {
                         return 0;
                     }
 
@@ -524,9 +523,13 @@ class BimpComm extends BimpDolObject
                 break;
 
             case 'id_commercial':
-                $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $value);
-                if (BimpObject::ObjectLoaded($user)) {
-                    return $user->dol_object->getFullName();
+                if ((int) $value) {
+                    $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $value);
+                    if (BimpObject::ObjectLoaded($user)) {
+                        return $user->dol_object->getFullName();
+                    }
+                } else {
+                    return 'Aucun';
                 }
                 break;
         }
@@ -551,6 +554,16 @@ class BimpComm extends BimpDolObject
                 break;
 
             case 'id_commercial':
+                $ids = array();
+                $empty = false;
+
+                foreach ($values as $value) {
+                    if ((int) $value) {
+                        $ids[] = (int) $value;
+                    } else {
+                        $empty = true;
+                    }
+                }
                 $joins['elemcont'] = array(
                     'table' => 'element_contact',
                     'on'    => 'elemcont.element_id = a.rowid',
@@ -561,12 +574,30 @@ class BimpComm extends BimpDolObject
                     'on'    => 'elemcont.fk_c_type_contact = typecont.rowid',
                     'alias' => 'typecont'
                 );
-                $filters['typecont.element'] = static::$dol_module;
-                $filters['typecont.source'] = 'internal';
-                $filters['typecont.code'] = 'SALESREPFOLL';
-                $filters['elemcont.fk_socpeople'] = array(
-                    'in' => $values
-                );
+
+                $sql = '';
+
+                if (!empty($ids)) {
+                    $sql = '(typecont.element = \'' . static::$dol_module . '\' AND typecont.source = \'internal\'';
+                    $sql .= ' AND typecont.code = \'SALESREPFOLL\' AND elemcont.fk_socpeople IN (' . implode(',', $ids) . '))';
+                }
+
+                if ($empty) {
+                    $sql .= ($sql ? ' OR ' : '');
+                    $sql = '(SELECT COUNT(ec2.fk_socpeople) FROM ' . MAIN_DB_PREFIX . 'element_contact ec2';
+                    $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'c_type_contact tc2 ON tc2.rowid = ec2.fk_c_type_contact';
+                    $sql .= ' WHERE tc2.element = \'' . static::$dol_module . '\'';
+                    $sql .= ' AND tc2.source = \'internal\'';
+                    $sql .= ' AND tc2.code = \'SALESREPFOLL\'';
+                    $sql .= ' AND ec2.element_id = a.rowid) = 0';
+                }
+
+                if ($sql) {
+                    $filters['commercial_custom'] = array(
+                        'custom' => $sql
+                    );
+                }
+
                 break;
         }
 

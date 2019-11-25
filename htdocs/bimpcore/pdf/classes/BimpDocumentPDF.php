@@ -36,6 +36,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
     public function __construct($db)
     {
+        
         $this->primary = BimpCore::getParam('pdf/primary', '000000');
         parent::__construct($db, 'P', 'A4');
         BimpObject::loadClass('bimpcommercial', 'BimpComm');

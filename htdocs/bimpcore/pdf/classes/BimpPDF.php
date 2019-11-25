@@ -19,7 +19,6 @@ class BimpPDF extends TCPDF
 
     public function __construct($orientation = 'P', $format = 'A4')
     {
-        
         parent::__construct($orientation, 'mm', $format);
     }
 

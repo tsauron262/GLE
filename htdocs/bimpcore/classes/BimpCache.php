@@ -825,7 +825,7 @@ class BimpCache
 
     // User: 
 
-    public static function getUsersArray($include_empty = 0)
+    public static function getUsersArray($include_empty = 0, $empty_label = '')
     {
         global $conf, $langs;
 
@@ -840,11 +840,6 @@ class BimpCache
             $cache_key .= '_active_only';
         }
         if (!isset(self::$cache[$cache_key])) {
-            if ($include_empty)
-                self::$cache[$cache_key] = array("" => "");
-            else
-                self::$cache[$cache_key] = array();
-
             if ($active_only) {
                 $where = '`statut` != 0';
             } else {
@@ -873,7 +868,7 @@ class BimpCache
             }
         }
 
-        return self::getCacheArray($cache_key, $include_empty);
+        return self::getCacheArray($cache_key, $include_empty, 0, $empty_label);
     }
 
     public static function getUserGroupsArray($include_empty = 1)
@@ -1308,14 +1303,18 @@ class BimpCache
 
     // Divers: 
 
-    public static function getTaxes($id_country = 1)
+    public static function getTaxes($id_country = 1, $active_only = true, $include_empty = false)
     {
         $id_country = (int) $id_country;
         $cache_key = 'taxes_' . $id_country;
 
+        if ($active_only) {
+            $cache_key .= '_active_only';
+        }
+
         if (!isset(self::$cache[$cache_key])) {
             self::$cache[$cache_key] = array();
-            $rows = self::getBdb()->getRows('c_tva', '`fk_pays` = ' . $id_country . ' AND `active` = 1', null, 'array', array('rowid', 'taux'));
+            $rows = self::getBdb()->getRows('c_tva', '`fk_pays` = ' . $id_country . ($active_only ? ' AND `active` = 1' : ''), null, 'array', array('rowid', 'taux'));
             if (!is_null($rows)) {
                 foreach ($rows as $r) {
                     self::$cache[$cache_key][(int) $r['rowid']] = $r['taux'];
@@ -1323,7 +1322,29 @@ class BimpCache
             }
         }
 
-        return self::$cache[$cache_key];
+        return self::getCacheArray($cache_key, $include_empty);
+    }
+
+    public static function getTaxesByRates($id_country = 1, $active_only = true, $include_empty = false)
+    {
+        $id_country = (int) $id_country;
+        $cache_key = 'taxes_' . $id_country . '_by_rates';
+
+        if ($active_only) {
+            $cache_key .= '_active_only';
+        }
+
+        if (!isset(self::$cache[$cache_key])) {
+            self::$cache[$cache_key] = array();
+            $rows = self::getBdb()->getRows('c_tva', '`fk_pays` = ' . $id_country . ($active_only ? ' AND `active` = 1' : ''), null, 'array', array('rowid', 'taux', 'note'));
+            if (!is_null($rows)) {
+                foreach ($rows as $r) {
+                    self::$cache[$cache_key][$r['taux']] = BimpTools::displayFloatValue((float) $r['taux'], 1) . '% - ' . $r['note'];
+                }
+            }
+        }
+
+        return self::getCacheArray($cache_key, $include_empty);
     }
 
     public static function getCentres()

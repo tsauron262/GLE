@@ -11,6 +11,7 @@ class ObjectLine extends BimpObject
     public $equipment_required = false;
     public static $equipment_required_in_entrepot = true;
     public static $product_search_name = 'tosell';
+    public static $tva_free = false;
 
     const LINE_PRODUCT = 1;
     const LINE_TEXT = 2;
@@ -3142,15 +3143,22 @@ class ObjectLine extends BimpObject
                         $html .= ' <span class="inputInfo warning">(non modifiable)</span>';
                     }
                 } else {
-                    $html = BimpInput::renderInput('text', $prefixe . 'tva_tx', (float) $value, array(
-                                'data'        => array(
-                                    'data_type' => 'number',
-                                    'decimals'  => 2,
-                                    'min'       => 0,
-                                    'max'       => 100
-                                ),
-                                'addon_right' => '<i class="fa fa-percent"></i>'
-                    ));
+                    if (static::$tva_free) {
+                        $html = BimpInput::renderInput('text', $prefixe . 'tva_tx', (float) $value, array(
+                                    'data'        => array(
+                                        'data_type' => 'number',
+                                        'decimals'  => 2,
+                                        'min'       => 0,
+                                        'max'       => 100
+                                    ),
+                                    'addon_right' => '<i class="fa fa-percent"></i>'
+                        ));
+                    } else {
+                        $tva_rates = BimpCache::getTaxesByRates(1);
+                        $html = BimpInput::renderInput('select', $prefixe . 'tva_tx', (float) $value, array(
+                                    'options' => $tva_rates
+                        ));
+                    }
                 }
                 break;
 

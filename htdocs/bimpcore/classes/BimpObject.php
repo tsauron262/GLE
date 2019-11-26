@@ -502,6 +502,11 @@ class BimpObject extends BimpCache
         $filters = array();
         $syntaxe = '';
         $primary = $this->getPrimary();
+        $ref_prop = $this->getRefProperty();
+        $name_prop = $this->getNameProperty();
+
+        $order_by = '';
+        $order_way = 'asc';
 
         if ($search_name === '') {
             $search_name = 'default';
@@ -514,6 +519,18 @@ class BimpObject extends BimpCache
             $syntaxe = $this->getConf($path . '/label_syntaxe', '');
             $joins = $this->config->getCompiledParams($path . '/joins');
             $filters = $this->config->getCompiledParams($path . '/filters');
+            $order_by = $this->getConf($path . '/order_by', '');
+            $order_way = $this->getConf($path . '/order_way', 'asc');
+
+            if (!$order_by) {
+                if ($ref_prop) {
+                    $order_by = 'a.' . $ref_prop;
+                } elseif ($name_prop) {
+                    $order_by = 'a.' . $name_prop;
+                } else {
+                    $order_by = 'a.' . $primary;
+                }
+            }
 
             foreach ($fields_search as $key => $field) {
                 if (!preg_match('/^(.+)\.(.+)/', $field)) {
@@ -534,7 +551,6 @@ class BimpObject extends BimpCache
             $has_extrafields = false;
             $fields_search[] = 'a.' . $primary;
             $fields_return[] = 'a.' . $primary;
-            $ref_prop = $this->getRefProperty();
 
             if ($ref_prop) {
                 if ($this->isDolObject() && (int) $this->getConf('fields/' . $ref_prop . '/dol_extra_field', 0, false, 'bool')) {
@@ -549,9 +565,9 @@ class BimpObject extends BimpCache
                 $fields_search[] = $ref_prop;
                 $fields_return[] = $ref_prop;
                 $syntaxe .= '<' . $ref_prop . '>';
+                $order_by = 'a.' . $ref_prop;
             }
 
-            $name_prop = $this->getNameProperty();
             if ($name_prop) {
                 if ($this->isDolObject() && (int) $this->getConf('fields/' . $name_prop . '/dol_extra_field', 0, false, 'bool')) {
                     if (preg_match('/^ef_(.*)$/', $name_prop, $matches)) {
@@ -566,6 +582,14 @@ class BimpObject extends BimpCache
                 $fields_return[] = $name_prop;
 
                 $syntaxe .= ($syntaxe ? ' - ' : '') . '<' . $name_prop . '>';
+
+                if (!$order_by) {
+                    $order_by = 'a.' . $name_prop;
+                }
+            }
+
+            if (!$order_by) {
+                $order_by = 'a.' . $primary;
             }
 
             if ($has_extrafields) {
@@ -584,7 +608,9 @@ class BimpObject extends BimpCache
             'fields_return' => $fields_return,
             'filters'       => $filters,
             'joins'         => $joins,
-            'label_syntaxe' => $syntaxe
+            'label_syntaxe' => $syntaxe,
+            'order_by'      => $order_by,
+            'order_way'     => $order_way
         );
     }
 
@@ -624,7 +650,7 @@ class BimpObject extends BimpCache
 
             $max_results = (isset($options['max_results']) ? (int) $options['max_results'] : 200);
 
-            $rows = $this->getList($filters, $max_results, 1, 'id', 'desc', 'array', $params['fields_return'], $joins);
+            $rows = $this->getList($filters, $max_results, 1, $params['order_by'], $params['order_way'], 'array', $params['fields_return'], $joins);
 
             if (is_array($rows)) {
                 foreach ($rows as $r) {
@@ -652,8 +678,8 @@ class BimpObject extends BimpCache
                                     $label = str_replace('<' . $field_name . '>', '', $label);
                                 }
                             }
-                        } else {
-                            if (isset($r[$field_name])) {
+                        } elseif ($field_name !== $primary) {
+                            if (isset($r[$field_name]) && !empty($r[$field_name])) {
                                 $label .= ($label ? ' - ' : '') . $r[$field_name];
                             }
                         }
@@ -676,7 +702,7 @@ class BimpObject extends BimpCache
                         }
                     }
 
-                    $results[(int) $r[$primary]] = array(
+                    $results[] = array(
                         'id'    => (int) $r[$primary],
                         'label' => $label,
                         'card'  => $card_html
@@ -4301,7 +4327,7 @@ class BimpObject extends BimpCache
 
     public function isDeletable($force_delete = false, &$errors = array())
     {
-        return $this->isEditable();
+        return $this->isEditable($force_delete, $errors);
     }
 
     public function isFieldEditable($field, $force_edit = false)

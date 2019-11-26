@@ -113,11 +113,11 @@ class CronSynopsis {
 //        $import->go(); 
 //        $this->output .= $import->output;
 //        
-//        require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/importExport/importProdFourn.class.php");
-//        $import = new importProdFourn($this->db);
-//        $import->debug = $debug;
-//        $import->go(); 
-//        $this->output .= $import->output;
+        require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/importExport/importProdFourn.class.php");
+        $import = new importProdFourn($this->db);
+        $import->debug = $debug;
+        $import->go(); 
+        $this->output .= $import->output;
 //        
 //        
 //        
@@ -380,7 +380,7 @@ class CronSynopsis {
         $str = "";
         if (array_key_exists('options_date_s', $user->array_options)) {
             $mails = "tommy@bimp.fr, grh@bimp.fr";
-            $mails2 = $mails .", f.poirier@bimp.fr, j.belhocine@bimp.fr";
+            $mails2 = $mails .", j.belhocine@bimp.fr";
             $sql = $this->db->query("SELECT u.login, u.rowid, u2.email  FROM `" . MAIN_DB_PREFIX . "user_extrafields` ue, " . MAIN_DB_PREFIX . "user u LEFT JOIN llx_user u2 ON u2.rowid = u.fk_user  WHERE `date_s` <= now() AND fk_object = u.rowid AND u.statut = 1");
             while ($result = $this->db->fetch_object($sql)) {
                 $userF = new User($this->db);

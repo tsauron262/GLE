@@ -483,7 +483,10 @@ class BimpInput
                 if (!isset($options['include_empty'])) {
                     $options['include_empty'] = 0;
                 }
-                $options['options'] = BimpCache::getUsersArray($options['include_empty']);
+                if (!isset($options['empty_label'])) {
+                    $options['empty_label'] = '';
+                }
+                $options['options'] = BimpCache::getUsersArray($options['include_empty'], $options['empty_label']);
                 return self::renderInput('select', $field_name, $value, $options, $form, $option, $input_id);
 
             case 'search_group':

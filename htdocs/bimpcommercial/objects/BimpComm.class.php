@@ -34,14 +34,12 @@ class BimpComm extends BimpDolObject
         3  => 'trimestre',
         12 => 'an'
     );
-    
     public static $exportedStatut = [
         0   => ['label' => 'Non traitée en comptabilitée', 'classes' => ['danger'], 'icon' => 'times'],
         1   => ['label' => 'Comptabilisée', 'classes' => ['success'], 'icon' => 'check'],
         102 => ['label' => 'Comptabilisation suspendue', 'classes' => ['important'], 'icon' => 'refresh'],
         204 => ['label' => 'Non comptabilisable', 'classes' => ['warning'], 'icon' => 'times'],
     ];
-    
     public static $zones_vente = array(
         self::BC_ZONE_FR          => 'France',
         self::BC_ZONE_UE          => 'Union Européenne avec TVA',
@@ -525,9 +523,13 @@ class BimpComm extends BimpDolObject
                 break;
 
             case 'id_commercial':
-                $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $value);
-                if (BimpObject::ObjectLoaded($user)) {
-                    return $user->dol_object->getFullName();
+                if ((int) $value) {
+                    $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $value);
+                    if (BimpObject::ObjectLoaded($user)) {
+                        return $user->dol_object->getFullName();
+                    }
+                } else {
+                    return 'Aucun';
                 }
                 break;
         }
@@ -552,6 +554,16 @@ class BimpComm extends BimpDolObject
                 break;
 
             case 'id_commercial':
+                $ids = array();
+                $empty = false;
+
+                foreach ($values as $value) {
+                    if ((int) $value) {
+                        $ids[] = (int) $value;
+                    } else {
+                        $empty = true;
+                    }
+                }
                 $joins['elemcont'] = array(
                     'table' => 'element_contact',
                     'on'    => 'elemcont.element_id = a.rowid',
@@ -562,12 +574,30 @@ class BimpComm extends BimpDolObject
                     'on'    => 'elemcont.fk_c_type_contact = typecont.rowid',
                     'alias' => 'typecont'
                 );
-                $filters['typecont.element'] = static::$dol_module;
-                $filters['typecont.source'] = 'internal';
-                $filters['typecont.code'] = 'SALESREPFOLL';
-                $filters['elemcont.fk_socpeople'] = array(
-                    'in' => $values
-                );
+
+                $sql = '';
+
+                if (!empty($ids)) {
+                    $sql = '(typecont.element = \'' . static::$dol_module . '\' AND typecont.source = \'internal\'';
+                    $sql .= ' AND typecont.code = \'SALESREPFOLL\' AND elemcont.fk_socpeople IN (' . implode(',', $ids) . '))';
+                }
+
+                if ($empty) {
+                    $sql .= ($sql ? ' OR ' : '');
+                    $sql = '(SELECT COUNT(ec2.fk_socpeople) FROM ' . MAIN_DB_PREFIX . 'element_contact ec2';
+                    $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'c_type_contact tc2 ON tc2.rowid = ec2.fk_c_type_contact';
+                    $sql .= ' WHERE tc2.element = \'' . static::$dol_module . '\'';
+                    $sql .= ' AND tc2.source = \'internal\'';
+                    $sql .= ' AND tc2.code = \'SALESREPFOLL\'';
+                    $sql .= ' AND ec2.element_id = a.rowid) = 0';
+                }
+
+                if ($sql) {
+                    $filters['commercial_custom'] = array(
+                        'custom' => $sql
+                    );
+                }
+
                 break;
         }
 
@@ -643,13 +673,17 @@ class BimpComm extends BimpDolObject
         return 0;
     }
 
-    public function getTotalTtcWithoutRemises()
+    public function getTotalTtcWithoutRemises($exclude_discounts = false)
     {
         $total = 0;
 
         if ($this->isLoaded()) {
             $lines = $this->getLines();
             foreach ($lines as $line) {
+                if ($exclude_discounts && (int) $line->id_remise_except) {
+                    continue;
+                }
+                
                 $total += $line->getTotalTtcWithoutRemises();
             }
         }
@@ -690,13 +724,13 @@ class BimpComm extends BimpDolObject
 
             $remise_globale = (float) $this->getData('remise_globale');
             if ($remise_globale) {
-                $ttc = $this->getTotalTtcWithoutRemises();
+                $ttc = $this->getTotalTtcWithoutRemises(true);
                 $remise_amount = $ttc * ($remise_globale / 100);
                 $total_lines = 0;
 
                 $lines = $this->getChildrenObjects('lines');
                 foreach ($lines as $line) {
-                    if ($line->isRemisable()) {
+                    if ($line->isRemisable(true)) {
                         $total_lines += (float) $line->getTotalTtcWithoutRemises();
                     }
                 }
@@ -3017,13 +3051,15 @@ class BimpComm extends BimpDolObject
                                 $id_propal = (int) $this->db->getValue('propaldet', 'fk_propal', 'fk_remise_except = ' . (int) $discount->id);
                                 if ($id_propal) {
                                     $propal = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $id_propal);
-                                    $msg = 'La remise #' . $id_discount . ' de ' . BimpTools::displayMoneyValue($discount->amount_ttc) . ' est déjà utilisée';
-                                    if (BimpObject::objectLoaded($propal)) {
-                                        $msg .= ' dans la proposition commerciale ' . $propal->getNomUrl(0, 1, 1, 'full');
-                                    } else {
-                                        $msg .= ' dans une proposition commerciale';
+                                    if($propal->getData("fk_statut") != 3){
+                                        $msg = 'La remise #' . $id_discount . ' de ' . BimpTools::displayMoneyValue($discount->amount_ttc) . ' est déjà utilisée';
+                                        if (BimpObject::objectLoaded($propal)) {
+                                            $msg .= ' dans la proposition commerciale ' . $propal->getNomUrl(0, 1, 1, 'full');
+                                        } else {
+                                            $msg .= ' dans une proposition commerciale';
+                                        }
+                                        $errors[] = $msg;
                                     }
-                                    $errors[] = $msg;
                                 }
                             }
                         }
@@ -3099,7 +3135,7 @@ class BimpComm extends BimpDolObject
         return [
             'success_callback' => $callback,
             'errors'           => $errors,
-            'warnings'         => $warnings
+            'warnings'         => array()
         ];
     }
 
@@ -3480,7 +3516,7 @@ class BimpComm extends BimpDolObject
         $warnings = array();
         $success = 'Remise globale enregistrée avec succès';
 
-        $total_ttc_without_remises = $this->getTotalTtcWithoutRemises();
+        $total_ttc_without_remises = $this->getTotalTtcWithoutRemises(true);
 
         if (!count($errors)) {
             if (isset($data['use_amount']) && (int) $data['use_amount']) {

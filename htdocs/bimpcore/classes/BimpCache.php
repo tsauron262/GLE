@@ -834,7 +834,7 @@ class BimpCache
 
     // User: 
 
-    public static function getUsersArray($include_empty = 0)
+    public static function getUsersArray($include_empty = 0, $empty_label = '')
     {
         global $conf, $langs;
 
@@ -849,11 +849,6 @@ class BimpCache
             $cache_key .= '_active_only';
         }
         if (!isset(self::$cache[$cache_key])) {
-            if ($include_empty)
-                self::$cache[$cache_key] = array("" => "");
-            else
-                self::$cache[$cache_key] = array();
-
             if ($active_only) {
                 $where = '`statut` != 0';
             } else {
@@ -882,7 +877,7 @@ class BimpCache
             }
         }
 
-        return self::getCacheArray($cache_key, $include_empty);
+        return self::getCacheArray($cache_key, $include_empty, 0, $empty_label);
     }
 
     public static function getUserGroupsArray($include_empty = 1)

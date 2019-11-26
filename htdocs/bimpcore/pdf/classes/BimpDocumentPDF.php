@@ -311,7 +311,7 @@ class BimpDocumentPDF extends BimpModelPDF
         $this->renderTop();
         $this->renderBeforeLines();
         $this->renderLines();
-        $this->renderAfterLines();
+        $this->renderFullBlock('renderAfterLines');
         $this->renderFullBlock('renderBottom');
         $this->renderFullBlock('renderAfterBottom');
         $this->renderFullBlock('renderAnnexes');

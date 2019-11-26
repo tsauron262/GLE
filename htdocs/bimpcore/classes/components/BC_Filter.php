@@ -120,6 +120,43 @@ class BC_Filter extends BimpComponent
         return array();
     }
 
+    public static function getDateRangeSqlFilter($value, &$errors)
+    {
+        $filter = array();
+
+        if (is_array($value)) {
+            if (isset($value['max']) && $value['max'] !== '') {
+                if (preg_match('/^\d{4}\-\d{2}\-\d{2}$/', $value['max'])) {
+                    $value['max'] .= ' 23:59:59';
+                }
+            }
+            if (isset($value['min']) || isset($value['max'])) {
+                if ($value['min'] !== '' && $value['max'] === '') {
+                    $filter = array(
+                        'operator' => '>=',
+                        'value'    => $value['min']
+                    );
+                } elseif ($value['max'] !== '' && $value['min'] === '') {
+                    $filter = array(
+                        'operator' => '<=',
+                        'value'    => $value['max']
+                    );
+                } else {
+                    $filter = array(
+                        'min' => $value['min'],
+                        'max' => $value['max']
+                    );
+                }
+            } else {
+                $errors[] = 'Valeurs minimales et maximales absentes';
+            }
+        } else {
+            $errors[] = 'Valeur invalide: "' . $value . '"';
+        }
+
+        return $filter;
+    }
+
     public function renderHtml()
     {
         if (!$this->params['show']) {

@@ -39,7 +39,6 @@ objects:
         instance: 
             id_object: 
                 field_value: gamme
-        
                 
 fields: 
     fk_entrepot: 
@@ -143,6 +142,14 @@ lists_cols:
     fk_product: 
         field: fk_product
         display: nom_url_libelle
+    ref_prod: 
+        label: Ref produit
+        field: ref
+        child: product
+    label_prod: 
+        label: Libellé produit
+        field: label
+        child: product
     reel: 
         field: reel
     stockShowRoom:

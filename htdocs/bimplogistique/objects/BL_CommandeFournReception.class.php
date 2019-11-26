@@ -1335,13 +1335,17 @@ class BL_CommandeFournReception extends BimpObject
 
         if (!count($errors)) {
             $this->set('status', self::BLCFR_BROUILLON);
-            $this->update();
+            $errors = array_merge($errors, $this->update());
         }
 
         $this->onLinesChange();
         $commande->checkReceptionStatus();
 
         return $errors;
+    }
+    
+    public function canEdit() {
+        return true;
     }
 
     public function onLinesChange()

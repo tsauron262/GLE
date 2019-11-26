@@ -3051,13 +3051,15 @@ class BimpComm extends BimpDolObject
                                 $id_propal = (int) $this->db->getValue('propaldet', 'fk_propal', 'fk_remise_except = ' . (int) $discount->id);
                                 if ($id_propal) {
                                     $propal = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $id_propal);
-                                    $msg = 'La remise #' . $id_discount . ' de ' . BimpTools::displayMoneyValue($discount->amount_ttc) . ' est déjà utilisée';
-                                    if (BimpObject::objectLoaded($propal)) {
-                                        $msg .= ' dans la proposition commerciale ' . $propal->getNomUrl(0, 1, 1, 'full');
-                                    } else {
-                                        $msg .= ' dans une proposition commerciale';
+                                    if($propal->getData("fk_statut") != 3){
+                                        $msg = 'La remise #' . $id_discount . ' de ' . BimpTools::displayMoneyValue($discount->amount_ttc) . ' est déjà utilisée';
+                                        if (BimpObject::objectLoaded($propal)) {
+                                            $msg .= ' dans la proposition commerciale ' . $propal->getNomUrl(0, 1, 1, 'full');
+                                        } else {
+                                            $msg .= ' dans une proposition commerciale';
+                                        }
+                                        $errors[] = $msg;
                                     }
-                                    $errors[] = $msg;
                                 }
                             }
                         }

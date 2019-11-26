@@ -1944,6 +1944,14 @@ class Bimp_Facture extends BimpComm
             }
         }
 
+        $client = $this->getChildObject('client');
+        if (BimpObject::objectLoaded($client)) {
+            $html .= '<div style="margin-top: 10px">';
+            $html .= '<strong>Client: </strong>';
+            $html .= BimpObject::getInstanceNomUrlWithIcons($client);
+            $html .= '</div>';
+        }
+
         return $html;
     }
 

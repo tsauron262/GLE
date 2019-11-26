@@ -30,7 +30,7 @@ class InvoiceSavPDF extends InvoicePDF
     protected function initHeader()
     {
         parent::initHeader();
-        
+
         if (!is_null($this->sav)) {
             $rows .= $this->sav->getData('ref') . '<br/>';
             $equipment = $this->sav->getchildObject('equipment');
@@ -45,9 +45,16 @@ class InvoiceSavPDF extends InvoicePDF
 
     public function getAfterTotauxHtml()
     {
+        return '';
+    }
+
+    public function renderSignature()
+    {
         if ($this->object->type === 3) {
-            return '';
+            return;
         }
+
+        $html = '';
         $html .= '<table style="width: 95%" cellpadding="3">';
 
         $html .= '<tr>';
@@ -64,10 +71,22 @@ class InvoiceSavPDF extends InvoicePDF
 
         $html .= '</table>';
 
-        return $html;
+        $table = new BimpPDF_Table($this->pdf, false);
+        $table->cellpadding = 0;
+        $table->remove_empty_cols = false;
+        $table->addCol('left', '', 95);
+        $table->addCol('right', '', 95);
+
+        $table->rows[] = array(
+            'left'  => '',
+            'right' => $html
+        );
+
+        $this->writeContent('<br/><br/>');
+        $table->write();
     }
 
-    public function renderAfterBottom()
+    public function renderSavConditions()
     {
         $html .= '<table cellpadding="20px"><tr><td>';
 //        $html .= '<p style="font-size: 7px; color: #002E50">';
@@ -88,5 +107,11 @@ class InvoiceSavPDF extends InvoicePDF
         $html .= '</td></tr></table>';
 
         $this->writeContent($html);
+    }
+
+    public function renderAfterBottom()
+    {
+        $this->renderFullBlock('renderSignature');
+        $this->renderFullBlock('renderSavConditions');
     }
 }

@@ -219,6 +219,12 @@ filters_panel:
             place_date:
                 field: date
                 child: places
+            place_date_end:
+                custom: 1
+                field: place_date_end
+                data_type: date
+                label: Date de départ (emplacement)
+                type: date_range
                 
 lists:
     default: 

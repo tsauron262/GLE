@@ -240,35 +240,7 @@ class BC_FieldFilter extends BC_Filter
             case 'date_range':
             case 'range':
                 foreach ($this->values as $value) {
-                    if (is_array($value)) {
-                        if (isset($value['max']) && $value['max'] !== '') {
-                            if (preg_match('/^\d{4}\-\d{2}\-\d{2}$/', $value['max'])) {
-                                $value['max'] .= ' 23:59:59';
-                            }
-                        }
-                        if (isset($value['min']) || isset($value['max'])) {
-                            if ($value['min'] !== '' && $value['max'] === '') {
-                                $or_field[] = array(
-                                    'operator' => '>=',
-                                    'value'    => $value['min']
-                                );
-                            } elseif ($value['max'] !== '' && $value['min'] === '') {
-                                $or_field[] = array(
-                                    'operator' => '<=',
-                                    'value'    => $value['max']
-                                );
-                            } else {
-                                $or_field[] = array(
-                                    'min' => $value['min'],
-                                    'max' => $value['max']
-                                );
-                            }
-                        } else {
-                            $errors[] = 'Valeurs minimales et maximales absentes';
-                        }
-                    } else {
-                        $errors[] = 'Valeur invalide: "' . $value . '"';
-                    }
+                    $or_field[] = $this->getDateRangeSqlFilter($value, $errors);
                 }
                 break;
 

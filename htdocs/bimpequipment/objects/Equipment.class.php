@@ -729,6 +729,31 @@ class Equipment extends BimpObject
                     );
                 }
                 break;
+
+            case 'place_date_end':
+                $joins['places'] = array(
+                    'table' => 'be_equipment_place',
+                    'on'    => 'places.id_equipment = a.id',
+                    'alias' => 'places'
+                );
+                $joins['next_place'] = array(
+                    'table' => 'be_equipment_place',
+                    'on'    => 'next_place.id_equipment = a.id',
+                    'alias' => 'next_place'
+                );
+                $filters['next_place_position'] = array('custom' => 'next_place.position = (places.position - 1)');
+
+                $or_field = array();
+                foreach ($values as $value) {
+                    $or_field[] = BC_Filter::getDateRangeSqlFilter($value, $errors);
+                }
+
+                if (!empty($or_field)) {
+                    $filters['next_place.date'] = array(
+                        'or_field' => $or_field
+                    );
+                }
+                break;
         }
     }
 
@@ -1219,28 +1244,28 @@ class Equipment extends BimpObject
 
         return $errors;
     }
-    
-    public function moveToPackage($id_package, $code_mvt, $stock_label, $force = 0, $date = null) {
+
+    public function moveToPackage($id_package, $code_mvt, $stock_label, $force = 0, $date = null)
+    {
         $errors = array();
         $warnings = array();
-        
+
         $package_dest = BimpCache::getBimpObjectInstance('bimpequipment', 'BE_Package', $id_package);
-        
-        if(!$package_dest->isLoaded())
+
+        if (!$package_dest->isLoaded())
             return array('l\'id du package est inconnu');
 
         if ($force == 1 and $this->getData('id_package'))
             $this->updateField('id_package', 0);
-        
-        if($date == null)
+
+        if ($date == null)
             $date = date('Y-m-d H:i:s');
-        
-        $errors= array_merge($errors, $package_dest->addEquipment($this->id, $code_mvt, $stock_label, $date, $warnings, 1));
+
+        $errors = array_merge($errors, $package_dest->addEquipment($this->id, $code_mvt, $stock_label, $date, $warnings, 1));
 
         return $errors;
     }
-          
-    
+
     public function moveToPlace($type, $id, $code_mvt, $stock_label, $force = 0, $date = null)
     {
         if ($force == 1 and $this->getData('id_package')) {

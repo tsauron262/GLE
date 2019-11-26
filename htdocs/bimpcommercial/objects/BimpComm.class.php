@@ -673,13 +673,17 @@ class BimpComm extends BimpDolObject
         return 0;
     }
 
-    public function getTotalTtcWithoutRemises()
+    public function getTotalTtcWithoutRemises($exclude_discounts = false)
     {
         $total = 0;
 
         if ($this->isLoaded()) {
             $lines = $this->getLines();
             foreach ($lines as $line) {
+                if ($exclude_discounts && (int) $line->id_remise_except) {
+                    continue;
+                }
+                
                 $total += $line->getTotalTtcWithoutRemises();
             }
         }
@@ -720,13 +724,13 @@ class BimpComm extends BimpDolObject
 
             $remise_globale = (float) $this->getData('remise_globale');
             if ($remise_globale) {
-                $ttc = $this->getTotalTtcWithoutRemises();
+                $ttc = $this->getTotalTtcWithoutRemises(true);
                 $remise_amount = $ttc * ($remise_globale / 100);
                 $total_lines = 0;
 
                 $lines = $this->getChildrenObjects('lines');
                 foreach ($lines as $line) {
-                    if ($line->isRemisable()) {
+                    if ($line->isRemisable(true)) {
                         $total_lines += (float) $line->getTotalTtcWithoutRemises();
                     }
                 }
@@ -3129,7 +3133,7 @@ class BimpComm extends BimpDolObject
         return [
             'success_callback' => $callback,
             'errors'           => $errors,
-            'warnings'         => $warnings
+            'warnings'         => array()
         ];
     }
 
@@ -3510,7 +3514,7 @@ class BimpComm extends BimpDolObject
         $warnings = array();
         $success = 'Remise globale enregistrée avec succès';
 
-        $total_ttc_without_remises = $this->getTotalTtcWithoutRemises();
+        $total_ttc_without_remises = $this->getTotalTtcWithoutRemises(true);
 
         if (!count($errors)) {
             if (isset($data['use_amount']) && (int) $data['use_amount']) {

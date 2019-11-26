@@ -180,14 +180,30 @@ function reloadObjectList(list_id, callback) {
     }
     error_msg += ' n\'a pas pu être rechargée';
 
+    // Permet d'éviter un écrasement du HTML si un nouveau refresh est demandé avant le retour ajax.
+    // Uile notamment lorsque l'utilisateur sélectionne plusieurs filtres d'affilé
+    var refresh_idx = parseInt($list.data('refresh_idx'));
+    if (isNaN(refresh_idx)) {
+        refresh_idx = 0;
+    }
+    refresh_idx++;
+    $list.data('refresh_idx', refresh_idx);
+
     BimpAjax('loadObjectList', data, null, {
         $list: $list,
+        refresh_idx,
         $resultContainer: $resultContainer,
         display_success: false,
         error_msg: error_msg,
         success: function (result, bimpAjax) {
-            $list.find('.headerTools').find('.loadingIcon').css('opacity', 0);
+            bimpAjax.$list.find('.headerTools').find('.loadingIcon').css('opacity', 0);
             if (result.rows_html) {
+                var cur_idx = parseInt($list.data('refresh_idx'));
+
+                if (!isNaN(cur_idx) && cur_idx > bimpAjax.refresh_idx) {
+                    return;
+                }
+
                 hidePopovers($list);
                 bimpAjax.$list.find('tbody.listRows').html(result.rows_html);
                 if (result.pagination_html) {

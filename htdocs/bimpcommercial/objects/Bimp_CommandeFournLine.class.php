@@ -1744,14 +1744,12 @@ class Bimp_CommandeFournLine extends FournObjectLine
                                     }
 
                                     // Suppr de l'équipement 
-                                    $eq_warnings = array(
-                                        $equipment->getData('serial') . ': TEST'
-                                    );
+                                    $eq_warnings = array();
                                     $eq_errors = $equipment->delete($eq_warnings, true);
 
                                     if (count($eq_errors)) {
                                         $msg = BimpTools::getMsgFromArray($eq_errors, 'Echec de la suppression de l\'équipement "' . $equipment->getData('serial') . '" (ID: ' . $equipment->id . ')');
-                                        $warnings[] = $msg;
+                                        $errors[] = $msg;
                                         dol_syslog('Annulation réception ' . $reception->getRef() . ' - Commande Fourn ' . $commande_fourn->getRef() . ' - ' . $msg, LOG_ERR);
                                     }
 
@@ -1879,16 +1877,18 @@ class Bimp_CommandeFournLine extends FournObjectLine
                 }
             }
 
-            $receptions = $this->getData('receptions');
+            if(!count($errors)){
+                $receptions = $this->getData('receptions');
 
-            $reception_data['received'] = 0;
-            $reception_data['equipments'] = array();
-            $receptions[(int) $id_reception] = $reception_data;
+                $reception_data['received'] = 0;
+                $reception_data['equipments'] = array();
+                $receptions[(int) $id_reception] = $reception_data;
 
-            $up_errors = $this->updateField('receptions', $receptions);
+                $up_errors = $this->updateField('receptions', $receptions);
 
-            if (count($up_errors)) {
-                $errors[] = BimpTools::getMsgFromArray($up_errors);
+                if (count($up_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($up_errors);
+                }
             }
         }
 

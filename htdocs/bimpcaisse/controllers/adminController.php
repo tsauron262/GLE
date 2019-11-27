@@ -38,7 +38,7 @@ class adminController extends BimpController{
     
     
     function renderFondsFermeture(){
-        $onclick = 'bimpModal.loadAjaxContent($(this), "loadFormFondCaisse", {dateRef: $("input[name=\'dateRef\']").val()}, "Fonds de caisse");';
+        $onclick = 'bimpModal.loadAjaxContent($(this), "loadFormFondCaisse", {dateRef: $("input[name=\'dateRef\']").val()}, "Fonds de caisse le "+$("input[name=\'dateRef\']").val()+" au soir");';
         $html = BimpRender::renderFreeForm(array(array('label'=>'Date', 'input' => BimpInput::renderInput('date', 'dateRef'))), array('<button class="btn btn-primary" onclick="'.htmlentities($onclick).'">Ok</button>'), 'Fonds de caisse');
 
         

@@ -1185,6 +1185,10 @@ class BS_SAV extends BimpObject
             $html .= '<strong>Mot de passe</strong>: ' . GSX_v2::$default_ids['apple_pword'];
         }
 
+        $html .= '<p class="small" style="text-align: center; margin-top: 15px">';
+        $html .= 'Si la fenêtre d\authentification ne s\'ouvre pas, veuillez vérifier que votre navigateur ne bloque pas l\'ouverture des fenêtres pop-up';
+        $html .= '</p>';
+
         $html .= '</div>';
 
         return $html;
@@ -2024,7 +2028,7 @@ class BS_SAV extends BimpObject
         $garantieHtService = $garantieTtcService = $garantiePaService = 0;
 
         BimpObject::loadClass($this->module, 'BS_SavPropalLine');
-        
+
 //        echo 'process <br/>';
 
         foreach ($this->getChildrenObjects('propal_lines', array(
@@ -2957,7 +2961,7 @@ class BS_SAV extends BimpObject
                         $errors[] = BimpTools::getMsgFromArray($part_errors);
                     }
                 }
-                
+
                 $this->processPropalGarantie();
             }
         }

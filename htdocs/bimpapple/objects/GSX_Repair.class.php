@@ -105,7 +105,7 @@ class GSX_Repair extends BimpObject
 
     // Méthodes V2: 
 
-    public function processRepairRequestOutcome($result, &$warnings = array())
+    public static function processRepairRequestOutcome($result, &$warnings = array())
     {
         $errors = array();
 

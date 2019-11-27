@@ -91,6 +91,7 @@ class gsxController extends BimpController
         $errors = array();
         $title = '';
         $html = '';
+        $button = null;
 
         $requestName = (isset($params['requestName']) ? $params['requestName'] : '');
         $serial = (isset($params['serial']) ? $params['serial'] : '');
@@ -111,13 +112,21 @@ class gsxController extends BimpController
                     $html = $gsxRequest->generateRequestFormHtml($values, $serial, $id_sav, $id_repair);
                     $title = $gsxRequest->requestLabel;
                 }
+
+                if ($requestName === 'repairCreate') {
+                    $button = array(
+                        'label'   => BimpRender::renderIcon('fas_question-circle', 'iconLeft') . 'Tester éligibilité',
+                        'onclick' => 'gsx_FetchRepairEligibility($(this))'
+                    );
+                }
             }
         }
 
         return array(
             'errors' => $errors,
             'title'  => $title,
-            'html'   => $html
+            'html'   => $html,
+            'button' => $button
         );
     }
 
@@ -474,6 +483,7 @@ class gsxController extends BimpController
 
         switch ($requestName) {
             case 'repairCreate':
+            case 'repairEligibility':
                 if (isset($result['componentIssues']) && !empty($result['componentIssues'])) {
                     $i = 0;
                     foreach ($result['componentIssues'] as $key => $compIssue) {
@@ -494,30 +504,32 @@ class gsxController extends BimpController
                     }
                 }
 
-                if (isset($result['repairType'])) {
-                    if (in_array($result['repairType'], array('MINS', 'MINC', 'WUMS', 'WUMC'))) {
-                        if (!isset($result['account']['soldtoContactEmail']) || !(string) $result['account']['soldtoContactEmail']) {
-                            $errors[] = 'L\'e-mail de contact est obligatoire pour les réparations de type "Mail-in"';
-                        }
-                        if (!isset($result['account']['soldToContactPhone']) || !(string) $result['account']['soldToContactPhone']) {
-                            $errors[] = 'Le n° de téléphone de contact est obligatoire pour les réparations de type "Mail-in"';
+                if ($requestName === 'repairCreate') {
+                    if (isset($result['repairType'])) {
+                        if (in_array($result['repairType'], array('MINS', 'MINC', 'WUMS', 'WUMC'))) {
+                            if (!isset($result['account']['soldtoContactEmail']) || !(string) $result['account']['soldtoContactEmail']) {
+                                $errors[] = 'L\'e-mail de contact est obligatoire pour les réparations de type "Mail-in"';
+                            }
+                            if (!isset($result['account']['soldToContactPhone']) || !(string) $result['account']['soldToContactPhone']) {
+                                $errors[] = 'Le n° de téléphone de contact est obligatoire pour les réparations de type "Mail-in"';
+                            }
                         }
                     }
-                }
 
-                if (isset($result['customer']['address'][0]['postalCode']) && (string) $result['customer']['address'][0]['postalCode']) {
-                    if (isset($result['customer']['address'][0]['countryCode']) && $result['customer']['address'][0]['countryCode'] === 'FRA') {
-                        $result['customer']['address'][0]['stateCode'] = substr($result['customer']['address'][0]['postalCode'], 0, 2);
+                    if (isset($result['customer']['address'][0]['postalCode']) && (string) $result['customer']['address'][0]['postalCode']) {
+                        if (isset($result['customer']['address'][0]['countryCode']) && $result['customer']['address'][0]['countryCode'] === 'FRA') {
+                            $result['customer']['address'][0]['stateCode'] = substr($result['customer']['address'][0]['postalCode'], 0, 2);
+                        }
                     }
-                }
 
-                // Traitement des questions: 
-                if (!isset($params['repairType']) && isset($result['repairType'])) {
-                    $params['repairType'] = $result['repairType'];
-                }
-                $questions_result = $this->gsxProcessRepairQuestionsForm($params, $result);
-                if (count($questions_result['errors'])) {
-                    $errors[] = BimpTools::getMsgFromArray($questions_result['errors'], 'Erreurs lors du traitement des questions');
+                    // Traitement des questions: 
+                    if (!isset($params['repairType']) && isset($result['repairType'])) {
+                        $params['repairType'] = $result['repairType'];
+                    }
+                    $questions_result = $this->gsxProcessRepairQuestionsForm($params, $result);
+                    if (count($questions_result['errors'])) {
+                        $errors[] = BimpTools::getMsgFromArray($questions_result['errors'], 'Erreurs lors du traitement des questions');
+                    }
                 }
                 break;
         }
@@ -1182,6 +1194,144 @@ class gsxController extends BimpController
             'errors'     => $errors,
             'warnings'   => $warnings,
             'modal_html' => $modal_html
+        );
+    }
+
+    protected function gsxFetchRepairEligibility($params)
+    {
+        ini_set('display_errors', 1);
+
+        $errors = array();
+        $warnings = array();
+        $html = '';
+        $repair_ok = 0;
+
+        $serial = (isset($params['serial']) ? $params['serial'] : 0);
+        $id_sav = (isset($params['id_sav']) ? (int) $params['id_sav'] : 0);
+
+        if (!$serial) {
+            $errors[] = 'Numéro de série absent';
+        }
+
+        if (!$id_sav) {
+            $errors[] = 'ID du SAV absent';
+        }
+
+        if (!count($errors) && $this->gsx_v2->logged) {
+            $gsxRequests = new GSX_Request_v2($this->gsx_v2, 'repairCreate');
+            $gsxRequests->serial = $serial;
+            $gsxRequests->id_sav = $id_sav;
+
+            $result = $gsxRequests->processRequestForm();
+            $errors = $this->gsxRequestFormResultOverride('repairEligibility', $result, $params, $warnings);
+
+            if (!count($errors)) {
+                if (is_array($result) && !empty($result)) {
+                    $data = array();
+                    foreach (array(
+                'repairType',
+                'coverageOption',
+                'unitReceivedDateTime',
+                'addressCosmeticDamage',
+                'consumerLaw',
+                'componentIssues',
+                'device',
+                'parts'
+                    ) as $data_name) {
+                        if (isset($result[$data_name])) {
+                            $data[$data_name] = $result[$data_name];
+                        }
+                    }
+
+                    $response = $this->gsx_v2->exec('repairEligibility', $data);
+
+                    if ($response === false) {
+                        $errors = $this->gsx_v2->getErrors();
+                    } else {
+                        $repair_ok = 1;
+
+                        if (isset($response['eligibilityDetails']) && !empty($response['eligibilityDetails'])) {
+                            $html .= '<h3>Détails éligibilité</h3>';
+                            $html .= '<table class="bimp_list_table">';
+                            $html .= '<tbody class="headers_col">';
+
+                            foreach (array(
+                        'coverageDescription' => 'Couverture',
+                        'coverageCode'        => 'Code couverture',
+                        'technicianMandatory' => 'Technicien requis',
+                            ) as $path => $label) {
+                                $value = BimpTools::getArrayValueFromPath($response['eligibilityDetails'], $path, true);
+                                if (!is_null($value)) {
+                                    $html .= '<tr><th>' . $label . '</th><td>' . $value . '</td></tr>';
+                                }
+                            }
+
+                            if (isset($response['eligibilityDetails']['outcome']) && !empty($response['eligibilityDetails']['outcome'])) {
+                                $html .= '<tr>';
+                                $html .= '<th>Messages</th>';
+                                $html .= '<td>';
+                                $rep_warnings = array();
+
+                                BimpObject::loadClass('bimpapple', 'GSX_Repair');
+                                $rep_errors = GSX_Repair::processRepairRequestOutcome($response['eligibilityDetails'], $rep_warnings);
+
+                                if (count($rep_errors)) {
+                                    $html .= BimpRender::renderAlerts($rep_errors);
+                                    $repair_ok = 0;
+                                }
+
+                                if (count($rep_warnings)) {
+                                    $html .= BimpRender::renderAlerts($rep_warnings, 'warning');
+                                }
+
+                                if (!count($errors) && !count($rep_warnings)) {
+                                    $html .= BimpRender::renderAlerts('Aucun message', 'info');
+                                }
+                                $html .= '</td>';
+                                $html .= '</tr>';
+                            }
+
+                            $html .= '</tbody>';
+                            $html .= '</table>';
+                        }
+
+                        if (isset($response['parts']) && !empty($response['parts'])) {
+                            $html .= '<h3>Eligibilité composants</h3>';
+
+                            foreach ($response['parts'] as $part) {
+                                $html .= '<h4>Composant "' . $part['number'] . '"</h4>';
+
+                                $html .= '<table class="bimp_list_table">';
+                                $html .= '<tbody class="headers_col">';
+
+                                foreach (array(
+                            'partType'            => 'Type de composant',
+                            'coverageDescription' => 'Couverture',
+                            'coverageCode'        => 'Code couverture',
+                            'billable'            => 'Facturable'
+                                ) as $path => $label) {
+                                    $value = BimpTools::getArrayValueFromPath($part, $path, true);
+                                    if (!is_null($value)) {
+                                        $html .= '<tr><th>' . $label . '</th><td>' . $value . '</td></tr>';
+                                    }
+                                }
+                            }
+
+                            $html .= '</tbody>';
+                            $html .= '</table>';
+                        }
+                    }
+                } else {
+                    $errors[] = BimpTools::getMsgFromArray($gsxRequests->errors, 'Erreurs lors du traitement des données');
+                }
+            }
+        }
+
+        return array(
+            'errors'    => $errors,
+            'warnings'  => $warnings,
+            'html'      => $html,
+            'repair_ok' => $repair_ok
         );
     }
 
@@ -3168,6 +3318,12 @@ class gsxController extends BimpController
                 'serial'      => BimpTools::getValue('gsx_serial', ''),
                 'id_sav'      => BimpTools::getValue('gsx_id_sav', 0),
                 'id_repair'   => BimpTools::getValue('gsx_id_repair', 0)
+            );
+        } elseif ((int) BimpTools::getValue('gsx_fetchRepairEligibility', 0)) {
+            $method = 'gsxFetchRepairEligibility';
+            $params = array(
+                'serial' => BimpTools::getValue('gsx_serial', ''),
+                'id_sav' => BimpTools::getValue('gsx_id_sav', 0),
             );
         } else {
             $method = BimpTools::getValue('gsx_method', '');

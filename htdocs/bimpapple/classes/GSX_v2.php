@@ -413,7 +413,7 @@ class GSX_v2 extends GSX_Const
                 array(
                     'componentCode'   => $issue->getData('category_code'),
                     'reproducibility' => $issue->getData('reproducibility'),
-                    'priority'        => (int) $issue->getData('priority'),
+                    'priority'        => 1,
                     'type'            => $issue->getData('type'),
                     'issueCode'       => $issue->getData('issue_code'),
                     'order'           => $issue->getData('position')

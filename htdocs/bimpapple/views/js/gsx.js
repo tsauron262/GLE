@@ -56,7 +56,7 @@ function GsxAjax(method, data, $resultContainer, params) {
 
     this.action = 'gsxRequest';
 
-    if (method !== 'gsxProcessRequestForm') {
+    if (method !== 'gsxProcessRequestForm' && method !== 'gsxFetchRepairEligibility') {
         this.data = {
             gsx_method: method,
             gsx_params: data
@@ -162,8 +162,13 @@ function gsx_loadRequestModalForm($button, title, requestName, data, params) {
                 if ($form.length) {
                     onFormLoaded($form);
                     $form.data('modal_idx', bimpAjax.modal_idx);
-                    var label = 'Envoyer<i class="fa fa-arrow-circle-right iconRight"></i>';
-                    var onclick = 'gsx_processRequestForm($(this))';
+                    if (typeof (result.button) === 'object') {
+                        var label = result.button.label;
+                        var onclick = result.button.onclick;
+                    } else {
+                        var label = 'Envoyer<i class="fa fa-arrow-circle-right iconRight"></i>';
+                        var onclick = 'gsx_processRequestForm($(this))';
+                    }
                     bimpModal.addButton(label, onclick, 'primary', 'save_object_button', bimpAjax.modal_idx);
                 }
             }
@@ -195,16 +200,76 @@ function gsx_processRequestForm($button) {
                 if ($form.length) {
                     var data = new FormData($form.get(0));
                     GsxAjax('gsxProcessRequestForm', data, $form.find('.ajaxResultContainer'), {
+                        modal_idx: modal_idx,
                         $button: $button,
                         display_processing: true,
                         processing_padding: 20,
                         append_html: true,
                         processData: false,
                         contentType: false,
-                        modal_scroll_bottom: true
-//                        success: function (result, bimpAjax) {
-////                            reloadRepairsViews(bimpAjax.id_sav); // fournir le callback côté PHP. 
-//                        }  
+                        modal_scroll_bottom: true,
+                        success: function (result, bimpAjax) {
+                            if (typeof (result.button) === 'object') {
+                                bimpModal.$footer.find('.extra_button.modal_' + bimpAjax.modal_idx).remove();
+                                bimpModal.addButton(result.button.label, result.button.onclick, 'primary', 'save_object_button', bimpAjax.modal_idx);
+                            }
+                        }
+                    });
+                    return;
+                }
+            }
+        }
+    }
+
+    bimp_msg('Une erreur est survenue. Envoi du formulaire impossible', 'danger');
+}
+
+function gsx_FetchRepairEligibility($button) {
+    if ($.isOk($button)) {
+        if ($button.hasClass('disabled')) {
+            return;
+        }
+
+        var modal_idx = parseInt($button.data('modal_idx'));
+
+        if (modal_idx && !isNaN(modal_idx)) {
+            var $container = bimpModal.getContent(modal_idx);
+
+            if ($.isOk($container)) {
+                var $form = $container.find('form.request_form');
+                if ($form.length) {
+                    $form.find('[name="gsx_requestForm"]').val(0);
+                    var $input = $form.find('[name="gsx_fetchRepairEligibility"]');
+                    if (!$input.length) {
+                        $form.append('<input type="hidden" name="gsx_fetchRepairEligibility" value="1"/>');
+                    } else {
+                        $input.val(1);
+                    }
+
+                    $form.find('[name="gsx_fetchRepairEligibility"]').val(1);
+                    var data = new FormData($form.get(0));
+                    GsxAjax('gsxFetchRepairEligibility', data, $form.find('.ajaxResultContainer'), {
+                        $form: $form,
+                        modal_idx: modal_idx,
+                        $button: $button,
+                        display_success: false,
+                        display_processing: true,
+                        processing_padding: 20,
+                        append_html: true,
+                        processData: false,
+                        contentType: false,
+                        modal_scroll_bottom: true,
+                        success: function (result, bimpAjax) {
+                            if (typeof (result.repair_ok) !== 'undefined' && result.repair_ok) {
+                                bimpAjax.$form.find('[name="gsx_requestForm"]').val(1);
+                                bimpAjax.$form.find('[name="gsx_fetchRepairEligibility"]').val(0);
+                                bimpModal.$footer.find('.extra_button.modal_' + bimpAjax.modal_idx).remove();
+
+                                var label = 'Créer la réparation<i class="fa fa-arrow-circle-right iconRight"></i>';
+                                var onclick = 'gsx_processRequestForm($(this))';
+                                bimpModal.addButton(label, onclick, 'primary', 'save_object_button', bimpAjax.modal_idx);
+                            }
+                        }
                     });
                     return;
                 }

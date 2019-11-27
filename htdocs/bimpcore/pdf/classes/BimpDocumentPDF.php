@@ -786,7 +786,7 @@ class BimpDocumentPDF extends BimpModelPDF
                         $product->array_options['options_deee'] = $product->array_options['options_deee'] * $row['qte'];
                         $product->array_options['options_rpcp'] = $product->array_options['options_rpcp'] * $row['qte'];
                         if ($row['pu_remise'] > 0)
-                            $row['pu_remise'] = BimpTools::displayMoneyValue($row['pu_remise'] * $row['qte'], "");
+                            $row['pu_remise'] = BimpTools::displayMoneyValue(str_replace(",", ".", $row['pu_remise']) * $row['qte'], "");
                         $row['qte'] = 1;
                     } elseif ($row['qte'] < 1) {
                         $row['pu_ht'] = price(str_replace(",", ".", $row['pu_ht']) * ($row['qte'] * -1));

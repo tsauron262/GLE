@@ -1079,7 +1079,7 @@ class Bimp_CommandeFourn extends BimpComm
             )
         ));
 
-        if (count($lines) && count($receptions)) {
+        if (count($lines)) {
             $has_billed = 0;
             $all_billed = 1;
 

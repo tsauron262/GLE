@@ -539,6 +539,38 @@ class Bimp_CommandeFournLine extends FournObjectLine
                 ))
             );
         }
+        
+        if (1) {
+            $commandeCliLine = BimpObject::getInstance("bimpcommercial", "Bimp_CommandeLine");
+            $filters = array();
+            $comm = $this->getParentInstance();
+            $filters['cd.fk_product'] = $this->id_product;
+            $filters['cex.entrepot'] = $comm->getData("entrepot");
+            $filters['a.qty_to_ship'] = array("operator"=>">", "value"=>0);
+            $joins = array();
+            
+            $joins['commandedet'] = array(
+                        'table' => 'commandedet',
+                        'on'    => 'cd.rowid = a.id_line',
+                        'alias' => 'cd'
+                    );
+            $joins['commextra'] = array(
+                        'table' => 'commande_extrafields',
+                        'on'    => 'cex.fk_object = a.id_obj',
+                        'alias' => 'cex'
+                    );
+            
+            
+            $buttons[] = array(
+                'label'   => 'Voir les commandes client',
+                'icon'    => 'fas_glasses',
+                'onclick' => $commandeCliLine->getJsLoadModalList('general',array(
+                    'title'         => 'Commande client utilisable',
+                    'extra_filters' => $filters,
+                    'extra_joins'   => $joins
+                ))
+            );
+        }
 
         $product = $this->getProduct();
 

@@ -769,7 +769,8 @@ class BimpDocumentPDF extends BimpModelPDF
 
                 if (!$this->hideTtc) {
                     $row['total_ttc'] = BimpTools::displayMoneyValue($row_total_ttc, '');
-                } elseif (!$this->hideReduc) {
+                }
+                if (!$this->hideReduc) {
                     $row['pu_remise'] = BimpTools::displayMoneyValue($pu_ht_with_remise, '');
                 }
 
@@ -837,7 +838,7 @@ class BimpDocumentPDF extends BimpModelPDF
             );
             if (!$this->hideTtc)
                 $row['total_ttc'] = BimpTools::displayMoneyValue(-$remise_infos['remise_globale_amount_ttc'], '');
-            elseif (!$this->hideReduc)
+            if (!$this->hideReduc)
                 $row['pu_remise'] = BimpTools::displayMoneyValue(-$remise_infos['remise_globale_amount_ht'], '');
 
             if ($this->hide_pu) {
@@ -865,7 +866,7 @@ class BimpDocumentPDF extends BimpModelPDF
             );
             if (!$this->hideTtc)
                 $row['total_ttc'] = BimpTools::displayMoneyValue(-$lines_remise_global_amount_ttc, '');
-            elseif (!$this->hideReduc)
+            if (!$this->hideReduc)
                 $row['pu_remise'] = BimpTools::displayMoneyValue(-$lines_remise_global_amount_ttc, '');
 
             if ($this->hide_pu) {

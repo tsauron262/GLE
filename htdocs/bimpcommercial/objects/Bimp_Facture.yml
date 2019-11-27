@@ -678,6 +678,27 @@ lists_cols:
     marge:
         field: marge
         has_total: 1
+    revalOk:
+        label: Reval... OK
+        value: 
+            callback: 
+                method: displayReval
+                params: 
+                    - ok
+    revalOkPlusMarge:
+        label: Marge + Reval OK
+        value: 
+            callback: 
+                method: displayReval
+                params: 
+                    - ok+marge
+    revalPrevuPlusMarge:
+        label: Marge + Reval Prévue
+        value: 
+            callback: 
+                method: displayReval
+                params: 
+                    - prevu+marge
     secteur_comm_check: 
         label: Secteur
         value: 

@@ -151,7 +151,7 @@ class Bimp_Commande extends BimpComm
         $htmlP = "";
         $db = $this->db->db;
 
-        if($this->isLoaded()){
+        if ($this->isLoaded()) {
             $sql = $db->query("SELECT rowid FROM `llx_synopsisdemandeinterv` WHERE `fk_commande` = " . $this->id);
             while ($ln = $db->fetch_object($sql)) {
                 $inter = BimpCache::getBimpObjectInstance("bimpfichinter", 'Bimp_Demandinter', $ln->rowid);
@@ -2038,10 +2038,73 @@ class Bimp_Commande extends BimpComm
             }
         }
 
+        // Trie des lignes par commandes:
+        $orderedLines = array();
+        
         foreach ($lines_qties as $id_line => $line_qty) {
             $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $id_line);
-
             if (BimpObject::objectLoaded($line)) {
+                $id_commande = (int) $line->getData('id_obj');
+                if (!array_key_exists($id_commande, $orderedLines)) {
+                    $orderedLines[$id_commande] = array();
+                }
+                $orderedLines[$id_commande][(int) $id_line] = $line_qty;
+            } else {
+                $errors[] = 'La ligne de commande client d\'ID ' . $id_line . ' n\'existe pas';
+            }
+        }
+
+        $lines_qties = array();
+
+        // Trie des lignes par positions dans la commande: 
+        foreach ($orderedLines as $id_commande => $lines) {
+            $lines_qties[$id_commande] = array();
+
+            $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $id_commande);
+
+            if (BimpObject::objectLoaded($commande)) {
+                $commande_lines = $commande->getLines();
+                foreach ($commande_lines as $comm_line) {
+                    if (array_key_exists((int) $comm_line->id, $lines)) {
+                        $lines_qties[$id_commande][(int) $comm_line->id] = $lines[(int) $comm_line->id];
+                    }
+                }
+            } else {
+                foreach ($lines as $id_line => $line_qty) {
+                    $lines_qties[$id_commande][$id_line] = $line_qty;
+                }
+            }
+        }
+
+        foreach ($lines_qties as $id_commande => $commande_lines_qties) {
+            $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $id_commande);
+
+            // Création de la ligne de l'intitulé de la commande d'origine si nécessaire: 
+            if (BimpObject::objectLoaded($commande)) {
+                $fac_line = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_FactureLine', array(
+                            'id_obj'             => (int) $facture->id,
+                            'linked_object_name' => 'commande_origin_label',
+                            'linked_id_object'   => (int) $id_commande
+                ));
+
+                if (!BimpObject::objectLoaded($fac_line)) {
+                    $fac_line = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureLine');
+                    $fac_line->validateArray(array(
+                        'id_obj'             => (int) $facture->id,
+                        'type'               => ObjectLine::LINE_TEXT,
+                        'linked_id_object'   => (int) $id_commande,
+                        'linked_object_name' => 'commande_origin_label',
+                    ));
+                    $fac_line->qty = 1;
+                    $fac_line->desc = 'Selon notre commande ' . $commande->getRef();
+                    $fac_line_warnings = array();
+                    $fac_line_errors = $fac_line->create($fac_line_warnings, true);
+                }
+            }
+
+            foreach ($commande_lines_qties as $id_line => $line_qty) {
+                $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $id_line);
+
                 $product = $line->getProduct();
                 $fac_line_errors = array();
 
@@ -2211,8 +2274,6 @@ class Bimp_Commande extends BimpComm
                         $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec de l\'enregistrement des quantités facturées pour la ligne n°' . $line->getData('position') . ' (ID: ' . $line->id . ')');
                     }
                 }
-            } else {
-                $errors[] = 'La ligne de commande client d\'ID ' . $id_line . ' n\'existe pas';
             }
         }
 
@@ -2275,21 +2336,21 @@ class Bimp_Commande extends BimpComm
 
                 if ($new_status !== (int) $this->getInitData('logistique_status')) {
                     $this->updateField('logistique_status', $new_status);
-                    if($new_status == 3){
+                    if ($new_status == 3) {
                         $idComm = $this->getIdCommercial();
                         $userT = new User($this->db->db);
                         $userT->fetch($idComm);
                         $mail = $userT->email;
-                        
+
                         $infoClient = "";
                         $client = $this->getChildObject('client');
-                        if(is_object($client) && $client->isLoaded()){                
-                            $infoClient = " du client ".$client->getNomUrl(1);
+                        if (is_object($client) && $client->isLoaded()) {
+                            $infoClient = " du client " . $client->getNomUrl(1);
                         }
-                        
-                        
-                        if(isset($mail) && $mail != "")
-                            mailSyn2("Logistique commande OK", $mail, 'admin@bimp.fr', 'Bonjour la logistique de votre commande '.$this->getNomUrl (1).$infoClient. ' est compléte ');
+
+
+                        if (isset($mail) && $mail != "")
+                            mailSyn2("Logistique commande OK", $mail, 'admin@bimp.fr', 'Bonjour la logistique de votre commande ' . $this->getNomUrl(1) . $infoClient . ' est compléte ');
                     }
                 }
             }

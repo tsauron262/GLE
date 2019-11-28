@@ -113,11 +113,11 @@ class CronSynopsis {
 //        $import->go(); 
 //        $this->output .= $import->output;
 //        
-//        require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/importExport/importProdFourn.class.php");
-//        $import = new importProdFourn($this->db);
-//        $import->debug = $debug;
-//        $import->go(); 
-//        $this->output .= $import->output;
+        require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/importExport/importProdFourn.class.php");
+        $import = new importProdFourn($this->db);
+        $import->debug = $debug;
+        $import->go(); 
+        $this->output .= $import->output;
 //        
 //        
 //        

@@ -1,8 +1,8 @@
 bootstrap: 1
 title: Factures clients
 
-js: 
-    - /bimpcommercial/views/js/facture.js
+#js: 
+#    - /bimpcommercial/views/js/facture.js
 
 objects: 
     facture: 

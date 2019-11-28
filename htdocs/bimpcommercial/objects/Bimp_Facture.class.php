@@ -1192,35 +1192,54 @@ class Bimp_Facture extends BimpComm
 
     public function getTotalRevalorisations()
     {
-        $totals = array(
-            'attente'  => 0,
-            'accepted' => 0,
-            'refused'  => 0
-        );
+        $clef = "totalRevalFact".$this->id;
+        if(isset(BimpCache::$cache[$clef])){
+            return BimpCache::$cache[$clef];
+        }
+        else{
+            $totals = array(
+                'attente'  => 0,
+                'accepted' => 0,
+                'refused'  => 0
+            );
 
-        if ($this->isLoaded()) {
-            $revals = BimpCache::getBimpObjectObjects('bimpfinanc', 'BimpRevalorisation', array(
-                        'id_facture' => (int) $this->id
-            ));
+            if ($this->isLoaded()) {
+                $revals = BimpCache::getBimpObjectObjects('bimpfinanc', 'BimpRevalorisation', array(
+                            'id_facture' => (int) $this->id
+                ));
 
-            foreach ($revals as $reval) {
-                switch ((int) $reval->getData('status')) {
-                    case 0:
-                        $totals['attente'] += $reval->getTotal();
-                        break;
+                foreach ($revals as $reval) {
+                    switch ((int) $reval->getData('status')) {
+                        case 0:
+                            $totals['attente'] += $reval->getTotal();
+                            break;
 
-                    case 1:
-                        $totals['accepted'] += $reval->getTotal();
-                        break;
+                        case 1:
+                            $totals['accepted'] += $reval->getTotal();
+                            break;
 
-                    case 2:
-                        $totals['refused'] += $reval->getTotal();
-                        break;
+                        case 2:
+                            $totals['refused'] += $reval->getTotal();
+                            break;
+                    }
                 }
             }
+            BimpCache::$cache[$clef] = $totals;
         }
-
         return $totals;
+    }
+    
+    public function displayReval($mode = "ok")
+    {
+        
+        $revals = $this->getTotalRevalorisations();
+
+        if($mode == "ok+marge")
+            return BimpTools::displayMoneyValue($this->getData ("marge") + $revals['accepted']);
+        if($mode == "prevu+marge")
+            return BimpTools::displayMoneyValue($this->getData ("marge") + $revals['accepted']+ $revals['attente']);
+        if($mode == "ok")
+            return BimpTools::displayMoneyValue($revals['accepted']);
     }
 
     public function getDefaultMailTo()
@@ -1942,6 +1961,14 @@ class Bimp_Facture extends BimpComm
                 $html .= ' par ' . $user->getNomUrl(1);
                 $html .= '</div>';
             }
+        }
+
+        $client = $this->getChildObject('client');
+        if (BimpObject::objectLoaded($client)) {
+            $html .= '<div style="margin-top: 10px">';
+            $html .= '<strong>Client: </strong>';
+            $html .= BimpObject::getInstanceNomUrlWithIcons($client);
+            $html .= '</div>';
         }
 
         return $html;

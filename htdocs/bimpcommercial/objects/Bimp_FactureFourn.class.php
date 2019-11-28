@@ -622,6 +622,15 @@ class Bimp_FactureFourn extends BimpComm
             $html .= '<div class="object_header_infos">';
             $html .= 'Date facture <strong>' . $this->displayData('datef', 'default', false, true) . '</strong>';
             $html .= '</div>';
+            
+            
+            $client = $this->getChildObject('client');
+            if (BimpObject::objectLoaded($client)) {
+                $html .= '<div style="margin-top: 10px">';
+                $html .= '<strong>Fournisseur: </strong>';
+                $html .= BimpObject::getInstanceNomUrlWithIcons($client);
+                $html .= '</div>';
+            }
         }
 
         return $html;

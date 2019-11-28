@@ -4327,7 +4327,7 @@ class BimpObject extends BimpCache
 
     public function isDeletable($force_delete = false, &$errors = array())
     {
-        return $this->isEditable();
+        return $this->isEditable($force_delete, $errors);
     }
 
     public function isFieldEditable($field, $force_edit = false)

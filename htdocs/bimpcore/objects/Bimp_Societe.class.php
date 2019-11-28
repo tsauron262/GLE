@@ -350,7 +350,8 @@ class Bimp_Societe extends BimpObject
                             if ($id_propal) {
                                 $propal = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $id_propal);
                                 if (BimpObject::objectLoaded($propal)) {
-                                    $disabled_label = ' - Ajouté à la propale "' . $propal->getRef() . '"';
+                                    if(!in_array($propal->getData('fk_statut'), array(2,3)))
+                                        $disabled_label = ' - Ajouté à la propale "' . $propal->getRef() . '"';
                                 } else {
                                     $this->db->delete('propaldet', '`fk_propal` = ' . $id_propal . ' AND `fk_remise_except` = ' . (int) $r['id']);
                                 }

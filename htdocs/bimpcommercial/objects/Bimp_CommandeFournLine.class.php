@@ -539,6 +539,38 @@ class Bimp_CommandeFournLine extends FournObjectLine
                 ))
             );
         }
+        
+        if (1) {
+            $commandeCliLine = BimpObject::getInstance("bimpcommercial", "Bimp_CommandeLine");
+            $filters = array();
+            $comm = $this->getParentInstance();
+            $filters['cd.fk_product'] = $this->id_product;
+            $filters['cex.entrepot'] = $comm->getData("entrepot");
+            $filters['a.qty_to_ship'] = array("operator"=>">", "value"=>0);
+            $joins = array();
+            
+            $joins['commandedet'] = array(
+                        'table' => 'commandedet',
+                        'on'    => 'cd.rowid = a.id_line',
+                        'alias' => 'cd'
+                    );
+            $joins['commextra'] = array(
+                        'table' => 'commande_extrafields',
+                        'on'    => 'cex.fk_object = a.id_obj',
+                        'alias' => 'cex'
+                    );
+            
+            
+            $buttons[] = array(
+                'label'   => 'Voir les commandes client',
+                'icon'    => 'fas_glasses',
+                'onclick' => $commandeCliLine->getJsLoadModalList('general',array(
+                    'title'         => 'Commande client utilisable',
+                    'extra_filters' => $filters,
+                    'extra_joins'   => $joins
+                ))
+            );
+        }
 
         $product = $this->getProduct();
 
@@ -1749,7 +1781,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
 
                                     if (count($eq_errors)) {
                                         $msg = BimpTools::getMsgFromArray($eq_errors, 'Echec de la suppression de l\'équipement "' . $equipment->getData('serial') . '" (ID: ' . $equipment->id . ')');
-                                        $warnings[] = $msg;
+                                        $errors[] = $msg;
                                         dol_syslog('Annulation réception ' . $reception->getRef() . ' - Commande Fourn ' . $commande_fourn->getRef() . ' - ' . $msg, LOG_ERR);
                                     }
 
@@ -1877,16 +1909,18 @@ class Bimp_CommandeFournLine extends FournObjectLine
                 }
             }
 
-            $receptions = $this->getData('receptions');
+            if(!count($errors)){
+                $receptions = $this->getData('receptions');
 
-            $reception_data['received'] = 0;
-            $reception_data['equipments'] = array();
-            $receptions[(int) $id_reception] = $reception_data;
+                $reception_data['received'] = 0;
+                $reception_data['equipments'] = array();
+                $receptions[(int) $id_reception] = $reception_data;
 
-            $up_errors = $this->updateField('receptions', $receptions);
+                $up_errors = $this->updateField('receptions', $receptions);
 
-            if (count($up_errors)) {
-                $errors[] = BimpTools::getMsgFromArray($up_errors);
+                if (count($up_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($up_errors);
+                }
             }
         }
 

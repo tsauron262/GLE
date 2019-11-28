@@ -38,10 +38,10 @@ class importProd extends importCat {
                 $sql = $this->db->query("SELECT rowid as id FROM llx_product WHERE ref = '" . $ln['ArtCode'] . "'");
                 if ($this->db->num_rows($sql) == 0) {
                     $this->error("Ref " . $ln['ArtCode'] . "inconnue");
-//                    if (/*$this->isProdActif($ln)*/1) {
-//                        $this->tabResult["inc"] ++;
-//                        $this->updateProd($this->addProd($ln), $ln);
-//                    }
+                    if (/*$this->isProdActif($ln)*/1) {
+                        $this->tabResult["inc"] ++;
+                        $this->updateProd($this->addProd($ln), $ln);
+                    }
                 } elseif ($this->db->num_rows($sql) == 1) {
                     $result = $this->db->fetch_object($sql);
                     $this->tabResult["connue"] ++;
@@ -97,39 +97,39 @@ class importProd extends importCat {
 
             $this->ident = $this->object->ref;
 
-//            $this->traiteChamp("price", $ln['ArtPrixBase'], true);
-//            $this->traiteChamp("tva_tx", $ln['ArtGTaxTaux'], true);
-//            $this->updatePrice = $this->update;
-//            $this->update = false;
-//
-//
-//            $this->traiteChamp("options_serialisable", ($ln['ArtStkNuf'] == "N° de série" || $ln['ArtStkNuf'] == "NUFARTSTKSERIE"));
-//            $this->traiteChamp("options_validate", 1);
-//            $this->traiteChamp("options_deee", ($ln['ArtFree1'] == '' ? 0 : $ln['ArtFree1']), true);
-//            $this->traiteChamp("options_rpcp", ($ln['ArtFree2'] == '' ? 0 : $ln['ArtFree2']), true);
-//            
-//            
-//            $this->traiteChamp("options_cto", $ln['ArtFree3']);
-//            $this->traiteChamp("options_crt", 3);
-//
-//
-//
-//            $this->traiteChamp("status", ($this->isProdActif($ln)) ? "1" : "0");
-//            $this->traiteChamp("status_buy", ($this->isProdActif($ln)) ? "1" : "0");
-//
-//
-//            $ln['ArtLib'] = utf8_decode($ln['ArtLib']);
-//            $this->traiteChamp("label", $ln['ArtLib']);
-//            
-//            $this->traiteChamp("pmp", $ln['ArtLastPA'], true);
-//            
-//            $desc = ($ln['ArtGCmtTxt'] != "")? $ln['ArtGCmtTxt'] : $ln['ArtLib'];
-//            
-//            
-//            $this->traiteChamp("description", $desc);
-//            $this->traiteChamp("ref", $ln['ArtCode']);
-//            $this->traiteChamp("import_key", $ln['ArtID']);
-//            $this->traiteChamp("barcode", $ln['ArtCodeBarre']);
+            $this->traiteChamp("price", $ln['ArtPrixBase'], true);
+            $this->traiteChamp("tva_tx", $ln['ArtGTaxTaux'], true);
+            $this->updatePrice = $this->update;
+            $this->update = false;
+
+
+            $this->traiteChamp("options_serialisable", ($ln['ArtStkNuf'] == "N° de série" || $ln['ArtStkNuf'] == "NUFARTSTKSERIE"));
+            $this->traiteChamp("options_validate", 1);
+            $this->traiteChamp("options_deee", ($ln['ArtFree1'] == '' ? 0 : $ln['ArtFree1']), true);
+            $this->traiteChamp("options_rpcp", ($ln['ArtFree2'] == '' ? 0 : $ln['ArtFree2']), true);
+            
+            
+            $this->traiteChamp("options_cto", $ln['ArtFree3']);
+            $this->traiteChamp("options_crt", 3);
+
+
+
+            $this->traiteChamp("status", ($this->isProdActif($ln)) ? "1" : "0");
+            $this->traiteChamp("status_buy", ($this->isProdActif($ln)) ? "1" : "0");
+
+
+            $ln['ArtLib'] = utf8_decode($ln['ArtLib']);
+            $this->traiteChamp("label", $ln['ArtLib']);
+            
+            $this->traiteChamp("pmp", $ln['ArtLastPA'], true);
+            
+            $desc = ($ln['ArtGCmtTxt'] != "")? $ln['ArtGCmtTxt'] : $ln['ArtLib'];
+            
+            
+            $this->traiteChamp("description", $desc);
+            $this->traiteChamp("ref", $ln['ArtCode']);
+            $this->traiteChamp("import_key", $ln['ArtID']);
+            $this->traiteChamp("barcode", $ln['ArtCodeBarre']);
             
 //            if(!isset($_REQUEST['light'])){
 //                $this->getAllCat();
@@ -148,10 +148,10 @@ class importProd extends importCat {
 //            }
 
 
-//            if ($this->updatePrice) {
-//                $this->object->updatePrice($this->object->price, 'HT', $user, $this->object->tva_tx);
-//                $this->tabResult["modifier"] ++;
-//            }
+            if ($this->updatePrice) {
+                $this->object->updatePrice($this->object->price, 'HT', $user, $this->object->tva_tx);
+                $this->tabResult["modifier"] ++;
+            }
             if ($this->update) {
                 $this->object->update($this->object->id, $user);
                 $this->tabResult["modifier"] ++;

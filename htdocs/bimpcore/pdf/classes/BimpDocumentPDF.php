@@ -733,7 +733,8 @@ class BimpDocumentPDF extends BimpModelPDF
 
                 if (!$this->hideTtc) {
                     $row['total_ttc'] = BimpTools::displayMoneyValue($row_total_ttc, '');
-                } elseif (!$this->hideReduc) {
+                }
+                if (!$this->hideReduc) {
                     $row['pu_remise'] = BimpTools::displayMoneyValue($pu_ht_with_remise, '');
                 }
 
@@ -749,7 +750,7 @@ class BimpDocumentPDF extends BimpModelPDF
                         $product->array_options['options_deee'] = $product->array_options['options_deee'] * $row['qte'];
                         $product->array_options['options_rpcp'] = $product->array_options['options_rpcp'] * $row['qte'];
                         if ($row['pu_remise'] > 0)
-                            $row['pu_remise'] = BimpTools::displayMoneyValue($row['pu_remise'] * $row['qte'], "");
+                            $row['pu_remise'] = BimpTools::displayMoneyValue(str_replace(",", ".", $row['pu_remise']) * $row['qte'], "");
                         $row['qte'] = 1;
                     } elseif ($row['qte'] < 1) {
                         $row['pu_ht'] = price(str_replace(",", ".", $row['pu_ht']) * ($row['qte'] * -1));
@@ -801,7 +802,7 @@ class BimpDocumentPDF extends BimpModelPDF
             );
             if (!$this->hideTtc)
                 $row['total_ttc'] = BimpTools::displayMoneyValue(-$remise_infos['remise_globale_amount_ttc'], '');
-            elseif (!$this->hideReduc)
+            if (!$this->hideReduc)
                 $row['pu_remise'] = BimpTools::displayMoneyValue(-$remise_infos['remise_globale_amount_ht'], '');
 
             if ($this->hide_pu) {
@@ -829,7 +830,7 @@ class BimpDocumentPDF extends BimpModelPDF
             );
             if (!$this->hideTtc)
                 $row['total_ttc'] = BimpTools::displayMoneyValue(-$lines_remise_global_amount_ttc, '');
-            elseif (!$this->hideReduc)
+            if (!$this->hideReduc)
                 $row['pu_remise'] = BimpTools::displayMoneyValue(-$lines_remise_global_amount_ttc, '');
 
             if ($this->hide_pu) {

@@ -86,7 +86,7 @@ class importProdFourn extends import8sens {
                 }
             }
             else{
-                $this->error("Fourn ".$ln['ProdFouCode']." introuvable");
+                $this->error("Fourn ".$ln['ProGFouCode']." introuvable");
             }
         }
         else{

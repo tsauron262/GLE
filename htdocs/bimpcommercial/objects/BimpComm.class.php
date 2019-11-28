@@ -343,6 +343,15 @@ class BimpComm extends BimpDolObject
             }
         }
 
+        if ($this->isLoaded()) {
+            $contacts = $this->dol_object->liste_contact(-1, 'internal');
+            foreach ($contacts as $item) {
+                if (!isset($emails[$item['email']])) {
+                    $emails[$item['email']] = $item['libelle'] . ': ' . $item['firstname'] . ' ' . $item['lastname'] . ' (' . $item['email'] . ')';
+                }
+            }
+        }
+        
         $emails['custom'] = 'Autre';
 
         return $emails;

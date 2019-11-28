@@ -121,9 +121,9 @@ class Interfacevalidate extends DolibarrTriggers
         if ($action == "BILL_CREATE" && $object->type == TYPE_STANDARD) {
             $object->fetchObjectLinked();
             if (isset($object->linkedObjects['commande']) && count($object->linkedObjects['commande'])) {
-                foreach ($object->linkedObjects['commande'] as $comm) {
-                    $object->addLine("Selon notre commande " . $comm->ref, 0, 0, 0);
-                }
+//                foreach ($object->linkedObjects['commande'] as $comm) {
+//                    $object->addLine("Selon notre commande " . $comm->ref, 0, 0, 0);
+//                }
             } else {
                 $ok = false;
                 if (isset($object->linkedObjects['propal']) && count($object->linkedObjects['propal'])) {

@@ -32,12 +32,9 @@ class BimpDocumentPDF extends BimpModelPDF
     public $totals = array("DEEE" => 0, "RPCP" => 0);
     public $target_label = '';
     public $after_totaux_label = '';
-    public $primary = '000000';
 
     public function __construct($db)
     {
-        
-        $this->primary = BimpCore::getParam('pdf/primary', '000000');
         parent::__construct($db, 'P', 'A4');
         BimpObject::loadClass('bimpcommercial', 'BimpComm');
 
@@ -199,20 +196,6 @@ class BimpDocumentPDF extends BimpModelPDF
             'header_right'  => $header_right,
             'primary_color' => $this->primary
         );
-    }
-
-    public function calculeWidthHieghtLogo($width, $height, $maxWidth, $maxHeight)
-    {
-        if ($width > $maxWidth) {
-            $height = round(($maxWidth / $width) * $height);
-            $width = $maxWidth;
-        }
-
-        if ($height > $maxHeight) {
-            $width = round(($maxHeight / $height) * $width);
-            $height = $maxHeight;
-        }
-        return array($width, $height);
     }
 
     protected function initfooter()
@@ -414,25 +397,6 @@ class BimpDocumentPDF extends BimpModelPDF
 
         $html .= $this->getCommercialInfosHtml();
 
-        return $html;
-    }
-
-    public function getSenderInfosHtml()
-    {
-        $html = '<br/><span style="font-size: 16px; color: #' . $this->primary . ';">' . $this->fromCompany->name . '</span><br/>';
-        $html .= '<span style="font-size: 9px">' . $this->fromCompany->address . '<br/>' . $this->fromCompany->zip . ' ' . $this->fromCompany->town . '<br/>';
-        if ($this->fromCompany->phone) {
-            $html .= 'Tél. : ' . $this->fromCompany->phone . '<br/>';
-        }
-        $html .= '</span>';
-        $html .= '<span style="color: #' . $this->primary . '; font-size: 8px;">';
-        if ($this->fromCompany->url) {
-            $html .= $this->fromCompany->url . ($this->fromCompany->email ? ' - ' : '');
-        }
-        if ($this->fromCompany->email) {
-            $html .= $this->fromCompany->email;
-        }
-        $html .= '</span>';
         return $html;
     }
 
@@ -769,7 +733,8 @@ class BimpDocumentPDF extends BimpModelPDF
 
                 if (!$this->hideTtc) {
                     $row['total_ttc'] = BimpTools::displayMoneyValue($row_total_ttc, '');
-                } elseif (!$this->hideReduc) {
+                }
+                if (!$this->hideReduc) {
                     $row['pu_remise'] = BimpTools::displayMoneyValue($pu_ht_with_remise, '');
                 }
 
@@ -785,7 +750,7 @@ class BimpDocumentPDF extends BimpModelPDF
                         $product->array_options['options_deee'] = $product->array_options['options_deee'] * $row['qte'];
                         $product->array_options['options_rpcp'] = $product->array_options['options_rpcp'] * $row['qte'];
                         if ($row['pu_remise'] > 0)
-                            $row['pu_remise'] = BimpTools::displayMoneyValue($row['pu_remise'] * $row['qte'], "");
+                            $row['pu_remise'] = BimpTools::displayMoneyValue(str_replace(",", ".", $row['pu_remise']) * $row['qte'], "");
                         $row['qte'] = 1;
                     } elseif ($row['qte'] < 1) {
                         $row['pu_ht'] = price(str_replace(",", ".", $row['pu_ht']) * ($row['qte'] * -1));
@@ -837,7 +802,7 @@ class BimpDocumentPDF extends BimpModelPDF
             );
             if (!$this->hideTtc)
                 $row['total_ttc'] = BimpTools::displayMoneyValue(-$remise_infos['remise_globale_amount_ttc'], '');
-            elseif (!$this->hideReduc)
+            if (!$this->hideReduc)
                 $row['pu_remise'] = BimpTools::displayMoneyValue(-$remise_infos['remise_globale_amount_ht'], '');
 
             if ($this->hide_pu) {
@@ -865,7 +830,7 @@ class BimpDocumentPDF extends BimpModelPDF
             );
             if (!$this->hideTtc)
                 $row['total_ttc'] = BimpTools::displayMoneyValue(-$lines_remise_global_amount_ttc, '');
-            elseif (!$this->hideReduc)
+            if (!$this->hideReduc)
                 $row['pu_remise'] = BimpTools::displayMoneyValue(-$lines_remise_global_amount_ttc, '');
 
             if ($this->hide_pu) {

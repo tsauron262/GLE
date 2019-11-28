@@ -314,4 +314,30 @@ class Bimp_Product_Entrepot extends BimpObject
 
         return $fields;
     }
+    
+    public function displayStockDesire(){
+        $stockAlert = $this->getStockAlert();
+        if(isset($stockAlert[$this->getData("fk_product")]) && isset($stockAlert[$this->getData("fk_product")][$this->getData("fk_entrepot")]))
+            return $stockAlert[$this->getData("fk_product")][$this->getData("fk_entrepot")]['desiredstock'];
+        return 0;
+    }
+    public function displayStockAlert(){
+        $stockAlert = $this->getStockAlert();
+        if(isset($stockAlert[$this->getData("fk_product")]) && isset($stockAlert[$this->getData("fk_product")][$this->getData("fk_entrepot")]))
+            return $stockAlert[$this->getData("fk_product")][$this->getData("fk_entrepot")]['seuil_stock_alerte'];
+        return 0;
+    }
+    
+    public function getStockAlert(){
+        $clef = "stockAlertEntrepot";
+        if(!isset(BimpCache::$cache[$clef])){
+            BimpCache::$cache[$clef] = array();
+            $sql = $this->db->db->query("SELECT * FROM `".MAIN_DB_PREFIX."product_warehouse_properties`");
+            while ($ln = $this->db->db->fetch_object($sql)){
+                BimpCache::$cache[$clef][$ln->fk_product][$ln->fk_entrepot] = array("seuil_stock_alerte"=>$ln->seuil_stock_alerte, "desiredstock"=>$ln->desiredstock);
+            }
+        }
+            
+        return BimpCache::$cache[$clef];
+    }
 }

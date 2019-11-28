@@ -27,6 +27,7 @@ Abstract class BimpModelPDF
     public $errors = array();
     public $langs;
     public $typeObject = '';
+    public $primary = '000000';
 
     public function __construct($db, $orientation = 'P', $format = 'A4')
     {
@@ -34,7 +35,7 @@ Abstract class BimpModelPDF
 
         $conf->global->MAIN_MAX_DECIMALS_SHOWN = str_replace("...", "", $conf->global->MAIN_MAX_DECIMALS_SHOWN);
 
-        
+
         $this->db = $db;
         $this->langs = $langs;
 
@@ -43,11 +44,13 @@ Abstract class BimpModelPDF
         $this->langs->load("dict");
         $this->langs->load("companies");
 
+        $this->primary = BimpCore::getParam('pdf/primary', '000000');
+
         $this->pdf = new BimpPDF($orientation, $format);
 
         $this->fromCompany = clone $mysoc; // Sender (en-tête)
         $this->footerCompany = clone $mysoc; // Pied de page. 
-        
+
         if (empty($this->fromCompany->country_code)) {
             $this->fromCompany->country_code = substr($langs->defaultlang, -2);
         }
@@ -145,7 +148,7 @@ Abstract class BimpModelPDF
 
         $this->pdf->writeHTML($styles . $content, false, false, true, false, '');
     }
-    
+
     public function renderFullBlock($method)
     {
         if (!method_exists($this, $method)) {
@@ -228,6 +231,52 @@ Abstract class BimpModelPDF
         return $html;
     }
 
+    public function getSenderInfosHtml()
+    {
+        $html = '<br/><span style="font-size: 16px; color: #' . $this->primary . ';">' . $this->fromCompany->name . '</span><br/>';
+        $html .= '<span style="font-size: 9px">' . $this->fromCompany->address . '<br/>' . $this->fromCompany->zip . ' ' . $this->fromCompany->town . '<br/>';
+        if ($this->fromCompany->phone) {
+            $html .= 'Tél. : ' . $this->fromCompany->phone . '<br/>';
+        }
+        $html .= '</span>';
+        $html .= '<span style="color: #' . $this->primary . '; font-size: 8px;">';
+        if ($this->fromCompany->url) {
+            $html .= $this->fromCompany->url . ($this->fromCompany->email ? ' - ' : '');
+        }
+        if ($this->fromCompany->email) {
+            $html .= $this->fromCompany->email;
+        }
+        $html .= '</span>';
+        return $html;
+    }
+
+    public function getEntrepotAddressHtml($entrepot)
+    {
+        $html = '';
+
+        if (BimpObject::objectLoaded($entrepot)) {
+            $html .= '<span style="font-size: 10px; font-weight: bold;">';
+            $html .= $entrepot->libelle . ' - ' . $entrepot->lieu;
+            $html .= '</span><br/>';
+
+            $html .= '<span style="font-size: 9px;">';
+            if ((string) $entrepot->address) {
+                $html .= $entrepot->address . '<br/>';
+            }
+            if ((string) $entrepot->zip) {
+                $html .= $entrepot->zip . ' ';
+            }
+
+            if ((string) $entrepot->town) {
+                $html .= $entrepot->town;
+            }
+
+            $html .= '</span>';
+        }
+
+        return $html;
+    }
+
     // Gestion du fichier de destination
 
     public function getFilePath()
@@ -237,16 +286,15 @@ Abstract class BimpModelPDF
         $path = DOL_DATA_ROOT . "/divers/";
 
         $nObj = $this->typeObject;
-        if(is_object($this->object_conf)){
+        if (is_object($this->object_conf)) {
             $objConf = $this->object_conf;
-        }
-        elseif ($nObj != "") {
+        } elseif ($nObj != "") {
             if (isset($conf->$nObj))
                 $objConf = $conf->$nObj;
             else
                 $path .= $nObj . "/";
         }
-        if(is_object($objConf)){
+        if (is_object($objConf)) {
             if (isset($objConf->dir_output))
                 $path = $objConf->dir_output . "/";
         }
@@ -291,5 +339,21 @@ Abstract class BimpModelPDF
                 echo ' - ' . $error . '<br/>';
             }
         }
+    }
+
+    // Tools: 
+
+    public function calculeWidthHieghtLogo($width, $height, $maxWidth, $maxHeight)
+    {
+        if ($width > $maxWidth) {
+            $height = round(($maxWidth / $width) * $height);
+            $width = $maxWidth;
+        }
+
+        if ($height > $maxHeight) {
+            $width = round(($maxHeight / $height) * $width);
+            $height = $maxHeight;
+        }
+        return array($width, $height);
     }
 }

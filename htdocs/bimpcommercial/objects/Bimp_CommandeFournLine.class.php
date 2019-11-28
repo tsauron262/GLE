@@ -1744,9 +1744,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
                                     }
 
                                     // Suppr de l'équipement 
-                                    $eq_warnings = array(
-                                        $equipment->getData('serial') . ': TEST'
-                                    );
+                                    $eq_warnings = array();
                                     $eq_errors = $equipment->delete($eq_warnings, true);
 
                                     if (count($eq_errors)) {

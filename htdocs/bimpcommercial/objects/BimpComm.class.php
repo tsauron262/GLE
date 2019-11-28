@@ -730,7 +730,7 @@ class BimpComm extends BimpDolObject
 
                 $lines = $this->getChildrenObjects('lines');
                 foreach ($lines as $line) {
-                    if ($line->isRemisable(true)) {
+                    if ($line->isRemisable()) {
                         $total_lines += (float) $line->getTotalTtcWithoutRemises();
                     }
                 }

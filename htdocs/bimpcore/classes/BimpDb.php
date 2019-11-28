@@ -284,6 +284,20 @@ class BimpDb
         return 0;
     }
 
+    public function getCount($table, $where = '1', $primary = 'id')
+    {
+        $sql = 'SELECT COUNT(DISTINCT `' . $primary . '`) as nb_rows FROM ' . MAIN_DB_PREFIX . $table;
+        $sql .= ' WHERE ' . $where;
+
+        $result = $this->executeS($sql, 'array');
+
+        if (isset($result[0]['nb_rows'])) {
+            return (int) $result[0]['nb_rows'];
+        }
+
+        return 0;
+    }
+
     public function getValues($table, $field, $where, $limit = null)
     {
         $sql = 'SELECT `' . $field . '` FROM ' . MAIN_DB_PREFIX . $table . ' WHERE ' . $where;

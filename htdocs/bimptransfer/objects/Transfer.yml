@@ -91,16 +91,25 @@ views:
                     col_md: 8
                     col_sm: 12
                     fields_table:
-                        name: default  
+                        name: default
                         
-                  - type: rows
-                    col_lg: 4
-                    col_md: 5
+    full: 
+        objects_change_reload: lines
+        edit_form: default
+        delete_btn: 1
+        rows:
+            - cols: 
+                  - type: object_header
+                  - type: fields_table
+                    col_lg: 7
+                    col_md: 8
                     col_sm: 12
-                    rows: 
-                        - cols: 
-                            - type: object_common_fields
-            
+                    fields_table:
+                        name: default
+                  - type: list
+                    list: 
+                        name: default
+                        children: lines
 forms:
     add:
         rows: 
@@ -133,7 +142,7 @@ lists:
             callback: userIsAdmin
         view_btn: 1
         page_btn: 1
-        modal_view: default
+        modal_view: full
         extra_btn: 
             callback: getListExtraButtons
         cols:

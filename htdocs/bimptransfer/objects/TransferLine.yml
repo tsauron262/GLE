@@ -4,6 +4,11 @@ parent_module: bimptransfer
 parent_object: Transfer
 parent_id_property: id_transfer
 
+labels: 
+    name: ligne de transfert
+    name_plur: lignes de transfert
+    is_female: 1
+    
 fields: 
     id_transfer:
         label: Transfert
@@ -34,6 +39,7 @@ fields:
 
 lists:
     default:
+       title: Lignes de transfert
        objects_change_reload: Transfer
        delete_btn: 1
        update_btn: 1

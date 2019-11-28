@@ -424,12 +424,19 @@ class Equipment extends BimpObject
         return $this->getData("serial");
     }
 
-    public function getProductLabel()
+    public function getProductLabel($with_ref = false)
     {
         $product = $this->getChildObject('product');
 
         if (BimpObject::objectLoaded($product)) {
-            return $product->label;
+            $label = '';
+
+            if ($with_ref) {
+                $label = $product->ref . ' - ';
+            }
+            $label .= $product->label;
+
+            return $label;
         }
 
         return (string) $this->getData('product_label');

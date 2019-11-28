@@ -85,7 +85,7 @@ class OrderFournPDF extends BimpDocumentPDF
                             if ($entrepot->zip) {
                                 $html .= $entrepot->zip . ' ';
                             } else {
-                                $html .= '<span style="color: #A00000; font-weight: bold">Code postal non défini</span> ';
+                                $html .= '<span style="color: #A00000; font-weight: bold">Code postal non défini</span>';
                             }
                             if ($entrepot->town) {
                                 $html .= $entrepot->town;

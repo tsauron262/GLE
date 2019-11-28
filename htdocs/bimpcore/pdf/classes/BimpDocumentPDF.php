@@ -32,12 +32,9 @@ class BimpDocumentPDF extends BimpModelPDF
     public $totals = array("DEEE" => 0, "RPCP" => 0);
     public $target_label = '';
     public $after_totaux_label = '';
-    public $primary = '000000';
 
     public function __construct($db)
     {
-        
-        $this->primary = BimpCore::getParam('pdf/primary', '000000');
         parent::__construct($db, 'P', 'A4');
         BimpObject::loadClass('bimpcommercial', 'BimpComm');
 
@@ -199,20 +196,6 @@ class BimpDocumentPDF extends BimpModelPDF
             'header_right'  => $header_right,
             'primary_color' => $this->primary
         );
-    }
-
-    public function calculeWidthHieghtLogo($width, $height, $maxWidth, $maxHeight)
-    {
-        if ($width > $maxWidth) {
-            $height = round(($maxWidth / $width) * $height);
-            $width = $maxWidth;
-        }
-
-        if ($height > $maxHeight) {
-            $width = round(($maxHeight / $height) * $width);
-            $height = $maxHeight;
-        }
-        return array($width, $height);
     }
 
     protected function initfooter()
@@ -414,25 +397,6 @@ class BimpDocumentPDF extends BimpModelPDF
 
         $html .= $this->getCommercialInfosHtml();
 
-        return $html;
-    }
-
-    public function getSenderInfosHtml()
-    {
-        $html = '<br/><span style="font-size: 16px; color: #' . $this->primary . ';">' . $this->fromCompany->name . '</span><br/>';
-        $html .= '<span style="font-size: 9px">' . $this->fromCompany->address . '<br/>' . $this->fromCompany->zip . ' ' . $this->fromCompany->town . '<br/>';
-        if ($this->fromCompany->phone) {
-            $html .= 'Tél. : ' . $this->fromCompany->phone . '<br/>';
-        }
-        $html .= '</span>';
-        $html .= '<span style="color: #' . $this->primary . '; font-size: 8px;">';
-        if ($this->fromCompany->url) {
-            $html .= $this->fromCompany->url . ($this->fromCompany->email ? ' - ' : '');
-        }
-        if ($this->fromCompany->email) {
-            $html .= $this->fromCompany->email;
-        }
-        $html .= '</span>';
         return $html;
     }
 

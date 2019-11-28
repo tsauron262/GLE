@@ -108,7 +108,7 @@ class TransferPDF extends BimpModelPDF
 
         $doc_ref = '';
         if (BimpObject::objectLoaded($this->object)) {
-            $doc_ref = 'Transfer #' . $this->object->id;
+            $doc_ref = 'Transfert #' . $this->object->id;
         }
 
         $this->header_vars = array(
@@ -118,7 +118,7 @@ class TransferPDF extends BimpModelPDF
             'header_infos'  => $this->getSenderInfosHtml(),
             'header_right'  => $header_right,
             'primary_color' => $this->primary,
-            'doc_name'      => 'Bon de transfer',
+            'doc_name'      => 'Bon de transfert',
             'doc_ref'       => $doc_ref
         );
     }

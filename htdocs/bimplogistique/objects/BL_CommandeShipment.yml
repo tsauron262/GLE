@@ -664,3 +664,19 @@ cards:
               display: nom_url
             - label: Infos
               field: info
+
+searches:
+    default: 
+        fields_search: 
+            - a.ref
+            - c.ref
+            - s.nom
+        joins:
+            commande: 
+                table: commande
+                on: c.rowid = a.id_commande_client
+                alias: c
+            s: 
+                table: societe
+                on: c.fk_soc = s.rowid
+                alias: s

@@ -2487,7 +2487,9 @@ class BC_Vente extends BimpObject
             }
         }
 
-        // Validation de la facture:         
+        // Validation de la facture:  
+        //forcage du droit 
+        $user->rights->facture->creer = 1;
         if ($facture->dol_object->validate($user) <= 0) {
             $msg = 'Echec de la validation de la facture';
             $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($facture->dol_object), $msg);

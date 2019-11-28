@@ -56,39 +56,34 @@
         margin-left: 3px;
     }
 
-    &.badge-danger {
-        background-color: $danger;
-        color: #fff;
-    }
-
     &.badge-success {
-        background-color: $success;
-        color: #fff;
+        background-color: $success!important;
+        color: #fff!important;
     }
 
     &.badge-danger {
-        background-color: $danger;
-        color: #fff;
+        background-color: $danger!important;
+        color: #fff!important;
     }
 
     &.badge-warning {
-        background-color: $warning;
-        color: #fff;
+        background-color: $warning!important;
+        color: #fff!important;
     }
 
     &.badge-info {
-        background-color: $info;
-        color: #fff;
+        background-color: $info!important;
+        color: #fff!important;
     }
 
     &.badge-important {
-        background-color: $important;
-        color: #fff;
+        background-color: $important!important;
+        color: #fff!important;
     }
 
     &.badge-primary {
-        background-color: $primary;
-        color: #fff;
+        background-color: $primary!important;
+        color: #fff!important;
     }
 }
 

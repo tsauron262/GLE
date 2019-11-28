@@ -1173,6 +1173,10 @@ class BS_SAV extends BimpObject
 //        $html .= BimpRender::renderIcon('fas_paste', 'iconLeft') . 'Coller token';
 //        $html .= '</span>';
 
+        $html .= '<p>';
+        $html .= '<span class="danger">' . BimpRender::renderIcon('fas_exclamation-circle', 'iconLeft') . 'Mode TEST activé</span>';
+        $html .= '</p>';
+
         $onclick = 'window.open(\'' . GSX_v2::$urls['login'][GSX_v2::$mode] . '\', \'Authentification GSX\', \'menubar=no, status=no, width=800, height=600\')';
         $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
         $html .= 'Réouvrir fenêtre d\'authentification' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');
@@ -1196,16 +1200,31 @@ class BS_SAV extends BimpObject
 
     public function renderApplePartsList($suffixe = '')
     {
+        if (!$this->isLoaded()) {
+            return '';
+        }
+
+        $html = '';
+
         if (BimpCore::getConf('use_gsx_v2')) {
-            $obj = BimpObject::getInstance('bimpsupport', 'BS_Issue');
+            $issue = BimpObject::getInstance('bimpsupport', 'BS_Issue');
+            $list = new BC_ListTable($issue, 'default', 1, $this->id);
+            if ($suffixe) {
+                $list->addIdentifierSuffix($suffixe);
+            }
+            $html .= $list->renderHtml();
+            
+            if ((int) $this->db->)
         } else {
-            $obj = BimpObject::getInstance('bimpsupport', 'BS_ApplePart');
+            $part = BimpObject::getInstance('bimpsupport', 'BS_ApplePart');
+            $list = new BC_ListTable($part, 'default', 1, $this->id);
+            if ($suffixe) {
+                $list->addIdentifierSuffix($suffixe);
+            }
+            $html .= $list->renderHtml();
         }
-        $list = new BC_ListTable($obj, 'default', 1, $this->id);
-        if ($suffixe) {
-            $list->addIdentifierSuffix($suffixe);
-        }
-        return $list->renderHtml();
+
+        return $html;
     }
 
     // Traitements:

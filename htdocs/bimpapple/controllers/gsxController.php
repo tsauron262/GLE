@@ -666,7 +666,7 @@ class gsxController extends BimpController
             $this->setSerial($params['serial']);
             $result = $this->gsxGetParts(array());
 
-            if (!is_null($result['parts'])) {
+            if (!is_null($result['parts']) && empty($result['errors'])) {
                 $id_sav = (isset($params['id_sav']) ? (int) $params['id_sav'] : 0);
                 $suffixe = (isset($params['suffixe']) ? $params['suffixe'] : '');
                 $html = $this->renderPartsList($result['parts'], $id_sav, $suffixe);
@@ -2401,6 +2401,36 @@ class gsxController extends BimpController
                             $content .= '<tr><th>' . $label . '</th><td>' . $value . '</td></tr>';
                         }
                     }
+
+                    if (isset($diag['deviceProfile']) && !empty($diag['deviceProfile'])) {
+                        $html .= '<tr>';
+                        $html .= '<th>Profile matériel</th>';
+                        $html .= '<td>';
+
+                        $html .= '<table>';
+                        $html .= '<tbody>';
+
+                        foreach (array(
+                            'type' => 'Type',
+                            'data/hardwareModel' => 'Modèle',
+                            'data/currentOsVersion' => 'Version actuelle de l\'OS',
+                            'data/latestOsVersion' => 'Dernière version de l\'OS',
+                            'data/restoreDate' => 'Date de restauration',
+                            'data/ilifeVersion' => 'ilife Version',
+                        ) as $path => $label) {
+                            $value = BimpTools::getArrayValueFromPath($diag, $path, true);
+                            if (!is_null($value)) {
+                                $content .= '<tr><th>' . $label . '</th><td>' . $value . '</td></tr>';
+                            }
+                        }
+
+                        $html .= '</tbody>';
+                        $html .= '</table>';
+
+                        $html .= '</td>';
+                        $html .= '</tr>';
+                    }
+
                     $content .= '</tbody>';
                     $content .= '</table>';
 
@@ -2425,26 +2455,35 @@ class gsxController extends BimpController
                                     $test_html .= '<tr><th>' . $label . '</th><td>' . $value . '</td></tr>';
                                 }
                             }
-                            $test_html .= '<tr><th>Résultats</th>';
-                            $test_html .= '<td>';
+
                             if (isset($test['detailResultData']) && !empty($test['detailResultData'])) {
+                                $test_html .= '<tr><th>Résultats</th>';
+                                $test_html .= '<td>';
+
                                 $test_html .= BimpRender::renderRecursiveArrayContent($test['detailResultData'], array(
                                             'foldable' => 1,
                                             'open'     => 0,
                                             'title'    => 'Résultats'
                                 ));
-                            } else {
-                                $test_html .= BimpRender::renderAlerts('Aucun résultat reçu', 'warning');
+
+                                $test_html .= '</td>';
+                                $test_html .= '</tr>';
                             }
-                            $test_html .= '</td>';
-                            $test_html .= '</tr>';
                             $test_html .= '</tbody>';
                             $test_html .= '</table>';
 
-                            $content .= BimpRender::renderPanel($test['testName'], $test_html, '', array(
+                            if ((int) $test['testStatusCode'] === 0) {
+                                $test_title = $test['testName'] . '  ' . '<span class="badge badge-success">' . BimpRender::renderIcon('fas_check', 'iconLeft') . $test['testStatus'] . '</span>';
+                                $test_open = false;
+                            } else {
+                                $test_title = $test['testName'] . '  ' . '<span class="badge badge-warning">' . BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . $test['testStatus'] . '</span>';
+                                $test_open = true;
+                            }
+
+                            $content .= BimpRender::renderPanel($test_title, $test_html, '', array(
                                         'type'     => 'default',
                                         'foldable' => true,
-                                        'open'     => false
+                                        'open'     => $test_open
                             ));
                         }
                     } else {
@@ -3079,7 +3118,7 @@ class gsxController extends BimpController
         $html = '';
         if (is_array($parts)) {
             if (empty($parts)) {
-                $html .= BimpRender::renderAlerts('Aucun composant compatible trouvé pour le numéro de série "' . $this->serial . '"', 'warning');
+                $html .= BimpRender::renderAlerts('Aucun composant compatible trouvé', 'warning');
             } else {
                 if ($this->use_gsx_v2) {
                     $html .= '<div id="partsListContainer' . $sufixe . '" class="partsListContainer">';

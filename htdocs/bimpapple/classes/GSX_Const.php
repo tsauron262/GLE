@@ -54,7 +54,7 @@ class GSX_Const
     public static $certifs = array(
         897316 => array(
             'test' => array('testCertif.pem', '', 'test.key'),
-            'prod' => array('AppleCare-Partner-0000897316.Prod.apple.com.chain.pem', '', '')
+            'prod' => array('AppleCare-Partner-0000897316.Prod.apple.com.chain.pem', '', 'prod.key')
         ),
         579256 => array(
             'test' => array('privatekey.nopass.pem', ''),

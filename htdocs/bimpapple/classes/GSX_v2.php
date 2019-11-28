@@ -52,10 +52,10 @@ class GSX_v2 extends GSX_Const
                 if (isset($user->array_options['options_apple_shipto']) && (string) $user->array_options['options_apple_shipto']) {
                     $this->shipTo = BimpTools::addZeros($user->array_options['options_apple_shipto'], self::$numbersNumChars);
                 } else {
-                    $this->shipTo = self::$default_ids['ship_to'];
+                    $this->shipTo = BimpTools::addZeros(self::$default_ids['ship_to']);
                 }
 
-                $this->soldTo = self::$default_ids['sold_to'];
+                $this->soldTo = BimpTools::addZeros(self::$default_ids['sold_to'], self::$numbersNumChars);
                 break;
         }
 
@@ -247,10 +247,12 @@ class GSX_v2 extends GSX_Const
             return 0;
         }
 
+
+
         $headers = array(
             'Accept: application/json',
             'Content-Type: application/json',
-//            'Accept-Language: fr_FR',
+            'Accept-Language: fr_FR',
             'X-Apple-SoldTo: ' . $this->soldTo,
             'X-Apple-ShipTo: ' . $this->shipTo
         );
@@ -320,6 +322,14 @@ class GSX_v2 extends GSX_Const
 
         if ($data === false) {
             $this->curlError($request_name, 'Aucune réponse reçue');
+            if (self::$log_requests) {
+                $information = curl_getinfo($this->ch);
+
+                $infos = "Header REQUEST : <br/>" . str_replace("\n", "<br/>", $information['request_header']);
+                $infos .= "Body REQUEST : <br/>" . str_replace("\n", "<br/>", print_r($params, 1)) . "<br/><br/>";
+                $infos .= 'AUCUNE REPONSE';
+                dol_syslog(str_replace('<br/>', "\n", str_replace('Array', "", $infos)), 3);
+            }
             return false;
         }
 
@@ -562,7 +572,7 @@ class GSX_v2 extends GSX_Const
     {
         return $this->exec('diagnosticTest', array(
                     'diagnostics' => array(
-                        'suiteId' => $suiteId
+                        'suiteId' => (string) $suiteId
                     ),
                     'device'      => array(
                         'id' => $serial

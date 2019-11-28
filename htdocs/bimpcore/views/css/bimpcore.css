@@ -11547,35 +11547,31 @@ a.label:hover, a.label:focus {
   .nav-pills > li > a > .badge {
     margin-left: 3px; }
   /* line 59, ../scss/bootstrap/_badges.scss */
-  .badge.badge-danger {
-    background-color: #A00000;
-    color: #fff; }
-  /* line 64, ../scss/bootstrap/_badges.scss */
   .badge.badge-success {
-    background-color: #348C41;
-    color: #fff; }
-  /* line 69, ../scss/bootstrap/_badges.scss */
+    background-color: #348C41 !important;
+    color: #fff !important; }
+  /* line 64, ../scss/bootstrap/_badges.scss */
   .badge.badge-danger {
-    background-color: #A00000;
-    color: #fff; }
-  /* line 74, ../scss/bootstrap/_badges.scss */
+    background-color: #A00000 !important;
+    color: #fff !important; }
+  /* line 69, ../scss/bootstrap/_badges.scss */
   .badge.badge-warning {
-    background-color: #E69900;
-    color: #fff; }
-  /* line 79, ../scss/bootstrap/_badges.scss */
+    background-color: #E69900 !important;
+    color: #fff !important; }
+  /* line 74, ../scss/bootstrap/_badges.scss */
   .badge.badge-info {
-    background-color: #3B6EA0;
-    color: #fff; }
-  /* line 84, ../scss/bootstrap/_badges.scss */
+    background-color: #3B6EA0 !important;
+    color: #fff !important; }
+  /* line 79, ../scss/bootstrap/_badges.scss */
   .badge.badge-important {
-    background-color: #963E96;
-    color: #fff; }
-  /* line 89, ../scss/bootstrap/_badges.scss */
+    background-color: #963E96 !important;
+    color: #fff !important; }
+  /* line 84, ../scss/bootstrap/_badges.scss */
   .badge.badge-primary {
-    background-color: #EF7D00;
-    color: #fff; }
+    background-color: #EF7D00 !important;
+    color: #fff !important; }
 
-/* line 97, ../scss/bootstrap/_badges.scss */
+/* line 92, ../scss/bootstrap/_badges.scss */
 a.badge:hover, a.badge:focus {
   color: #fff;
   text-decoration: none;

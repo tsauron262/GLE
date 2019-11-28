@@ -650,7 +650,7 @@ function saveCommandeLineFactures($button, id_line) {
     }
 }
 
-function addSelectedCommandeLinesToFacture($button, list_id, id_commande, id_client_facture, id_contact, id_cond_reglement) {
+function addSelectedCommandeLinesToFacture($button, list_id, id_commande, id_client_facture, id_contact, id_cond_reglement, note_public, note_private) {
     if ($button.hasClass('disabled')) {
         return;
     }
@@ -673,7 +673,9 @@ function addSelectedCommandeLinesToFacture($button, list_id, id_commande, id_cli
         facture_lines_list: [],
         id_client_facture: id_client_facture,
         id_contact: id_contact,
-        id_cond_reglement: id_cond_reglement
+        id_cond_reglement: id_cond_reglement,
+        note_public: note_public,
+        note_private: note_private
     };
 
     $selected.each(function () {

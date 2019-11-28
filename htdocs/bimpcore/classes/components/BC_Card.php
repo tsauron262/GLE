@@ -337,6 +337,13 @@ class BC_Card extends BimpComponent
                 'value' => '<a href="http://' . $this->display_object->url . '" title="Site web" target="_blank">' . $this->display_object->url . '</a>'
             );
         }
+        
+        if (isset($this->display_object->note_public) && $this->display_object->note_public != "") {
+            $fields[] = array(
+                'icon'  => 'info',
+                'value' => $this->display_object->note_public
+            );
+        }
 
         return self::renderCard($this->display_object, $title, $img_url, $fields, $this->params['view_btn']);
     }

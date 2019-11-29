@@ -555,15 +555,18 @@ class gsxController extends BimpController
                         $errors[] = 'Le SAV d\'ID ' . $id_sav . ' n\'existe pas';
                     }
                 }
+                  
+                if (!count($errors)) {
+                    $repair = BimpObject::getInstance('bimpapple', 'GSX_Repair');
+                    $errors = $repair->processRepairRequestOutcome($response, $warnings);
+                }
 
                 if (!isset($response['repairId'])) {
                     $errors[] = 'ID de la réparation non reçu';
                 }
 
                 if (!count($errors)) {
-                    $repair = BimpObject::getInstance('bimpapple', 'GSX_Repair');
 
-                    $errors = $repair->processRepairRequestOutcome($response, $warnings);
 
                     if (!count($errors)) {
                         $rep_warnings = array();

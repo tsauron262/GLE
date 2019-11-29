@@ -15,3 +15,8 @@ CREATE TABLE IF NOT EXISTS `llx_bs_sav_issue` (
 ALTER TABLE `llx_bs_apple_part` ADD `id_issue` int(11) NOT NULL DEFAULT 0;
 ALTER TABLE `llx_bs_apple_part` ADD `is_tier` int(1) NOT NULL DEFAULT 0;
 ALTER TABLE `llx_bs_apple_part` ADD `not_invoiced` int(1) NOT NULL DEFAULT 0;
+
+ALTER TABLE `llx_bimp_gsx_repair` ADD `old_repair_number` VARCHAR(128) NOT NULL DEFAULT '' AFTER `canceled`; 
+
+UPDATE llx_bimp_gsx_repair SET `old_repair_number` = `repair_number`;
+UPDATE llx_bimp_gsx_repair SET `repair_number` = `repair_confirm_number`;

@@ -139,6 +139,39 @@ class BS_ApplePart extends BimpObject
         return GSX_v2::$reproducibilities;
     }
 
+    public function getSavIssuesArray()
+    {
+        if ($this->isLoaded()) {
+            $sav = $this->getParentInstance();
+            if (BimpObject::objectLoaded($sav)) {
+                return $sav->getIssuesArray(true);
+            }
+        }
+
+        return array();
+    }
+
+    // Getters config: 
+
+    public function getNoIssueExtaButtons()
+    {
+        $buttons = array();
+
+        if ($this->isLoaded()) {
+            if (!(int) $this->getData('id_issue')) {
+                $buttons[] = array(
+                    'label'   => 'Attribuer à un problème composant',
+                    'icon'    => 'fas_arrow-circle-right',
+                    'onclick' => $this->getJsActionOnclick('attributeToIssue', array(), array(
+                        'form_name' => 'select_issue'
+                    ))
+                );
+            }
+        }
+
+        return $buttons;
+    }
+
     // Getters données
 
     public static function getCategProdApple($ref, $desc)
@@ -351,6 +384,35 @@ class BS_ApplePart extends BimpObject
         }
 
         return $errors;
+    }
+
+    // Actions: 
+
+    public function actionAttributeToIssue($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Attribution au problème composant effectuée avec succès';
+
+        if ($this->isLoaded($errors)) {
+            $sav = $this->getParentInstance();
+            if (!BimpObject::objectLoaded($sav)) {
+                $errors[] = 'ID du SAV absent';
+            } else {
+                $id_issue = (isset($data['id_issue']) ? (int) $data['id_issue'] : 0);
+
+                if (!$id_issue) {
+                    $errors[] = 'Aucun problème composant sélectionné';
+                } else {
+                    $errors = $this->updateField('id_issue', $id_issue, null, true);
+                }
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
     }
 
     // Overrides: 

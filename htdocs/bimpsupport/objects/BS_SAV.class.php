@@ -731,6 +731,40 @@ class BS_SAV extends BimpObject
         return $this->getSocietePropalsArray((int) $this->getData('id_client'));
     }
 
+    public function getIssuesArray($include_empty = false)
+    {
+        if ($this->isLoaded()) {
+            $cache_key = 'sav_' . $this->id . '_issues_array';
+
+            if (!isset(self::$cache[$cache_key])) {
+                $issues = $this->getChildrenObjects('issues');
+
+                foreach ($issues as $issue) {
+                    $label = '';
+                    if ((string) $issue->getData('category_label')) {
+                        $label .= $issue->getData('category_label');
+                    }
+
+                    if ((string) $issue->getData('issue_label')) {
+                        $label .= ($label ? ' - ' : '') . $issue->getData('issue_label');
+                    }
+
+                    $repro = (string) $issue->displayData('reproducibility', 'default', false, true);
+
+                    if ($repro) {
+                        $label .= ($label ? ' - ' : '') . $repro;
+                    }
+
+                    self::$cache[$cache_key][(int) $issue->id] = $label;
+                }
+            }
+
+            return self::getCacheArray($cache_key, $include_empty);
+        }
+
+        return array();
+    }
+
     // Getters données: 
 
     public function getNomUrl($withpicto = true)
@@ -1213,8 +1247,26 @@ class BS_SAV extends BimpObject
                 $list->addIdentifierSuffix($suffixe);
             }
             $html .= $list->renderHtml();
-            
-            if ((int) $this->db->)
+
+            $nParts = (int) $this->db->getCount('bs_apple_part', '`id_sav` = ' . (int) $this->id . ' AND (`id_issue` = 0 OR `id_issue` IS NULL)');
+
+            if ($nParts > 0) {
+                if ($nParts > 1) {
+                    $msg = $nParts . ' composants ont été ajoutés au panier via l\'ancienne version.<br/>Veuillez attribuer chancun de ces composants à un problème composant';
+                } else {
+                    $msg = '1 composant a été ajouté au panier via l\'ancienne version.<br/>Veuillez attribuer ce composant à un problème composant';
+                }
+
+                $html .= BimpRender::renderAlerts($msg, 'warning');
+
+                $part = BimpObject::getInstance('bimpsupport', 'BS_ApplePart');
+                $list = new BC_ListTable($part, 'no_issue', 1, $this->id);
+                $list->addFieldFilterValue('id_issue', 0);
+                if ($suffixe) {
+                    $list->addIdentifierSuffix($suffixe);
+                }
+                $html .= $list->renderHtml();
+            }
         } else {
             $part = BimpObject::getInstance('bimpsupport', 'BS_ApplePart');
             $list = new BC_ListTable($part, 'default', 1, $this->id);

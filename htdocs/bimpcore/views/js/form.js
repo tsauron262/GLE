@@ -1803,8 +1803,6 @@ function loadSearchObjectResults($input, idx) {
                                         });
                                     }
 
-                                    console.log(choices);
-
                                     if (choices.length) {
                                         displayInputChoices(bimpAjax.$input, choices, function ($btn) {
                                             $('body').find('.popover.fade').remove();

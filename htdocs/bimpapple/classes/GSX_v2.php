@@ -598,6 +598,15 @@ class GSX_v2 extends GSX_Const
         ));
     }
 
+    public function serialEligibility($serial)
+    {
+        return $this->exec('repairEligibility', array(
+                    'device' => array(
+                        'id' => $serial
+                    )
+        ));
+    }
+
     // Gestion des erreurs: 
 
     public function initError($msg, $log_error = false)

@@ -128,6 +128,7 @@ function onSavFormLoaded($form) {
     var $input = $form.find('[name="id_equipment"]');
     if ($input.length) {
         $input.change(function () {
+            
             var $container = $input.findParentByClass('inputContainer');
             if ($container.length) {
                 $container.find('div.equipmentAjaxInfos').remove();
@@ -137,7 +138,8 @@ function onSavFormLoaded($form) {
                 var params = {
                     $container: $container,
                     display_success: false,
-                    display_errors: false,
+                    display_errors: true,
+                    display_warnings: true,
                     display_processing: true,
                     processing_padding: 0,
                     append_html: true,
@@ -145,7 +147,7 @@ function onSavFormLoaded($form) {
                 };
 
                 if (typeof (use_gsx_v2) !== 'undefined' && use_gsx_v2) {
-                    GsxAjax('gsxGetEquipmentWarrantyInfos', {
+                    GsxAjax('gsxGetEquipmentEligibility', {
                         id_equipment: $input.val()
                     }, $container.find('.equipmentAjaxInfos'), params);
                 } else {

@@ -52,7 +52,7 @@ class GSX_v2 extends GSX_Const
                 if (isset($user->array_options['options_apple_shipto']) && (string) $user->array_options['options_apple_shipto']) {
                     $this->shipTo = BimpTools::addZeros($user->array_options['options_apple_shipto'], self::$numbersNumChars);
                 } else {
-                    $this->shipTo = BimpTools::addZeros(self::$default_ids['ship_to']);
+                    $this->shipTo = BimpTools::addZeros(self::$default_ids['ship_to'], self::$numbersNumChars);
                 }
 
                 $this->soldTo = BimpTools::addZeros(self::$default_ids['sold_to'], self::$numbersNumChars);

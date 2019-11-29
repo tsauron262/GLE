@@ -1207,9 +1207,11 @@ class BS_SAV extends BimpObject
 //        $html .= BimpRender::renderIcon('fas_paste', 'iconLeft') . 'Coller token';
 //        $html .= '</span>';
 
-        $html .= '<p>';
-        $html .= '<span class="danger">' . BimpRender::renderIcon('fas_exclamation-circle', 'iconLeft') . 'Mode TEST activé</span>';
-        $html .= '</p>';
+        if (GSX_Const::$mode === 'test') {
+            $html .= '<p>';
+            $html .= '<span class="danger">' . BimpRender::renderIcon('fas_exclamation-circle', 'iconLeft') . 'Mode TEST activé</span>';
+            $html .= '</p>';
+        }
 
         $onclick = 'window.open(\'' . GSX_v2::$urls['login'][GSX_v2::$mode] . '\', \'Authentification GSX\', \'menubar=no, status=no, width=800, height=600\')';
         $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';

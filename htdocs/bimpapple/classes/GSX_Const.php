@@ -7,7 +7,7 @@ class GSX_Const
     public static $mode = 'prod'; // test ou prod
     public static $debug_mode = false;
     public static $log_errors = true;
-    public static $log_requests = true;
+    public static $log_requests = false;
     public static $numbersNumChars = 10;
     public static $sav_files = array(
         'test' => 'TEST'
@@ -210,6 +210,8 @@ class GSX_Const
         // Requêtes Ajax GSX acivées côté js seulement si le user possède un apple_id (Pour éviter les demandes d'authentification intempestives). 
         if (isset($user->array_options['options_apple_id']) && (string) $user->array_options['options_apple_id']) {
             $use_gsx = 1;
+        } else {
+            $use_gsx = 0;
         }
 
         $html = '<script type="text/javascript">';

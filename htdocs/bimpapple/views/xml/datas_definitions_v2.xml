@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+    <!--Génériques-->
+    <def name="type" type="select">
+        <label>Type</label>
+    </def>
+    <def name="id" type="text" max="18" regex="^[0-9a-zA-Z]{1,18}$" format="Lettres et chiffres seulement">
+        <label>Identifiant</label>
+    </def>
+    
+    <!--Repairs-->
+    <def name="repairType" type="select" values="repair_types" edit="0">
+        <label>Type de réparation</label>
+    </def>
+    <def name="serviceNonRepairType" type="select" values="service_types">
+        <display_if data="repairType" show_values="SVNR"></display_if>
+        <label>Type de service sans réparation</label>
+    </def>
+    <def name="purchaseOrderNumber" type="text" max="30">
+        <label>N° de commande</label>
+    </def>
+    <def name="repairClassification" type="select" values="repair_classifications">
+        <label>Classification de la réparation</label>
+    </def>
+    <def name="coverageOption" type="select" values="coverage_options">
+        <label>Option de couverture</label>
+    </def>
+    <def name="unitReceivedDateTime" type="datetime">
+        <label>Date et heure de réception de l'unité</label>
+    </def>
+    <def name="boxRequired" type="bool">
+        <label>Boîte requise pour l'envoi</label>
+    </def>
+    <def name="loanerStockUnavailable" type="bool">
+        <label>Aucun stock de prêt disponible</label>
+    </def>
+    <def name="reservationId" type="text" max="25" regex="^[a-z0-9A-Z]{0,25}$" format="Lettres et chiffres seulement">
+        <label>Identifiant réservation</label>
+    </def>
+    <def name="referenceNumber" type="text" max="15">
+        <label>Référence</label>
+    </def>
+    <def name="addressCosmeticDamage" type="bool">
+        <label>Dommages cosmétiques</label>
+    </def>
+    <def name="consumerLaw" type="select" values="consumer_law">
+        <label>Couverture du droit de la consommation</label>
+    </def>
+    <def name="techId" type="text" max="15">
+        <label>Identifiant du technicien</label>
+    </def>
+    
+    <!--notes-->
+    <def name="notes" type="datasGroup" itemLabel="Note">
+        <label>Notes</label>
+    </def>
+    <def name="content" type="textarea" max="4000">
+        <label>Contenu</label>
+    </def>
+    
+    <!--loaners-->
+    <def name="loaners" type="datasGroup" itemLabel="Composant de prêt">
+        <label>Composants de prêt</label>
+    </def>
+    <def name="partNumber" type="text" max="18">
+        <label>Réf. composant</label>
+    </def>
+    <def name="returnStatusCode" type="select">
+        <label>Raison du retour</label>
+        <values>
+            <val val="DOA">HS à l'arrivée</val>
+        </values>
+    </def>
+    
+    <def name="fromConsignedStock" type="bool">
+        <label>Pris dans le stock consigné</label>
+    </def>
+    
+    <!--device-->
+    <def name="device" type="datasGroup">
+        <label>Matériel</label>
+    </def>
+    
+    <!--deviceConfiguration-->
+    <def name="configuration" type="datasGroup">
+        <label>Configuration</label>
+    </def>
+    <def name="hardDiskSize" type="text" max="25">
+        <label>Taille du disque dur</label>
+    </def>
+    <def name="osVersion" type="text" max="10">
+        <label>Version de l'OS</label>
+    </def>
+    <def name="ramSize" type="text" max="25">
+        <label>Taille de la RAM</label>
+    </def>
+    
+    <!--componentIssues-->
+    <def name="componentIssue" type="datasGroup">
+        <label>Problème</label>
+    </def>
+    <def name="componentIssues" type="datasGroup">
+        <label>Problèmes</label>
+    </def>
+    <def name="componentCode" type="text" max="7">
+        <label>Catégorie</label>
+    </def>
+    <def name="issueCode" type="text" max="7">
+        <label>Code du problème</label>
+    </def>
+    <def name="reproducibility" type="select" values="reproducibilities">
+        <label>Niveau de récurrence du problème</label>
+    </def>
+    <def name="priority" type="select" data_type="int">
+        <label>Priorité</label>
+        <values>
+            <val val="1">Haute</val>
+            <val val="2">Moyenne</val>
+            <val val="3">Faible</val>
+        </values>
+    </def>
+    <def name="order" type="int" min="1" max="6">
+        <label>Rang</label>
+    </def>
+    
+    <!--attachments-->
+    <def name="attachments" type="datasGroup" itemLabel="Fichier joint">
+        <label>Fichiers joints</label>
+    </def>
+    <def name="fileOrigin" type="select">
+        <label>Origine</label>
+        <values>
+            <val val="sav">Fichier du SAV</val>
+            <val val="user">Fichier utilisateur</val>
+        </values>
+    </def>
+    <def name="savFile" type="select" values="sav_files">
+        <label>Fichier</label>
+    </def>
+    
+    <!--repairFlags-->
+    <def name="repairFlags" type="datasGroup">
+        <label>Statuts réparation</label>
+    </def>
+    <def name="requestReviewByApple" type="bool">
+        <label>Requête vérifiée par Apple</label>
+    </def>
+    <def name="markComplete" type="bool">
+        <label>Marquer complète</label>
+    </def>
+    
+    <!--parts-->
+    <def name="parts" type="datasGroup" useCart="1" itemLabel="Composant">
+        <label>Composants</label>
+    </def>
+    <def name="part_label" type="text" max="255" edit="0">
+        <label>Désignation</label>
+    </def>
+    <def name="number" type="text" max="18">
+        <label>Réf. composant</label>
+    </def>
+    <def name="partUsed" type="text" max="18">
+        <label>Réf. composant utilisé</label>
+    </def>
+    <def name="kgbDeviceDetail" type="datasGroup">
+        <label>Détail KGB</label>
+    </def>
+    <def name="pricingOption" type="text" max="10">
+        <label>Code prix spécial</label>
+    </def>
+    
+    <!--account-->
+    <def name="account" type="datasGroup">
+        <label>Information de contact</label>
+    </def>
+    <def name="soldtoContactEmail" type="text" max="241">
+        <label>Adresse e-mail</label>
+    </def>
+    <def name="soldToContactPhone" type="text" max="30">
+        <label>N° tél.</label>
+    </def>   
+    
+    <!--customer-->
+    <def name="customer" type="datasGroup">
+        <label>Client</label>
+    </def>
+    <def name="firstName" type="text" max="96">
+        <label>Prénom</label>
+    </def>
+    <def name="lastName" type="text" max="96">
+        <label>Nom</label>
+    </def>
+    <def name="companyName" type="text" max="100">
+        <label>Société</label>
+    </def>
+    <def name="primaryPhone" type="text" max="30">
+        <label>N° tél. principal</label>
+    </def>
+    <def name="emailAddress" type="text" max="241">
+        <label>Adresse e-mail</label>
+    </def>
+    <def name="sendSMSOnPrimaryPhone" type="bool">
+        <label>Envoyer SMS sur tél. principal</label>
+    </def>
+    <def name="primarySMSProvider" type="text">
+        <label>Fournisseur SMS</label>
+    </def>
+    <def name="secondaryPhone" type="text" max="30">
+        <label>N° tél secondaire</label>
+    </def>
+    <def name="secondaryContact" type="text" max="40">
+        <label>Nom du contact secondaire</label>
+    </def>
+    
+    <!--address-->
+    
+    <def name="address" type="datasGroup">
+        <label>Adresse</label>
+    </def>
+    <def name="line1" type="text" max="60">
+        <label>Ligne 1</label>
+    </def>
+    <def name="line2" type="text" max="40">
+        <label>Ligne 2</label>
+    </def>
+    <def name="line3" type="text" max="40">
+        <label>Ligne 3</label>
+    </def>
+    <def name="line4" type="text" max="40">
+        <label>Ligne 4</label>
+    </def>
+    <def name="postalCode" type="text" max="10">
+        <label>Code postal</label>
+    </def>
+    <def name="city" type="text" max="40">
+        <label>Ville</label>
+    </def>
+    <def name="county" type="text" max="40">
+        <label>Comté</label>
+    </def>
+    <def name="stateCode" type="text" max="3">
+        <label>Code état/province</label>
+    </def>
+    <def name="countryCode" type="select" values="countriesCodes">
+        <label>Pays</label>
+    </def>
+    
+    <!--divers-->
+    <def name="file" type="file">
+        <label>Fichier</label>
+    </def>
+    
+    <!--Questions-->
+    <def name="questions" type="custom_full_content">
+        <label>Questions</label>
+    </def>
+</root>

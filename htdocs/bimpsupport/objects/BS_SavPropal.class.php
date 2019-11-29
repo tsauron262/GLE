@@ -53,4 +53,13 @@ class BS_SavPropal extends Bimp_Propal
 
         return '';
     }
+
+    public function getFilesArray($with_deleted = 0)
+    {
+        if ($this->isLoaded()) {
+            return BimpCache::getObjectFilesArray('bimpcommercial', 'Bimp_Propal', $this->id, $with_deleted);
+        }
+
+        return array();
+    }
 }

@@ -1130,6 +1130,7 @@ class BimpDocumentPDF extends BimpModelPDF
     {
         global $conf;
 
+        $htmlInfo = $html = "";
         if ($this->hideTotal) {
             return '';
         }
@@ -1262,7 +1263,8 @@ class BimpDocumentPDF extends BimpModelPDF
 
                 // TVA
                 foreach ($this->tva as $tvakey => $tvaval) {
-                    if (1) {
+                    $ht = $this->ht[$tvakey];
+                    if ($ht != 0) {
                         if (1) {
                             $tvacompl = '';
                             if (preg_match('/\*/', $tvakey)) {
@@ -1277,13 +1279,25 @@ class BimpDocumentPDF extends BimpModelPDF
                             }
 
                             $html .= '<tr>';
-                            $html .= '<td style="background-color: #F0F0F0;">' . $totalvat . ' (' . BimpTools::displayMoneyValue($this->ht[$tvakey], '') . ' €)</td>';
+                            $html .= '<td style="background-color: #F0F0F0;">' . $totalvat . ' (' . BimpTools::displayMoneyValue($ht, '') . ' €)</td>';
                             $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . BimpTools::displayMoneyValue($tvaval, '');
                             if ((int) $this->periodicity) {
                                 $html .= ' / ' . BimpComm::$pdf_periodicity_label_masc[(int) $this->periodicity];
                             }
                             $html .= '</td>';
                             $html .= '</tr>';
+                            
+                            
+                            //todo phrase suivant tva 
+//                            $infos =  array();
+//                                    $infos[] ="mmmffff30";
+//                            switch ($tvakey){
+//                                case 0:
+//                                    $infos[] = "mmm";
+//                                case 20:
+//                                    $infos[] ="mmmffff30";
+//                            }
+//                            $htmlInfo  .= implode("<br/>", $infos);
                         }
                     }
                 }
@@ -1435,7 +1449,7 @@ class BimpDocumentPDF extends BimpModelPDF
         $html .= '</table>';
         $html .= '<br/>';
 
-        return $html;
+        return $html.$htmlInfo;
     }
 
     public function getPaymentsHtml()

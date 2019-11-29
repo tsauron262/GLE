@@ -639,7 +639,7 @@ class BC_ListTable extends BC_List
                         $col_params['label'] = ucfirst($col_name);
                     }
                 }
-                $sortable = ($col_params['field'] && !$col_params['child'] ? $this->object->getConf('fields/' . $col_params['field'] . '/sortable', 1, false, 'bool') : false);
+                $sortable = ($this->params['enable_sort'] && ($col_params['field'] && !$col_params['child'] ? $this->object->getConf('fields/' . $col_params['field'] . '/sortable', 1, false, 'bool') : false));
 
                 $html .= '<th';
                 if (!is_null($col_params['width'])) {

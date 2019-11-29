@@ -12,6 +12,7 @@ class BimpCore
             '/bimpcore/views/js/bootstrap.min.js',
             '/bimpcore/views/js/bootstrap-datetimepicker.js',
             '/bimpcore/views/js/functions.js',
+            '/bimpcore/views/js/scroller.js',
             '/bimpcore/views/js/ajax.js',
 //            '/bimpcore/views/js/component.js',
             '/bimpcore/views/js/modal.js',

@@ -25,7 +25,7 @@ class Equipment extends BimpObject
 
     public function __construct($db)
     {
-        require_once(DOL_DOCUMENT_ROOT . "/bimpequipment/objects/BE_Place.class.php");
+        self::loadClass('bimpequipment', 'BE_Place');
         self::$typesPlace = BE_Place::$types;
         parent::__construct("bimpequipment", get_class($this));
         $this->iconeDef = "fa-laptop";
@@ -1061,7 +1061,6 @@ class Equipment extends BimpObject
         } else {
             $isIphone = false;
         }
-        $gsx = new GSX($isIphone);
 
         $errors = array();
 
@@ -1073,38 +1072,43 @@ class Equipment extends BimpObject
             'warning'           => ''
         );
 
-        if (!$gsx->connect) {
-            $errors = BimpTools::getMsgFromArray($gsx->errors['init'], 'Echec de la connexion GSX');
-        } else {
-            $response = $gsx->lookup($serial);
+        $use_gsx_v2 = (int) BimpCore::getConf('use_gsx_v2');
+        
+        if (!$use_gsx_v2) { // V2 => gsxController::gsxGetEquipmentInfos(). 
+            $gsx = new GSX($isIphone);
+            if (!$gsx->connect) {
+                $errors[] = BimpTools::getMsgFromArray($gsx->errors['init'], 'Echec de la connexion GSX');
+            } else {
+                $response = $gsx->lookup($serial);
 
-            if (isset($response) && count($response)) {
-                if (isset($response['ResponseArray']) && count($response['ResponseArray'])) {
-                    if (isset($response['ResponseArray']['responseData']) && count($response['ResponseArray']['responseData'])) {
-                        $data = $response['ResponseArray']['responseData'];
-                        if (isset($data['productDescription']) && $data['productDescription']) {
-                            $result['product_label'] = $data['productDescription'];
-                        }
-                        if (isset($data['estimatedPurchaseDate']) && $data['estimatedPurchaseDate']) {
-                            if (preg_match('/^(\d{2})\/(\d{2})\/(\d{2})$/', $data['estimatedPurchaseDate'], $matches)) {
-                                $result['date_purchase'] = '20' . $matches[3] . '-' . $matches[2] . '-' . $matches[1];
+                if (isset($response) && count($response)) {
+                    if (isset($response['ResponseArray']) && count($response['ResponseArray'])) {
+                        if (isset($response['ResponseArray']['responseData']) && count($response['ResponseArray']['responseData'])) {
+                            $data = $response['ResponseArray']['responseData'];
+                            if (isset($data['productDescription']) && $data['productDescription']) {
+                                $result['product_label'] = $data['productDescription'];
                             }
-                        }
-                        if (isset($data['coverageEndDate']) && $data['coverageEndDate']) {
-                            if (preg_match('/^(\d{2})\/(\d{2})\/(\d{2})$/', $data['coverageEndDate'], $matches)) {
-                                $result['date_warranty_end'] = '20' . $matches[3] . '-' . $matches[2] . '-' . $matches[1];
+                            if (isset($data['estimatedPurchaseDate']) && $data['estimatedPurchaseDate']) {
+                                if (preg_match('/^(\d{2})\/(\d{2})\/(\d{2})$/', $data['estimatedPurchaseDate'], $matches)) {
+                                    $result['date_purchase'] = '20' . $matches[3] . '-' . $matches[2] . '-' . $matches[1];
+                                }
                             }
-                        }
-                        if (isset($data['warrantyStatus']) && $data['warrantyStatus']) {
-                            $result['warranty_type'] = $data['warrantyStatus'];
-                        }
-                        if (isset($data['activationLockStatus']) && $data['activationLockStatus']) {
-                            $result['warning'] = $data['activationLockStatus'];
+                            if (isset($data['coverageEndDate']) && $data['coverageEndDate']) {
+                                if (preg_match('/^(\d{2})\/(\d{2})\/(\d{2})$/', $data['coverageEndDate'], $matches)) {
+                                    $result['date_warranty_end'] = '20' . $matches[3] . '-' . $matches[2] . '-' . $matches[1];
+                                }
+                            }
+                            if (isset($data['warrantyStatus']) && $data['warrantyStatus']) {
+                                $result['warranty_type'] = $data['warrantyStatus'];
+                            }
+                            if (isset($data['activationLockStatus']) && $data['activationLockStatus']) {
+                                $result['warning'] = $data['activationLockStatus'];
+                            }
                         }
                     }
                 }
             }
-        }
+        } 
 
         return $result;
     }

@@ -67,11 +67,6 @@ class BimpComm extends BimpDolObject
         return 0;
     }
 
-    public function useEntrepot()
-    {
-        return !BimpCore::getConf("NOT_USE_ENTREPOT");
-    }
-
     // Getters booléens: 
 
     public function isDeletable($force_delete = false)
@@ -249,6 +244,11 @@ class BimpComm extends BimpDolObject
         }
 
         return 1;
+    }
+    
+    public function useEntrepot()
+    {
+        return !BimpCore::getConf("NOT_USE_ENTREPOT");
     }
 
     // Getters array: 
@@ -1690,7 +1690,7 @@ class BimpComm extends BimpDolObject
 
     public function displayTxMarque()
     {
-        return BimpTools::displayFloatValue($this->getTxMarge(), 4, ',') . '%';
+        return BimpTools::displayFloatValue($this->getTxMarque(), 4, ',') . '%';
     }
 
     // Rendus HTML: 

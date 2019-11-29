@@ -362,6 +362,51 @@ function setCommonEvents($container) {
             }
         });
     });
+
+    // foldable array contents: 
+    $container.find('.array_content_container.foldable').each(function () {
+        if (!parseInt($(this).data('foldable_array_content_container_init'))) {
+            $(this).children('.array_content_caption').children('span.title').click(function () {
+                var $foldableContainer = $(this).findParentByClass('array_content_container');
+                if ($.isOk($foldableContainer)) {
+                    if ($foldableContainer.hasClass('open')) {
+                        $foldableContainer.children('.array_content').slideUp(250, function () {
+                            $foldableContainer.removeClass('open').addClass('closed');
+                        });
+                    } else {
+                        $foldableContainer.children('.array_content').slideDown(250, function () {
+                            $foldableContainer.removeClass('closed').addClass('open');
+                        });
+                    }
+                }
+            });
+
+            $(this).children('.folding_buttons').children('span.open_all').click(function () {
+                var $foldableContainer = $(this).findParentByClass('array_content_container');
+                if ($.isOk($foldableContainer)) {
+                    $foldableContainer.find('.array_content').each(function () {
+                        $(this).slideDown(250, function () {
+                            $(this).findParentByClass('array_content_container').removeClass('closed').addClass('open');
+                        });
+                    });
+                }
+            });
+
+            $(this).children('.folding_buttons').children('span.close_all').click(function () {
+                var $foldableContainer = $(this).findParentByClass('array_content_container');
+                if ($.isOk($foldableContainer)) {
+                    $foldableContainer.find('.array_content').each(function () {
+                        $(this).slideUp(250, function () {
+                            $(this).findParentByClass('array_content_container').removeClass('open').addClass('closed');
+                        });
+                    });
+                }
+            });
+
+            $(this).data('foldable_array_content_container_init', 1);
+        }
+    });
+
     // Popup
     $container.find('.displayPopupButton').each(function () {
         if (!parseInt($(this).data('popup_btn_event_init'))) {

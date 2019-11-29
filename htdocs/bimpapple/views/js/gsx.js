@@ -35,10 +35,6 @@ var partDataType = {
 // GSX V2:
 
 function GsxAjax(method, data, $resultContainer, params) {
-    if (!use_gsx) {
-        bimp_msg('GSX inactif pour ce user (mess à suppr. - gsx.js)');
-        return;
-    }
 
     if (typeof (params.confirm_msg) !== 'undefined' && params.confirm_msg) {
         if (!confirm(params.confirm_msg)) {

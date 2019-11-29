@@ -3390,6 +3390,7 @@ class BS_SAV extends BimpObject
                                                 $bimpFacture->setRemiseGlobalePercent((float) $propal->getData('remise_globale'));
                                             }
 
+                                            $user->rights->facture->creer = 1;
                                             if ($bimpFacture->dol_object->validate($user, '') <= 0) { //pas d'entrepot pour pas de destock
                                                 $msg = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($bimpFacture->dol_object), 'Echec de la validation de la facture');
                                                 $warnings[] = $msg;

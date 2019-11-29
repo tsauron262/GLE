@@ -683,6 +683,17 @@ class Bimp_CommandeFournLine extends FournObjectLine
 
                         if ($link) {
                             $html .= ($html ? '<br/><br/>' : '') . $link;
+                            
+                            
+                            $reservations = $line->getReservations();
+                            $nb  = 0;
+                            foreach($reservations as $resa){
+                                if($resa->getData('status') < 200){
+                                    $nb += $resa->getData('qty');
+                                }
+                            }
+                            $html .= '<br/>';
+                            $html .= 'Reste à réserver : '.$nb;
                         }
                     }
                 }
@@ -720,6 +731,18 @@ class Bimp_CommandeFournLine extends FournObjectLine
                         $html .= '&nbsp;&nbsp;&nbsp;<a href="' . $url . '" target="_blank">Logistique' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight') . '</a>';
                         $html .= '<br/>';
                         $html .= 'Ligne n°' . $line->getData('position');
+                        
+                        $reservations = $line->getReservations();
+                        $nb  = 0;
+                        foreach($reservations as $resa){
+                            if($resa->getData('status') < 200){
+                                $nb += $resa->getData('qty');
+                            }
+                        }
+                        $html .= '<br/>';
+                        $html .= 'Reste à réserver : '.$nb;
+                        
+                        
                     } else {
                         $html .= BimpRender::renderAlerts('Erreur: Commande absente pour la ligne de commande d\'ID ' . $id_line);
                     }

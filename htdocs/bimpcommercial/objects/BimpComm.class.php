@@ -1694,7 +1694,7 @@ class BimpComm extends BimpDolObject
 
     public function displayTxMarque()
     {
-        return BimpTools::displayFloatValue($this->getTxMarge(), 4, ',') . '%';
+        return BimpTools::displayFloatValue($this->getTxMarque(), 4, ',') . '%';
     }
 
     // Rendus HTML: 

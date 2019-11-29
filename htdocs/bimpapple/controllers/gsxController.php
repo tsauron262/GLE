@@ -1595,6 +1595,7 @@ class gsxController extends BimpController
             }
         }
 
+        
         return $responses;
     }
 

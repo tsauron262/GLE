@@ -562,7 +562,6 @@ class gsxController extends BimpController
 
                 if (!count($errors)) {
                     $repair = BimpObject::getInstance('bimpapple', 'GSX_Repair');
-
                     $errors = $repair->processRepairRequestOutcome($response, $warnings);
 
                     if (!count($errors)) {

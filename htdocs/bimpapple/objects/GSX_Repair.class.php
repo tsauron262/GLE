@@ -133,7 +133,7 @@ class GSX_Repair extends BimpObject
                         }
                     }
 
-                    $msgs[] = $msgs;
+                    $msgs[] = $msg;
                 }
             }
 

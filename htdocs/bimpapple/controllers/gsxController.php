@@ -561,7 +561,7 @@ class gsxController extends BimpController
                     $errors = $repair->processRepairRequestOutcome($response, $warnings);
                 }
 
-                if (!isset($response['repairId'])) {
+                if (!count($errors) && !isset($response['repairId'])) {
                     $errors[] = 'ID de la réparation non reçu';
                 }
 

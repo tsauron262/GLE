@@ -42,11 +42,11 @@ class BimpComm extends BimpDolObject
     ];
     public static $zones_vente = array(
         self::BC_ZONE_FR          => 'France',
-        self::BC_ZONE_UE          => 'Union Européenne avec TVA',
-        self::BC_ZONE_UE_SANS_TVA => 'Union Européenne sans TVA',
+        self::BC_ZONE_UE          => 'Union Européenne',
+        //self::BC_ZONE_UE_SANS_TVA => 'Union Européenne sans TVA',
         self::BC_ZONE_HORS_UE     => 'Hors UE'
     );
-    protected $margins_infos = null;
+    protected $margins_infos = null; 
 
     public function __construct($module, $object_name)
     {
@@ -238,7 +238,7 @@ class BimpComm extends BimpDolObject
     public function isTvaActive()
     {
         if (static::$use_zone_vente_for_tva && $this->dol_field_exists('zone_vente')) {
-            if ((int) $this->getData('zone_vente') === self::BC_ZONE_HORS_UE || (int) $this->getData('zone_vente') === self::BC_ZONE_UE_SANS_TVA) {
+            if ((int) $this->getData('zone_vente') === self::BC_ZONE_HORS_UE || (int) $this->getData('zone_vente') === self::BC_ZONE_UE) {
                 return 0;
             }
         }
@@ -1256,11 +1256,7 @@ class BimpComm extends BimpDolObject
                 if ($country->code === 'FR') {
                     $zone = self::BC_ZONE_FR;
                 } elseif ((int) $country->in_ue) {
-                    if ($client->getData('tva_intra')) {
-                        $zone = self::BC_ZONE_UE_SANS_TVA;
-                    } else {
                         $zone = self::BC_ZONE_UE;
-                    }
                 } else {
                     $zone = self::BC_ZONE_HORS_UE;
                 }
@@ -3788,7 +3784,7 @@ class BimpComm extends BimpDolObject
             if (static::$use_zone_vente_for_tva && $init_zone && $this->areLinesEditable()) {
                 $cur_zone = (int) $this->getData('zone_vente');
 
-                if ($cur_zone !== $init_zone && in_array($cur_zone, array(self::BC_ZONE_HORS_UE, self::BC_ZONE_UE_SANS_TVA))) {
+                if ($cur_zone !== $init_zone && in_array($cur_zone, array(self::BC_ZONE_HORS_UE, self::BC_ZONE_UE))) {
                     $lines_errors = $this->removeLinesTvaTx();
                     if (count($lines_errors)) {
                         $warnings[] = BimpTools::getMsgFromArray($lines_errors, 'Des erreurs sont survenues lors de la suppression des taux de TVA');

@@ -27,6 +27,10 @@ class BS_Issue extends BimpObject
 
         return 0;
     }
+    
+    public function canDelete(){
+        return 1;
+    }
 
     public function isDeletable()
     {

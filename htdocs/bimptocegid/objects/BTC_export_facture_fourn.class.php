@@ -25,7 +25,7 @@ class BTC_export_facture_fourn extends BTC_export {
             $code_auxiliaire = $societe->getData('code_compta_fournisseur');
         } else {
             $export_societe = $this->getInstance('bimptocegid', 'BTC_export_societe');
-            $code_auxiliaire = $export_societe->export($societe);
+            $code_auxiliaire = $export_societe->export($societe, "f");
         }
 
 

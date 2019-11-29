@@ -155,6 +155,48 @@ function loadModalForm($button, data, title, successCallback, on_save) {
     }, {}, 'medium');
 }
 
+function appendModalForm(html, form_id, buttons, title) {
+    if (typeof (html) !== 'string' || !html) {
+        return;
+    }
+
+    if (typeof (title) === 'undefined') {
+        title = '';
+    }
+
+    if (buttons === 'default') {
+        buttons = [{
+                label: '<i class="fas fa5-save iconLeft"></i>Enregistrer',
+                onclick: 'saveObjectFromForm(\'' + form_id + '\')',
+                type: 'primary',
+                classes: 'save_object_button'
+            }];
+    } else if (typeof (buttons) === 'undefined') {
+        buttons = [];
+    }
+
+    bimpModal.newContent(title, html);
+    
+    var modal_idx = bimpModal.idx;
+    var $form = bimpModal.$contents.find('#modal_content_' + modal_idx).find('#' + form_id);
+    if ($.isOk($form)) {
+        $form.data('modal_idx', modal_idx);
+        bimpModal.removeComponentContent($form.attr('id'));
+
+        for (var i in buttons) {
+            if (buttons[i].type === 'undefined') {
+                buttons[i].type = 'primary';
+            }
+            if (buttons[i].classes === 'undefined') {
+                buttons[i].classes = 'save_object_button';
+            }
+            bimpModal.addButton(buttons[i].label, buttons[i].onclick, buttons[i].type, buttons[i].classes, modal_idx);
+        }
+
+        onFormLoaded($form);
+    }
+}
+
 function reloadForm(form_id) {
     var $form = $('#' + form_id);
     if (!$form.length) {
@@ -231,11 +273,11 @@ function closeForm(form_id) {
 
     var $modal = $form.findParentByClass('modal');
     if ($.isOk($modal)) {
-//        var modal_idx = parseInt($form.data('modal_idx'));
-//        if (modal_idx) {
-//            bimpModal.removeContent(modal_idx);
-//        }
-        bimpModal.clearAllContents();
+        var modal_idx = parseInt($form.data('modal_idx'));
+        if (modal_idx) {
+            bimpModal.removeContent(modal_idx);
+        }
+//        bimpModal.clearAllContents();
     } else {
         var $container = $('#' + form_id + '_container');
         if ($container.length) {
@@ -1350,6 +1392,66 @@ function removeSubObjectForm($button) {
     }
 }
 
+function addFormGroupMultipleItem($button, inputName) {
+    var $container = $button.findParentByClass('formInputGroup');
+    if (!$.isOk($container)) {
+        bimp_msg('Une erreur est survenue. opération impossible', 'danger', null, true);
+        return;
+    }
+
+    if ($container.data('field_name') !== inputName) {
+        bimp_msg('Une erreur est survenue. opération impossible ici', 'danger', null, true);
+        return;
+    }
+
+    var max_items = parseInt($container.data('max_items'));
+
+    if (!isNaN(max_items) && max_items > 0) {
+        if ($container.children('.formGroupMultipleItems').children('.formGroupMultipleItem').length >= max_items) {
+            bimp_msg('Vous ne pouvez ajouter que ' + max_items + ' élément(s)', 'warning', null, true);
+            return;
+        }
+    }
+
+    var $template = $container.children('div.dataInputTemplate');
+    var $index = $container.find('[name="' + inputName + '_nextIdx"]');
+    if ($template.length) {
+        if ($index.length) {
+            var html = $template.html();
+            var index = parseInt($index.val());
+            var regex = new RegExp('idx', 'g');
+            html = html.replace(regex, index);
+            index++;
+            var $list = $container.find('div.formGroupMultipleItems');
+            var $form = $container.findParentByTag('form');
+            if ($list.length) {
+                $list.append(html);
+                var $item = $list.find('.formGroupMultipleItem').last();
+                setInputsEvents($item);
+                setCommonEvents($item);
+                if ($form.length) {
+                    setContainerDisplayIfEvents($form, $item);
+                }
+                $index.val(index);
+                return;
+            }
+        }
+    }
+}
+
+function removeFormGroupMultipleItem($button) {
+    if ($.isOk($button)) {
+        var $container = $button.findParentByClass('formGroupMultipleItem');
+
+        if ($.isOk($container)) {
+            $container.remove();
+            return;
+        }
+    }
+
+    bimp_msg('Une erreur est survenue, opération abandonnée (Conteneur absent ou invalide)', 'danger', null, true);
+}
+
 function searchZipTown($input) {
     if (!$.isOk($input)) {
         return;
@@ -1701,8 +1803,6 @@ function loadSearchObjectResults($input, idx) {
                                         });
                                     }
 
-                                    console.log(choices);
-
                                     if (choices.length) {
                                         displayInputChoices(bimpAjax.$input, choices, function ($btn) {
                                             $('body').find('.popover.fade').remove();
@@ -1967,39 +2067,7 @@ function setFormEvents($form) {
         return;
     }
 
-    // Gestion automatique des affichages d'options supplémentaires lorsque certains input prennent certaines valeurs.
-    // placer les champs optionnels dans un container avec class="display_if". 
-    // Et Attributs: 
-    // data-input_name=nom_input_a_checker (string)
-    // data-show_values=valeur(s)_pour_afficher_container (string ou objet)
-    // data-hide_values=valeur(s)_pour_masquer_container (string ou objet)
-
-    $form.find('.display_if').each(function () {
-        var $container = $(this);
-        var input_name = $container.data('input_name');
-        if (input_name) {
-            var $input = $form.find('[name=' + input_name + ']');
-            if ($input.length) {
-                $input.change(function () {
-                    toggleInputDisplay($container, $(this));
-                });
-            }
-        } else {
-            var inputs_names = $container.data('inputs_names');
-            if (inputs_names) {
-                inputs_names += '';
-                inputs_names = inputs_names.split(',');
-                for (var i in inputs_names) {
-                    var $input = $form.find('[name="' + inputs_names[i] + '"]');
-                    if ($input.length) {
-                        $input.change(function () {
-                            toggleInputDisplay($container, $(this));
-                        });
-                    }
-                }
-            }
-        }
-    });
+    setContainerDisplayIfEvents($form, $form);
 
     resetInputDisplay($form);
     setInputsEvents($form);
@@ -2022,6 +2090,49 @@ function setFormEvents($form) {
         e.preventDefault();
         e.stopPropagation();
         submitForm($form.attr('id'));
+    });
+}
+
+function setContainerDisplayIfEvents($form, $container) {
+    // Gestion automatique des affichages d'options supplémentaires lorsque certains input prennent certaines valeurs.
+    // placer les champs optionnels dans un container avec class="display_if". 
+    // Et Attributs: 
+    // data-input_name=nom_input_a_checker (string)
+    // data-show_values=valeur(s)_pour_afficher_container (string ou objet)
+    // data-hide_values=valeur(s)_pour_masquer_container (string ou objet)
+
+    if (!$.isOk($container) || !$.isOk($form)) {
+        return;
+    }
+
+    $container.find('.display_if').each(function () {
+        var $displayIf = $(this);
+        if (!parseInt($displayIf.data('display_if_events_init'))) {
+            var input_name = $displayIf.data('input_name');
+            if (input_name) {
+                var $input = $form.find('[name=' + input_name + ']');
+                if ($input.length) {
+                    $input.change(function () {
+                        toggleInputDisplay($displayIf, $(this));
+                    });
+                }
+            } else {
+                var inputs_names = $displayIf.data('inputs_names');
+                if (inputs_names) {
+                    inputs_names += '';
+                    inputs_names = inputs_names.split(',');
+                    for (var i in inputs_names) {
+                        var $input = $form.find('[name="' + inputs_names[i] + '"]');
+                        if ($input.length) {
+                            $input.change(function () {
+                                toggleInputDisplay($displayIf, $(this));
+                            });
+                        }
+                    }
+                }
+            }
+            $displayIf.data('display_if_events_init', 1);
+        }
     });
 }
 
@@ -2142,6 +2253,7 @@ function setInputsEvents($container) {
     $container.find('select').each(function () {
         if (!$(this).data('select_2_converted')) {
             if (!$.isOk($(this).findParentByClass('subObjectFormTemplate')) &&
+                    !$.isOk($(this).findParentByClass('dataInputTemplate')) &&
                     !$(this).hasClass('no_select2')) {
                 if ($(this).hasClass('select2-hidden-accessible')) {
                     $(this).select2('destroy');

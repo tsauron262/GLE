@@ -5,7 +5,8 @@ function onEquipmentFormLoaded($form) {
     $form.find('[name="date_purchase_picker"]').removeClass('disabled');
     $form.find('[name="date_warranty_end_picker"]').removeClass('disabled');
     $form.find('[name="warranty_type"]').removeClass('disabled');
-//    $form.find('[name="note"]').removeClass('disabled');
+
+
     if ($.isOk($form)) {
         $form.find('[name="serial"]').change(function () {
             var $container = $form.find($('#' + $form.attr('id') + '_result'));
@@ -15,11 +16,8 @@ function onEquipmentFormLoaded($form) {
                 $form.find('[name="date_purchase_picker"]').addClass('disabled');
                 $form.find('[name="date_warranty_end_picker"]').addClass('disabled');
                 $form.find('[name="warranty_type"]').addClass('disabled');
-//                $form.find('[name="note"]').addClass('disabled');
-                BimpAjax('equipmentGgxLookup', {
-                    serial: serial
-                }, $container, {
-                    url: equipment_url,
+
+                var params = {
                     $form: $form,
                     display_processing: true,
                     display_success: false,
@@ -29,7 +27,7 @@ function onEquipmentFormLoaded($form) {
                         $form.find('[name="date_purchase_picker"]').removeClass('disabled');
                         $form.find('[name="date_warranty_end_picker"]').removeClass('disabled');
                         $form.find('[name="warranty_type"]').removeClass('disabled');
-//                        $form.find('[name="note"]').removeClass('disabled');
+
                         if (typeof (result.data.product_label) === 'string' && result.data.product_label) {
                             bimpAjax.$form.find('[name="product_label"]').val(result.data.product_label).change();
                         }
@@ -47,9 +45,6 @@ function onEquipmentFormLoaded($form) {
                         if (typeof (result.data.warning) === 'string' && result.data.warning) {
                             bimpAjax.$form.find('[name="serial"]').parent().append(result.data.warning);
                         }
-//                        if (typeof (result.data.note) === 'string' && result.data.note) {
-//                            bimpAjax.$form.find('[name="note"]').val(result.data.note).change();
-//                        }
                     },
                     error: function (result, bimpAjax) {
                         $form.find('[name="product_label"]').removeClass('disabled');
@@ -58,7 +53,18 @@ function onEquipmentFormLoaded($form) {
                         $form.find('[name="warranty_type"]').removeClass('disabled');
                         $form.find('[name="note"]').removeClass('disabled');
                     }
-                });
+                };
+
+                if (typeof (use_gsx_v2) !== 'undefined' && use_gsx_v2) {
+                    GsxAjax('gsxGetEquipmentInfos', {
+                        serial: serial
+                    }, $container, params);
+                } else {
+                    params.url = equipment_url;
+                    BimpAjax('equipmentGgxLookup', {
+                        serial: serial
+                    }, $container, params);
+                }
             }
         });
 

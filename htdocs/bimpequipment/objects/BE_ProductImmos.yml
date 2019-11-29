@@ -88,8 +88,6 @@ filters_panels:
 #                label: Date de départ emplacement
 #                type: date_range
                 
-                
-                    
 lists_cols: 
     qty_immos: 
         field: qty

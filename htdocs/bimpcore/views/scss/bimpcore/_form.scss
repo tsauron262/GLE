@@ -46,6 +46,7 @@
             }
         }
     }
+    
     .formGroupButtons {
         display: block;
         text-align: right;
@@ -55,7 +56,9 @@
         }
     }
 
-    &.subObjectForm {
+    &.subObjectForm,
+    .formGroupMultipleItem {
+        margin-bottom: 10px; 
         border: 1px solid #969696;
         padding: 10px;
     }

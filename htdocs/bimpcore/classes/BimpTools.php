@@ -1450,6 +1450,45 @@ class BimpTools
         return $value;
     }
 
+    public static function value2String($value, $no_html = false)
+    {
+        if (is_bool($value)) {
+            if ($value) {
+                if ($no_html) {
+                    return 'OUI';
+                } else {
+                    return '<span class="success">OUI</span>';
+                }
+            } else {
+                if ($no_html) {
+                    return 'NON';
+                } else {
+                    return '<span class="danger">NON</span>';
+                }
+            }
+        }
+
+        if (preg_match('/^(\d{4}\-\d{2}\-\d{2}).?(\d{2}:\d{2}:\d{2})?.*$/', $value, $matches)) {
+            if (preg_match('/^1970\-01\-01.*$/', $value)) {
+                return '';
+            }
+            
+            $datetime = $matches[1];
+            if (isset($matches[2]) && $matches[2] && $matches[2] !== '00:00:00') {
+                $datetime .= $matches[2];
+            }
+
+            $dt = new DateTime($datetime);
+            if (isset($matches[2]) && $matches[2] && $matches[2] !== '00:00:00') {
+                return $dt->format('d / m / Y H:i:s');
+            } else {
+                return $dt->format('d / m / Y');
+            }
+        }
+
+        return $value;
+    }
+
     // Gestion des durées:
 
     public static function getTimeDataFromSeconds($total_seconds)
@@ -1819,6 +1858,33 @@ class BimpTools
         }
 
         return $array;
+    }
+
+    public static function getArrayValueFromPath($array, $path, $value2String = false, $no_html = false)
+    {
+        $keys = explode('/', $path);
+
+        $current_value = null;
+
+        foreach ($keys as $key) {
+            if (is_null($current_value)) {
+                if (isset($array[$key])) {
+                    $current_value = $array[$key];
+                } else {
+                    return null;
+                }
+            } elseif (isset($current_value[$key])) {
+                $current_value = $current_value[$key];
+            } else {
+                return null;
+            }
+        }
+
+        if ($value2String) {
+            $current_value = self::value2String($current_value);
+        }
+
+        return $current_value;
     }
 
     // Divers:

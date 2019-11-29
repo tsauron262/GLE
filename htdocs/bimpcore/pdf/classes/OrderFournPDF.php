@@ -27,6 +27,8 @@ class OrderFournPDF extends BimpDocumentPDF
         $this->pdf->addCgvPages = false;
 
         $this->target_label = 'Fournisseur';
+        
+        $this->hideReduc = true;
     }
 
     protected function initData()

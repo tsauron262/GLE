@@ -555,14 +555,18 @@ class gsxController extends BimpController
                         $errors[] = 'Le SAV d\'ID ' . $id_sav . ' n\'existe pas';
                     }
                 }
+                  
+                if (!count($errors)) {
+                    $repair = BimpObject::getInstance('bimpapple', 'GSX_Repair');
+                    $errors = $repair->processRepairRequestOutcome($response, $warnings);
+                }
 
                 if (!isset($response['repairId'])) {
                     $errors[] = 'ID de la réparation non reçu';
                 }
 
                 if (!count($errors)) {
-                    $repair = BimpObject::getInstance('bimpapple', 'GSX_Repair');
-                    $errors = $repair->processRepairRequestOutcome($response, $warnings);
+
 
                     if (!count($errors)) {
                         $rep_warnings = array();
@@ -2270,7 +2274,7 @@ class gsxController extends BimpController
 
                         if (isset($data['warrantyInfo']['coverageEndDate']) &&
                                 (string) $data['warrantyInfo']['coverageEndDate'] &&
-                                !pref_match('/^1970\-01\-01.*$/', $data['warrantyInfo']['coverageEndDate'])) {
+                                !preg_match('/^1970\-01\-01.*$/', $data['warrantyInfo']['coverageEndDate'])) {
                             $dt = new DateTime($data['warrantyInfo']['coverageEndDate']);
                             $date = $dt->format('Y-m-d H:i:s');
                             if ($date !== $equipment->getData('date_warranty_end')) {
@@ -2281,7 +2285,7 @@ class gsxController extends BimpController
 
                         if (isset($data['warrantyInfo']['purchaseDate']) &&
                                 (string) $data['warrantyInfo']['purchaseDate'] &&
-                                !pref_match('/^1970\-01\-01.*$/', $data['warrantyInfo']['purchaseDate'])) {
+                                !preg_match('/^1970\-01\-01.*$/', $data['warrantyInfo']['purchaseDate'])) {
                             $dt = new DateTime($data['warrantyInfo']['purchaseDate']);
                             $date = $dt->format('Y-m-d H:i:s');
                             if ($date !== $equipment->getData('date_purchase')) {

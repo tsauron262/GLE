@@ -7,7 +7,7 @@ class GSX_Const
     public static $mode = 'prod'; // test ou prod
     public static $debug_mode = false;
     public static $log_errors = true;
-    public static $log_requests = true;
+    public static $log_requests = false;
     public static $numbersNumChars = 10;
     public static $sav_files = array(
         'test' => 'TEST'

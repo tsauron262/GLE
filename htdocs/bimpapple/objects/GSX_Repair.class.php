@@ -110,12 +110,12 @@ class GSX_Repair extends BimpObject
         $errors = array();
 
         if (isset($result['outcome'])) {
-            $msgs = array();
-            if (isset($result['outcome']['reasons'])) {
-                if(isset($result['outcome']['reasons']))
-                    $result['outcome'][] = result['outcome'];
+            if(isset($result['outcome']['reasons']))
+                $result['outcome'][] = result['outcome'];
                 
-                foreach($result['outcome'] as $outcome){
+            foreach($result['outcome'] as $outcome){
+                if (isset($outcome['reasons'])) {
+                    $msgs = array();
                     foreach ($outcome['reasons'] as $reason) {
                         $msg = $reason['type'] . '<br/>';
                         foreach ($reason['messages'] as $message) {
@@ -136,17 +136,14 @@ class GSX_Repair extends BimpObject
                                 }
                             }
                         }
-
                         $msgs[] = $msg;
                     }
-                }
-            }
+                    if (in_array($result['outcome']['action'], array('MESSAGE', 'HOLD', 'WARNING'))) {
+                        $warnings[] = BimpTools::getMsgFromArray($msgs, $result['outcome']['action']);
+                    } else {
+                        $errors[] = BimpTools::getMsgFromArray($msgs, $result['outcome']['action']);
+                    }
 
-            if (!empty($msgs)) {
-                if (in_array($result['outcome']['action'], array('MESSAGE', 'HOLD', 'WARNING'))) {
-                    $warnings[] = BimpTools::getMsgFromArray($msgs, $result['outcome']['action']);
-                } else {
-                    $errors[] = BimpTools::getMsgFromArray($msgs, $result['outcome']['action']);
                 }
             }
         }

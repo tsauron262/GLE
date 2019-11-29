@@ -138,7 +138,7 @@ class GSX_Repair extends BimpObject
                         }
                         $msgs[] = $msg;
                     }
-                    if (in_array($result['outcome']['action'], array('MESSAGE', 'HOLD', 'WARNING', 'REPAIR_TYPE'))) {
+                    if (!isset($result['outcome']['action']) || in_array($result['outcome']['action'], array('MESSAGE', 'HOLD', 'WARNING', 'REPAIR_TYPE'))) {
                         $warnings[] = BimpTools::getMsgFromArray($msgs, $result['outcome']['action']);
                     } else {
                         $errors[] = BimpTools::getMsgFromArray($msgs, $result['outcome']['action']);

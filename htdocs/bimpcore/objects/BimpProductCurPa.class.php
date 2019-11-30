@@ -68,7 +68,7 @@ class BimpProductCurPa extends BimpObject
 
             if (!(string) $date) {
                 if (isset($res[0]['amount'])) {
-                    $pa = (float) $res[0]['id'];
+                    $pa = (float) $res[0]['amount'];
                 }
             } elseif (is_array($res)) {
                 // On fait en sorte que si $date est inférieur au plus petit date_from trouvé, ce soit ce dernier qui soit retourné

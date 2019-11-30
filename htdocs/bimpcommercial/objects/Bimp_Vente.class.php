@@ -390,6 +390,10 @@ VQ - Collège
         $entrepots = BimpCache::getEntrepotsShipTos();
         $entrepots[-9999] = "1683245";
         $shiptos_data = array();
+        
+        echo '<pre>';
+        print_r($entrepots);
+        exit;
 
         $total_ca = 0;
         foreach ($products_list as $p) {

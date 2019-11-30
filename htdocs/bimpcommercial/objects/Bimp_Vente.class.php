@@ -390,7 +390,7 @@ VQ - Collège
         $entrepots = BimpCache::getEntrepotsShipTos();
         $entrepots[-9999] = "1683245";
         $shiptos_data = array();
-        
+
         $total_ca = 0;
         foreach ($products_list as $p) {
             $entrepots_data = $product->getAppleCsvData($dateFrom, $dateTo, $entrepots, $p['rowid']);
@@ -701,11 +701,11 @@ VQ - Collège
                 $success_callback = 'window.open(\'' . $url . '\');';
             }
         }
-        
+
         $html = (isset($result['html']) ? $result['html'] : '');
-        
+
         if ($html) {
-            $success_callback .= 'bimpModal.newContent(\'Distribution\', \''.$html.'\', false, \'\', $());';
+            $success_callback .= 'setTimeout(function() {bimpModal.newContent(\'Distribution\', \'' . $html . '\', false, \'\', $());}, 500);';
         }
 
         return array(

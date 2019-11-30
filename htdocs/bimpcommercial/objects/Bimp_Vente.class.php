@@ -391,10 +391,6 @@ VQ - Collège
         $entrepots[-9999] = "1683245";
         $shiptos_data = array();
         
-        echo '<pre>';
-        print_r($entrepots);
-        exit;
-
         $total_ca = 0;
         foreach ($products_list as $p) {
             $entrepots_data = $product->getAppleCsvData($dateFrom, $dateTo, $entrepots, $p['rowid']);
@@ -677,7 +673,7 @@ VQ - Collège
         return $shipTosData;
     }
 
-// Actions : 
+    // Actions :
 
     public function actionGenerateAppleCSV($data, &$success)
     {
@@ -702,15 +698,20 @@ VQ - Collège
             $file_name = $result['filename'];
             if (file_exists(DOL_DATA_ROOT . '/bimpcore/apple_csv/' . date('Y') . '/' . $file_name)) {
                 $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . htmlentities('apple_csv/' . date('Y') . '/' . $file_name);
-                $success_callback = 'window.open(\'' . $url . '\')';
+                $success_callback = 'window.open(\'' . $url . '\');';
             }
+        }
+        
+        $html = (isset($result['html']) ? $result['html'] : '');
+        
+        if ($html) {
+            $success_callback .= 'bimpModal.newContent(\'Distribution\', \''.$html.'\', false, \'\', $());';
         }
 
         return array(
             'errors'           => $errors,
             'warnings'         => $warnings,
-            'success_callback' => $success_callback,
-            'html'             => (isset($result['html']) ? $result['html'] : '')
+            'success_callback' => $success_callback
         );
     }
 }

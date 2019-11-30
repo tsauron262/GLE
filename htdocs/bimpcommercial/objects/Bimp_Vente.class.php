@@ -453,7 +453,7 @@ VQ - Collège
         $html = '';
         if ($distribute_ca) {
             $shiptos = explode(',', BimpCore::getConf('csv_apple_distribute_ca_shiptos'));
-            $shipTosData = $this->distributeCaForShiptos($shipTosData, $shiptos, 80, $html);
+            $shiptos_data = $this->distributeCaForShiptos($total_ca, $shiptos_data, $shiptos, 80, $html);
         }
 
         foreach ($products_list as $p) {
@@ -520,42 +520,38 @@ VQ - Collège
                 'products' => array()
             );
             foreach ($shipToData['products'] as $id_p => $p) {
-                $shipToData['products'][] = $id_p;
+                $data['products'][] = $id_p;
             }
             $data['nProds'] = (count($data['products']) - 1);
 
             if (in_array($shipTo, $shiptos)) {
-                if ((float) $shipToData['total_ca']) {
-                    $total_ca_v2 += (float) $shipToData['total_ca'];
-                    $v2_shipTos[] = $data;
-                } else {
-                    $shipTo['ca_tx'] = 0;
-                }
+                $total_ca_v2 += (float) $shipToData['total_ca'];
+                $v2_shipTos[] = $data;
             } else {
-                if ((float) $shipToData['total_ca']) {
-                    $total_ca_v1 += (float) $shipToData['total_ca'];
-                    $v1_shipTos[] = $data;
-                } else {
-                    $shipTo['ca_tx'] = 0;
-                }
+                $total_ca_v1 += (float) $shipToData['total_ca'];
+                $v1_shipTos[] = $data;
+            }
+
+            if ((float) $shipToData['total_ca']) {
+                $shipTosData[$shipTo]['ca_tx'] = $shipToData['total_ca'] / $total_ca;
+            } else {
+                $shipTosData[$shipTo]['ca_tx'] = 0;
             }
         }
-
-        $shipTo['ca_tx'] = $shipToData['total_ca'] / $total_ca;
-
+        
         $rate = 80;
         $v2 = ($total_ca_v2 / $total_ca) * 100;
 
         // Ajustement aléatoire du % v2: 
         $adjust = (rand(0, 500) / 100);
-        if (rand(0, 1)) {
+        if ((int) rand(0, 1)) {
             $adjust *= -1;
         }
         $rate += $adjust;
 
         $html .= '<h3>Distribution du CA</h3>';
 
-        $html .= '<br/><span class="bold">CA total: </span>' . BimpTools::displayMoneyValue($total_ca);
+        $html .= '<br/><span class="bold">CA total: </span>' . BimpTools::displayMoneyValue($total_ca) . '<br/>';
         $html .= '<span class="bold">Pourcentage du CA pour la distribution dans v2: </span>' . BimpTools::displayFloatValue($rate) . '<br/>';
         $html .= '<span class="small">(Avec ajustement aléatoire entre +5% et -5%)</span><br/>';
 
@@ -595,7 +591,7 @@ VQ - Collège
         $n = 0;
         while ($v2 < $rate) {
             $n++;
-            if ($n > 10000) {
+            if ($n > 50000) {
                 break; // protection boucle infinie
             }
 
@@ -633,6 +629,8 @@ VQ - Collège
                             $total_ca_v2 += $v2_diff;
 
                             $v2 = ($total_ca_v2 / $total_ca) * 100;
+
+//                            $html .= $v2_shipTo . ': + ' . $v2_diff . '<br/>';
                         }
                     }
                 }

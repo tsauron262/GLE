@@ -166,6 +166,13 @@ forms:
               input_name: date_to
               input: 
                   type: date    
+            - custom: 1
+              label: Répartir le CA
+              input_name: distribute_ca
+              data_type: bool
+              input: 
+                  type: toggle
+              value: 1
         
 fields_tables: 
     infos: 

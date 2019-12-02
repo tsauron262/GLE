@@ -205,12 +205,7 @@ class GSX_Const
 
     public static function renderJsVars()
     {
-        global $user;
-
-        // Requêtes Ajax GSX acivées côté js seulement si le user possède un apple_id (Pour éviter les demandes d'authentification intempestives). 
-//        if (isset($user->array_options['options_apple_id']) && (string) $user->array_options['options_apple_id']) {
-            $use_gsx = 1;
-//        }
+        $use_gsx = 1;
 
         $html = '<script type="text/javascript">';
         $html .= 'use_gsx = ' . $use_gsx . ';';

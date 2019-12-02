@@ -555,7 +555,7 @@ class gsxController extends BimpController
                         $errors[] = 'Le SAV d\'ID ' . $id_sav . ' n\'existe pas';
                     }
                 }
-                  
+
                 if (!count($errors)) {
                     $repair = BimpObject::getInstance('bimpapple', 'GSX_Repair');
                     $errors = $repair->processRepairRequestOutcome($response, $warnings);
@@ -1384,10 +1384,10 @@ class gsxController extends BimpController
                                         $html .= '<tr><th>' . $label . '</th><td>' . $value . '</td></tr>';
                                     }
                                 }
-                            }
 
-                            $html .= '</tbody>';
-                            $html .= '</table>';
+                                $html .= '</tbody>';
+                                $html .= '</table>';
+                            }
                         }
                     }
                 } else {
@@ -1595,6 +1595,7 @@ class gsxController extends BimpController
             }
         }
 
+        
         return $responses;
     }
 

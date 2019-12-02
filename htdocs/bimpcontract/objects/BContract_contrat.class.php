@@ -43,6 +43,13 @@ class BContract_contrat extends BimpDolObject {
     CONST CONTRAT_REGLEMENT_30_JOURS = 56;
     CONST CONTRAT_REGLEMENT_REMBOURCEMENT = 57;
     CONST CONTRAT_REGLEMENT_AMERICAN_EXPRESS = 58;
+    
+    CONST CONTRAT_GLOBAL = "CT";
+    CONST CONTRAT_DE_MAINTENANCE = 'CMA';
+    CONST CONTRAT_SUPPORT_TELEPHONIQUE = 'CST'; // Gommer partous le mot hotline (support) et téléphonique par télémaintenance / Téléassitance 
+    CONST CONTRAT_MONITORING = 'CMO'; 
+    CONST CONTRAT_DE_SPARE = 'CSP';
+    CONST CONTRAT_DE_DELEGATION_DE_PERSONEL = 'CDP';
 
     public static $status_list = Array(
         self::CONTRAT_STATUS_BROUILLON => Array('label' => 'Brouillon', 'classes' => Array('warning'), 'icon' => 'fas_trash-alt'),
@@ -87,10 +94,18 @@ class BContract_contrat extends BimpDolObject {
         self::CONTRAT_REGLEMENT_REMBOURCEMENT => 'Rembourcement',
         self::CONTRAT_REGLEMENT_AMERICAN_EXPRESS => 'American Express'
     );
+    public static $objet_contrat = [
+        self::CONTRAT_GLOBAL => ['label' => "Contrat global", 'classes' => [], 'icon' => 'globe'],
+        self::CONTRAT_DE_MAINTENANCE => ['label' => "Contrat de maintenance", 'classes' => [], 'icon' => 'cogs'],
+        self::CONTRAT_SUPPORT_TELEPHONIQUE => ['label' => "Contrat de support téléphonique", 'classes' => [], 'icon' => 'phone'],
+        self::CONTRAT_MONITORING => ['label' => "Contrat de monitoring", 'classes' => [], 'icon' => 'terminal'],
+        self::CONTRAT_DE_SPARE => ['label' => "Contrat de spare", 'classes' => [], 'icon' => 'share'],
+        self::CONTRAT_DE_DELEGATION_DE_PERSONEL => ['label' => "Contrat de délégation du personnel", 'classes' => [], 'icon' => 'male'],
+    ];
     
     public static $true_objects_for_link = [
         'commande' => 'Commande',
-        'facture_fourn' => 'Facture fournisseur',
+        'facture_fourn' => 'Facture fournisseur', 
         'propal' => 'Proposition commercial'
     ];
     
@@ -103,8 +118,25 @@ class BContract_contrat extends BimpDolObject {
         }
 //        if($user->id == 460 || $user->id == 512 || $user->admin) {
 //            $this->redirectMode = 4;
-//        }
+//        }        
         return parent::__construct($module, $object_name);
+    }
+    
+    public function actionUpdateSyntec() {
+        $syntec = file_get_contents("https://syntec.fr/"); 
+        if(preg_match('/<div class="indice-number"[^>]*>(.*)<\/div>/isU', $syntec, $matches)){
+            $indice = str_replace(' ', "", strip_tags($matches[0]));
+            BimpCore::setConf('current_indice_syntec',  str_replace(' ', "", strip_tags($matches[0])));
+            $success = "L'indice Syntec c'est mis à jours avec succès";
+        } else {
+            return "Impossible de récupérer l'indice Syntec automatiquement, merci de la rensseigner manuellement";
+        }
+        return [
+            'success' => $success,
+            'errors' => $errors,
+            'warnings' => $warnings
+        ];
+        
     }
 
     public function update(&$warnings = array(), $force_update = false) {
@@ -133,6 +165,8 @@ class BContract_contrat extends BimpDolObject {
                 }
             }
             return ['success' => $success, 'warnings' => $warnings, 'errors' => $errors];
+        } else {
+            return parent::update();
         }
     }
     
@@ -190,7 +224,7 @@ class BContract_contrat extends BimpDolObject {
     }
     
     public function displayRef() {
-        return $this->getData('ref') . ' - ' . $this->getData('objet_contrat');
+        return $this->getData('ref') . ' - ' . $this->getName();
     }
     
     public function getTitleEcheancier() {
@@ -204,7 +238,15 @@ class BContract_contrat extends BimpDolObject {
     }
     
     public function getName() {
-        return $this->getData('objet_contrat');
+        $objet = $this->getData('objet_contrat');
+        $client = $this->getInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
+        return "<span><i class='fas fa-".self::$objet_contrat[$objet]['icon']."' ></i> ".self::$objet_contrat[$objet]['label']."</span>";
+        
+        return self::$objet_contrat[$this->getData('objet_contrat')];
+    }
+    
+    public function getIndiceSyntec() {
+        return BimpCore::getConf('current_indice_syntec') ;
     }
     
     public function getAddContactIdClient()
@@ -229,6 +271,13 @@ class BContract_contrat extends BimpDolObject {
         $buttons = Array();
         if ($this->isLoaded() && BimpTools::getContext() != 'public') {
             $status = $this->getData('statut');
+            
+            $buttons[] = array(
+                'label'   => 'Mettre à jours l\'indice Syntec',
+                'icon'    => 'fas_sync',
+                'onclick' => $this->getJsActionOnclick('updateSyntec', array(), array())
+            );
+            
             if($status == self::CONTRAT_STATUS_VALIDE) {
                 $buttons[] = array(
                 'label'   => 'Générer le PDF du contrat',
@@ -272,20 +321,6 @@ class BContract_contrat extends BimpDolObject {
                 );
             }
             
-//            if (!is_null($status)) {
-//                $status = (int) $status;
-//                $soc = $this->getChildObject('client');
-//                // Cloner: 
-//                if ($this->can("create")) {
-//                    $buttons[] = array(
-//                        'label'   => 'Cloner',
-//                        'icon'    => 'copy',
-//                        'onclick' => $this->getJsActionOnclick('duplicate', array(), array(
-//                            'form_name' => 'clone_contrat'
-//                        ))
-//                    );
-//                }
-//            }
         }
 
         return $buttons;
@@ -375,6 +410,10 @@ class BContract_contrat extends BimpDolObject {
     
     /* ACTIONS */
     
+    public function actionCloseContrat() {
+        
+    }
+    
     public function actionSigned($data, &$success) {
         $success = 'Contrat signé avec succes';
         $this->updateField('date_contrat', date('Y-m-d HH:ii:ss'));
@@ -382,7 +421,24 @@ class BContract_contrat extends BimpDolObject {
     
     public function actionValidation($data, &$success) {
         global $user;
-        if($this->dol_object->validate($user) <= 0) {
+        $have_contact = false;
+        $ref = $this->newRef($this->getData('objet_contrat') . date('ym'));
+        $list_contact = $this->getSocieteContactsArray($this->getData('fk_soc'), false);
+        
+        foreach ($list_contact as $contact_type => $contact_name) {
+            print_r($contact_type . "<br />");
+            $id_contact_type = $this->db->getValue('c_type_contact', 'rowid', 'code = "CONTACTSITECONTRAT"');
+            if($contact_type == $id_contact_type) {
+                $have_contact = true;
+            }
+        }
+        
+        if(!$have_contact) {
+            return "Il doit y avoir au moin un site associé au contrat";
+        }
+        
+        if($this->dol_object->validate($user, $ref) <= 0) {
+            $success = 'Le contrat ' . $ref ;
             $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object));
             return 0;
         }
@@ -498,16 +554,27 @@ class BContract_contrat extends BimpDolObject {
                 return 'Vous ne pouvez pas demander un renouvellement TACITE pour des périodes différentes de (12, 24 ou 36 mois)';
             }
         }
-
-        parent::create($warnings, $force_create);
-            $date = new DateTime($this->getData('date_start'));
-            $instance = $this->getInstance('bimpcontract', 'BContract_echeancier');
-            $instance->set('id_contrat', $this->id);
-            $instance->set('next_facture_date', $date->format('Y-m-d H:i:s'));
-            $instance->set('next_facture_amount', $this->reste_a_payer());
-            $instance->set('validate', 0);
-            $instance->create();
-        
+            $errors = parent::create($warnings, $force_create);
+            
+            if(!count($errors)) {
+                if(!BimpTools::getValue('use_syntec')) {
+                    $this->updateField('syntec', null);
+                }
+                $date = new DateTime($this->getData('date_start'));
+                $instance = $this->getInstance('bimpcontract', 'BContract_echeancier');
+                $instance->set('id_contrat', $this->id);
+                $instance->set('next_facture_date', $date->format('Y-m-d H:i:s'));
+                $instance->set('next_facture_amount', $this->reste_a_payer());
+                $instance->set('validate', 0);
+                $instance->create();
+            }
+            
+            $callback = "window.location.href = '" . DOL_URL_ROOT . "/bimpcontract/index.php?fc=contrat&id='".$this->id."';";
+            return [
+                'success_callback' => $callback,
+                'errors'           => $errors,
+                'warnings'         => $warnings
+            ];
     }
     
     public function fetch($id, $parent = null) {
@@ -1053,6 +1120,19 @@ class BContract_contrat extends BimpDolObject {
         
         
         
+    }
+    
+    public function newRef($start_ref) {
+        $count_contrat = count($this->db->getRows('contrat', "ref LIKE '$start_ref%'")) + 1;
+        
+        if($count_contrat < 10) {
+            $add_zero = "000";
+        } elseif($count_contrat > 10 && $count_contrat < 100) {
+            $add_zero = "00";
+        } else {
+            $add_zero = '0';
+        }
+        return $start_ref . $add_zero . $count_contrat;
     }
     
 }

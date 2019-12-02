@@ -443,7 +443,7 @@ VQ - Collège
                         'stock_showroom' => $data['stock_showroom']
                     );
 
-                    $product_ca = (float) $data['ventes'] * (float) $p['price'];
+                    $product_ca = (float) $data['ventes'] * (float) $pa_ht;
                     $shiptos_data[$ship_to]['total_ca'] += $product_ca;
                     $total_ca += $product_ca;
                 }
@@ -512,7 +512,7 @@ VQ - Collège
         $total_ca_v2 = 0;
 
         $v1_shipTos = array();
-        $v2_shipTos = array(210323,211408,456858,999405,1369256,1686054,1777717,1782927,1782928,1782929,1782930);
+        $v2_shipTos = array();
 
         foreach ($shipTosData as $shipTo => $shipToData) {
             $data = array(
@@ -616,8 +616,8 @@ VQ - Collège
                             // Qty aléatoire à transférer (max: 10). 
                             $max = ((int) $v1_prod['ventes'] > 10 ? 10 : (int) $v1_prod['ventes']);
                             $qty = rand(1, $max);
-                            $v1_diff = (float) $v1_prod['pu_ht'] * $qty;
-                            $v2_diff = (float) $v2_prod['pu_ht'] * $qty;
+                            $v1_diff = (float) $v1_prod['pa_ht'] * $qty;
+                            $v2_diff = (float) $v2_prod['pa_ht'] * $qty;
 
                             $shipTosData[$v1_shipTo]['products'][$id_product]['ventes'] -= $qty;
                             $shipTosData[$v2_shipTo]['products'][$id_product]['ventes'] += $qty;

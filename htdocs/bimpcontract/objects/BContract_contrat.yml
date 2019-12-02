@@ -131,6 +131,8 @@ fields:
         label: Indice SYNTEC en vigueur à la signature
         type: float
         dol_extra_field: 1
+        default_value: 
+            callback: getIndiceSyntec
         input:
             help: 
                 callback: getSyntecSite
@@ -168,6 +170,8 @@ fields:
         type: string
         dol_extra_field: 1
         required: 1
+        values:
+            array: objet_contrat
         
     fk_commercial_signature:
         label: Commercial signataire
@@ -204,11 +208,11 @@ fields_tables:
             - field: ref
               label: Référence du contrat
               edit: 0
+            - field: objet_contrat
+              edit: 0
             - label: Contrat initial
               value:
                   callback: getContratSource
-              edit: 0
-            - field: objet_contrat
               edit: 0
             - field: date_contrat
               edit: 0
@@ -325,11 +329,14 @@ forms:
             - field: tacite
             - custom: 1
               label: Utiliser l'indice SYNTEC
+              value: 1
               input_name: use_syntec
               input: 
                   type: toggle
+                  
             - field: syntec
-              
+              default_value: huxdisqhuisq
+                  
             - field: denounce
               edit: 0
             - field: moderegl

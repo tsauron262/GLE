@@ -110,38 +110,41 @@ class GSX_Repair extends BimpObject
         $errors = array();
 
         if (isset($result['outcome'])) {
-            $msgs = array();
-            if (isset($result['outcome']['reasons'])) {
-                foreach ($result['outcome']['reasons'] as $reason) {
-                    $msg = $reason['type'] . '<br/>';
-                    foreach ($reason['messages'] as $message) {
-                        $msg .= ' - ' . $message . '<br/>';
-                    }
+            if(isset($result['outcome']['reasons']))
+                $result['outcome'][] = $result['outcome'];
+                
+            foreach($result['outcome'] as $outcome){
+                if (isset($outcome['reasons'])) {
+                    $msgs = array();
+                    foreach ($outcome['reasons'] as $reason) {
+                        $msg = $reason['type'] . '<br/>';
+                        foreach ($reason['messages'] as $message) {
+                            $msg .= ' - ' . $message . '<br/>';
+                        }
 
-                    if ($reason['type'] === 'REPAIR_TYPE' && isset($reason['repairOptions'])) {
-                        $msg .= 'Types de réparation éligibles: <br/>';
-                        if (empty($reason['repairOptions'])) {
-                            $msg .= 'Aucun';
-                        } else {
-                            foreach ($reason['repairOptions'] as $option) {
-                                $msg .= $option['priority'] . ': ' . (isset(GSX_Const::$repair_types[$option['option']]) ? GSX_Const::$repair_types[$option['option']] : $option['option']);
-                                if (isset($option['subOption'])) {
-                                    $msg .= ' (type de service: ' . (isset(GSX_Const::$service_types[$option['subOption']]) ? GSX_Const::$service_types[$option['subOption']] : $option['subOption']) . ')';
+                        if ($reason['type'] === 'REPAIR_TYPE' && isset($reason['repairOptions'])) {
+                            $msg .= 'Types de réparation éligibles: <br/>';
+                            if (empty($reason['repairOptions'])) {
+                                $msg .= 'Aucun';
+                            } else {
+                                foreach ($reason['repairOptions'] as $option) {
+                                    $msg .= $option['priority'] . ': ' . (isset(GSX_Const::$repair_types[$option['option']]) ? GSX_Const::$repair_types[$option['option']] : $option['option']);
+                                    if (isset($option['subOption'])) {
+                                        $msg .= ' (type de service: ' . (isset(GSX_Const::$service_types[$option['subOption']]) ? GSX_Const::$service_types[$option['subOption']] : $option['subOption']) . ')';
+                                    }
+                                    $msg .= '<br/>';
                                 }
-                                $msg .= '<br/>';
                             }
                         }
+                        $msgs[] = $msg;
+                    }
+                    if (!isset($result['outcome']['action']) || in_array($result['outcome']['action'], array('MESSAGE', 'HOLD', 'WARNING', 'REPAIR_TYPE'))) {
+                        $warnings[] = BimpTools::getMsgFromArray($msgs, $result['outcome']['action']);
+                    } else {
+                        $errors[] = BimpTools::getMsgFromArray($msgs, $result['outcome']['action']);
                     }
 
-                    $msgs[] = $msg;
-                }
-            }
 
-            if (!empty($msgs)) {
-                if (in_array($result['outcome']['action'], array('MESSAGE', 'HOLD', 'WARNING'))) {
-                    $warnings[] = BimpTools::getMsgFromArray($msgs, $result['outcome']['action']);
-                } else {
-                    $errors[] = BimpTools::getMsgFromArray($msgs, $result['outcome']['action']);
                 }
             }
         }

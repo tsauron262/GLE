@@ -27,6 +27,10 @@ class BS_Issue extends BimpObject
 
         return 0;
     }
+    
+    public function canDelete(){
+        return 1;
+    }
 
     public function isDeletable()
     {
@@ -424,6 +428,8 @@ class BS_Issue extends BimpObject
                         $part = BimpObject::getInstance('bimpsupport', 'BS_ApplePart');
 
                         $part_warnings = array();
+                        
+                        $part_data['stock_price'] = str_replace(",", "", $part_data['stock_price']);
                         $part_errors = $part->validateArray(array(
                             'id_sav'         => (int) $sav->id,
                             'id_issue'       => (int) $this->id,

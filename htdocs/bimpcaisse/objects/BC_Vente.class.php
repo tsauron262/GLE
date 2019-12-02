@@ -1083,7 +1083,7 @@ class BC_Vente extends BimpObject
         $id_cond = (int) $this->getData('id_cond_reglement');
         $html .= '<div id="condReglement" style="font-size: 14px">';
         $html .= '<span style="font-weight: bold">Condition de réglement : </span>';
-        $html .= '<select id="condReglementSelect" name="condReglementSelect"  disabled>';
+        $html .= '<select id="condReglementSelect" name="condReglementSelect"  '.(!BimpCore::getConf('use_mode_reglement_caisse')? 'disabled' : '').'>';
         foreach ($this->getCond_reglementsArray() as $id => $label) {
             $html .= '<option value="' . $id . '"' . ((int) $id === $id_cond ? ' selected=""' : '') . '>' . $label . '</option>';
         }

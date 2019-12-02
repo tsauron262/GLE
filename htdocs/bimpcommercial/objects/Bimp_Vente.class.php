@@ -512,7 +512,7 @@ VQ - Collège
         $total_ca_v2 = 0;
 
         $v1_shipTos = array();
-        $v2_shipTos = array();
+        $v2_shipTos = array(210323,211408,456858,999405,1369256,1686054,1777717,1782927,1782928,1782929,1782930);
 
         foreach ($shipTosData as $shipTo => $shipToData) {
             $data = array(

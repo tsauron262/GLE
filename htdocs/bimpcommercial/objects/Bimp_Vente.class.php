@@ -291,7 +291,7 @@ class Bimp_Vente extends BimpObject
 
         $products_list = $product->getList(array(
             'ef.collection' => (int) $id_category
-                ), null, null, 'rowid', 'asc', 'array', array('rowid', 'ref', 'price', 'no_fixe_prices', 'pmp'), array(
+                ), null, null, 'rowid', 'asc', 'array', array('rowid', 'ref', 'price', 'no_fixe_prices', 'pmp', 'cur_pa_ht'), array(
             'ef' => array(
                 'alias' => 'ef',
                 'table' => 'product_extrafields',
@@ -417,7 +417,7 @@ VQ - Collège
                     }
                 }
             }
-
+            
             foreach ($entrepots_data as $ship_to => $data) {
                 if ($data['ventes'] < 0)
                     $data['ventes'] = 0;

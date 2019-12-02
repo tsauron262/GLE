@@ -997,7 +997,7 @@ class BS_SAV extends BimpObject
         $repairS = BimpObject::getInstance('bimpapple', 'GSX_Repair');
         $list = $repairS->getList(array('id_sav' => $this->id));
         foreach ($list as $arr) {
-            $return .= "<a href='#gsx'>" . $arr['repair_confirm_number'] . "</a><br/>";
+            $return .= "<a href='#gsx'>" . $arr['repair_number'] . "</a><br/>";
         }
 
         return $return;

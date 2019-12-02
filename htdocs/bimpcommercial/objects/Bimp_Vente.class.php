@@ -291,7 +291,7 @@ class Bimp_Vente extends BimpObject
 
         $products_list = $product->getList(array(
             'ef.collection' => (int) $id_category
-                ), null, null, 'rowid', 'asc', 'array', array('rowid', 'ref', 'price', 'no_fixe_prices', 'pmp'), array(
+                ), null, null, 'rowid', 'asc', 'array', array('rowid', 'ref', 'price', 'no_fixe_prices', 'pmp', 'cur_pa_ht'), array(
             'ef' => array(
                 'alias' => 'ef',
                 'table' => 'product_extrafields',
@@ -417,7 +417,7 @@ VQ - Collège
                     }
                 }
             }
-
+            
             foreach ($entrepots_data as $ship_to => $data) {
                 if ($data['ventes'] < 0)
                     $data['ventes'] = 0;
@@ -443,7 +443,7 @@ VQ - Collège
                         'stock_showroom' => $data['stock_showroom']
                     );
 
-                    $product_ca = (float) $data['ventes'] * (float) $p['price'];
+                    $product_ca = (float) $data['ventes'] * (float) $pa_ht;
                     $shiptos_data[$ship_to]['total_ca'] += $product_ca;
                     $total_ca += $product_ca;
                 }
@@ -616,8 +616,8 @@ VQ - Collège
                             // Qty aléatoire à transférer (max: 10). 
                             $max = ((int) $v1_prod['ventes'] > 10 ? 10 : (int) $v1_prod['ventes']);
                             $qty = rand(1, $max);
-                            $v1_diff = (float) $v1_prod['pu_ht'] * $qty;
-                            $v2_diff = (float) $v2_prod['pu_ht'] * $qty;
+                            $v1_diff = (float) $v1_prod['pa_ht'] * $qty;
+                            $v2_diff = (float) $v2_prod['pa_ht'] * $qty;
 
                             $shipTosData[$v1_shipTo]['products'][$id_product]['ventes'] -= $qty;
                             $shipTosData[$v2_shipTo]['products'][$id_product]['ventes'] += $qty;

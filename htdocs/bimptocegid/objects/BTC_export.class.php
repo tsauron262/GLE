@@ -35,7 +35,13 @@ class BTC_export extends BimpObject {
                 $this->date_export = date('Y-m-d');
             }
             $this->create_daily_file();
-            $this->$function_name();
+            
+            if(isset($_REQUEST['ref']) && !empty($_REQUEST['ref'])) {
+                $this->$function_name($_REQUEST['ref']);
+            } else {
+                $this->$function_name();
+            }
+            
         } elseif($origin == 'web') {
             echo BimpRender::renderAlerts("Vous ne pouvez pas exporter d'écriture directement depuis cette page", 'danger', false);
         } else {

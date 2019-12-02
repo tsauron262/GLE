@@ -210,7 +210,7 @@ class gsxController extends BimpController
                         $is_company = false;
                         $id_typeent = (int) $client->getData('fk_typent');
                         if ($id_typeent) {
-                            if (!in_array(BimpCache::getBdb()->getValue('c_typent', 'code', '`rowid` = ' . $id_typeent), array('TE_UNKNOWN', 'TE_PRIVATE', 'TE_OTHER'))) {
+                            if (!in_array(BimpCache::getBdb()->getValue('c_typent', 'code', '`id` = ' . $id_typeent), array('TE_UNKNOWN', 'TE_PRIVATE', 'TE_OTHER'))) {
                                 $is_company = true;
                             }
                         }

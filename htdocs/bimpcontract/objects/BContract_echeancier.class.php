@@ -1,7 +1,7 @@
 <?php
 
 class BContract_echeancier extends BimpObject {
-    
+
     
     public function cronEcheancier() {
         
@@ -104,7 +104,7 @@ class BContract_echeancier extends BimpObject {
         $instance->set('fk_cond_reglement', ($client->getData('cond_reglement')) ? $client->getData('cond_reglement') : 2);
         $instance->set('fk_mode_reglement', ($client->getData('mode_reglement')) ? $client->getData('mode_reglement') : 2);
         $instance->set('datef', $data['date_start']);
-        $instance->set('ef_type', 'C');
+        $instance->set('ef_type', 'CT');
         $errors = $instance->create($warnings = Array(), true);
         if(!count($errors)) {
               
@@ -152,11 +152,12 @@ class BContract_echeancier extends BimpObject {
         $html .= '</thead>';
         $html .= '<tbody class="listRows">';
         $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}';
+        $can_create_next_facture = true;
         if($data->factures_send) {
             $current_number_facture = 1;
             foreach($data->factures_send as $element_element) {   
                 $facture = $this->getInstance('bimpcommercial', 'Bimp_Facture', $element_element['d']);
-                $can_create_next_facture = true;
+                
                 if($facture->getData('fk_statut') == 0) {
                     $can_create_next_facture = false;
                 }

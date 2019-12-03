@@ -158,6 +158,10 @@ views:
             - cols: 
                   - type: object_header
             - cols: 
+                - type: custom
+                  custom: 
+                      callback: renderPropalReviewInfos
+            - cols: 
                   - type: fields_table
                     col_lg: 6
                     col_md: 6

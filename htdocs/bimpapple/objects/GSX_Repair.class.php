@@ -98,6 +98,34 @@ class GSX_Repair extends BimpObject
         return !$this->use_gsx_v2;
     }
 
+    public function isActionAllowed($action, &$errors = array())
+    {
+        switch ($action) {
+            case 'reviewPropal':
+                if (!$this->isLoaded($errors)) {
+                    return 0;
+                }
+
+                $sav = $this->getChildObject('sav');
+                if (BimpObject::objectLoaded($sav)) {
+                    $propal = $sav->getChildObject('propal');
+                    if (BimpObject::objectLoaded($propal)) {
+                        $propal_status = (int) $propal->getData('fk_statut');
+                        if ($propal_status) {
+                            if (!$sav->isActionAllowed('reviewPropal', $errors)) {
+                                return 0;
+                            }
+                        }
+                        return 1;
+                    }
+                }
+
+                $errors[] = 'Devis non trouvé pour cette réparation';
+                return 0;
+        }
+        return parent::isActionAllowed($action, $errors);
+    }
+
     public function getRef()
     {
         return $this->getData('repair_number');
@@ -110,10 +138,10 @@ class GSX_Repair extends BimpObject
         $errors = array();
 
         if (isset($result['outcome'])) {
-            if(isset($result['outcome']['reasons']))
+            if (isset($result['outcome']['reasons']))
                 $result['outcome'][] = $result['outcome'];
-                
-            foreach($result['outcome'] as $outcome){
+
+            foreach ($result['outcome'] as $outcome) {
                 if (isset($outcome['reasons'])) {
                     $msgs = array();
                     foreach ($outcome['reasons'] as $reason) {
@@ -143,8 +171,6 @@ class GSX_Repair extends BimpObject
                     } else {
                         $errors[] = BimpTools::getMsgFromArray($msgs, $result['outcome']['action']);
                     }
-
-
                 }
             }
         }
@@ -1149,8 +1175,6 @@ class GSX_Repair extends BimpObject
 
     public function renderRepairParts()
     {
-
-
         if ($this->isLoaded()) {
             if (isset($this->repairLookUp['parts']) && !empty($this->repairLookUp['parts'])) {
 
@@ -1164,10 +1188,10 @@ class GSX_Repair extends BimpObject
                 'kbbDeviceDetail/imei'   => 'IMEI',
                 'kbbDeviceDetail/imei2'  => 'IMEI2',
                 'kbbDeviceDetail/meid'   => 'MEID',
-                'kgbDeviceDetail/serial' => 'Nouveau Numéro de série (KGB = nouveau : à confirmer)',
-                'kgbDeviceDetail/imei'   => 'Nouveau IMEI (KGB = nouveau : à confirmer)',
-                'kgbDeviceDetail/imei2'  => 'Nouveau IMEI2 (KGB = nouveau : à confirmer)',
-                'kgbDeviceDetail/meid'   => 'Nouveau MEID (KGB = nouveau : à confirmer)',
+                'kgbDeviceDetail/serial' => 'Nouveau Numéro de série',
+                'kgbDeviceDetail/imei'   => 'Nouveau IMEI',
+                'kgbDeviceDetail/imei2'  => 'Nouveau IMEI2',
+                'kgbDeviceDetail/meid'   => 'Nouveau MEID',
                 'partUsed'               => 'Réf. composant utilisé',
                 'coverageOption'         => 'Option de couverture',
                 'coverageCode'           => 'Code couverture',
@@ -1308,6 +1332,128 @@ class GSX_Repair extends BimpObject
                 }
 
                 return $parts_html;
+            }
+        }
+
+        return '';
+    }
+
+    public function renderPropalReviewInfos()
+    {
+        if ($this->isLoaded()) {
+            if (empty($this->repairLookUp)) {
+                $this->lookup();
+            }
+
+            if (isset($this->repairLookUp['parts']) && !empty($this->repairLookUp['parts'])) {
+                $sav = $this->getChildObject('sav');
+                if (BimpObject::objectLoaded($sav)) {
+                    $propal = $sav->getChildObject('propal');
+
+                    if (BimpObject::objectLoaded($propal)) {
+                        $propal_status = (int) $propal->getData('fk_statut');
+                        if (!$propal_status || $sav->isActionAllowed('reviewPropal')) {
+                            $parts = array();
+
+                            foreach ($this->repairLookUp['parts'] as $repairPart) {
+                                $savPart = BimpCache::findBimpObjectInstance('bimpsupport', 'BS_ApplePart', array(
+                                            'id_sav'      => (int) $sav->id,
+                                            'part_number' => $repairPart['number']
+                                ));
+
+                                if (BimpObject::objectLoaded($savPart)) {
+                                    $savPartPrice = (float) $savPart->getPrice();
+                                    if (((float) $repairPart['netPrice'] > 0 && $savPartPrice !== (float) $repairPart['netPrice']) ||
+                                            !(float) $repairPart['netPrice'] && $savPartPrice !== 0 && (int) $savPart->getData('out_of_warranty')) {
+                                        $parts[] = array(
+                                            'number'        => $repairPart['number'],
+                                            'current_price' => $savPartPrice,
+                                            'new_price'     => (float) $repairPart['netPrice']
+                                        );
+                                    }
+                                }
+                            }
+
+                            if (!empty($parts)) {
+                                $html = '';
+
+                                $html .= '<div class="row">';
+                                $html .= '<div class="col-sm-12 col-md-6">';
+
+                                $msg = 'Un écart de prix a été constaté entre le devis et la réparation pour ';
+                                if (count($parts) > 1) {
+                                    $msg .= count($parts) . ' composants';
+                                } else {
+                                    $msg .= '1 composant';
+                                }
+                                $html .= BimpRender::renderAlerts($msg, 'warning');
+
+                                $html .= '<table class="bimp_list_table">';
+                                $html .= '<thead>';
+                                $html .= '<tr>';
+                                $html .= '<th>Réf. composant</th>';
+                                $html .= '<th>Prix actuel du devis</th>';
+                                $html .= '<th>Prix réparation</th>';
+                                $html .= '<th></th>';
+                                $html .= '</tr>';
+                                $html .= '</thead>';
+                                $html .= '<tbody>';
+
+                                foreach ($parts as $part) {
+                                    $html .= '<tr>';
+                                    $html .= '<td>' . $part['number'] . '</td>';
+                                    $html .= '<td>' . BimpTools::displayMoneyValue($part['current_price']) . '</td>';
+                                    $html .= '<td>' . BimpTools::displayMoneyValue($part['new_price']) . '</td>';
+                                    $html .= '<td>';
+                                    $html .= '<span class="btn btn-default" onclick="';
+                                    $html .= $this->getJsActionOnclick('reviewPropal', array(
+                                        'parts' => htmlentities(json_encode(array(
+                                            array(
+                                                'number'    => $part['number'],
+                                                'new_price' => (float) $part['new_price']
+                                            )
+                                        )))
+                                            ), array(
+                                        'confirm_msg' => 'Veuillez confirmer la ' . ($propal_status ? 'révision' : 'mise à jour') . ' du devis pour le composant ' . $part['number']
+                                    ));
+                                    $html .= '">';
+                                    $html .= BimpRender::renderIcon('fas_pen', 'iconLeft') . ($propal_status ? 'Réviser' : 'Mettre à jour') . ' le devis';
+                                    $html .= '</span>';
+                                    $html .= '</td>';
+                                    $html .= '</tr>';
+                                }
+
+                                $html .= '</tbody>';
+                                $html .= '</table>';
+
+                                if (count($parts) > 1) {
+                                    $parts_data = array();
+                                    foreach ($parts as $part) {
+                                        $parts_data[] = array(
+                                            'number'    => $part['number'],
+                                            'new_price' => (float) $part['new_price']
+                                        );
+                                    }
+
+                                    $html .= '<div class="buttonsContainer" style="text-align: right; margin-top: 10px">';
+                                    $html .= '<span class="btn btn-default" onclick="' . $this->getJsActionOnclick('reviewPropal', array(
+                                                'parts' => $parts_data
+                                                    ), array(
+                                                'confirm_msg' => 'Veuillez confirmer la ' . ($propal_status ? 'révision' : 'mise à jour') . ' du devis pour tous les composants'
+                                            )) . '">';
+                                    $html .= BimpRender::renderIcon('fas_pen', 'iconLeft') . ($propal_status ? 'Réviser' : 'Mettre à jour') . ' le devis pour tous les composants';
+                                    $html .= '</span>';
+                                    $html .= '</div>';
+                                }
+
+                                $html .= '</div>';
+                                $html .= '</div>';
+
+                                return $html;
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -1523,7 +1669,89 @@ class GSX_Repair extends BimpObject
         return $js;
     }
 
-    // Actions (obsolètes pour la V2 : ces actions sont traitées dans gsxController): 
+    // Actions V2 
+
+    public function actionReviewPropal($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+        $success_callback = '';
+
+        $parts = isset($data['parts']) ? json_decode($data['parts'], 1) : array();
+
+        if (empty($parts)) {
+            $errors[] = 'Aucun composant à mettre à jour dans le devis indiqué';
+        } else {
+            $sav = $this->getChildObject('sav');
+            if (BimpObject::objectLoaded($sav)) {
+                $propal = $sav->getChildObject('propal');
+                if (BimpObject::objectLoaded($propal)) {
+                    $propal_status = (int) $propal->getData('fk_statut');
+                    if ($propal_status > 0) {
+                        // révision de la propale: 
+                        $prop_warnings = array();
+                        $prop_errors = $sav->reviewPropal($prop_warnings);
+
+                        if (count($prop_errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($prop_errors, 'Echec de la révision de la propale');
+                        } else {
+                            $success .= 'Mise en révision du devis effectuée avec succès<br/>';
+                        }
+
+                        if (count($prop_warnings)) {
+                            $warnings[] = BimpTools::getMsgFromArray($prop_errors, 'Erreurs lors de la révision de la propale');
+                        }
+
+                        $success_callback = 'bimp_reloadPage();';
+                    }
+
+                    if (!count($errors)) {
+                        // Mise à jour des pièces Apple: 
+                        foreach ($parts as $part) {
+                            $savPart = BimpCache::findBimpObjectInstance('bimpsupport', 'BS_ApplePart', array(
+                                        'id_sav'      => (int) $sav->id,
+                                        'part_number' => $part['number']
+                            ));
+
+                            if (!BimpObject::objectLoaded($savPart)) {
+                                $warnings[] = 'La référence "' . $part['number'] . '" n\'a pas été trouvée parmi les pièces Apple enregistrées pour ce SAV';
+                                continue;
+                            }
+
+                            if (!(float) $part['new_price']) {
+                                $savPart->set('out_of_warranty', 0);
+                            } else {
+                                $savPart->set('out_of_warranty', 1);
+                                $savPart->setPrice((float) $part['new_price']);
+                            }
+
+                            $part_warnings = array();
+                            $part_errors = $savPart->update($part_warnings, true);
+
+                            if (count($part_errors)) {
+                                $warnings[] = BimpTools::getMsgFromArray($part_errors, 'Echec de la mise à jour du prix pour le composant "' . $part['number'] . '"');
+                            } else {
+                                $success .= 'Mise à jour du composant "' . $part['number'] . '" effectuée avec succès<br/>';
+                            }
+
+                            if (count($part_warnings)) {
+                                $warnings[] = BimpTools::getMsgFromArray($part_errors, 'Erreurs lors de la mise à jour du prix pour le composant "' . $part['number'] . '"');
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $success_callback
+        );
+    }
+
+    // Actions V1 (obsolètes pour la V2 : ces actions sont traitées dans gsxController): 
 
     public function actionImportRepair($data, &$success = '')
     {

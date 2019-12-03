@@ -386,6 +386,29 @@ class BS_ApplePart extends BimpObject
         return $errors;
     }
 
+    public function setPrice($new_price)
+    {
+        $type = $this->getData('price_type');
+
+        switch ($type) {
+            case 'EXCHANGE':
+                $this->set('exchange_price', (float) $new_price);
+                break;
+
+            case 'STOCK':
+                $this->set('stock_price', (float) $new_price);
+                break;
+
+            default:
+                $priceOptions = $this->getData('price_options');
+                if (isset($priceOptions[$type]['price'])) {
+                    $priceOptions[$type]['price'] = (float) $new_price;
+                    $this->set('price_options', $priceOptions);
+                }
+                break;
+        }
+    }
+
     // Actions: 
 
     public function actionAttributeToIssue($data, &$success)

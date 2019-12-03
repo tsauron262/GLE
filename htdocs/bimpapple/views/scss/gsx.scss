@@ -1,11 +1,9 @@
-#createRepairForm,
-#findRepairsToImportForm,
+.gsxRepairViewForm
 {
     display: none;
     text-align: center;
 
-    .createRepairFormContent,
-    .findRepairsToImportFormContent {
+    .gsxRepairViewFormContent {
         text-align: left;
         max-width: 600px;
         margin: auto;

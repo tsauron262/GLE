@@ -248,9 +248,23 @@ class gsxController extends BimpController
                             );
                         } else {
                             $client_data = $client->getDataArray();
+                            $company_name = '';
+                            $firstname = '';
+                            $lastname = '';
+
+                            if ($is_company) {
+                                $company_name = (string) $client_data['nom'];
+                            } elseif (preg_match(('/^(.+) (.+)$/U'), $client_data['nom'], $matches)) {
+                                $lastname = $matches[1];
+                                $firstname = $matches[2];
+                            } else {
+                                $lastname = $client_data['nom'];
+                            }
 
                             $values['customer'] = array(
-                                'companyName'  => (string) $client_data['nom'],
+                                'firstName'    => $firstname,
+                                'lastName'     => $lastname,
+                                'companyName'  => $company_name,
                                 'emailAddress' => (string) $client_data['email'],
                                 'primaryPhone' => (string) $client_data['phone'],
                                 'address'      => array(
@@ -308,9 +322,10 @@ class gsxController extends BimpController
 
                                     if ($is_tier_parts) {
                                         $values['parts'][] = array(
-                                            'part_label'    => $part->getData('label'),
-                                            'number'        => $part->getData('part_number'),
-                                            'pricingOption' => $pricingOption
+                                            'part_label'     => $part->getData('label'),
+                                            'number'         => $part->getData('part_number'),
+                                            'pricingOption'  => $pricingOption,
+                                            'componentIssue' => 'hidden'
                                         );
                                     } else {
                                         $values['parts'][] = array(
@@ -382,8 +397,9 @@ class gsxController extends BimpController
         }
 
         return array(
-            'errors'   => $errors,
-            'warnings' => $warnings
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $success_callback
         );
     }
 
@@ -587,12 +603,12 @@ class gsxController extends BimpController
                         if (count($rep_errors)) {
                             $errors[] = BimpTools::getMsgFromArray($rep_errors, 'Echec de la création ' . $repair->getLabel('of_the'));
                         } else {
-                            $success_callback = $sav->getJsActionOnclick('attentePiece', array(), array('form_name' => 'send_msg'));
-                            $success_callback .= ';reloadRepairsViews(' . $id_sav . ')';
+                            $success_callback = 'bimpModal.clearAllContents();';
+                            $success_callback .= 'setTimeout(function() {' . $sav->getJsActionOnclick('attentePiece', array(), array('form_name' => 'send_msg')) . '}, 1000);';
+                            $success_callback .= ';reloadRepairsViews(' . $id_sav . ');';
                         }
                     }
                 }
-
                 break;
         }
         return array(
@@ -1267,6 +1283,7 @@ class gsxController extends BimpController
 
     protected function gsxFetchRepairEligibility($params)
     {
+        // Appellé via le formulaire de création d'une réparation. 
         ini_set('display_errors', 1);
 
         $errors = array();
@@ -1318,77 +1335,7 @@ class gsxController extends BimpController
                         $errors = $this->gsx_v2->getErrors();
                     } else {
                         $repair_ok = 1;
-
-                        if (isset($response['eligibilityDetails']) && !empty($response['eligibilityDetails'])) {
-                            $html .= '<h3>Détails éligibilité</h3>';
-                            $html .= '<table class="bimp_list_table">';
-                            $html .= '<tbody class="headers_col">';
-
-                            foreach (array(
-                        'coverageDescription' => 'Couverture',
-                        'coverageCode'        => 'Code couverture',
-                        'technicianMandatory' => 'Technicien requis',
-                            ) as $path => $label) {
-                                $value = BimpTools::getArrayValueFromPath($response['eligibilityDetails'], $path, true);
-                                if (!is_null($value)) {
-                                    $html .= '<tr><th>' . $label . '</th><td>' . $value . '</td></tr>';
-                                }
-                            }
-
-                            if (isset($response['eligibilityDetails']['outcome']) && !empty($response['eligibilityDetails']['outcome'])) {
-                                $html .= '<tr>';
-                                $html .= '<th>Messages</th>';
-                                $html .= '<td>';
-                                $rep_warnings = array();
-
-                                BimpObject::loadClass('bimpapple', 'GSX_Repair');
-                                $rep_errors = GSX_Repair::processRepairRequestOutcome($response['eligibilityDetails'], $rep_warnings);
-
-                                if (count($rep_errors)) {
-                                    $html .= BimpRender::renderAlerts($rep_errors);
-                                    $repair_ok = 0;
-                                }
-
-                                if (count($rep_warnings)) {
-                                    $html .= BimpRender::renderAlerts($rep_warnings, 'warning');
-                                }
-
-                                if (!count($errors) && !count($rep_warnings)) {
-                                    $html .= BimpRender::renderAlerts('Aucun message', 'info');
-                                }
-                                $html .= '</td>';
-                                $html .= '</tr>';
-                            }
-
-                            $html .= '</tbody>';
-                            $html .= '</table>';
-                        }
-
-                        if (isset($response['parts']) && !empty($response['parts'])) {
-                            $html .= '<h3>Eligibilité composants</h3>';
-
-                            foreach ($response['parts'] as $part) {
-                                $html .= '<h4>Composant "' . $part['number'] . '"</h4>';
-
-                                $html .= '<table class="bimp_list_table">';
-                                $html .= '<tbody class="headers_col">';
-
-                                foreach (array(
-                            'partType'            => 'Type de composant',
-                            'coverageDescription' => 'Couverture',
-                            'coverageCode'        => 'Code couverture',
-                            'billable'            => 'Facturable'
-                                ) as $path => $label) {
-                                    $value = BimpTools::getArrayValueFromPath($part, $path, true);
-                                    if (!is_null($value)) {
-                                        $html .= '<tr><th>' . $label . '</th><td>' . $value . '</td></tr>';
-                                    }
-                                }
-
-                                $html .= '</tbody>';
-                                $html .= '</table>';
-                            }
-                        }
+                        $html = $this->renderEligibilityDetails($response, $repair_ok, $errors);
                     }
                 } else {
                     $errors[] = BimpTools::getMsgFromArray($gsxRequests->errors, 'Erreurs lors du traitement des données');
@@ -1401,6 +1348,118 @@ class gsxController extends BimpController
             'warnings'  => $warnings,
             'html'      => $html,
             'repair_ok' => $repair_ok
+        );
+    }
+
+    protected function gsxLoadRepairEligibilityDetails($params)
+    {
+        // Appellé via le bouton "Tester Eligibilité" 
+        $errors = array();
+        $warnings = array();
+        $html = '';
+
+        if ($this->gsx_v2->logged) {
+            $id_sav = (isset($params['id_sav']) ? (int) $params['id_sav'] : 0);
+            $repair_type = (isset($params['repairType']) ? $params['repairType'] : '');
+
+            if (!$id_sav) {
+                $errors[] = 'ID du SAV absent';
+            } else {
+                $sav = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SAV', $id_sav);
+                if (!BimpObject::objectLoaded($sav)) {
+                    $errors[] = 'Le SAV d\'ID ' . $id_sav . ' n\'existe pas';
+                } else {
+                    $serial = $sav->getSerial();
+
+                    if (!$serial) {
+                        $errors[] = 'Numéro de série de l\'appareil absent';
+                    } else {
+                        $data = array(
+                            'device' => array(
+                                'id' => $serial
+                            )
+                        );
+
+                        if ($repair_type) {
+                            $data['repairType'] = $repair_type;
+                        }
+
+                        $issues = $sav->getChildrenObjects('issues');
+
+                        if (!empty($issues)) {
+                            $data['componentIssues'] = array();
+
+                            $n = 1;
+                            foreach ($issues as $issue) {
+                                $is_tier_parts = $issue->isTierPart();
+
+                                if (!$is_tier_parts) {
+                                    $data['componentIssues'][] = array(
+                                        'componentCode'   => $issue->getData('category_code'),
+                                        'issueCode'       => $issue->getData('issue_code'),
+                                        'reproducibility' => $issue->getData('reproducibility'),
+                                        'priority'        => (int) $n,
+                                        'type'            => $issue->getData('type'),
+                                        'order'           => (int) $n,
+                                    );
+                                }
+
+                                $n++;
+
+                                if ($repair_type) {
+                                    $parts = BimpCache::getBimpObjectObjects('bimpsupport', 'BS_ApplePart', array(
+                                                'id_issue' => (int) $issue->id,
+                                                'no_order' => 0
+                                    ));
+
+                                    if (!empty($parts)) {
+                                        if (!isset($data['parts'])) {
+                                            $data['parts'] = array();
+                                        }
+
+                                        foreach ($parts as $part) {
+                                            $part_data = array(
+                                                'number' => $part->getData('part_number')
+                                            );
+
+                                            $typePrice = (string) $part->getData('price_type');
+                                            if ($typePrice && !in_array($typePrice, array('STOCK', 'EXCHANGE'))) {
+                                                $part_data['pricingOption'] = $typePrice;
+                                            }
+
+                                            if (!$is_tier_parts) {
+                                                $part_data['partUsed'] = $part->getData('part_number');
+                                                $part_data['componentIssue'] = array(
+                                                    'componentCode'   => $issue->getData('category_code'),
+                                                    'issueCode'       => $issue->getData('issue_code'),
+                                                    'reproducibility' => $issue->getData('reproducibility')
+                                                );
+                                            }
+
+                                            $data['parts'][] = $part_data;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        
+                        $response = $this->gsx_v2->exec('repairEligibility', $data);
+
+                        if ($response === false) {
+                            $errors = $this->gsx_v2->getErrors();
+                        } else {
+                            $repair_ok = 1;
+                            $html = $this->renderEligibilityDetails($response, $repair_ok, $errors);
+                        }
+                    }
+                }
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings,
+            'html'     => $html
         );
     }
 
@@ -1595,7 +1654,7 @@ class gsxController extends BimpController
             }
         }
 
-        
+
         return $responses;
     }
 
@@ -2431,8 +2490,6 @@ class gsxController extends BimpController
                 $html .= $this->gsx_v2->displayErrors();
             }
 
-//            $html .= $sav->renderChildrenList('diagnostics', 'default', true);
-
             $html .= BimpRender::renderPanel('Diagnostics', $this->renderSavGsxDiagnosticsView($sav), '', array(
                         'panel_id' => 'sav_diagnostics',
                         'type'     => 'secondary',
@@ -2755,6 +2812,84 @@ class gsxController extends BimpController
         }
 
         $html .= '</div>';
+
+        return $html;
+    }
+
+    protected function renderEligibilityDetails($response, &$repair_ok = 1)
+    {
+        $html = '';
+
+        if (isset($response['eligibilityDetails']) && !empty($response['eligibilityDetails'])) {
+            $html .= '<h3>Détails éligibilité</h3>';
+            $html .= '<table class="bimp_list_table">';
+            $html .= '<tbody class="headers_col">';
+
+            foreach (array(
+        'coverageDescription' => 'Couverture',
+        'coverageCode'        => 'Code couverture',
+        'technicianMandatory' => 'Technicien requis',
+            ) as $path => $label) {
+                $value = BimpTools::getArrayValueFromPath($response['eligibilityDetails'], $path, true);
+                if (!is_null($value)) {
+                    $html .= '<tr><th>' . $label . '</th><td>' . $value . '</td></tr>';
+                }
+            }
+
+            if (isset($response['eligibilityDetails']['outcome']) && !empty($response['eligibilityDetails']['outcome'])) {
+                $html .= '<tr>';
+                $html .= '<th>Messages</th>';
+                $html .= '<td>';
+                $rep_warnings = array();
+
+                BimpObject::loadClass('bimpapple', 'GSX_Repair');
+                $rep_errors = GSX_Repair::processRepairRequestOutcome($response['eligibilityDetails'], $rep_warnings);
+
+                if (count($rep_errors)) {
+                    $html .= BimpRender::renderAlerts($rep_errors);
+                    $repair_ok = 0;
+                }
+
+                if (count($rep_warnings)) {
+                    $html .= BimpRender::renderAlerts($rep_warnings, 'warning');
+                }
+
+                if ($rep_errors && !count($rep_warnings)) {
+                    $html .= BimpRender::renderAlerts('Aucun message', 'info');
+                }
+                $html .= '</td>';
+                $html .= '</tr>';
+            }
+
+            $html .= '</tbody>';
+            $html .= '</table>';
+        }
+
+        if (isset($response['parts']) && !empty($response['parts'])) {
+            $html .= '<h3>Eligibilité composants</h3>';
+
+            foreach ($response['parts'] as $part) {
+                $html .= '<h4>Composant "' . $part['number'] . '"</h4>';
+
+                $html .= '<table class="bimp_list_table">';
+                $html .= '<tbody class="headers_col">';
+
+                foreach (array(
+            'partType'            => 'Type de composant',
+            'coverageDescription' => 'Couverture',
+            'coverageCode'        => 'Code couverture',
+            'billable'            => 'Facturable'
+                ) as $path => $label) {
+                    $value = BimpTools::getArrayValueFromPath($part, $path, true);
+                    if (!is_null($value)) {
+                        $html .= '<tr><th>' . $label . '</th><td>' . $value . '</td></tr>';
+                    }
+                }
+
+                $html .= '</tbody>';
+                $html .= '</table>';
+            }
+        }
 
         return $html;
     }
@@ -3087,7 +3222,7 @@ class gsxController extends BimpController
         $html .= '<div class="buttonsContainer align-right">';
         $onclick = '';
         if ($this->use_gsx_v2) {
-            $onclick = '$(\'#findRepairsToImportForm\').slideDown(250);';
+            $onclick = '$(\'.gsxRepairViewForm\').hide();$(\'#findRepairsToImportForm\').slideDown(250);';
         } else {
             $repair_instance = BimpObject::getInstance('bimpapple', 'GSX_Repair');
             $onclick = $repair_instance->getJsActionOnclick('importRepair', array(
@@ -3103,11 +3238,15 @@ class gsxController extends BimpController
         $html .= '<button type="button" class="btn btn-default" onclick="' . $onclick . '">';
         $html .= '<i class="fas fa5-cloud-download-alt iconLeft"></i>Importer depuis GSX</button>';
 
-        $onclick = '$(\'#createRepairForm\').slideDown(250);';
+        $onclick = '$(\'.gsxRepairViewForm\').hide();$(\'#createRepairForm\').slideDown(250);';
         $html .= '<button type="button" class="btn btn-default" onclick="' . $onclick . '">';
         $html .= '<i class="fa fa-plus-circle iconLeft"></i>Créer une nouvelle réparation</button>';
 
         if ($this->use_gsx_v2) {
+            $onclick = '$(\'.gsxRepairViewForm\').hide();$(\'#testEligibilityForm\').slideDown(250);';
+            $html .= '<button type="button" class="btn btn-default" onclick="' . $onclick . '">';
+            $html .= BimpRender::renderIcon('fas_question-circle', 'iconLeft') . 'Tester éligibilité</button>';
+
             if (isset(GSX_Const::$urls['gsx'][GSX_v2::$mode]) && GSX_Const::$urls['gsx'][GSX_v2::$mode]) {
                 $html .= '<a href="' . GSX_Const::$urls['gsx'][GSX_v2::$mode] . '" class="btn btn-default" target="_blank">';
                 $html .= 'GSX' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');
@@ -3118,8 +3257,9 @@ class gsxController extends BimpController
         $html .= '</div>';
 
         if ($this->use_gsx_v2) {
-            $html .= '<div id="findRepairsToImportForm">';
-            $html .= '<div class="findRepairsToImportFormContent">';
+            // Form Import réparation
+            $html .= '<div id="findRepairsToImportForm" class="gsxRepairViewForm">';
+            $html .= '<div class="findRepairsToImportFormContent gsxRepairViewFormContent">';
 
             $buttons = array();
             $buttons[] = BimpRender::renderButton(array(
@@ -3153,8 +3293,9 @@ class gsxController extends BimpController
             $html .= '</div>';
             $html .= '</div>';
 
-            $html .= '<div id="createRepairForm">';
-            $html .= '<div class="createRepairFormContent">';
+            // Form Créa réparation
+            $html .= '<div id="createRepairForm" class="gsxRepairViewForm">';
+            $html .= '<div class="createRepairFormContent gsxRepairViewFormContent">';
 
             $buttons = array();
             $buttons[] = BimpRender::renderButton(array(
@@ -3187,6 +3328,44 @@ class gsxController extends BimpController
                             ), $buttons, 'Création d\'une nouvelle réparation');
 
             $html .= '</div>';
+            $html .= '</div>';
+            
+            // Form Test éligibilité: 
+            $html .= '<div id="testEligibilityForm" class="gsxRepairViewForm">';
+            $html .= '<div class="testEligibilityFormContent gsxRepairViewFormContent">';
+            
+            $buttons = array();
+            $buttons[] = BimpRender::renderButton(array(
+                        'label'       => 'Annuler',
+                        'icon_before' => 'times',
+                        'classes'     => array('btn btn-danger'),
+                        'attr'        => array(
+                            'onclick' => '$(\'#testEligibilityForm\').slideUp(250);'
+            )));
+
+            $onclick = 'gsx_loadEligibilityDetails($(this), ' . $sav->id . ', $(\'#gsxEligibilityDetails\'));';
+            $buttons[] = BimpRender::renderButton(array(
+                        'label'      => 'Valider',
+                        'icon_after' => 'arrow-circle-right',
+                        'classes'    => array('btn btn-primary'),
+                        'attr'       => array(
+                            'onclick' => $onclick
+            )));
+
+            $html .= BimpRender::renderFreeForm(array(
+                        array(
+                            'label' => 'Type de réparation',
+                            'input' => BimpInput::renderInput('select', 'eligibilityRepairType', null, array(
+                                'options' => GSX_Const::$repair_types
+                            ))
+                        ),
+                            ), $buttons, 'Test éligibilité');
+            
+            $html .= '</div>';
+            $html .= '</div>';
+
+            // Container détails éligibilité:
+            $html .= '<div id="gsxEligibilityDetails" style="display: none; margin: 15px 0; max-width: 800px">';
             $html .= '</div>';
         } else {
             $html .= '<div id="createRepairForm">';

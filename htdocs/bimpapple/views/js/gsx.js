@@ -244,7 +244,7 @@ function gsx_FetchRepairEligibility($button) {
 
                     $form.find('[name="gsx_fetchRepairEligibility"]').val(1);
                     bimpModal.$footer.find('.extra_button.create_repair_button.modal_' + modal_idx).remove();
-                    
+
                     var data = new FormData($form.get(0));
                     GsxAjax('gsxFetchRepairEligibility', data, $form.find('.ajaxResultContainer'), {
                         $form: $form,
@@ -261,12 +261,20 @@ function gsx_FetchRepairEligibility($button) {
                             if (typeof (result.repair_ok) !== 'undefined' && result.repair_ok) {
                                 bimpAjax.$form.find('[name="gsx_requestForm"]').val(1);
                                 bimpAjax.$form.find('[name="gsx_fetchRepairEligibility"]').val(0);
-                                
+
                                 var label = 'Créer la réparation<i class="fa fa-arrow-circle-right iconRight"></i>';
                                 var onclick = 'gsx_processRequestForm($(this))';
                                 bimpModal.addButton(label, onclick, 'primary', 'save_object_button create_repair_button', bimpAjax.modal_idx);
                             }
                         }
+//                        ,error: function(result, bimpAjax) {
+//                            bimpAjax.$form.find('[name="gsx_requestForm"]').val(1);
+//                                bimpAjax.$form.find('[name="gsx_fetchRepairEligibility"]').val(0);
+//                                
+//                                var label = 'Créer la réparation<i class="fa fa-arrow-circle-right iconRight"></i>';
+//                                var onclick = 'gsx_processRequestForm($(this))';
+//                                bimpModal.addButton(label, onclick, 'primary', 'save_object_button create_repair_button', bimpAjax.modal_idx);
+//                        }
                     });
                     return;
                 }
@@ -547,6 +555,38 @@ function gsx_loadDiagnosticsDetails($button, id_sav) {
     GsxAjax('gsxLoadDiagnosticsDetails', {
         id_sav: id_sav
     }, $('#diagnosticsDetails'), {
+        $button: $button,
+        id_sav: id_sav,
+        append_html: true,
+        display_success: false,
+        display_processing: true,
+        processing_padding: 20,
+        processing_msg: 'Chargement en cours'
+    });
+}
+
+function gsx_loadEligibilityDetails($button, id_sav, $resultContainer) {
+    if ($.isOk($button) && $button.hasClass('disabled')) {
+        return;
+    }
+
+    if (!$.isOk($resultContainer)) {
+        $resultContainer = $('#gsxEligibilityDetails');
+    }
+
+    var data = {
+        id_sav: id_sav
+    };
+
+    var $container = $button.findParentByClass('testEligibilityFormContent');
+    if ($.isOk($container)) {
+        var repairType = $container.find('[name="eligibilityRepairType"]').val();
+        if (repairType) {
+            data['repairType'] = repairType;
+        }
+    }
+
+    GsxAjax('gsxLoadRepairEligibilityDetails', data, $resultContainer, {
         $button: $button,
         id_sav: id_sav,
         append_html: true,

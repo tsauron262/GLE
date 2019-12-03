@@ -12,12 +12,15 @@ class adminController extends BimpController{
         $tabEntCaisse = array();
         while ($ln = $db->fetch_object($sql)){
             $tabEntCaisse[$ln->ref][$ln->id] = $ln->name;
+            $this->tabEntrepotEnfant[$ln->fk_parent][$ln->rowid] = $ln->ref;
+            $this->tabIdEntrepot[$ln->ref] = $ln->rowid;
         }
         
         
+        $tabResult = array();
         foreach($tabEntCaisse as $entrepot => $tabCaisses){
-            $html .= "<br/><br/>Entrepot : ".$entrepot;
             $tot = 0;
+            $htmlEnt = "";
             foreach($tabCaisses as $idCaisse => $nameCaisse){
                 $sql2 = $db->query("SELECT * FROM `llx_bc_caisse_session` WHERE `id_caisse` = ".$idCaisse." AND `date_closed` < '".$dateRef." 23:59:59' ORDER BY `date_closed` DESC LIMIT 0,1");
                 $montant = 0;$date = "";
@@ -26,14 +29,41 @@ class adminController extends BimpController{
                     $montant = $ln->fonds_end;
                     $date = $ln->date_closed;
                 }
-                $html .= "<br/>Caisse : ".$nameCaisse." | ".dol_print_date($date)." | ".$montant;
+                $htmlEnt .= "<h4>Caisse : ".$nameCaisse." </h4>Au ".dol_print_date($date)." | ".$montant." €";
                 $tot += $montant;
             }
-            $html .= "<br/>Total : ".$tot;
             
+            $tabResult[$entrepot]= array("html"=>$htmlEnt, 'entrepot'=>$entrepot, "tot" => $tot);
+        }
+        
+        foreach($tabResult as $result){
+        }
+        
+        foreach($tabResult as $result){
+            $html .= "<h3>Entrepot ".$result["entrepot"]." : ".$result["tot"]." €</h3>";
+            
+            $totEnfant = 0;
+            $htmlEnfant = $this->getChildInfo($tabResult, $result["entrepot"], $totEnfant);
+            
+            
+            if($htmlEnfant != '')
+                $html .= "<h4>".$htmlEnfant. " : ".($result["tot"]+$totEnfant)." €</h4>";
+            $html .= $result["html"]."<br/><br/>";
         }
         
         return array("html"=>$html);
+    }
+    
+    function getChildInfo($tabResult, $entrepot, &$tot = 0){
+        $html = "";
+            if(isset($this->tabEntrepotEnfant[$this->tabIdEntrepot[$entrepot]])){
+                foreach($this->tabEntrepotEnfant[$this->tabIdEntrepot[$entrepot]] as $entrepotFille){
+                    $tot += $tabResult[$entrepotFille]["tot"];
+                    $html .= '+'.$entrepotFille .$this->getChildInfo($tabResult, $entrepotFille, $tot);
+                }
+            }
+            
+            return $html;
     }
     
     

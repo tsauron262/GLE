@@ -1854,7 +1854,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
                     }
                 }
             } else {
-                if ((float) $reception_data['qty'] > 0) {
+                if ((float) $reception_data['qty'] > 0 || (float) $reception_data['qty'] < 0) {
                     // Traitement de la réservation correspondante: 
                     if ($id_commande_client_line) {
                         if (isset($reception_data['assign_to_commande_client']) && (int) $reception_data['assign_to_commande_client']) {
@@ -1879,7 +1879,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
                     if (!count($errors)) {
                         // Retrait du stock:
                         if (BimpObject::objectLoaded($product)) {
-                            $stock_label = 'Annulation réception n°' . $reception->getData('num_reception') . ' BR: ' . $reception->getData('ref') . ' - Commande fournisseur: ' . $commande_fourn->getData('ref');
+                            $stock_label = 'Annulation réception n°' . $reception->getData('num_reception') .((float) $reception_data['qty'] < 0? ' (Retour au fournisseur)' : ''). ' BR: ' . $reception->getData('ref') . ' - Commande fournisseur: ' . $commande_fourn->getData('ref');
                             $code_mvt = 'ANNUL_CMDF_' . $commande_fourn->id . '_LN_' . $this->id . '_RECEP_' . $reception->id;
 
                             if ($product->dol_object->correct_stock($user, $id_entrepot, (int) $reception_data['qty'], 1, $stock_label, 0, $code_mvt, "order_supplier", $commande_fourn->id) <= 0) {

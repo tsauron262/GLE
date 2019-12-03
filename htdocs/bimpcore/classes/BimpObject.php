@@ -4684,7 +4684,7 @@ class BimpObject extends BimpCache
 
     // Gestion des notes:
 
-    public function addNote($content, $visibility = null, $viewed = 0, $auto = 1)
+    public function addNote($content, $visibility = null, $viewed = 0, $auto = 1, $email = '', $type_author = 1)
     {
         if (!$this->isLoaded()) {
             return array('ID ' . $this->getLabel('of_the') . ' absent');
@@ -4694,7 +4694,7 @@ class BimpObject extends BimpCache
         if (is_null($visibility)) {
             $visibility = BimpNote::BIMP_NOTE_MEMBERS;
         }
-
+        
         $errors = $note->validateArray(array(
             'obj_type'   => 'bimp_object',
             'obj_module' => $this->module,
@@ -4703,7 +4703,9 @@ class BimpObject extends BimpCache
             'visibility' => (int) $visibility,
             'content'    => $content,
             'viewed'     => $viewed,
-            'auto'       => $auto
+            'auto'       => $auto,
+            "email"      => $email,
+            "type_author"=> $type_author
         ));
 
         if (!count($errors)) {

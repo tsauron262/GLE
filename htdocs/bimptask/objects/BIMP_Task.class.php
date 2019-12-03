@@ -10,6 +10,7 @@ class BIMP_Task extends BimpObject
         'consoles@bimp.fr' => "CONSOLES", 
         'licences@bimp.fr' => "LICENCES", 
         'vols@bimp.fr' => "VOLS", 
+        'sms-apple@bimp.fr' => "Code APPLE", 
         'other' => 'AUTRE');
     public static $nbNonLu = 0;
     public static $nbAlert = 0;
@@ -51,6 +52,14 @@ class BIMP_Task extends BimpObject
         $tasks = $this->getList(array('dst' => $this->getData('dst'), 'src' => $this->getData('src'), 'subj' => $this->getData('subj'), 'txt' => $this->getData('txt'), 'prio' => $this->getData('prio'), 'status' => 0));
         if (count($tasks) == 0)
             parent::create();
+    }
+    
+    public function create(&$warnings = array(), $force_create = false) {
+        $return = parent::create($warnings, $force_create);
+        
+        $this->updateField('date_update', $this->getData('date_create'));
+        
+        return $return;
     }
 
     public function renderLight()
@@ -268,6 +277,10 @@ class BIMP_Task extends BimpObject
             'errors'   => $errors,
             'warnings' => $warnings
         );
+    }
+    
+    public function afterCreateNote($note){
+            $this->updateField ('date_update', $note->getData('date_create'));
     }
 
     public function actionClose($data, &$success)

@@ -115,6 +115,8 @@ function traiteTask($dst, $src, $subj, $txt) {
         $tab = array("obj_type" => "bimp_object", "obj_module" => "bimptask", "obj_name" => "BIMP_Task", "id_obj" => $idTask, "type_author" => "3", "email" => $src, "visibility" => 4, "content" => $txt);
         $errors = array_merge($errors, $note->validateArray($tab));
         $errors = array_merge($errors, $note->create());
+        
+//        $errors = array_merge($errors, $task->addNote($txt, 4, 0, 0, $src, 3));
     }
 
     if (count($errors) > 0) {

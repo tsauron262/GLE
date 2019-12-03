@@ -259,11 +259,16 @@ class FournObjectLine extends ObjectLine
                         if (!BimpObject::objectLoaded($product)) {
                             $errors[] = 'Le produit d\'ID ' . $this->id_product . ' n\'existe pas';
                         } else {
-                            if ((int) $product->getData('fk_product_type') === 0) {
-                                $qty_str = (string) $this->qty;
+                            $statut = $product->getData('tobuy');
+                            if($statut == 0)
+                                $errors[] = 'Le produit ' . $product->getData('ref') . ' est hors achat';
+                            else{
+                                if ((int) $product->getData('fk_product_type') === 0) {
+                                    $qty_str = (string) $this->qty;
 
-                                if (preg_match('/.*\..*/', $qty_str)) {
-                                    $errors[] = 'Les quantités décimales ne sont autorisées que pour les produits de type "Service". Veuillez corriger';
+                                    if (preg_match('/.*\..*/', $qty_str)) {
+                                        $errors[] = 'Les quantités décimales ne sont autorisées que pour les produits de type "Service". Veuillez corriger';
+                                    }
                                 }
                             }
                         }
@@ -337,7 +342,7 @@ class FournObjectLine extends ObjectLine
         }
         return $errors;
     }
-
+  
     public function create(&$warnings = array(), $force_create = false)
     {
         $errors = array();

@@ -249,7 +249,16 @@ class gsxController extends BimpController
                         } else {
                             $client_data = $client->getDataArray();
 
+                            
+                            $nom = $prenom = "";
+                            $tabNomPre = explode(" ", $client_data['nom']);
+                            if(count($tabNomPre) == 2){
+                                $nom = $tabNomPre[0];
+                                $prenom = $tabNomPre[1];
+                            }
                             $values['customer'] = array(
+                                'firstName'      => (string) $prenom,
+                                'lastName'       => (string) $nom,
                                 'companyName'  => (string) $client_data['nom'],
                                 'emailAddress' => (string) $client_data['email'],
                                 'primaryPhone' => (string) $client_data['phone'],

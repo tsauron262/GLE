@@ -78,6 +78,9 @@ function traiteTask($dst, $src, $subj, $txt) {
     if (isset($matches[0])) {
         $idTask = str_replace($const, "", $matches[0]);
     }
+    
+    if($dst == "sms-apple@bimp.fr")
+        $idTask= 25350;
 
     $tabTxt = explode("-------------", $txt);
     $tabTxt = explode("\n> ", $tabTxt[0]);

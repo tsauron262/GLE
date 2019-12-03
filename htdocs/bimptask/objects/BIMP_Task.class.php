@@ -12,6 +12,7 @@ class BIMP_Task extends BimpObject
         'vols@bimp.fr' => "VOLS", 
         'sms-apple@bimp.fr' => "Code APPLE", 
         'other' => 'AUTRE');
+    public static $srcNotAttribute = array('sms-apple@bimp.fr');
     public static $nbNonLu = 0;
     public static $nbAlert = 0;
     public static $valStatus = array(0 => array('label' => "En cours", 'classes' => array('error')), 4 => array('label' => "Terminé", 'classes' => array('info')));
@@ -317,7 +318,7 @@ class BIMP_Task extends BimpObject
     {
         global $user;
         $buttons = array();
-        if ($this->isEditable()) {
+        if ($this->isEditable() && !in_array($this->getType(),self::$srcNotAttribute)) {
             if ($this->can("edit")) {
                 if (filter_var($this->getData("src"), FILTER_VALIDATE_EMAIL) && filter_var($this->getData("dst"), FILTER_VALIDATE_EMAIL))
                     $buttons[] = array(

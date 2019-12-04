@@ -46,15 +46,6 @@ sections:
                               name: infos
                               panel: 1
                               object: sav
-                              
-                    - cols: 
-                        - type: custom
-                          col_lg: 6
-                          col_md: 6
-                          custom: 
-                              callback: 
-                                  method: renderPropalesList
-                                  object: sav                              
           - id: materiel
             title: Matériel
             struct: 
@@ -74,28 +65,11 @@ sections:
           - id: devis
             title: Devis
             struct: 
-                type: rows
-                rows: 
-                    - cols: 
-                        - type: custom
-                          custom: 
-                              callback: 
-                                  method: renderPropalView
-                                  object: sav
-                                  
-                    - cols: 
-                        - type: custom
-                          custom: 
-                              callback: 
-                                  method: renderApplePartsList
-                                  object: sav
-                    - cols: 
-                        - type: custom
-                          custom: 
-                              callback: 
-                                  method: renderLoadPartsButton
-                                  params:
-                                      object: sav                    
+                type: view
+                view: 
+                    object: sav
+                    name: propal
+                    
           - id: gsx
             title: <i class="fa fa-apple iconLeft"></i>GSX
             content: 

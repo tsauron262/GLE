@@ -76,6 +76,17 @@ forms:
                       prop: 
                           name: lookupNumbers
                           is_static: 1
+                          
+    part_update: 
+        title: Mise à jour du numéro de série
+        icon: fas_pen
+        rows: 
+            - custom: 1
+              label: Nouveau numéro de série
+              input_name: kgb_number
+              input: 
+                  type: text
+              required: 1
             
 fields_tables:
     infos: 
@@ -154,6 +165,7 @@ views:
                         
     gsx_v2: 
         panel: 0
+        objects_change_reload: BS_SAV,BS_SavPropalLine,BS_ApplePart
         rows: 
             - cols: 
                   - type: object_header

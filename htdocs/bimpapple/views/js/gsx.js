@@ -597,6 +597,51 @@ function gsx_loadEligibilityDetails($button, id_sav, $resultContainer) {
     });
 }
 
+function gsx_loadUpdatePartKgbForm($button, id_sav, id_repair, part_number) {
+    loadModalForm($button, {
+        module: 'bimpapple',
+        object_name: 'GSX_Repair',
+        id_object: id_repair,
+        form_name: 'part_update'
+    }, 'Mise à jour du numéro de série', function () {
+        bimpModal.$footer.find('.save_object_button.modal_' + bimpModal.idx).attr('onclick', 'gsx_updatePartKgb($(this), ' + id_sav + ',' + id_repair + ', \'' + part_number + '\')');
+    });
+}
+
+function gsx_updatePartKgb($button, id_sav, id_repair, part_number) {
+    var modal_idx = parseInt($button.data('modal_idx'));
+
+    if (modal_idx) {
+        var $form = bimpModal.$contents.find('#modal_content_' + modal_idx);
+        if ($.isOk($form)) {
+            var kgb_number = $form.find('[name="kgb_number"]').val();
+
+            if (!kgb_number) {
+                bimp_msg('Veuillez saisir le nouveau numéro de série', 'warning', null, true);
+                return;
+            }
+
+            GsxAjax('gsxRepairAction', {
+                action: 'updatePartNumber',
+                id_repair: id_repair,
+                part_number: part_number,
+                kgb_number: kgb_number
+            }, $form.find('.ajaxResultContainer'), {
+                $button: $button,
+                id_sav: id_sav,
+                modal_idx: modal_idx,
+                display_success_in_popup_only: true,
+                display_processing: true,
+                processing_padding: 20,
+                success: function (result, bimpAjax) {
+                    bimpModal.removeContent(bimpAjax.modal_idx, true, false);
+                    reloadRepairsViews(bimpAjax.id_sav);
+                }
+            });
+        }
+    }
+}
+
 // GSX V1 / V2:
 
 var PM = [];

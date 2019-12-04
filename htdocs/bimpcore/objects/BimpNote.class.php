@@ -36,6 +36,17 @@ class BimpNote extends BimpObject
         self::BN_DEST_USER  => 'Utilisateur',
         self::BN_DEST_GROUP => 'Group'
     );
+    
+    public function create(&$warnings = array(), $force_create = false) {
+        $return = parent::create($warnings, $force_create);
+        
+        if(!count($return)){
+            $obj = $this->getParentInstance();
+            if(is_object($obj) && $obj->isLoaded() && method_exists($obj, 'afterCreateNote'))
+                    $obj->afterCreateNote($this);
+        }
+        return $return;
+    }
 
     // Getters booléens:
 

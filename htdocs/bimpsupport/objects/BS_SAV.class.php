@@ -2356,7 +2356,7 @@ class BS_SAV extends BimpObject
                     $errors[] = 'Attention: PDF du devis non trouvé et donc non envoyé au client File : ' . $fileProp;
                     dol_syslog('SAV "' . $this->getRef() . '" - ID ' . $this->id . ': échec envoi du devis au client ' . print_r($errors, 1), LOG_ERR, 0, "_devissav");
                 } else {
-                    $errors[] = 'Attention: PDF du devis pas encore créer File : ' . $fileProp;
+                    $errors[] = 'Attention: PDF du devis pas encore créé File : ' . $fileProp;
                 }
             } else {
                 unset($propal);

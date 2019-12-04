@@ -14,7 +14,7 @@ class FixeTabs_bimptask extends FixeTabs_module {
         $tasks = $task->getList(array('id_user_owner' => (int) $this->user->id, 'status' => array(
                 'operator' => '<',
                 'value' => 4
-        )));
+        )), null, null,'date_update');
         $i = $j = 0;
         BIMP_Task::$nbNonLu = 0;
         BIMP_Task::$nbAlert = 0;
@@ -48,7 +48,7 @@ class FixeTabs_bimptask extends FixeTabs_module {
             'status' => array(
                 'operator' => '<',
                 'value' => 4
-        )));
+        )), null, null,'date_update');
 
         $i2 = $j2 = 0;
         BIMP_Task::$nbNonLu = 0;

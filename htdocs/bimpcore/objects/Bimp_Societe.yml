@@ -393,6 +393,8 @@ lists:
         icon: fas_building
         add_btn_label: Nouvelle société
         checkboxes: 1
+        configurable: 1
+        filters_panel: default
         bulk_actions:
             - label: supprimer les société sélectionnées
               icon: fas_trash-alt
@@ -422,7 +424,135 @@ lists:
                 field: code_client
             origine:
                 field: origine
+       
                 
+                
+lists_cols: 
+    id: 
+        field: id
+    nom:
+        field: nom
+    name_alias:
+        field: name_alias
+    email: 
+        field: email
+    phone:
+        field: phone
+    address:
+        field: address
+    zip:
+        field: zip
+    town: 
+        field: town
+    origine:
+        field: origine
+    accounting_account:
+        field: accounting_account
+    accounting_account_fournisseur:
+        field: accounting_account_fournisseur
+    is_salarie:
+        field: is_salarie
+    status:
+        field: status
+    client:
+        field: client
+    fournisseur:
+        field: fournisseur
+    code_client:
+        field: code_client
+    code_fournisseur:
+        field: code_fournisseur
+    code_compta:
+        field: code_compta
+    code_compta_fournisseur:
+        field: code_compta_fournisseur
+    fk_pays:
+        field: fk_pays
+    fk_departement:
+        field: fk_departement
+    siren:
+        field: siren
+    siret:
+        field: siret
+    ape:
+        field: ape
+    exported:
+        field: exported
+    mode_reglement:
+        field: mode_reglement
+    cond_reglement_id:
+        field: cond_reglement_id
+    num_sepa:
+        field: num_sepa
+    note_private:
+        field: note_private
+    note_public:
+        field: note_public
+        
+        
+filters_panels: 
+    default: 
+        filters: 
+            id: 
+                field: id
+            nom:
+                field: nom
+            name_alias:
+                field: name_alias
+            email: 
+                field: email
+            phone:
+                field: phone
+            address:
+                field: address
+            zip:
+                field: zip
+            town: 
+                field: town
+            origine:
+                field: origine
+            accounting_account:
+                field: accounting_account
+            accounting_account_fournisseur:
+                field: accounting_account_fournisseur
+            is_salarie:
+                field: is_salarie
+            status:
+                field: status
+            client:
+                field: client
+            fournisseur:
+                field: fournisseur
+            code_client:
+                field: code_client
+            code_fournisseur:
+                field: code_fournisseur
+            code_compta:
+                field: code_compta
+            code_compta_fournisseur:
+                field: code_compta_fournisseur
+            fk_pays:
+                field: fk_pays
+            fk_departement:
+                field: fk_departement
+            siren:
+                field: siren
+            siret:
+                field: siret
+            ape:
+                field: ape
+            exported:
+                field: exported
+            mode_reglement:
+                field: mode_reglement
+            cond_reglement_id:
+                field: cond_reglement_id
+            num_sepa:
+                field: num_sepa
+            note_private:
+                field: note_private
+            note_public:
+                field: note_public  
 cards: 
     default: 
         type: societe_card

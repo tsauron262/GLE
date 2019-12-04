@@ -1474,7 +1474,7 @@ class GSX_Repair extends BimpObject
                                     $html .= '<td>' . $part['number'] . '</td>';
                                     $html .= '<td>' . $part['desc'] . '</td>';
                                     $html .= '<td>';
-                                    if ($part['current_price']) {
+                                    if ($part['current_price'] == 'none') {
                                         $html .= '<span class="warning">Absent du panier</span>';
                                     } else {
                                         $html .= BimpTools::displayMoneyValue($part['current_price']);

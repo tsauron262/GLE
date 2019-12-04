@@ -1535,6 +1535,10 @@ class gsxController extends BimpController
                             )
                         );
                     }
+                    else{
+                        $parts[] = array(
+                            'number'         => $part->getData('part_number'));
+                    }
                 }
 
                 if (GSX_Const::$mode === 'test') {

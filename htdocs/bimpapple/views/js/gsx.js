@@ -244,7 +244,7 @@ function gsx_FetchRepairEligibility($button) {
 
                     $form.find('[name="gsx_fetchRepairEligibility"]').val(1);
                     bimpModal.$footer.find('.extra_button.create_repair_button.modal_' + modal_idx).remove();
-                    
+
                     var data = new FormData($form.get(0));
                     GsxAjax('gsxFetchRepairEligibility', data, $form.find('.ajaxResultContainer'), {
                         $form: $form,
@@ -261,12 +261,20 @@ function gsx_FetchRepairEligibility($button) {
                             if (typeof (result.repair_ok) !== 'undefined' && result.repair_ok) {
                                 bimpAjax.$form.find('[name="gsx_requestForm"]').val(1);
                                 bimpAjax.$form.find('[name="gsx_fetchRepairEligibility"]').val(0);
-                                
+
                                 var label = 'Créer la réparation<i class="fa fa-arrow-circle-right iconRight"></i>';
                                 var onclick = 'gsx_processRequestForm($(this))';
                                 bimpModal.addButton(label, onclick, 'primary', 'save_object_button create_repair_button', bimpAjax.modal_idx);
                             }
                         }
+//                        ,error: function(result, bimpAjax) {
+//                            bimpAjax.$form.find('[name="gsx_requestForm"]').val(1);
+//                                bimpAjax.$form.find('[name="gsx_fetchRepairEligibility"]').val(0);
+//                                
+//                                var label = 'Créer la réparation<i class="fa fa-arrow-circle-right iconRight"></i>';
+//                                var onclick = 'gsx_processRequestForm($(this))';
+//                                bimpModal.addButton(label, onclick, 'primary', 'save_object_button create_repair_button', bimpAjax.modal_idx);
+//                        }
                     });
                     return;
                 }
@@ -555,6 +563,83 @@ function gsx_loadDiagnosticsDetails($button, id_sav) {
         processing_padding: 20,
         processing_msg: 'Chargement en cours'
     });
+}
+
+function gsx_loadEligibilityDetails($button, id_sav, $resultContainer) {
+    if ($.isOk($button) && $button.hasClass('disabled')) {
+        return;
+    }
+
+    if (!$.isOk($resultContainer)) {
+        $resultContainer = $('#gsxEligibilityDetails');
+    }
+
+    var data = {
+        id_sav: id_sav
+    };
+
+    var $container = $button.findParentByClass('testEligibilityFormContent');
+    if ($.isOk($container)) {
+        var repairType = $container.find('[name="eligibilityRepairType"]').val();
+        if (repairType) {
+            data['repairType'] = repairType;
+        }
+    }
+
+    GsxAjax('gsxLoadRepairEligibilityDetails', data, $resultContainer, {
+        $button: $button,
+        id_sav: id_sav,
+        append_html: true,
+        display_success: false,
+        display_processing: true,
+        processing_padding: 20,
+        processing_msg: 'Chargement en cours'
+    });
+}
+
+function gsx_loadUpdatePartKgbForm($button, id_sav, id_repair, part_number) {
+    loadModalForm($button, {
+        module: 'bimpapple',
+        object_name: 'GSX_Repair',
+        id_object: id_repair,
+        form_name: 'part_update'
+    }, 'Mise à jour du numéro de série', function () {
+        bimpModal.$footer.find('.save_object_button.modal_' + bimpModal.idx).attr('onclick', 'gsx_updatePartKgb($(this), ' + id_sav + ',' + id_repair + ', \'' + part_number + '\')');
+    });
+}
+
+function gsx_updatePartKgb($button, id_sav, id_repair, part_number) {
+    var modal_idx = parseInt($button.data('modal_idx'));
+
+    if (modal_idx) {
+        var $form = bimpModal.$contents.find('#modal_content_' + modal_idx);
+        if ($.isOk($form)) {
+            var kgb_number = $form.find('[name="kgb_number"]').val();
+
+            if (!kgb_number) {
+                bimp_msg('Veuillez saisir le nouveau numéro de série', 'warning', null, true);
+                return;
+            }
+
+            GsxAjax('gsxRepairAction', {
+                action: 'updatePartNumber',
+                id_repair: id_repair,
+                part_number: part_number,
+                kgb_number: kgb_number
+            }, $form.find('.ajaxResultContainer'), {
+                $button: $button,
+                id_sav: id_sav,
+                modal_idx: modal_idx,
+                display_success_in_popup_only: true,
+                display_processing: true,
+                processing_padding: 20,
+                success: function (result, bimpAjax) {
+                    bimpModal.removeContent(bimpAjax.modal_idx, true, false);
+                    reloadRepairsViews(bimpAjax.id_sav);
+                }
+            });
+        }
+    }
 }
 
 // GSX V1 / V2:

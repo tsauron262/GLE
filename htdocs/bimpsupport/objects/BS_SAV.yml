@@ -712,17 +712,40 @@ views:
         objects_change_reload: BS_SavProduct,BS_ApplePart,Bimp_Paiement
         rows:
             - cols: 
-                  - type: fields_table
-                    col_lg: 6
-                    col_md: 6
-                    fields_table: 
-                        name: infos
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  fields_table: 
+                      name: infos
                   
-                  - type: fields_table
-                    col_lg: 6
-                    col_md: 6
-                    fields_table:
-                        name: client
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  fields_table:
+                      name: client
+            - cols: 
+                - type: custom
+                  col_lg: 6
+                  col_md: 6
+                  custom: 
+                      callback: renderPropalesList            
+                      
+    propal: 
+        panel: 0
+        rows: 
+            - cols: 
+                - type: custom
+                  custom: 
+                      callback: renderPropalView
+            - cols: 
+                - type: custom
+                  custom: 
+                      callback: renderApplePartsList
+            - cols: 
+                - type: custom
+                  custom: 
+                      callback: renderLoadPartsButton
+            
     materiel:
         panel: 0
         rows:    

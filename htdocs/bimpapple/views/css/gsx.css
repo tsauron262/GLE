@@ -1,127 +1,123 @@
 /* line 1, ../scss/gsx.scss */
-#createRepairForm,
-#findRepairsToImportForm {
+.gsxRepairViewForm {
   display: none;
   text-align: center; }
-  /* line 7, ../scss/gsx.scss */
-  #createRepairForm .createRepairFormContent,
-  #createRepairForm .findRepairsToImportFormContent,
-  #findRepairsToImportForm .createRepairFormContent,
-  #findRepairsToImportForm .findRepairsToImportFormContent {
+  /* line 6, ../scss/gsx.scss */
+  .gsxRepairViewForm .gsxRepairViewFormContent {
     text-align: left;
     max-width: 600px;
     margin: auto;
     display: inline-block; }
 
-/* line 17, ../scss/gsx.scss */
+/* line 15, ../scss/gsx.scss */
 .partsListContainer .partsSearchContainer {
   padding: 10px;
   background-color: #F0F0F0;
   margin-bottom: 15px; }
-/* line 23, ../scss/gsx.scss */
+/* line 21, ../scss/gsx.scss */
 .partsListContainer .searchBloc {
   display: inline-block;
   margin-right: 15px;
   margin-bottom: 15px; }
-  /* line 28, ../scss/gsx.scss */
+  /* line 26, ../scss/gsx.scss */
   .partsListContainer .searchBloc input, .partsListContainer .searchBloc select {
     margin: 0 8px; }
-  /* line 31, ../scss/gsx.scss */
+  /* line 29, ../scss/gsx.scss */
   .partsListContainer .searchBloc .btn {
     margin: 0 15px; }
 
-/* line 38, ../scss/gsx.scss */
+/* line 36, ../scss/gsx.scss */
 #partsList .panel-title {
   font-weight: bold; }
-/* line 42, ../scss/gsx.scss */
+/* line 40, ../scss/gsx.scss */
 #partsList .badge {
   font-size: 11px;
   margin: -3px 8px 0; }
-  /* line 46, ../scss/gsx.scss */
+  /* line 44, ../scss/gsx.scss */
   #partsList .badge.badge-danger {
     background-color: #780000; }
 
-/* line 52, ../scss/gsx.scss */
+/* line 50, ../scss/gsx.scss */
 .partsSearchResult {
   display: none;
   padding: 10px;
   margin: 10px 0;
   background-color: #F0F0F0; }
 
-/* line 60, ../scss/gsx.scss */
+/* line 58, ../scss/gsx.scss */
 .curKeywords .curKeyword {
   display: inline-block;
   margin: 5px 12px;
   padding: 8px 12px;
   background-color: #fff;
   border: 1px solid #A0A0A0; }
-  /* line 67, ../scss/gsx.scss */
+  /* line 65, ../scss/gsx.scss */
   .curKeywords .curKeyword:before {
     font-family: 'FontAwesome';
     margin-right: 8px;
     content: '\f0b0'; }
-  /* line 73, ../scss/gsx.scss */
+  /* line 71, ../scss/gsx.scss */
   .curKeywords .curKeyword .removeKeyWord {
     cursor: pointer; }
-    /* line 76, ../scss/gsx.scss */
+    /* line 74, ../scss/gsx.scss */
     .curKeywords .curKeyword .removeKeyWord i {
       font-size: 14px;
       margin-left: 12px;
       color: #505050; }
-      /* line 81, ../scss/gsx.scss */
+      /* line 79, ../scss/gsx.scss */
       .curKeywords .curKeyword .removeKeyWord i:hover {
         color: #A00000; }
 
-/* line 89, ../scss/gsx.scss */
+/* line 87, ../scss/gsx.scss */
 .partSearchNum {
   display: inline-block;
   margin: 5px 12px;
   padding: 8px 12px;
   background-color: #fff;
   border: 1px solid #A0A0A0; }
-  /* line 96, ../scss/gsx.scss */
+  /* line 94, ../scss/gsx.scss */
   .partSearchNum:before {
     font-family: 'FontAwesome';
     margin-right: 8px;
     content: '\f002'; }
-  /* line 102, ../scss/gsx.scss */
+  /* line 100, ../scss/gsx.scss */
   .partSearchNum .removeSearch {
     cursor: pointer; }
-    /* line 105, ../scss/gsx.scss */
+    /* line 103, ../scss/gsx.scss */
     .partSearchNum .removeSearch i {
       font-size: 14px;
       margin-left: 12px;
       color: #505050; }
-      /* line 110, ../scss/gsx.scss */
+      /* line 108, ../scss/gsx.scss */
       .partSearchNum .removeSearch i:hover {
         color: #A00000; }
 
-/* line 117, ../scss/gsx.scss */
+/* line 115, ../scss/gsx.scss */
 .dataInputTemplate {
   display: none; }
 
-/* line 121, ../scss/gsx.scss */
+/* line 119, ../scss/gsx.scss */
 .subInputsList {
   margin-bottom: 15px; }
 
-/* line 125, ../scss/gsx.scss */
+/* line 123, ../scss/gsx.scss */
 .rapairFormQuestions {
   margin: 15px;
   padding-left: 15px;
   border-left: 1px dotted #B2B2B2; }
 
-/* line 131, ../scss/gsx.scss */
+/* line 129, ../scss/gsx.scss */
 .repairFormQuestion {
   margin-top: 10px; }
-  /* line 134, ../scss/gsx.scss */
+  /* line 132, ../scss/gsx.scss */
   .repairFormQuestion .repairQuestionLabel {
     font-weight: bold; }
-  /* line 138, ../scss/gsx.scss */
+  /* line 136, ../scss/gsx.scss */
   .repairFormQuestion .repairQuestionInput {
     margin: 5px 15px; }
-    /* line 141, ../scss/gsx.scss */
+    /* line 139, ../scss/gsx.scss */
     .repairFormQuestion .repairQuestionInput input, .repairFormQuestion .repairQuestionInput select {
       width: 300px; }
-    /* line 145, ../scss/gsx.scss */
+    /* line 143, ../scss/gsx.scss */
     .repairFormQuestion .repairQuestionInput textarea {
       width: 600px; }

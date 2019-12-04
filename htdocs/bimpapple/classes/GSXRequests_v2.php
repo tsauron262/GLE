@@ -178,6 +178,11 @@ class GSX_Request_v2
 
         $inputName = ($prefixe ? $prefixe . '_' : '') . $dataName . (isset($index) ? '_' . $index : '');
         $valuesName = $dataName;
+        
+        if (isset($values[$valuesName]) && $values[$valuesName] === 'hidden') {
+            return '';
+        }
+        
         $defs = $this->getDataDefinitionsArray($dataName);
 
         if (!isset($defs)) {

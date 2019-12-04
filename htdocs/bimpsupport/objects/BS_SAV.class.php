@@ -593,12 +593,12 @@ class BS_SAV extends BimpObject
 
             // Réviser devis:  
             if ($this->isActionAllowed('reviewPropal')) {
-                $callback = 'function() {bimp_reloadPage();}';
+//                $callback = 'function() {bimp_reloadPage();}';
                 $buttons[] = array(
                     'label'   => 'Réviser Devis',
                     'icon'    => 'edit',
                     'onclick' => $this->getJsActionOnclick('reviewPropal', array(), array(
-                        'success_callback' => $callback,
+//                        'success_callback' => $callback,
                         'confirm_msg'      => 'Veuillez confirmer la révision du devis'
                     ))
                 );
@@ -606,26 +606,26 @@ class BS_SAV extends BimpObject
 
             // Envoyer devis: 
             if ($this->isActionAllowed('validate_propal')) {
-                $callback = 'function() {bimp_reloadPage();}';
+//                $callback = 'function() {bimp_reloadPage();}';
                 $buttons[] = array(
                     'label'   => 'Envoyer devis',
                     'icon'    => 'arrow-circle-right',
                     'onclick' => $this->getJsActionOnclick('validatePropal', array(), array(
                         'form_name'        => 'validate_propal',
-                        'success_callback' => $callback
+//                        'success_callback' => $callback
                     ))
                 );
             }
 
             // Ajouter acompte: 
             if ($this->isActionAllowed('validate_propal') && $this->getData('id_facture_acompte') < 1) {
-                $callback = 'function() {bimp_reloadPage();}';
+//                $callback = 'function() {bimp_reloadPage();}';
                 $buttons[] = array(
                     'label'   => 'Ajouter Acompte',
                     'icon'    => 'plus-circle',
                     'onclick' => $this->getJsActionOnclick('addAcompte', array(), array(
                         'form_name'        => 'add_acompte',
-                        'success_callback' => $callback
+//                        'success_callback' => $callback
                     ))
                 );
             }
@@ -1050,7 +1050,7 @@ class BS_SAV extends BimpObject
                     foreach ($rows as $r) {
                         $onclick = $this->getJsActionOnclick('correctAcompteModePaiement', array('id_paiement' => (int) $r['rowid']), array(
                             'form_name'        => 'acompte_mode_paiement',
-                            'success_callback' => 'function() {bimp_reloadPage();}'
+//                            'success_callback' => 'function() {bimp_reloadPage();}'
                         ));
 
                         $html .= '<div style="margin: 15px 0">';
@@ -1279,6 +1279,48 @@ class BS_SAV extends BimpObject
         }
 
         return $html;
+    }
+
+    public function renderLoadPartsButton($serial = null, $suffixe = "")
+    {
+        if ((int) BimpCore::getConf('use_gsx_v2')) {
+            return '';
+        }
+
+        if (!BimpObject::objectLoaded($sav)) {
+            $html = BimpRender::renderAlerts('ID du SAV absent ou invalide');
+        } else {
+            if (is_null($serial)) {
+                $equipment = $sav->getChildObject('equipment');
+                if (BimpObject::objectLoaded($equipment)) {
+                    $serial = $equipment->getData('serial');
+                }
+            }
+
+            if (is_null($serial)) {
+                $html = BimpRender::renderAlerts('Numéro de série de l\'équipement absent');
+            } elseif (preg_match('/^S?[A-Z0-9]{11,12}$/', $serial) || preg_match('/^S?[0-9]{15}$/', $serial)) {
+                $html = '<div id="loadPartsButtonContainer' . $suffixe . '" class="buttonsContainer">';
+                $html .= BimpRender::renderButton(array(
+                            'label'       => 'Charger la liste des composants compatibles',
+                            'icon_before' => 'download',
+                            'classes'     => array('btn btn-default'),
+                            'attr'        => array(
+                                'onclick' => 'loadPartsList(\'' . $serial . '\', ' . $sav->id . ', \'' . $suffixe . '\')'
+                            )
+                ));
+                $html .= '</div>';
+                $html .= '<div id="partsListContainer' . $suffixe . '" class="partsListContainer" style="display: none"></div>';
+            } else {
+                $html = BimpRender::renderAlerts('Le numéro de série de l\'équipement sélectionné ne correspond pas à un produit Apple: ' . $serial, 'warning');
+            }
+        }
+
+        return BimpRender::renderPanel('Liste des composants Apple comptatibles', $html, '', array(
+                    'type'     => 'secondary',
+                    'icon'     => 'bars',
+                    'foldable' => true
+        ));
     }
 
     // Traitements:

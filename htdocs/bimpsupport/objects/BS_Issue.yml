@@ -126,7 +126,7 @@ views:
                       
 lists: 
     default: 
-        objects_change_reload: BS_ApplePart
+        objects_change_reload: BS_ApplePart,GSX_Repair
         title: Liste des problèmes composants
         icon: fas_exclamation-circle
         positions: 1

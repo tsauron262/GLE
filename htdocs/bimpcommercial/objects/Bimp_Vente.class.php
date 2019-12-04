@@ -703,7 +703,7 @@ VQ - Collège
         $html = (isset($result['html']) ? $result['html'] : '');
 
         if ($html) {
-            $success_callback .= 'setTimeout(function() {bimpModal.newContent(\'Distribution\', \'' . $html . '\', false, \'\', $());}, 500);';
+            $success_callback .= 'setTimeout(function() {bimpModal.newContent(\'Distribution\', \'' . $html . '\', false, \'\', $());}, 1000);';
         }
 
         return array(

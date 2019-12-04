@@ -82,7 +82,12 @@ forms:
         icon: fas_pen
         rows: 
             - custom: 1
-              label: Nouveau numéro de série
+              label: Numéro de série actuel (KBB)
+              input_name: kbb_number
+              input: 
+                  type: text
+            - custom: 1
+              label: Nouveau numéro de série (KGB)
               input_name: kgb_number
               input: 
                   type: text

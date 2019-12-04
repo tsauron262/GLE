@@ -92,7 +92,7 @@ fields:
         required: 1
         
     amount: 
-        label: Montant unitaire
+        label: Différence unitaire à corriger
         type: money
         unsigned: 0
         required: 1

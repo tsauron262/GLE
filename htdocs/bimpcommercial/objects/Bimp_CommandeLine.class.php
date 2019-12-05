@@ -361,6 +361,33 @@ class Bimp_CommandeLine extends ObjectLine
         return $buttons;
     }
 
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array())
+    {
+        switch ($field_name) {
+            case 'reservations_status':
+                if (!empty($values)) {
+                    $sql = 'SELECT COUNT(DISTINCT reservation.id) FROM ' . MAIN_DB_PREFIX . 'br_reservation reservation';
+                    $sql .= ' WHERE reservation.id_commande_client_line = a.id AND reservation.qty > 0 AND reservation.status = ';
+
+                    $or = array();
+
+                    foreach ($values as $status) {
+                        $or['(' . $sql . $status . ')'] = array(
+                            'operator' => '>',
+                            'value'    => 0
+                        );
+                    }
+
+                    if (!empty($or)) {
+                        $filters['or_reservations_status'] = array(
+                            'or' => $or
+                        );
+                    }
+                }
+                break;
+        }
+    }
+
     // Getters valeurs:
 
     public function getFullQty()
@@ -937,6 +964,12 @@ class Bimp_CommandeLine extends ObjectLine
         }
 
         return array();
+    }
+
+    public static function getReservationsStatusArray()
+    {
+        BimpObject::loadClass('bimpreservation', 'BR_Reservation');
+        return BR_Reservation::getStatusListArrayStatic(BR_Reservation::BR_RESERVATION_COMMANDE);
     }
 
     // Affichages:

@@ -264,7 +264,9 @@ class Bimp_CommandeLine extends ObjectLine
                     $buttons[] = array(
                         'label'   => 'Supprimer',
                         'icon'    => 'fas_trash-alt',
-                        'onclick' => $this->getJsActionOnclick('removeAcompte')
+                        'onclick' => $this->getJsActionOnclick('removeAcompte', array(), array(
+                            'confirm_msg' => 'Veuillez confirmer le retrait de l\\\'acompte'
+                        ))
                     );
                 }
             }
@@ -350,7 +352,9 @@ class Bimp_CommandeLine extends ObjectLine
             $buttons[] = array(
                 'label'   => 'Supprimer',
                 'icon'    => 'fas_trash-alt',
-                'onclick' => $this->getJsActionOnclick('removeAcompte')
+                'onclick' => $this->getJsActionOnclick('removeAcompte', array(), array(
+                    'confirm_msg' => 'Veuillez confirmer le retrait de l\\\'acompte'
+                ))
             );
         }
 

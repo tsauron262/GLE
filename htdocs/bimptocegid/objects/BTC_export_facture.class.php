@@ -194,18 +194,18 @@ class BTC_export_facture extends BTC_export {
                         
                         if(!$is_frais_de_port && !$is_remise) {
                             if($use_d3e){
-                                if(($facture->getData('zone_vente') == 1 && $line->tva_tx > 0) || $facture->getData('zone_vente') != 1){
+                                if(($facture->getData('zone_vente') == 1 && $line->tva_tx != 0) || $facture->getData('zone_vente') != 1){
                                     $lignes[$use_compte_general]['HT'] += $line->multicurrency_total_ht - ($produit->getData('deee') * $line->qty);
                                     $total_ht_lignes += $line->multicurrency_total_ht;
                                 }
                             } else {
-                                if(($facture->getData('zone_vente') == 1 && $line->tva_tx > 0) || $facture->getData('zone_vente') != 1){
+                                if(($facture->getData('zone_vente') == 1 && $line->tva_tx != 0) || $facture->getData('zone_vente') != 1){
                                     $lignes[$use_compte_general]['HT'] += $line->multicurrency_total_ht;
                                     $total_ht_lignes += $line->multicurrency_total_ht;
                                 }
                             }
                             
-                            if($use_tva && $line->tva_tx > 0) {
+                            if($use_tva && $line->tva_tx != 0) {
                                 $lignes[$compte_general_tva]['HT'] += $line->multicurrency_total_tva;
                                 $total_ht_lignes += $line->multicurrency_total_tva;
                             } elseif($use_tva && $line->tva_tx == 0) {

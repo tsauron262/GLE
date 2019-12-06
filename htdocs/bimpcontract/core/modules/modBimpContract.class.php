@@ -8,7 +8,7 @@ class modBimpContract extends DolibarrModules {
         global $langs, $conf;
 
         $this->db = $db;
-        $this->numero = 752342;  // TODO Go on page https://wiki.dolibarr.org/index.php/List_of_modules_id to reserve id number for your module
+        $this->numero = 7523423;  // TODO Go on page https://wiki.dolibarr.org/index.php/List_of_modules_id to reserve id number for your module
         $this->rights_class = 'BimpContract';
 
         // Family can be 'crm','financial','hr','projects','products','ecm','technic','interface','other'

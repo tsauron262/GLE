@@ -1296,7 +1296,7 @@ class GSX_Repair extends BimpObject
                 foreach ($this->repairLookUp['parts'] as $part) {
                     $part_html = '';
                     $html = '<table class="bimp_list_table">';
-                    $html .= '<tbody class="header_col">';
+                    $html .= '<tbody class="headers_col">';
                     foreach (array(
                 'description'            => 'Désignation',
                 'type'                   => 'Type',

@@ -215,8 +215,13 @@ class BTC_export_facture extends BTC_export {
                             
                         }
                     } else {
-                        $lignes[$use_compte_general]['HT'] += $line->multicurrency_total_ht;
-                        $total_ht_lignes += $line->multicurrency_total_ht;
+                        if($use_tva && $line->tva_tx != 0) {
+                                $lignes[$compte_general_tva]['HT'] += $line->multicurrency_total_tva;
+                                $total_ht_lignes += $line->multicurrency_total_tva;
+                            } elseif($use_tva && $line->tva_tx == 0) {
+                                $lignes[$compte_general_tva_null]['HT'] += $line->multicurrency_total_ht;
+                                $total_ht_lignes += $line->multicurrency_total_ht;
+                            }
                     }
                 }
             } 

@@ -314,7 +314,7 @@ class GSX_Repair extends BimpObject
                         if (!count($errors)) {
                             $request = $this->gsx->_requestBuilder($requestName, '', array(
                                 'returnOrderNumber' => $part['returnOrderNumber'],
-                                'partNumber'        => $part['partNumber']
+                                'partNumber'        => $part['number']
                             ));
 
                             $labelResponse = $this->gsx->request($request, $client);
@@ -322,6 +322,8 @@ class GSX_Repair extends BimpObject
                                 if (!file_put_contents(DOL_DATA_ROOT . $filePath, $labelResponse[$client . 'Response']['returnLabelData']['returnLabelFileData'])) {
                                     $errors[] = 'Echec de la récupération de l\'étiquette de retour pour le composant "' . $part['number'] . '"';
                                 }
+                            } else {
+                                $errors = $this->gsx->errors['soap'];
                             }
                         }
                         $this->use_gsx_v2 = $use_gsx_v2;
@@ -1292,7 +1294,7 @@ class GSX_Repair extends BimpObject
             if (isset($this->repairLookUp['parts']) && !empty($this->repairLookUp['parts'])) {
 
                 foreach ($this->repairLookUp['parts'] as $part) {
-                    $part_html = "";
+                    $part_html = '';
                     $html = '<table class="bimp_list_table">';
                     $html .= '<tbody class="header_col">';
                     foreach (array(
@@ -1325,10 +1327,10 @@ class GSX_Repair extends BimpObject
                         }
                     }
 
-                    $html .= '</tbody>';
+                    $html .= '</tbody class="headers_col">';
                     $html .= '</table>';
 
-                    $part_html .= '<div class="col-sm-12 sol-md-6 col-lg-6">';
+                    $part_html .= '<div class="col-xs-12 col-sm-6 sol-md-6 col-lg-6">';
                     $title = BimpRender::renderIcon('fas_info-circle', 'iconLeft') . 'Infos';
                     $part_html .= BimpRender::renderPanel($title, $html, '', array(
                                 'foldable' => 1,
@@ -1337,7 +1339,7 @@ class GSX_Repair extends BimpObject
                     $part_html .= '</div>';
 
 
-                    $part_html .= '<div class="col-sm-12 sol-md-6 col-lg-6">';
+                    $part_html .= '<div class="col-xs-12 col-sm-6 sol-md-6 col-lg-6">';
                     // Infos commande:
                     $has_lines = false;
                     $html = '<table class="bimp_list_table">';

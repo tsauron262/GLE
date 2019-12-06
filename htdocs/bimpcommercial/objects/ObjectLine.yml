@@ -592,6 +592,13 @@ filters_panels:
             product: 
                 field: fk_product
                 child: dol_line
+            ref-prod:
+                field: ref-prod
+#                child: product
+                custom: 1
+                label: Réf Prod
+                type: value
+                data_type: string
             fk_product_type:
                 field: fk_product_type
                 custom: 1
@@ -600,6 +607,9 @@ filters_panels:
                 data_type: bool
                 input: 
                     type: toggle
+            secteur:
+                field: ef_type
+                child: parent
                 
             product: 
                 field: fk_product

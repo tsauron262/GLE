@@ -21,7 +21,7 @@ class BContract_contratLine extends BContract_contrat {
             $description = $data['description'];
         }
         
-        if ($contrat->dol_object->addLine($description, $produit->getData('price'), 1, $produit->getData('tva_tx'), 0, 0, $produit->id, $data['remise_percent'], $instance->getData('date_start'), $instance->getEndDate()->format('Y-m-d'), 'HT', 0.0, 0, null, 0, Array('fk_contrat' => $contrat->id)) > 0) {
+        if ($contrat->dol_object->addLine($description, $produit->getData('price'), $data['qty'], $produit->getData('tva_tx'), 0, 0, $produit->id, $data['remise_percent'], $instance->getData('date_start'), $instance->getEndDate()->format('Y-m-d'), 'HT', 0.0, 0, null, 0, Array('fk_contrat' => $contrat->id)) > 0) {
             //$errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($contrat));
             
         }

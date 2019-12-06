@@ -230,7 +230,7 @@ class GSX_Repair extends BimpObject
         return $buttons;
     }
 
-    public function updatePartNumber($part_number, $kgb_number, &$warnings = array())
+    public function updatePartNumber($part_number, $kgb_number, $kbb_number, &$warnings = array())
     {
         $errors = array();
 
@@ -241,17 +241,26 @@ class GSX_Repair extends BimpObject
         $this->initGsx($errors);
 
         if (empty($errors)) {
-            $result = $this->gsx_v2->exec('repairUpdate', array(
+            $params = array(
                 'repairId' => $this->getData('repair_number'),
                 'parts'    => array(
                     array(
                         'number'          => $part_number,
+                        'sequenceNumber'  => 1,
                         'kgbDeviceDetail' => array(
                             'id' => $kgb_number
                         )
                     )
                 )
-            ));
+            );
+
+            if ($kbb_number) {
+                $params['parts'][0]['kbbDeviceDetail'] = array(
+                    'id' => $kbb_number
+                );
+            }
+
+            $result = $this->gsx_v2->exec('repairUpdate', $params);
 
             if (!is_array($result) || empty($result)) {
                 $errors = $this->gsx_v2->getErrors();

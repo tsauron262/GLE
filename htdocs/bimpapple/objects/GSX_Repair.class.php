@@ -230,7 +230,7 @@ class GSX_Repair extends BimpObject
         return $buttons;
     }
 
-    public function updatePartNumber($part_number, $kgb_number, &$warnings = array())
+    public function updatePartNumber($part_number, $kgb_number, $kbb_number, &$warnings = array())
     {
         $errors = array();
 
@@ -241,17 +241,27 @@ class GSX_Repair extends BimpObject
         $this->initGsx($errors);
 
         if (empty($errors)) {
-            $result = $this->gsx_v2->exec('repairUpdate', array(
+            $params = array(
                 'repairId' => $this->getData('repair_number'),
                 'parts'    => array(
                     array(
-                        'number'          => $part_number,
-                        'kgbDeviceDetail' => array(
+                        'number'                => $part_number,
+                        'sequenceNumber'        => 1,
+                        'relatedSequenceNumber' => 1,
+                        'kgbDeviceDetail'       => array(
                             'id' => $kgb_number
                         )
                     )
                 )
-            ));
+            );
+
+            if ($kbb_number) {
+                $params['parts'][0]['kbbDeviceDetail'] = array(
+                    'id' => $kbb_number
+                );
+            }
+
+            $result = $this->gsx_v2->exec('repairUpdate', $params);
 
             if (!is_array($result) || empty($result)) {
                 $errors = $this->gsx_v2->getErrors();
@@ -261,6 +271,72 @@ class GSX_Repair extends BimpObject
         }
 
         return $errors;
+    }
+
+    public function getPartReturnLabelFileUrl($part, &$errors = array())
+    {
+        $fileName = '';
+        $filePath = '';
+
+        if ($this->isLoaded($errors)) {
+            if (isset($part['returnOrderNumber']) && $part['returnOrderNumber'] && isset($part['number']) && $part['number']) {
+                $sav = $this->getChildObject('sav');
+                if (BimpObject::objectLoaded($sav)) {
+                    $dir = '/bimpcore/sav/' . $sav->id . '';
+                    $fileName = 'label_' . $part['number'] . '_' . $part['returnOrderNumber'] . '.pdf';
+                    $filePath = $dir . '/' . $fileName;
+                    $fileUrl = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . 'sav/' . $sav->id . '/' . $fileName;
+
+                    if (!file_exists(DOL_DATA_ROOT . $filePath)) {
+                        if (!is_dir(DOL_DATA_ROOT . $dir)) {
+                            BimpTools::makeDirectories('bimpcore/sav/' . $sav->id, DOL_DATA_ROOT);
+                        }
+
+                        $serial = $sav->getSerial();
+                        if ($serial) {
+                            $this->setSerial($serial);
+                        }
+
+                        if ($this->isIphone) {
+                            $client = 'IPhoneReturnLabel';
+                        } else {
+                            $client = 'ReturnLabel';
+                        }
+                        $requestName = $client . 'Request';
+
+                        $use_gsx_v2 = $this->use_gsx_v2;
+                        $this->use_gsx_v2 = 0;
+
+                        if (is_null($this->gsx)) {
+                            $this->initGsx($errors);
+                        }
+
+                        if (!count($errors)) {
+                            $request = $this->gsx->_requestBuilder($requestName, '', array(
+                                'returnOrderNumber' => $part['returnOrderNumber'],
+                                'partNumber'        => $part['number']
+                            ));
+
+                            $labelResponse = $this->gsx->request($request, $client);
+                            if (isset($labelResponse[$client . 'Response']['returnLabelData']['returnLabelFileName'])) {
+                                if (!file_put_contents(DOL_DATA_ROOT . $filePath, $labelResponse[$client . 'Response']['returnLabelData']['returnLabelFileData'])) {
+                                    $errors[] = 'Echec de la récupération de l\'étiquette de retour pour le composant "' . $part['number'] . '"';
+                                }
+                            } else {
+                                $errors = $this->gsx->errors['soap'];
+                            }
+                        }
+                        $this->use_gsx_v2 = $use_gsx_v2;
+                    }
+                }
+            }
+        }
+
+        if ($filePath && file_exists(DOL_DATA_ROOT . $filePath)) {
+            return $fileUrl;
+        }
+
+        return '';
     }
 
     // Méthodes V1 / V2: 
@@ -1214,11 +1290,11 @@ class GSX_Repair extends BimpObject
     public function renderRepairParts()
     {
         if ($this->isLoaded()) {
-            
+
             if (isset($this->repairLookUp['parts']) && !empty($this->repairLookUp['parts'])) {
 
                 foreach ($this->repairLookUp['parts'] as $part) {
-                    $part_html = "";
+                    $part_html = '';
                     $html = '<table class="bimp_list_table">';
                     $html .= '<tbody class="header_col">';
                     foreach (array(
@@ -1251,10 +1327,10 @@ class GSX_Repair extends BimpObject
                         }
                     }
 
-                    $html .= '</tbody>';
+                    $html .= '</tbody class="headers_col">';
                     $html .= '</table>';
 
-                    $part_html .= '<div class="col-sm-12 sol-md-6 col-lg-6">';
+                    $part_html .= '<div class="col-xs-12 col-sm-6 sol-md-6 col-lg-6">';
                     $title = BimpRender::renderIcon('fas_info-circle', 'iconLeft') . 'Infos';
                     $part_html .= BimpRender::renderPanel($title, $html, '', array(
                                 'foldable' => 1,
@@ -1263,7 +1339,7 @@ class GSX_Repair extends BimpObject
                     $part_html .= '</div>';
 
 
-                    $part_html .= '<div class="col-sm-12 sol-md-6 col-lg-6">';
+                    $part_html .= '<div class="col-xs-12 col-sm-6 sol-md-6 col-lg-6">';
                     // Infos commande:
                     $has_lines = false;
                     $html = '<table class="bimp_list_table">';
@@ -1347,6 +1423,25 @@ class GSX_Repair extends BimpObject
                             $html .= '<td>' . $value . '</td>';
                             $html .= '</tr>';
                         }
+                    }
+
+                    if (isset($part['returnOrderNumber']) && $part['returnOrderNumber']) {
+                        $file_errors = array();
+                        $file_url = $this->getPartReturnLabelFileUrl($part, $file_errors);
+
+                        $html .= '<tr>';
+                        $html .= '<th>Etiquette de retour</th>';
+                        $html .= '<td>';
+                        if (count($file_errors)) {
+                            $html .= BimpRender::renderAlerts($file_errors);
+                        }
+                        if ($file_url) {
+                            $html .= '<a class="btn btn-default" href="' . $file_url . '" target="_blank">';
+                            $html .= BimpRender::renderIcon('fas_file-pdf', 'iconLeft') . 'Fichier PDF';
+                            $html .= '</a>';
+                        }
+                        $html .= '</td>';
+                        $html .= '</tr>';
                     }
 
                     $html .= '</tbody>';

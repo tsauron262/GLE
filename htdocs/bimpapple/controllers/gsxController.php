@@ -1029,7 +1029,7 @@ class gsxController extends BimpController
         $serial = (isset($params['serial']) ? $params['serial'] : '');
         $sav = null;
 
-        if($id_sav != 'none'){
+        if ($id_sav != 'none') {
             if (!$id_sav) {
                 $errors[] = 'ID du SAV absent';
             } else {
@@ -1054,9 +1054,10 @@ class gsxController extends BimpController
             'html'     => $html
         );
     }
-    
-    public function getInfoSerialHtml($serial){
-        
+
+    public function getInfoSerialHtml($serial)
+    {
+
         if (is_null($this->gsx_v2)) {
             $this->gsx_v2 = GSX_v2::getInstance();
         }
@@ -1280,6 +1281,7 @@ class gsxController extends BimpController
                     case 'updatePartNumber':
                         $part_number = (isset($params['part_number']) ? $params['part_number'] : '');
                         $kgb_number = (isset($params['kgb_number']) ? $params['kgb_number'] : '');
+                        $kbb_number = (isset($params['kbb_number']) ? $params['kbb_number'] : '');
 
                         if (!$part_number) {
                             $errors[] = 'Réference du composant absent';
@@ -1290,7 +1292,7 @@ class gsxController extends BimpController
                         }
 
                         if (!count($errors)) {
-                            $errors = $repair->updatePartNumber($part_number, $kgb_number, $warnings);
+                            $errors = $repair->updatePartNumber($part_number, $kgb_number, $kbb_number, $warnings);
                         }
                         break;
 
@@ -1545,10 +1547,9 @@ class gsxController extends BimpController
                                 'reproducibility' => $issue->getData('reproducibility')
                             )
                         );
-                    }
-                    else{
+                    } else {
                         $parts[] = array(
-                            'number'         => $part->getData('part_number'));
+                            'number' => $part->getData('part_number'));
                     }
                 }
 
@@ -2528,7 +2529,7 @@ class gsxController extends BimpController
                 $html .= $this->gsx_v2->displayErrors();
             }
 
-            if(is_object($sav)){
+            if (is_object($sav)) {
                 $html .= BimpRender::renderPanel('Diagnostics', $this->renderSavGsxDiagnosticsView($sav), '', array(
                             'panel_id' => 'sav_diagnostics',
                             'type'     => 'secondary',
@@ -2545,8 +2546,7 @@ class gsxController extends BimpController
 
                 $html .= $sav->renderApplePartsList('gsx');
             }
-        }
-        else{
+        } else {
             $warnings[] = "pas loggé";
             die('dddddd');
         }

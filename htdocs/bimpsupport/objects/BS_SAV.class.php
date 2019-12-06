@@ -257,6 +257,15 @@ class BS_SAV extends BimpObject
         return 0;
     }
 
+    public function hasParts()
+    {
+        if ($this->isLoaded()) {
+            return ((int) $this->db->getCount('bs_apple_part', '`id_sav` = ' . (int) $this->id) ? 1 : 0);
+        }
+
+        return 0;
+    }
+
     public function hasTierParts()
     {
         if ($this->isLoaded()) {
@@ -599,7 +608,7 @@ class BS_SAV extends BimpObject
                     'icon'    => 'edit',
                     'onclick' => $this->getJsActionOnclick('reviewPropal', array(), array(
 //                        'success_callback' => $callback,
-                        'confirm_msg'      => 'Veuillez confirmer la révision du devis'
+                        'confirm_msg' => 'Veuillez confirmer la révision du devis'
                     ))
                 );
             }
@@ -611,7 +620,7 @@ class BS_SAV extends BimpObject
                     'label'   => 'Envoyer devis',
                     'icon'    => 'arrow-circle-right',
                     'onclick' => $this->getJsActionOnclick('validatePropal', array(), array(
-                        'form_name'        => 'validate_propal',
+                        'form_name' => 'validate_propal',
 //                        'success_callback' => $callback
                     ))
                 );
@@ -624,7 +633,7 @@ class BS_SAV extends BimpObject
                     'label'   => 'Ajouter Acompte',
                     'icon'    => 'plus-circle',
                     'onclick' => $this->getJsActionOnclick('addAcompte', array(), array(
-                        'form_name'        => 'add_acompte',
+                        'form_name' => 'add_acompte',
 //                        'success_callback' => $callback
                     ))
                 );
@@ -1049,7 +1058,7 @@ class BS_SAV extends BimpObject
                 if (!is_null($rows)) {
                     foreach ($rows as $r) {
                         $onclick = $this->getJsActionOnclick('correctAcompteModePaiement', array('id_paiement' => (int) $r['rowid']), array(
-                            'form_name'        => 'acompte_mode_paiement',
+                            'form_name' => 'acompte_mode_paiement',
 //                            'success_callback' => 'function() {bimp_reloadPage();}'
                         ));
 

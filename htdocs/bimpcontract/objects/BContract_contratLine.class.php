@@ -1,9 +1,10 @@
 <?php
 
-class BContract_contratLine extends BimpObject {
+require_once DOL_DOCUMENT_ROOT . '/bimpcontract/objects/BContract_contrat.class.php';
 
-    protected function createDolObject(&$errors) {
-        global $db;
+class BContract_contratLine extends BContract_contrat {
+
+    public function createDolObject(&$errors) {
         $data = $this->getDataArray();
         $contrat = $this->getParentInstance();
         $produit = $this->getInstance('bimpcore', 'Bimp_Product', $data['fk_product']);
@@ -14,32 +15,30 @@ class BContract_contratLine extends BimpObject {
         
         $instance = $this->getParentInstance();
                 
-        if ($data['nb_materiel'] > 0) {
-            if (!empty($data['serials'])) {
-                
-                $array_serails = explode(',', $data['serials']);                
-                if ($data['nb_materiel'] > count($array_serails)) {
-                    $errors[] = $data['nb_materiel'] . " matériels couverts pour " . count($array_serails) . ' numéros de série rentrés';
-                    return 0;
-                }
-            } else {
-                $errors[] = "Vous devez rentré " . $data['nb_materiel'] . " numéro de série";
-                return 0;
-            }
-        }
-        
-        if(is_null($data['desc'])) {
+        if(is_null($data['desc']) || empty($data['desc'])) {
             $description = $produit->getData('label');
         } else {
             $description = $data['description'];
         }
         
-        if ($contrat->dol_object->addLine($description, $produit->getData('price'), $data['qty'], $produit->getData('tva_tx'), 0, 0, $produit->id, $data['remise_percent'], $instance->getData('date_start'), $instance->getEndDate()->format('Y-m-d'), 'HT', 0.0, 0, null, 0, Array('serials' => $data['serials'], 'nb_materiel' => $data['nb_materiel'], 'fk_contrat' => $contrat->id)) <= 0) {
-            $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($contrat));
-            return 0;
+        if ($contrat->dol_object->addLine($description, $produit->getData('price'), $data['qty'], $produit->getData('tva_tx'), 0, 0, $produit->id, $data['remise_percent'], $instance->getData('date_start'), $instance->getEndDate()->format('Y-m-d'), 'HT', 0.0, 0, null, 0, Array('fk_contrat' => $contrat->id)) > 0) {
+            //$errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($contrat));
+            
         }
-        return 1;
+        
+        return 0;
     }
+    
+    public function deleteDolObject(&$errors) {
+        global $user;
+        $contrat = $this->getParentInstance();
+        if($contrat->dol_object->deleteLine($this->id, $user) > 0) {
+            return ['success' => 'Ligne du contrat supprimée avec succès'];
+        }
+        
+    }
+    
+    public function updateAssociations() {}
 
     protected function updateDolObject(&$errors) {
         $data = $this->getDataArray();

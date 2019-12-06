@@ -245,9 +245,10 @@ class GSX_Repair extends BimpObject
                 'repairId' => $this->getData('repair_number'),
                 'parts'    => array(
                     array(
-                        'number'          => $part_number,
-                        'sequenceNumber'  => 1,
-                        'kgbDeviceDetail' => array(
+                        'number'                => $part_number,
+                        'sequenceNumber'        => 1,
+                        'relatedSequenceNumber' => 1,
+                        'kgbDeviceDetail'       => array(
                             'id' => $kgb_number
                         )
                     )

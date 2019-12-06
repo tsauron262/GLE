@@ -22,14 +22,6 @@ sections:
                 list: 
                     panel: 1
                     object: contrat
-          - id: assistance
-            title: Assistance incluses
-            struct: 
-                type: list
-                list: 
-                    panel: 1
-                    object: assistance_contrat
-          
           - id: recap_contrat_echeancier
             title: Récapitulatif des prélèvements contrat
             struct:
@@ -38,3 +30,10 @@ sections:
                     panel: 1
                     object: echeancier
                     name: default
+          - id: configuration
+            title: Configuration
+            struct: 
+                type: list
+                list: 
+                    panel: 1
+                    object: assistance_contrat

@@ -1,13 +1,15 @@
 <?php
 
-require_once '../../main.inc.php';
+require_once '../../bimpcore/main.php';
+
+require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 //error_reporting(E_ALL);
 ////error_reporting(E_ERROR);
 //ini_set('display_errors', 1);
 
-require_once DOL_DOCUMENT_ROOT . '/includes/nusoap/lib/nusoap.php';
-require_once DOL_DOCUMENT_ROOT . '/synopsisapple/gsxDatas.class.php';
-require_once DOL_DOCUMENT_ROOT . '/synopsisapple/partsCart.class.php';
+//require_once DOL_DOCUMENT_ROOT . '/includes/nusoap/lib/nusoap.php';
+//require_once DOL_DOCUMENT_ROOT . '/synopsisapple/gsxDatas.class.php';
+//require_once DOL_DOCUMENT_ROOT . '/synopsisapple/partsCart.class.php';
 
 $coefPrix = 1;
 
@@ -85,15 +87,19 @@ if (isset($_GET['action'])) {
 
         case 'loadProduct':
             if (isset($_GET['serial'])) {
-                if (isset($_GET['prodId'])) {
-                    $datas = new gsxDatas($_GET['serial'], $userId, $password, $serviceAccountNo);
-                    if ($datas->connect)
-                        echo $datas->getLookupHtml($_GET['prodId']);
-                    else
-                        echo $datas->getGSXErrorsHtml();
-                } else {
-                    echo '<p class="error">Une erreur est survenue  : ID produit absent</p>' . "\n";
-                }
+                
+                $gsx = BimpController::getInstance('bimpapple', 'gsx');
+                
+                $errors = $warning = array();
+                $tab = $gsx->getInfoSerialHtml($_GET['serial']);
+                
+                
+                echo $tab['html'];
+                
+                if(count($tab['errors']))
+                    print_r($tab['errors']);
+                if(count($tab['warning']))
+                    print_r($tab['warning']);
             } else {
                 echo '<p class="error">Une erreur est survenue (numéro de série absent)</p>' . "\n";
             }

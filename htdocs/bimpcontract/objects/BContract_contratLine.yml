@@ -1,6 +1,7 @@
 bootstrap: 1
 table: contratdet
 
+parent_module: bimpcontract
 parent_id_property: fk_contrat
 parent_object: BContract_contrat
 
@@ -41,7 +42,7 @@ fields:
         label: Contrat
         type: int
     fk_product:
-        label: produit
+        label: Produit
         type: id_object
         object: produit
         required: 1
@@ -54,7 +55,7 @@ fields:
                 type: search_product
                 societe_type: customer    
     qty:
-        label: Qté service
+        label: Qté
         type: qty
         default_value: 1
     price_ht:
@@ -74,19 +75,6 @@ fields:
     remise:
         label: Total remise
         type: money
-    # Extrafields
-    serials:
-        label: Numéros de série
-        dol_extra_field: 1
-        type: text
-        input:
-            help: Merci de séparer les numéros de série par (,), (;),(:) ou un retour à la ligne
-    nb_materiel:
-        label: Qté matériel
-        dol_extra_field: 1
-        default_value: 0
-        type: qty
-
 lists: 
     default: 
         title: Lignes du contrat
@@ -96,8 +84,7 @@ lists:
         n: 20
         checkbox: 1
         add_object_row: 0
-        update_btn: 1
-        edit_btn: 1
+        edit_btn: 0
         edit_form: default
         add_form_name: add
         delete_btn: 1
@@ -121,10 +108,6 @@ lists:
                 field: price_ht
             total_ttc:
                 field: total_ttc
-            nb_materiel:
-                field: nb_materiel
-            serials:
-                field: serials
 forms:
     default:
         rows:
@@ -141,16 +124,9 @@ forms:
             
     add:
         rows:
-            - field: description
             - field: fk_product
-            - field: qty
-            - custom: 1
-              input:
-                  type: qty
-              label: Nb matériel
-              value: 0
               input_name: nb_materiel
-            - field: serials
+            - field: qty
             - field: remise_percent
             - field: tva_tx
 

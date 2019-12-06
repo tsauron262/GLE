@@ -1029,12 +1029,14 @@ class gsxController extends BimpController
         $serial = (isset($params['serial']) ? $params['serial'] : '');
         $sav = null;
 
-        if (!$id_sav) {
-            $errors[] = 'ID du SAV absent';
-        } else {
-            $sav = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SAV', $id_sav);
-            if (!BimpObject::objectLoaded($sav)) {
-                $errors[] = 'Le SAV d\'ID ' . $id_sav . ' n\'existe pas';
+        if($id_sav != 'none'){
+            if (!$id_sav) {
+                $errors[] = 'ID du SAV absent';
+            } else {
+                $sav = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SAV', $id_sav);
+                if (!BimpObject::objectLoaded($sav)) {
+                    $errors[] = 'Le SAV d\'ID ' . $id_sav . ' n\'existe pas';
+                }
             }
         }
 
@@ -1051,6 +1053,15 @@ class gsxController extends BimpController
             'warnings' => $warnings,
             'html'     => $html
         );
+    }
+    
+    public function getInfoSerialHtml($serial){
+        
+        if (is_null($this->gsx_v2)) {
+            $this->gsx_v2 = GSX_v2::getInstance();
+        }
+        $tab = $this->gsxLoadSavGsxView(array('serial' => $serial, 'id_sav' => 'none'));
+        return $tab;
     }
 
     protected function gsxLoadSavRepairs($params)
@@ -2517,21 +2528,27 @@ class gsxController extends BimpController
                 $html .= $this->gsx_v2->displayErrors();
             }
 
-            $html .= BimpRender::renderPanel('Diagnostics', $this->renderSavGsxDiagnosticsView($sav), '', array(
-                        'panel_id' => 'sav_diagnostics',
-                        'type'     => 'secondary',
-                        'icon'     => 'fas_stethoscope',
-                        'foldable' => true
-            ));
+            if(is_object($sav)){
+                $html .= BimpRender::renderPanel('Diagnostics', $this->renderSavGsxDiagnosticsView($sav), '', array(
+                            'panel_id' => 'sav_diagnostics',
+                            'type'     => 'secondary',
+                            'icon'     => 'fas_stethoscope',
+                            'foldable' => true
+                ));
 
-            $html .= BimpRender::renderPanel('Réparations', $this->renderRepairs($sav), '', array(
-                        'panel_id' => 'sav_repairs',
-                        'type'     => 'secondary',
-                        'icon'     => 'fas_tools',
-                        'foldable' => true
-            ));
+                $html .= BimpRender::renderPanel('Réparations', $this->renderRepairs($sav), '', array(
+                            'panel_id' => 'sav_repairs',
+                            'type'     => 'secondary',
+                            'icon'     => 'fas_tools',
+                            'foldable' => true
+                ));
 
-            $html .= $sav->renderApplePartsList('gsx');
+                $html .= $sav->renderApplePartsList('gsx');
+            }
+        }
+        else{
+            $warnings[] = "pas loggé";
+            die('dddddd');
         }
 
         return $html;

@@ -35,7 +35,18 @@ class BL_CommandeShipment extends BimpObject
         return (int) parent::isEditable($force_edit);
     }
 
-    //getShipmentQty de commmande line
+    public function isFieldEditable($field, $force_edit = false)
+    {
+        $status = (int) $this->getData('status');
+        switch ($field) {
+            case 'id_user_resp':
+                if (!$force_edit && $status === self::BLCS_EXPEDIEE) {
+                    return 0;
+                }
+        }
+
+        return (int) parent::isFieldEditable($field, $force_edit);
+    }
 
     public function isActionAllowed($action, &$errors = array())
     {

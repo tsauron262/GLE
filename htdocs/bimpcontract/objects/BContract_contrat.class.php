@@ -109,13 +109,23 @@ class BContract_contrat extends BimpDolObject {
         'propal' => 'Proposition commercial'
     ];
     
+    
+    
     public static $dol_module = 'contract';
     
     function __construct($module, $object_name) {
-//        global $user;
-        if(BimpTools::getContext() == 'public') {
+        global $user;
+//        if(BimpTools::getContext() == 'public') {
+        if(BimpTools::getContext() == 'private'){
+            $this->redirectMode = 1;
+        } elseif(BimpTools::getContext() == 'public') {
             $this->redirectMode = 4;
         }
+        
+        if($user->id == 19)
+            $this->redirectMode = 4;
+            
+//        }
 //        if($user->id == 460 || $user->id == 512 || $user->admin) {
 //            $this->redirectMode = 4;
 //        }        
@@ -370,15 +380,20 @@ class BContract_contrat extends BimpDolObject {
         $card .= '<div class="col-md-4">';
         $card .= '<div class="card">';
         $card .= '<div class="header">';
-        $card .= '<h4 class="title">' . $this->getRef() . '</h4>';
+        $card .= '<h3 class="title"><b class="warning">' . $this->getRef() . '</b></h3>';
         $card .= '<p class="category">';
-        $card .= ($this->isValide()) ? 'Contrat en cours de vadité' : 'Contrat échu';
+        $card .= '<b>Type du contrat : ' . self::$objet_contrat[$this->getData('objet_contrat')]['label'] . '</b><br />';
+        $card .= '<b>Durée du contrat : '. $this->getData('duree_mois') .' mois</b><br />';
+        $card .= '<b>Périodicitée de facturation : '. self::$period[$this->getData('periodicity')] .'</b><br />';
         $card .= '</p>';
         $card .= '</div>';
         $card .= '<div class="content"><div class="footer"><div class="legend">';
-        $card .= ($this->isValide()) ? '<i class="fa fa-plus text-success"></i> <a href="?fc=contrat_ticket&id=' . $this->getData('id') . '&navtab-maintabs=tickets">Créer un ticket support</a>' : '';
-        $card .= '<i class="fa fa-eye text-info"></i><a href="?fc=contrat_ticket&id='.$this->getData('id').'">Voir le contrat</a></div><hr><div class="stats"></div></div></div>';
-        $card .= '</div></div>';
+        $card .= '<div class="btn_action_contrat">';
+        $card .=  ($this->isValide()) ? '<i class="fa fa-plus"></i> <a href="?fc=contrat_ticket&id=' . $this->getData('id') . '&navtab-maintabs=tickets">Créer un ticket support</a><br />' : "";
+        $card .= '<i class="fa fa-eye"></i><a href="?fc=contrat_ticket&id='.$this->getData('id').'">Voir le contrat</a>';
+        $card .= '</div>';
+        $card .= '</div><div class="stats"></div></div></div></div>';
+        $card .= '</div>';
 
         return $card;
     }
@@ -421,12 +436,11 @@ class BContract_contrat extends BimpDolObject {
     
     public function actionValidation($data, &$success) {
         global $user;
-        $have_contact = false;
+        $have_contact = true;
         $ref = $this->newRef($this->getData('objet_contrat') . date('ym'));
         $list_contact = $this->getSocieteContactsArray($this->getData('fk_soc'), false);
         
         foreach ($list_contact as $contact_type => $contact_name) {
-            print_r($contact_type . "<br />");
             $id_contact_type = $this->db->getValue('c_type_contact', 'rowid', 'code = "CONTACTSITECONTRAT"');
             if($contact_type == $id_contact_type) {
                 $have_contact = true;
@@ -443,6 +457,7 @@ class BContract_contrat extends BimpDolObject {
             return 0;
         }
         $this->dol_object->activateAll($user);
+        $this->actionGeneratePdf([], $success);
         
     }
     

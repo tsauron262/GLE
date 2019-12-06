@@ -80,6 +80,36 @@ class ObjectLine extends BimpObject
 //            self::$types[self::LINE_FREE] = 'Ligne libre';
         return parent::__construct($module, $object_name);
     }
+    
+    
+    public function getCustomFilterValueLabel($field_name, $value)
+    {
+        switch ($field_name) {
+            case 'id_product':
+                $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $value);
+                if (BimpObject::ObjectLoaded($product)) {
+                    return $product->getRef();
+                }
+                break;
+
+            case 'id_commercial':
+                if ((int) $value) {
+                    $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $value);
+                    if (BimpObject::ObjectLoaded($user)) {
+                        return $user->dol_object->getFullName();
+                    }
+                } else {
+                    return 'Aucun';
+                }
+                break;
+            case 'fk_product_type':
+                return ($value?'Oui': 'Non');
+        }
+
+        return parent::getCustomFilterValueLabel($field_name, $value);
+    }
+    
+    
 
     // Gestion des droits utilisateurs:
 
@@ -687,6 +717,67 @@ class ObjectLine extends BimpObject
                     'in' => $values
                 );
                 return;
+            case 'id_commercial':
+                $ids = array();
+                $empty = false;
+
+                foreach ($values as $value) {
+                    if ((int) $value) {
+                        $ids[] = (int) $value;
+                    } else {
+                        $empty = true;
+                    }
+                }
+                $joins['elemcont'] = array(
+                    'table' => 'element_contact',
+                    'on'    => 'elemcont.element_id = a.id_obj',
+                    'alias' => 'elemcont'
+                );
+                $joins['typecont'] = array(
+                    'table' => 'c_type_contact',
+                    'on'    => 'elemcont.fk_c_type_contact = typecont.rowid',
+                    'alias' => 'typecont'
+                );
+
+                $sql = '';
+
+                if (!empty($ids)) {
+                    $sql = '(typecont.element = \'' . static::$parent_comm_type . '\' AND typecont.source = \'internal\'';
+                    $sql .= ' AND typecont.code = \'SALESREPFOLL\' AND elemcont.fk_socpeople IN (' . implode(',', $ids) . '))';
+                }
+
+                if ($empty) {
+                    $sql .= ($sql ? ' OR ' : '');
+                    $sql = '(SELECT COUNT(ec2.fk_socpeople) FROM ' . MAIN_DB_PREFIX . 'element_contact ec2';
+                    $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'c_type_contact tc2 ON tc2.rowid = ec2.fk_c_type_contact';
+                    $sql .= ' WHERE tc2.element = \'' . static::$parent_comm_type . '\'';
+                    $sql .= ' AND tc2.source = \'internal\'';
+                    $sql .= ' AND tc2.code = \'SALESREPFOLL\'';
+                    $sql .= ' AND ec2.element_id = a.id_obj) = 0';
+                }
+
+                if ($sql) {
+                    $filters['commercial_custom'] = array(
+                        'custom' => $sql
+                    );
+                }
+                break;
+            case 'fk_product_type':
+                $alias = 'product';
+                $line_alias = 'dol_line';
+                $joins[$line_alias] = array(
+                    'alias' => $line_alias,
+                    'table' => static::$dol_line_table,
+                    'on'    => $line_alias . '.rowid = a.id_line'
+                );
+                $joins[$alias] = array(
+                    'alias' => $alias,
+                    'table' => 'product',
+                    'on'    => $alias . '.rowid = ' . $line_alias . '.fk_product'
+                );
+                $filters[$alias . '.fk_product_type'] = $values;
+                
+                break;
         }
 
         parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors);

@@ -2022,6 +2022,8 @@ class BimpController
     {
         $i++;
 
+        ignore_user_abort(0);
+        
         $bimp_fixe_tabs = new FixeTabs();
         $bimp_fixe_tabs->init();
 
@@ -2039,7 +2041,6 @@ class BimpController
                 $returnHtml = $html;
             $_SESSION[$hashCash]['html'] = $html;
             $_SESSION[$hashCash]['nbBouclePush'] = $_SESSION[$hashCash]['nbBouclePush'] * 1.1; //Pour ne pas surchargé quand navigateur resté ouvert, mais ne pas avoir des boucle morte quand navigation rapide
-
 
             return array(
                 'errors'     => $errors,

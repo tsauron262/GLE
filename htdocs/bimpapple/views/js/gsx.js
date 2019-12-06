@@ -616,6 +616,7 @@ function gsx_updatePartKgb($button, id_sav, id_repair, part_number) {
         var $form = bimpModal.$contents.find('#modal_content_' + modal_idx);
         if ($.isOk($form)) {
             var kgb_number = $form.find('[name="kgb_number"]').val();
+            var kbb_number = $form.find('[name="kbb_number"]').val();
 
             if (!kgb_number) {
                 bimp_msg('Veuillez saisir le nouveau numéro de série', 'warning', null, true);
@@ -626,7 +627,8 @@ function gsx_updatePartKgb($button, id_sav, id_repair, part_number) {
                 action: 'updatePartNumber',
                 id_repair: id_repair,
                 part_number: part_number,
-                kgb_number: kgb_number
+                kgb_number: kgb_number,
+                kbb_number: kbb_number
             }, $form.find('.ajaxResultContainer'), {
                 $button: $button,
                 id_sav: id_sav,

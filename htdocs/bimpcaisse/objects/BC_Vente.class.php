@@ -1035,14 +1035,14 @@ class BC_Vente extends BimpObject
         $html .= '<div class="col-lg-4">';
         $html .= '<button id="ventePaiementCBButton" type="button" class="ventePaiementButton btn btn-default btn-large"';
         $html .= ' onclick="displayNewPaiementForm($(this));" data-code="CG">';
-        $html .= '<i class="fa fas fa-envelope iconLeft"></i>Chéque Gallerie';
+        $html .= BimpRender::renderIcon('fas_money-check', 'iconLeft') . 'Chéque Gallerie';
         $html .= '</button>';
         $html .= '</div>';
 
         $html .= '<div class="col-lg-4">';
         $html .= '<button id="ventePaiementCBButton" type="button" class="ventePaiementButton btn btn-default btn-large"';
         $html .= ' onclick="displayNewPaiementForm($(this));" data-code="no">';
-        $html .= '<i class="fa fa-times-circle iconLeft"></i>Financement';
+        $html .= BimpRender::renderIcon('fas_hand-holding-usd', 'iconLeft') . 'Financement';
         $html .= '</button>';
         $html .= '</div>';
 
@@ -1083,7 +1083,7 @@ class BC_Vente extends BimpObject
         $id_cond = (int) $this->getData('id_cond_reglement');
         $html .= '<div id="condReglement" style="font-size: 14px">';
         $html .= '<span style="font-weight: bold">Condition de réglement : </span>';
-        $html .= '<select id="condReglementSelect" name="condReglementSelect"  '.(!BimpCore::getConf('use_mode_reglement_caisse')? 'disabled' : '').'>';
+        $html .= '<select id="condReglementSelect" name="condReglementSelect"  ' . (!BimpCore::getConf('use_mode_reglement_caisse') ? 'disabled' : '') . '>';
         foreach ($this->getCond_reglementsArray() as $id => $label) {
             $html .= '<option value="' . $id . '"' . ((int) $id === $id_cond ? ' selected=""' : '') . '>' . $label . '</option>';
         }
@@ -1156,7 +1156,7 @@ class BC_Vente extends BimpObject
             if (!array_key_exists($code, BC_VentePaiement::$codes)) {
                 $html .= BimpRender::renderAlerts('Type de paiement invalide');
             } else {
-                $html .= '<i class="fa fa-' . BC_VentePaiement::$codes[$code]['icon'] . '"></i>';
+                $html .= BimpRender::renderIcon(BC_VentePaiement::$codes[$code]['icon']);
                 $html .= BC_VentePaiement::$codes[$code]['label'];
             }
             $html .= '</div>';

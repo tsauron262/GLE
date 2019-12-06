@@ -1035,7 +1035,7 @@ class BC_Vente extends BimpObject
         $html .= '<div class="col-lg-4">';
         $html .= '<button id="ventePaiementCBButton" type="button" class="ventePaiementButton btn btn-default btn-large"';
         $html .= ' onclick="displayNewPaiementForm($(this));" data-code="CG">';
-        $html .= BimpRender::renderIcon('fas_money-check', 'iconLeft') . 'Chéque Gallerie';
+        $html .= BimpRender::renderIcon('fas_money-check', 'iconLeft') . 'Chéque Galerie';
         $html .= '</button>';
         $html .= '</div>';
 

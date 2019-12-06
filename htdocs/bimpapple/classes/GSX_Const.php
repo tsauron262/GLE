@@ -79,7 +79,12 @@ class GSX_Const
         'repairId' => 'ID réparation'
     );
     // Codes GSX: 
-
+    public static $deviceIdentifiers = array(
+        'meid'   => 'MEID',
+        'imei2'  => 'IMEI2',
+        'serial' => 'Numéro de série',
+        'imei'   => 'IMEI'
+    );
     public static $repair_types = array(
         'CIN'  => 'Carry-In',
         'CRBR' => 'Carry-In Return Before Replace',

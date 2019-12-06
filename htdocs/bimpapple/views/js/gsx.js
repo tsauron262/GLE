@@ -267,14 +267,14 @@ function gsx_FetchRepairEligibility($button) {
                                 bimpModal.addButton(label, onclick, 'primary', 'save_object_button create_repair_button', bimpAjax.modal_idx);
                             }
                         }
-//                        ,error: function(result, bimpAjax) {
-//                            bimpAjax.$form.find('[name="gsx_requestForm"]').val(1);
-//                                bimpAjax.$form.find('[name="gsx_fetchRepairEligibility"]').val(0);
-//                                
-//                                var label = 'Créer la réparation<i class="fa fa-arrow-circle-right iconRight"></i>';
-//                                var onclick = 'gsx_processRequestForm($(this))';
-//                                bimpModal.addButton(label, onclick, 'primary', 'save_object_button create_repair_button', bimpAjax.modal_idx);
-//                        }
+                        ,error: function(result, bimpAjax) {
+                            bimpAjax.$form.find('[name="gsx_requestForm"]').val(1);
+                                bimpAjax.$form.find('[name="gsx_fetchRepairEligibility"]').val(0);
+                                
+                                var label = 'Créer la réparation<i class="fa fa-arrow-circle-right iconRight"></i>';
+                                var onclick = 'gsx_processRequestForm($(this))';
+                                bimpModal.addButton(label, onclick, 'primary', 'save_object_button create_repair_button', bimpAjax.modal_idx);
+                        }
                     });
                     return;
                 }
@@ -597,12 +597,13 @@ function gsx_loadEligibilityDetails($button, id_sav, $resultContainer) {
     });
 }
 
-function gsx_loadUpdatePartKgbForm($button, id_sav, id_repair, part_number) {
+function gsx_loadUpdatePartKgbForm($button, id_sav, id_repair, part_number, form_values) {
     loadModalForm($button, {
         module: 'bimpapple',
         object_name: 'GSX_Repair',
         id_object: id_repair,
-        form_name: 'part_update'
+        form_name: 'part_update',
+        param_values: form_values
     }, 'Mise à jour du numéro de série', function () {
         bimpModal.$footer.find('.save_object_button.modal_' + bimpModal.idx).attr('onclick', 'gsx_updatePartKgb($(this), ' + id_sav + ',' + id_repair + ', \'' + part_number + '\')');
     });

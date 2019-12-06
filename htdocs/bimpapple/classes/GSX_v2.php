@@ -426,7 +426,7 @@ class GSX_v2 extends GSX_Const
                     'priority'        => 1,
                     'type'            => $issue->getData('type'),
                     'issueCode'       => $issue->getData('issue_code'),
-                    'order'           => $issue->getData('position')
+                    'order'           => 1
                 )
             );
         }

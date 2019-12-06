@@ -1214,6 +1214,7 @@ class GSX_Repair extends BimpObject
     public function renderRepairParts()
     {
         if ($this->isLoaded()) {
+            
             if (isset($this->repairLookUp['parts']) && !empty($this->repairLookUp['parts'])) {
 
                 foreach ($this->repairLookUp['parts'] as $part) {
@@ -1365,13 +1366,36 @@ class GSX_Repair extends BimpObject
                     $title = BimpRender::renderIcon('fas_box', 'iconLeft') . 'Composant ' . $part['number'];
                     $buttons = array();
 
-                    if (isset($part['returnStatusCode']) && $part['returnStatusCode'] && (!isset($part['kgbDeviceDetail']) || empty($part['kgbDeviceDetail']))) {
+                    if (isset($part['returnStatusCode']) && $part['returnStatusCode']) {
+                        $edit = (isset($part['kgbDeviceDetail']) && !empty($part['kgbDeviceDetail']));
+
+                        $values = array(
+                            'fields' => array(
+                                'kbb_number' => '',
+                                'kgb_number' => ''
+                            )
+                        );
+
+                        foreach (array(
+                    'kbb_number' => 'kbbDeviceDetail',
+                    'kgb_number' => 'kgbDeviceDetail'
+                        ) as $number_type => $numberDataName) {
+                            foreach (GSX_Const::$deviceIdentifiers as $id_type => $id_label) {
+                                if (isset($part[$numberDataName]['identifiers'][$id_type]) && (string) $part[$numberDataName]['identifiers'][$id_type]) {
+                                    $values['fields'][$number_type] = $part[$numberDataName]['identifiers'][$id_type];
+                                    break;
+                                }
+                            }
+                        }
+
+                        $values_str = htmlentities(json_encode($values));
+
                         $buttons[] = array(
-                            'label'       => 'Mettre à jour le numéro de série',
+                            'label'       => ($edit ? 'Corriger le nouveau numéro de série' : 'Mettre à jour le numéro de série'),
                             'icon_before' => 'fas_pen',
                             'classes'     => array('btn', 'btn-default'),
                             'attr'        => array(
-                                'onclick' => 'gsx_loadUpdatePartKgbForm($(this), ' . (int) $this->getData('id_sav') . ', ' . (int) $this->id . ', \'' . $part['number'] . '\')'
+                                'onclick' => 'gsx_loadUpdatePartKgbForm($(this), ' . (int) $this->getData('id_sav') . ', ' . (int) $this->id . ', \'' . $part['number'] . '\', \'' . $values_str . '\')'
                             )
                         );
                     }
@@ -1474,7 +1498,7 @@ class GSX_Repair extends BimpObject
                                     $html .= '<td>' . $part['number'] . '</td>';
                                     $html .= '<td>' . $part['desc'] . '</td>';
                                     $html .= '<td>';
-                                    if ($part['current_price']) {
+                                    if ($part['current_price'] === 'none') {
                                         $html .= '<span class="warning">Absent du panier</span>';
                                     } else {
                                         $html .= BimpTools::displayMoneyValue($part['current_price']);

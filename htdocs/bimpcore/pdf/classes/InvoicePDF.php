@@ -163,7 +163,7 @@ class InvoicePDF extends BimpDocumentPDF
                 break;
             case 2: $docName = $this->langs->transnoentities('InvoiceAvoir');
                 break;
-            case 3: $docName = $this->langs->transnoentities('InvoiceDeposit');
+            case 3: $docName = $this->langs->transnoentities('Acompte');
                 break;
             case 4: $docName = $this->langs->transnoentities('InvoiceProFormat');
                 break;

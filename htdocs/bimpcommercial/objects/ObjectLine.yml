@@ -576,9 +576,31 @@ filters_panels:
             entrepot: 
                 field: entrepot
                 child: parent
+            commercial: 
+                custom: 1
+                field: id_commercial
+                label: Commercial
+                data_type: id_object
+                type: value
+                input: 
+                    type: search_user
+                    include_empty: 1
+                    empty_label: Aucun
             fk_soc:
                 field: fk_soc
                 child: parent
+            product: 
+                field: fk_product
+                child: dol_line
+            fk_product_type:
+                field: fk_product_type
+                custom: 1
+                label: Service
+                type: value
+                data_type: bool
+                input: 
+                    type: toggle
+                
             product: 
                 field: fk_product
                 child: dol_line

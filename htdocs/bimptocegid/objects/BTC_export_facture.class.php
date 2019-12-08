@@ -204,8 +204,8 @@ class BTC_export_facture extends BTC_export {
                                     break;
                             }
                             
-                            $lignes[$use_compte_general]['HT'] -= $line->multicurrency_total_ht;
-                            $total_ht_lignes -= $line->multicurrency_total_ht;
+                            $lignes[$use_compte_general]['HT'] += $line->multicurrency_total_ht;
+                            $total_ht_lignes += $line->multicurrency_total_ht;
                         }
                         
                         if(!$is_frais_de_port && !$is_remise) {
@@ -263,7 +263,7 @@ class BTC_export_facture extends BTC_export {
             $structure['type_de_compte'] = ['-', 1];
             $structure['code_auxiliaire'] = ['', 16];
             $structure['montant'] = [abs(round($infos['HT'], 2)), 20, true];
-            if($l != 'REMISE') {
+            if($infos['HT'] > 0) {
                 $structure['sens'] = [$this->get_sens($total_ttc_facture, 'facture', true, $sens_parent), 1];
             } else {
                 $structure['sens'] = [$this->get_sens($total_ttc_facture, 'facture', false, $sens_parent), 1];

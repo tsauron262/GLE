@@ -121,6 +121,7 @@ class BTC_export_paiement extends BTC_export {
                     default:
                         $compte_g = $entrepot->compte_comptable;
                         $journal = $entrepot->code_journal_compta;
+                        $affiche_code_reglement = $reglement->code;
                         break;
                 }
 

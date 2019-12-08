@@ -104,6 +104,10 @@ class ObjectLine extends BimpObject
                 break;
             case 'fk_product_type':
                 return ($value?'Oui': 'Non');
+            case 'ref-prod':
+                return $this->traiteLike($value);
+            default:
+                return $value;
         }
 
         return parent::getCustomFilterValueLabel($field_name, $value);
@@ -762,6 +766,24 @@ class ObjectLine extends BimpObject
                     );
                 }
                 break;
+            case 'ref-prod':
+                $alias = 'product';
+                $line_alias = 'dol_line';
+                $joins[$line_alias] = array(
+                    'alias' => $line_alias,
+                    'table' => static::$dol_line_table,
+                    'on'    => $line_alias . '.rowid = a.id_line'
+                );
+                $joins[$alias] = array(
+                    'alias' => $alias,
+                    'table' => 'product',
+                    'on'    => $alias . '.rowid = ' . $line_alias . '.fk_product'
+                );
+                foreach($values as $value)
+                $filters[$alias . '.ref'] = array('operator'=>'like', 'value'=>$this->traiteLike($value));
+                
+                break;
+                
             case 'fk_product_type':
                 $alias = 'product';
                 $line_alias = 'dol_line';
@@ -784,6 +806,12 @@ class ObjectLine extends BimpObject
     }
 
     // Getters valeurs:
+    
+    public function traiteLike($value){
+        if(stripos($value, "%") === false)
+                return $value."%";
+        return $value;
+    }
 
     public function getFullQty()
     {

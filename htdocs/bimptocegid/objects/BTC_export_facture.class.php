@@ -190,10 +190,22 @@ class BTC_export_facture extends BTC_export {
                         
                         $is_remise = false;
                         $montant_remise = 0;
-                        if($produit->getData('ref') == 'REMISE' || $produit->getData('ref') == 'TEX' || $produit->getData('ref') == 'REMISE-01' || $produit->getData('ref') == 'REMISECRT') {
+                        if($produit->getData('ref') == 'REMISE' || $produit->getData('ref') == 'TEX' || $produit->getData('ref') == 'REMISE-01' || $produit->getData('ref') == 'REMISE-02' || $produit->getData('ref') == 'REMISE-03' || $produit->getData('ref') == 'REMISECRT') {
                             $is_remise = true;
-                            $lignes['REMISE']['HT'] += $line->multicurrency_total_ht;
-                            $lignes['REMISE']['COMPTE'] = $use_compte_general;
+                            
+                            switch($produit->getData('ref')) {
+                                case "REMISE" :
+                                    $use_compte_general = $compte_general_produit;
+                                    break;
+                                case "REMISE-01":
+                                case "REMISE-02":
+                                case "REMISE-03":
+                                    $use_compte_general = $compte_general_service;
+                                    break;
+                            }
+                            
+                            $lignes[$use_compte_general]['HT'] -= $line->multicurrency_total_ht;
+                            $total_ht_lignes -= $line->multicurrency_total_ht;
                         }
                         
                         if(!$is_frais_de_port && !$is_remise) {

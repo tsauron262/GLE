@@ -39,7 +39,7 @@ class BTC_export_paiement extends BTC_export {
                 }
 
                 $entrepot = $this->loadEntrepot($id_entrepot);
-                $reglement = $this->db->getRow('c_paiement', 'id = ' . $paiment->getData('id_mode_paiement'));
+                $reglement = $this->db->getRow('c_paiement', 'id = ' . $paiement->getData('id_mode_paiement'));
 
                 if (!$is_vente_ticket) {
                     $client = $this->getInstance('bimpcore', 'Bimp_Client', $id_client);

@@ -264,7 +264,7 @@ class BTC_export_facture extends BTC_export {
             
             $structure['type_de_compte'] = ['-', 1];
             $structure['code_auxiliaire'] = ['', 16];
-            $structure['montant'] = [abs(round($infos['HT'], 2)), 20, true];
+            $structure['montant'] = [abs($infos['HT']), 20, true];
             if($infos['HT'] > 0) {
                 $structure['sens'] = [$this->get_sens($total_ttc_facture, 'facture', true, $sens_parent), 1];
             } else {

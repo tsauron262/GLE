@@ -3,6 +3,8 @@
 if (isset($_GET['actionTest'])) {
     require "../../main.inc.php";
     llxHeader();
+    
+    session_write_close();
     $class = new test_sav();
     if ($_GET['actionTest'] == "mailNonFerme")
         $class->mailNonFerme();

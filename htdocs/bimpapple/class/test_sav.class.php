@@ -151,6 +151,9 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
 
                             if ($repair->repairLookUp['repairStatusCode'] == "RFPU") {
                                 $erreurSOAP = $repair->close(1, 0);
+                                if(isset($erreurSOAP['errors']))
+                                    $erreurSOAP = $erreurSOAP['errors'];
+                                
                                 if (count($erreurSOAP) == 0){
                                     echo "Semble avoir été fermé en auto<br/>";
                                     $this->nbOk++;
@@ -175,10 +178,10 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                                     $this->nbErr++;
                                     $messErreur = $this->displayError("N'arrive pas a être passé a RFPU dans GSX", $ligne, $repair, $erreurSOAP);
                                     echo $messErreur;
-                                    if (isset($_GET['envoieMail'])){
-                                        mailSyn2("Sav non RFPU dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $messErreur);
-                                        $this->nbMail++;
-                                    }
+//                                    if (isset($_GET['envoieMail'])){
+//                                        mailSyn2("Sav non RFPU dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $messErreur);
+//                                        $this->nbMail++;
+//                                    }
                                 }
                             }
                         }

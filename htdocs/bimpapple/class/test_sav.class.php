@@ -149,7 +149,7 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                                     $mailTech = $user->email;
                             }
 
-                            if ($repair->repairLookUp['repairStatusCode'] == "Prêt pour enlèvement") {
+                            if ($repair->repairLookUp['repairStatusCode'] == "RFPU") {
                                 $erreurSOAP = $repair->close(1, 0);
                                 if (count($erreurSOAP) == 0){
                                     echo "Semble avoir été fermé en auto<br/>";
@@ -159,10 +159,10 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                                     $this->nbErr++;
                                     $messErreur = $this->displayError("N'arrive pas a être fermé", $ligne, $repair, $erreurSOAP);
                                     echo $messErreur;
-                                    if (isset($_GET['envoieMail'])){
-                                        mailSyn2("Sav non fermé dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $messErreur);
-                                        $this->nbMail++;
-                                    }
+//                                    if (isset($_GET['envoieMail'])){
+//                                        mailSyn2("Sav non fermé dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $messErreur);
+//                                        $this->nbMail++;
+//                                    }
                                 }
                             }
                             else {//tentative de passage a rfpu
@@ -228,7 +228,7 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                     $erreurSOAP = $repair->lookup();
                     if (count($erreurSOAP) == 0) {
                         echo "Tentative de maj de " . $ligne->ref;
-                        if ($repair->repairLookUp['repairStatusCode'] == "Prêt pour enlèvement" || $repair->getData('ready_for_pick_up')) {
+                        if ($repair->repairLookUp['repairStatusCode'] == "RFPU" || $repair->getData('ready_for_pick_up')) {
                             echo "Passage dans GLE a RFPU<br/>";
                             $repair->readyForPickUp = 1;
                             $repair->update();

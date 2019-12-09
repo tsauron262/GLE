@@ -105,7 +105,7 @@ else{
     foreach($branches as $branche){
         if($branche->companynumber == $siret || ($siret == $siren && stripos($branche->type, "Siège") !== false)){
             $adress = $branche->full_address->address;
-            $nom = $branche->full_address->name;
+            //$nom = $branche->full_address->name;
             $codeP = $branche->postcode;
             $ville = $branche->municipality;
             $siret = $branche->companynumber;

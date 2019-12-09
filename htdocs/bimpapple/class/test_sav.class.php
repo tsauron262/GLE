@@ -41,6 +41,7 @@ class test_sav {
 
     function testGlobal() {
         $_GET['envoieMail'] = "yes";
+    session_write_close();
 //        $this->tentativeARestitueAuto(4);
 //        $this->tentativeARestitueAuto(1);
 //        $this->tentativeARestitueAuto(2);

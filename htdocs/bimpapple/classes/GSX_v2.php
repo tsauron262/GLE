@@ -277,7 +277,7 @@ class GSX_v2 extends GSX_Const
 
     public function exec($request_name, $params, &$response_headers = array())
     {
-        // Protection boucle infinie: 
+        // Protection boucle infinie: //passé de 50 a 1000 car pse probléme dans script de maj 
         if ($this->n > 50) {
             echo 'TOO MUCH <br/>';
             return false;

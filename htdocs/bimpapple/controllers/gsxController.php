@@ -1282,7 +1282,7 @@ class gsxController extends BimpController
                         $part_number = (isset($params['part_number']) ? $params['part_number'] : '');
                         $kgb_number = (isset($params['kgb_number']) ? $params['kgb_number'] : '');
                         $kbb_number = (isset($params['kbb_number']) ? $params['kbb_number'] : '');
-                        $sequence_number = (isset($params['sequence_number']) ? $params['sequence_number'] : '');
+                        $sequence_number = (isset($params['sequence_number']) ? $params['sequence_number'] : 0);
 
                         if (!$part_number) {
                             $errors[] = 'Réference du composant absent';

@@ -267,13 +267,13 @@ function gsx_FetchRepairEligibility($button) {
                                 bimpModal.addButton(label, onclick, 'primary', 'save_object_button create_repair_button', bimpAjax.modal_idx);
                             }
                         }
-                        ,error: function(result, bimpAjax) {
+                        , error: function (result, bimpAjax) {
                             bimpAjax.$form.find('[name="gsx_requestForm"]').val(1);
-                                bimpAjax.$form.find('[name="gsx_fetchRepairEligibility"]').val(0);
-                                
-                                var label = 'Créer la réparation<i class="fa fa-arrow-circle-right iconRight"></i>';
-                                var onclick = 'gsx_processRequestForm($(this))';
-                                bimpModal.addButton(label, onclick, 'primary', 'save_object_button create_repair_button', bimpAjax.modal_idx);
+                            bimpAjax.$form.find('[name="gsx_fetchRepairEligibility"]').val(0);
+
+                            var label = 'Créer la réparation<i class="fa fa-arrow-circle-right iconRight"></i>';
+                            var onclick = 'gsx_processRequestForm($(this))';
+                            bimpModal.addButton(label, onclick, 'primary', 'save_object_button create_repair_button', bimpAjax.modal_idx);
                         }
                     });
                     return;
@@ -617,6 +617,7 @@ function gsx_updatePartKgb($button, id_sav, id_repair, part_number) {
         if ($.isOk($form)) {
             var kgb_number = $form.find('[name="kgb_number"]').val();
             var kbb_number = $form.find('[name="kbb_number"]').val();
+            var sequence_number = $form.find('[name="sequence_number"]').val();
 
             if (!kgb_number) {
                 bimp_msg('Veuillez saisir le nouveau numéro de série', 'warning', null, true);
@@ -628,7 +629,8 @@ function gsx_updatePartKgb($button, id_sav, id_repair, part_number) {
                 id_repair: id_repair,
                 part_number: part_number,
                 kgb_number: kgb_number,
-                kbb_number: kbb_number
+                kbb_number: kbb_number,
+                sequence_number: sequence_number
             }, $form.find('.ajaxResultContainer'), {
                 $button: $button,
                 id_sav: id_sav,

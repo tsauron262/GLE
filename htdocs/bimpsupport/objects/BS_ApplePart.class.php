@@ -288,21 +288,25 @@ class BS_ApplePart extends BimpObject
         }
     }
 
-    public function convertPrix($type, $prix, $ref, $desc)
+    public function convertPrix($type, $prix, $ref, $desc = '')
+    {
+        return self::convertPrixStatic($type, $prix, $ref, $this->getData('price_type'));
+    }
+
+    public static function convertPrixStatic($type, $prix, $ref, $price_type = 'STOCK')
     {
         $coefPrix = 1;
         $constPrix = 0;
         $newPrix = 0;
 
-
         //Application des coef et constantes
         if ($type == "ios") {
             $constPrix = 45;
-        } elseif ($type == "batt" && $this->getData('price_type') == "EXCHANGE") {
+        } elseif ($type == "batt" && $price_type == "EXCHANGE") {
             $newPrix = 49.16666666;
-        } elseif ($type == "battX" && $this->getData('price_type') == "EXCHANGE") {
+        } elseif ($type == "battX" && $price_type == "EXCHANGE") {
             $newPrix = 70;
-        } elseif ($type == "ecran" && $this->getData('price_type') == "EXCHANGE") {
+        } elseif ($type == "ecran" && $price_type == "EXCHANGE") {
             foreach (self::$tabRefCommencePrixEcran as $refT => $tabInfo)
                 if ($ref == $refT)
                     $newPrix = str_replace(",", ".", $tabInfo[0]);

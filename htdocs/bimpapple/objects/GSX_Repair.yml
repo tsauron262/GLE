@@ -82,6 +82,13 @@ forms:
         icon: fas_pen
         rows: 
             - custom: 1
+              hidden: 1
+              label: Sequence number
+              input_name: sequence_number
+              data_type: int
+              input: 
+                  type: hidden
+            - custom: 1
               label: Numéro de série actuel (KBB)
               input_name: kbb_number
               input: 

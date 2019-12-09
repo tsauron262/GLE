@@ -153,22 +153,24 @@ class BimpCore
         return self::$conf_cache;
     }
 
-    public static function getConf($name)
+    public static function getConf($name, $default = null)
     {
         $cache = self::getConfCache();
 
-        if (isset(self::$conf_cache_not_exist[$name]))
-            return null;
+        if (isset(self::$conf_cache_not_exist[$name])) {
+            return $default;
+        }
 
         if (!isset($cache[$name])) {
             $value = BimpCache::getBdb()->getValue('bimpcore_conf', 'value', '`name` = \'' . $name . '\'');
             if (!is_null($value)) {
                 self::$conf_cache[$name] = $value;
                 return $value;
-            } else
+            } else {
                 self::$conf_cache_not_exist[$name] = $name;
+            }
 
-            return null;
+            return $default;
         }
 
         return self::$conf_cache[$name];

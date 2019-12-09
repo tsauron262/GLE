@@ -34,7 +34,6 @@ class GSX_Repair extends BimpObject
     public static $readyForPickupCodes = array('RFPU');
     public static $cancelCodes = array('GX02', 'GX08', 'SCNC', 'CCAR', 'CCCR', 'CCNR');
     public static $closeCodes = array('SACM', 'SCOM', 'CFPH', 'CRCN', 'CRCP', 'CUNR', 'CRDE', 'SPCM');
-    
 
     public function __construct($module, $object_name)
     {
@@ -231,7 +230,7 @@ class GSX_Repair extends BimpObject
         return $buttons;
     }
 
-    public function updatePartNumber($part_number, $kgb_number, $kbb_number, &$warnings = array())
+    public function updatePartNumber($part_number, $kgb_number, $kbb_number, $sequence_number = 0, &$warnings = array())
     {
         $errors = array();
 
@@ -246,11 +245,13 @@ class GSX_Repair extends BimpObject
                 'repairId' => $this->getData('repair_number'),
                 'parts'    => array(
                     array(
-                        'number'                => $part_number,
-                        'sequenceNumber'        => 1,
-                        'relatedSequenceNumber' => 1,
-                        'kgbDeviceDetail'       => array(
+                        'number'          => $part_number,
+                        'sequenceNumber'  => (int) $sequence_number,
+                        'kgbDeviceDetail' => array(
                             'id' => $kgb_number
+                        ),
+                        'kbbDeviceDetail' => array(
+                            'id' => $kbb_number
                         )
                     )
                 )
@@ -1291,7 +1292,6 @@ class GSX_Repair extends BimpObject
     public function renderRepairParts()
     {
         if ($this->isLoaded()) {
-
             if (isset($this->repairLookUp['parts']) && !empty($this->repairLookUp['parts'])) {
 
                 foreach ($this->repairLookUp['parts'] as $part) {
@@ -1299,25 +1299,25 @@ class GSX_Repair extends BimpObject
                     $html = '<table class="bimp_list_table">';
                     $html .= '<tbody class="headers_col">';
                     foreach (array(
-                'description'            => 'Désignation',
-                'type'                   => 'Type',
-                'kbbDeviceDetail/serial' => 'Numéro de série',
-                'kbbDeviceDetail/imei'   => 'IMEI',
-                'kbbDeviceDetail/imei2'  => 'IMEI2',
-                'kbbDeviceDetail/meid'   => 'MEID',
-                'kgbDeviceDetail/serial' => 'Nouveau Numéro de série',
-                'kgbDeviceDetail/imei'   => 'Nouveau IMEI',
-                'kgbDeviceDetail/imei2'  => 'Nouveau IMEI2',
-                'kgbDeviceDetail/meid'   => 'Nouveau MEID',
-                'partUsed'               => 'Réf. composant utilisé',
-                'coverageOption'         => 'Option de couverture',
-                'coverageCode'           => 'Code couverture',
-                'coverageDescription'    => 'Couverture',
-                'fromConsignedStock'     => 'Provient du stock consigné',
-                'netPrice'               => 'Prix net',
-                'currency'               => 'Devise',
-                'pricingOption'          => 'Prix spécial appliqué',
-                'billable'               => 'Facturable'
+                'description'                        => 'Désignation',
+                'type'                               => 'Type',
+                'kbbDeviceDetail/identifiers/serial' => 'Numéro de série',
+                'kbbDeviceDetail/identifiers/imei'   => 'IMEI',
+                'kbbDeviceDetail/identifiers/imei2'  => 'IMEI2',
+                'kbbDeviceDetail/identifiers/meid'   => 'MEID',
+                'kgbDeviceDetail/identifiers/serial' => 'Nouveau Numéro de série',
+                'kgbDeviceDetail/identifiers/imei'   => 'Nouveau IMEI',
+                'kgbDeviceDetail/identifiers/imei2'  => 'Nouveau IMEI2',
+                'kgbDeviceDetail/identifiers/meid'   => 'Nouveau MEID',
+                'partUsed'                           => 'Réf. composant utilisé',
+                'coverageOption'                     => 'Option de couverture',
+                'coverageCode'                       => 'Code couverture',
+                'coverageDescription'                => 'Couverture',
+                'fromConsignedStock'                 => 'Provient du stock consigné',
+                'netPrice'                           => 'Prix net',
+                'currency'                           => 'Devise',
+                'pricingOption'                      => 'Prix spécial appliqué',
+                'billable'                           => 'Facturable'
                     ) as $path => $label) {
                         $value = BimpTools::getArrayValueFromPath($part, $path, true);
                         if ($value) {
@@ -1462,13 +1462,14 @@ class GSX_Repair extends BimpObject
                     $title = BimpRender::renderIcon('fas_box', 'iconLeft') . 'Composant ' . $part['number'];
                     $buttons = array();
 
-                    if (isset($part['returnStatusCode']) && $part['returnStatusCode']) {
-                        $edit = (isset($part['kgbDeviceDetail']) && !empty($part['kgbDeviceDetail']));
+                    if (isset($part['returnStatusCode']) && $part['returnStatusCode'] &&
+                            (!isset($part['kgbDeviceDetail']) || empty($part['kgbDeviceDetail']))) {
 
                         $values = array(
                             'fields' => array(
-                                'kbb_number' => '',
-                                'kgb_number' => ''
+                                'kbb_number'      => '',
+                                'kgb_number'      => '',
+                                'sequence_number' => isset($part['sequenceNumber']) ? (int) $part['sequenceNumber'] : 0,
                             )
                         );
 
@@ -1487,7 +1488,7 @@ class GSX_Repair extends BimpObject
                         $values_str = htmlentities(json_encode($values));
 
                         $buttons[] = array(
-                            'label'       => ($edit ? 'Corriger le nouveau numéro de série' : 'Mettre à jour le numéro de série'),
+                            'label'       => 'Mettre à jour le numéro de série',
                             'icon_before' => 'fas_pen',
                             'classes'     => array('btn', 'btn-default'),
                             'attr'        => array(
@@ -1661,6 +1662,7 @@ class GSX_Repair extends BimpObject
     }
 
     // Rendus HTML V1: 
+
     public function renderActions()
     {
         if ($this->use_gsx_v2) {
@@ -1939,6 +1941,7 @@ class GSX_Repair extends BimpObject
                                     $warnings[] = BimpTools::getMsgFromArray($part_errors, 'Erreurs lors de la mise à jour du prix pour le composant "' . $part['number'] . '"');
                                 }
                             } else {
+                                // Ajout au devis (pièce absente du panier) : 
                                 $desc = (isset($part['number']) && $part['number'] ? $part['number'] : '');
                                 if (isset($part['desc']) && $part['desc']) {
                                     $desc .= ($desc ? ' - ' : '') . $part['desc'];
@@ -1955,9 +1958,13 @@ class GSX_Repair extends BimpObject
                                     'remisable'       => 1
                                 ));
 
+                                BimpObject::loadClass('bimpsupport', 'BS_ApplePart');
+                                $part_type = BS_ApplePart::getCategProdApple(isset($part['number']) ? $part['number'] : '', isset($part['desc']) ? $part['desc'] : '');
+                                $pu_ht = (float) BS_ApplePart::convertPrixStatic($part_type, (float) $part['new_price'], $part['number']);
+
                                 $line->desc = $desc;
                                 $line->qty = 1;
-                                $line->pu_ht = (float) $part['new_price'];
+                                $line->pu_ht = $pu_ht;
                                 $line->pa_ht = (float) $part['new_price'];
                                 $line->tva_tx = 20;
 

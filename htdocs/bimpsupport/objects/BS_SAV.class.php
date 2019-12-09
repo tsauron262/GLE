@@ -3443,7 +3443,7 @@ class BS_SAV extends BimpObject
                                 $rep_errors = array('Réparation d\'id ' . $item['id'] . ' non trouvée');
                             }
                             if (count($rep_errors)) {
-                                $warnings[] = BimpTools::getMsgFromArray($rep_errors, 'Echec de la fermeture de la réparation d\'ID ' . $item['id']);
+                                $warnings[] = BimpTools::getMsgFromArray($rep_errors, 'Echec de la fermeture de la réparation (2) d\'ID ' . $item['id']);
                             }
                         }
                     }
@@ -3811,12 +3811,17 @@ class BS_SAV extends BimpObject
                 foreach ($list as $item) {
                     $repair = BimpCache::getBimpObjectInstance('bimpapple', 'GSX_Repair', (int) $item['id']);
                     if ($repair->isLoaded()) {
-                        $rep_errors = $repair->close();
+                        $tmp = $repair->close();
+                        if(isset($tmp['errors']) && count($tmp['errors']))
+                            $rep_errors = $tmp['errors'];
+                        else {
+                            $rep_errors = $tmp;
+                        }
                     } else {
                         $rep_errors = array('Réparation d\'id ' . $item['id'] . ' non trouvée');
                     }
                     if (count($rep_errors)) {
-                        $warnings[] = BimpTools::getMsgFromArray($rep_errors, 'Echec de la fermeture de la réparation d\'ID ' . $item['id']);
+                        $warnings[] = BimpTools::getMsgFromArray($rep_errors, 'Echec de la fermeture de la réparation (1) d\'ID ' . $item['id']);
                     }
                 }
             }

@@ -247,10 +247,10 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                                     if ($user->statut == 1 && $user->email != "")
                                         $mailTech = $user->email;
                                 }
-                                if (isset($_GET['envoieMail'])){
-                                    mailSyn2("Sav non RFPU dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $messErreur);
-                                    $this->nbMail++;
-                                }
+//                                if (isset($_GET['envoieMail'])){
+//                                    mailSyn2("Sav non RFPU dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $messErreur);
+//                                    $this->nbMail++;
+//                                }
                             }
                         }
                     }

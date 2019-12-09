@@ -108,7 +108,7 @@ class BTC_export_paiement extends BTC_export {
                         $journal = "OD";
                         break;
 
-                    case "SOF":
+                    case "SOFINC":
                         $compte_g = "41199100";
                         $journal = "OD";
                         $affiche_code_reglement = "FIN";

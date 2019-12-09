@@ -3,6 +3,8 @@
 if (isset($_GET['actionTest'])) {
     require "../../main.inc.php";
     llxHeader();
+    
+    session_write_close();
     $class = new test_sav();
     if ($_GET['actionTest'] == "mailNonFerme")
         $class->mailNonFerme();
@@ -39,6 +41,7 @@ class test_sav {
 
     function testGlobal() {
         $_GET['envoieMail'] = "yes";
+    session_write_close();
 //        $this->tentativeARestitueAuto(4);
 //        $this->tentativeARestitueAuto(1);
 //        $this->tentativeARestitueAuto(2);
@@ -129,7 +132,7 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                             echo "Fermée dans GSX maj dans GLE.<br/>";
                             $this->nbOk++;
                         }
-                        elseif($repair->repairLookUp['repairStatus'] == "Fermée et complétée"){
+                        elseif($repair->repairLookUp['repairStatusCode'] == "SPCM"){//"Fermée et complétée"){
                             echo "fermé dans GSX Impossible de Fermé dans GLE ";
                             $this->nbErr++;
                         } 
@@ -146,7 +149,7 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                                     $mailTech = $user->email;
                             }
 
-                            if ($repair->repairLookUp['repairStatus'] == "Prêt pour enlèvement") {
+                            if ($repair->repairLookUp['repairStatusCode'] == "RFPU") {
                                 $erreurSOAP = $repair->close(1, 0);
                                 if (count($erreurSOAP) == 0){
                                     echo "Semble avoir été fermé en auto<br/>";
@@ -156,10 +159,10 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                                     $this->nbErr++;
                                     $messErreur = $this->displayError("N'arrive pas a être fermé", $ligne, $repair, $erreurSOAP);
                                     echo $messErreur;
-                                    if (isset($_GET['envoieMail'])){
-                                        mailSyn2("Sav non fermé dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $messErreur);
-                                        $this->nbMail++;
-                                    }
+//                                    if (isset($_GET['envoieMail'])){
+//                                        mailSyn2("Sav non fermé dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $messErreur);
+//                                        $this->nbMail++;
+//                                    }
                                 }
                             }
                             else {//tentative de passage a rfpu
@@ -198,7 +201,7 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
     function displayError($mess, $ligne, $repair = null, $tabError = null){
         $html = "<br/>".$mess ."<br/> SAV :". $this->getNomUrlChrono($ligne->cid, $ligne->ref) . " Depuis : " . $ligne->nbJ . " jours";
         if(isset($repair)){
-            $html .= "<br/>Code repa : " . $repair->getData('repair_confirm_number') . "  Statut GSX : " . $repair->repairLookUp['repairStatus'];
+            $html .= "<br/>Code repa : " . $repair->getData('repair_number') . "  Statut GSX : " . $repair->repairLookUp['repairStatusCode'];
             $html .= "<br/>RFPU dans GLE ?".$repair->getData('ready_for_pick_up')." Fermé dans GLE ?".$repair->getData('repair_complete');
         }
         if(is_array($tabError) && count($tabError) > 0)
@@ -225,7 +228,7 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                     $erreurSOAP = $repair->lookup();
                     if (count($erreurSOAP) == 0) {
                         echo "Tentative de maj de " . $ligne->ref;
-                        if ($repair->repairLookUp['repairStatus'] == "Prêt pour enlèvement" || $repair->getData('ready_for_pick_up')) {
+                        if ($repair->repairLookUp['repairStatusCode'] == "RFPU" || $repair->getData('ready_for_pick_up')) {
                             echo "Passage dans GLE a RFPU<br/>";
                             $repair->readyForPickUp = 1;
                             $repair->update();
@@ -247,10 +250,10 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                                     if ($user->statut == 1 && $user->email != "")
                                         $mailTech = $user->email;
                                 }
-                                if (isset($_GET['envoieMail'])){
-                                    mailSyn2("Sav non RFPU dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $messErreur);
-                                    $this->nbMail++;
-                                }
+//                                if (isset($_GET['envoieMail'])){
+//                                    mailSyn2("Sav non RFPU dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $messErreur);
+//                                    $this->nbMail++;
+//                                }
                             }
                         }
                     }

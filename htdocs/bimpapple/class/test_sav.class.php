@@ -131,7 +131,7 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                             echo "Fermée dans GSX maj dans GLE.<br/>";
                             $this->nbOk++;
                         }
-                        elseif($repair->repairLookUp['repairStatusCode'] == "Fermée et complétée"){
+                        elseif($repair->repairLookUp['repairStatusCode'] == "SPCM"){//"Fermée et complétée"){
                             echo "fermé dans GSX Impossible de Fermé dans GLE ";
                             $this->nbErr++;
                         } 

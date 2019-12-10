@@ -408,163 +408,8 @@ class Equipment extends BimpObject
         return $buttons;
     }
 
-    // Getters données: 
-
-    public function getName()
-    {
-        if ($this->isLoaded()) {
-            return 'Equipement #' . $this->id;
-        }
-
-        return '';
-    }
-
-    public function getRef()
-    {
-        return $this->getData("serial");
-    }
-
-    public function getProductLabel($with_ref = false)
-    {
-        $product = $this->getChildObject('product');
-
-        if (BimpObject::objectLoaded($product)) {
-            $label = '';
-
-            if ($with_ref) {
-                $label = $product->ref . ' - ';
-            }
-            $label .= $product->label;
-
-            return $label;
-        }
-
-        return (string) $this->getData('product_label');
-    }
-
-    public function getHasReservationsArray()
-    {
-        return array(
-            '' => '',
-            1  => 'OUI',
-            0  => 'NON'
-        );
-    }
-
-    public function getReservationsList()
-    {
-        if (!$this->isLoaded()) {
-            return array();
-        }
-
-        $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
-        $rows = $reservation->getList(array(
-            'id_equipment' => (int) $this->id,
-            'status'       => array(
-                'and' => array(
-                    array(
-                        'operator' => '<',
-                        'value'    => 300
-                    ),
-                    array(
-                        'operator' => '>=',
-                        'value'    => 200
-                    )
-                )
-            )
-                ), null, null, 'id', 'desc', 'array', array('id'));
-
-        $reservations = array();
-
-        if (!is_null($rows) && count($rows)) {
-            foreach ($rows as $r) {
-                $reservations[] = (int) $r['id'];
-            }
-        }
-
-        return $reservations;
-    }
-
-    public function getContratsArray()
-    {
-        $id_soc = isset($this->data['id_soc']) ? $this->data['id_soc'] : 0;
-
-        if (!$id_soc) {
-            return array(
-                0 => '<span class="warning">Aucun contrat</span>'
-            );
-        }
-
-        $rows = $this->db->getRows('contrat', '`fk_soc` = ' . (int) $id_soc, null, 'array', array('rowid', 'ref'));
-
-        $return = array(
-            0 => '<span class="warning">Aucun contrat</span>',
-        );
-
-        if (!is_nan($rows)) {
-            foreach ($rows as $r) {
-                $return[(int) $r['rowid']] = $r['ref'];
-            }
-        }
-
-        return $return;
-    }
-
-    public function getCurrentPlace()
-    {
-        if ($this->isLoaded()) {
-            if (is_null($this->current_place)) {
-                $place = BimpObject::getInstance($this->module, 'BE_Place');
-                $items = $place->getList(array(
-                    'id_equipment' => $this->id,
-                    'position'     => 1
-                        ), 1, 1, 'id', 'desc', 'array', array(
-                    'id'
-                ));
-
-                if (isset($items[0])) {
-                    $place = BimpCache::getBimpObjectInstance($this->module, 'BE_Place', (int) $items[0]['id']);
-                    if ($place->isLoaded()) {
-                        $this->current_place = $place;
-                    } else {
-                        $this->current_place = null;
-                    }
-                }
-            }
-        }
-
-        return $this->current_place;
-    }
-
-    public function getOriginIdElementInput()
-    {
-        $element = (int) $this->getData('origin_element');
-        if ($element) {
-            switch ($element) {
-                case 1:
-                    return BimpInput::renderInput('search_societe', 'origin_id_element', $this->getData('origin_id_element'), array(
-                                'type' => 'supplier'
-                    ));
-
-                case 2:
-                    return BimpInput::renderInput('search_societe', 'origin_id_element', $this->getData('origin_id_element'), array(
-                                'type' => 'customer'
-                    ));
-
-                case 3:
-                    return BimpInput::renderInput('text', 'origin_id_element', $this->getData('origin_id_element'), array(
-                                'data' => array(
-                                    'data_type' => 'number',
-                                    'decimals'  => 0,
-                                    'unsigned'  => 1
-                                )
-                    ));
-            }
-        }
-
-        return '';
-    }
-
+    // Getters filters: 
+     
     public function getProductSearchFilters(&$filters, $value, &$joins = array(), $main_alias = 'a')
     {
         $where = 'prod.ref LIKE \'%' . (string) $value . '%\' OR prod.label LIKE \'%' . (string) $value . '%\' OR prod.barcode = \'' . (string) $value . '\'';
@@ -674,7 +519,89 @@ class Equipment extends BimpObject
             $filters[$sql] = 0;
         }
     }
+    
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array())
+    {
+        switch ($field_name) {
+            case 'in_package':
+                if (empty($values) || (in_array(0, $values) && in_array(1, $values))) {
+                    // On ne filtre pas...
+                    break;
+                }
+                if (in_array(0, $values)) {
+                    $filters['a.id_package'] = 0;
+                }
+                if (in_array(1, $values)) {
+                    $filters['a.id_package'] = array(
+                        'operator' => '>',
+                        'value'    => 0
+                    );
+                }
+                break;
 
+            case 'place_date_end':
+                $joins['places'] = array(
+                    'table' => 'be_equipment_place',
+                    'on'    => 'places.id_equipment = a.id',
+                    'alias' => 'places'
+                );
+                $joins['next_place'] = array(
+                    'table' => 'be_equipment_place',
+                    'on'    => 'next_place.id_equipment = a.id',
+                    'alias' => 'next_place'
+                );
+                $filters['next_place_position'] = array('custom' => 'next_place.position = (places.position - 1)');
+
+                $or_field = array();
+                foreach ($values as $value) {
+                    $or_field[] = BC_Filter::getRangeSqlFilter($value, $errors);
+                }
+
+                if (!empty($or_field)) {
+                    $filters['next_place.date'] = array(
+                        'or_field' => $or_field
+                    );
+                }
+                break;
+        }
+    }
+    
+    // Getters array: 
+    
+    public function getHasReservationsArray()
+    {
+        return array(
+            '' => '',
+            1  => 'OUI',
+            0  => 'NON'
+        );
+    }
+    
+    public function getContratsArray()
+    {
+        $id_soc = isset($this->data['id_soc']) ? $this->data['id_soc'] : 0;
+
+        if (!$id_soc) {
+            return array(
+                0 => '<span class="warning">Aucun contrat</span>'
+            );
+        }
+
+        $rows = $this->db->getRows('contrat', '`fk_soc` = ' . (int) $id_soc, null, 'array', array('rowid', 'ref'));
+
+        $return = array(
+            0 => '<span class="warning">Aucun contrat</span>',
+        );
+
+        if (!is_nan($rows)) {
+            foreach ($rows as $r) {
+                $return[(int) $r['rowid']] = $r['ref'];
+            }
+        }
+
+        return $return;
+    }
+    
     public static function getAvailableEquipmentsArray($id_entrepot = null, $id_product = null)
     {
         $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
@@ -717,51 +644,128 @@ class Equipment extends BimpObject
 
         return $equipments;
     }
+    
+    // Getters données: 
 
-    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array())
+    public function getName()
     {
-        switch ($field_name) {
-            case 'in_package':
-                if (empty($values) || (in_array(0, $values) && in_array(1, $values))) {
-                    // On ne filtre pas...
-                    break;
-                }
-                if (in_array(0, $values)) {
-                    $filters['a.id_package'] = 0;
-                }
-                if (in_array(1, $values)) {
-                    $filters['a.id_package'] = array(
-                        'operator' => '>',
-                        'value'    => 0
-                    );
-                }
-                break;
-
-            case 'place_date_end':
-                $joins['places'] = array(
-                    'table' => 'be_equipment_place',
-                    'on'    => 'places.id_equipment = a.id',
-                    'alias' => 'places'
-                );
-                $joins['next_place'] = array(
-                    'table' => 'be_equipment_place',
-                    'on'    => 'next_place.id_equipment = a.id',
-                    'alias' => 'next_place'
-                );
-                $filters['next_place_position'] = array('custom' => 'next_place.position = (places.position - 1)');
-
-                $or_field = array();
-                foreach ($values as $value) {
-                    $or_field[] = BC_Filter::getDateRangeSqlFilter($value, $errors);
-                }
-
-                if (!empty($or_field)) {
-                    $filters['next_place.date'] = array(
-                        'or_field' => $or_field
-                    );
-                }
-                break;
+        if ($this->isLoaded()) {
+            return 'Equipement #' . $this->id;
         }
+
+        return '';
+    }
+
+    public function getRef()
+    {
+        return $this->getData("serial");
+    }
+
+    public function getProductLabel($with_ref = false)
+    {
+        $product = $this->getChildObject('product');
+
+        if (BimpObject::objectLoaded($product)) {
+            $label = '';
+
+            if ($with_ref) {
+                $label = $product->ref . ' - ';
+            }
+            $label .= $product->label;
+
+            return $label;
+        }
+
+        return (string) $this->getData('product_label');
+    }
+
+    public function getReservationsList()
+    {
+        if (!$this->isLoaded()) {
+            return array();
+        }
+
+        $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
+        $rows = $reservation->getList(array(
+            'id_equipment' => (int) $this->id,
+            'status'       => array(
+                'and' => array(
+                    array(
+                        'operator' => '<',
+                        'value'    => 300
+                    ),
+                    array(
+                        'operator' => '>=',
+                        'value'    => 200
+                    )
+                )
+            )
+                ), null, null, 'id', 'desc', 'array', array('id'));
+
+        $reservations = array();
+
+        if (!is_null($rows) && count($rows)) {
+            foreach ($rows as $r) {
+                $reservations[] = (int) $r['id'];
+            }
+        }
+
+        return $reservations;
+    }
+
+    public function getCurrentPlace()
+    {
+        if ($this->isLoaded()) {
+            if (is_null($this->current_place)) {
+                $place = BimpObject::getInstance($this->module, 'BE_Place');
+                $items = $place->getList(array(
+                    'id_equipment' => $this->id,
+                    'position'     => 1
+                        ), 1, 1, 'id', 'desc', 'array', array(
+                    'id'
+                ));
+
+                if (isset($items[0])) {
+                    $place = BimpCache::getBimpObjectInstance($this->module, 'BE_Place', (int) $items[0]['id']);
+                    if ($place->isLoaded()) {
+                        $this->current_place = $place;
+                    } else {
+                        $this->current_place = null;
+                    }
+                }
+            }
+        }
+
+        return $this->current_place;
+    }
+
+    public function getOriginIdElementInput()
+    {
+        $element = (int) $this->getData('origin_element');
+        if ($element) {
+            switch ($element) {
+                case 1:
+                    return BimpInput::renderInput('search_societe', 'origin_id_element', $this->getData('origin_id_element'), array(
+                                'type' => 'supplier'
+                    ));
+
+                case 2:
+                    return BimpInput::renderInput('search_societe', 'origin_id_element', $this->getData('origin_id_element'), array(
+                                'type' => 'customer'
+                    ));
+
+                case 3:
+                    return BimpInput::renderInput('text', 'origin_id_element', $this->getData('origin_id_element'), array(
+                                'data' => array(
+                                    'data_type' => 'number',
+                                    'decimals'  => 0,
+                                    'unsigned'  => 1
+                                )
+                    ));
+            }
+        }
+
+        return '';
     }
 
     // Affichage: 

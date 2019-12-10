@@ -120,7 +120,7 @@ class BC_Filter extends BimpComponent
         return array();
     }
 
-    public static function getDateRangeSqlFilter($value, &$errors)
+    public static function getRangeSqlFilter($value, &$errors = array())
     {
         $filter = array();
 

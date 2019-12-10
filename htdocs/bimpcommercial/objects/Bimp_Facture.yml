@@ -13,6 +13,7 @@ force_extrafields_update: 1
 table: facture
 controller: facture
 icon: fas_file-invoice-dollar
+
 list_page_url: 
     controller: factures
 
@@ -66,7 +67,7 @@ fields:
         values: 
             array: exportedStatut
     ignore_compta:
-        label: Ignorée
+        label: Ignorée en compta
         type: bool
         dol_extra_field: 1
     type: 
@@ -179,7 +180,7 @@ fields:
     fk_input_reason: unset
     total_ht: unset
        
-forms:     
+forms: 
     default: 
         msgs: 
             callback: renderCreateWarning
@@ -617,8 +618,10 @@ fields_tables:
 views: 
     default: 
         objects_change_reload: Bimp_FactureLine,Bimp_Paiement,ObjectLineRemise,BimpFile,BimpRevalorisation
+        
     content_infos: 
         objects_change_reload: Bimp_FactureLine,Bimp_Paiement,ObjectLineRemise,BimpFile,BimpRevalorisation
+        
     full: 
         objects_change_reload: Bimp_FactureLine,Bimp_Paiement,ObjectLineRemise,BimpFile,BimpRevalorisation
         
@@ -630,6 +633,24 @@ filters_panels:
                 show: 1
             date_lim_reglement:
                 field: date_lim_reglement
+            revals_prevues: 
+                custom: 1
+                field: revals_prevues
+                label: Revalorisations prévues
+                type: range
+                data_type: money
+            revals_brouillons: 
+                custom: 1
+                field: revals_brouillons
+                label: Revalorisations en attente
+                type: range
+                data_type: money
+            revals_ok: 
+                custom: 1
+                field: revals_ok
+                label: Revalorisations acceptées
+                type: range
+                data_type: money
             ref: 
                 field: facnumber
             total_ht:
@@ -638,6 +659,7 @@ filters_panels:
                 field: total_ttc
             ignore_compta:
                 field: ignore_compta
+            
             availability: unset
             
 lists_cols: 
@@ -679,21 +701,21 @@ lists_cols:
         field: marge
         has_total: 1
     revalOk:
-        label: Reval... OK
+        label: Reval. OK
         value: 
             callback: 
                 method: displayReval
                 params: 
                     - ok
     revalOkPlusMarge:
-        label: Marge + Reval OK
+        label: Marge + Reval. OK
         value: 
             callback: 
                 method: displayReval
                 params: 
                     - ok+marge
     revalPrevuPlusMarge:
-        label: Marge + Reval Prévue
+        label: Marge + Reval. prévues
         value: 
             callback: 
                 method: displayReval

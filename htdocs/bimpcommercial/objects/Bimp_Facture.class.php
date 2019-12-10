@@ -92,7 +92,7 @@ class Bimp_Facture extends BimpComm
 
             case 'addContact':
                 return 1;
-                
+
             case 'cancel':
                 return (int) $user->admin;
 
@@ -881,6 +881,37 @@ class Bimp_Facture extends BimpComm
         return $buttons;
     }
 
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array())
+    {
+        switch ($field_name) {
+            case 'revals_brouillons':
+            case 'revals_prevues':
+            case 'revals_ok':
+                switch ($field_name) {
+                    case 'revals_brouillons': $status = '0';
+                        break;
+                    case 'revals_prevues': $status = '0,1';
+                        break;
+                    case 'revals_ok': $status = '1';
+                        break;
+                }
+                $or_field = array();
+                foreach ($values as $value) {
+                    $or_field[] = BC_Filter::getRangeSqlFilter($value, $errors);
+                }
+
+                if (!empty($or_field)) {
+                    $sql = '(SELECT SUM(reval.amount * reval.qty) FROM ' . MAIN_DB_PREFIX . 'bimp_revalorisation reval';
+                    $sql .= ' WHERE reval.id_facture = a.rowid';
+                    $sql .= ' AND reval.status IN (' . $status . '))';
+                    $filters[$sql] = array(
+                        'or_field' => $or_field
+                    );
+                }
+                break;
+        }
+    }
+
     // Getters Array: 
 
     public function getSelectTypesArray()
@@ -1192,11 +1223,10 @@ class Bimp_Facture extends BimpComm
 
     public function getTotalRevalorisations()
     {
-        $clef = "totalRevalFact".$this->id;
-        if(isset(BimpCache::$cache[$clef])){
+        $clef = "totalRevalFact" . $this->id;
+        if (isset(BimpCache::$cache[$clef])) {
             return BimpCache::$cache[$clef];
-        }
-        else{
+        } else {
             $totals = array(
                 'attente'  => 0,
                 'accepted' => 0,
@@ -1228,17 +1258,17 @@ class Bimp_Facture extends BimpComm
         }
         return $totals;
     }
-    
+
     public function displayReval($mode = "ok")
     {
-        
+
         $revals = $this->getTotalRevalorisations();
 
-        if($mode == "ok+marge")
-            return BimpTools::displayMoneyValue($this->getData ("marge") + $revals['accepted']);
-        if($mode == "prevu+marge")
-            return BimpTools::displayMoneyValue($this->getData ("marge") + $revals['accepted']+ $revals['attente']);
-        if($mode == "ok")
+        if ($mode == "ok+marge")
+            return BimpTools::displayMoneyValue($this->getData("marge") + $revals['accepted']);
+        if ($mode == "prevu+marge")
+            return BimpTools::displayMoneyValue($this->getData("marge") + $revals['accepted'] + $revals['attente']);
+        if ($mode == "ok")
             return BimpTools::displayMoneyValue($revals['accepted']);
     }
 

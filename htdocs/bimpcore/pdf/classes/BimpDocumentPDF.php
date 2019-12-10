@@ -163,7 +163,6 @@ class BimpDocumentPDF extends BimpModelPDF
         } else {
             $sizes = dol_getImageSize($logo_file, false);
 
-
             $tabTaille = $this->calculeWidthHieghtLogo($sizes['width'], $sizes['height'], $this->maxLogoWidth, $this->maxLogoHeight);
 
             $logo_width = $tabTaille[0];
@@ -178,10 +177,7 @@ class BimpDocumentPDF extends BimpModelPDF
                 if (file_exists($soc_logo_file)) {
                     $sizes = dol_getImageSize($soc_logo_file, false);
                     if (isset($sizes['width']) && (int) $sizes['width'] && isset($sizes['height']) && $sizes['height']) {
-
                         $tabTaille = $this->calculeWidthHieghtLogo($sizes['width'] / 3, $sizes['height'] / 3, 200, 100);
-
-
 
                         $header_right = '<img src="' . $soc_logo_file . '" width="' . $tabTaille[0] . 'px" height="' . $tabTaille[1] . 'px"/>';
                     }
@@ -189,7 +185,7 @@ class BimpDocumentPDF extends BimpModelPDF
             }
         }
 
-        $this->pdf->topMargin = 50;
+        $this->pdf->topMargin = 53;
 
         $this->header_vars = array(
             'logo_img'      => $logo_file,
@@ -1532,6 +1528,11 @@ class BimpDocumentPDF extends BimpModelPDF
 
     public function renderAnnexes()
     {
+        $this->renderAnnexeListings();
+    }
+
+    public function renderAnnexeListings()
+    {
         if (!empty($this->annexe_listings)) {
             foreach ($this->annexe_listings as $annexe_type => $annexe) {
 
@@ -1540,7 +1541,7 @@ class BimpDocumentPDF extends BimpModelPDF
                     $html = '';
                     $html .= '<table style="width: 100%" cellspacing="0" cellpadding="3px">';
                     $html .= '<tr>';
-                    $html .= '<td class="section_title" style="border-top: solid 1px #' . $this->primary . '; border-bottom: solid 1px #' . $this->primary . '">';
+                    $html .= '<td class="section_title" style="font-weight: bold; font-size: 8px; border-top: solid 1px #' . $this->primary . '; border-bottom: solid 1px #' . $this->primary . '">';
                     $html .= '<span style="color: #' . $this->primary . '">' . $annexe_title . '</span></td>';
                     $html .= '</tr>';
                     $html .= '</table>';
@@ -1549,11 +1550,11 @@ class BimpDocumentPDF extends BimpModelPDF
 
                     foreach ($annexe['lists'] as $list) {
                         $table = new BimpPDF_Table($this->pdf, false);
-                        $table->title = '<div style="font-weight: bold;font-size: 11px;">' . $list['title'] . '</div>';
-                        $table->new_page_title = '<div style="font-weight: bold;font-size: 11px;">' . $annexe_title - $list['title'] . ' (suite)</div>';
+                        $table->new_page_title = '<div style="font-weight: bold;font-size: 9px;">' . $annexe_title . ' - ' . $list['title'] . ' (suite)</div>';
+                        $table->cellpadding = 1;
 
                         for ($i = 0; $i < $list['cols']; $i++) {
-                            $table->addCol($i, '', 0, 'font-size: 8px');
+                            $table->addCol($i, '', 0, 'font-size: 6px');
                         }
 
                         $rows = array();
@@ -1571,6 +1572,14 @@ class BimpDocumentPDF extends BimpModelPDF
                         }
 
                         if (!empty($rows)) {
+                            $html = '';
+                            $html .= '<table style="width: 100%" cellspacing="0" cellpadding="6px">';
+                            $html .= '<tr>';
+                            $html .= '<td style="font-weight: bold;font-size: 8px;">' . $list['title'] . '</td>';
+                            $html .= '</tr>';
+                            $html .= '</table>';
+                            $this->writeContent($html);
+
                             $table->rows = $rows;
                             $table->write();
                         }

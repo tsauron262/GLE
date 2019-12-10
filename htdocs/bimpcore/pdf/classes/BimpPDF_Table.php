@@ -272,7 +272,7 @@ class BimpPDF_Table
 
         // Affichage du titre: 
         if ($this->title) {
-            $this->pdf->writeContent($this->title . '<br/>');
+            $this->pdf->writeHTML($this->title . '<br/>');
         }
 
         // Calcul de la largeur des colonnes:
@@ -333,9 +333,9 @@ class BimpPDF_Table
                 $this->pdf->newPage();
 
                 if ($this->new_page_title) {
-                    $this->pdf->writeContent($this->new_page_title . '<br/>');
+                    $this->pdf->writeHTML($this->new_page_title . '<br/>');
                 } elseif ($this->title) {
-                    $this->pdf->writeContent($this->title . '<br/>');
+                    $this->pdf->writeHTML($this->title . '<br/>');
                 }
 
                 $this->writeHeader($cols);

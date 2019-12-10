@@ -597,6 +597,7 @@ class InvoicePDF extends BimpDocumentPDF
 
     public function renderAnnexes()
     {
+        $this->next_annexe_idx = 1;
         if (count($this->shipments) > 3 || $this->nb_deliveries > 1) {
             $html = '';
 
@@ -705,7 +706,5 @@ class InvoicePDF extends BimpDocumentPDF
 
             $this->writeContent($html);
         }
-
-        parent::renderAnnexes();
     }
 }

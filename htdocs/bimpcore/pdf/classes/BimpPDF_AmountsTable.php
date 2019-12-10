@@ -7,13 +7,14 @@ class BimpPDF_AmountsTable extends BimpPDF_Table
 
     public $colsToSet = array();
     public $cols_def = array(
-        'desc'      => array('label' => 'Désignation', 'width_mm' => 100, 'active' => 0),
+        'desc'      => array('label' => 'Désignation', 'width_mm' => 80, 'active' => 0),
         'pu_ht'     => array('label' => 'P.U. HT', 'active' => 0, 'style' => 'text-align: right;', 'head_style' => 'text-align: center;'),
-        'qte'       => array('label' => 'Qté', 'active' => 0, 'style' => 'text-align: right;', 'head_style' => 'text-align: center;'),
+        'pu_remise' => array('label' => 'P.U remisé', 'active' => 0, 'style' => 'text-align: right;', 'head_style' => 'text-align: center;'),
+        'qte'       => array('label' => 'Qté', 'width_mm' => 15, 'active' => 0, 'style' => 'text-align: right;', 'head_style' => 'text-align: center;'),
         'progress'  => array('label' => 'Progression', 'active' => 0, 'style' => 'text-align: right;', 'head_style' => 'text-align: center;'),
-        'reduc'     => array('label' => 'Remise.', 'active' => 0, 'style' => 'text-align: right;', 'head_style' => 'text-align: center;'),
+        'reduc'     => array('label' => 'Remise', 'active' => 0, 'style' => 'text-align: right;', 'head_style' => 'text-align: center;'),
         'total_ht'  => array('label' => 'Total HT', 'active' => 0, 'style' => 'text-align: right;', 'head_style' => 'text-align: center;'),
-        'tva'       => array('label' => 'TVA', 'active' => 0, 'style' => 'text-align: right;', 'head_style' => 'text-align: center;'),
+        'tva'       => array('label' => 'TVA', 'width_mm' => 12, 'active' => 0, 'style' => 'text-align: right;', 'head_style' => 'text-align: center;'),
         'total_ttc' => array('label' => 'Total TTC', 'active' => 0, 'style' => 'text-align: right;', 'head_style' => 'text-align: center;'),
         'pu_remise' => array('label' => 'P.U remisé', 'active' => 0, 'style' => 'text-align: right;', 'head_style' => 'text-align: center;')
     );

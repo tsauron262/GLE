@@ -33,7 +33,7 @@ class BimpDocumentPDF extends BimpModelPDF
     public $target_label = '';
     public $after_totaux_label = '';
     public $next_annexe_idx = 1;
-    public $max_line_serials = 100;
+    public $max_line_serials = 50;
     public $annexe_listings = array();
 
     public function __construct($db)
@@ -297,7 +297,8 @@ class BimpDocumentPDF extends BimpModelPDF
         $this->renderFullBlock('renderBottom');
         $this->renderFullBlock('renderAfterBottom');
         $this->renderFullBlock('renderAnnexes');
-
+        $this->renderAnnexeListings();
+        
         $cur_page = (int) $this->pdf->getPage();
         $num_pages = (int) $this->pdf->getNumPages();
         if (($num_pages - $cur_page) === 1) {
@@ -1528,7 +1529,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
     public function renderAnnexes()
     {
-        $this->renderAnnexeListings();
+        
     }
 
     public function renderAnnexeListings()

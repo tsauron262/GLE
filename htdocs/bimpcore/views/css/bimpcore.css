@@ -16068,10 +16068,9 @@ table.objectlistTable {
   table.objectlistTable.center-align > tfoot > tr > td {
     text-align: center; }
 
-/* line 347, ../scss/bimpcore/_list.scss */
-.objectlistTableContainer {
-  overflow-x: auto; }
-
+/*.objectlistTableContainer {
+    overflow-x: auto;
+}*/
 /* line 351, ../scss/bimpcore/_list.scss */
 .sortTitle {
   cursor: pointer; }

@@ -1359,12 +1359,6 @@ class BC_ListTable extends BC_List
                 }
 
                 $rowButtons = array();
-                if (count($item_params['extra_btn'])) {
-                    foreach ($item_params['extra_btn'] as $btn_params) {
-                        $rowButtons[] = $btn_params;
-                    }
-                }
-
                 $this->setConfPath();
 
                 if ((int) $row['params']['canEdit']) {
@@ -1381,6 +1375,15 @@ class BC_ListTable extends BC_List
                             'onclick' => 'updateObjectFromRow(\'' . $this->identifier . '\', ' . $id_object . ', $(this))'
                         );
                     }
+                }
+
+                if (count($item_params['extra_btn'])) {
+                    foreach ($item_params['extra_btn'] as $btn_params) {
+                        $rowButtons[] = $btn_params;
+                    }
+                }
+
+                if ((int) $row['params']['canEdit']) {
                     if ((int) $item_params['edit_btn']) {
                         $title = '';
                         if (!is_null($item_params['edit_form_title']) && $item_params['edit_form_title']) {
@@ -1452,7 +1455,8 @@ class BC_ListTable extends BC_List
 
                 $i = 1;
                 foreach ($rowButtons as $btn_params) {
-                    $position = ($i === count($rowButtons) || ($i === count($rowButtons) - 1 && strlen($btn_params['label']) > 20) ? 'left' : 'top');
+//                    echo $i . '(' . count($rowButtons) . '): ' . $btn_params['label'] . ': ' . strlen($btn_params['label']) . '<br/>';
+                    $position = ($i === count($rowButtons) || ($i === (count($rowButtons) - 1) && strlen($btn_params['label']) > 18) ? 'left' : 'top');
                     $html .= $this->renderRowButton($btn_params, $position);
                     $i++;
                 }

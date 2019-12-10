@@ -15720,17 +15720,21 @@ input[type=text].large_input {
   display: none !important; }
 
 /* line 1, ../scss/bimpcore/_list.scss */
+.object_list_table {
+  overflow-x: auto; }
+
+/* line 5, ../scss/bimpcore/_list.scss */
 table.bimp_list_table,
 table.objectlistTable {
   border: none;
   box-shadow: none;
   width: 100%; }
-  /* line 3, ../scss/bimpcore/_list.scss */
+  /* line 7, ../scss/bimpcore/_list.scss */
   table.bimp_list_table td, table.bimp_list_table th,
   table.objectlistTable td,
   table.objectlistTable th {
     padding: 5px; }
-  /* line 11, ../scss/bimpcore/_list.scss */
+  /* line 15, ../scss/bimpcore/_list.scss */
   table.bimp_list_table > thead > tr > th,
   table.objectlistTable > thead > tr > th {
     padding: 10px 6px;
@@ -15740,15 +15744,11 @@ table.objectlistTable {
     text-align: left;
     font-weight: bold;
     min-width: 80px; }
-    /* line 21, ../scss/bimpcore/_list.scss */
+    /* line 25, ../scss/bimpcore/_list.scss */
     table.bimp_list_table > thead > tr > th.th_checkboxes,
     table.objectlistTable > thead > tr > th.th_checkboxes {
       min-width: 40px !important;
       width: 40px !important; }
-    /* line 26, ../scss/bimpcore/_list.scss */
-    table.bimp_list_table > thead > tr > th.th_tools,
-    table.objectlistTable > thead > tr > th.th_tools {
-      min-width: 0; }
     /* line 30, ../scss/bimpcore/_list.scss */
     table.bimp_list_table > thead > tr > th.positionHandle,
     table.objectlistTable > thead > tr > th.positionHandle {

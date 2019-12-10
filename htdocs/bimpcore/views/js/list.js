@@ -1015,7 +1015,7 @@ function checkListWidth($list) {
         return;
     }
 
-    var offset = 5;
+    var offset = 0;
 
     if ($(window).width() > 1270) {
         var $filtersPanel = $list.find('.listFiltersPanelContainer');
@@ -1039,9 +1039,8 @@ function checkListWidth($list) {
     }
 
     $list.find('tr.headerRow').find('.listPopup').each(function () {
-        $(this).css('margin-right', offset + 'px');
+        $(this).css('margin-right', (offset + 5) + 'px');
     });
-
 }
 
 // Gestion des inputs:
@@ -1154,23 +1153,28 @@ function onListLoaded($list) {
                         $table.findParentByClass('objectlistTableContainer').removeClass('col-md-12').removeClass('col-lg-12').addClass('col-md-9').addClass('col-lg-10');
                         $filtersPanel.stop().fadeIn(150);
                         $(this).removeClass('action-open').addClass('action-close');
+                        checkListWidth($list);
                     } else {
                         $filtersPanel.stop().fadeOut(150, function () {
                             $table.findParentByClass('objectlistTableContainer').removeClass('col-md-9').removeClass('col-lg-10').addClass('col-md-12').addClass('col-lg-12');
+                            checkListWidth($list);
                         });
                         $(this).removeClass('action-close').addClass('action-open');
                     }
-                    checkListWidth($list);
                 }
             });
             $tools.find('.openSearchRowButton').click(function () {
                 var $searchRow = $list.find('.listSearchRow');
                 if ($searchRow.length) {
                     if ($(this).hasClass('action-open')) {
-                        $searchRow.stop().fadeIn(150);
+                        $searchRow.stop().fadeIn(150, function() {
+                            checkListWidth($list);
+                        });
                         $(this).removeClass('action-open').addClass('action-close');
                     } else {
-                        $searchRow.stop().fadeOut(150);
+                        $searchRow.stop().fadeOut(150, function() {
+                            checkListWidth($list);
+                        });
                         $(this).removeClass('action-close').addClass('action-open');
                     }
                 }
@@ -1179,10 +1183,14 @@ function onListLoaded($list) {
                 var $addRow = $list.find('.addObjectRow');
                 if ($addRow.length) {
                     if ($(this).hasClass('action-open')) {
-                        $addRow.stop().fadeIn(150);
+                        $addRow.stop().fadeIn(150, function() {
+                            checkListWidth($list);
+                        });
                         $(this).removeClass('action-open').addClass('action-close');
                     } else {
-                        $addRow.stop().fadeOut(150);
+                        $addRow.stop().fadeOut(150, function() {
+                            checkListWidth($list);
+                        });
                         $(this).removeClass('action-close').addClass('action-open');
                     }
                 }

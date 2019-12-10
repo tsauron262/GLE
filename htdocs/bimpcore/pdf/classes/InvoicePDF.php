@@ -178,7 +178,7 @@ class InvoicePDF extends BimpDocumentPDF
         // Réf facture: 
         $docRef = $this->langs->transnoentities("Ref") . " : " . $this->langs->convToOutputCharset($this->facture->ref);
         if ($this->facture->statut == Facture::STATUS_DRAFT) {
-            $docRef = '<span style="color: #800000"> ' . $docRef . ' - ' . $this->langs->transnoentities("NotValidated") . '</span>';
+            $docRef = '<span style="color: #800000"> ' . $docRef . ' - Non validé' . (BimpObject::objectLoaded($this->bimpCommObject) ? $this->bimpCommObject->e() : '') . '</span>';
         }
 
         $this->header_vars['doc_name'] = $docName;

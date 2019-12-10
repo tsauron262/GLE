@@ -238,9 +238,14 @@ class BC_FieldFilter extends BC_Filter
                 break;
 
             case 'date_range':
+                foreach ($this->values as $value) {
+                    $or_field[] = $this->getRangeSqlFilter($value, $errors);
+                }
+                break;
+                
             case 'range':
                 foreach ($this->values as $value) {
-                    $or_field[] = $this->getDateRangeSqlFilter($value, $errors);
+                    $or_field[] = $this->getRangeSqlFilter($value, $errors);
                 }
                 break;
 

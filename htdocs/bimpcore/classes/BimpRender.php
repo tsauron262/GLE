@@ -258,7 +258,7 @@ class BimpRender
                     $button['data']['html'] = 'true';
                     $button['data']['content'] = $popover;
                 }
-                
+
                 $buttons_html[] = BimpRender::renderButton($button, 'button');
             }
         }
@@ -702,6 +702,7 @@ class BimpRender
         $return .= ' data-placement="' . $placement . '"';
         $return .= ' data-content="' . htmlentities($content) . '"';
         $return .= ' data-html="' . (is_string($html) ? $html : ($html ? 'true' : 'false')) . '"';
+        $return .= ' data-viewport="' . htmlentities('{"selector": "window", "padding": 0}') . '"';
 
         return $return;
     }

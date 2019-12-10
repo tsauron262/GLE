@@ -692,52 +692,55 @@ class BC_ListTable extends BC_List
                 }
             }
 
-            $html .= '<th class="th_tools">';
-            $html .= '<div class="headerTools">';
-
-            $html .= '<span class="fa-spin loadingIcon"></span>';
+            $tools_width = 64;
+            $tools_html = '<div class="headerTools">';
+            $tools_html .= '<span class="fa-spin loadingIcon"></span>';
 
             if (!is_null($this->params['filters_panel'])) {
-                $html .= '<span class="headerButton openFiltersPanelButton open-close action-' . ($this->params['filters_panel_open'] ? 'close' : 'open') . '"></span>';
+                $tools_html .= '<span class="headerButton openFiltersPanelButton open-close action-' . ($this->params['filters_panel_open'] ? 'close' : 'open') . '"></span>';
+                $tools_width += 44;
             }
             if ($this->search && $this->params['enable_search']) {
-                $html .= '<span class="headerButton openSearchRowButton open-close action-open"></span>';
+                $tools_html .= '<span class="headerButton openSearchRowButton open-close action-open"></span>';
+                $tools_width += 44;
             }
             if ($this->params['add_object_row']) {
-                $html .= '<span class="headerButton openAddObjectRowButton open-close action-' . ($this->params['add_object_row_open'] ? 'close' : 'open') . '"></span>';
+                $tools_html .= '<span class="headerButton openAddObjectRowButton open-close action-' . ($this->params['add_object_row_open'] ? 'close' : 'open') . '"></span>';
+                $tools_width += 44;
             }
             if ($this->params['positions']) {
-                $html .= '<span class="headerButton activatePositionsButton bs-popover open-close action-' . ($this->params['positions_open'] ? 'close' : 'open') . '"';
-//                if ($this->params['positions_open']) {
-//                    $label = 'Désactiver le positionnement';
-//                } else {
-//                    $label = 'Activer le positionnement';
-//                }
-//                $html .= BimpRender::renderPopoverData($label, 'top', false);
-                $html .= '></span>';
+                $tools_html .= '<span class="headerButton activatePositionsButton bs-popover open-close action-' . ($this->params['positions_open'] ? 'close' : 'open') . '"';
+                $tools_html .= '></span>';
+                $tools_width += 44;
             }
             if ($this->params['checkboxes'] && count($this->params['bulk_actions'])) {
-                $html .= '<span class="headerButton displayPopupButton openBulkActionsPopupButton"';
-                $html .= ' data-popup_id="' . $this->identifier . '_bulkActionsPopup"></span>';
-                $html .= $this->renderBulkActionsPopup();
+                $tools_html .= '<span class="headerButton displayPopupButton openBulkActionsPopupButton"';
+                $tools_html .= ' data-popup_id="' . $this->identifier . '_bulkActionsPopup"></span>';
+                $tools_html .= $this->renderBulkActionsPopup();
+                $tools_width += 32;
             }
 
             $parametersPopUpHtml = $this->renderParametersPopup();
             if ($parametersPopUpHtml) {
-                $html .= '<div style="display: inline-block">';
-                $html .= '<span class="headerButton displayPopupButton openParametersPopupButton"';
-                $html .= ' data-popup_id="' . $this->identifier . '_parametersPopup"></span>';
-                $html .= $parametersPopUpHtml;
-                $html .= '</div>';
+                $tools_html .= '<div style="display: inline-block">';
+                $tools_html .= '<span class="headerButton displayPopupButton openParametersPopupButton"';
+                $tools_html .= ' data-popup_id="' . $this->identifier . '_parametersPopup"></span>';
+                $tools_html .= $parametersPopUpHtml;
+                $tools_html .= '</div>';
+                $tools_width += 32;
             }
 
             if ($this->params['enable_refresh']) {
-                $html .= '<span class="headerButton refreshListButton bs-popover"';
-                $html .= BimpRender::renderPopoverData('Actualiser la liste', 'top', false);
-                $html .= '></span>';
+                $tools_html .= '<span class="headerButton refreshListButton bs-popover"';
+                $tools_html .= BimpRender::renderPopoverData('Actualiser la liste', 'left', false, '#' . $this->identifier);
+                $tools_html .= '></span>';
+                $tools_width += 32;
             }
 
-            $html .= '</div>';
+            $tools_html .= '</div>';
+
+            $html .= '<th class="th_tools" style="min-width: ' . $tools_width . 'px">';
+            $html .= $tools_html;
             $html .= '</th>';
 
             $html .= '</tr>';
@@ -1226,7 +1229,7 @@ class BC_ListTable extends BC_List
         return $html;
     }
 
-    public function renderRowButton($btn_params)
+    public function renderRowButton($btn_params, $popover_position = 'top')
     {
         $html = '';
         $tag = isset($btn_params['tag']) ? $btn_params['tag'] : 'span';
@@ -1234,7 +1237,7 @@ class BC_ListTable extends BC_List
 
         if (isset($btn_params['label'])) {
             $html .= ' bs-popover"';
-            $html .= BimpRender::renderPopoverData($btn_params['label']);
+            $html .= BimpRender::renderPopoverData($btn_params['label'], $popover_position, 'false', '#' . $this->identifier);
         } else {
             $html .= '"';
         }
@@ -1356,12 +1359,6 @@ class BC_ListTable extends BC_List
                 }
 
                 $rowButtons = array();
-                if (count($item_params['extra_btn'])) {
-                    foreach ($item_params['extra_btn'] as $btn_params) {
-                        $rowButtons[] = $btn_params;
-                    }
-                }
-
                 $this->setConfPath();
 
                 if ((int) $row['params']['canEdit']) {
@@ -1378,6 +1375,15 @@ class BC_ListTable extends BC_List
                             'onclick' => 'updateObjectFromRow(\'' . $this->identifier . '\', ' . $id_object . ', $(this))'
                         );
                     }
+                }
+
+                if (count($item_params['extra_btn'])) {
+                    foreach ($item_params['extra_btn'] as $btn_params) {
+                        $rowButtons[] = $btn_params;
+                    }
+                }
+
+                if ((int) $row['params']['canEdit']) {
                     if ((int) $item_params['edit_btn']) {
                         $title = '';
                         if (!is_null($item_params['edit_form_title']) && $item_params['edit_form_title']) {
@@ -1447,8 +1453,12 @@ class BC_ListTable extends BC_List
                 $min_width = ((count($rowButtons) * 36) + 12) . 'px';
                 $html .= '<td class="buttons" style="min-width: ' . $min_width . '; ' . $item_params['td_style'] . '">';
 
+                $i = 1;
                 foreach ($rowButtons as $btn_params) {
-                    $html .= $this->renderRowButton($btn_params);
+//                    echo $i . '(' . count($rowButtons) . '): ' . $btn_params['label'] . ': ' . strlen($btn_params['label']) . '<br/>';
+                    $position = ($i === count($rowButtons) || ($i === (count($rowButtons) - 1) && strlen($btn_params['label']) > 18) ? 'left' : 'top');
+                    $html .= $this->renderRowButton($btn_params, $position);
+                    $i++;
                 }
 
                 $html .= '</td>';
@@ -1491,8 +1501,8 @@ class BC_ListTable extends BC_List
 
         if (is_null($this->items)) {
             $this->fetchItems();
-        }        
-        
+        }
+
         $this->setConfPath();
 
         $object_instance = $this->object;
@@ -1535,20 +1545,19 @@ class BC_ListTable extends BC_List
             $current_bc = $prev_bc;
             return $rows;
         }
-        
-        
+
+
         $nb = 0;
         foreach ($this->items as $item) {
             $nb++;
-            if($nb == 2){
+            if ($nb == 2) {
                 $cache_mem = BimpCache::$cache;
-            }
-            elseif($nb > 2){
+            } elseif ($nb > 2) {
                 BimpCache::$cache = $cache_mem;
             }
-            
-            
-            
+
+
+
             $line = '';
             $object = BimpCache::getBimpObjectInstance($this->object->module, $this->object->object_name, (int) $item[$primary], $this->parent);
             if (BimpObject::objectLoaded($object)) {
@@ -1599,7 +1608,7 @@ class BC_ListTable extends BC_List
                 $rows .= $line . "\n";
             }
         }
-        
+
         BimpCache::$cache = $cache_mem;
 
         $this->object = $object_instance;

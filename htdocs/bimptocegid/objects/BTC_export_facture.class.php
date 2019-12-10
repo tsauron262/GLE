@@ -33,6 +33,9 @@ class BTC_export_facture extends BTC_export {
             $is_client_interco = true;
         }
         
+        $compte_refact_ht = $this->convertion_to_interco_code(BimpCore::getConf('BIMPTOCEGID_refacturation_ht'), $compte_general_411);
+        $compte_refact_ttc = $this->convertion_to_interco_code(BimpCore::getConf('BIMPTOCEGID_refacturation_ttc'), $compte_general_411);;
+        
         switch($facture->getData('zone_vente')) {
             case 1:
                 $compte_general_produit = $this->convertion_to_interco_code(BimpCore::getConf('BIMPTOCEGID_vente_produit_fr'), $compte_general_411);
@@ -178,6 +181,8 @@ class BTC_export_facture extends BTC_export {
                     }
                     if($line->fk_product){
                         $is_frais_de_port = false;
+                        $is_commission = false;
+                        $is_refact = false;
                         if($frais_de_port = $this->db->getRow('categorie_product', 'fk_categorie = 9705 AND fk_product = ' . $produit->id) || $produit->id == 129950) {
                             $is_frais_de_port = true;
                             $lignes[$compte_general_port]['HT'] += $line->multicurrency_total_ht;
@@ -208,7 +213,26 @@ class BTC_export_facture extends BTC_export {
                             $total_ht_lignes += $line->multicurrency_total_ht;
                         }
                         
-                        if(!$is_frais_de_port && !$is_remise) {
+                        if($produit->getData('ref') == "ZZCOMMISSION") {
+                            $is_commission = true;
+                            $lignes[$compte_general_comissions]['HT'] += $line->multicurrency_total_ht;
+                            $total_ht_lignes += $line->multicurrency_total_ht;
+                        }
+                        
+                        switch($produit->getData('ref')) {
+                            case "REFACT_FILIALES":
+                                $is_refact = true;
+                                $lignes[$compte_refact_ht]['HT'] += $line->multicurrency_total_ht;
+                                $total_ht_lignes += $line->multicurrency_total_ht;
+                                break;
+                             case "REFACT_TTC_FILIALES":
+                                $is_refact = true;
+                                $lignes[$compte_refact_ttc]['HT'] += $line->multicurrency_total_ht;
+                                $total_ht_lignes += $line->multicurrency_total_ht;
+                                break;
+                        }
+                        
+                        if(!$is_frais_de_port && !$is_remise && !$is_commission && !$is_refact) {
                             if($use_d3e){
                                 if(($facture->getData('zone_vente') == 1 && $line->tva_tx != 0) || $facture->getData('zone_vente') != 1){
                                     $lignes[$use_compte_general]['HT'] += $line->multicurrency_total_ht - ($produit->getData('deee') * $line->qty);

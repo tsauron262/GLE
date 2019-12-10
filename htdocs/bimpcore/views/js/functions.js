@@ -549,7 +549,11 @@ function setCommonEvents($container) {
             placement: 'bottom',
             html: true,
             trigger: 'hover',
-            content: $(this).data('title')
+            content: $(this).data('title'),
+            viewport: {
+                selector: 'window',
+                padding: 0
+            }
         });
     });
 

@@ -1119,6 +1119,7 @@ function onListLoaded($list) {
 
         var $table = $list.find('table.objectlistTable');
         var $tbody = $list.find('tbody.listRows');
+        var list_id = $list.attr('id');
 
         if ($tbody.find('tr.objectListItemRow').length > 10) {
             $list.find('tr.listFooterButtons').show();
@@ -1130,12 +1131,19 @@ function onListLoaded($list) {
 //        $(this).attr('target', '_blank');
             var link_title = $(this).attr('title');
             if (link_title) {
+                $(this).popover('destroy');
+                $(this).removeClass('classfortooltip');
                 $(this).removeAttr('title');
                 $(this).popover({
                     trigger: 'hover',
                     content: link_title,
                     placement: 'bottom',
-                    html: true
+                    html: true,
+                    container: '#' + list_id,
+                    viewport: {
+                        selector: 'window',
+                        padding: 0
+                    }
                 });
             }
         });
@@ -1167,12 +1175,12 @@ function onListLoaded($list) {
                 var $searchRow = $list.find('.listSearchRow');
                 if ($searchRow.length) {
                     if ($(this).hasClass('action-open')) {
-                        $searchRow.stop().fadeIn(150, function() {
+                        $searchRow.stop().fadeIn(150, function () {
                             checkListWidth($list);
                         });
                         $(this).removeClass('action-open').addClass('action-close');
                     } else {
-                        $searchRow.stop().fadeOut(150, function() {
+                        $searchRow.stop().fadeOut(150, function () {
                             checkListWidth($list);
                         });
                         $(this).removeClass('action-close').addClass('action-open');
@@ -1183,12 +1191,12 @@ function onListLoaded($list) {
                 var $addRow = $list.find('.addObjectRow');
                 if ($addRow.length) {
                     if ($(this).hasClass('action-open')) {
-                        $addRow.stop().fadeIn(150, function() {
+                        $addRow.stop().fadeIn(150, function () {
                             checkListWidth($list);
                         });
                         $(this).removeClass('action-open').addClass('action-close');
                     } else {
-                        $addRow.stop().fadeOut(150, function() {
+                        $addRow.stop().fadeOut(150, function () {
                             checkListWidth($list);
                         });
                         $(this).removeClass('action-close').addClass('action-open');
@@ -1320,6 +1328,8 @@ function onListRefeshed($list) {
 //        $(this).attr('target', '_blank');
 //    });
 
+    var list_id = $list.attr('id');
+
     var $tbody = $list.find('tbody.listRows');
 
     if ($tbody.find('tr.objectListItemRow').length > 10) {
@@ -1332,12 +1342,19 @@ function onListRefeshed($list) {
 //        $(this).attr('target', '_blank');
         var link_title = $(this).attr('title');
         if (link_title) {
+            $(this).popover('destroy');
+            $(this).removeClass('classfortooltip');
             $(this).removeAttr('title');
             $(this).popover({
                 trigger: 'hover',
                 content: link_title,
                 placement: 'bottom',
-                html: true
+                html: true,
+                container: '#' + list_id,
+                viewport: {
+                    selector: 'window',
+                    padding: 0
+                }
             });
         }
     });

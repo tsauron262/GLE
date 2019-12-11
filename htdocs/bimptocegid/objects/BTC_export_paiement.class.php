@@ -6,9 +6,9 @@ class BTC_export_paiement extends BTC_export {
     const RETURNED_STATUS_OK = 1;
 
     public function export($id, $paiement_id, $forced) {
-
-        $errors = [];
-        $success = [];
+        
+        $error = 0;
+        $ecritures = '';
         $liste_transactions = $this->db->getRows('paiement_facture', 'fk_paiement = ' . $id);
         $paiement = $this->getInstance('bimpcommercial', 'Bimp_Paiement', $id);
         foreach ($liste_transactions as $transaction) {
@@ -186,7 +186,7 @@ class BTC_export_paiement extends BTC_export {
                     'fin' => ['0', 2]
                 ];
 
-                $ecritures = $this->struct($structure);
+                $ecritures .= $this->struct($structure);
 
                 $structure['compte'] = [$compte_general_411, 17];
                 $structure['code_compta'] = [$auxiliaire_client, 16];
@@ -196,10 +196,9 @@ class BTC_export_paiement extends BTC_export {
                 $structure['lettrage'] = ['-XAL', 4];
                 $ecritures .= $this->struct($structure);
 
-                $this->write_tra($ecritures, $this->create_daily_file('paiement'));
-
         }
-        $paiement->updateField('exported', self::RETURNED_STATUS_OK);
+        
+        return $this->write_tra($ecritures, $this->create_daily_file('paiement'));
     }
 
 }

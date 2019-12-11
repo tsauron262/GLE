@@ -2933,7 +2933,7 @@ class ObjectLine extends BimpObject
                                 'rang' => (int) $line['position']
                                     ), '`' . $primary . '` = ' . (int) $line['id_line']) <= 0) {
                         $msg = 'Echec de la mise à jour de la position de la ligne d\'ID ' . $line['id_line'];
-                        $sqlError = $this->db->lasterror();
+                        $sqlError = $this->db->db->lasterror();
                         if ($sqlError) {
                             $msg .= ' - ' . $sqlError;
                         }

@@ -162,7 +162,7 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                                     $this->nbErr++;
                                     $messErreur = $this->displayError("N'arrive pas a être fermé", $ligne, $repair, $erreurSOAP);
                                     echo $messErreur;
-                                    $mailTech = "tommy@bimp.fr";
+                                    $mailTech .= ",tommy@bimp.fr";
                                     if (isset($_GET['envoieMail'])){
                                         mailSyn2("Sav non fermé dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $messErreur);
                                         $this->nbMail++;
@@ -180,7 +180,7 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                                     $messErreur = $this->displayError("N'arrive pas a être passé a RFPU dans GSX", $ligne, $repair, $erreurSOAP);
                                     echo $messErreur;
                                     
-                                    $mailTech = "tommy@bimp.fr";
+                                    $mailTech .= ", tommy@bimp.fr";
                                     if (isset($_GET['envoieMail'])){
                                         mailSyn2("Sav non RFPU dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $messErreur);
                                         $this->nbMail++;
@@ -256,10 +256,11 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                                     if ($user->statut == 1 && $user->email != "")
                                         $mailTech = $user->email;
                                 }
-//                                if (isset($_GET['envoieMail'])){
-//                                    mailSyn2("Sav non RFPU dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $messErreur);
-//                                    $this->nbMail++;
-//                                }
+                                $mailTech .= ', tommy@bimp.fr';
+                                if (isset($_GET['envoieMail'])){
+                                    mailSyn2("Sav non RFPU dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $messErreur);
+                                    $this->nbMail++;
+                                }
                             }
                         }
                     }

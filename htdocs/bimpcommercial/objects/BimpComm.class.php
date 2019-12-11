@@ -3529,7 +3529,7 @@ class BimpComm extends BimpDolObject
                     $errors[] = 'Montant de la remise globale absent';
                 }
 
-                if ($total_ttc_without_remises > 0) {
+                if ($total_ttc_without_remises != 0) {
                     $data['remise_globale'] = round(((float) $data['remise_globale_amount'] / $total_ttc_without_remises) * 100, 8);
                 } else {
                     $data['remise_globale'] = 0;

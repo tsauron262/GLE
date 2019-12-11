@@ -347,6 +347,7 @@ forms:
               label: Montant de la remise
               input_name: remise_globale_amount
               data_type: money
+              unsigned: 1
               input: 
                   help: Ce montant sera déduit du Total TTC et sera converti en pourcentage global. 
               value: 

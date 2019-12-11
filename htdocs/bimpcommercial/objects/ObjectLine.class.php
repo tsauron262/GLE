@@ -80,8 +80,7 @@ class ObjectLine extends BimpObject
 //            self::$types[self::LINE_FREE] = 'Ligne libre';
         return parent::__construct($module, $object_name);
     }
-    
-    
+
     public function getCustomFilterValueLabel($field_name, $value)
     {
         switch ($field_name) {
@@ -103,7 +102,7 @@ class ObjectLine extends BimpObject
                 }
                 break;
             case 'fk_product_type':
-                return ($value?'Oui': 'Non');
+                return ($value ? 'Oui' : 'Non');
             case 'ref-prod':
                 return $this->traiteLike($value);
             default:
@@ -112,8 +111,6 @@ class ObjectLine extends BimpObject
 
         return parent::getCustomFilterValueLabel($field_name, $value);
     }
-    
-    
 
     // Gestion des droits utilisateurs:
 
@@ -779,11 +776,11 @@ class ObjectLine extends BimpObject
                     'table' => 'product',
                     'on'    => $alias . '.rowid = ' . $line_alias . '.fk_product'
                 );
-                foreach($values as $value)
-                $filters[$alias . '.ref'] = array('operator'=>'like', 'value'=>$this->traiteLike($value));
-                
+                foreach ($values as $value)
+                    $filters[$alias . '.ref'] = array('operator' => 'like', 'value' => $this->traiteLike($value));
+
                 break;
-                
+
             case 'fk_product_type':
                 $alias = 'product';
                 $line_alias = 'dol_line';
@@ -798,7 +795,7 @@ class ObjectLine extends BimpObject
                     'on'    => $alias . '.rowid = ' . $line_alias . '.fk_product'
                 );
                 $filters[$alias . '.fk_product_type'] = $values;
-                
+
                 break;
         }
 
@@ -806,10 +803,11 @@ class ObjectLine extends BimpObject
     }
 
     // Getters valeurs:
-    
-    public function traiteLike($value){
-        if(stripos($value, "%") === false)
-                return $value."%";
+
+    public function traiteLike($value)
+    {
+        if (stripos($value, "%") === false)
+            return $value . "%";
         return $value;
     }
 
@@ -1294,7 +1292,7 @@ class ObjectLine extends BimpObject
                         } else {
                             $remise_globale_rate = (float) $remise_globale_rate;
                         }
-                        if ($remise_globale_rate > 0) {
+                        if ($remise_globale_rate != 0) {
                             $this->remises_total_infos['remise_globale_percent'] = $remise_globale_rate;
                             $this->remises_total_infos['remise_globale_amount_ht'] = $total_ht * ($remise_globale_rate / 100);
                             $this->remises_total_infos['remise_globale_amount_ttc'] = $total_ttc * ($remise_globale_rate / 100);

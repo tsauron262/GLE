@@ -101,10 +101,7 @@ class ObjectLine extends BimpObject
                     return 'Aucun';
                 }
                 break;
-            case 'fk_product_type':
-                return ($value ? 'Oui' : 'Non');
-            case 'ref-prod':
-                return $this->traiteLike($value);
+
             default:
                 return $value;
         }
@@ -763,6 +760,7 @@ class ObjectLine extends BimpObject
                     );
                 }
                 break;
+                
             case 'ref-prod':
                 $alias = 'product';
                 $line_alias = 'dol_line';
@@ -776,9 +774,20 @@ class ObjectLine extends BimpObject
                     'table' => 'product',
                     'on'    => $alias . '.rowid = ' . $line_alias . '.fk_product'
                 );
-                foreach ($values as $value)
-                    $filters[$alias . '.ref'] = array('operator' => 'like', 'value' => $this->traiteLike($value));
 
+                $or_field = array();
+                foreach ($values as $value) {
+                    $filter = BC_Filter::getValuePartSqlFilter($value, "middle");
+                    if (!empty($filter)) {
+                        $or_field[] = $filter;
+                    }
+                }
+
+                if (!empty($or_field)) {
+                    $filters[$alias . '.ref'] = array(
+                        'or_field' => $or_field
+                    );
+                }
                 break;
 
             case 'fk_product_type':
@@ -794,7 +803,10 @@ class ObjectLine extends BimpObject
                     'table' => 'product',
                     'on'    => $alias . '.rowid = ' . $line_alias . '.fk_product'
                 );
-                $filters[$alias . '.fk_product_type'] = $values;
+                
+                $filters[$alias . '.fk_product_type'] = array(
+                    'in' => $values
+                );
 
                 break;
         }
@@ -803,13 +815,6 @@ class ObjectLine extends BimpObject
     }
 
     // Getters valeurs:
-
-    public function traiteLike($value)
-    {
-        if (stripos($value, "%") === false)
-            return $value . "%";
-        return $value;
-    }
 
     public function getFullQty()
     {

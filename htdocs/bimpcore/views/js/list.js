@@ -1018,29 +1018,27 @@ function checkListWidth($list) {
     var offset = 0;
 
     if ($(window).width() > 1270) {
-        var $filtersPanel = $list.find('.listFiltersPanelContainer');
+        var $filters = $list.find('.listFiltersPanelContainer');
         var $table = $list.find('.objectlistTableContainer').children('.objectlistTable');
 
-        var width = 0;
-
-        if ($filtersPanel.length && $filtersPanel.css('display') !== 'none') {
-            width += $filtersPanel.width();
-        }
-
+        var width = 60;
+        
         if ($table.length) {
-            width += $table.width();
+            width += $table.width() + 12;
         }
-
-        var panel_width = $panelBody.width();
-
-        if (width > panel_width) {
-            offset = Math.round(panel_width - width);
+        
+        if ($filters.length && $filters.css('display') !== 'none') {
+            width += $filters.width() + 12;
+            
+            $list.css({
+                'width': width + 'px'
+            });
+        } else {
+            $list.css({
+                'width': 'auto'
+            });
         }
     }
-
-    $list.find('tr.headerRow').find('.listPopup').each(function () {
-        $(this).css('margin-right', (offset + 5) + 'px');
-    });
 }
 
 // Gestion des inputs:

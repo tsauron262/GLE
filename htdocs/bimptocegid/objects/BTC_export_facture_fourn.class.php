@@ -62,7 +62,7 @@ class BTC_export_facture_fourn extends BTC_export {
 
         $liste_des_lignes_facture = $facture->dol_object->lines;
         $lignes = [];
-        $total_ttc_facture = round($facture->getData('total_ttc'), 2);
+        $total_ttc_facture = $facture->getData('total_ttc');
         $inverse = false;
         if ($total_ttc_facture < 0) {
             $inverse = true;
@@ -172,14 +172,14 @@ class BTC_export_facture_fourn extends BTC_export {
         $total_lignes_facture = 0;
         foreach ($liste_des_lignes_facture as $ligne) {
             if ($ligne->total_ttc != doubleval(0)) {
-                $total_lignes_facture += $ligne->total_ht;
+                $total_lignes_facture += round($ligne->total_ht, 2);
                 if ($ligne->fk_product) {
                     $is_frais_de_port = false;
                     $produit = $this->getInstance('bimpcore', 'Bimp_Product', $ligne->fk_product);
                     //$frais_de_port = $this->db->getRow('categorie_product', 'fk_categorie = 9705 AND fk_product = ' . $produit->id);
                     if ($frais_de_port = $this->db->getRow('categorie_product', 'fk_categorie = 9705 AND fk_product = ' . $produit->id) || $produit->id == 129950) { // ID du produit à enlever quand il sera categoriser (FRAIS DE PORT LDLC
                         if (!$use_tva || $ligne->tva_tx == 0) {
-                            $use_compte_general = $this->convertion_to_interco_code('60480000', $compte_general_401);
+                            $use_compte_general = $this->convertion_to_interco_code(BimpCore::getConf('BIMPTOCEGID_achat_tva_null'), $compte_general_401);
                         } else {
                             $use_compte_general = $this->convertion_to_interco_code($compte_frais_de_port, $compte_general_401);
                         }
@@ -193,7 +193,7 @@ class BTC_export_facture_fourn extends BTC_export {
                             $use_compte_general = ($use_tva && $ligne->tva_tx == 0) ? $compte_achat_tva_null : $compte_achat_service;
                         }
 
-                        if ($facture->getData('fk_soc') == 261968) {
+                        if ($this->isApple($societe->getData('nom'))) {
                             $use_compte_general = '60793000';
                         }
                         if ($use_d3e) {
@@ -212,7 +212,7 @@ class BTC_export_facture_fourn extends BTC_export {
                             }
                         }
                     }
-                    if ($facture->getData('fk_soc') == 261968) {
+                    if ($this->isApple($societe->getData('nom'))) {
                         $use_compte_general = '60793000';
                     }
                     if (in_array($produit->getData('ref'), self::$rfa_fournisseur)) {
@@ -231,7 +231,7 @@ class BTC_export_facture_fourn extends BTC_export {
                                 break;
                         }
 
-                        if ($facture->getData('fk_soc') == 261968) { // ToDo Faire une fonction car appel récurant
+                        if ($this->isApple($societe->getData('nom'))) {
                             $use_compte_general = '60973000';
                         }
 
@@ -273,9 +273,9 @@ class BTC_export_facture_fourn extends BTC_export {
         }
 
 
-        if (round($total_ttc_facture) != round($total_lignes_facture)) {
-            $montant_ecart = round($total_ttc_facture) - round($total_lignes_facture);
-            $this->rectifications_ecarts($lignes, $montant_ecart, 'achat');
+        if (round($total_ttc_facture, 2) != round($total_lignes_facture, 2)) {
+            $montant_ecart = round($total_ttc_facture, 2) - round($total_lignes_facture, 2);
+            $this->rectifications_ecarts($lignes, round($montant_ecart, 2), 'achat');
         }
 
         foreach ($lignes as $l => $infos) {
@@ -305,7 +305,7 @@ class BTC_export_facture_fourn extends BTC_export {
             $facture->updateField('exported', 1);
             return 1;
         } else {
-            return -3;
+            return 0;
         }
     }
 

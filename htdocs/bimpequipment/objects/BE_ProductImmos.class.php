@@ -175,7 +175,7 @@ class BE_ProductImmos extends Bimp_Product
                     self::$currentFilters['place_date'] = $values;
                     $or_field = array();
                     foreach ($this->values as $value) {
-                        $or_field[] = BC_Filter::getDateRangeSqlFilter($value, $errors);
+                        $or_field[] = BC_Filter::getRangeSqlFilter($value, $errors);
                     }
 
                     if (!empty($or_field)) {
@@ -209,7 +209,7 @@ class BE_ProductImmos extends Bimp_Product
 //
 //                $or_field = array();
 //                foreach ($values as $value) {
-//                    $or_field[] = BC_Filter::getDateRangeSqlFilter($value, $errors);
+//                    $or_field[] = BC_Filter::getRangeSqlFilter($value, $errors);
 //                }
 //
 //                if (!empty($or_field)) {

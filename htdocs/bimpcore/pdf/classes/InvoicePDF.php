@@ -178,7 +178,7 @@ class InvoicePDF extends BimpDocumentPDF
         // Réf facture: 
         $docRef = $this->langs->transnoentities("Ref") . " : " . $this->langs->convToOutputCharset($this->facture->ref);
         if ($this->facture->statut == Facture::STATUS_DRAFT) {
-            $docRef = '<span style="color: #800000"> ' . $docRef . ' - ' . $this->langs->transnoentities("NotValidated") . '</span>';
+            $docRef = '<span style="color: #800000"> ' . $docRef . ' - Non validé' . (BimpObject::objectLoaded($this->bimpCommObject) ? $this->bimpCommObject->e() : '') . '</span>';
         }
 
         $this->header_vars['doc_name'] = $docName;
@@ -597,8 +597,8 @@ class InvoicePDF extends BimpDocumentPDF
 
     public function renderAnnexes()
     {
+        $this->next_annexe_idx = 1;
         if (count($this->shipments) > 3 || $this->nb_deliveries > 1) {
-            $i = 1;
             $html = '';
 
             $html .= '<div style="font-size: 8px">';
@@ -610,7 +610,7 @@ class InvoicePDF extends BimpDocumentPDF
             if (count($this->shipments) > 3) {
                 $html .= '<table style="width: 100%" cellspacing="0" cellpadding="3px">';
                 $html .= '<tr>';
-                $html .= '<td class="section_title" style="font-weight: bold; color: #' . $this->primary . '; border-top: solid 1px #' . $this->primary . '; border-bottom: solid 1px #' . $this->primary . '">Annexe ' . $i . ': références livraisons</td>';
+                $html .= '<td class="section_title" style="font-weight: bold; color: #' . $this->primary . '; border-top: solid 1px #' . $this->primary . '; border-bottom: solid 1px #' . $this->primary . '">Annexe ' . $this->next_annexe_idx . ': références livraisons</td>';
                 $html .= '</tr>';
                 $html .= '</table>';
 
@@ -632,7 +632,7 @@ class InvoicePDF extends BimpDocumentPDF
                     }
                 }
                 $html .= '</div>';
-                $i++;
+                $this->next_annexe_idx++;
             }
             $html .= '</td>';
 
@@ -641,7 +641,7 @@ class InvoicePDF extends BimpDocumentPDF
             if ($this->nb_deliveries > 1) {
                 $html .= '<table style="width: 100%" cellspacing="0" cellpadding="3px">';
                 $html .= '<tr>';
-                $html .= '<td class="section_title" style="font-weight: bold; color: #' . $this->primary . '; border-top: solid 1px #' . $this->primary . '; border-bottom: solid 1px #' . $this->primary . '">Annexe ' . $i . ': adresses de livraison</td>';
+                $html .= '<td class="section_title" style="font-weight: bold; color: #' . $this->primary . '; border-top: solid 1px #' . $this->primary . '; border-bottom: solid 1px #' . $this->primary . '">Annexe ' . $this->next_annexe_idx . ': adresses de livraison</td>';
                 $html .= '</tr>';
                 foreach ($this->deliveries as $id_client => $contacts) {
                     foreach ($contacts as $id_contact => $origins) {
@@ -696,9 +696,9 @@ class InvoicePDF extends BimpDocumentPDF
                     }
                 }
                 $html .= '</table>';
+                $this->next_annexe_idx++;
             }
 
-            $i++;
             $html .= '</td>';
             $html .= '</tr>';
             $html .= '</table>';

@@ -120,7 +120,7 @@ class BC_Filter extends BimpComponent
         return array();
     }
 
-    public static function getDateRangeSqlFilter($value, &$errors)
+    public static function getRangeSqlFilter($value, &$errors = array())
     {
         $filter = array();
 
@@ -155,6 +155,19 @@ class BC_Filter extends BimpComponent
         }
 
         return $filter;
+    }
+
+    public static function getValuePartSqlFilter($value, $part_type)
+    {
+        $value = (string) $value;
+        if ($value !== '') {
+            return array(
+                'part_type' => $part_type,
+                'part'      => $value
+            );
+        }
+        
+        return array();
     }
 
     public function renderHtml()

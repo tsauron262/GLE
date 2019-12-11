@@ -593,20 +593,18 @@ filters_panels:
                 field: fk_product
                 child: dol_line
             ref-prod:
-                field: ref-prod
-#                child: product
                 custom: 1
-                label: Réf Prod
-                type: value
-                data_type: string
+                field: ref-prod
+                label: Réf. produit
+                type: value_part
             fk_product_type:
                 field: fk_product_type
                 custom: 1
-                label: Service
-                type: value
-                data_type: bool
-                input: 
-                    type: toggle
+                label: Type (produit / service)
+                type: check_list
+                items: 
+                    0: Produit
+                    1: Service
             secteur:
                 field: ef_type
                 child: parent

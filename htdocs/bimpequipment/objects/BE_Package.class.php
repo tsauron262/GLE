@@ -266,7 +266,7 @@ class BE_Package extends BimpObject
 
                 $or_field = array();
                 foreach ($values as $value) {
-                    $or_field[] = BC_Filter::getDateRangeSqlFilter($value, $errors);
+                    $or_field[] = BC_Filter::getRangeSqlFilter($value, $errors);
                 }
 
                 if (!empty($or_field)) {

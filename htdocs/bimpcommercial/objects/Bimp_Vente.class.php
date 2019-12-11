@@ -417,7 +417,7 @@ VQ - Collège
                     }
                 }
             }
-            
+
             foreach ($entrepots_data as $ship_to => $data) {
                 if ($data['ventes'] < 0)
                     $data['ventes'] = 0;
@@ -538,7 +538,7 @@ VQ - Collège
                 $shipTosData[$shipTo]['ca_tx'] = 0;
             }
         }
-        
+
         $rate = 80;
         $v2 = ($total_ca_v2 / $total_ca) * 100;
 
@@ -588,6 +588,9 @@ VQ - Collège
         $nV1 = count($v1_shipTos) - 1;
         $nV2 = count($v2_shipTos) - 1;
 
+        $floor = (float) (BimpCore::getConf('csv_apple_sueil_v1', 2) / 100);
+        $ceil = (float) (BimpCore::getConf('csv_apple_plafond_v2', 10) / 100);
+
         $n = 0;
         while ($v2 < $rate) {
             $n++;
@@ -630,7 +633,17 @@ VQ - Collège
 
                             $v2 = ($total_ca_v2 / $total_ca) * 100;
 
-//                            $html .= $v2_shipTo . ': + ' . $v2_diff . '<br/>';
+                            if ((float) ($shipTosData[$v1_shipTo]['total_ca'] / $total_ca) <= $floor) {
+                                unset($v1_shipTos[$v1_idx]);
+                                sort($v1_shipTos);
+                                $nV1--;
+                            }
+
+                            if ((float) ($shipTosData[$v2_shipTo]['total_ca'] / $total_ca) >= $ceil) {
+                                unset($v2_shipTos[$v2_idx]);
+                                sort($v2_shipTos);
+                                $nV2--;
+                            }
                         }
                     }
                 }

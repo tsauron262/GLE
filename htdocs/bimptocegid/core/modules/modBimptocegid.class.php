@@ -122,6 +122,9 @@ class modBimptocegid extends DolibarrModules {
         $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_comissions_fr", 70820000)';
         $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_comissions_ue", 70829100)';
         $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_comissions_ex", 70829000)';
+        //refacturation filliales
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_refacturation_ht", 79100000)';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_refacturation_ttc", 79119000)';
         
         require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
         $name = 'module_version_' . strtolower($this->name);

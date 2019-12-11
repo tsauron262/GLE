@@ -227,20 +227,19 @@ class BC_FieldFilter extends BC_Filter
 
             case 'value_part':
                 foreach ($this->values as $value) {
-                    $value = (string) $value;
-                    if ($value !== '') {
-                        $or_field[] = array(
-                            'part_type' => $this->params['part_type'],
-                            'part'      => $value
-                        );
-                    }
+                $or_field[] = self::getValuePartSqlFilter($value, $this->params['part_type'], $errors);
                 }
                 break;
 
             case 'date_range':
+                foreach ($this->values as $value) {
+                    $or_field[] = $this->getRangeSqlFilter($value, $errors);
+                }
+                break;
+                
             case 'range':
                 foreach ($this->values as $value) {
-                    $or_field[] = $this->getDateRangeSqlFilter($value, $errors);
+                    $or_field[] = $this->getRangeSqlFilter($value, $errors);
                 }
                 break;
 

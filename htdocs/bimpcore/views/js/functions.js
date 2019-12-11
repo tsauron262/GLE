@@ -233,6 +233,22 @@ function loadImageModal($button, src, title) {
     bimpModal.loadImage($button, src, title);
 }
 
+// Popovers: 
+
+function hidePopovers($container) {
+    $container.find('.bs-popover').each(function () {
+        $(this).popover('hide');
+    });
+}
+
+function resetPopovers($container) {
+    $container.find('.bs-popover').each(function () {
+        var options = $(this).data('bs.popover').options;
+        $(this).popover('destroy');
+        $(this).popover(options);
+    });
+}
+
 // Actions: 
 
 function toggleFoldableSection($caption) {
@@ -278,12 +294,6 @@ function toggleElementDisplay($element, $button) {
             }
         }
     }
-}
-
-function hidePopovers($container) {
-    $container.find('.bs-popover').each(function () {
-        $(this).popover('hide');
-    });
 }
 
 // Evenements: 
@@ -539,7 +549,11 @@ function setCommonEvents($container) {
             placement: 'bottom',
             html: true,
             trigger: 'hover',
-            content: $(this).data('title')
+            content: $(this).data('title'),
+            viewport: {
+                selector: 'window',
+                padding: 0
+            }
         });
     });
 

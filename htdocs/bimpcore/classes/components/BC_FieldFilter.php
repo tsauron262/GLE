@@ -227,13 +227,7 @@ class BC_FieldFilter extends BC_Filter
 
             case 'value_part':
                 foreach ($this->values as $value) {
-                    $value = (string) $value;
-                    if ($value !== '') {
-                        $or_field[] = array(
-                            'part_type' => $this->params['part_type'],
-                            'part'      => $value
-                        );
-                    }
+                $or_field[] = self::getValuePartSqlFilter($value, $this->params['part_type'], $errors);
                 }
                 break;
 

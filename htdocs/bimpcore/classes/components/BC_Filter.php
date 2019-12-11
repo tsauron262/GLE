@@ -157,6 +157,19 @@ class BC_Filter extends BimpComponent
         return $filter;
     }
 
+    public static function getValuePartSqlFilter($value, $part_type)
+    {
+        $value = (string) $value;
+        if ($value !== '') {
+            return array(
+                'part_type' => $part_type,
+                'part'      => $value
+            );
+        }
+        
+        return array();
+    }
+
     public function renderHtml()
     {
         if (!$this->params['show']) {

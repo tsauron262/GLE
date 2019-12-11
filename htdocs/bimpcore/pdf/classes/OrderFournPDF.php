@@ -27,7 +27,7 @@ class OrderFournPDF extends BimpDocumentPDF
         $this->pdf->addCgvPages = false;
 
         $this->target_label = 'Fournisseur';
-        
+
         $this->hideReduc = true;
     }
 
@@ -139,6 +139,10 @@ class OrderFournPDF extends BimpDocumentPDF
                     if ($id_contact) {
                         $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $id_contact);
                         if (BimpObject::objectLoaded($contact)) {
+                            $soc = $contact->getParentInstance();
+                            if (BimpObject::objectLoaded($soc) && $soc->isCompany()) {
+                                $html .= '<span style="font-weight: bold">' . $soc->getData('nom') . '</span><br/>';
+                            }
                             $html .= '<span style="font-weight: bold">' . $contact->getData('firstname') . ' ' . $contact->getData('lastname') . '</span><br/>';
                             $html .= $contact->getData('address') . '<br/>';
                             $html .= $contact->getData('zip') . ' ' . $contact->getData('town') . '<br/>';

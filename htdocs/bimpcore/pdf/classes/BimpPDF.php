@@ -9,7 +9,7 @@ class BimpPDF extends TCPDF
     protected $header = '';
     protected $footer = '';
     protected $pagination = '';
-    public $topMargin = 40;
+    public $topMargin = 42;
     public $sideMargin = 10;
     public $headerMargin = 10;
     public $footerMargin = 30;

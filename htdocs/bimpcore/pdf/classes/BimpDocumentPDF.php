@@ -32,6 +32,9 @@ class BimpDocumentPDF extends BimpModelPDF
     public $totals = array("DEEE" => 0, "RPCP" => 0);
     public $target_label = '';
     public $after_totaux_label = '';
+    public $next_annexe_idx = 1;
+    public $max_line_serials = 50;
+    public $annexe_listings = array();
 
     public function __construct($db)
     {
@@ -160,7 +163,6 @@ class BimpDocumentPDF extends BimpModelPDF
         } else {
             $sizes = dol_getImageSize($logo_file, false);
 
-
             $tabTaille = $this->calculeWidthHieghtLogo($sizes['width'], $sizes['height'], $this->maxLogoWidth, $this->maxLogoHeight);
 
             $logo_width = $tabTaille[0];
@@ -175,10 +177,7 @@ class BimpDocumentPDF extends BimpModelPDF
                 if (file_exists($soc_logo_file)) {
                     $sizes = dol_getImageSize($soc_logo_file, false);
                     if (isset($sizes['width']) && (int) $sizes['width'] && isset($sizes['height']) && $sizes['height']) {
-
                         $tabTaille = $this->calculeWidthHieghtLogo($sizes['width'] / 3, $sizes['height'] / 3, 200, 100);
-
-
 
                         $header_right = '<img src="' . $soc_logo_file . '" width="' . $tabTaille[0] . 'px" height="' . $tabTaille[1] . 'px"/>';
                     }
@@ -186,7 +185,7 @@ class BimpDocumentPDF extends BimpModelPDF
             }
         }
 
-        $this->pdf->topMargin = 50;
+        $this->pdf->topMargin = 53;
 
         $this->header_vars = array(
             'logo_img'      => $logo_file,
@@ -298,6 +297,7 @@ class BimpDocumentPDF extends BimpModelPDF
         $this->renderFullBlock('renderBottom');
         $this->renderFullBlock('renderAfterBottom');
         $this->renderFullBlock('renderAnnexes');
+        $this->renderAnnexeListings();
         
         $cur_page = (int) $this->pdf->getPage();
         $num_pages = (int) $this->pdf->getNumPages();
@@ -553,7 +553,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
     public function renderLines()
     {
-        global $conf;
+        global $conf, $user;
 
         $table = new BimpPDF_AmountsTable($this->pdf);
 
@@ -640,15 +640,38 @@ class BimpDocumentPDF extends BimpModelPDF
                             $desc .= '<span style="font-size: 6px;">N° de série: </span>';
                             $fl = true;
                             $desc .= '<span style="font-size: 6px; font-style: italic">';
-                            foreach ($equipments as $id_equipment) {
-                                $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
-                                if (BimpObject::objectLoaded($equipment)) {
-                                    if (!$fl) {
-                                        $desc .= ', ';
-                                    } else {
-                                        $fl = false;
+                            if (count($equipments) > (int) $this->max_line_serials && (int) $user->id === 1) {
+                                $desc .= 'voir annexe';
+                                $serials = array();
+
+                                foreach ($equipments as $id_equipment) {
+                                    $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+                                    $serials[] = $equipment->getData('serial');
+                                }
+
+                                if (!isset($this->annexe_listings['serials'])) {
+                                    $this->annexe_listings['serials'] = array(
+                                        'title' => 'Numéros de série',
+                                        'lists' => array()
+                                    );
+                                }
+
+                                $this->annexe_listings['serials']['lists'][] = array(
+                                    'title' => 'Référence "' . $product->ref . '" - ' . $product->label,
+                                    'cols'  => 8,
+                                    'items' => $serials
+                                );
+                            } else {
+                                foreach ($equipments as $id_equipment) {
+                                    $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+                                    if (BimpObject::objectLoaded($equipment)) {
+                                        if (!$fl) {
+                                            $desc .= ', ';
+                                        } else {
+                                            $fl = false;
+                                        }
+                                        $desc .= $equipment->getData('serial');
                                     }
-                                    $desc .= $equipment->getData('serial');
                                 }
                             }
                             $desc .= '</span>';
@@ -1028,7 +1051,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
         // /!\ ATTENTION: ne surtout pas oublier de réinitialiser toutes les variables de classe définies ici
         // La fonction peut être appellée plusieurs fois dans certain cas. 
-        
+
         $this->total_remises = 0;
         $this->localtax1 = array();
         $this->localtax2 = array();
@@ -1114,7 +1137,7 @@ class BimpDocumentPDF extends BimpModelPDF
             if (!isset($this->tva[$vatrate])) {
                 $this->tva[$vatrate] = 0;
             }
-            
+
             if (!isset($this->ht[$vatrate])) {
                 $this->ht[$vatrate] = 0;
             }
@@ -1286,8 +1309,8 @@ class BimpDocumentPDF extends BimpModelPDF
                             }
                             $html .= '</td>';
                             $html .= '</tr>';
-                            
-                            
+
+
                             //todo phrase suivant tva 
 //                            $infos =  array();
 //                                    $infos[] ="mmmffff30";
@@ -1449,7 +1472,7 @@ class BimpDocumentPDF extends BimpModelPDF
         $html .= '</table>';
         $html .= '<br/>';
 
-        return $html.$htmlInfo;
+        return $html . $htmlInfo;
     }
 
     public function getPaymentsHtml()
@@ -1507,5 +1530,67 @@ class BimpDocumentPDF extends BimpModelPDF
     public function renderAnnexes()
     {
         
+    }
+
+    public function renderAnnexeListings()
+    {
+        if (!empty($this->annexe_listings)) {
+            foreach ($this->annexe_listings as $annexe_type => $annexe) {
+
+                if (!empty($annexe['lists'])) {
+                    $annexe_title = 'Annexe ' . $this->next_annexe_idx . ' - ' . $annexe['title'];
+                    $html = '';
+                    $html .= '<table style="width: 100%" cellspacing="0" cellpadding="3px">';
+                    $html .= '<tr>';
+                    $html .= '<td class="section_title" style="font-weight: bold; font-size: 8px; border-top: solid 1px #' . $this->primary . '; border-bottom: solid 1px #' . $this->primary . '">';
+                    $html .= '<span style="color: #' . $this->primary . '">' . $annexe_title . '</span></td>';
+                    $html .= '</tr>';
+                    $html .= '</table>';
+
+                    $this->writeContent($html);
+
+                    foreach ($annexe['lists'] as $list) {
+                        $table = new BimpPDF_Table($this->pdf, false);
+                        $table->new_page_title = '<div style="font-weight: bold;font-size: 9px;">' . $annexe_title . ' - ' . $list['title'] . ' (suite)</div>';
+                        $table->cellpadding = 1;
+
+                        for ($i = 0; $i < $list['cols']; $i++) {
+                            $table->addCol($i, '', 0, 'font-size: 6px');
+                        }
+
+                        $rows = array();
+                        $row = array();
+                        $i = 0;
+                        foreach ($list['items'] as $item) {
+                            $row[$i] = $item;
+
+                            $i++;
+                            if ($i >= $list['cols']) {
+                                $i = 0;
+                                $rows[] = $row;
+                                $row = array();
+                            }
+                        }
+
+                        if (!empty($rows)) {
+                            $html = '';
+                            $html .= '<table style="width: 100%" cellspacing="0" cellpadding="6px">';
+                            $html .= '<tr>';
+                            $html .= '<td style="font-weight: bold;font-size: 8px;">' . $list['title'] . '</td>';
+                            $html .= '</tr>';
+                            $html .= '</table>';
+                            $this->writeContent($html);
+
+                            $table->rows = $rows;
+                            $table->write();
+                        }
+
+                        unset($table);
+                    }
+                }
+
+                $this->next_annexe_idx++;
+            }
+        }
     }
 }

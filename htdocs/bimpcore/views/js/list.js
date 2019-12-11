@@ -1015,32 +1015,40 @@ function checkListWidth($list) {
         return;
     }
 
-    var offset = 0;
-
     if ($(window).width() > 1270) {
-        var $filtersPanel = $list.find('.listFiltersPanelContainer');
+        var $filters = $list.find('.listFiltersPanelContainer');
         var $table = $list.find('.objectlistTableContainer').children('.objectlistTable');
 
         var width = 0;
 
-        if ($filtersPanel.length && $filtersPanel.css('display') !== 'none') {
-            width += $filtersPanel.width();
-        }
-
         if ($table.length) {
-            width += $table.width();
+            $table.parent().removeAttr('style');
+            width += $table.width() + 12;
         }
 
-        var panel_width = $panelBody.width();
+        if ($filters.length && $filters.css('display') !== 'none') {
+            $filters.removeAttr('style');
 
-        if (width > panel_width) {
-            offset = Math.round(panel_width - width);
+            if ($filters.width() > 300) {
+                $filters.attr('style', 'width: 300px!important');
+            }
+
+            width += $filters.width() + 12;
+
+            $list.css({
+                'width': width + 'px'
+            });
+
+            if ($table.length) {
+                var table_width = width - $filters.width() - 24;
+                $table.parent().attr('style', 'width: ' + table_width + 'px!important');
+            }
+        } else {
+            $list.css({
+                'width': 'auto'
+            });
         }
     }
-
-    $list.find('tr.headerRow').find('.listPopup').each(function () {
-        $(this).css('margin-right', (offset + 5) + 'px');
-    });
 }
 
 // Gestion des inputs:
@@ -1119,6 +1127,7 @@ function onListLoaded($list) {
 
         var $table = $list.find('table.objectlistTable');
         var $tbody = $list.find('tbody.listRows');
+        var list_id = $list.attr('id');
 
         if ($tbody.find('tr.objectListItemRow').length > 10) {
             $list.find('tr.listFooterButtons').show();
@@ -1130,12 +1139,19 @@ function onListLoaded($list) {
 //        $(this).attr('target', '_blank');
             var link_title = $(this).attr('title');
             if (link_title) {
+                $(this).popover('destroy');
+                $(this).removeClass('classfortooltip');
                 $(this).removeAttr('title');
                 $(this).popover({
                     trigger: 'hover',
                     content: link_title,
                     placement: 'bottom',
-                    html: true
+                    html: true,
+                    container: '#' + list_id,
+                    viewport: {
+                        selector: 'window',
+                        padding: 0
+                    }
                 });
             }
         });
@@ -1167,12 +1183,12 @@ function onListLoaded($list) {
                 var $searchRow = $list.find('.listSearchRow');
                 if ($searchRow.length) {
                     if ($(this).hasClass('action-open')) {
-                        $searchRow.stop().fadeIn(150, function() {
+                        $searchRow.stop().fadeIn(150, function () {
                             checkListWidth($list);
                         });
                         $(this).removeClass('action-open').addClass('action-close');
                     } else {
-                        $searchRow.stop().fadeOut(150, function() {
+                        $searchRow.stop().fadeOut(150, function () {
                             checkListWidth($list);
                         });
                         $(this).removeClass('action-close').addClass('action-open');
@@ -1183,12 +1199,12 @@ function onListLoaded($list) {
                 var $addRow = $list.find('.addObjectRow');
                 if ($addRow.length) {
                     if ($(this).hasClass('action-open')) {
-                        $addRow.stop().fadeIn(150, function() {
+                        $addRow.stop().fadeIn(150, function () {
                             checkListWidth($list);
                         });
                         $(this).removeClass('action-open').addClass('action-close');
                     } else {
-                        $addRow.stop().fadeOut(150, function() {
+                        $addRow.stop().fadeOut(150, function () {
                             checkListWidth($list);
                         });
                         $(this).removeClass('action-close').addClass('action-open');
@@ -1320,6 +1336,8 @@ function onListRefeshed($list) {
 //        $(this).attr('target', '_blank');
 //    });
 
+    var list_id = $list.attr('id');
+
     var $tbody = $list.find('tbody.listRows');
 
     if ($tbody.find('tr.objectListItemRow').length > 10) {
@@ -1332,12 +1350,19 @@ function onListRefeshed($list) {
 //        $(this).attr('target', '_blank');
         var link_title = $(this).attr('title');
         if (link_title) {
+            $(this).popover('destroy');
+            $(this).removeClass('classfortooltip');
             $(this).removeAttr('title');
             $(this).popover({
                 trigger: 'hover',
                 content: link_title,
                 placement: 'bottom',
-                html: true
+                html: true,
+                container: '#' + list_id,
+                viewport: {
+                    selector: 'window',
+                    padding: 0
+                }
             });
         }
     });

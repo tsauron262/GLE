@@ -94,15 +94,15 @@ class BTC_export extends BimpObject {
      * @param type $id_element
      */
     
-    protected function addTaskAlert($error, $id_element){
+    protected function addTaskAlert($data){
         global $conf;
         $msg = "";
         $subj = "";
         
         switch($error) {
             case self::TYPE_RETURN_NE:
-                $subj = 'Paiement - Ecriture non inscrit dans le fichier TRA';
-                $msg = "Bonjour, le paiement <b>#".$id_element."</b> à été traiter par le module mais son écriture n'à pas été inscrit dans le fichier</b>";
+                $subj = 'Compta ERP - ' . $data['ref'];
+                $msg = "La pièce comptable " . $data['ref'] . ' ne c\'est pas exportée';
                 break;
         }
         
@@ -130,6 +130,7 @@ class BTC_export extends BimpObject {
                     $instance->updateField('exported', 1);
                 } else {
                     // Mettre task
+                    $this->addTaskAlert(['ref' => $instance->getData('ref')]);
                 }
             }
         } else {

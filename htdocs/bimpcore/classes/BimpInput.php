@@ -344,6 +344,9 @@ class BimpInput
                                 if ((string) $value === (string) $payment_data['code']) {
                                     $html .= ' selected="1"';
                                 }
+                                if (isset($payment_data['forbidden']) && $payment_data['forbidden']) {
+                                    $html .= ' disabled="disabled"';
+                                }
                                 $html .= '>' . $payment_data['label'] . '</option>';
                                 break;
 

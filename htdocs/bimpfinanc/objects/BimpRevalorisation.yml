@@ -93,6 +93,8 @@ fields:
         
     amount: 
         label: Différence unitaire à corriger
+        input: 
+            help: précédée d’un “-" si montant négatif
         type: money
         unsigned: 0
         required: 1

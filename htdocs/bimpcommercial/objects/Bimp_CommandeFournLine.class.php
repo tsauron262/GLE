@@ -2022,19 +2022,19 @@ class Bimp_CommandeFournLine extends FournObjectLine
                         $to_billed_qty = $fullQty - $billed_qty;
                     }
 
-                    if ($received_qty !== (float) $this->getData('qty_received')) {
+                    if ($received_qty != (float) $this->getData('qty_received')) {
                         $this->updateField('qty_received', $received_qty, null, true);
                     }
 
-                    if ($to_receive_qty !== (float) $this->getData('qty_to_receive')) {
+                    if ($to_receive_qty != (float) $this->getData('qty_to_receive')) {
                         $this->updateField('qty_to_receive', $to_receive_qty, null, true);
                     }
                     
-                    if ($billed_qty !== (float) $this->getData('qty_billed')) {
+                    if ($billed_qty != (float) $this->getData('qty_billed')) {
                         $this->updateField('qty_billed', $billed_qty, null, true);
                     }
                     
-                    if ($to_billed_qty !== (float) $this->getData('qty_to_billed')) {
+                    if ($to_billed_qty != (float) $this->getData('qty_to_billed')) {
                         $this->updateField('qty_to_billed', $to_billed_qty, null, true);
                     }
                     

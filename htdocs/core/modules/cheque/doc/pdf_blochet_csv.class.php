@@ -68,6 +68,7 @@ class BordereauChequeBlochet_csv extends ModeleChequeReceipts
 	function write_file($object, $_dir, $number, $outputlangs)
 	{
 
+            $this->object = $object;
             $this->Body($pdf, $pagenb, $pages, $outputlangs);
 
             
@@ -114,26 +115,51 @@ class BordereauChequeBlochet_csv extends ModeleChequeReceipts
 	function Body(&$pdf, $pagenb, $pages, $outputlangs)
 	{
 		$num=count($this->lines);
-                    $this->out .= $this->addCell('Num Cheque');
-                    $this->out .= $this->addCell('Banque');
-                    $this->out .= $this->addCell('Emeteur');
-                    $this->out .= $this->addCell('Montant', 'last');
+                $this->out .= $this->addCell('Facture');
+                $this->out .= $this->addCell('Code Client');
+                $this->out .= $this->addCell('Libelle Client');
+                $this->out .= $this->addCell('Montant Pai Fact');
+                $this->out .= $this->addCell('Emeteur');
+                $this->out .= $this->addCell('Banque');
+                $this->out .= $this->addCell('Montant Cheque');
+                $this->out .= $this->addCell('Num Cheque', 'last');
+
+                $this->out .= $this->sautLigne;
+
+                $sql = $this->db->query("SELECT *, pf.amount as paifact, b.amount as paitot FROM `llx_paiement` p, llx_bank b, llx_paiement_facture pf, llx_facture f, llx_societe s WHERE s.rowid = f.fk_soc AND f.rowid = fk_facture AND p.`fk_bank` = b.rowid AND`fk_bordereau` = ".$this->object->id." AND pf.`fk_paiement` = p.rowid ORDER by fk_bank");
                     
-                    $this->out .= $this->sautLigne;
-		for ($j = 0; $j < $num; $j++)
+                $memoireIdBank = 0;   
+		while($ln = $this->db->fetch_object($sql))
 		{
-                    $numCheque = $this->lines[$j]->num_chq?$this->lines[$j]->num_chq:'';
-                    $banque = dol_trunc($outputlangs->convToOutputCharset($this->lines[$j]->bank_chq),44);
-                    $emeteur = dol_trunc($outputlangs->convToOutputCharset($this->lines[$j]->emetteur_chq),50);
-                    $montant = price($this->lines[$j]->amount_chq);
+                    
+                    $facture = $ln->facnumber;
+                    $codeCli = $ln->code_client;
+                    $libCli = $ln->nom;
+                    $paifact = $ln->paifact;
                     
                     
                     
                     
-                    $this->out .= $this->addCell($numCheque);
-                    $this->out .= $this->addCell($banque);
+                    if($memoireIdBank != $ln->fk_bank){
+                        $memoireIdBank = $ln->fk_bank;
+                        $numCheque = $ln->num_chq;//$this->lines[$j]->num_chq?$this->lines[$j]->num_chq:'';
+                        $banque = $ln->banque;
+                        $emeteur = $ln->emetteur;
+                        $montant = $ln->paitot;
+                    }
+                    else{
+                        $numCheque = $banque = $emeteur = $montant = "";
+                    }
+                    
+                    
+                    $this->out .= $this->addCell($facture);
+                    $this->out .= $this->addCell($codeCli);
+                    $this->out .= $this->addCell($libCli);
+                    $this->out .= $this->addCell($paifact);
                     $this->out .= $this->addCell($emeteur);
-                    $this->out .= $this->addCell($montant, 'last');
+                    $this->out .= $this->addCell($banque);
+                    $this->out .= $this->addCell($montant);
+                    $this->out .= $this->addCell($numCheque, 'last');
                     
                     $this->out .= $this->sautLigne;
 		}

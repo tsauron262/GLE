@@ -67,6 +67,9 @@ filters_panels:
             date_valid: 
                 field: date_valid
                 child: parent
+            paye: 
+                field: paye
+                child: parent
                 
 lists_cols: 
     reval: 

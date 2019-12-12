@@ -909,7 +909,21 @@ class Bimp_Facture extends BimpComm
                     );
                 }
                 break;
+
+            case 'tech_sav':
+                $joins['sav'] = array(
+                    'table' => 'bs_sav',
+                    'alias' => 'sav',
+                    'on'    => '(a.rowid = sav.id_facture OR a.rowid = sav.id_facture_acompte OR a.rowid = sav.id_facture_avoir)'
+                );
+
+                $filters['sav.id_user_tech'] = array(
+                    'in' => $values
+                );
+                break;
         }
+
+        return parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors);
     }
 
     // Getters Array: 

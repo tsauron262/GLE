@@ -94,7 +94,7 @@ fields:
     amount: 
         label: Différence unitaire à corriger
         input: 
-            help: précédée d’un “-" si montant négatif
+            help: Indiquez le montant unitaire à soustraire du prix d'achat.</br>(Valeur négative si le prix d'achat doit être augmenté).
         type: money
         unsigned: 0
         required: 1
@@ -103,7 +103,8 @@ fields:
         label: Qté
         type: qty
         decimals: 4
-        default_value: 0
+        default_value: 
+            callback: getDefaultQty
         
     status: 
         label: Statut

@@ -2,6 +2,7 @@
 
 class BimpRevalorisation extends BimpObject
 {
+
     public static $status_list = array(
         0 => array('label' => 'En Attente', 'icon' => 'fas_hourglass-start', 'classes' => array('warning')),
         1 => array('label' => 'Acceptée', 'icon' => 'fas_check', 'classes' => array('success')),
@@ -31,7 +32,7 @@ class BimpRevalorisation extends BimpObject
         global $user;
         return ($user->admin || $user->rights->bimpcommercial->commission->read);
     }
-    
+
     public function canDelete()
     {
         global $user;
@@ -267,6 +268,24 @@ class BimpRevalorisation extends BimpObject
     public function getTotal()
     {
         return (float) $this->getData('amount') * (float) $this->getData('qty');
+    }
+
+    public function getDefaultQty()
+    {
+        if (!$this->isLoaded()) {
+            if ((int) $this->getData('id_facture_line')) {
+                $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureLine', (int) $this->getData('id_facture_line'));
+                if (BimpObject::objectLoaded($line)) {
+                    return (float) $line->qty;
+                }
+            }
+        }
+        
+        if (isset($this->data['qty'])) { // Pas de $this->getData('qty') sinon boucle infinie... 
+            return (float) $this->data['qty'];
+        }
+        
+        return 0;
     }
 
     // Getters params: 

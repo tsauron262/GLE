@@ -141,7 +141,7 @@ class gsxController extends BimpController
                 $repairType = (isset($params['repairType']) ? $params['repairType'] : '');
 
                 if (!$id_sav) {
-                    $errors[] = 'ID du SAV absent';
+                    $errors[] = 'ID du SAV absent 53';
                 } else {
                     $sav = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SAV', $id_sav);
                     if (!BimpObject::objectLoaded($sav)) {
@@ -564,7 +564,7 @@ class gsxController extends BimpController
 
                 $id_sav = (isset($params['id_sav']) ? (int) $params['id_sav'] : 0);
                 if (!$id_sav) {
-                    $errors[] = 'ID du SAV absent';
+                    $errors[] = 'ID du SAV absent 54';
                 } else {
                     $sav = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SAV', $id_sav);
                     if (!BimpObject::objectLoaded($sav)) {
@@ -757,7 +757,7 @@ class gsxController extends BimpController
         $id_sav = (isset($params['id_sav']) ? (int) $params['id_sav'] : 0);
 
         if (!$id_sav) {
-            $errors[] = 'ID du SAV absent';
+            $errors[] = 'ID du SAV absent 55';
         } else {
             $sav = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SAV', $id_sav);
 
@@ -815,7 +815,7 @@ class gsxController extends BimpController
             } else {
                 $sav = $issue->getParentInstance();
                 if (!BimpObject::objectLoaded($sav)) {
-                    $errors[] = 'ID du SAV absent';
+                    $errors[] = 'ID du SAV absent 56';
                 } else {
                     $serial = $sav->getSerial();
 
@@ -1031,7 +1031,7 @@ class gsxController extends BimpController
 
         if ($id_sav != 'none') {
             if (!$id_sav) {
-                $errors[] = 'ID du SAV absent';
+                $errors[] = 'ID du SAV absent 57';
             } else {
                 $sav = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SAV', $id_sav);
                 if (!BimpObject::objectLoaded($sav)) {
@@ -1074,7 +1074,7 @@ class gsxController extends BimpController
         $id_sav = (isset($params['id_sav']) ? (int) $params['id_sav'] : 0);
 
         if (!$id_sav) {
-            $errors[] = 'ID du SAV absent';
+            $errors[] = 'ID du SAV absent 58';
         } else {
             $sav = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SAV', $id_sav);
             if (!BimpObject::objectLoaded($sav)) {
@@ -1103,7 +1103,7 @@ class gsxController extends BimpController
         $identifier_type = (isset($params['identifier_type']) ? $params['identifier_type'] : '');
 
         if (!$id_sav) {
-            $errors[] = 'ID du SAV absent';
+            $errors[] = 'ID du SAV absent 59';
         }
 
         if (!$identifier) {
@@ -1196,7 +1196,7 @@ class gsxController extends BimpController
         $repairs = (isset($params['repairs']) ? $params['repairs'] : array());
 
         if (!$id_sav) {
-            $errors[] = 'ID du SAV absent';
+            $errors[] = 'ID du SAV absent 60';
         } else {
             $sav = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SAV', $id_sav);
             if (!BimpObject::objectLoaded($sav)) {
@@ -1330,7 +1330,7 @@ class gsxController extends BimpController
         }
 
         if (!$id_sav) {
-            $errors[] = 'ID du SAV absent';
+            $errors[] = 'ID du SAV absent 61';
         }
 
         if (!count($errors) && $this->gsx_v2->logged) {
@@ -1396,7 +1396,7 @@ class gsxController extends BimpController
             $repair_type = (isset($params['repairType']) ? $params['repairType'] : '');
 
             if (!$id_sav) {
-                $errors[] = 'ID du SAV absent';
+                $errors[] = 'ID du SAV absent 62';
             } else {
                 $sav = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SAV', $id_sav);
                 if (!BimpObject::objectLoaded($sav)) {
@@ -1504,7 +1504,7 @@ class gsxController extends BimpController
             $id_sav = (isset($params['id_sav']) ? (int) $params['id_sav'] : 0);
             $repairType = (isset($params['repairType']) ? $params['repairType'] : '');
             if (!$id_sav) {
-                $errors[] = 'ID du SAV absent';
+                $errors[] = 'ID du SAV absent 63';
             } else {
                 $sav = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SAV', $id_sav);
                 if (!BimpObject::objectLoaded($sav)) {
@@ -1700,18 +1700,20 @@ class gsxController extends BimpController
         $warnings = array();
 
         $html = '';
-
+        
         $id_sav = (isset($params['id_sav']) ? (int) $params['id_sav'] : 0);
-        $serial = '';
+        $serial = (isset($params['serial']) ? $params['serial'] : '');
 
-        if (!$id_sav) {
-            $errors[] = 'ID du SAV absent';
-        } else {
-            $sav = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SAV', $id_sav);
-            if (!BimpObject::objectLoaded($sav)) {
-                $errors[] = 'Le SAV d\'ID ' . $id_sav . ' n\'existe pas';
+        if($serial == ""){
+            if (!$id_sav) {
+                $errors[] = 'ID du SAV absent 64v';
             } else {
-                $serial = $sav->getSerial();
+                $sav = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SAV', $id_sav);
+                if (!BimpObject::objectLoaded($sav)) {
+                    $errors[] = 'Le SAV d\'ID ' . $id_sav . ' n\'existe pas';
+                } else {
+                    $serial = $sav->getSerial();
+                }
             }
         }
 
@@ -1738,7 +1740,7 @@ class gsxController extends BimpController
                             $html .= 'De ' . $suite['timeEstimate']['minimum'] . ' à ' . $suite['timeEstimate']['maximum'] . ' minute(s)';
                             $html .= '</td>';
                             $html .= '<td>';
-                            $html .= '<span class="btn btn-default" onclick="gsx_runDiagnostic($(this), ' . $id_sav . ', ' . $suite['suiteId'] . ')">';
+                            $html .= '<span class="btn btn-default" onclick="gsx_runDiagnostic($(this), \'' . $serial . '\', ' . $suite['suiteId'] . ')">';
                             $html .= 'Lancer' . BimpRender::renderIcon('fas_arrow-circle-right', 'iconRight');
                             $html .= '</span>';
                             $html .= '</td>';
@@ -1769,20 +1771,11 @@ class gsxController extends BimpController
         $errors = array();
         $warnings = array();
 
-        $id_sav = (isset($params['id_sav']) ? (int) $params['id_sav'] : 0);
+       
         $suite_id = (isset($params['suite_id']) ? (int) $params['suite_id'] : '');
-        $serial = '';
+        $serial = (isset($params['serial']) ?  $params['serial'] : '');
 
-        if (!$id_sav) {
-            $errors[] = 'ID du SAV absent';
-        } else {
-            $sav = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SAV', $id_sav);
-            if (!BimpObject::objectLoaded($sav)) {
-                $errors[] = 'Le SAV d\'ID ' . $id_sav . ' n\'existe pas';
-            } else {
-                $serial = $sav->getSerial();
-            }
-        }
+       
 
         if (!$suite_id) {
             $errors[] = 'Identifiant du type de diagnostic absent';
@@ -1808,17 +1801,12 @@ class gsxController extends BimpController
     protected function gsxRefreshDiagnosticStatus($params)
     {
         $errors = array();
-
-        $id_sav = (isset($params['id_sav']) ? (int) $params['id_sav'] : 0);
-        if (!$id_sav) {
-            $errors[] = 'ID du SAV absent';
+        
+        $serial = (isset($params['serial']) ? $params['serial'] : '');
+        if ($serial == "") {
+            $errors[] = 'Serial absent';
         } else {
-            $sav = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SAV', $id_sav);
-            if (!BimpObject::objectLoaded($sav)) {
-                $errors[] = 'Le SAV d\'ID ' . $id_sav . ' n\'existe pas';
-            } else {
-                $html = $this->renderDiagnosticStatus($sav);
-            }
+                $html = $this->renderDiagnosticStatus($serial);
         }
 
         return array(
@@ -1831,17 +1819,12 @@ class gsxController extends BimpController
     {
         $errors = array();
 
-        $id_sav = (isset($params['id_sav']) ? (int) $params['id_sav'] : 0);
-        if (!$id_sav) {
-            $errors[] = 'ID du SAV absent';
-        } else {
-            $sav = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SAV', $id_sav);
-            if (!BimpObject::objectLoaded($sav)) {
-                $errors[] = 'Le SAV d\'ID ' . $id_sav . ' n\'existe pas';
-            } else {
-                $html = $this->renderDiagnosticsDetails($sav);
-            }
+        $serial = (isset($params['serial']) ? $params['serial'] : '');
+        if($serial != ''){
+            $html = $this->renderDiagnosticsDetails($serial);
         }
+        else
+                $errors[] = 'Serial absent 76';
 
         return array(
             'errors' => $errors,
@@ -2530,14 +2513,14 @@ class gsxController extends BimpController
                 $html .= $this->gsx_v2->displayErrors();
             }
 
-            if (is_object($sav)) {
-                $html .= BimpRender::renderPanel('Diagnostics', $this->renderSavGsxDiagnosticsView($sav), '', array(
+                $html .= BimpRender::renderPanel('Diagnostics', $this->renderSavGsxDiagnosticsView($serial), '', array(
                             'panel_id' => 'sav_diagnostics',
                             'type'     => 'secondary',
                             'icon'     => 'fas_stethoscope',
                             'foldable' => true
                 ));
 
+            if (is_object($sav)) {
                 $html .= BimpRender::renderPanel('Réparations', $this->renderRepairs($sav), '', array(
                             'panel_id' => 'sav_repairs',
                             'type'     => 'secondary',
@@ -2555,7 +2538,7 @@ class gsxController extends BimpController
         return $html;
     }
 
-    protected function renderSavGsxDiagnosticsView($sav)
+    protected function renderSavGsxDiagnosticsView($serial)
     {
         if (!$this->use_gsx_v2) {
             return '';
@@ -2565,21 +2548,21 @@ class gsxController extends BimpController
 
         $html .= '<div>';
         $html .= '<h3 style="display: inline-block; margin-left: 15px">Diagnostic en cours</h3>';
-        $html .= '<span  style="margin-left: 30px" class="btn btn-default" onclick="gsx_refeshDiagnosticStatus($(this), ' . $sav->id . ')">';
+        $html .= '<span  style="margin-left: 30px" class="btn btn-default" onclick="gsx_refeshDiagnosticStatus($(this), \'' . $serial . '\')">';
         $html .= BimpRender::renderIcon('fas_redo', 'iconLeft') . 'Actualiser';
         $html .= '</span>';
         $html .= '</div>';
 
         $html .= '<div id="currentDiagnosticStatus">';
-        $html .= $this->renderDiagnosticStatus($sav);
+        $html .= $this->renderDiagnosticStatus($serial);
         $html .= '</div>';
 
         $html .= '<div class="buttonsContainer align-right">';
-        $html .= '<button class="btn btn-default" onclick="gsx_diagnosticSuites($(this), ' . $sav->id . ')">';
+        $html .= '<button class="btn btn-default" onclick="gsx_diagnosticSuites($(this), \'' . $serial . '\')">';
         $html .= 'Lancer diagnostic' . BimpRender::renderIcon('fas_arrow-circle-right', 'iconRight');
         $html .= '</button>';
 
-        $html .= '<button class="btn btn-default" onclick="gsx_loadDiagnosticsDetails($(this), ' . $sav->id . ')">';
+        $html .= '<button class="btn btn-default" onclick="gsx_loadDiagnosticsDetails($(this), \'' . $serial . '\')">';
         $html .= BimpRender::renderIcon('fas_download', 'iconLeft') . 'Charger le détail des diagnostics';
         $html .= '</button>';
         $html .= '</div>';
@@ -2590,17 +2573,17 @@ class gsxController extends BimpController
         return $html;
     }
 
-    protected function renderDiagnosticStatus($sav)
+    protected function renderDiagnosticStatus($serial)
     {
         $html = '';
 
-        if (!BimpObject::objectLoaded($sav)) {
-            return BimpRender::renderAlerts('ID du SAV absent');
+        if (!isset($serial) || $serial == "") {
+            return BimpRender::renderAlerts('Serial absent');
         }
 
         if ($this->gsx_v2->logged) {
             $this->gsx_v2->resetErrors();
-            $data = $this->gsx_v2->diagnosticStatus($sav->getSerial());
+            $data = $this->gsx_v2->diagnosticStatus($serial);
 
             if ($data === false) {
                 $html .= $this->gsx_v2->displayErrors();
@@ -2616,13 +2599,13 @@ class gsxController extends BimpController
         return $html;
     }
 
-    protected function renderDiagnosticsDetails($sav)
+    protected function renderDiagnosticsDetails($serial)
     {
         $html = '';
 
-        if (BimpObject::objectLoaded($sav) && $this->gsx_v2->logged) {
+        if ($serial != "") {
             $this->gsx_v2->resetErrors();
-            $data = $this->gsx_v2->diagnosticsLookup($sav->getSerial());
+            $data = $this->gsx_v2->diagnosticsLookup($serial);
 
             if ($data === false) {
                 $html .= $this->gsx_v2->displayErrors();
@@ -2740,7 +2723,7 @@ class gsxController extends BimpController
                     ));
                 }
             } else {
-                $html .= BimpRender::renderAlerts('Aucun diagnostic trouvé pour ce SAV', 'warning');
+                $html .= BimpRender::renderAlerts('Aucun diagnostic trouvé pour ce serial', 'warning');
             }
         }
 
@@ -2952,7 +2935,7 @@ class gsxController extends BimpController
         $sav = null;
 
         if (!(int) $id_sav) {
-            $errors[] = 'ID du SAV absent';
+            $errors[] = 'ID du SAV absent 68';
         } else {
             $sav = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SAV', (int) $id_sav);
             if (!$sav->isLoaded()) {
@@ -3755,7 +3738,7 @@ class gsxController extends BimpController
         }
 
         if (!$id_sav) {
-            $errors[] = 'ID du SAV absent';
+            $errors[] = 'ID du SAV absent 69';
         }
 
         if (!count($errors)) {
@@ -3878,7 +3861,7 @@ class gsxController extends BimpController
         $numberType = BimpTools::getValue('importNumberType', '');
 
         if (!$id_sav) {
-            $errors[] = 'ID du SAV absent';
+            $errors[] = 'ID du SAV absent 70';
         }
 
         if (!$number) {
@@ -3940,7 +3923,7 @@ class gsxController extends BimpController
         $id_sav = BimpTools::getValue('id_sav', 0);
 
         if (!$id_sav) {
-            $errors[] = 'ID du SAV absent';
+            $errors[] = 'ID du SAV absent 71';
         } else {
             $sav = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SAV', $id_sav);
             if (is_null($sav) || !$sav->isLoaded()) {
@@ -3970,7 +3953,7 @@ class gsxController extends BimpController
         }
 
         if (!$id_sav) {
-            $errors[] = 'ID du SAV absent';
+            $errors[] = 'ID du SAV absent 72';
         }
 
         if (!count($errors)) {

@@ -478,22 +478,22 @@ function gsx_importRepairs($button, id_sav, modal_idx) {
     });
 }
 
-function gsx_diagnosticSuites($button, id_sav) {
+function gsx_diagnosticSuites($button, serial) {
     if ($.isOk($button) && $button.hasClass('disabled')) {
         return;
     }
 
     bimpModal.newContent('Lancer un diagnostic à distance', '', false, '', null, 'medium');
-    bimpModal.removeComponentContent('diagnostic_suites_' + id_sav);
+    bimpModal.removeComponentContent('diagnostic_suites_' + serial);
     var modal_idx = bimpModal.idx;
     var $container = bimpModal.$contents.find('#modal_content_' + modal_idx);
 
     GsxAjax('gsxDiagnosticSuites', {
-        id_sav: id_sav
+        serial: serial
     }, $container, {
         $button: $button,
         modal_idx: modal_idx,
-        id_sav: id_sav,
+        serial: serial,
         display_success: false,
         append_html: true,
         display_processing: true,
@@ -505,7 +505,7 @@ function gsx_diagnosticSuites($button, id_sav) {
     });
 }
 
-function gsx_runDiagnostic($button, id_sav, suite_id) {
+function gsx_runDiagnostic($button, serial, suite_id) {
     if ($.isOk($button) && $button.hasClass('disabled')) {
         return;
     }
@@ -516,11 +516,11 @@ function gsx_runDiagnostic($button, id_sav, suite_id) {
     var $container = $row.next().find('td');
 
     GsxAjax('gsxRunDiagnostic', {
-        id_sav: id_sav,
+        serial: serial,
         suite_id: suite_id
     }, $container, {
         $button: $button,
-        id_sav: id_sav,
+        serial: serial,
         display_success: true,
         success_msg: 'Diagnostic initié avec succès',
         display_processing: true,
@@ -529,16 +529,16 @@ function gsx_runDiagnostic($button, id_sav, suite_id) {
     });
 }
 
-function gsx_refeshDiagnosticStatus($button, id_sav) {
+function gsx_refeshDiagnosticStatus($button, serial) {
     if ($.isOk($button) && $button.hasClass('disabled')) {
         return;
     }
 
     GsxAjax('gsxRefreshDiagnosticStatus', {
-        id_sav: id_sav
+        serial: serial
     }, $('#currentDiagnosticStatus'), {
         $button: $button,
-        id_sav: id_sav,
+        serial: serial,
         append_html: true,
         display_success: false,
         display_processing: true,
@@ -547,16 +547,16 @@ function gsx_refeshDiagnosticStatus($button, id_sav) {
     });
 }
 
-function gsx_loadDiagnosticsDetails($button, id_sav) {
+function gsx_loadDiagnosticsDetails($button, serial) {
     if ($.isOk($button) && $button.hasClass('disabled')) {
         return;
     }
 
     GsxAjax('gsxLoadDiagnosticsDetails', {
-        id_sav: id_sav
+        serial: serial
     }, $('#diagnosticsDetails'), {
         $button: $button,
-        id_sav: id_sav,
+        serial: serial,
         append_html: true,
         display_success: false,
         display_processing: true,

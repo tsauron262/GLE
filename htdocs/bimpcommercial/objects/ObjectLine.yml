@@ -615,6 +615,12 @@ filters_panels:
             description: 
                 field: description
                 child: dol_line
+            total_ht_ln: 
+                field: total_ht
+                child: dol_line
+            total_ttc_ln: 
+                field: total_ttc
+                child: dol_line
             total_ht: 
                 field: total
                 child: parent

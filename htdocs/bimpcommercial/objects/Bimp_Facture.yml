@@ -659,7 +659,13 @@ filters_panels:
                 field: total_ttc
             ignore_compta:
                 field: ignore_compta
-            
+            tech_sav: 
+                custom: 1
+                field: tech_sav
+                label: Technicien SAV
+                type: value
+                input: 
+                    type: search_user
             availability: unset
             
 lists_cols: 

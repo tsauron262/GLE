@@ -266,7 +266,7 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                     }
                     else {
                         $this->nbErr++;
-                        $messErreur = $this->displayError("Echec de la recup dans GSX ", $ligne, $repair, $erreurSOAP);
+                        $messErreur = $this->displayError("Echec de la recup dans GSX ", $ligne, null, $erreurSOAP);
                         echo $messErreur;
                         $_SESSION['idRepairIncc'][$ligne->rid] = $ligne->ref;
                     }
@@ -279,35 +279,35 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
         }
     }
 
-    function mailNonFerme() {
-        global $db;
-        $nbJ = (isset($_GET['nbJ'])) ? $_GET['nbJ'] : 60;
-        $sql = $db->query("SELECT DATEDIFF(now(), c.tms) as nbJ, c.id as cid, Etat, `fk_user_modif` as user, fk_user_author as user2,
-
-c.ref FROM `".MAIN_DB_PREFIX."synopsischrono` c, ".MAIN_DB_PREFIX."synopsischrono_chrono_105 cs
-
-WHERE c.id = cs.id AND cs.Etat != 999 AND cs.Etat != 2 AND cs.Etat != 9 AND DATEDIFF(now(), c.tms) > " . $nbJ . " ORDER BY user");
-        $user = new User($db);
-        $tabUser = array();
-        while ($ligne = $db->fetch_object($sql)) {
-            if ($ligne->user > 0)
-                $userId = $ligne->user;
-            elseif ($ligne->user2 > 0)
-                $userId = $ligne->user2;
-            else
-                $userId = 0;
-
-
-
-            if (!isset($tabUser[$userId])) {
-                $user = new User($db);
-                $user->fetch($userId);
-                $tabUser[$userId] = $user;
-            }
-
-            echo "SAV Non fermé depuis : " . $ligne->nbJ . " jours || " . $this->getNomUrlChrono($ligne->cid, $ligne->ref) . "   par : " . $tabUser[$userId]->getNomUrl(1) . " </br>";
-        }
-    }
+//    function mailNonFerme() {
+//        global $db;
+//        $nbJ = (isset($_GET['nbJ'])) ? $_GET['nbJ'] : 60;
+//        $sql = $db->query("SELECT DATEDIFF(now(), c.tms) as nbJ, c.id as cid, Etat, `fk_user_modif` as user, fk_user_author as user2,
+//
+//c.ref FROM `".MAIN_DB_PREFIX."synopsischrono` c, ".MAIN_DB_PREFIX."synopsischrono_chrono_105 cs
+//
+//WHERE c.id = cs.id AND cs.Etat != 999 AND cs.Etat != 2 AND cs.Etat != 9 AND DATEDIFF(now(), c.tms) > " . $nbJ . " ORDER BY user");
+//        $user = new User($db);
+//        $tabUser = array();
+//        while ($ligne = $db->fetch_object($sql)) {
+//            if ($ligne->user > 0)
+//                $userId = $ligne->user;
+//            elseif ($ligne->user2 > 0)
+//                $userId = $ligne->user2;
+//            else
+//                $userId = 0;
+//
+//
+//
+//            if (!isset($tabUser[$userId])) {
+//                $user = new User($db);
+//                $user->fetch($userId);
+//                $tabUser[$userId] = $user;
+//            }
+//
+//            echo "SAV Non fermé depuis : " . $ligne->nbJ . " jours || " . $this->getNomUrlChrono($ligne->cid, $ligne->ref) . "   par : " . $tabUser[$userId]->getNomUrl(1) . " </br>";
+//        }
+//    }
 
     function getNomUrlChrono($id, $ref) {
         global $db;

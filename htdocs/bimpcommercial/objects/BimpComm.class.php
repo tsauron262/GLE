@@ -100,6 +100,9 @@ class BimpComm extends BimpDolObject
                     if (!(int) $this->areLinesEditable()) {
                         return 0;
                     }
+                    
+                    if(!$user->rights->bimpcommercial->edit_zone_vente)
+                        return 0;
                 }
                 break;
         }

@@ -142,12 +142,12 @@ class BordereauChequeBlochet_csv extends ModeleChequeReceipts
                     
                     if($memoireIdBank != $ln->fk_bank){
                         $i++;
-                        $total += $montant;
                         $memoireIdBank = $ln->fk_bank;
                         $numCheque = $ln->num_chq;//$this->lines[$j]->num_chq?$this->lines[$j]->num_chq:'';
                         $banque = $ln->banque;
                         $emeteur = $ln->emetteur;
                         $montant = $ln->paitot;
+                        $total += $montant;
                     }
                     else{
                         $numCheque = $banque = $emeteur = $montant = "";

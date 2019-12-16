@@ -659,48 +659,70 @@ class indexController extends BimpController
                 if (is_null($session) || !$session->isLoaded()) {
                     $errors[] = 'Session de caisse invalide';
                 } else {
-                    $current_fonds = (float) $caisse->getData('fonds');
-
-                    if ($fonds !== $current_fonds) {
-                        if (!$confirm_fonds) {
-                            $msg = 'Un écart avec le fonds de caisse théorique a été constaté (Fonds actuel: ' . BimpTools::displayMoneyValue($current_fonds, 'EUR') . ').<br/>';
-                            $msg .= 'Confirmez-vous le montant du fonds de caisse indiqué?';
-                            $html = BimpRender::renderAlerts($msg, 'warning');
-                            $need_confirm_fonds = 1;
-                        } else {
-                            global $user;
-                            $msg = 'Correction du fonds de caisse suite à un différentiel constaté à la fermeture par ' . $user->getNomUrl();
-                            $correction_errors = $caisse->correctFonds($fonds, $msg);
-                            if (count($correction_errors)) {
-                                $errors[] = BimpTools::getMsgFromArray($correction_errors, 'Echec de la correction du fonds de caisse');
-                            } else {
-                                $fonds = $caisse->getSavedData('fonds');
-                            }
-                            $caisse->set('fonds', $fonds);
+                    if(!count($errors)) {
+                        if(1){
+                            $bc_vente = BimpObject::getInstance('bimpcaisse', 'BC_Vente');
+                            $filters = array();
+                            $filters['id_caisse'] = array($caisse->id);
+                            $filters['id_caisse_session'] = array($session->id);
+                            $list = $bc_vente->getList($filters);
+                            foreach($list as $infoVente)
+                                if($infoVente['status'] == 1)
+                                    $nbBr++;
+                            if($nbBr > 0)
+                                $errors[] = "Abandonnez toutes les ventes à l’état brouillon au préalable. (".$nbBr.")";
                         }
                     }
+                    
+                    
+                    
+                    
+                    
+                    
+                    if(!count($errors)) {
+                        $current_fonds = (float) $caisse->getData('fonds');
 
-                    // Fermeture de la session: 
-                    if (!$need_confirm_fonds) {
-                        $session->set('date_closed', date('Y-m-d H:i:s'));
-                        $session->set('id_user_closed', (int) $user->id);
-                        $session->set('fonds_end', $fonds);
-                        $session_errors = $session->update();
-                        if (!count($session_errors)) {
-                            $caisse->set('id_current_session', 0);
-                            $caisse->set('status', 0);
-                            $session_errors = $caisse->update();
+                        if ($fonds !== $current_fonds) {
+                            if (!$confirm_fonds) {
+                                $msg = 'Un écart avec le fonds de caisse théorique a été constaté (Fonds actuel: ' . BimpTools::displayMoneyValue($current_fonds, 'EUR') . ').<br/>';
+                                $msg .= 'Confirmez-vous le montant du fonds de caisse indiqué?';
+                                $html = BimpRender::renderAlerts($msg, 'warning');
+                                $need_confirm_fonds = 1;
+                            } else {
+                                global $user;
+                                $msg = 'Correction du fonds de caisse suite à un différentiel constaté à la fermeture par ' . $user->getNomUrl();
+                                $correction_errors = $caisse->correctFonds($fonds, $msg);
+                                if (count($correction_errors)) {
+                                    $errors[] = BimpTools::getMsgFromArray($correction_errors, 'Echec de la correction du fonds de caisse');
+                                } else {
+                                    $fonds = $caisse->getSavedData('fonds');
+                                }
+                                $caisse->set('fonds', $fonds);
+                            }
                         }
-                        if (count($session_errors)) {
-                            $errors[] = BimpTools::getMsgFromArray($session_errors, 'Echec de la fermeture de la caisse');
-                        } else {
-                            $errors = array_merge($errors, $caisse->disconnectAllUsers());
 
-                            $html = BimpRender::renderAlerts('Fermeture de la caisse "' . $caisse->getData('name') . '" effectuée avec succès', 'success');
+                        // Fermeture de la session: 
+                        if (!$need_confirm_fonds) {
+                            $session->set('date_closed', date('Y-m-d H:i:s'));
+                            $session->set('id_user_closed', (int) $user->id);
+                            $session->set('fonds_end', $fonds);
+                            $session_errors = $session->update();
+                            if (!count($session_errors)) {
+                                $caisse->set('id_current_session', 0);
+                                $caisse->set('status', 0);
+                                $session_errors = $caisse->update();
+                            }
+                            if (count($session_errors)) {
+                                $errors[] = BimpTools::getMsgFromArray($session_errors, 'Echec de la fermeture de la caisse');
+                            } else {
+                                $errors = array_merge($errors, $caisse->disconnectAllUsers());
 
-                            $recap_url = DOL_URL_ROOT . '/bimpcore/view.php?module=bimpcaisse&object_name=BC_CaisseSession&id_object=' . $session->id . '&view=recap';
-                            $recap_width = BC_Caisse::$windowWidthByDpi[(int) $caisse->getData('printer_dpi')];
-//                            $recap_url = 'window.open(\'' . $url . '\', \'Récapitulatif session de caisse\', "menubar=no, status=no, width=' . BC_Caisse::$windowWidthByDpi[(int) $caisse->getData('printer_dpi')] . ', height=900");';
+                                $html = BimpRender::renderAlerts('Fermeture de la caisse "' . $caisse->getData('name') . '" effectuée avec succès', 'success');
+
+                                $recap_url = DOL_URL_ROOT . '/bimpcore/view.php?module=bimpcaisse&object_name=BC_CaisseSession&id_object=' . $session->id . '&view=recap';
+                                $recap_width = BC_Caisse::$windowWidthByDpi[(int) $caisse->getData('printer_dpi')];
+    //                            $recap_url = 'window.open(\'' . $url . '\', \'Récapitulatif session de caisse\', "menubar=no, status=no, width=' . BC_Caisse::$windowWidthByDpi[(int) $caisse->getData('printer_dpi')] . ', height=900");';
+                            }
                         }
                     }
                 }

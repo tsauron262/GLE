@@ -3,7 +3,7 @@
 class BTC_export_facture extends BTC_export {
     
     public function export($id_facture, $forced) {
-        $this->create_daily_file('vente');
+        $file = $this->create_daily_file('vente');
         $facture = $this->getInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
         if($contact = $this->db->getRow('element_contact', 'element_id = ' . $facture->getData('fk_soc') . ' AND fk_c_type_contact = 60')) {
             $id_client_facturation = $contact->fk_socpeople;
@@ -295,7 +295,7 @@ class BTC_export_facture extends BTC_export {
             $ecritures .= $this->struct($structure);
         }
         
-         if($this->write_tra($ecritures, "")) {
+         if($this->write_tra($ecritures, $file)) {
             $facture->updateField('exported', 1);
             return 1;
         } else {

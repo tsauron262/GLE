@@ -128,7 +128,7 @@ class BordereauChequeBlochet_csv extends ModeleChequeReceipts
 
                 $sql = $this->db->query("SELECT *, pf.amount as paifact, b.amount as paitot FROM `llx_paiement` p, llx_bank b, llx_paiement_facture pf, llx_facture f, llx_societe s WHERE s.rowid = f.fk_soc AND f.rowid = fk_facture AND p.`fk_bank` = b.rowid AND`fk_bordereau` = ".$this->object->id." AND pf.`fk_paiement` = p.rowid ORDER by fk_bank");
                     
-                $memoireIdBank = 0;   
+                $memoireIdBank = $total = $i = 0;   
 		while($ln = $this->db->fetch_object($sql))
 		{
                     
@@ -141,6 +141,8 @@ class BordereauChequeBlochet_csv extends ModeleChequeReceipts
                     
                     
                     if($memoireIdBank != $ln->fk_bank){
+                        $i++;
+                        $total += $montant;
                         $memoireIdBank = $ln->fk_bank;
                         $numCheque = $ln->num_chq;//$this->lines[$j]->num_chq?$this->lines[$j]->num_chq:'';
                         $banque = $ln->banque;
@@ -155,15 +157,25 @@ class BordereauChequeBlochet_csv extends ModeleChequeReceipts
                     $this->out .= $this->addCell($facture);
                     $this->out .= $this->addCell($codeCli);
                     $this->out .= $this->addCell($libCli);
-                    $this->out .= $this->addCell($paifact);
+                    $this->out .= $this->addCell(price($paifact));
                     $this->out .= $this->addCell($emeteur);
                     $this->out .= $this->addCell($banque);
-                    $this->out .= $this->addCell($montant);
+                    $this->out .= $this->addCell(price($montant));
                     $this->out .= $this->addCell($numCheque, 'last');
                     
                     $this->out .= $this->sautLigne;
 		}
-                
+            
+            $this->out .= $this->sautLigne;
+            
+            $this->out .= $this->addCell('Total');
+            $this->out .= $this->addCell($i);
+            $this->out .= $this->addCell('');
+            $this->out .= $this->addCell('');
+            $this->out .= $this->addCell('');
+            $this->out .= $this->addCell('');
+            $this->out .= $this->addCell(price($total));
+            $this->out .= $this->addCell('', 'last');
 	}
         
         public function addCell($text, $option){

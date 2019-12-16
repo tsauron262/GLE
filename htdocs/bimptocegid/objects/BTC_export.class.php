@@ -409,8 +409,9 @@ class BTC_export extends BimpObject {
     }
     
     protected function write_tra($ecriture, $file) {
-        $opened_file = fopen($this->file, 'a+');
+        $opened_file = fopen($file, 'a+');
         if(fwrite($opened_file, $ecriture)) {
+            echo 'ecrit';
             return true;
         } else {
             return false;

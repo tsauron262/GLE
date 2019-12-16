@@ -96,7 +96,7 @@ class BTC_export extends BimpObject {
                 //$this->create_daily_file('vente');
                 $this->$function_name($_REQUEST['ref']);
             } else {
-                $this->create_daily_file('vente');
+                //$this->create_daily_file('vente');
                 $this->$function_name(null, $since);
             }
             

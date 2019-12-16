@@ -116,8 +116,8 @@ class BTC_export extends BimpObject {
     protected function create_daily_file($element = null, $date = null) {
         
         $daily_files = [];
-        if(!is_null($this->current_date_by_get)) {
-            $complementFileName = $this->current_date_by_get;
+        if(isset($_REQUEST['date']) && !empty($_REQUEST['date'])) {
+            $complementFileName = $_REQUEST['date'];
             $complementDirectory = 'BY_DATE';
         }elseif(!is_null($this->current_ref_by_get)) {
             $complementFileName = $this->current_ref_by_get;

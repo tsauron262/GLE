@@ -5,6 +5,7 @@ class BTC_export extends BimpObject {
     private $sql_limit = 1; // Nombre de résultats dans la requete SQL: null = unlimited
     private $date_export = null;
     private $today;
+    public $file;
     private $current_month;
     private $current_ref_by_get = null;
     private $current_date_by_get = null;
@@ -162,7 +163,7 @@ class BTC_export extends BimpObject {
         
         
         echo $export_dir . $file; die();
-        
+        $this->file = $export_dir . $file;
         return $export_dir . $file;
     }
     
@@ -408,7 +409,7 @@ class BTC_export extends BimpObject {
     }
     
     protected function write_tra($ecriture, $file) {
-        $opened_file = fopen($file, 'a+');
+        $opened_file = fopen($this->file, 'a+');
         if(fwrite($opened_file, $ecriture)) {
             return true;
         } else {

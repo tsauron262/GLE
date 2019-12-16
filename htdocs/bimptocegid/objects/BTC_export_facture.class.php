@@ -299,7 +299,7 @@ class BTC_export_facture extends BTC_export {
             $facture->updateField('exported', 1);
             return 1;
         } else {
-            return -3;
+            return 0;
         }
         
     }

@@ -120,8 +120,8 @@ class BTC_export extends BimpObject {
         if(isset($_REQUEST['date']) && !empty($_REQUEST['date'])) {
             $complementFileName = $_REQUEST['date'];
             $complementDirectory = 'BY_DATE';
-        }elseif(!is_null($this->current_ref_by_get)) {
-            $complementFileName = $this->current_ref_by_get;
+        }elseif(isset($_REQUEST['ref']) && !empty($_REQUEST['ref'])) {
+            $complementFileName = $_REQUEST['ref'];
             $complementDirectory = 'BY_REF';
         } else {
             $complementFileName = $this->today;

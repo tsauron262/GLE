@@ -1686,7 +1686,7 @@ class gsxController extends BimpController
 
                     $response['answers'][] = $answer;
                     $responses[] = $response;
-                } elseif (!isset($q['optional']) || !(int) $q['optional']) {
+                } elseif ($q['answerType'] !== 'INT' && (!isset($q['optional']) || !(int) $q['optional'])) {
                     $errors[] = 'Une réponse est obligatoire pour la question "' . $q['questionPhrase'] . '"';
                 }
             }

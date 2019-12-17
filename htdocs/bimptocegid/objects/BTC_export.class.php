@@ -156,7 +156,6 @@ class BTC_export extends BimpObject {
             mkdir($export_dir_month . 'exported/', 0777, true);
         }
         
-        chown($export_dir, 'gle');
                 
         if(!file_exists($export_dir_month . $file)) {
             $create_file = fopen($export_dir_month . $file, 'a+');
@@ -199,6 +198,7 @@ class BTC_export extends BimpObject {
     private function export_paiement($ref = null) {
         $liste = $this->get_paiements_for_export($ref);
         $forced = (is_null($ref)) ? false : true;
+        rmdir($this->export_directory . $this->project_directory . '/');
         if(count($liste)) {
             $instance = $this->getInstance('bimptocegid', 'BTC_export_paiement');
             foreach ($liste as $paiement) {

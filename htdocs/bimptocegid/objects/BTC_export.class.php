@@ -12,7 +12,7 @@ class BTC_export extends BimpObject {
     private $folder_trimestre = "";
     private $export_directory = "/data/synchro/bimp/"; // Dossier d'écriture des fichiers
     //private $export_directory = '/usr/local/data2/test_alexis/synchro/'; // Chemin DATAs version de test alexis 
-    private $project_directory = 'BIMPtoCEGID';
+    private $project_directory = 'exportCegid';
     public $type_ecriture = "S"; // S: Simulation, N: Normal
     
     public static $trimestres = [
@@ -198,7 +198,6 @@ class BTC_export extends BimpObject {
     private function export_paiement($ref = null) {
         $liste = $this->get_paiements_for_export($ref);
         $forced = (is_null($ref)) ? false : true;
-        rmdir($this->export_directory . $this->project_directory . '/');
         if(count($liste)) {
             $instance = $this->getInstance('bimptocegid', 'BTC_export_paiement');
             foreach ($liste as $paiement) {

@@ -5,7 +5,7 @@ class BTC_export_societe extends BTC_export {
     const EXPORTED = 1;
     
     public function export(Bimp_Societe $client, $want = 'c') {
-        
+        $file = $this->create_daily_file("tier");
         $is_subsidiary = ($client->getData('is_subsidiary') ? true : false);
         $is_salarie = ($client->getData('is_salarie') ? true : false);
         $is_particulier = false;
@@ -140,7 +140,7 @@ class BTC_export_societe extends BTC_export {
         }
         
         
-        if($this->write_tra($ecritures, $this->create_daily_file('tier'))) {
+        if($this->write_tra($ecritures, $file)) {
             $client->updateField('exported', self::EXPORTED);
             $client->updateField('code_compta', $auxiliaire_client);
             $client->updateField('code_compta_fournisseur', $auxiliaire_fournisseur);

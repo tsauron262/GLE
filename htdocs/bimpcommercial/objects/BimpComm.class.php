@@ -41,12 +41,12 @@ class BimpComm extends BimpDolObject
         204 => ['label' => 'Non comptabilisable', 'classes' => ['warning'], 'icon' => 'times'],
     ];
     public static $zones_vente = array(
-        self::BC_ZONE_FR          => 'France',
-        self::BC_ZONE_UE          => 'Union Européenne',
+        self::BC_ZONE_FR      => 'France',
+        self::BC_ZONE_UE      => 'Union Européenne',
         //self::BC_ZONE_UE_SANS_TVA => 'Union Européenne sans TVA',
-        self::BC_ZONE_HORS_UE     => 'Hors UE'
+        self::BC_ZONE_HORS_UE => 'Hors UE'
     );
-    protected $margins_infos = null; 
+    protected $margins_infos = null;
 
     public function __construct($module, $object_name)
     {
@@ -100,8 +100,8 @@ class BimpComm extends BimpDolObject
                     if (!(int) $this->areLinesEditable()) {
                         return 0;
                     }
-                    
-                    if(!$user->rights->bimpcommercial->edit_zone_vente)
+
+                    if (!$user->rights->bimpcommercial->edit_zone_vente)
                         return 0;
                 }
                 break;
@@ -248,7 +248,7 @@ class BimpComm extends BimpDolObject
 
         return 1;
     }
-    
+
     public function useEntrepot()
     {
         return !BimpCore::getConf("NOT_USE_ENTREPOT");
@@ -354,7 +354,7 @@ class BimpComm extends BimpDolObject
                 }
             }
         }
-        
+
         $emails['custom'] = 'Autre';
 
         return $emails;
@@ -695,7 +695,7 @@ class BimpComm extends BimpDolObject
                 if ($exclude_discounts && (int) $line->id_remise_except) {
                     continue;
                 }
-                
+
                 $total += $line->getTotalTtcWithoutRemises();
             }
         }
@@ -1259,7 +1259,7 @@ class BimpComm extends BimpDolObject
                 if ($country->code === 'FR') {
                     $zone = self::BC_ZONE_FR;
                 } elseif ((int) $country->in_ue) {
-                        $zone = self::BC_ZONE_UE;
+                    $zone = self::BC_ZONE_UE;
                 } else {
                     $zone = self::BC_ZONE_HORS_UE;
                 }
@@ -2807,7 +2807,7 @@ class BimpComm extends BimpDolObject
         return count($errors) ? 0 : 1;
     }
 
-    public function createAcompte($amount, $id_mode_paiement, $id_bank_account = 0, $date_paiement = null, $use_caisse = false, &$warnings = array())
+    public function createAcompte($amount, $id_mode_paiement, $id_bank_account = 0, $date_paiement = null, $use_caisse = false, $num_paiement = '', $nom_emetteur = '', $banque_emetteur = '', &$warnings = array())
     {
 
         global $user, $langs;
@@ -2816,7 +2816,9 @@ class BimpComm extends BimpDolObject
         $caisse = null;
         $id_caisse = 0;
 
-        $type_paiement = $this->db->getValue('c_paiement', 'code', '`id` = ' . (int) $id_mode_paiement);
+        $type_paiement = $id_mode_paiement;
+
+        $id_mode_paiement = $this->db->getValue('c_paiement', 'id', '`code` = \'' . $id_mode_paiement . '\'');
 
         if (!$this->useCaisseForPayments) {
             $use_caisse = false;
@@ -2910,11 +2912,12 @@ class BimpComm extends BimpDolObject
                 $payement->amounts = array($factureA->id => $amount);
                 $payement->datepaye = ($date_paiement ? BimpTools::getDateForDolDate($date_paiement) : dol_now());
                 $payement->paiementid = (int) $id_mode_paiement;
+                $payement->num_paiement = $num_paiement;
                 if ($payement->create($user) <= 0) {
                     $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($payement), 'Des erreurs sont survenues lors de la création du paiement de la facture d\'acompte');
                 } else {
                     // Ajout du paiement au compte bancaire: 
-                    if ($payement->addPaymentToBank($user, 'payment', '(CustomerInvoicePayment)', $id_bank_account, '', '') < 0) {
+                    if ($payement->addPaymentToBank($user, 'payment', '(CustomerInvoicePayment)', $id_bank_account, $nom_emetteur, $banque_emetteur) < 0) {
                         $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($payement), 'Echec de l\'ajout de l\'acompte au compte bancaire ' . $bank_account->bank);
                     }
 
@@ -3060,7 +3063,7 @@ class BimpComm extends BimpDolObject
                                 $id_propal = (int) $this->db->getValue('propaldet', 'fk_propal', 'fk_remise_except = ' . (int) $discount->id);
                                 if ($id_propal) {
                                     $propal = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $id_propal);
-                                    if($propal->getData("fk_statut") != 3){
+                                    if ($propal->getData("fk_statut") != 3) {
                                         $msg = 'La remise #' . $id_discount . ' de ' . BimpTools::displayMoneyValue($discount->amount_ttc) . ' est déjà utilisée';
                                         if (BimpObject::objectLoaded($propal)) {
                                             $msg .= ' dans la proposition commerciale ' . $propal->getNomUrl(0, 1, 1, 'full');
@@ -3565,7 +3568,7 @@ class BimpComm extends BimpDolObject
         $warnings = array();
         $success = 'Acompte créé avec succès';
 
-        $id_mode_paiement = isset($data['id_mode_paiement']) ? (int) $data['id_mode_paiement'] : 0;
+        $id_mode_paiement = isset($data['id_mode_paiement']) ? $data['id_mode_paiement'] : '';
         $id_bank_account = isset($data['bank_account']) ? (int) $data['bank_account'] : 0;
         $amount = isset($data['amount']) ? (float) $data['amount'] : 0;
 
@@ -3573,7 +3576,7 @@ class BimpComm extends BimpDolObject
             $errors[] = 'Date de paiement absent';
         }
 
-        if ($data['id_mode_paiement'] == 2 && is_null($data['bank_account'])) {
+        if ($data['id_mode_paiement'] == 'VIR' && is_null($data['bank_account'])) {
             $errors[] = "Le compte banqaire est obligatoire pour un virement bancaire";
         }
 
@@ -3592,8 +3595,21 @@ class BimpComm extends BimpDolObject
             }
         }
 
+        $num_paiement = '';
+        $nom_emetteur = '';
+        $banque_emetteur = '';
+
+        if (in_array($id_mode_paiement, array('CHQ', 'VIR'))) {
+            $num_paiement = isset($data['num_paiement']) ? $data['num_paiement'] : '';
+            $nom_emetteur = isset($data['nom_emetteur']) ? $data['nom_emetteur'] : '';
+        }
+
+        if ($id_mode_paiement === 'CHQ') {
+            $banque_emetteur = isset($data['banque_emetteur']) ? $data['banque_emetteur'] : '';
+        }
+
         if (!count($errors)) {
-            $errors = $this->createAcompte($amount, $id_mode_paiement, $id_bank_account, $data['date'], $use_caisse, $warnings);
+            $errors = $this->createAcompte($amount, $id_mode_paiement, $id_bank_account, $data['date'], $use_caisse, $num_paiement, $nom_emetteur, $banque_emetteur, $warnings);
         }
 
         return array(

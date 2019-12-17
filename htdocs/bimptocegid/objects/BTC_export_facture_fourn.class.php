@@ -10,7 +10,7 @@ class BTC_export_facture_fourn extends BTC_export {
     public static $rfa_fournisseur = ['GEN-CRT', 'GEN-RFA', 'GEN-IPH', 'REMISE'];
 
     public function export($id_facture, $forced) {
-
+        $file = $this->create_daily_file('achat');
         $facture = $this->getInstance('bimpcommercial', 'Bimp_FactureFourn', $id_facture);
         $societe = $this->getInstance('bimpcore', 'Bimp_Societe', $facture->getData('fk_soc'));
         $is_fournisseur_interco = false;
@@ -294,14 +294,14 @@ class BTC_export_facture_fourn extends BTC_export {
             $tva_calcule = round(20 * $lignes[$use_compte_general]['HT'] / 100, 2);
             $structure['compte_general'] = [BimpCore::getConf('BIMPTOCEGID_autoliquidation_tva_666'), 17];
             $structure['sens'] = [$this->get_sens($total_ttc_facture, 'facture_fourn', false, $sens_parent), 1];
-            $structure['montant'] = [round($tva_calcule, 2), 20, true];
+            $structure['montant'] = [abs(round($tva_calcule, 2)), 20, true];
             $ecritures .= $this->struct($structure);
             $structure['compte_general'] = [BimpCore::getConf('BIMPTOCEGID_autoliquidation_tva_711'), 17];
             $structure['sens'] = [$sens_parent, 1];
             $ecritures .= $this->struct($structure);
         }
 
-        if ($this->write_tra($ecritures, $this->create_daily_file('achat'))) {
+        if ($this->write_tra($ecritures, $file)) {
             $facture->updateField('exported', 1);
             return 1;
         } else {

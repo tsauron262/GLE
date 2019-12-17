@@ -92,7 +92,7 @@ fields:
         required: 1
         
     amount: 
-        label: Différence unitaire à corriger
+        label: Montant unitaire
         input: 
             help: Indiquez le montant unitaire à soustraire du prix d'achat.</br>(Valeur négative si le prix d'achat doit être augmenté).
         type: money
@@ -141,6 +141,7 @@ forms:
             - field: type
             - field: date
             - field: amount
+              label: Différence unitaire à corriger
             - field: qty
             - field: note
         

@@ -627,16 +627,34 @@ class BS_SAV extends BimpObject
             }
 
             // Ajouter acompte: 
-            if ($this->isActionAllowed('validate_propal') && $this->getData('id_facture_acompte') < 1) {
-//                $callback = 'function() {bimp_reloadPage();}';
-                $buttons[] = array(
-                    'label'   => 'Ajouter Acompte',
-                    'icon'    => 'plus-circle',
-                    'onclick' => $this->getJsActionOnclick('addAcompte', array(), array(
-                        'form_name' => 'add_acompte',
-//                        'success_callback' => $callback
-                    ))
-                );
+            if ($this->isActionAllowed('validate_propal')) {
+                $onclick = '';
+
+                if (!(int) $this->getData('id_facture_acompte')) {
+                    $onclick = $this->getJsActionOnclick('addAcompte', array(), array(
+                        'form_name' => 'add_acompte'
+                    ));
+                } elseif (BimpObject::objectLoaded($propal) && $propal->isActionAllowed('addAcompte')) {
+                    $id_mode_paiement = 0;
+                    $client = $propal->getChildObject('client');
+                    if (BimpObject::objectLoaded($client)) {
+                        $id_mode_paiement = $client->dol_object->mode_reglement_id;
+                    }
+
+                    $onclick = $propal->getJsActionOnclick('addAcompte', array(
+                        'id_mode_paiement' => $id_mode_paiement
+                            ), array(
+                        'form_name' => 'acompte'
+                    ));
+                }
+
+                if ($onclick) {
+                    $buttons[] = array(
+                        'label'   => 'Ajouter un acompte',
+                        'icon'    => 'fas_hand-holding-usd',
+                        'onclick' => $onclick
+                    );
+                }
             }
 
             // Payer facture: 
@@ -658,9 +676,6 @@ class BS_SAV extends BimpObject
                 }
             }
         }
-
-
-
 
         global $user;
         if (($user->admin || $user->id == 60 || $user->id == 282 || $user->id == 78) && BimpObject::objectLoaded($propal)) {
@@ -3812,7 +3827,7 @@ class BS_SAV extends BimpObject
                     $repair = BimpCache::getBimpObjectInstance('bimpapple', 'GSX_Repair', (int) $item['id']);
                     if ($repair->isLoaded()) {
                         $tmp = $repair->close(true, false);
-                        if(isset($tmp['errors']))
+                        if (isset($tmp['errors']))
                             $rep_errors = $tmp['errors'];
                         else {
                             $rep_errors = $tmp;

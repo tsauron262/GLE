@@ -128,6 +128,19 @@ class BimpObject extends BimpCache
 
         return null;
     }
+    
+    public function fetch_thirdparty(){
+        $tabPossible = array('societe', 'client');
+        
+        foreach($tabPossible as $posible){
+            $temp = $this->getChildObject($posible);
+            if(is_object($temp) && $temp->isLoaded()){
+                $this->thirdparty = $temp->dol_object;
+            }
+        }
+        
+        return false;
+    }
 
     public static function loadClass($module, $object_name)
     {

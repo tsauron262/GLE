@@ -426,6 +426,9 @@ class BTC_export extends BimpObject {
     }
     
     protected function log($element, $ref, $file) {
+        if(!file_exists('/data2/exportCegid/export.log')) {
+            mkdir('/data2/exportCegid/', 0777, true);
+        }
         $log = date('d/m/Y') . '::' . $element . ' : Ref : ' . $ref . " à été ecrit dans le fichier " . $file . "\n";
         $this->write_logs($log);
     }

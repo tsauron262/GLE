@@ -328,10 +328,14 @@ class gsxController extends BimpController
                                             'componentIssue' => 'hidden'
                                         );
                                     } else {
+                                        $part_used = (string) $part->getData('new_part_number');
+                                        if (!$part_used) {
+                                            $part_used = $part->getData('part_number');
+                                        }
                                         $values['parts'][] = array(
                                             'part_label'     => $part->getData('label'),
                                             'number'         => $part->getData('part_number'),
-                                            'partUsed'       => $part->getData('part_number'),
+                                            'partUsed'       => $part_used,
                                             'pricingOption'  => $pricingOption,
                                             'componentIssue' => array(
                                                 'componentCode'   => $issue->getData('category_code'),
@@ -1700,11 +1704,11 @@ class gsxController extends BimpController
         $warnings = array();
 
         $html = '';
-        
+
         $id_sav = (isset($params['id_sav']) ? (int) $params['id_sav'] : 0);
         $serial = (isset($params['serial']) ? $params['serial'] : '');
 
-        if($serial == ""){
+        if ($serial == "") {
             if (!$id_sav) {
                 $errors[] = 'ID du SAV absent 64v';
             } else {
@@ -1771,11 +1775,11 @@ class gsxController extends BimpController
         $errors = array();
         $warnings = array();
 
-       
-        $suite_id = (isset($params['suite_id']) ? (int) $params['suite_id'] : '');
-        $serial = (isset($params['serial']) ?  $params['serial'] : '');
 
-       
+        $suite_id = (isset($params['suite_id']) ? (int) $params['suite_id'] : '');
+        $serial = (isset($params['serial']) ? $params['serial'] : '');
+
+
 
         if (!$suite_id) {
             $errors[] = 'Identifiant du type de diagnostic absent';
@@ -1801,12 +1805,12 @@ class gsxController extends BimpController
     protected function gsxRefreshDiagnosticStatus($params)
     {
         $errors = array();
-        
+
         $serial = (isset($params['serial']) ? $params['serial'] : '');
         if ($serial == "") {
             $errors[] = 'Serial absent';
         } else {
-                $html = $this->renderDiagnosticStatus($serial);
+            $html = $this->renderDiagnosticStatus($serial);
         }
 
         return array(
@@ -1820,11 +1824,10 @@ class gsxController extends BimpController
         $errors = array();
 
         $serial = (isset($params['serial']) ? $params['serial'] : '');
-        if($serial != ''){
+        if ($serial != '') {
             $html = $this->renderDiagnosticsDetails($serial);
-        }
-        else
-                $errors[] = 'Serial absent 76';
+        } else
+            $errors[] = 'Serial absent 76';
 
         return array(
             'errors' => $errors,
@@ -2513,12 +2516,12 @@ class gsxController extends BimpController
                 $html .= $this->gsx_v2->displayErrors();
             }
 
-                $html .= BimpRender::renderPanel('Diagnostics', $this->renderSavGsxDiagnosticsView($serial), '', array(
-                            'panel_id' => 'sav_diagnostics',
-                            'type'     => 'secondary',
-                            'icon'     => 'fas_stethoscope',
-                            'foldable' => true
-                ));
+            $html .= BimpRender::renderPanel('Diagnostics', $this->renderSavGsxDiagnosticsView($serial), '', array(
+                        'panel_id' => 'sav_diagnostics',
+                        'type'     => 'secondary',
+                        'icon'     => 'fas_stethoscope',
+                        'foldable' => true
+            ));
 
             if (is_object($sav)) {
                 $html .= BimpRender::renderPanel('Réparations', $this->renderRepairs($sav), '', array(

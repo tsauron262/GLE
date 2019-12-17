@@ -480,11 +480,37 @@ forms:
             - custom: 1
               label: Mode de paiement
               input_name: id_mode_paiement
-              data_type: id
               required: 1
               input: 
                   type: select_payment
+                  value_type: code
                   include_empty: 1
+            - custom: 1
+              label: N° (chèque ou virement)
+              input_name: num_paiement
+              input: 
+                  type: text
+              display_if: 
+                    field_name: id_mode_paiement
+                    show_values: CHQ,VIR
+            - custom: 1
+              label: Emetteur (Chèque ou virement)
+              data_type: string
+              input_name: nom_emetteur
+              input: 
+                  type: text
+              display_if: 
+                  field_name: id_mode_paiement
+                  show_values: CHQ,VIR
+            - custom: 1
+              label: Banque émetteur (chèque)
+              data_type: string
+              input_name: banque_emetteur
+              input: 
+                  type: text
+              display_if: 
+                  field_name: id_mode_paiement
+                  show_values: CHQ
             - custom: 1
               label: Date de paiement de l'acompte
               data_type: date

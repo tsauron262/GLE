@@ -59,14 +59,21 @@ function InfoSoc(elem,elem2) {
             moi.checkData("siret");
         });
         
-        var isParticulier = ($("#typent_id").length == 0 || this.typeTier.val() == 8);
+        var isParticulier = (this.typeTier.length == 0 || this.typeTier.val() == 8);
+        
+        
+        var isInFrance = (this.pays.length == 0 || this.pays.val() == 1 || this.pays.val() == 0);
         
         var actu = this.elem.val();
         if(actu == "")
             actu = this.elem2.val();
         for(var i = 0; i< 5; i++)
             actu = actu.replace(" ", "").replace("-", "");
-        if(!isParticulier && (actu == "" || !this.isSiretSiren(actu))){
+        
+        
+        console.log('Isparticulier '+isParticulier);
+        console.log('isInFrance '+isInFrance);
+        if(!isParticulier && isInFrance && (actu == "" || !this.isSiretSiren(actu))){
             this.promptSiren(actu);
         }
     }

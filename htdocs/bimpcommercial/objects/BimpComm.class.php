@@ -101,6 +101,9 @@ class BimpComm extends BimpDolObject
                     if (!(int) $this->areLinesEditable()) {
                         return 0;
                     }
+
+                    if (!$user->rights->bimpcommercial->edit_zone_vente)
+                        return 0;
                 }
                 break;
         }
@@ -2802,7 +2805,7 @@ class BimpComm extends BimpDolObject
         return count($errors) ? 0 : 1;
     }
 
-    public function createAcompte($amount, $id_mode_paiement, $id_bank_account = 0, $date_paiement = null, $use_caisse = false, &$warnings = array())
+    public function createAcompte($amount, $id_mode_paiement, $id_bank_account = 0, $date_paiement = null, $use_caisse = false, $num_paiement = '', $nom_emetteur = '', $banque_emetteur = '', &$warnings = array())
     {
 
         global $user, $langs;
@@ -2811,7 +2814,9 @@ class BimpComm extends BimpDolObject
         $caisse = null;
         $id_caisse = 0;
 
-        $type_paiement = $this->db->getValue('c_paiement', 'code', '`id` = ' . (int) $id_mode_paiement);
+        $type_paiement = $id_mode_paiement;
+
+        $id_mode_paiement = $this->db->getValue('c_paiement', 'id', '`code` = \'' . $id_mode_paiement . '\'');
 
         if (!$this->useCaisseForPayments) {
             $use_caisse = false;
@@ -2896,6 +2901,7 @@ class BimpComm extends BimpDolObject
                 $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($factureA), 'Des erreurs sont survenues lors de la création de la facture d\'acompte');
             } else {
                 $factureA->addline("Acompte", $amount / 1.2, 1, 20, null, null, null, 0, null, null, null, null, null, 'HT', null, 1, null, null, null, null, null, null, $amount / 1.2);
+                $user->rights->facture->creer = 1;
                 $factureA->validate($user);
 
                 // Création du paiement: 
@@ -2904,11 +2910,12 @@ class BimpComm extends BimpDolObject
                 $payement->amounts = array($factureA->id => $amount);
                 $payement->datepaye = ($date_paiement ? BimpTools::getDateForDolDate($date_paiement) : dol_now());
                 $payement->paiementid = (int) $id_mode_paiement;
+                $payement->num_paiement = $num_paiement;
                 if ($payement->create($user) <= 0) {
                     $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($payement), 'Des erreurs sont survenues lors de la création du paiement de la facture d\'acompte');
                 } else {
                     // Ajout du paiement au compte bancaire: 
-                    if ($payement->addPaymentToBank($user, 'payment', '(CustomerInvoicePayment)', $id_bank_account, '', '') < 0) {
+                    if ($payement->addPaymentToBank($user, 'payment', '(CustomerInvoicePayment)', $id_bank_account, $nom_emetteur, $banque_emetteur) < 0) {
                         $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($payement), 'Echec de l\'ajout de l\'acompte au compte bancaire ' . $bank_account->bank);
                     }
 
@@ -3553,7 +3560,7 @@ class BimpComm extends BimpDolObject
         $warnings = array();
         $success = 'Acompte créé avec succès';
 
-        $id_mode_paiement = isset($data['id_mode_paiement']) ? (int) $data['id_mode_paiement'] : 0;
+        $id_mode_paiement = isset($data['id_mode_paiement']) ? $data['id_mode_paiement'] : '';
         $id_bank_account = isset($data['bank_account']) ? (int) $data['bank_account'] : 0;
         $amount = isset($data['amount']) ? (float) $data['amount'] : 0;
 
@@ -3561,7 +3568,7 @@ class BimpComm extends BimpDolObject
             $errors[] = 'Date de paiement absent';
         }
 
-        if ($data['id_mode_paiement'] == 2 && is_null($data['bank_account'])) {
+        if ($data['id_mode_paiement'] == 'VIR' && is_null($data['bank_account'])) {
             $errors[] = "Le compte banqaire est obligatoire pour un virement bancaire";
         }
 
@@ -3580,8 +3587,21 @@ class BimpComm extends BimpDolObject
             }
         }
 
+        $num_paiement = '';
+        $nom_emetteur = '';
+        $banque_emetteur = '';
+
+        if (in_array($id_mode_paiement, array('CHQ', 'VIR'))) {
+            $num_paiement = isset($data['num_paiement']) ? $data['num_paiement'] : '';
+            $nom_emetteur = isset($data['nom_emetteur']) ? $data['nom_emetteur'] : '';
+        }
+
+        if ($id_mode_paiement === 'CHQ') {
+            $banque_emetteur = isset($data['banque_emetteur']) ? $data['banque_emetteur'] : '';
+        }
+
         if (!count($errors)) {
-            $errors = $this->createAcompte($amount, $id_mode_paiement, $id_bank_account, $data['date'], $use_caisse, $warnings);
+            $errors = $this->createAcompte($amount, $id_mode_paiement, $id_bank_account, $data['date'], $use_caisse, $num_paiement, $nom_emetteur, $banque_emetteur, $warnings);
         }
 
         return array(

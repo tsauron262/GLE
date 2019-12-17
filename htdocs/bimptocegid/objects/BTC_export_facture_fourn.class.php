@@ -10,7 +10,7 @@ class BTC_export_facture_fourn extends BTC_export {
     public static $rfa_fournisseur = ['GEN-CRT', 'GEN-RFA', 'GEN-IPH', 'REMISE'];
 
     public function export($id_facture, $forced) {
-
+        $file = $this->create_daily_file('achat');
         $facture = $this->getInstance('bimpcommercial', 'Bimp_FactureFourn', $id_facture);
         $societe = $this->getInstance('bimpcore', 'Bimp_Societe', $facture->getData('fk_soc'));
         $is_fournisseur_interco = false;
@@ -301,7 +301,7 @@ class BTC_export_facture_fourn extends BTC_export {
             $ecritures .= $this->struct($structure);
         }
 
-        if ($this->write_tra($ecritures, $this->create_daily_file('achat'))) {
+        if ($this->write_tra($ecritures, $file)) {
             $facture->updateField('exported', 1);
             return 1;
         } else {

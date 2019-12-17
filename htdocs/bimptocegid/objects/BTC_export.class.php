@@ -200,8 +200,8 @@ class BTC_export extends BimpObject {
             $instance = $this->getInstance('bimptocegid', 'BTC_export_paiement');
             foreach ($liste as $paiement) {
                 if($instance->export($paiement->rowid, $paiement->fk_paiement, $forced)) {
-                    $instance->fetch($paiement->rowid);
-                    $instance->updateField('exported', 1);
+                    $pay = $this->getInstance('bimpcommercial', 'Bimp_Paiement', $paiement->rowid);
+                    $pay->updateField('exported', 1);
                 } else {
                     // Mettre task
                     $this->addTaskAlert(['ref' => $instance->getData('ref')]);

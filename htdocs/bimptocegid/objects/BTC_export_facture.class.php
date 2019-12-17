@@ -3,8 +3,9 @@
 class BTC_export_facture extends BTC_export {
     
     public function export($id_facture, $forced) {
-        $file = $this->create_daily_file('vente');
+        
         $facture = $this->getInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
+        $file = $this->create_daily_file('vente', $facture->getData('datef'));
         if($contact = $this->db->getRow('element_contact', 'element_id = ' . $facture->getData('fk_soc') . ' AND fk_c_type_contact = 60')) {
             $id_client_facturation = $contact->fk_socpeople;
         } else {
@@ -74,7 +75,7 @@ class BTC_export_facture extends BTC_export {
             $code_auxiliaire = $societe->getData('code_compta');
         } else {
             $export_societe = $this->getInstance('bimptocegid', 'BTC_export_societe');
-            $code_auxiliaire = $export_societe->export($societe);
+            $code_auxiliaire = $export_societe->export($societe, 'c', $facture->getData('datef'));
         }
         
         $label = strtoupper($this->suppr_accents($societe->getData('nom')));

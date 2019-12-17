@@ -297,6 +297,7 @@ class BTC_export_facture extends BTC_export {
         
          if($this->write_tra($ecritures, $file)) {
             $facture->updateField('exported', 1);
+            $this->log('FACTURE CLIENT', $facture->getData('facnumber'), $file);
             return 1;
         } else {
             return 0;

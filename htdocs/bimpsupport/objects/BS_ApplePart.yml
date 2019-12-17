@@ -31,7 +31,9 @@ fields:
     label: 
         label: Libellé
     part_number:
-        label: Numéro
+        label: Référence
+    new_part_number: 
+        label: Nouvelle ref. 
     comptia_code: 
         label: Code CompTIA
         values: 
@@ -102,6 +104,7 @@ fields_tables:
         panel_header: 0
         rows: 
             - field: part_number
+            - field: new_part_number
             - field: label
             - field: qty
               edit: 1

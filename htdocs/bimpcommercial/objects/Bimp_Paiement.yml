@@ -18,6 +18,9 @@ fields:
     statut: 
         label: Statut
         type: int
+    datec:
+        label: Créer le
+        type: date
     datep: 
         label: Date
         type: date

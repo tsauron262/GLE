@@ -141,6 +141,7 @@ class BTC_export_societe extends BTC_export {
         
         
         if($this->write_tra($ecritures, $file)) {
+            $this->log('EXPORT TIERS', $client->getData('code_client'), $file);
             $client->updateField('exported', self::EXPORTED);
             $client->updateField('code_compta', $auxiliaire_client);
             $client->updateField('code_compta_fournisseur', $auxiliaire_fournisseur);

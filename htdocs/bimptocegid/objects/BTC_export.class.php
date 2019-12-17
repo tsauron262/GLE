@@ -13,6 +13,7 @@ class BTC_export extends BimpObject {
     private $export_directory = "/data/synchro/bimp/"; // Dossier d'écriture des fichiers
     //private $export_directory = '/usr/local/data2/test_alexis/synchro/'; // Chemin DATAs version de test alexis 
     private $project_directory = 'exportCegid';
+    private $directory_logs_file = '/data2/exportCegid/export.log';
     public $type_ecriture = "S"; // S: Simulation, N: Normal
     
     public static $trimestres = [
@@ -205,6 +206,7 @@ class BTC_export extends BimpObject {
             foreach ($liste as $paiement) {
                 if($instance->export($paiement->rowid, $paiement->fk_paiement, $forced)) {
                     $pay = $this->getInstance('bimpcommercial', 'Bimp_Paiement', $paiement->rowid);
+                    $this->log('PAIEMENT CLIENT', $pay->getData('ref'), 'FICHIER DE PAIEMENT');
                     $pay->updateField('exported', 1);
                 } else {
                     // Mettre task
@@ -223,7 +225,7 @@ class BTC_export extends BimpObject {
             $instance = $this->getInstance('bimptocegid', 'BTC_export_facture_fourn');
             foreach($liste as $facture_fourn) {
                 $error = $instance->export($facture_fourn->rowid, $forced);
-                if($error <= 0) {
+                if($error > 0) {
                     
                 }
             }
@@ -423,6 +425,21 @@ class BTC_export extends BimpObject {
         }
     }
     
+    protected function log($element, $ref, $file) {
+        if(!file_exists('/data2/exportCegid/export.log')) {
+            mkdir('/data2/exportCegid/', 0777, true);
+        }
+        $log = date('d/m/Y') . '::' . $element . ' : Ref : ' . $ref . " à été ecrit dans le fichier " . $file . "\n";
+        $this->write_logs($log);
+    }
+
+
+    protected function write_logs($log) {
+        $opened_file = fopen($this->directory_logs_file, 'a+');
+        fwrite($opened_file, $log);
+        fclose($opened_file);
+    }
+
     public function isApple($nom_client) {        
         if(strstr(strtolower($nom_client), 'apple')) {
             return true;

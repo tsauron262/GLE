@@ -4,15 +4,11 @@ class BTC_export extends BimpObject {
 
     private $sql_limit = 1; // Nombre de résultats dans la requete SQL: null = unlimited
     private $date_export = null;
-    private $today;
     public $file;
-    private $current_month;
-    private $current_ref_by_get = null;
-    private $current_date_by_get = null;
-    private $folder_trimestre = "";
-    private $export_directory = "/data/synchro/bimp/"; // Dossier d'écriture des fichiers
-    //private $export_directory = '/usr/local/data2/test_alexis/synchro/'; // Chemin DATAs version de test alexis 
+    //private $export_directory = "/data/synchro/bimp/"; // Dossier d'écriture des fichiers
+    private $export_directory = '/usr/local/data2/test_alexis/synchro/'; // Chemin DATAs version de test alexis 
     private $project_directory = 'exportCegid';
+    private $imported_log = '/data/synchro/bimp/exportCegid/imported.log';
     private $directory_logs_file = '/data2/exportCegid/export.log';
     public $type_ecriture = "S"; // S: Simulation, N: Normal
     
@@ -22,35 +18,6 @@ class BTC_export extends BimpObject {
         "T3" => ["07", "08", "09"],
         "T4" => ["10", "11", "12"]
     ];
-    
-    public static $month = [
-        "01" => "Janvier", "02" => "Février", "03" => "Mars",
-        "04" => "Avril", "05" => "Mai", "06" => "Juin",
-        "07" => "Juillet", "08" => "Août", "09" => "Septembre",
-        "10" => "Octobre", "11" => "Novembre", "12" => "Décembre"
-    ];
-    
-    public function defineFolderTrimestre() {
-        foreach(self::$trimestres as $T => $dates) {
-            if(in_array(date('m'), $dates)) {
-                switch($T) {
-                    case 'T1':
-                        $folder  = "_Trimestre_1";
-                        break;
-                    case 'T2':
-                        $folder = "_Trimestre_2";
-                        break;
-                    case 'T3':
-                        $folder = "_Trimestre_3";
-                        break;
-                    case 'T4':
-                        $folder = "_Trimestre_4";
-                        break;
-                }
-            }
-        }
-        return date('Y') .  $folder;
-    }
 
     public function getStartTrimestreComptable() {
         foreach(self::$trimestres as $T => $dates) {
@@ -58,12 +25,8 @@ class BTC_export extends BimpObject {
                 $start_trimestre = date('Y') . '-' . $dates[0] . '-01';
             }
         }
-        if(BimpCore::getConf("BIMPtoCEGID_start_current_trimestre") != $start_trimestre) {
-            BimpCore::setConf("BIMPtoCEGID_start_current_trimestre", $start_trimestre);
-        }
-        
+        return "2019-07-01";
         return $start_trimestre;
-
     }
     
     /**
@@ -73,18 +36,17 @@ class BTC_export extends BimpObject {
      * 
      */
     
+    public function exportFromIndex($date, $ref, $all, $element) {
+        echo $element;
+    }
+    
     public function export($element, $origin) {
-        $since = false;
         
         if($origin == 'cronJob') {
             
-            $this->folder_trimestre = $this->defineFolderTrimestre();
-            $this->current_month = self::$month[date('m')];
-            $this->today = date("Y-m-d");
             if(isset($_REQUEST['date']) && !empty($_REQUEST['date'])) {
                 $this->date_export = $_REQUEST['date'];
                 $this->current_date_by_get = $_REQUEST['date'];
-                //$this->create_daily_file();
             } else {
                 $this->date_export = $this->getStartTrimestreComptable();
                 $since = true;
@@ -96,10 +58,8 @@ class BTC_export extends BimpObject {
             
             if(isset($_REQUEST['ref']) && !empty($_REQUEST['ref'])) {
                 $this->current_ref_by_get = $_REQUEST['ref'];
-                //$this->create_daily_file('vente');
                 $this->$function_name($_REQUEST['ref']);
             } else {
-                //$this->create_daily_file('vente');
                 $this->$function_name(null, $since);
             }
             
@@ -119,19 +79,18 @@ class BTC_export extends BimpObject {
     protected function create_daily_file($element = null, $date = null) {
         
         $daily_files = [];
-        if(isset($_REQUEST['date']) && !empty($_REQUEST['date'])) {
-            $complementFileName = $_REQUEST['date'];
+        if(isset($_REQUEST['date']) && !empty($_REQUEST['date']) || !is_null($date)) {
+            $complementFileName = isset($_REQUEST['date']) ? $_REQUEST['date'] : $date;
             $complementDirectory = 'BY_DATE';
         }elseif(isset($_REQUEST['ref']) && !empty($_REQUEST['ref'])) {
             $complementFileName = $_REQUEST['ref'];
             $complementDirectory = 'BY_REF';
         } else {
-            $complementFileName = $this->today;
-            $complementDirectory = $this->folder_trimestre;
+            $complementFileName = date("Y-m-d");
+            $complementDirectory = 'BY_DATE';
         }
         
         $export_dir = $this->export_directory . $this->project_directory . '/' . $complementDirectory . '/';
-        $export_dir_month = $export_dir . $this->current_month . "/";
         $export_project_dir = $this->export_directory . $this->project_directory . '/';
         
         switch($element) {
@@ -151,10 +110,10 @@ class BTC_export extends BimpObject {
         
         if(!is_dir($export_dir)) {
             mkdir($export_project_dir, 0777, true);
-            mkdir($export_project_dir . "exported/", 0777, true);
+            mkdir($export_project_dir . "imported/", 0777, true);
             mkdir($export_dir, 0777, true);
             mkdir($export_dir_month, 0777, true);
-            mkdir($export_dir_month . 'exported/', 0777, true);
+            mkdir($export_dir_month . 'imported/', 0777, true);
         }
         
         shell_exec("chmod -R 777 " . $export_dir);
@@ -198,8 +157,8 @@ class BTC_export extends BimpObject {
      * @param type $ref
      */
     
-    private function export_paiement($ref = null) {
-        $liste = $this->get_paiements_for_export($ref);
+    private function export_paiement($ref = null, $since) {
+        $liste = $this->get_paiements_for_export($ref, $since);
         $forced = (is_null($ref)) ? false : true;
         if(count($liste)) {
             $instance = $this->getInstance('bimptocegid', 'BTC_export_paiement');
@@ -218,8 +177,8 @@ class BTC_export extends BimpObject {
         }
     }
     
-    private function export_facture_fourn($ref = null) {
-        $liste = $this->get_facture_fourn_for_export($ref);
+    private function export_facture_fourn($ref = null, $since) {
+        $liste = $this->get_facture_fourn_for_export($ref, $since);
         $forced = (is_null($ref)) ? false : true;
         if(count($liste)) {
             $instance = $this->getInstance('bimptocegid', 'BTC_export_facture_fourn');
@@ -234,8 +193,8 @@ class BTC_export extends BimpObject {
         }
     }
     
-    private function export_facture($ref = null) {
-        $liste = $this->get_facture_client_for_export($ref);
+    private function export_facture($ref = null, $since) {
+        $liste = $this->get_facture_client_for_export($ref, $since);
         $forced = (is_null($ref)) ? false : true;
         if(count($liste)) {
             $instance = $this->getInstance('bimptocegid', 'BTC_export_facture');
@@ -254,7 +213,7 @@ class BTC_export extends BimpObject {
         if(!is_null($ref)) {
             return $this->db->getRows('paiement', 'ref = "' . $ref . '"');
         } elseif($since) {
-            return $this->db->getRows('paiement', 'exported = 0 AND datec BETWEEN "'.$this->date_export.' 00:00:00" AND "'.$this->today.' 23:59:59"', $this->sql_limit);
+            return $this->db->getRows('paiement', 'exported = 0 AND datec BETWEEN "'.$this->date_export.' 00:00:00" AND "'.date("Y-m-d").' 23:59:59"', $this->sql_limit);
         } else {
             return $this->db->getRows('paiement', 'exported = 0 AND datec BETWEEN "'.$this->date_export.' 00:00:00" AND "'.$this->date_export.' 23:59:59"', $this->sql_limit);
         }
@@ -265,7 +224,7 @@ class BTC_export extends BimpObject {
         if(!is_null($ref)) {
             return $this->db->getRows('facture_fourn', 'ref="'.$ref.'"');
         } elseif($since) {
-            return $this->db->getRows('facture_fourn', 'exported = 0 AND fk_statut IN(1,2) AND datec BETWEEN "'.$this->date_export.' 00:00:00" AND "'.$this->today.' 23:59:59"', $this->sql_limit);
+            return $this->db->getRows('facture_fourn', 'exported = 0 AND fk_statut IN(1,2) AND datec BETWEEN "'.$this->date_export.' 00:00:00" AND "'.date("Y-m-d").' 23:59:59"', $this->sql_limit);
         } else {
             return $this->db->getRows('facture_fourn', 'exported = 0 AND fk_statut IN(1,2) AND datec BETWEEN "'.$this->date_export.' 00:00:00" AND "'.$this->date_export.' 23:59:59"', $this->sql_limit);
         }
@@ -275,7 +234,7 @@ class BTC_export extends BimpObject {
         if(!is_null($ref)) {
             return $this->db->getRows('facture', 'facnumber="'.$ref.'"');
         } elseif ($since) {
-            return $this->db->getRows('facture', 'exported = 0 AND fk_statut IN(1,2) AND type != 3 AND datef BETWEEN "'.$this->date_export.'" AND "'.$this->today.'"', $this->sql_limit);            
+            return $this->db->getRows('facture', 'exported = 0 AND fk_statut IN(1,2) AND type != 3 AND datef BETWEEN "'.$this->date_export.'" AND "'.date("Y-m-d").'"', $this->sql_limit);            
         } else {
             return $this->db->getRows('facture', 'exported = 0 AND fk_statut IN(1,2) AND type != 3 AND datef BETWEEN "'.$this->date_export.'" AND "'.$this->date_export.'"', $this->sql_limit);
         }

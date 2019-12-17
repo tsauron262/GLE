@@ -8,6 +8,7 @@ class Bimp_FactureFourn extends BimpComm
 {
 
     public static $discount_lines_allowed = false;
+    public static $remise_globale_allowed = false;
     public static $cant_edit_zone_vente_secteurs = array();
     public $redirectMode = 4; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
     public static $dol_module = 'facture_fourn';
@@ -1247,7 +1248,7 @@ class Bimp_FactureFourn extends BimpComm
         return parent::getDbData($final_fields);
     }
 
-    public function createLinesFromOrigin($origin)
+    public function createLinesFromOrigin($origin, $params)
     {
         $errors = array();
 
@@ -1260,7 +1261,7 @@ class Bimp_FactureFourn extends BimpComm
         }
 
         if (!is_a($origin, 'Bimp_CommandeFourn')) {
-            return parent::createLinesFromOrigin($origin);
+            return parent::createLinesFromOrigin($origin, $params);
         }
 
         $lines = $origin->getChildrenObjects('lines', array(), 'position', 'asc');
@@ -1321,29 +1322,8 @@ class Bimp_FactureFourn extends BimpComm
 
                     $lines_new[(int) $line->id] = (int) $line_instance->id;
 
-                    // NOTE: on intègre pas les remises de la ligne de commande: celles-ci sont déjà déduites dans le pu_ht.
-                    // Création des remises pour la ligne en cours:
-//                    $remises = $line->getRemises();
-//                    if (!is_null($remises) && count($remises)) {
-//                        $j = 0;
-//                        foreach ($remises as $r) {
-//                            $j++;
-//                            $remise = BimpObject::getInstance('bimpcommercial', 'ObjectLineRemise');
-//                            $remise->validateArray(array(
-//                                'id_object_line' => (int) $line_instance->id,
-//                                'object_type'    => $line_instance::$parent_comm_type,
-//                                'label'          => $r->getData('label'),
-//                                'type'           => (int) $r->getData('type'),
-//                                'percent'        => (float) $r->getData('percent'),
-//                                'montant'        => (float) $r->getData('montant'),
-//                                'per_unit'       => (int) $r->getData('per_unit')
-//                            ));
-//                            $remise_errors = $remise->create($warnings, true);
-//                            if (count($remise_errors)) {
-//                                $errors[] = BimpTools::getMsgFromArray($remise_errors, 'Echec de la création de la remise n°' . $j . ' pour la ligne n°' . $i);
-//                            }
-//                        }
-//                    }
+                    // NOTE: on n'intègre pas les remises de la ligne de commande: celles-ci sont déjà déduites dans le pu_ht.
+                     
                     // Ajout des équipements: 
                     if ($isSerialisable) {
                         $equipments = (isset($line_data['equipments']) ? $line_data['equipments'] : array());

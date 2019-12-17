@@ -191,22 +191,6 @@ fields:
         label: Note publique
         type: html  
         sortable: 0
-    remise_globale: 
-        label: Remise globale
-        type: percent
-        default_value: 0
-        decimals: 8
-        display_if: 
-            field_name: use_amount
-            show_values: 0
-    remise_globale_label: 
-        label: Intitulé de la remise globale
-        type: text
-        input: 
-            rows: 1
-            auto_expand: 1
-        default_value: 
-            callback: getDefaultRemiseGlobaleLabel
     zone_vente: 
         label: Zone de vente
         type: int
@@ -330,31 +314,31 @@ forms:
                   options: 
                       array: socAvailableDiscounts
         
-    remise_globale: 
-        title: Remise Globale
-        icon: percent
-        rows: 
-            - field: remise_globale_label
-            - custom: 1
-              label: Définir à partir d'un montant fixe
-              input_name: use_amount
-              data_type: bool
-              input: 
-                  type: toggle
-              value: 1
-            - field: remise_globale
-            - custom: 1
-              label: Montant de la remise
-              input_name: remise_globale_amount
-              data_type: money
-              unsigned: 1
-              input: 
-                  help: Ce montant sera déduit du Total TTC et sera converti en pourcentage global. 
-              value: 
-                  callback: getRemiseGlobaleAmount
-              display_if: 
-                  field_name: use_amount
-                  show_values: 1
+#    remise_globale: 
+#        title: Remise Globale
+#        icon: percent
+#        rows: 
+#            - field: remise_globale_label
+#            - custom: 1
+#              label: Définir à partir d'un montant fixe
+#              input_name: use_amount
+#              data_type: bool
+#              input: 
+#                  type: toggle
+#              value: 1
+#            - field: remise_globale
+#            - custom: 1
+#              label: Montant de la remise
+#              input_name: remise_globale_amount
+#              data_type: money
+#              unsigned: 1
+#              input: 
+#                  help: Montant à déduire du total TTC
+#              value: 
+#                  callback: getRemiseGlobaleAmount
+#              display_if: 
+#                  field_name: use_amount
+#                  show_values: 1
             
     email: 
         rows: 
@@ -607,8 +591,6 @@ filters_panels:
                 field: total
             zone_vente:
                 field: zone_vente
-            remise_globale: 
-                field: remise_globale
             note_private: 
                 field: note_private
             note_public: 
@@ -718,7 +700,7 @@ lists:
             
 views: 
     default: 
-        objects_change_reload: BimpFile,BimpNote
+        objects_change_reload: BimpFile,BimpNote,RemiseGlobale
         delete_btn: 1
         edit_form: default
         footer_extra_btn: 
@@ -764,6 +746,9 @@ views:
                   col_sm: 12
                   rows: 
                       - cols: 
+                            - type: custom
+                              custom: 
+                                  callback: renderRemisesGlobalesList
                             - type: fields_table
                               fields_table: 
                                   name: totals
@@ -826,7 +811,7 @@ views:
                       callback: renderEventsTable
                           
     full: 
-        objects_change_reload: Bimp_File
+        objects_change_reload: Bimp_File,RemiseGlobale
         rows: 
             - cols: 
                 - type: object_header

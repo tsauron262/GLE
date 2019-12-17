@@ -1886,6 +1886,21 @@ class BimpTools
 
         return $current_value;
     }
+    
+    public static function overrideArray($array, $override)
+    {
+        if (!is_array($array)) {
+            $array = array();
+        }
+        
+        if (is_array($override)) {
+            foreach ($override as $key => $value) {
+                $array[$key] = $value;
+            }
+        }
+        
+        return $array;
+    }
 
     // Divers:
 

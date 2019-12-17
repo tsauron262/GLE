@@ -2040,7 +2040,7 @@ class Bimp_Commande extends BimpComm
 
         // Trie des lignes par commandes:
         $orderedLines = array();
-        
+
         foreach ($lines_qties as $id_line => $line_qty) {
             $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $id_line);
             if (BimpObject::objectLoaded($line)) {
@@ -2272,6 +2272,121 @@ class Bimp_Commande extends BimpComm
                     $line_errors = array_merge($line_errors, $line_warnings);
                     if (count($line_errors)) {
                         $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec de l\'enregistrement des quantités facturées pour la ligne n°' . $line->getData('position') . ' (ID: ' . $line->id . ')');
+                    }
+                }
+            }
+        }
+
+        return $errors;
+    }
+
+    public function processFacturesRemisesGlobales()
+    {
+        $errors = array();
+        if ($this->isLoaded($errors)) {
+            $rgs = $this->getRemisesGlobales();
+            $lines = $this->getLines('not_text');
+            $total_ttc = (float) $this->getTotalTtcWithoutRemises(true);
+
+            if (!empty($rgs)) {
+                foreach ($rgs as $rg) {
+                    // Détermination du montant TTC de la rg: 
+                    $rg_amount_ttc = 0;
+
+                    switch ($rg->getData('type')) {
+                        case 'amount':
+                            $rg_amount_ttc = (float) $rg->getData('amount');
+                            break;
+
+                        case 'percent':
+                            $total_ttc = (float) $this->getTotalTtcWithoutRemises(true);
+                            $remise_rate = (float) $rg->getData('percent');
+                            $rg_amount_ttc = $total_ttc * ($remise_rate / 100);
+                            break;
+                    }
+
+                    // Déduction des parts de la rg pour les qtés présentes dans les factures validées
+                    $lines_remaining_qties = array();
+
+                    foreach ($lines as $line) {
+                        $lines_remaining_qties[(int) $line->id] = (float) $line->getFullQty();
+                        $factures = $line->getData('factures');
+
+                        foreach ($factures as $id_fac => $fac_data) {
+                            $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_fac);
+
+                            if (BimpObject::objectLoaded($facture) && (int) $facture->getData('fk_statut') > 0) {
+                                $fac_line = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_FactureLine', array(
+                                            'id_obj'             => (int) $id_fac,
+                                            'linked_object_name' => 'commande_line',
+                                            'linked_id_object'   => (int) $line->id
+                                                ), true);
+
+                                if (BimpObject::objectLoaded($fac_line)) {
+                                    $fac_line_remise = BimpCache::findBimpObjectInstance('bimpcommercial', 'ObjectLineRemise', array(
+                                                'id_object_line'           => (int) $fac_line->id,
+                                                'object_type'              => $fac_line::$parent_comm_type,
+                                                'linked_id_remise_globale' => (int) $rg->id
+                                                    ), true);
+
+                                    if (BimpObject::objectLoaded($fac_line_remise)) {
+                                        $rg_amount_ttc -= (float) $fac_line->getTotalTtcWithoutRemises(true) * ((float) $fac_line_remise->getData('percent') / 100);
+                                        $lines_remaining_qties[(int) $line->id] -= (float) $fac_line->getFullQty();
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Calcul de la nouvelle part pour chaque ligne: 
+                    $total_lines_ttc = 0;
+                    foreach ($lines as $line) {
+                        if ($line->isRemisable() && isset($lines_remaining_qties[(int) $line->id]) && (float) $lines_remaining_qties[(int) $line->id]) {
+                            $total_lines_ttc += ((float) $line->pu_ht * (1 + ((float) $line->tva_tx / 100))) * (float) $lines_remaining_qties[(int) $line->id];
+                        }
+                    }
+
+                    $lines_rate = ($rg_amount_ttc / $total_lines_ttc) * 100;
+
+                    // Assignation du nouveau taux pour chaque ligne de facture brouillon: 
+                    
+                    foreach ($lines as $line) {
+                        $factures = $line->getData('factures');
+                        foreach ($factures as $id_fac => $fac_data) {
+                            $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_fac);
+
+                            if (BimpObject::objectLoaded($facture) && (int) $facture->getData('fk_statut') === 0) {
+                                $fac_line = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_FactureLine', array(
+                                            'id_obj'             => (int) $id_fac,
+                                            'linked_object_name' => 'commande_line',
+                                            'linked_id_object'   => (int) $line->id
+                                                ), true);
+
+                                if (BimpObject::objectLoaded($fac_line)) {
+                                    $fac_line_remise = BimpCache::findBimpObjectInstance('bimpcommercial', 'ObjectLineRemise', array(
+                                                'id_object_line'           => (int) $fac_line->id,
+                                                'object_type'              => $fac_line::$parent_comm_type,
+                                                'linked_id_remise_globale' => (int) $rg->id
+                                                    ), true);
+
+                                    if (BimpObject::objectLoaded($fac_line_remise)) {
+                                        if ((float) $fac_line_remise->getData('percent') === (float) $lines_rate) {
+                                            continue;
+                                        }
+                                        $fac_line_remise->set('percent', $lines_rate);
+                                    } else {
+                                        $fac_line_remise = BimpObject::createBimpObject('bimpcommercial', 'ObjectLineRemise', array(
+                                                    'id_object_line'           => (int) $fac_line->id,
+                                                    'object_type'              => $fac_line::$parent_comm_type,
+                                                    'linked_id_remise_globale' => (int) $rg->id,
+                                                    'type'                     => ObjectLineRemise::OL_REMISE_PERCENT,
+                                                    'percent'                  => (float) $lines_rate,
+                                                    'label'                    => 'Part de la remise "' . $rg->getData('label') . '" (Commande ' . $this->getRef() . ')'
+                                                        ), $errors, $errors);
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }

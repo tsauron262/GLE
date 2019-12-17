@@ -3835,11 +3835,75 @@ class Bimp_CommandeLine extends ObjectLine
         return array();
     }
 
+    public function processFactureLineRemisesGlobales($id_facture)
+    {
+        if ($this->isLoaded()) {
+            $commande = $this->getParentInstance();
+
+            if (BimpObject::objectLoaded($commande)) {
+                $rgs = $commande->getRemisesGlobales();
+
+                if (!empty($rgs)) {
+                    foreach ($rgs as $rg) {
+                        $rg_amount_ttc = 0;
+
+                        switch ($rg->getData('type')) {
+                            case 'amount':
+                                $rg_amount_ttc = (float) $rg->getData('amount');
+                                break;
+
+                            case 'percent':
+                                $total_ttc = (float) $this->getTotalTtcWithoutRemises(true);
+                                $remise_rate = (float) $rg->getData('percent');
+                                $rg_amount_ttc = $total_ttc * ($remise_rate / 100);
+                                break;
+                        }
+
+                        // Déduction des parts de rg des qtés présentes dans les autres factures: 
+
+                        $factures = $this->getData('factures');
+
+                        foreach ($factures as $id_fac => $facture_data) {
+                            if ((int) $id_fac === (int) $id_facture) {
+                                continue;
+                            }
+
+                            $sql = 'SELECT r.percent FROM ' . MAIN_DB_PREFIX . 'object_line_remise r ';
+                            $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'bimp_facture_line l ON l.id = r.id_object_line';
+                            $sql .= ' WHERE r.is_remise_globale = 1';
+                            $sql .= ' AND l.id_obj = ' . (int) $id_fac;
+                            $sql .= ' AND l.linked_object_name = \'commande_line\'';
+                            $sql .= ' AND l.linked_id_object = ' . $this->id;
+
+                            $rows = $this->db->executeS($sql, 'array');
+
+                            if (is_array($rows)) {
+                                foreach ($rows as $r) {
+                                    $done_qty += (float) $facture_data['qty'];
+                                    $rg_amount_ht -= $this->pu_ht * (float) $facture_data['qty'] * ((float) $r['percent'] / 100);
+                                    break; // on est censé n'avoir qu'une seule rg par ligne de facture. 
+                                }
+                            }
+                        }
+
+                        // Calcul du nouveau taux pour les qtés restantes: 
+                        $remain_qty = $full_qty - $done_qty;
+                        $total_ht = (float) $this->pu_ht * $remain_qty;
+                        if ($total_ht) {
+                            return ($rg_amount_ht / $total_ht) * 100;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     public function getFactureLineRemiseGlobaleRate($id_facture)
     {
         if ($this->isLoaded()) {
             $remises_infos = $this->getRemiseTotalInfos();
 
+            // To Change... 
             if ((float) $remises_infos['remise_globale_amount_ht']) {
                 $full_qty = (float) $this->getFullQty();
                 $done_qty = 0;

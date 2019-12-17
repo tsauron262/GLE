@@ -6,11 +6,13 @@ class BTC_export_paiement extends BTC_export {
     const RETURNED_STATUS_OK = 1;
 
     public function export($id, $paiement_id, $forced) {
-        $file = $this->create_daily_file('paiement');
+        
         $error = 0;
         $ecritures = '';
         $liste_transactions = $this->db->getRows('paiement_facture', 'fk_paiement = ' . $id);
         $paiement = $this->getInstance('bimpcommercial', 'Bimp_Paiement', $id);
+        $datec = new DateTime($paiement->getData('datec'));
+        $file = $this->create_daily_file('paiement', $datec->format("Y-m-d"));
         foreach ($liste_transactions as $transaction) {
             $is_vente_ticket = false;
             $is_client_interco = false;
@@ -45,7 +47,7 @@ class BTC_export_paiement extends BTC_export {
                     $client = $this->getInstance('bimpcore', 'Bimp_Client', $id_client);
                     if ($client->getData('exported') === 0) {
                         $export_societe = $this->getInstance('bimptocegid', 'BTC_export_societe');
-                        $auxiliaire_client = $export_societe->export($client);
+                        $auxiliaire_client = $export_societe->export($client, 'c', $datec->format("Y-m-d"));
                     } else {
                         $auxiliaire_client = $client->getData('code_compta');
                     }

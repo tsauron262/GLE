@@ -774,13 +774,6 @@ class BC_Form extends BC_Panel
             return '';
         }
 
-        global $current_bc;
-        if (!is_object($current_bc)) {
-            $current_bc = null;
-        }
-        $prev_bc = $current_bc;
-        $current_bc = $this;
-
         if (is_null($object) && $object_name) {
             $object = $parent->config->getObject('', $object_name);
         }
@@ -819,7 +812,6 @@ class BC_Form extends BC_Panel
             $html .= '</div>';
         }
 
-        $current_bc = $prev_bc;
         return $html;
     }
 }

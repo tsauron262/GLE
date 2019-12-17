@@ -409,7 +409,7 @@ class Equipment extends BimpObject
     }
 
     // Getters filters: 
-     
+
     public function getProductSearchFilters(&$filters, $value, &$joins = array(), $main_alias = 'a')
     {
         $where = 'prod.ref LIKE \'%' . (string) $value . '%\' OR prod.label LIKE \'%' . (string) $value . '%\' OR prod.barcode = \'' . (string) $value . '\'';
@@ -519,7 +519,7 @@ class Equipment extends BimpObject
             $filters[$sql] = 0;
         }
     }
-    
+
     public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array())
     {
         switch ($field_name) {
@@ -565,9 +565,9 @@ class Equipment extends BimpObject
                 break;
         }
     }
-    
+
     // Getters array: 
-    
+
     public function getHasReservationsArray()
     {
         return array(
@@ -576,7 +576,7 @@ class Equipment extends BimpObject
             0  => 'NON'
         );
     }
-    
+
     public function getContratsArray()
     {
         $id_soc = isset($this->data['id_soc']) ? $this->data['id_soc'] : 0;
@@ -601,7 +601,7 @@ class Equipment extends BimpObject
 
         return $return;
     }
-    
+
     public static function getAvailableEquipmentsArray($id_entrepot = null, $id_product = null)
     {
         $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
@@ -644,7 +644,7 @@ class Equipment extends BimpObject
 
         return $equipments;
     }
-    
+
     // Getters données: 
 
     public function getName()
@@ -1077,7 +1077,7 @@ class Equipment extends BimpObject
         );
 
         $use_gsx_v2 = (int) BimpCore::getConf('use_gsx_v2');
-        
+
         if (!$use_gsx_v2) { // V2 => gsxController::gsxGetEquipmentInfos(). 
             $gsx = new GSX($isIphone);
             if (!$gsx->connect) {
@@ -1112,7 +1112,7 @@ class Equipment extends BimpObject
                     }
                 }
             }
-        } 
+        }
 
         return $result;
     }
@@ -1312,6 +1312,38 @@ class Equipment extends BimpObject
         return $errors;
     }
 
+    public static function fetchImei($serial, $gsx = null)
+    {
+        if (!(int) BimpCore::getConf('use_gsx_v2', 0)) {
+            return '';
+        }
+
+        if (preg_match('/^S(.+)$/', $serial, $matches)) {
+            $serial = $matches[1];
+        }
+
+        if (is_null($gsx)) {
+            if (!class_exists('GSX_v2')) {
+                require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_v2.php';
+            }
+            $gsx = new GSX_v2();
+        }
+
+        if ($gsx->logged) {
+            $data = $gsx->productDetailsBySerial($serial);
+            
+            if (isset($data['device'])) {
+                if (isset($data['device']['identifiers']['imei']) && $data['device']['identifiers']['imei']) {
+                    return $data['device']['identifiers']['imei'];
+                } else {
+                    return 'n/a';
+                }
+            }
+        }
+
+        return '';
+    }
+
     // Renders: 
 
     public function renderReservationsList()
@@ -1420,10 +1452,10 @@ class Equipment extends BimpObject
 
     public function validate()
     {
-        $serial = $this->getData('serial');
+        $serial = (string) $this->getData('serial');
         $id_product = (int) $this->getData('id_product');
 
-        if (!is_null($serial) && $serial && $id_product && !defined('DONT_CHECK_SERIAL')) {
+        if ($serial && $id_product && !defined('DONT_CHECK_SERIAL')) {
             $where = '`serial` = \'' . $serial . '\' AND `id_product` = ' . $id_product;
             if ($this->isLoaded()) {
                 $where .= ' AND `id` != ' . (int) $this->id;
@@ -1433,6 +1465,12 @@ class Equipment extends BimpObject
             if (!is_null($value) && (int) $value) {
                 return array('Ce numéro de série pour ce même produit est déjà associé à l\'équipement ' . $value);
             }
+        }
+
+        $init_serial = (string) $this->getInitData('serial');
+
+        if ($serial && (!(string) $this->getData('imei') || ($init_serial && $serial != $init_serial))) {
+            $this->set('imei', self::fetchImei($this->getData('serial')));
         }
 
         if ($id_product) {

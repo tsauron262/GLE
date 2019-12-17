@@ -127,12 +127,14 @@ fields:
         
     serial: 
         label: Numéro de série
-        type: string
         size: 128
         required: 1
         search:
             type: value_part
             part_type: beginning
+            
+    imei: 
+        label: N° IMEI
         
     ref_immo: 
         label: Réf. immobilisation
@@ -272,6 +274,7 @@ fields_tables:
         icon: info-circle
         rows:
             - field: serial
+            - field: imei
             - field: ref_immo
             - label: Disponibilité
               value: 
@@ -378,6 +381,7 @@ forms:
     default:
         rows: 
             - field: serial
+            - field: imei
             - field: id_product
               show: 
                   callback: isNotLoaded
@@ -402,6 +406,7 @@ forms:
         force_edit: 1
         rows:
             - field: serial
+            - field: imei
             - field: id_product
               show: 
                   callback: isNotLoaded
@@ -416,6 +421,7 @@ forms:
     light_place: 
         rows: 
             - field: serial
+            - field: imei
             - field: id_product
             - field: product_label
             - field: type
@@ -432,6 +438,8 @@ filters_panel:
                 field: id_product
             serial: 
                 field: serial
+            imei: 
+                field: imei
             date_purchase: 
                 field: date_purchase
             date_vente:
@@ -497,6 +505,9 @@ lists_cols:
             type: value_part
     serial:
         field: serial
+    imei: 
+        label: IMEI
+        field: imei
     place: 
         label: Emplacement
         value:

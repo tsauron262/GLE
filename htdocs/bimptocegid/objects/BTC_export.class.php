@@ -156,6 +156,8 @@ class BTC_export extends BimpObject {
             mkdir($export_dir_month . 'exported/', 0777, true);
         }
         
+        shell_exec("chmod -R 777 " . $export_dir);
+        
                 
         if(!file_exists($export_dir_month . $file)) {
             $create_file = fopen($export_dir_month . $file, 'a+');

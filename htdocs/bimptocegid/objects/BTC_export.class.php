@@ -76,6 +76,7 @@ class BTC_export extends BimpObject {
         $since = false;
         
         if($origin == 'cronJob') {
+            
             $this->folder_trimestre = $this->defineFolderTrimestre();
             $this->current_month = self::$month[date('m')];
             $this->today = date("Y-m-d");
@@ -154,6 +155,8 @@ class BTC_export extends BimpObject {
             mkdir($export_dir_month, 0777, true);
             mkdir($export_dir_month . 'exported/', 0777, true);
         }
+        
+        shell_exec('chmod 777 -R ' . $this->export_directory . $this->project_directory . '/');
         
         if(!file_exists($export_dir_month . $file)) {
             $create_file = fopen($export_dir_month . $file, 'a+');

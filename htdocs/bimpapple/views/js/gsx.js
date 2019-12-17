@@ -357,6 +357,7 @@ function gsx_saveAppleParts($button, id_issue, modal_idx) {
             if ($.isOk($row)) {
                 parts.push({
                     part_number: $row.data('num'),
+                    new_part_number: $row.data('newNum'),
                     label: $row.data('name'),
                     stock_price: $row.data('stock_price'),
                     exchange_price: $row.data('exchange_price'),

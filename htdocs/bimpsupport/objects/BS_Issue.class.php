@@ -27,8 +27,9 @@ class BS_Issue extends BimpObject
 
         return 0;
     }
-    
-    public function canDelete(){
+
+    public function canDelete()
+    {
         return 1;
     }
 
@@ -428,16 +429,17 @@ class BS_Issue extends BimpObject
                         $part = BimpObject::getInstance('bimpsupport', 'BS_ApplePart');
 
                         $part_warnings = array();
-                        
+
                         $part_data['stock_price'] = str_replace(",", "", $part_data['stock_price']);
                         $part_errors = $part->validateArray(array(
-                            'id_sav'         => (int) $sav->id,
-                            'id_issue'       => (int) $this->id,
-                            'part_number'    => $part_data['part_number'],
-                            'label'          => $part_data['label'],
-                            'stock_price'    => $part_data['stock_price'],
-                            'exchange_price' => $part_data['exchange_price'],
-                            'price_options'  => $part_data['price_options'],
+                            'id_sav'          => (int) $sav->id,
+                            'id_issue'        => (int) $this->id,
+                            'part_number'     => $part_data['part_number'],
+                            'new_part_number' => (isset($part_data['new_part_number']) ? $part_data['new_part_number'] : ''),
+                            'label'           => $part_data['label'],
+                            'stock_price'     => $part_data['stock_price'],
+                            'exchange_price'  => $part_data['exchange_price'],
+                            'price_options'   => $part_data['price_options'],
                         ));
 
                         if (!count($part_errors)) {

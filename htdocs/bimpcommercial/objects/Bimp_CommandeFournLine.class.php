@@ -276,6 +276,28 @@ class Bimp_CommandeFournLine extends FournObjectLine
 
         return $qty;
     }
+    
+    public function getBilledQty($id_reception = null)
+    {
+        $receptions = $this->getData('receptions');
+
+        $qty = 0;
+
+        foreach ($receptions as $id_r => $reception_data) {
+            if (!is_null($id_reception) && ((int) $id_r !== (int) $id_reception)) {
+                continue;
+            }
+            
+            $reception = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeFournReception', (int) $id_r);
+            if (!BimpObject::objectLoaded($reception) || (int) $reception->getData('status') !== BL_CommandeFournReception::BLCFR_RECEPTIONNEE) {
+                continue;
+            }
+            if($reception->getData('id_facture'))
+                $qty += (float) $reception_data['qty'];
+        }
+
+        return $qty;
+    }
 
     public function getReceptionData($id_reception)
     {
@@ -869,21 +891,21 @@ class Bimp_CommandeFournLine extends FournObjectLine
 
         $html .= '</span>';
 
-//        // Qté facturée: 
-//        $qty_billed = (float) $this->getBilledQty();
-//        if ($qty_billed <= 0) {
-//            $class = 'danger';
-//        } elseif ($qty_billed < $total_qty) {
-//            $class = 'warning';
-//        } else {
-//            $class = 'success';
-//        }
-//        $html .= '<span class="bs-popover ' . $class . '" style="display: inline-block; margin-left: 15px"';
-//        $html .= BimpRender::renderPopoverData('Qtés ajoutées à une facture');
-//        $html .= '>';
-//        $html .= BimpRender::renderIcon('fas_file-invoice-dollar', 'iconLeft');
-//        $html .= $qty_billed;
-//        $html .= '</span>';
+        // Qté facturée: 
+        $qty_billed = (float) $this->getBilledQty();
+        if ($qty_billed <= 0) {
+            $class = 'danger';
+        } elseif ($qty_billed < $total_qty) {
+            $class = 'warning';
+        } else {
+            $class = 'success';
+        }
+        $html .= '<span class="bs-popover ' . $class . '" style="display: inline-block; margin-left: 15px"';
+        $html .= BimpRender::renderPopoverData('Qtés ajoutées à une facture');
+        $html .= '>';
+        $html .= BimpRender::renderIcon('fas_file-invoice-dollar', 'iconLeft');
+        $html .= $qty_billed;
+        $html .= '</span>';
 
         return $html;
     }
@@ -1991,14 +2013,31 @@ class Bimp_CommandeFournLine extends FournObjectLine
                         $received_qty = abs((float) $this->getReceivedQty(null, true));
                         $to_receive_qty = $fullQty - $received_qty;
                     }
+                    
+                    if (isset($status_forced['invoice']) && (int) $status_forced['invoice'] && $cmd_status === 5) {
+                        $billed_qty = $fullQty;
+                        $to_billed_qty = 0;
+                    } else {
+                        $billed_qty = abs((float) $this->getBilledQty(null));
+                        $to_billed_qty = $fullQty - $billed_qty;
+                    }
 
-                    if ($received_qty !== (float) $this->getData('qty_received')) {
+                    if ($received_qty != (float) $this->getData('qty_received')) {
                         $this->updateField('qty_received', $received_qty, null, true);
                     }
 
-                    if ($to_receive_qty !== (float) $this->getData('qty_to_receive')) {
+                    if ($to_receive_qty != (float) $this->getData('qty_to_receive')) {
                         $this->updateField('qty_to_receive', $to_receive_qty, null, true);
                     }
+                    
+                    if ($billed_qty != (float) $this->getData('qty_billed')) {
+                        $this->updateField('qty_billed', $billed_qty, null, true);
+                    }
+                    
+                    if ($to_billed_qty != (float) $this->getData('qty_to_billed')) {
+                        $this->updateField('qty_to_billed', $to_billed_qty, null, true);
+                    }
+                    
                 }
             } else {
                 if ((float) $this->qty && !(float) $this->pu_ht) {

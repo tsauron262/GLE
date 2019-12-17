@@ -19,7 +19,7 @@ class BimpRevalorisation extends BimpObject
     public function canCreate()
     {
         global $user;
-        return ($user->admin || $user->rights->bimpcommercial->commission->write);
+        return ($user->admin || $user->rights->bimpcommercial->reval->write);
     }
 
     public function canEdit()
@@ -27,10 +27,16 @@ class BimpRevalorisation extends BimpObject
         return (int) $this->canCreate();
     }
 
+    public function canValid()
+    {
+        global $user;
+        return ($user->admin || $user->rights->bimpcommercial->reval->valid);
+    }
+
     public function canView()
     {
         global $user;
-        return ($user->admin || $user->rights->bimpcommercial->commission->read);
+        return ($user->admin || $user->rights->bimpcommercial->reval->read);
     }
 
     public function canDelete()
@@ -45,8 +51,7 @@ class BimpRevalorisation extends BimpObject
         switch ($action) {
             case 'process':
             case 'cancelProcess':
-//                todo: 
-                return 1;
+                return $this->canValid();
 
             case 'addToCommission':
             case 'removeFromUserCommission':

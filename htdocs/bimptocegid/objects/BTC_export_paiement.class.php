@@ -6,7 +6,7 @@ class BTC_export_paiement extends BTC_export {
     const RETURNED_STATUS_OK = 1;
 
     public function export($id, $paiement_id, $forced) {
-        
+        $file = $this->create_daily_file('paiement');
         $error = 0;
         $ecritures = '';
         $liste_transactions = $this->db->getRows('paiement_facture', 'fk_paiement = ' . $id);
@@ -198,7 +198,7 @@ class BTC_export_paiement extends BTC_export {
 
         }
         
-        return $this->write_tra($ecritures, $this->create_daily_file('paiement'));
+        return $this->write_tra($ecritures, $file);
     }
 
 }

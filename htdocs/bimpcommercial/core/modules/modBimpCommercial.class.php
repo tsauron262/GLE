@@ -272,6 +272,39 @@ class modBimpCommercial extends DolibarrModules
 
 		$r++;
                 
+                $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
+		$this->rights[$r][1] = 'Voir reval';	// Permission label
+		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
+		$this->rights[$r][4] = 'reval';				// In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+		$this->rights[$r][5] = 'read';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+
+		$r++;
+                
+                $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
+		$this->rights[$r][1] = 'Créer reval';	// Permission label
+		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
+		$this->rights[$r][4] = 'reval';				// In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+		$this->rights[$r][5] = 'write';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+
+		$r++;
+                
+                $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
+		$this->rights[$r][1] = 'Valider reval';	// Permission label
+		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
+		$this->rights[$r][4] = 'reval';				// In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+		$this->rights[$r][5] = 'valid';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+
+		$r++;
+                
+                $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
+		$this->rights[$r][1] = 'Edite zone de Vente';	// Permission label
+		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
+		$this->rights[$r][4] = 'edit_zone_vente';				// In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+//		$this->rights[$r][5] = 'valid';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+
+		$r++;
+                
+                
                 
 
 		// Main menu entries
@@ -371,9 +404,9 @@ class modBimpCommercial extends DolibarrModules
                 }
                 
                 //contact commercial
-                $sql[]="INSERT INTO `".MAIN_DB_PREFIX."c_type_contact`(`element`, `source`, `code`, `libelle`, `active`) VALUES ('propal', 'internal','SALESREPSIGN','Commercial', '1');";
-                $sql[]="INSERT INTO `".MAIN_DB_PREFIX."c_type_contact`(`element`, `source`, `code`, `libelle`, `active`) VALUES ('commande', 'internal','SALESREPSIGN','Commercial', '1');";
-                $sql[]="INSERT INTO `".MAIN_DB_PREFIX."c_type_contact`(`element`, `source`, `code`, `libelle`, `active`) VALUES ('facture', 'internal','SALESREPSIGN','Commercial', '1');";
+//                $sql[]="INSERT INTO `".MAIN_DB_PREFIX."c_type_contact`(`element`, `source`, `code`, `libelle`, `active`) VALUES ('propal', 'internal','SALESREPSIGN','Commercial', '1');";
+//                $sql[]="INSERT INTO `".MAIN_DB_PREFIX."c_type_contact`(`element`, `source`, `code`, `libelle`, `active`) VALUES ('commande', 'internal','SALESREPSIGN','Commercial', '1');";
+//                $sql[]="INSERT INTO `".MAIN_DB_PREFIX."c_type_contact`(`element`, `source`, `code`, `libelle`, `active`) VALUES ('facture', 'internal','SALESREPSIGN','Commercial', '1');";
                 
 
                 // Propales: 

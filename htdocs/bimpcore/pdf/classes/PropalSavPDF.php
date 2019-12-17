@@ -134,7 +134,7 @@ class SavRestitutePDF extends PropalSavPDF
 
         $html .= '<tr>';
 //        $html .= '<td style="text-align: center;">Cachet, Date, Signature et mention <b>"Bon pour Commande"</b></td>';
-        $html .= '<td style="text-align:center;"><i><b>Je reconnait avoir récupéré ce jour mon matériel :</b></i></td>';
+        $html .= '<td style="text-align:center;"><i><b>Je reconnais avoir récupéré ce jour mon matériel :</b></i></td>';
 
         $html .= '<td></td>';
         $html .= '</tr>';

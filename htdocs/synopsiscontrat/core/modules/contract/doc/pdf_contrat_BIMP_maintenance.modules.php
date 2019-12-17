@@ -49,9 +49,9 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
         global $conf;
         $logo = $conf->mycompany->dir_output . '/logos/' . $this->emetteur->logo;
         if(is_object($pdf1)){
-            $pdf1->Image($logo, 0, 10, 0, $size, '', '', '', false, 250, 'C');
+            $pdf1->Image($logo, 0, 10, 0, $size, '', '', '', false, 250, 'L');
         } else {
-            $pdf->Image($logo, 0, 10, 0, $size, '', '', '', false, 250, 'C');
+            $pdf->Image($logo, 0, 10, 0, $size, '', '', '', false, 250, 'L');
         }
         
     }
@@ -475,16 +475,20 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $pdf1->SetXY($this->marge_gauche, $this->marge_haute - 17);
                 $pdf->SetFont('', 'B', 14);
                 $pdf1->SetFont('', 'B', 14);
-                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 3, "Contrat", 0, 'C');
-                $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 3, "Contrat", 0, 'C');
-                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 3, "N° " . $propref, 0, 'C');
-                $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 3, "N° " . $propref, 0, 'C');
+                $pdf->setXY(58,10);
+                $pdf1->setXY(58,10);
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 3, "Contrat d'assistance et de maintenance informatique", 0, 'L');
+                $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 3, "Contrat d'assistance et de maintenance informatique", 0, 'L');
+                $pdf->setX(58);
+                $pdf1->setX(58);
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 3, "N° " . $propref, 0, 'L');
+                $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 3, "N° " . $propref, 0, 'L');
                 $pdf->SetFont('', 'B', 8);
                 $pdf1->SetFont('', 'B', 8);
                 $pdf->SetTextColor(255,140,115);
                 $pdf1->SetTextColor(255,140,115);
-                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, "Exemplaire à conserver", 0, 'C');
-                $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, "Exemplaire à nous retourner signé", 0, 'C');
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, "Exemplaire à conserver", 0, 'R');
+                $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, "Exemplaire à nous retourner signé", 0, 'R');
                     
                 $pdf->SetTextColor(0,0,0);
                 $pdf1->SetTextColor(0,0,0);
@@ -854,6 +858,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
     }
 
     function _pagefoot(&$pdf, $outputlangs, $paraphe = true) {
+        global $mysoc;
         $pdf->SetDrawColor(255, 255, 255);
         $pdf->setColor('fill', 255, 255, 255);
         $pdf->SetTextColor(0, 0, 0);
@@ -869,7 +874,11 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
             $pdf->SetTextColor(200, 200, 200);
             $pdf->SetTextColor(0, 0, 0);
         }
-        
+        $pdf->setY(285);
+        $pdf->SetFont('', '', 8);
+        $pdf->SetTextColor(200, 200, 200);
+        $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 3, $mysoc->name . " - SAS au capital de " . $mysoc->capital . ' - ' . $mysoc->address . ' - ' . $mysoc->zip . ' ' . $mysoc->town . ' - Tél ' . $mysoc->phone . ' - SIRET: 320 387 483 00433'  , 0, 'C');
+        $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 3, 'APE : 4651Z - RCS/RM : Lyon B 320 387 483 - Num. TVA : FR 34 320387483'  , 0, 'C');
     }
 
     function hex2RGB($hexStr, $returnAsString = false, $seperator = ',') {

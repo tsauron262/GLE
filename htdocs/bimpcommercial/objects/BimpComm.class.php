@@ -100,6 +100,9 @@ class BimpComm extends BimpDolObject
                     if (!(int) $this->areLinesEditable()) {
                         return 0;
                     }
+                    
+                    if(!$user->rights->bimpcommercial->edit_zone_vente)
+                        return 0;
                 }
                 break;
         }
@@ -2898,6 +2901,7 @@ class BimpComm extends BimpDolObject
                 $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($factureA), 'Des erreurs sont survenues lors de la création de la facture d\'acompte');
             } else {
                 $factureA->addline("Acompte", $amount / 1.2, 1, 20, null, null, null, 0, null, null, null, null, null, 'HT', null, 1, null, null, null, null, null, null, $amount / 1.2);
+                $user->rights->facture->creer = 1;
                 $factureA->validate($user);
 
                 // Création du paiement: 

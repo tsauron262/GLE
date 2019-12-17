@@ -206,6 +206,7 @@ class BTC_export extends BimpObject {
             foreach ($liste as $paiement) {
                 if($instance->export($paiement->rowid, $paiement->fk_paiement, $forced)) {
                     $pay = $this->getInstance('bimpcommercial', 'Bimp_Paiement', $paiement->rowid);
+                    $this->log('PAIEMENT CLIENT', $pay->getData('ref'), 'FICHIER DE PAIEMENT');
                     $pay->updateField('exported', 1);
                 } else {
                     // Mettre task
@@ -225,7 +226,7 @@ class BTC_export extends BimpObject {
             foreach($liste as $facture_fourn) {
                 $error = $instance->export($facture_fourn->rowid, $forced);
                 if($error > 0) {
-                    $this->log('PAIEMENT CLIENT', $pay->getData('ref'), 'FICHIER DE PAIEMENT');
+                    
                 }
             }
         } else {

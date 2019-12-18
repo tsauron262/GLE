@@ -30,7 +30,7 @@ $equipment = BimpObject::getInstance('bimpequipment', 'Equipment');
 
 $rows = $equipment->getList(array(
     'imei' => ''
-        ), 10, 1, 'id', 'desc', 'array', array('id', 'serial'));
+        ), null, null, 'id', 'desc', 'array', array('id', 'serial'));
 
 echo count($rows) . ' équipement(s) à traiter <br/><br/>';
 
@@ -51,7 +51,7 @@ foreach ($rows as $r) {
 
     if (!$imei) {
         $imei = 'n/a';
-    } else {
+    } elseif ($imei !== 'n/a') {
         $nOK++;
     }
 

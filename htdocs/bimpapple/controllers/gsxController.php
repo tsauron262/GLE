@@ -891,10 +891,13 @@ class gsxController extends BimpController
 
                 if (isset($result['device']['identifiers']['serial'])) {
                     $data['serial'] = $result['device']['identifiers']['serial'];
-                }
                 
-                if (isset($result['device']['identifiers']['imei'])) {
-                    $data['imei'] = $result['device']['identifiers']['imei'];
+                    if (isset($result['device']['identifiers']['imei'])) {
+                        $data['imei'] = $result['device']['identifiers']['imei'];
+                    }
+                    else{
+                        $data['imei'] = "n/a";
+                    }
                 }
 
                 if (isset($result['device']['warrantyInfo']['warrantyStatusDescription'])) {

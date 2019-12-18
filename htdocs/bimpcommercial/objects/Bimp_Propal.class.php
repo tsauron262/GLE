@@ -679,7 +679,7 @@ class Bimp_Propal extends BimpComm
     public function review($check = true, &$errors = array(), &$warnings = array())
     {
         global $user, $langs;
-        
+
         $errors = array();
         if ($check) {
             if (!$this->isActionAllowed('review', $errors)) {
@@ -709,6 +709,21 @@ class Bimp_Propal extends BimpComm
 
         $totHt = (float) $this->dol_object->total_ht;
 
+        // Ajout des notes: 
+        $this->addNote('Proposition commerciale mise en révision le ' . date('d / m / Y') . ' par ' . $user->getFullName($langs) . "\n" . 'Révision: ' . $newPropal->getRef());
+        $newPropal->addNote('Révision de la proposition: ' . $this->getRef());
+
+        // Copie des lignes: 
+        $warnings = array_merge($warnings, $newPropal->createLinesFromOrigin($this, array(
+                    'is_review' => true
+        )));
+
+        // Copie des contacts: 
+        $newPropal->copyContactsFromOrigin($this, $warnings);
+
+        // Copie des remises globales:
+        $newPropal->copyRemisesGlobalesFromOrigin($this, $warnings);
+
         // Ajout de la ligne "Proposition commerciale révisée" dans la propale actuelle: 
         $line = BimpObject::getInstance('bimpcommercial', 'Bimp_PropalLine');
         $line->desc = 'Proposition commerciale révisée';
@@ -735,21 +750,6 @@ class Bimp_Propal extends BimpComm
         if (count($line_warnings)) {
             $warnings[] = BimpTools::getMsgFromArray($line_warnings, 'Erreurs suite à la création de la ligne "révision"');
         }
-
-        // Ajout des notes: 
-        $this->addNote('Proposition commerciale mise en révision le ' . date('d / m / Y') . ' par ' . $user->getFullName($langs) . "\n" . 'Révision: ' . $newPropal->getRef());
-        $newPropal->addNote('Révision de la proposition: ' . $this->getRef());
-
-        // Copie des lignes: 
-        $warnings = array_merge($warnings, $newPropal->createLinesFromOrigin($this, array(
-                    'is_review' => true
-        )));
-
-        // Copie des contacts: 
-        $newPropal->copyContactsFromOrigin($this, $warnings);
-        
-        // Copie des remises globales:
-        $newPropal->copyRemisesGlobalesFromOrigin($this, $warnings);
 
         return $new_id_propal;
     }

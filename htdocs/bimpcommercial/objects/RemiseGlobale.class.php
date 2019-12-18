@@ -48,9 +48,9 @@ class RemiseGlobale extends BimpObject
             switch ($this->getData('obj_type')) {
                 case 'propal':
                     return BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', (int) $this->getData('id_obj'));
-                case 'commande':
+                case 'order':
                     return BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $this->getData('id_obj'));
-                case 'facture':
+                case 'invoice':
                     return BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $this->getData('id_obj'));
             }
         }

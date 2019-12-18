@@ -2349,7 +2349,7 @@ class Bimp_Commande extends BimpComm
                     $lines_rate = ($rg_amount_ttc / $total_lines_ttc) * 100;
 
                     // Assignation du nouveau taux pour chaque ligne de facture brouillon: 
-                    
+
                     foreach ($lines as $line) {
                         $factures = $line->getData('factures');
                         foreach ($factures as $id_fac => $fac_data) {
@@ -3140,12 +3140,16 @@ class Bimp_Commande extends BimpComm
                     $propal = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $origin_id);
                 }
                 if (BimpObject::objectLoaded($propal)) {
+                    // Copie des notes: 
                     BimpObject::loadClass('bimpcore', 'BimpNote');
                     $note_errors = BimpNote::copyObjectNotes($propal, $this);
 
                     if (count($note_errors)) {
                         $warnings[] = BimpTools::getMsgFromArray($note_errors, 'Erreurs lors de la copie des notes de la propales');
                     }
+
+                    // Copie des remises globales: 
+                    $this->copyRemisesGlobalesFromOrigin($propal, $warnings);
                 }
             }
         }

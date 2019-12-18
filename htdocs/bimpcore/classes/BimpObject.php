@@ -3194,8 +3194,10 @@ class BimpObject extends BimpCache
             $errors[] = 'Vous n\'avez pas la permission de créer ' . $this->getLabel('a');
         }
 
-        if (!$this->isCreatable($force_create)) {
-            $errors[] = 'Il n\'est pas possible de créer ' . $this->getLabel('a');
+        if (!$this->isCreatable($force_create, $errors)) {
+            if (!count($errors)) {
+                $errors[] = 'Il n\'est pas possible de créer ' . $this->getLabel('a');
+            }
         }
 
         if (!count($errors)) {
@@ -6773,7 +6775,7 @@ class BimpObject extends BimpCache
             }
 
             $label = $instance->getLabel('of_the');
-            $ref_prop = $this->getRefProperty();
+            $ref_prop = $instance->getRefProperty();
 
             if ($ref_prop && isset($data[$ref_prop])) {
                 $label .= ' "' . $data[$ref_prop] . '"';

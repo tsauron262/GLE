@@ -10,11 +10,11 @@ top_htmlhead('', 'Récupération IMEI équipements', 0, 0, array(), array());
 
 echo '<body>';
 
+BimpCore::displayHeaderFiles();
+
 //session_destroy();
 set_time_limit(3600); // 1h
 ignore_user_abort(0);
-
-BimpCore::displayHeaderFiles();
 
 global $db;
 $bdb = new BimpDb($db);
@@ -30,7 +30,7 @@ $equipment = BimpObject::getInstance('bimpequipment', 'Equipment');
 
 $rows = $equipment->getList(array(
     'imei' => ''
-        ), null, null, 'id', 'desc', 'array', array('id', 'serial'));
+        ), 10000, 1, 'id', 'desc', 'array', array('id', 'serial'));
 
 echo count($rows) . ' équipement(s) à traiter <br/><br/>';
 

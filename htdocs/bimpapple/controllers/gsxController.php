@@ -874,6 +874,7 @@ class gsxController extends BimpController
 
         $data = array(
             'product_label'     => '',
+            'serial'            => $serial,
             'imei'              => '',
             'date_purchase'     => '',
             'date_warranty_end' => '',
@@ -888,6 +889,10 @@ class gsxController extends BimpController
                     $data['product_label'] = $result['device']['productDescription'];
                 }
 
+                if (isset($result['device']['identifiers']['serial'])) {
+                    $data['serial'] = $result['device']['identifiers']['serial'];
+                }
+                
                 if (isset($result['device']['identifiers']['imei'])) {
                     $data['imei'] = $result['device']['identifiers']['imei'];
                 }

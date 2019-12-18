@@ -377,6 +377,17 @@ class BS_SAV extends BimpObject
                     'success_callback' => $callback
                 ))
             );
+
+            $onclick = 'generatePDFFile($(this), ' . $this->id . ', \'irreparable\');';
+            $buttons[] = array(
+                'label'   => 'Générer Doc Irreparable',
+                'icon'    => 'fas_file-pdf',
+                'onclick' => $this->getJsActionOnclick('generatePDF', array(
+                    'file_type' => 'irreparable'
+                        ), array(
+                    'success_callback' => $callback
+                ))
+            );
         }
 
         return $buttons;
@@ -2628,7 +2639,7 @@ class BS_SAV extends BimpObject
     {
         $url = '';
 
-        if (!in_array($file_type, array('pc', 'destruction', 'destruction2', 'pret', 'europe'))) {
+        if (!in_array($file_type, array('pc', 'destruction', 'destruction2', 'pret', 'europe', 'irreparable'))) {
             $errors[] = 'Type de fichier PDF invalide';
             return '';
         }
@@ -2662,6 +2673,9 @@ class BS_SAV extends BimpObject
                     break;
                 case 'pret':
                     $ref = 'Pret-' . $this->getData('ref');
+                    break;
+                case 'irreparable':
+                    $ref = 'Obsolete-' . $this->getData('ref');
                     break;
             }
 

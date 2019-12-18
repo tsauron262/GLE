@@ -899,6 +899,7 @@ searches:
     default: 
         fields_search: 
             - e.serial
+            - e.imei
             - a.ref
             - s.nom
             - r.repair_confirm_number

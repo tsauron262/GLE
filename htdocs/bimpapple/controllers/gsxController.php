@@ -874,6 +874,8 @@ class gsxController extends BimpController
 
         $data = array(
             'product_label'     => '',
+            'serial'            => $serial,
+            'imei'              => '',
             'date_purchase'     => '',
             'date_warranty_end' => '',
             'warranty_type'     => '',
@@ -885,6 +887,14 @@ class gsxController extends BimpController
             if (is_array($result)) {
                 if (isset($result['device']['productDescription'])) {
                     $data['product_label'] = $result['device']['productDescription'];
+                }
+
+                if (isset($result['device']['identifiers']['serial'])) {
+                    $data['serial'] = $result['device']['identifiers']['serial'];
+                }
+                
+                if (isset($result['device']['identifiers']['imei'])) {
+                    $data['imei'] = $result['device']['identifiers']['imei'];
                 }
 
                 if (isset($result['device']['warrantyInfo']['warrantyStatusDescription'])) {
@@ -982,16 +992,18 @@ class gsxController extends BimpController
         if ($serial) {
             $data = $this->gsx_v2->serialEligibility($serial);
             if (isset($data['eligibilityDetails']) && !empty($data['eligibilityDetails'])) {
+
+                $html .= '<div style="margin-top: 15px; padding: 10px; border: 1px solid #DCDCDC">';
                 $html .= '<h4>Eligibilité</h4>';
-                $html .= '<table>';
-                $html .= '<tbody>';
+                $html .= '<table class="bimp_list_table">';
+                $html .= '<tbody class="headers_col">';
                 foreach (array(
             'coverageDescription' => 'Couverture',
             'coverageCode'        => 'Code couverture'
                 ) as $path => $label) {
                     $value = BimpTools::getArrayValueFromPath($data['eligibilityDetails'], $path, true);
                     $html .= '<tr>';
-                    $html .= '<td style="font-weight: bold">' . $label . '</td>';
+                    $html .= '<th>' . $label . '</ht>';
                     $html .= '<td>' . $value . '</td>';
                     $html .= '</tr>';
                 }
@@ -1010,6 +1022,7 @@ class gsxController extends BimpController
                         $html .= BimpRender::renderAlerts($warnings_msgs, 'warning');
                     }
                 }
+                $html .= '</div>';
             } else {
                 $errors = $this->gsx_v2->getErrors();
             }

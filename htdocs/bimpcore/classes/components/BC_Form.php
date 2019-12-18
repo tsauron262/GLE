@@ -774,7 +774,6 @@ class BC_Form extends BC_Panel
             return '';
         }
 
-
         if (is_null($object) && $object_name) {
             $object = $parent->config->getObject('', $object_name);
         }

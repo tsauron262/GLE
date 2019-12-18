@@ -122,6 +122,7 @@ class BordereauChequeBlochet_csv extends ModeleChequeReceipts
                 $this->out .= $this->addCell('Total Facture');
                 $this->out .= $this->addCell('Montant Pai Fact');
                 $this->out .= $this->addCell('Restant Pai Fact');
+                $this->out .= $this->addCell('Ref paiement');
                 $this->out .= $this->addCell('Emeteur');
                 $this->out .= $this->addCell('Banque');
                 $this->out .= $this->addCell('Montant Cheque');
@@ -129,7 +130,7 @@ class BordereauChequeBlochet_csv extends ModeleChequeReceipts
 
                 $this->out .= $this->sautLigne;
 
-                $sql = $this->db->query("SELECT *, pf.amount as paifact, b.amount as paitot, f.rowid as facid FROM `llx_paiement` p, llx_bank b, llx_paiement_facture pf, llx_facture f, llx_societe s WHERE s.rowid = f.fk_soc AND f.rowid = fk_facture AND p.`fk_bank` = b.rowid AND`fk_bordereau` = ".$this->object->id." AND pf.`fk_paiement` = p.rowid ORDER by fk_bank");
+                $sql = $this->db->query("SELECT *, pf.amount as paifact, b.amount as paitot, f.rowid as facid, p.ref as refP FROM `llx_paiement` p, llx_bank b, llx_paiement_facture pf, llx_facture f, llx_societe s WHERE s.rowid = f.fk_soc AND f.rowid = fk_facture AND p.`fk_bank` = b.rowid AND`fk_bordereau` = ".$this->object->id." AND pf.`fk_paiement` = p.rowid ORDER by fk_bank");
                     
                 $memoireIdBank = $total = $i = 0;   
 		while($ln = $this->db->fetch_object($sql))
@@ -138,7 +139,6 @@ class BordereauChequeBlochet_csv extends ModeleChequeReceipts
                     $restant = $facObject->getRemainToPay(true);
                     $facture = $facObject->getData('facnumber');
                     $totFact = $facObject->getData('total_ttc');
-                    
                     
                     $codeCli = $ln->code_client;
                     $codeCompta = $ln->code_compta;
@@ -156,9 +156,10 @@ class BordereauChequeBlochet_csv extends ModeleChequeReceipts
                         $emeteur = $ln->emetteur;
                         $montant = $ln->paitot;
                         $total += $montant;
+                        $refP = $ln->refP;
                     }
                     else{
-                        $numCheque = $banque = $emeteur = $montant = "";
+                        $numCheque = $banque = $emeteur = $montant = $refP = "";
                     }
                     
                     
@@ -169,6 +170,7 @@ class BordereauChequeBlochet_csv extends ModeleChequeReceipts
                     $this->out .= $this->addCell($this->toPriceCsv($totFact));
                     $this->out .= $this->addCell($this->toPriceCsv($paifact));
                     $this->out .= $this->addCell($this->toPriceCsv ($restant));
+                    $this->out .= $this->addCell($refP);
                     $this->out .= $this->addCell($emeteur);
                     $this->out .= $this->addCell($banque);
                     $this->out .= $this->addCell(price($montant));
@@ -181,6 +183,7 @@ class BordereauChequeBlochet_csv extends ModeleChequeReceipts
             
             $this->out .= $this->addCell('Total');
             $this->out .= $this->addCell($i);
+            $this->out .= $this->addCell('');
             $this->out .= $this->addCell('');
             $this->out .= $this->addCell('');
             $this->out .= $this->addCell('');

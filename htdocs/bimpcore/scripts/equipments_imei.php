@@ -12,7 +12,7 @@ echo '<body>';
 
 //session_destroy();
 set_time_limit(3600); // 1h
-ignore_user_abort(1);
+ignore_user_abort(0);
 
 BimpCore::displayHeaderFiles();
 

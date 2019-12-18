@@ -264,7 +264,7 @@ class pdf_bimpsupport_europe extends ModeleBimpSupport {
                 $pdf->SetXY('77', '162.8');
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 9);
                 $pdf->MultiCell(300, 6, str_replace("\n", " ", $sav->getData("symptomes")), 0, 'L');
-                $pdf->SetXY('128', '178');
+                $pdf->SetXY('27', '185.8');
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 9);
                 $pdf->MultiCell(300, 6, str_replace("\n", " ", $sav->getData("symptomes")), 0, 'L');
 //$s = new Societe();

@@ -5,8 +5,8 @@ class BTC_export extends BimpObject {
     private $sql_limit = 1; // Nombre de résultats dans la requete SQL: null = unlimited
     private $date_export = null;
     public $file;
-    //private $export_directory = "/data/synchro/bimp/"; // Dossier d'écriture des fichiers
-    private $export_directory = '/usr/local/data2/test_alexis/synchro/'; // Chemin DATAs version de test alexis 
+    private $export_directory = "/data/synchro/bimp/"; // Dossier d'écriture des fichiers
+    //private $export_directory = '/usr/local/data2/test_alexis/synchro/'; // Chemin DATAs version de test alexis 
     private $project_directory = 'exportCegid';
     private $imported_log = '/data/synchro/bimp/exportCegid/imported.log';
     private $directory_logs_file = '/data2/exportCegid/export.log';

@@ -405,7 +405,7 @@ class GSX_v2 extends GSX_Const
         $params = array(
             'devices' => array(
                 array(
-                    'id' => $serial
+                    'id' => $this->traiteSerialApple($serial)
                 )
             )
         );
@@ -433,7 +433,7 @@ class GSX_v2 extends GSX_Const
         switch ($identifier_type) {
             case 'serial':
                 $params['device'] = array(
-                    'id' => $identifier
+                    'id' => $this->traiteSerialApple($identifier)
                 );
                 break;
 
@@ -464,7 +464,7 @@ class GSX_v2 extends GSX_Const
     {
         $params = array(
             'device'     => array(
-                'id' => $serial
+                'id' => $this->traiteSerialApple($serial)
             ),
             'repairType' => $repairType
         );
@@ -484,7 +484,7 @@ class GSX_v2 extends GSX_Const
     {
         return $this->exec('componentIssue', array(
                     'device' => array(
-                        'id' => $serial
+                        'id' => $this->traiteSerialApple($serial)
                     )
         ));
     }
@@ -494,7 +494,7 @@ class GSX_v2 extends GSX_Const
         $params = array(
             'attachments' => array(),
             'device'      => array(
-                'id' => $serial
+                'id' => $this->traiteSerialApple($serial)
             )
         );
 
@@ -556,7 +556,7 @@ class GSX_v2 extends GSX_Const
     public function diagnosticSuites($serial)
     {
         return $this->exec('diagnosticSuites', array(
-                    'deviceId' => $serial
+                    'deviceId' => $this->traiteSerialApple($serial)
         ));
     }
 
@@ -567,7 +567,7 @@ class GSX_v2 extends GSX_Const
                         'suiteId' => (string) $suiteId
                     ),
                     'device'      => array(
-                        'id' => $serial
+                        'id' => $this->traiteSerialApple($serial)
                     )
         ));
     }
@@ -576,7 +576,7 @@ class GSX_v2 extends GSX_Const
     {
         return $this->exec('diagnosticStatus', array(
                     'device' => array(
-                        'id' => $serial
+                        'id' => $this->traiteSerialApple($serial)
                     )
         ));
     }
@@ -585,16 +585,24 @@ class GSX_v2 extends GSX_Const
     {
         return $this->exec('diagnosticsLookup', array(
                     'device' => array(
-                        'id' => $serial
+                        'id' => $this->traiteSerialApple($serial)
                     )
         ));
+    }
+    
+    public function traiteSerialApple($serial){
+        if(stripos($serial, 'S') === 0){
+            return substr($serial,1);
+        }
+        die('nnn');
+        return $serial;
     }
 
     public function serialEligibility($serial)
     {
         return $this->exec('repairEligibility', array(
                     'device' => array(
-                        'id' => $serial
+                        'id' => $this->traiteSerialApple($serial)
                     )
         ));
     }

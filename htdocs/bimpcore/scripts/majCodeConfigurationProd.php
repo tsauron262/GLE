@@ -13,10 +13,10 @@ while($ln = $db->fetch_object($sql)){
             $erreurs[] = $ln->fin." plusieurs prod ...";
         }
         else{
-            if(!isset($ln->fin))
+            if(!isset($ok[$ln->fin]))
                 $ok[$ln->fin]= 0;  
             else
-                $erreurs[] = $ln->fin.' plusieurs fois ATTENTION......';
+                $erreurs[] = $ln->fin.' plusieurs ('.($ok[$ln->fin]+1).') fois ATTENTION......';
             $ok[$ln->fin]++;
             
             $sql2 = $db->query("SELECT COUNT(*) as nbSerial  FROM `llx_be_equipment` WHERE ( LENGTH(serial) = 13 || LENGTH(serial) = 12) AND id_product = 0 AND serial LIKE '%".$ln->fin."'");

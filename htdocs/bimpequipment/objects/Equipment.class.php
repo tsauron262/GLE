@@ -1312,36 +1312,42 @@ class Equipment extends BimpObject
         return $errors;
     }
 
-    public static function fetchImei($serial, $gsx = null)
+    public static function gsxFetchIdentifiers($serial, $gsx = null)
     {
-        if (!(int) BimpCore::getConf('use_gsx_v2', 0)) {
-            return '';
-        }
-
-        if (preg_match('/^S(.+)$/', $serial, $matches)) {
-            $serial = $matches[1];
-        }
-
-        if (is_null($gsx)) {
-            if (!class_exists('GSX_v2')) {
-                require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_v2.php';
+        $identifiers = array(
+            'serial' => $serial,
+            'imei'   => ''
+        );
+        if ((int) BimpCore::getConf('use_gsx_v2', 0)) {
+            if (preg_match('/^S(.+)$/', $serial, $matches)) {
+                $serial = $matches[1];
             }
-            $gsx = new GSX_v2();
-        }
 
-        if ($gsx->logged) {
-            $data = $gsx->productDetailsBySerial($serial);
-            
-            if (isset($data['device'])) {
-                if (isset($data['device']['identifiers']['imei']) && $data['device']['identifiers']['imei']) {
-                    return $data['device']['identifiers']['imei'];
-                } else {
-                    return 'n/a';
+            if (is_null($gsx)) {
+                if (!class_exists('GSX_v2')) {
+                    require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_v2.php';
+                }
+                $gsx = new GSX_v2();
+            }
+
+            if ($gsx->logged) {
+                $data = $gsx->productDetailsBySerial($serial);
+
+                if (isset($data['device'])) {
+                    if (isset($data['device']['identifiers']['imei']) && $data['device']['identifiers']['imei']) {
+                        $identifiers['imei'] = $data['device']['identifiers']['imei'];
+                    } else {
+                        $identifiers['imei'] = 'n/a';
+                    }
+
+                    if (isset($data['device']['identifiers']['serial']) && $data['device']['identifiers']['serial']) {
+                        $identifiers['serial'] = $data['device']['identifiers']['serial'];
+                    }
                 }
             }
         }
 
-        return '';
+        return $identifiers;
     }
 
     // Renders: 
@@ -1470,7 +1476,12 @@ class Equipment extends BimpObject
         $init_serial = (string) $this->getInitData('serial');
 
         if ($serial && (!(string) $this->getData('imei') || ($init_serial && $serial != $init_serial))) {
-            $this->set('imei', self::fetchImei($this->getData('serial')));
+            $identifiers = self::gsxFetchIdentifiers($serial);
+            $this->set('imei', $identifiers['imei']);
+
+            if ($identifiers['imei'] === $serial && $identifiers['serial']) {
+                $this->set('serial', $identifiers['serial']);
+            }
         }
 
         if ($id_product) {

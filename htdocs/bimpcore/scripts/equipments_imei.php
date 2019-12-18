@@ -12,7 +12,7 @@ echo '<body>';
 
 //session_destroy();
 set_time_limit(3600); // 1h
-ignore_user_abort(1);
+ignore_user_abort(0);
 
 BimpCore::displayHeaderFiles();
 
@@ -47,7 +47,11 @@ foreach ($rows as $r) {
         continue;
     }
 
-    $imei = Equipment::fetchImei($r['serial'], $gsx);
+    $ids = Equipment::gsxFetchIdentifiers($r['serial'], $gsx);
+
+    $imei = $ids['imei'];
+    $serial = $ids['serial'];
+
 
     if (!$imei) {
         $imei = 'n/a';
@@ -55,11 +59,17 @@ foreach ($rows as $r) {
         $nOK++;
     }
 
+    $data = array(
+        'imei' => $imei
+    );
+
+    if ($imei === $r['serial'] && $serial) {
+        $data['serial'] = $serial;
+    }
+
     $nDone++;
 
-    if ($bdb->update('be_equipment', array(
-                'imei' => $imei
-                    ), '`id` = ' . (int) $r['id']) <= 0) {
+    if ($bdb->update('be_equipment', $data, '`id` = ' . (int) $r['id']) <= 0) {
         echo BimpRender::renderAlerts('ERREUR SQL') . ' ' . $bdb->db->lasterror() . '<br/><br/>';
         break;
     }

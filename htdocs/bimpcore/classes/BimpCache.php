@@ -65,7 +65,7 @@ class BimpCache
         return self::cacheExists('bimp_object_' . $module . '_' . $object_name . '_' . $id_object);
     }
 
-    public static function getBimpObjectInstance($module, $object_name, $id_object, $parent = null)
+    public static function getBimpObjectInstance($module, $object_name, $id_object = null, $parent = null)
     {
         // Pas très propre mais seule solution trouvée: 
         if ($object_name === 'Bimp_Propal' && (int) $id_object) {

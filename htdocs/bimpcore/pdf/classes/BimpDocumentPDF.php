@@ -81,7 +81,7 @@ class BimpDocumentPDF extends BimpModelPDF
                     $this->proforma = (int) $this->object->array_options['options_pdf_proforma'];
                 }
 
-                if (is_null($this->contact)) {
+                if (is_null($this->contact) && method_exists($this->object, 'getIdContact')) {
                     $contacts = $this->object->getIdContact('external', 'CUSTOMER');
                     if (isset($contacts[0]) && $contacts[0]) {
                         BimpTools::loadDolClass('contact');
@@ -99,7 +99,7 @@ class BimpDocumentPDF extends BimpModelPDF
                 }
 
                 if (is_null($this->thirdparty)) {
-                    if (!isset($this->object->thirdparty)) {
+                    if (!isset($this->object->thirdparty) && method_exists($this->object, 'fetch_thirdparty')) {
                         $this->object->fetch_thirdparty();
                     }
                     if (isset($this->object->thirdparty)) {
@@ -185,15 +185,20 @@ class BimpDocumentPDF extends BimpModelPDF
             }
         }
 
+        $doc_ref = "";
+        if(is_object($this->object) && isset($this->object->ref))
+            $doc_ref = $this->object->ref;
+        
         $this->pdf->topMargin = 53;
-
+        
         $this->header_vars = array(
             'logo_img'      => $logo_file,
             'logo_width'    => $logo_width,
             'logo_height'   => $logo_height,
             'header_infos'  => $this->getSenderInfosHtml(),
             'header_right'  => $header_right,
-            'primary_color' => $this->primary
+            'primary_color' => $this->primary,
+            'doc_ref'       => $doc_ref
         );
     }
 

@@ -207,7 +207,7 @@ class pdf_bimpsupport_pc extends ModeleBimpSupport
             if ((int) $sav->getData('user_create') > 0) {
                 $user_author = $sav->getChildObject('user_create');
                 $pdf->SetXY('41', '53.5');
-                $pdf->MultiCell(100, 6, $user_author->getFullName($langs), 0, 'L');
+                $pdf->MultiCell(100, 6, $user_author->firstname, 0, 'L');
             }
 
             if ($sav->getData('prestataire_number') != "") {

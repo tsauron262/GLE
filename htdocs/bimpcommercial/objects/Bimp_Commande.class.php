@@ -126,20 +126,28 @@ class Bimp_Commande extends BimpComm
 
         if ($this->isLoaded()) {
             $sql = $this->db->db->query("SELECT rowid FROM `llx_synopsisdemandeinterv` WHERE `fk_commande` = " . $this->id);
-            while ($ln = $this->db->db->fetch_object($sql)) {
-                $objT = BimpCache::getBimpObjectInstance("bimpfichinter", 'Bimp_Demandinter', $ln->rowid);
-                if ($objT->isLoaded()) {
-                    $html .= $this->renderListFileForObject($objT);
+            if($sql){
+                while ($ln = $this->db->db->fetch_object($sql)) {
+                    $objT = BimpCache::getBimpObjectInstance("bimpfichinter", 'Bimp_Demandinter', $ln->rowid);
+                    if ($objT->isLoaded()) {
+                        $html .= $this->renderListFileForObject($objT);
+                    }
                 }
             }
+            else
+                $html .= BimpRender::renderAlerts('Probléme avec les DI');
 
             $sql = $this->db->db->query("SELECT rowid FROM `llx_synopsis_fichinter` WHERE `fk_commande` = " . $this->id);
-            while ($ln = $this->db->db->fetch_object($sql)) {
-                $objT = BimpCache::getBimpObjectInstance("bimpfichinter", 'Bimp_Fichinter', $ln->rowid);
-                if ($objT->isLoaded()) {
-                    $html .= $this->renderListFileForObject($objT);
+            if($sql){
+                while ($ln = $this->db->db->fetch_object($sql)) {
+                    $objT = BimpCache::getBimpObjectInstance("bimpfichinter", 'Bimp_Fichinter', $ln->rowid);
+                    if ($objT->isLoaded()) {
+                        $html .= $this->renderListFileForObject($objT);
+                    }
                 }
             }
+            else
+                $html .= BimpRender::renderAlerts('Probléme avec les FI');
         }
 
 
@@ -153,30 +161,38 @@ class Bimp_Commande extends BimpComm
 
         if ($this->isLoaded()) {
             $sql = $db->query("SELECT rowid FROM `llx_synopsisdemandeinterv` WHERE `fk_commande` = " . $this->id);
-            while ($ln = $db->fetch_object($sql)) {
-                $inter = BimpCache::getBimpObjectInstance("bimpfichinter", 'Bimp_Demandinter', $ln->rowid);
-                $icon = $inter->params['icon'];
-                $htmlP .= '<tr>';
-                $htmlP .= '<td><strong>' . BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($inter->getLabel()) . '</strong></td>';
-                $htmlP .= '<td>' . $inter->getNomUrl(0) . '</td>';
-                $htmlP .= '<td>' . $inter->displayData("date_valid") . '</td>';
-                $htmlP .= '<td>' . $inter->displayData("total_ht") . '</td>';
-                $htmlP .= '<td>' . $inter->displayData("fk_statut") . '</td>';
-                $htmlP .= '</tr>';
+            if($sql){
+                while ($ln = $db->fetch_object($sql)) {
+                    $inter = BimpCache::getBimpObjectInstance("bimpfichinter", 'Bimp_Demandinter', $ln->rowid);
+                    $icon = $inter->params['icon'];
+                    $htmlP .= '<tr>';
+                    $htmlP .= '<td><strong>' . BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($inter->getLabel()) . '</strong></td>';
+                    $htmlP .= '<td>' . $inter->getNomUrl(0) . '</td>';
+                    $htmlP .= '<td>' . $inter->displayData("date_valid") . '</td>';
+                    $htmlP .= '<td>' . $inter->displayData("total_ht") . '</td>';
+                    $htmlP .= '<td>' . $inter->displayData("fk_statut") . '</td>';
+                    $htmlP .= '</tr>';
+                }
             }
+            else
+                $htmlP .= BimpRender::renderAlerts('Probléme avec les DI');
 
             $sql = $db->query("SELECT rowid FROM `llx_synopsis_fichinter` WHERE `fk_commande` = " . $this->id);
-            while ($ln = $db->fetch_object($sql)) {
-                $inter = BimpCache::getBimpObjectInstance("bimpfichinter", 'Bimp_Fichinter', $ln->rowid);
-                $icon = $inter->params['icon'];
-                $htmlP .= '<tr>';
-                $htmlP .= '<td><strong>' . BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($inter->getLabel()) . '</strong></td>';
-                $htmlP .= '<td>' . $inter->getNomUrl(0) . '</td>';
-                $htmlP .= '<td>' . $inter->displayData("date_valid") . '</td>';
-                $htmlP .= '<td>' . $inter->displayData("total_ht") . '</td>';
-                $htmlP .= '<td>' . $inter->displayData("fk_statut") . '</td>';
-                $htmlP .= '</tr>';
+            if($sql){
+                while ($ln = $db->fetch_object($sql)) {
+                    $inter = BimpCache::getBimpObjectInstance("bimpfichinter", 'Bimp_Fichinter', $ln->rowid);
+                    $icon = $inter->params['icon'];
+                    $htmlP .= '<tr>';
+                    $htmlP .= '<td><strong>' . BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($inter->getLabel()) . '</strong></td>';
+                    $htmlP .= '<td>' . $inter->getNomUrl(0) . '</td>';
+                    $htmlP .= '<td>' . $inter->displayData("date_valid") . '</td>';
+                    $htmlP .= '<td>' . $inter->displayData("total_ht") . '</td>';
+                    $htmlP .= '<td>' . $inter->displayData("fk_statut") . '</td>';
+                    $htmlP .= '</tr>';
+                }
             }
+            else
+                $htmlP .= BimpRender::renderAlerts('Probléme avec les FI');
         }
 
         $html = parent::renderLinkedObjectsTable($htmlP);

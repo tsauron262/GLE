@@ -289,7 +289,7 @@ class BContract_contrat extends BimpDolObject {
                 'onclick' => $this->getJsActionOnclick('updateSyntec', array(), array())
             );
             
-            if($status == self::CONTRAT_STATUS_VALIDE) {
+            //if($status == self::CONTRAT_STATUS_VALIDE) {
                 $buttons[] = array(
                 'label'   => 'Générer le PDF du contrat',
                 'icon'    => 'fas_sync',
@@ -300,7 +300,7 @@ class BContract_contrat extends BimpDolObject {
                 'icon'    => 'fas_sync',
                 'onclick' => $this->getJsActionOnclick('generatePdfCourrier', array(), array())
             );
-            }
+            //}
             
             $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}';
             if ($this->getData('statut') == self::CONTRAT_STATUS_BROUILLON) {

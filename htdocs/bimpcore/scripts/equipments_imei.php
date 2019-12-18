@@ -12,7 +12,7 @@ echo '<body>';
 
 BimpCore::displayHeaderFiles();
 
-//session_destroy();
+session_destroy();
 set_time_limit(3600); // 1h
 ignore_user_abort(0);
 
@@ -51,7 +51,6 @@ foreach ($rows as $r) {
 
     $imei = $ids['imei'];
     $serial = $ids['serial'];
-
 
     if (!$imei) {
         $imei = 'n/a';

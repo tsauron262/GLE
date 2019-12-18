@@ -5,9 +5,9 @@ class BTC_export extends BimpObject {
     private $sql_limit = 1; // Nombre de résultats dans la requete SQL: null = unlimited
     private $date_export = null;
     public $file;
-    //private $export_directory = "/data/synchro/bimp/"; // Dossier d'écriture des fichiers
-    private $export_directory = '/usr/local/data2/test_alexis/synchro/'; // Chemin DATAs version de test alexis 
-    private $project_directory = 'exportCegid';
+    //public $export_directory = "/data/synchro/bimp/"; // Dossier d'écriture des fichiers
+    //public $export_directory = '/usr/local/data2/test_alexis/synchro/'; // Chemin DATAs version de test alexis 
+    private $project_directory = 'exportCegid/';
     private $imported_log = '/data/synchro/bimp/exportCegid/imported.log';
     private $directory_logs_file = '/data2/exportCegid/export.log';
     public $type_ecriture = "S"; // S: Simulation, N: Normal
@@ -37,37 +37,66 @@ class BTC_export extends BimpObject {
      */
     
     public function exportFromIndex($date, $ref, $all, $element) {
-        echo $element;
+        if(!is_null($date)) {
+            $this->export($element, 'interface', ['date' => $date]);
+        } elseif(!is_null($ref)) {
+            $this->export($element, 'interface', ['ref' => $ref]);
+        } elseif($all) {
+            echo 'all';
+        } else {
+            return BimpRender::renderAlerts('Une erreur inatendu c\'est produite', 'danger', false);
+        }
     }
     
-    public function export($element, $origin) {
-        
-        if($origin == 'cronJob') {
-            
-            if(isset($_REQUEST['date']) && !empty($_REQUEST['date'])) {
-                $this->date_export = $_REQUEST['date'];
-                $this->current_date_by_get = $_REQUEST['date'];
-            } else {
-                $this->date_export = $this->getStartTrimestreComptable();
+    public function export($element, $origin, $data = []) {
+        print_r($data);
+        if($origin = 'interface') {
+            $function_name = 'export_' . $element;
+            $this->sql_limit = null;
+            $since = false;
+            if(array_key_exists('date', $data)) {
+                $this->date_export = $data['date'];
+            } elseif(array_key_exists('since', $data)) {
                 $since = true;
             }
-            if(isset($_REQUEST['sql_limit'])){
-                $this->sql_limit = $_REQUEST['sql_limit'];
-            }
-            $function_name = 'export_' . $element;
             
-            if(isset($_REQUEST['ref']) && !empty($_REQUEST['ref'])) {
-                $this->current_ref_by_get = $_REQUEST['ref'];
-                $this->$function_name($_REQUEST['ref']);
+            if(array_key_exists('ref', $data)) {
+                return $this->$function_name($data['ref'], $since, $data['ref'], 'BY_REF');
             } else {
-                $this->$function_name(null, $since);
+                return $this->$function_name(null, $since, $this->date_export, 'BY_DATE');
             }
             
-        } elseif($origin == 'web') {
-            echo BimpRender::renderAlerts("Vous ne pouvez pas exporter d'écriture directement depuis cette page", 'danger', false);
+            
+            
         } else {
-            echo BimpRender::renderAlerts("L'origine <b>".$origin."</b> n'existe pas", 'danger', false);
+            if($origin == 'cronJob') {
+            
+                if(isset($_REQUEST['date']) && !empty($_REQUEST['date'])) {
+                    $this->date_export = $_REQUEST['date'];
+                } else {
+                    $this->date_export = $this->getStartTrimestreComptable();
+                    $since = true;
+                }
+                if(isset($_REQUEST['sql_limit'])){
+                    $this->sql_limit = $_REQUEST['sql_limit'];
+                }
+                $function_name = 'export_' . $element;
+
+                if(isset($_REQUEST['ref']) && !empty($_REQUEST['ref'])) {
+                    $this->$function_name($_REQUEST['ref']);
+                } else {
+                    $this->$function_name(null, $since);
+                }
+
+            } elseif($origin == 'web') {
+                echo BimpRender::renderAlerts("Vous ne pouvez pas exporter d'écriture directement depuis cette page", 'danger', false);
+            } else {
+                echo BimpRender::renderAlerts("L'origine <b>".$origin."</b> n'existe pas", 'danger', false);
+            }
         }
+        
+        
+        
     }
     
     /**
@@ -76,22 +105,27 @@ class BTC_export extends BimpObject {
      * @return string
      */
     
-    protected function create_daily_file($element = null, $date = null) {
+    protected function create_daily_file($element = null, $date = null, $complementFileName = '', $complementDirectory = '') {
         
         $daily_files = [];
-        if(isset($_REQUEST['date']) && !empty($_REQUEST['date']) || !is_null($date)) {
-            $complementFileName = isset($_REQUEST['date']) ? $_REQUEST['date'] : $date;
-            $complementDirectory = 'BY_DATE';
-        }elseif(isset($_REQUEST['ref']) && !empty($_REQUEST['ref'])) {
-            $complementFileName = $_REQUEST['ref'];
-            $complementDirectory = 'BY_REF';
-        } else {
-            $complementFileName = date("Y-m-d");
-            $complementDirectory = 'BY_DATE';
+        
+        if(empty($complementDirectory) && empty($complementFileName)) {
+            if(isset($_REQUEST['date']) && !empty($_REQUEST['date']) || !is_null($date)) {
+                $complementFileName = isset($_REQUEST['date']) ? $_REQUEST['date'] : $date;
+                $complementDirectory = 'BY_DATE';
+            }elseif(isset($_REQUEST['ref']) && !empty($_REQUEST['ref'])) {
+                $complementFileName = $_REQUEST['ref'];
+                $complementDirectory = 'BY_REF';
+            } else {
+                $complementFileName = date("Y-m-d");
+                $complementDirectory = 'BY_DATE';
+            }
         }
         
-        $export_dir = $this->export_directory . $this->project_directory . '/' . $complementDirectory . '/';
-        $export_project_dir = $this->export_directory . $this->project_directory . '/';
+        
+        
+        $export_dir = DIR_SYNCH . $this->project_directory . '/' . $complementDirectory . '/';
+        $export_project_dir = DIR_SYNCH . $this->project_directory . '/';
         
         switch($element) {
             case 'vente':
@@ -112,15 +146,13 @@ class BTC_export extends BimpObject {
             mkdir($export_project_dir, 0777, true);
             mkdir($export_project_dir . "imported/", 0777, true);
             mkdir($export_dir, 0777, true);
-            mkdir($export_dir_month, 0777, true);
-            mkdir($export_dir_month . 'imported/', 0777, true);
         }
         
         shell_exec("chmod -R 777 " . $export_dir);
         
                 
-        if(!file_exists($export_dir_month . $file)) {
-            $create_file = fopen($export_dir_month . $file, 'a+');
+        if(!file_exists($export_dir . $file)) {
+            $create_file = fopen($export_dir . $file, 'a+');
             fwrite($create_file, $this->head_tra());
             fclose($create_file);
         }
@@ -157,13 +189,13 @@ class BTC_export extends BimpObject {
      * @param type $ref
      */
     
-    private function export_paiement($ref = null, $since) {
+    private function export_paiement($ref = null, $since = false, $name = '', $dir = '') {
         $liste = $this->get_paiements_for_export($ref, $since);
         $forced = (is_null($ref)) ? false : true;
         if(count($liste)) {
             $instance = $this->getInstance('bimptocegid', 'BTC_export_paiement');
             foreach ($liste as $paiement) {
-                if($instance->export($paiement->rowid, $paiement->fk_paiement, $forced)) {
+                if($instance->export($paiement->rowid, $paiement->fk_paiement, $forced, ['name' => $name, 'dir' => $dir])) {
                     $pay = $this->getInstance('bimpcommercial', 'Bimp_Paiement', $paiement->rowid);
                     $this->log('PAIEMENT CLIENT', $pay->getData('ref'), 'FICHIER DE PAIEMENT');
                     $pay->updateField('exported', 1);
@@ -394,7 +426,7 @@ class BTC_export extends BimpObject {
 
 
     protected function write_logs($log) {
-        $opened_file = fopen($this->directory_logs_file, 'a+');
+        $opened_file = fopen(DIR_SYNCH . $this->project_directory, 'a+');
         fwrite($opened_file, $log);
         fclose($opened_file);
     }
@@ -446,6 +478,12 @@ class BTC_export extends BimpObject {
         $mail.= "<br /><br />";
         $mail.= $send_user->getData('signature');
         echo $mail;
+        
+    }
+    
+    public function actionDl($data, &$success) {
+        
+        
         
     }
     

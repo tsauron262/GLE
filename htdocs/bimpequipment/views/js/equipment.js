@@ -1,7 +1,9 @@
 var equipment_url = dol_url_root + '/bimpequipment/index.php';
 
 function onEquipmentFormLoaded($form) {
+    $form.find('[name="serial"]').removeClass('disabled');
     $form.find('[name="product_label"]').removeClass('disabled');
+    $form.find('[name="imei"]').removeClass('disabled');
     $form.find('[name="date_purchase_picker"]').removeClass('disabled');
     $form.find('[name="date_warranty_end_picker"]').removeClass('disabled');
     $form.find('[name="warranty_type"]').removeClass('disabled');
@@ -13,6 +15,8 @@ function onEquipmentFormLoaded($form) {
             var serial = $(this).val();
             if (serial) {
                 $form.find('[name="product_label"]').addClass('disabled');
+                $form.find('[name="serial"]').addClass('disabled');
+                $form.find('[name="imei"]').addClass('disabled');
                 $form.find('[name="date_purchase_picker"]').addClass('disabled');
                 $form.find('[name="date_warranty_end_picker"]').addClass('disabled');
                 $form.find('[name="warranty_type"]').addClass('disabled');
@@ -24,12 +28,20 @@ function onEquipmentFormLoaded($form) {
                     processing_msg: 'Chargement des données GSX en cours',
                     success: function (result, bimpAjax) {
                         $form.find('[name="product_label"]').removeClass('disabled');
+                        $form.find('[name="serial"]').removeClass('disabled');
+                        $form.find('[name="imei"]').removeClass('disabled');
                         $form.find('[name="date_purchase_picker"]').removeClass('disabled');
                         $form.find('[name="date_warranty_end_picker"]').removeClass('disabled');
                         $form.find('[name="warranty_type"]').removeClass('disabled');
 
                         if (typeof (result.data.product_label) === 'string' && result.data.product_label) {
                             bimpAjax.$form.find('[name="product_label"]').val(result.data.product_label).change();
+                        }
+                        if (typeof (result.data.serial) === 'string' && result.data.serial) {
+                            bimpAjax.$form.find('[name="serial"]').val(result.data.serial);
+                        }
+                        if (typeof (result.data.imei) === 'string' && result.data.imei) {
+                            bimpAjax.$form.find('[name="imei"]').val(result.data.imei).change();
                         }
                         if (typeof (result.data.date_purchase) === 'string' && result.data.date_purchase) {
                             bimpAjax.$form.find('[name="date_purchase_picker"]').data("DateTimePicker").date(moment(result.data.date_purchase));
@@ -48,6 +60,8 @@ function onEquipmentFormLoaded($form) {
                     },
                     error: function (result, bimpAjax) {
                         $form.find('[name="product_label"]').removeClass('disabled');
+                        $form.find('[name="serial"]').removeClass('disabled');
+                        $form.find('[name="imei"]').removeClass('disabled');
                         $form.find('[name="date_purchase_picker"]').removeClass('disabled');
                         $form.find('[name="date_warranty_end_picker"]').removeClass('disabled');
                         $form.find('[name="warranty_type"]').removeClass('disabled');

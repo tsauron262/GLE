@@ -2,7 +2,7 @@
 
 class GSX_Const
 {
-
+    
     // Toutes les données en dur pour GSX V2 sont à mettre ici: 
     public static $mode = 'prod'; // test ou prod
     public static $debug_mode = false;

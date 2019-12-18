@@ -161,7 +161,7 @@ class Bimp_CommandeLine extends ObjectLine
                 $onclick .= $commande->id . ', ' . (int) $id_client_facture . ', ';
                 $onclick .= (($id_client_facture === (int) $commande->getData('fk_soc')) ? (int) $commande->dol_object->contactid : 0) . ', ';
                 $onclick .= (int) $commande->getData('fk_cond_reglement') . ',';
-                $onclick .= '\'' . $commande->getData('note_public') . '\', \'' . $commande->getData('note_private') . '\');';
+                $onclick .= '\'' . htmlentities($commande->getData('note_public')) . '\', \'' . htmlentities($commande->getData('note_private')) . '\');';
 
                 $actions[] = array(
                     'label'   => 'Quantités facture',

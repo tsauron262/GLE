@@ -115,15 +115,16 @@ class BContract_contrat extends BimpDolObject {
     
     function __construct($module, $object_name) {
         global $user;
+        $this->redirectMode = 1;
 //        if(BimpTools::getContext() == 'public') {
-        if(BimpTools::getContext() == 'private'){
-            $this->redirectMode = 1;
-        } elseif(BimpTools::getContext() == 'public') {
-            $this->redirectMode = 4;
-        }
-        
-        if($user->id == 19)
-            $this->redirectMode = 4;
+//        if(BimpTools::getContext() == 'private'){
+//            $this->redirectMode = 1;
+//        } elseif(BimpTools::getContext() == 'public') {
+//            $this->redirectMode = 4;
+//        }
+//        
+//        if($user->id == 19)
+//            $this->redirectMode = 4;
             
 //        }
 //        if($user->id == 460 || $user->id == 512 || $user->admin) {

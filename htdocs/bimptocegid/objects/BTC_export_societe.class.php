@@ -4,8 +4,9 @@ class BTC_export_societe extends BTC_export {
     
     const EXPORTED = 1;
     
-    public function export(Bimp_Societe $client, $want = 'c') {
-        $file = $this->create_daily_file("tier");
+    public function export(Bimp_Societe $client, $want = 'c', $date_element) {
+        
+        $file = $this->create_daily_file("tier", $date_element);
         $is_subsidiary = ($client->getData('is_subsidiary') ? true : false);
         $is_salarie = ($client->getData('is_salarie') ? true : false);
         $is_particulier = false;

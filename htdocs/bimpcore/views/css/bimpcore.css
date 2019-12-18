@@ -16811,3 +16811,11 @@ td.buttons {
   .objectFieldsTable > tfoot > tr > th,
   .objectFieldsTable > tfoot > tr > td {
     font-size: 8px !important; } }
+
+
+
+/*menu plus a droite */
+
+.login_block{
+    margin-right: 20px;
+}

@@ -163,7 +163,7 @@ fields:
         dol_extra_field: 1
         default_value: 3
         values:
-            array: mode_reglement
+            array: modeReglements
 
     objet_contrat:
         label: Objet du contrat

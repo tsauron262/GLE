@@ -5,9 +5,9 @@ class BTC_export extends BimpObject {
     private $sql_limit = 1; // Nombre de résultats dans la requete SQL: null = unlimited
     private $date_export = null;
     public $file;
-    private $export_directory = "/data/synchro/bimp/"; // Dossier d'écriture des fichiers
-    //private $export_directory = '/usr/local/data2/test_alexis/synchro/'; // Chemin DATAs version de test alexis 
-    private $project_directory = 'exportCegid';
+    //public $export_directory = "/data/synchro/bimp/"; // Dossier d'écriture des fichiers
+    //public $export_directory = '/usr/local/data2/test_alexis/synchro/'; // Chemin DATAs version de test alexis 
+    private $project_directory = 'exportCegid/';
     private $imported_log = '/data/synchro/bimp/exportCegid/imported.log';
     private $directory_logs_file = '/data2/exportCegid/export.log';
     public $type_ecriture = "S"; // S: Simulation, N: Normal
@@ -124,8 +124,8 @@ class BTC_export extends BimpObject {
         
         
         
-        $export_dir = $this->export_directory . $this->project_directory . '/' . $complementDirectory . '/';
-        $export_project_dir = $this->export_directory . $this->project_directory . '/';
+        $export_dir = DIR_SYNCH . $this->project_directory . '/' . $complementDirectory . '/';
+        $export_project_dir = DIR_SYNCH . $this->project_directory . '/';
         
         switch($element) {
             case 'vente':
@@ -146,15 +146,13 @@ class BTC_export extends BimpObject {
             mkdir($export_project_dir, 0777, true);
             mkdir($export_project_dir . "imported/", 0777, true);
             mkdir($export_dir, 0777, true);
-            mkdir($export_dir_month, 0777, true);
-            mkdir($export_dir_month . 'imported/', 0777, true);
         }
         
         shell_exec("chmod -R 777 " . $export_dir);
         
                 
-        if(!file_exists($export_dir_month . $file)) {
-            $create_file = fopen($export_dir_month . $file, 'a+');
+        if(!file_exists($export_dir . $file)) {
+            $create_file = fopen($export_dir . $file, 'a+');
             fwrite($create_file, $this->head_tra());
             fclose($create_file);
         }
@@ -428,7 +426,7 @@ class BTC_export extends BimpObject {
 
 
     protected function write_logs($log) {
-        $opened_file = fopen($this->directory_logs_file, 'a+');
+        $opened_file = fopen(DIR_SYNCH . $this->project_directory, 'a+');
         fwrite($opened_file, $log);
         fclose($opened_file);
     }
@@ -480,6 +478,12 @@ class BTC_export extends BimpObject {
         $mail.= "<br /><br />";
         $mail.= $send_user->getData('signature');
         echo $mail;
+        
+    }
+    
+    public function actionDl($data, &$success) {
+        
+        
         
     }
     

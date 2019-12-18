@@ -7,11 +7,9 @@
             $export = BimpObject::getInstance('bimptocegid', 'BTC_export');
 
             $html = '<h3><b>BIMP</b><b class="warning" >to</b><b>CEGID</b></h3>';
-            
             $html .= "<b>Date de début de l'export: </b>" . $export->getStartTrimestreComptable() . ' (Début du trimestre) <br :>';
             if(isset($_POST['date']) || isset($_POST['ref']) || isset($_POST['since']) ) {
                 $erreur = "";
-
                 if(!isset($_REQUEST['element']) && empty($_REQUEST['element'])) {
                     $erreur = 'Aucun élément choisi';
                 } elseif(isset($_POST['date']) && empty($_POST['date'])) {
@@ -71,7 +69,7 @@
             }
             $html .= "<form method='POST' action='".DOL_URL_ROOT."/bimptocegid/".$add."'><input type='date' name='date' ><input type='submit' class='btn btn-primary' value='Exporter' onclick=''></form>";
             $html .= "<form method='POST' action='".DOL_URL_ROOT."/bimptocegid/".$add."'><input placeholder='Référence' type='text' name='ref' ><input type='submit' class='btn btn-primary' value='Exporter' onclick=''></form>";
-            $html .= "<form method='POST' action='".DOL_URL_ROOT."/bimptocegid/".$add."'><input placeholder='Depuis le ".$export->getStartTrimestreComptable()."' type='text' name='since' disabled><input type='submit' class='btn btn-primary' value='Exporter' onclick=''></form>";
+            $html .= "<form method='POST' action='".DOL_URL_ROOT."/bimptocegid/".$add."'><input placeholder='Depuis le ".$export->getStartTrimestreComptable()."' type='text' disabled><input type='submit' class='btn btn-primary' value='Exporter' onclick='' name='since'></form>";
 
             return $html;
             

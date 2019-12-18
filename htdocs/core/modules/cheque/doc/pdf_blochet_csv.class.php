@@ -28,7 +28,7 @@ require_once DOL_DOCUMENT_ROOT.'/core/lib/pdf.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/company.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/modules/cheque/modules_chequereceipts.php';
 
-
+require_once(DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php');
 /**
  *	Class of file to build cheque deposit receipts
  */
@@ -117,8 +117,11 @@ class BordereauChequeBlochet_csv extends ModeleChequeReceipts
 		$num=count($this->lines);
                 $this->out .= $this->addCell('Facture');
                 $this->out .= $this->addCell('Code Client');
+                $this->out .= $this->addCell('Code Compta');
                 $this->out .= $this->addCell('Libelle Client');
+                $this->out .= $this->addCell('Total Facture');
                 $this->out .= $this->addCell('Montant Pai Fact');
+                $this->out .= $this->addCell('Restant Pai Fact');
                 $this->out .= $this->addCell('Emeteur');
                 $this->out .= $this->addCell('Banque');
                 $this->out .= $this->addCell('Montant Cheque');
@@ -126,14 +129,19 @@ class BordereauChequeBlochet_csv extends ModeleChequeReceipts
 
                 $this->out .= $this->sautLigne;
 
-                $sql = $this->db->query("SELECT *, pf.amount as paifact, b.amount as paitot FROM `llx_paiement` p, llx_bank b, llx_paiement_facture pf, llx_facture f, llx_societe s WHERE s.rowid = f.fk_soc AND f.rowid = fk_facture AND p.`fk_bank` = b.rowid AND`fk_bordereau` = ".$this->object->id." AND pf.`fk_paiement` = p.rowid ORDER by fk_bank");
+                $sql = $this->db->query("SELECT *, pf.amount as paifact, b.amount as paitot, f.rowid as facid FROM `llx_paiement` p, llx_bank b, llx_paiement_facture pf, llx_facture f, llx_societe s WHERE s.rowid = f.fk_soc AND f.rowid = fk_facture AND p.`fk_bank` = b.rowid AND`fk_bordereau` = ".$this->object->id." AND pf.`fk_paiement` = p.rowid ORDER by fk_bank");
                     
                 $memoireIdBank = $total = $i = 0;   
 		while($ln = $this->db->fetch_object($sql))
 		{
+                    $facObject = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $ln->facid);
+                    $restant = $facObject->getRemainToPay(true);
+                    $facture = $facObject->getData('facnumber');
+                    $totFact = $facObject->getData('total_ttc');
                     
-                    $facture = $ln->facnumber;
+                    
                     $codeCli = $ln->code_client;
+                    $codeCompta = $ln->code_compta;
                     $libCli = $ln->nom;
                     $paifact = $ln->paifact;
                     
@@ -156,8 +164,11 @@ class BordereauChequeBlochet_csv extends ModeleChequeReceipts
                     
                     $this->out .= $this->addCell($facture);
                     $this->out .= $this->addCell($codeCli);
+                    $this->out .= $this->addCell($codeCompta);
                     $this->out .= $this->addCell($libCli);
-                    $this->out .= $this->addCell(price($paifact));
+                    $this->out .= $this->addCell(round($totFact,2));
+                    $this->out .= $this->addCell(round($paifact,2));
+                    $this->out .= $this->addCell(round ($restant,2));
                     $this->out .= $this->addCell($emeteur);
                     $this->out .= $this->addCell($banque);
                     $this->out .= $this->addCell(price($montant));
@@ -174,11 +185,14 @@ class BordereauChequeBlochet_csv extends ModeleChequeReceipts
             $this->out .= $this->addCell('');
             $this->out .= $this->addCell('');
             $this->out .= $this->addCell('');
+            $this->out .= $this->addCell('');
+            $this->out .= $this->addCell('');
+            $this->out .= $this->addCell('');
             $this->out .= $this->addCell(price($total));
             $this->out .= $this->addCell('', 'last');
 	}
         
-        public function addCell($text, $option){
+        public function addCell($text, $option = ''){
             $return = $this->protec.$text.$this->protec;
             if($option != 'last')
                 $return .= $this->sep;

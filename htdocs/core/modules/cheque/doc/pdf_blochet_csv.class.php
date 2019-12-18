@@ -166,9 +166,9 @@ class BordereauChequeBlochet_csv extends ModeleChequeReceipts
                     $this->out .= $this->addCell($codeCli);
                     $this->out .= $this->addCell($codeCompta);
                     $this->out .= $this->addCell($libCli);
-                    $this->out .= $this->addCell(toPriceCsv($totFact));
-                    $this->out .= $this->addCell(toPriceCsv($paifact));
-                    $this->out .= $this->addCell(toPriceCsv ($restant));
+                    $this->out .= $this->addCell($this->toPriceCsv($totFact));
+                    $this->out .= $this->addCell($this->toPriceCsv($paifact));
+                    $this->out .= $this->addCell($this->toPriceCsv ($restant));
                     $this->out .= $this->addCell($emeteur);
                     $this->out .= $this->addCell($banque);
                     $this->out .= $this->addCell(price($montant));

@@ -3,6 +3,7 @@ bootstrap: 1
 
 js:
     - /bimpequipment/views/js/equipment.js
+    - /bimpapple/views/js/gsx.js
     
 objects: 
     equipment:

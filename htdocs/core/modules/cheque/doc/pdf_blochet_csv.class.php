@@ -166,9 +166,9 @@ class BordereauChequeBlochet_csv extends ModeleChequeReceipts
                     $this->out .= $this->addCell($codeCli);
                     $this->out .= $this->addCell($codeCompta);
                     $this->out .= $this->addCell($libCli);
-                    $this->out .= $this->addCell(round($totFact,2));
-                    $this->out .= $this->addCell(round($paifact,2));
-                    $this->out .= $this->addCell(round ($restant,2));
+                    $this->out .= $this->addCell(toPriceCsv($totFact));
+                    $this->out .= $this->addCell(toPriceCsv($paifact));
+                    $this->out .= $this->addCell(toPriceCsv ($restant));
                     $this->out .= $this->addCell($emeteur);
                     $this->out .= $this->addCell($banque);
                     $this->out .= $this->addCell(price($montant));
@@ -197,6 +197,11 @@ class BordereauChequeBlochet_csv extends ModeleChequeReceipts
             if($option != 'last')
                 $return .= $this->sep;
             return $return;
+        }
+        
+        
+        public function toPriceCsv($number){
+            return str_replace(".", ",", round($number,2));
         }
 
 }

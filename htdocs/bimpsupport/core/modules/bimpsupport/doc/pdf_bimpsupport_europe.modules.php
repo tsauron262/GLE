@@ -257,7 +257,7 @@ class pdf_bimpsupport_europe extends ModeleBimpSupport {
                 
                 $pdf->SetXY('30', '200.6');
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 9);
-                $pdf->MultiCell(300, 6, str_replace("\n", " ","chdisuchdsuichudsicdhsui" . $sav->getData("diagnostic")), 0, 'L');
+                $pdf->MultiCell(300, 6, str_replace("\n", " ", $sav->getData("diagnostic")), 0, 'L');
                 $pdf->SetXY('94', '170.4');
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 9);
                 $pdf->MultiCell(300, 6, str_replace("\n", " ", $sav->getData("date_create")), 0, 'L');

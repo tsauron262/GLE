@@ -45,7 +45,7 @@ class pdf_bimpsupport_irreparable extends BimpDocumentPDF
         parent::initHeader();
         
         
-        $this->header_vars['doc_name'] = 'mmm';
+        $this->header_vars['doc_name'] = 'ATTESTATION DE NON-REPARABILITE';
     }
     
     public function renderBottom(){

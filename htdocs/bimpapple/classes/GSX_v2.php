@@ -594,7 +594,6 @@ class GSX_v2 extends GSX_Const
         if(stripos($serial, 'S') === 0){
             return substr($serial,1);
         }
-        die('nnn');
         return $serial;
     }
 

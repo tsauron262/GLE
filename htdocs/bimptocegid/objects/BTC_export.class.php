@@ -8,8 +8,8 @@ class BTC_export extends BimpObject {
     //public $export_directory = "/data/synchro/bimp/"; // Dossier d'écriture des fichiers
     //public $export_directory = '/usr/local/data2/test_alexis/synchro/'; // Chemin DATAs version de test alexis 
     private $project_directory = 'exportCegid/';
-    private $imported_log = '/data/synchro/bimp/exportCegid/imported.log';
-    private $directory_logs_file = '/data2/exportCegid/export.log';
+    //private $imported_log = '/data/synchro/bimp/exportCegid/imported.log';
+    //private $directory_logs_file = '/data2/exportCegid/export.log';
     public $type_ecriture = "S"; // S: Simulation, N: Normal
     
     public static $trimestres = [
@@ -25,7 +25,7 @@ class BTC_export extends BimpObject {
                 $start_trimestre = date('Y') . '-' . $dates[0] . '-01';
             }
         }
-        return "2019-07-01";
+        //return "2019-07-01";
         return $start_trimestre;
     }
     
@@ -42,7 +42,7 @@ class BTC_export extends BimpObject {
         } elseif(!is_null($ref)) {
             $this->export($element, 'interface', ['ref' => $ref]);
         } elseif($all) {
-            echo 'all';
+            $this->export($element, 'interface', ['since' => true]);
         } else {
             return BimpRender::renderAlerts('Une erreur inatendu c\'est produite', 'danger', false);
         }
@@ -406,7 +406,6 @@ class BTC_export extends BimpObject {
     }
     
     protected function write_tra($ecriture, $file) {
-        echo $file;
         $opened_file = fopen($file, 'a+');
         if(fwrite($opened_file, $ecriture)) {
             return true;
@@ -416,9 +415,6 @@ class BTC_export extends BimpObject {
     }
     
     protected function log($element, $ref, $file) {
-        if(!file_exists('/data2/exportCegid/export.log')) {
-            mkdir('/data2/exportCegid/', 0777, true);
-        }
         $log = date('d/m/Y') . '::' . $element . ' : Ref : ' . $ref . " à été ecrit dans le fichier " . $file . "\n";
         $this->write_logs($log);
     }
@@ -453,7 +449,6 @@ class BTC_export extends BimpObject {
         foreach($lignes_facture as $compte_comptable => $infos) {
             $compte_general = substr($compte_comptable, 0, 3);
             if(in_array($compte_general, $comptes_reatribuable[$type_ecriture]) && !$reactribution_faite) {
-                echo $ecart;
                 $lignes_facture[$compte_comptable]['HT'] += $ecart;
                 $reactribution_faite = true;
             }           
@@ -481,8 +476,15 @@ class BTC_export extends BimpObject {
         $mail.= "Cause : " . $cause;
         $mail.= "<br /><br />";
         $mail.= $send_user->getData('signature');
-        echo $mail;
         
+    }
+    
+    public function actionDeleteTra($data, &$success) {
+        global $user;
+        $fromFolder = DIR_SYNCH . $this->project_directory . $data['folder'];
+        if(unlink($fromFolder . $data['nom'])) {
+            $this->write_logs("***SUPPRESSION*** " . date('d/m/Y H:i:s') . " => USER : " . $user->login . " => TRA:  " . $data['nom'] . "\n", true);
+        }
     }
     
     public function actionImported($data, &$success) {
@@ -494,7 +496,7 @@ class BTC_export extends BimpObject {
         //return $destFolder . $data['nom'];
         //return $fromFolder . $data['nom'] . ' TO ' . $destFolder . $data['nom'] . '.' . $user->login;
         if(copy($fromFolder . $data['nom'], $destFolder . $data['nom'] . '.' . $user->login)) {
-            $this->write_logs(date('d/m/Y H:i:s') . " - " . $user->login . " - fichier " . $data['nom'] . " - Déplacer dans le dossier imported" . "\n", true);
+            $this->write_logs("***IMPORTATION*** " . date('d/m/Y H:i:s') . " => USER : " . $user->login . " => TRA:  " . $data['nom'] . "\n", true);
             unlink($fromFolder . $data['nom']);
             $success = "Le fichier " . $data['nom'] . " à été déplacé avec succès";
         } else {

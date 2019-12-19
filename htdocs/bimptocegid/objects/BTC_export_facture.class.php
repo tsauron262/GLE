@@ -6,7 +6,7 @@ class BTC_export_facture extends BTC_export {
         
         $facture = $this->getInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
         
-        if(array_key_exists('name', $confFile) && array_key_exists('dir', $confFile)) { // VERIFIER SI SE N4EST PAS VIDE
+        if(!empty($confFile['name']) && !empty($confFile['dir'])) {
             $file =$this->create_daily_file('vente', null, $confFile['name'], $confFile['dir']);
         } else {
             $file =$this->create_daily_file('vente', $facture->getData('datef'));

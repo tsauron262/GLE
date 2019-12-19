@@ -948,7 +948,7 @@ class BContract_contrat extends BimpDolObject {
     
     public function getTotalContrat() {
         foreach ($this->dol_object->lines as $line){
-            if($line->total_ttc > 0){
+            if($line->total_ttc > 0 && $line->qty > 0){
                 $montant += $line->total_ht;
             }
         }

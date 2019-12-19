@@ -47,7 +47,7 @@ class BContract_contrat extends BimpDolObject {
     
     CONST CONTRAT_GLOBAL = "CT";
     CONST CONTRAT_DE_MAINTENANCE = 'CMA';
-    CONST CONTRAT_SUPPORT_TELEPHONIQUE = 'CST'; // Gommer partous le mot hotline (support) et téléphonique par télémaintenance / Téléassitance 
+    CONST CONTRAT_SUPPORT_TELEPHONIQUE = 'CST';
     CONST CONTRAT_MONITORING = 'CMO'; 
     CONST CONTRAT_DE_SPARE = 'CSP';
     CONST CONTRAT_DE_DELEGATION_DE_PERSONEL = 'CDP';
@@ -118,11 +118,7 @@ class BContract_contrat extends BimpDolObject {
     function __construct($module, $object_name) {
         global $user, $db;
         $this->redirectMode = 1;
-        
-//        if(!$this->field_exists('gti')) {
-//            $extrafields = new ExtraFields($db);
-//            $extrafields->addExtraField('gti', 'Délais d\'intervention', 'select', 39, 30, 'contrat', 0, 0, "", array( 'options' => array(2 => '2h ouvrées',4 => '4h ouvrées',8 => '8h ouvrées',16 => '16h ouvrées')), 1, "", 1, 1, "", "", "", 1);
-//        }
+
         
 //        if(BimpTools::getContext() == 'public') {
 //        if(BimpTools::getContext() == 'private'){

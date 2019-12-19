@@ -2,10 +2,17 @@
 
 class BTC_export_facture extends BTC_export {
     
-    public function export($id_facture, $forced) {
+    public function export($id_facture, $forced, $confFile) {
         
         $facture = $this->getInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
-        $file = $this->create_daily_file('vente', $facture->getData('datef'));
+        
+        if(array_key_exists('name', $confFile) && array_key_exists('dir', $confFile)) { // VERIFIER SI SE N4EST PAS VIDE
+            $file =$this->create_daily_file('vente', null, $confFile['name'], $confFile['dir']);
+        } else {
+            $file =$this->create_daily_file('vente', $facture->getData('datef'));
+        }
+        
+        //$file = $this->create_daily_file('vente', $facture->getData('datef'));
         if($contact = $this->db->getRow('element_contact', 'element_id = ' . $facture->getData('fk_soc') . ' AND fk_c_type_contact = 60')) {
             $id_client_facturation = $contact->fk_socpeople;
         } else {

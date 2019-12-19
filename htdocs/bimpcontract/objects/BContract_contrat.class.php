@@ -114,8 +114,14 @@ class BContract_contrat extends BimpDolObject {
     public static $dol_module = 'contract';
     
     function __construct($module, $object_name) {
-        global $user;
+        global $user, $db;
         $this->redirectMode = 1;
+        
+        if(!$this->field_exists('gti')) {
+            $extrafields = new ExtraFields($db);
+            $extrafields->addExtraField('gti', 'Délais d\'intervention', 'select', 39, 30, 'contrat', 0, 0, "", array( 'options' => array(2 => '2h ouvrées',4 => '4h ouvrées',8 => '8h ouvrées',16 => '16h ouvrées')), 1, "", 1, 1, "", "", "", 1);
+        }
+        
 //        if(BimpTools::getContext() == 'public') {
 //        if(BimpTools::getContext() == 'private'){
 //            $this->redirectMode = 1;

@@ -303,13 +303,7 @@ class BTC_export_facture extends BTC_export {
             $ecritures .= $this->struct($structure);
         }
         
-         if($this->write_tra($ecritures, $file)) {
-            $facture->updateField('exported', 1);
-            $this->log('FACTURE CLIENT', $facture->getData('facnumber'), $file);
-            return 1;
-        } else {
-            return 0;
-        }
+        return $this->write_tra($ecritures, $file);
         
     }
     

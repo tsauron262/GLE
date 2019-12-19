@@ -37,7 +37,6 @@
                     if(isset($_POST['since'])) { $all = true;}
                     
                     $export->exportFromIndex($date, $ref, $all, $_REQUEST['element']);
-                    
                 }
                 
             }
@@ -73,7 +72,7 @@
 
             $html .= '<br /><br /><br />';
             
-            $scanned_directory_by_date = array_diff(scandir(DIR_SYNCH . 'exportCegid/BY_DATE'), array('..', '.'));
+            $scanned_directory_by_date = array_diff(scandir(DIR_SYNCH . 'exportCegid/BY_DATE'), array('..', '.', 'imported'));
             
             $html .= '<h3>Liste des fichiers TRA par date</h3>';
             $html .= '<table class="bimp_list_table">';
@@ -88,11 +87,15 @@
             $html .= '</thead>';
 
             $html .= '<tbody>';
+            if($scanned_directory_by_date) {
             foreach ($scanned_directory_by_date as $file => $name) {
                 $html .= '<tr>';
  
                 $onclick = "window.open('".DOL_URL_ROOT."/bimptocegid/doc.php?folder=BY_DATE&nom=".$name."')";
-                
+                $onclick_imported = $export->getJsActionOnclick('imported', array('nom' => $name, 'folder' => "BY_DATE/"), array(
+                        'confirm_msg'      => "Cette action est irrévessible, voullez vous continuer ?",
+                        'success_callback' => 'function() {bimp_reloadPage();}'
+                ));
                     $html .= '<td><a class="btn btn-default" onclick = "'.$onclick.'">';
                     
                     
@@ -117,14 +120,21 @@
 
                     $html .= '<td class="buttons">';
 
-                    $html .= BimpRender::renderRowButton('Télécharger', 'download', $onclick);
-                    $html .= BimpRender::renderRowButton('Marquer comme importé dans Cégid', 'check', $onclick);
+                    $html .= BimpRender::renderRowButton('Marquer comme importé dans Cégid', 'check', $onclick_imported);
                     $html .= '</td>';
                     $html .= '</tr>';
             }
+            }
+            else {
+                $html .= '<tr>';
+                $html .= '<td colspan="4">';
+                $html .= BimpRender::renderAlerts('Aucun fichier TRA par date', 'info', false);
+                $html .= '</td>';
+                $html .= '</tr>';
+            }
             $html .= '</tbody></table>';
             
-            $scanned_directory_by_ref = array_diff(scandir(DIR_SYNCH . 'exportCegid/BY_REF'), array('..', '.'));
+            $scanned_directory_by_ref = array_diff(scandir(DIR_SYNCH . 'exportCegid/BY_REF'), array('..', '.', 'imported'));
             
             $html .= '<h3>Liste des fichiers TRA par REF</h3>';
             $html .= '<table class="bimp_list_table">';
@@ -140,12 +150,11 @@
 
             $html .= '<tbody>';
             if($scanned_directory_by_ref) {
-                foreach ($scanned_directory_by_date as $file => $name) {
+                foreach ($scanned_directory_by_ref as $file => $name) {
                 $html .= '<tr>';
- 
-                $onclick = $export->getJsActionOnclick('dl', array('nom' => $name, 'folder' => "BY_DATE/"), array(
-                        'confirm_msg'      => 'Veuillez confirmer le téléchargement de votre fichier',
-                    ));
+                $onclick = "window.open('".DOL_URL_ROOT."/bimptocegid/doc.php?folder=BY_DATE&nom=".$name."')";
+                
+                 
                 
                     $html .= '<td><a class="btn btn-default" onclick = "'.$onclick.'">';
                     
@@ -183,7 +192,7 @@
             } else {
                 $html .= '<tr>';
                 $html .= '<td colspan="4">';
-                $html .= BimpRender::renderAlerts('Aucun fichier', 'info', false);
+                $html .= BimpRender::renderAlerts('Aucun fichier TRA par ref', 'info', false);
                 $html .= '</td>';
                 $html .= '</tr>';
             }

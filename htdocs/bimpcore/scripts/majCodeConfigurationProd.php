@@ -58,10 +58,12 @@ class majCodeConfigurationnProd{
     }
     
     function updateCodeConfigProd($go){
-        $sql = $this->db->query("SELECT COUNT(*) as nbSerial, SUBSTRING(`serial`, LENGTH(`serial`)-3, 4) as fin, MIN(id) as minEquipment, MIN(id_product) as minProd, MAX(id_product) as maxProd, COUnT(DISTINCT(id_product)) as nbProd FROM `llx_be_equipment` "
+        $sql = $this->db->query("SELECT COUNT(*) as nbSerial, SUBSTRING(`serial`, LENGTH(`serial`)-3, 4) as fin, MIN(id) as minEquipment, MIN(id_product) as minProd, MAX(id_product) as maxProd, COUnT(DISTINCT(id_product)) as nbProd "
+                . "FROM `llx_be_equipment`, llx_product p "
                 . "WHERE ".$this->whereTaille." AND  id_product > 0 "
                 . "AND SUBSTRING(`serial`, LENGTH(`serial`)-3, 4) NOT IN (SELECT code_config FROM llx_product_extrafields WHERE code_config IS NOT NULL) "
-                . "AND id_product IN (SELECT rowid FROM llx_product WHERE ref LIKE 'APP-%') "
+                . "AND id_product =p.rowid AND ref LIKE 'APP-%' "
+                . "AND label  NOT LIKE '%(Demo)%' "
                 . "GROUP BY fin ORDER BY COUNT(*) DESC");
         while($ln = $this->db->fetch_object($sql)){
             if($ln->nbSerial > 30){

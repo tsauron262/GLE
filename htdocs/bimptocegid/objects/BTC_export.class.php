@@ -189,6 +189,7 @@ class BTC_export extends BimpObject {
      */
     
     private function export_paiement($ref = null, $since = false, $name = '', $dir = '') {
+        global $user;
         $liste = $this->get_paiements_for_export($ref, $since);
         $forced = (is_null($ref)) ? false : true;
         if(count($liste)) {
@@ -196,8 +197,10 @@ class BTC_export extends BimpObject {
             foreach ($liste as $paiement) {
                 if($instance->export($paiement->rowid, $paiement->fk_paiement, $forced, ['name' => $name, 'dir' => $dir])) {
                     $pay = $this->getInstance('bimpcommercial', 'Bimp_Paiement', $paiement->rowid);
-                    $this->log('PAIEMENT CLIENT', $pay->getData('ref'), 'FICHIER DE PAIEMENT');
-                    $pay->updateField('exported', 1);
+                     $this->write_logs("***EXPORTATION*** " . date('d/m/Y H:i:s') . " => USER : " . $user->login . " => FACTURE:  " . $paiement->ref . "\n", true);
+                    if(is_null($ref)){
+                        $pay->updateField('exported', 1);
+                    }
                 } else {
                     // Mettre task
                     $this->addTaskAlert(['ref' => $instance->getData('ref')]);
@@ -209,14 +212,19 @@ class BTC_export extends BimpObject {
     }
     
     private function export_facture_fourn($ref = null, $since, $name = '', $dir = '') {
+        global $user;
         $liste = $this->get_facture_fourn_for_export($ref, $since);
         $forced = (is_null($ref)) ? false : true;
         if(count($liste)) {
             $instance = $this->getInstance('bimptocegid', 'BTC_export_facture_fourn');
             foreach($liste as $facture_fourn) {
                 $error = $instance->export($facture_fourn->rowid, $forced, ['name' => $name, 'dir' => $dir]);
+                $piece = $this->getInstance('bimpcommercial', 'Bimp_FactureFourn', $facture_fourn->rowid);
                 if($error > 0) {
-                    
+                    if(is_null($ref)) {
+                        $piece->updateField('exported', 1);
+                    }
+                    $this->write_logs("***EXPORTATION*** " . date('d/m/Y H:i:s') . " => USER : " . $user->login . " => FACTURE:  " . $facture_fourn->ref . "\n", true);
                 }
             }
         } else {
@@ -225,14 +233,20 @@ class BTC_export extends BimpObject {
     }
     
     private function export_facture($ref = null, $since, $name = '', $dir = '') {
+        global $user;
         $liste = $this->get_facture_client_for_export($ref, $since);
         $forced = (is_null($ref)) ? false : true;
         if(count($liste)) {
             $instance = $this->getInstance('bimptocegid', 'BTC_export_facture');
             foreach($liste as $facture) {
                 $error = $instance->export($facture->rowid, $forced, ['name' => $name, 'dir' => $dir]);
-                if($error <= 0) {
-                    
+                $piece = $this->getInstance('bimpcommercial', 'Bimp_Facturet', $facture->rowid);
+                if($error > 0) {
+                    $this->log('FACTURE CLIENT', $facture->facnumber, $file);
+                    $this->write_logs("***EXPORTATION*** " . date('d/m/Y H:i:s') . " => USER : " . $user->login . " => FACTURE:  " . $facture->facnumber . "\n", true);
+                    if(is_null($ref)) {
+                        $piece->updateField('exported', 1);
+                    }
                 }
             }
         } else {

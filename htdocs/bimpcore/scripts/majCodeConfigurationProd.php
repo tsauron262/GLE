@@ -10,7 +10,7 @@ $erreurs = $info = $ok = array();
 $go = (isset($_REQUEST['action']) && $_REQUEST['action'] == 'go')? 1 : 0;
 
 while($ln = $db->fetch_object($sql)){
-    if($ln->nbSerial > 50){
+    if($ln->nbSerial > 30){
         if($ln->nbProd > 1){
             $erreurs[] = $ln->fin." plusieurs prod (".$ln->nbProd.")  ".$ln->minProd.", ".$ln->maxProd.($ln->nbProd > 2? ", ..." :"");
         }
@@ -32,7 +32,7 @@ while($ln = $db->fetch_object($sql)){
             
         }
     }
-    else{
+    elseif($ln->nbSerial > 5){
         $erreurs[] = $ln->fin." pas assé d'equipment (".$ln->nbSerial.")";
     }
 }

@@ -614,6 +614,7 @@ fields_tables:
         icon: fas_info-circle
         rows:  
             - field: ref
+            - field: code_config
             - field: label
             - field: fk_product_type
             - field: type2

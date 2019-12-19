@@ -32,6 +32,9 @@ while($ln = $db->fetch_object($sql)){
             
         }
     }
+    else{
+        $erreurs[] = $ln->fin." pas assé d'equipment (".$ln->nbSerial.")";
+    }
 }
 
 

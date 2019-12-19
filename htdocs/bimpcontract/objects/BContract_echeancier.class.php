@@ -103,7 +103,7 @@ class BContract_echeancier extends BimpObject {
         $instance->set('entrepot', 50);
         $instance->set('fk_cond_reglement', ($client->getData('cond_reglement')) ? $client->getData('cond_reglement') : 2);
         $instance->set('fk_mode_reglement', ($client->getData('mode_reglement')) ? $client->getData('mode_reglement') : 2);
-        $instance->set('datef', $data['date_start']);
+        $instance->set('datef', date('Y-m-d H:i:s'));
         $instance->set('ef_type', 'CT');
         $lines = $this->getInstance('bimpcontract', 'BContract_contratLine');
         $desc = "<b>Services du contrat</b>" . "<br />";

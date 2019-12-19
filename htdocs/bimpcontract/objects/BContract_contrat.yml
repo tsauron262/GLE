@@ -301,7 +301,6 @@ forms:
             - field: ref
               edit: 0
             - field: ref_ext
-            - field: gti
             - field: objet_contrat
             - field: fk_soc
               edit: 0

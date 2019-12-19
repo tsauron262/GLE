@@ -103,14 +103,21 @@ class BContract_echeancier extends BimpObject {
         $instance->set('entrepot', 50);
         $instance->set('fk_cond_reglement', ($client->getData('cond_reglement')) ? $client->getData('cond_reglement') : 2);
         $instance->set('fk_mode_reglement', ($client->getData('mode_reglement')) ? $client->getData('mode_reglement') : 2);
-        $instance->set('datef', $data['date_start']);
+        $instance->set('datef', date('Y-m-d H:i:s'));
         $instance->set('ef_type', 'CT');
+        $lines = $this->getInstance('bimpcontract', 'BContract_contratLine');
+        $desc = "<b>Services du contrat</b>" . "<br />";
+            foreach($lines->getList(['fk_contrat' => $parent->id]) as $idLine => $infos) {
+                $desc .= $infos['description'] . "<br />";
+            }
         $errors = $instance->create($warnings = Array(), true);
         if(!count($errors)) {
               
             $dateStart = new DateTime($data['date_start']);
             $dateEnd = new DateTime($data['date_end']);
-            if($instance->dol_object->addline("Facturation pour la période du <b>".$dateStart->format('d / m / Y')."</b> au <b>".$dateEnd->format('d / m / Y')."</b>", (double) $data['total_ht'], 1, 20, 0, 0, 0, 0, $data['date_start'], $data['date_end'], 0, 0, '', 'HT', 0, 1) > 0) {
+            
+            
+            if($instance->dol_object->addline("Facturation pour la période du <b>".$dateStart->format('d / m / Y')."</b> au <b>".$dateEnd->format('d / m / Y')."</b><br />" . $desc, (double) $data['total_ht'], 1, 20, 0, 0, 0, 0, $data['date_start'], $data['date_end'], 0, 0, '', 'HT', 0, 1) > 0) {
                 $success = 'Facture créer avec succès';
                 addElementElement("contrat", "facture", $parent->id, $instance->id);
                 $this->updateField('next_facture_date', $dateEnd->add(new DateInterval('P1D'))->format('Y-m-d H:i:s'));

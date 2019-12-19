@@ -13,7 +13,13 @@ class BTC_export_facture_fourn extends BTC_export {
         
         $facture = $this->getInstance('bimpcommercial', 'Bimp_FactureFourn', $id_facture);
         $datec = new DateTime($facture->getData('datec'));
-        $file = $this->create_daily_file('achat', $datec->format("Y-m-d"));
+        
+        if(!empty($confFile['name']) && !empty($confFile['dir'])) {
+            $file =$this->create_daily_file('achat', null, $confFile['name'], $confFile['dir']);
+        } else {
+            $file =$this->create_daily_file('achat', $datec->format("Y-m-d"));
+        }
+        
         $societe = $this->getInstance('bimpcore', 'Bimp_Societe', $facture->getData('fk_soc'));
         $is_fournisseur_interco = false;
 

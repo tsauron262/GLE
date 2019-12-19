@@ -12,11 +12,11 @@ class BTC_export_paiement extends BTC_export {
         $liste_transactions = $this->db->getRows('paiement_facture', 'fk_paiement = ' . $id);
         $paiement = $this->getInstance('bimpcommercial', 'Bimp_Paiement', $id);
         $datec = new DateTime($paiement->getData('datec'));
-        
-        if(array_key_exists('name', $confFile) && array_key_exists('dir', $confFile)) {
-            $this->create_daily_file('paiement', $datec->format("Y-m-d"));
+
+        if(!empty($confFile['name']) && !empty($confFile['dir'])) {
+            $file =$this->create_daily_file('paiement', null, $confFile['name'], $confFile['dir']);
         } else {
-            $this->create_daily_file('paiement', $datec->format("Y-m-d"));
+            $file =$this->create_daily_file('paiement', $datec->format("Y-m-d"));
         }
         
         //$file = $this->create_daily_file('paiement', $datec->format("Y-m-d"));

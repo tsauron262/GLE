@@ -89,6 +89,9 @@ fields:
                 type: search_societe
                 societe_type: customer    
         create_form: light
+    ref_ext:
+        type: string
+        label: Annule et remplace
     datec:
         label: Date du contrat
         type: date
@@ -297,6 +300,7 @@ forms:
         rows:
             - field: ref
               edit: 0
+            - field: ref_ext
             - field: objet_contrat
             - field: fk_soc
               edit: 0

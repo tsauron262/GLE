@@ -16,6 +16,7 @@ class BContract_contrat extends BimpDolObject {
     CONST CONTRAT_PERIOD_SEMESTRIELLE = 6;
     CONST CONTRAT_PERIOD_ANNUELLE = 12;
     // Les délais d'intervention
+    CONST CONTRAT_DELAIS_0_HEURES = 0;
     CONST CONTRAT_DELAIS_4_HEURES = 4;
     CONST CONTRAT_DELAIS_8_HEURES = 8;
     CONST CONTRAT_DELAIS_16_HEURES = 16;
@@ -46,7 +47,7 @@ class BContract_contrat extends BimpDolObject {
     
     CONST CONTRAT_GLOBAL = "CT";
     CONST CONTRAT_DE_MAINTENANCE = 'CMA';
-    CONST CONTRAT_SUPPORT_TELEPHONIQUE = 'CST'; // Gommer partous le mot hotline (support) et téléphonique par télémaintenance / Téléassitance 
+    CONST CONTRAT_SUPPORT_TELEPHONIQUE = 'CST';
     CONST CONTRAT_MONITORING = 'CMO'; 
     CONST CONTRAT_DE_SPARE = 'CSP';
     CONST CONTRAT_DE_DELEGATION_DE_PERSONEL = 'CDP';
@@ -68,6 +69,7 @@ class BContract_contrat extends BimpDolObject {
         self::CONTRAT_PERIOD_ANNUELLE => 'Annuelle'
     );
     public static $gti = Array(
+        self::CONTRAT_DELAIS_0_HEURES => '',
         self::CONTRAT_DELAIS_4_HEURES => '4 heures ouvrées',
         self::CONTRAT_DELAIS_8_HEURES => '8 heures ouvrées',
         self::CONTRAT_DELAIS_16_HEURES => '16 heures ouvrées'
@@ -114,8 +116,10 @@ class BContract_contrat extends BimpDolObject {
     public static $dol_module = 'contract';
     
     function __construct($module, $object_name) {
-        global $user;
+        global $user, $db;
         $this->redirectMode = 1;
+
+        
 //        if(BimpTools::getContext() == 'public') {
 //        if(BimpTools::getContext() == 'private'){
 //            $this->redirectMode = 1;

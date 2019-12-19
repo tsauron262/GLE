@@ -308,14 +308,8 @@ class BTC_export_facture_fourn extends BTC_export {
             $structure['sens'] = [$sens_parent, 1];
             $ecritures .= $this->struct($structure);
         }
-
-        if ($this->write_tra($ecritures, $file)) {
-            $facture->updateField('exported', 1);
-            $this->log('FACTURE FOUNISSEUR', $facture->getData('ref'), $file);
-            return 1;
-        } else {
-            return 0;
-        }
+        
+        return $this->write_tra($ecritures, $file);
     }
 
 }

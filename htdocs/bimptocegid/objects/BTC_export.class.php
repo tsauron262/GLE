@@ -49,7 +49,6 @@ class BTC_export extends BimpObject {
     }
     
     public function export($element, $origin, $data = []) {
-        print_r($data);
         if($origin = 'interface') {
             $function_name = 'export_' . $element;
             $this->sql_limit = null;
@@ -108,13 +107,13 @@ class BTC_export extends BimpObject {
     protected function create_daily_file($element = null, $date = null, $complementFileName = '', $complementDirectory = '') {
         
         $daily_files = [];
-        
+                
         if(empty($complementDirectory) && empty($complementFileName)) {
             if(isset($_REQUEST['date']) && !empty($_REQUEST['date']) || !is_null($date)) {
                 $complementFileName = isset($_REQUEST['date']) ? $_REQUEST['date'] : $date;
                 $complementDirectory = 'BY_DATE';
             }elseif(isset($_REQUEST['ref']) && !empty($_REQUEST['ref'])) {
-                $complementFileName = $_REQUEST['ref'];
+                $complementFileName = isset($_REQUEST['ref']) ? $_REQUEST['ref'] : $ref;
                 $complementDirectory = 'BY_REF';
             } else {
                 $complementFileName = date("Y-m-d");
@@ -209,13 +208,13 @@ class BTC_export extends BimpObject {
         }
     }
     
-    private function export_facture_fourn($ref = null, $since) {
+    private function export_facture_fourn($ref = null, $since, $name = '', $dir = '') {
         $liste = $this->get_facture_fourn_for_export($ref, $since);
         $forced = (is_null($ref)) ? false : true;
         if(count($liste)) {
             $instance = $this->getInstance('bimptocegid', 'BTC_export_facture_fourn');
             foreach($liste as $facture_fourn) {
-                $error = $instance->export($facture_fourn->rowid, $forced);
+                $error = $instance->export($facture_fourn->rowid, $forced, ['name' => $name, 'dir' => $dir]);
                 if($error > 0) {
                     
                 }
@@ -225,13 +224,13 @@ class BTC_export extends BimpObject {
         }
     }
     
-    private function export_facture($ref = null, $since) {
+    private function export_facture($ref = null, $since, $name = '', $dir = '') {
         $liste = $this->get_facture_client_for_export($ref, $since);
         $forced = (is_null($ref)) ? false : true;
         if(count($liste)) {
             $instance = $this->getInstance('bimptocegid', 'BTC_export_facture');
             foreach($liste as $facture) {
-                $error = $instance->export($facture->rowid, $forced);
+                $error = $instance->export($facture->rowid, $forced, ['name' => $name, 'dir' => $dir]);
                 if($error <= 0) {
                     
                 }
@@ -425,8 +424,13 @@ class BTC_export extends BimpObject {
     }
 
 
-    protected function write_logs($log) {
-        $opened_file = fopen(DIR_SYNCH . $this->project_directory, 'a+');
+    protected function write_logs($log, $copy_log = false) {
+        if($copy_log) {
+            $opened_file = fopen(DIR_SYNCH . $this->project_directory . 'imported.log', 'a+');
+        } else {
+            $opened_file = fopen(DIR_SYNCH . $this->project_directory . 'export.log', 'a+');
+        }
+        
         fwrite($opened_file, $log);
         fclose($opened_file);
     }
@@ -481,8 +485,28 @@ class BTC_export extends BimpObject {
         
     }
     
-    public function actionDl($data, &$success) {
+    public function actionImported($data, &$success) {
         
+        global $user;
+        $fromFolder = DIR_SYNCH . $this->project_directory . $data['folder'];
+        $destFolder = $fromFolder . 'imported/';
+        
+        //return $destFolder . $data['nom'];
+        //return $fromFolder . $data['nom'] . ' TO ' . $destFolder . $data['nom'] . '.' . $user->login;
+        if(copy($fromFolder . $data['nom'], $destFolder . $data['nom'] . '.' . $user->login)) {
+            $this->write_logs(date('d/m/Y H:i:s') . " - " . $user->login . " - fichier " . $data['nom'] . " - Déplacer dans le dossier imported" . "\n", true);
+            unlink($fromFolder . $data['nom']);
+            $success = "Le fichier " . $data['nom'] . " à été déplacé avec succès";
+        } else {
+            $e = error_get_last();
+            $errors = $e['message'];
+        }
+        
+        return [
+            "success" => $success,
+            'errors' => $errors,
+            'warnings' => $warnings
+        ];
         
         
     }

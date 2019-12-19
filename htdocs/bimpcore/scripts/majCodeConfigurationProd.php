@@ -12,7 +12,7 @@ $go = (isset($_REQUEST['action']) && $_REQUEST['action'] == 'go')? 1 : 0;
 while($ln = $db->fetch_object($sql)){
     if($ln->nbSerial > 50){
         if($ln->nbProd > 1){
-            $erreurs[] = $ln->fin." plusieurs prod (".$ln->minProd.", ".$ln->maxProd.", ...)";
+            $erreurs[] = $ln->fin." plusieurs prod (".$ln->nbProd.")  ".$ln->minProd.", ".$ln->maxProd.", ...";
         }
         else{
             if(!isset($ok[$ln->fin])){

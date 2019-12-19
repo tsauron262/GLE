@@ -16,6 +16,7 @@ class BContract_contrat extends BimpDolObject {
     CONST CONTRAT_PERIOD_SEMESTRIELLE = 6;
     CONST CONTRAT_PERIOD_ANNUELLE = 12;
     // Les délais d'intervention
+    CONST CONTRAT_DELAIS_0_HEURES = 0;
     CONST CONTRAT_DELAIS_4_HEURES = 4;
     CONST CONTRAT_DELAIS_8_HEURES = 8;
     CONST CONTRAT_DELAIS_16_HEURES = 16;
@@ -68,6 +69,7 @@ class BContract_contrat extends BimpDolObject {
         self::CONTRAT_PERIOD_ANNUELLE => 'Annuelle'
     );
     public static $gti = Array(
+        self::CONTRAT_DELAIS_0_HEURES => '',
         self::CONTRAT_DELAIS_4_HEURES => '4 heures ouvrées',
         self::CONTRAT_DELAIS_8_HEURES => '8 heures ouvrées',
         self::CONTRAT_DELAIS_16_HEURES => '16 heures ouvrées'
@@ -117,10 +119,10 @@ class BContract_contrat extends BimpDolObject {
         global $user, $db;
         $this->redirectMode = 1;
         
-        if(!$this->field_exists('gti')) {
-            $extrafields = new ExtraFields($db);
-            $extrafields->addExtraField('gti', 'Délais d\'intervention', 'select', 39, 30, 'contrat', 0, 0, "", array( 'options' => array(2 => '2h ouvrées',4 => '4h ouvrées',8 => '8h ouvrées',16 => '16h ouvrées')), 1, "", 1, 1, "", "", "", 1);
-        }
+//        if(!$this->field_exists('gti')) {
+//            $extrafields = new ExtraFields($db);
+//            $extrafields->addExtraField('gti', 'Délais d\'intervention', 'select', 39, 30, 'contrat', 0, 0, "", array( 'options' => array(2 => '2h ouvrées',4 => '4h ouvrées',8 => '8h ouvrées',16 => '16h ouvrées')), 1, "", 1, 1, "", "", "", 1);
+//        }
         
 //        if(BimpTools::getContext() == 'public') {
 //        if(BimpTools::getContext() == 'private'){

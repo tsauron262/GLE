@@ -7,6 +7,8 @@ $sql = $db->query("SELECT COUNT(*) as nbSerial, SUBSTRING(`serial`, LENGTH(`seri
 
 $erreurs = $info = $ok = array();
 
+$totSav = 0;
+
 $go = (isset($_REQUEST['action']) && $_REQUEST['action'] == 'go')? 1 : 0;
 
 while($ln = $db->fetch_object($sql)){
@@ -19,6 +21,8 @@ while($ln = $db->fetch_object($sql)){
                 $ok[$ln->fin]= 0; 
                 $sql2 = $db->query("SELECT COUNT(*) as nbSerial  FROM `llx_be_equipment` WHERE ( LENGTH(serial) = 13 || LENGTH(serial) = 12) AND id_product = 0 AND serial LIKE '%".$ln->fin."'");
                 $ln2 = $db->fetch_object($sql2);
+                
+                $totSav += $ln2->nbSerial;
 
                 $info[] = "OK prod ".$ln->minProd.' code config '.$ln->fin. '   corrigera '.$ln2->nbSerial. ' equipement SAV';
 
@@ -64,3 +68,8 @@ echo '<pre>';
 print_r($info);
 
 print_r($erreurs);
+
+
+
+
+echo '<br/><br/>Fin : corrigerais : '.$totSav.' equipment sans produit';

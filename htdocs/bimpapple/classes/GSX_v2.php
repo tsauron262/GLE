@@ -384,7 +384,7 @@ class GSX_v2 extends GSX_Const
     {
         return $this->exec('productDetails', array(
                     'device' => array(
-                        'id' => $serial
+                        'id' => $this->traiteSerialApple($serial)
                     )
         ));
     }
@@ -394,7 +394,7 @@ class GSX_v2 extends GSX_Const
         return $this->exec('partsSummary', array(
                     'devices' => array(
                         array(
-                            'id' => $serial
+                            'id' => $this->traiteSerialApple($serial)
                         )
                     )
         ));

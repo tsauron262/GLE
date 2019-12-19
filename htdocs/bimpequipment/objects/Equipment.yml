@@ -676,6 +676,7 @@ searches:
         fields_search: 
             - a.product_label
             - a.serial
+            - a.imei
         fields_return: 
             - a.serial
         label_syntaxe: '<a.serial>'

@@ -1342,7 +1342,7 @@ class gsxController extends BimpController
         $errors = array();
         $warnings = array();
         $html = '';
-        $repair_ok = 0;
+        $repair_ok = 1;
 
         $serial = (isset($params['serial']) ? $params['serial'] : 0);
         $id_sav = (isset($params['id_sav']) ? (int) $params['id_sav'] : 0);

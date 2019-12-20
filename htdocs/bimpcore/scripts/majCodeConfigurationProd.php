@@ -63,16 +63,16 @@ class majCodeConfigurationnProd{
     function fusionSav($serial, $idProd){
         $serial = $this->traiteSerialApple($serial);
         $sql = $this->db->query("SELECT * FROM llx_be_equipment WHERE (serial LIKE '".$serial."' || serial LIKE 'S".$serial."') AND id_product=".$idProd);
-        $queChezCleint = true;
+        $pasChezCleint = 0;
         $tabEquipment = array();
         while($ln = $this->db->fetch_object($sql)){
             $ex = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $ln->id);
             $place = $ex->getCurrentPlace();
             $tabEquipment[] = $ex;
             if(is_object($place) && $place->getData('type') != 1)
-                $queChezCleint = false;
+                $pasChezCleint++;
         }
-        if($queChezCleint)
+        if($pasChezCleint < 2)
             $this->erreurs[] = "Fustion OK";
         else
             $this->erreurs[] = "Fustion BAD";

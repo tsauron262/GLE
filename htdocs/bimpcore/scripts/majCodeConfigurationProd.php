@@ -50,17 +50,17 @@ class majCodeConfigurationnProd{
         }
     }
     
-    function testSerialDouble(){
+    function testSerialDouble($go = false){
         $sql3 = $this->db->query("SELECT COUNT(*) as nbIdentique, serial, id_product FROM `llx_be_equipment` WHERE `id_product` > 0 AND ".$this->whereTaille." GROUP BY `serial`, id_product HAVING nbIdentique > 1  
         ORDER BY COUNT(*)  DESC");
         while($ln3 = $this->db->fetch_object($sql3)){
             $this->erreurs[] = $ln3->serial." plusieurs foix (".$ln3->nbIdentique.") ... grave";
-            $this->fusionSav($ln3->serial, $ln3->id_product);
+            $this->fusionSav($ln3->serial, $ln3->id_product, $go);
         }
     }
     
     
-    function fusionSav($serial, $idProd){
+    function fusionSav($serial, $idProd, $go = false){
         $serial = $this->traiteSerialApple($serial);
         $sql = $this->db->query("SELECT * FROM llx_be_equipment WHERE (serial LIKE '".$serial."' || serial LIKE 'S".$serial."') AND id_product=".$idProd." ORDER BY id DESC");
         $pasChezCleint = 0;
@@ -81,7 +81,12 @@ class majCodeConfigurationnProd{
                 $equipmentAGarde = $tabEquipment[0];
             foreach($tabEquipment as $ex){
                 if($ex->id != $equipmentAGarde->id){
-                    $this->changeIdSav($ex->id, $equipmentAGarde->id);
+                    if($equipmentAGarde->id < 1)
+                        die("grosse erreur");
+                    if($go){
+                        $this->changeIdSav($ex->id, $equipmentAGarde->id);
+                        $ex->delete();
+                    }
                 }
             }
         }
@@ -102,8 +107,6 @@ class majCodeConfigurationnProd{
             $this->db->query("UPDATE `llx_".$table."` SET `".$champ."` = '".$newId."' WHERE ".$champ." = ".$oldId.";");
         }
         
-        
-        die($oldId." ".$newId);
     }
     
     public function traiteSerialApple($serial){
@@ -161,7 +164,7 @@ class majCodeConfigurationnProd{
             $this->updateEquipmentOrfellin();
         }
         
-        $this->testSerialDouble();
+        $this->testSerialDouble($go);
         
         
         $this->bilan();

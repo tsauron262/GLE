@@ -8,7 +8,7 @@ class modBimptocegid extends DolibarrModules {
         global $langs, $conf;
 
         $this->db = $db;
-        $this->numero = 514586;
+        $this->numero = 51458653;
         $this->rights_class = 'bimptocegid';
         $this->family = "Bimp";
         $this->module_position = 500;

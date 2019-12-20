@@ -53,7 +53,7 @@ class majCodeConfigurationnProd{
         $sql3 = $this->db->query("SELECT COUNT(*) as nbIdentique, serial FROM `llx_be_equipment` WHERE `id_product` > 0 AND ".$this->whereTaille." GROUP BY `serial`, id_product HAVING nbIdentique > 1  
         ORDER BY COUNT(*)  DESC");
         while($ln3 = $this->db->fetch_object($sql3)){
-            $this->erreurs[] = $ln3->serial." plusieurs foix ... grave";
+            $this->erreurs[] = $ln3->serial." plusieurs foix (".$ln3->nbIdentique.") ... grave";
         }
     }
     

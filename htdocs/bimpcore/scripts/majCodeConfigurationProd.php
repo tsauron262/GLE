@@ -62,21 +62,48 @@ class majCodeConfigurationnProd{
     
     function fusionSav($serial, $idProd){
         $serial = $this->traiteSerialApple($serial);
-        $sql = $this->db->query("SELECT * FROM llx_be_equipment WHERE (serial LIKE '".$serial."' || serial LIKE 'S".$serial."') AND id_product=".$idProd);
+        $sql = $this->db->query("SELECT * FROM llx_be_equipment WHERE (serial LIKE '".$serial."' || serial LIKE 'S".$serial."') AND id_product=".$idProd." ORDER BY id DESC");
         $pasChezCleint = 0;
         $tabEquipment = array();
+        $equipmentAGarde = null;
         while($ln = $this->db->fetch_object($sql)){
             $ex = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $ln->id);
             $place = $ex->getCurrentPlace();
             $tabEquipment[] = $ex;
-            if(is_object($place) && $place->getData('type') != 1)
+            if(is_object($place) && $place->getData('type') != 1){
                 $pasChezCleint++;
+                $equipmentAGarde = $ex;
+            }
         }
-        if($pasChezCleint < 2)
+        if($pasChezCleint < 2){
             $this->erreurs[] = "Fustion OK";
+            if(!is_object($equipmentAGarde))
+                $equipmentAGarde = $tabEquipment[0];
+            foreach($tabEquipment as $ex){
+                if($ex->id != $equipmentAGarde->id){
+                    $this->changeIdSav($ex->id, $equipmentAGarde->id);
+                }
+            }
+        }
         else
             $this->erreurs[] = "Fustion BAD";
         
+    }
+    
+    public function changeIdSav($oldId, $newId){
+        $sql = $this->db->query("SELECT MAX(`position`) as max FROM `llx_be_equipment_place` WHERE `id_equipment` = ".$newId);
+        $ln = $this->db->fetch_object($sql);
+        $sql2 = $this->db->query("UPDATE `llx_be_equipment_place` SET id_equipment = ".$newId.", position = (position + ".$ln->max.")  WHERE `id_equipment`=".$oldId);
+        
+        $tabConversion = array("bs_sav" =>'', 'br_reservation' => '', 'bc_vente_article'=>'', 'bc_vente_return'=>'', 'object_line_equipment'=>'', 'bcontract_serials'=>'', 'bs_sav_product' => '', 'bt_transfer_det' => '');
+        foreach($tabConversion as $table => $champ){
+            if($champ == '')
+                $champ = 'id_equipment';
+            $this->db->query("UPDATE `llx_".$table."` SET `".$champ."` = '".$newId."' WHERE ".$champ." = ".$oldId.";");
+        }
+        
+        
+        die($oldId." ".$newId);
     }
     
     public function traiteSerialApple($serial){

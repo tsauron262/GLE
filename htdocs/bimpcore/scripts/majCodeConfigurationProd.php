@@ -21,6 +21,7 @@ $cl->exec($go);
 class majCodeConfigurationnProd{
     private $whereTaille = '( LENGTH(serial) = 13 || LENGTH(serial) = 12)';
     private $totCorrection = 0;
+    private $totFusion =  0;
     private $erreurs = array();
     private $info = array();
     private $ok = array();
@@ -83,6 +84,7 @@ class majCodeConfigurationnProd{
                 if($ex->id != $equipmentAGarde->id){
                     if($equipmentAGarde->id < 1)
                         die("grosse erreur");
+                    $this->totFusion++;
                     if($go){
                         $this->changeIdSav($ex->id, $equipmentAGarde->id);
                         $ex->delete();
@@ -180,6 +182,7 @@ class majCodeConfigurationnProd{
 
 
         echo '<br/><br/>Fin : corrigerais : '.$this->totCorrection.' equipment sans produit';
+        echo '<br/><br/>Fin : corrigerais : '.$this->totFusion.' equipment fusionné';
     }
 
 }

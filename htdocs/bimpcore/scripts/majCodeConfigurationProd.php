@@ -3,6 +3,7 @@
 require_once("../../main.inc.php");
 
 
+require_once __DIR__ . '/../Bimp_Lib.php';
 
 
 
@@ -50,11 +51,39 @@ class majCodeConfigurationnProd{
     }
     
     function testSerialDouble(){
-        $sql3 = $this->db->query("SELECT COUNT(*) as nbIdentique, serial FROM `llx_be_equipment` WHERE `id_product` > 0 AND ".$this->whereTaille." GROUP BY `serial`, id_product HAVING nbIdentique > 1  
+        $sql3 = $this->db->query("SELECT COUNT(*) as nbIdentique, serial, id_product FROM `llx_be_equipment` WHERE `id_product` > 0 AND ".$this->whereTaille." GROUP BY `serial`, id_product HAVING nbIdentique > 1  
         ORDER BY COUNT(*)  DESC");
         while($ln3 = $this->db->fetch_object($sql3)){
             $this->erreurs[] = $ln3->serial." plusieurs foix (".$ln3->nbIdentique.") ... grave";
+            $this->fusionSav($ln3->serial, $ln3->id_product);
         }
+    }
+    
+    
+    function fusionSav($serial, $idProd){
+        $serial = $this->traiteSerialApple($serial);
+        $sql = $this->db->query("SELECT * FROM llx_be_equipment WHERE (serial LIKE '".$serial."' || serial LIKE 'S".$serial."') AND id_product=".$idProd);
+        $queChezCleint = true;
+        $tabEquipment = array();
+        while($ln = $this->db->fetch_object($sql)){
+            $ex = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $ln->id);
+            $place = $ex->getCurrentPlace();
+            $tabEquipment[] = $ex;
+            if(is_object($place) && $place->getData('type') != 1)
+                $queChezCleint = false;
+        }
+        if($queChezCleint)
+            $this->erreurs[] = "Fustion OK";
+        else
+            $this->erreurs[] = "Fustion BAD";
+        
+    }
+    
+    public function traiteSerialApple($serial){
+        if(stripos($serial, 'S') === 0){
+            return substr($serial,1);
+        }
+        return $serial;
     }
     
     function updateCodeConfigProd($go){

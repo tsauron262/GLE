@@ -107,11 +107,11 @@ class gsxController extends BimpController
 
             if ($gsx->logged) {
                 $values = $this->gsxGetRequestFormValues($requestName, $params, $errors);
-                if (!count($errors)) {
+//                if (!count($errors)) {
                     $gsxRequest = new GSX_Request_v2($gsx, $requestName);
                     $html = $gsxRequest->generateRequestFormHtml($values, $serial, $id_sav, $id_repair);
                     $title = $gsxRequest->requestLabel;
-                }
+//                }
 
                 if ($requestName === 'repairCreate') {
                     $button = array(

@@ -160,6 +160,8 @@ class majCodeConfigurationnProd{
     
     function exec($go = false){
         
+        $this->vireS();
+        
         $this->updateCodeConfigProd($go);
         
         if($go){
@@ -170,6 +172,16 @@ class majCodeConfigurationnProd{
         
         
         $this->bilan();
+    }
+    
+    function vireS(){
+        $sql = $this->db->query("SELECT * FROM `llx_be_equipment`, llx_product p WHERE p.rowid = `id_product` AND LENGTH(serial) = 13 AND `ref` LIKE 'APP-%'");
+        while($ln = $this->db->fetch_object($sql)){
+            $serial = $ln->serial;
+            $serial2 = $this->traiteSerialApple($serial);
+            if($serial != $serial2)
+                $this->db->query("UPDATE llx_be_equipment SET serial ='".$serial2."' WHERE serial = '".$serial."'");
+        }
     }
     
     

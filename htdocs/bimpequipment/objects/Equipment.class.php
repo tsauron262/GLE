@@ -1316,7 +1316,9 @@ class Equipment extends BimpObject
     {
         $identifiers = array(
             'serial' => $serial,
-            'imei'   => ''
+            'imei'   => '',
+            'imei2'  => '',
+            'meid'   => ''
         );
         if ((int) BimpCore::getConf('use_gsx_v2', 0)) {
             if (preg_match('/^S(.+)$/', $serial, $matches)) {
@@ -1338,6 +1340,19 @@ class Equipment extends BimpObject
                     } else {
                         $identifiers['imei'] = 'n/a';
                     }
+
+                    if (isset($data['device']['identifiers']['imei2']) && $data['device']['identifiers']['imei2']) {
+                        $identifiers['imei2'] = $data['device']['identifiers']['imei2'];
+                    } else {
+                        $identifiers['imei2'] = 'n/a';
+                    }
+
+                    if (isset($data['device']['identifiers']['meid']) && $data['device']['identifiers']['meid']) {
+                        $identifiers['meid'] = $data['device']['identifiers']['meid'];
+                    } else {
+                        $identifiers['meid'] = 'n/a';
+                    }
+
 
                     if (isset($data['device']['identifiers']['serial']) && $data['device']['identifiers']['serial']) {
                         $identifiers['serial'] = $data['device']['identifiers']['serial'];
@@ -1460,15 +1475,17 @@ class Equipment extends BimpObject
         $serial = (string) $this->getData('serial');
         $id_product = (int) $this->getData('id_product');
 
-        if ($serial && $id_product && !defined('DONT_CHECK_SERIAL')) {
-            $where = '`serial` = \'' . $serial . '\' AND `id_product` = ' . $id_product;
-            if ($this->isLoaded()) {
-                $where .= ' AND `id` != ' . (int) $this->id;
-            }
+        if ($serial && $id_product) {
+            if (!defined('DONT_CHECK_SERIAL')) {
+                $where = '`serial` = \'' . $serial . '\' AND `id_product` = ' . $id_product;
+                if ($this->isLoaded()) {
+                    $where .= ' AND `id` != ' . (int) $this->id;
+                }
 
-            $value = $this->db->getValue($this->getTable(), 'id', $where);
-            if (!is_null($value) && (int) $value) {
-                return array('Ce numéro de série pour ce même produit est déjà associé à l\'équipement ' . $value);
+                $value = $this->db->getValue($this->getTable(), 'id', $where);
+                if (!is_null($value) && (int) $value) {
+                    return array('Ce numéro de série pour ce même produit est déjà associé à l\'équipement ' . $value);
+                }
             }
         }
 
@@ -1477,9 +1494,30 @@ class Equipment extends BimpObject
         if ($serial && (!(string) $this->getData('imei') || ($init_serial && $serial != $init_serial))) {
             $identifiers = self::gsxFetchIdentifiers($serial);
             $this->set('imei', $identifiers['imei']);
+            $this->set('imei2', $identifiers['imei2']);
+            $this->set('meid', $identifiers['meid']);
 
             if ($identifiers['serial']) {
                 $this->set('serial', $identifiers['serial']);
+                $serial = $identifiers['serial'];
+            }
+        }
+
+        if (!$id_product && $serial && (!$this->getInitData('serial') || $this->getInitData('serial') !== $serial)) {
+            // pas de correction du id_product pour l'instant car trop dangereux (stocks, incohérences commandes / factures, etc.)
+            if (preg_match('/^.+(.{4})$/', $serial, $matches)) {
+                $apple_product = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Product', array(
+                            'code_config' => $matches[1],
+                            'ref'         => array(
+                                'part'      => 'APP-',
+                                'part_type' => 'beginning'
+                            )
+                                ), true);
+                
+                if (BimpObject::objectLoaded($apple_product)) {
+                    $this->set('id_product');
+                    $this->set('product_label', '');
+                }
             }
         }
 

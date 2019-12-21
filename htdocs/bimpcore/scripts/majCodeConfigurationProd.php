@@ -48,6 +48,7 @@ class majCodeConfigurationnProd{
         $sql4 = $this->db->query("SELECT code_config, fk_object FROM llx_product_extrafields WHERE code_config IS NOT NULL");
         while($ln4 = $this->db->fetch_object($sql4)){
             $this->db->query("UPDATE llx_be_equipment SET id_product = ".$ln4->fk_object." WHERE serial LIKE '%".$ln4->code_config."' and ".$this->whereTaille);
+            // Je rajouterais " and id_product = 0" par précaution. 
         }
     }
     
@@ -102,7 +103,7 @@ class majCodeConfigurationnProd{
         $ln = $this->db->fetch_object($sql);
         $sql2 = $this->db->query("UPDATE `llx_be_equipment_place` SET id_equipment = ".$newId.", position = (position + ".$ln->max.")  WHERE `id_equipment`=".$oldId);
         
-        $tabConversion = array("bs_sav" =>'', 'br_reservation' => '', 'bc_vente_article'=>'', 'bc_vente_return'=>'', 'object_line_equipment'=>'', 'bcontract_serials'=>'', 'bs_sav_product' => '', 'bt_transfer_det' => '');
+        $tabConversion = array("bs_sav" =>'', 'br_reservation' => '', 'bc_vente_article'=>'', 'bc_vente_return'=>'', 'object_line_equipment'=>'', 'bcontract_serials'=>'', /*'bs_sav_product' => '', */'bt_transfer_det' => '');
         foreach($tabConversion as $table => $champ){
             if($champ == '')
                 $champ = 'id_equipment';
@@ -119,7 +120,7 @@ class majCodeConfigurationnProd{
     }
     
     function updateCodeConfigProd($go){
-        $sql = $this->db->query("SELECT COUNT(*) as nbSerial, SUBSTRING(`serial`, LENGTH(`serial`)-3, 4) as fin, MIN(id) as minEquipment, MIN(id_product) as minProd, MAX(id_product) as maxProd, COUnT(DISTINCT(id_product)) as nbProd "
+        $sql = $this->db->query("SELECT COUNT(*) as nbSerial, SUBSTRING(`serial`, LENGTH(`serial`)-3, 4) as fin, MIN(id) as minEquipment, MIN(id_product) as minProd, MAX(id_product) as maxProd, COUNT(DISTINCT(id_product)) as nbProd "
                 . "FROM `llx_be_equipment`, llx_product p "
                 . "WHERE ".$this->whereTaille." AND  id_product > 0 "
                 . "AND SUBSTRING(`serial`, LENGTH(`serial`)-3, 4) NOT IN (SELECT code_config FROM llx_product_extrafields WHERE code_config IS NOT NULL) "

@@ -921,19 +921,23 @@ class BimpTools
     {
         $sql = 'SELECT ';
 
-        if (!is_null($return_fields) && is_array($return_fields) && count($return_fields)) {
-            $first_loop = true;
-            foreach ($return_fields as $field) {
-                if (!$first_loop) {
-                    $sql .= ', ';
-                } else {
-                    $first_loop = false;
+        if (!is_null($return_fields)) {
+            if (is_array($return_fields) && count($return_fields)) {
+                $first_loop = true;
+                foreach ($return_fields as $field) {
+                    if (!$first_loop) {
+                        $sql .= ', ';
+                    } else {
+                        $first_loop = false;
+                    }
+                    if (preg_match('/\./', $field)) {
+                        $sql .= $field;
+                    } elseif (!is_null($default_alias) && $default_alias) {
+                        $sql .= $default_alias . '.' . $field;
+                    }
                 }
-                if (preg_match('/\./', $field)) {
-                    $sql .= $field;
-                } elseif (!is_null($default_alias) && $default_alias) {
-                    $sql .= $default_alias . '.' . $field;
-                }
+            } elseif (is_string($return_fields)) {
+                $sql .= $return_fields;
             }
         } else {
             $sql .= '*';
@@ -1472,7 +1476,7 @@ class BimpTools
             if (preg_match('/^1970\-01\-01.*$/', $value)) {
                 return '';
             }
-            
+
             $datetime = $matches[1];
             if (isset($matches[2]) && $matches[2] && $matches[2] !== '00:00:00') {
                 $datetime .= $matches[2];

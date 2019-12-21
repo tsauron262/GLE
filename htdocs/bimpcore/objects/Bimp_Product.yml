@@ -475,7 +475,6 @@ fields:
         label: Code configuration
         dol_extra_field: 1
         
-        
 forms: 
     # Utiliser plutôt "default" que "card" pour le formulaire principal 
     # Important car tout objet doit avoir un formulaire par défaut s'il est éditable.

@@ -150,7 +150,7 @@ class BimpCache
             $sql .= BimpTools::getSqlWhere($filters);
 
             $rows = self::getBdb()->executeS($sql, 'array');
-
+            
             if (!is_null($rows) && count($rows)) {
                 if (count($rows) > 1) {
                     if (!empty($filters) && $delete_if_multiple) {
@@ -180,7 +180,7 @@ class BimpCache
                 return null;
             }
 
-            return self::getBimpObjectInstance($module, $object_name, $id_object);
+            return BimpObject::getInstance($module, $object_name, $id_object);
         }
 
         return null;

@@ -136,6 +136,12 @@ fields:
     imei: 
         label: N° IMEI
         
+    imei2: 
+        label: N° IMEI2
+        
+    meid: 
+        label: N° MEID
+        
     ref_immo: 
         label: Réf. immobilisation
         default_value: ''
@@ -275,6 +281,8 @@ fields_tables:
         rows:
             - field: serial
             - field: imei
+            - field: imei2
+            - field: meid
             - field: ref_immo
             - label: Disponibilité
               value: 
@@ -382,6 +390,8 @@ forms:
         rows: 
             - field: serial
             - field: imei
+            - field: imei2
+            - field: meid
             - field: id_product
               show: 
                   callback: isNotLoaded
@@ -407,6 +417,8 @@ forms:
         rows:
             - field: serial
             - field: imei
+            - field: imei2
+            - field: meid
             - field: id_product
               show: 
                   callback: isNotLoaded
@@ -422,6 +434,8 @@ forms:
         rows: 
             - field: serial
             - field: imei
+            - field: imei2
+            - field: meid
             - field: id_product
             - field: product_label
             - field: type
@@ -440,6 +454,10 @@ filters_panel:
                 field: serial
             imei: 
                 field: imei
+            imei2: 
+                field: imei2
+            meid: 
+                field: meid
             date_purchase: 
                 field: date_purchase
             date_vente:
@@ -508,6 +526,12 @@ lists_cols:
     imei: 
         label: IMEI
         field: imei
+    imei2: 
+        label: IMEI2
+        field: imei2
+    meid: 
+        label: MEID
+        field: meid
     place: 
         label: Emplacement
         value:
@@ -552,6 +576,8 @@ lists_cols:
             callback:  displayOldSn
     date_purchase:
         field: date_purchase
+    date_create:
+        field: date_create
 
 lists:
     default: 
@@ -677,6 +703,8 @@ searches:
             - a.product_label
             - a.serial
             - a.imei
+            - a.imei2
+            - a.meid
         fields_return: 
             - a.serial
         label_syntaxe: '<a.serial>'
@@ -694,3 +722,6 @@ cards:
                           - nom_url
             - icon: barcode
               field: serial
+            - field: imei
+            - field: imei2
+            - field: meid

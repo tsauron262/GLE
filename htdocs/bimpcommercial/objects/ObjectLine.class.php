@@ -28,6 +28,7 @@ class ObjectLine extends BimpObject
     public $remise = null;
     public $date_from = null;
     public $date_to = null;
+    public $nbCalcremise = 0;
     public $id_remise_except = null;
     public static $product_line_data = array(
         'id_product'     => array('label' => 'Produit / Service', 'type' => 'int', 'required' => 1),
@@ -2823,8 +2824,11 @@ class ObjectLine extends BimpObject
 
             if (is_null($this->remise) || (float) $this->remise !== (float) $remises_infos['total_percent'] ||
                     $remises_infos['total_percent'] !== (float) $this->getData('remise') ||
-                    $remises_infos['total_percent'] !== (float) $this->getInitData('remise')) {
+                    $remises_infos['total_percent'] !== (float) $this->getInitData('remise') ) {
+                if($this->nbCalcremise < 4){
+                    $this->nbCalcremise++;
                 $this->update($warnings, true);
+                }
             }
         }
     }

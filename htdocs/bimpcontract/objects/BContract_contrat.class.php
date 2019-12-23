@@ -30,21 +30,7 @@ class BContract_contrat extends BimpDolObject {
     CONST CONTRAT_DENOUNCE_NON = 0;
     CONST CONTRAT_DENOUNCE_OUI_DANS_LES_TEMPS = 1;
     CONST CONTRAT_DENOUNCE_OUI_HORS_DELAIS = 2;
-    // Mode de règlements
-    CONST CONTRAT_REGLEMENT_TIP = 1;
-    CONST CONTRAT_REGLEMENT_VIREMENT = 2;
-    CONST CONTRAT_REGLEMENT_PRELEVEMENT = 3;
-    CONST CONTRAT_REGLEMENT_ESPECES = 4;
-    CONST CONTRAT_REGLEMENT_CB = 6;
-    CONST CONTRAT_REGLEMENT_CHEQUE = 7;
-    CONST CONTRAT_REGLEMENT_BOR = 11;
-    CONST CONTRAT_REGLEMENT_FINANCEMENT = 13;
-    CONST CONTRAT_REGLEMENT_TRAITE = 51;
-    CONST CONTRAT_REGLEMENT_MANDAT = 55;
-    CONST CONTRAT_REGLEMENT_30_JOURS = 56;
-    CONST CONTRAT_REGLEMENT_REMBOURCEMENT = 57;
-    CONST CONTRAT_REGLEMENT_AMERICAN_EXPRESS = 58;
-    
+
     CONST CONTRAT_GLOBAL = "CT";
     CONST CONTRAT_DE_MAINTENANCE = 'CMA';
     CONST CONTRAT_SUPPORT_TELEPHONIQUE = 'CST';
@@ -81,21 +67,7 @@ class BContract_contrat extends BimpDolObject {
         self::CONTRAT_RENOUVELLEMENT_3_FOIS => 'Tacite 3 fois',
         self::CONTRAT_RENOUVELLEMENT_SUR_PROPOSITION => 'Sur proposition'
     );
-    public static $mode_reglement = Array(
-        self::CONTRAT_REGLEMENT_TIP => 'TIP',
-        self::CONTRAT_REGLEMENT_VIREMENT => 'Virement',
-        self::CONTRAT_REGLEMENT_PRELEVEMENT => 'Prélèvement',
-        self::CONTRAT_REGLEMENT_ESPECES => 'Espèces',
-        self::CONTRAT_REGLEMENT_CB => 'Carte banquaire',
-        self::CONTRAT_REGLEMENT_CHEQUE => 'Chèque',
-        self::CONTRAT_REGLEMENT_BOR => 'B.O.R',
-        self::CONTRAT_REGLEMENT_FINANCEMENT => 'Financement',
-        self::CONTRAT_REGLEMENT_TRAITE => 'Traité',
-        self::CONTRAT_REGLEMENT_MANDAT => 'Mandat',
-        self::CONTRAT_REGLEMENT_30_JOURS => '30 jours',
-        self::CONTRAT_REGLEMENT_REMBOURCEMENT => 'Rembourcement',
-        self::CONTRAT_REGLEMENT_AMERICAN_EXPRESS => 'American Express'
-    );
+
     public static $objet_contrat = [
         self::CONTRAT_GLOBAL => ['label' => "Contrat global", 'classes' => [], 'icon' => 'globe'],
         self::CONTRAT_DE_MAINTENANCE => ['label' => "Contrat de maintenance", 'classes' => [], 'icon' => 'cogs'],
@@ -117,26 +89,10 @@ class BContract_contrat extends BimpDolObject {
     
     function __construct($module, $object_name) {
         global $user, $db;
-        $this->redirectMode = 1;
-        
-        if($this->getData('statut') == self::CONTRAT_STATUS_BROUILLON) {
-            $this->updateField('date_contrat', null); // ToDo à viré lorsque le formulaire sur les commandes sera fait
-        }
-        
-//        if(BimpTools::getContext() == 'public') {
-//        if(BimpTools::getContext() == 'private'){
-//            $this->redirectMode = 1;
-//        } elseif(BimpTools::getContext() == 'public') {
-//            $this->redirectMode = 4;
-//        }
-//        
-//        if($user->id == 19)
-//            $this->redirectMode = 4;
-            
-//        }
-//        if($user->id == 460 || $user->id == 512 || $user->admin) {
-//            $this->redirectMode = 4;
-//        }        
+        if(BimpTools::getContext() != 'public')
+            $this->redirectMode = 1;
+        else
+            $this->redirectMode = 4;
         return parent::__construct($module, $object_name);
     }
     
@@ -154,7 +110,6 @@ class BContract_contrat extends BimpDolObject {
             'errors' => $errors,
             'warnings' => $warnings
         ];
-        
     }
 
     public function update(&$warnings = array(), $force_update = false) {
@@ -287,6 +242,10 @@ class BContract_contrat extends BimpDolObject {
     {
         global $conf, $langs, $user;
         $buttons = Array();
+        if($this->getData('statut') == self::CONTRAT_STATUS_BROUILLON) {
+             // ToDo à viré lorsque le formulaire sur les commandes sera fait
+           
+        }
         if ($this->isLoaded() && BimpTools::getContext() != 'public') {
             $status = $this->getData('statut');
             
@@ -338,7 +297,6 @@ class BContract_contrat extends BimpDolObject {
                     ))
                 );
             }
-            
         }
 
         return $buttons;
@@ -464,10 +422,60 @@ class BContract_contrat extends BimpDolObject {
             $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object));
             return 0;
         }
+        
+        if(!BimpTools::getValue('use_syntec')) {
+            $this->updateField('syntec', null);
+        }
+        $date = new DateTime($this->getData('date_start'));
+        $instance = $this->getInstance('bimpcontract', 'BContract_echeancier');
+        $instance->set('id_contrat', $this->id);
+        $instance->set('next_facture_date', $date->format('Y-m-d H:i:s'));
+        $instance->set('next_facture_amount', $this->reste_a_payer());
+        $instance->set('validate', 0);
+        $instance->create();
+            
+        
         $this->dol_object->activateAll($user);
         $this->actionGeneratePdf([], $success);
         
     }
+    
+    public function actionFusion($data, &$success) {
+        
+        $ids_selected_contrats = $data['id_objects'];
+        
+        $last_socid = 0;
+        
+        foreach($ids_selected_contrats as $id) {
+            $contrat = $this->getInstance('bimpcontract', 'BContract_contrat', $id);
+            
+            if($contrat->getData('statut') == self::CONTRAT_STATUS_BROUILLON) {
+                return 'Le contrat ne peut être fusionné car il est en statut brouillon';
+            }
+            
+            if($contrat->getData('fk_soc') != $last_socid && $last_socid > 0) {
+                return 'Les contrat ne peuvent êtres fusionné car ce n\'est pas le même client';
+            }
+
+            $last_socid = $contrat->getData('fk_soc');
+        
+            
+            
+        }
+        
+    }
+    
+//    public function getBulkActions()
+//    {
+//        return array(
+//            [
+//                'label'     => 'Fusionner les contrats sélectionnés',
+//                'icon'      => 'fas_sign-in-alt',
+//                'onclick'   => 'setSelectedObjectsAction($(this), \'list_id\', \'fusion\', {}, null, null, true)',
+//                'btn_class' => 'deleteSelectedObjects'
+//            ],
+//        );
+//    }
     
     public function actionAddContact($data, &$success)
     {
@@ -578,20 +586,7 @@ class BContract_contrat extends BimpDolObject {
             }
         }
             $errors = parent::create($warnings, $force_create);
-            
-            if(!count($errors)) {
-                if(!BimpTools::getValue('use_syntec')) {
-                    $this->updateField('syntec', null);
-                }
-                $date = new DateTime($this->getData('date_start'));
-                $instance = $this->getInstance('bimpcontract', 'BContract_echeancier');
-                $instance->set('id_contrat', $this->id);
-                $instance->set('next_facture_date', $date->format('Y-m-d H:i:s'));
-                $instance->set('next_facture_amount', $this->reste_a_payer());
-                $instance->set('validate', 0);
-                $instance->create();
-            }
-            
+
             $callback = "window.location.href = '" . DOL_URL_ROOT . "/bimpcontract/index.php?fc=contrat&id='".$this->id."';";
             return [
                 'success_callback' => $callback,
@@ -790,14 +785,19 @@ class BContract_contrat extends BimpDolObject {
 
         if ($this->isLoaded()) {
             global $conf;
-            $dir = $conf->contrat->dir_output. '/' . dol_sanitizeFileName($this->getRef());
+            $ref = $this->getRef();
+            if($this->getData('statut') == self::CONTRAT_STATUS_BROUILLON) {
+                $ref = str_replace('(', "_", $ref);
+                $ref = str_replace(')', "_", $ref);
+            }
+            
+            $dir = $conf->contrat->dir_output. '/' . $ref;
 
             if (!function_exists('dol_dir_list')) {
                 require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
             }
 
             $files_list = dol_dir_list($dir, 'files', 0, '', '(\.meta|_preview.*.*\.png)$', 'date', SORT_DESC);
-
             $html .= '<table class="bimp_list_table">';
 
             $html .= '<thead>';
@@ -813,7 +813,7 @@ class BContract_contrat extends BimpDolObject {
 
 
             if (count($files_list)) {
-                $url = DOL_URL_ROOT . '/document.php?modulepart=' . static::$dol_module . '&file=' . dol_sanitizeFileName($this->getRef()) . urlencode('/');
+                $url = DOL_URL_ROOT . '/document.php?modulepart=' . static::$dol_module . '&file=' . $ref . urlencode('/');
                 foreach ($files_list as $file) {
                     $html .= '<tr>';
 
@@ -1138,9 +1138,28 @@ class BContract_contrat extends BimpDolObject {
         
     }
     
-    public function createFromCommande(Bimp_Commande $commande) {
+    public function createFromCommande($id_commande) {
+        
+        //$commande = $this->getInstance('bimpcommercial', "Bimp_Commande", $id_commande);
+        
+        $new_contrat = BimpObject::getInstance('bimpcontract', 'BContract_contrat');
+//        $new_contrat->set('date_contrat', null);
+//        $new_contrat->set('date_start', date("Y-m-d 00:00:00"));
+//        $new_contrat->set('objet_contrat', 'CT');
+        
+        $new_contrat->create();
         
         
+        
+        
+//        foreach($commande->dol_object->lines as $line) {
+//            $produit = $this->getInstance('bimpcore', 'Bimp_Product', $line->fk_product);
+//            if($produit->getData('fk_product_type') == 1) {
+//                
+//                
+//                
+//            }
+//        }
         
     }
     

@@ -2825,10 +2825,10 @@ class ObjectLine extends BimpObject
             if (is_null($this->remise) || (float) $this->remise !== (float) $remises_infos['total_percent'] ||
                     $remises_infos['total_percent'] !== (float) $this->getData('remise') ||
                     $remises_infos['total_percent'] !== (float) $this->getInitData('remise') ) {
-                if($this->nbCalcremise < 90){
+//                if($this->nbCalcremise < 90){
                     $this->nbCalcremise++;
                     $this->update($warnings, true);
-                }
+//                }
             }
         }
     }

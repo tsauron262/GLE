@@ -50,7 +50,7 @@ class Bimp_Commande extends BimpComm
         2 => array('label' => 'Non facturable', 'icon' => 'fas_exclamation-circle', 'classes' => array('danger'))
     );
     public static $logistique_active_status = array(1, 2, 3);
-
+    
     // Gestion des droits et autorisations: 
 
     public function canCreate()
@@ -611,7 +611,29 @@ class Bimp_Commande extends BimpComm
                     ))
                 );
             }
-//            
+            
+            // Créer un contrat
+//            if($status == Commande::STATUS_VALIDATED && $user->rights->contrat->creer) {
+//                $buttons[] = array(
+//                'label'   => 'Créer un contrat',
+//                'icon'    => 'fas_file-contract',
+//                'onclick' => $this->getJsActionOnclick('addContrat', 
+//                        array(), 
+//                        array(
+//                            'form_name' => "contrat"
+//                        )
+//                    )
+//                );
+//            } else {
+//                $buttons[] = array(
+//                        'label'    => 'Créer un contrat',
+//                        'icon'     => 'fas_file-contract',
+//                        'onclick'  => '',
+//                        'disabled' => 1,
+//                        'popover'  => 'Vous n\'avez pas la permission'
+//                    );
+//            }
+            
             // Créer intervention
             if ($conf->ficheinter->enabled) {
                 $langs->load("interventions");
@@ -764,6 +786,19 @@ class Bimp_Commande extends BimpComm
 
         return $buttons;
     }
+    
+//    public function actionCreateContrat($data, &$success) {
+//        $instance = $this->getInstance('bimpcontract', 'BContract_contrat');
+//        if($instance->createFromCommande($data['id']) > 0) {
+//            $callback = '';
+//        }
+//        
+//        return [
+//            'success_callback' => $callback,
+//            'warnings' => $warnings,
+//            'errors' => $errors
+//        ];
+//    }
 
     public function getProductFournisseursPricesArray()
     {
@@ -1866,7 +1901,7 @@ class Bimp_Commande extends BimpComm
     }
 
     // Traitements factures: 
-
+    
     public function createFacture(&$errors = array(), $id_client = null, $id_contact = null, $cond_reglement = null, $id_account = null, $public_note = '', $private_note = '', $remises = array(), $other_commandes = array(), $libelle = null, $id_entrepot = null, $ef_type = null, $force_create = false)
     {
         if (!$this->isLoaded()) {

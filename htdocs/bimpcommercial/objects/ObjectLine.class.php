@@ -2827,7 +2827,7 @@ class ObjectLine extends BimpObject
                     $remises_infos['total_percent'] !== (float) $this->getInitData('remise') ) {
                 if($this->nbCalcremise < 4){
                     $this->nbCalcremise++;
-                $this->update($warnings, true);
+                    $this->update($warnings, true);
                 }
             }
         }

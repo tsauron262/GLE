@@ -1,5 +1,7 @@
 <?php
 
+ini_set('memory_limit', '6000M');
+
 class BL_CommandeShipment extends BimpObject
 {
 

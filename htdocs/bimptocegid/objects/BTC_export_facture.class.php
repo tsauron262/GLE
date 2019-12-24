@@ -201,13 +201,15 @@ class BTC_export_facture extends BTC_export {
                             }
                         }
                         
-                        $is_remise = false;
-                        $montant_remise = 0;
-                        if($produit->getData('ref') == 'REMISE' || $produit->getData('ref') == 'TEX' || $produit->getData('ref') == 'REMISE-01' || $produit->getData('ref') == 'REMISE-02' || $produit->getData('ref') == 'REMISE-03' || $produit->getData('ref') == 'REMISECRT') {
-                            $is_remise = true;
-                            
+//                        $is_remise = false;
+//                        $montant_remise = 0;
+//                        if($produit->getData('ref') == 'REMISE' || $produit->getData('ref') == 'TEX' || $produit->getData('ref') == 'REMISE-01' || $produit->getData('ref') == 'REMISE-02' || $produit->getData('ref') == 'REMISE-03' || $produit->getData('ref') == 'REMISECRT') {
+//                            $is_remise = true;
+//
                             switch($produit->getData('ref')) {
                                 case "REMISE" :
+                                case "REMISECRT":
+                                case "TEX":
                                     $use_compte_general = $compte_general_produit;
                                     break;
                                 case "REMISE-01":
@@ -216,10 +218,10 @@ class BTC_export_facture extends BTC_export {
                                     $use_compte_general = $compte_general_service;
                                     break;
                             }
-                            
-                            $lignes[$use_compte_general]['HT'] += $line->multicurrency_total_ht;
-                            $total_lignes += round($line->multicurrency_total_ht, 2);
-                        }
+//                            
+//                            $lignes[$use_compte_general]['HT'] += $line->multicurrency_total_ht;
+//                            $total_lignes += round($line->multicurrency_total_ht, 2);
+//                        }
                         
                         if($produit->getData('ref') == "ZZCOMMISSION") {
                             $is_commission = true;

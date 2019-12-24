@@ -170,6 +170,9 @@ class BTC_export_facture extends BTC_export {
             $facture->updateField('exported', 204);
         }
         
+        $have_product_in_facture = $this->have_in_facture($facture->dol_object->lines);
+        $have_service_in_facture = $this->have_in_facture($facture->dol_object->lines, 'service');
+        
         foreach($facture->dol_object->lines as $line) {
             if(is_null($facture->getData('ignore_compta')) || $facture->getData('ignore_compta') == 0) { // Si la facture n'est pas ignorée en compta
                 if(round($line->multicurrency_total_ht, 2) != 0 && !$ignore) {
@@ -205,17 +208,18 @@ class BTC_export_facture extends BTC_export {
 //                        $montant_remise = 0;
 //                        if($produit->getData('ref') == 'REMISE' || $produit->getData('ref') == 'TEX' || $produit->getData('ref') == 'REMISE-01' || $produit->getData('ref') == 'REMISE-02' || $produit->getData('ref') == 'REMISE-03' || $produit->getData('ref') == 'REMISECRT') {
 //                            $is_remise = true;
-//
+                            
+                        
                             switch($produit->getData('ref')) {
                                 case "REMISE" :
                                 case "REMISECRT":
                                 case "TEX":
-                                    $use_compte_general = $compte_general_produit;
+                                    $use_compte_general = ($have_product_in_facture) ? $compte_general_produit : $compte_general_service;
                                     break;
                                 case "REMISE-01":
                                 case "REMISE-02":
                                 case "REMISE-03":
-                                    $use_compte_general = $compte_general_service;
+                                    $use_compte_general = ($have_service_in_facture) ? $compte_general_service : $compte_general_produit;
                                     break;
                             }
 //                            

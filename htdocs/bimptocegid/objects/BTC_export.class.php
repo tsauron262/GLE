@@ -527,12 +527,20 @@ class BTC_export extends BimpObject {
         
     }
     
-// A UTILISER POUR LES EXPORTS DES FACTURES
-//    if($contact = $this->db->getRow('element_contact', 'element_id = ' . $facture->getData('fk_soc') . ' AND fk_c_type_contact = 60')) {
-//                $id_client_facturation = $contact->fk_socpeople;
-//            } else {
-//                $id_client_facturation = $facture->getData('fk_soc');
-//            }
-    
-    
+    public function have_in_facture($lines, $type = 'product') {
+        
+        $searching = ($type == 'service') ? 1 : 0;
+        
+        foreach($lines as $line) {
+            if($line->fk_product) {
+                $p = $this->getInstance('bimpcore', "Bimp_Product", $line->fk_product);
+                if($p->getData('fk_product_type') == $searching) {
+                    return true;
+                }
+            }
+        }
+        
+        return false;
+        
+    }
 }

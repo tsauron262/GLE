@@ -240,7 +240,7 @@ class BTC_export extends BimpObject {
             $instance = $this->getInstance('bimptocegid', 'BTC_export_facture');
             foreach($liste as $facture) {
                 $error = $instance->export($facture->rowid, $forced, ['name' => $name, 'dir' => $dir]);
-                $piece = $this->getInstance('bimpcommercial', 'Bimp_Facturet', $facture->rowid);
+                $piece = $this->getInstance('bimpcommercial', 'Bimp_Facture', $facture->rowid);
                 if($error > 0) {
                     $this->log('FACTURE CLIENT', $facture->facnumber, $file);
                     $this->write_logs("***EXPORTATION*** " . date('d/m/Y H:i:s') . " => USER : " . $user->login . " => FACTURE:  " . $facture->facnumber . "\n", false);

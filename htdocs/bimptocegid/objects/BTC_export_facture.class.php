@@ -285,6 +285,7 @@ class BTC_export_facture extends BTC_export {
         
         if($use_d3e && $d3e != 0) {
             $lignes[$compte_general_d3e]['HT'] = $d3e;
+            $total_lignes += $d3e;
         }
         
         if(round($total_lignes, 2) != round($total_ttc_facture, 2)) {

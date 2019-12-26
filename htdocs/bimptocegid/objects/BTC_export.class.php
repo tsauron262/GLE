@@ -240,8 +240,8 @@ class BTC_export extends BimpObject {
         if(count($liste)) {
             $instance = $this->getInstance('bimptocegid', 'BTC_export_facture');
             foreach($liste as $facture) {
-                if(round($facture->total_ttc, 2) != 0) {
-                    echo round($facture->total_ttc, 2);
+                if(round($facture->total_ttc, 1) != 0) {
+                    echo round($facture->total_ttc, 1);
                     $error = $instance->export($facture->rowid, $forced, ['name' => $name, 'dir' => $dir]);
                 }
                 $piece = $this->getInstance('bimpcommercial', 'Bimp_Facture', $facture->rowid);

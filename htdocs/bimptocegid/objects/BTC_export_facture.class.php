@@ -283,7 +283,7 @@ class BTC_export_facture extends BTC_export {
                                 $total_lignes += round($line->multicurrency_total_ht, 2);
                             } elseif($use_tva && $line->tva_tx == 0) {
                                 $lignes[$compte_general_tva_null]['HT'] += $line->multicurrency_total_ht;
-                                $total_lignes += round($line->multicurrency_total_ht, 2);;
+                                $total_lignes += round($line->multicurrency_total_ht, 2);
                             }
                     }
                 }
@@ -294,14 +294,9 @@ class BTC_export_facture extends BTC_export {
             $lignes[$compte_general_d3e]['HT'] = $d3e;
         }
                 
-        if(round($total_lignes, 2) != round($total_ttc_facture, 2)) {
-            echo 'Total des lignes : ' . round($total_lignes, 2) . '<br /> Total de la facture : ' . round($total_ttc_facture, 2);
-            
+        if(round($total_lignes, 2) != round($total_ttc_facture, 2)) {            
             $montant_ecart = round($total_ttc_facture, 2) - (round($total_lignes, 2));
-            echo '<br />' . $montant_ecart;
-          
-            
-            
+
             $lignes = $this->rectifications_ecarts($lignes, round($montant_ecart,2), 'vente');
            
         }

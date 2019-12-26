@@ -294,14 +294,17 @@ class BTC_export_facture extends BTC_export {
             $lignes[$compte_general_d3e]['HT'] = $d3e;
         }
         $montant_ecart = $total_ttc_facture - $total_lignes;
-        echo 'PAS ENCORE PASSER : ' . $montant_ecart;
         
+        $rounded_decimal = 2;
+        if($montant_ecart < 0.01) {
+            $rounded_decimal = 3;
+        }
         
-        if(round($total_lignes, 2) != round($total_ttc_facture, 2)) {            
-            $montant_ecart = round($total_ttc_facture, 2) - (round($total_lignes, 2));
-            echo 'MONTANT : ' . round($montant_ecart,2);
+        if(round($total_lignes, $rounded_decimal) != round($total_ttc_facture, $rounded_decimal)) {            
+            $montant_ecart = round($total_ttc_facture, $rounded_decimal) - (round($total_lignes, $rounded_decimal));
+            echo 'MONTANT : ' . round($montant_ecart,$rounded_decimal);
 
-            $lignes = $this->rectifications_ecarts($lignes, round($montant_ecart,2), 'vente');
+            $lignes = $this->rectifications_ecarts($lignes, round($montant_ecart,$rounded_decimal), 'vente');
            
         }
         foreach($lignes as $l => $infos) {

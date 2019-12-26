@@ -236,10 +236,13 @@ class BTC_export extends BimpObject {
         global $user;
         $liste = $this->get_facture_client_for_export($ref, $since);
         $forced = (is_null($ref)) ? false : true;
+        $error = 0;
         if(count($liste)) {
             $instance = $this->getInstance('bimptocegid', 'BTC_export_facture');
             foreach($liste as $facture) {
-                $error = $instance->export($facture->rowid, $forced, ['name' => $name, 'dir' => $dir]);
+                if(round($facture->total_ttc, 2) > 0 ){
+                    $error = $instance->export($facture->rowid, $forced, ['name' => $name, 'dir' => $dir]);
+                }
                 $piece = $this->getInstance('bimpcommercial', 'Bimp_Facture', $facture->rowid);
                 if($error > 0) {
                     $this->log('FACTURE CLIENT', $facture->facnumber, $file);

@@ -457,7 +457,6 @@ class BTC_export extends BimpObject {
     
     protected function rectifications_ecarts($lignes_facture, $ecart, $type_ecriture) {
         
-        echo $ecart;
         $comptes_reatribuable = 
             [
                 'achat' => ["607", "604"],

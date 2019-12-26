@@ -249,7 +249,14 @@ class BTC_export_facture extends BTC_export {
                         if(!$is_frais_de_port && !$is_remise && !$is_commission && !$is_refact) {
                             if($use_d3e){
                                 if(($facture->getData('zone_vente') == 1 && $line->tva_tx != 0) || $facture->getData('zone_vente') != 1){
-                                    $lignes[$use_compte_general]['HT'] += $line->multicurrency_total_ht - ($produit->getData('deee') * $line->qty);
+                                    
+                                    $add_ht = $line->multicurrency_total_ht - ($produit->getData('deee') * $line->qty);
+                                    
+                                    if($line->multicurrency_total_ht < 0) {
+                                        $add_ht = $line->multicurrency_total_ht + ($produit->getData('deee') * $line->qty);
+                                    }
+                                    
+                                    $lignes[$use_compte_general]['HT'] += $add_ht;
                                     $total_lignes += round($line->multicurrency_total_ht, 2);
                                 }
                             } else {
@@ -286,9 +293,7 @@ class BTC_export_facture extends BTC_export {
         if($use_d3e && $d3e != 0) {
             $lignes[$compte_general_d3e]['HT'] = $d3e;
         }
-        
-        $total_lignes += $d3e;
-        
+                
         if(round($total_lignes, 2) != round($total_ttc_facture, 2)) {
             $montant_ecart = round($total_ttc_facture, 2) - (round($total_lignes, 2));
             $lignes = $this->rectifications_ecarts($lignes, round($montant_ecart,2), 'vente');

@@ -295,6 +295,7 @@ class BTC_export_facture extends BTC_export {
         }
                 
         if(round($total_lignes, 2) != round($total_ttc_facture, 2)) {
+            echo 'Total des lignes : ' . round($total_lignes, 2) . '<br /> Total de la facture : ' . round($total_ttc_facture, 2);
             $montant_ecart = round($total_ttc_facture, 2) - (round($total_lignes, 2));
             $lignes = $this->rectifications_ecarts($lignes, round($montant_ecart,2), 'vente');
            

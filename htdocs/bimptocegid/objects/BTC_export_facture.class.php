@@ -293,7 +293,10 @@ class BTC_export_facture extends BTC_export {
         if($use_d3e && $d3e != 0) {
             $lignes[$compte_general_d3e]['HT'] = $d3e;
         }
-                
+        $montant_ecart = round($total_ttc_facture, 2) - (round($total_lignes, 2));
+        echo 'PAS ENCORE PASSER : ' . $montant_ecart;
+        
+        
         if(round($total_lignes, 2) != round($total_ttc_facture, 2)) {            
             $montant_ecart = round($total_ttc_facture, 2) - (round($total_lignes, 2));
             echo 'MONTANT : ' . round($montant_ecart,2);

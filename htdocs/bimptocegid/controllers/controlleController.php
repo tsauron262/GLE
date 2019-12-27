@@ -2,7 +2,7 @@
 
 class controlleController extends BimpController {
 
-    private $dir = '/usr/local/data2/test_alexis/synchro/';
+    private $dir = DIR_SYNCH . 'exportCegid/BY_DATE/';
 
     public function renderHtml() {
         

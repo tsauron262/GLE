@@ -34,8 +34,7 @@ class BTC_export_facture extends BTC_export {
         $use_tva = true;
         $use_d3e = true;
         
-        $compte_general_tva_null = BimpCore::getConf('BIMPTOCEGID_vente_tva_null');
-        
+        $compte_general_tva_null = $this->convertion_to_interco_code(BimpCore::getConf('BIMPTOCEGID_vente_tva_null'), $compte_general_411);
         if ($societe->getData('is_subsidiary')) {
             $compte_general_411 = $societe->getData('accounting_account');
             $is_client_interco = true;
@@ -49,7 +48,7 @@ class BTC_export_facture extends BTC_export {
                 $compte_general_produit = $this->convertion_to_interco_code(BimpCore::getConf('BIMPTOCEGID_vente_produit_fr'), $compte_general_411);
                 $compte_general_service = $this->convertion_to_interco_code(BimpCore::getConf('BIMPTOCEGID_vente_service_fr'), $compte_general_411);
                 $compte_general_tva = BimpCore::getConf('BIMPTOCEGID_vente_tva_fr');
-                $compte_general_d3e = BimpCore::getConf('BIMPTOCEGID_vente_dee_fr');
+                $compte_general_d3e = $this->convertion_to_interco_code(BimpCore::getConf('BIMPTOCEGID_vente_dee_fr'), $compte_general_411);
                 $compte_general_port = $this->convertion_to_interco_code(BimpCore::getConf('BIMPTOCEGID_frais_de_port_vente_fr'), $compte_general_411);
                 $compte_general_comissions = $this->convertion_to_interco_code(BimpCore::getConf('BIMPTOCEGID_comissions_fr'), $compte_general_411);
                 break;

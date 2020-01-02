@@ -632,33 +632,34 @@ filters_panels:
 #                child: product
             remise_crt:
                 field: remise_crt
-            categ1:
-                custom: 1
-                label: Catégorie (1)
-                field: categ1
-                type: value
-                input:
-                    type: select
-                    options: 
-                        callback: getCategoriesArray
-            categ2:
-                custom: 1
-                label: Catégorie (2)
-                field: categ2
-                type: value
-                input:
-                    type: select
-                    options: 
-                        callback: getCategoriesArray
-            categ3:
-                custom: 1
-                label: Catégorie (3)
-                field: categ3
-                type: value
-                input:
-                    type: select
-                    options: 
-                        callback: getCategoriesArray
+#            categ1:
+#                custom: 1
+#                label: Catégorie (1)
+#                field: categ1
+#                type: value
+#                input:
+#                    type: select
+#                    options: 
+#                        callback: getCategoriesArray
+#            categ2:
+#                custom: 1
+#                label: Catégorie (2)
+#                field: categ2
+#                type: value
+#                input:
+#                    type: select
+#                    options: 
+#                        callback: getCategoriesArray
+#            categ3:
+#                custom: 1
+#                label: Catégorie (3)
+#                field: categ3
+#                type: value
+#                input:
+#                    type: select
+#                    options: 
+#                        callback: getCategoriesArray
+            
                 
 lists_cols: 
     position: 

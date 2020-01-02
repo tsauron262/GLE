@@ -6,8 +6,8 @@ class BTC_export_facture_fourn extends BTC_export {
     const CAUSE_TVA = 2;
     const CAUSE_ZONE_ACHAT = 3;
 
-    public static $avoir_fournisseur = ['GEN-AVOIR', 'GEN-AVOIR-6097000'];
-    public static $rfa_fournisseur = ['GEN-CRT', 'GEN-RFA', 'GEN-IPH', 'REMISE'];
+    public static $avoir_fournisseur = [];
+    public static $rfa_fournisseur = ['GEN-CRT', 'GEN-RFA', 'GEN-IPH', 'REMISE', 'GEN-RETROCESSION', 'GEN-AVOIR', 'GEN-AVOIR-6097000'];
 
     public function export($id_facture, $forced) {
         
@@ -87,6 +87,7 @@ class BTC_export_facture_fourn extends BTC_export {
                         $compte_frais_de_port = BimpCore::getConf('BIMPTOCEGID_frais_de_port_achat_ue');
                         $compte_achat_deee = null;
                         $compte_achat_tva_null = null;
+                        $compte_achat_tva_null_service = null;
                         $compte_achat_tva = null;
                         break;
                     case 4: // Achat en UE
@@ -98,6 +99,7 @@ class BTC_export_facture_fourn extends BTC_export {
                         $compte_frais_de_port = BimpCore::getConf('BIMPTOCEGID_frais_de_port_achat_ue');
                         $compte_achat_deee = null;
                         $compte_achat_tva_null = null;
+                        $compte_achat_tva_null_service = null;
                         $compte_achat_tva = null;
                         break;
                     case 3: // Achat export
@@ -109,6 +111,7 @@ class BTC_export_facture_fourn extends BTC_export {
                         $compte_frais_de_port = BimpCore::getConf('BIMPTOCEGID_frais_de_port_achat_ex');
                         $compte_achat_deee = null;
                         $compte_achat_tva_null = null;
+                        $compte_achat_tva_null_service = null;
                         $compte_achat_tva = null;
                         break;
                     default:
@@ -119,6 +122,7 @@ class BTC_export_facture_fourn extends BTC_export {
                         $compte_achat_service = $this->convertion_to_interco_code(BimpCore::getConf('BIMPTOCEGID_achat_service_fr'), $compte_general_401);
                         $compte_frais_de_port = $this->convertion_to_interco_code(BimpCore::getConf('BIMPTOCEGID_frais_de_port_achat_fr'), $compte_general_401);
                         $compte_achat_tva_null = BimpCore::getConf('BIMPTOCEGID_achat_tva_null');
+                        $compte_achat_tva_null_service = BimpCore::getConf('BIMPTOCEGID_achat_tva_null_service');
                         $compte_achat_tva = BimpCore::getConf('BIMPTOCEGID_achat_tva_fr');
                         $compte_achat_deee = $this->convertion_to_interco_code(BimpCore::getConf('BIMPTOCEGID_achat_dee_fr'), $compte_general_401);
                         break;
@@ -198,7 +202,7 @@ class BTC_export_facture_fourn extends BTC_export {
                         if ($produit->getData('fk_product_type') == 0) {
                             $use_compte_general = ($use_tva && $ligne->tva_tx == 0) ? $compte_achat_tva_null : $compte_achat_produit;
                         } elseif ($produit->getData('fk_product_type') == 1) {
-                            $use_compte_general = ($use_tva && $ligne->tva_tx == 0) ? $compte_achat_tva_null : $compte_achat_service;
+                            $use_compte_general = ($use_tva && $ligne->tva_tx == 0) ? $compte_achat_tva_null_service : $compte_achat_service;
                         }
 
                         if ($this->isApple($societe->getData('nom'))) {

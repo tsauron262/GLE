@@ -211,7 +211,7 @@ class BTC_export extends BimpObject {
         }
     }
     
-    private function export_facture_fourn($ref = null, $since, $name = '', $dir = '') {
+    private function export_facture_fourn($ref = null, $since, $ref = null, $name = '', $dir = '') {
         global $user;
         $liste = $this->get_facture_fourn_for_export($ref, $since);
         $forced = (is_null($ref)) ? false : true;

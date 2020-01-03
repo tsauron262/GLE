@@ -9,7 +9,7 @@ class BTC_export_facture_fourn extends BTC_export {
     public static $avoir_fournisseur = [];
     public static $rfa_fournisseur = ['GEN-CRT', 'GEN-RFA', 'GEN-IPH', 'REMISE', 'GEN-RETROCESSION', 'GEN-AVOIR', 'GEN-AVOIR-6097000'];
 
-    public function export($id_facture, $forced) {
+    public function export($id_facture, $forced, $confFile) {
         
         $facture = $this->getInstance('bimpcommercial', 'Bimp_FactureFourn', $id_facture);
         $datec = new DateTime($facture->getData('datec'));

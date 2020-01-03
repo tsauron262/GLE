@@ -233,7 +233,7 @@ class BTC_export_facture_fourn extends BTC_export {
                     }
                     $contre_partie_ligne_fournisseur = $use_compte_general;
                     $is_frais_de_port = false;
-                    if ($use_d3e) {
+                    if ($use_d3e && !$is_rfa) {
                         if ($produit->isLoaded()) {
                             $use_compte_general = $compte_achat_deee;
                             if ($produit->getData('deee') > 0) {

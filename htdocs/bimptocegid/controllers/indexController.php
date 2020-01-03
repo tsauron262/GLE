@@ -66,10 +66,13 @@
                 $html .= "<h3>Export des <b class='warning'>".ucfirst($_REQUEST['element'])."</b></h3>";
                 $html .= "Le fichier tiers correspondant ce crée automatiquement<br />";
             }
-            $html .= "<form method='POST' action='".DOL_URL_ROOT."/bimptocegid/".$add."'><input type='date' name='date' ><input type='submit' class='btn btn-primary' value='Exporter' onclick=''></form>";
-            $html .= "<form method='POST' action='".DOL_URL_ROOT."/bimptocegid/".$add."'><input placeholder='Référence' type='text' name='ref' ><input type='submit' class='btn btn-primary' value='Exporter' onclick=''></form>";
-            $html .= "<form method='POST' action='".DOL_URL_ROOT."/bimptocegid/".$add."'><input placeholder='Depuis le ".$export->getStartTrimestreComptable()."' type='text' disabled><input type='submit' class='btn btn-primary' value='Exporter' onclick='' name='since'></form>";
+            if(isset($_REQUEST['element'])) {
+                $html .= "<form method='POST' action='".DOL_URL_ROOT."/bimptocegid/".$add."'><input type='date' name='date' ><input type='submit' class='btn btn-primary' value='Exporter' onclick=''></form>";
+                $html .= "<form method='POST' action='".DOL_URL_ROOT."/bimptocegid/".$add."'><input placeholder='Référence' type='text' name='ref' ><input type='submit' class='btn btn-primary' value='Exporter' onclick=''></form>";
+                $html .= "<form method='POST' action='".DOL_URL_ROOT."/bimptocegid/".$add."'><input placeholder='Depuis le ".$export->getStartTrimestreComptable()."' type='text' disabled><input type='submit' class='btn btn-primary' value='Exporter' onclick='' name='since'></form>";
 
+            }
+            
             $html .= '<br /><br /><br />';
             
             $scanned_directory_by_date = array_diff(scandir(DIR_SYNCH . 'exportCegid/BY_DATE'), array('..', '.', 'imported'));

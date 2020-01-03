@@ -202,7 +202,7 @@ fields:
 #        default_value: 2
         
     ref_client: unset
-    total: unset
+#    total: unset
     fk_availability: unset
     fk_input_reason: unset
     remise_globale: unset

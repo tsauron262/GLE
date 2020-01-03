@@ -322,7 +322,7 @@ class indexController extends BimpController
 
                 $rows[] = array(
                     'label' => 'Caisse',
-                    'input' => '<strong>' . $caisse->getData('name') . '</strong>'
+                    'input' => '<strong>' . $caisse->getData('name') . ' au '. dol_print_date(dol_now()).'</strong>'
                 );
 
                 $rows[] = array(

@@ -225,6 +225,9 @@ views:
 filters_panels: 
     default: 
         filters: 
+            client:
+                field: fk_soc
+                child: facture
             dates: 
                 field: date
             entrepot: 

@@ -170,6 +170,10 @@ fields:
         label: Total TTC
         dol_prop: total_ttc
         type: money
+    total_ttc: 
+        label: Total TTC
+        dol_prop: total_ttc
+        type: money
     total_ht: 
         label: Total HT
         type: money

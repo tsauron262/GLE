@@ -187,8 +187,25 @@ class BTC_export_facture_fourn extends BTC_export {
                 $total_lignes_facture += round($ligne->total_ht, 2);
                 if ($ligne->fk_product) {
                     $is_frais_de_port = false;
+                    $is_rfa = false;
                     $produit = $this->getInstance('bimpcore', 'Bimp_Product', $ligne->fk_product);
                     //$frais_de_port = $this->db->getRow('categorie_product', 'fk_categorie = 9705 AND fk_product = ' . $produit->id);
+                    if (in_array($produit->getData('ref'), self::$rfa_fournisseur)) {
+                        $is_rfa = true;
+                        switch ($zone_achat) {
+                            case 1:
+                                $use_compte_general = BimpCore::getConf('BIMPTOCEGID_rfa_fournisseur_fr');
+                                break;
+                            case 2:
+                                $use_compte_general = BimpCore::getConf('BIMPTOCEGID_rfa_fournisseur_ue');
+                                break;
+                            case 3:
+                                $use_compte_general = BimpCore::getConf('BIMPTOCEGID_rfa_fournisseur_ex');
+                                break;
+                            case 4:
+                                $use_compte_general = BimpCore::getConf('BIMPTOCEGID_rfa_fournisseur_ue');
+                                break;
+                        }
                     if ($frais_de_port = $this->db->getRow('categorie_product', 'fk_categorie = 9705 AND fk_product = ' . $produit->id) || $produit->id == 129950) { // ID du produit à enlever quand il sera categoriser (FRAIS DE PORT LDLC
                         if ($use_tva && $ligne->tva_tx == 0) {
                             $use_compte_general = $this->convertion_to_interco_code($compte_achat_tva_null_service, $compte_general_401);
@@ -198,7 +215,7 @@ class BTC_export_facture_fourn extends BTC_export {
                         $lignes[$use_compte_general]['HT'] += $ligne->total_ht;
                         $is_frais_de_port = true;
                     }
-                    if (!$is_frais_de_port) {
+                    if (!$is_frais_de_port && !$is_rfa) {
                         if ($produit->getData('fk_product_type') == 0) {
                             $use_compte_general = ($use_tva && $ligne->tva_tx == 0) ? $compte_achat_tva_null : $compte_achat_produit;
                         } elseif ($produit->getData('fk_product_type') == 1) {
@@ -227,21 +244,7 @@ class BTC_export_facture_fourn extends BTC_export {
                     if ($this->isApple($societe->getData('nom'))) {
                         $use_compte_general = '60793000';
                     }
-                    if (in_array($produit->getData('ref'), self::$rfa_fournisseur)) {
-                        switch ($zone_achat) {
-                            case 1:
-                                $use_compte_general = BimpCore::getConf('BIMPTOCEGID_rfa_fournisseur_fr');
-                                break;
-                            case 2:
-                                $use_compte_general = BimpCore::getConf('BIMPTOCEGID_rfa_fournisseur_ue');
-                                break;
-                            case 3:
-                                $use_compte_general = BimpCore::getConf('BIMPTOCEGID_rfa_fournisseur_ex');
-                                break;
-                            case 4:
-                                $use_compte_general = BimpCore::getConf('BIMPTOCEGID_rfa_fournisseur_ue');
-                                break;
-                        }
+                    
 
                         if ($this->isApple($societe->getData('nom'))) {
                             $use_compte_general = '60973000';

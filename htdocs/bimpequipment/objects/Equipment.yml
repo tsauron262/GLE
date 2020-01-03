@@ -702,6 +702,7 @@ searches:
         fields_search: 
             - a.product_label
             - a.serial
+            - CONCAT('S', a.serial)
             - a.imei
             - a.imei2
             - a.meid

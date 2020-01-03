@@ -622,7 +622,7 @@ filters_panels:
                 field: total_ttc
                 child: dol_line
             total_ht: 
-                field: total
+                field: total_ht
                 child: parent
             total_ttc: 
                 field: total_ttc

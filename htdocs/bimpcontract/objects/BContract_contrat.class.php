@@ -442,40 +442,50 @@ class BContract_contrat extends BimpDolObject {
     
     public function actionFusion($data, &$success) {
         
-        $ids_selected_contrats = $data['id_objects'];
+        $errors = [];
         
+        $ids_selected_contrats = $data['id_objects'];
+        $success = "Les contrats ont bien été fusionnés";
         $last_socid = 0;
+        
+        if(count($ids_selected_contrats) == 1) {
+            $errors[] = "Vous ne pouvez pas fusionner qu'un seul contrat";
+        }
         
         foreach($ids_selected_contrats as $id) {
             $contrat = $this->getInstance('bimpcontract', 'BContract_contrat', $id);
             
             if($contrat->getData('statut') == self::CONTRAT_STATUS_BROUILLON) {
-                return 'Le contrat ne peut être fusionné car il est en statut brouillon';
+                $errors[] = 'Le contrat '. $contrat->getRef() .' ne peut être fusionné car il est en statut brouillon';
             }
             
             if($contrat->getData('fk_soc') != $last_socid && $last_socid > 0) {
-                return 'Les contrat ne peuvent êtres fusionné car ce n\'est pas le même client';
+                $errors[] = 'Les contrat ne peuvent êtres fusionné car ce n\'est pas le même client';
             }
 
             $last_socid = $contrat->getData('fk_soc');
-        
-            
-            
+
         }
+        
+        return [
+            'errors' => $errors,
+            'warnings' => $warnings,
+            'success' => $success
+        ];
         
     }
     
-//    public function getBulkActions()
-//    {
-//        return array(
-//            [
-//                'label'     => 'Fusionner les contrats sélectionnés',
-//                'icon'      => 'fas_sign-in-alt',
-//                'onclick'   => 'setSelectedObjectsAction($(this), \'list_id\', \'fusion\', {}, null, null, true)',
-//                'btn_class' => 'deleteSelectedObjects'
-//            ],
-//        );
-//    }
+    public function getBulkActions()
+    {
+        return array(
+            [
+                'label'     => 'Fusionner les contrats sélectionnés',
+                'icon'      => 'fas_sign-in-alt',
+                'onclick'   => 'setSelectedObjectsAction($(this), \'list_id\', \'fusion\', {}, null, null, true)',
+                'btn_class' => 'setSelectedObjectsAction'
+            ],
+        );
+    }
     
     public function actionAddContact($data, &$success)
     {
@@ -1138,29 +1148,35 @@ class BContract_contrat extends BimpDolObject {
         
     }
     
-    public function createFromCommande($id_commande) {
-        
-        //$commande = $this->getInstance('bimpcommercial', "Bimp_Commande", $id_commande);
-        
+    public function createFromCommande($commande, $data) {
+        //print_r($data); die();
         $new_contrat = BimpObject::getInstance('bimpcontract', 'BContract_contrat');
-//        $new_contrat->set('date_contrat', null);
-//        $new_contrat->set('date_start', date("Y-m-d 00:00:00"));
-//        $new_contrat->set('objet_contrat', 'CT');
-        
-        $new_contrat->create();
-        
-        
-        
-        
-//        foreach($commande->dol_object->lines as $line) {
-//            $produit = $this->getInstance('bimpcore', 'Bimp_Product', $line->fk_product);
-//            if($produit->getData('fk_product_type') == 1) {
-//                
-//                
-//                
-//            }
-//        }
-        
+        $new_contrat->set('fk_soc', $data['fk_soc']);
+        $new_contrat->set('date_contrat', null);
+        $new_contrat->set('date_start', $data['valid_start']);
+        $new_contrat->set('objet_contrat', $data['objet_contrat']);
+        $new_contrat->set('fk_commercial_signature', $data['commercial_signature']);
+        $new_contrat->set('fk_commercial_suivi', $data['commercial_suivi']);
+        $new_contrat->set('periodicity', $data['periodicity']);
+        $new_contrat->set('gti', $data['gti']);
+        $new_contrat->set('duree_mois', $data['duree_mois']);
+        $new_contrat->set('tacite', $data['re_new']);
+        $new_contrat->set('moderegl', $data['fk_mode_reglement']);
+        if($data['use_syntec'] == 1) {
+            $new_contrat->set('syntec', BimpCore::getConf('current_indice_syntec'));
+        }
+//        echo '<pre>';
+//        print_r($commande->dol_object->lines); die();
+        if($new_contrat->create() > 0) {
+            
+            foreach($commande->dol_object->lines as $line) {
+                $produit = $this->getInstance('bimpcore', 'Bimp_Product', $line->fk_product);
+                if($produit->getData('fk_product_type') == 1) {
+                    $new_contrat->dol_object->addLine($line->libelle, $line->price, $line->qty, $line->tva_tx, 0, 0, $line->fk_product, $line->remise_percent, $data['valid_start'], $data['valid_start']);                
+                }
+            }
+            
+        }
     }
     
     public function newRef($start_ref) {

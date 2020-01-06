@@ -72,11 +72,13 @@ class Interfacevalidate extends DolibarrTriggers
             }
             
             if (is_object($bimp_object) && $bimp_object->isLoaded()) {
-                $client = $bimp_object->getChildObject('client');
-                if (is_object($client) && $client->isLoaded()) {
-                    if (!$client->canBuy($errors)) {
-                        $object->errors = array_merge($object->errors, $errors);
-                        return -1;
+                if($action != 'BILL_VALIDATE' && $bimp_object->getData('type') != 'M'){                
+                    $client = $bimp_object->getChildObject('client');
+                    if (is_object($client) && $client->isLoaded()) {
+                        if (!$client->canBuy($errors)) {
+                            $object->errors = array_merge($object->errors, $errors);
+                            return -1;
+                        }
                     }
                 }
             }

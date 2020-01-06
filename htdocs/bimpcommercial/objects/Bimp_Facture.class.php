@@ -39,7 +39,17 @@ class Bimp_Facture extends BimpComm
             return true;
         parent::iAmAdminRedirect();
     }
+    
+    public function isFieldEditable($field, $force_edit = false) {
+        if((int) $this->getData('fk_statut') > 0 && ($field == 'datef'))
+            return 0;
+        
+        
+        return parent::isFieldEditable($field, $force_edit);
+    }
 
+            
+            
     public function isEditable($force_edit = false, &$errors = array())
     {
         if ($this->getData('exported') == 1)
@@ -2107,6 +2117,12 @@ class Bimp_Facture extends BimpComm
                 $html .= BimpRender::renderAlerts($msg, 'warning');
             }
         }
+        
+        
+        $today = date('Y-m-d');
+        if (!$this->canFactureAutreDate() && $this->getData('datef') != $today){
+            $html .= BimpRender::renderAlerts('Attention, la date va être modifiée à aujourd\'hui', 'warning');
+        }
 
         $html .= '<input type="hidden" name="validation_type" value="' . $validation_type . '">';
 
@@ -3155,7 +3171,8 @@ class Bimp_Facture extends BimpComm
 
             if (!count($errors)) {
                 $today = date('Y-m-d');
-                if ($this->getData('datef') != $today) {
+                if (!$this->canFactureAutreDate() && $this->getData('datef') != $today) {
+                    $warnings[] = "Attention la date a été modifiée à la date du jour.";
                     $errors = $this->updateField('datef', $today);
                 }
             }
@@ -3193,6 +3210,11 @@ class Bimp_Facture extends BimpComm
             'success_callback' => $success_callback,
             'modal_html'       => $modal_html
         );
+    }
+    
+    public function canFactureAutreDate(){
+        global $user;
+        return $user->rights->bimpcommercial->edit_date_facture;
     }
 
     public function actionModify($data, &$success)

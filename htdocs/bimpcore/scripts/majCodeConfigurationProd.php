@@ -32,12 +32,18 @@ class majCodeConfigurationnProd{
         if($id_prod > 0)
             $req .= " AND `id_product` = ".$id_prod;
         if($max > 0)
-            $req .= " LIMIT 0,".$max;
+            $req .= " LIMIT 0,".($max+1);
         $sql = $this->db->query($req);
+        $i = 0;
+        $moreReturn = '';
         while($ln = $this->db->fetch_object($sql)){
-            $return[] = $ln->serial;
+            if($i < $max)
+                $return[] = $ln->serial;
+            else
+                $moreReturn = "...";
+            $i++;
         }
-        return implode(" | ", $return);
+        return implode(" | ", $return).$moreReturn;
     }
     
     function __construct($db) {
@@ -47,8 +53,8 @@ class majCodeConfigurationnProd{
     function updateEquipmentOrfellin(){
         $sql4 = $this->db->query("SELECT code_config, fk_object FROM llx_product_extrafields WHERE code_config IS NOT NULL");
         while($ln4 = $this->db->fetch_object($sql4)){
-            $this->db->query("UPDATE llx_be_equipment SET id_product = ".$ln4->fk_object." WHERE serial LIKE '%".$ln4->code_config."' and ".$this->whereTaille);
-            // Je rajouterais " and id_product = 0" par précaution. 
+            $this->db->query("UPDATE llx_be_equipment SET id_product = ".$ln4->fk_object." WHERE serial LIKE '%".$ln4->code_config."' and (id_product is null || id_product = 0) and  ".$this->whereTaille);
+            // Je rajouterais " and id_product = 0" par précaution. Fallait le faire... j'ai foutu le bordel...
         }
     }
     
@@ -126,6 +132,7 @@ class majCodeConfigurationnProd{
                 . "AND SUBSTRING(`serial`, LENGTH(`serial`)-3, 4) NOT IN (SELECT code_config FROM llx_product_extrafields WHERE code_config IS NOT NULL) "
                 . "AND id_product =p.rowid AND ref LIKE 'APP-%' "
                 . "AND label  NOT LIKE '%(Demo)%' "
+                . "AND ref  NOT LIKE 'APP-Z0%' "
                 . "GROUP BY fin ORDER BY COUNT(*) DESC");
         while($ln = $this->db->fetch_object($sql)){
             if($ln->nbSerial > 9){
@@ -163,6 +170,8 @@ class majCodeConfigurationnProd{
         
         $this->vireS();
         
+        $this->corrigeErreur();
+        
         $this->updateCodeConfigProd($go);
         
         if($go){
@@ -173,6 +182,15 @@ class majCodeConfigurationnProd{
         
         
         $this->bilan();
+    }
+    
+    function corrigeErreur(){
+        $sql = $this->db->query("SELECT prod.id, test.id_product FROM ERP_PROD_BIMP.`llx_be_equipment` prod, ERP_TEST_TOMMY1.llx_be_equipment test WHERE prod.serial = test.serial AND test.id = prod.id AND prod.id_product != test.id_product AND test.id_product > 0");
+        while($ln = $this->db->fetch_object($sql)){
+            $this->db->query("UPDATE llx_be_equipment SET id_product = ".$ln->id_product." WHERE id=".$ln->id);
+        }
+        
+        
     }
     
     function vireS(){

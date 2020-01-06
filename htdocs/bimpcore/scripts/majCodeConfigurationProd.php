@@ -53,8 +53,8 @@ class majCodeConfigurationnProd{
     function updateEquipmentOrfellin(){
         $sql4 = $this->db->query("SELECT code_config, fk_object FROM llx_product_extrafields WHERE code_config IS NOT NULL");
         while($ln4 = $this->db->fetch_object($sql4)){
-            $this->db->query("UPDATE llx_be_equipment SET id_product = ".$ln4->fk_object." WHERE serial LIKE '%".$ln4->code_config."' and ".$this->whereTaille);
-            // Je rajouterais " and id_product = 0" par précaution. 
+            $this->db->query("UPDATE llx_be_equipment SET id_product = ".$ln4->fk_object." WHERE serial LIKE '%".$ln4->code_config."' and (id_product is null || id_product = 0) and  ".$this->whereTaille);
+            // Je rajouterais " and id_product = 0" par précaution. Fallait le faire... j'ai foutu le bordel...
         }
     }
     

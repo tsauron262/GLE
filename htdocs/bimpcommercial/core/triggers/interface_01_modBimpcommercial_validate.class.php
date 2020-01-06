@@ -66,18 +66,19 @@ class Interfacevalidate extends DolibarrTriggers
             if ($action == 'ORDER_VALIDATE') {
                 $bimp_object = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $object->id);
 
-                if (is_object($bimp_object) && $bimp_object->isLoaded()) {
-                    $client = $bimp_object->getChildObject('client');
-                    if (is_object($client) && $client->isLoaded()) {
-                        if (!$client->canBuy($errors)) {
-                            $object->errors = array_merge($object->errors, $errors);
-                            return -1;
-                        }
-                    }
-                }
             } else {
                 $bimp_object = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $object->id);
                 $bimp_object->onValidate();
+            }
+            
+            if (is_object($bimp_object) && $bimp_object->isLoaded()) {
+                $client = $bimp_object->getChildObject('client');
+                if (is_object($client) && $client->isLoaded()) {
+                    if (!$client->canBuy($errors)) {
+                        $object->errors = array_merge($object->errors, $errors);
+                        return -1;
+                    }
+                }
             }
 
 

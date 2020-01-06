@@ -659,6 +659,23 @@ filters_panels:
 #                    type: select
 #                    options: 
 #                        callback: getCategoriesArray
+
+
+#            categorie:
+#                child: product
+#                field: categorie
+#            collection:
+#                child: product
+#                field: collection
+#            nature:
+#                child: product
+#                field: nature
+#            famille:
+#                child: product
+#                field: famille
+#            gamme:
+#                child: product
+#                field: gamme
             
                 
 lists_cols: 
@@ -783,6 +800,21 @@ lists_cols:
         field: fk_soc
         child: parent
         display: nom_url
+    categorie:
+        child: product
+        field: categorie
+    collection:
+        child: product
+        field: collection
+    nature:
+        child: product
+        field: nature
+    famille:
+        child: product
+        field: famille
+    gamme:
+        child: product
+        field: gamme
                         
 lists:      
     global:

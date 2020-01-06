@@ -133,7 +133,7 @@ class majCodeConfigurationnProd{
                 . "AND id_product =p.rowid AND ref LIKE 'APP-%' "
                 . "AND label  NOT LIKE '%(Demo)%' "
                 . "AND ref  NOT LIKE 'APP-Z0%' "
-                . "AND label  NOT LIKE '%Watch%'  "
+                . "AND label  NOT LIKE '%WaTcHe%'  "
                 . "GROUP BY fin ORDER BY COUNT(*) DESC");
         while($ln = $this->db->fetch_object($sql)){
             if($ln->nbSerial > 9){

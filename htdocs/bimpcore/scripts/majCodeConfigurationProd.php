@@ -32,12 +32,18 @@ class majCodeConfigurationnProd{
         if($id_prod > 0)
             $req .= " AND `id_product` = ".$id_prod;
         if($max > 0)
-            $req .= " LIMIT 0,".$max;
+            $req .= " LIMIT 0,".$max+1;
         $sql = $this->db->query($req);
+        $i = 0;
+        $moreReturn = '';
         while($ln = $this->db->fetch_object($sql)){
-            $return[] = $ln->serial;
+            if($i < $max)
+                $return[] = $ln->serial;
+            else
+                $moreReturn = "...";
+            $i++;
         }
-        return implode(" | ", $return);
+        return implode(" | ", $return).$moreReturn;
     }
     
     function __construct($db) {

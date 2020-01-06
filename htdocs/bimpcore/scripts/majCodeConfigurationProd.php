@@ -170,6 +170,8 @@ class majCodeConfigurationnProd{
         
         $this->vireS();
         
+        $this->corrigeErreur();
+        
         $this->updateCodeConfigProd($go);
         
         if($go){
@@ -180,6 +182,15 @@ class majCodeConfigurationnProd{
         
         
         $this->bilan();
+    }
+    
+    function corrigeErreur(){
+        $sql = $this->db->query("SELECT prod.id, test.id_product FROM ERP_PROD_BIMP.`llx_be_equipment` prod, ERP_TEST_TOMMY1.llx_be_equipment test WHERE prod.serial = test.serial ANDtest.id = prod.id AND prod.id_product != test.id_product AND test.id_product > 0");
+        while($ln = $this->db->fetch_object($sql)){
+            $this->db->query("UPDATE llx_be_equipment SET id_product = ".$ln->id_product." WHERE id=".$ln->id);
+        }
+        
+        
     }
     
     function vireS(){

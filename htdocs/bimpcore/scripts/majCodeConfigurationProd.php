@@ -32,7 +32,7 @@ class majCodeConfigurationnProd{
         if($id_prod > 0)
             $req .= " AND `id_product` = ".$id_prod;
         if($max > 0)
-            $req .= " LIMIT 0,".$max+1;
+            $req .= " LIMIT 0,".($max+1);
         $sql = $this->db->query($req);
         $i = 0;
         $moreReturn = '';

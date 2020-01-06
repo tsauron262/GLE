@@ -2273,7 +2273,7 @@ class ObjectLine extends BimpObject
                         case 'Commande':
                         case 'CommandeFournisseur':
                         case 'FactureFournisseur':
-                            $result = $object->updateline($id_line, $this->desc);
+                            $result = $object->updateline($id_line, $this->desc, 0, 0, 0, 0);
                             break;
 
                         default:

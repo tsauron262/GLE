@@ -716,6 +716,7 @@ class ObjectLine extends BimpObject
                     'in' => $values
                 );
                 return;
+
             case 'id_commercial':
                 $ids = array();
                 $empty = false;
@@ -761,7 +762,7 @@ class ObjectLine extends BimpObject
                     );
                 }
                 break;
-                
+
             case 'ref-prod':
                 $alias = 'product';
                 $line_alias = 'dol_line';
@@ -804,11 +805,34 @@ class ObjectLine extends BimpObject
                     'table' => 'product',
                     'on'    => $alias . '.rowid = ' . $line_alias . '.fk_product'
                 );
-                
+
                 $filters[$alias . '.fk_product_type'] = array(
                     'in' => $values
                 );
 
+                break;
+
+            case 'categorie':
+            case 'collection':
+            case 'nature':
+            case 'famille':
+            case 'gamme':
+                $alias = 'product_ef';
+                $line_alias = 'dol_line';
+                $joins[$line_alias] = array(
+                    'alias' => $line_alias,
+                    'table' => static::$dol_line_table,
+                    'on'    => $line_alias . '.rowid = a.id_line'
+                );
+                $joins[$alias] = array(
+                    'alias' => $alias,
+                    'table' => 'product_extrafields',
+                    'on'    => $alias . '.fk_object = ' . $line_alias . '.fk_product'
+                );
+
+                $filters[$alias . '.' . $field_name] = array(
+                    'in' => $values
+                );
                 break;
         }
 
@@ -2824,10 +2848,10 @@ class ObjectLine extends BimpObject
 
             if (is_null($this->remise) || (float) $this->remise !== (float) $remises_infos['total_percent'] ||
                     $remises_infos['total_percent'] !== (float) $this->getData('remise') ||
-                    $remises_infos['total_percent'] !== (float) $this->getInitData('remise') ) {
+                    $remises_infos['total_percent'] !== (float) $this->getInitData('remise')) {
 //                if($this->nbCalcremise < 90){
-                    $this->nbCalcremise++;
-                    $this->update($warnings, true);
+                $this->nbCalcremise++;
+                $this->update($warnings, true);
 //                }
             }
         }

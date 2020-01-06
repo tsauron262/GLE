@@ -116,6 +116,7 @@ fields:
     fk_mode_reglement: 
         label: Mode de règlement
         dol_prop: mode_reglement_id
+        required : 1
         type: int
         values: 
             array: modeReglements

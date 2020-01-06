@@ -170,7 +170,7 @@ class majCodeConfigurationnProd{
         
         $this->vireS();
         
-        $this->corrigeErreur();
+        //$this->corrigeErreur();
         
         $this->updateCodeConfigProd($go);
         

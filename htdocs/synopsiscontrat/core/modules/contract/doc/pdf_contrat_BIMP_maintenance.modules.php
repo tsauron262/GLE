@@ -214,7 +214,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
     }
 
     public function display_cp($pdf, $contrat, $user, $outputlangs) {
-        $titre = "Indissociable des conditions générales du Contrat";
+        $titre = "Indissociable des Conditions Générales du Contrat";
         $parag1 = "Les présentes Conditions Particulières sont signées en application et exécution des Conditions Générales du Contrat, avec lesquelles elles forment un tout indivisible. Le Client reconnaît avoir pris connaissance desdites Conditions Générales et s'engage à les respecter.";
         $parag2 = "Il est expressément convenu entre les Parties qu'en cas de contradiction entre une ou plusieurs dispositions des Conditions Générales du Contrat et une ou plusieurs dispositions des présentes Conditions Particulières, ces dernières prévalent.";
         $pdf->AddPage();
@@ -372,6 +372,8 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
             $chaine_description = str_replace("<br />", "\n", $chaine_description);
             $chaine_description = str_replace("<ul>", '', $chaine_description);
             $chaine_description = str_replace("</ul>", '', $chaine_description);
+            $chaine_description = str_replace("<p>", '', $chaine_description);
+            $chaine_description = str_replace("</p>", '', $chaine_description);
             
             $pdf->MultiCell($this->page_largeur - $this->marge_droite - $this->marge_gauche, 7, $chaine_description, 0, 'L'); 
             
@@ -877,7 +879,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
         }
         $pdf->setY(285);
         $pdf->SetFont('', '', 8);
-        $pdf->SetTextColor(200, 200, 200);
+        $pdf->SetTextColor(150, 150, 150);
         $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 3, $mysoc->name . " - SAS au capital de " . $mysoc->capital . ' - ' . $mysoc->address . ' - ' . $mysoc->zip . ' ' . $mysoc->town . ' - Tél ' . $mysoc->phone . ' - SIRET: 320 387 483 00433'  , 0, 'C');
         $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 3, 'APE : 4651Z - RCS/RM : Lyon B 320 387 483 - Num. TVA : FR 34 320387483'  , 0, 'C');
     }

@@ -1150,6 +1150,7 @@ class BContract_contrat extends BimpDolObject {
     
     public function createFromCommande($commande, $data) {
         //print_r($data); die();
+        global $user;
         $new_contrat = BimpObject::getInstance('bimpcontract', 'BContract_contrat');
         $new_contrat->set('fk_soc', $data['fk_soc']);
         $new_contrat->set('date_contrat', null);
@@ -1172,10 +1173,16 @@ class BContract_contrat extends BimpDolObject {
             foreach($commande->dol_object->lines as $line) {
                 $produit = $this->getInstance('bimpcore', 'Bimp_Product', $line->fk_product);
                 if($produit->getData('fk_product_type') == 1) {
-                    $new_contrat->dol_object->addLine($line->libelle, $line->price, $line->qty, $line->tva_tx, 0, 0, $line->fk_product, $line->remise_percent, $data['valid_start'], $data['valid_start']);                
+                    $description = ($line->description) ? $line->description : $line->libelle;
+                    $end_date = new DateTime($data['valid_start']);
+                    $end_date->add(new DateInterval("P" . $data['duree_mois'] . "M"));
+                    $new_contrat->dol_object->addLine($description, $line->price, $line->qty, $line->tva_tx, 0, 0, $line->fk_product, $line->remise_percent, $data['valid_start'], $end_date->format('Y-m-d'), 'HT', 0.0, 0, null, 0, 0, null, $line->rang);                 
                 }
             }
-            
+            addElementElement('commande', 'contrat', $commande->id, $new_contrat->id);
+            return $new_contrat->id;
+        } else {
+            return -1;
         }
     }
     

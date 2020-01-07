@@ -1180,7 +1180,9 @@ class BContract_contrat extends BimpDolObject {
                 }
             }
             addElementElement('commande', 'contrat', $commande->id, $new_contrat->id);
-            
+            return $new_contrat->id;
+        } else {
+            return -1;
         }
     }
     

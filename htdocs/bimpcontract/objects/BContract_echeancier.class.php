@@ -142,6 +142,7 @@ class BContract_echeancier extends BimpObject {
     }
     
     public function displayEcheancier($data) {
+        global $user;
         $instance_facture = $this->getInstance('bimpcommercial', 'Bimp_Facture');
         $parent = $this->getParentInstance();
         $html = '';
@@ -181,14 +182,12 @@ class BContract_echeancier extends BimpObject {
                     . '<td style="text-align:center">' . $facture->getNomUrl(1) . '</td>'
                     . '<td style="text-align:center">'.$paye.'</td>'
                     . '<td style="text-align:center; margin-right:10%">';
-                
-                if($facture->getData('fk_statut') == 0) {
+                if($facture->getData('fk_statut') == 0 && $user->rights->facture->validate) {
                     $html .= '<span class="rowButton bs-popover" data-trigger="hover" data-placement="top"  data-content="Valider la facture" onclick="' . $this->getJsActionOnclick("validateFacture", array('id_facture' => $facture->id), array("success_callback" => $callback)) . '")"><i class="fa fa-check" ></i></span>';
                 } else {
-                    $html .= '<span class="rowButton bs-popover" data-toggle="popover" data-trigger="hover" data-container="body" data-placement="top" data-content="Afficher la page dans un nouvel onglet" data-html="false" onclick="window.open(\'/pour_contrat/htdocs/bimpcommercial/index.php?fc=facture&amp;id='.$facture->id.'\');" data-original-title="" title=""><i class="fas fa5-external-link-alt"></i></span>';
+                    $html .= '<span class="rowButton bs-popover" data-toggle="popover" data-trigger="hover" data-container="body" data-placement="top" data-content="Afficher la page dans un nouvel onglet" data-html="false" onclick="window.open(\''.DOL_URL_ROOT.'/bimpcommercial/index.php?fc=facture&amp;id='.$facture->id.'\');" data-original-title="" title=""><i class="fas fa5-external-link-alt"></i></span>';
                 }
-                
-                if($current_number_facture == count($data->factures_send) && $facture->getData('fk_statut') == 0) {
+                if($current_number_facture == count($data->factures_send) && $facture->getData('fk_statut') == 0 && $user->rights->facture->supprimer) {
                     $html .= '<span class="rowButton bs-popover" data-trigger="hover" data-placement="top"  data-content="Supprimer la facture" onclick="' . $this->getJsActionOnclick("deleteFacture", array('id_facture' => $facture->id), array("success_callback" => $callback)) . '")"><i class="fa fa-times" ></i></span>';
                 }
                 
@@ -220,8 +219,10 @@ class BContract_echeancier extends BimpObject {
                     . '<td style="text-align:center"><b class="important" >Période non facturée</b></td>'
                     . '<td style="text-align:center; margin-right:10%">';
                 if($firstDinamycLine && $can_create_next_facture){
-                    // ICI NE PAS AFFICHER QUAND LA FACTURE EST PAS VALIDER 
-                    $html .= '<span class="rowButton bs-popover" data-trigger="hover" data-placement="top"  data-content="Facturer la période" onclick="' . $this->getJsActionOnclick("createFacture", array('date_start' => $startedDate->format('Y-m-d'), 'date_end' => $enderDate->format('Y-m-d'), 'total_ht' => $amount), array("success_callback" => $callback)) . '")"><i class="fa fa-plus" ></i></span>';
+                    // ICI NE PAS AFFICHER QUAND LA FACTURE EST PAS VALIDER
+                    if($user->rights->facture->creer) {
+                        $html .= '<span class="rowButton bs-popover" data-trigger="hover" data-placement="top"  data-content="Facturer la période" onclick="' . $this->getJsActionOnclick("createFacture", array('date_start' => $startedDate->format('Y-m-d'), 'date_end' => $enderDate->format('Y-m-d'), 'total_ht' => $amount), array("success_callback" => $callback)) . '")"><i class="fa fa-plus" ></i></span>';
+                    }
                     $firstDinamycLine = false;
                 }
             $html .= '</tr>';
@@ -229,7 +230,7 @@ class BContract_echeancier extends BimpObject {
         }
         $html .= '</tbody>';
         $html .= '</table>';
-        if($parent->is_not_finish()){
+        if($parent->is_not_finish() && $user->rights->facture->creer){
             $html .= '<div class="panel-footer"><div class="btn-group"><button type="button" class="btn btn-default" aria-haspopup="true" aria-expanded="false" onclick="'. $this->getJsLoadModalForm('create_perso', "Créer une facture personalisée ou une facturation de plusieurs périodes") .'"><i class="fa fa-plus-square-o iconLeft"></i>Créer une facture personalisée ou une facturation de plusieurs périodes</button></div></div>';
         }
          $html .= "<br/>"

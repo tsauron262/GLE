@@ -28,8 +28,9 @@ class Bimp_FactureLine extends ObjectLine
         // Aucune vérif pour les factures (L'équipement est attribué à titre indicatif)
         return array();
     }
-    public function isRemiseEditable() {
-        
+
+    public function isRemiseEditable()
+    {
         return $this->isParentDraft();
     }
 
@@ -225,6 +226,11 @@ class Bimp_FactureLine extends ObjectLine
 
                 $commLine = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $this->getData('linked_id_object'));
 
+                $commande = $commLine->getParentInstance();
+                if ($commande->id === 88354) {
+                    return;
+                }
+                
                 $rg = BimpCache::findBimpObjectInstance('bimpcommercial', 'ObjectLineRemise', array(
                             'id_object_line'    => (int) $this->id,
                             'object_type'       => 'facture',

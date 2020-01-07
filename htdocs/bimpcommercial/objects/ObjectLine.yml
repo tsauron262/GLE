@@ -140,6 +140,19 @@ fields:
         display_if: 
             field_name: type
             show_values: 1
+            
+    hide_in_pdf: 
+        label: Masquer la ligne dans le PDF
+        type: bool
+        input: 
+            type: custom
+            content: 
+                callback: 
+                    method: renderLineInput
+                    params: 
+                        - hide_in_pdf
+        default_value: 0
+        depends_on: pu_ht,qty,type
 
 forms: 
     default: 
@@ -226,6 +239,8 @@ forms:
                     field_name: type
                     show_values: 1,3
                 depends_on: id_product
+            hide_in_pdf: 
+                field: hide_in_pdf
 #            fourn_price:
 #                custom: 1
 #                label: Prix d'achat fournisseur
@@ -722,7 +737,6 @@ filters_panels:
                             params: 
                                 - gamme
             
-                
 lists_cols: 
     position: 
         label: N°
@@ -860,6 +874,9 @@ lists_cols:
     gamme:
         child: product
         field: gamme
+    hide_in_pdf: 
+        label: Masquer (PDF)
+        field: hide_in_pdf
                         
 lists:      
     global:

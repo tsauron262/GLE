@@ -6,6 +6,7 @@ fields:
     remise_pa: unset
     remise_crt: unset
     remise_crt_percent: unset
+    hide_in_pdf: unset
     
 forms: 
     fournline: 
@@ -310,6 +311,7 @@ lists_cols:
                     
     remise_crt: unset
     remise_pa: unset
+    hide_in_pdf: unset
     
 filters_panels: 
     default: 

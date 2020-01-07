@@ -636,7 +636,12 @@ class Equipment extends BimpObject
                 $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $item['id_equipment']);
                 if (BimpObject::objectLoaded($equipment)) {
                     if ($equipment->isAvailable((int) $id_entrepot)) {
-                        $equipments[(int) $equipment->id] = $equipment->getRef();
+                        $label = $equipment->getRef();
+                        $imei = $equipment->getData('imei');
+                        if($imei != '')
+                            $label .= ' ('.$imei.')';
+                        
+                        $equipments[(int) $equipment->id] = $label;
                     }
                 }
             }

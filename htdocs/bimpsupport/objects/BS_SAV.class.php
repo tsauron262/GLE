@@ -579,9 +579,7 @@ class BS_SAV extends BimpObject
                     $buttons[] = array(
                         'label'   => 'Restituer',
                         'icon'    => 'times-circle',
-                        'onclick' => $this->getJsActionOnclick('close', array('restitute' => 1), array(
-                            'form_name' => 'restitute_no_paiement'
-                        ))
+                        'onclick' => $this->getJsActionOnclick('close', array('restitute' => 1), array())
                     );
                 }
             }

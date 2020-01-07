@@ -440,21 +440,6 @@ forms:
               content: 
                   callback: renderEquipmentPlaceOptionInput
                   
-    restitute_no_paiement: 
-            - custom: 1
-              label: Notifier le client
-              input_name: send_msg
-              data_type: bool
-              input: 
-                  type: toggle
-              value: 1
-            - custom: 1
-              label: Replacer l'équipement dans son emplacement précédent
-              input_name: put_equipment_on_prev_place
-              data_type: bool
-              content: 
-                  callback: renderEquipmentPlaceOptionInput
-                  
     close_refused: 
         title: Fermeture
         rows: 

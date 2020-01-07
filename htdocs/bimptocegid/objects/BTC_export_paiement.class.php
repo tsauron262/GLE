@@ -74,6 +74,11 @@ class BTC_export_paiement extends BTC_export {
                 $date = new DateTime($paiement->getData('datep'));
                 $label = ($transaction->amount > 0) ? "Pay" : "Rem";
                 $label .= ' clt ' . $auxiliaire_client . ' ' . $date->format('dmY');
+                
+                $compte_g = $entrepot->compte_comptable;
+                $journal = $entrepot->code_journal_compta;
+                $affiche_code_reglement = $reglement->code;
+                
                 switch ($reglement->code) {
 
                     case 'LIQ':
@@ -127,17 +132,12 @@ class BTC_export_paiement extends BTC_export {
                         $journal = "OD";
                         $affiche_code_reglement = 'CHQ';
                         $label = "Pay clt CG " . $entrepot->town;
-                    default:
-                        $compte_g = $entrepot->compte_comptable;
-                        $journal = $entrepot->code_journal_compta;
-                        $affiche_code_reglement = $reglement->code;
-                        break;
                 }
 
                 
                 $numero_unique = preg_replace('~\D~', '', $paiement->getData('ref'));
                 $numero_unique = substr($numero_unique, 1, 8);
-
+                                
                 $structure = [
                     'journal' => [$journal, 3],
                     'date' => [$date->format('dmY'), 8],
@@ -178,7 +178,7 @@ class BTC_export_paiement extends BTC_export {
                     'tva' => ['', 3],
                     'tpf' => ['', 3],
                     'contre_partie' => [$compte_general_411, 17],
-                    'vide' => [$auxiliaire_client, 34],
+                    'vide' => [substr($auxiliaire_client, 0, 16), 34],
                     'date_1' => ['01011900', 8],
                     'date_2' => ['01011900', 8],
                     'date_3' => ['01011900', 8],

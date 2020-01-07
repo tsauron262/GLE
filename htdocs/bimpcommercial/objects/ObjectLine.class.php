@@ -82,34 +82,6 @@ class ObjectLine extends BimpObject
         return parent::__construct($module, $object_name);
     }
 
-    public function getCustomFilterValueLabel($field_name, $value)
-    {
-        switch ($field_name) {
-            case 'id_product':
-                $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $value);
-                if (BimpObject::ObjectLoaded($product)) {
-                    return $product->getRef();
-                }
-                break;
-
-            case 'id_commercial':
-                if ((int) $value) {
-                    $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $value);
-                    if (BimpObject::ObjectLoaded($user)) {
-                        return $user->dol_object->getFullName();
-                    }
-                } else {
-                    return 'Aucun';
-                }
-                break;
-
-            default:
-                return $value;
-        }
-
-        return parent::getCustomFilterValueLabel($field_name, $value);
-    }
-
     // Gestion des droits utilisateurs:
 
     public function canEditField($field_name)
@@ -239,7 +211,7 @@ class ObjectLine extends BimpObject
             return 0;
         }
 
-        if (!in_array($field, array('remise_crt', 'remise_crt_percent', 'force_qty_1', 'hide_product_label', 'date_from', 'date_to', 'desc', 'ref_supplier'))) {
+        if (!in_array($field, array('remise_crt', 'remise_crt_percent', 'force_qty_1', 'hide_product_label', 'date_from', 'date_to', 'desc', 'ref_supplier', 'hide_in_pdf'))) {
             if (!$force_edit) {
                 if (!$this->isParentDraft()) {
                     return 0;
@@ -837,6 +809,34 @@ class ObjectLine extends BimpObject
         }
 
         parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors);
+    }
+
+    public function getCustomFilterValueLabel($field_name, $value)
+    {
+        switch ($field_name) {
+            case 'id_product':
+                $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $value);
+                if (BimpObject::ObjectLoaded($product)) {
+                    return $product->getRef();
+                }
+                break;
+
+            case 'id_commercial':
+                if ((int) $value) {
+                    $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $value);
+                    if (BimpObject::ObjectLoaded($user)) {
+                        return $user->dol_object->getFullName();
+                    }
+                } else {
+                    return 'Aucun';
+                }
+                break;
+
+            default:
+                return $value;
+        }
+
+        return parent::getCustomFilterValueLabel($field_name, $value);
     }
 
     // Getters valeurs:
@@ -3388,33 +3388,20 @@ class ObjectLine extends BimpObject
                 }
                 break;
 
-//            case 'remise_pa':
-//                $product = $this->getProduct();
-//                if (BimpObject::objectLoaded($product)) {
-//                    if ((int) BimpTools::getPostFieldValue('remise_crt', 0)) {
-//                        $remise_pa = (float) $product->getRemiseCrt();
-//                        $html .= '<input type="hidden" name="' . $prefixe . 'remise_pa" value="' . $remise_pa . '"/>';
-//                        $html .= BimpTools::displayFloatValue($remise_pa, 8) . '%';
-//                    } elseif ($this->canEditRemisePa()) {
-//                        $html .= BimpInput::renderInput('text', $prefixe . 'remise_pa', (float) $value, array(
-//                                    'addon_right' => BimpRender::renderIcon('fas_percent'),
-//                                    'data'        => array(
-//                                        'data_type' => 'number',
-//                                        'decimals'  => 8,
-//                                        'min'       => 0,
-//                                        'max'       => 100,
-//                                        'unsigned'  => 1
-//                                    )
-//                        ));
-//                    } else {
-//                        $html .= '<input type="hidden" name="' . $prefixe . 'remise_pa" value="0"/>';
-//                        $html .= '0%';
-//                    }
-//                } else {
-//                    $html .= '<input type="hidden" name="' . $prefixe . 'remise_pa" value="0"/>';
-//                    $html .= '<span class="warning">Attente sélection d\'un produit</span>';
-//                }
-//                break;
+            case 'hide_in_pdf':
+                $type = (int) $this->getData('type');
+                $pu_ht = (float) BimpTools::getPostFieldValue('pu_ht', $this->pu_ht);
+                $qty = (float) BimpTools::getPostFieldValue('qty', $this->qty);
+                if ($this->field_exists('qty_modif')) {
+                    $qty += (float) $this->getData('qty_modif');
+                }
+                if ($type === self::LINE_TEXT || ($pu_ht * $qty) == 0) {
+                    $html .= BimpInput::renderInput('toggle', $prefixe . 'hide_in_pdf', (int) $this->getData('hide_in_pdf'));
+                } else {
+                    $html .= '<span class="danger">NON</span>';
+                    $html .= '<input type="hidden" value="0" name="' . $prefixe . 'hide_in_pdf' . '"/>';
+                }
+                break;
         }
 
         return $html;
@@ -4196,6 +4183,12 @@ class ObjectLine extends BimpObject
                     foreach (static::$product_line_data as $field => $params) {
                         if ($this->field_exists('def_' . $field)) {
                             $this->set('def_' . $field, $this->{$field});
+                        }
+                    }
+
+                    if ($this->field_exists('hide_in_pdf')) {
+                        if ($this->pu_ht * $this->getFullQty() != 0) {
+                            $this->set('hide_in_pdf', 0);
                         }
                     }
                     break;

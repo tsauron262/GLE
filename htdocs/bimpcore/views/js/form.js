@@ -176,7 +176,7 @@ function appendModalForm(html, form_id, buttons, title) {
     }
 
     bimpModal.newContent(title, html);
-    
+
     var modal_idx = bimpModal.idx;
     var $form = bimpModal.$contents.find('#modal_content_' + modal_idx).find('#' + form_id);
     if ($.isOk($form)) {
@@ -649,6 +649,16 @@ function reloadObjectInput(form_id, input_name, fields, keep_new_value) {
         }
     }
 
+    if ($.isOk($container)) {
+        var $parent = $container.parent();
+        var reload_idx = parseInt($parent.data('reload_idx'));
+        if (isNaN(reload_idx)) {
+            reload_idx = 0;
+        }
+        reload_idx++;
+        $parent.data('reload_idx', reload_idx);
+    }
+
     var data = {
         form_id: form_id,
         module: $form.data('module'),
@@ -675,15 +685,27 @@ function reloadObjectInput(form_id, input_name, fields, keep_new_value) {
         $form: $form,
         $container: $container,
         input_name: input_name,
+        reload_idx: reload_idx,
         error_msg: 'Echec du chargement du champ',
         display_success: false,
         success: function (result, bimpAjax) {
             if (typeof (result.html) !== 'undefined') {
                 var $form = $('#' + result.form_id);
                 var $parent = bimpAjax.$container.parent();
+                var parent_reload_idx = parseInt($parent.data('reload_idx'));
+                if (isNaN(parent_reload_idx)) {
+                    parent_reload_idx = 0;
+                }
+
+                if (parent_reload_idx > bimpAjax.reload_idx) {
+                    // Un nouveau reload a eut lieu entre temps... 
+                    return;
+                }
+
                 $parent.html(result.html).slideDown(250, function () {
                     $parent.removeAttr('style');
                 });
+
                 setCommonEvents($parent);
                 setInputContainerEvents($parent.find('.inputContainer'));
                 setInputsEvents($parent);

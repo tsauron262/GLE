@@ -697,7 +697,7 @@ lists:
               onclick: setSelectedObjectsAction($(this), 'list_id', 'removeInventaire', {}, '', 'Retirer de l\'inventaire ?', true)
               
 searches:
-    default: 
+    default:
         has_serial: 1
         fields_search: 
             - a.product_label
@@ -717,9 +717,9 @@ cards:
             - icon: fas_box
               label: Produit
               value: 
-                  callback: 
+                  callback:
                       method: displayProduct
-                      params: 
+                      params:
                           - nom_url
             - icon: barcode
               field: serial

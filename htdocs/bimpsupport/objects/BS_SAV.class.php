@@ -3654,20 +3654,19 @@ class BS_SAV extends BimpObject
                         }
 
                         // Création de la facture:
-                        $total_ttc = (float) $propal->getTotalTtc();
+                        $total_ttc_wo_discounts = (float) $propal->getTotalTtcWithoutDiscountsAbsolutes();
                         $lines = $propal->getLines('not_text');
 
                         $has_amounts_lines = false;
 
                         foreach ($lines as $line) {
-                            // suppr partie "pa_ht" dès que correctif pa facture en place
                             if (round((float) $line->getTotalTTC(), 2)) {
                                 $has_amounts_lines = true;
                                 break;
                             }
                         }
 
-                        if (!round($total_ttc, 2) && !$has_amounts_lines) {
+                        if (!round($total_ttc_wo_discounts, 2) && !$has_amounts_lines) {
                             $url = DOL_URL_ROOT . '/bimpsupport/bon_restitution.php?id_sav=' . $this->id;
                         } else {
                             if ((int) $this->getData('id_facture')) {

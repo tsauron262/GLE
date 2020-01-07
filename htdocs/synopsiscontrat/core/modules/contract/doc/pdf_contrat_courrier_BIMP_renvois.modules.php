@@ -184,7 +184,7 @@ class pdf_contrat_courrier_BIMP_renvois extends ModeleSynopsiscontrat {
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, 'Code client : ' . $client->code_client, 0, 'L');
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 16, '', 0, 'C');
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 10, 'Madame, Monsieur, ', 0, 'L');
-                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 10, 'Veillez trouvez ci joint le contrat citer en object.', 0, 'L');
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 10, 'Veillez trouvez ci joint le contrat cité en objet.', 0, 'L');
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 10, 'Merci de parapher chaque page et de nous retourner notre exemplaire dûment rempli et signé, afin de finaliser votre dossier', 0, 'L');
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 10, 'Bimp reste à votre disposition pour tout renseignement complémentaire.', 0, 'L');
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 10, 'Nous vous prions d\'agréer, Madame, Monsieur, l\'expression de nos sincères salutations.', 0, 'L');

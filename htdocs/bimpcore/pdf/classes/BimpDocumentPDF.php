@@ -675,7 +675,7 @@ class BimpDocumentPDF extends BimpModelPDF
                                         } else {
                                             $fl = false;
                                         }
-                                        $desc .= $equipment->getData('serial');
+                                        $desc .= $equipment->displaySerialImei();
                                     }
                                 }
                             }

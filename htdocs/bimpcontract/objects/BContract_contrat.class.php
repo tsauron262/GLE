@@ -1150,6 +1150,7 @@ class BContract_contrat extends BimpDolObject {
     
     public function createFromCommande($commande, $data) {
         //print_r($data); die();
+        global $user;
         $new_contrat = BimpObject::getInstance('bimpcontract', 'BContract_contrat');
         $new_contrat->set('fk_soc', $data['fk_soc']);
         $new_contrat->set('date_contrat', null);
@@ -1179,7 +1180,7 @@ class BContract_contrat extends BimpDolObject {
                 }
             }
             addElementElement('commande', 'contrat', $commande->id, $new_contrat->id);
-
+            $new_contrat->dol_object->activateAll($user);
         }
     }
     

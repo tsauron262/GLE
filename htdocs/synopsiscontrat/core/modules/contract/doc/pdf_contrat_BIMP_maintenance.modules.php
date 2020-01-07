@@ -214,7 +214,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
     }
 
     public function display_cp($pdf, $contrat, $user, $outputlangs) {
-        $titre = "Indissociable des conditions générales du Contrat";
+        $titre = "Indissociable des Conditions Générales du Contrat";
         $parag1 = "Les présentes Conditions Particulières sont signées en application et exécution des Conditions Générales du Contrat, avec lesquelles elles forment un tout indivisible. Le Client reconnaît avoir pris connaissance desdites Conditions Générales et s'engage à les respecter.";
         $parag2 = "Il est expressément convenu entre les Parties qu'en cas de contradiction entre une ou plusieurs dispositions des Conditions Générales du Contrat et une ou plusieurs dispositions des présentes Conditions Particulières, ces dernières prévalent.";
         $pdf->AddPage();

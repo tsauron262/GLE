@@ -132,6 +132,8 @@ class majCodeConfigurationnProd{
                 . "AND SUBSTRING(`serial`, LENGTH(`serial`)-3, 4) NOT IN (SELECT code_config FROM llx_product_extrafields WHERE code_config IS NOT NULL) "
                 . "AND id_product =p.rowid AND ref LIKE 'APP-%' "
                 . "AND label  NOT LIKE '%(Demo)%' "
+                . "AND label  NOT LIKE '%Demo' "
+                . "AND label  NOT LIKE '%Recondtionné%' "
                 . "AND ref  NOT LIKE 'APP-Z0%' "
                 . "AND label  NOT LIKE '%WaTcH%'  "
                 . "AND (label  NOT LIKE '%GRAVURE%' || label  NOT LIKE '%C2C%')  "

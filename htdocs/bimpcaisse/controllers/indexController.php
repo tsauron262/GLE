@@ -533,9 +533,9 @@ class indexController extends BimpController
         if (!$id_caisse) {
             $errors[] = 'Aucune caisse sélectionnée';
         }
-        if (!$fonds) {
-            $errors[] = 'Montant du fonds de caisse non renseigné';
-        }
+//        if (!$fonds) {
+//            $errors[] = 'Montant du fonds de caisse non renseigné';
+//        }
 
         BimpObject::loadClass('bimpcaisse', 'BC_Caisse');
         $id_user_caisse = (int) BC_Caisse::getUserCaisse((int) $user->id);
@@ -646,9 +646,9 @@ class indexController extends BimpController
         if (!$id_caisse) {
             $errors[] = 'Aucune caisse sélectionnée';
         }
-        if (!$fonds) {
-            $errors[] = 'Montant du fonds de caisse non renseigné';
-        }
+//        if (!$fonds) {
+//            $errors[] = 'Montant du fonds de caisse non renseigné';
+//        }
 
         if (!count($errors)) {
             $caisse = BimpCache::getBimpObjectInstance($this->module, 'BC_Caisse', $id_caisse);

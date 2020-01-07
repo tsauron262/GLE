@@ -795,6 +795,9 @@ class BimpComm extends BimpDolObject
         if (!empty($user->email)) {
             $emails[$user->email] = $user->getFullName($langs) . ' (' . $user->email . ')';
         }
+        
+        if(!$user->admin)
+            return $emails;
 
         if (!empty($user->email_aliases)) {
             foreach (explode(',', $user->email_aliases) as $alias) {

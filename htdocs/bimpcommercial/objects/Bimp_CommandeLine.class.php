@@ -386,6 +386,8 @@ class Bimp_CommandeLine extends ObjectLine
                 }
                 break;
         }
+        
+        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors);
     }
 
     // Getters valeurs:

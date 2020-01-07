@@ -659,6 +659,68 @@ filters_panels:
 #                    type: select
 #                    options: 
 #                        callback: getCategoriesArray
+
+
+            categorie:
+                custom: 1
+                label: Catégorie produit
+                field: categorie
+                type: value
+                input: 
+                    type: select
+                    options: 
+                        callback: 
+                            method: getProductsTagsByTypeArray
+                            params: 
+                                - categorie
+            collection:
+                custom: 1
+                label: Collection produit
+                field: collection
+                type: value
+                input: 
+                    type: select
+                    options: 
+                        callback: 
+                            method: getProductsTagsByTypeArray
+                            params: 
+                                - collection
+            nature:
+                custom: 1
+                label: Nature produit
+                field: nature
+                type: value
+                input: 
+                    type: select
+                    options: 
+                        callback: 
+                            method: getProductsTagsByTypeArray
+                            params: 
+                                - nature
+            famille:
+                custom: 1
+                label: Famille produit
+                field: famille
+                type: value
+                input: 
+                    type: select
+                    options: 
+                        callback: 
+                            method: getProductsTagsByTypeArray
+                            params: 
+                                - famille
+            gamme:
+                custom: 1
+                label: Gamme produit
+                field: gamme
+                type: value
+                input: 
+                    type: select
+                    options: 
+                        callback: 
+                            method: getProductsTagsByTypeArray
+                            params: 
+                                - gamme
             
                 
 lists_cols: 
@@ -783,6 +845,21 @@ lists_cols:
         field: fk_soc
         child: parent
         display: nom_url
+    categorie:
+        child: product
+        field: categorie
+    collection:
+        child: product
+        field: collection
+    nature:
+        child: product
+        field: nature
+    famille:
+        child: product
+        field: famille
+    gamme:
+        child: product
+        field: gamme
                         
 lists:      
     global:

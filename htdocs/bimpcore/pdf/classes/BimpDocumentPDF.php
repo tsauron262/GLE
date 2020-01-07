@@ -651,7 +651,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
                                 foreach ($equipments as $id_equipment) {
                                     $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
-                                    $serials[] = $equipment->getData('serial');
+                                    $serials[] = $equipment->displaySerialImei();
                                 }
 
                                 if (!isset($this->annexe_listings['serials'])) {

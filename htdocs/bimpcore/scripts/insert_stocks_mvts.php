@@ -17,6 +17,8 @@ BimpCore::displayHeaderFiles();
 global $db, $user;
 $bdb = new BimpDb($db);
 
+exit;
+
 $filename = DOL_DOCUMENT_ROOT . '/bimpcore/stocks_mvts.json';
 $data = json_decode(file_get_contents($filename), 1);
 $rows = $data['data'];

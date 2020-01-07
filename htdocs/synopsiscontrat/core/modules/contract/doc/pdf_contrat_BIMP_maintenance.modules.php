@@ -360,19 +360,20 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
             $nb_line = ceil($nb_char_desc / 136);
             $last_char = 136;
             $start_char = 0;
-            if($nb_line > 1) {
-               $i = 1;
-               while($i <= $nb_line){
-                    $pdf->Cell($W * 9, 7, substr($associate_product->description, $start_char, 136), 1, null, 'L', true);
-                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 5, "", 0, 'L'); 
-                    $start_char = $last_char;
-                    $i++;
-                } 
-                
-            } else {
-                $pdf->Cell($W * 9, 7, substr($associate_product->description, 0, 136), 1, null, 'L', true);
-                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 7, "", 0, 'L'); 
-            }
+            
+            
+            $chaine_description = $line->description;
+            //$chaine_description = strip_tags($chaine_description,"<b><u><i><a><img><p><strong><em><font><tr><blockquote>");
+            $chaine_description = str_replace(":&nbsp;", ' ', $chaine_description);  
+            $chaine_description = str_replace("<li>", '', $chaine_description);
+            $chaine_description = str_replace("</li>", "\n", $chaine_description);
+            $chaine_description = str_replace("<br>", "\n", $chaine_description);
+            $chaine_description = str_replace("<br/>", "\n", $chaine_description);
+            $chaine_description = str_replace("<br />", "\n", $chaine_description);
+            $chaine_description = str_replace("<ul>", '', $chaine_description);
+            $chaine_description = str_replace("</ul>", '', $chaine_description);
+            
+            $pdf->MultiCell($this->page_largeur - $this->marge_droite - $this->marge_gauche, 7, $chaine_description, 0, 'L'); 
             
             $first_passage = false;
             

@@ -11,7 +11,7 @@ class BC_Caisse extends BimpObject
         72  => '72 dpi',
         100 => '100 dpi',
         200 => '200 dpi',
-        300 => '300dpi'
+        300 => '300 dpi'
     );
     public static $windowWidthByDpi = array(
         72  => 596,

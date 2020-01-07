@@ -334,6 +334,16 @@ forms:
             - field: id_client
             - field: id_contact
             - field: id_equipment
+            - custom: 1
+              label: Conserver l'équipement dans son emplacement actuel
+              input_name: keep_equipment_current_place
+              data_type: bool
+              content: 
+                  callback: renderEquipmentPlaceOptionInput
+              display_if: 
+                  field_name: id_equipment
+                  hide_values: 0,
+              depends_on: id_equipment
             - field: symptomes
             - field: id_contrat
             - field: prioritaire
@@ -423,6 +433,27 @@ forms:
               input: 
                   type: toggle
               value: 1
+            - custom: 1
+              label: Replacer l'équipement dans son emplacement précédent
+              input_name: put_equipment_on_prev_place
+              data_type: bool
+              content: 
+                  callback: renderEquipmentPlaceOptionInput
+                  
+    restitute_no_paiement: 
+            - custom: 1
+              label: Notifier le client
+              input_name: send_msg
+              data_type: bool
+              input: 
+                  type: toggle
+              value: 1
+            - custom: 1
+              label: Replacer l'équipement dans son emplacement précédent
+              input_name: put_equipment_on_prev_place
+              data_type: bool
+              content: 
+                  callback: renderEquipmentPlaceOptionInput
                   
     close_refused: 
         title: Fermeture

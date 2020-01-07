@@ -135,7 +135,9 @@ class majCodeConfigurationnProd{
                 . "AND label  NOT LIKE '%Demo' "
                 . "AND label  NOT LIKE '%Recondtionné%' "
                 . "AND ref  NOT LIKE 'APP-Z0%' "
+                . "AND ref  NOT LIKE 'APP-MTFP'  "
                 . "AND label  NOT LIKE '%WaTcH%'  "
+                . "AND serial  NOT IN ('C02Z20KVHX87')  "
                 . "AND (label  NOT LIKE '%GRAVURE%' || label  NOT LIKE '%C2C%')  "
                 . "GROUP BY fin ORDER BY COUNT(*) DESC");
         while($ln = $this->db->fetch_object($sql)){

@@ -186,11 +186,11 @@ class BimpDocumentPDF extends BimpModelPDF
         }
 
         $doc_ref = "";
-        if(is_object($this->object) && isset($this->object->ref))
+        if (is_object($this->object) && isset($this->object->ref))
             $doc_ref = $this->object->ref;
-        
+
         $this->pdf->topMargin = 53;
-        
+
         $this->header_vars = array(
             'logo_img'      => $logo_file,
             'logo_width'    => $logo_width,
@@ -303,7 +303,7 @@ class BimpDocumentPDF extends BimpModelPDF
         $this->renderFullBlock('renderAfterBottom');
         $this->renderFullBlock('renderAnnexes');
         $this->renderAnnexeListings();
-        
+
         $cur_page = (int) $this->pdf->getPage();
         $num_pages = (int) $this->pdf->getNumPages();
         if (($num_pages - $cur_page) === 1) {
@@ -611,6 +611,15 @@ class BimpDocumentPDF extends BimpModelPDF
                 continue;
             }
 
+            if (BimpObject::objectLoaded($bimpLine) && $bimpLine->field_exists('hide_in_pdf')) {
+                if ((int) $bimpLine->getData('type') === ObjectLine::LINE_TEXT || ((float) $bimpLine->pu_ht * (float) $bimpLine->getFullQty() == 0)) {
+                    if ((int) $bimpLine->getData('hide_in_pdf')) {
+                        continue;
+                    }
+                }
+            }
+
+
             $product = null;
             if (!is_null($line->fk_product) && $line->fk_product) {
                 $product = new Product($this->db);
@@ -651,7 +660,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
                                 foreach ($equipments as $id_equipment) {
                                     $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
-                                    $serials[] = $equipment->getData('serial');
+                                    $serials[] = $equipment->displaySerialImei();
                                 }
 
                                 if (!isset($this->annexe_listings['serials'])) {
@@ -675,7 +684,7 @@ class BimpDocumentPDF extends BimpModelPDF
                                         } else {
                                             $fl = false;
                                         }
-                                        $desc .= $equipment->getData('serial');
+                                        $desc .= $equipment->displaySerialImei();
                                     }
                                 }
                             }

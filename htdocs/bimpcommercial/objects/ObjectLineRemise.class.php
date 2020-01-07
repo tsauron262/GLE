@@ -8,6 +8,11 @@ class ObjectLineRemise extends BimpObject
 
     // Getters - Ovveride BimpObject
 
+    public function canCreate()
+    {
+        return 1;
+    }
+
     public function isParentEditable()
     {
         $parent = $this->getParentInstance();
@@ -163,10 +168,6 @@ class ObjectLineRemise extends BimpObject
         }
 
         return parent::update($warnings, $force_update);
-    }
-    
-    public function canCreate() {
-        return 1;
     }
 
     public function delete(&$warnings = array(), $force_delete = false)

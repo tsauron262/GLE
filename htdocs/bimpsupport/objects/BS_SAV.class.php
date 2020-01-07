@@ -638,34 +638,34 @@ class BS_SAV extends BimpObject
             }
 
             // Ajouter acompte: 
-            if ($this->isActionAllowed('validate_propal')) {
-                $onclick = '';
+            $onclick = '';
 
-                if (!(int) $this->getData('id_facture_acompte')) {
-                    $onclick = $this->getJsActionOnclick('addAcompte', array(), array(
-                        'form_name' => 'add_acompte'
-                    ));
-                } elseif (BimpObject::objectLoaded($propal) && $propal->isActionAllowed('addAcompte')) {
-                    $id_mode_paiement = 0;
-                    $client = $propal->getChildObject('client');
-                    if (BimpObject::objectLoaded($client)) {
-                        $id_mode_paiement = $client->dol_object->mode_reglement_id;
-                    }
+            $err = array();
 
-                    $onclick = $propal->getJsActionOnclick('addAcompte', array(
-                        'id_mode_paiement' => $id_mode_paiement
-                            ), array(
-                        'form_name' => 'acompte'
-                    ));
+            if ($this->isActionAllowed('validate_propal') && !(int) $this->getData('id_facture_acompte')) {
+                $onclick = $this->getJsActionOnclick('addAcompte', array(), array(
+                    'form_name' => 'add_acompte'
+                ));
+            } elseif (BimpObject::objectLoaded($propal) && $propal->isActionAllowed('addAcompte', $err)) {
+                $id_mode_paiement = 0;
+                $client = $propal->getChildObject('client');
+                if (BimpObject::objectLoaded($client)) {
+                    $id_mode_paiement = $client->dol_object->mode_reglement_id;
                 }
 
-                if ($onclick) {
-                    $buttons[] = array(
-                        'label'   => 'Ajouter un acompte',
-                        'icon'    => 'fas_hand-holding-usd',
-                        'onclick' => $onclick
-                    );
-                }
+                $onclick = $propal->getJsActionOnclick('addAcompte', array(
+                    'id_mode_paiement' => $id_mode_paiement
+                        ), array(
+                    'form_name' => 'acompte'
+                ));
+            }
+
+            if ($onclick) {
+                $buttons[] = array(
+                    'label'   => 'Ajouter un acompte',
+                    'icon'    => 'fas_hand-holding-usd',
+                    'onclick' => $onclick
+                );
             }
 
             // Payer facture: 
@@ -1556,7 +1556,7 @@ class BS_SAV extends BimpObject
             $factureA->modelpdf = self::$facture_model_pdf;
             $factureA->array_options['options_type'] = "S";
             $factureA->array_options['options_entrepot'] = $this->getData('id_entrepot');
-            
+
             $user->rights->facture->creer = 1;
             if ($factureA->create($user) <= 0) {
                 $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($factureA), 'Des erreurs sont survenues lors de la création de la facture d\'acompte');
@@ -3654,20 +3654,19 @@ class BS_SAV extends BimpObject
                         }
 
                         // Création de la facture:
-                        $total_ttc = (float) $propal->getTotalTtc();
+                        $total_ttc_wo_discounts = (float) $propal->getTotalTtcWithoutDiscountsAbsolutes();
                         $lines = $propal->getLines('not_text');
 
                         $has_amounts_lines = false;
 
                         foreach ($lines as $line) {
-                            // suppr partie "pa_ht" dès que correctif pa facture en place
                             if (round((float) $line->getTotalTTC(), 2)) {
                                 $has_amounts_lines = true;
                                 break;
                             }
                         }
 
-                        if (!round($total_ttc, 2) && !$has_amounts_lines) {
+                        if (!round($total_ttc_wo_discounts, 2) && !$has_amounts_lines) {
                             $url = DOL_URL_ROOT . '/bimpsupport/bon_restitution.php?id_sav=' . $this->id;
                         } else {
                             if ((int) $this->getData('id_facture')) {

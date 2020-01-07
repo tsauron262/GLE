@@ -636,13 +636,23 @@ class Equipment extends BimpObject
                 $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $item['id_equipment']);
                 if (BimpObject::objectLoaded($equipment)) {
                     if ($equipment->isAvailable((int) $id_entrepot)) {
-                        $equipments[(int) $equipment->id] = $equipment->getRef();
+                        
+                        $equipments[(int) $equipment->id] = $equipment->displaySerialImei();
                     }
                 }
             }
         }
 
         return $equipments;
+    }
+    
+    public function displaySerialImei(){
+        $label = $this->getRef();
+        $imei = $this->getData('imei');
+        if($imei != '')
+            $label .= ' ('.$imei.')';
+        
+        return $label;
     }
 
     // Getters données: 
@@ -1504,21 +1514,21 @@ class Equipment extends BimpObject
         }
 
         if (!$id_product && $serial && (!$this->getInitData('serial') || $this->getInitData('serial') !== $serial)) {
-            // pas de correction du id_product pour l'instant car trop dangereux (stocks, incohérences commandes / factures, etc.)
-//            if (preg_match('/^.+(.{4})$/', $serial, $matches)) {
-//                $apple_product = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Product', array(
-//                            'code_config' => $matches[1],
-//                            'ref'         => array(
-//                                'part'      => 'APP-',
-//                                'part_type' => 'beginning'
-//                            )
-//                                ), true);
-//                
-//                if (BimpObject::objectLoaded($apple_product)) {
-//                    $this->set('id_product');
-//                    $this->set('product_label', '');
-//                }
-//            }
+            // Pas de correction du id_product pour l'instant car trop dangereux (stocks, incohérences commandes / factures, etc.)
+            if (preg_match('/^.+(.{4})$/', $serial, $matches)) {
+                $apple_product = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Product', array(
+                            'code_config' => $matches[1],
+                            'ref'         => array(
+                                'part'      => 'APP-',
+                                'part_type' => 'beginning'
+                            )
+                                ), true);
+
+                if (BimpObject::objectLoaded($apple_product)) {
+                    $this->set('id_product', $id_product);
+                    $this->set('product_label', '');
+                }
+            }
         }
 
         if ($id_product) {

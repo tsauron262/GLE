@@ -543,6 +543,12 @@ views:
                             col_lg: 12
                             fields_table: 
                                 name: infos
+                      - cols:
+                          - type: list
+                            col_lg: 12
+                            list:
+                                object: lines
+                                name: interface_client
 
     
     file:

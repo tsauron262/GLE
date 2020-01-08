@@ -632,6 +632,8 @@ filters_panels:
                 show: 1
             date_lim_reglement:
                 field: date_lim_reglement
+            datef:
+                field: datef
             revals_prevues: 
                 custom: 1
                 field: revals_prevues

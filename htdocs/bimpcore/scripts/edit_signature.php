@@ -28,6 +28,7 @@ $nb_user = sizeof($ids);
 $cnt = 0;
 foreach ($ids as $id) {
     $user = new User($db);
+    $user->oldcopy = clone($user); 
     $user->fetch((int) $id);
     $user->signature = getSignature($user);
     if ($user->update($admin) < 0)

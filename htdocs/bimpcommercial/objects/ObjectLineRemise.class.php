@@ -8,6 +8,11 @@ class ObjectLineRemise extends BimpObject
 
     // Getters - Ovveride BimpObject
 
+    public function canCreate()
+    {
+        return 1;
+    }
+
     public function isParentEditable()
     {
         $parent = $this->getParentInstance();

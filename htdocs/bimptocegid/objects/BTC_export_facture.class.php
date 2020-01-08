@@ -2,10 +2,17 @@
 
 class BTC_export_facture extends BTC_export {
     
-    public function export($id_facture, $forced) {
+    public function export($id_facture, $forced, $confFile) {
         
         $facture = $this->getInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
-        $file = $this->create_daily_file('vente', $facture->getData('datef'));
+        
+        if(!empty($confFile['name']) && !empty($confFile['dir'])) {
+            $file =$this->create_daily_file('vente', null, $confFile['name'], $confFile['dir']);
+        } else {
+            $file =$this->create_daily_file('vente', $facture->getData('datef'));
+        }
+        
+        //$file = $this->create_daily_file('vente', $facture->getData('datef'));
         if($contact = $this->db->getRow('element_contact', 'element_id = ' . $facture->getData('fk_soc') . ' AND fk_c_type_contact = 60')) {
             $id_client_facturation = $contact->fk_socpeople;
         } else {
@@ -27,8 +34,7 @@ class BTC_export_facture extends BTC_export {
         $use_tva = true;
         $use_d3e = true;
         
-        $compte_general_tva_null = BimpCore::getConf('BIMPTOCEGID_vente_tva_null');
-        
+        $compte_general_tva_null = $this->convertion_to_interco_code(BimpCore::getConf('BIMPTOCEGID_vente_tva_null'), $compte_general_411);
         if ($societe->getData('is_subsidiary')) {
             $compte_general_411 = $societe->getData('accounting_account');
             $is_client_interco = true;
@@ -42,7 +48,7 @@ class BTC_export_facture extends BTC_export {
                 $compte_general_produit = $this->convertion_to_interco_code(BimpCore::getConf('BIMPTOCEGID_vente_produit_fr'), $compte_general_411);
                 $compte_general_service = $this->convertion_to_interco_code(BimpCore::getConf('BIMPTOCEGID_vente_service_fr'), $compte_general_411);
                 $compte_general_tva = BimpCore::getConf('BIMPTOCEGID_vente_tva_fr');
-                $compte_general_d3e = BimpCore::getConf('BIMPTOCEGID_vente_dee_fr');
+                $compte_general_d3e = $this->convertion_to_interco_code(BimpCore::getConf('BIMPTOCEGID_vente_dee_fr'), $compte_general_411);
                 $compte_general_port = $this->convertion_to_interco_code(BimpCore::getConf('BIMPTOCEGID_frais_de_port_vente_fr'), $compte_general_411);
                 $compte_general_comissions = $this->convertion_to_interco_code(BimpCore::getConf('BIMPTOCEGID_comissions_fr'), $compte_general_411);
                 break;
@@ -163,6 +169,9 @@ class BTC_export_facture extends BTC_export {
             $facture->updateField('exported', 204);
         }
         
+        $have_product_in_facture = $this->have_in_facture($facture->dol_object->lines);
+        $have_service_in_facture = $this->have_in_facture($facture->dol_object->lines, 'service');
+        
         foreach($facture->dol_object->lines as $line) {
             if(is_null($facture->getData('ignore_compta')) || $facture->getData('ignore_compta') == 0) { // Si la facture n'est pas ignorée en compta
                 if(round($line->multicurrency_total_ht, 2) != 0 && !$ignore) {
@@ -194,25 +203,28 @@ class BTC_export_facture extends BTC_export {
                             }
                         }
                         
-                        $is_remise = false;
-                        $montant_remise = 0;
-                        if($produit->getData('ref') == 'REMISE' || $produit->getData('ref') == 'TEX' || $produit->getData('ref') == 'REMISE-01' || $produit->getData('ref') == 'REMISE-02' || $produit->getData('ref') == 'REMISE-03' || $produit->getData('ref') == 'REMISECRT') {
-                            $is_remise = true;
+//                        $is_remise = false;
+//                        $montant_remise = 0;
+//                        if($produit->getData('ref') == 'REMISE' || $produit->getData('ref') == 'TEX' || $produit->getData('ref') == 'REMISE-01' || $produit->getData('ref') == 'REMISE-02' || $produit->getData('ref') == 'REMISE-03' || $produit->getData('ref') == 'REMISECRT') {
+//                            $is_remise = true;
                             
+                        
                             switch($produit->getData('ref')) {
                                 case "REMISE" :
-                                    $use_compte_general = $compte_general_produit;
+                                case "REMISECRT":
+                                case "TEX":
+                                    $use_compte_general = ($have_product_in_facture) ? $compte_general_produit : $compte_general_service;
                                     break;
                                 case "REMISE-01":
                                 case "REMISE-02":
                                 case "REMISE-03":
-                                    $use_compte_general = $compte_general_service;
+                                    $use_compte_general = ($have_service_in_facture) ? $compte_general_service : $compte_general_produit;
                                     break;
                             }
-                            
-                            $lignes[$use_compte_general]['HT'] += $line->multicurrency_total_ht;
-                            $total_lignes += round($line->multicurrency_total_ht, 2);
-                        }
+//                            
+//                            $lignes[$use_compte_general]['HT'] += $line->multicurrency_total_ht;
+//                            $total_lignes += round($line->multicurrency_total_ht, 2);
+//                        }
                         
                         if($produit->getData('ref') == "ZZCOMMISSION") {
                             $is_commission = true;
@@ -236,7 +248,14 @@ class BTC_export_facture extends BTC_export {
                         if(!$is_frais_de_port && !$is_remise && !$is_commission && !$is_refact) {
                             if($use_d3e){
                                 if(($facture->getData('zone_vente') == 1 && $line->tva_tx != 0) || $facture->getData('zone_vente') != 1){
-                                    $lignes[$use_compte_general]['HT'] += $line->multicurrency_total_ht - ($produit->getData('deee') * $line->qty);
+                                    
+                                    $add_ht = $line->multicurrency_total_ht - ($produit->getData('deee') * $line->qty);
+                                    
+                                    if($line->multicurrency_total_ht < 0) {
+                                        $add_ht = $line->multicurrency_total_ht + ($produit->getData('deee') * $line->qty);
+                                    }
+                                    
+                                    $lignes[$use_compte_general]['HT'] += $add_ht;
                                     $total_lignes += round($line->multicurrency_total_ht, 2);
                                 }
                             } else {
@@ -263,7 +282,7 @@ class BTC_export_facture extends BTC_export {
                                 $total_lignes += round($line->multicurrency_total_ht, 2);
                             } elseif($use_tva && $line->tva_tx == 0) {
                                 $lignes[$compte_general_tva_null]['HT'] += $line->multicurrency_total_ht;
-                                $total_lignes += round($line->multicurrency_total_ht, 2);;
+                                $total_lignes += round($line->multicurrency_total_ht, 2);
                             }
                     }
                 }
@@ -273,8 +292,8 @@ class BTC_export_facture extends BTC_export {
         if($use_d3e && $d3e != 0) {
             $lignes[$compte_general_d3e]['HT'] = $d3e;
         }
-        
-        if(round($total_lignes, 2) != round($total_ttc_facture, 2)) {
+
+        if(round($total_ttc_facture, 2) != round($total_lignes, 2)) {            
             $montant_ecart = round($total_ttc_facture, 2) - (round($total_lignes, 2));
             $lignes = $this->rectifications_ecarts($lignes, round($montant_ecart,2), 'vente');
            
@@ -296,13 +315,7 @@ class BTC_export_facture extends BTC_export {
             $ecritures .= $this->struct($structure);
         }
         
-         if($this->write_tra($ecritures, $file)) {
-            $facture->updateField('exported', 1);
-            $this->log('FACTURE CLIENT', $facture->getData('facnumber'), $file);
-            return 1;
-        } else {
-            return 0;
-        }
+        return $this->write_tra($ecritures, $file);
         
     }
     

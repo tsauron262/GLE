@@ -471,12 +471,17 @@ fields:
         label: CTO
         dol_extra_field: 1
         
+    code_config:
+        label: Code configuration
+        dol_extra_field: 1
+        
 forms: 
     # Utiliser plutôt "default" que "card" pour le formulaire principal 
     # Important car tout objet doit avoir un formulaire par défaut s'il est éditable.
     default: 
         rows:
             - field: ref
+            - field: code_config
             - field: label
             - field: description
             - field: fk_product_type
@@ -609,6 +614,7 @@ fields_tables:
         icon: fas_info-circle
         rows:  
             - field: ref
+            - field: code_config
             - field: label
             - field: fk_product_type
             - field: type2
@@ -849,6 +855,7 @@ filters_panels:
     default: 
         filters: 
             - field: ref
+            - field: code_config
             - field: label
             - field: fk_product_type
             - field: stock
@@ -949,6 +956,8 @@ lists_cols:
     seuil_stock: 
         label: Lim. stock
         field: seuil_stock_alerte
+    code_config:
+        field: code_config
                 
 lists: 
     default: 

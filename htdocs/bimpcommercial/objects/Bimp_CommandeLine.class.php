@@ -16,6 +16,12 @@ class Bimp_CommandeLine extends ObjectLine
 
     public function isRemiseEditable()
     {
+        $parent = $this->getParentInstance();
+
+        if (BimpObject::objectLoaded($parent) && $parent->isLogistiqueActive() && !(float) $this->qty && !(float) $this->getBilledQty()) {
+            return 1;
+        }
+
         return (int) $this->isParentEditable();
     }
 
@@ -132,6 +138,21 @@ class Bimp_CommandeLine extends ObjectLine
         }
 
         return 1;
+    }
+
+    public function isFieldEditable($field, $force_edit = false)
+    {
+        if (!(int) $this->isEditable()) {
+            return 0;
+        }
+
+        $parent = $this->getParentInstance();
+
+        if (!in_array($field, array('remisable', 'qty')) && BimpObject::objectLoaded($parent) && $parent->isLogistiqueActive() && !(float) $this->qty && !(float) $this->getBilledQty()) {
+            return 1;
+        }
+
+        return parent::isFieldEditable($field, $force_edit);
     }
 
     // Getters params:
@@ -386,6 +407,8 @@ class Bimp_CommandeLine extends ObjectLine
                 }
                 break;
         }
+
+        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors);
     }
 
     // Getters valeurs:

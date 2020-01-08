@@ -40,6 +40,15 @@ class Bimp_Facture extends BimpComm
         parent::iAmAdminRedirect();
     }
 
+    public function isFieldEditable($field, $force_edit = false)
+    {
+        if ((int) $this->getData('fk_statut') > 0 && ($field == 'datef'))
+            return 0;
+
+
+        return parent::isFieldEditable($field, $force_edit);
+    }
+
     public function isEditable($force_edit = false, &$errors = array())
     {
         if ($this->getData('exported') == 1)
@@ -127,6 +136,12 @@ class Bimp_Facture extends BimpComm
         }
 
         return parent::canSetAction($action);
+    }
+
+    public function canFactureAutreDate()
+    {
+        global $user;
+        return $user->rights->bimpcommercial->edit_date_facture;
     }
 
     // Getters booléens:
@@ -2058,10 +2073,10 @@ class Bimp_Facture extends BimpComm
                         $has_amounts_lines = false;
                         $neg_lines = 0;
                         foreach ($lines as $line) {
-                            if (round((float) $line->getTotalTTC(), 2) || round((float) $line->pa_ht, 2)) {
+                            if (round((float) $line->getTotalTTC(), 2)) {// || round((float) $line->pa_ht, 2)) {
                                 $has_amounts_lines = true;
                             }
-                            if ((float) $line->getTotalTTC() < 0 && !(int) $line->id_remise_except) {
+                            if (round((float) $line->getTotalTTC(), 2) < 0 && !(int) $line->id_remise_except) {
                                 $neg_lines++;
                             }
                         }
@@ -2106,6 +2121,12 @@ class Bimp_Facture extends BimpComm
 
                 $html .= BimpRender::renderAlerts($msg, 'warning');
             }
+        }
+
+
+        $today = date('Y-m-d');
+        if (!$this->canFactureAutreDate() && $this->getData('datef') != $today) {
+            $html .= BimpRender::renderAlerts('Attention, la date va être modifiée à aujourd\'hui', 'warning');
         }
 
         $html .= '<input type="hidden" name="validation_type" value="' . $validation_type . '">';
@@ -2375,15 +2396,15 @@ class Bimp_Facture extends BimpComm
             }
 
             foreach ($lines as $line) {
-                if (round((float) $line->getTotalTTC(), 2) || round((float) $line->pa_ht, 2)) {
+                if (round((float) $line->getTotalTTC(), 2)) {// || round((float) $line->pa_ht, 2)) {
                     $has_amounts_lines = true;
                 }
-                if ((float) $line->getTotalTTC() < 0 && !(int) $line->id_remise_except) {
+                if (round((float) $line->getTotalTTC(), 2) < 0 && !(int) $line->id_remise_except) {
                     $neg_lines++;
                 }
             }
 
-            if (!$total_ttc && !$has_amounts_lines) {
+            if (!round($total_ttc, 2) && !$has_amounts_lines) {
                 $errors[] = 'Aucune ligne avec montant non nul ajoutée à cette facture';
                 return $errors;
             }
@@ -3153,7 +3174,8 @@ class Bimp_Facture extends BimpComm
 
             if (!count($errors)) {
                 $today = date('Y-m-d');
-                if ($this->getData('datef') != $today) {
+                if (!$this->canFactureAutreDate() && $this->getData('datef') != $today) {
+                    $warnings[] = "Attention la date a été modifiée à la date du jour.";
                     $errors = $this->updateField('datef', $today);
                 }
             }

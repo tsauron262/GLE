@@ -739,6 +739,9 @@ class BimpComm extends BimpDolObject
         if (!empty($user->email)) {
             $emails[$user->email] = $user->getFullName($langs) . ' (' . $user->email . ')';
         }
+        
+        if(!$user->admin)
+            return $emails;
 
         if (!empty($user->email_aliases)) {
             foreach (explode(',', $user->email_aliases) as $alias) {
@@ -2576,8 +2579,45 @@ class BimpComm extends BimpDolObject
 
         return $errors;
     }
-
-    public function createLinesFromOrigin($origin, $params = array())
+    
+//    public function actionAddContrat($data, &$success) {
+//                
+//        $new_contrat = $this->getInstance('bimpcontract', 'BContract_contrat');
+//        $new_contrat->set('fk_soc', $data['fk_soc']);
+//        $new_contrat->set('date_start', $data['valid_start']);
+//        $new_contrat->set('objet_contrat', $data['objet_contrat']);
+//        $new_contrat->set('fk_commercial_signature', $data['commercial_signature']);
+//        $new_contrat->set('fk_commercial_suivi', $data['commercial_suivi']);
+//        $new_contrat->set('moderegl', $data['fk_mode_reglement']);
+//        $new_contrat->set('gti', $data['gti']);
+//        $new_contrat->set('duree_mois', $data["duree_mois"]);
+//        $new_contrat->set('periodicity', $data['periodicity']);
+//        $new_contrat->set('tacite', $data['re_new']);
+//        
+//        if($data['use_syntec']) {
+//            $new_contrat->set('syntec', BimpCore::getConf('current_indice_syntec'));
+//        }
+//        if($new_contrat->create()) {
+//            foreach($this->dol_object->lines as $line) {
+//                if($line->fk_product && $line->fk_product_type == 1) {
+//                    $produit = $this->getInstance('bimpcore', 'Bimp_Product', $line->fk_product);
+//                    $end = new DateTime($data['valid_start']);
+//                    $end->add(new DateInterval("P" . $data['duree_mois'] . "M"));
+//                    $new_contrat->dol_object->addline($line->product_desc, $line->subprice, $line->qty, $line->tva_tx,0,0, $line->fk_product, $line->remise_percent, $data['valid_start'], $end->format("Y-m-d"));
+//                }
+//            }
+//            addElementElement('commande', 'contrat', $this->id, $new_contrat->id);
+//        }
+//        
+//        return [
+//            "success_callback" => "window.location.href = \"".DOL_URL_ROOT."/bimpcontract/?fc=contrat&id=".$new_contrat->id."\"",
+//            "errors" => $errors,
+//            "warnings" => $warnings
+//        ];
+//        
+//    }
+//    
+    public function createLinesFromOrigin($origin, $inverse_prices = false, $pa_editable = true)
     {
         $errors = array();
 

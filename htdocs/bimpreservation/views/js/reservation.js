@@ -207,7 +207,8 @@ function onReserveEquipmentsFormLoaded($form) {
                         if ($select.length) {
                             var done = false;
                             $select.find('option').each(function () {
-                                if (serial === $(this).text()) {
+//                                if (serial === $(this).text()) {
+                                if ($(this).text().indexOf(serial) !== -1) {
                                     $input.val('');
                                     $select.val($(this).attr('value')).change();
                                     done = true;

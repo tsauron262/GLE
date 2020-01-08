@@ -29,6 +29,11 @@ class Bimp_FactureLine extends ObjectLine
         return array();
     }
 
+    public function isRemiseEditable()
+    {
+        return $this->isParentDraft();
+    }
+
     public function isFieldEditable($field, $force_edit = false)
     {
         switch ($field) {

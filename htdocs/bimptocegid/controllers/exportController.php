@@ -8,9 +8,9 @@ class exportController extends BimpController {
     
     public function renderHtml() {
         global $user;
-        if (!$user->admin && $user->id != 460) {
-            accessforbidden();
-        }
+//        if (!$user->admin && $user->id != 460) {
+//            accessforbidden();
+//        }
         
         
         

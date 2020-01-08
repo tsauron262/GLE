@@ -49,7 +49,7 @@ lists:
         enable_sort: 0
         filters_panel: default
         add_object_row: 0
-        filters_panel_open: 1
+        filters_panel_open: 0
         extra_btn: 
             callback: getDefaultListExtraButtons
         cols:

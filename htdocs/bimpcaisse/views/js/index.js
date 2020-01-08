@@ -304,10 +304,10 @@ function openCaisse($button, confirm_fonds) {
     }
 
     var fonds = parseFloat($form.find('[name="fonds"]').val());
-    if (!fonds) {
-        bimp_msg('Veuillez indiquer le montant du fonds de caisse', 'warning', null, true);
-        return;
-    }
+//    if (!fonds) {
+//        bimp_msg('Veuillez indiquer le montant du fonds de caisse', 'warning', null, true);
+//        return;
+//    }
 
     BimpAjax('openCaisse', {
         id_caisse: id_caisse,
@@ -347,10 +347,10 @@ function closeCaisse($button, confirm_fonds) {
     }
 
     var fonds = parseFloat($form.find('[name="fonds"]').val());
-    if (!fonds) {
-        bimp_msg('Veuillez indiquer le montant du fonds de caisse', 'warning', null, true);
-        return;
-    }
+//    if (!fonds) {
+//        bimp_msg('Veuillez indiquer le montant du fonds de caisse', 'warning', null, true);
+//        return;
+//    }
 
     BimpAjax('closeCaisse', {
         id_caisse: id_caisse,

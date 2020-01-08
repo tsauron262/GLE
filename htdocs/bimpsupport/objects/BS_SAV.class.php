@@ -579,7 +579,7 @@ class BS_SAV extends BimpObject
                     $buttons[] = array(
                         'label'   => 'Restituer',
                         'icon'    => 'times-circle',
-                        'onclick' => $this->getJsActionOnclick('close', array('restitute' => 1))
+                        'onclick' => $this->getJsActionOnclick('close', array('restitute' => 1), array())
                     );
                 }
             }
@@ -638,34 +638,34 @@ class BS_SAV extends BimpObject
             }
 
             // Ajouter acompte: 
-            if ($this->isActionAllowed('validate_propal')) {
-                $onclick = '';
+            $onclick = '';
 
-                if (!(int) $this->getData('id_facture_acompte')) {
-                    $onclick = $this->getJsActionOnclick('addAcompte', array(), array(
-                        'form_name' => 'add_acompte'
-                    ));
-                } elseif (BimpObject::objectLoaded($propal) && $propal->isActionAllowed('addAcompte')) {
-                    $id_mode_paiement = 0;
-                    $client = $propal->getChildObject('client');
-                    if (BimpObject::objectLoaded($client)) {
-                        $id_mode_paiement = $client->dol_object->mode_reglement_id;
-                    }
+            $err = array();
 
-                    $onclick = $propal->getJsActionOnclick('addAcompte', array(
-                        'id_mode_paiement' => $id_mode_paiement
-                            ), array(
-                        'form_name' => 'acompte'
-                    ));
+            if ($this->isActionAllowed('validate_propal') && !(int) $this->getData('id_facture_acompte')) {
+                $onclick = $this->getJsActionOnclick('addAcompte', array(), array(
+                    'form_name' => 'add_acompte'
+                ));
+            } elseif (BimpObject::objectLoaded($propal) && $propal->isActionAllowed('addAcompte', $err)) {
+                $id_mode_paiement = 0;
+                $client = $propal->getChildObject('client');
+                if (BimpObject::objectLoaded($client)) {
+                    $id_mode_paiement = $client->dol_object->mode_reglement_id;
                 }
 
-                if ($onclick) {
-                    $buttons[] = array(
-                        'label'   => 'Ajouter un acompte',
-                        'icon'    => 'fas_hand-holding-usd',
-                        'onclick' => $onclick
-                    );
-                }
+                $onclick = $propal->getJsActionOnclick('addAcompte', array(
+                    'id_mode_paiement' => $id_mode_paiement
+                        ), array(
+                    'form_name' => 'acompte'
+                ));
+            }
+
+            if ($onclick) {
+                $buttons[] = array(
+                    'label'   => 'Ajouter un acompte',
+                    'icon'    => 'fas_hand-holding-usd',
+                    'onclick' => $onclick
+                );
             }
 
             // Payer facture: 
@@ -1358,6 +1358,56 @@ class BS_SAV extends BimpObject
         ));
     }
 
+    public function renderEquipmentPlaceOptionInput()
+    {
+        $html = '';
+
+        if ($this->isLoaded()) {
+            $input_name = 'put_equipment_on_prev_place';
+            $id_equipment = (int) $this->getData('id_equipment');
+
+            if ($id_equipment) {
+                $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $id_equipment);
+
+                if (BimpObject::objectLoaded($equipment)) {
+                    $cur_place = $equipment->getCurrentPlace();
+                    if (BimpObject::objectLoaded($cur_place) && (int) $cur_place->getData('type') === BE_Place::BE_PLACE_SAV && (int) $cur_place->getData('id_entrepot') === (int) $this->getData('id_entrepot')) {
+                        $prev_place = BimpCache::findBimpObjectInstance('bimpequipment', 'BE_Place', array(
+                                    'id_equipment' => $id_equipment,
+                                    'position'     => 2
+                        ));
+
+                        if (BimpObject::objectLoaded($prev_place)) {
+                            $html .= '(' . $prev_place->displayPlace(true) . ')<br/><br/>';
+                            $html .= BimpInput::renderInput('toggle', $input_name, 1);
+                            return $html;
+                        }
+                    }
+                }
+            }
+        } else {
+            $input_name = 'keep_equipment_current_place';
+            $id_equipment = (int) BimpTools::getPostFieldValue('id_equipment', 0);
+
+            if ($id_equipment) {
+                $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $id_equipment);
+                if (BimpObject::objectLoaded($equipment)) {
+                    $place = $equipment->getCurrentPlace();
+                    if (BimpObject::objectLoaded($place)) {
+                        $html .= '(' . $place->displayPlace(true) . ')<br/><br/>';
+                        $html .= BimpInput::renderInput('toggle', $input_name, 0);
+                        return $html;
+                    }
+                }
+            }
+        }
+
+        $html .= '<span class="danger">NON</span>';
+        $html .= '<input type="hidden" value="0" name="' . $input_name . '"/>';
+
+        return $html;
+    }
+
     // Traitements:
 
     public function checkObject($context = '', $field = '')
@@ -1556,7 +1606,7 @@ class BS_SAV extends BimpObject
             $factureA->modelpdf = self::$facture_model_pdf;
             $factureA->array_options['options_type'] = "S";
             $factureA->array_options['options_entrepot'] = $this->getData('id_entrepot');
-            
+
             $user->rights->facture->creer = 1;
             if ($factureA->create($user) <= 0) {
                 $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($factureA), 'Des erreurs sont survenues lors de la création de la facture d\'acompte');
@@ -3571,37 +3621,71 @@ class BS_SAV extends BimpObject
                         }
 
                         if ((int) $this->getData('id_equipment')) {
-                            $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
-                            $place_errors = $place->validateArray(array(
-                                'id_equipment' => (int) $this->getData('id_equipment'),
-                                'type'         => BE_Place::BE_PLACE_CLIENT,
-                                'id_client'    => (int) $this->getData('id_client'),
-                                'infos'        => 'Restitution ' . $this->getData('ref'),
-                                'date'         => date('Y-m-d H:i:s')
-                            ));
-                            if (!count($place_errors)) {
-                                $place_errors = $place->create();
-                            }
-                            if (count($place_errors)) {
-                                $warnings[] = BimpTools::getMsgFromArray($place_errors, 'Echec de l\'enregistrement du nouvel emplacement pour l\'équipement de ce SAV');
+                            $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $this->getData('id_equipment'));
+
+                            if (BimpObject::objectLoaded($equipment)) {
+                                $cur_place = $equipment->getCurrentPlace();
+                                if (BimpObject::objectLoaded($cur_place) && (int) $cur_place->getData('type') === BE_Place::BE_PLACE_SAV && (int) $cur_place->getData('id_entrepot') === (int) $this->getData('id_entrepot')) {
+                                    $prev_place = BimpCache::findBimpObjectInstance('bimpequipment', 'BE_Place', array(
+                                                'id_equipment' => (int) $this->getData('id_equipment'),
+                                                'position'     => 2
+                                    ));
+
+                                    $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
+
+                                    $w = array();
+                                    if (BimpObject::objectLoaded($prev_place) && isset($data['put_equipment_on_prev_place']) && (int) $data['put_equipment_on_prev_place']) {
+                                        $place_errors = $place->validateArray(array(
+                                            'id_equipment' => (int) $this->getData('id_equipment'),
+                                            'type'         => $prev_place->getData('type'),
+                                            'id_client'    => (int) $prev_place->getData('id_client'),
+                                            'id_contact'   => (int) $prev_place->getData('id_contact'),
+                                            'id_entrepot'  => (int) $prev_place->getData('id_entrepot'),
+                                            'id_user'      => (int) $prev_place->getData('id_user'),
+                                            'code_centre'  => $prev_place->getData('code_centre'),
+                                            'place_name'   => $prev_place->getData('place_name'),
+                                            'infos'        => 'Restitution ' . $this->getData('ref'),
+                                            'date'         => date('Y-m-d H:i:s')
+                                        ));
+                                        if (!count($place_errors)) {
+                                            $place_errors = $place->create($w, true);
+                                        }
+                                        if (count($place_errors)) {
+                                            $warnings[] = BimpTools::getMsgFromArray($place_errors, 'Echec de l\'enregistrement du nouvel emplacement pour l\'équipement de ce SAV');
+                                        }
+                                    } else {
+                                        $place_errors = $place->validateArray(array(
+                                            'id_equipment' => (int) $this->getData('id_equipment'),
+                                            'type'         => BE_Place::BE_PLACE_CLIENT,
+                                            'id_client'    => (int) $this->getData('id_client'),
+                                            'infos'        => 'Restitution ' . $this->getData('ref'),
+                                            'date'         => date('Y-m-d H:i:s')
+                                        ));
+                                        if (!count($place_errors)) {
+                                            $place_errors = $place->create($w, true);
+                                        }
+                                        if (count($place_errors)) {
+                                            $warnings[] = BimpTools::getMsgFromArray($place_errors, 'Echec de l\'enregistrement du nouvel emplacement pour l\'équipement de ce SAV');
+                                        }
+                                    }
+                                }
                             }
                         }
 
                         // Création de la facture:
-                        $total_ttc = (float) $propal->getTotalTtc();
+                        $total_ttc_wo_discounts = (float) $propal->getTotalTtcWithoutDiscountsAbsolutes();
                         $lines = $propal->getLines('not_text');
 
                         $has_amounts_lines = false;
 
                         foreach ($lines as $line) {
-                            // suppr partie "pa_ht" dès que correctif pa facture en place
                             if (round((float) $line->getTotalTTC(), 2)) {
                                 $has_amounts_lines = true;
                                 break;
                             }
                         }
 
-                        if (!round($total_ttc, 2) && !$has_amounts_lines) {
+                        if (!round($total_ttc_wo_discounts, 2) && !$has_amounts_lines) {
                             $url = DOL_URL_ROOT . '/bimpsupport/bon_restitution.php?id_sav=' . $this->id;
                         } else {
                             if ((int) $this->getData('id_facture')) {
@@ -4160,20 +4244,30 @@ class BS_SAV extends BimpObject
 
             // Emplacement de l'équipement: 
             if ((int) $this->getData('id_equipment')) {
-                $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
-                $place_errors = $place->validateArray(array(
-                    'id_equipment' => (int) $this->getData('id_equipment'),
-                    'type'         => BE_Place::BE_PLACE_SAV,
-                    'id_entrepot'  => (int) $this->getData('id_entrepot'),
-                    'infos'        => 'Ouverture du SAV ' . $this->getData('ref'),
-                    'date'         => date('Y-m-d H:i:s')
-                ));
-                if (!count($place_errors)) {
-                    $place_errors = $place->create();
-                }
+                $equipment = $this->getChildObject('equipment');
 
-                if (count($place_errors)) {
-                    $warnings[] = BimpTools::getMsgFromArray($place_errors, 'Echec de la création de l\'emplacement de l\'équipement');
+                if (!BimpObject::objectLoaded($equipment)) {
+                    $warnings[] = 'L\'équipement d\'ID ' . $this->getData('id_equipment') . ' n\'existe pas';
+                } else {
+                    $current_place = $equipment->getCurrentPlace();
+
+                    if (!BimpObject::objectLoaded($current_place) || !(int) BimpTools::getPostFieldValue('keep_equipment_current_place', 0)) {
+                        $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
+                        $place_errors = $place->validateArray(array(
+                            'id_equipment' => (int) $this->getData('id_equipment'),
+                            'type'         => BE_Place::BE_PLACE_SAV,
+                            'id_entrepot'  => (int) $this->getData('id_entrepot'),
+                            'infos'        => 'Ouverture du SAV ' . $this->getData('ref'),
+                            'date'         => date('Y-m-d H:i:s')
+                        ));
+                        if (!count($place_errors)) {
+                            $place_errors = $place->create();
+                        }
+
+                        if (count($place_errors)) {
+                            $warnings[] = BimpTools::getMsgFromArray($place_errors, 'Echec de la création de l\'emplacement de l\'équipement');
+                        }
+                    }
                 }
             }
 

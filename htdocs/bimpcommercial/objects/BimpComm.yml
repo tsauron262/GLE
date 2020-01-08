@@ -116,6 +116,7 @@ fields:
     fk_mode_reglement: 
         label: Mode de règlement
         dol_prop: mode_reglement_id
+        required : 1
         type: int
         values: 
             array: modeReglements
@@ -167,6 +168,10 @@ fields:
         type: date
         label: Date Validation
     total: 
+        label: Total TTC
+        dol_prop: total_ttc
+        type: money
+    total_ttc: 
         label: Total TTC
         dol_prop: total_ttc
         type: money

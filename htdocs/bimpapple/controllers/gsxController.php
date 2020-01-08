@@ -873,9 +873,12 @@ class gsxController extends BimpController
         }
 
         $data = array(
+            'id_product'        => 0,
             'product_label'     => '',
             'serial'            => $serial,
             'imei'              => '',
+            'imei2'             => '',
+            'meid'              => '',
             'date_purchase'     => '',
             'date_warranty_end' => '',
             'warranty_type'     => '',
@@ -883,6 +886,7 @@ class gsxController extends BimpController
         );
 
         if ($serial) {
+            $matches = array();
             if (preg_match('/^S(.+)$/', $serial, $matches)) {
                 $serial = $matches[1];
             }
@@ -899,6 +903,33 @@ class gsxController extends BimpController
                         $data['imei'] = $result['device']['identifiers']['imei'];
                     } else {
                         $data['imei'] = "n/a";
+                    }
+
+                    if (isset($result['device']['identifiers']['imei2'])) {
+                        $data['imei2'] = $result['device']['identifiers']['imei2'];
+                    } else {
+                        $data['imei2'] = "n/a";
+                    }
+
+                    if (isset($result['device']['identifiers']['meid'])) {
+                        $data['meid'] = $result['device']['identifiers']['meid'];
+                    } else {
+                        $data['meid'] = "n/a";
+                    }
+
+                    $matches = array();
+                    if (preg_match('/^.+(.{4})$/', $data['serial'], $matches)) {
+                        $product = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Product', array(
+                                    'code_config' => $matches[1],
+                                    'ref'         => array(
+                                        'part'      => 'APP-',
+                                        'part_type' => 'beginning'
+                                    )
+                                        ), true);
+//                        
+                        if (BimpObject::objectLoaded($product)) {
+                            $data['id_product'] = (int) $product->id;
+                        }
                     }
                 }
 
@@ -918,8 +949,6 @@ class gsxController extends BimpController
                     $dt = new DateTime($result['device']['warrantyInfo']['purchaseDate']);
                     $data['date_purchase'] = $dt->format('Y-m-d H:i:s');
                 }
-
-                // $data['warning'] à traiter (Utiliser $result['device']['activationDetails']['unlocked'] ?) 
             }
         }
 
@@ -2896,7 +2925,7 @@ class gsxController extends BimpController
 
                 if (count($rep_errors)) {
                     $html .= BimpRender::renderAlerts($rep_errors);
-                    $repair_ok = 0;
+//                    $repair_ok = 0;  test todo pour faire quand meme avec warning
                 }
 
                 if (count($rep_warnings)) {

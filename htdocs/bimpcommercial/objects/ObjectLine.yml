@@ -140,6 +140,19 @@ fields:
         display_if: 
             field_name: type
             show_values: 1
+            
+    hide_in_pdf: 
+        label: Masquer la ligne dans le PDF
+        type: bool
+        input: 
+            type: custom
+            content: 
+                callback: 
+                    method: renderLineInput
+                    params: 
+                        - hide_in_pdf
+        default_value: 0
+        depends_on: pu_ht,qty,type
 
 forms: 
     default: 
@@ -226,6 +239,8 @@ forms:
                     field_name: type
                     show_values: 1,3
                 depends_on: id_product
+            hide_in_pdf: 
+                field: hide_in_pdf
 #            fourn_price:
 #                custom: 1
 #                label: Prix d'achat fournisseur
@@ -622,7 +637,7 @@ filters_panels:
                 field: total_ttc
                 child: dol_line
             total_ht: 
-                field: total
+                field: total_ht
                 child: parent
             total_ttc: 
                 field: total_ttc
@@ -632,34 +647,96 @@ filters_panels:
 #                child: product
             remise_crt:
                 field: remise_crt
-            categ1:
+#            categ1:
+#                custom: 1
+#                label: Catégorie (1)
+#                field: categ1
+#                type: value
+#                input:
+#                    type: select
+#                    options: 
+#                        callback: getCategoriesArray
+#            categ2:
+#                custom: 1
+#                label: Catégorie (2)
+#                field: categ2
+#                type: value
+#                input:
+#                    type: select
+#                    options: 
+#                        callback: getCategoriesArray
+#            categ3:
+#                custom: 1
+#                label: Catégorie (3)
+#                field: categ3
+#                type: value
+#                input:
+#                    type: select
+#                    options: 
+#                        callback: getCategoriesArray
+
+
+            categorie:
                 custom: 1
-                label: Catégorie (1)
-                field: categ1
+                label: Catégorie produit
+                field: categorie
                 type: value
-                input:
+                input: 
                     type: select
                     options: 
-                        callback: getCategoriesArray
-            categ2:
+                        callback: 
+                            method: getProductsTagsByTypeArray
+                            params: 
+                                - categorie
+            collection:
                 custom: 1
-                label: Catégorie (2)
-                field: categ2
+                label: Collection produit
+                field: collection
                 type: value
-                input:
+                input: 
                     type: select
                     options: 
-                        callback: getCategoriesArray
-            categ3:
+                        callback: 
+                            method: getProductsTagsByTypeArray
+                            params: 
+                                - collection
+            nature:
                 custom: 1
-                label: Catégorie (3)
-                field: categ3
+                label: Nature produit
+                field: nature
                 type: value
-                input:
+                input: 
                     type: select
                     options: 
-                        callback: getCategoriesArray
-                
+                        callback: 
+                            method: getProductsTagsByTypeArray
+                            params: 
+                                - nature
+            famille:
+                custom: 1
+                label: Famille produit
+                field: famille
+                type: value
+                input: 
+                    type: select
+                    options: 
+                        callback: 
+                            method: getProductsTagsByTypeArray
+                            params: 
+                                - famille
+            gamme:
+                custom: 1
+                label: Gamme produit
+                field: gamme
+                type: value
+                input: 
+                    type: select
+                    options: 
+                        callback: 
+                            method: getProductsTagsByTypeArray
+                            params: 
+                                - gamme
+            
 lists_cols: 
     position: 
         label: N°
@@ -782,6 +859,24 @@ lists_cols:
         field: fk_soc
         child: parent
         display: nom_url
+    categorie:
+        child: product
+        field: categorie
+    collection:
+        child: product
+        field: collection
+    nature:
+        child: product
+        field: nature
+    famille:
+        child: product
+        field: famille
+    gamme:
+        child: product
+        field: gamme
+    hide_in_pdf: 
+        label: Masquer (PDF)
+        field: hide_in_pdf
                         
 lists:      
     global:

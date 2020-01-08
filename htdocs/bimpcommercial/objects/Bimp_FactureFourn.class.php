@@ -1366,7 +1366,22 @@ class Bimp_FactureFourn extends BimpComm
 
     protected function updateDolObject(&$errors)
     {
-        return parent::updateDolObject($errors);
+        parent::updateDolObject($errors);
+        $data = array(
+            'fk_soc'            => (int) $this->getData('fk_soc'),
+            'ref_supplier'      => $this->getData('ref_supplier'),
+            'fk_cond_reglement' => $this->getData('fk_cond_reglement'),
+            'fk_mode_reglement' => $this->getData('fk_mode_reglement'),
+            'model_pdf'         => $this->getData('model_pdf'),
+            'note_private'      => $this->getData('note_private'),
+            'note_public'       => $this->getData('note_public'),
+        );
+        if ($this->db->update($this->dol_object->table_element, $data, '`rowid` = ' . (int) $this->id) <= 0) {
+            $errorsSql = $this->db->db->lasterror();
+            $errors[] = 'Echec de la mise à jour de la facture fournisseur' . ($errorsSql ? ' - ' . $errorsSql : '');
+            return 0;
+        }
+        return 1;
     }
 
     // Overrides BimpObject

@@ -28,11 +28,15 @@ $nb_user = sizeof($ids);
 $cnt = 0;
 foreach ($ids as $id) {
     $user = new User($db);
+    $user->oldcopy = clone($user); 
     $user->fetch((int) $id);
-    $user->signature = getSignature($user);
-    if ($user->update($admin) < 0)
-        $user_errors[] = $user;
-    $cnt++;
+    $new = getSignature($user);
+    if($user->signature != $new){
+        $user->signature = $new;
+        if ($user->update($admin) < 0)
+            $user_errors[] = $user;
+        $cnt++;
+    }
 }
 
 if (sizeof($user_errors) == 0)

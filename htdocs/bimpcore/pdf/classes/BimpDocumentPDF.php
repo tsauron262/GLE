@@ -605,6 +605,15 @@ class BimpDocumentPDF extends BimpModelPDF
                 continue;
             }
 
+            if (BimpObject::objectLoaded($bimpLine) && $bimpLine->field_exists('hide_in_pdf')) {
+                if ((int) $bimpLine->getData('type') === ObjectLine::LINE_TEXT || ((float) $bimpLine->pu_ht * (float) $bimpLine->getFullQty() == 0)) {
+                    if ((int) $bimpLine->getData('hide_in_pdf')) {
+                        continue;
+                    }
+                }
+            }
+
+
             $product = null;
             if (!is_null($line->fk_product) && $line->fk_product) {
                 $product = new Product($this->db);
@@ -644,7 +653,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
                                 foreach ($equipments as $id_equipment) {
                                     $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
-                                    $serials[] = $equipment->getData('serial');
+                                    $serials[] = $equipment->displaySerialImei();
                                 }
 
                                 if (!isset($this->annexe_listings['serials'])) {
@@ -668,7 +677,7 @@ class BimpDocumentPDF extends BimpModelPDF
                                         } else {
                                             $fl = false;
                                         }
-                                        $desc .= $equipment->getData('serial');
+                                        $desc .= $equipment->displaySerialImei();
                                     }
                                 }
                             }

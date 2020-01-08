@@ -559,9 +559,9 @@ class BLPDF extends OrderPDF
         $table->cols_def['qte']['style'] = 'text-align: center;';
         $table->cols_def['qte']['head_style'] = 'text-align: center;';
 
-        if(!isset($_GET['chiffre']) || $_GET['chiffre'] == 1)
+        if (!isset($_GET['chiffre']) || $_GET['chiffre'] == 1)
             $table->setCols(array('code_article', 'desc', 'pu_ht', 'tva', 'total_ht', 'qte', 'dl', 'ral'));
-        else{
+        else {
             $table->setCols(array('code_article', 'desc', 'qte', 'dl', 'ral'));
             $this->hideTotal = 1;
         }
@@ -596,6 +596,14 @@ class BLPDF extends OrderPDF
                 $this->acompteTtc -= $line->total_ttc;
                 $this->acompteTva20 -= $line->total_tva;
                 continue;
+            }
+
+            if (BimpObject::objectLoaded($bimpLine) && $bimpLine->field_exists('hide_in_pdf')) {
+                if ((int) $bimpLine->getData('type') === ObjectLine::LINE_TEXT || ((float) $bimpLine->pu_ht * (float) $bimpLine->getFullQty() == 0)) {
+                    if ((int) $bimpLine->getData('hide_in_pdf')) {
+                        continue;
+                    }
+                }
             }
 
             $product = null;
@@ -740,7 +748,7 @@ class BLPDF extends OrderPDF
                 }
             }
 
-            if(!isset($_GET['detail']) || $_GET['detail'] == 1 || $row['qte'] > 0)
+            if (!isset($_GET['detail']) || $_GET['detail'] == 1 || $row['qte'] > 0)
                 $table->rows[] = $row;
 
             unset($product);

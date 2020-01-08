@@ -324,7 +324,7 @@ class Inventory2 extends BimpDolObject
         } else
             $errors[] = "Erreur lors de la validation des données renseignées";
 
-        return (int) $inventory_line->db->db->last_insert_id();
+        return (int) $inventory_line->id;
     }
     
     public function getEquipmentExpected() {

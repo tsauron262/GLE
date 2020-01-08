@@ -481,6 +481,7 @@ forms:
     default: 
         rows:
             - field: ref
+            - field: code_config
             - field: label
             - field: description
             - field: fk_product_type

@@ -132,16 +132,17 @@ class majCodeConfigurationnProd{
                 . "AND SUBSTRING(`serial`, LENGTH(`serial`)-3, 4) NOT IN (SELECT code_config FROM llx_product_extrafields WHERE code_config IS NOT NULL) "
                 . "AND id_product =p.rowid AND ref LIKE 'APP-%' "
                 . "AND label  NOT LIKE '%(Demo)%' "
-                . "AND label  NOT LIKE '%Demo' "
+                . "AND label  NOT LIKE '%Demo%' "
                 . "AND label  NOT LIKE '%Recondtionné%' "
                 . "AND ref  NOT LIKE 'APP-Z0%' "
                 . "AND ref  NOT LIKE 'APP-MTFP'  "
                 . "AND label  NOT LIKE '%WaTcH%'  "
+                . "AND label  NOT LIKE '%Earphones%'  "
                 . "AND serial  NOT IN ('C02Z20KVHX87')  "
                 . "AND (label  NOT LIKE '%GRAVURE%' || label  NOT LIKE '%C2C%')  "
                 . "GROUP BY fin ORDER BY COUNT(*) DESC");
         while($ln = $this->db->fetch_object($sql)){
-            if($ln->nbSerial > 9){
+            if($ln->nbSerial > 3){
                 if($ln->nbProd > 1){
                     $this->erreurs[] = $ln->fin." plusieurs prod (".$ln->nbProd.")  <br/>".$ln->minProd."(".$this->getSN($ln->fin, $ln->minProd, 4).") <br/>".$ln->maxProd."(".$this->getSN($ln->fin, $ln->maxProd, 4).")".($ln->nbProd > 2? "<br/> ..." :"")."<br/>";
                 }
@@ -165,7 +166,7 @@ class majCodeConfigurationnProd{
 
                 }
             }
-            elseif($ln->nbSerial > 3){
+            elseif($ln->nbSerial > 1){
                 $this->erreurs[] = $ln->fin." pas assé d'equipment (".$ln->nbSerial.")";
             }
         }

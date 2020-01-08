@@ -838,7 +838,7 @@ class Inventory extends BimpDolObject
         } else {
             $errors[] = "Erreur lors de la validation des données renseignées";
         }
-        return array('id_inventory_det' => $inventory_line->db->db->last_insert_id(), 'errors' => $errors);
+        return array('id_inventory_det' => $inventory_line->id, 'errors' => $errors);
     }
     public function getEntrepotRef() {
         $sql = 'SELECT ref';

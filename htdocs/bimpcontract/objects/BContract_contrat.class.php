@@ -246,6 +246,7 @@ class BContract_contrat extends BimpDolObject {
              // ToDo à viré lorsque le formulaire sur les commandes sera fait
            
         }
+        
         if ($this->isLoaded() && BimpTools::getContext() != 'public') {
             $status = $this->getData('statut');
             
@@ -350,7 +351,11 @@ class BContract_contrat extends BimpDolObject {
         $card .= '<p class="category">';
         $card .= '<b>Type du contrat : ' . self::$objet_contrat[$this->getData('objet_contrat')]['label'] . '</b><br />';
         $card .= '<b>Durée du contrat : '. $this->getData('duree_mois') .' mois</b><br />';
-        $card .= '<b>Périodicitée de facturation : '. self::$period[$this->getData('periodicity')] .'</b><br />';
+        
+        if($this->getData('periodicity')) {
+            $card .= '<b>Périodicitée de facturation : '. self::$period[$this->getData('periodicity')] .'</b><br />';
+        }
+
         $card .= '</p>';
         $card .= '</div>';
         $card .= '<div class="content"><div class="footer"><div class="legend">';

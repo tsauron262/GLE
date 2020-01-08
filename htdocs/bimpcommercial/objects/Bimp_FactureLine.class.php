@@ -210,7 +210,6 @@ class Bimp_FactureLine extends ObjectLine
 
     public function onSave(&$errors = array(), &$warnings = array())
     {
-
         if ($this->isLoaded()) {
             if ($this->getData('linked_object_name') === 'commande_line') {
                 $facture = $this->getParentInstance();

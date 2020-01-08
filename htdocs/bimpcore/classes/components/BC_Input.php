@@ -301,7 +301,7 @@ class BC_Input extends BimpComponent
                         $options['data']['decimals'] = $decimals;
                         $options['data']['min'] = isset($this->field_params['min']) ? $this->field_params['min'] : $min;
                         $options['data']['max'] = isset($this->field_params['max']) ? $this->field_params['max'] : $max;
-                        $options['data']['unsigned'] = isset($this->field_params['unsigned']) ? $this->field_params['unsigned'] : 0;
+                        $options['data']['unsigned'] = isset($this->field_params['unsigned']) ? (int) $this->field_params['unsigned'] : 0;
                         break;
 
                     case 'string':

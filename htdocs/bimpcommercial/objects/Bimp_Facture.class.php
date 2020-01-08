@@ -3732,15 +3732,15 @@ class Bimp_Facture extends BimpComm
                     if (count($line_errors)) {
                         $warnings[] = BimpTools::getMsgFromArray($line_errors);
                     }
+
+                    // Copie des remises globales: 
+                    $this->copyRemisesGlobalesFromOrigin($facture, $warnings, true);
                 } elseif ($avoir_remain_to_pay) {
                     $this->dol_object->addline($langs->trans('invoiceAvoirLineWithPaymentRestAmount'), (float) $facture->getRemainToPay() * -1, 1, 0, 0, 0, 0, 0, '', '', 'TTC');
                 }
 
                 // Copie des contacts: 
                 $this->copyContactsFromOrigin($facture, $warnings);
-
-                // Copie des remises globales: 
-                $this->copyRemisesGlobalesFromOrigin($facture, $warnings);
                 break;
 
             case Facture::TYPE_STANDARD:
@@ -3792,7 +3792,7 @@ class Bimp_Facture extends BimpComm
                         $this->copyContactsFromOrigin($avoir_to_refacture, $warnings);
 
                         // Copie des remises globales: 
-                        $this->copyRemisesGlobalesFromOrigin($facture, $warnings);
+                        $this->copyRemisesGlobalesFromOrigin($avoir_to_refacture, $warnings, true);
                     }
                 }
                 break;

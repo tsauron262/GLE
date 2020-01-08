@@ -313,32 +313,6 @@ forms:
                   type: select
                   options: 
                       array: socAvailableDiscounts
-        
-#    remise_globale: 
-#        title: Remise Globale
-#        icon: percent
-#        rows: 
-#            - field: remise_globale_label
-#            - custom: 1
-#              label: Définir à partir d'un montant fixe
-#              input_name: use_amount
-#              data_type: bool
-#              input: 
-#                  type: toggle
-#              value: 1
-#            - field: remise_globale
-#            - custom: 1
-#              label: Montant de la remise
-#              input_name: remise_globale_amount
-#              data_type: money
-#              unsigned: 1
-#              input: 
-#                  help: Montant à déduire du total TTC
-#              value: 
-#                  callback: getRemiseGlobaleAmount
-#              display_if: 
-#                  field_name: use_amount
-#                  show_values: 1
             
     email: 
         rows: 

@@ -1238,6 +1238,9 @@ class ObjectLine extends BimpObject
                 'global_percent'            => 0,
                 'global_amount_ht'          => 0,
                 'global_amount_ttc'         => 0,
+                'ext_global_percent'        => 0,
+                'ext_global_amount_ht'      => 0,
+                'ext_global_amount_ttc'     => 0,
                 'total_percent'             => 0,
                 'total_amount_ht'           => 0,
                 'total_amount_ttc'          => 0,
@@ -1270,9 +1273,16 @@ class ObjectLine extends BimpObject
                     $percent = (float) $remise->getData('percent');
                     $amount_ht = $total_ht * ($percent / 100);
                     $amount_ttc = $total_ttc * ($percent / 100);
-                    $this->remises_total_infos['global_percent'] += $percent;
-                    $this->remises_total_infos['global_amount_ht'] += $amount_ht;
-                    $this->remises_total_infos['global_amount_ttc'] += $amount_ttc;
+
+                    if ((int) $remise->getData('id_remise_globale')) {
+                        $this->remises_total_infos['global_percent'] += $percent;
+                        $this->remises_total_infos['global_amount_ht'] += $amount_ht;
+                        $this->remises_total_infos['global_amount_ttc'] += $amount_ttc;
+                    } else {
+                        $this->remises_total_infos['ext_global_percent'] += $percent;
+                        $this->remises_total_infos['ext_global_amount_ht'] += $amount_ht;
+                        $this->remises_total_infos['ext_global_amount_ttc'] += $amount_ttc;
+                    }
                     $this->remises_total_infos['remises_globales'][$id_remise_globale] = array(
                         'percent'    => $percent,
                         'amount_ht'  => $amount_ht,
@@ -1304,9 +1314,9 @@ class ObjectLine extends BimpObject
                 $this->remises_total_infos['line_amount_ttc'] = (float) ($total_ttc * ($this->remises_total_infos['line_percent'] / 100));
             }
 
-            $this->remises_total_infos['total_percent'] = round($this->remises_total_infos['line_percent'] + $this->remises_total_infos['global_percent'], 8);
-            $this->remises_total_infos['total_amount_ht'] = $this->remises_total_infos['line_amount_ht'] + $this->remises_total_infos['global_amount_ht'];
-            $this->remises_total_infos['total_amount_ttc'] = $this->remises_total_infos['line_amount_ttc'] + $this->remises_total_infos['global_amount_ttc'];
+            $this->remises_total_infos['total_percent'] = round($this->remises_total_infos['line_percent'] + $this->remises_total_infos['global_percent'] + $this->remises_total_infos['ext_global_percent'], 8);
+            $this->remises_total_infos['total_amount_ht'] = $this->remises_total_infos['line_amount_ht'] + $this->remises_total_infos['global_amount_ht'] + $this->remises_total_infos['ext_global_amount_ht'];
+            $this->remises_total_infos['total_amount_ttc'] = $this->remises_total_infos['line_amount_ttc'] + $this->remises_total_infos['global_amount_ttc'] + $this->remises_total_infos['ext_global_amount_ttc'];
         }
 
         return $this->remises_total_infos;
@@ -2987,15 +2997,30 @@ class ObjectLine extends BimpObject
 
                 if (!empty($remises)) {
                     foreach ($remises as $remise) {
-                        if (!$copy_remises_globales && (int) $remise->getData('id_remise_globale')) {
+                        if (!$copy_remises_globales && ((int) $remise->getData('id_remise_globale') || (int) $remise->getData('linked_id_remise_globale'))) {
                             continue;
                         }
 
                         $data = $remise->getDataArray();
                         $data['id_object_line'] = (int) $this->id;
                         $data['object_type'] = static::$parent_comm_type;
-                        if ((float) $data['amount'] != 0 && $inverse_prices) {
-                            $data['amount'] = ((float) $data['amount'] * -1);
+
+//                        if ((int) $data['linked_id_remise_globale']) {
+//                            $data['linked_id_remise_globale'] = 0;
+//
+//                            // On converti la remise en montant fixe.
+//                            if ((float) $data['percent']) {
+//                                $total_ttc = (float) $origin->getTotalTtcWithoutRemises(true);
+//                                $data['montant'] = $total_ttc * ((float) $data['percent'] / 100);
+//                                $data['percent'] = 0;
+//                                $data['type'] = ObjectLineRemise::OL_REMISE_AMOUNT;
+//                                $data['per_unit'] = 0;
+//                            }
+//                        }
+
+
+                        if ((float) $data['montant'] != 0 && $inverse_prices) {
+                            $data['montant'] = ((float) $data['montant'] * -1);
                         }
 
                         BimpObject::createBimpObject('bimpcommercial', 'ObjectLineRemise', $data, true, $errors, $errors);

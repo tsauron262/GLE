@@ -186,11 +186,11 @@ class BimpDocumentPDF extends BimpModelPDF
         }
 
         $doc_ref = "";
-        if(is_object($this->object) && isset($this->object->ref))
+        if (is_object($this->object) && isset($this->object->ref))
             $doc_ref = $this->object->ref;
-        
+
         $this->pdf->topMargin = 53;
-        
+
         $this->header_vars = array(
             'logo_img'      => $logo_file,
             'logo_width'    => $logo_width,
@@ -802,6 +802,14 @@ class BimpDocumentPDF extends BimpModelPDF
                 $rg = BimpCache::getBimpObjectInstance('bimpcommercial', 'RemiseGlobale', (int) $id_rg);
                 if (BimpObject::objectLoaded($rg)) {
                     $remise_label = $rg->getData('label');
+
+                    if ($rg->getData('obj_type') !== $this->bimpCommObject::$element_name ||
+                            (int) $rg->getData('id_obj') !== (int) $this->bimpCommObject->id) {
+                        $rg_obj = $rg->getParentObject();
+                        if (BimpObject::objectLoaded($rg_obj)) {
+                            $remise_label .= ' (' . BimpTools::ucfirst($rg_obj->getLabel()) . ' ' . $rg_obj->getRef() . ')';
+                        }
+                    }
                 }
 
                 if (!$remise_label) {
@@ -1023,10 +1031,24 @@ class BimpDocumentPDF extends BimpModelPDF
         $this->tva = array();
         $this->ht = array();
 
+        $bimpLines = array();
+        if (BimpObject::objectLoaded($this->bimpCommObject) && is_a($this->bimpCommObject, 'BimpComm')) {
+            foreach ($this->bimpCommObject->getChildrenObjects('lines') as $bimpLine) {
+                $bimpLines[(int) $bimpLine->getData('id_line')] = $bimpLine;
+            }
+        }
+
         $i = 0;
         foreach ($this->object->lines as $line) {
+            $bimpLine = isset($bimpLines[(int) $line->id]) ? $bimpLines[(int) $line->id] : null;
+
             if (!$this->hideReduc && $line->remise_percent) {
-                $this->total_remises += ((float) $line->subprice * ((float) $line->remise_percent / 100)) * (float) $line->qty;
+                if (BimpObject::objectLoaded($bimpLine)) {
+                    $remise_infos = $bimpLine->getRemiseTotalInfos();
+                    $this->total_remises += (float) $remise_infos['line_amount_ht'] + (float) $remise_infos['global_amount_ttc'] + $remise_infos['ext_global_amount_ttc'];
+                } else {
+                    $this->total_remises += ((float) $line->subprice * ((float) $line->remise_percent / 100)) * (float) $line->qty;
+                }
             }
 
             $sign = 1;

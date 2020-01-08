@@ -22,6 +22,10 @@ fields:
         
     label: 
         label: Libellé
+        type: text
+        input: 
+            rows: 1
+            auto_expand: 1
         
     type: 
         label: Type de réduction

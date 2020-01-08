@@ -17,7 +17,9 @@ class public_indexController extends Bimp_user_client_controller {
         $html .= 'La societé <b><i>' . $soc->nom . '</i></b> est actuellement ';
         $html .= ($valide_contrat) ? '<b style="color:green">sous contrat <i class="fa fa-check" ></i></b>' : '<b style="color:red">hors contrat <i class="fa fa-times" ></i></b>';
         $html .= '</div>';
-        $html .= '<br /><br /><br />';
+//        $message_alert = '<b>Pour effecturé une recherche par numéro de série ou par numéro IMEI faites le depuis <a href="client.php?fc=serials_imei">cette page</a></b>';
+//        $html .= '<br /><br />' . BimpRender::renderAlerts($message_alert, 'warning', false);
+//        $html .= '<br />';
         $html .= '<h4>Mes contrats en cours</h4>';
         if ($valide_contrat) {
             $html .= $this->display_list_card($valide_contrat, true);

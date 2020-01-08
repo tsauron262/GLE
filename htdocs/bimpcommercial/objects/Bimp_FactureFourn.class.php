@@ -1398,7 +1398,7 @@ class Bimp_FactureFourn extends BimpComm
         );
         if ($this->db->update($this->dol_object->table_element, $data, '`rowid` = ' . (int) $this->id) <= 0) {
             $errorsSql = $this->db->db->lasterror();
-            $errors[] = 'Echec de la mise à jour de la commande fournisseur' . ($errorsSql ? ' - ' . $errorsSql : '');
+            $errors[] = 'Echec de la mise à jour de la facture fournisseur' . ($errorsSql ? ' - ' . $errorsSql : '');
             return 0;
         }
         return 1;

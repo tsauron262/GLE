@@ -137,6 +137,7 @@ class majCodeConfigurationnProd{
                 . "AND ref  NOT LIKE 'APP-Z0%' "
                 . "AND ref  NOT LIKE 'APP-MTFP'  "
                 . "AND label  NOT LIKE '%WaTcH%'  "
+                . "AND label  NOT LIKE '%Earphones%'  "
                 . "AND serial  NOT IN ('C02Z20KVHX87')  "
                 . "AND (label  NOT LIKE '%GRAVURE%' || label  NOT LIKE '%C2C%')  "
                 . "GROUP BY fin ORDER BY COUNT(*) DESC");

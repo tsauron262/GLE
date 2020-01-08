@@ -13,6 +13,13 @@ class BL_CommandeFournReception extends BimpObject
         self::BLCFR_ANNULEE      => array('label' => 'Annulée', 'icon' => 'times', 'classes' => array('danger'))
     );
 
+    // Droits user: 
+
+    public function canEdit()
+    {
+        return 1;
+    }
+
     // Getters booléens: 
 
     public function isFieldEditable($field, $force_edit = false)
@@ -439,10 +446,18 @@ class BL_CommandeFournReception extends BimpObject
         return $html;
     }
 
-    public function renderLineSerialInputs($line, $serial, $pu_ht, $tva_tx)
+    public function renderLineSerialInputs($line, $serial, $pu_ht, $tva_tx, $code_config = '')
     {
         $html = '';
-        $html .= '<td style="width: 220px" class="serial" data-serial="' . $serial . '">' . $serial . '</td>';
+        $html .= '<td style="width: 220px" class="serial" data-serial="' . $serial . '">';
+        $html .= $serial;
+        if ($code_config && !preg_match('/^.+' . preg_quote($code_config) . '$/', $serial)) {
+            $html .= '<br/>';
+            $html .= '<span class="danger">';
+            $html .= BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . 'Les 4 derniers caractères ne correspondent pas au code configuration (' . $code_config . ')';
+            $html .= '</span>';
+        }
+        $html .= '</td>';
         $html .= '<td style="width: 120px">';
         $html .= BimpInput::renderInput('text', 'line_' . $line->id . '_reception_' . $this->id . '_serial_' . $serial . '_pu_ht', $pu_ht, array(
                     'addon_right' => BimpRender::renderIcon('fas_euro-sign'),
@@ -616,9 +631,27 @@ class BL_CommandeFournReception extends BimpObject
                     if (!$isReturn) {
                         // *** Edition / ajout des nouveaux numéros de série: ***
 
+                        $code_config = '';
+
+                        if (preg_match('/^APP\-.+$/', $product->getRef())) {
+                            $code_config = (string) $product->getData('code_config');
+                        }
+
                         if (isset($reception_data['serials']) && !empty($reception_data['serials'])) {
+                            $nSerialsKo = 0;
+                            if ($code_config) {
+                                foreach ($reception_data['serials'] as $serial_data) {
+                                    if (isset($serial_data['serial']) && (string) $serial_data['serial'] && !preg_match('/^.+' . preg_quote($code_config) . '$/', $serial_data['serial'])) {
+                                        $nSerialsKo++;
+                                    }
+                                }
+                            }
+
                             // Liste des N° de série déjà ajoutés: 
                             $html .= '<span class="bold">' . count($reception_data['serials']) . ' numéro(s) de série ajouté(s)</span>';
+                            if ($nSerialsKo > 0) {
+                                $html .= BimpRender::renderAlerts('Attention: ' . $nSerialsKo . ' numéro(s) de série ne correspondent pas au code configuration du produit (' . $code_config . ')', 'warning');
+                            }
                             $html .= '<table class="bimp_list_table">';
                             $html .= '<tbody>';
 
@@ -627,7 +660,7 @@ class BL_CommandeFournReception extends BimpObject
                                     $pu_ht = (isset($serial_data['pu_ht']) ? (float) $serial_data['pu_ht'] : $line_pu_ht);
                                     $tva_tx = (isset($serial_data['tva_tx']) ? (float) $serial_data['tva_tx'] : (float) $line->tva_tx);
                                     $html .= '<tr class="line_' . $line->id . '_serial_data">';
-                                    $html .= $this->renderLineSerialInputs($line, $serial_data['serial'], $pu_ht, $tva_tx);
+                                    $html .= $this->renderLineSerialInputs($line, $serial_data['serial'], $pu_ht, $tva_tx, $code_config);
                                     $html .= '</tr>';
                                 }
                             }
@@ -1174,7 +1207,7 @@ class BL_CommandeFournReception extends BimpObject
         return $lines_data;
     }
 
-    public function checkLinesData($lines_data)
+    public function checkLinesData($lines_data, &$code_config_errors = null)
     {
         $errors = array();
 
@@ -1183,9 +1216,20 @@ class BL_CommandeFournReception extends BimpObject
             if (!BimpObject::objectLoaded($line)) {
                 $errors[] = 'La ligne de commande fournisseur d\'ID ' . $id_line . ' n\'existe pas';
             } else {
-                $line_errors = $line->checkReceptionData((int) $this->id, $line_data);
+                $code_config_serials_errors = array();
+                $line_errors = $line->checkReceptionData((int) $this->id, $line_data, $code_config_serials_errors);
                 if (count($line_errors)) {
                     $errors[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n°' . $line->getData('position'));
+                } elseif (is_array($code_config_errors) && count($code_config_serials_errors)) {
+                    $product = $line->getProduct();
+                    if (BimpObject::objectLoaded($product)) {
+                        $code_config = (string) $product->getData('code_config');
+                        if ($code_config) {
+                            $title = 'Ligne n°' . $line->getData('position') . ' (produit ' . $product->getRef() . '): ' . count($code_config_serials_errors);
+                            $title .= ' numéro(s) de série ne correspondent pas au code configuration du produit (' . $code_config . ')';
+                            $code_config_errors[] = BimpTools::getMsgFromArray($code_config_serials_errors, $title);
+                        }
+                    }
                 }
             }
         }
@@ -1343,10 +1387,6 @@ class BL_CommandeFournReception extends BimpObject
 
         return $errors;
     }
-    
-    public function canEdit() {
-        return true;
-    }
 
     public function onLinesChange()
     {
@@ -1418,7 +1458,25 @@ class BL_CommandeFournReception extends BimpObject
             $lines_data = $this->processLinesFormData($data, $errors);
 
             if (!count($errors)) {
-                $errors = $this->checkLinesData($lines_data);
+                $codes_config_errors = array();
+                $errors = $this->checkLinesData($lines_data, $codes_config_errors);
+
+                if (!count($errors) && count($codes_config_errors) && (!isset($data['force_validation']) || !(int) $data['force_validation'])) {
+                    $data['force_validation'] = 1;
+                    $onclick = $this->getJsActionOnclick('validateReception', $data, array(
+                        'success_callback' => 'function() {bimpModal.clearCurrentContent();}'
+                    ));
+
+                    $msg = BimpTools::getMsgFromArray($codes_config_errors);
+                    $msg .= '<br/><span class="btn btn-default" onclick="' . $onclick . '">';
+                    $msg .= BimpRender::renderIcon('fas_check', 'iconLeft') . 'Forcer la validation';
+                    $msg .= '</span>';
+                    $msg .= '<br/><span style="font-weight: bold">';
+                    $msg .= 'ATTENTION: si vous effectuez une modification, veuillez utiliser le bouton "Valider" ci-dessous';
+                    $msg .= '</span>';
+
+                    $errors[] = $msg;
+                }
 
                 if (!count($errors)) {
                     $errors = $this->saveLinesData($lines_data);

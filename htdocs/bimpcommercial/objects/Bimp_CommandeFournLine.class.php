@@ -276,7 +276,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
 
         return $qty;
     }
-    
+
     public function getBilledQty($id_reception = null)
     {
         $receptions = $this->getData('receptions');
@@ -287,12 +287,12 @@ class Bimp_CommandeFournLine extends FournObjectLine
             if (!is_null($id_reception) && ((int) $id_r !== (int) $id_reception)) {
                 continue;
             }
-            
+
             $reception = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeFournReception', (int) $id_r);
             if (!BimpObject::objectLoaded($reception) || (int) $reception->getData('status') !== BL_CommandeFournReception::BLCFR_RECEPTIONNEE) {
                 continue;
             }
-            if($reception->getData('id_facture'))
+            if ($reception->getData('id_facture'))
                 $qty += (float) $reception_data['qty'];
         }
 
@@ -561,32 +561,32 @@ class Bimp_CommandeFournLine extends FournObjectLine
                 ))
             );
         }
-        
+
         if (1) {
             $commandeCliLine = BimpObject::getInstance("bimpcommercial", "Bimp_CommandeLine");
             $filters = array();
             $comm = $this->getParentInstance();
             $filters['cd.fk_product'] = $this->id_product;
             $filters['cex.entrepot'] = $comm->getData("entrepot");
-            $filters['a.qty_to_ship'] = array("operator"=>">", "value"=>0);
+            $filters['a.qty_to_ship'] = array("operator" => ">", "value" => 0);
             $joins = array();
-            
+
             $joins['commandedet'] = array(
-                        'table' => 'commandedet',
-                        'on'    => 'cd.rowid = a.id_line',
-                        'alias' => 'cd'
-                    );
+                'table' => 'commandedet',
+                'on'    => 'cd.rowid = a.id_line',
+                'alias' => 'cd'
+            );
             $joins['commextra'] = array(
-                        'table' => 'commande_extrafields',
-                        'on'    => 'cex.fk_object = a.id_obj',
-                        'alias' => 'cex'
-                    );
-            
-            
+                'table' => 'commande_extrafields',
+                'on'    => 'cex.fk_object = a.id_obj',
+                'alias' => 'cex'
+            );
+
+
             $buttons[] = array(
                 'label'   => 'Voir les commandes client',
                 'icon'    => 'fas_glasses',
-                'onclick' => $commandeCliLine->getJsLoadModalList('general',array(
+                'onclick' => $commandeCliLine->getJsLoadModalList('general', array(
                     'title'         => 'Commande client utilisable',
                     'extra_filters' => $filters,
                     'extra_joins'   => $joins
@@ -705,17 +705,17 @@ class Bimp_CommandeFournLine extends FournObjectLine
 
                         if ($link) {
                             $html .= ($html ? '<br/><br/>' : '') . $link;
-                            
-                            
+
+
                             $reservations = $line->getReservations();
-                            $nb  = 0;
-                            foreach($reservations as $resa){
-                                if($resa->getData('status') < 200){
+                            $nb = 0;
+                            foreach ($reservations as $resa) {
+                                if ($resa->getData('status') < 200) {
                                     $nb += $resa->getData('qty');
                                 }
                             }
                             $html .= '<br/>';
-                            $html .= 'Reste à réserver : '.$nb;
+                            $html .= 'Reste à réserver : ' . $nb;
                         }
                     }
                 }
@@ -753,18 +753,16 @@ class Bimp_CommandeFournLine extends FournObjectLine
                         $html .= '&nbsp;&nbsp;&nbsp;<a href="' . $url . '" target="_blank">Logistique' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight') . '</a>';
                         $html .= '<br/>';
                         $html .= 'Ligne n°' . $line->getData('position');
-                        
+
                         $reservations = $line->getReservations();
-                        $nb  = 0;
-                        foreach($reservations as $resa){
-                            if($resa->getData('status') < 200){
+                        $nb = 0;
+                        foreach ($reservations as $resa) {
+                            if ($resa->getData('status') < 200) {
                                 $nb += $resa->getData('qty');
                             }
                         }
                         $html .= '<br/>';
-                        $html .= 'Reste à réserver : '.$nb;
-                        
-                        
+                        $html .= 'Reste à réserver : ' . $nb;
                     } else {
                         $html .= BimpRender::renderAlerts('Erreur: Commande absente pour la ligne de commande d\'ID ' . $id_line);
                     }
@@ -1192,7 +1190,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
         return array();
     }
 
-    public function checkReceptionData($id_reception, $data)
+    public function checkReceptionData($id_reception, $data, &$code_config_errors = null)
     {
         $errors = array();
 
@@ -1221,6 +1219,22 @@ class Bimp_CommandeFournLine extends FournObjectLine
                         }
                         if (count($serials)) {
                             $errors = $this->checkReceptionSerials($serials, $id_reception);
+
+                            if (is_array($code_config_errors) && !count($errors)) {
+                                $product = $this->getProduct();
+
+                                if (BimpObject::objectLoaded($product) && preg_match('/^APP\-.+$/', $product->getRef())) {
+                                    $code_config = (string) $product->getData('code_config');
+
+                                    if ($code_config) {
+                                        foreach ($serials as $serial) {
+                                            if (!preg_match('/^.+' . preg_quote($code_config) . '$/', $serial)) {
+                                                $code_config_errors[] = $serial;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 } else {
@@ -1901,7 +1915,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
                     if (!count($errors)) {
                         // Retrait du stock:
                         if (BimpObject::objectLoaded($product)) {
-                            $stock_label = 'Annulation réception n°' . $reception->getData('num_reception') .((float) $reception_data['qty'] < 0? ' (Retour au fournisseur)' : ''). ' BR: ' . $reception->getData('ref') . ' - Commande fournisseur: ' . $commande_fourn->getData('ref');
+                            $stock_label = 'Annulation réception n°' . $reception->getData('num_reception') . ((float) $reception_data['qty'] < 0 ? ' (Retour au fournisseur)' : '') . ' BR: ' . $reception->getData('ref') . ' - Commande fournisseur: ' . $commande_fourn->getData('ref');
                             $code_mvt = 'ANNUL_CMDF_' . $commande_fourn->id . '_LN_' . $this->id . '_RECEP_' . $reception->id;
 
                             if ($product->dol_object->correct_stock($user, $id_entrepot, (int) $reception_data['qty'], 1, $stock_label, 0, $code_mvt, "order_supplier", $commande_fourn->id) <= 0) {
@@ -1954,7 +1968,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
                 }
             }
 
-            if(!count($errors)){
+            if (!count($errors)) {
                 $receptions = $this->getData('receptions');
 
                 $reception_data['received'] = 0;
@@ -2013,7 +2027,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
                         $received_qty = abs((float) $this->getReceivedQty(null, true));
                         $to_receive_qty = $fullQty - $received_qty;
                     }
-                    
+
                     if (isset($status_forced['invoice']) && (int) $status_forced['invoice'] && $cmd_status === 5) {
                         $billed_qty = $fullQty;
                         $to_billed_qty = 0;
@@ -2029,15 +2043,14 @@ class Bimp_CommandeFournLine extends FournObjectLine
                     if ($to_receive_qty != (float) $this->getData('qty_to_receive')) {
                         $this->updateField('qty_to_receive', $to_receive_qty, null, true);
                     }
-                    
+
                     if ($billed_qty != (float) $this->getData('qty_billed')) {
                         $this->updateField('qty_billed', $billed_qty, null, true);
                     }
-                    
+
                     if ($to_billed_qty != (float) $this->getData('qty_to_billed')) {
                         $this->updateField('qty_to_billed', $to_billed_qty, null, true);
                     }
-                    
                 }
             } else {
                 if ((float) $this->qty && !(float) $this->pu_ht) {

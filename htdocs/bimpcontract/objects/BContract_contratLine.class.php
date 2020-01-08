@@ -71,8 +71,9 @@ class BContract_contratLine extends BContract_contrat {
             if (count($array)) {
                 foreach ($array as $serial) {
                     $equipment = $this->getInstance('bimpequipment', 'Equipment');
-                    if ($equipment->find(['serial' => $serial])) {
-                        $html .= $equipment->getNomUrl(true, true, true);
+                    if ($equipment->find(['serial' => $serial]) && BimpTools::getContext() == 'private') {
+                            $html .= $equipment->getNomUrl(true, true, true);
+                        
                     } else {
                         $html .= $serial;
                     }

@@ -149,6 +149,32 @@ forms:
             - field: id_user_client
               edit: 0
             - field: contact_in_soc
+              label: Utilisateur
+            - custom: 1
+              label: Choix
+              required: 1
+              input_name: choix
+              values: 
+                serial: N° de série
+                imei: N° IMEI
+              input: 
+                type: switch_options
+            - custom: 1
+              label: N° Série ou N° IMEI
+              required: 1
+              input_name: serial_imei
+              input: 
+                  type: text
+            - custom: 1
+              label: Adresse d'envoi
+              input_name: adresse_envois
+              input:
+                  type: text
+            - custom: 1
+              label: Adresse mail bon de retour
+              input_name: adress_bon_retour
+              input:
+                  type: text
             - field: status
               edit: 0
             - field: sujet

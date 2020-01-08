@@ -2076,7 +2076,7 @@ class Bimp_Facture extends BimpComm
                             if (round((float) $line->getTotalTTC(), 2)) {// || round((float) $line->pa_ht, 2)) {
                                 $has_amounts_lines = true;
                             }
-                            if ((float) $line->getTotalTTC() < 0 && !(int) $line->id_remise_except) {
+                            if (round((float) $line->getTotalTTC(), 2) < 0 && !(int) $line->id_remise_except) {
                                 $neg_lines++;
                             }
                         }
@@ -2399,7 +2399,7 @@ class Bimp_Facture extends BimpComm
                 if (round((float) $line->getTotalTTC(), 2)) {// || round((float) $line->pa_ht, 2)) {
                     $has_amounts_lines = true;
                 }
-                if ((float) $line->getTotalTTC() < 0 && !(int) $line->id_remise_except) {
+                if (round((float) $line->getTotalTTC(), 2) < 0 && !(int) $line->id_remise_except) {
                     $neg_lines++;
                 }
             }

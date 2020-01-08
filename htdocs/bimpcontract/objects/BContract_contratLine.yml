@@ -5,6 +5,9 @@ parent_module: bimpcontract
 parent_id_property: fk_contrat
 parent_object: BContract_contrat
 
+header_btn: 
+    callback: getActionsButtons
+
 dol_object: 
     instance: 
         dol_object: 
@@ -58,6 +61,8 @@ fields:
         label: Qté
         type: qty
         default_value: 1
+    serials:
+        label: N° de série
     price_ht:
         label: P.U HT
         type: money
@@ -108,6 +113,13 @@ lists:
                 field: price_ht
             total_ttc:
                 field: total_ttc
+    interface_client:
+        extends: default
+        cols:
+            fk_product: unset
+            qty: unset
+        list_filters: 
+            callback: getListFilters
 forms:
     default:
         rows:
@@ -129,6 +141,19 @@ forms:
             - field: qty
             - field: remise_percent
             - field: tva_tx
+    add_serial:
+        rows:
+            - custom: 1
+              label: Numéros de séries
+              input_name: serials
+              value:
+                  callback: 
+                      method: displaySerialsList
+                      params:
+                          - 1
+              input:
+                  type: textarea
+                  help: Merci de séparer les numéros de séries par un saut de ligne
 
 fields_tables:
     infos:
@@ -136,13 +161,16 @@ fields_tables:
         rows:
             - field: fk_product
               display: nom
-            - field: price_ht
-              label: Prix unitaire hors-taxe
-            - field: qty
-              label: Quantitée dans le contrat
-            - field: nb_materiel
-              label: Nombre de matériels couverts par ce service
-            
+              label: Service
+#            - field: price_ht
+#              label: Prix unitaire hors-taxe
+#            - field: qty
+#              label: Quantitée dans le contrat
+#            - field: nb_materiel
+#              label: Nombre de matériels couverts par ce service
+            - label: Numéro(s) de série lié(s) au contrat
+              value: 
+                  callback: displaySerialsList
 
 views:
     default: 

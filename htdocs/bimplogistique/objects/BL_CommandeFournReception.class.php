@@ -1468,9 +1468,8 @@ class BL_CommandeFournReception extends BimpObject
                     ));
 
                     $msg = BimpTools::getMsgFromArray($codes_config_errors);
-                    $msg .= '<br/><br/>';
-                    $msg .= '<span class="btn btn-default" onclick="' . $onclick . '">';
-                    $msg .= 'Forcer la validation';
+                    $msg .= '<br/><span class="btn btn-default" onclick="' . $onclick . '">';
+                    $msg .= BimpRender::renderIcon('fas_check', 'iconLeft') . 'Forcer la validation';
                     $msg .= '</span>';
                     $msg .= '<br/><span style="font-weight: bold">';
                     $msg .= 'ATTENTION: si vous effectuez une modification, veuillez utiliser le bouton "Valider" ci-dessous';

@@ -436,8 +436,7 @@ class BContract_contrat extends BimpDolObject {
     public function actionValidation($data, &$success) {
         global $user;
         $ref = $this->newRef($this->getData('objet_contrat') . date('ym'));
-        $list_contact = $this->getSocieteContactsArray($this->getData('fk_soc'), false);
-        $id_contact_type = $this->db->getValue('c_type_contact', 'rowid', 'code = "SITE"');
+        $id_contact_type = $this->db->getValue('c_type_contact', 'rowid', 'code = "SITE" AND element = "contrat"');
         $have_contact = ($this->db->getValue('element_contact', 'rowid', 'element_id = ' . $this->id . ' AND fk_c_type_contact = ' . $id_contact_type)) ? true : false;
         
         if(!$have_contact) {

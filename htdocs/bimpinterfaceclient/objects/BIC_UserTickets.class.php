@@ -41,6 +41,8 @@ class BIC_UserTickets extends BS_Ticket {
         
         // Vérification que le numéro de série est bien dans le contrat
         
+        
+        
 //        $id_contrat = $_REQUEST['id'];
 //        $in_contrat = (count($this->db->getRow('bcontract_serials', BimpTools::getValue('choix') . ' = "'.BimpTools::getValue('serial_imei').'"'))) ? true : false;
 //        if($in_contrat){
@@ -56,7 +58,7 @@ class BIC_UserTickets extends BS_Ticket {
                 $add_sujet .= "<b>".$label_serial_imei.":</b> " . BimpTools::getValue('serial_imei') . "<br />";
                 
                 if(BimpTools::getValue('adresse_envois')) {
-                    $add_sujet .= "<b>Adresse d'envois:</b> " . BimpTools::getValue('adresse_envois') . "<br />";
+                    $add_sujet .= "<b>Adresse d'envoi:</b> " . BimpTools::getValue('adresse_envois') . "<br />";
                 }
                 
                 if(BimpTools::getValue('contact_in_soc')) {
@@ -64,7 +66,7 @@ class BIC_UserTickets extends BS_Ticket {
                 }
                 
                 if(BimpTools::getValue('adress_bon_retour')) {
-                    $add_sujet .= "<b>Adresse email pour envois du bon de retour:</b> " . BimpTools::getValue('adress_bon_retour') . "<br />";
+                    $add_sujet .= "<b>Adresse email pour envoi du bon de retour:</b> " . BimpTools::getValue('adress_bon_retour') . "<br />";
                 }
 
                 $add_sujet .= "------------------------------<br /><br />";

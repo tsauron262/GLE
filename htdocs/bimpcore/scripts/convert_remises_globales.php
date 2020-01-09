@@ -18,7 +18,8 @@ global $db;
 $bdb = new BimpDb($db);
 
 //processPropales($bdb);
-processCommandes($bdb);
+//processCommandes($bdb);
+processFactures($bdb);
 
 function processPropales($bdb)
 {
@@ -144,7 +145,7 @@ function processCommandes($bdb)
             'operator' => '!=',
             'value'    => 0
         ),
-        'rowid'          => 50702
+        'rowid'          => 50714
             ), null, null, 'id', 'asc', 'array', array(
         'rowid', 'remise_globale', 'remise_globale_label'
     ));
@@ -253,7 +254,7 @@ function processCommandes($bdb)
                                 foreach ($remises as $remise) {
                                     echo 'MAJ REMISE #' . $remise->id . ': ';
                                     if ($bdb->update('object_line_remise', array(
-                                                'linked_id_remise_globale' => $rg->id,
+                                                'linked_id_remise_globale' => $id_rg,
                                                 'is_remise_globale'        => 0
                                                     ), '`id` = ' . (int) $remise->id) <= 0) {
                                         echo BimpRender::renderAlerts('Commande #' . $commande->id . ' échec de la modif de la remise fac line #' . $fac_line->id . ' - ' . $bdb->db->lasterror());
@@ -271,6 +272,15 @@ function processCommandes($bdb)
                     }
                 }
             }
+            unset($commande);
+            BimpCache::$cache = array();
+            $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $r['rowid']);
+            $lines = $commande->getLines('not_text');
+            $total_ttc = 0;
+            foreach ($lines as $line) {
+                $total_ttc += (float) $line->getTotalTTC();
+            }
+            echo 'TOTAL TTC FINAL: ' . $total_ttc . '<br/>';
         }
 
         unset($commande);
@@ -287,18 +297,22 @@ function processFactures($bdb)
             'operator' => '!=',
             'value'    => 0
         ),
-//            'rowid'          => 143792
+            'rowid'          => 225314
             ), null, null, 'id', 'asc', 'array', array(
         'rowid', 'remise_globale', 'remise_globale_label'
     ));
 
     foreach ($rows as $r) {
-        echo '<br/>MAJ COMMANDE ' . $r['rowid'] . '<br/>';
         $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $r['rowid']);
 
         if (BimpObject::objectLoaded($facture)) {
+            echo '<br/>MAJ FACTURE ' . $r['rowid'] . '<br/>';
+
             $total_ttc = $facture->getTotalTtcWithoutRemises(true);
             $amount = round($total_ttc * ($r['remise_globale'] / 100), 2);
+
+            echo 'Total TTC INITIAL: ' . $facture->getTotalTtc() . '<br/>';
+            echo 'Montant RG: ' . $amount . '<br/>';
 
             $data = array(
                 'obj_type' => Bimp_Facture::$element_name,
@@ -373,13 +387,21 @@ function processFactures($bdb)
                     }
                 }
             }
+            unset($facture);
+            BimpCache::$cache = array();
+            $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $r['rowid']);
+            $lines = $facture->getLines('not_text');
+            $total_ttc = 0;
+            foreach ($lines as $line) {
+                $total_ttc += (float) $line->getTotalTTC();
+            }
+            echo 'TOTAL TTC FINAL: ' . $total_ttc . '<br/>';
         }
 
         unset($facture);
         BimpCache::$cache = array();
     }
 }
-
 echo '<br/>FIN';
 
 echo '</body></html>';

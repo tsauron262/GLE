@@ -2617,7 +2617,7 @@ class BimpComm extends BimpDolObject
 //        
 //    }
 //    
-    public function createLinesFromOrigin($origin, $inverse_prices = false, $pa_editable = true)
+    public function createLinesFromOrigin($origin, $params = array())
     {
         $errors = array();
 

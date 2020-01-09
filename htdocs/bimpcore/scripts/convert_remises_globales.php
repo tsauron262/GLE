@@ -19,7 +19,7 @@ $bdb = new BimpDb($db);
 
 //processPropales($bdb);
 //processCommandes($bdb);
-processFactures($bdb);
+//processFactures($bdb);
 
 function processPropales($bdb)
 {
@@ -30,7 +30,7 @@ function processPropales($bdb)
             'operator' => '!=',
             'value'    => 0
         ),
-//        'rowid'          => 293324
+        'rowid'          => 293354
             ), null, null, 'id', 'asc', 'array', array(
         'rowid', 'remise_globale', 'remise_globale_label'
     ));
@@ -67,9 +67,9 @@ function processPropales($bdb)
                     echo BimpRender::renderAlerts(BimpTools::getMsgFromArray($rg_errors, 'Propal #' . $propal->id . ': échec de la création de la remise globale'));
                 } else {
                     echo '<span class="success">OK</span><br/>';
-                    $bdb->update('propal', array(
-                        'remise_globale' => 0
-                            ), '`rowid` = ' . (int) $propal->id);
+//                    $bdb->update('propal', array(
+//                        'remise_globale' => 0
+//                            ), '`rowid` = ' . (int) $propal->id);
                 }
 
                 if (count($rg_warnings)) {
@@ -81,9 +81,9 @@ function processPropales($bdb)
                 if (!$id_rg) {
                     echo BimpRender::renderAlerts('Propal #' . $propal->id . ': échec de l\'insertion de la remise globale en base - ' . $bdb->db->lasterror());
                 } else {
-                    $bdb->update('propal', array(
-                        'remise_globale' => 0
-                            ), '`rowid` = ' . (int) $propal->id);
+//                    $bdb->update('propal', array(
+//                        'remise_globale' => 0
+//                            ), '`rowid` = ' . (int) $propal->id);
 
                     $lines = $propal->getLines('not_text');
                     $total_lines = 0;
@@ -182,9 +182,9 @@ function processCommandes($bdb)
                     echo BimpRender::renderAlerts(BimpTools::getMsgFromArray($rg_errors, 'Commande #' . $commande->id . ': échec de la création de la remise globale'));
                 } else {
                     echo '<span class="success">OK</span><br/>';
-                    $bdb->update('commande', array(
-                        'remise_globale' => 0
-                            ), '`rowid` = ' . (int) $commande->id);
+//                    $bdb->update('commande', array(
+//                        'remise_globale' => 0
+//                            ), '`rowid` = ' . (int) $commande->id);
                 }
 
                 if (count($rg_warnings)) {
@@ -196,9 +196,9 @@ function processCommandes($bdb)
                 if (!$id_rg) {
                     echo BimpRender::renderAlerts('Commande #' . $commande->id . ': échec de l\'insertion de la remise globale en base - ' . $bdb->db->lasterror());
                 } else {
-                    $bdb->update('commande', array(
-                        'remise_globale' => 0
-                            ), '`rowid` = ' . (int) $commande->id);
+//                    $bdb->update('commande', array(
+//                        'remise_globale' => 0
+//                            ), '`rowid` = ' . (int) $commande->id);
 
                     $lines = $commande->getLines('not_text');
                     $total_lines = 0;
@@ -334,9 +334,9 @@ function processFactures($bdb)
                     echo BimpRender::renderAlerts(BimpTools::getMsgFromArray($rg_errors, 'Facture #' . $facture->id . ': échec de la création de la remise globale'));
                 } else {
                     echo '<span class="success">OK</span><br/>';
-                    $bdb->update('facture', array(
-                        'remise_globale' => 0
-                            ), '`rowid` = ' . (int) $facture->id);
+//                    $bdb->update('facture', array(
+//                        'remise_globale' => 0
+//                            ), '`rowid` = ' . (int) $facture->id);
                 }
 
                 if (count($rg_warnings)) {
@@ -348,9 +348,9 @@ function processFactures($bdb)
                 if (!$id_rg) {
                     echo BimpRender::renderAlerts('Facture #' . $facture->id . ': échec de l\'insertion de la remise globale en base - ' . $bdb->db->lasterror());
                 } else {
-                    $bdb->update('facture', array(
-                        'remise_globale' => 0
-                            ), '`rowid` = ' . (int) $facture->id);
+//                    $bdb->update('facture', array(
+//                        'remise_globale' => 0
+//                            ), '`rowid` = ' . (int) $facture->id);
 
                     $lines = $facture->getLines('not_text');
                     $total_lines = 0;

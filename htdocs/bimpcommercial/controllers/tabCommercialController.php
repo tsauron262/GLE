@@ -44,13 +44,6 @@ class tabCommercialController extends BimpController {
                 $list_propale->addFieldFilterValue('fk_soc', $id_soc);
             $html .= $list_propale->renderHtml();
 
-            // Facture
-            $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
-            $list_facture = new BC_ListTable($facture, $is_submit_id ? 'client' : 'default', 1, null, "Factures");
-            if ($is_submit_id)
-                $list_facture->addFieldFilterValue('fk_soc', $id_soc);
-            $html .= $list_facture->renderHtml();
-
             // Commande client
             $commande_client = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande');
             $list_commande_client = new BC_ListTable($commande_client, $is_submit_id ? 'client' : 'default', 1, null, "Commandes client");
@@ -66,6 +59,20 @@ class tabCommercialController extends BimpController {
                 $list_shipment->addJoin('commande', 'a.id_commande_client=cf.rowid', 'cf');
             }
             $html .= $list_shipment->renderHtml();
+            
+            // Contrat
+            $contrat = BimpObject::getInstance('bimpcontract', 'BContract_contrat');
+            $list_contrat = new BC_ListTable($contrat, $is_submit_id ? 'client' : 'default', 1, null, "Contrat");
+            if ($is_submit_id)
+                $list_contrat->addFieldFilterValue('fk_soc', $id_soc);
+            $html .= $list_contrat->renderHtml();
+            
+            // Facture
+            $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
+            $list_facture = new BC_ListTable($facture, $is_submit_id ? 'client' : 'default', 1, null, "Factures");
+            if ($is_submit_id)
+                $list_facture->addFieldFilterValue('fk_soc', $id_soc);
+            $html .= $list_facture->renderHtml();
         }
 
         if ($societe->fournisseur > 0 or ! $is_submit_id) {
@@ -181,6 +188,8 @@ class tabCommercialController extends BimpController {
         $html .= '<a href="'.DOL_URL_ROOT.'/bimpcommercial/index.php?fc=propals" class="btn btn-default">Devis</a>';
         $html .= '<br/><br/>';
         $html .= '<a href="'.DOL_URL_ROOT.'/bimpcommercial/index.php?fc=commandes" class="btn btn-default">Commandes</a>';
+        $html .= '<br/><br/>';
+        $html .= '<a href="'.DOL_URL_ROOT.'/bimpcontract/index.php" class="btn btn-default">Contrats</a>';
         $html .= '<br/><br/>';
         $html .= '<a href="'.DOL_URL_ROOT.'/bimpcommercial/index.php?fc=factures" class="btn btn-default">Factures</a>';
         $html .= '<br/><br/>';

@@ -295,6 +295,11 @@ lists:
                 field: datec
             date_contrat:
                 field: date_contrat
+    
+    client:
+        extends: default
+        cols:
+            fk_soc: unset
 
 forms:
     edit_contrat:

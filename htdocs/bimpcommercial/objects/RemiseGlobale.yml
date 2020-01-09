@@ -41,6 +41,8 @@ fields:
     percent: 
         label: Taux
         type: percent
+        input: 
+            help: Pourcentage appliqué sur le total TTC hors remises
         default_value: 0
         display_if: 
             field_name: type

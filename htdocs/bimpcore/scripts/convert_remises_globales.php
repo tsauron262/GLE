@@ -17,6 +17,9 @@ BimpCore::displayHeaderFiles();
 global $db;
 $bdb = new BimpDb($db);
 
+//processPropales($bdb);
+processCommandes($bdb);
+
 function processPropales($bdb)
 {
     $instance = BimpObject::getInstance('bimpcommercial', 'Bimp_Propal');
@@ -26,7 +29,7 @@ function processPropales($bdb)
             'operator' => '!=',
             'value'    => 0
         ),
-//            'rowid'          => 143792
+//        'rowid'          => 293324
             ), null, null, 'id', 'asc', 'array', array(
         'rowid', 'remise_globale', 'remise_globale_label'
     ));
@@ -35,8 +38,13 @@ function processPropales($bdb)
         $propal = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', (int) $r['rowid']);
 
         if (BimpObject::objectLoaded($propal)) {
+            echo '<br/>MAJ PROPALE ' . $r['rowid'] . '<br/>';
+
             $total_ttc = $propal->getTotalTtcWithoutRemises(true);
             $amount = round($total_ttc * ($r['remise_globale'] / 100), 2);
+
+            echo 'Total TTC INITIAL: ' . $propal->getTotalTtc() . '<br/>';
+            echo 'Montant RG: ' . $amount . '<br/>';
 
             $data = array(
                 'obj_type' => Bimp_Propal::$element_name,
@@ -55,15 +63,16 @@ function processPropales($bdb)
                 $rg_errors = $rg->create($rg_warnings, true);
 
                 if (count($rg_errors)) {
-                    echo BimpRender::renderAlerts(BimpTools::getMsgFromArray($rg_errors, 'Propal #' . $popal->id . ': échec de la création de la remise globale'));
+                    echo BimpRender::renderAlerts(BimpTools::getMsgFromArray($rg_errors, 'Propal #' . $propal->id . ': échec de la création de la remise globale'));
                 } else {
+                    echo '<span class="success">OK</span><br/>';
                     $bdb->update('propal', array(
                         'remise_globale' => 0
                             ), '`rowid` = ' . (int) $propal->id);
                 }
 
                 if (count($rg_warnings)) {
-                    echo BimpRender::renderAlerts(BimpTools::getMsgFromArray($rg_errors, 'Propal #' . $popal->id . ': erreurs lors de la création de la remise globale'), 'warning');
+                    echo BimpRender::renderAlerts(BimpTools::getMsgFromArray($rg_errors, 'Propal #' . $propal->id . ': erreurs lors de la création de la remise globale'), 'warning');
                 }
             } else {
                 $id_rg = (int) $bdb->insert('bimp_remise_globale', $data, true);
@@ -98,12 +107,27 @@ function processPropales($bdb)
                                             'percent'           => $line_rate
                                         ))) {
                                     echo BimpRender::renderAlerts('Propal #' . $propal->id . ' - ligne n°' . $line->getData('position') . ': échec de l\'insertion de la remise - ' . $bdb->db->lasterror());
+                                } else {
+                                    echo '<span class="success">OK</span><br/>';
+                                    $remises_infos = $line->getRemiseTotalInfos(true);
+                                    if ((float) $line->remise !== (float) $remises_infos['total_percent']) {
+                                        echo BimpRender::renderAlerts('Ligne n° ' . $line->getData('position') . ' - Ecart: ' . $line->remise . ' => ' . $remises_infos['total_percent'], 'warning');
+                                    }
                                 }
                             }
                         }
                     }
                 }
             }
+            unset($propal);
+            BimpCache::$cache = array();
+            $propal = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', (int) $r['rowid']);
+            $lines = $propal->getLines('not_text');
+            $total_ttc = 0;
+            foreach ($lines as $line) {
+                $total_ttc += (float) $line->getTotalTTC();
+            }
+            echo 'TOTAL TTC FINAL: ' . $total_ttc . '<br/>';
         }
 
         unset($propal);
@@ -120,7 +144,7 @@ function processCommandes($bdb)
             'operator' => '!=',
             'value'    => 0
         ),
-//            'rowid'          => 143792
+        'rowid'          => 50702
             ), null, null, 'id', 'asc', 'array', array(
         'rowid', 'remise_globale', 'remise_globale_label'
     ));
@@ -129,8 +153,13 @@ function processCommandes($bdb)
         $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $r['rowid']);
 
         if (BimpObject::objectLoaded($commande)) {
+            echo '<br/>MAJ COMMANDE ' . $r['rowid'] . '<br/>';
+
             $total_ttc = $commande->getTotalTtcWithoutRemises(true);
             $amount = round($total_ttc * ($r['remise_globale'] / 100), 2);
+
+            echo 'Total TTC INITIAL: ' . $commande->getTotalTtc() . '<br/>';
+            echo 'Montant RG: ' . $amount . '<br/>';
 
             $data = array(
                 'obj_type' => Bimp_Commande::$element_name,
@@ -151,6 +180,7 @@ function processCommandes($bdb)
                 if (count($rg_errors)) {
                     echo BimpRender::renderAlerts(BimpTools::getMsgFromArray($rg_errors, 'Commande #' . $commande->id . ': échec de la création de la remise globale'));
                 } else {
+                    echo '<span class="success">OK</span><br/>';
                     $bdb->update('commande', array(
                         'remise_globale' => 0
                             ), '`rowid` = ' . (int) $commande->id);
@@ -192,6 +222,12 @@ function processCommandes($bdb)
                                             'percent'           => $line_rate
                                         ))) {
                                     echo BimpRender::renderAlerts('Commande #' . $commande->id . ' - ligne n°' . $line->getData('position') . ': échec de l\'insertion de la remise - ' . $bdb->db->lasterror());
+                                } else {
+                                    echo '<span class="success">OK</span><br/>';
+                                    $remises_infos = $line->getRemiseTotalInfos(true);
+                                    if ((float) $line->remise !== (float) $remises_infos['total_percent']) {
+                                        echo BimpRender::renderAlerts('Ligne n° ' . $line->getData('position') . ' - Ecart: ' . $line->remise . ' => ' . $remises_infos['total_percent'], 'warning');
+                                    }
                                 }
                             }
                         }
@@ -207,6 +243,7 @@ function processCommandes($bdb)
                             ));
 
                             foreach ($fac_lines as $fac_line) {
+                                echo 'FAC LINE #' . $fac_line->id . '<br/>';
                                 $remises = BimpCache::getBimpObjectObjects('bimpcommercial', 'ObjectLineRemise', array(
                                             'id_object_line'    => (int) $fac_line->id,
                                             'object_type'       => $fac_line::$parent_comm_type,
@@ -214,12 +251,15 @@ function processCommandes($bdb)
                                 ));
 
                                 foreach ($remises as $remise) {
+                                    echo 'MAJ REMISE #' . $remise->id . ': ';
                                     if ($bdb->update('object_line_remise', array(
                                                 'linked_id_remise_globale' => $rg->id,
                                                 'is_remise_globale'        => 0
                                                     ), '`id` = ' . (int) $remise->id) <= 0) {
                                         echo BimpRender::renderAlerts('Commande #' . $commande->id . ' échec de la modif de la remise fac line #' . $fac_line->id . ' - ' . $bdb->db->lasterror());
                                         $ok = false;
+                                    } else {
+                                        echo 'OK <br/>';
                                     }
                                 }
                             }
@@ -253,6 +293,7 @@ function processFactures($bdb)
     ));
 
     foreach ($rows as $r) {
+        echo '<br/>MAJ COMMANDE ' . $r['rowid'] . '<br/>';
         $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $r['rowid']);
 
         if (BimpObject::objectLoaded($facture)) {
@@ -278,6 +319,7 @@ function processFactures($bdb)
                 if (count($rg_errors)) {
                     echo BimpRender::renderAlerts(BimpTools::getMsgFromArray($rg_errors, 'Facture #' . $facture->id . ': échec de la création de la remise globale'));
                 } else {
+                    echo '<span class="success">OK</span><br/>';
                     $bdb->update('facture', array(
                         'remise_globale' => 0
                             ), '`rowid` = ' . (int) $facture->id);
@@ -319,6 +361,12 @@ function processFactures($bdb)
                                             'percent'           => $line_rate
                                         ))) {
                                     echo BimpRender::renderAlerts('Facture #' . $facture->id . ' - ligne n°' . $line->getData('position') . ': échec de l\'insertion de la remise - ' . $bdb->db->lasterror());
+                                } else {
+                                    echo '<span class="success">OK</span><br/>';
+                                    $remises_infos = $line->getRemiseTotalInfos(true);
+                                    if ((float) $line->remise !== (float) $remises_infos['total_percent']) {
+                                        echo BimpRender::renderAlerts('Ligne n° ' . $line->getData('position') . ' - Ecart: ' . $line->remise . ' => ' . $remises_infos['total_percent'], 'warning');
+                                    }
                                 }
                             }
                         }
@@ -331,6 +379,7 @@ function processFactures($bdb)
         BimpCache::$cache = array();
     }
 }
+
 echo '<br/>FIN';
 
 echo '</body></html>';

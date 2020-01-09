@@ -168,7 +168,7 @@ fields_tables:
 #              label: Quantitée dans le contrat
 #            - field: nb_materiel
 #              label: Nombre de matériels couverts par ce service
-            - label: Numéro(s) de série lié(s) au contrat
+            - label: Numéro(s) de série lié(s) à cette ligne de service
               value: 
                   callback: displaySerialsList
 

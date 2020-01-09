@@ -1,0 +1,1 @@
+UPDATE `llx_c_type_contact` SET `libelle` = "Site d'intervention" WHERE `llx_c_type_contact`.`code` = 'SITE'; 

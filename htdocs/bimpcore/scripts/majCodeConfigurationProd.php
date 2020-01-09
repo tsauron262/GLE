@@ -107,7 +107,8 @@ class majCodeConfigurationnProd{
     public function changeIdSav($oldId, $newId){
         $sql = $this->db->query("SELECT MAX(`position`) as max FROM `llx_be_equipment_place` WHERE `id_equipment` = ".$newId);
         $ln = $this->db->fetch_object($sql);
-        $sql2 = $this->db->query("UPDATE `llx_be_equipment_place` SET id_equipment = ".$newId.", position = (position + ".$ln->max.")  WHERE `id_equipment`=".$oldId);
+        $max = ($ln->max > 0)? $ln->max : 0;
+        $sql2 = $this->db->query("UPDATE `llx_be_equipment_place` SET id_equipment = ".$newId.", position = (position + ".$max.")  WHERE `id_equipment`=".$oldId);
         
         $tabConversion = array("bs_sav" =>'', 'br_reservation' => '', 'bc_vente_article'=>'', 'bc_vente_return'=>'', 'object_line_equipment'=>'', 'bcontract_serials'=>'', /*'bs_sav_product' => '', */'bt_transfer_det' => '');
         foreach($tabConversion as $table => $champ){

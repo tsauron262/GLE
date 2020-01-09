@@ -72,10 +72,18 @@ class BContract_contratLine extends BContract_contrat {
                 foreach ($array as $serial) {
                     $equipment = $this->getInstance('bimpequipment', 'Equipment');
                     if ($equipment->find(['serial' => $serial]) && BimpTools::getContext() == 'private') {
-                            $html .= $equipment->getNomUrl(true, true, true);
+                            $html .= "<b>N° de série: </b>" . $equipment->getNomUrl(true, true, true);
+                            if($equipment->getData('imei')) {
+                                $html .= "<b style='margin-left: 2%'>N° IMEI : </b>" . $equipment->getData('imei');
+                            }
                         
                     } else {
-                        $html .= $serial;
+                        $html .= "<b>N° de séries: </b>" . $serial;
+                        if ($equipment->find(['serial' => $serial])) {
+                            if($equipment->getData('imei')) {
+                                $html .= "<b style='margin-left: 2%'>N° IMEI : </b>" . $equipment->getData('imei');
+                            }
+                        }
                     }
                     $html .= "<br />";
                 }
@@ -110,7 +118,7 @@ class BContract_contratLine extends BContract_contrat {
                 ))
             );
         }
-        if ($parent->getData('statut') == 1 && BimpTools::getContext() != 'public') {
+        if ($parent->getData('statut') == 1 && BimpTools::getContext() != 'public' && $parent->getData('objet_contrat') == 'CSP') {
             $buttons[] = array(
                 'label' => 'Remplacer un numéro de série',
                 'icon' => 'fas_retweet',
@@ -119,7 +127,7 @@ class BContract_contratLine extends BContract_contrat {
                 ))
             );
         }
-
+        
         return $buttons;
     }
 
@@ -135,7 +143,7 @@ class BContract_contratLine extends BContract_contrat {
     public function actionSetSerial($data, &$success) {
         $to_insert = [];
         $all = explode("\n", $data['serials']);
-        $success = "Les numéros de séries ont bien été inscrit dans la ligne de service";
+        $success = "Les numéros de séries ont bien été inscrient dans la ligne de service";
         foreach ($all as $serial) {
 
             if ($serial) {

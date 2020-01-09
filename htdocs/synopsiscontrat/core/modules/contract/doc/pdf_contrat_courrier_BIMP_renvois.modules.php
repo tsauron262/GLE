@@ -40,7 +40,9 @@ class pdf_contrat_courrier_BIMP_renvois extends ModeleSynopsiscontrat {
     public function addLogo(&$pdf, $size) {
         global $conf;
         $logo = $conf->mycompany->dir_output . '/logos/' . $this->emetteur->logo;
-        $pdf->Image($logo, 0, 10, 0, $size, '', '', '', false, 250, 'L');
+        if(is_file($logo)) {
+            $pdf->Image($logo, 0, 10, 0, $size, '', '', '', false, 250, 'L');
+        }
     }
 
     public function ChapterTitle($num, $title) {

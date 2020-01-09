@@ -3016,7 +3016,15 @@ class SupplierInvoiceLine extends CommonObjectLine
         $sql.= " ".$this->product_type.",";
         $sql.= " ".price2num($this->remise_percent).",";
         $sql.= " ".price2num($this->subprice).",";
-        $sql.= " ".price2num($this->total_ttc/$this->qty).",";
+        /* moddrsi */
+//        $sql.= " ".price2num($this->total_ttc/$this->qty).",";
+        if ((float) $this->qty && (float) $this->total_ttc) {
+            $pu_ttc = $this->total_ttc / $this->qty;
+        } else {
+            $pu_ttc = 0;
+        }
+        $sql .= " " . price2num($pu_ttc) . ",";
+        /* fmoddrsi */
         $sql.= " ".(! empty($this->date_start)?"'".$this->db->idate($this->date_start)."'":"null").",";
         $sql.= " ".(! empty($this->date_end)?"'".$this->db->idate($this->date_end)."'":"null").",";
         $sql.= ' '.(!empty($this->fk_code_ventilation)?$this->fk_code_ventilation:0).',';

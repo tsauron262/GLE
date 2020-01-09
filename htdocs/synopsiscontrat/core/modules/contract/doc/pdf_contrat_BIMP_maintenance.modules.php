@@ -48,12 +48,13 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
     public function addLogo(&$pdf, $size, $pdf1 = null) {
         global $conf;
         $logo = $conf->mycompany->dir_output . '/logos/' . $this->emetteur->logo;
-        if(is_object($pdf1)){
-            $pdf1->Image($logo, 0, 10, 0, $size, '', '', '', false, 250, 'L');
-        } else {
-            $pdf->Image($logo, 0, 10, 0, $size, '', '', '', false, 250, 'L');
+        if(is_file($logo)) {
+             if(is_object($pdf1)){
+                $pdf1->Image($logo, 0, 10, 0, $size, '', '', '', false, 250, 'L');
+            } else {
+                $pdf->Image($logo, 0, 10, 0, $size, '', '', '', false, 250, 'L');
+            }
         }
-        
     }
 
     public function ChapterTitle($num, $title) {
@@ -251,7 +252,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
         $pdf->SetFont('', '', 8);
         global $db;
         $bimp = new BimpDb($db);
-        $id_contact_type = $bimp->getValue('c_type_contact', 'rowid', 'code = "CONTACTSITECONTRAT"');
+        $id_contact_type = $bimp->getValue('c_type_contact', 'rowid', 'code = "SITE" and element = "contrat"');
         $contacts = $bimp->getRows('element_contact', 'element_id = ' . $contrat->id . ' and fk_c_type_contact = ' . $id_contact_type);
         foreach ($contacts as $key => $infos) {
             $inf = $bimp->getRow("socpeople", "rowid = " . $infos->fk_socpeople);
@@ -656,7 +657,8 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $pdf->SetFont('', '', 7);
                 $date = new DateTime();
                 $date->setTimestamp((int) $extra->options_date_start);
-                $date->add(new DateInterval("P" . $extra->options_duree_mois . "M"));
+                if($extra->options_duree_mois > 0)
+                    $date->add(new DateInterval("P" . $extra->options_duree_mois . "M"));
                 $date->sub(new DateInterval("P1D"));
                 $pdf->Cell($W, 8, $date->format('d/m/Y'), 1, null, 'L', true);
                 $pdf->SetFont('', 'B', 7);

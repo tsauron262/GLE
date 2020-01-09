@@ -126,9 +126,15 @@ class modBimptocegid extends DolibarrModules {
         $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_refacturation_ht", 79100000)';
         $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_refacturation_ttc", 79119000)';
         
+        //Config
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_code_fournisseur_apple", "0000001000000000")';
+        
         // Conf
         $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPtoCEGID_start_current_trimestre", "2019-07-01")';
-
+        
+        $extrafields = new ExtraFields($this->db);
+        $extrafields->addExtrafield('type_compta', 'Classement du produit en comptabilitée', 'select', 200, null, 'product', 0, 0, 0, 'a:1:{s:7:"options";a:3:{i:0;s:11:"Pas de type";i:1;s:7:"Produit";i:2;s:7:"Service";}}', 1, null, 1);
+        
         require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
         $name = 'module_version_' . strtolower($this->name);
         if (BimpCore::getConf($name) == "") { // C'est la première fois qu'on install le module

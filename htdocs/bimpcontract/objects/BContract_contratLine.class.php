@@ -20,6 +20,8 @@ class BContract_contratLine extends BContract_contrat {
         } else {
             $description = $data['description'];
         }
+        
+        
 
         if ($contrat->dol_object->addLine($description, $produit->getData('price'), $data['qty'], $produit->getData('tva_tx'), 0, 0, $produit->id, $data['remise_percent'], $instance->getData('date_start'), $instance->getEndDate()->format('Y-m-d'), 'HT', 0.0, 0, null, 0, Array('fk_contrat' => $contrat->id)) > 0) {
             //$errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($contrat));
@@ -69,16 +71,39 @@ class BContract_contratLine extends BContract_contrat {
         if (!$textarea) {
 
             if (count($array)) {
+                $html .= '<table>';
+                $html .= '<thead><th>N° de série</th><th>N° IMEI</th></thead>';
+                $html .= '<tbody>';
                 foreach ($array as $serial) {
+                    $html .= '<tr>';
                     $equipment = $this->getInstance('bimpequipment', 'Equipment');
-                    if ($equipment->find(['serial' => $serial]) && BimpTools::getContext() == 'private') {
+                    if ($equipment->find(['serial' => $serial], true) && BimpTools::getContext() != 'public') {
+                            $html .= '<td>';
                             $html .= $equipment->getNomUrl(true, true, true);
+                            $html .= '</td>';
+                            $html .= '<td>';
+                            if($equipment->getData('imei')) {
+                                $html .= $equipment->getData('imei');
+                            }
+                            $html .= '</td>';
                         
                     } else {
+                        $html .= '<td>';
                         $html .= $serial;
+                        $html .= '</td>';
+                        $html .= '<td>';
+                        if ($equipment->find(['serial' => $serial])) {
+                            if($equipment->getData('imei')) {
+                                $html .= $equipment->getData('imei');
+                            }
+                        }
+                        $html .= '</td>';
                     }
-                    $html .= "<br />";
+                    //$html .= "<br />";
+                    $html .= '</tr>';
                 }
+                $html .= '</tbody>';
+                $html .= '<table>';
             } else {
                 $html .= BimpRender::renderAlerts("Il n'y à pas de numéros de série dans cette ligne de service", 'info', false);
             }
@@ -97,27 +122,30 @@ class BContract_contratLine extends BContract_contrat {
 
     public function getActionsButtons() {
         $buttons = array();
+        
+        if($this->getData('fk_contrat') > 0) {
+            $parent = $this->getinstance('bimpcontract', 'BContract_contrat');
+            $parent->find(['rowid' => $this->getData('fk_contrat')]);
 
-        $parent = $this->getinstance('bimpcontract', 'BContract_contrat');
-        $parent->find(['rowid' => $this->getData('fk_contrat')]);
-        // Remise globale: 
-        if ($parent->getData('statut') == 0) {
-            $buttons[] = array(
-                'label' => 'Ajouter des numéros de série',
-                'icon' => 'fas_plug',
-                'onclick' => $this->getJsActionOnclick('setSerial', array(), array(
-                    'form_name' => 'add_serial'
-                ))
-            );
-        }
-        if ($parent->getData('statut') == 1 && BimpTools::getContext() != 'public') {
-            $buttons[] = array(
-                'label' => 'Remplacer un numéro de série',
-                'icon' => 'fas_retweet',
-                'onclick' => $this->getJsActionOnclick('rebaseSerial', array(), array(
-                    'form_name' => 'rebase_serial'
-                ))
-            );
+            // Remise globale: 
+            if ($parent->getData('statut') == 0) {
+                $buttons[] = array(
+                    'label' => 'Ajouter des numéros de série',
+                    'icon' => 'fas_plug',
+                    'onclick' => $this->getJsActionOnclick('setSerial', array(), array(
+                        'form_name' => 'add_serial'
+                    ))
+                );
+            }
+            if ($parent->getData('statut') == 1 && BimpTools::getContext() != 'public') {
+                $buttons[] = array(
+                    'label' => 'Remplacer un numéro de série',
+                    'icon' => 'fas_retweet',
+                    'onclick' => $this->getJsActionOnclick('rebaseSerial', array(), array(
+                        'form_name' => 'rebase_serial'
+                    ))
+                );
+            }
         }
 
         return $buttons;
@@ -131,11 +159,15 @@ class BContract_contratLine extends BContract_contrat {
 
         return $return;
     }
-
+    
+    public function actionRebaseSerial($data, &$success) {
+        
+    }
+    
     public function actionSetSerial($data, &$success) {
         $to_insert = [];
         $all = explode("\n", $data['serials']);
-        $success = "Les numéros de séries ont bien été inscrit dans la ligne de service";
+        $success = "Les numéros de séries ont bien été inscrient dans la ligne de service";
         foreach ($all as $serial) {
 
             if ($serial) {

@@ -36,7 +36,7 @@ class BC_Field extends BimpComponent
         'number'     => array(
             'min'      => array('data_type' => 'float'),
             'max'      => array('data_type' => 'float'),
-            'unsigned' => array('data_type' => 'bool', 'default' => 1),
+            'unsigned' => array('data_type' => 'bool', 'default' => 0),
             'decimals' => array('data_type' => 'int', 'default' => 2)
         ),
         'money'      => array(

@@ -1765,11 +1765,14 @@ class BS_SAV extends BimpObject
                 require_once(DOL_DOCUMENT_ROOT . "/bimpcore/classes/BimpRevision.php");
 
                 $old_id_propal = $propal->id;
-                $remise_globale = (float) $propal->getData('remise_globale');
-                $remise_global_label = $propal->getData('remise_globale_label');
 
                 $revision = new BimpRevisionPropal($propal->dol_object);
                 $new_id_propal = $revision->reviserPropal(false, true, self::$propal_model_pdf, $errors, $this->getData("id_client"));
+
+                $new_propal = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SavPropal', (int) $new_id_propal);
+                if (!BimpObject::objectLoaded($new_propal)) {
+                    $errors[] = 'Le nouveau devis d\'ID ' . $new_id_propal . ' n\'existe pas';
+                }
 
                 if ($new_id_propal && !count($errors)) {
                     //Anulation du montant de la propal
@@ -1779,6 +1782,7 @@ class BS_SAV extends BimpObject
                     else {
                         $tTva = (($propal->dol_object->total_ttc / ($totHt != 0 ? $totHt : 1) - 1) * 100);
                     }
+
                     $propal->fetch($old_id_propal);
                     $propal->dol_object->statut = 0;
                     $propal->dol_object->addline("Devis révisé", -($totHt) / (100 - $client->dol_object->remise_percent) * 100, 1, $tTva, 0, 0, 0, $client->dol_object->remise_percent, 'HT', 0, 0, 1, -1, 0, 0, 0, 0); //-$totPa);
@@ -1793,109 +1797,39 @@ class BS_SAV extends BimpObject
                     $asso = new BimpAssociation($this, 'propales');
                     $asso->addObjectAssociation((int) $new_id_propal);
 
-                    $propalLine = BimpObject::getInstance('bimpsupport', 'BS_SavPropalLine');
+                    // Copie des lignes: 
+                    $warnings = array_merge($warnings, $new_propal->createLinesFromOrigin($propal, array(
+                                'is_review' => true
+                    )));
 
-                    $lines_list = $propalLine->getList(array(
-                        'id_obj' => (int) $old_id_propal,
-                            ), null, null, 'position', 'asc', 'array', array('id'));
-                    $i = 0;
-                    foreach ($lines_list as $item) {
-                        $i++;
-                        $propalLine = BimpObject::getInstance('bimpsupport', 'BS_SavPropalLine', (int) $item['id']);
-                        if ($propalLine->isLoaded()) {
-                            if ($propalLine->getData('linked_object_name') == 'sav_garantie')
-                                continue;
+                    // Check des AppleParts: 
+                    $new_apple_parts_lines = BimpCache::getBimpObjectObjects('bimpsupport', 'BS_SavPropalLine', array(
+                                'id_obj'             => (int) $new_id_propal,
+                                'linked_object_name' => 'sav_apple_part'
+                    ));
 
-                            $remises = $propalLine->getRemises();
-                            $eq_lines = $propalLine->getEquipmentLines();
-                            $propalLine->id = null;
-                            $propalLine->set('id', 0);
-                            $propalLine->set('id_line', 0);
-                            $propalLine->set('id_parent_line', 0);
-                            $propalLine->remise = 0;
-                            $propalLine->setIdParent($new_id_propal);
-
-                            $apple_part = null;
-                            if ($propalLine->getData('linked_object_name') === 'sav_apple_part') {
-                                $apple_part = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_ApplePart', (int) $propalLine->getData('linked_id_object'), $this);
-                                if (!BimpObject::objectLoaded($apple_part)) {
-                                    $propalLine->set('deletable', 1);
-                                    $propalLine->set('editable', 1);
-                                    $propalLine->set('remisable', 1);
-                                    $propalLine->set('linked_id_object', 0);
-                                    $propalLine->set('linked_object_name', '');
-                                }
-                            }
-
-                            $line_warnings = array();
-                            $line_errors = $propalLine->create($line_warnings);
-                            if (count($line_warnings)) {
-                                $warnings[] = BimpTools::getMsgFromArray($line_errors, 'Erreurs suite à la la copie de la ligne du devis n°' . $i);
-                            }
-
-                            if (count($line_errors)) {
-                                $warnings[] = BimpTools::getMsgFromArray($line_errors, 'Echec de la copie de la ligne du devis n°' . $i);
-                            } else {
-                                if (count($remises)) {
-                                    $j = 0;
-                                    foreach ($remises as $remise) {
-                                        $j++;
-                                        $remise->id = null;
-                                        $remise->set('id', 0);
-                                        $remise->set('id_object_line', $propalLine->id);
-                                        $remise_errors = $remise->create();
-                                        if (count($remise_errors)) {
-                                            $warnings[] = BimpTools::getMsgFromArray($remise_errors, 'Echec de la copie de la remise n°' . $j . ' pour la ligne du devis n°' . $i);
-                                        }
-                                    }
-                                }
-                                if (count($eq_lines)) {
-                                    $new_eq_lines = $propalLine->getEquipmentLines();
-                                    $j = 0;
-                                    foreach ($eq_lines as $eq_line) {
-                                        $j++;
-                                        $id_equipment = (int) $eq_line->getData('id_equipment');
-                                        if ($id_equipment) {
-                                            $new_eq_line = array_shift($new_eq_lines);
-                                            $eq_line_errors = array();
-                                            if (BimpObject::objectLoaded($new_eq_line)) {
-                                                $new_eq_line->validateArray(array(
-                                                    'id_equipment'   => $id_equipment,
-                                                    'pu_ht'          => (float) $eq_line->getData('pu_ht'),
-                                                    'tva_tx'         => (float) $eq_line->getData('tva_tx'),
-                                                    'pa_ht'          => (float) $eq_line->getData('pa_ht'),
-                                                    'id_fourn_price' => (int) $eq_line->getData('id_fourn_price')
-                                                ));
-                                                $eq_line_errors = $new_eq_line->update();
-                                            } else {
-                                                $eq_line_errors[] = 'Aucune ligne d\'équipement disponible';
-                                            }
-                                            if (count($eq_line_errors)) {
-                                                $warnings[] = BimpTools::getMsgFromArray($eq_line_errors, 'Echec de la copie de la ligne d\'équipement n°' . $j . ' pour la ligne du devis n°' . $i);
-                                            }
-                                        }
-                                    }
-                                }
+                    if (!empty($new_apple_parts_lines)) {
+                        foreach ($new_apple_parts_lines as $line) {
+                            $apple_part = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_ApplePart', (int) $line->getData('linked_id_object'));
+                            if (!BimpObject::objectLoaded($apple_part)) {
+                                $line->set('deletable', 1);
+                                $line->set('editable', 1);
+                                $line->set('remisable', 1);
+                                $line->set('linked_id_object', 0);
+                                $line->set('linked_object_name', '');
+                                $line->update($w, true);
                             }
                         }
                     }
 
-//                    $apple_parts = $this->getChildrenObjects('apple_parts');
-//                    foreach ($apple_parts as $apple_part) {
-//                        $apple_part_warnings = array();
-//                        $apple_part->update($apple_part_warnings, true);
-//                    }
+                    // Copie des contacts: 
+                    $new_propal->copyContactsFromOrigin($propal, $warnings);
+
+                    // Copie des remises globales: 
+                    $new_propal->copyRemisesGlobalesFromOrigin($propal, $warnings);
+
+                    // Traitement de la garantie: 
                     $this->processPropalGarantie();
-
-                    // Ajout de la remise globale: 
-                    if ($remise_globale) {
-                        $bimpPropal = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SavPropal', (int) $new_id_propal);
-
-                        if (BimpObject::objectLoaded($propal)) {
-                            $bimpPropal->updateField('remise_globale_label', $remise_global_label);
-                            $bimpPropal->setRemiseGlobalePercent($remise_globale);
-                        }
-                    }
                 } else {
                     $errors[] = 'Echec de la mise en révision du devis';
                 }
@@ -3619,7 +3553,7 @@ class BS_SAV extends BimpObject
                     $res_errors = $this->setReservationsStatus(304);
 
                     if (count($res_errors)) {
-                        $warnings[] = BimpTools::getMsgFromArray($res_errors, 'Des erreurs sont survenues lors de la mise à jour des réservations de produits:');
+                        $warnings[] = BimpTools::getMsgFromArray($res_errors, 'Des erreurs sont survenues lors de la mise à jour des réservations de produits');
                     }
 
                     if (!count($errors)) {
@@ -3797,6 +3731,7 @@ class BS_SAV extends BimpObject
                                 }
 
                                 global $user;
+                                $user->rights->facture->creer = 1;
 
                                 $id_facture = $facture->create($user);
                                 if ($id_facture <= 0) {
@@ -3815,15 +3750,11 @@ class BS_SAV extends BimpObject
                                             $errors[] = BimpTools::getMsgFromArray($lines_errors, 'Des erreurs sont survenues lors de l\'ajout des lignes à la facture');
                                         } else {
                                             $bimpFacture->fetch($bimpFacture->id);
-                                            $bimpFacture->dol_object->addline("Résolution : " . $this->getData('resolution'), 0, 1, 0, 0, 0, 0, 0, null, null, null, null, null, 'HT', 0, 3);
+                                            $bimpFacture->dol_object->addline("Résolution: " . $this->getData('resolution'), 0, 1, 0, 0, 0, 0, 0, null, null, null, null, null, 'HT', 0, 3);
 
-                                            // Intégration de la remise globale: 
-                                            if ((float) $propal->getData('remise_globale')) {
-                                                $bimpFacture->updateField('remise_globale_label', $propal->getData('remise_globale_label'));
-                                                $bimpFacture->setRemiseGlobalePercent((float) $propal->getData('remise_globale'));
-                                            }
+                                            // Copie des remises globales: 
+                                            $bimpFacture->copyRemisesGlobalesFromOrigin($propal, $warnings);
 
-                                            $user->rights->facture->creer = 1;
                                             if ($bimpFacture->dol_object->validate($user, '') <= 0) { //pas d'entrepot pour pas de destock
                                                 $msg = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($bimpFacture->dol_object), 'Echec de la validation de la facture');
                                                 $warnings[] = $msg;
@@ -3879,7 +3810,6 @@ class BS_SAV extends BimpObject
                                                         $warnings[] = BimpTools::getMsgFromArray($up_errors, 'Echec de l\'enregistrement de l\'ID de la facture (' . $bimpFacture->id . ')');
                                                     }
                                                 }
-
 
                                                 $bimpFacture->dol_object->generateDocument(self::$facture_model_pdf, $langs);
 

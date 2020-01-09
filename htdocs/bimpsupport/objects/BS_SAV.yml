@@ -720,6 +720,7 @@ views:
                   list: 
                       name: default
                       children: prets
+                      
     infos:
         title: 
             callback: getRef

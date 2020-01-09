@@ -180,9 +180,6 @@ forms:
             - field: zone_vente
               show: 
                   callback: isLoaded
-            - field: remise_globale_label
-              show: 
-                  callback: hasRemiseGlobale
             - field: note_private
             - field: note_public
             
@@ -283,10 +280,6 @@ fields_tables:
               edit: 1
             - field: pdf_proforma
               edit: 1
-            - field: remise_globale_label
-              edit: 1
-              show: 
-                  callback: hasRemiseGlobale
             - label: Fichier PDF
               value: 
                   callback: displayPDFButton
@@ -302,11 +295,11 @@ fields_tables:
             
 views: 
     default: 
-        objects_change_reload: Bimp_PropalLine,ObjectLineRemise,BimpFile
+        objects_change_reload: Bimp_PropalLine,ObjectLineRemise,BimpFile,RemiseGlobale
     content_infos: 
-        objects_change_reload: Bimp_PropalLine,ObjectLineRemise,BimpFile
+        objects_change_reload: Bimp_PropalLine,ObjectLineRemise,BimpFile,RemiseGlobale
     full: 
-        objects_change_reload: Bimp_PropalLine,ObjectLineRemise,BimpFile
+        objects_change_reload: Bimp_PropalLine,ObjectLineRemise,BimpFile,RemiseGlobale
      
 lists_cols: 
     date_create: 

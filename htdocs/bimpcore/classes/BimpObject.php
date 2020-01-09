@@ -3207,8 +3207,10 @@ class BimpObject extends BimpCache
             $errors[] = 'Vous n\'avez pas la permission de créer ' . $this->getLabel('a');
         }
 
-        if (!$this->isCreatable($force_create)) {
-            $errors[] = 'Il n\'est pas possible de créer ' . $this->getLabel('a');
+        if (!$this->isCreatable($force_create, $errors)) {
+            if (!count($errors)) {
+                $errors[] = 'Il n\'est pas possible de créer ' . $this->getLabel('a');
+            }
         }
 
         if (!count($errors)) {
@@ -4707,18 +4709,18 @@ class BimpObject extends BimpCache
         if (is_null($visibility)) {
             $visibility = BimpNote::BIMP_NOTE_MEMBERS;
         }
-        
+
         $errors = $note->validateArray(array(
-            'obj_type'   => 'bimp_object',
-            'obj_module' => $this->module,
-            'obj_name'   => $this->object_name,
-            'id_obj'     => (int) $this->id,
-            'visibility' => (int) $visibility,
-            'content'    => $content,
-            'viewed'     => $viewed,
-            'auto'       => $auto,
-            "email"      => $email,
-            "type_author"=> $type_author
+            'obj_type'    => 'bimp_object',
+            'obj_module'  => $this->module,
+            'obj_name'    => $this->object_name,
+            'id_obj'      => (int) $this->id,
+            'visibility'  => (int) $visibility,
+            'content'     => $content,
+            'viewed'      => $viewed,
+            'auto'        => $auto,
+            "email"       => $email,
+            "type_author" => $type_author
         ));
 
         if (!count($errors)) {
@@ -6785,12 +6787,19 @@ class BimpObject extends BimpCache
                 $create_errors = $instance->create($create_warnings, $force_create);
             }
 
+            $label = $instance->getLabel('of_the');
+            $ref_prop = $instance->getRefProperty();
+
+            if ($ref_prop && isset($data[$ref_prop])) {
+                $label .= ' "' . $data[$ref_prop] . '"';
+            }
+
             if (count($create_errors)) {
-                $errors[] = BimpTools::getMsgFromArray($create_errors, 'Echec de la création ' . $instance->getLabel('of_the'));
+                $errors[] = BimpTools::getMsgFromArray($create_errors, 'Echec de la création ' . $label);
             }
 
             if (count($create_warnings)) {
-                $warnings[] = BimpTools::getMsgFromArray($create_warnings, 'Erreurs suite à la création ' . $instance->getLabel('of_the'));
+                $warnings[] = BimpTools::getMsgFromArray($create_warnings, 'Erreurs suite à la création ' . $label);
             }
 
             return $instance;

@@ -337,10 +337,6 @@ forms:
                 field: zone_vente
                 show: 
                     callback: isLoaded
-            remise_globale_label: 
-                field: remise_globale_label
-                show: 
-                    callback: hasRemiseGlobale
             note_private: 
                 field: note_private
             note_public: 
@@ -597,10 +593,6 @@ fields_tables:
 #              edit: 1
 #            - field: pdf_hide_ttc
 #              edit: 1
-            - field: remise_globale_label
-              edit: 1
-              show: 
-                  callback: hasRemiseGlobale
             - label: Fichier PDF
               value: 
                   callback: displayPDFButton
@@ -616,13 +608,11 @@ fields_tables:
             
 views: 
     default: 
-        objects_change_reload: Bimp_FactureLine,Bimp_Paiement,ObjectLineRemise,BimpFile,BimpRevalorisation
-        
+        objects_change_reload: Bimp_FactureLine,Bimp_Paiement,ObjectLineRemise,BimpFile,BimpRevalorisation,RemiseGlobale
     content_infos: 
-        objects_change_reload: Bimp_FactureLine,Bimp_Paiement,ObjectLineRemise,BimpFile,BimpRevalorisation
-        
+        objects_change_reload: Bimp_FactureLine,Bimp_Paiement,ObjectLineRemise,BimpFile,BimpRevalorisation,RemiseGlobale
     full: 
-        objects_change_reload: Bimp_FactureLine,Bimp_Paiement,ObjectLineRemise,BimpFile,BimpRevalorisation
+        objects_change_reload: Bimp_FactureLine,Bimp_Paiement,ObjectLineRemise,BimpFile,BimpRevalorisation,RemiseGlobale
         
 filters_panels: 
     default: 

@@ -205,8 +205,6 @@ fields:
 #    total: unset
     fk_availability: unset
     fk_input_reason: unset
-    remise_globale: unset
-    remise_globale_label: unset
     
 forms: 
     default: 
@@ -578,8 +576,6 @@ filters_panels:
                 
             availability: unset
             ref_client: unset
-            remise_globale: unset
-            remise_globale_label: unset
             
 lists_cols: 
     ref_supplier: 

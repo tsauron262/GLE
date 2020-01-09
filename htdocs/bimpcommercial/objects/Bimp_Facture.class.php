@@ -2839,8 +2839,6 @@ class Bimp_Facture extends BimpComm
                             $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec de la mise à jour de la ligne de commande associée (ID ' . $commLine->id . ')');
                             break;
                         }
-                    } else {
-                        echo 'ici <br/>';
                     }
                 }
             }
@@ -3858,10 +3856,16 @@ class Bimp_Facture extends BimpComm
                 }
 
                 if ($avoir_same_lines) {
-                    $line_errors = $this->createLinesFromOrigin($facture, true, false);
+                    $line_errors = $this->createLinesFromOrigin($facture, array(
+                        'inverse_prices' => true,
+                        'pa_editable'    => false
+                    ));
                     if (count($line_errors)) {
                         $warnings[] = BimpTools::getMsgFromArray($line_errors);
                     }
+
+                    // Copie des remises globales: 
+                    $this->copyRemisesGlobalesFromOrigin($facture, $warnings, true);
                 } elseif ($avoir_remain_to_pay) {
                     $this->dol_object->addline($langs->trans('invoiceAvoirLineWithPaymentRestAmount'), (float) $facture->getRemainToPay() * -1, 1, 0, 0, 0, 0, 0, '', '', 'TTC');
                 }
@@ -3907,13 +3911,19 @@ class Bimp_Facture extends BimpComm
                 if (!count($errors)) {
                     if (BimpObject::objectLoaded($avoir_to_refacture)) {
                         // copie des lignes: 
-                        $lines_errors = $this->createLinesFromOrigin($avoir_to_refacture, true, false);
+                        $lines_errors = $this->createLinesFromOrigin($avoir_to_refacture, array(
+                            'inverse_prices' => true,
+                            'pa_editable'    => false
+                        ));
                         if (count($lines_errors)) {
                             $warnings[] = BimpTools::getMsgFromArray($lines_errors);
                         }
 
                         // Copie des contacts: 
                         $this->copyContactsFromOrigin($avoir_to_refacture, $warnings);
+
+                        // Copie des remises globales: 
+                        $this->copyRemisesGlobalesFromOrigin($avoir_to_refacture, $warnings, true);
                     }
                 }
                 break;

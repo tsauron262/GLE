@@ -291,11 +291,11 @@ class BContract_contrat extends BimpDolObject {
                 'icon'    => 'fas_sync',
                 'onclick' => $this->getJsActionOnclick('generatePdfCourrier', array(), array())
             );
-            $buttons[] = array(
-                'label'   => 'Générer le PDF de l\'échéancier',
-                'icon'    => 'fas_sync',
-                'onclick' => $this->getJsActionOnclick('generatePdfCourrier', array(), array())
-            );
+//            $buttons[] = array(
+//                'label'   => 'Générer le PDF de l\'échéancier',
+//                'icon'    => 'fas_sync',
+//                'onclick' => $this->getJsActionOnclick('generatePdfCourrier', array(), array())
+//            );
             
             $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}';
             if ($this->getData('statut') == self::CONTRAT_STATUS_BROUILLON) {

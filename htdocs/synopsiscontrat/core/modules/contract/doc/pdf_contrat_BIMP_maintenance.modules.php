@@ -48,12 +48,13 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
     public function addLogo(&$pdf, $size, $pdf1 = null) {
         global $conf;
         $logo = $conf->mycompany->dir_output . '/logos/' . $this->emetteur->logo;
-        if(is_object($pdf1)){
-            $pdf1->Image($logo, 0, 10, 0, $size, '', '', '', false, 250, 'L');
-        } else {
-            $pdf->Image($logo, 0, 10, 0, $size, '', '', '', false, 250, 'L');
+        if(is_file($logo)) {
+             if(is_object($pdf1)){
+                $pdf1->Image($logo, 0, 10, 0, $size, '', '', '', false, 250, 'L');
+            } else {
+                $pdf->Image($logo, 0, 10, 0, $size, '', '', '', false, 250, 'L');
+            }
         }
-        
     }
 
     public function ChapterTitle($num, $title) {

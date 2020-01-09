@@ -303,6 +303,7 @@ class BContract_contrat extends BimpDolObject {
                     'label' => 'Valider le contrat',
                     'icon' => 'fas_check',
                     'onclick' => $this->getJsActionOnclick('validation', array(), array(
+                        'confirm_msg'      => "Voulez vous valider ce contrat ?",
                         'success_callback' => $callback
                     ))
                 );
@@ -312,6 +313,7 @@ class BContract_contrat extends BimpDolObject {
                     'label' => 'Contrat signé',
                     'icon' => 'fas_signature',
                     'onclick' => $this->getJsActionOnclick('signed', array(), array(
+                        'confirm_msg'      => "Voulez vous identifier ce contrat comme signé ?",
                         'success_callback' => $callback
                     ))
                 );
@@ -322,6 +324,7 @@ class BContract_contrat extends BimpDolObject {
                     'label' => 'Créer un avenant',
                     'icon' => 'fas_plus',
                     'onclick' => $this->getJsActionOnclick('createAvenant', array(), array(
+                        'confirm_msg'      => "Créer un avenant pour ce contrat ?",
                         'success_callback' => $callback
                     ))
                 );
@@ -928,7 +931,7 @@ class BContract_contrat extends BimpDolObject {
             return BimpRender::renderAlerts('Le contrat n\'est pas validé', 'danger', false);
         }
         if(!$this->getData('date_start') || !$this->getData('periodicity') || !$this->getData('duree_mois')) {
-            return BimpRender::renderAlerts("Un des champs : Durée en mois, Date de début, Périodicitée est obligatoire pour la génération de l'échéancier", 'warning', false);
+            return BimpRender::renderAlerts("Le contrat à été créer avec l'ancienne méthode donc il ne comporte pas d'échéancier", 'warning', false);
         }
         
         $create = false;

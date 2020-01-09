@@ -173,7 +173,7 @@ class Bimp_Facture extends BimpComm
 
     public function isActionAllowed($action, &$errors = array())
     {
-        if (in_array($action, array('validate', 'modify', 'reopen', 'sendMail', 'addAcompte', 'useRemise', 'removeFromUserCommission', 'removeFromEntrepotCommission', 'addToCommission', 'convertToReduc', 'checkPa'))) {
+        if (in_array($action, array('validate', 'modify', 'reopen', 'sendMail', 'addAcompte', 'useRemise', 'removeFromUserCommission', 'removeFromEntrepotCommission', 'addToCommission', 'convertToReduc', 'checkPa', 'createAcompteRemiseRbt'))) {
             if (!$this->isLoaded()) {
                 $errors[] = 'ID de la facture absent';
                 return 0;
@@ -466,6 +466,13 @@ class Bimp_Facture extends BimpComm
             case 'checkPa':
                 if (!in_array($type, array(0, 1, 2))) {
                     $errors[] = 'Ce type de facture n\'est pas élligible pour le processus de vérification des prix d\'achat';
+                    return 0;
+                }
+                return 1;
+
+            case 'createAcompteRemiseRbt':
+                if ($type !== Facture::TYPE_DEPOSIT) {
+                    $errors[] = 'Cette facture n\'est pas de type facture d\'acompte';
                     return 0;
                 }
                 return 1;
@@ -775,7 +782,7 @@ class Bimp_Facture extends BimpComm
                                 'onclick' => 'window.location = \'' . $url . '\';'
                             );
                         }
-                    } else {
+                    } elseif ($type !== Facture::TYPE_DEPOSIT) {
                         // Créer un avoir:
                         $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
                         $values = array(
@@ -1288,19 +1295,6 @@ class Bimp_Facture extends BimpComm
         return $totals;
     }
 
-    public function displayReval($mode = "ok")
-    {
-
-        $revals = $this->getTotalRevalorisations();
-
-        if ($mode == "ok+marge")
-            return BimpTools::displayMoneyValue($this->getData("marge") + $revals['accepted']);
-        if ($mode == "prevu+marge")
-            return BimpTools::displayMoneyValue($this->getData("marge") + $revals['accepted'] + $revals['attente']);
-        if ($mode == "ok")
-            return BimpTools::displayMoneyValue($revals['accepted']);
-    }
-
     public function getDefaultMailTo()
     {
         $items = array();
@@ -1331,6 +1325,18 @@ class Bimp_Facture extends BimpComm
     }
 
     // Affichages: 
+
+    public function displayReval($mode = "ok")
+    {
+        $revals = $this->getTotalRevalorisations();
+
+        if ($mode == "ok+marge")
+            return BimpTools::displayMoneyValue($this->getData("marge") + $revals['accepted']);
+        if ($mode == "prevu+marge")
+            return BimpTools::displayMoneyValue($this->getData("marge") + $revals['accepted'] + $revals['attente']);
+        if ($mode == "ok")
+            return BimpTools::displayMoneyValue($revals['accepted']);
+    }
 
     public function displayZoneVenteField()
     {
@@ -1429,7 +1435,7 @@ class Bimp_Facture extends BimpComm
     public function displayType()
     {
         $html = $this->displayData('type');
-        $extra = $this->displayTypeExtra();
+        $extra = $this->displayTypeExtra(true);
         if ($extra) {
             $html .= '<br/>' . $extra;
         }
@@ -1437,7 +1443,7 @@ class Bimp_Facture extends BimpComm
         return $html;
     }
 
-    public function displayTypeExtra()
+    public function displayTypeExtra($with_actions = false)
     {
         $html = '';
 
@@ -1508,6 +1514,7 @@ class Bimp_Facture extends BimpComm
             }
 
             if (in_array($type, array(Facture::TYPE_CREDIT_NOTE, Facture::TYPE_DEPOSIT))) {
+                BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
                 $discount = new DiscountAbsolute($this->db->db);
                 $result = $discount->fetch(0, $this->id);
                 if ($result > 0) {
@@ -1516,6 +1523,40 @@ class Bimp_Facture extends BimpComm
                     }
                     $html .= BimpTools::ucfirst($this->getLabel('this')) . ' a été converti' . ($this->isLabelFemale() ? 'e' : '') . ' en ';
                     $html .= $discount->getNomUrl(1, 'discount');
+
+                    if ((int) $discount->fk_facture) {
+                        $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $discount->fk_facture);
+                        $html .= '<br/>Remise consommée dans la facture ' . (BimpObject::objectLoaded($facture) ? $facture->getNomUrl(0, 1, 1, 'full') : '#' . $discount->fk_facture);
+                    } elseif ((int) $discount->fk_facture_line) {
+                        $id_facture = $this->db->getValue('facturedet', 'fk_facture', 'rowid = ' . (int) $discount->fk_facture_line);
+                        $facture = null;
+                        if ((int) $id_facture) {
+                            $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_facture);
+                        }
+                        $html .= '<br/>Remise ajoutée à la facture ' . (BimpObject::objectLoaded($facture) ? $facture->getNomUrl(0, 1, 1, 'full') : ((int) $id_facture ? '#' . $id_facture : ' (ligne #' . $discount->fk_facture_line . ')'));
+                    } else {
+                        self::loadClass('bimpcore', 'Bimp_Societe');
+                        $use_label = Bimp_Societe::getDiscountUsedLabel((int) $discount->id, true);
+
+                        if ($use_label) {
+                            $html .= '<br/>Remise ' . str_replace('Ajouté', 'ajoutée', $use_label);
+                        } else {
+                            $html .= '<br/>Remise non consommée';
+
+                            if ($with_actions) {
+                                if ($this->isActionAllowed('createAcompteRemiseRbt') && $this->canSetAction('createAcompteRemiseRbt')) {
+                                    $html .= '<div style="margin: 10px 0; text-align: center">';
+                                    $onclick = $this->getJsActionOnclick('createAcompteRemiseRbt', array(), array(
+                                        'confirm_msg' => 'Veuillez confirmer la création d\\\'un remboursement de cet acompte'
+                                    ));
+                                    $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+                                    $html .= BimpRender::renderIcon('fas_hand-holding-usd', 'iconLeft') . 'Rembourser cette remise';
+                                    $html .= '</span>';
+                                    $html .= '</div>';
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -3580,6 +3621,74 @@ class Bimp_Facture extends BimpComm
         return array(
             'errors'   => $errors,
             'warnings' => $warnings
+        );
+    }
+
+    public function actionCreateAcompteRemiseRbt($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+        $succes_callback = '';
+
+        // Vérifications: 
+        BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
+        $discount = new DiscountAbsolute($this->db->db);
+        $discount->fetch(0, (int) $this->id);
+
+        if (!BimpObject::objectLoaded($discount)) {
+            $errors[] = 'Aucune remise créée à partir ' . $this->getLabel('of_this');
+        } elseif ((int) $discount->fk_facture) {
+            $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $discount->fk_facture);
+            $errors[] = 'La remise a été consommée dans la facture ' . (BimpObject::objectLoaded($facture) ? $facture->getNomUrl(0, 1, 1, 'full') : '#' . $discount->fk_facture);
+        } elseif ((int) $discount->fk_facture_line) {
+            $id_facture = $this->db->getValue('facturedet', 'fk_facture', 'rowid = ' . (int) $discount->fk_facture_line);
+            $facture = null;
+            if ((int) $id_facture) {
+                $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_facture);
+            }
+            $errors[] = 'La remise a été ajouté à la facture ' . (BimpObject::objectLoaded($facture) ? $facture->getNomUrl(0, 1, 1, 'full') : ((int) $id_facture ? '#' . $id_facture : ' (ligne #' . $discount->fk_facture_line . ')'));
+        } else {
+            BimpObject::loadClass('bimpcore', 'Bimp_Societe');
+            $use_label = Bimp_Societe::getDiscountUsedLabel((int) $discount->id, true);
+
+            if ($use_label) {
+                $use_label = str_replace('Ajouté', 'ajoutée', $use_label);
+
+                $errors[] = 'La remise a été ' . $use_label;
+            }
+        }
+
+        // Création de la facture:
+        if (!count($errors)) {
+            $facture = BimpObject::createBimpObject('bimpcommercial', 'Bimp_Facture', array(
+                        'datef'             => date('Y-m-d'),
+                        'entrepot'          => (int) $this->getData('entrepot'),
+                        'libelle'           => 'Remboursement acompte ' . $this->getRef(),
+                        'ef_type'           => $this->getData('ef_type'),
+                        'fk_soc'            => (int) $this->getData('fk_soc'),
+                        'fk_cond_reglement' => (int) $this->getData('fk_cond_reglement'),
+                        'fk_mode_reglement' => (int) $this->getData('fk_mode_reglement')
+                            ), true, $errors, $warnings);
+
+            if (!count($errors) && BimpObject::objectLoaded($facture)) {
+                // Ajout de la remise. 
+                $dis_errors = $facture->insertDiscount((int) $discount->id);
+                if (count($dis_errors)) {
+                    $warnings[] = BimpTools::getMsgFromArray($dis_errors, 'Echec de l\'ajout de la remise à la facture de remboursement');
+                }
+
+                $url = $facture->getUrl();
+                if ($url) {
+                    $succes_callback = 'window.open(\'' . $url . '\');';
+                }
+            }
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $succes_callback
         );
     }
 

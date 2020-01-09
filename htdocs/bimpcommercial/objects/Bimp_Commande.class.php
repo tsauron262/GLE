@@ -1821,9 +1821,9 @@ class Bimp_Commande extends BimpComm
 
         if (empty($other_commandes)) {
             $facture->dol_object->array_options['options_pdf_hide_pu'] = $this->getData('pdf_hide_pu');
-            $facture->dol_object->array_options['options_pdf_hide_reduc'] = $this->getData('pdf_hide_reduc');
-            $facture->dol_object->array_options['options_pdf_hide_total'] = $this->getData('pdf_hide_total');
-            $facture->dol_object->array_options['options_pdf_hide_ttc'] = $this->getData('pdf_hide_ttc');
+//            $facture->dol_object->array_options['options_pdf_hide_reduc'] = $this->getData('pdf_hide_reduc');
+//            $facture->dol_object->array_options['options_pdf_hide_total'] = $this->getData('pdf_hide_total');
+//            $facture->dol_object->array_options['options_pdf_hide_ttc'] = $this->getData('pdf_hide_ttc');
         }
 
         // Possibility to add external linked objects with hooks

@@ -69,24 +69,39 @@ class BContract_contratLine extends BContract_contrat {
         if (!$textarea) {
 
             if (count($array)) {
+                $html .= '<table>';
+                $html .= '<thead><th>N° de série</th><th>N° IMEI</th></thead>';
+                $html .= '<tbody>';
                 foreach ($array as $serial) {
+                    $html .= '<tr>';
                     $equipment = $this->getInstance('bimpequipment', 'Equipment');
                     if ($equipment->find(['serial' => $serial]) && BimpTools::getContext() == 'private') {
-                            $html .= "<b>N° de série: </b>" . $equipment->getNomUrl(true, true, true);
+                            $html .= '<td>';
+                            $html .= $equipment->getNomUrl(true, true, true);
+                            $html .= '</td>';
+                            $html .= '<td>';
                             if($equipment->getData('imei')) {
-                                $html .= "<b style='margin-left: 2%'>N° IMEI : </b>" . $equipment->getData('imei');
+                                $html .= $equipment->getData('imei');
                             }
+                            $html .= '</td>';
                         
                     } else {
-                        $html .= "<b>N° de séries: </b>" . $serial;
+                        $html .= '<td>';
+                        $html .= $serial;
+                        $html .= '</td>';
+                        $html .= '<td>';
                         if ($equipment->find(['serial' => $serial])) {
                             if($equipment->getData('imei')) {
-                                $html .= "<b style='margin-left: 2%'>N° IMEI : </b>" . $equipment->getData('imei');
+                                $html .= $equipment->getData('imei');
                             }
                         }
+                        $html .= '</td>';
                     }
-                    $html .= "<br />";
+                    //$html .= "<br />";
+                    $html .= '</tr>';
                 }
+                $html .= '</tbody>';
+                $html .= '<table>';
             } else {
                 $html .= BimpRender::renderAlerts("Il n'y à pas de numéros de série dans cette ligne de service", 'info', false);
             }

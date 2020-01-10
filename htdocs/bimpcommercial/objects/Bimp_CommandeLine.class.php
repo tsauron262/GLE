@@ -1856,7 +1856,7 @@ class Bimp_CommandeLine extends ObjectLine
                 }
                 $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $id_equipment);
                 if (BimpObject::objectLoaded($equipment)) {
-                    $items[$id_equipment] = $equipment->getData('serial');
+                    $items[$id_equipment] = $equipment->displaySerialImei();
                     if ($is_return) {
                         if (array_key_exists((int) $id_equipment, $equipments_returned)) {
                             $entrepôt = BimpCache::getDolObjectInstance((int) $equipments_returned[(int) $id_equipment], 'product/stock', 'entrepot');

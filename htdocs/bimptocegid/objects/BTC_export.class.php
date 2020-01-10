@@ -452,8 +452,9 @@ class BTC_export extends BimpObject {
         fclose($opened_file);
     }
 
-    public function isApple($nom_client) {        
-        if(strstr(strtolower($nom_client), 'apple')) {
+    public function isApple($nom_client) {
+        // TMP, faire avec le code fournisseur
+        if($nom_client == 'APPLE DISTRIBUTION INTERNATIONAL ') {
             return true;
         }
         return false;

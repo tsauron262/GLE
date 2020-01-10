@@ -994,7 +994,7 @@ class BL_CommandeShipment extends BimpObject
                                 foreach ($equipments as $id_equipment) {
                                     $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $id_equipment);
                                     if (BimpObject::objectLoaded($equipment)) {
-                                        $items[$id_equipment] = $equipment->getData('serial');
+                                        $items[$id_equipment] = $equipment->displaySerialImei();
                                     }
                                 }
                                 $html .= BimpInput::renderInput('check_list', 'line_' . $line->id . '_equipments', array(), array(
@@ -1199,7 +1199,7 @@ class BL_CommandeShipment extends BimpObject
                                         if (!array_key_exists((int) $id_equipment, $items)) {
                                             $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
                                             if ($equipment->isLoaded()) {
-                                                $items[(int) $id_equipment] = $equipment->getData('serial');
+                                                $items[(int) $id_equipment] = $equipment->displaySerialImei();
                                             }
                                         }
                                     }

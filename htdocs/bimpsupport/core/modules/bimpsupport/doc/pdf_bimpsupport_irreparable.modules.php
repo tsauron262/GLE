@@ -38,6 +38,8 @@ class pdf_bimpsupport_irreparable extends BimpDocumentPDF
 {
     public function initData() {
         parent::initData();
+        static::$use_cgv = false;
+        $this->pdf->addCgvPages = false;
     }
     
     protected function initHeader()
@@ -45,7 +47,7 @@ class pdf_bimpsupport_irreparable extends BimpDocumentPDF
         parent::initHeader();
         
         
-        $this->header_vars['doc_name'] = 'ATTESTATION DE NON-REPARABILITE';
+        $this->header_vars['doc_name'] = 'Dossier n° :';
     }
     
     public function renderBottom(){
@@ -57,7 +59,7 @@ class pdf_bimpsupport_irreparable extends BimpDocumentPDF
         
         $text = "<h1>ATTESTATION DE NON-REPARABILITE</h1>
 
-<p>    Nous soussigné, ".$this->fromCompany->name.", ".$this->fromCompany->address." - ".$this->fromCompany->zip." ".$this->fromCompany->town.", 
+<p>Nous soussigné, ".($this->fromCompany->name == "OLYS" ? "Bimp OLYS SAS" : $this->fromCompany->name).", ".$this->fromCompany->address." - ".$this->fromCompany->zip." ".$this->fromCompany->town.", 
 agissant en qualité de revendeur informatique, 
 
 attestons que le produit :

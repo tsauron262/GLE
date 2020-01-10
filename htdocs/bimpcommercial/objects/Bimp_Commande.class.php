@@ -2263,6 +2263,9 @@ class Bimp_Commande extends BimpComm
                     // Assignation du nouveau taux pour chaque ligne de facture brouillon: 
 
                     foreach ($lines as $line) {
+                        if (!$line->isRemisable()) {
+                            continue;
+                        }
                         $factures = $line->getData('factures');
                         foreach ($factures as $id_fac => $fac_data) {
                             $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_fac);

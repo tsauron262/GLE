@@ -7,7 +7,9 @@ CREATE TABLE IF NOT EXISTS `llx_bimp_remise_globale` (
   `amount` decimal(24,2) NOT NULL DEFAULT 0.00,
   `percent` decimal(24,4) NOT NULL DEFAULT 0.0000,
   `user_create` int(11) NOT NULL DEFAULT 0,
-  `date_create` datetime NOT NULL DEFAULT current_timestamp
+  `date_create` datetime NOT NULL DEFAULT current_timestamp,
+  `user_update` int(11) NOT NULL DEFAULT 0,
+  `date_update` datetime NOT NULL DEFAULT current_timestamp
 );
 
 ALTER TABLE `llx_bimp_remise_globale` ADD INDEX( `obj_type`, `id_obj`);

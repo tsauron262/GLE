@@ -1,5 +1,5 @@
 #Active / désactive tous les débugs
-debug: 1
+debug: 0
 
 bimpcore: 
     controller: 

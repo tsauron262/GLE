@@ -2850,15 +2850,14 @@ class ObjectLine extends BimpObject
             if (is_null($this->remise) || (float) $this->remise !== (float) $remises_infos['total_percent'] ||
                     $remises_infos['total_percent'] !== (float) $this->getData('remise') ||
                     $remises_infos['total_percent'] !== (float) $this->getInitData('remise')) {
-                
+
                 $this->remise = (float) $remises_infos['total_percent'];
                 $this->set('remise', (float) $remises_infos['total_percent']);
-                
+
 //                if($this->nbCalcremise < 90){
                 $this->nbCalcremise++;
                 $this->update($warnings, true);
 //                }
-                
             }
         }
     }
@@ -2921,7 +2920,7 @@ class ObjectLine extends BimpObject
     {
         $errors = array();
 
-        if ($this->isLoaded($errors)) {
+        if ($this->isLoaded($errors) && $this->isRemisable()) {
             if (!BimpObject::objectLoaded($rg)) {
                 $errors[] = 'ID de la remise globale absent';
             } else {

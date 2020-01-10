@@ -261,7 +261,7 @@ class BTC_export extends BimpObject {
         if(!is_null($ref)) {
             return $this->db->getRows('paiement', 'ref = "' . $ref . '"');
         } elseif($since) {
-            return $this->db->getRows('paiement', 'exported = 0 AND datec BETWEEN "'.$this->date_export.' 00:00:00" AND "'.date("Y-m-d").' 23:59:59"', $this->sql_limit);
+            return $this->db->getRows('paiement', 'exported = 0 AND datec BETWEEN "'.BimpCore::getConf("BIMPtoCEGID_start_current_trimestre").' 00:00:00" AND "'.date("Y-m-d").' 23:59:59"', $this->sql_limit);
         } else {
             return $this->db->getRows('paiement', 'exported = 0 AND datec BETWEEN "'.$this->date_export.' 00:00:00" AND "'.$this->date_export.' 23:59:59"', $this->sql_limit);
         }
@@ -272,7 +272,11 @@ class BTC_export extends BimpObject {
         if(!is_null($ref)) {
             return $this->db->getRows('facture_fourn', 'ref="'.$ref.'"');
         } elseif($since) {
-            return $this->db->getRows('facture_fourn', 'exported = 0 AND fk_statut IN(1,2) AND datec BETWEEN "'.$this->date_export.' 00:00:00" AND "'.date("Y-m-d").' 23:59:59"', $this->sql_limit);
+            $hier = new DateTime(date('Y-m-d') . '23:59:59');
+            $hier->sub(new DateInterval("P1D"));
+            //echo 'exported = 0 AND fk_statut IN(1,2) AND datec BETWEEN "'.BimpCore::getConf("BIMPtoCEGID_start_current_trimestre").' 00:00:00" AND "'.$hier->format('Y-m-d H:i:s') . '"';
+            //die();
+            return $this->db->getRows('facture_fourn', 'exported = 0 AND fk_statut IN(1,2) AND datec BETWEEN "'.BimpCore::getConf("BIMPtoCEGID_start_current_trimestre").' 00:00:00" AND "'.$hier->format('Y-m-d').'"', $this->sql_limit);
         } else {
             return $this->db->getRows('facture_fourn', 'exported = 0 AND fk_statut IN(1,2) AND datec BETWEEN "'.$this->date_export.' 00:00:00" AND "'.$this->date_export.' 23:59:59"', $this->sql_limit);
         }
@@ -282,7 +286,7 @@ class BTC_export extends BimpObject {
         if(!is_null($ref)) {
             return $this->db->getRows('facture', 'facnumber="'.$ref.'"');
         } elseif ($since) {
-            return $this->db->getRows('facture', 'exported = 0 AND fk_statut IN(1,2) AND type != 3 AND datef BETWEEN "'.$this->date_export.'" AND "'.date("Y-m-d").'"', $this->sql_limit);            
+            return $this->db->getRows('facture', 'exported = 0 AND fk_statut IN(1,2) AND type != 3 AND datef BETWEEN "'.BimpCore::getConf("BIMPtoCEGID_start_current_trimestre").'" AND "'.date("Y-m-d").'"', $this->sql_limit);            
         } else {
             return $this->db->getRows('facture', 'exported = 0 AND fk_statut IN(1,2) AND type != 3 AND datef BETWEEN "'.$this->date_export.'" AND "'.$this->date_export.'"', $this->sql_limit);
         }
@@ -448,8 +452,9 @@ class BTC_export extends BimpObject {
         fclose($opened_file);
     }
 
-    public function isApple($nom_client) {        
-        if(strstr(strtolower($nom_client), 'apple')) {
+    public function isApple($nom_client) {
+        // TMP, faire avec le code fournisseur
+        if($nom_client == 'APPLE DISTRIBUTION INTERNATIONAL ') {
             return true;
         }
         return false;

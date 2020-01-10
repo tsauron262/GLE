@@ -880,6 +880,7 @@ lists_cols:
                         
 lists:      
     global:
+        objects_change_reload: ObjectLineRemise,RemiseGlobale
         configurable: 1
         positions: 0
         filters_panel: default
@@ -905,7 +906,7 @@ lists:
         checkboxes: 1
         positions: 1
         positions_open: 1
-        objects_change_reload: ObjectLineRemise
+        objects_change_reload: ObjectLineRemise,RemiseGlobale
         after_list_content: 
             callback: renderQuickAddForm
         enable_search: 0

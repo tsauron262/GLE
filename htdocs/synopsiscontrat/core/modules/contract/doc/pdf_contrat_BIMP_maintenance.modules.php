@@ -252,7 +252,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
         $pdf->SetFont('', '', 8);
         global $db;
         $bimp = new BimpDb($db);
-        $id_contact_type = $bimp->getValue('c_type_contact', 'rowid', 'code = "CONTACTSITECONTRAT"');
+        $id_contact_type = $bimp->getValue('c_type_contact', 'rowid', 'code = "SITE" and element = "contrat"');
         $contacts = $bimp->getRows('element_contact', 'element_id = ' . $contrat->id . ' and fk_c_type_contact = ' . $id_contact_type);
         foreach ($contacts as $key => $infos) {
             $inf = $bimp->getRow("socpeople", "rowid = " . $infos->fk_socpeople);

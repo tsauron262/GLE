@@ -291,11 +291,11 @@ class BContract_contrat extends BimpDolObject {
                 'icon'    => 'fas_sync',
                 'onclick' => $this->getJsActionOnclick('generatePdfCourrier', array(), array())
             );
-            $buttons[] = array(
-                'label'   => 'Générer le PDF de l\'échéancier',
-                'icon'    => 'fas_sync',
-                'onclick' => $this->getJsActionOnclick('generatePdfCourrier', array(), array())
-            );
+//            $buttons[] = array(
+//                'label'   => 'Générer le PDF de l\'échéancier',
+//                'icon'    => 'fas_sync',
+//                'onclick' => $this->getJsActionOnclick('generatePdfCourrier', array(), array())
+//            );
             
             $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}';
             if ($this->getData('statut') == self::CONTRAT_STATUS_BROUILLON) {
@@ -303,6 +303,7 @@ class BContract_contrat extends BimpDolObject {
                     'label' => 'Valider le contrat',
                     'icon' => 'fas_check',
                     'onclick' => $this->getJsActionOnclick('validation', array(), array(
+                        'confirm_msg'      => "Voulez vous valider ce contrat ?",
                         'success_callback' => $callback
                     ))
                 );
@@ -312,6 +313,7 @@ class BContract_contrat extends BimpDolObject {
                     'label' => 'Contrat signé',
                     'icon' => 'fas_signature',
                     'onclick' => $this->getJsActionOnclick('signed', array(), array(
+                        'confirm_msg'      => "Voulez vous identifier ce contrat comme signé ?",
                         'success_callback' => $callback
                     ))
                 );
@@ -322,6 +324,7 @@ class BContract_contrat extends BimpDolObject {
                     'label' => 'Créer un avenant',
                     'icon' => 'fas_plus',
                     'onclick' => $this->getJsActionOnclick('createAvenant', array(), array(
+                        'confirm_msg'      => "Créer un avenant pour ce contrat ?",
                         'success_callback' => $callback
                     ))
                 );
@@ -436,8 +439,7 @@ class BContract_contrat extends BimpDolObject {
     public function actionValidation($data, &$success) {
         global $user;
         $ref = $this->newRef($this->getData('objet_contrat') . date('ym'));
-        $list_contact = $this->getSocieteContactsArray($this->getData('fk_soc'), false);
-        $id_contact_type = $this->db->getValue('c_type_contact', 'rowid', 'code = "SITE"');
+        $id_contact_type = $this->db->getValue('c_type_contact', 'rowid', 'code = "SITE" AND element = "contrat"');
         $have_contact = ($this->db->getValue('element_contact', 'rowid', 'element_id = ' . $this->id . ' AND fk_c_type_contact = ' . $id_contact_type)) ? true : false;
         
         if(!$have_contact) {
@@ -929,7 +931,7 @@ class BContract_contrat extends BimpDolObject {
             return BimpRender::renderAlerts('Le contrat n\'est pas validé', 'danger', false);
         }
         if(!$this->getData('date_start') || !$this->getData('periodicity') || !$this->getData('duree_mois')) {
-            return BimpRender::renderAlerts("Un des champs : Durée en mois, Date de début, Périodicitée est obligatoire pour la génération de l'échéancier", 'warning', false);
+            return BimpRender::renderAlerts("Le contrat à été créer avec l'ancienne méthode donc il ne comporte pas d'échéancier", 'warning', false);
         }
         
         $create = false;
@@ -1216,7 +1218,7 @@ class BContract_contrat extends BimpDolObject {
                     $description = ($line->description) ? $line->description : $line->libelle;
                     $end_date = new DateTime($data['valid_start']);
                     $end_date->add(new DateInterval("P" . $data['duree_mois'] . "M"));
-                    $new_contrat->dol_object->addLine($description, $line->price, $line->qty, $line->tva_tx, 0, 0, $line->fk_product, $line->remise_percent, $data['valid_start'], $end_date->format('Y-m-d'), 'HT', 0.0, 0, null, 0, 0, null, $line->rang);                 
+                    $new_contrat->dol_object->addLine($description, $line->subprice, $line->qty, $line->tva_tx, 0, 0, $line->fk_product, $line->remise_percent, $data['valid_start'], $end_date->format('Y-m-d'), 'HT', 0.0, 0, null, 0, 0, null, $line->rang);                 
                 }
             }
             addElementElement('commande', 'contrat', $commande->id, $new_contrat->id);

@@ -22,6 +22,10 @@ fields:
         
     label: 
         label: Libellé
+        type: text
+        input: 
+            rows: 1
+            auto_expand: 1
         
     type: 
         label: Type de réduction
@@ -61,6 +65,16 @@ fields:
         label: Remise globale
         type: bool
         default_value: 0
+        
+    id_remise_globale: 
+        label: Remise globale
+        type: id
+        default_value: 0
+        
+    linked_id_remise_globale: 
+        label: Remise globale liée
+        type: id
+        default_value: 0
             
 forms: 
     default: 
@@ -91,7 +105,7 @@ forms:
                   
 lists: 
     default: 
-        title: Remises de la ligne (hors remise globale)
+        title: Remises de la ligne
         icon: percent
         checkboxes: 1
         bulk_actions:

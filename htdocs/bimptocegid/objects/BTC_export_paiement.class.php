@@ -132,6 +132,7 @@ class BTC_export_paiement extends BTC_export {
                         $journal = "OD";
                         $affiche_code_reglement = 'CHQ';
                         $label = "Pay clt CG " . $entrepot->town;
+                        break;
                 }
 
                 

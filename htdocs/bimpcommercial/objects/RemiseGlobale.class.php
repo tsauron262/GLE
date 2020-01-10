@@ -10,6 +10,7 @@ class RemiseGlobale extends BimpObject
     );
 
     // Getters booléens: 
+    
 
     public function isCreatable($force_create = false, &$errors = array())
     {

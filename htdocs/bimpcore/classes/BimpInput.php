@@ -24,10 +24,12 @@ class BimpInput
 
         switch ($type) {
             case 'hidden':
+                $value = htmlentities($value);
                 $html .= '<input type="hidden" id="' . $field_name . '" name="' . $field_name . '" value="' . $value . '" class="' . $extra_class . '"/>';
                 break;
 
             case 'text':
+                $value = htmlentities($value);
                 $data = '';
                 if (isset($options['data'])) {
                     foreach ($options['data'] as $data_name => $data_value) {
@@ -185,6 +187,8 @@ class BimpInput
                 break;
 
             case 'textarea':
+                $value = htmlentities($value);
+                
                 if (!isset($options['rows'])) {
                     $options['rows'] = 3;
                 }

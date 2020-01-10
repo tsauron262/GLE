@@ -82,6 +82,6 @@ lists_cols:
         
 lists: 
     default: 
-        objects_change_reload: ObjectLineRemise,Bimp_Facture,BimpRevalorisation
+        objects_change_reload: ObjectLineRemise,RemiseGlobale,Bimp_Facture,BimpRevalorisation
     global: 
-        objects_change_reload: ObjectLineRemise,Bimp_Facture,BimpRevalorisation
+        objects_change_reload: ObjectLineRemise,RemiseGlobale,Bimp_Facture,BimpRevalorisation

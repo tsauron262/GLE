@@ -650,7 +650,7 @@ class BimpRender
         $html .= '</div>';
 
         $html .= '<div id="openModalBtn" onclick="bimpModal.show();" class="closed bs-popover"';
-        $html .= BimpRender::renderPopoverData('Afficher la fenêtre popup', 'top');
+        $html .= BimpRender::renderPopoverData('Afficher la fenêtre popup', 'left');
         $html .= '>';
         $html .= BimpRender::renderIcon('far_window-restore');
         $html .= '</div>';

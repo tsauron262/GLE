@@ -678,6 +678,8 @@ class Bimp_Propal extends BimpComm
 
     public function review($check = true, &$errors = array(), &$warnings = array())
     {
+        global $user, $langs;
+
         $errors = array();
         if ($check) {
             if (!$this->isActionAllowed('review', $errors)) {
@@ -701,14 +703,26 @@ class Bimp_Propal extends BimpComm
             return 0;
         }
 
-        $newPropal->set('remise_globale_label', $this->getData('remise_globale_label'));
         $newPropal->set('zone_vente', $this->getData('zone_vente'));
         $pw = array();
         $newPropal->update($pw, true);
 
-        $lines = $this->getLines();
-
         $totHt = (float) $this->dol_object->total_ht;
+
+        // Ajout des notes: 
+        $this->addNote('Proposition commerciale mise en révision le ' . date('d / m / Y') . ' par ' . $user->getFullName($langs) . "\n" . 'Révision: ' . $newPropal->getRef());
+        $newPropal->addNote('Révision de la proposition: ' . $this->getRef());
+
+        // Copie des lignes: 
+        $warnings = array_merge($warnings, $newPropal->createLinesFromOrigin($this, array(
+                    'is_review' => true
+        )));
+
+        // Copie des contacts: 
+        $newPropal->copyContactsFromOrigin($this, $warnings);
+
+        // Copie des remises globales:
+        $newPropal->copyRemisesGlobalesFromOrigin($this, $warnings);
 
         // Ajout de la ligne "Proposition commerciale révisée" dans la propale actuelle: 
         $line = BimpObject::getInstance('bimpcommercial', 'Bimp_PropalLine');
@@ -721,7 +735,7 @@ class Bimp_Propal extends BimpComm
         $line->validateArray(array(
             'id_obj'    => (int) $this->id,
             'type'      => ObjectLine::LINE_FREE,
-            'deletable' => 0,
+            'deletable' => 1,
             'editable'  => 0,
             'remisable' => 0
         ));
@@ -735,76 +749,6 @@ class Bimp_Propal extends BimpComm
 
         if (count($line_warnings)) {
             $warnings[] = BimpTools::getMsgFromArray($line_warnings, 'Erreurs suite à la création de la ligne "révision"');
-        }
-
-        global $user, $langs;
-        $this->addNote('Proposition commerciale mise en révision le ' . date('d / m / Y') . ' par ' . $user->getFullName($langs) . "\n" . 'Révision: ' . $newPropal->getRef());
-        $newPropal->addNote('Révision de la proposition: ' . $this->getRef());
-
-        // Copie des lignes: 
-        $newLines = array();
-        foreach ($lines as $line) {
-            $remises = $line->getRemises();
-            $newLine = clone $line;
-
-            $newLine->id = null;
-            $newLine->set('id', 0);
-            $newLine->set('id_line', 0);
-            $newLine->set('id_parent_line', 0);
-            $newLine->remise = 0;
-            $newLine->setIdParent($new_id_propal);
-
-            $newLine_warnings = array();
-            $newLine_errors = $newLine->create($newLine_warnings, true);
-
-            if (count($newLine_warnings)) {
-                $warnings[] = BimpTools::getMsgFromArray($newLine_warnings, 'Erreurs suite à la copie de la ligne n° ' . $line->getData('position'));
-            }
-
-            if (count($newLine_errors)) {
-                $warnings[] = BimpTools::getMsgFromArray($newLine_errors, 'Echec de la copie de la ligne n°' . $line->getData('position'));
-            } else {
-                $newLines[(int) $line->id] = $newLine->id;
-                if (count($remises)) {
-                    $i = 0;
-                    foreach ($remises as $remise) {
-                        $i++;
-                        $newRemise = clone $remise;
-                        $newRemise->id = null;
-                        $newRemise->set('id', 0);
-                        $newRemise->set('id_object_line', $newLine->id);
-
-                        $newRemise_warnings = array();
-                        $newRemise_errors = $newRemise->create($newRemise_warnings, true);
-
-                        if (count($newRemise_errors)) {
-                            $warnings[] = BimpTools::getMsgFromArray($newRemise_errors, 'Echec de la création ' . $newRemise->getLabel('of_the') . ' n°' . $i);
-                        }
-                        if (count($newRemise_warnings)) {
-                            $warnings[] = BimpTools::getMsgFromArray($newRemise_warnings, 'Erreurs suite à la création ' . $newRemise->getLabel('of_the') . ' n°' . $i);
-                        }
-                    }
-                }
-            }
-        }
-
-        // Attribution des lignes parentes: 
-        foreach ($lines as $line) {
-            $id_parent_line = (int) $line->getData('id_parent_line');
-
-            if ($id_parent_line) {
-                if (isset($newLines[(int) $line->id]) && (int) $newLines[(int) $line->id] && isset($newLines[$id_parent_line]) && (int) $newLines[$id_parent_line]) {
-                    $line_instance = BimpCache::getBimpObjectInstance($this->module, $this->object_name . 'Line', (int) $newLines[(int) $line->id]);
-                    if (BimpObject::objectLoaded($line_instance)) {
-                        $line_instance->updateField('id_parent_line', (int) $newLines[(int) $id_parent_line]);
-                    }
-                }
-            }
-        }
-
-        // Ajout de la remise globale: 
-        if ((float) $this->getData('remise_globale')) {
-            $newPropal->setRemiseGlobalePercent((float) $this->getData('remise_globale'));
         }
 
         return $new_id_propal;

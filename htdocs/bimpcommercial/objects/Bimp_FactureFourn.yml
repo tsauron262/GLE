@@ -140,8 +140,6 @@ fields:
     fk_input_reason: unset
     ref_client: unset
     total: unset
-    remise_globale: unset
-    remise_globale_label: unset
     tx_marge: unset
     tx_marque: unset
     
@@ -258,7 +256,6 @@ filters_panels:
                 field: paye
                 
             availability: unset
-            remise_globale: unset
             ref_client: unset
             
 lists_cols: 

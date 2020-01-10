@@ -469,7 +469,7 @@ class Reservations
         else
             $message .= ' [Non communiqué]' . "\n";
 
-        if (isset($customer)) {
+        if (isset($customer) && is_object($customer)) {
             $message .= "\t" . 'Client : ' . $customer->name . ' (' . $customer->email . ').' . "\n";
             $message .= "\t" . '' . $customer->getNomUrl(1) . "\n";
         }

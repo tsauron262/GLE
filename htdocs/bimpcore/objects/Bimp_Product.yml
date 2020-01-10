@@ -474,6 +474,12 @@ fields:
     code_config:
         label: Code configuration
         dol_extra_field: 1
+    
+    type_compta:
+        label: Classement forcé en compta
+        dol_extra_field: 1
+        values:
+            array: type_compta
         
 forms: 
     # Utiliser plutôt "default" que "card" pour le formulaire principal 
@@ -486,6 +492,7 @@ forms:
             - field: description
             - field: fk_product_type
             - field: type2
+            - field: type_compta
             - field: barcode
             - field: customcode
             - field: accountancy_code_buy
@@ -618,6 +625,8 @@ fields_tables:
             - field: label
             - field: fk_product_type
             - field: type2
+              edit: 1
+            - field: type_compta
               edit: 1
             - field: barcode
             - field: customcode

@@ -3987,15 +3987,9 @@ class Bimp_Facture extends BimpComm
         $i = 0;
         while ($ln = $this->db->db->fetch_object($sql)) {
             $obj = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $ln->rowid);
-//            $idC = $obj->getIdCommercial();
-//            if($idC < 1)
-//                $idC = 1;
-//            $userC = new User($this->db->db);
-//            $userC->fetch($idC);
-//            $mail = $userC->email;
             $userCreate = new User($this->db->db);
             $userCreate->fetch((int) $obj->getData('fk_user_author'));
-            ;
+            
             $mail = $userCreate->email;
             if ($mail == '')
                 $mail = "tommy@bimp.fr";

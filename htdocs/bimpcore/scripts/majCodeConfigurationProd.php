@@ -19,7 +19,7 @@ $cl->exec($go);
 
 
 class majCodeConfigurationnProd{
-    private $whereTaille = '( LENGTH(serial) = 13 || LENGTH(serial) = 12 || LENGTH(serial) = 11)';
+    private $whereTaille = '( LENGTH(serial) = 13 || LENGTH(serial) = 12 || LENGTH(serial) = 11) AND serial NOT LIKE "ZZ%"';
     private $totCorrection = 0;
     private $totFusion =  0;
     private $erreurs = array();
@@ -202,7 +202,7 @@ class majCodeConfigurationnProd{
     }
     
     function vireS(){
-        $sql = $this->db->query("SELECT * FROM `llx_be_equipment`, llx_product p WHERE p.rowid = `id_product` AND serial LIKE 'S%' AND LENGTH(serial) > 11 AND LENGTH(serial) < 15 AND `ref` LIKE 'APP-%'");
+        $sql = $this->db->query("SELECT * FROM `llx_be_equipment`, llx_product p WHERE p.rowid = `id_product` AND serial LIKE 'S%' AND LENGTH(serial) > 11 AND LENGTH(serial) < 15 AND ( `ref` LIKE 'APP-%' || `ref` LIKE 'OCC-%')");
         while($ln = $this->db->fetch_object($sql)){
             $serial = $ln->serial;
             $serial2 = $this->traiteSerialApple($serial);

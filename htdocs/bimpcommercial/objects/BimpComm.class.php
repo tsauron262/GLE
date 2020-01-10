@@ -3297,6 +3297,7 @@ class BimpComm extends BimpDolObject
         return $errors;
     }
 
+    
     public function processRemisesGlobales()
     {
         $errors = array();

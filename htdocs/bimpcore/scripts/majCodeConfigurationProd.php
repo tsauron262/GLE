@@ -19,7 +19,7 @@ $cl->exec($go);
 
 
 class majCodeConfigurationnProd{
-    private $whereTaille = '( LENGTH(serial) = 13 || LENGTH(serial) = 12 || LENGTH(serial) = 11) AND serial NOT LIKE "ZZ%"';
+    private $whereTaille = '( LENGTH(serial) = 13 || LENGTH(serial) = 12 || LENGTH(serial) = 11) AND serial NOT LIKE "ZZ%" AND serial NOT LIKE "%Postes%"';
     private $totCorrection = 0;
     private $totFusion =  0;
     private $erreurs = array();

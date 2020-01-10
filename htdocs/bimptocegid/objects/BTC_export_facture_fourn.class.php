@@ -13,7 +13,7 @@ class BTC_export_facture_fourn extends BTC_export {
 
         $facture = $this->getInstance('bimpcommercial', 'Bimp_FactureFourn', $id_facture);
         $datec = new DateTime($facture->getData('datec'));
-
+        
         if (!empty($confFile['name']) && !empty($confFile['dir'])) {
             $file = $this->create_daily_file('achat', null, $confFile['name'], $confFile['dir']);
         } else {
@@ -205,7 +205,7 @@ class BTC_export_facture_fourn extends BTC_export {
                             $use_compte_general = ($use_tva && $ligne->tva_tx == 0) ? $compte_achat_tva_null_service : $compte_achat_service;
                         }
 
-                        if ($this->isApple($societe->getData('nom'))) {
+                        if ($this->isApple($societe->getData('code_compta_fournisseur'))) {
                             $use_compte_general = BimpCore::getConf('BIMPTOCEGID_achat_fournisseur_apple');
                         }
                     }
@@ -242,7 +242,7 @@ class BTC_export_facture_fourn extends BTC_export {
                                 break;
                         }
 
-                        if ($this->isApple($societe->getData('nom'))) {
+                        if ($this->isApple($societe->getData('code_compta_fournisseur'))) {
                             $use_compte_general = BimpCore::getConf('BIMPTOCEGID_avoir_fournisseur_apple'); // On applique le compte comptable des avoirs chez APPLE
                         }
                     }

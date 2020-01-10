@@ -63,8 +63,7 @@ class BTC_export extends BimpObject {
                 return $this->$function_name($data['ref'], $since, $data['ref'], 'BY_REF');
             } else {
                 return $this->$function_name(null, $since, $this->date_export, 'BY_DATE');
-            }
-            
+            }            
             
             
         } else {
@@ -278,7 +277,7 @@ class BTC_export extends BimpObject {
             //die();
             return $this->db->getRows('facture_fourn', 'exported = 0 AND fk_statut IN(1,2) AND datec BETWEEN "'.BimpCore::getConf("BIMPtoCEGID_start_current_trimestre").' 00:00:00" AND "'.$hier->format('Y-m-d').'"', $this->sql_limit);
         } else {
-            return $this->db->getRows('facture_fourn', 'exported = 0 AND fk_statut IN(1,2) AND datec BETWEEN "'.$this->date_export.' 00:00:00" AND "'.$this->date_export.' 23:59:59"', $this->sql_limit);
+            return $this->db->getRows('facture_fourn', 'exported = 0 AND fk_statut IN(1,2) AND datec BETWEEN "'.$this->date_export.' 00:00:00" AND "'.$this->date_export.' 23:59:59" OR date_valid = "'.$this->date_export.'"', $this->sql_limit);
         }
     }
     
@@ -452,12 +451,33 @@ class BTC_export extends BimpObject {
         fclose($opened_file);
     }
 
-    public function isApple($nom_client) {
-        // TMP, faire avec le code fournisseur
-        if($nom_client == 'APPLE DISTRIBUTION INTERNATIONAL ') {
+    public function isApple($code_compta_fournisseur) {
+        if($code_compta_fournisseur == BimpCore::getConf('BIMPTOCEGID_code_fournisseur_apple')) {
             return true;
         }
         return false;
+    }
+    
+    public function product_or_service($id) {
+        
+        $instance = $this->getInstance('bimpcore', 'Bimp_Product', $id);
+        $type_compta = $instance->getData('type_compta');
+        
+        if($type_compta > 0) {
+            switch($type_compta) {
+                case 1:
+                    $type = 0;
+                    break;
+                case 2:
+                    $type = 1;
+                    break; 
+            }
+        } else {
+            $type = $instance->getData('fk_product_type');
+        }
+        
+        return $type;
+        
     }
     
     protected function rectifications_ecarts($lignes_facture, $ecart, $type_ecriture) {

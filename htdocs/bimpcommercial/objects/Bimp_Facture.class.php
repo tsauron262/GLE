@@ -2313,85 +2313,86 @@ class Bimp_Facture extends BimpComm
         $has_checked = false;
 
         if ($this->isLoaded($errors)) {
-            $type_check = BimpTools::getPostFieldValue('type_check', '');
-            if (!$type_check) {
-                $errors[] = 'Type de prix d\'achat des produits à récupérer absent';
+//            $type_check = BimpTools::getPostFieldValue('type_check', '');
+//            if (!$type_check) {
+//                $errors[] = 'Type de prix d\'achat des produits à récupérer absent';
+//            } else {
+            $type_check = 'create';
+            $lines = $this->getLines('product');
+
+            if (empty($lines)) {
+                return BimpRender::renderAlerts('Aucune ligne produit trouvée', 'warning');
             } else {
-                $lines = $this->getLines('product');
+                $date = '';
+                switch ($type_check) {
+                    case 'create':
+                        $date = $this->getData('datec');
+                        break;
 
-                if (empty($lines)) {
-                    return BimpRender::renderAlerts('Aucune ligne produit trouvée', 'warning');
-                } else {
-                    $date = '';
-                    switch ($type_check) {
-                        case 'create':
+                    case 'validate':
+                        if ((int) $this->getData('status') < 1) {
                             $date = $this->getData('datec');
-                            break;
-
-                        case 'validate':
-                            if ((int) $this->getData('status') < 1) {
-                                $date = $this->getData('datec');
-                            } else {
-                                $date = $this->getData('date_valid') . ' 00:00:00';
-                            }
-                            break;
-                    }
-                    $html .= '<table class="bimp_list_table">';
-                    $html .= '<thead>';
-                    $html .= '<tr>';
-                    $html .= '<th style="text-align: center; width: 30px;"></th>';
-                    $html .= '<th style="text-align: center; width: 45px;">Ligne n°</th>';
-                    $html .= '<th>Produit</th>';
-                    $html .= '<th>PA enregistré</th>';
-                    $html .= '<th>PA attendu</th>';
-                    $html .= '<th>Orgine du PA attendu</th>';
-                    $html .= '</tr>';
-                    $html .= '</thead>';
-
-                    $html .= '<tbody>';
-
-                    foreach ($lines as $line) {
-                        $line_pa_ht = (float) $line->getPaWithRevalorisations();
-                        $infos = $line->findValidPrixAchat($date);
-                        $is_ok = (round($line_pa_ht, 2) === round((float) $infos['pa_ht'], 2));
-                        $check = (!$is_ok && (int) $line->getData('pa_editable'));
-
-                        $html .= '<tr class="lineRow" data-id_line="' . $line->id . '" data-new_pa="' . $infos['pa_ht'] . '">';
-                        $html .= '<td style="text-align: center; width: 30px;">';
-                        if (!$is_ok) {
-                            $html .= '<input type="checkbox" value="' . $line->id . '" name="lines[]"';
-                            if ($check) {
-                                $has_checked = true;
-                                $html .= ' checked';
-                            }
-                            $html .= '/>';
+                        } else {
+                            $date = $this->getData('date_valid') . ' 00:00:00';
                         }
-                        $html .= '</td>';
-                        $html .= '<td style="text-align: center; width: 45px;">' . $line->getData('position') . '</td>';
-                        $html .= '<td>';
-                        $html .= $line->displayLineData('desc_light');
-                        if (!(int) $line->getData('pa_editable')) {
-                            $html .= '<br/><span class="warning">Attention: la ligne est marquée "prix d\'achat non éditable"</span>';
-                        }
-                        $html .= '</td>';
-                        $html .= '<td>';
-                        $html .= BimpTools::displayMoneyValue((float) $line->pa_ht);
-                        if ((float) $line->pa_ht !== $line_pa_ht) {
-                            $html .= '<br/>';
-                            $html .= 'Corrections incluses: ' . BimpTools::displayMoneyValue($line_pa_ht);
-                        }
-                        $html .= '</td>';
-                        $html .= '<td>';
-                        $html .= '<span class="' . ($is_ok ? 'success' : ($check ? 'danger' : 'warning')) . '">' . BimpTools::displayMoneyValue((float) $infos['pa_ht']) . '</span>';
-                        $html .= '</td>';
-                        $html .= '<td>' . $infos['origin'] . '</td>';
-                        $html .= '</tr>';
-                    }
-
-                    $html .= '</tbody>';
-                    $html .= '</table>';
+                        break;
                 }
+                $html .= '<table class="bimp_list_table">';
+                $html .= '<thead>';
+                $html .= '<tr>';
+                $html .= '<th style="text-align: center; width: 30px;"></th>';
+                $html .= '<th style="text-align: center; width: 45px;">Ligne n°</th>';
+                $html .= '<th>Produit</th>';
+                $html .= '<th>PA enregistré</th>';
+                $html .= '<th>PA attendu</th>';
+                $html .= '<th>Orgine du PA attendu</th>';
+                $html .= '</tr>';
+                $html .= '</thead>';
+
+                $html .= '<tbody>';
+
+                foreach ($lines as $line) {
+                    $line_pa_ht = (float) $line->getPaWithRevalorisations();
+                    $infos = $line->findValidPrixAchat($date);
+                    $is_ok = (round($line_pa_ht, 2) === round((float) $infos['pa_ht'], 2));
+                    $check = (!$is_ok && (int) $line->getData('pa_editable'));
+
+                    $html .= '<tr class="lineRow" data-id_line="' . $line->id . '" data-new_pa="' . $infos['pa_ht'] . '">';
+                    $html .= '<td style="text-align: center; width: 30px;">';
+                    if (!$is_ok) {
+                        $html .= '<input type="checkbox" value="' . $line->id . '" name="lines[]"';
+                        if ($check) {
+                            $has_checked = true;
+                            $html .= ' checked';
+                        }
+                        $html .= '/>';
+                    }
+                    $html .= '</td>';
+                    $html .= '<td style="text-align: center; width: 45px;">' . $line->getData('position') . '</td>';
+                    $html .= '<td>';
+                    $html .= $line->displayLineData('desc_light');
+                    if (!(int) $line->getData('pa_editable')) {
+                        $html .= '<br/><span class="warning">Attention: la ligne est marquée "prix d\'achat non éditable"</span>';
+                    }
+                    $html .= '</td>';
+                    $html .= '<td>';
+                    $html .= BimpTools::displayMoneyValue((float) $line->pa_ht);
+                    if ((float) $line->pa_ht !== $line_pa_ht) {
+                        $html .= '<br/>';
+                        $html .= 'Corrections incluses: ' . BimpTools::displayMoneyValue($line_pa_ht);
+                    }
+                    $html .= '</td>';
+                    $html .= '<td>';
+                    $html .= '<span class="' . ($is_ok ? 'success' : ($check ? 'danger' : 'warning')) . '">' . BimpTools::displayMoneyValue((float) $infos['pa_ht']) . '</span>';
+                    $html .= '</td>';
+                    $html .= '<td>' . $infos['origin'] . '</td>';
+                    $html .= '</tr>';
+                }
+
+                $html .= '</tbody>';
+                $html .= '</table>';
             }
+//            }
         }
 
         if (count($errors)) {

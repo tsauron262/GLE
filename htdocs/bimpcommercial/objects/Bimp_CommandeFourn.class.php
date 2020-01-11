@@ -830,8 +830,6 @@ class Bimp_CommandeFourn extends BimpComm
         return static::$types_entrepot;
     }
 
-
-
     // Rendus HTML - overrides BimpObject:
 
     public function renderHeaderExtraLeft()
@@ -1128,6 +1126,7 @@ class Bimp_CommandeFourn extends BimpComm
     public function onValidate()
     {
         if ($this->isLoaded()) {
+            // Mise à jour des PA courant des produits: 
             $products = array();
 
             $lines = $this->getLines('not_text');
@@ -1152,7 +1151,7 @@ class Bimp_CommandeFourn extends BimpComm
                 }
 
                 $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $id_product);
-                
+
                 if ((int) $product->getData('no_fixe_prices')) {
                     continue;
                 }
@@ -1164,6 +1163,24 @@ class Bimp_CommandeFourn extends BimpComm
                 }
 
                 $product->setCurrentPaHt($pa_ht, $id_fp, 'commande_fourn', (int) $this->id);
+            }
+
+            // Mise à jour des PA des lignes de factures associées: 
+            foreach ($lines as $line) {
+                if ($line->getData('linked_object_name') === 'commande_line' && (int) $line->getData('linked_id_object')) {
+                    $comm_line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $line->getData('linked_id_object'));
+
+                    if (BimpObject::objectLoaded($comm_line)) {                        
+                        $fac_lines = BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_FactureLine', array(
+                                    'linked_object_name' => 'commande_line',
+                                    'linked_id_object'   => (int) $comm_line->id
+                        ));
+
+                        foreach ($fac_lines as $fac_line) {
+                            $fac_line->checkPrixAchat();
+                        }
+                    }
+                }
             }
         }
     }
@@ -1200,16 +1217,15 @@ class Bimp_CommandeFourn extends BimpComm
         $success = BimpTools::ucfirst($this->getLabel()) . ' approuvé' . ($this->isLabelFemale() ? 'e' : '') . ' avec succès';
 
         global $user, $conf, $langs;
-        
-        
-        
+
+
+
         $lines = $this->getLines('not_text');
         foreach ($lines as $line) {
             $prod = $line->getChildObject('product');
-            if($prod->isLoaded())
-                if(!$prod->isAchetable($errors,false,false))
-                     return array('errors' => $errors);
-            
+            if ($prod->isLoaded())
+                if (!$prod->isAchetable($errors, false, false))
+                    return array('errors' => $errors);
         }
 
         $result = $this->dol_object->approve($user, (int) $this->getData('entrepot'), 0);
@@ -1221,10 +1237,10 @@ class Bimp_CommandeFourn extends BimpComm
         } else {
             $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object, null, null, $warnings), 'Des erreurs sont survenues lors de l\'approbation ' . $this->getLabel('of_this'));
         }
-        
-        
-        
-        
+
+
+
+
         return array(
             'errors'           => $errors,
             'warnings'         => $warnings,
@@ -1825,10 +1841,9 @@ class Bimp_CommandeFourn extends BimpComm
                             } else {
                                 $errors = $this->updateField('status_forced', $status_forced);
                             }
-                            if($data['invoice_status'] == 2){
+                            if ($data['invoice_status'] == 2) {
                                 $this->updateField("billed", 1);
-                            }
-                            else
+                            } else
                                 $this->updateField("billed", 0);
                         }
                     }

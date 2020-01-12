@@ -24,6 +24,17 @@ class Bimp_Product extends BimpObject
         'HT'  => 'HT',
         'TTC' => 'TTC'
     );
+    
+    CONST TYPE_COMPTA_NONE = 0;
+    CONST TYPE_COMPTA_PRODUIT = 1;
+    CONST TYPE_COMPTA_SERVICE = 2;
+    
+    public static $type_compta = [
+        self::TYPE_COMPTA_NONE => 'Aucun re-classement',
+        self::TYPE_COMPTA_PRODUIT => 'Considéré comme produit',
+        self::TYPE_COMPTA_SERVICE => "Considéré comme service"
+    ];
+    
     public static $units_weight = array();
     public static $units_length = array();
     public static $units_surface = array();

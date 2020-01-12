@@ -35,6 +35,7 @@ class BimpDocumentPDF extends BimpModelPDF
     public $next_annexe_idx = 1;
     public $max_line_serials = 50;
     public $annexe_listings = array();
+    public static $use_cgv = true;
 
     public function __construct($db)
     {
@@ -879,7 +880,7 @@ class BimpDocumentPDF extends BimpModelPDF
 //        $html .= '<p style="font-size: 6px; font-weight: bold; font-style: italic">RÉSERVES DE PROPRIÉTÉ : applicables selon la loi n°80.335 du 12 mai';
 //        $html .= ' 1980 et de l\'article L624-16 du code de commerce. Seul le Tribunal de Lyon est compétent.</p>';
 
-        if (BimpCore::getConf("CGV_BIMP")) {
+        if (BimpCore::getConf("CGV_BIMP") && static::$use_cgv) {
             $html .= '<span style="font-weight: bold;">';
             if ($this->pdf->addCgvPages)
                 $html .= 'La signature de ce document vaut acceptation de nos Conditions Générales de Vente annexées et disponibles sur www.bimp.fr';

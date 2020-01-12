@@ -177,7 +177,8 @@ class BTC_export_facture extends BTC_export {
                 if(round($line->multicurrency_total_ht, 2) != 0 && !$ignore) {
                     if($line->fk_product) {
                         $produit = $this->getInstance('bimpcore', 'Bimp_Product', $line->fk_product);
-                        $type_produit = $produit->getData('fk_product_type');
+                        //$type_produit = $produit->getData('fk_product_type');
+                        $type_produit = $this->product_or_service($produit->id);
                         $d3e += $produit->getData('deee') * $line->qty;
                     } else {
                         $type_produit = $line->product_type;
@@ -319,6 +320,34 @@ class BTC_export_facture extends BTC_export {
         
     }
     
-    
+    public function export_v2($id_facture, $forced, $confFile) {
+        
+        $facture = $this->getInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
+        $societe = $this->getInstance('bimpcore', 'Bimp_Societe', $facture->getData('fk_soc'));
+        
+        if(!empty($confFile['name']) && !empty($confFile['dir'])) {
+            $file =$this->create_daily_file('vente', null, $confFile['name'], $confFile['dir']);
+        } else {
+            $file =$this->create_daily_file('vente', $facture->getData('datef'));
+        }
+        
+        $is_client_interco = false;
+        $is_vente_ticket = false;
+        $compte_general_411 = '41100000';
+        $total_ttc_facture = $facture->getData('multicurrency_total_ttc');
+        $date_facture = new DateTime($facture->getData('datef'));
+        $date_creation = new dateTime($facture->getData('datec'));
+        $date_echeance = new DateTime($facture->getData('date_lim_reglement'));
+        $id_reglement = ($facture->getData('fk_mode_reglement') > 0) ? $facture->getData('fk_mode_reglement') : 6;
+        $reglement = $this->db->getRow('c_paiement', 'id = ' . $id_reglement);
+        
+        if ($societe->getData('is_subsidiary')) {
+            $compte_general_411 = $societe->getData('accounting_account');
+            $is_client_interco = true;
+        }
+        $compte_general_tva_null = $this->convertion_to_interco_code(BimpCore::getConf('BIMPTOCEGID_vente_tva_null'), $compte_general_411);
+
+    }
+
 }
 

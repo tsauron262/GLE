@@ -577,7 +577,7 @@ class Bimp_Propal extends BimpComm
                 }
             }
             //Créer un contrat
-            if ($conf->contrat->enabled && ($status == 1 || $status == 2)) {
+            if ($conf->contrat->enabled && ($status == 1 || $status == 2 || $status = 4)) {
                 $buttons[] = array(
                     'label'   => 'Créer un contrat',
                     'icon'    => 'fas_file-signature',

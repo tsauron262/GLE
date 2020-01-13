@@ -290,7 +290,9 @@ class BimpComm extends BimpDolObject
             }
 
             if (BimpObject::objectLoaded($soc)) {
-                return $soc->getAvailableDiscountsArray($is_fourn);
+                $allowed = array();
+                
+                return $soc->getAvailableDiscountsArray($is_fourn, true, $allowed);
             }
         }
 

@@ -315,7 +315,7 @@ class Bimp_Societe extends BimpObject
         return 0;
     }
 
-    public function getAvailableDiscountsArray($is_fourn = false)
+    public function getAvailableDiscountsArray($is_fourn = false, $allowed = array())
     {
         $discounts = array();
 
@@ -340,7 +340,7 @@ class Bimp_Societe extends BimpObject
 
             if (!is_null($rows)) {
                 foreach ($rows as $r) {
-                    $disabled_label = static::getDiscountUsedLabel((int) $r['id']);
+                    $disabled_label = static::getDiscountUsedLabel((int) $r['id'], false, $allowed);
 
                     $discounts[(int) $r['id']] = array(
                         'label'    => BimpTools::getRemiseExceptLabel($r['description']) . ' (' . BimpTools::displayMoneyValue((float) $r['amount'], '') . ' TTC)' . ($disabled_label ? ' - ' . $disabled_label : ''),
@@ -356,7 +356,7 @@ class Bimp_Societe extends BimpObject
         return $discounts;
     }
 
-    public static function getDiscountUsedLabel($id_discount, $with_nom_url = false)
+    public static function getDiscountUsedLabel($id_discount, $with_nom_url = false, $allowed = array())
     {
         $use_label = '';
 
@@ -367,7 +367,7 @@ class Bimp_Societe extends BimpObject
         $bdb = BimpCache::getBdb();
 
         $id_facture = (int) $bdb->getValue('facturedet', 'fk_facture', 'fk_remise_except = ' . (int) $id_discount);
-        if ($id_facture) {
+        if ($id_facture && (!isset($allowed['factures']) || !in_array($id_facture, $allowed['factures']))) {
             $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
             if (BimpObject::objectLoaded($facture)) {
                 $use_label = 'Ajouté à la facture ' . ($with_nom_url ? $facture->getNomUrl(1, 1, 1, 'full') : '"' . $facture->getRef() . '"');
@@ -376,7 +376,7 @@ class Bimp_Societe extends BimpObject
             }
         } else {
             $id_commande = (int) $bdb->getValue('commandedet', 'fk_commande', 'fk_remise_except = ' . (int) $id_discount);
-            if ($id_commande) {
+            if ($id_commande && (!isset($allowed['commandes']) || !in_array($id_commande, $allowed['commandes']))) {
                 $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $id_commande);
                 if (BimpObject::objectLoaded($commande)) {
                     $use_label = 'Ajouté à la commande ' . ($with_nom_url ? $commande->getNomUrl(1, 1, 1, 'full') : '"' . $commande->getRef() . '"');
@@ -385,11 +385,11 @@ class Bimp_Societe extends BimpObject
                 }
             } else {
                 $id_propal = (int) $bdb->getValue('propaldet', 'fk_propal', 'fk_remise_except = ' . (int) $id_discount);
-                if ($id_propal) {
+                if ($id_propal && (!isset($allowed['propales']) || !in_array($id_propal, $allowed['propales']))) {
                     $propal = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $id_propal);
                     if (BimpObject::objectLoaded($propal)) {
                         if (!in_array($propal->getData('fk_statut'), array(2, 3))) {
-                            $use_label = 'Ajouté à la propale ' .  ($with_nom_url ? $propal->getNomUrl(1, 1, 1, 'full') : '"' . $propal->getRef() . '"');
+                            $use_label = 'Ajouté à la propale ' . ($with_nom_url ? $propal->getNomUrl(1, 1, 1, 'full') : '"' . $propal->getRef() . '"');
                         }
                     } else {
                         $bdb->delete('propaldet', '`fk_propal` = ' . $id_propal . ' AND `fk_remise_except` = ' . (int) $id_discount);

@@ -532,16 +532,16 @@ class Bimp_Propal extends BimpComm
                     );
                 }
 
-                // Créer contrat:
-                if ($this->isActionAllowed('createContract') && $this->canSetAction('createContract')) {
-                    $url = DOL_URL_ROOT . '/contrat/card.php?action=create&origin=propal&originid=' . $this->id . '&socid=' . (int) $this->getData('fk_soc');
-                    $buttons[] = array(
-                        'label'   => 'Créer un contrat',
-                        'icon'    => 'fas_file-signature',
-//                        'onclick' => $this->getJsActionOnclick('createContract')
-                        'onclick' => 'window.location = \'' . $url . '\''
-                    );
-                }
+//                // Créer contrat:
+//                if ($this->isActionAllowed('createContract') && $this->canSetAction('createContract')) {
+//                    $url = DOL_URL_ROOT . '/contrat/card.php?action=create&origin=propal&originid=' . $this->id . '&socid=' . (int) $this->getData('fk_soc');
+//                    $buttons[] = array(
+//                        'label'   => 'Créer un contrat',
+//                        'icon'    => 'fas_file-signature',
+////                        'onclick' => $this->getJsActionOnclick('createContract')
+//                        'onclick' => 'window.location = \'' . $url . '\''
+//                    );
+//                }
 //                
                 // Créer facture / avoir
                 if ($this->isActionAllowed('createInvoice') && $this->canSetAction('createInvoice')) {
@@ -580,7 +580,7 @@ class Bimp_Propal extends BimpComm
             if ($conf->contrat->enabled && ($status == 1 || $status == 2)) {
                 $buttons[] = array(
                     'label'   => 'Créer un contrat',
-                    'icon'    => 'fas_file-contract',
+                    'icon'    => 'fas_file-signature',
                     'onclick' => $this->getJsActionOnclick('createContrat', array(), array(
                         'form_name' => "contrat"
                             )

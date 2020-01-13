@@ -388,8 +388,8 @@ class Bimp_Societe extends BimpObject
                 if ($id_propal && (!isset($allowed['propales']) || !in_array($id_propal, $allowed['propales']))) {
                     $propal = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $id_propal);
                     if (BimpObject::objectLoaded($propal)) {
-                        if (!in_array($propal->getData('fk_statut'), array(2, 3))) {
-                            $use_label = 'Ajouté à la propale ' . ($with_nom_url ? $propal->getNomUrl(1, 1, 1, 'full') : '"' . $propal->getRef() . '"');
+                        if (!in_array($propal->getData('fk_statut'), array(3, 4))) {
+                            $use_label = 'Ajouté à la propale ' .  ($with_nom_url ? $propal->getNomUrl(1, 1, 1, 'full') : '"' . $propal->getRef() . '"');
                         }
                     } else {
                         $bdb->delete('propaldet', '`fk_propal` = ' . $id_propal . ' AND `fk_remise_except` = ' . (int) $id_discount);

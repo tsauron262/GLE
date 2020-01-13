@@ -1324,6 +1324,19 @@ class Bimp_Facture extends BimpComm
         return $items;
     }
 
+    public function getCommandesOriginList()
+    {
+        if ($this->isLoaded()) {
+            $items = BimpTools::getDolObjectLinkedObjectsListByTypes($this->dol_object, $this->db, array('commande'));
+
+            if (isset($items['commande'])) {
+                return $items['commande'];
+            }
+        }
+
+        return array();
+    }
+
     // Affichages: 
 
     public function displayReval($mode = "ok")
@@ -3652,9 +3665,7 @@ class Bimp_Facture extends BimpComm
             $use_label = Bimp_Societe::getDiscountUsedLabel((int) $discount->id, true);
 
             if ($use_label) {
-                $use_label = str_replace('Ajouté', 'ajoutée', $use_label);
-
-                $errors[] = 'La remise a été ' . $use_label;
+                $errors[] = 'La remise a été ' . str_replace('Ajouté', 'ajoutée', $use_label);
             }
         }
 
@@ -3990,7 +4001,7 @@ class Bimp_Facture extends BimpComm
             $obj = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $ln->rowid);
             $userCreate = new User($this->db->db);
             $userCreate->fetch((int) $obj->getData('fk_user_author'));
-            
+
             $mail = $userCreate->email;
             if ($mail == '')
                 $mail = "tommy@bimp.fr";

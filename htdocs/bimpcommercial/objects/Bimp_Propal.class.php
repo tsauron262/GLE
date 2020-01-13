@@ -599,26 +599,6 @@ class Bimp_Propal extends BimpComm
 
         return $buttons;
     }
-    
-     public function actionCreateContrat($data, &$success)
-    {
-        $instance = $this->getInstance('bimpcontract', 'BContract_contrat');
-
-        $id_new_contrat = 0;
-        $id_new_contrat = $instance->createFromPropal($this, $data);
-
-        if ($id_new_contrat > 0) {
-            $callback = 'window.location.href = "' . DOL_URL_ROOT . '/bimpcontract/index.php?fc=contrat&id=' . $id_new_contrat . '"';
-        } else {
-            $errors[] = "Le contrat n\'à pas été créer";
-        }
-
-        return [
-            'success_callback' => $callback,
-            'warnings'         => $warnings,
-            'errors'           => $errors
-        ];
-    }
 
     public function getDirOutput()
     {
@@ -937,6 +917,26 @@ class Bimp_Propal extends BimpComm
             'warnings'         => $warnings,
             'success_callback' => 'window.location = \'' . $url . '\''
         );
+    }
+    
+    public function actionCreateContrat($data, &$success = '')
+    {
+        $instance = $this->getInstance('bimpcontract', 'BContract_contrat');
+        
+        $id_new_contrat = 0;
+        $id_new_contrat = $instance->createFromPropal($this, $data);
+
+        if ($id_new_contrat > 0) {
+            $callback = 'window.location.href = "' . DOL_URL_ROOT . '/bimpcontract/index.php?fc=contrat&id=' . $id_new_contrat . '"';
+        } else {
+            $errors[] = "Le contrat n\'à pas été créer";
+        }
+
+        return [
+            'success_callback' => $callback,
+            'warnings'         => array(),
+            'errors'           => $errors
+        ];
     }
 
     // Overrides BimpObject: 

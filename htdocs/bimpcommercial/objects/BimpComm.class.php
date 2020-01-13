@@ -290,9 +290,7 @@ class BimpComm extends BimpDolObject
             }
 
             if (BimpObject::objectLoaded($soc)) {
-                $allowed = array();
-                
-                return $soc->getAvailableDiscountsArray($is_fourn, true, $allowed);
+                return $soc->getAvailableDiscountsArray($is_fourn, $this->getSocAvalaibleDiscountsAllowed());
             }
         }
 
@@ -741,8 +739,8 @@ class BimpComm extends BimpDolObject
         if (!empty($user->email)) {
             $emails[$user->email] = $user->getFullName($langs) . ' (' . $user->email . ')';
         }
-        
-        if(!$user->admin)
+
+        if (!$user->admin)
             return $emails;
 
         if (!empty($user->email_aliases)) {
@@ -1012,7 +1010,6 @@ class BimpComm extends BimpDolObject
                 $where = '`fk_source` = ' . (int) $origin_id . ' AND `sourcetype` = \'' . $origin . '\'';
                 $where .= ' AND `targettype` = \'' . $this->dol_object->element . '\'';
 
-
                 $result = $this->db->getValue('element_element', 'rowid', $where);
 
                 if (!is_null($result) && (int) $result) {
@@ -1261,11 +1258,42 @@ class BimpComm extends BimpDolObject
             }
 
             if (BimpObject::objectLoaded($soc)) {
-                return $soc->getAvailableDiscountsAmounts();
+                return $soc->getAvailableDiscountsAmounts(false, $this->getSocAvalaibleDiscountsAllowed());
             }
         }
 
         return 0;
+    }
+
+    public function getSocAvalaibleDiscountsAllowed()
+    {
+        $allowed = array();
+        if ($this->isLoaded()) {
+            if (is_a($this, 'Bimp_Facture')) {
+                $commandes = $this->getCommandesOriginList();
+
+                if (!empty($commandes)) {
+                    $allowed['commandes'] = $commandes;
+                    $allowed['propales'] = array();
+
+                    foreach ($commandes as $id_commande) {
+                        $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $id_commande);
+                        if (BimpObject::objectLoaded($commande)) {
+                            $propales = $commande->getPropalesOriginList();
+                            foreach ($propales as $id_propal) {
+                                if (!in_array((int) $id_propal, $allowed['propales'])) {
+                                    $allowed['propales'][] = (int) $id_propal;
+                                }
+                            }
+                        }
+                    }
+                }
+            } elseif (is_a($this, 'Bimp_Commande')) {
+                $allowed['propales'] = $this->getPropalesOriginList();
+            }
+        }
+
+        return $allowed;
     }
 
     public function getTxMarge()
@@ -2579,7 +2607,7 @@ class BimpComm extends BimpDolObject
 
         return $errors;
     }
-    
+
 //    public function actionAddContrat($data, &$success) {
 //                
 //        $new_contrat = $this->getInstance('bimpcontract', 'BContract_contrat');
@@ -3180,70 +3208,10 @@ class BimpComm extends BimpDolObject
                 if (!BimpObject::objectLoaded($discount)) {
                     $errors[] = 'La remise d\'ID ' . $id_discount . ' n\'existe pas';
                 } else {
-                    if (in_array($this->object_name, array('Bimp_CommandeFourn', 'Bimp_FactureFourn'))) {
-                        $id_facture_fourn = 0;
-                        if ((isset($discount->fk_invoice_supplier) && (int) $discount->fk_invoice_supplier)) {
-                            $id_facture_fourn = (int) $discount->fk_invoice_supplier;
-                        } elseif (isset($discount->fk_invoice_supplier_line) && (int) $discount->fk_invoice_supplier_line) {
-                            $id_facture_fourn = (int) $this->db->getValue('facture_fourn_det', 'fk_facture_fourn', 'rowid = ' . (int) $discount->fk_invoice_supplier_line);
-                        }
-
-                        if ($id_facture_fourn) {
-                            $factureFourn = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureFourn', $id_facture_fourn);
-                            $msg = 'La remise #' . $id_discount . ' de ' . BimpTools::displayMoneyValue($discount->amount_ttc) . ' est déjà utilisée';
-                            if (BimpObject::objectLoaded($factureFourn)) {
-                                $msg .= ' dans la facture fournisseur ' . $factureFourn->getNomUrl(0, 1, 1, 'full');
-                            } else {
-                                $msg .= ' dans une facture fournisseur';
-                            }
-                            $errors[] = $msg;
-                        }
-                    } else {
-                        $id_facture = 0;
-                        if ((isset($discount->fk_facture) && (int) $discount->fk_facture)) {
-                            $id_facture = (int) $discount->fk_facture;
-                        } elseif (isset($discount->fk_facture_line) && (int) $discount->fk_facture_line) {
-                            $id_facture = (int) $this->db->getValue('facturedet', 'fk_facture', 'rowid = ' . (int) $discount->fk_facture_line);
-                        } else {
-                            $id_facture = (int) $this->db->getValue('facturedet', 'fk_facture', 'fk_remise_except = ' . (int) $discount->id);
-                        }
-
-                        if ($id_facture) {
-                            $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
-                            $msg = 'La remise #' . $id_discount . ' de ' . BimpTools::displayMoneyValue($discount->amount_ttc) . ' est déjà utilisée';
-                            if (BimpObject::objectLoaded($facture)) {
-                                $msg .= ' dans la facture ' . $facture->getNomUrl(0, 1, 1, 'full');
-                            } else {
-                                $msg .= ' dans une facture';
-                            }
-                            $errors[] = $msg;
-                        } else {
-                            $id_commande = (int) $this->db->getValue('commandedet', 'fk_commande', 'fk_remise_except = ' . (int) $discount->id);
-                            if ($id_commande) {
-                                $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $id_commande);
-                                $msg = 'La remise #' . $id_discount . ' de ' . BimpTools::displayMoneyValue($discount->amount_ttc) . ' est déjà utilisée';
-                                if (BimpObject::objectLoaded($commande)) {
-                                    $msg .= ' dans la commande ' . $commande->getNomUrl(0, 1, 1, 'full');
-                                } else {
-                                    $msg .= ' dans une commande';
-                                }
-                                $errors[] = $msg;
-                            } else {
-                                $id_propal = (int) $this->db->getValue('propaldet', 'fk_propal', 'fk_remise_except = ' . (int) $discount->id);
-                                if ($id_propal) {
-                                    $propal = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $id_propal);
-                                    if ($propal->getData("fk_statut") != 3) {
-                                        $msg = 'La remise #' . $id_discount . ' de ' . BimpTools::displayMoneyValue($discount->amount_ttc) . ' est déjà utilisée';
-                                        if (BimpObject::objectLoaded($propal)) {
-                                            $msg .= ' dans la proposition commerciale ' . $propal->getNomUrl(0, 1, 1, 'full');
-                                        } else {
-                                            $msg .= ' dans une proposition commerciale';
-                                        }
-                                        $errors[] = $msg;
-                                    }
-                                }
-                            }
-                        }
+                    BimpObject::loadClass('bimpcore', 'Bimp_Societe');
+                    $used_label = Bimp_Societe::getDiscountUsedLabel($id_discount, true, $this->getSocAvalaibleDiscountsAllowed());
+                    if ($used_label) {
+                        $errors[] = 'La remise #' . $id_discount . ' de ' . BimpTools::displayMoneyValue($discount->amount_ttc) . ' a été ' . str_replace('Ajouté', 'ajoutée', $used_label);
                     }
 
                     if (!count($errors)) {
@@ -3297,7 +3265,6 @@ class BimpComm extends BimpDolObject
         return $errors;
     }
 
-    
     public function processRemisesGlobales()
     {
         $errors = array();

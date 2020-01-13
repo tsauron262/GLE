@@ -654,6 +654,19 @@ class Bimp_Commande extends BimpComm
         return self::getSocieteContactsArray($id_client_facture);
     }
 
+    public function getPropalesOriginList()
+    {
+        if ($this->isLoaded()) {
+            $items = BimpTools::getDolObjectLinkedObjectsListByTypes($this->dol_object, $this->db, array('propal'));
+
+            if (isset($items['propal'])) {
+                return $items['propal'];
+            }
+        }
+
+        return array();
+    }
+
     // Rendus HTML: 
 
     public function renderHeaderExtraLeft()
@@ -2100,7 +2113,7 @@ class Bimp_Commande extends BimpComm
                     }
 
                     $fac_line->qty = (float) $line_qty;
-                    
+
                     $fac_line_errors = array();
                     if (BimpObject::objectLoaded($product) && $product->isSerialisable()) {
                         $fac_line_errors = $fac_line->setEquipments(array());

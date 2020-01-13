@@ -2104,10 +2104,13 @@ class Bimp_Commande extends BimpComm
                         $fac_line->update($fac_line_warnings, true);
                     }
                 } else {
-                    if ((int) $line->getData('type') === ObjectLine::LINE_TEXT) {
+                    if ((int) $line->getData('type') === ObjectLine::LINE_TEXT || (int) $line->id_remise_except) {
                         if (!(float) $line_qty) {
                             $fac_line_warnings = array();
-                            $line->delete($fac_line_warnings, true);
+                            $line_errors = $fac_line->delete($fac_line_warnings, true);
+                            if (count($line_errors) && (int) $line->id_remise_except) {
+                                $errors[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n°' . $line->getData('position') . ': échec de la suppression de la ligne de facture correspondante');
+                            }
                         }
                         continue;
                     }

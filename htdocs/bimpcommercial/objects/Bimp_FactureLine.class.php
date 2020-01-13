@@ -499,4 +499,26 @@ class Bimp_FactureLine extends ObjectLine
 
         $errors = parent::create($warnings, $force_create);
     }
+
+    public function delete(&$warnings = array(), $force_delete = false)
+    {
+        $commLine = null;
+        $id_facture = (int) $this->getData('id_obj');
+
+        if ($this->isLoaded()) {
+            if ($this->getData('linked_object_name') === 'commande_line' && (int) $this->getData('linked_id_object')) {
+                $commLine = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $this->getData('linked_id_object'));
+            }
+        }
+
+        $errors = parent::delete($warnings, $force_delete);
+
+        if (!count($errors)) {
+            if (BimpObject::objectLoaded($commLine)) {
+                $commLine->onFactureDelete($id_facture);
+            }
+        }
+
+        return $errors;
+    }
 }

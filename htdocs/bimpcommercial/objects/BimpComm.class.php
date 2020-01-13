@@ -3216,13 +3216,79 @@ class BimpComm extends BimpDolObject
 
                     if (!count($errors)) {
                         if ($this->object_name === 'Bimp_Facture') {
+                            // Recherche d'une éventuelle ligne de commmande à traiter: 
+                            $sql = 'SELECT l.rowid as id_line FROM ' . MAIN_DB_PREFIX . 'commandedet l';
+                            $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commande c ON c.rowid = l.fk_commande';
+                            $sql .= ' WHERE l.fk_remise_except = ' . (int) $discount->id;
+                            $sql .= ' AND c.fk_statut > 0';
+
+                            $result = $this->db->executeS($sql, 'array');
+
+                            $commLine = null;
+                            if (isset($result[0]['id_line']) && (int) $result[0]['id_line']) {
+                                $commLine = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', array(
+                                            'id_line' => (int) $result[0]['id_line']
+                                ));
+                            }
+
+                            $ok = false;
                             if ((int) $this->getData('fk_statut') > 0) {
                                 if ($discount->link_to_invoice(0, $this->id) <= 0) {
                                     $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($discount), 'Echec de l\'application de la remise');
+                                } else {
+                                    if (BimpObject::objectLoaded($commLine) && (float) $commLine->getFullQty() == 1) {
+                                        $commLine->updateField('factures', array(
+                                            $this->id => array(
+                                                'qty' => 1
+                                            )
+                                        ));
+                                        $commLine->checkQties();
+                                    }
                                 }
                             } else {
-                                if ($this->dol_object->insert_discount($discount->id) <= 0) {
-                                    $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'insertion de la remise');
+                                $line = $this->getLineInstance();
+
+                                $line_errors = $line->validateArray(array(
+                                    'id_obj'    => (int) $this->id,
+                                    'type'      => ObjectLine::LINE_FREE,
+                                    'deletable' => 1,
+                                    'editable'  => 0,
+                                    'remisable' => 0,
+                                ));
+
+                                if (BimpObject::objectLoaded($commLine)) {
+                                    $line->set('linked_object_name', 'commande_line');
+                                    $line->set('linked_id_object', $commLine->id);
+                                } else {
+                                    $line->set('linked_object_name', 'discount');
+                                    $line->set('linked_id_object', $discount->id);
+                                }
+
+                                if (!count($line_errors)) {
+                                    $line->desc = BimpTools::getRemiseExceptLabel($discount->description);
+                                    $line->id_product = 0;
+                                    $line->pu_ht = -$discount->amount_ht;
+                                    $line->pa_ht = -$discount->amount_ht;
+                                    $line->qty = 1;
+                                    $line->tva_tx = (float) $discount->tva_tx;
+                                    $line->id_remise_except = (int) $discount->id;
+                                    $line->remise = 0;
+
+                                    $line_warnings = array();
+                                    $line_errors = $line->create($line_warnings, true);
+                                }
+
+                                if (count($line_errors)) {
+                                    $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec de la création de la ligne de remise');
+                                } else {
+                                    if (BimpObject::objectLoaded($commLine) && (float) $commLine->getFullQty() == 1) {
+                                        $commLine->updateField('factures', array(
+                                            $this->id => array(
+                                                'qty' => 1
+                                            )
+                                        ));
+                                        $commLine->checkQties();
+                                    }
                                 }
                             }
                             $this->checkIsPaid();

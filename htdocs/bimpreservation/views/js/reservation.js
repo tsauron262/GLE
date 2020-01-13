@@ -208,7 +208,13 @@ function onReserveEquipmentsFormLoaded($form) {
                             var done = false;
                             $select.find('option').each(function () {
 //                                if (serial === $(this).text()) {
-                                if ($(this).text().indexOf(serial) !== -1) {
+                                if ($(this).text().toLowerCase().indexOf(serial.toLowerCase()) !== -1) {
+                                    $input.val('');
+                                    $select.val($(this).attr('value')).change();
+                                    done = true;
+                                }
+                                var valPlusS = "S" + $(this).text();
+                                if (valPlusS.toLowerCase().indexOf(serial.toLowerCase()) !== -1) {
                                     $input.val('');
                                     $select.val($(this).attr('value')).change();
                                     done = true;

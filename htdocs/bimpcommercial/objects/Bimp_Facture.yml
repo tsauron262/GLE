@@ -507,23 +507,23 @@ forms:
         modal_format: large
         title: Vérification des prix d\'achat
         rows: 
-            - custom: 1
-              label: Prix d'achat attendus
-              input_name: type_check
-              input: 
-                  type: select
-                  options: 
-                      create: Prix d'achat des produits en cours à la date de création de la facture
-                      validate: Prix d'achat des produits en cours à la date de validation de la facture
-                      current: Prix d'achat actuels des produits
-              value: create
+#            - custom: 1
+#              label: Prix d'achat attendus
+#              input_name: type_check
+#              input: 
+#                  type: select
+#                  options: 
+#                      create: Prix d'achat des produits en cours à la date de création de la facture
+#                      validate: Prix d'achat des produits en cours à la date de validation de la facture
+#                      current: Prix d'achat actuels des produits
+#              value: create
             
             - custom: 1
               label: Résultat
               input_name: result
               content: 
                   callback: renderCheckPaForm
-              depends_on: type_check
+#              depends_on: type_check
                                   
 fields_tables: 
     infos: 

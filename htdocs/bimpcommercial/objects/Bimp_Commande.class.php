@@ -120,7 +120,7 @@ class Bimp_Commande extends BimpComm
     }
 
     // Getters booléens:
-    
+
     public function isActionAllowed($action, &$errors = array())
     {
         global $conf;
@@ -2119,7 +2119,11 @@ class Bimp_Commande extends BimpComm
                     }
 
                     $fac_line->qty = (float) $line_qty;
-                    $fac_line_errors = $fac_line->setEquipments(array());
+                    
+                    $fac_line_errors = array();
+                    if (BimpObject::objectLoaded($product) && $product->isSerialisable()) {
+                        $fac_line_errors = $fac_line->setEquipments(array());
+                    }
 
                     if (count($fac_line_errors)) {
                         $errors[] = BimpTools::getMsgFromArray($fac_line_errors, 'Echec de la mise à jour de la liste des équipements pour la ligne de facture n°' . $fac_line->getData('position'));
@@ -2192,7 +2196,7 @@ class Bimp_Commande extends BimpComm
             if (isset($this->hold_process_factures_remises_globales) && $this->hold_process_factures_remises_globales) {
                 return array();
             }
-            
+
             if (!(int) $this->getData('fk_statut')) {
                 return array();
             }
@@ -2258,7 +2262,7 @@ class Bimp_Commande extends BimpComm
                             $total_lines_ttc += ((float) $line->pu_ht * (1 + ((float) $line->tva_tx / 100))) * (float) $lines_remaining_qties[(int) $line->id];
                         }
                     }
-                    
+
                     $lines_rate = ($rg_amount_ttc / $total_lines_ttc) * 100;
                     // Assignation du nouveau taux pour chaque ligne de facture brouillon: 
 

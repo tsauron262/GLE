@@ -1229,7 +1229,7 @@ class BContract_contrat extends BimpDolObject {
     }
     
     public function newRef($start_ref) {
-        $count_contrat = count($this->db->getRows('contrat', "ref LIKE '$start_ref%'")) + 1;
+        $count_contrat = count($this->db->getRows('contrat', "ref LIKE '%$start_ref%'")) + 1;
         
         if($count_contrat < 10) {
             $add_zero = "000";

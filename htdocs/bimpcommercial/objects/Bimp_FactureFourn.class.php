@@ -49,6 +49,9 @@ class Bimp_FactureFourn extends BimpComm
     
     public function update(&$warnings = array(), $force_update = false)
     {
+        $errors = $this->checkDate();
+        if (count($errors))
+            return $errors;
         $init_fk_account = (int) $this->getInitData('fk_account');
         $fk_account = (int) $this->getData('fk_account');
 
@@ -87,9 +90,7 @@ class Bimp_FactureFourn extends BimpComm
 
     public function create(&$warnings = array(), $force_create = false)
     {
-        $dateMAx = '2019-10-01';
-        if ($this->getData('datef') < $dateMAx)
-            $errors[] = 'Date inférieur au ' . $dateMAx . ' creation impossible';
+        $errors = $this->checkDate();
         if (count($errors))
             return $errors;
         
@@ -97,6 +98,13 @@ class Bimp_FactureFourn extends BimpComm
         $this->set('date_lim_reglement', BimpTools::getDateFromDolDate($this->dol_object->calculate_date_lim_reglement($this->getData('fk_cond_reglement'))));
         
         return parent::create($warnings, $force_create);
+    }
+    
+    public function checkDate(){
+        $dateMAx = '2020-01-01';
+        if ($this->getData('datef') < $dateMAx)
+            $errors[] = 'Date inférieur au ' . $dateMAx . ' creation impossible';
+        return $errors;
     }
 
     public function isActionAllowed($action, &$errors = array())

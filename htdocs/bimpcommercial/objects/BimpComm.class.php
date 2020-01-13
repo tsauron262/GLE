@@ -2740,9 +2740,9 @@ class BimpComm extends BimpDolObject
 
             // On libère l'avoir associé dans le cas d'une révision
             if ($params['is_review'] && (int) $line->id_remise_except) {
-                $this->db->update($line->dol_line_table, array(
+                $this->db->update($line::$dol_line_table, array(
                     'fk_remise_except' => 0
-                        ), '`' . $line->dol_line_primary . '` = ' . (int) $line->getData('id_line'));
+                        ), '`' . $line::$dol_line_primary . '` = ' . (int) $line->getData('id_line'));
             }
 
             $line_errors = $new_line->create($warnings, true);
@@ -2751,9 +2751,9 @@ class BimpComm extends BimpDolObject
 
                 // On réassocie l'avoir dans le cas d'une révision
                 if ($params['is_review'] && (int) $new_line->id_remise_except) {
-                    $this->db->update($line->dol_line_table, array(
+                    $this->db->update($line::$dol_line_table, array(
                         'fk_remise_except' => $new_line->id_remise_except
-                            ), '`' . $line->dol_line_primary . '` = ' . (int) $line->getData('id_line'));
+                            ), '`' . $line::$dol_line_primary . '` = ' . (int) $line->getData('id_line'));
                 }
                 continue;
             } elseif ($params['is_review'] && ((int) $line->getData('linked_id_object') || (string) $line->getData('linked_object_name'))) {

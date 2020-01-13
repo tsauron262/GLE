@@ -306,7 +306,7 @@ class Bimp_Propal extends BimpComm
 
     public function getActionsButtons()
     {
-        global $langs;
+        global $langs, $conf;
         $langs->load('propal');
 
         $buttons = parent::getActionsButtons();
@@ -532,16 +532,16 @@ class Bimp_Propal extends BimpComm
                     );
                 }
 
-                // Créer contrat:
-                if ($this->isActionAllowed('createContract') && $this->canSetAction('createContract')) {
-                    $url = DOL_URL_ROOT . '/contrat/card.php?action=create&origin=propal&originid=' . $this->id . '&socid=' . (int) $this->getData('fk_soc');
-                    $buttons[] = array(
-                        'label'   => 'Créer un contrat',
-                        'icon'    => 'fas_file-signature',
-//                        'onclick' => $this->getJsActionOnclick('createContract')
-                        'onclick' => 'window.location = \'' . $url . '\''
-                    );
-                }
+//                // Créer contrat:
+//                if ($this->isActionAllowed('createContract') && $this->canSetAction('createContract')) {
+//                    $url = DOL_URL_ROOT . '/contrat/card.php?action=create&origin=propal&originid=' . $this->id . '&socid=' . (int) $this->getData('fk_soc');
+//                    $buttons[] = array(
+//                        'label'   => 'Créer un contrat',
+//                        'icon'    => 'fas_file-signature',
+////                        'onclick' => $this->getJsActionOnclick('createContract')
+//                        'onclick' => 'window.location = \'' . $url . '\''
+//                    );
+//                }
 //                
                 // Créer facture / avoir
                 if ($this->isActionAllowed('createInvoice') && $this->canSetAction('createInvoice')) {
@@ -576,9 +576,48 @@ class Bimp_Propal extends BimpComm
                     );
                 }
             }
+            //Créer un contrat
+            if ($conf->contrat->enabled && ($status == 1 || $status == 2)) {
+                $buttons[] = array(
+                    'label'   => 'Créer un contrat',
+                    'icon'    => 'fas_file-signature',
+                    'onclick' => $this->getJsActionOnclick('createContrat', array(), array(
+                        'form_name' => "contrat"
+                            )
+                    )
+                );
+            } else {
+                $buttons[] = array(
+                    'label'    => 'Créer un contrat',
+                    'icon'     => 'fas_file-contract',
+                    'onclick'  => '',
+                    'disabled' => 1,
+                    'popover'  => 'Vous n\'avez pas la permission'
+                );
+            }
         }
 
         return $buttons;
+    }
+    
+     public function actionCreateContrat($data, &$success)
+    {
+        $instance = $this->getInstance('bimpcontract', 'BContract_contrat');
+
+        $id_new_contrat = 0;
+        $id_new_contrat = $instance->createFromPropal($this, $data);
+
+        if ($id_new_contrat > 0) {
+            $callback = 'window.location.href = "' . DOL_URL_ROOT . '/bimpcontract/index.php?fc=contrat&id=' . $id_new_contrat . '"';
+        } else {
+            $errors[] = "Le contrat n\'à pas été créer";
+        }
+
+        return [
+            'success_callback' => $callback,
+            'warnings'         => $warnings,
+            'errors'           => $errors
+        ];
     }
 
     public function getDirOutput()

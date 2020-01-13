@@ -393,25 +393,6 @@ class Bimp_Commande extends BimpComm
                 );
             }
 
-            //Créer un contrat
-            if ($conf->contrat->enabled && ($status == Commande::STATUS_VALIDATED || $status == Commande::STATUS_ACCEPTED || $status == Commande::STATUS_CLOSED)) {
-                $buttons[] = array(
-                    'label'   => 'Créer un contrat',
-                    'icon'    => 'fas_file-contract',
-                    'onclick' => $this->getJsActionOnclick('createContrat', array(), array(
-                        'form_name' => "contrat"
-                            )
-                    )
-                );
-            } else {
-                $buttons[] = array(
-                    'label'    => 'Créer un contrat',
-                    'icon'     => 'fas_file-contract',
-                    'onclick'  => '',
-                    'disabled' => 1,
-                    'popover'  => 'Vous n\'avez pas la permission'
-                );
-            }
 
             // Créer intervention
             if ($conf->ficheinter->enabled) {
@@ -2982,26 +2963,6 @@ class Bimp_Commande extends BimpComm
             'warnings'         => $warnings,
             'success_callback' => $success_callback
         );
-    }
-
-    public function actionCreateContrat($data, &$success)
-    {
-        $instance = $this->getInstance('bimpcontract', 'BContract_contrat');
-
-        $id_new_contrat = 0;
-        $id_new_contrat = $instance->createFromCommande($this, $data);
-
-        if ($id_new_contrat > 0) {
-            $callback = 'window.location.href = "' . DOL_URL_ROOT . '/bimpcontract/index.php?fc=contrat&id=' . $id_new_contrat . '"';
-        } else {
-            $errors[] = "Le contrat n\'à pas été créer";
-        }
-
-        return [
-            'success_callback' => $callback,
-            'warnings'         => $warnings,
-            'errors'           => $errors
-        ];
     }
 
     // Overrides BimpComm:

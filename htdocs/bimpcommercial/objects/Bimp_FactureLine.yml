@@ -59,6 +59,12 @@ fields:
         type: bool
         default_value: 1
         
+forms: 
+    default: 
+        rows: 
+            pa_editable: 
+                label: Activer la correction automatique du prix d'achat
+                field: pa_editable
 filters_panels: 
     default: 
         filters: 

@@ -2579,7 +2579,7 @@ class ObjectLine extends BimpObject
         return $errors;
     }
 
-    public function calcPaByEquipments($update = true, $date_cur_pa = null, &$new_pa = null, &$default_cur_pa = null)
+    public function calcPaByEquipments($update = true, $date_cur_pa = null, &$new_pa = null, &$default_cur_pa = null, &$details = array())
     {
         $errors = array();
 
@@ -2608,6 +2608,10 @@ class ObjectLine extends BimpObject
 
                 $diff = $qty - $nDone;
 
+                if ($nDone > 0) {
+                    $details[] = 'PA réel équipements pour ' . $nDone . ' unité(s) - Moyenne: ' . BimpTools::displayMoneyValue($total_achats / $nDone);
+                }
+
                 if ($diff > 0) {
                     $cur_pa = null;
                     $cur_pa_amount = 0;
@@ -2619,6 +2623,13 @@ class ObjectLine extends BimpObject
                             $cur_pa_amount = (float) $cur_pa->getData('amount');
                             $default_cur_pa = $cur_pa;
                         }
+                    }
+
+                    if ((string) $date_cur_pa) {
+                        $dt = new DateTime($date_cur_pa);
+                        $details[] = 'PA courant du produit au ' . $dt->format('d / m / Y') . ': pour ' . $diff . ' unité(s) - ' . BimpTools::displayMoneyValue($cur_pa_amount);
+                    } else {
+                        $details[] = 'PA courant du produit pour ' . $diff . ' unité(s) : ' . BimpTools::displayMoneyValue($cur_pa_amount);
                     }
 
                     $total_achats += ($cur_pa_amount * $diff);
@@ -2652,6 +2663,8 @@ class ObjectLine extends BimpObject
                                 'buy_price_ht' => (float) $new_pa_ht
                                     ), '`rowid` = ' . (int) $this->getData('id_line')) <= 0) {
                         $errors[] = 'Echec de la mise à jour du prix d\'achat - ' . $this->db->db->lasterror();
+                    } else {
+                        $this->pa_ht = $new_pa_ht;
                     }
                 } else {
                     $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';

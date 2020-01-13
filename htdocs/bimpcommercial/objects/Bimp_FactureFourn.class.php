@@ -45,10 +45,12 @@ class Bimp_FactureFourn extends BimpComm
 
         return 1;
     }
-    
-    
+
     public function update(&$warnings = array(), $force_update = false)
     {
+        $errors = $this->checkDate();
+        if (count($errors))
+            return $errors;
         $init_fk_account = (int) $this->getInitData('fk_account');
         $fk_account = (int) $this->getData('fk_account');
 
@@ -87,16 +89,21 @@ class Bimp_FactureFourn extends BimpComm
 
     public function create(&$warnings = array(), $force_create = false)
     {
-        $dateMAx = '2019-10-01';
-        if ($this->getData('datef') < $dateMAx)
-            $errors[] = 'Date inférieur au ' . $dateMAx . ' creation impossible';
+        $errors = $this->checkDate();
         if (count($errors))
             return $errors;
-        
+
         $this->dol_object->date = strtotime($this->getData('datef'));
         $this->set('date_lim_reglement', BimpTools::getDateFromDolDate($this->dol_object->calculate_date_lim_reglement($this->getData('fk_cond_reglement'))));
-        
+
         return parent::create($warnings, $force_create);
+    }
+    
+    public function checkDate(){
+        $dateMAx = '2020-01-01';
+        if ($this->getData('datef') < $dateMAx)
+            $errors[] = 'Date inférieur au ' . $dateMAx . ' creation impossible';
+        return $errors;
     }
 
     public function isActionAllowed($action, &$errors = array())
@@ -623,8 +630,8 @@ class Bimp_FactureFourn extends BimpComm
             $html .= '<div class="object_header_infos">';
             $html .= 'Date facture <strong>' . $this->displayData('datef', 'default', false, true) . '</strong>';
             $html .= '</div>';
-            
-            
+
+
             $client = $this->getChildObject('client');
             if (BimpObject::objectLoaded($client)) {
                 $html .= '<div style="margin-top: 10px">';
@@ -971,9 +978,11 @@ class Bimp_FactureFourn extends BimpComm
         if ($this->isLoaded()) {
             $lines = $this->getLines('not_text');
             foreach ($lines as $line) {
+                // Maj des données d'achat des équipements:
                 $line->onFactureValidate();
             }
 
+            // Maj des prix d'achat courants des produits: 
             $products = array();
             foreach ($lines as $line) {
                 if (!(int) $line->id_product) {
@@ -1009,6 +1018,28 @@ class Bimp_FactureFourn extends BimpComm
                 }
 
                 $product->setCurrentPaHt($pa_ht, $id_fp, 'facture_fourn', (int) $this->id);
+            }
+
+            // Maj des prix d'achat des lignes de factures client associées: 
+            foreach ($lines as $line) {
+                if ($line->getData('linked_object_name') === 'commande_fourn_line' && (int) $line->getData('linked_id_object')) {
+                    $comm_fourn_line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFournLine', (int) $line->getData('linked_id_object'));
+
+                    if (BimpObject::objectLoaded($comm_fourn_line) && $comm_fourn_line->getData('linked_object_name') === 'commande_line' && (int) $comm_fourn_line->getData('linked_id_object')) {
+                        $comm_line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $comm_fourn_line->getData('linked_id_object'));
+
+                        if (BimpObject::objectLoaded($comm_line)) {
+                            $fac_lines = BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_FactureLine', array(
+                                        'linked_object_name' => 'commande_line',
+                                        'linked_id_object'   => (int) $comm_line->id
+                            ));
+
+                            foreach ($fac_lines as $fac_line) {
+                                $fac_line->checkPrixAchat();
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -1323,7 +1354,6 @@ class Bimp_FactureFourn extends BimpComm
                     $lines_new[(int) $line->id] = (int) $line_instance->id;
 
                     // NOTE: on n'intègre pas les remises de la ligne de commande: celles-ci sont déjà déduites dans le pu_ht.
-                     
                     // Ajout des équipements: 
                     if ($isSerialisable) {
                         $equipments = (isset($line_data['equipments']) ? $line_data['equipments'] : array());
@@ -1431,5 +1461,30 @@ class Bimp_FactureFourn extends BimpComm
         }
 
         return $result;
+    }
+    
+    
+    
+    public static function sendInvoiceDraftWhithMail()
+    {
+        $date = new DateTime();
+        $nbDay = 5;
+        $date->sub(new DateInterval('P' . $nbDay . 'D'));
+        $sql = $this->db->db->query("SELECT rowid FROM `" . MAIN_DB_PREFIX . "facture_fourn` WHERE `datec` < '" . $date->format('Y-m-d') . "' AND `fk_statut` = 0");
+        $i = 0;
+        while ($ln = $this->db->db->fetch_object($sql)) {
+            $obj = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $ln->rowid);
+            $userCreate = new User($this->db->db);
+            $userCreate->fetch((int) $obj->getData('fk_user_author'));
+            
+            $mail = $userCreate->email;
+//            if ($mail == '')
+                $mail = "tommy@bimp.fr";
+                echo $obj->getNomUrl();
+            if (mailSyn2('Facture fournisseur brouillon à régulariser', $mail, 'admin@bimp.fr', 'Bonjour, vous avez laissé une facture fournisseur en l’état de brouillon depuis plus de ' . $nbDay . ' jour(s) : ' . $obj->getNomUrl() . ' <br/>Merci de bien vouloir la régulariser au plus vite.'))
+                $i++;
+        }
+        $this->resprints = "OK " . $i . ' mails';
+        return "OK " . $i . ' mails';
     }
 }

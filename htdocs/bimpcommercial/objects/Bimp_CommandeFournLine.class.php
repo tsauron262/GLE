@@ -2076,11 +2076,6 @@ class Bimp_CommandeFournLine extends FournObjectLine
         }
     }
 
-    public function checkCommandeClientLinePrixAchat($qty, $pa_ht)
-    {
-        
-    }
-
     // Actions: 
 
     public function actionAddReceptions($data, &$success)

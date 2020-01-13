@@ -388,7 +388,7 @@ class Bimp_Societe extends BimpObject
                 if ($id_propal) {
                     $propal = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $id_propal);
                     if (BimpObject::objectLoaded($propal)) {
-                        if (!in_array($propal->getData('fk_statut'), array(2, 3))) {
+                        if (!in_array($propal->getData('fk_statut'), array(4, 3))) {
                             $use_label = 'Ajouté à la propale ' .  ($with_nom_url ? $propal->getNomUrl(1, 1, 1, 'full') : '"' . $propal->getRef() . '"');
                         }
                     } else {

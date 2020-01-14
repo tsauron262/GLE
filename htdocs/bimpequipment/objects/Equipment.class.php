@@ -937,12 +937,12 @@ class Equipment extends BimpObject
         }
         return implode(" ", $tabT);
     }
-    
+
     public function displaySerialImei()
     {
         $label = $this->getRef();
         $imei = $this->getData('imei');
-        if ($imei != '')
+        if ($imei != '' && $imei != 'n/a')
             $label .= ' (' . $imei . ')';
 
         return $label;

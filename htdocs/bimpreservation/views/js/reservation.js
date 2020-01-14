@@ -208,7 +208,7 @@ function onReserveEquipmentsFormLoaded($form) {
                             var done = false;
                             $select.find('option').each(function () {
                                 if ($input.hasClass('apple_prod')) {
-                                    serial = serial.replace(/^S?(.+)$/, '$1');
+                                    serial = serial.replace(/^S?(.+)$/i, '$1');
                                 }
                                 if ($(this).text().indexOf(serial) !== -1) {
                                     $input.val('');

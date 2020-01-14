@@ -285,7 +285,7 @@ class Bimp_Societe extends BimpObject
         return array($this->id, $user);
     }
 
-    public function getAvailableDiscountsAmounts($is_fourn = false)
+    public function getAvailableDiscountsAmounts($is_fourn = false, $allowed = array())
     {
         if ($this->isLoaded()) {
             global $conf;
@@ -300,9 +300,27 @@ class Bimp_Societe extends BimpObject
                 $sql .= ' AND (r.fk_invoice_supplier IS NULL AND r.fk_invoice_supplier_line IS NULL)';
             } else {
                 $sql .= ' AND (r.fk_facture IS NULL AND r.fk_facture_line IS NULL)';
-                $sql .= ' AND (SELECT COUNT(fdet.rowid) FROM ' . MAIN_DB_PREFIX . 'facturedet fdet WHERE fdet.fk_remise_except = r.rowid) = 0';
-                $sql .= ' AND (SELECT COUNT(cdet.rowid) FROM ' . MAIN_DB_PREFIX . 'commandedet cdet WHERE cdet.fk_remise_except = r.rowid) = 0';
-                $sql .= ' AND (SELECT COUNT(pdet.rowid) FROM ' . MAIN_DB_PREFIX . 'propaldet pdet WHERE pdet.fk_remise_except = r.rowid) = 0';
+
+                $and_where = '';
+                if (isset($allowed['factures']) && !empty($allowed['factures'])) {
+                    $and_where = ' AND fdet.fk_facture NOT IN (' . implode(',', $allowed['factures']) . ')';
+                }
+
+                $sql .= ' AND (SELECT COUNT(fdet.rowid) FROM ' . MAIN_DB_PREFIX . 'facturedet fdet WHERE fdet.fk_remise_except = r.rowid' . $and_where . ') = 0';
+
+                $and_where = '';
+                if (isset($allowed['commandes']) && !empty($allowed['commandes'])) {
+                    $and_where = ' AND cdet.fk_commande NOT IN (' . implode(',', $allowed['commandes']) . ')';
+                }
+
+                $sql .= ' AND (SELECT COUNT(cdet.rowid) FROM ' . MAIN_DB_PREFIX . 'commandedet cdet WHERE cdet.fk_remise_except = r.rowid' . $and_where . ') = 0';
+
+                $and_where = '';
+                if (isset($allowed['propales']) && !empty($allowed['propales'])) {
+                    $and_where = ' AND pdet.fk_propal NOT IN (' . implode(',', $allowed['propales']) . ')';
+                }
+
+                $sql .= ' AND (SELECT COUNT(pdet.rowid) FROM ' . MAIN_DB_PREFIX . 'propaldet pdet WHERE pdet.fk_remise_except = r.rowid' . $and_where . ') = 0';
             }
 
             $result = $this->db->executeS($sql, 'array');
@@ -315,7 +333,7 @@ class Bimp_Societe extends BimpObject
         return 0;
     }
 
-    public function getAvailableDiscountsArray($is_fourn = false)
+    public function getAvailableDiscountsArray($is_fourn = false, $allowed = array())
     {
         $discounts = array();
 
@@ -332,15 +350,13 @@ class Bimp_Societe extends BimpObject
                 $sql .= ' AND (r.fk_invoice_supplier IS NULL AND r.fk_invoice_supplier_line IS NULL)';
             } else {
                 $sql .= ' AND (r.fk_facture IS NULL AND r.fk_facture_line IS NULL)';
-//                $sql .= ' AND (SELECT COUNT(pdet.rowid) FROM ' . MAIN_DB_PREFIX . 'propaldet pdet WHERE pdet.fk_remise_except = r.rowid) = 0';
-//                $sql .= ' AND (SELECT COUNT(cdet.rowid) FROM ' . MAIN_DB_PREFIX . 'commandedet cdet WHERE cdet.fk_remise_except = r.rowid) = 0';
             }
 
             $rows = $this->db->executeS($sql, 'array');
 
             if (!is_null($rows)) {
                 foreach ($rows as $r) {
-                    $disabled_label = static::getDiscountUsedLabel((int) $r['id']);
+                    $disabled_label = static::getDiscountUsedLabel((int) $r['id'], false, $allowed);
 
                     $discounts[(int) $r['id']] = array(
                         'label'    => BimpTools::getRemiseExceptLabel($r['description']) . ' (' . BimpTools::displayMoneyValue((float) $r['amount'], '') . ' TTC)' . ($disabled_label ? ' - ' . $disabled_label : ''),
@@ -356,7 +372,7 @@ class Bimp_Societe extends BimpObject
         return $discounts;
     }
 
-    public static function getDiscountUsedLabel($id_discount, $with_nom_url = false)
+    public static function getDiscountUsedLabel($id_discount, $with_nom_url = false, $allowed = array())
     {
         $use_label = '';
 
@@ -366,33 +382,100 @@ class Bimp_Societe extends BimpObject
 
         $bdb = BimpCache::getBdb();
 
-        $id_facture = (int) $bdb->getValue('facturedet', 'fk_facture', 'fk_remise_except = ' . (int) $id_discount);
-        if ($id_facture) {
-            $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
-            if (BimpObject::objectLoaded($facture)) {
-                $use_label = 'Ajouté à la facture ' . ($with_nom_url ? $facture->getNomUrl(1, 1, 1, 'full') : '"' . $facture->getRef() . '"');
-            } else {
-                $bdb->delete('facturedet', '`fk_facture` = ' . $id_facture . ' AND `fk_remise_except` = ' . (int) $id_discount);
-            }
-        } else {
-            $id_commande = (int) $bdb->getValue('commandedet', 'fk_commande', 'fk_remise_except = ' . (int) $id_discount);
-            if ($id_commande) {
-                $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $id_commande);
-                if (BimpObject::objectLoaded($commande)) {
-                    $use_label = 'Ajouté à la commande ' . ($with_nom_url ? $commande->getNomUrl(1, 1, 1, 'full') : '"' . $commande->getRef() . '"');
-                } else {
-                    $bdb->delete('commandedet', '`fk_commande` = ' . $id_commande . ' AND `fk_remise_except` = ' . (int) $id_discount);
+        if (!class_exists('DiscountAbsolute')) {
+            require_once DOL_DOCUMENT_ROOT . '/core/class/discount.class.php';
+        }
+
+        $discount = new DiscountAbsolute($bdb->db);
+        $discount->fetch((int) $id_discount);
+
+        if (BimpObject::objectLoaded($discount)) {
+            if ((int) $discount->fk_invoice_supplier_source) {
+                // Remise fournisseur
+                $id_facture_fourn = 0;
+                if ((isset($discount->fk_invoice_supplier) && (int) $discount->fk_invoice_supplier)) {
+                    $id_facture_fourn = (int) $discount->fk_invoice_supplier;
+                } elseif (isset($discount->fk_invoice_supplier_line) && (int) $discount->fk_invoice_supplier_line) {
+                    $id_facture_fourn = (int) $this->db->getValue('facture_fourn_det', 'fk_facture_fourn', 'rowid = ' . (int) $discount->fk_invoice_supplier_line);
+                }
+
+                if ($id_facture_fourn) {
+                    $factureFourn = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureFourn', $id_facture_fourn);
+                    if (BimpObject::objectLoaded($factureFourn)) {
+                        $use_label = 'Ajouté à la facture fournisseur ' . ($with_nom_url ? $factureFourn->getNomUrl(0, 1, 1, 'full') : '"' . $factureFourn->getRef() . '"');
+                    } else {
+                        $use_label .= 'Ajouté à la facture fournisseur #' . $id_facture_fourn;
+                    }
                 }
             } else {
-                $id_propal = (int) $bdb->getValue('propaldet', 'fk_propal', 'fk_remise_except = ' . (int) $id_discount);
-                if ($id_propal) {
-                    $propal = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $id_propal);
-                    if (BimpObject::objectLoaded($propal)) {
-                        if (!in_array($propal->getData('fk_statut'), array(4, 3))) {
-                            $use_label = 'Ajouté à la propale ' .  ($with_nom_url ? $propal->getNomUrl(1, 1, 1, 'full') : '"' . $propal->getRef() . '"');
-                        }
+                // Remise client
+                // On ne tient pas compte de $allowed dans les deux cas suivants: 
+                $id_facture = 0;
+                if ((isset($discount->fk_facture) && (int) $discount->fk_facture)) {
+                    $id_facture = (int) $discount->fk_facture;
+                } elseif (isset($discount->fk_facture_line) && (int) $discount->fk_facture_line) {
+                    $id_facture = (int) $this->db->getValue('facturedet', 'fk_facture', 'rowid = ' . (int) $discount->fk_facture_line);
+                }
+
+                if ($id_facture) {
+                    $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
+                    if (BimpObject::objectLoaded($facture)) {
+                        $use_label = 'Ajouté à la facture ' . ($with_nom_url ? $facture->getNomUrl(0, 1, 1, 'full') : '"' . $facture->getRef() . '"');
                     } else {
-                        $bdb->delete('propaldet', '`fk_propal` = ' . $id_propal . ' AND `fk_remise_except` = ' . (int) $id_discount);
+                        $use_label .= 'Ajouté à la facture #' . $id_facture;
+                    }
+                } else {
+                    $rows = $bdb->getRows('facturedet', 'fk_remise_except = ' . (int) $id_discount, null, 'array', array('fk_facture'));
+                    if (is_array($rows)) {
+                        foreach ($rows as $r) {
+                            if (!isset($allowed['factures']) || !in_array((int) $r['fk_facture'], $allowed['factures'])) {
+                                $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $r['fk_facture']);
+                                if (BimpObject::objectLoaded($facture)) {
+                                    $use_label = 'Ajouté à la facture ' . ($with_nom_url ? $facture->getNomUrl(1, 1, 1, 'full') : '"' . $facture->getRef() . '"');
+                                    break;
+                                } else {
+                                    $bdb->delete('facturedet', '`fk_facture` = ' . $r['fk_facture'] . ' AND `fk_remise_except` = ' . (int) $id_discount);
+                                }
+                            }
+                        }
+                    }
+
+                    if (!$use_label) {
+                        $rows = $bdb->getRows('commandedet', 'fk_remise_except = ' . (int) $id_discount, null, 'array', array('fk_commande'));
+                        if (is_array($rows)) {
+                            foreach ($rows as $r) {
+                                if (!isset($allowed['commandes']) || !in_array((int) $r['fk_commande'], $allowed['commandes'])) {
+                                    $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $r['fk_commande']);
+                                    if (BimpObject::objectLoaded($commande)) {
+                                        $use_label = 'Ajouté à la commande ' . ($with_nom_url ? $commande->getNomUrl(1, 1, 1, 'full') : '"' . $commande->getRef() . '"');
+                                        break;
+                                    } else {
+                                        $bdb->delete('commandedet', '`fk_commande` = ' . $r['fk_commande'] . ' AND `fk_remise_except` = ' . (int) $id_discount);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (!$use_label) {
+                        $rows = $bdb->getRows('propaldet', 'fk_remise_except = ' . (int) $id_discount, null, 'array', array('fk_propal'));
+                        if (is_array($rows)) {
+                            foreach ($rows as $r) {
+                                if (!isset($allowed['propales']) || !in_array((int) $r['fk_propal'], $allowed['propales'])) {
+                                    $propal = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', (int) $r['fk_propal']);
+                                    if (BimpObject::objectLoaded($propal)) {
+                                        if (!in_array($propal->getData('fk_statut'), array(4, 3))) {
+                                            if (!(int) $bdb->getValue('element_element', 'rowid', '`fk_source` = ' . $r['fk_propal'] . ' AND `sourcetype` = \'propal\'  AND `targettype` = \'commande\'')) {
+                                                $use_label = 'Ajouté à la propale ' . ($with_nom_url ? $propal->getNomUrl(1, 1, 1, 'full') : '"' . $propal->getRef() . '"');
+                                                break;
+                                            }
+                                        }
+                                    } else {
+                                        $bdb->delete('propaldet', '`fk_propal` = ' . $r['fk_propal'] . ' AND `fk_remise_except` = ' . (int) $id_discount);
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }

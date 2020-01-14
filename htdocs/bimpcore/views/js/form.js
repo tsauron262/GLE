@@ -1690,7 +1690,7 @@ function onChecklistSearchInputChange($input) {
                 var regex1 = new RegExp('^(.*)(' + val + ')(.*)$', 'i');
                 var regex2 = '';
                 if (/^S.+$/i.test(val)) {
-                    regex2 = new RegExp('^(.*)(' + val.replace(/^(.+)$/i, '$1') + ')(.*)$', 'i');
+                    regex2 = new RegExp('^(.*)(' + val.replace(/^S(.+)$/i, '$1') + ')(.*)$', 'i');
                 }
                 $container.findParentByClass('check_list_container').find('.check_list_item').each(function () {
                     if (!$(this).children('input[type=checkbox]').prop('checked')) {

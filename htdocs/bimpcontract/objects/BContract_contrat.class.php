@@ -80,7 +80,7 @@ class BContract_contrat extends BimpDolObject {
     public static $true_objects_for_link = [
         'commande' => 'Commande',
         'facture_fourn' => 'Facture fournisseur', 
-        'propal' => 'Proposition commercial'
+        //'propal' => 'Proposition commercial'
     ];
     
     

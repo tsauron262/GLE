@@ -125,14 +125,15 @@ class Bimp_Facture extends BimpComm
                 return (int) $commission->can('create');
 
             case 'checkPa':
-                if (!$user->admin) {
-                    return 0; // A suppr
-                }
-                $line_instance = $this->getLineInstance();
-                if (is_a($line_instance, 'ObjectLine')) {
-                    return (int) $line_instance->canEditPrixAchat();
-                }
-                return 0;
+//                if (!$user->admin) {
+//                    return 0; // A suppr
+//                }
+//                $line_instance = $this->getLineInstance();
+//                if (is_a($line_instance, 'ObjectLine')) {
+//                    return (int) $line_instance->canEditPrixAchat();
+//                }
+                return 1;
+//                return 0;
         }
 
         return parent::canSetAction($action);
@@ -2084,13 +2085,13 @@ class Bimp_Facture extends BimpComm
             $html .= '</div>';
         }
         $id_contrat = $this->db->getValue('element_element', 'fk_source', 'sourcetype = "contrat" and targettype = "facture" and fk_target = ' . $this->id);
-        if($id_contrat && $this->getData('fk_statut') == 0) {
-                $html .= '<div class="object_header_infos">';
-                $msg = "<h5>Cette facture est une facture de contrat. Pour le moment, merci de supprimer cette PROV à partir de l'échéancier et non <b>pas</b> depuis le bouton \"poubelle\" habituel. <b><i class='fas fa-exclamation-triangle'></i> TR&Egrave;S IMPORTANT</b></h5>";
-                $msg .= '<h5><b><a href="'.DOL_URL_ROOT.'/bimpcontract?fc=contrat&id='.$id_contrat.'&navtab-maintabs=echeancier">Aller vers la page de l\'échéancier du contrat <i class="fas fa-arrow-right" ></i></a></b></h5>';
-                $html .= BimpRender::renderAlerts($msg, 'danger', false);
-                $html .= '</div>';
-            }
+        if ($id_contrat && $this->getData('fk_statut') == 0) {
+            $html .= '<div class="object_header_infos">';
+            $msg = "<h5>Cette facture est une facture de contrat. Pour le moment, merci de supprimer cette PROV à partir de l'échéancier et non <b>pas</b> depuis le bouton \"poubelle\" habituel. <b><i class='fas fa-exclamation-triangle'></i> TR&Egrave;S IMPORTANT</b></h5>";
+            $msg .= '<h5><b><a href="' . DOL_URL_ROOT . '/bimpcontract?fc=contrat&id=' . $id_contrat . '&navtab-maintabs=echeancier">Aller vers la page de l\'échéancier du contrat <i class="fas fa-arrow-right" ></i></a></b></h5>';
+            $html .= BimpRender::renderAlerts($msg, 'danger', false);
+            $html .= '</div>';
+        }
 
         return $html;
     }

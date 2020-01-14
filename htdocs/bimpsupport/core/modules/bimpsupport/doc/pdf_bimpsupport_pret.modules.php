@@ -218,7 +218,7 @@ class pdf_bimpsupport_pret extends ModeleBimpSupport
                                 $pdf->SetXY(169, $y);
                                 $pdf->MultiCell(35, 6, price($product->price_ttc), 0, 'C');
                                 $totalTtc += $product->price_ttc;
-                                $y += 8;
+                                $y += 16;
                             }
                         } else {
                             $price_ttc = (float) $equipment->getData('prix_vente_except');
@@ -242,7 +242,7 @@ class pdf_bimpsupport_pret extends ModeleBimpSupport
                             $pdf->SetXY(169, $y);
                             $pdf->MultiCell(35, 6, price($price_ttc), 0, 'C');
                             $totalTtc += $price_ttc;
-                            $y += 8;
+                            $y += 16;
                         }
                     }
                 }

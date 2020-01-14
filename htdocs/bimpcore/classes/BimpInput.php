@@ -7,7 +7,15 @@ require_once DOL_DOCUMENT_ROOT . '/core/class/html.formfile.class.php';
 
 class BimpInput
 {
+
     public static $paiementRestrictive = array('VIR');
+
+    static function canUseRestrictedPaiement()
+    {
+        // Cette fonction ne devrait pas être dans cette classe... 
+        global $user;
+        return $user->rights->bimpcommercial->factureAnticipe;
+    }
 
     public static function renderInput($type, $field_name, $value = '', $options = array(), $form = null, $option = null, $input_id = null)
     {
@@ -188,7 +196,7 @@ class BimpInput
 
             case 'textarea':
                 $value = htmlentities($value);
-                
+
                 if (!isset($options['rows'])) {
                     $options['rows'] = 3;
                 }
@@ -343,11 +351,11 @@ class BimpInput
 
                 foreach ($form->cache_types_paiements as $id_payment => $payment_data) {
                     if (!(int) $options['active_only'] || ((int) $options['active_only'] && (int) $payment_data['active'])) {
-                        if(in_array($payment_data['code'],static::$paiementRestrictive) && !self::canUseRestrictedPaiement()){
+                        if (in_array($payment_data['code'], static::$paiementRestrictive) && !self::canUseRestrictedPaiement()) {
                             $payment_data['forbidden'] = 1;
                         }
-                        
-                        
+
+
                         switch ($options['value_type']) {
                             case 'code':
                                 $html .= '<option value="' . $payment_data['code'] . '" data-id_payment="' . $id_payment . '"';
@@ -777,12 +785,6 @@ class BimpInput
                 break;
         }
         return $html;
-    }
-    
-        
-    static function canUseRestrictedPaiement(){
-        global $user;
-        return $user->rights->bimpcommercial->factureAnticipe;
     }
 
     public static function renderDatePickerInput($input_name, $value = '', $options = array(), $input_id = null, $type = "datetime")

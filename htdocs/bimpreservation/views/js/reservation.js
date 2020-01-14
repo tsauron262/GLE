@@ -196,7 +196,7 @@ function onReserveEquipmentsFormLoaded($form) {
                     }
                 }
             });
-            
+
             var $container = $input.findParentByClass('addValueInputContainer');
             if ($.isOk($container)) {
                 var $btn = $container.find('.addValueBtn');
@@ -207,7 +207,9 @@ function onReserveEquipmentsFormLoaded($form) {
                         if ($select.length) {
                             var done = false;
                             $select.find('option').each(function () {
-//                                if (serial === $(this).text()) {
+                                if ($input.hasClass('apple_prod')) {
+                                    serial = serial.replace(/^S?(.+)$/, '$1');
+                                }
                                 if ($(this).text().indexOf(serial) !== -1) {
                                     $input.val('');
                                     $select.val($(this).attr('value')).change();

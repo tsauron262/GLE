@@ -1348,7 +1348,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
             foreach ($serials_checked as $serial) {
                 if ($equipment->find(array(
                             'id_product' => $id_product,
-                            'serial'     => $serial
+                            'serial'     => static::traiteSerialApple($serial)
                                 ), true)) {
                     $place = $equipment->getCurrentPlace();
 

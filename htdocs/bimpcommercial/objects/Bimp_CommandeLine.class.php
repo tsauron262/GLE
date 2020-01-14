@@ -2242,15 +2242,15 @@ class Bimp_CommandeLine extends ObjectLine
             if (!empty($factures_list)) {
                 $html .= '<div id="commande_line_' . $this->id . '_factures_form' . '" class="commande_factures_form line_facture_qty_container">';
 
-                if ($isSerialisable) {
-                    $html .= '<div class="row">';
-                    $html .= '<div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">';
-
-                    $html .= $dispatcher->renderHtml();
-
-                    $html .= '</div>';
-                    $html .= '<div class="col-lg-8 col-md-8 col-sm-6 col-xs-12">';
-                }
+//                if ($isSerialisable) {
+//                    $html .= '<div class="row">';
+//                    $html .= '<div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">';
+//
+//                    $html .= $dispatcher->renderHtml();
+//
+//                    $html .= '</div>';
+//                    $html .= '<div class="col-lg-8 col-md-8 col-sm-6 col-xs-12">';
+//                }
 
                 $html .= '<form>';
                 $html .= '<table class="bimp_list_table">';
@@ -2258,6 +2258,7 @@ class Bimp_CommandeLine extends ObjectLine
                 $html .= '<tr>';
                 $html .= '<th style="width: 250px;">Facture</th>';
                 $html .= '<th>Qté</th>';
+                $html .= '<th>Correction auto du PA</th>';
                 if ($isSerialisable) {
                     $html .= '<th>Equipements</th>';
                 }
@@ -2294,9 +2295,25 @@ class Bimp_CommandeLine extends ObjectLine
                     if ($facture && (int) $facture->getData('fk_statut') === (int) Facture::STATUS_DRAFT) {
                         $html .= $this->renderFactureQtyInput($id_facture, true);
                     } else {
-
                         $html .= '<input type="hidden" name="line_' . $this->id . '_facture_' . $id_facture . '_qty" value="' . $facture_data['qty'] . '" class="line_facture_qty total_max"/>';
                         $html .= $facture_data['qty'];
+                    }
+                    $html .= '</td>';
+
+                    $html .= '<td>';
+                    if ($facture) {
+                        $pa_editable = 1;
+                        $fac_line = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_FactureLine', array(
+                                    'id_obj'             => $id_facture,
+                                    'linked_object_name' => 'commande_line',
+                                    'linked_id_object'   => $this->id
+                        ));
+                        if (BimpObject::objectLoaded($fac_line)) {
+                            $pa_editable = (int) $fac_line->getData('pa_editable');
+                        }
+                        $html .= BimpInput::renderInput('toggle', 'line_' . $this->id . '_facture_' . $id_facture . '_pa_editable', $pa_editable, array(
+                                    'extra_class' => 'line_facture_pa_editable'
+                        ));
                     }
                     $html .= '</td>';
 
@@ -2351,10 +2368,10 @@ class Bimp_CommandeLine extends ObjectLine
                 $html .= '</button>';
                 $html .= '</div>';
 
-                if ($isSerialisable) {
-                    $html .= '</div>';
-                    $html .= '</div>';
-                }
+//                if ($isSerialisable) {
+//                    $html .= '</div>';
+//                    $html .= '</div>';
+//                }
 
                 $html .= '</div>';
             } else {
@@ -3763,10 +3780,19 @@ class Bimp_CommandeLine extends ObjectLine
             }
 
             // Mise à jour de la ligne de facture: 
+            $data = array(
+                'qty' => (float) $facture_data['qty']
+            );
+
+            if (isset($facture_data['equipments'])) {
+                $data['equipments'] = $facture_data['equipments'];
+            }
+            if (isset($facture_data['pa_editable'])) {
+                $data['pa_editable'] = $facture_data['pa_editable'];
+            }
+
             $fac_errors = $commande->addLinesToFacture((int) $facture_data['id_facture'], array(
-                $this->id => (float) $facture_data['qty']
-                    ), array(
-                $this->id => $equipments
+                $this->id => $data
             ));
 
             if (count($fac_errors)) {

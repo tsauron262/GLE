@@ -250,15 +250,15 @@ class BContract_echeancier extends BimpObject {
          } 
          
          if($parent->getTotalContrat() - $parent->getTotalDejaPayer() == 0) {
-            $html .= "<tr > <th  style='background-color:#ed7c1c;color:white;text-align:center'>Reste à facturé</th> <td style='text-align:center'><b class='success'> ".price($parent->getTotalContrat() - $parent->getTotalDejaPayer())." € </b></td> <td style='text-align:center'><b class='success'> ".price(($parent->getTotalContrat() - $parent->getTotalDejaPayer()) * 1.20)." €</b></td> </tr>";
+            $html .= "<tr > <th  style='background-color:#ed7c1c;color:white;text-align:center'>Reste à facturer</th> <td style='text-align:center'><b class='success'> ".price($parent->getTotalContrat() - $parent->getTotalDejaPayer())." € </b></td> <td style='text-align:center'><b class='success'> ".price(($parent->getTotalContrat() - $parent->getTotalDejaPayer()) * 1.20)." €</b></td> </tr>";
          } else {
-            $html .= "<tr > <th  style='background-color:#ed7c1c;color:white;text-align:center'>Reste à facturé</th> <td style='text-align:center'><b class='danger'> ".price($parent->getTotalContrat() - $parent->getTotalDejaPayer())." € </b></td> <td style='text-align:center'><b class='danger'> ".price(($parent->getTotalContrat() - $parent->getTotalDejaPayer()) * 1.20)." €</b></td> </tr>";
+            $html .= "<tr > <th  style='background-color:#ed7c1c;color:white;text-align:center'>Reste à facturer</th> <td style='text-align:center'><b class='danger'> ".price($parent->getTotalContrat() - $parent->getTotalDejaPayer())." € </b></td> <td style='text-align:center'><b class='danger'> ".price(($parent->getTotalContrat() - $parent->getTotalDejaPayer()) * 1.20)." €</b></td> </tr>";
          }
          
          if($parent->getTotalContrat() - $parent->getTotalDejaPayer(true) == 0){
-            $html .= "<tr> <th style='background-color:#ed7c1c;color:white;text-align:center'>Reste à payé</th> <td style='text-align:center'><b class='success'> 0 € </b></td> <td style='text-align:center'><b class='success'>0 €</b></td> </tr>";
+            $html .= "<tr> <th style='background-color:#ed7c1c;color:white;text-align:center'>Reste à payer</th> <td style='text-align:center'><b class='success'> 0 € </b></td> <td style='text-align:center'><b class='success'>0 €</b></td> </tr>";
         } else {
-            $html .= "<tr> <th style='background-color:#ed7c1c;color:white;text-align:center'>Reste à payé</th> <td style='text-align:center'><b class='danger'> ".price($parent->getTotalContrat() - $parent->getTotalDejaPayer(true))." € </b></td> <td style='text-align:center'><b class='danger'> ".price(($parent->getTotalContrat(true) * 1.20) - ($parent->getTotalDejaPayer(true) * 1.20))." €</b></td> </tr>";
+            $html .= "<tr> <th style='background-color:#ed7c1c;color:white;text-align:center'>Reste à payer</th> <td style='text-align:center'><b class='danger'> ".price($parent->getTotalContrat() - $parent->getTotalDejaPayer(true))." € </b></td> <td style='text-align:center'><b class='danger'> ".price(($parent->getTotalContrat(true) * 1.20) - ($parent->getTotalDejaPayer(true) * 1.20))." €</b></td> </tr>";
         }
         $html .= "</table>";
         return $html;

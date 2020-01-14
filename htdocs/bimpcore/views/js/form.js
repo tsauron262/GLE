@@ -1659,7 +1659,7 @@ function selectChecklistItem($container, label) {
 
     $container.find('.check_list_item').each(function () {
         var $item = $(this);
-        if (label === $item.find('label').text()) {
+        if (label.toLowerCase() === $item.find('label').text().toLowerCase() || label.toLowerCase() === ("S"+$item.find('label').text()).toLowerCase()) {
             if (!check) {
                 var $cb = $item.find('input[type=checkbox]');
                 if ($cb.length) {

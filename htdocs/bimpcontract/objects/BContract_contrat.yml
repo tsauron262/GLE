@@ -388,19 +388,19 @@ forms:
               display_if:
                   field_name: type_piece
                   show_values: facture_fourn
-            - custom: 1
-              label: Liste des propositions commercial client
-              input_name: propal_client
-              input: 
-                  type: select
-              values:
-                   callback: 
-                       method: getListClient
-                       params:
-                           - propal
-              display_if:
-                  field_name: type_piece
-                  show_values: propal
+#            - custom: 1
+#              label: Liste des propositions commercial client
+#              input_name: propal_client
+#              input: 
+#                  type: select
+#              values:
+#                   callback: 
+#                       method: getListClient
+#                       params:
+#                           - propal
+#              display_if:
+#                  field_name: type_piece
+#                  show_values: propal
     clone_contrat:
         edit: 1
         msgs:

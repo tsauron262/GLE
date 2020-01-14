@@ -29,8 +29,8 @@ if (!$gsx->logged) {
 $equipment = BimpObject::getInstance('bimpequipment', 'Equipment');
 
 $rows = $equipment->getList(array(
-    'imei' => ''
-        ), 10000, 1, 'id', 'desc', 'array', array('id', 'serial'));
+    'imei2' => ''
+        ), 1, 1, 'id', 'desc', 'array', array('id', 'serial'));
 
 echo count($rows) . ' équipement(s) à traiter <br/><br/>';
 
@@ -50,6 +50,8 @@ foreach ($rows as $r) {
     $ids = Equipment::gsxFetchIdentifiers($r['serial'], $gsx);
 
     $imei = $ids['imei'];
+    $imei2 = $ids['imei2'];
+    $meid = $ids['meid'];
     $serial = $ids['serial'];
 
     if (!$imei) {
@@ -58,13 +60,27 @@ foreach ($rows as $r) {
         $nOK++;
     }
 
+    if (!$imei2) {
+        $imei2 = 'n/a';
+    }
+
+    if (!$meid) {
+        $meid = 'n/a';
+    }
+
     $data = array(
-        'imei' => $imei
+        'imei'  => $imei,
+        'imei2' => $imei2,
+        'meid'  => $meid
     );
 
-    if ($imei === $r['serial'] && $serial) {
+    if ($serial && ($imei === $r['serial'] || $imei2 === $r['serial'] || $meid === $r['serial'])) {
         $data['serial'] = $serial;
     }
+    
+    echo '<pre>';
+    print_r($data);
+    echo '</pre>';
 
     $nDone++;
 

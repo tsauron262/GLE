@@ -46,13 +46,17 @@ objects:
         relation: hasMany
         delete: 1
         instance: 
-            bimp_object: BS_Inter
+            bimp_object: 
+                module: bimpsupport
+                name: BS_Inter
         
     notes:
         relation: hasMany
         delete: 0
         instance:
-            bimp_object: BS_Note
+            bimp_object: 
+                module: bimpsupport
+                name: BS_Note
                 
     files:
         instance:

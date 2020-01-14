@@ -242,7 +242,7 @@ class pdf_bimpsupport_pret extends ModeleBimpSupport
                             $pdf->SetXY(169, $y);
                             $pdf->MultiCell(35, 6, price($price_ttc), 0, 'C');
                             $totalTtc += $price_ttc;
-                            $y += 16;
+                            $y += 8;
                         }
                     }
                 }

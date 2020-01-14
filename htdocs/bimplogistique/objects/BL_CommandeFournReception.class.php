@@ -53,6 +53,10 @@ class BL_CommandeFournReception extends BimpObject
                     $errors[] = 'La réception n\'a pas le statut "réceptionnée"';
                     return 0;
                 }
+                if ((int) $this->getData('id_facture')) {
+                    $errors[] = 'Cette réception a été facturée';
+                    return 0;
+                }
                 $commande = $this->getParentInstance();
                 if ((int) $commande->isBilled()) {
                     $errors[] = 'Une facture a été créée pour la commande fournisseur';
@@ -88,31 +92,35 @@ class BL_CommandeFournReception extends BimpObject
         if (!$this->isLoaded()) {
             $errors[] = 'ID de la réception absent';
         } else {
-            $commande = $this->getParentInstance();
-            if (!BimpObject::objectLoaded($commande)) {
-                $errors[] = 'ID de la commande fournisseur absent';
+            if ((int) $this->getData('id_facture')) {
+                $errors[] = 'Cette réception a été facturée';
             } else {
-                BimpObject::loadClass('bimpcommercial', 'ObjectLine');
-                $lines = $commande->getChildrenObjects('lines', array(
-                    'type' => array(
-                        'in' => array(ObjectLine::LINE_PRODUCT, ObjectLine::LINE_FREE)
-                    )
-                ));
+                $commande = $this->getParentInstance();
+                if (!BimpObject::objectLoaded($commande)) {
+                    $errors[] = 'ID de la commande fournisseur absent';
+                } else {
+                    BimpObject::loadClass('bimpcommercial', 'ObjectLine');
+                    $lines = $commande->getChildrenObjects('lines', array(
+                        'type' => array(
+                            'in' => array(ObjectLine::LINE_PRODUCT, ObjectLine::LINE_FREE)
+                        )
+                    ));
 
-                $check = true;
+                    $check = true;
 
-                foreach ($lines as $line) {
-                    $line_errors = array();
-                    if (!$line->isReceptionCancellable($this->id, $line_errors)) {
-                        $check = false;
+                    foreach ($lines as $line) {
+                        $line_errors = array();
+                        if (!$line->isReceptionCancellable($this->id, $line_errors)) {
+                            $check = false;
+                        }
+
+                        if (count($line_errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n°' . $line->getData('position'));
+                        }
                     }
 
-                    if (count($line_errors)) {
-                        $errors[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n°' . $line->getData('position'));
-                    }
+                    return ((count($errors) || !$check) ? 0 : 1);
                 }
-
-                return ((count($errors) || !$check) ? 0 : 1);
             }
         }
 
@@ -451,11 +459,11 @@ class BL_CommandeFournReception extends BimpObject
         $html = '';
         $html .= '<td style="width: 220px" class="serial" data-serial="' . $serial . '">';
         $html .= $serial;
-        
-        $isImei = (preg_match("/[0-9]/", $serial))? true : false;
-        
-        
-        if (!$isImei &&$code_config && !preg_match('/^.+' . preg_quote($code_config) . '$/', $serial)) {
+
+        $isImei = (preg_match("/[0-9]/", $serial)) ? true : false;
+
+
+        if (!$isImei && $code_config && !preg_match('/^.+' . preg_quote($code_config) . '$/', $serial)) {
             $html .= '<br/>';
             $html .= '<span class="danger">';
             $html .= BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . 'Les 4 derniers caractères ne correspondent pas au code configuration (' . $code_config . ')';

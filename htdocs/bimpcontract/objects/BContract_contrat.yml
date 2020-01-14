@@ -63,7 +63,7 @@ table: contrat
 controller: contrat
 icon: fas_file
 list_page_url: 
-    controller: contrat
+    controller: index
 
 labels: 
     name: contrat

@@ -2084,7 +2084,7 @@ class Bimp_Facture extends BimpComm
             $html .= '</div>';
         }
         $id_contrat = $this->db->getValue('element_element', 'fk_source', 'sourcetype = "contrat" and targettype = "facture" and fk_target = ' . $this->id);
-        if($id_contrat && $this->getData('statut') == 0) {
+        if($id_contrat && $this->getData('fk_statut') == 0) {
                 $html .= '<div class="object_header_infos">';
                 $msg = "<h5>Cette facture est une facture de contrat. Pour le moment, merci de supprimer cette PROV à partir de l'échéancier et non depuis le bouton supprimer de la facture. <b><i class='fas fa-exclamation-triangle'></i> Très important</b></h5>";
                 $msg .= '<h5><b><a href="'.DOL_URL_ROOT.'/bimpcontract?fc=contrat&id='.$id_contrat.'&navtab-maintabs=echeancier">Page de l\'échéancier du contrat</a></b></h5>';

@@ -2225,9 +2225,9 @@ class BimpObject extends BimpCache
                         }
                         if ($this->isChild($instance)) {
                             $filters[$instance->getParentIdProperty()] = $this->id;
-                        } elseif (empty($filters)) {
+                        } elseif (empty($filters) || get_class($instance) == "BimpObject") {
                             $msg = 'Appel à getChildrenList() invalide' . "\n";
-                            $msg .= 'Obj: ' . $this->object_name . ' - instance: ' . $instance->object_name . "\n";
+                            $msg .= 'Obj: ' . $this->object_name . ' - instance: ' . $instance->object_name .' - class: ' . get_class($instance) . "\n";
                             $msg .= 'ERP: ' . DOL_URL_ROOT;
 
                             mailSyn2('ERREUR getChildren', 'f.martinez@bimp.fr', 'no-replay@bimp.fr', $msg);

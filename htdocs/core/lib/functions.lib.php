@@ -1021,8 +1021,11 @@ function dol_syslog($message, $level = LOG_INFO, $ident = 0, $suffixinfilename='
         
         /*mod drsi*/
         if(! empty($message)){
-            if(stripos($message, "deprecated") !== false)
-                    $suffixinfilename = "_deprecated";
+            if(stripos($message, "deprecated") !== false){
+                if(function_exists("synGetDebug"))
+                    $message .= synGetDebug();
+                $suffixinfilename = "_deprecated";
+            }
             if(stripos($message, "Creating default object from empty value") !== false)
                     $suffixinfilename = "_recurent";
             if(stripos($message, "Ldap::") !== false)

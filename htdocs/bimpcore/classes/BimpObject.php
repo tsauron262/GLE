@@ -2230,7 +2230,7 @@ class BimpObject extends BimpCache
                             $msg .= 'Obj: ' . $this->object_name . ' - instance: ' . $instance->object_name .' - class: ' . get_class($instance) . "\n";
                             $msg .= 'ERP: ' . DOL_URL_ROOT;
 
-                            mailSyn2('ERREUR getChildren', 'f.martinez@bimp.fr', 'no-replay@bimp.fr', $msg);
+                            mailSyn2('ERREUR getChildren', 'dev@bimp.fr', 'no-replay@bimp.fr', $msg);
 
                             return array();
                         }

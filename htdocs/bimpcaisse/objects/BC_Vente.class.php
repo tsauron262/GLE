@@ -2651,7 +2651,7 @@ class BC_Vente extends BimpObject
             }
         }
 
-        //$facture->dol_object->generateDocument(self::$facture_model, $langs);
+        $facture->dol_object->generateDocument(self::$facture_model, $langs);
 
         return $facture->id;
     }

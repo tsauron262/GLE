@@ -150,24 +150,6 @@ class BC_Caisse extends BimpObject
         return $caisses;
     }
 
-    public function getCurrentSession()
-    {
-        $session = null;
-
-        if ($this->isLoaded()) {
-            $session = BimpCache::findBimpObjectInstance('bimpcaisse', 'BC_CaisseSession', array(
-                        'id_caisse'      => (int) $this->id,
-                        'id_user_closed' => 0
-                            ), true);
-
-            if (!BimpObject::objectLoaded($session)) {
-                $session = null;
-            }
-        }
-
-        return $session;
-    }
-
     // Rendu HTML
 
     public static function renderUserCaisseInput()
@@ -356,43 +338,26 @@ class BC_Caisse extends BimpObject
         return $errors;
     }
 
-    public function deletePaiement($id_bc_paiement, $code_mode_paiement, $amount)
-    {
-        $errors = array();
-
-        if ($this->isLoaded($errors)) {
-            $paiement = BimpCache::getBimpObjectInstance('bimpcaisse', 'BC_Paiement', (int) $id_bc_paiement);
-            if (!BimpObject::objectLoaded($paiement)) {
-                $errors[] = 'Le paiement en caisse #' . $id_bc_paiement . ' n\'existe pas';
-            } else {
-                if ($code_mode_paiement === 'LIQ') {
-                    $session = $this->getCurrentSession();
-                    if (BimpObject::objectLoaded($session) && (int) $session->id === (int) $paiement->getData('id_caisse_session')) {
-                        // Correction du fonds de caisse: 
-                        
-                    }
-                }
-            }
-        }
-
-        return $errors;
-    }
-
     public static function onPaiementDelete($id_paiement, $code_mode_paiement, $amount)
     {
         $errors = array();
 
-        $bc_paiements = BimpCache::getBimpObjectObjects('bimpcaisse', 'BC_Paiement', array(
+        $bc_paiement = BimpCache::findBimpObjectInstance('bimpcaisse', 'BC_Paiement', array(
                     'id_paiement' => (int) $id_paiement
-        ));
+                        ), true);
+        if (BimpObject::objectLoaded($bc_paiement)) {
+            $caisse = $bc_paiement->getChildObject('caisse');
+            $errors = $bc_paiement->delete($warnings, false);
 
-        foreach ($bc_paiements as $paiement) {
-            $caisse = $paiement->getChildObject('caisse');
-
-            if (BimpObject::objectLoaded($caisse)) {
-                $errors = array_merge($errors, $caisse->deletePaiement($paiement->id));
-            } else {
-                $errors[] = 'Caisse absente pour la suppression du paiement en caisse #' . $paiement->id;
+            if (!count($errors)) {
+                if (BimpObject::objectLoaded($caisse)) {
+                    if ($code_mode_paiement === 'LIQ') {
+                        // Correction du fonds de caisse
+                        $fonds = (float) $caisse->getData('fonds');
+                        $fonds -= (float) $amount;
+                        $caisse->updateField('fonds', $fonds);
+                    }
+                }
             }
         }
 

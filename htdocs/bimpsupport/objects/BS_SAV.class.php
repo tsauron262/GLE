@@ -2331,6 +2331,15 @@ class BS_SAV extends BimpObject
 
         $errors = array();
         $error_msg = 'Echec de l\'envoi de la notification au client';
+        
+        
+        if (!$msg_type) {
+            if (BimpTools::isSubmit('msg_type')) {
+                $msg_type = BimpTools::getValue('msg_type');
+            } else {
+                return array($error_msg . ' (Type de message absent)');
+            }
+        }
 
         $extra_data = BimpTools::getValue('extra_data', array());
         if (isset($extra_data['nbJours'])) {
@@ -2372,13 +2381,10 @@ class BS_SAV extends BimpObject
                     $tabFile[] = $fileProp;
                     $tabFile2[] = "application/pdf";
                     $tabFile3[] = $ref_propal . ".pdf";
-                    dol_syslog('SAV "' . $this->getRef() . '" - ID ' . $this->id . ': pdf devis OK ', LOG_ERR, 0, "_devissav");
                 } elseif (in_array((int) $this->getData('status'), self::$need_propal_status)) {
                     $errors[] = 'Attention: PDF du devis non trouvé et donc non envoyé au client File : ' . $fileProp;
                     dol_syslog('SAV "' . $this->getRef() . '" - ID ' . $this->id . ': échec envoi du devis au client ' . print_r($errors, 1), LOG_ERR, 0, "_devissav");
-                } else {
-                    $errors[] = 'Attention: PDF du devis pas encore créé File : ' . $fileProp;
-                }
+                } 
             } else {
                 unset($propal);
                 $propal = null;
@@ -2396,13 +2402,6 @@ class BS_SAV extends BimpObject
         $textSuivie = "\n <a href='" . DOL_MAIN_URL_ROOT . "/bimpsupport/public/page.php?serial=" . $this->getChildObject("equipment")->getData("serial") . "&id_sav=" . $this->id . "&user_name=" . substr($this->getChildObject("client")->dol_object->name, 0, 3) . "'>Vous pouvez suivre l'intervention ici.</a>";
 
 
-        if (!$msg_type) {
-            if (BimpTools::isSubmit('msg_type')) {
-                $msg_type = BimpTools::getValue('msg_type');
-            } else {
-                return array($error_msg . ' (Type de message absent)');
-            }
-        }
 
         $subject = '';
         $mail_msg = '';

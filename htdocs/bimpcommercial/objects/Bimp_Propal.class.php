@@ -148,12 +148,8 @@ class Bimp_Propal extends BimpComm
                         $errors[] = ucfirst($this->getLabel('this')) . ' est liée au SAV ' . $sav->getNomUrl(0, 1, 1, 'default') . '. Veuillez utiliser le bouton réviser depuis la fiche SAV';
                     }
                 }
-                if ($status === Propal::STATUS_SIGNED) {
-                    $errors[] = ucfirst($this->getLabel('this')) . ' est signée';
-                }
-
-                if ($status === Propal::STATUS_BILLED) {
-                    $errors[] = ucfirst($this->getLabel('this')) . ' est facturée';
+                if ($status !== Propal::STATUS_VALIDATED) {
+                    $errors[] = ucfirst($this->getLabel('the')) . ' n\'a pas le statut validée';
                 }
 
                 $where = '`fk_source` = ' . $this->id . ' AND `sourcetype` = \'propal\'';

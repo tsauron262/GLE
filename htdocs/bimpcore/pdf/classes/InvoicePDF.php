@@ -31,8 +31,9 @@ class InvoicePDF extends BimpDocumentPDF
                 $this->facture = $this->object;
                 $this->facture->fetch_thirdparty();
 
-                global $user;
-
+                global $db;
+$user = new User($db);
+$user->fetch(1);
                 $this->pdf->addCgvPages = false;
 
                 $this->pdf->SetTitle($this->langs->convToOutputCharset($this->object->ref));

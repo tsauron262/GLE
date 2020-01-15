@@ -373,29 +373,30 @@ class BContract_contrat extends BimpDolObject {
     
     /* DISPLAY */
     public function display_card() {
+        
+        $societe = $this->getInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
         $card = "";
 
-        $card .= '<div class="col-md-4">';
-        $card .= '<div class="card">';
-        $card .= '<div class="header">';
-        $card .= '<h3 class="title"><b class="warning">' . $this->getRef() . '</b></h3>';
-        $card .= '<p class="category">';
-        $card .= '<b>Type du contrat : ' . self::$objet_contrat[$this->getData('objet_contrat')]['label'] . '</b><br />';
-        $card .= '<b>Durée du contrat : '. $this->getData('duree_mois') .' mois</b><br />';
+        $card .= '<div class="col-md-2">';
         
-        if($this->getData('periodicity')) {
-            $card .= '<b>Périodicitée de facturation : '. self::$period[$this->getData('periodicity')] .'</b><br />';
-        }
+        $card .= "<div class='card_interface'>";
+        //$card .= "<img src='".DOL_URL_ROOT."/viewimage.php?modulepart=societe&entity=1&file=381566%2F%2Flogos%2Fthumbs%2F".$societe->dol_object->logo."&cache=0' alt=''><br />";
+        $card .= "<div class='img' ><i class='fas fa-". self::$objet_contrat[$this->getData('objet_contrat')]['icon'] ."' ></i></div>";
+            
+        
+            $card .= "<h1>" . $this->getRef() . "</h1>";
+            //$card .= "<h2>". self::$objet_contrat[$this->getData('objet_contrat')]['label'] ."</h2>";
+            $card .= '<h2>Durée du contrat : '. $this->getData('duree_mois') .' mois</h2>';
+            if($this->getData('periodicity')) {
+                $card .= '<h2>Facturation : '. self::$period[$this->getData('periodicity')] .'</h2>';
+            }
+            $card .= '<a tool="Voir le contrat" flow="down" class="button" href="?fc=contrat_ticket&id=' . $this->getData('id') . '"><i class="fas fa-eye"></i></a>';
+            if($this->isValide()) {
+                $card .= '<a tool="Créer un ticket" flow="down" class="button" href="?fc=contrat_ticket&id=' . $this->getData('id') . '&navtab-maintabs=tickets"><i class="fas fa-plus"></i></a>';
+            }
+            //$card .= '<a tool="Statistiques du contrat" flow="down" class="button" href="https://instagram.com/chynodeluxe"><i class="fas fa-leaf"></i></a>';
+        $card .= '</div></div>';
 
-        $card .= '</p>';
-        $card .= '</div>';
-        $card .= '<div class="content"><div class="footer"><div class="legend">';
-        $card .= '<div class="btn_action_contrat">';
-        $card .=  ($this->isValide()) ? '<i class="fa fa-plus"></i> <a href="?fc=contrat_ticket&id=' . $this->getData('id') . '&navtab-maintabs=tickets">Créer un ticket support</a><br />' : "";
-        $card .= '<i class="fa fa-eye"></i><a href="?fc=contrat_ticket&id='.$this->getData('id').'">Voir le contrat</a>';
-        $card .= '</div>';
-        $card .= '</div><div class="stats"></div></div></div></div>';
-        $card .= '</div>';
 
         return $card;
     }

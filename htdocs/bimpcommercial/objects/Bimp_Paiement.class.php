@@ -24,6 +24,8 @@ class Bimp_Paiement extends BimpObject
         parent::__construct($module, $object_name);
     }
     
+    // Droits user: 
+    
     public function canEdit() {
         if($this->getData('exported') == 1) {
             return 0;
@@ -34,6 +36,7 @@ class Bimp_Paiement extends BimpObject
     public function canDelete() {
         return $this->canEdit();
     }
+    
     // Getters: 
 
     public function getAmountFromFacture()
@@ -586,6 +589,13 @@ class Bimp_Paiement extends BimpObject
         }
 
         return null;
+    }
+    
+    // Traitements: 
+    
+    public function onDelete()
+    {
+        
     }
 
     // Overrides: 

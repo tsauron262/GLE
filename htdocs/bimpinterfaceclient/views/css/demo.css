@@ -208,7 +208,7 @@
 
 .card_interface {
   background-size: contain;
-  width:90%;
+  min-width:90%;
   border-radius: 10px;
   box-shadow: 0 10px 30px -5px rgba(60, 60, 60, 0.2);
   text-align: center;
@@ -407,9 +407,9 @@
   animation: tooltips-vert 300ms ease-out forwards;
 }
 
-[tooltip][flow^="left"]:hover::before,
-[tooltip][flow^="left"]:hover::after,
-[tooltip][flow^="right"]:hover::before,
-[tooltip][flow^="right"]:hover::after {
+[tool][flow^="left"]:hover::before,
+[tool][flow^="left"]:hover::after,
+[tool][flow^="right"]:hover::before,
+[tool][flow^="right"]:hover::after {
   animation: tooltips-horz 300ms ease-out forwards;
 }

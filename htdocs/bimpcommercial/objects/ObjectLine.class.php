@@ -67,6 +67,14 @@ class ObjectLine extends BimpObject
     public $remises = null;
     public $bimp_line_only = false;
     protected $remises_total_infos = null;
+    
+    
+    public static function traiteSerialApple($serial){
+        if(stripos($serial, 'S') === 0){
+            return substr($serial,1);
+        }
+        return $serial;
+    }
 
     public function __construct($module, $object_name)
     {

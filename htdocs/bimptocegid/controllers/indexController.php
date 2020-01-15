@@ -4,6 +4,8 @@
         
         public function renderHtml() {
             
+            die('Momentanément indisponible, contactez Tommy');
+            
             $export = BimpObject::getInstance('bimptocegid', 'BTC_export');
 
             $html = '<h3><b>BIMP</b><b class="warning" >to</b><b>CEGID</b></h3>';

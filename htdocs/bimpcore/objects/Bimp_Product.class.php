@@ -1868,9 +1868,9 @@ class Bimp_Product extends BimpObject
             // Use main commercial Franck PINERI
             if (!$email_sent) {
                 require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
-                $user = new User($this->db->db);
-                $user->fetch((int) 62);
-                $warnings = array_merge($warnings, $this->sendEmailCommandeValid($commande, $user->email));
+                $userT = new User($this->db->db);
+                $userT->fetch((int) 62);
+                $warnings = array_merge($warnings, $this->sendEmailCommandeValid($commande, $userT->email));
                 $email_sent = true;
                 continue;
             }
@@ -1906,10 +1906,10 @@ class Bimp_Product extends BimpObject
             // Use main commercial Franck PINERI
             if (!$email_sent) {
                 require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
-                $user = new User($this->db->db);
-                $user->fetch((int) 62);
-                if (BimpObject::objectLoaded($user)) {
-                    $errors = array_merge($warnings, $this->sendEmailPropalValid($propal, $user->email));
+                $userT = new User($this->db->db);
+                $userT->fetch((int) 62);
+                if (BimpObject::objectLoaded($userT)) {
+                    $errors = array_merge($warnings, $this->sendEmailPropalValid($propal, $userT->email));
                     $email_sent = true;
                 }
                 continue;
@@ -1925,11 +1925,11 @@ class Bimp_Product extends BimpObject
                 continue;
 
             if (BimpObject::objectLoaded($vente)) {
-                $user = new User($this->db->db);
-                $user->fetch((int) $vente->getData('id_user_resp'));
+                $userT = new User($this->db->db);
+                $userT->fetch((int) $vente->getData('id_user_resp'));
 
-                if (BimpObject::objectLoaded($user)) {
-                    $warnings = array_merge($warnings, $this->sendEmailVenteCaisseValid($vente, $user->email));
+                if (BimpObject::objectLoaded($userT)) {
+                    $warnings = array_merge($warnings, $this->sendEmailVenteCaisseValid($vente, $userT->email));
                 }
             }
         }
@@ -1987,9 +1987,9 @@ class Bimp_Product extends BimpObject
             // Use main commercial Franck PINERI
             if (!$email_sent) {
                 require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
-                $user = new User($this->db->db);
-                $user->fetch((int) 62);
-                $errors = array_merge($errors, $this->sendEmailCommandeRefuse($commande, $user->email));
+                $userT = new User($this->db->db);
+                $userT->fetch((int) 62);
+                $errors = array_merge($errors, $this->sendEmailCommandeRefuse($commande, $userT->email));
                 $email_sent = true;
                 continue;
             }
@@ -2022,9 +2022,9 @@ class Bimp_Product extends BimpObject
             // Use main commercial Franck PINERI
             if (!$email_sent) {
                 require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
-                $user = new User($this->db->db);
-                $user->fetch((int) 62);
-                $errors = array_merge($errors, $this->sendEmailPropalRefuse($commande, $user->email));
+                $userT = new User($this->db->db);
+                $userT->fetch((int) 62);
+                $errors = array_merge($errors, $this->sendEmailPropalRefuse($commande, $userT->email));
                 $email_sent = true;
                 continue;
             }
@@ -2036,11 +2036,11 @@ class Bimp_Product extends BimpObject
         foreach ($ventes as $id_vente) {
             $vente = BimpCache::getBimpObjectInstance('bimpcaisse', 'BC_Vente', (int) $id_vente);
             if (BimpObject::objectLoaded($vente)) {
-                $user = new User($this->db->db);
-                $user->fetch((int) $vente->getData('id_user_resp'));
+                $userT = new User($this->db->db);
+                $userT->fetch((int) $vente->getData('id_user_resp'));
 
-                if (BimpObject::objectLoaded($user)) {
-                    $errors = array_merge($errors, $this->sendEmailVenteCaisseRefuse($vente, $user->email));
+                if (BimpObject::objectLoaded($userT)) {
+                    $errors = array_merge($errors, $this->sendEmailVenteCaisseRefuse($vente, $userT->email));
                 }
             }
         }

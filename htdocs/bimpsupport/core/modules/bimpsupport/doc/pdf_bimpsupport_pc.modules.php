@@ -202,7 +202,7 @@ class pdf_bimpsupport_pc extends ModeleBimpSupport
 
             $pdf->SetXY('16', '53.8');
             $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 8);
-            $pdf->MultiCell(50, 6, dol_print_date($sav->getData('date_create')), 0, 'L');
+            $pdf->MultiCell(50, 6, dol_print_date($this->db->jdate($sav->getData('date_create'))), 0, 'L');
 
             if ((int) $sav->getData('user_create') > 0) {
                 $user_author = $sav->getChildObject('user_create');

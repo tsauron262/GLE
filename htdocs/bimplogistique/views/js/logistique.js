@@ -516,6 +516,12 @@ function onShipmentFactureFormSubmit($form, extra_data) {
                         if ($input.length) {
                             line.qty = parseFloat($input.val());
                         }
+
+                        $input = $(this).find('input.line_facture_pa_editable');
+                        if ($input.length) {
+                            line.pa_editable = parseInt($input.val());
+                        }
+
                         var $equipments_row = $container.find('#facture_line_' + id_line + '_equipments');
                         if ($equipments_row.length) {
                             $equipments_row.find('[name="line_' + id_line + '_facture_' + id_facture + '_equipments[]"]:checked').each(function () {
@@ -566,6 +572,12 @@ function onShipmentsBulkFactureFormSubmit($form, extra_data) {
                         if ($input.length) {
                             line.qty = parseFloat($input.val());
                         }
+
+                        $input = $(this).find('input.line_facture_pa_editable');
+                        if ($input.length) {
+                            line.pa_editable = parseInt($input.val());
+                        }
+
                         var $equipments_row = $container.find('#facture_line_' + id_line + '_equipments');
                         if ($equipments_row.length) {
                             $equipments_row.find('[name="line_' + id_line + '_facture_0_equipments[]"]:checked').each(function () {
@@ -619,6 +631,11 @@ function saveCommandeLineFactures($button, id_line) {
                 if (isNaN(data.qty)) {
                     bimp_msg('Quantités invalides pour la facture "' + $row.data('facnumber') + '"<br/>Veuillez corriger', 'danger', null, true);
                     return;
+                }
+
+                var $input = $row.find('input.line_facture_pa_editable');
+                if ($input.length) {
+                    data.pa_editable = parseInt($input.val());
                 }
                 data.equipments = [];
 
@@ -712,6 +729,12 @@ function onFactureFormSubmit($form, extra_data) {
                 qty = parseFloat($qty_input.val());
             }
 
+            var $paEditableInput = $(this).find('input.line_facture_pa_editable');
+            var pa_editable = 1;
+            if ($paEditableInput.length) {
+                pa_editable = parseInt($paEditableInput.val());
+            }
+
             var equipments = [];
             var $row = $form.find('#facture_line_' + id_line + '_equipments');
             if ($row.length) {
@@ -723,6 +746,7 @@ function onFactureFormSubmit($form, extra_data) {
             lines.push({
                 id_line: id_line,
                 qty: qty,
+                pa_editable: pa_editable,
                 equipments: equipments
             });
         }

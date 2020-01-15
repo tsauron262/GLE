@@ -65,6 +65,7 @@ forms:
             pa_editable: 
                 label: Activer la correction automatique du prix d'achat
                 field: pa_editable
+                
 filters_panels: 
     default: 
         filters: 
@@ -76,6 +77,9 @@ filters_panels:
             paye: 
                 field: paye
                 child: parent
+            pa_editable: 
+                label: Correction auto du PA
+                field: pa_editable
                 
 lists_cols: 
     reval: 
@@ -85,6 +89,9 @@ lists_cols:
     date_valid: 
         field: date_valid
         child: parent
+    pa_editable: 
+        label: Corr. auto PA
+        field: pa_editable
         
 lists: 
     default: 

@@ -67,6 +67,14 @@ class ObjectLine extends BimpObject
     public $remises = null;
     public $bimp_line_only = false;
     protected $remises_total_infos = null;
+    
+    
+    public static function traiteSerialApple($serial){
+        if(stripos($serial, 'S') === 0){
+            return substr($serial,1);
+        }
+        return $serial;
+    }
 
     public function __construct($module, $object_name)
     {
@@ -600,7 +608,7 @@ class ObjectLine extends BimpObject
             }
             if ($this->isParentEditable() && in_array((int) $this->getData('type'), array(self::LINE_PRODUCT, self::LINE_FREE)) && !(int) $this->getData('id_parent_line')) {
                 $line_instance = BimpObject::getInstance($this->module, $this->object_name);
-                $onclick = $line_instance->getJsLoadModalForm('default', 'Ajout d\\\'une sous-ligne à la ligne n°' . $this->getData('position'), array(
+                $onclick = $line_instance->getJsLoadModalForm((is_a($this, 'FournObjectLine'))? 'fournline' : 'default', 'Ajout d\\\'une sous-ligne à la ligne n°' . $this->getData('position'), array(
                     'objects' => array(
                         'remises' => $this->getClientDefaultRemiseFormValues()
                     ),

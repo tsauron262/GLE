@@ -183,7 +183,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $pdf->setColor('fill', 235, 235, 235);
                 $pdf->setFont('', 'B', 7);
                 $pdf->Cell($W * 2, 7, "TOTAL $designation", 1, null, 'L', true);
-                $pdf->Cell($W * 2, 7, $total->$designation . "€", 1, null, 'C', true);
+                $pdf->Cell($W * 2, 7, number_format($total->$designation, 2, '.', "") . "€", 1, null, 'C', true);
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 7, "", 0, 'C');
             }
         }
@@ -247,6 +247,33 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
         $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, $parag2, 0, 'L');
         $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 2, "", 0, 'C');
         $pdf->SetFont('', 'B', 9);
+        $pdf->setDrawColor(236, 147, 0);
+        
+        if($contrat->note_public) {
+            $pdf->Line(15, 80, 195, 80);
+            $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, 'Note particulière au contrat', 0, 'C');
+            $pdf->Line(15, 88, 195, 88);
+            $pdf->setY(90);
+            $pdf->setFont('','', 8);
+            $chaine_description = $contrat->note_public;
+            
+            $chaine_description = str_replace(":&nbsp;", ' ', $chaine_description);  
+            $chaine_description = str_replace("<li>", '', $chaine_description);
+            $chaine_description = str_replace("</li>", "\n", $chaine_description);
+            $chaine_description = str_replace("<br>", "\n", $chaine_description);
+            $chaine_description = str_replace("<br/>", "\n", $chaine_description);
+            $chaine_description = str_replace("<br />", "\n", $chaine_description);
+            $chaine_description = str_replace("<ul>", '', $chaine_description);
+            $chaine_description = str_replace("</ul>", '', $chaine_description);
+            $chaine_description = str_replace("<p>", '', $chaine_description);
+            $chaine_description = str_replace("</p>", '', $chaine_description);
+            $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, $chaine_description, 0, 'L');
+            $pdf->setDrawColor(240, 240, 240);
+            $pdf->Line(15, $pdf->getY() + 3, 195, $pdf->getY() + 3);
+            $pdf->setY($pdf->getY() + 4);
+            $pdf->SetFont('', 'B', 9);
+        }
+        
         $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, 'Liste des sites d\'intervention', 0, 'L');
         $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 2, "", 0, 'C');
         $pdf->SetFont('', '', 8);

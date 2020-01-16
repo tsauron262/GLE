@@ -65,14 +65,13 @@ class Interfacevalidate extends DolibarrTriggers
         if ($action == 'ORDER_VALIDATE' || $action == 'BILL_VALIDATE') {
             if ($action == 'ORDER_VALIDATE') {
                 $bimp_object = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $object->id);
-
             } else {
                 $bimp_object = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $object->id);
                 $bimp_object->onValidate();
             }
-            
+
             if (is_object($bimp_object) && $bimp_object->isLoaded()) {
-                if($action != 'BILL_VALIDATE' && $bimp_object->getData('type') != 'M'){                
+                if ($action != 'BILL_VALIDATE' && $bimp_object->getData('type') != 'M') {
                     $client = $bimp_object->getChildObject('client');
                     if (is_object($client) && $client->isLoaded()) {
                         if (!$client->canBuy($errors)) {
@@ -306,6 +305,17 @@ class Interfacevalidate extends DolibarrTriggers
                 if (in_array($object->cond_reglement_id, array(0, 39)) || $object->cond_reglement_code == "VIDE") {
                     setEventMessages("Merci de séléctionner les conditions de réglement", null, 'errors');
                     return -2;
+                }
+            }
+        }
+
+        if ($action == 'PAYMENT_CUSTOMER_DELETE') {
+            $bimp_object = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Paiement', $object->id);
+            if (BimpObject::objectLoaded($bimp_object)) {
+                $errors = $bimp_object->onDelete();
+                if (count($errors)) {
+                    setEventMessages(BimpTools::getMsgFromArray($errors), null, 'errors');
+                    return -1;
                 }
             }
         }

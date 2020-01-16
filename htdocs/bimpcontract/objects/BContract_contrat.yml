@@ -57,7 +57,14 @@ objects:
     echeancier:
         instance:
             bimp_object: BContract_echeancier
-          
+    
+    user:
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: Bimp_User
+            id_object:
+                field_value: fk_user_author       
 
 table: contrat
 controller: contrat
@@ -103,8 +110,15 @@ fields:
         type: int
         values:
             array: status_list
+    fk_user_author:
+        label: Créé par
+        type: id_object
+        object: user
+        dol_prop: user_author_id
+    note_public:
+        label: Note particulière au contrat
+        type: html
         
-            
     # Extrafields
     date_start:
         label: Date d'effet du contrat
@@ -256,9 +270,7 @@ fields_tables:
         rows: 
             - field: fk_soc
               display: card
-            - label: Fichier PDF
-              value: 
-                  callback: displayPDFButton
+            - field: note_public
    
               
                               
@@ -295,6 +307,8 @@ lists:
                 field: datec
             date_contrat:
                 field: date_contrat
+            fk_user_author:
+                field: fk_user_author
     
     client:
         extends: default
@@ -318,6 +332,7 @@ forms:
             - field: syntec
             - field: tacite
             - field: denounce
+            - field: note_public
     
     add_contrat:
         rows:

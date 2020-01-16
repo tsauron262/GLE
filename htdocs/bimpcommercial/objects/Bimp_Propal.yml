@@ -305,6 +305,11 @@ forms:
                         global: user
               input: 
                 type: search_user
+            - custom: 1
+              label: Note particulière au contrat
+              input_name: note_public
+              input:
+                  type: html
             
 fields_tables: 
     infos: 

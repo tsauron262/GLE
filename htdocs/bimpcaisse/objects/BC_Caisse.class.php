@@ -338,6 +338,32 @@ class BC_Caisse extends BimpObject
         return $errors;
     }
 
+    public static function onPaiementDelete($id_paiement, $code_mode_paiement, $amount)
+    {
+        $errors = array();
+
+        $bc_paiement = BimpCache::findBimpObjectInstance('bimpcaisse', 'BC_Paiement', array(
+                    'id_paiement' => (int) $id_paiement
+                        ), true);
+        if (BimpObject::objectLoaded($bc_paiement)) {
+            $caisse = $bc_paiement->getChildObject('caisse');
+            $errors = $bc_paiement->delete($warnings, false);
+
+            if (!count($errors)) {
+                if (BimpObject::objectLoaded($caisse)) {
+                    if ($code_mode_paiement === 'LIQ') {
+                        // Correction du fonds de caisse
+                        $fonds = (float) $caisse->getData('fonds');
+                        $fonds -= (float) $amount;
+                        $caisse->updateField('fonds', $fonds);
+                    }
+                }
+            }
+        }
+
+        return $errors;
+    }
+
     // Acions: 
 
     public function actionConnectUser($data, &$success)

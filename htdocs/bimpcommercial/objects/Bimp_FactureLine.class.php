@@ -37,6 +37,9 @@ class Bimp_FactureLine extends ObjectLine
     public function isFieldEditable($field, $force_edit = false)
     {
         switch ($field) {
+            case 'pa_editable':
+                return 1;
+                
             case 'remise_crt':
             case 'remise_crt_percent':
                 if (!$this->isParentDraft()) {

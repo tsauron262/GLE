@@ -87,6 +87,15 @@ class BContract_contratLine extends BContract_contrat {
                             }
                             $html .= '</td>';
                         
+                    } elseif($equipment->find(['serial' => substr($serial, 1)], true) && BimpTools::getContext() != 'public') { 
+                        $html .= '<td>';
+                            $html .= $equipment->getNomUrl(true, true, true);
+                            $html .= '</td>';
+                            $html .= '<td>';
+                            if($equipment->getData('imei')) {
+                                $html .= $equipment->getData('imei');
+                            }
+                            $html .= '</td>';
                     } else {
                         $html .= '<td>';
                         $html .= $serial;

@@ -196,9 +196,10 @@ class TransferLine extends BimpObject
         $sql = 'SELECT id, quantity_sent';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . $this->getTable();
         $sql .= ' WHERE id_transfer=' . $id_transfer;
-        $sql .= ' AND id_product=' . $id_product;
         if ($id_equipment > 0)
             $sql .= ' AND id_equipment=' . $id_equipment;
+        else
+            $sql .= ' AND id_product=' . $id_product;
 
         $result = $this->db->db->query($sql);
         if ($result and $this->db->db->num_rows($result) > 0) {

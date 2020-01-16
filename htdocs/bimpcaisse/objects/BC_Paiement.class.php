@@ -7,10 +7,6 @@ class BC_Paiement extends BimpObject
 
     public function isEditable($force_edit = false, &$errors = array())
     {
-        if (!$this->isLoaded($errors)) {
-            return 0;
-        }
-
         $caisse_session = $this->getChildObject('caisse_session');
         $caisse = $this->getChildObject('caisse');
         if (BimpObject::objectLoaded($caisse_session)) {

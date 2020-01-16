@@ -1875,14 +1875,14 @@ class Bimp_Facture extends BimpComm
 
             $html .= '<div class="buttonsContainer align-center">';
             if ($this->isActionAllowed('useRemise') && $this->canSetAction('useRemise')) {
-                $discount_amount = (float) $this->getSocAvailableDiscountsAmounts();
-                if ($discount_amount) {
+//                $discount_amount = (float) $this->getSocAvailableDiscountsAmounts();
+//                if ($discount_amount) {
                     $html .= '<button class="btn btn-default" onclick="' . $this->getJsActionOnclick('useRemise', array(), array(
                                 'form_name' => 'use_remise'
                             )) . '">';
                     $html .= BimpRender::renderIcon('fas_file-import', 'iconLeft') . 'Appliquer un avoir disponible';
                     $html .= '</button>';
-                }
+//                }
             }
 
             if ($this->isActionAllowed('convertToReduc') && $this->canSetAction('convertToReduc')) {

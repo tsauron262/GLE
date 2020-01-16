@@ -21,16 +21,20 @@ class BContract_echeancier extends BimpObject {
     
     public function renderlistEndPeriod() {
         $parent = $this->getParentInstance();
-        $next_facture_date = $this->getData('next_facture_date');
-        $start = New DateTime($next_facture_date);
-        $enderDates = New DateTime($next_facture_date);
-        $enderDates->add(new DateInterval("P" . $parent->getData('periodicity') . 'M'))->sub(new DateInterval("P1D"));
+        $start = New DateTime($this->getData('next_facture_date'));
+        $for_return_array_end_date = date('Y-m-d', mktime(0,0,0, $start->format('m') + 1, 0, $start->format('Y')));
+        $for_return_array_start_date = date('Y-m-d', mktime(0,0,0, $start->format('m'), 1, $start->format('Y')));
+        $dateTime_end_date = new DateTime($for_return_array_end_date);        
         $reste_periode = $parent->reste_periode();
         $returnedArray = Array();
+
         for($rp = 1; $rp <= $reste_periode; $rp++) {
-            $returnedArray[$enderDates->format('Y-m-d H:i:s')] = $enderDates->format('d / m / Y');
-            $enderDates->add(new DateInterval("P" . $parent->getData('periodicity') . 'M'));
+            $returnedArray[$dateTime_end_date->format('Y-m-d H:i:s')] = $dateTime_end_date->format('d / m / Y');
+            $start->add(new DateInterval("P" . $parent->getData('periodicity') . 'M'));
+            $for_return_array_end_date = date('Y-m-d', mktime(0,0,0, $start->format('m') + 1, 0, $start->format('Y')));
+            $dateTime_end_date = new DateTime($for_return_array_end_date);
         }
+
         return $returnedArray;
     }
     
@@ -212,11 +216,18 @@ class BContract_echeancier extends BimpObject {
             if(!$firstPassage){
                 $startedDate->add(new DateInterval("P" . $data->periodicity . "M"));
             }
+            
+            $start_mktime = date('Y-m-d', mktime(0,0,0, $startedDate->format('m'), 1, $startedDate->format('Y')));
+            $end_mktime =date('Y-m-d', mktime(0,0,0, $startedDate->format('m') + 1, 0, $startedDate->format('Y')));
+            
+            $dateTime_start_mkTime = new DateTime($start_mktime);
+            $dateTime_end_mkTime = new DateTime($end_mktime);
+            
             $firstPassage = false;
             $amount  = $data->reste_a_payer / $data->reste_periode;
             $tva = $amount * 0.2;
             $html .= '<tr class="objectListItemRow" >';
-            $html .= '<td style="text-align:center" >Du <b>'.$startedDate->format('d / m / Y').'</b> au <b>'.$enderDate->format('d / m / Y').'</b></td>';
+            $html .= '<td style="text-align:center" >Du <b>'.$dateTime_start_mkTime->format('d/m/Y').'</b> au <b>'.$dateTime_end_mkTime->format('d/m/Y').'</b></td>';
                 $html .=  '<td style="text-align:center">' . price($amount) . ' € </td>'
                         . '<td style="text-align:center">' . price($tva) . ' € </td>'
                     . '<td style="text-align:center">' . price($amount + $tva) . ' € </td>'
@@ -226,7 +237,7 @@ class BContract_echeancier extends BimpObject {
                 if($firstDinamycLine && $can_create_next_facture){
                     // ICI NE PAS AFFICHER QUAND LA FACTURE EST PAS VALIDER
                     if($user->rights->facture->creer) {
-                        $html .= '<span class="rowButton bs-popover" data-trigger="hover" data-placement="top"  data-content="Facturer la période" onclick="' . $this->getJsActionOnclick("createFacture", array('date_start' => $startedDate->format('Y-m-d'), 'date_end' => $enderDate->format('Y-m-d'), 'total_ht' => $amount), array("success_callback" => $callback)) . '")"><i class="fa fa-plus" ></i></span>';
+                        $html .= '<span class="rowButton bs-popover" data-trigger="hover" data-placement="top"  data-content="Facturer la période" onclick="' . $this->getJsActionOnclick("createFacture", array('date_start' => $dateTime_start_mkTime->format('Y-m-d'), 'date_end' => $dateTime_end_mkTime->format('Y-m-d'), 'total_ht' => $amount), array("success_callback" => $callback)) . '")"><i class="fa fa-plus" ></i></span>';
                     }
                     $firstDinamycLine = false;
                 }

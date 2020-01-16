@@ -262,7 +262,7 @@ class BContract_contrat extends BimpDolObject {
         if ($this->isLoaded() && BimpTools::getContext() != 'public') {
             $status = $this->getData('statut');
             
-            if($user->id == 232 || $user->id == 460 || $user->admin) {
+            if(($user->id == 232 || $user->id == 460 || $user->admin) && $this->getData('statut') == 1) {
                 $buttons[] = array(
                     'label'   => 'Réouvrir le contrat',
                     'icon'    => 'fas_sync',

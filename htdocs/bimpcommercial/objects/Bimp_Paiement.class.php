@@ -43,20 +43,22 @@ class Bimp_Paiement extends BimpObject
 
     public function isEditable($force_edit = false, &$errors = array())
     {
-        if ($this->getData('exported') == 1) {
-            $errors[] = 'Paiement exporté en compta';
-            return 0;
-        }
+        if ($this->isLoaded()) {
+            if ($this->getData('exported') == 1) {
+                $errors[] = 'Paiement exporté en compta';
+                return 0;
+            }
 
-        if ($this->useCaisse) {
-            $bc_paiement = BimpCache::findBimpObjectInstance('bimpcaisse', 'BC_Paiement', array(
-                        'id_paiement' => (int) $this->id
-                            ), true);
-            if (BimpObject::objectLoaded($bc_paiement)) {
-                $p_errors = array();
-                if (!$bc_paiement->isEditable($force_edit, $p_errors)) {
-                    $errors[] = BimpTools::getMsgFromArray($p_errors);
-                    return 0;
+            if ($this->useCaisse) {
+                $bc_paiement = BimpCache::findBimpObjectInstance('bimpcaisse', 'BC_Paiement', array(
+                            'id_paiement' => (int) $this->id
+                                ), true);
+                if (BimpObject::objectLoaded($bc_paiement)) {
+                    $p_errors = array();
+                    if (!$bc_paiement->isEditable($force_edit, $p_errors)) {
+                        $errors[] = BimpTools::getMsgFromArray($p_errors);
+                        return 0;
+                    }
                 }
             }
         }

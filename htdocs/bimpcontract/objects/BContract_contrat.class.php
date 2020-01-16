@@ -1261,7 +1261,7 @@ class BContract_contrat extends BimpDolObject {
                 $interval = $now->diff($this->getEndDate());
                 //print_r($interval);
                 $intervale_days = $interval->days;
-                $intervale_days = 14;
+                //$intervale_days = 14;
                 
                 $renderAlert = true;
                 if($intervale_days < 365) {

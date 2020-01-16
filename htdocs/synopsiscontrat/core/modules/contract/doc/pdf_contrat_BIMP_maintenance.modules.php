@@ -249,7 +249,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
         $pdf->SetFont('', 'B', 9);
         $pdf->setDrawColor(236, 147, 0);
         
-        if($contrat->note_public) {
+        if(!empty($contrat->note_public) || !is_null($contrat->note_public)) {
             $pdf->Line(15, 80, 195, 80);
             $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, 'Note particulière au contrat', 0, 'C');
             $pdf->Line(15, 88, 195, 88);

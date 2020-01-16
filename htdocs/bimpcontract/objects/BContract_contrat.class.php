@@ -241,6 +241,15 @@ class BContract_contrat extends BimpDolObject {
         return self::getSocieteContactsArray($id_client, false);
     }
     
+    public function actionReopen() {
+        // Fonction temporaire pour le moment TODO a modifier
+        $this->updateField('statut', 0);
+        //$sql = "DELETE FROM llx_bcontract_prelevement WHERE id_contrat = " . $this->id;
+        
+        $this->db->delete('bcontract_prelevement', 'id_contrat = ' . $this->id);
+        
+    }
+    
     public function getActionsButtons()
     {
         global $conf, $langs, $user;
@@ -253,6 +262,13 @@ class BContract_contrat extends BimpDolObject {
         if ($this->isLoaded() && BimpTools::getContext() != 'public') {
             $status = $this->getData('statut');
             
+            if(($user->id == 232 || $user->id == 460 || $user->admin) && $this->getData('statut') == 1) {
+                $buttons[] = array(
+                    'label'   => 'Réouvrir le contrat',
+                    'icon'    => 'fas_sync',
+                    'onclick' => $this->getJsActionOnclick('reopen', array(), array())
+                );
+            }
             
             if($user->admin || $user->id == 460){
                 $buttons[] = array(

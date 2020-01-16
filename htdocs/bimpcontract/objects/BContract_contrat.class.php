@@ -2,7 +2,7 @@
 
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/objects/BimpDolObject.class.php';
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
-
+require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
 class BContract_contrat extends BimpDolObject {
     //public $redirectMode = 4;
     // Les status
@@ -377,7 +377,7 @@ class BContract_contrat extends BimpDolObject {
         $societe = $this->getInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
         $card = "";
 
-        $card .= '<div class="col-md-2">';
+        $card .= '<div class="col-md-4">';
         
         $card .= "<div class='card_interface'>";
         //$card .= "<img src='".DOL_URL_ROOT."/viewimage.php?modulepart=societe&entity=1&file=381566%2F%2Flogos%2Fthumbs%2F".$societe->dol_object->logo."&cache=0' alt=''><br />";
@@ -427,11 +427,7 @@ class BContract_contrat extends BimpDolObject {
     }
     
     /* ACTIONS */
-    
-    public function actionCloseContrat() {
-        
-    }
-    
+
     public function actionSigned($data, &$success) {
         $success = 'Contrat signé avec succes';
         $this->updateField('date_contrat', date('Y-m-d HH:ii:ss'));
@@ -1206,16 +1202,17 @@ class BContract_contrat extends BimpDolObject {
         $new_contrat->set('duree_mois', $data['duree_mois']);
         $new_contrat->set('tacite', $data['re_new']);
         $new_contrat->set('moderegl', $data['fk_mode_reglement']);
+        $new_contrat->set('note_public', $data['note_public']);
         if($data['use_syntec'] == 1) {
             $new_contrat->set('syntec', BimpCore::getConf('current_indice_syntec'));
         }
 //        echo '<pre>';
 //        print_r($commande->dol_object->lines); die();
         if($new_contrat->create() > 0) {
-            foreach($propal->dol_object->lines as $line) {
+            foreach($propal->dol_object->lines as $line) {                
                 $produit = $this->getInstance('bimpcore', 'Bimp_Product', $line->fk_product);
                 if($produit->getData('fk_product_type') == 1 && $line->total_ht != 0) {
-                    $description = ($line->description) ? $line->description : $line->libelle;
+                    $description = ($line->desc) ? $line->desc : $line->libelle;
                     $end_date = new DateTime($data['valid_start']);
                     $end_date->add(new DateInterval("P" . $data['duree_mois'] . "M"));
                     $new_contrat->dol_object->addLine($description, $line->subprice, $line->qty, $line->tva_tx, 0, 0, $line->fk_product, $line->remise_percent, $data['valid_start'], $end_date->format('Y-m-d'), 'HT', 0.0, 0, null, 0, 0, null, $line->rang);                 
@@ -1241,5 +1238,72 @@ class BContract_contrat extends BimpDolObject {
         }
         return $start_ref . $add_zero . $count_contrat;
     }
+    
+    public function renderHeaderExtraLeft()
+    {   
+        
+        $html = '';
+        
+        if($this->isLoaded()) {
+            if ($this->dol_object->element == 'contrat' && BimpTools::getContext() != 'public') {
+                $userCreationContrat = new User($this->db->db);
+                $userCreationContrat->fetch((int) $this->getData('fk_user_author'));
+
+                $html .= '<div class="object_header_infos">';
+                $create = new DateTime($this->getData('datec'));
+                $html .= 'Créé le <strong >' . $create->format('d / m / Y') . '</strong>';
+                $html .= ' par <strong >' . $userCreationContrat->getNomUrl(1) . '</strong>';
+                $html .= '</div>';
+            }
+            if($this->getData('statut') == self::CONTRAT_STATUS_VALIDE) {
+                
+                $now = new DateTime();
+                $interval = $now->diff($this->getEndDate());
+                //print_r($interval);
+                $intervale_days = $interval->days;
+                $intervale_days = 14;
+                
+                $renderAlert = true;
+                if($intervale_days < 365) {
+                    $html .= '<div class="object_header_infos">';
+                    if($intervale_days <= 365 && $intervale_days > 90) {
+                        $renderAlert = false;
+                        $alerte_type = 'info';
+                    } elseif($intervale_days <= 90 && $intervale_days > 30) {
+                        $alerte_type = 'info';
+                    } elseif($intervale_days <= 30 && $intervale_days > 15) {
+                        $alerte_type = 'warning';
+                    } else {
+                        $alerte_type = 'danger';
+                    }
+
+                    if($renderAlert)
+                        $html .= BimpRender::renderAlerts('Ce contrat expire dans <strong>'.$intervale_days.' jours</strong>', $alerte_type, false);
+                    else
+                        $html .= 'Ce contrat expire dans <strong>'.$intervale_days.' jours</strong>';
+                    $html .= '</div>';
+                }
+                
+            }
+        }
+        return $html;
+    }
+    
+    public function relance_renouvellement_commercial() {
+  
+    }
+    
+    public function cronContrat() {
+        
+        // Vérifier tous les contrats à clore.
+        
+        
+        
+        // Vérifier tous les contrats pour faire la relance aux commeciaux
+        
+        // Vérifier tout les contrats a facturé et envoyer aux commerciaux.
+        
+    }
+    
     
 }

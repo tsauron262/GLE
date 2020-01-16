@@ -50,6 +50,8 @@ lists:
         filters_panel: default
         add_object_row: 0
         filters_panel_open: 0
+        edit_btn: 1
+        edit_form: modif
         extra_btn: 
             callback: getDefaultListExtraButtons
         cols:
@@ -110,6 +112,10 @@ forms:
               input_name: attached_serials
               input: 
                 type: html
+    
+    modif:
+        rows:
+            - field: serial
                 
                 
         

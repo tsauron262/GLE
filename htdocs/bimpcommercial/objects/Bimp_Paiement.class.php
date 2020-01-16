@@ -635,7 +635,7 @@ class Bimp_Paiement extends BimpObject
 
         if ($this->isDeletable(false, $errors)) {
             if ($this->useCaisse) {
-                $BC_Caisse = BimpObject::getInstance('bimpcaisse', 'BC_Caisse');
+                $BC_Caisse = BimpObject::getInstance('bimpcaisse', 'BC_Caisse');//pour chargé la classe
                 $errors = array_merge($errors, BC_Caisse::onPaiementDelete($this->id, $this->dol_object->type_code, (float) $this->getData('amount')));
             }
         }

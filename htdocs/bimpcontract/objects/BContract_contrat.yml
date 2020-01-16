@@ -307,6 +307,8 @@ lists:
                 field: datec
             date_contrat:
                 field: date_contrat
+            fk_user_author:
+                field: fk_user_author
     
     client:
         extends: default

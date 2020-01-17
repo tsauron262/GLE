@@ -6739,7 +6739,7 @@ class BimpObject extends BimpCache
             $post_temp = $_POST;
             $_POST = $list_data;
 
-            $list = new BC_ListTable($this, $list_name);
+            $list = new BC_ListTable($this, $list_name, 1, isset($list_data['id_parent']) ? (int) $list_data['id_parent'] : 0);
 
             if (count($list->errors)) {
                 $errors = $list->errors;

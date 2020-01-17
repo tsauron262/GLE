@@ -4887,22 +4887,26 @@ class Bimp_CommandeLine extends ObjectLine
         if (!$id_line) {
             $errors[] = 'ID de la ligne de commande absent';
         } else {
-            $this->db->update('commandedet', array(
-                'fk_remise_except' => 0
-                    ), '`rowid` = ' . (int) $id_line);
+            $qty_modif = (float) $this->getData('qty_modif');
+            $qty_modif--;
 
-            if ($this->update($warnings, true) <= 0) {
-                $msg = 'Echec du retrait de l\'acompte';
-                $sqlError = $this->db->db->lasterror();
-                if ($sqlError) {
-                    $msg .= ' - ' . $sqlError;
-                }
-
-                $errors[] = $msg;
+            if (!(float) $this->qty && !$qty_modif && (int) $this->getData('id_line') && $this->isLoaded()) {
+                $this->db->delete('commandedet', 'rowid = ' . (int) $this->getData('id_line'));
+                $this->db->delete('bimp_commande_line', 'id = ' . (int) $this->id);
             } else {
-                $up_errors = $this->updateField('qty_modif', -1);
-                if (count($up_errors)) {
-                    $warnings[] = 'Echec de la mise à jour des quantités de la ligne';
+                $this->db->update('commandedet', array(
+                    'fk_remise_except' => 0
+                        ), '`rowid` = ' . (int) $id_line);
+
+                $this->set('qty_modif', $qty_modif);
+                if ($this->update($warnings, true) <= 0) {
+                    $msg = 'Echec du retrait de l\'acompte';
+                    $sqlError = $this->db->db->lasterror();
+                    if ($sqlError) {
+                        $msg .= ' - ' . $sqlError;
+                    }
+
+                    $errors[] = $msg;
                 }
             }
         }

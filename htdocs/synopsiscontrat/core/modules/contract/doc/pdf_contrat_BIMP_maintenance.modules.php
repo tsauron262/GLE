@@ -273,9 +273,14 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
             $pdf->setY($pdf->getY() + 4);
             $pdf->SetFont('', 'B', 9);
         }
-        
-        $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, 'Liste des sites d\'intervention', 0, 'L');
+        $pdf->setDrawColor(236, 147, 0);
+        $pdf->Line(15, $pdf->getY() + 3, 195, $pdf->getY() + 3);
+        $pdf->setY($pdf->getY() + 5);
+        $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, 'Liste des sites d\'intervention', 0, 'C');
+        $pdf->Line(15, $pdf->getY() + 3, 195, $pdf->getY() + 3);
+        $pdf->setY($pdf->getY() + 2);
         $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 2, "", 0, 'C');
+        $pdf->setDrawColor(240, 240, 240);
         $pdf->SetFont('', '', 8);
         global $db;
         $bimp = new BimpDb($db);
@@ -403,7 +408,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
             $chaine_description = str_replace("<p>", '', $chaine_description);
             $chaine_description = str_replace("</p>", '', $chaine_description);
             
-            $pdf->MultiCell($this->page_largeur - $this->marge_droite - $this->marge_gauche, 7, $chaine_description, 0, 'L'); 
+            $pdf->MultiCell($this->page_largeur - $this->marge_droite - $this->marge_gauche - 25, 7, $chaine_description, 0, 'L'); 
             
             $first_passage = false;
             

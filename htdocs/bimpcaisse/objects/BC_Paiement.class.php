@@ -7,31 +7,29 @@ class BC_Paiement extends BimpObject
 
     public function isEditable($force_edit = false, &$errors = array())
     {
-        if (!$this->isLoaded($errors)) {
-            return 0;
-        }
-
-        $caisse_session = $this->getChildObject('caisse_session');
-        $caisse = $this->getChildObject('caisse');
-        if (BimpObject::objectLoaded($caisse_session)) {
+        if ($this->isLoaded()) {
+            $caisse_session = $this->getChildObject('caisse_session');
             $caisse = $this->getChildObject('caisse');
-            if ((int) $caisse_session->getData('id_user_closed') || (BimpObject::objectLoaded($caisse) && (int) $caisse->getData('id_current_session') !== (int) $caisse_session->id)) {
-                $errors[] = 'Paiement enregistré dans une session de caisse fermée';
+            if (BimpObject::objectLoaded($caisse_session)) {
+                $caisse = $this->getChildObject('caisse');
+                if ((int) $caisse_session->getData('id_user_closed') || (BimpObject::objectLoaded($caisse) && (int) $caisse->getData('id_current_session') !== (int) $caisse_session->id)) {
+                    $errors[] = 'Paiement enregistré dans une session de caisse fermée';
+                    return 0;
+                }
+            } else {
+                $errors[] = 'ID de la session de caisse absent';
                 return 0;
             }
-        } else {
-            $errors[] = 'ID de la session de caisse absent';
-            return 0;
-        }
 
-        if ((int) $this->getData('id_paiement')) {
-            $paiement = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Paiement', (int) $this->getData('id_paiement'));
+            if ((int) $this->getData('id_paiement')) {
+                $paiement = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Paiement', (int) $this->getData('id_paiement'));
 
-            if (BimpObject::objectLoaded($paiement)) {
-                // Surtout pas d'appel à $paiement->isEditable() sinon boucle infinie. 
-                if ($paiement->getData('exported') == 1) {
-                    $errors[] = 'Paiement exporté en compta';
-                    return 0;
+                if (BimpObject::objectLoaded($paiement)) {
+                    // Surtout pas d'appel à $paiement->isEditable() sinon boucle infinie. 
+                    if ($paiement->getData('exported') == 1) {
+                        $errors[] = 'Paiement exporté en compta';
+                        return 0;
+                    }
                 }
             }
         }

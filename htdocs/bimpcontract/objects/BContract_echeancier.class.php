@@ -217,12 +217,18 @@ class BContract_echeancier extends BimpObject {
                 $startedDate->add(new DateInterval("P" . $data->periodicity . "M"));
             }
             
-            $start_mktime = date('Y-m-d', mktime(0,0,0, $startedDate->format('m'), 1, $startedDate->format('Y')));
-            $end_mktime =date('Y-m-d', mktime(0,0,0, $startedDate->format('m') + 1, 0, $startedDate->format('Y')));
-            
-            $dateTime_start_mkTime = new DateTime($start_mktime);
-            $dateTime_end_mkTime = new DateTime($end_mktime);
-            
+            $start_no_beggin_month = true;
+            if($startedDate->format('d') == '01') {
+                $start_mktime = date('Y-m-d', mktime(0,0,0, $startedDate->format('m'), 1, $startedDate->format('Y')));
+                $end_mktime =date('Y-m-d', mktime(0,0,0, $startedDate->format('m') + $data->periodicity, 0, $startedDate->format('Y')));
+                $dateTime_start_mkTime = new DateTime($start_mktime);
+                $dateTime_end_mkTime = new DateTime($end_mktime);
+            } else {
+                $start_no_beggin_month = true;
+                $dateTime_start_mkTime = $startedDate;
+                $dateTime_end_mkTime = $enderDate;
+            }
+
             $firstPassage = false;
             $amount  = $data->reste_a_payer / $data->reste_periode;
             $tva = $amount * 0.2;
@@ -242,7 +248,9 @@ class BContract_echeancier extends BimpObject {
                     $firstDinamycLine = false;
                 }
             $html .= '</tr>';
-            $enderDate = $enderDate->add(new DateInterval("P" . $data->periodicity . "M"));
+            if($start_no_beggin_month) {
+                $enderDate->add(new DateInterval("P" . $data->periodicity . "M"));
+            }
         }
         $html .= '</tbody>';
         $html .= '</table>';

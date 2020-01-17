@@ -48,7 +48,7 @@ class Bimp_Facture extends BimpComm
 
     public function isFieldEditable($field, $force_edit = false)
     {
-        if($field == 'statut_export')
+        if(in_array($field, array('statut_export', 'douane_number')))
             return 1;
         if ((int) $this->getData('fk_statut') > 0 && ($field == 'datef'))
             return 0;

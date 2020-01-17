@@ -43,9 +43,20 @@ class BContract_contratLine extends BContract_contrat {
     }
 
     protected function updateDolObject(&$errors) {
+        global $user;
         $data = $this->getDataArray();
+        //print_r($data); die();
         $contrat = $this->getParentInstance();
-        return 0;
+        if($contrat->dol_object->updateline($this->id, $data['description'], $data['price_ht'], $data['qty'], $data['remise_percent'], $contrat->getData('date_start'), $contrat->getEndDate()->format('Y-m-d'), $data['tva_tx']) > 0) {
+            $success = "Modifier avec succès";
+        } else {
+            $errors = 'Erreur';
+        }
+        return [
+            'success' => $success,
+            'errors' => $errors,
+            'warnings' => $warnings
+        ];
     }
 
     public function canCreate() {

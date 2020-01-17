@@ -131,10 +131,10 @@ class BimpComm extends BimpDolObject
 //                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' n\'est plus au statut "brouillon"';
 //                    return 0;
 //                }
-                if ($this->field_exists('invoice_status') && $this->getData('invoice_status') > 0) {
-                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' est déja facturé' . $this->e();
-                    return 0;
-                }
+//                if ($this->field_exists('invoice_status') && (int) $this->getData('invoice_status') === 2) {
+//                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' est entièrement facturé' . $this->e();
+//                    return 0;
+//                }
 
                 $client = $this->getChildObject('client');
 
@@ -171,6 +171,18 @@ class BimpComm extends BimpDolObject
                         }
                     }
 
+                    return 1;
+                }
+
+                if ($this->object_name === 'Bimp_Commande') {
+                    if (!in_array((int) $this->getData('status'), array(0, 1))) {
+                        $errors[] = 'Statut actuel ' . $this->getLabel('of_the') . ' ne permet pas l\'ajout d\'avoir disponible';
+                        return 0;
+                    }
+//                    if ($this->field_exists('invoice_status') && (int) $this->getData('invoice_status') === 2) {
+//                        $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' est entièrement facturé' . $this->e();
+//                        return 0;
+//                    }
                     return 1;
                 }
 
@@ -444,29 +456,33 @@ class BimpComm extends BimpDolObject
     {
         $buttons = array();
 
-        if ($this->isLoaded() && (int) $this->getData('fk_statut') === 0) {
-            $product = BimpObject::getInstance('bimpcore', 'Bimp_Product');
+        if ($this->isLoaded()) {
+            if ((int) $this->getData('fk_statut') === 0) {
+                $product = BimpObject::getInstance('bimpcore', 'Bimp_Product');
 
-            $buttons[] = array(
-                'label'       => 'Créer un produit',
-                'icon_before' => 'fas_box',
-                'classes'     => array('btn', 'btn-default'),
-                'attr'        => array(
-                    'onclick' => $product->getJsLoadModalForm('lightFourn', 'Nouveau produit')
-                )
-            );
-
-            if ($this->isActionAllowed('useRemise') && $this->canSetAction('useRemise')) {
                 $buttons[] = array(
-                    'label'       => 'Ajouter un avoir disponible',
-                    'icon_before' => 'fas_file-import',
+                    'label'       => 'Créer un produit',
+                    'icon_before' => 'fas_box',
                     'classes'     => array('btn', 'btn-default'),
                     'attr'        => array(
-                        'onclick' => $this->getJsActionOnclick('useRemise', array(), array(
-                            'form_name' => 'use_remise'
-                        ))
+                        'onclick' => $product->getJsLoadModalForm('lightFourn', 'Nouveau produit')
                     )
                 );
+            }
+
+            if ($this->isActionAllowed('useRemise') && $this->canSetAction('useRemise')) {
+                if ($this->object_name === 'Bimp_Commande' || (int) $this->getData('fk_statut') === 0) {
+                    $buttons[] = array(
+                        'label'       => 'Ajouter un avoir disponible',
+                        'icon_before' => 'fas_file-import',
+                        'classes'     => array('btn', 'btn-default'),
+                        'attr'        => array(
+                            'onclick' => $this->getJsActionOnclick('useRemise', array(), array(
+                                'form_name' => 'use_remise'
+                            ))
+                        )
+                    );
+                }
             }
         }
 
@@ -3327,6 +3343,11 @@ class BimpComm extends BimpDolObject
                                 $line->tva_tx = (float) $discount->tva_tx;
                                 $line->id_remise_except = (int) $discount->id;
                                 $line->remise = 0;
+                                
+                                if ($this->object_name === 'Bimp_Commande' && (int) $this->getData('fk_statut') !== 0) {
+                                    $line->qty = 0;
+                                    $line->set('qty_modif', 1);
+                                }
 
                                 $line_warnings = array();
                                 $line_errors = $line->create($line_warnings, true);

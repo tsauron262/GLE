@@ -52,7 +52,7 @@ class TransferLine extends BimpObject
 
         if (!$errors) {
             $errors = array_merge($errors, parent::create());
-            $id_affected = $this->db->db->last_insert_id();
+            $id_affected = $this->db->db->last_insert_id($this->getTable());
         }
         return $errors;
     }
@@ -327,27 +327,25 @@ class TransferLine extends BimpObject
         $id_equipment = $this->getData('id_equipment');
         // Equipment
         if ($id_equipment > 0) {
-            $emplacement = BimpObject::getInstance('bimpequipment', 'BE_Place');
+            $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+            
             if ($new_qty > 0) {
-                $errors = array_merge($errors, $emplacement->validateArray(array(
-                            'id_equipment' => $id_equipment,
-                            'type'         => 2,
-                            'id_entrepot'  => $transfer->getData('id_warehouse_dest'),
-                            'infos'        => 'Transfert de stock #' . $transfer->id,
-                            'code_mvt'     => $codemove,
-                            'date'         => dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')
-                )));
+                $errors = array_merge($errors, $equipment->moveToPlace(
+                        BE_Place::BE_PLACE_ENTREPOT,
+                        $transfer->getData('id_warehouse_dest'),
+                        $codemove,
+                        'Transfert de stock #' . $transfer->id,
+                        1));
+                
             } else {
-                $errors = array_merge($errors, $emplacement->validateArray(array(
-                            'id_equipment' => $id_equipment,
-                            'type'         => 2,
-                            'id_entrepot'  => $transfer->getData('id_warehouse_source'),
-                            'infos'        => 'Annulation transfert de stock #' . $transfer->id,
-                            'code_mvt'     => $codemove.'_ANNUL',
-                            'date'         => dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')
-                )));
+                $errors = array_merge($errors, $equipment->moveToPlace(
+                        BE_Place::BE_PLACE_ENTREPOT,
+                        $transfer->getData('id_warehouse_source'),
+                        $codemove.'_ANNUL',
+                        'Annulation transfert de stock #' . $transfer->id,
+                        1));
             }
-            $errors = array_merge($errors, $emplacement->create());
+//            $errors = array_merge($errors, $emplacement->create());
             // Product
         } else {
             // Toujours passer par le cache pour les objets!

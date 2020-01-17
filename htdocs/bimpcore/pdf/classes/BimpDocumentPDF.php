@@ -828,15 +828,17 @@ class BimpDocumentPDF extends BimpModelPDF
 
                 $row = array(
                     'desc'     => $remise_label,
-                    'qte'      => 1,
+                    'qte'      => '',
                     'tva'      => '',
-                    'pu_ht'    => BimpTools::displayMoneyValue(-$rg_amount_ttc, ''),
-                    'total_ht' => BimpTools::displayMoneyValue(-$rg_amount_ttc, '')
+                    'pu_ht'    => '',//BimpTools::displayMoneyValue(-$rg_amount_ttc, ''),
+                    'total_ht' => '',//BimpTools::displayMoneyValue(-$rg_amount_ttc, '')
                 );
                 if (!$this->hideTtc)
                     $row['total_ttc'] = BimpTools::displayMoneyValue(-$rg_amount_ttc, '');
-                if (!$this->hideReduc)
-                    $row['pu_remise'] = BimpTools::displayMoneyValue(-$rg_amount_ttc, '');
+                else
+                    $row['total_ht'] = BimpTools::displayMoneyValue(-$rg_amount_ttc, '');
+//                if (!$this->hideReduc)
+//                    $row['pu_remise'] = BimpTools::displayMoneyValue(-$rg_amount_ttc, '');
 
                 if ($this->hide_pu) {
                     unset($row['pu_ht']);

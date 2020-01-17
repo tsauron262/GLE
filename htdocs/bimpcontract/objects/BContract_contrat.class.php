@@ -89,10 +89,8 @@ class BContract_contrat extends BimpDolObject {
     
     function __construct($module, $object_name) {
         global $user, $db;
-        if(BimpTools::getContext() != 'public')
-            $this->redirectMode = 1;
-        else
-            $this->redirectMode = 4;
+
+        $this->redirectMode = 4;
         return parent::__construct($module, $object_name);
     }
     

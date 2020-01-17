@@ -270,6 +270,14 @@ class BContract_contrat extends BimpDolObject {
                 );
             }
             
+            if((($user->id == 232 || $user->id == 460 || $user->admin) && $this->getData('statut') == 1) && (!is_null($this->getData('date_contrat')))) {
+                $buttons[] = array(
+                    'label'   => 'Dé-signer le contrat',
+                    'icon'    => 'fas_sync',
+                    'onclick' => $this->getJsActionOnclick('unSign', array(), array())
+                );
+            }
+            
             if($user->admin || $user->id == 460){
                 $buttons[] = array(
                     'label'   => 'Mettre à jours l\'indice Syntec',
@@ -381,6 +389,18 @@ class BContract_contrat extends BimpDolObject {
             'warnings' => $warnings
         );
         
+    }
+    
+    public function actionUnSign() {
+        if($this->updateField('date_contrat', null)) {
+            $success = 'Contrat dé-signer';
+        }
+        
+        return [
+          'success' => $success,
+          'errors' => $errors,
+          'warnings' => $warnings
+        ];
     }
     
     public function getSyntecSite() {

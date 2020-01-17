@@ -31,6 +31,12 @@ class Bimp_Facture extends BimpComm
         4 => array('label' => 'Facture proforma'),
         5 => array('label' => 'Facture de situation')
     );
+    public static $statut_export = array(
+        0 => array('label' => ''),
+        1 => array('label' => 'Attestation Dédouanement Reçue '),
+        2 => array('label' => 'Attestation Dédouanement Non Reçue'),
+        3 => array('label' => 'Non déclarable'),
+    );
 
     public function iAmAdminRedirect()
     {
@@ -42,17 +48,23 @@ class Bimp_Facture extends BimpComm
 
     public function isFieldEditable($field, $force_edit = false)
     {
+        if($field == 'statut_export')
+            return 1;
         if ((int) $this->getData('fk_statut') > 0 && ($field == 'datef'))
             return 0;
 
-
+        if ($this->getData('exported') == 1)
+            return 0;
+        
+        
         return parent::isFieldEditable($field, $force_edit);
     }
 
     public function isEditable($force_edit = false, &$errors = array())
     {
-        if ($this->getData('exported') == 1)
-            return 0;
+        return 1;
+//        if ($this->getData('exported') == 1)
+//            return 0;
 
         return parent::isEditable($force_edit, $errors);
     }

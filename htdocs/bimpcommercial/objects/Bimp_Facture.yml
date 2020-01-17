@@ -175,6 +175,11 @@ fields:
     fk_facture_source:
         label: Facture source
         type: id
+    statut_export:
+        label: Statut export
+        type: int
+        values: 
+            array: statut_export
     ref: unset
     fk_availability: unset
     fk_input_reason: unset
@@ -341,6 +346,8 @@ forms:
                 field: note_private
             note_public: 
                 field: note_public
+            statut_export:
+                field: statut_export
             
     refacture: 
         extends: default
@@ -560,6 +567,8 @@ fields_tables:
 #              value:
 #                  callback: displayZoneVenteField
             - field: exported
+            - field: statut_export
+              edit: 1
     
     client: 
         rows: 
@@ -726,6 +735,9 @@ lists_cols:
         label: Reste à payer
         value: 
             callback: displayRemainToPay
+    statut_export:
+        field: statut_export
+        edit: 1
     
 lists: 
     default: 

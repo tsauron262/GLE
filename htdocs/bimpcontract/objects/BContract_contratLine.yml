@@ -89,7 +89,7 @@ lists:
         n: 20
         checkbox: 1
         add_object_row: 0
-        edit_btn: 0
+        edit_btn: 1
         edit_form: default
         add_form_name: add
         delete_btn: 1
@@ -114,6 +114,7 @@ lists:
             total_ttc:
                 field: total_ttc
     interface_client:
+        edit_btn: 0
         extends: default
         cols:
             fk_product: unset

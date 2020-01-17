@@ -451,12 +451,16 @@ class BContract_contrat extends BimpDolObject {
     
     public function actionValidation($data, &$success) {
         global $user;
-        $ref = $this->newRef($this->getData('objet_contrat') . date('ym') . '-' . $user->id);
+        $ref = $this->getData('objet_contrat') . date('ym') . '-' . $this->id;
         $id_contact_type = $this->db->getValue('c_type_contact', 'rowid', 'code = "SITE" AND element = "contrat"');
         $have_contact = ($this->db->getValue('element_contact', 'rowid', 'element_id = ' . $this->id . ' AND fk_c_type_contact = ' . $id_contact_type)) ? true : false;
         
         if(!$have_contact) {
             return "Il doit y avoir au moin un site d'intervention associé au contrat";
+        }
+        
+        if(!strpos("PROV", $this->getData('ref'))) {
+            $ref = $this->getData('ref');
         }
         
         if($this->dol_object->validate($user, $ref) <= 0) {
@@ -1241,19 +1245,19 @@ class BContract_contrat extends BimpDolObject {
         }
     }
     
-    public function newRef($start_ref) {
-        
-        $count_contrat = count($this->db->getRows('contrat', "ref LIKE '%$start_ref%'")) + 1;
-        
-        if($count_contrat < 10) {
-            $add_zero = "000";
-        } elseif($count_contrat > 10 && $count_contrat < 100) {
-            $add_zero = "00";
-        } else {
-            $add_zero = '0';
-        }
-        return $start_ref . $add_zero . $count_contrat;
-    }
+//    public function newRef($start_ref) {
+//        
+//        $count_contrat = count($this->db->getRows('contrat', "ref LIKE '%$start_ref%'")) + 1;
+//        
+//        if($count_contrat < 10) {
+//            $add_zero = "000";
+//        } elseif($count_contrat > 10 && $count_contrat < 100) {
+//            $add_zero = "00";
+//        } else {
+//            $add_zero = '0';
+//        }
+//        return $start_ref . $add_zero . $count_contrat;
+//    }
     
     public function renderHeaderExtraLeft()
     {   

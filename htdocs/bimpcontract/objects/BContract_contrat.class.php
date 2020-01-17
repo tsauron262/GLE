@@ -451,7 +451,7 @@ class BContract_contrat extends BimpDolObject {
     
     public function actionValidation($data, &$success) {
         global $user;
-        $ref = $this->getData('objet_contrat') . date('ym') . '-' . $this->id;
+        
         $id_contact_type = $this->db->getValue('c_type_contact', 'rowid', 'code = "SITE" AND element = "contrat"');
         $have_contact = ($this->db->getValue('element_contact', 'rowid', 'element_id = ' . $this->id . ' AND fk_c_type_contact = ' . $id_contact_type)) ? true : false;
         
@@ -459,7 +459,9 @@ class BContract_contrat extends BimpDolObject {
             return "Il doit y avoir au moin un site d'intervention associé au contrat";
         }
         
-        if(!strpos("PROV", $this->getData('ref'))) {
+        if(strpos($this->getData('ref'), "PROV")) {
+            $ref = $this->getData('objet_contrat') . date('ym') . '-' . $this->id;
+        } else {
             $ref = $this->getData('ref');
         }
         

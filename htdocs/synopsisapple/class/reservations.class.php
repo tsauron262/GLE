@@ -523,7 +523,9 @@ Conditions particulières aux iPhones
 
 - Pour certains types de pannes sous garantie, un envoi de l’iPhone dans un centre Apple peut être nécessaire, entrainant un délai plus long (jusqu’à 10 jours ouvrés), dans ce cas un téléphone de prêt est possible (sous réserve de disponibilité). Si cela vous intéresse, merci de vous munir d’un chèque de caution.
 
-- Les réparations d’écrans d’iPhones sont directement envoyées chez Apple pour calibrer correctement votre iPhone et nécessitent donc un délai moyen de 10 jours ouvrés.
+La plupart de nos centres peuvent effectuer une réparation de votre écran d’iPhone sous 24h00. Pour savoir si votre centre SAV est éligible à ce type de réparation et qu’une plage de rendez-vous est disponible, consulter notre site à l’adresse suivante :
+
+<a href=\"https://www.bimp.fr/tarifs-sav/\">https://www.bimp.fr/tarifs-sav/</a>
 
 Nous proposons des services de sauvegarde des données, de protection de votre téléphone… venez nous rencontrer pour découvrir tous les services que nous pouvons vous proposer.
 Votre satisfaction est notre objectif, nous mettrons tout en œuvre pour vous satisfaire et réduire les délais d’immobilisation de votre produit Apple.

@@ -193,7 +193,7 @@ class BContract_contratLine extends BContract_contrat {
         //print_r($liste_exist_serials); 
         
         foreach($liste_exist_serials as $serial) {
-            $toUpdate[] = $serial;
+            $toUpdate[] = strip_tags($serial);
         }
         
         if($this->updateField('serials', $toUpdate)) {
@@ -215,7 +215,7 @@ class BContract_contratLine extends BContract_contrat {
         foreach ($all as $serial) {
 
             if ($serial) {
-                $to_insert[] = $serial;
+                $to_insert[] = strip_tags($serial);
             }
         }
 

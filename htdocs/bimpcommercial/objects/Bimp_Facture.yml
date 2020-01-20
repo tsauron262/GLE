@@ -175,6 +175,13 @@ fields:
     fk_facture_source:
         label: Facture source
         type: id
+    statut_export:
+        label: Statut export
+        type: int
+        values: 
+            array: statut_export
+    douane_number:
+        label: N° Douane
     ref: unset
     fk_availability: unset
     fk_input_reason: unset
@@ -341,6 +348,10 @@ forms:
                 field: note_private
             note_public: 
                 field: note_public
+            statut_export:
+                field: statut_export
+            douane_number:
+                field: douane_number
             
     refacture: 
         extends: default
@@ -560,6 +571,10 @@ fields_tables:
 #              value:
 #                  callback: displayZoneVenteField
             - field: exported
+            - field: statut_export
+              edit: 1
+            - field: douane_number
+              edit: 1
     
     client: 
         rows: 
@@ -658,6 +673,10 @@ filters_panels:
                 input: 
                     type: search_user
             availability: unset
+            statut_export:
+                field: statut_export
+            douane_number:
+                field: douane_number
             
 lists_cols: 
     ref: 
@@ -726,6 +745,12 @@ lists_cols:
         label: Reste à payer
         value: 
             callback: displayRemainToPay
+    statut_export:
+        field: statut_export
+        edit: 1
+    douane_number:
+        field: douane_number
+        edit: 1
     
 lists: 
     default: 

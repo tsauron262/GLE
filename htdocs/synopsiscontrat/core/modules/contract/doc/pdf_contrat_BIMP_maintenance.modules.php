@@ -532,7 +532,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $pdf->SetTextColor(255,140,115);
                 $pdf1->SetTextColor(255,140,115);
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, "Exemplaire à conserver par le client", 0, 'R');
-                $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, "Exemplaire à nous retourner signé à Olys", 0, 'R');
+                $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, "Exemplaire à retourner signé à Olys", 0, 'R');
                     
                 $pdf->SetTextColor(0,0,0);
                 $pdf1->SetTextColor(0,0,0);

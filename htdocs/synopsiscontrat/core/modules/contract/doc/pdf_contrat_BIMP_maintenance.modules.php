@@ -557,6 +557,8 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $pdf->Cell($W, 4, $client->nom . "\n", "L", null, 'C', true);
                 $pdf1->Cell($W, 4, $client->nom . "\n", "L", null, 'C', true);
                 
+                
+                
                 $pdf->SetFont('', '', 9); $pdf1->SetFont('', '', 9);
                 // Si il y a un contact 'Contact client suivi contrat';
                 $bimp = new BimpDb($this->db);
@@ -586,10 +588,13 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $pdf->Cell($W, 4, "Email : " . $mysoc->email, "R", null, 'C', true);
                 $pdf->Cell($W, 4, "Email : " . $client->email, "L", null, 'C', true);
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
-                $pdf->Cell($W, 4, "", "R", null, 'C', true);
+                
+                $commercial = BimpObject::getInstance('bimpcore', 'Bimp_User', $contrat->commercial_suivi_id);
+                
+                $pdf->Cell($W, 4, "Commercial : " . $commercial->getData('lastname') . ' ' . $commercial->getData('firstname'), "R", null, 'C', true);
                 $pdf->Cell($W, 4, "SIREN : " . $client->idprof1, "L", null, 'C', true);
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
-                $pdf->Cell($W, 4, "", "R", null, 'C', true);
+                $pdf->Cell($W, 4, "Contact commercial : " . $commercial->getData('email'), "R", null, 'C', true);
                 $pdf->Cell($W, 4, "Code client : " . $client->code_client, "L", null, 'C', true);
                 $pdf1->SetFont('', '', 7);
                 $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
@@ -605,10 +610,10 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $pdf1->Cell($W, 4, "Email : " . $mysoc->email, "R", null, 'C', true);
                 $pdf1->Cell($W, 4, "Email : " . $client->email, "L", null, 'C', true);
                 $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
-                $pdf1->Cell($W, 4, "", "R", null, 'C', true);
+                $pdf1->Cell($W, 4, "Commercial : " . $commercial->getData('lastname') . ' ' . $commercial->getData('firstname'), "R", null, 'C', true);
                 $pdf1->Cell($W, 4, "SIREN : " . $client->idprof1, "L", null, 'C', true);
                 $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
-                $pdf1->Cell($W, 4, "", "R", null, 'C', true);
+                $pdf1->Cell($W, 4, "Contact commercial : " . $commercial->getData('email'), "R", null, 'C', true);
                 $pdf1->Cell($W, 4, "Code client : " . $client->code_client, "L", null, 'C', true);
 
                 // Tableau des conditions du contrat

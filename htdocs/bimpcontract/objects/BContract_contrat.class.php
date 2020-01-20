@@ -968,7 +968,7 @@ class BContract_contrat extends BimpDolObject {
             return BimpRender::renderAlerts('Le contrat n\'est pas validé', 'danger', false);
         }
         if(!$this->getData('date_start') || !$this->getData('periodicity') || !$this->getData('duree_mois')) {
-            return BimpRender::renderAlerts("Le contrat à été créer avec l'ancienne méthode donc il ne comporte pas d'échéancier", 'warning', false);
+            return BimpRender::renderAlerts("Le contrat a été créé avec l'ancienne méthode donc il ne comporte pas d'échéancier", 'warning', false);
         }
         
         $create = false;
@@ -1243,6 +1243,7 @@ class BContract_contrat extends BimpDolObject {
         $new_contrat->set('tacite', $data['re_new']);
         $new_contrat->set('moderegl', $data['fk_mode_reglement']);
         $new_contrat->set('note_public', $data['note_public']);
+        $new_contrat->set('ref_ext', $data['ref_ext']);
         if($data['use_syntec'] == 1) {
             $new_contrat->set('syntec', BimpCore::getConf('current_indice_syntec'));
         }
@@ -1327,6 +1328,16 @@ class BContract_contrat extends BimpDolObject {
             }
         }
         return $html;
+    }
+    
+    public function isSigned($display = null) {
+
+        if (!is_null($this->getData('date_contrat'))) {
+            return (is_null($display) ? 1 : "<b class='success'>OUI</b>");
+        } else {
+            return (is_null($display) ? 0 : "<b class='danger'>NON</b>");
+        }
+        
     }
     
     public function relance_renouvellement_commercial() {

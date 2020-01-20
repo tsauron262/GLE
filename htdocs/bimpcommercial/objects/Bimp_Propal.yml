@@ -219,6 +219,12 @@ forms:
             - field: fk_soc
               edit: 0
             - custom: 1
+              label: Annule et remplace
+              input_name: ref_ext
+              input:
+                  type: text
+                  help: A remplire en cas de renouvellement d'un ancien contrat
+            - custom: 1
               label: Début de validité du contrat
               required: 1
               input_name: valid_start

@@ -223,13 +223,13 @@ fields_tables:
             - field: ref
               label: Référence du contrat
               edit: 0
+            - field: ref_ext
+              edit: 0
             - field: objet_contrat
               edit: 0
             - label: Contrat initial
               value:
                   callback: getContratSource
-              edit: 0
-            - field: date_contrat
               edit: 0
             - field: date_start
               edit: 0
@@ -298,6 +298,13 @@ lists:
         cols: 
             ref: 
                 field: ref
+            signed:
+                label: Contrat signé
+                value:
+                    callback:
+                        method: isSigned
+                        params:
+                            - display
             statut:
                 field: statut
             fk_soc:
@@ -305,8 +312,6 @@ lists:
                 display: nom_url
             datec:
                 field: datec
-            date_contrat:
-                field: date_contrat
             fk_user_author:
                 field: fk_user_author
     

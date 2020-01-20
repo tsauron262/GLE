@@ -150,7 +150,7 @@ class BContract_contratLine extends BContract_contrat {
             // Remise globale: 
             if ($parent->getData('statut') == 0) {
                 $buttons[] = array(
-                    'label' => 'Ajouter des numéros de série',
+                    'label' => 'Ajouter/Modifier des numéros de série',
                     'icon' => 'fas_plug',
                     'onclick' => $this->getJsActionOnclick('setSerial', array(), array(
                         'form_name' => 'add_serial'

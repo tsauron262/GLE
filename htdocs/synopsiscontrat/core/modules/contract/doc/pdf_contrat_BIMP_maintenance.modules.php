@@ -350,33 +350,41 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
             $pdf->setTextColor(0, 0, 0);
             
                         
-            $serials = BimpObject::getInstance('bimpcontract', 'BContract_Serials_Imei');
-            $list = $serials->getList(['id_contrat' => $contrat->id]);
+//            $serials = BimpObject::getInstance('bimpcontract', 'BContract_Serials_Imei');
+//            $list = $serials->getList(['id_contrat' => $contrat->id]);
+//            
+//            $chaine_serials = '';
+//            $last_current = $line->id;
+//            $start_serial = 1;
+//            foreach ($list as $l => $infos) {
+//                $current = $line->id;
+//                if($current != $last_current) {
+//                    $chaine_serials = '';
+//                }
+//                if(in_array($line->id, explode(',', $infos['id_line']))) {
+//                    $chaine_serials .= $infos['serial'] . ', ';
+//                    if(strlen($chaine_serials) >= 80) {
+//                        $pdf->Cell($W * 9, 5, $chaine_serials, 1, null, 'L', true);
+//                        $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 5, "", 0, 'L'); 
+//                        $chaine_serials = '';
+//                    }
+//                }
+//                $last_current = $current;
+//            }
+//            
+//            if(strlen($chaine_serials) > 0){
+//                $pdf->Cell($W * 9, 5, $chaine_serials, 1, null, 'L', true);
+//                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 5, "", 0, 'L');
+//            }
+            $chaine_serial = '';
             
-            $chaine_serials = '';
-            $last_current = $line->id;
-            $start_serial = 1;
-            foreach ($list as $l => $infos) {
-                $current = $line->id;
-                if($current != $last_current) {
-                    $chaine_serials = '';
-                }
-                if(in_array($line->id, explode(',', $infos['id_line']))) {
-                    $chaine_serials .= $infos['serial'] . ', ';
-                    if(strlen($chaine_serials) >= 80) {
-                        $pdf->Cell($W * 9, 5, $chaine_serials, 1, null, 'L', true);
-                        $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 5, "", 0, 'L'); 
-                        $chaine_serials = '';
-                    }
-                }
-                $last_current = $current;
-            }
+            $L = BimpObject::getInstance('bimpcontract', 'BContract_contratLine', $line->id);
             
-            if(strlen($chaine_serials) > 0){
-                $pdf->Cell($W * 9, 5, $chaine_serials, 1, null, 'L', true);
-                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 5, "", 0, 'L');
+            $serials_tab = json_decode($L->getData('serials'));
+            foreach ($serials_tab as $serial) {
+                $chaine_serial .= ", " . $serial;
             }
-            $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 5, "", 0, 'L'); 
+            $pdf->MultiCell($this->page_largeur - $this->marge_droite - $this->marge_gauche - 25, 7, $chaine_serial, 0, 'L');
             $pdf->SetFont('', '', 7);
             $pdf->setDrawColor(255, 255, 255);
             $pdf->setColor('fill', 236, 147, 0);

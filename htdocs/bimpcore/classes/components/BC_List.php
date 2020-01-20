@@ -499,7 +499,7 @@ class BC_List extends BC_Panel
                                 $field_on = BimpTools::getObjectPrimary($this->object, $this->params['sort_field'], $object);
                                 if (!is_null($table) && !is_null($field_on)) {
                                     $order_by = $table . '.' . $join_field;
-                                    $joins[] = array(
+                                    $joins[$table] = array(
                                         'alias' => $table,
                                         'table' => $table,
                                         'on'    => $table . '.' . $field_on . ' = a.' . $this->params['sort_field']
@@ -516,7 +516,7 @@ class BC_List extends BC_Panel
                                     $field_on = $sort_obj->getPrimary();
                                     if (!is_null($table) && !is_null($field_on)) {
                                         $order_by = $table . '.' . $this->params['sort_option'];
-                                        $joins[] = array(
+                                        $joins[$table] = array(
                                             'alias' => $table,
                                             'table' => $table,
                                             'on'    => $table . '.' . $field_on . ' = a.' . $this->params['sort_field']

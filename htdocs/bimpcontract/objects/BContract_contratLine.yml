@@ -155,6 +155,23 @@ forms:
               input:
                   type: textarea
                   help: Merci de séparer les numéros de séries par un saut de ligne
+    rebase_serial:
+        rows:
+            - custom: 1
+              label: Numéro de série à remplacer
+              input_name: old_serial
+              input: 
+                  type: select
+              values: 
+                  array: 
+                    callback: getArraySerials
+            - custom: 1
+              label: Nouveau numéro de série
+              input_name: new_serial
+              required: 1
+              input: 
+                  type: text
+              
 
 fields_tables:
     infos:

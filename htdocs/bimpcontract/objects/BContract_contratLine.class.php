@@ -181,7 +181,31 @@ class BContract_contratLine extends BContract_contrat {
     }
     
     public function actionRebaseSerial($data, &$success) {
+
+        $liste_exist_serials = json_decode($this->getData('serials'));
+        $old_serial = $liste_exist_serials[$data['old_serial']];
+        if(in_array(strtoupper($data['new_serial']), $liste_exist_serials)) {
+            return "Le numéro de série <b>".$data['new_serial']."</b> est déjà présent dans le contrat";
+        }
         
+        unset($liste_exist_serials[array_search($old_serial, $liste_exist_serials)]);
+        array_push($liste_exist_serials, $data['new_serial']);
+        //print_r($liste_exist_serials); 
+        
+        foreach($liste_exist_serials as $serial) {
+            $toUpdate[] = strip_tags($serial);
+        }
+        
+        if($this->updateField('serials', $toUpdate)) {
+            $success = "Numéro de série remplacer avec succès";
+        }
+        
+    }
+    
+    // UPDATE `llx_contratdet` SET `serials` = '["AZERTYUI2","AZERTYUI3","AZERTYUI1"]' WHERE `llx_contratdet`.`rowid` = 16010; 
+    
+    public function getArraySerials() {
+        return json_decode($this->getData('serials'));
     }
     
     public function actionSetSerial($data, &$success) {
@@ -191,7 +215,7 @@ class BContract_contratLine extends BContract_contrat {
         foreach ($all as $serial) {
 
             if ($serial) {
-                $to_insert[] = $serial;
+                $to_insert[] = strip_tags($serial);
             }
         }
 

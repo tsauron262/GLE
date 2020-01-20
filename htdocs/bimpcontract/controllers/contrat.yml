@@ -35,13 +35,13 @@ sections:
                     panel: 1
                     object: contrat
                     name: lines
-          - id: serials
-            title: N° de série / N° IMEI
-            struct:
-                type: list
-                list:
-                    name: bimp
-                    object: serials
+#          - id: serials
+#            title: N° de série / N° IMEI
+#            struct:
+#                type: list
+#                list:
+#                    name: bimp
+#                    object: serials
           - id: contact_adresse_contrat
             title: Contact / Adresse
             struct: 

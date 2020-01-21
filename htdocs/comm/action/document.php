@@ -109,9 +109,13 @@ if ($object->id > 0)
 	if ($object->authorid > 0)		{ $tmpuser=new User($db); $res=$tmpuser->fetch($object->authorid); $object->author=$tmpuser; }
 	if ($object->usermodid > 0)		{ $tmpuser=new User($db); $res=$tmpuser->fetch($object->usermodid); $object->usermod=$tmpuser; }
 
-	$author=new User($db);
-	$author->fetch($object->author->id);
-	$object->author=$author;
+        
+        $author = null;
+        if(is_object($object->author) && $object->author->id > 0){
+            $author=new User($db);
+            $author->fetch($object->author->id);
+            $object->author=$author;
+        }
 
 
 	$head=actions_prepare_head($object);

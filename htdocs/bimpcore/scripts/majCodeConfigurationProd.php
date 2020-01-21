@@ -206,8 +206,10 @@ class majCodeConfigurationnProd{
         while($ln = $this->db->fetch_object($sql)){
             $serial = $ln->serial;
             $serial2 = $this->traiteSerialApple($serial);
-            if($serial != $serial2)
+            if($serial != $serial2){
+                $this->info[] = $serial ." transformé en ".$serial2;
                 $this->db->query("UPDATE llx_be_equipment SET serial ='".$serial2."' WHERE serial = '".$serial."'");
+            }
         }
     }
     

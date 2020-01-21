@@ -1026,6 +1026,11 @@ function dol_syslog($message, $level = LOG_INFO, $ident = 0, $suffixinfilename='
                     $message .= synGetDebug();
                 $suffixinfilename = "_deprecated";
             }
+            if(stripos($message, "Forbidden") !== false || stripos($message, "Duplicate") !== false || stripos($message, "a déjà le statut") !== false){
+                if(function_exists("synGetDebug"))
+                    $message .= synGetDebug();
+                $suffixinfilename = "_duplicate";
+            }
             if(stripos($message, "Creating default object from empty value") !== false)
                     $suffixinfilename = "_recurent";
             if(stripos($message, "Ldap::") !== false)

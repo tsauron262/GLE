@@ -263,7 +263,10 @@ class BContract_echeancier extends BimpObject {
             if ($parent->is_not_finish() && $user->rights->facture->creer) {
                 $html .= '<div class="panel-footer"><div class="btn-group"><button type="button" class="btn btn-default" aria-haspopup="true" aria-expanded="false" onclick="' . $this->getJsLoadModalForm('create_perso', "Créer une facture personalisée ou une facturation de plusieurs périodes") . '"><i class="fa fa-plus-square-o iconLeft"></i>Créer une facture personalisée ou une facturation de plusieurs périodes</button></div></div>';
             }
-            $html .= "<br/>"
+            
+        }
+        
+        $html .= "<br/>"
                     . "<table style='float:right' class='border' border='1'>"
                     . "<tr> <th style='border-right: 1px solid black; border-top: 1px solid white; border-left: 1px solid white; width: 20%'></th>  <th style='background-color:#ed7c1c;color:white;text-align:center'>Montant HT</th> <th style='background-color:#ed7c1c;color:white;text-align:center'>Montant TTC</th> </tr>"
                     . "<tr> <th style='background-color:#ed7c1c;color:white;text-align:center'>Contrat</th> <td style='text-align:center'><b>" . price($parent->getTotalContrat()) . " €</b></td> <td style='text-align:center'><b> " . price($parent->getTotalContrat() * 1.20) . " €</b></td> </tr>"
@@ -287,7 +290,6 @@ class BContract_echeancier extends BimpObject {
                 $html .= "<tr> <th style='background-color:#ed7c1c;color:white;text-align:center'>Reste à payer</th> <td style='text-align:center'><b class='danger'> " . price($parent->getTotalContrat() - $parent->getTotalDejaPayer(true)) . " € </b></td> <td style='text-align:center'><b class='danger'> " . price(($parent->getTotalContrat(true) * 1.20) - ($parent->getTotalDejaPayer(true) * 1.20)) . " €</b></td> </tr>";
             }
             $html .= "</table>";
-        }
 
 
         return $html;

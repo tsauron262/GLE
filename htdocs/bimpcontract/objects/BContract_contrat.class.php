@@ -5,6 +5,8 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
 class BContract_contrat extends BimpDolObject {
     //public $redirectMode = 4;
+    public static $email_type = '';
+    //
     // Les status
     CONST CONTRAT_STATUS_BROUILLON = 0;
     CONST CONTRAT_STATUS_VALIDE = 1;
@@ -259,6 +261,14 @@ class BContract_contrat extends BimpDolObject {
         
         if ($this->isLoaded() && BimpTools::getContext() != 'public') {
             $status = $this->getData('statut');
+            
+//            $buttons[] = array(
+//                    'label'   => 'Envoyer par e-mail',
+//                    'icon'    => 'envelope',
+//                    'onclick' => $this->getJsActionOnclick('sendEmail', array(), array(
+//                        'form_name' => 'email'
+//                    ))
+//                );
             
             if(($user->id == 232 || $user->id == 460 || $user->admin) && $this->getData('statut') == 1) {
                 $buttons[] = array(
@@ -1368,5 +1378,172 @@ class BContract_contrat extends BimpDolObject {
         
     }
     
+//    public function getEmailUsersFromArray()
+//    {
+//        global $user, $langs, $conf;
+//
+//        $emails = array();
+//
+//        // User connecté: 
+//
+//        if (!empty($user->email)) {
+//            $emails[$user->email] = $user->getFullName($langs) . ' (' . $user->email . ')';
+//        }
+//
+//        if (!$user->admin)
+//            return $emails;
+//
+//        if (!empty($user->email_aliases)) {
+//            foreach (explode(',', $user->email_aliases) as $alias) {
+//                $alias = trim($alias);
+//                if ($alias) {
+//                    $alias = str_replace('/</', '', $alias);
+//                    $alias = str_replace('/>/', '', $alias);
+//                    if (!isset($emails[$alias])) {
+//                        $emails[$alias] = $user->getFullName($langs) . ' (' . $alias . ')';
+//                    }
+//                }
+//            }
+//        }
+//
+//        // Société: 
+//
+//        if (!empty($conf->global->MAIN_INFO_SOCIETE_MAIL)) {
+//            $emails[$conf->global->MAIN_INFO_SOCIETE_MAIL] = $conf->global->MAIN_INFO_SOCIETE_NOM . ' (' . $conf->global->MAIN_INFO_SOCIETE_MAIL . ')';
+//        }
+//
+//        if (!empty($conf->global->MAIN_INFO_SOCIETE_MAIL_ALIASES)) {
+//            foreach (explode(',', $conf->global->MAIN_INFO_SOCIETE_MAIL_ALIASES) as $alias) {
+//                $alias = trim($alias);
+//                if ($alias) {
+//                    $alias = str_replace('/</', '', $alias);
+//                    $alias = str_replace('/>/', '', $alias);
+//                    if (!isset($emails[$alias])) {
+//                        $emails[$alias] = $conf->global->MAIN_INFO_SOCIETE_NOM . ' (' . $alias . ')';
+//                    }
+//                }
+//            }
+//        }
+//
+//        // Contacts pièce: 
+//
+//        if ($this->isLoaded()) {
+//            $c_user = new User($this->db->db);
+//            $contacts = $this->dol_object->liste_contact(-1, 'internal');
+//            foreach ($contacts as $item) {
+//                $c_user->fetch($item['id']);
+//                if (BimpObject::objectLoaded($c_user)) {
+//                    if (!empty($c_user->email) && !isset($emails[$c_user->email])) {
+//                        $emails[$c_user->email] = $item['libelle'] . ': ' . $c_user->getFullName($langs) . ' (' . $c_user->email . ')';
+//                    }
+//
+//                    if (!empty($c_user->email_aliases)) {
+//                        foreach (explode(',', $c_user->email_aliases) as $alias) {
+//                            $alias = trim($alias);
+//                            if ($alias) {
+//                                $alias = str_replace('/</', '', $alias);
+//                                $alias = str_replace('/>/', '', $alias);
+//                                if (!isset($emails[$alias])) {
+//                                    $emails[$alias] = $item['libelle'] . ': ' . $c_user->getFullName($langs) . ' (' . $alias . ')';
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//
+//        return $emails;
+//    }
+//    
+//    public function renderMailToInputs($input_name)
+//    {
+//        $emails = $this->getMailsToArray();
+//
+//        $html = '';
+//
+//        $html .= BimpInput::renderInput('select', $input_name . '_add_value', '', array(
+//                    'options'     => $emails,
+//                    'extra_class' => 'emails_select principal'
+//        ));
+//
+//
+//        $html .= '<p class="inputHelp selectMailHelp">';
+//        $html .= 'Sélectionnez une adresse e-mail puis cliquez sur "Ajouter"';
+//        $html .= '</p>';
+//
+//        $html .= '<div class="mail_custom_value" style="display: none; margin-top: 10px">';
+//        $html .= BimpInput::renderInput('text', $input_name . '_add_value_custom', '');
+//        $html .= '<p class="inputHelp">Entrez une adresse e-mail valide puis cliquez sur "Ajouter"</p>';
+//        $html .= '</div>';
+//
+//        return $html;
+//    }
+//    
+//    public function getMailsToArray()
+//    {
+//        global $user, $langs;
+//
+//        $client = $this->getChildObject('client');
+//
+//        $emails = array(
+//            ""           => "",
+//            $user->email => $user->getFullName($langs) . " (" . $user->email . ")"
+//        );
+//
+//        if ($this->isLoaded()) {
+//            $contacts = $this->dol_object->liste_contact(-1, 'external');
+//            foreach ($contacts as $item) {
+//                if (!isset($emails[(int) $item['id']])) {
+//                    $emails[(int) $item['id']] = $item['libelle'] . ': ' . $item['firstname'] . ' ' . $item['lastname'] . ' (' . $item['email'] . ')';
+//                }
+//            }
+//        }
+//
+//        if (BimpObject::objectLoaded($client)) {
+//            $client_emails = self::getSocieteEmails($client->dol_object);
+//            if (is_array($client_emails)) {
+//                foreach ($client_emails as $value => $label) {
+//                    if (!isset($emails[$value])) {
+//                        $emails[$value] = $label;
+//                    }
+//                }
+//            }
+//        }
+//
+//        if ($this->isLoaded()) {
+//            $contacts = $this->dol_object->liste_contact(-1, 'internal');
+//            foreach ($contacts as $item) {
+//                if (!isset($emails[$item['email']])) {
+//                    $emails[$item['email']] = $item['libelle'] . ': ' . $item['firstname'] . ' ' . $item['lastname'] . ' (' . $item['email'] . ')';
+//                }
+//            }
+//        }
+//
+//        $emails['custom'] = 'Autre';
+//
+//        return $emails;
+//    }
+//    
+//    public function getDefaultMailTo()
+//    {
+//        return array();
+//    }
+//    
+//   public function getEmailModelsArray()
+//    {
+//        if (!static::$email_type) {
+//            return array();
+//        }
+//
+//        return self::getEmailTemplatesArray(static::$email_type, true);
+//    }
+//    
+    public function isBySocId() {
+        if(isset($_REQUEST['socid']) && $_REQUEST['socid'] > 0) {
+            return 1;
+        }
+        return 0;
+    }
     
 }

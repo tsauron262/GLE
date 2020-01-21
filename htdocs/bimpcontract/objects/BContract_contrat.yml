@@ -265,6 +265,9 @@ fields_tables:
               edit: 0
             - field: denounce
               edit: 0
+            - label: Commercial
+              value:
+                  callback: displayCommercial
     client: 
         panel: 0
         rows: 
@@ -325,6 +328,102 @@ lists:
             fk_soc: unset
 
 forms:
+#    email: 
+#        rows: 
+#            - custom: 1
+#              label: Emetteur
+#              input_name: from
+#              input: 
+#                  type: select
+#                  options: 
+#                      array: emailUsersFrom
+#                      
+#            - custom: 1
+#              label: Destinataires
+#              input_name: mail_to
+#              input: 
+#                  type: custom
+#                  content: 
+#                      callback: 
+#                          method: renderMailToInputs
+#                          params: 
+#                              - mail_to
+#                  multiple: 1
+#              values: 
+#                  array: mailsTo
+#              value: 
+#                  callback: getDefaultMailTo
+#              required: 1
+#              
+#            - custom: 1
+#              label: Copies à
+#              input_name: copy_to
+#              input: 
+#                  type: custom
+#                  content: 
+#                      callback: 
+#                          method: renderMailToInputs
+#                          params: 
+#                              - copy_to
+#                  multiple: 1
+#                          
+#            - custom: 1
+#              label: Accusé de réception
+#              input_name: confirm_reception
+#              data_type: bool
+#              input: 
+#                  type: toggle
+#              default_value: 0
+#              
+#            - custom: 1
+#              label: Modèle de courriel
+#              input_name: id_model
+#              input: 
+#                  type: select
+#                  options: 
+#                      array: emailModels
+#                      
+#            - custom: 1
+#              label: Objet
+#              input_name: mail_object
+#              input: 
+#                  type: text
+#              value: 
+#                  callback: getEmailTopicByModel
+#              depends_on: id_model
+#              
+#            - custom: 1
+#              label: Message
+#              data_type: html
+#              input_name: msg_html
+#              input: 
+#                  type: html
+#              value: 
+#                  callback: getEmailContentByModel
+#              depends_on: id_model
+#              
+#            - custom: 1
+#              label: Fichiers joints
+#              input_name: join_files
+#              data_type: id_object
+#              input: 
+#                  type: check_list
+#                  items: 
+#                      callback: getAllFiles
+##                      array: files
+#              value: 
+#                  callback: getJoinFilesValues
+#              object: files
+#              create_form: upload
+#              create_form_label: Ajouter
+#              create_form_values: 
+#                  fields: 
+#                      parent_module: 
+#                          prop: module
+#                      parent_object_name: 
+#                          prop: object_name
+#                      id_parent: 
+#                          prop: id
     edit_contrat:
         rows:
             - field: ref

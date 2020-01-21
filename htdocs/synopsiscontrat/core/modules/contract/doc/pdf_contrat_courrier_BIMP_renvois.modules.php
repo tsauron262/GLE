@@ -172,7 +172,7 @@ class pdf_contrat_courrier_BIMP_renvois extends ModeleSynopsiscontrat {
                     $contact = new Contact($this->db);
                     $contact->fetch($id_contact);
                     $pdf->Cell($W, 4, "", 0, null, 'C', true);
-                    $pdf->Cell($W, 4, "Contact : " . $contact->lastname . " " . $contact->firstname, 0, null, 'C', true);
+                    $pdf->Cell($W, 4, $contact->lastname . " " . $contact->firstname, 0, null, 'L', true);
                     $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
                 }
                 $pdf->Cell($W, 4, "", 0, null, 'C', true);

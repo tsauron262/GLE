@@ -44,15 +44,27 @@ lists:
             id_contrat:
                 field: id_contrat
                 display: nom_url
-            next_facture_date:
-                field: next_facture_date
-                edit: 1
-            next_facture_amount:
-                field: next_facture_amount
-                edit: 1
-            validate:
-                field: validate
-                edit: 1
+            client:
+                label: Client
+                value: 
+                    callback:
+                        method: displayParentInfos
+                        params:
+                            - fk_soc
+                            - bimpcore
+                            - Bimp_Societe
+            facture_send:
+                label: Factures émisent
+                value:
+                    callback: displayFactureEmises
+            next_facture:
+                label: Date de la prochaine facture
+                value:
+                    callback: displayNextFactureDate
+            etat_facturation:
+                label: Etat facturation
+                value:
+                    callback: displayRetard
                 
 forms:
     create_perso:

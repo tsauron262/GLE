@@ -23,7 +23,7 @@ sections:
                     panel: 1
                     object: contrat
           - id: recap_contrat_echeancier
-            title: Récapitulatif des péchéanciers contrat
+            title: Récapitulatif des échéanciers contrat
             struct:
                 type: list
                 list:

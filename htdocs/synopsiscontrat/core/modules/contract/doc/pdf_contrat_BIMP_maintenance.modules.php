@@ -142,7 +142,8 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 BimpTools::loadDolClass('product');
                 $p = new Product($db);
                 $p->fetch($line->fk_product);
-                $pdf->Cell($W * 5, 6, (strlen($p->label) > 40) ? substr($p->label, 0, 40) . " ..." : $p->label, 1, null, 'L', true);
+                //echo '<pre>';print_r($p);
+                $pdf->Cell($W * 5, 6, (strlen($p->label) > 60) ? substr($p->label, 0, 60) . " ..." : $p->label, 1, null, 'L', true);
                 $pdf->Cell($W, 6, number_format($line->tva_tx, 0, '', '') . "%", 1, null, 'C', true);
                 $pdf->Cell($W * 2, 6, number_format($line->price_ht, 2, '.', '') . "€", 1, null, 'C', true);
                 $pdf->Cell($W, 6, $line->qty, 1, null, 'C', true);

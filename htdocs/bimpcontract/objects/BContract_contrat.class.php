@@ -478,7 +478,9 @@ class BContract_contrat extends BimpDolObject {
         }
         
         if(strpos($this->getData('ref'), "PROV")) {
-            $ref = $this->getData('objet_contrat') . date('ym') . '-' . $this->id;
+            
+            $ref = BimpTools::getNextRef('contrat', 'ref', $this->getData('objet_contrat') . '{AA}{MM}-00');
+            
         } else {
             $ref = $this->getData('ref');
         }
@@ -1328,6 +1330,16 @@ class BContract_contrat extends BimpDolObject {
             }
         }
         return $html;
+    }
+    
+    public function displayCommercial() {
+
+        BimpTools::loadDolClass('user');
+        $commercial = new User($this->db->db);
+        $commercial->fetch($this->getData('fk_commercial_suivi'));
+        
+        return $commercial->getNomUrl(1);
+        
     }
     
     public function isSigned($display = null) {

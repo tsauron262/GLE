@@ -182,23 +182,27 @@ class BContract_contrat extends BimpDolObject {
     }
     
     public function displayDateNextFacture() {
-        
         if($this->isLoaded()) {
             $echeancier = $this->getInstance('bimpcontract', "BContract_echeancier");
-            if($echeancier->find(['id_contrat' => $this->id])) {
-                $return = $echeancier->getData('next_facture_date');
-            } else {
-                $return = $this->getData('date_start');
-            }
-
-            if($return != '' && new DateTime($return) > new DateTime('01-01-2000 00:00:00')){
-                $return = new DateTime($return);
-                $return = $return->format('d / m / Y');
-            }
-            
+                $fin = false;
+                if($echeancier->find(['id_contrat' => $this->id])) {
+                    $next_facture_date = $echeancier->getData('next_facture_date');
+                    if($next_facture_date == 0) {
+                        $fin = true;
+                        $return = "<b class='important'>&Eacute;chéancier totalement facturé</b>";
+                    } else {
+                        $return = $next_facture_date;
+                    }
+                    
+                } else {
+                    $return = $this->getData('date_start');
+                }
+                if(!$fin) {
+                    $return = new DateTime($return);
+                    $return = $return->format('d / m / Y');
+                }
             return $return;
         }
-
     }
     
     public function displayRef() {

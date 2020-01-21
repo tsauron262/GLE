@@ -191,8 +191,10 @@ class BContract_contrat extends BimpDolObject {
                 $return = $this->getData('date_start');
             }
 
-            $return = new DateTime($return);
-            $return = $return->format('d / m / Y');
+            if($return != '' && new DateTime($return) > new DateTime('01-01-2000 00:00:00')){
+                $return = new DateTime($return);
+                $return = $return->format('d / m / Y');
+            }
             
             return $return;
         }

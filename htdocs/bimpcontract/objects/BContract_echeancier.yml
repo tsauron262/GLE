@@ -65,6 +65,11 @@ lists:
                 label: Etat facturation
                 value:
                     callback: displayRetard
+                    
+    client:
+        extends: default
+        cols:
+            client: unset
                 
 forms:
     create_perso:

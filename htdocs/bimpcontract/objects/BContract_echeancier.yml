@@ -61,6 +61,10 @@ lists:
                 label: Date de la prochaine facture
                 value:
                     callback: displayNextFactureDate
+            etat_facturation:
+                label: Etat facturation
+                value:
+                    callback: displayRetard
                 
 forms:
     create_perso:

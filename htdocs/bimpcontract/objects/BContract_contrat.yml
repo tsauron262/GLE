@@ -314,6 +314,10 @@ lists:
                 field: datec
             fk_user_author:
                 field: fk_user_author
+            commercial:
+                label: Commercial
+                value:
+                    callback: displayCommercial
     
     client:
         extends: default

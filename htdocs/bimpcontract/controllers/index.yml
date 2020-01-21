@@ -25,6 +25,16 @@ sections:
                         params: 
                             - renderContractsTab
                             - default
+        recap_contrat_echeancier:
+            label: Récapitulatif des échéanciers contrat
+            sections:
+                - type: custom
+                  custom:
+                      callback:
+                          method: renderTabs
+                          params:
+                              - renderTimeTableTab
+                              - recap_contrat_echeancier
 #        deux:
 #    - type: nav_tabs
 #      nav_tabs: 
@@ -38,15 +48,16 @@ sections:
 #          - id: recap_contrat_echeancier
 #            title: Récapitulatif des échéanciers contrat
 #            struct:
-        recap_contrat_echeancier:
-            label: Récapitulatif des échéanciers contrat
-            sections:
-                - type: list
-                  list:
-                    panel: 1
-                    object: echeancier
-                    name: default
+#        recap_contrat_echeancier:
+#            label: Récapitulatif des échéanciers contrat
+#            sections:
+#                - type: list
+#                  list:
+#                    panel: 1
+#                    object: echeancier
+#                    name: default
         config:
+            show: 0
             label: Configuration
             sections:
                 - type: list

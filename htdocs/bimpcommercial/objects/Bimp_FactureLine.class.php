@@ -373,8 +373,8 @@ class Bimp_FactureLine extends ObjectLine
 
                                 $fac_fourn_ref = (string) $this->db->getValue('facture_fourn', 'ref', 'rowid = ' . (int) $ff_line->getData('id_obj'));
                                 if ($fac_fourn_ref) {
-                                    $total_achats += ($cf_line->pu_ht * $ff_line_qty);
-                                    $details[] = 'PA Facture fournisseur ' . $fac_fourn_ref . ' pour ' . $ff_line_qty . ' unité(s) : ' . BimpTools::displayMoneyValue((float) $cf_line->pu_ht);
+                                    $total_achats += ($ff_line->pu_ht * $ff_line_qty);
+                                    $details[] = 'PA Facture fournisseur ' . $fac_fourn_ref . ' pour ' . $ff_line_qty . ' unité(s) : ' . BimpTools::displayMoneyValue((float) $ff_line->pu_ht);
                                     $cf_line_remain_qty -= $ff_line_qty;
                                 }
                             }

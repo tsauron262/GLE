@@ -13,27 +13,44 @@ objects:
             bimp_object: BContract_echeancier
     
 sections:
-    - type: nav_tabs
-      nav_tabs: 
-          - id: liste
-            title: Liste complète des contrats
-            struct: 
-                type: list
-                list: 
-                    panel: 1
-                    object: contrat
-          - id: recap_contrat_echeancier
-            title: Récapitulatif des échéanciers contrat
-            struct:
-                type: list
-                list:
+    - type: tabs
+      tabs: 
+        default:
+            label: Contrats
+            sections:
+                - type: custom
+                  custom: 
+                      callback: 
+                        method: renderTabs
+                        params: 
+                            - renderContractsTab
+                            - default
+#        deux:
+#    - type: nav_tabs
+#      nav_tabs: 
+#          - id: liste
+#            title: Liste complète des contrats
+#            struct: 
+#                type: list
+#                list: 
+#                    panel: 1
+#                    object: contrat
+#          - id: recap_contrat_echeancier
+#            title: Récapitulatif des échéanciers contrat
+#            struct:
+        recap_contrat_echeancier:
+            label: Récapitulatif des échéanciers contrat
+            sections:
+                - type: list
+                  list:
                     panel: 1
                     object: echeancier
                     name: default
-          - id: configuration
-            title: Configuration
-            struct: 
-                type: list
-                list: 
+        config:
+            label: Configuration
+            sections:
+                - type: list
+                  title: Configuration
+                  list: 
                     panel: 1
                     object: assistance_contrat

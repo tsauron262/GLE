@@ -335,12 +335,11 @@ class BContract_echeancier extends BimpObject {
     public function displayFactureEmises() {
 
         $class = 'danger';
-        
         $parent = $this->getParentInstance();
         $nombre_total_facture = $parent->getData('duree_mois') / $parent->getData('periodicity');
-
         $nombre_fature_send = count(getElementElement('contrat', 'facture', $this->getData('id_contrat')));
         $popover = 'Facture émisent ('.$nombre_fature_send.') / Nombre période ('.$nombre_total_facture.') ';
+        
         if ($nombre_fature_send > 0 && $nombre_fature_send < $nombre_total_facture) {
             $class = "warning";
         } elseif ($nombre_fature_send == $nombre_total_facture) {
@@ -357,10 +356,32 @@ class BContract_echeancier extends BimpObject {
         
         $next = $this->getData('next_facture_date');
         
+        if($next != 0) {
+            $alert = "";
+            $dateTime = new DateTime($next);
+            
+            return '<b>' . $dateTime->format('d / m / Y') . '</b>';
+        }
+        
+        return '<b class="important" >Echéancier totalement facturé</b>';
+        
+        
+    }
+    
+    public function displayRetard() {
+        
+        $alert = "<b class='success bs-popover' ".BimpRender::renderPopoverData('Facturation à jour').">".BimpRender::renderIcon('check')."</b>";
+        $next = $this->getData('next_facture_date');
         $dateTime = new DateTime($next);
+        $toDay = new DateTime();
+        if($toDay->diff($dateTime)->invert == 1 && $next != 0) {
+            
+            $popover = BimpRender::renderPopoverData('Retard de facturation de ' . $toDay->diff($dateTime)->d . ' Jours', 'top');
+            
+            $alert = '<b class="danger bs-popover" '.$popover.' >'.BimpRender::renderIcon('warning').'</b>';
+        }
         
-        return '<b>' . $dateTime->format('d / m / Y') . '</b>';
-        
+        return $alert;
         
     }
 

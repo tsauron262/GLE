@@ -1338,7 +1338,7 @@ class ObjectLine extends BimpObject
                 }
             }
 
-            if ($total_line_amounts) {
+            if ($total_line_amounts && $total_ttc) {
                 $this->remises_total_infos['line_percent'] += (float) (($total_line_amounts / $total_ttc) * 100);
             }
 

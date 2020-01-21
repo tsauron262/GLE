@@ -615,3 +615,12 @@ views:
                 - type: list
                   list:
                       children: lines
+
+searches:
+    default:
+        has_serial: 1
+        fields_search: 
+            - a.ref
+        fields_return: 
+            - a.ref
+        label_syntaxe: '<a.ref>'

@@ -265,6 +265,9 @@ fields_tables:
               edit: 0
             - field: denounce
               edit: 0
+            - label: Commercial
+              value:
+                  callback: displayCommercial
     client: 
         panel: 0
         rows: 

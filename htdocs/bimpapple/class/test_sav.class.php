@@ -55,7 +55,7 @@ class test_sav
             global $user;
             $user->fetch(242);
             if(!$this->repair->initGsx($error, true)){
-                $this->output .= " Non authentifié sur GSX ! ".print_r($error,1);
+                $this->output .= " Non authentifié sur GSX ! ".print_r($error,1).print_r($this->repair->gsx_v2,1);
                 return false;
             }
         }

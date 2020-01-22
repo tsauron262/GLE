@@ -124,7 +124,7 @@ if ($id > 0)
 		$sql.= " WHERE f.fk_soc = s.rowid AND s.rowid = ".$object->id;
 		$sql.= " AND f.entity = ".$conf->entity;
 		$sql.= $db->order($sortfield, $sortorder);
-die($sql);
+
 		$resql=$db->query($sql);
 		if ($resql)
 		{

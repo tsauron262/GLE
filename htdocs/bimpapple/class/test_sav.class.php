@@ -39,16 +39,10 @@ class test_sav
         require_once DOL_DOCUMENT_ROOT . '/synopsistools/SynDiversFunction.php';
         require_once DOL_DOCUMENT_ROOT . '/bimpapple/objects/GSX_Repair.class.php';
         
-        
-        
-        
-        
-        
         $this->initGsx();
     }
     
     function initGsx(){
-        
         $error = array();
         $this->repair = new GSX_Repair('bimpapple', 'GSX_Repair');
         if(!$this->repair->initGsx($error)){
@@ -62,7 +56,6 @@ class test_sav
                 $this->output .= " Non authentifié sur GSX ! ";
             }
         }
-        $this->output .= print_r($error,1).print_r($user->array_options,1);
     }
 
     function testGlobal()
@@ -70,16 +63,8 @@ class test_sav
         $_GET['envoieMail'] = "yes";
         session_write_close();
         $this->initGsx();
-//        $this->tentativeARestitueAuto(4);
-//        $this->tentativeARestitueAuto(1);
-//        $this->tentativeARestitueAuto(2);
-//        $this->tentativeARestitueAuto(3);
         $this->tentativeARestitueAuto(0);
 
-//        $this->tentativeFermetureAuto(4);
-//        $this->tentativeFermetureAuto(1);
-//        $this->tentativeFermetureAuto(2);
-//        $this->tentativeFermetureAuto(3);
         $this->tentativeFermetureAuto(0);
 
         if ($this->nbErr > 0)
@@ -141,10 +126,6 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                         echo "fermé dans GSX Impossible de Fermé dans GLE ";
                         $this->nbErr++;
                     } else {
-
-
-
-
                         $mailTech = "jc.cannet@bimp.fr";
                         if ($ligne->Technicien > 0) {
                             $user = new User($db);
@@ -311,8 +292,16 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
         global $db;
         return "<a href='" . DOL_URL_ROOT . "/bimpsupport/index.php?fc=sav&id=" . $id . "'>" . $ref . "</a>";
     }
+    
+    
+    function fetchImeiPetit(){
+        
+        $this->initGsx();
+        
+        $this->fetchEquipmentsImei(1);
+    }
 
-    function fetchEquipmentsImei()
+    function fetchEquipmentsImei($nb = 100)
     {
         if (!class_exists('GSX_v2')) {
             require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_v2.php';
@@ -326,7 +315,7 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
 
             $rows = $equipment->getList(array(
                 'imei' => ''
-                    ), 1, 1, 'id', 'desc', 'array', array('id', 'serial'));
+                    ), $nb, 1, 'id', 'desc', 'array', array('id', 'serial'));
 
             if (!empty($rows)) {
                 foreach ($rows as $r) {

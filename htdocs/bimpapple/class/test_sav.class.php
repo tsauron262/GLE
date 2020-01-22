@@ -337,14 +337,18 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                     $ids = Equipment::gsxFetchIdentifiers($r['serial'], $gsx);
 
                     $imei = $ids['imei'];
+                    $imei2 = $ids['imei2'];
+                    $meid = $ids['meid'];
                     $serial = $ids['serial'];
-
+                    
                     if (!$imei) {
                         $imei = 'n/a';
                     }
 
                     $data = array(
-                        'imei' => $imei
+                        'imei' => $imei,
+                        'imei2' => $imei2,
+                        'meid' => $meid
                     );
 
                     if ($r['serial'] && $serial && $r['serial'] !== $serial) {

@@ -2211,7 +2211,7 @@ class BimpTools
             $random = rand(0,10000000);
             $text = "Yes".$random;
             file_put_contents($file, $text);
-            sleep(0.200);
+            sleep(0.400);
             $text2 = file_get_contents($file);
             if($text == $text2)
                 return 1;

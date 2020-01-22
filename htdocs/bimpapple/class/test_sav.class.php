@@ -52,8 +52,10 @@ class test_sav
         $error = array();
         $this->repair = new GSX_Repair('bimpapple', 'GSX_Repair');
         if(!$this->repair->initGsx($error)){
-            global $user;
+            global $user, $db;
+            $user = new User($db);
             $user->fetch(242);
+            $user->fetch_optionals();
             $this->output .= "userId".$user->id.$user->login;
             if(!$this->repair->initGsx($error, true)){
                 $this->output .= " Non authentifié sur GSX ! ";

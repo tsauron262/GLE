@@ -715,7 +715,7 @@ function mailSyn($to, $sujet, $text, $headers = null, $cc = '') {
 }
 
 function synGetDebug(){
-//    $debugT = debug_backtrace();
+    $debugT = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT);
 //                    foreach($debugT as $id=>$ln){
 //                        if($ln['function'] != "synGetDebug"){
 //                            $debug[$id] = $debugT[$id];
@@ -727,7 +727,7 @@ function synGetDebug(){
 //                                $debug [$id]['object'] = get_class($debug [$id]['object']);
 //                        }
 //                    }
-//                    return print_r($debug,1);
+                    return print_r($debug,1);
 }
 
 function utf8_encodeRien($str) {

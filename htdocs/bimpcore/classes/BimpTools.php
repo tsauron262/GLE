@@ -2257,4 +2257,19 @@ class BimpTools
         } else
             return 0;
     }
+    
+    
+    public static function getMailOrSuperiorMail($idComm){
+        $userT = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $idComm);
+        $ok = true;
+        if($userT->getData("statut") == 1)
+            $ok = false;
+        if($ok && $userT->getData('email') != '')
+            return $userT->getData('email');
+        
+        if($userT->getData('fk_user') > 0)
+            return static::getMailOrSuperiorMail($userT->getData('fk_user'));
+        
+        return "admin@bimp.fr";
+    }
 }

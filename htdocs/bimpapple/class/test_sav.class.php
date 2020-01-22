@@ -42,7 +42,6 @@ class test_sav
         
         
         
-        $this->repair = new GSX_Repair('bimpapple', 'GSX_Repair');
         
         
         $this->initGsx();
@@ -50,12 +49,13 @@ class test_sav
     
     function initGsx(){
         
-        
-        if(!$this->repair->initGsx()){
+        $error = array();
+        $this->repair = new GSX_Repair('bimpapple', 'GSX_Repair');
+        if(!$this->repair->initGsx($error)){
             global $user;
             $user->fetch(242);
-            if(!$this->repair->initGsx()){
-                $this->output .= " Non authentifié sur GSX ! ";
+            if(!$this->repair->initGsx($error, true)){
+                $this->output .= " Non authentifié sur GSX ! ".print_r($error,1);
                 return false;
             }
         }

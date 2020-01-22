@@ -53,7 +53,7 @@ class test_sav
         $this->repair = new GSX_Repair('bimpapple', 'GSX_Repair');
         if(!$this->repair->initGsx($error)){
             global $user, $db, $conf;
-            $conf->entity = 0;
+            $conf->entity = 1;
             $user = new User($db);
             $user->fetch(242);
             $user->fetch_optionals(242);

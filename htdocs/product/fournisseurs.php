@@ -181,7 +181,7 @@ if (empty($reshook))
 			$langs->load("errors");
 			setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentities("RefSupplier")), null, 'errors');
 		}
-		if ($id_fourn <= 0)
+		if ($id_fourn <= 0 || !is_int($id_fourn))
 		{
 			$error++;
 			$langs->load("errors");

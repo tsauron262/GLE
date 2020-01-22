@@ -298,7 +298,10 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
         
         $this->initGsx();
         
-        $this->fetchEquipmentsImei(1);
+        $this->fetchEquipmentsImei(3);
+        
+        
+        $this->output .= ' ' . $this->nbImei . ' n° IMEI corrigé(s).';
     }
 
     function fetchEquipmentsImei($nb = 100)

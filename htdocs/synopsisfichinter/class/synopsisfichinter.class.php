@@ -1110,7 +1110,7 @@ class SynopsisfichinterLigne extends FichinterLigne{
         $sql.= ')';
         $sql.= " VALUES (" . $this->fk_fichinter . ",";
         $sql.= " '" . addslashes($this->desc) . "',";
-        $sql.= " '" . $this->db->idate($this->datei) . "',";
+        $sql.= " '" . $this->db->idate($this->db->jdate($this->datei)) . "',";
         $sql.= " " . $this->duration . ",";
         $sql.= ' ' . $rangToUse;
         $sql.= ')';

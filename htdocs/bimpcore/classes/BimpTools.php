@@ -2239,7 +2239,7 @@ class BimpTools
                 $text = "Attention bloquage de plus de " . $nbMax . " secondes voir pour type : " . $type;
                 dol_syslog("ATTENTION " . $text, 3);
                 mailSyn2("Bloquage anormal", "dev@bimp.fr", "admin@bimp.fr", "Attention : " . $text);
-                die($text);
+                static::bloqueDebloque($type, false);
             }
         } else
             return 0;

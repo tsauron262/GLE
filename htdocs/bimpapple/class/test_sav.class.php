@@ -54,11 +54,12 @@ class test_sav
         if(!$this->repair->initGsx($error)){
             global $user;
             $user->fetch(242);
+            $this->output .= "userId".$user->id.$user->login;
             if(!$this->repair->initGsx($error, true)){
-                $this->output .= " Non authentifié sur GSX ! ".print_r($error,1).print_r($this->repair->gsx_v2,1);
-                return false;
+                $this->output .= " Non authentifié sur GSX ! ";
             }
         }
+        $this->output .= print_r($error,1).print_r($this->repair->gsx_v2,1);
     }
 
     function testGlobal()

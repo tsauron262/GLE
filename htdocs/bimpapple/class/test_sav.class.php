@@ -51,7 +51,6 @@ class test_sav
             $user = new User($db);
             $user->fetch(242);
             $user->fetch_optionals(242);
-            $this->output .= "userId".$user->id.$user->login."|".$user->array_options['options_apple_id'];
             if(!$this->repair->initGsx($error, true)){
                 $this->output .= " Non authentifié sur GSX ! ";
             }

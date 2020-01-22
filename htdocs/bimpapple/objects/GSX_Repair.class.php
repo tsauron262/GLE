@@ -45,12 +45,12 @@ class GSX_Repair extends BimpObject
     public function initGsx(&$errors = array())
     {
         if ($this->use_gsx_v2) {
-            if (is_null($this->gsx_v2)) {
-                $this->gsx_v2 = GSX_v2::getInstance();
+            if (is_null($this->gsx_v2) || !$this->gsx_v2->logged) {
+                $this->gsx_v2 = GSX_v2::getInstance((is_null($this->gsx_v2)?false:true));
             }
             $this->gsx_v2->resetErrors();
             if (!$this->gsx_v2->logged) {
-                $errors[] = 'Non authentifié sur GSX : '.$this->appleId;
+                $errors[] = 'Non authentifié sur GSX : '.$this->gsx_v2->appleId;
                 return false;
             }
         } else {

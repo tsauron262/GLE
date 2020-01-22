@@ -40,9 +40,20 @@ class test_sav
         require_once DOL_DOCUMENT_ROOT . '/bimpapple/objects/GSX_Repair.class.php';
         
         
-        global $user;
         
-        $user->fetch(242);
+        
+        $this->repair = new GSX_Repair('bimpapple', 'GSX_Repair');
+        
+        
+        if(!$this->repair->initGsx()){
+            global $user;
+
+            $user->fetch(242);
+            if(!$this->repair->initGsx())
+                echo("non auth");
+        }
+        
+        die($this->repair->gsx_v2->appleId."ppppp");
     }
 
     function testGlobal()
@@ -103,22 +114,20 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
         $sql = $db->query($this->getReq('closed', $iTribu));
 
 
-        $repair = new GSX_Repair('bimpapple', 'GSX_Repair');
-
 
 
         while ($ligne = $db->fetch_object($sql)) {
             if (!$this->useCache || !isset($_SESSION['idRepairIncc'][$ligne->rid])) {
-                if (isset($repair->gsx))
-                    $repair->gsx->errors['soap'] = array();
-                $repair->fetch($ligne->rid);
-                $erreurSOAP = $repair->lookup();
+                if (isset($this->repair->gsx))
+                    $this->repair->gsx->errors['soap'] = array();
+                $this->repair->fetch($ligne->rid);
+                $erreurSOAP = $this->repair->lookup();
                 if (count($erreurSOAP) == 0) {
                     echo "Tentative de maj de " . $ligne->ref;
-                    if ($repair->getData('repair_complete')) {
+                    if ($this->repair->getData('repair_complete')) {
                         echo "Fermée dans GSX maj dans GLE.<br/>";
                         $this->nbOk++;
-                    } elseif ($repair->repairLookUp['repairStatusCode'] == "SPCM") {//"Fermée et complétée"){
+                    } elseif ($this->repair->repairLookUp['repairStatusCode'] == "SPCM") {//"Fermée et complétée"){
                         echo "fermé dans GSX Impossible de Fermé dans GLE ";
                         $this->nbErr++;
                     } else {
@@ -134,8 +143,8 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                                 $mailTech = $user->email;
                         }
 
-                        if ($repair->repairLookUp['repairStatusCode'] == "RFPU") {
-                            $erreurSOAP = $repair->close(1, 0);
+                        if ($this->repair->repairLookUp['repairStatusCode'] == "RFPU") {
+                            $erreurSOAP = $this->repair->close(1, 0);
                             if (isset($erreurSOAP['errors']))
                                 $erreurSOAP = $erreurSOAP['errors'];
 
@@ -144,7 +153,7 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                                 $this->nbOk++;
                             } else {
                                 $this->nbErr++;
-                                $messErreur = $this->displayError("N'arrive pas a être fermé", $ligne, $repair, $erreurSOAP);
+                                $messErreur = $this->displayError("N'arrive pas a être fermé", $ligne, $this->repair, $erreurSOAP);
                                 echo $messErreur;
                                 $mailTech .= ",tommy@bimp.fr";
                                 if (isset($_GET['envoieMail'])) {
@@ -153,13 +162,13 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                                 }
                             }
                         } else {//tentative de passage a rfpu
-                            $erreurSOAP = $repair->updateStatus('RFPU');
+                            $erreurSOAP = $this->repair->updateStatus('RFPU');
                             if (count($erreurSOAP) == 0) {
                                 echo "Semble avoir été passer dans GSX a RFPU<br/>";
                                 $this->nbOk++;
                             } else {
                                 $this->nbErr++;
-                                $messErreur = $this->displayError("N'arrive pas a être passé a RFPU dans GSX", $ligne, $repair, $erreurSOAP);
+                                $messErreur = $this->displayError("N'arrive pas a être passé a RFPU dans GSX", $ligne, $this->repair, $erreurSOAP);
                                 echo $messErreur;
 
                                 $mailTech .= ", tommy@bimp.fr";
@@ -172,7 +181,7 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                     }
                 } else {
                     $this->nbErr++;
-                    $messErreur = $this->displayError("Echec de la recup dans GSX", $ligne, $repair, $erreurSOAP);
+                    $messErreur = $this->displayError("Echec de la recup dans GSX", $ligne, $this->repair, $erreurSOAP);
                     echo $messErreur;
                     $_SESSION['idRepairIncc'][$ligne->rid] = $ligne->ref;
                 }
@@ -204,30 +213,29 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
         $sql = $db->query($this->getReq('ready', $iTribu));
 
 
-        $repair = new GSX_Repair('bimpapple', 'GSX_Repair');
 
 
 
         while ($ligne = $db->fetch_object($sql)) {
             if (!$this->useCache || !isset($_SESSION['idRepairIncc'][$ligne->rid])) {
-                if (isset($repair->gsx))
-                    $repair->gsx->errors['soap'] = array();
-                $repair->fetch($ligne->rid);
-                $erreurSOAP = $repair->lookup();
+                if (isset($this->repair->gsx))
+                    $this->repair->gsx->errors['soap'] = array();
+                $this->repair->fetch($ligne->rid);
+                $erreurSOAP = $this->repair->lookup();
                 if (count($erreurSOAP) == 0) {
                     echo "Tentative de maj de " . $ligne->ref;
-                    if ($repair->repairLookUp['repairStatusCode'] == "RFPU" || $repair->getData('ready_for_pick_up')) {
+                    if ($this->repair->repairLookUp['repairStatusCode'] == "RFPU" || $this->repair->getData('ready_for_pick_up')) {
                         echo "Passage dans GLE a RFPU<br/>";
-                        $repair->readyForPickUp = 1;
-                        $repair->update();
+                        $this->repair->readyForPickUp = 1;
+                        $this->repair->update();
                         $this->nbOk++;
                     } else {
-                        if (count($repair->updateStatus('RFPU')) == 0) {
+                        if (count($this->repair->updateStatus('RFPU')) == 0) {
                             echo "Semble avoir été passer dans GSX a RFPU<br/>";
                             $this->nbOk++;
                         } else {
                             $this->nbErr++;
-                            $messErreur = $this->displayError("N'arrive pas a être passé a RFPU dans GSX", $ligne, $repair, $erreurSOAP);
+                            $messErreur = $this->displayError("N'arrive pas a être passé a RFPU dans GSX", $ligne, $this->repair, $erreurSOAP);
                             echo $messErreur;
 
                             $mailTech = "jc.cannet@bimp.fr";

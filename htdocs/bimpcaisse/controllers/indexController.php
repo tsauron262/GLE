@@ -108,7 +108,7 @@ class indexController extends BimpController
             $html .= '<i class="fa fa-calculator"></i>';
             $html .= '<div class="headerBlockTitle">Caisse:</div>';
             $html .= '<div class="headerBlockContent">';
-            $html .= $caisse->getData('name');
+            $html .= $caisse->getData('name'). " (".$caisse->getSecteur_code().")";
             $html .= '</div>';
             $html .= '</div>';
         }

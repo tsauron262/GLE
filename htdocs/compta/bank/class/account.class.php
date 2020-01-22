@@ -402,7 +402,7 @@ class Account extends CommonObject
 	{
 		// Deprecatîon warning
 		if (is_numeric($oper)) {
-			dol_syslog(__METHOD__ . ": using numeric operations is deprecated", LOG_WARNING);
+			//pas ci deprecié, enncore present en version 11dol_syslog(__METHOD__ . ": using numeric operations is deprecated", LOG_WARNING);
 		}
 
 		// Clean parameters

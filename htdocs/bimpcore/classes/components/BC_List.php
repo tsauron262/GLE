@@ -470,7 +470,7 @@ class BC_List extends BC_Panel
         }
 
         $filters = $this->filters;
-        if (!is_null($this->id_parent)) {
+        if (!is_null($this->id_parent) && $this->id_parent != 0) {
             $parent_id_property = $this->object->getParentIdProperty();
             if ($parent_id_property) {
                 $filters[$parent_id_property] = $this->id_parent;

@@ -89,14 +89,14 @@ class Reservations
             if ($this->display_debug) {
                 echo $error . '<br/>';
             } else {
-                dol_syslog("Réservations Apple, erreur: " . $error, LOG_ERR);
+                dol_syslog("Réservations Apple, erreur: " . $error, LOG_ERR, 0, "_apple");
             }
         } else if (is_array($error)) {
             foreach ($error as $e) {
                 if ($this->display_debug) {
                     echo $e . '<br/>';
                 } else {
-                    dol_syslog("Réservations Apple, erreur: " . $e, LOG_ERR);
+                    dol_syslog("Réservations Apple, erreur: " . $e, LOG_ERR, 0, "_apple");
                 }
             }
         }
@@ -532,9 +532,14 @@ Votre satisfaction est notre objectif, nous mettrons tout en œuvre pour vous sa
 Bien cordialement
 L’équipe BIMP";
             $mailsCli = $customer->email;
-            if ($mailsCli && $mailsCli != "" && mailSyn2("RDV SAV BIMP", $mailsCli, '', str_replace("\n", "<br/>", $messageClient))) {
-                if ($this->display_debug) {
-                    echo '[OK].<br/>';
+            if ($mailsCli && $mailsCli != ""){
+                if(mailSyn2("RDV SAV BIMP", $mailsCli, '', str_replace("\n", "<br/>", $messageClient))) {
+                    if ($this->display_debug) {
+                        echo '[OK].<br/>';
+                    }
+                }
+                else{
+                    mailSyn2("impossible d'envoyé le mail", "tommy@bimp.fr", "admin@bimp.fr", "Resa mail client erreur : ".$mailsCli." obj : ".print_r($resa,1));
                 }
             }
             else{

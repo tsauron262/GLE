@@ -33,7 +33,7 @@ class GSX_Repair extends BimpObject
     );
     public static $readyForPickupCodes = array('RFPU');
     public static $cancelCodes = array('GX02', 'GX08', 'SCNC', 'CCAR', 'CCCR', 'CCNR');
-    public static $closeCodes = array('SACM', 'SCOM', 'CFPH', 'CRCN', 'CRCP', 'CUNR', 'CRDE', 'SPCM');
+    public static $closeCodes = array('SACM', 'SCOM', 'CFPH', 'CRCN', 'CRCP', 'CUNR', 'CRDE', 'SPCM', 'RLSD');
 
     public function __construct($module, $object_name)
     {

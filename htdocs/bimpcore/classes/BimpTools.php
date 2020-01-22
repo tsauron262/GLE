@@ -2207,10 +2207,22 @@ class BimpTools
     public static function bloqueDebloque($type, $bloque = true)
     {
         $file = static::getFileBloqued($type);
-        if ($bloque)
-            file_put_contents($file, "Yes");
+        if ($bloque){
+            $random = rand(0,10000000);
+            $text = "Yes".$random;
+            file_put_contents($file, $text);
+            sleep(0.400);
+            $text2 = file_get_contents($file);
+            if($text == $text2)
+                return 1;
+            else{//conflit
+                mailSyn2("Conflit de ref évité", "dev@bimp.fr", "admin@bimp.fr", "Attention : Un conflit de ref de type ".$type." a été évité");
+                self::sleppIfBloqued($type);
+                return static::bloqueDebloque($type, $bloque);
+            }
+        }
         elseif (is_file($file))
-            unlink($file);
+            return unlink($file);
     }
 
     public static function getFileBloqued($type)
@@ -2239,9 +2251,25 @@ class BimpTools
                 $text = "Attention bloquage de plus de " . $nbMax . " secondes voir pour type : " . $type;
                 dol_syslog("ATTENTION " . $text, 3);
                 mailSyn2("Bloquage anormal", "dev@bimp.fr", "admin@bimp.fr", "Attention : " . $text);
-                die($text);
+                static::bloqueDebloque($type, false);
+                return 0;
             }
         } else
             return 0;
+    }
+    
+    
+    public static function getMailOrSuperiorMail($idComm){
+        $userT = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $idComm);
+        $ok = true;
+        if($userT->getData("statut") < 1)
+            $ok = false;
+        if($ok && $userT->getData('email') != '')
+            return $userT->getData('email');
+        
+        if($userT->getData('fk_user') > 0)
+            return static::getMailOrSuperiorMail($userT->getData('fk_user'));
+        
+        return "admin@bimp.fr";
     }
 }

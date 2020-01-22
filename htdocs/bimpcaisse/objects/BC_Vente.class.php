@@ -2285,7 +2285,7 @@ class BC_Vente extends BimpObject
 
         $facture->validateArray(array(
             'type'              => Facture::TYPE_STANDARD,
-            'ef_type'           => BimpCore::getConf('bimpcaisse_secteur_code'),
+            'ef_type'           => $caisse->getSecteur_code(),
             'entrepot'          => (int) $this->getData('id_entrepot'),
             'datef'             => date('Y-m-d'),
             'fk_soc'            => $id_client,

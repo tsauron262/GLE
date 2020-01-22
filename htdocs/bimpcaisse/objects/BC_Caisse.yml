@@ -50,6 +50,12 @@ fields:
         values: 
             array: printer_dpis
         default_value: 200
+    secteur_code:
+        label: Secteur (Canal de Vente)
+        values: 
+            array: secteurs
+        default_value: 
+            callback: getSecteur_code_default
     
 
 forms: 
@@ -61,12 +67,14 @@ forms:
             - field: fonds
             - field: id_account
             - field: printer_dpi
+            - field: secteur_code
     edit: 
         rows: 
             - field: name
             - field: fonds
             - field: id_account
             - field: printer_dpi
+            - field: secteur_code
             
     user_connect: 
         rows: 
@@ -112,6 +120,9 @@ lists:
             account: 
                 field: id_account
                 display: nom_url
+            secteur_code:
+                field: secteur_code
+                
         add_form_name: default
         edit_btn: 1
         edit_form: edit

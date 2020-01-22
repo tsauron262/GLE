@@ -61,7 +61,7 @@ class test_sav
                 $this->output .= " Non authentifié sur GSX ! ";
             }
         }
-        $this->output .= print_r($error,1).print_r($this->repair->gsx_v2,1);
+        $this->output .= print_r($error,1).print_r($user->array_options,1);
     }
 
     function testGlobal()

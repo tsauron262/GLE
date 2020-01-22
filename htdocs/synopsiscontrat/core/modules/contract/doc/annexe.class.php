@@ -167,6 +167,7 @@ class annexe {
             $qteT = 0;
             $phraseDelai = "";
             while ($result = $this->db->fetch_object($res)) {
+                require_once(DOL_DOCUMENT_ROOT."/Synopsis_Contrat/class/contrat.class.php");
                 $ligneContrat = new Synopsis_ContratLigne($this->db);
                 $ligneContrat->fetch($result->rowid);
                 //if (isset($result->date_fin_validite)) {

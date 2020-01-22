@@ -49,11 +49,11 @@ class test_sav
             global $user;
 
             $user->fetch(242);
-            if(!$this->repair->initGsx())
-                echo("non auth");
+            if(!$this->repair->initGsx()){
+                $this->output .= " Non authentifié sur GSX ! ";
+                return false;
+            }
         }
-        
-        die($this->repair->gsx_v2->appleId."ppppp");
     }
 
     function testGlobal()

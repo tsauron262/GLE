@@ -6,8 +6,6 @@ if (isset($_GET['actionTest'])) {
 
     session_write_close();
     $class = new test_sav();
-    if ($_GET['actionTest'] == "mailNonFerme")
-        $class->mailNonFerme();
     if ($_GET['actionTest'] == "fermetureAuto") {
         $class->tentativeFermetureAuto();
     }
@@ -18,6 +16,8 @@ if (isset($_GET['actionTest'])) {
 
     if ($_GET['actionTest'] == "global") {
         $class->testGlobal();
+        
+        echo $class->output;
     }
     echo "<br/><br/>Fin";
     llxFooter();
@@ -38,6 +38,15 @@ class test_sav
         require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
         require_once DOL_DOCUMENT_ROOT . '/synopsistools/SynDiversFunction.php';
         require_once DOL_DOCUMENT_ROOT . '/bimpapple/objects/GSX_Repair.class.php';
+        
+        
+        global $user;
+        $user->array_options['options_apple_id'] = "tommy@drsi.fr";
+        $user->array_options['options_apple_service'] = "897316";
+        $user->array_options['options_apple_shipto'] = "1046075";
+        $user->array_options['options_apple_id'] = "";
+        $user->array_options['options_apple_service'] = "";
+        $user->array_options['options_apple_shipto'] = "";
     }
 
     function testGlobal()
@@ -85,34 +94,6 @@ AND DATEDIFF(now(), s.date_update) < 60
 AND s.status = " . ($statut == "closed" ? "999" : "9");
 
 
-
-
-
-        global $user;
-        $user->array_options['options_apple_id'] = "tommy@drsi.fr";
-        $user->array_options['options_apple_service'] = "897316";
-        $user->array_options['options_apple_shipto'] = "1046075";
-
-//        if ($iTribu == 1) {
-//            $req .= " AND ( ref LIKE('SAVN%'))";
-//            global $user;
-//            $user->array_options['options_apple_id'] = "f.marino@bimp.fr";
-//            $user->array_options['options_apple_service'] = "0000579256";
-//            $user->array_options['options_apple_shipto'] = "0000459993";
-//        } elseif ($iTribu == 2) {
-//            $req .= " AND ( ref LIKE('SAVMONTP%') || ref LIKE('SAVMAU%'))";
-//            global $user;
-//            $user->array_options['options_apple_id'] = "xavier@itribustore.fr";
-//            $user->array_options['options_apple_service'] = "0000579256";
-//            $user->array_options['options_apple_shipto'] = "0000579256";
-//        } elseif ($iTribu == 3) {
-//            $req .= " AND ( ref LIKE('SAVP%'))";
-//            global $user;
-//            $user->array_options['options_apple_id'] = "elodie@itribustore.fr";
-//            $user->array_options['options_apple_service'] = "579256";
-//            $user->array_options['options_apple_shipto'] = "883234";
-//        } elseif ($iTribu == 4)
-//            $req .= " AND ( ref NOT LIKE('SAVN%') && ref NOT LIKE('SAVP%') && ref NOT LIKE('SAVMONTP%') && ref NOT LIKE('SAVMAU%') )";
 
         $req .= " AND DATEDIFF(now(), s.date_update) < 100 ORDER BY `nbJ` DESC, s.id";
 
@@ -171,7 +152,7 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                                 echo $messErreur;
                                 $mailTech .= ",tommy@bimp.fr";
                                 if (isset($_GET['envoieMail'])) {
-                                    mailSyn2("Sav non fermé dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $messErreur);
+//                                    mailSyn2("Sav non fermé dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $messErreur);
                                     $this->nbMail++;
                                 }
                             }
@@ -187,7 +168,7 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
 
                                 $mailTech .= ", tommy@bimp.fr";
                                 if (isset($_GET['envoieMail'])) {
-                                    mailSyn2("Sav non RFPU dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $messErreur);
+//                                    mailSyn2("Sav non RFPU dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $messErreur);
                                     $this->nbMail++;
                                 }
                             }
@@ -262,7 +243,7 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                             }
                             $mailTech .= ', tommy@bimp.fr';
                             if (isset($_GET['envoieMail'])) {
-                                mailSyn2("Sav non RFPU dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $messErreur);
+//                                mailSyn2("Sav non RFPU dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $messErreur);
                                 $this->nbMail++;
                             }
                         }

@@ -89,14 +89,14 @@ class Reservations
             if ($this->display_debug) {
                 echo $error . '<br/>';
             } else {
-                dol_syslog("Réservations Apple, erreur: " . $error, LOG_ERR);
+                dol_syslog("Réservations Apple, erreur: " . $error, LOG_ERR, 0, "_apple");
             }
         } else if (is_array($error)) {
             foreach ($error as $e) {
                 if ($this->display_debug) {
                     echo $e . '<br/>';
                 } else {
-                    dol_syslog("Réservations Apple, erreur: " . $e, LOG_ERR);
+                    dol_syslog("Réservations Apple, erreur: " . $e, LOG_ERR, 0, "_apple");
                 }
             }
         }

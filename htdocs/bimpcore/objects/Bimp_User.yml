@@ -18,6 +18,9 @@ objects:
                 field_value: fk_user
                 
 fields: 
+    statut:
+        label: Statut
+        field: statut
     admin: 
         label: Administrateur
         type: bool

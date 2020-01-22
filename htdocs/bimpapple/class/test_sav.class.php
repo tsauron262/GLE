@@ -322,7 +322,7 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
 
             $rows = $equipment->getList(array(
                 'imei' => ''
-                    ), 100, 1, 'id', 'desc', 'array', array('id', 'serial'));
+                    ), 1, 1, 'id', 'desc', 'array', array('id', 'serial'));
 
             if (!empty($rows)) {
                 foreach ($rows as $r) {

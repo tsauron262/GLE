@@ -50,7 +50,7 @@ class GSX_Repair extends BimpObject
             }
             $this->gsx_v2->resetErrors();
             if (!$this->gsx_v2->logged) {
-                $errors[] = 'Non authentifié sur GSX';
+                $errors[] = 'Non authentifié sur GSX : '.$this->appleId;
                 return false;
             }
         } else {

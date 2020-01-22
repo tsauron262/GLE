@@ -715,7 +715,7 @@ function mailSyn($to, $sujet, $text, $headers = null, $cc = '') {
 }
 
 function synGetDebug(){
-    $debugT = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT);
+    $debugT = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
 //                    foreach($debugT as $id=>$ln){
 //                        if($ln['function'] != "synGetDebug"){
 //                            $debug[$id] = $debugT[$id];

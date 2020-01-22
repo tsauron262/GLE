@@ -41,12 +41,8 @@ class test_sav
         
         
         global $user;
-        $user->array_options['options_apple_id'] = "tommy@drsi.fr";
-        $user->array_options['options_apple_service'] = "897316";
-        $user->array_options['options_apple_shipto'] = "1046075";
-        $user->array_options['options_apple_id'] = "";
-        $user->array_options['options_apple_service'] = "";
-        $user->array_options['options_apple_shipto'] = "";
+        
+        $user->fetch(242);
     }
 
     function testGlobal()

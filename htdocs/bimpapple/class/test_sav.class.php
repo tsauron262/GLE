@@ -45,9 +45,14 @@ class test_sav
         $this->repair = new GSX_Repair('bimpapple', 'GSX_Repair');
         
         
+        $this->initGsx();
+    }
+    
+    function initGsx(){
+        
+        
         if(!$this->repair->initGsx()){
             global $user;
-
             $user->fetch(242);
             if(!$this->repair->initGsx()){
                 $this->output .= " Non authentifié sur GSX ! ";
@@ -60,6 +65,7 @@ class test_sav
     {
         $_GET['envoieMail'] = "yes";
         session_write_close();
+        $this->initGsx();
 //        $this->tentativeARestitueAuto(4);
 //        $this->tentativeARestitueAuto(1);
 //        $this->tentativeARestitueAuto(2);

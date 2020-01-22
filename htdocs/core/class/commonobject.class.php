@@ -4728,7 +4728,7 @@ if($obj->up == null)
 			$sql.= " FROM ".MAIN_DB_PREFIX.$table_element."_extrafields";
 			$sql.= " WHERE fk_object = ".$rowid;
 
-			//dol_syslog(get_class($this)."::fetch_optionals get extrafields data for ".$this->table_element, LOG_DEBUG);		// Too verbose
+			dol_syslog(get_class($this)."::fetch_optionals get extrafields data for ".$this->table_element.$sql, 3);		// Too verbose
 			$resql=$this->db->query($sql);
 			if ($resql)
 			{

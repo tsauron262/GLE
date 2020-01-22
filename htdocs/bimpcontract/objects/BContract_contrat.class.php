@@ -495,7 +495,7 @@ class BContract_contrat extends BimpDolObject {
         
         if(strpos($this->getData('ref'), "PROV")) {
             
-            $ref = BimpTools::getNextRef('contrat', 'ref', $this->getData('objet_contrat') . '{AA}{MM}-01');
+            $ref = BimpTools::getNextRef('contrat', 'ref', $this->getData('objet_contrat') . '{AA}{MM}-00');
             
         } else {
             $ref = $this->getData('ref');

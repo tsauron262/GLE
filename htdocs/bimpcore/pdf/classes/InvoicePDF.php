@@ -538,25 +538,25 @@ class InvoicePDF extends BimpDocumentPDF
                 elseif ($obj->type == 3)
                     $text = $this->langs->trans("Deposit");
                 else
-                    $text = $this->langs->trans("UnknownType");
+                    $text = '';
 
                 $invoice->fetch($obj->fk_facture_source);
-            }
 
-            $html .= '<tr>';
-            $html .= '<td style="font-size: 7px; border-bottom: solid 1px #DCDCDC;">';
-            $html .= dol_print_date($obj->datef, 'day', false, $this->langs, true);
-            $html .= '</td>';
-            $html .= '<td style="font-size: 7px; border-bottom: solid 1px #DCDCDC;">';
-            $html .= price(($conf->multicurrency->enabled && $this->object->multicurrency_tx != 1) ? $obj->multicurrency_amount_ttc : $obj->amount_ttc, 0, $this->langs);
-            $html .= '</td>';
-            $html .= '<td style="font-size: 7px; border-bottom: solid 1px #DCDCDC;">';
-            $html .= $text;
-            $html .= '</td>';
-            $html .= '<td style="font-size: 7px; border-bottom: solid 1px #DCDCDC;">';
-            $html .= $invoice->ref;
-            $html .= '</td>';
-            $html .= '</tr>';
+                $html .= '<tr>';
+                $html .= '<td style="font-size: 7px; border-bottom: solid 1px #DCDCDC;">';
+                $html .= dol_print_date($this->db->jdate($obj->datef), 'day', false, $this->langs, true);
+                $html .= '</td>';
+                $html .= '<td style="font-size: 7px; border-bottom: solid 1px #DCDCDC;">';
+                $html .= price(($conf->multicurrency->enabled && $this->object->multicurrency_tx != 1) ? $obj->multicurrency_amount_ttc : $obj->amount_ttc, 0, $this->langs);
+                $html .= '</td>';
+                $html .= '<td style="font-size: 7px; border-bottom: solid 1px #DCDCDC;">';
+                $html .= $text;
+                $html .= '</td>';
+                $html .= '<td style="font-size: 7px; border-bottom: solid 1px #DCDCDC;">';
+                $html .= $invoice->ref;
+                $html .= '</td>';
+                $html .= '</tr>';
+            }
         }
 
         // Loop on each payment

@@ -2262,7 +2262,7 @@ class BimpTools
     public static function getMailOrSuperiorMail($idComm){
         $userT = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $idComm);
         $ok = true;
-        if($userT->getData("statut") == 1)
+        if($userT->getData("statut") < 1)
             $ok = false;
         if($ok && $userT->getData('email') != '')
             return $userT->getData('email');

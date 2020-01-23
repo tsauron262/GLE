@@ -405,7 +405,7 @@ class BContract_echeancier extends BimpObject {
     }
     
     public function displayRetard() {
-        
+        $parent = $this->getParentInstance();
         $alert = "<b class='success bs-popover' ".BimpRender::renderPopoverData('Facturation à jour').">".BimpRender::renderIcon('check')."</b>";
         $next = $this->getData('next_facture_date');
         $dateTime = new DateTime($next);
@@ -417,7 +417,10 @@ class BContract_echeancier extends BimpObject {
             $alert = '<b class="danger bs-popover" '.$popover.' >'.BimpRender::renderIcon('warning').'</b>';
         }
         
-        return $alert;
+        if($parent->getData('duree_mois') > 0)
+            return $alert;
+        else
+            return '';
         
     }
 

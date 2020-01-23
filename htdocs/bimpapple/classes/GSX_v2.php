@@ -91,9 +91,9 @@ class GSX_v2 extends GSX_Const
         }
     }
 
-    public static function getInstance()
+    public static function getInstance($force_new = false)
     {
-        if (is_null(self::$instance)) {
+        if (is_null(self::$instance) || $force_new) {
             self::$instance = new GSX_v2();
         }
 

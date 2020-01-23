@@ -686,9 +686,9 @@ if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'create') {
             print "<option value='-1'>S&eacute;lectionner -></option>";
             while ($res = $db->fetch_object($sql)) {
                 if ($_REQUEST['fk_commande'] == $res->rowid) {
-                    print "<option SELECTED value='" . $res->rowid . "'>" . $res->ref . " ".dol_print_date($res->date_commande)."</option>";
+                    print "<option SELECTED value='" . $res->rowid . "'>" . $res->ref . " ".dol_print_date($db->jdate($res->date_commande))."</option>";
                 } else {
-                    print "<option value='" . $res->rowid . "'>" . $res->ref ." ".dol_print_date($res->date_commande)."</option>";
+                    print "<option value='" . $res->rowid . "'>" . $res->ref ." ".dol_print_date($db->jdate($res->date_commande))."</option>";
                 }
             }
             print "</SELECT>";

@@ -6,8 +6,6 @@ if (isset($_GET['actionTest'])) {
 
     session_write_close();
     $class = new test_sav();
-    if ($_GET['actionTest'] == "mailNonFerme")
-        $class->mailNonFerme();
     if ($_GET['actionTest'] == "fermetureAuto") {
         $class->tentativeFermetureAuto();
     }
@@ -18,6 +16,8 @@ if (isset($_GET['actionTest'])) {
 
     if ($_GET['actionTest'] == "global") {
         $class->testGlobal();
+        
+        echo $class->output;
     }
     echo "<br/><br/>Fin";
     llxFooter();
@@ -38,22 +38,32 @@ class test_sav
         require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
         require_once DOL_DOCUMENT_ROOT . '/synopsistools/SynDiversFunction.php';
         require_once DOL_DOCUMENT_ROOT . '/bimpapple/objects/GSX_Repair.class.php';
+        
+        $this->initGsx();
+    }
+    
+    function initGsx(){
+        $error = array();
+        $this->repair = new GSX_Repair('bimpapple', 'GSX_Repair');
+        if(!$this->repair->initGsx($error)){
+            global $user, $db, $conf;
+            $conf->entity = 1;
+            $user = new User($db);
+            $user->fetch(242);
+            $user->fetch_optionals(242);
+            if(!$this->repair->initGsx($error, true)){
+                $this->output .= " Non authentifié sur GSX ! ";
+            }
+        }
     }
 
     function testGlobal()
     {
         $_GET['envoieMail'] = "yes";
         session_write_close();
-//        $this->tentativeARestitueAuto(4);
-//        $this->tentativeARestitueAuto(1);
-//        $this->tentativeARestitueAuto(2);
-//        $this->tentativeARestitueAuto(3);
+        $this->initGsx();
         $this->tentativeARestitueAuto(0);
 
-//        $this->tentativeFermetureAuto(4);
-//        $this->tentativeFermetureAuto(1);
-//        $this->tentativeFermetureAuto(2);
-//        $this->tentativeFermetureAuto(3);
         $this->tentativeFermetureAuto(0);
 
         if ($this->nbErr > 0)
@@ -86,34 +96,6 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
 
 
 
-
-
-        global $user;
-        $user->array_options['options_apple_id'] = "tommy@drsi.fr";
-        $user->array_options['options_apple_service'] = "897316";
-        $user->array_options['options_apple_shipto'] = "1046075";
-
-//        if ($iTribu == 1) {
-//            $req .= " AND ( ref LIKE('SAVN%'))";
-//            global $user;
-//            $user->array_options['options_apple_id'] = "f.marino@bimp.fr";
-//            $user->array_options['options_apple_service'] = "0000579256";
-//            $user->array_options['options_apple_shipto'] = "0000459993";
-//        } elseif ($iTribu == 2) {
-//            $req .= " AND ( ref LIKE('SAVMONTP%') || ref LIKE('SAVMAU%'))";
-//            global $user;
-//            $user->array_options['options_apple_id'] = "xavier@itribustore.fr";
-//            $user->array_options['options_apple_service'] = "0000579256";
-//            $user->array_options['options_apple_shipto'] = "0000579256";
-//        } elseif ($iTribu == 3) {
-//            $req .= " AND ( ref LIKE('SAVP%'))";
-//            global $user;
-//            $user->array_options['options_apple_id'] = "elodie@itribustore.fr";
-//            $user->array_options['options_apple_service'] = "579256";
-//            $user->array_options['options_apple_shipto'] = "883234";
-//        } elseif ($iTribu == 4)
-//            $req .= " AND ( ref NOT LIKE('SAVN%') && ref NOT LIKE('SAVP%') && ref NOT LIKE('SAVMONTP%') && ref NOT LIKE('SAVMAU%') )";
-
         $req .= " AND DATEDIFF(now(), s.date_update) < 100 ORDER BY `nbJ` DESC, s.id";
 
         $req .= " LIMIT 0,500";
@@ -126,29 +108,23 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
         $sql = $db->query($this->getReq('closed', $iTribu));
 
 
-        $repair = new GSX_Repair('bimpapple', 'GSX_Repair');
-
 
 
         while ($ligne = $db->fetch_object($sql)) {
             if (!$this->useCache || !isset($_SESSION['idRepairIncc'][$ligne->rid])) {
-                if (isset($repair->gsx))
-                    $repair->gsx->errors['soap'] = array();
-                $repair->fetch($ligne->rid);
-                $erreurSOAP = $repair->lookup();
+                if (isset($this->repair->gsx))
+                    $this->repair->gsx->errors['soap'] = array();
+                $this->repair->fetch($ligne->rid);
+                $erreurSOAP = $this->repair->lookup();
                 if (count($erreurSOAP) == 0) {
                     echo "Tentative de maj de " . $ligne->ref;
-                    if ($repair->getData('repair_complete')) {
+                    if ($this->repair->getData('repair_complete')) {
                         echo "Fermée dans GSX maj dans GLE.<br/>";
                         $this->nbOk++;
-                    } elseif ($repair->repairLookUp['repairStatusCode'] == "SPCM") {//"Fermée et complétée"){
+                    } elseif ($this->repair->repairLookUp['repairStatusCode'] == "SPCM") {//"Fermée et complétée"){
                         echo "fermé dans GSX Impossible de Fermé dans GLE ";
                         $this->nbErr++;
                     } else {
-
-
-
-
                         $mailTech = "jc.cannet@bimp.fr";
                         if ($ligne->Technicien > 0) {
                             $user = new User($db);
@@ -157,8 +133,8 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                                 $mailTech = $user->email;
                         }
 
-                        if ($repair->repairLookUp['repairStatusCode'] == "RFPU") {
-                            $erreurSOAP = $repair->close(1, 0);
+                        if ($this->repair->repairLookUp['repairStatusCode'] == "RFPU") {
+                            $erreurSOAP = $this->repair->close(1, 0);
                             if (isset($erreurSOAP['errors']))
                                 $erreurSOAP = $erreurSOAP['errors'];
 
@@ -167,27 +143,27 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                                 $this->nbOk++;
                             } else {
                                 $this->nbErr++;
-                                $messErreur = $this->displayError("N'arrive pas a être fermé", $ligne, $repair, $erreurSOAP);
+                                $messErreur = $this->displayError("N'arrive pas a être fermé", $ligne, $this->repair, $erreurSOAP);
                                 echo $messErreur;
                                 $mailTech .= ",tommy@bimp.fr";
                                 if (isset($_GET['envoieMail'])) {
-                                    mailSyn2("Sav non fermé dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $messErreur);
+//                                    mailSyn2("Sav non fermé dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $messErreur);
                                     $this->nbMail++;
                                 }
                             }
                         } else {//tentative de passage a rfpu
-                            $erreurSOAP = $repair->updateStatus('RFPU');
+                            $erreurSOAP = $this->repair->updateStatus('RFPU');
                             if (count($erreurSOAP) == 0) {
                                 echo "Semble avoir été passer dans GSX a RFPU<br/>";
                                 $this->nbOk++;
                             } else {
                                 $this->nbErr++;
-                                $messErreur = $this->displayError("N'arrive pas a être passé a RFPU dans GSX", $ligne, $repair, $erreurSOAP);
+                                $messErreur = $this->displayError("N'arrive pas a être passé a RFPU dans GSX", $ligne, $this->repair, $erreurSOAP);
                                 echo $messErreur;
 
                                 $mailTech .= ", tommy@bimp.fr";
                                 if (isset($_GET['envoieMail'])) {
-                                    mailSyn2("Sav non RFPU dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $messErreur);
+//                                    mailSyn2("Sav non RFPU dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $messErreur);
                                     $this->nbMail++;
                                 }
                             }
@@ -195,7 +171,7 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                     }
                 } else {
                     $this->nbErr++;
-                    $messErreur = $this->displayError("Echec de la recup dans GSX", $ligne, $repair, $erreurSOAP);
+                    $messErreur = $this->displayError("Echec de la recup dans GSX", $ligne, $this->repair, $erreurSOAP);
                     echo $messErreur;
                     $_SESSION['idRepairIncc'][$ligne->rid] = $ligne->ref;
                 }
@@ -227,30 +203,29 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
         $sql = $db->query($this->getReq('ready', $iTribu));
 
 
-        $repair = new GSX_Repair('bimpapple', 'GSX_Repair');
 
 
 
         while ($ligne = $db->fetch_object($sql)) {
             if (!$this->useCache || !isset($_SESSION['idRepairIncc'][$ligne->rid])) {
-                if (isset($repair->gsx))
-                    $repair->gsx->errors['soap'] = array();
-                $repair->fetch($ligne->rid);
-                $erreurSOAP = $repair->lookup();
+                if (isset($this->repair->gsx))
+                    $this->repair->gsx->errors['soap'] = array();
+                $this->repair->fetch($ligne->rid);
+                $erreurSOAP = $this->repair->lookup();
                 if (count($erreurSOAP) == 0) {
                     echo "Tentative de maj de " . $ligne->ref;
-                    if ($repair->repairLookUp['repairStatusCode'] == "RFPU" || $repair->getData('ready_for_pick_up')) {
+                    if ($this->repair->repairLookUp['repairStatusCode'] == "RFPU" || $this->repair->getData('ready_for_pick_up')) {
                         echo "Passage dans GLE a RFPU<br/>";
-                        $repair->readyForPickUp = 1;
-                        $repair->update();
+                        $this->repair->readyForPickUp = 1;
+                        $this->repair->update();
                         $this->nbOk++;
                     } else {
-                        if (count($repair->updateStatus('RFPU')) == 0) {
+                        if (count($this->repair->updateStatus('RFPU')) == 0) {
                             echo "Semble avoir été passer dans GSX a RFPU<br/>";
                             $this->nbOk++;
                         } else {
                             $this->nbErr++;
-                            $messErreur = $this->displayError("N'arrive pas a être passé a RFPU dans GSX", $ligne, $repair, $erreurSOAP);
+                            $messErreur = $this->displayError("N'arrive pas a être passé a RFPU dans GSX", $ligne, $this->repair, $erreurSOAP);
                             echo $messErreur;
 
                             $mailTech = "jc.cannet@bimp.fr";
@@ -262,7 +237,7 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                             }
                             $mailTech .= ', tommy@bimp.fr';
                             if (isset($_GET['envoieMail'])) {
-                                mailSyn2("Sav non RFPU dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $messErreur);
+//                                mailSyn2("Sav non RFPU dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $messErreur);
                                 $this->nbMail++;
                             }
                         }
@@ -316,8 +291,19 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
         global $db;
         return "<a href='" . DOL_URL_ROOT . "/bimpsupport/index.php?fc=sav&id=" . $id . "'>" . $ref . "</a>";
     }
+    
+    
+    function fetchImeiPetit(){
+        
+        $this->initGsx();
+        
+        $this->fetchEquipmentsImei(30);
+        
+        
+        $this->output .= ' ' . $this->nbImei . ' n° IMEI corrigé(s).';
+    }
 
-    function fetchEquipmentsImei()
+    function fetchEquipmentsImei($nb = 100)
     {
         if (!class_exists('GSX_v2')) {
             require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_v2.php';
@@ -331,7 +317,7 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
 
             $rows = $equipment->getList(array(
                 'imei' => ''
-                    ), 100, 1, 'id', 'desc', 'array', array('id', 'serial'));
+                    ), $nb, 1, 'id', 'desc', 'array', array('id', 'serial'));
 
             if (!empty($rows)) {
                 foreach ($rows as $r) {
@@ -346,14 +332,18 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                     $ids = Equipment::gsxFetchIdentifiers($r['serial'], $gsx);
 
                     $imei = $ids['imei'];
+                    $imei2 = $ids['imei2'];
+                    $meid = $ids['meid'];
                     $serial = $ids['serial'];
-
+                    
                     if (!$imei) {
                         $imei = 'n/a';
                     }
 
                     $data = array(
-                        'imei' => $imei
+                        'imei' => $imei,
+                        'imei2' => $imei2,
+                        'meid' => $meid
                     );
 
                     if ($r['serial'] && $serial && $r['serial'] !== $serial) {

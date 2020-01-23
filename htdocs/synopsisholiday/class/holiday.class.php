@@ -2632,8 +2632,8 @@ class SynopsisHoliday extends Holiday {
 
                 date_default_timezone_set("GMT");
 
-                $ac->datep = $dateBegin->format('Y-m-d H:i:s');
-                $ac->datef = $dateEnd->format('Y-m-d H:i:s');
+                $ac->datep = $this->db->jdate($dateBegin->format('Y-m-d H:i:s'));
+                $ac->datef = $this->db->jdate($dateEnd->format('Y-m-d H:i:s'));
                 $ac->note = $this->LibStatut($this->statut) . ' - ' . (isset($substitute) ? 'Remplaçant: ' . dolGetFirstLastname($substitute->firstname, $substitute->lastname . '.') : 'Aucun rempaçant désigné.');
 
                 $result = $ac->update($updateUser);

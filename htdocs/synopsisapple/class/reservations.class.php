@@ -408,8 +408,8 @@ class Reservations
 //        $dateBegin->setTimezone(new DateTimeZone("Europe/Paris"));
 //        $dateEnd->setTimezone(new DateTimeZone("Europe/Paris"));
 
-        $ac->datep = $dateBegin->format('Y-m-d H:i:s');
-        $ac->datef = $dateEnd->format('Y-m-d H:i:s');
+        $ac->datep = $this->db->jdate($dateBegin->format('Y-m-d H:i:s'));
+        $ac->datef = $this->db->jdate($dateEnd->format('Y-m-d H:i:s'));
 
         $usersAssigned = array();
         foreach ($users as $u)

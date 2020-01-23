@@ -121,7 +121,7 @@ class BContract_echeancier extends BimpObject {
             $dateEnd = new DateTime($data['date_end']);
 
 
-            if ($instance->dol_object->addline("Facturation pour la période du <b>" . $dateStart->format('d / m / Y') . "</b> au <b>" . $dateEnd->format('d / m / Y') . "</b><br /><br />" . $desc, (double) $data['total_ht'], 1, 20, 0, 0, 0, 0, $data['date_start'], $data['date_end'], 0, 0, '', 'HT', 0, 1) > 0) {
+            if ($instance->dol_object->addline("Facturation pour la période du <b>" . $this->db->db->jdate($dateStart->format('d / m / Y')) . "</b> au <b>" . $this->db->db->jdate($dateEnd->format('d / m / Y')) . "</b><br /><br />" . $desc, (double) $data['total_ht'], 1, 20, 0, 0, 0, 0, $data['date_start'], $data['date_end'], 0, 0, '', 'HT', 0, 1) > 0) {
                 $success = 'Facture créer avec succès';
                 addElementElement("contrat", "facture", $parent->id, $instance->id);
 

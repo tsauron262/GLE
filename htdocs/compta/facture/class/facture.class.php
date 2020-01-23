@@ -4551,7 +4551,7 @@ class FactureLigne extends CommonInvoiceLine
 		$sql.= " ".price2num($this->remise_percent).",";
 		$sql.= " ".price2num($this->subprice).",";
 		$sql.= ' '.(! empty($this->fk_remise_except)?$this->fk_remise_except:"null").',';
-		$sql.= " ".(! empty($this->date_start)?"'".$this->db->idate($this->date_start)."'":"null").",";
+		$sql.= " ".(! empty($this->date_start)?"'".$this->db->idate($this->db->jdate($this->date_start))."'":"null").",";
 		$sql.= " ".(! empty($this->date_end)?"'".$this->db->idate($this->date_end)."'":"null").",";
 		$sql.= ' '.$this->fk_code_ventilation.',';
 		$sql.= ' '.$this->rang.',';

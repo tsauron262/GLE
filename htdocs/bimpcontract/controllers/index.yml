@@ -13,27 +13,55 @@ objects:
             bimp_object: BContract_echeancier
     
 sections:
-    - type: nav_tabs
-      nav_tabs: 
-          - id: liste
-            title: Liste complète des contrats
-            struct: 
-                type: list
-                list: 
-                    panel: 1
-                    object: contrat
-          - id: recap_contrat_echeancier
-            title: Récapitulatif des prélèvements contrat
-            struct:
-                type: list
-                list:
-                    panel: 1
-                    object: echeancier
-                    name: default
-          - id: configuration
-            title: Configuration
-            struct: 
-                type: list
-                list: 
+    - type: tabs
+      tabs: 
+        default:
+            label: Contrats
+            sections:
+                - type: custom
+                  custom: 
+                      callback: 
+                        method: renderTabs
+                        params: 
+                            - renderContractsTab
+                            - default
+        recap_contrat_echeancier:
+            label: Récapitulatif des échéanciers contrat
+            sections:
+                - type: custom
+                  custom:
+                      callback:
+                          method: renderTabs
+                          params:
+                              - renderTimeTableTab
+                              - recap_contrat_echeancier
+#        deux:
+#    - type: nav_tabs
+#      nav_tabs: 
+#          - id: liste
+#            title: Liste complète des contrats
+#            struct: 
+#                type: list
+#                list: 
+#                    panel: 1
+#                    object: contrat
+#          - id: recap_contrat_echeancier
+#            title: Récapitulatif des échéanciers contrat
+#            struct:
+#        recap_contrat_echeancier:
+#            label: Récapitulatif des échéanciers contrat
+#            sections:
+#                - type: list
+#                  list:
+#                    panel: 1
+#                    object: echeancier
+#                    name: default
+        config:
+            show: 0
+            label: Configuration
+            sections:
+                - type: list
+                  title: Configuration
+                  list: 
                     panel: 1
                     object: assistance_contrat

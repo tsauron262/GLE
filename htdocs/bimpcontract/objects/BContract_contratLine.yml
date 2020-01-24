@@ -89,7 +89,7 @@ lists:
         n: 20
         checkbox: 1
         add_object_row: 0
-        edit_btn: 0
+        edit_btn: 1
         edit_form: default
         add_form_name: add
         delete_btn: 1
@@ -114,6 +114,7 @@ lists:
             total_ttc:
                 field: total_ttc
     interface_client:
+        edit_btn: 0
         extends: default
         cols:
             fk_product: unset
@@ -154,6 +155,23 @@ forms:
               input:
                   type: textarea
                   help: Merci de séparer les numéros de séries par un saut de ligne
+    rebase_serial:
+        rows:
+            - custom: 1
+              label: Numéro de série à remplacer
+              input_name: old_serial
+              input: 
+                  type: select
+              values: 
+                  array: 
+                    callback: getArraySerials
+            - custom: 1
+              label: Nouveau numéro de série
+              input_name: new_serial
+              required: 1
+              input: 
+                  type: text
+              
 
 fields_tables:
     infos:

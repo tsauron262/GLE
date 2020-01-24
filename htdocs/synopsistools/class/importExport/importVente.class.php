@@ -25,7 +25,7 @@ class importVente extends import8sens {
     }
 
     public function go() {
-        $this->dateDepart = "31/09/2019";
+        $this->dateDepart = "31/12/2019";
         
         
 //        $this->dateAchatDef = "05/10/2014";

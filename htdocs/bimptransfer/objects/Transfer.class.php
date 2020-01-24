@@ -59,11 +59,14 @@ class Transfer extends BimpDolObject
 
     public function isGood()
     {
-        foreach ($this->getLines() as $line) {
-            if ($line->getData("quantity_transfered") < $line->getData("quantity_sent"))
-                return 0;
+        if ($this->isLoaded()) {
+            foreach ($this->getLines() as $line) {
+                if ($line->getData("quantity_transfered") < $line->getData("quantity_sent"))
+                    return 0;
+            }
+            return 1;
         }
-        return 1;
+        return 0;
     }
 
     public function userIsAdmin()

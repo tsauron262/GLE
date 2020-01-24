@@ -125,7 +125,7 @@ class Bimp_Product_Entrepot extends BimpObject
         $html = '';
         $html .= 'Produits/Entrepot';
         if($this->dateBilan)
-            $html .= ' date de valeur  < '.dol_print_date ($this->dateBilan). ' (Stock Date, Stock show room, Nb Ventes, Ventes a NB mois)';
+            $html .= ' date de valeur  < '.dol_print_date ($this->db->db->jdate($this->dateBilan)). ' (Stock Date, Stock show room, Nb Ventes, Ventes a NB mois)';
         return $html;
     }
 

@@ -5,6 +5,8 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
 class BContract_contrat extends BimpDolObject {
     //public $redirectMode = 4;
+    public static $email_type = '';
+    //
     // Les status
     CONST CONTRAT_STATUS_BROUILLON = 0;
     CONST CONTRAT_STATUS_VALIDE = 1;
@@ -82,18 +84,43 @@ class BContract_contrat extends BimpDolObject {
         'facture_fourn' => 'Facture fournisseur', 
         //'propal' => 'Proposition commercial'
     ];
-    
-    
-    
+
     public static $dol_module = 'contract';
     
     function __construct($module, $object_name) {
         global $user, $db;
-        if(BimpTools::getContext() != 'public')
-            $this->redirectMode = 1;
-        else
-            $this->redirectMode = 4;
+
+        $this->redirectMode = 4;
         return parent::__construct($module, $object_name);
+    }
+    
+    public function cronContrat() {
+        
+        // Vérifier tous les contrats à clore.
+        //$all = $this->getInstance('bimp')
+        
+        foreach($this->getList(['statut' => 1]) as $contrat) {
+            
+            print_r($contrat);
+            
+        }
+        
+        
+        // Vérifier tous les contrats pour faire la relance aux commeciaux
+        
+        // Vérifier tout les contrats a facturé et envoyer aux commerciaux.
+        
+    }
+    
+    public function isClosDansCombienDeTemps() {
+        
+        $aujourdhui = new DateTime();
+        $finContrat = $this->getEndDate();
+        $diff = $aujourdhui->diff($finContrat);
+        if(!$diff->invert) {
+            return $diff->d;
+        }
+        return 0;
     }
     
     public function actionUpdateSyntec() {
@@ -182,21 +209,27 @@ class BContract_contrat extends BimpDolObject {
     }
     
     public function displayDateNextFacture() {
-        
         if($this->isLoaded()) {
             $echeancier = $this->getInstance('bimpcontract', "BContract_echeancier");
-            if($echeancier->find(['id_contrat' => $this->id])) {
-                $return = $echeancier->getData('next_facture_date');
-            } else {
-                $return = $this->getData('date_start');
-            }
-
-            $return = new DateTime($return);
-            $return = $return->format('d / m / Y');
-            
+                $fin = false;
+                if($echeancier->find(['id_contrat' => $this->id])) {
+                    $next_facture_date = $echeancier->getData('next_facture_date');
+                    if($next_facture_date == 0) {
+                        $fin = true;
+                        $return = "<b class='important'>&Eacute;chéancier totalement facturé</b>";
+                    } else {
+                        $return = $next_facture_date;
+                    }
+                    
+                } else {
+                    $return = $this->getData('date_start');
+                }
+                if(!$fin) {
+                    $return = new DateTime($return);
+                    $return = $return->format('d / m / Y');
+                }
             return $return;
         }
-
     }
     
     public function displayRef() {
@@ -262,11 +295,27 @@ class BContract_contrat extends BimpDolObject {
         if ($this->isLoaded() && BimpTools::getContext() != 'public') {
             $status = $this->getData('statut');
             
+//            $buttons[] = array(
+//                    'label'   => 'Envoyer par e-mail',
+//                    'icon'    => 'envelope',
+//                    'onclick' => $this->getJsActionOnclick('sendEmail', array(), array(
+//                        'form_name' => 'email'
+//                    ))
+//                );
+            
             if(($user->id == 232 || $user->id == 460 || $user->admin) && $this->getData('statut') == 1) {
                 $buttons[] = array(
                     'label'   => 'Réouvrir le contrat',
                     'icon'    => 'fas_sync',
                     'onclick' => $this->getJsActionOnclick('reopen', array(), array())
+                );
+            }
+            
+            if((($user->id == 232 || $user->id == 460 || $user->admin) && $this->getData('statut') == 1) && (!is_null($this->getData('date_contrat')))) {
+                $buttons[] = array(
+                    'label'   => 'Dé-signer le contrat',
+                    'icon'    => 'fas_sync',
+                    'onclick' => $this->getJsActionOnclick('unSign', array(), array())
                 );
             }
             
@@ -383,6 +432,18 @@ class BContract_contrat extends BimpDolObject {
         
     }
     
+    public function actionUnSign() {
+        if($this->updateField('date_contrat', null)) {
+            $success = 'Contrat dé-signer';
+        }
+        
+        return [
+          'success' => $success,
+          'errors' => $errors,
+          'warnings' => $warnings
+        ];
+    }
+    
     public function getSyntecSite() {
        return "Pour connaitre l'indice syntec en vigueur, veuillez vous rendre sur le site internet <a href='https://www.syntec.fr' target='_blank'>https://www.syntec.fr</a>";
     }
@@ -451,12 +512,20 @@ class BContract_contrat extends BimpDolObject {
     
     public function actionValidation($data, &$success) {
         global $user;
-        $ref = $this->newRef($this->getData('objet_contrat') . date('ym') . '-' . $user->id);
+        
         $id_contact_type = $this->db->getValue('c_type_contact', 'rowid', 'code = "SITE" AND element = "contrat"');
         $have_contact = ($this->db->getValue('element_contact', 'rowid', 'element_id = ' . $this->id . ' AND fk_c_type_contact = ' . $id_contact_type)) ? true : false;
         
         if(!$have_contact) {
             return "Il doit y avoir au moin un site d'intervention associé au contrat";
+        }
+        
+        if(strpos($this->getData('ref'), "PROV")) {
+            
+            $ref = BimpTools::getNextRef('contrat', 'ref', $this->getData('objet_contrat') . '{AA}{MM}-00');
+            
+        } else {
+            $ref = $this->getData('ref');
         }
         
         if($this->dol_object->validate($user, $ref) <= 0) {
@@ -695,150 +764,6 @@ class BContract_contrat extends BimpDolObject {
    /* RENDER */
   /**********/
     
-    public function renderLinkedObjectsTable()
-    {
-        $html = '';
-
-        if ($this->isLoaded()) {
-            $objects = array();
-
-            if ($this->isDolObject()) {
-                $propal_instance = null;
-                $facture_instance = null;
-                $commande_instance = null;
-                $commande_fourn_instance = null;
-                foreach (BimpTools::getDolObjectLinkedObjectsList($this->dol_object, $this->db) as $item) {
-                    switch ($item['type']) {
-                        case 'propal':
-                            $propal_instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', (int) $item['id_object']);
-                            if ($propal_instance->isLoaded()) {
-                                $icon = $propal_instance->params['icon'];
-                                $objects[] = array(
-                                    'type'     => BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($propal_instance->getLabel()),
-                                    'ref'      => $propal_instance->getNomUrl(0, true, true, 'full'),
-                                    'date'     => $propal_instance->displayData('datep'),
-                                    'total_ht' => $propal_instance->displayData('total_ht'),
-                                    'status'   => $propal_instance->displayData('fk_statut')
-                                );
-                            }
-                            break;
-
-                        case 'facture':
-                            $facture_instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $item['id_object']);
-                            if ($facture_instance->isLoaded()) {
-                                $icon = $facture_instance->params['icon'];
-                                $objects[] = array(
-                                    'type'     => BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($facture_instance->getLabel()),
-                                    'ref'      => $facture_instance->getNomUrl(0, true, true, 'full'),
-                                    'date'     => $facture_instance->displayData('datef'),
-                                    'total_ht' => $facture_instance->displayData('total'),
-                                    'status'   => $facture_instance->displayData('fk_statut')
-                                );
-                            }
-                            break;
-
-                        case 'commande':
-                            $commande_instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $item['id_object']);
-                            if ($commande_instance->isLoaded()) {
-                                $icon = $commande_instance->params['icon'];
-                                $objects[] = array(
-                                    'type'     => BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($commande_instance->getLabel()),
-                                    'ref'      => $commande_instance->getNomUrl(0, true, true, 'full'),
-                                    'date'     => $commande_instance->displayData('date_commande'),
-                                    'total_ht' => $commande_instance->displayData('total_ht'),
-                                    'status'   => $commande_instance->displayData('fk_statut')
-                                );
-                            }
-                            break;
-
-                        case 'order_supplier':
-                            $commande_fourn_instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn', (int) $item['id_object']);
-                            if ($commande_fourn_instance->isLoaded()) {
-                                $icon = $commande_fourn_instance->params['icon'];
-                                $objects[] = array(
-                                    'type'     => BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($commande_fourn_instance->getLabel()),
-                                    'ref'      => $commande_fourn_instance->getNomUrl(0, true, true, 'full'),
-                                    'date'     => $commande_fourn_instance->displayData('date_commande'),
-                                    'total_ht' => $commande_fourn_instance->displayData('total_ht'),
-                                    'status'   => $commande_fourn_instance->displayData('fk_statut')
-                                );
-                            }
-                            break;
-                        
-                        case 'contrat':
-                            $contrat = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat', (int) $item['id_object']);
-                            if ($contrat->isLoaded()) {
-                                $icon = $contrat->params['icon'];
-                                $objects[] = array(
-                                    'type'     => BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($contrat->getLabel()),
-                                    'ref'      => $contrat->getNomUrl(0, true, true, 'full'),
-                                    'date'     => $contrat->displayData('date_start'),
-                                    'total_ht' => $contrat->getTotalContrat() . ' €',
-                                    'status'   => $contrat->displayData('statut')
-                                );
-                            }
-                            break;
-
-                        case 'invoice_supplier':
-                            $facture_fourn_instance = BimpCache::getDolObjectInstance((int) $item['id_object'], 'fourn', 'fournisseur.facture', 'FactureFournisseur');
-                            BimpObject::loadClass('bimpcommercial', 'Bimp_Facture');
-                            if (BimpObject::objectLoaded($facture_fourn_instance)) {
-                                $date_facture = new DateTime(BimpTools::getDateFromDolDate($facture_fourn_instance->date));
-                                $objects[] = array(
-                                    'type'     => 'Facture fournisseur',
-                                    'ref'      => BimpObject::getInstanceNomUrlWithIcons($facture_fourn_instance),
-                                    'date'     => $date_facture->format('d / m / Y'),
-                                    'total_ht' => BimpTools::displayMoneyValue((float) $facture_fourn_instance->total_ht, 'EUR'),
-                                    'status'   => Bimp_Facture::$status_list[(int) $facture_fourn_instance->statut]['label']
-                                );
-                            }
-                            break;
-                    }
-                }
-            }
-
-            $html .= '<table class="bimp_list_table">';
-            $html .= '<thead>';
-            $html .= '<tr>';
-            $html .= '<th>Type</th>';
-            $html .= '<th>Réf.</th>';
-            $html .= '<th>Date</th>';
-            $html .= '<th>Montant HT</th>';
-            $html .= '<th>Statut</th>';
-            $html .= '</tr>';
-            $html .= '</thead>';
-
-            $html .= '<tbody>';
-
-            if (count($objects)) {
-                foreach ($objects as $data) {
-                    $html .= '<tr>';
-                    $html .= '<td><strong>' . $data['type'] . '</strong></td>';
-                    $html .= '<td>' . $data['ref'] . '</td>';
-                    $html .= '<td>' . $data['date'] . '</td>';
-                    $html .= '<td>' . $data['total_ht'] . '</td>';
-                    $html .= '<td>' . $data['status'] . '</td>';;
-                    $html .= '</tr>';
-                }
-            } else {
-                $html .= '<tr>';
-                $html .= '<td colspan="5">' . BimpRender::renderAlerts('Aucun objet lié', 'info') . '</td>';
-                $html .= '</tr>';
-            }
-
-            $html .= '</tbody>';
-            $html .= '</table>';
-            $html .= '<br /><div class="btn-group"><button type="button" class="btn btn-default" aria-haspopup="true" aria-expanded="false" onclick="'. $this->getJsLoadModalForm('add_linked_object', "Lier une pièce au contrat") .'"><i class="fa fa-link iconLeft"></i>Lier une pièce au contrat</button></div>';
-
-            $html = BimpRender::renderPanel('Objets liés', $html, '', array(
-                        'foldable' => true,
-                        'type'     => 'secondary',
-                        'icon'     => 'fas_link',
-            ));
-        }
-
-        return $html;
-    }
  
     public function renderFilesTable()
     {
@@ -944,7 +869,7 @@ class BContract_contrat extends BimpDolObject {
             return BimpRender::renderAlerts('Le contrat n\'est pas validé', 'danger', false);
         }
         if(!$this->getData('date_start') || !$this->getData('periodicity') || !$this->getData('duree_mois')) {
-            return BimpRender::renderAlerts("Le contrat à été créer avec l'ancienne méthode donc il ne comporte pas d'échéancier", 'warning', false);
+            return BimpRender::renderAlerts("Le contrat a été créé avec l'ancienne méthode donc il ne comporte pas d'échéancier", 'warning', false);
         }
         
         $create = false;
@@ -1219,6 +1144,7 @@ class BContract_contrat extends BimpDolObject {
         $new_contrat->set('tacite', $data['re_new']);
         $new_contrat->set('moderegl', $data['fk_mode_reglement']);
         $new_contrat->set('note_public', $data['note_public']);
+        $new_contrat->set('ref_ext', $data['ref_ext']);
         if($data['use_syntec'] == 1) {
             $new_contrat->set('syntec', BimpCore::getConf('current_indice_syntec'));
         }
@@ -1241,19 +1167,19 @@ class BContract_contrat extends BimpDolObject {
         }
     }
     
-    public function newRef($start_ref) {
-        
-        $count_contrat = count($this->db->getRows('contrat', "ref LIKE '%$start_ref%'")) + 1;
-        
-        if($count_contrat < 10) {
-            $add_zero = "000";
-        } elseif($count_contrat > 10 && $count_contrat < 100) {
-            $add_zero = "00";
-        } else {
-            $add_zero = '0';
-        }
-        return $start_ref . $add_zero . $count_contrat;
-    }
+//    public function newRef($start_ref) {
+//        
+//        $count_contrat = count($this->db->getRows('contrat', "ref LIKE '%$start_ref%'")) + 1;
+//        
+//        if($count_contrat < 10) {
+//            $add_zero = "000";
+//        } elseif($count_contrat > 10 && $count_contrat < 100) {
+//            $add_zero = "00";
+//        } else {
+//            $add_zero = '0';
+//        }
+//        return $start_ref . $add_zero . $count_contrat;
+//    }
     
     public function renderHeaderExtraLeft()
     {   
@@ -1280,6 +1206,7 @@ class BContract_contrat extends BimpDolObject {
                 //$intervale_days = 14;
                 
                 $renderAlert = true;
+                $hold= false;
                 if($intervale_days < 365) {
                     $html .= '<div class="object_header_infos">';
                     if($intervale_days <= 365 && $intervale_days > 90) {
@@ -1292,10 +1219,23 @@ class BContract_contrat extends BimpDolObject {
                     } else {
                         $alerte_type = 'danger';
                     }
+                    
+                    if(!$this->getData('duree_mois') || !$this->getData('date_start')) {
+                        
+                        
+                        
+                        $val = $this->db->getMax('contratdet', 'date_fin_validite', 'fk_contrat = ' . $this->id);
+                        
+                        $date_fin = new DateTime($val);
+                        
+                        $html .= BimpRender::renderAlerts('<h5>Ceci est un ancien contrat dont la date d\'expiration est le : <b> '.$date_fin->format('d / m / Y').' </b></h5> ', 'info', false);
+                        $renderAlert = false;
+                        $hold = true;
+                    }
 
                     if($renderAlert)
                         $html .= BimpRender::renderAlerts('Ce contrat expire dans <strong>'.$intervale_days.' jours</strong>', $alerte_type, false);
-                    else
+                    elseif(!$hold)
                         $html .= 'Ce contrat expire dans <strong>'.$intervale_days.' jours</strong>';
                     $html .= '</div>';
                 }
@@ -1305,21 +1245,196 @@ class BContract_contrat extends BimpDolObject {
         return $html;
     }
     
+    public function displayCommercial() {
+
+        BimpTools::loadDolClass('user');
+        $commercial = new User($this->db->db);
+        $commercial->fetch($this->getData('fk_commercial_suivi'));
+        
+        return $commercial->getNomUrl(1);
+        
+    }
+    
+    public function isSigned($display = null) {
+
+        if (!is_null($this->getData('date_contrat'))) {
+            return (is_null($display) ? 1 : "<b class='success'>OUI</b>");
+        } else {
+            return (is_null($display) ? 0 : "<b class='danger'>NON</b>");
+        }
+        
+    }
+    
     public function relance_renouvellement_commercial() {
   
     }
-    
-    public function cronContrat() {
-        
-        // Vérifier tous les contrats à clore.
-        
-        
-        
-        // Vérifier tous les contrats pour faire la relance aux commeciaux
-        
-        // Vérifier tout les contrats a facturé et envoyer aux commerciaux.
-        
+
+//    public function getEmailUsersFromArray()
+//    {
+//        global $user, $langs, $conf;
+//
+//        $emails = array();
+//
+//        // User connecté: 
+//
+//        if (!empty($user->email)) {
+//            $emails[$user->email] = $user->getFullName($langs) . ' (' . $user->email . ')';
+//        }
+//
+//        if (!$user->admin)
+//            return $emails;
+//
+//        if (!empty($user->email_aliases)) {
+//            foreach (explode(',', $user->email_aliases) as $alias) {
+//                $alias = trim($alias);
+//                if ($alias) {
+//                    $alias = str_replace('/</', '', $alias);
+//                    $alias = str_replace('/>/', '', $alias);
+//                    if (!isset($emails[$alias])) {
+//                        $emails[$alias] = $user->getFullName($langs) . ' (' . $alias . ')';
+//                    }
+//                }
+//            }
+//        }
+//
+//        // Société: 
+//
+//        if (!empty($conf->global->MAIN_INFO_SOCIETE_MAIL)) {
+//            $emails[$conf->global->MAIN_INFO_SOCIETE_MAIL] = $conf->global->MAIN_INFO_SOCIETE_NOM . ' (' . $conf->global->MAIN_INFO_SOCIETE_MAIL . ')';
+//        }
+//
+//        if (!empty($conf->global->MAIN_INFO_SOCIETE_MAIL_ALIASES)) {
+//            foreach (explode(',', $conf->global->MAIN_INFO_SOCIETE_MAIL_ALIASES) as $alias) {
+//                $alias = trim($alias);
+//                if ($alias) {
+//                    $alias = str_replace('/</', '', $alias);
+//                    $alias = str_replace('/>/', '', $alias);
+//                    if (!isset($emails[$alias])) {
+//                        $emails[$alias] = $conf->global->MAIN_INFO_SOCIETE_NOM . ' (' . $alias . ')';
+//                    }
+//                }
+//            }
+//        }
+//
+//        // Contacts pièce: 
+//
+//        if ($this->isLoaded()) {
+//            $c_user = new User($this->db->db);
+//            $contacts = $this->dol_object->liste_contact(-1, 'internal');
+//            foreach ($contacts as $item) {
+//                $c_user->fetch($item['id']);
+//                if (BimpObject::objectLoaded($c_user)) {
+//                    if (!empty($c_user->email) && !isset($emails[$c_user->email])) {
+//                        $emails[$c_user->email] = $item['libelle'] . ': ' . $c_user->getFullName($langs) . ' (' . $c_user->email . ')';
+//                    }
+//
+//                    if (!empty($c_user->email_aliases)) {
+//                        foreach (explode(',', $c_user->email_aliases) as $alias) {
+//                            $alias = trim($alias);
+//                            if ($alias) {
+//                                $alias = str_replace('/</', '', $alias);
+//                                $alias = str_replace('/>/', '', $alias);
+//                                if (!isset($emails[$alias])) {
+//                                    $emails[$alias] = $item['libelle'] . ': ' . $c_user->getFullName($langs) . ' (' . $alias . ')';
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//
+//        return $emails;
+//    }
+//    
+//    public function renderMailToInputs($input_name)
+//    {
+//        $emails = $this->getMailsToArray();
+//
+//        $html = '';
+//
+//        $html .= BimpInput::renderInput('select', $input_name . '_add_value', '', array(
+//                    'options'     => $emails,
+//                    'extra_class' => 'emails_select principal'
+//        ));
+//
+//
+//        $html .= '<p class="inputHelp selectMailHelp">';
+//        $html .= 'Sélectionnez une adresse e-mail puis cliquez sur "Ajouter"';
+//        $html .= '</p>';
+//
+//        $html .= '<div class="mail_custom_value" style="display: none; margin-top: 10px">';
+//        $html .= BimpInput::renderInput('text', $input_name . '_add_value_custom', '');
+//        $html .= '<p class="inputHelp">Entrez une adresse e-mail valide puis cliquez sur "Ajouter"</p>';
+//        $html .= '</div>';
+//
+//        return $html;
+//    }
+//    
+//    public function getMailsToArray()
+//    {
+//        global $user, $langs;
+//
+//        $client = $this->getChildObject('client');
+//
+//        $emails = array(
+//            ""           => "",
+//            $user->email => $user->getFullName($langs) . " (" . $user->email . ")"
+//        );
+//
+//        if ($this->isLoaded()) {
+//            $contacts = $this->dol_object->liste_contact(-1, 'external');
+//            foreach ($contacts as $item) {
+//                if (!isset($emails[(int) $item['id']])) {
+//                    $emails[(int) $item['id']] = $item['libelle'] . ': ' . $item['firstname'] . ' ' . $item['lastname'] . ' (' . $item['email'] . ')';
+//                }
+//            }
+//        }
+//
+//        if (BimpObject::objectLoaded($client)) {
+//            $client_emails = self::getSocieteEmails($client->dol_object);
+//            if (is_array($client_emails)) {
+//                foreach ($client_emails as $value => $label) {
+//                    if (!isset($emails[$value])) {
+//                        $emails[$value] = $label;
+//                    }
+//                }
+//            }
+//        }
+//
+//        if ($this->isLoaded()) {
+//            $contacts = $this->dol_object->liste_contact(-1, 'internal');
+//            foreach ($contacts as $item) {
+//                if (!isset($emails[$item['email']])) {
+//                    $emails[$item['email']] = $item['libelle'] . ': ' . $item['firstname'] . ' ' . $item['lastname'] . ' (' . $item['email'] . ')';
+//                }
+//            }
+//        }
+//
+//        $emails['custom'] = 'Autre';
+//
+//        return $emails;
+//    }
+//    
+//    public function getDefaultMailTo()
+//    {
+//        return array();
+//    }
+//    
+//   public function getEmailModelsArray()
+//    {
+//        if (!static::$email_type) {
+//            return array();
+//        }
+//
+//        return self::getEmailTemplatesArray(static::$email_type, true);
+//    }
+//    
+    public function isBySocId() {
+        if(isset($_REQUEST['socid']) && $_REQUEST['socid'] > 0) {
+            return 1;
+        }
+        return 0;
     }
-    
     
 }

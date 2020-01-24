@@ -6,8 +6,8 @@
             
             global $user;
             
-            if(!$user->admin)
-            die('Momentanément indisponible, contactez Tommy');
+//            if(!$user->admin)
+//            die('Momentanément indisponible, contactez Tommy');
             
             $export = BimpObject::getInstance('bimptocegid', 'BTC_export');
 

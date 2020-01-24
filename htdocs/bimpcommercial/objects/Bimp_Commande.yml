@@ -715,6 +715,10 @@ filters_panels:
                 field: date_livraison
             reval:
                 field: revalorisation
+            validComm:
+                field: validComm
+            validFin:
+                field: validFin
             
 lists_cols: 
     date_create: 

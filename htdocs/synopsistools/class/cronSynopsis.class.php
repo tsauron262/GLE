@@ -77,11 +77,11 @@ class CronSynopsis {
 //        $import->go(); 
 //        $this->output .= $import->output;
         
-        require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/importExport/importProd.class.php");
-        $import = new importProd($this->db);
-        $import->debug = $debug;
-        $import->go(); 
-        $this->output .= $import->output;
+//        require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/importExport/importProd.class.php");
+//        $import = new importProd($this->db);
+//        $import->debug = $debug;
+//        $import->go(); 
+//        $this->output .= $import->output;
         
         
         
@@ -113,11 +113,11 @@ class CronSynopsis {
 //        $import->go(); 
 //        $this->output .= $import->output;
 //        
-        require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/importExport/importProdFourn.class.php");
-        $import = new importProdFourn($this->db);
-        $import->debug = $debug;
-        $import->go(); 
-        $this->output .= $import->output;
+//        require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/importExport/importProdFourn.class.php");
+//        $import = new importProdFourn($this->db);
+//        $import->debug = $debug;
+//        $import->go(); 
+//        $this->output .= $import->output;
 //        
 //        
 //        
@@ -176,6 +176,13 @@ class CronSynopsis {
 //            
 //        }
 //        
+        
+        
+        require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/importExport/importMatricule.class.php");
+        $import = new importMatricule($this->db);
+        $import->debug = $debug;
+        $import->go(); 
+        $this->output .= $import->output;
 
 
         echo "fin";

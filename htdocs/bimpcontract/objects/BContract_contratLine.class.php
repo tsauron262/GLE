@@ -43,9 +43,20 @@ class BContract_contratLine extends BContract_contrat {
     }
 
     protected function updateDolObject(&$errors) {
+        global $user;
         $data = $this->getDataArray();
+        //print_r($data); die();
         $contrat = $this->getParentInstance();
-        return 0;
+        if($contrat->dol_object->updateline($this->id, $data['description'], $data['price_ht'], $data['qty'], $data['remise_percent'], $contrat->getData('date_start'), $contrat->getEndDate()->format('Y-m-d'), $data['tva_tx']) > 0) {
+            $success = "Modifier avec succès";
+        } else {
+            $errors = 'Erreur';
+        }
+        return [
+            'success' => $success,
+            'errors' => $errors,
+            'warnings' => $warnings
+        ];
     }
 
     public function canCreate() {
@@ -139,7 +150,7 @@ class BContract_contratLine extends BContract_contrat {
             // Remise globale: 
             if ($parent->getData('statut') == 0) {
                 $buttons[] = array(
-                    'label' => 'Ajouter des numéros de série',
+                    'label' => 'Ajouter/Modifier des numéros de série',
                     'icon' => 'fas_plug',
                     'onclick' => $this->getJsActionOnclick('setSerial', array(), array(
                         'form_name' => 'add_serial'
@@ -170,7 +181,31 @@ class BContract_contratLine extends BContract_contrat {
     }
     
     public function actionRebaseSerial($data, &$success) {
+
+        $liste_exist_serials = json_decode($this->getData('serials'));
+        $old_serial = $liste_exist_serials[$data['old_serial']];
+        if(in_array(strtoupper($data['new_serial']), $liste_exist_serials)) {
+            return "Le numéro de série <b>".$data['new_serial']."</b> est déjà présent dans le contrat";
+        }
         
+        unset($liste_exist_serials[array_search($old_serial, $liste_exist_serials)]);
+        array_push($liste_exist_serials, $data['new_serial']);
+        //print_r($liste_exist_serials); 
+        
+        foreach($liste_exist_serials as $serial) {
+            $toUpdate[] = strip_tags($serial);
+        }
+        
+        if($this->updateField('serials', $toUpdate)) {
+            $success = "Numéro de série remplacer avec succès";
+        }
+        
+    }
+    
+    // UPDATE `llx_contratdet` SET `serials` = '["AZERTYUI2","AZERTYUI3","AZERTYUI1"]' WHERE `llx_contratdet`.`rowid` = 16010; 
+    
+    public function getArraySerials() {
+        return json_decode($this->getData('serials'));
     }
     
     public function actionSetSerial($data, &$success) {
@@ -180,7 +215,7 @@ class BContract_contratLine extends BContract_contrat {
         foreach ($all as $serial) {
 
             if ($serial) {
-                $to_insert[] = $serial;
+                $to_insert[] = strip_tags($serial);
             }
         }
 

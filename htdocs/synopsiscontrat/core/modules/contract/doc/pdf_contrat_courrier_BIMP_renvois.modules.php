@@ -85,7 +85,7 @@ class pdf_contrat_courrier_BIMP_renvois extends ModeleSynopsiscontrat {
         $this->pdf->Ln();
     }
     function write_file($contrat, $outputlangs = '') {
-        global $user, $langs, $conf;
+        global $user, $langs, $conf, $mysoc;
         if (!is_object($outputlangs))
             $outputlangs = $langs;
         $outputlangs->load("main");
@@ -172,7 +172,7 @@ class pdf_contrat_courrier_BIMP_renvois extends ModeleSynopsiscontrat {
                     $contact = new Contact($this->db);
                     $contact->fetch($id_contact);
                     $pdf->Cell($W, 4, "", 0, null, 'C', true);
-                    $pdf->Cell($W, 4, "Contact : " . $contact->lastname . " " . $contact->firstname, 0, null, 'C', true);
+                    $pdf->Cell($W, 4, $contact->lastname . " " . $contact->firstname, 0, null, 'L', true);
                     $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
                 }
                 $pdf->Cell($W, 4, "", 0, null, 'C', true);
@@ -181,7 +181,7 @@ class pdf_contrat_courrier_BIMP_renvois extends ModeleSynopsiscontrat {
                 $pdf->Cell($W, 4, "", 0, null, 'C', true);
                 $pdf->Cell($W, 4, $client->zip . ' ' . $client->town, 0, null, 'L', true);
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 16, '', 0, 'C');
-                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, 'Le ......./......./.......', 0, 'L');
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, 'Le ' . date('d / m / Y'), 0, 'L');
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 10, '', 0, 'C');
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, 'Objet : contrat N°' . $contrat->ref, 0, 'L');
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, 'Code client : ' . $client->code_client, 0, 'L');

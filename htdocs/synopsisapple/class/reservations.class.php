@@ -89,14 +89,14 @@ class Reservations
             if ($this->display_debug) {
                 echo $error . '<br/>';
             } else {
-                dol_syslog("Réservations Apple, erreur: " . $error, LOG_ERR);
+                dol_syslog("Réservations Apple, erreur: " . $error, LOG_ERR, 0, "_apple");
             }
         } else if (is_array($error)) {
             foreach ($error as $e) {
                 if ($this->display_debug) {
                     echo $e . '<br/>';
                 } else {
-                    dol_syslog("Réservations Apple, erreur: " . $e, LOG_ERR);
+                    dol_syslog("Réservations Apple, erreur: " . $e, LOG_ERR, 0, "_apple");
                 }
             }
         }
@@ -408,8 +408,8 @@ class Reservations
 //        $dateBegin->setTimezone(new DateTimeZone("Europe/Paris"));
 //        $dateEnd->setTimezone(new DateTimeZone("Europe/Paris"));
 
-        $ac->datep = $dateBegin->format('Y-m-d H:i:s');
-        $ac->datef = $dateEnd->format('Y-m-d H:i:s');
+        $ac->datep = $this->db->jdate($dateBegin->format('Y-m-d H:i:s'));
+        $ac->datef = $this->db->jdate($dateEnd->format('Y-m-d H:i:s'));
 
         $usersAssigned = array();
         foreach ($users as $u)
@@ -523,16 +523,23 @@ Conditions particulières aux iPhones
 
 - Pour certains types de pannes sous garantie, un envoi de l’iPhone dans un centre Apple peut être nécessaire, entrainant un délai plus long (jusqu’à 10 jours ouvrés), dans ce cas un téléphone de prêt est possible (sous réserve de disponibilité). Si cela vous intéresse, merci de vous munir d’un chèque de caution.
 
-- Les réparations d’écrans d’iPhones sont directement envoyées chez Apple pour calibrer correctement votre iPhone et nécessitent donc un délai moyen de 10 jours ouvrés.
+La plupart de nos centres peuvent effectuer une réparation de votre écran d’iPhone sous 24h00. Pour savoir si votre centre SAV est éligible à ce type de réparation et qu’une plage de rendez-vous est disponible, consulter notre site à l’adresse suivante :
+
+<a href=\"https://www.bimp.fr/tarifs-sav/\">https://www.bimp.fr/tarifs-sav/</a>
 
 Nous proposons des services de sauvegarde des données, de protection de votre téléphone… venez nous rencontrer pour découvrir tous les services que nous pouvons vous proposer.
 Votre satisfaction est notre objectif, nous mettrons tout en œuvre pour vous satisfaire et réduire les délais d’immobilisation de votre produit Apple.
 Bien cordialement
 L’équipe BIMP";
             $mailsCli = $customer->email;
-            if ($mailsCli && $mailsCli != "" && mailSyn2("RDV SAV BIMP", $mailsCli, '', str_replace("\n", "<br/>", $messageClient))) {
-                if ($this->display_debug) {
-                    echo '[OK].<br/>';
+            if ($mailsCli && $mailsCli != ""){
+                if(mailSyn2("RDV SAV BIMP", $mailsCli, '', str_replace("\n", "<br/>", $messageClient))) {
+                    if ($this->display_debug) {
+                        echo '[OK].<br/>';
+                    }
+                }
+                else{
+                    mailSyn2("impossible d'envoyé le mail", "tommy@bimp.fr", "admin@bimp.fr", "Resa mail client erreur : ".$mailsCli." obj : ".print_r($resa,1));
                 }
             }
             else{

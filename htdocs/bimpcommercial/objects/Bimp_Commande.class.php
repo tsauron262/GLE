@@ -2404,9 +2404,8 @@ class Bimp_Commande extends BimpComm
                     $this->updateField('logistique_status', $new_status);
                     if ($new_status == 3) {
                         $idComm = $this->getIdCommercial();
-                        $userT = new User($this->db->db);
-                        $userT->fetch($idComm);
-                        $mail = $userT->email;
+                        $mail = BimpTools::getMailOrSuperiorMail($idComm);
+                        
 
                         $infoClient = "";
                         $client = $this->getChildObject('client');

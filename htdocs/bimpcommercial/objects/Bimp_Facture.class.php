@@ -31,6 +31,12 @@ class Bimp_Facture extends BimpComm
         4 => array('label' => 'Facture proforma'),
         5 => array('label' => 'Facture de situation')
     );
+    public static $statut_export = array(
+        0 => array('label' => ''),
+        1 => array('label' => 'Attestation Dédouanement Reçue '),
+        2 => array('label' => 'Attestation Dédouanement Non Reçue'),
+        3 => array('label' => 'Non déclarable'),
+    );
 
     public function iAmAdminRedirect()
     {
@@ -42,17 +48,23 @@ class Bimp_Facture extends BimpComm
 
     public function isFieldEditable($field, $force_edit = false)
     {
+        if(in_array($field, array('statut_export', 'douane_number')))
+            return 1;
         if ((int) $this->getData('fk_statut') > 0 && ($field == 'datef'))
             return 0;
 
-
+        if ($this->getData('exported') == 1)
+            return 0;
+        
+        
         return parent::isFieldEditable($field, $force_edit);
     }
 
     public function isEditable($force_edit = false, &$errors = array())
     {
-        if ($this->getData('exported') == 1)
-            return 0;
+        return 1;
+//        if ($this->getData('exported') == 1)
+//            return 0;
 
         return parent::isEditable($force_edit, $errors);
     }
@@ -3924,6 +3936,7 @@ class Bimp_Facture extends BimpComm
             $mail = $userCreate->email;
             if ($mail == '')
                 $mail = "tommy@bimp.fr";
+            require_once(DOL_DOCUMENT_ROOT."/synopsistools/SynDiversFunction.php");
             if (mailSyn2('Facture brouillon à régulariser', $mail, 'admin@bimp.fr', 'Bonjour, vous avez laissé une facture en l’état de brouillon depuis plus de ' . $nbDay . ' jour(s) : ' . $obj->getNomUrl() . ' <br/>Merci de bien vouloir la régulariser au plus vite.'))
                 $i++;
         }

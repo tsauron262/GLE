@@ -3923,6 +3923,7 @@ class Bimp_Facture extends BimpComm
         $sql = $this->db->db->query("SELECT rowid FROM `" . MAIN_DB_PREFIX . "facture` WHERE `datec` < '" . $date->format('Y-m-d') . "' AND `fk_statut` = 0");
         $i = 0;
         while ($ln = $this->db->db->fetch_object($sql)) {
+            dol_syslog("ici"."SELECT rowid FROM `" . MAIN_DB_PREFIX . "facture` WHERE `datec` < '" . $date->format('Y-m-d') . "' AND `fk_statut` = 0",3);
             $obj = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $ln->rowid);
             $userCreate = new User($this->db->db);
             $userCreate->fetch((int) $obj->getData('fk_user_author'));

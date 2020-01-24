@@ -121,7 +121,7 @@ class BContract_echeancier extends BimpObject {
             $dateEnd = new DateTime($data['date_end']);
 
 
-            if ($instance->dol_object->addline("Facturation pour la période du <b>" . $this->db->db->jdate($dateStart->format('d / m / Y')) . "</b> au <b>" . $this->db->db->jdate($dateEnd->format('d / m / Y')) . "</b><br /><br />" . $desc, (double) $data['total_ht'], 1, 20, 0, 0, 0, 0, $data['date_start'], $data['date_end'], 0, 0, '', 'HT', 0, 1) > 0) {
+            if ($instance->dol_object->addline("Facturation pour la période du <b>" . $dateStart->format('d / m / Y') . "</b> au <b>" . $dateEnd->format('d / m / Y') . "</b><br /><br />" . $desc, (double) $data['total_ht'], 1, 20, 0, 0, 0, 0, $data['date_start'], $data['date_end'], 0, 0, '', 'HT', 0, 1) > 0) {
                 $success = 'Facture créer avec succès';
                 addElementElement("contrat", "facture", $parent->id, $instance->id);
 
@@ -335,34 +335,68 @@ class BContract_echeancier extends BimpObject {
     }
 
     public function displayFactureEmises() {
-
-        $class = 'danger';
-        $parent = $this->getParentInstance();
-        $nombre_total_facture = $parent->getData('duree_mois') / $parent->getData('periodicity');
-        $nombre_fature_send = count(getElementElement('contrat', 'facture', $this->getData('id_contrat')));
-        $popover = 'Facture émisent ('.$nombre_fature_send.') / Nombre période ('.$nombre_total_facture.') ';
         
-        if ($nombre_fature_send > 0 && $nombre_fature_send < $nombre_total_facture) {
-            $class = "warning";
-        } elseif ($nombre_fature_send == $nombre_total_facture) {
-            $class = 'success';
-            $popover = 'Facturation terminée';
+        $class = 'danger';
+        $class_periode = 'danger';
+        $parent = $this->getParentInstance();
+        
+        if($parent->getData('duree_mois') > 0) {
+            if($parent->isLoaded()) {
+                $reste_periode = $parent->reste_periode();
+                $nombre_total_facture = $parent->getData('duree_mois') / $parent->getData('periodicity');
+                $nombre_fature_send = count(getElementElement('contrat', 'facture', $this->getData('id_contrat')));
+                $review_view = false;
+                $popover_periode = $reste_periode . ' ';
+                $popover_periode .= ($reste_periode > 1) ? 'périodes' : 'période';
+                $popover_periode .= ' encore à facturer';
+                
+                $affichage_nombre_facture_total = $nombre_total_facture;
+                
+                $popover = 'Facture émises ('.$nombre_fature_send.') / Nombre période ('.$nombre_total_facture.') ';
+                
+                
+                if (($nombre_fature_send > 0 && $nombre_fature_send < $nombre_total_facture) && (ceil($reste_periode) > 0 && $nombre_fature_send > 0)) {
+                    $class = "warning";
+                    if($nombre_fature_send + $reste_periode != $nombre_total_facture) {
+                        $review_view = true;
+                    }
+                    
+                } elseif (($nombre_fature_send == $nombre_total_facture) || ($reste_periode < 1) ) {
+                    $class = 'success';
+                    $affichage_nombre_facture_total = $nombre_fature_send;
+                    $popover = 'Facturation terminée';
+                }
+                
+                if(!$review_view)
+                    $returned_data = '<b class="' . $class . ' bs-popover" '.BimpRender::renderPopoverData($popover, 'top').' >' . '<i class="fas fa5-file-invoice-dollar iconLeft" ></i>' . $nombre_fature_send . ' / ' . $affichage_nombre_facture_total . '' . '</b>';
+                else
+                    $returned_data = '<b class="' . $class . ' bs-popover" '.BimpRender::renderPopoverData('Factures émises (' . $nombre_fature_send . ') / Nombre de périodes (' . ($reste_periode + 1) . ') au lieu de ' . $nombre_total_facture . ' périodes théorique', 'top').' >' . '<i class="fas fa5-file-invoice-dollar iconLeft" ></i>' . $nombre_fature_send . ' / ' . ($reste_periode + 1) . '' . '</b>';
+                
+                if($reste_periode > 0 && $reste_periode <= $nombre_total_facture) {
+                    $class_periode = "warning";
+                    $returned_data .= ' <b class="' . $class_periode . ' bs-popover" '.BimpRender::renderPopoverData($popover_periode, 'top').' >' . '<i style="margin-left:30px" class="fas fa-hourglass-half iconLeft"></i>' . $reste_periode. '</b>';
+                }
+                
+                } else {
+                $returned_data = "<b class='danger'>Ce contrat n'existe plus</b>";
+            }
+        } else {
+            $returned_data = '<b class="info" >Ce contrat ne comporte pas d\'échéancier</b>';
         }
-
-        $returned_data = '<b class="' . $class . ' bs-popover" '.BimpRender::renderPopoverData($popover, 'top').' >' . $nombre_fature_send . ' / ' . $nombre_total_facture . '</b>';
-
         return $returned_data;
     }
     
     public function displayNextFactureDate() {
         
         $next = $this->getData('next_facture_date');
-        
-        if($next != 0) {
+        $parent = $this->getParentInstance();
+        if($next != 0 && $parent->getData('duree_mois') > 0) {
             $alert = "";
             $dateTime = new DateTime($next);
             
             return '<b>' . $dateTime->format('d / m / Y') . '</b>';
+        } elseif($parent->getData('duree_mois') <= 0){
+            return '<b class="info" >Il n\'y à pas de facturation pour ce contrat</b>';
         }
         
         return '<b class="important" >Echéancier totalement facturé</b>';
@@ -371,7 +405,7 @@ class BContract_echeancier extends BimpObject {
     }
     
     public function displayRetard() {
-        
+        $parent = $this->getParentInstance();
         $alert = "<b class='success bs-popover' ".BimpRender::renderPopoverData('Facturation à jour').">".BimpRender::renderIcon('check')."</b>";
         $next = $this->getData('next_facture_date');
         $dateTime = new DateTime($next);
@@ -383,7 +417,10 @@ class BContract_echeancier extends BimpObject {
             $alert = '<b class="danger bs-popover" '.$popover.' >'.BimpRender::renderIcon('warning').'</b>';
         }
         
-        return $alert;
+        if($parent->getData('duree_mois') > 0)
+            return $alert;
+        else
+            return '';
         
     }
 

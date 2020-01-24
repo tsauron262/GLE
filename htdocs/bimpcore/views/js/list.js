@@ -150,18 +150,34 @@ function getListData($list) {
     if ($listFilters.length) {
         if ($listFilters.data('list_identifier') === $list.attr('id')) {
             data['filters_panel_values'] = getAllListFieldsFilters($listFilters);
+
+            var $input = $listFilters.find('select[name="id_filters_to_load"]');
+            if ($input.length) {
+                var id_list_filters = parseInt($input.val());
+                if (id_list_filters && !isNaN(id_list_filters)) {
+                    data['id_current_list_filters'] = id_list_filters;
+                }
+            }
         }
     }
 
     return data;
 }
 
-function reloadObjectList(list_id, callback) {
+function reloadObjectList(list_id, callback, full_reload, id_config) {
     var $list = $('#' + list_id);
 
     if (!$list.length) {
 //        console.error('Erreur technique: identifiant de la liste invalide (' + list_id + '). Echec du rechargement de la liste');
         return;
+    }
+
+    if (typeof (full_reload) === 'undefined') {
+        full_reload = false;
+    }
+
+    if (typeof (id_config) === 'undefined') {
+        id_config = 0;
     }
 
     $list.find('.headerTools').find('.loadingIcon').css('opacity', 1);
@@ -170,6 +186,14 @@ function reloadObjectList(list_id, callback) {
     var object_name = $list.data('object_name');
 
     var data = getListData($list);
+
+    if (full_reload) {
+        data['full_reload'] = 1;
+    }
+
+    if (id_config) {
+        data['param_id_config'] = id_config;
+    }
 
     // Envoi requête:
     var error_msg = 'Une erreur est sruvenue. La liste des ';
@@ -192,6 +216,7 @@ function reloadObjectList(list_id, callback) {
     BimpAjax('loadObjectList', data, null, {
         $list: $list,
         refresh_idx,
+        full_reload: full_reload,
         $resultContainer: $resultContainer,
         display_success: false,
         error_msg: error_msg,
@@ -205,6 +230,7 @@ function reloadObjectList(list_id, callback) {
                 }
 
                 hidePopovers($list);
+
                 bimpAjax.$list.find('tbody.listRows').html(result.rows_html);
                 if (result.pagination_html) {
                     bimpAjax.$list.find('.listPagination').each(function () {
@@ -230,7 +256,26 @@ function reloadObjectList(list_id, callback) {
                     bimpAjax.$list.find('.headerTools').find('.openFiltersPanelButton').removeClass('action-close').addClass('action-open').hide();
                 }
 
-                onListRefeshed(bimpAjax.$list);
+                if (bimpAjax.full_reload) {
+                    if (result.thead_html) {
+                        bimpAjax.$list.find('thead.listTableHead').html(result.thead_html);
+                    }
+                }
+
+                if (typeof (result.colspan) !== 'undefined') {
+                    var colspan = parseInt(result.colspan);
+
+                    if (!isNaN(colspan)) {
+                        $list.find('td.fullrow').attr('colspan', colspan);
+                    }
+                }
+
+                if (bimpAjax.full_reload) {
+                    bimpAjax.$list.data('loaded_event_processed', 0);
+                    onListLoaded(bimpAjax.$list);
+                } else {
+                    onListRefeshed(bimpAjax.$list);
+                }
 
                 if (typeof (callback) === 'function') {
                     callback(true);
@@ -248,6 +293,23 @@ function reloadObjectList(list_id, callback) {
             }
         }
     });
+}
+
+function loadListConfig($button, id_config) {
+    var $list = $button.findParentByClass('object_list_table');
+
+    if (!$.isOk($list)) {
+        bimp_msg('Erreur: liste non trouvée', 'danger', null, true);
+        return;
+    }
+
+    if ($button.hasClass('disabled')) {
+        return;
+    }
+
+    $button.addClass('disabled');
+
+    reloadObjectList($list.attr('id'), null, true, id_config);
 }
 
 function loadModalList(module, object_name, list_name, id_parent, $button, title, extra_data, extra_filters, extra_joins) {
@@ -311,9 +373,11 @@ function loadModalFormFromList(list_id, form_name, $button, id_object, id_parent
         'id_parent': id_parent
     };
 
-    var $values_input = $list.find('input[name=' + form_name + '_add_form_values]');
-    if ($values_input.length) {
-        data['param_values'] = $values_input.val();
+    if (!id_object) {
+        var $values_input = $list.find('input[name=' + form_name + '_add_form_values]');
+        if ($values_input.length) {
+            data['param_values'] = $values_input.val();
+        }
     }
 
     var $asso_filters_input = $list.find('input[name=param_associations_filters]');
@@ -792,6 +856,30 @@ function setSelectedObjectsAction($button, list_id, action, extra_data, form_nam
             }
         }
     }
+}
+
+function loadListUserConfigsModalList($button, list_id, id_user) {
+    var $list = $('#' + list_id);
+
+    if (!$.isOk($list)) {
+        bimp_msg('Erreur: liste non trouvée pour l\'identifiant "' + list_id + '"', 'danger');
+        return;
+    }
+
+    bimpModal.loadAjaxContent($button, 'loadListUserConfigsList', {
+        module: $list.data('module'),
+        object_name: $list.data('object_name'),
+        list_type: $list.data('type'),
+        list_name: $list.data('name'),
+        id_user: id_user
+    }, 'Gestion des configurations de la liste', 'Chargement', function (result, bimpAjax) {
+        var $new_list = bimpAjax.$resultContainer.find('#' + result.list_id);
+        if ($new_list.length) {
+            $new_list.data('modal_idx', bimpAjax.$resultContainer.data('idx'));
+            bimpModal.removeComponentContent($new_list.attr('id'));
+            onListLoaded($new_list);
+        }
+    }, {}, 'large');
 }
 
 // Actions:

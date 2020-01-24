@@ -66,6 +66,7 @@ class BC_ListTable extends BC_List
         $this->params_def['inline_view_item'] = array('data_type' => 'int', 'default' => 0);
         $this->params_def['after_list_content'] = array('default' => '');
         $this->params_def['enable_csv'] = array('data_type' => 'bool', 'default' => 1);
+        $this->params_def['search_open'] = array('data_type' => 'bool', 'default' => 0);
 
         global $current_bc;
         if (!is_object($current_bc)) {
@@ -174,7 +175,7 @@ class BC_ListTable extends BC_List
         $list_cols = array();
 
         if ($this->params['configurable'] && BimpObject::objectLoaded($this->userConfig)) {
-            $list_cols = explode(',', $this->userConfig->getData('cols'));
+            $list_cols = $this->userConfig->getData('cols');
         }
 
         if (!is_array($list_cols) || !count($list_cols)) {
@@ -518,7 +519,7 @@ class BC_ListTable extends BC_List
         }
 
         $html .= '<table class="noborder objectlistTable" style="border: none; min-width: ' . ($this->colspan * 80) . 'px" width="100%">';
-        $html .= '<thead>';
+        $html .= '<thead class="listTableHead">';
 
         $html .= $this->renderHeaderRow();
         $html .= $this->renderSearchRow();
@@ -534,7 +535,7 @@ class BC_ListTable extends BC_List
         $html .= '<tfoot>';
 
         $html .= '<tr class="listFooterButtons">';
-        $html .= '<td colspan="' . $this->colspan . '">';
+        $html .= '<td colspan="' . $this->colspan . '" class="fullrow">';
         $html .= '<div style="text-align: right">';
         foreach ($this->getHeaderButtons() as $button) {
             $button['classes'][] = 'headerBtn';
@@ -701,7 +702,7 @@ class BC_ListTable extends BC_List
                 $tools_width += 44;
             }
             if ($this->search && $this->params['enable_search']) {
-                $tools_html .= '<span class="headerButton openSearchRowButton open-close action-open"></span>';
+                $tools_html .= '<span class="headerButton openSearchRowButton open-close action-' . ($this->params['search_open'] ? 'close' : 'open') . '"></span>';
                 $tools_width += 44;
             }
             if ($this->params['add_object_row']) {
@@ -772,7 +773,11 @@ class BC_ListTable extends BC_List
         $html .= '<tr id="' . $this->identifier . '_searchRow" class="listSearchRow"';
         $html .= ' data-list_name="' . $this->name . '"';
         $html .= ' data-module_name="' . $this->object->module . '"';
-        $html .= ' data-object_name="' . $this->object->object_name . '">';
+        $html .= ' data-object_name="' . $this->object->object_name . '"';
+        if (!$this->params['search_open']) {
+            $html .= ' style="display: none"';
+        }
+        $html .= '>';
 
         $html .= '<td style="text-align: center"><i class="fa fa-search"></i></td>';
 
@@ -837,7 +842,7 @@ class BC_ListTable extends BC_List
 
         if ((int) $this->params['total_row'] && !empty($this->totals)) {
             $html .= '<tr class="margin_row">';
-            $html .= '<td colspan="' . $this->colspan . '"></td>';
+            $html .= '<td colspan="' . $this->colspan . '" class="fullrow"></td>';
             $html .= '</tr>';
 
             $html .= '<tr class="total_row">';
@@ -964,7 +969,7 @@ class BC_ListTable extends BC_List
         $hide = (is_null($this->nbItems) || ($this->params['n'] <= 0) || ($this->params['n'] >= $this->nbItems));
 
         $html = '<tr class="paginationContainer"' . ($hide ? ' style="display: none"' : '') . '>';
-        $html .= '<td colspan="' . $this->colspan . '" style="padding: 5px 10px 15px;">';
+        $html .= '<td colspan="' . $this->colspan . '" style="padding: 5px 10px 15px;" class="fullrow">';
         $html .= '<div id="' . $this->identifier . '_pagination" class="listPagination">';
         $html .= $this->renderPagination();
         $html .= '</div>';
@@ -1137,7 +1142,7 @@ class BC_ListTable extends BC_List
         }
 
         global $user;
-        if (BimpObject::objectLoaded($user) && $this->params['configurable']) {
+        if (BimpObject::objectLoaded($user) && (int) $this->params['configurable']) {
             $content .= '<div class="title">';
             $content .= 'Paramètres utilisateur';
             $content .= '</div>';
@@ -1148,6 +1153,8 @@ class BC_ListTable extends BC_List
                 'list_name'  => $this->name,
             );
 
+            $configs = ListConfig::getUserConfigsArray($user->id, $this->object, static::$type, $this->name);
+
             if (BimpObject::objectLoaded($this->userConfig)) {
                 $values['sort_field'] = $this->userConfig->getData('sort_field');
                 $values['sort_way'] = $this->userConfig->getData('sort_way');
@@ -1156,6 +1163,16 @@ class BC_ListTable extends BC_List
                 $values['total_row'] = $this->userConfig->getData('total_row');
 
                 $content .= '<div style="font-weight: normal; font-size: 11px">';
+
+                $content .= 'Configuration actuelle:<br/>';
+                $content .= '<div style="margin: 5px 0; font-weight: bold">';
+                $content .= $this->userConfig->getData('name');
+                if ($this->userConfig->can('edit')) {
+                    $content .= '&nbsp;&nbsp;&nbsp;<span class="btn btn-default btn-small" onclick="' . $this->userConfig->getJsLoadModalForm('default', 'Edition de la configuration #' . $this->userConfig->id) . '">';
+                    $content .= BimpRender::renderIcon('fas_edit', 'iconLeft') . 'Editer';
+                    $content .= '</span>';
+                }
+                $content .= '</div>';
 
                 $content .= 'Nombre d\'éléments par page: <span class="bold">' . ((int) $values['nb_items'] ? $values['nb_items'] : BimpRender::renderIcon('fas_infinity')) . '</span><br/>';
 
@@ -1173,23 +1190,58 @@ class BC_ListTable extends BC_List
                 $content .= 'Ordre de tri: <span class="bold">' . $this->userConfig->displayData('sort_way') . '</span><br/>';
                 $content .= 'Afficher les totaux: <span class="bold">' . ((int) $values['total_row'] ? 'OUI' : 'NON') . '</span>';
                 $content .= '</div>';
+
+                $userConfig = BimpObject::getInstance('bimpcore', 'ListConfig');
+                $onclick = 'loadListUserConfigsModalList($(this), \'' . $this->identifier . '\', ' . $user->id . ')';
             } else {
                 $values['sort_field'] = $this->params['sort_field'];
                 $values['sort_way'] = $this->params['sort_way'];
                 $values['sort_option'] = $this->params['sort_option'];
                 $values['nb_items'] = $this->params['n'];
                 $values['total_row'] = (int) $this->params['total_row'];
+
+                $userConfig = BimpObject::getInstance('bimpcore', 'ListConfig');
+                $onclick = $userConfig->getJsLoadModalForm('default', 'Nouvelle configuration de liste', array(
+                    'fields' => array(
+                        'name'        => '',
+                        'obj_module'  => $this->object->module,
+                        'obj_name'    => $this->object->object_name,
+                        'list_type'   => static::$type,
+                        'list_name'   => $this->name,
+                        'owner_type'  => ListConfig::TYPE_USER,
+                        'nb_items'    => $this->params['n'],
+                        'sort_field'  => $this->params['sort_field'],
+                        'sort_way'    => $this->params['sort_way'],
+                        'sort_option' => $this->params['sort_option'],
+                        'total_row'   => $this->params['total_row'],
+                        'is_default'  => 1
+                    )
+                ));
             }
 
             $content .= '<div style="margin-bottom: 15px; text-align: center">';
+            if (count($configs) > 1) {
+                $items = array();
+
+                foreach ($configs as $id_config => $config_label) {
+                    if ((int) $id_config === (int) $this->userConfig->id) {
+                        continue;
+                    }
+                    $items[] = '<span class="btn btn-light-default" onclick="loadListConfig($(this), ' . $id_config . ');">' . $config_label . '</span>';
+                }
+
+                $content .= BimpRender::renderDropDownButton('Charger', $items, array(
+                            'icon'       => 'fas_user-cog',
+                            'menu_right' => 1
+                        )) . '<br/>';
+            }
+
             $content .= BimpRender::renderButton(array(
                         'classes'     => array('btn', 'btn-default'),
-                        'label'       => 'Editer les paramètres utilisateur',
-                        'icon_before' => 'fas_user-cog',
+                        'label'       => 'Editer les configurations',
+                        'icon_before' => 'fas_pen',
                         'attr'        => array(
-                            'onclick' => $this->object->getJsActionOnclick('setListConfig', $values, array(
-                                'form_name' => 'list_config'
-                            ))
+                            'onclick' => $onclick
                         )
             ));
             $content .= '</div>';
@@ -1351,7 +1403,7 @@ class BC_ListTable extends BC_List
                     if ($row['cols'][$col_name]['col_style']) {
                         $html .= $row['cols'][$col_name]['col_style'];
                     }
-                    $html .= '"' . ($row['params']['single_cell'] ? ' colspan="' . count($this->cols) . '"' : '') . '>';
+                    $html .= '"' . ($row['params']['single_cell'] ? ' colspan="' . count($this->cols) . '" class="fullrow"' : '') . '>';
                     if ((int) $row['cols'][$col_name]['show']) {
                         $html .= (isset($row['cols'][$col_name]['content']) ? $row['cols'][$col_name]['content'] : '');
                     }
@@ -1470,7 +1522,7 @@ class BC_ListTable extends BC_List
             $label = $this->object->getLabel('name');
             $isFemale = $this->object->isLabelFemale();
             $html .= '<tr>';
-            $html .= '<td  colspan="' . $this->colspan . '" style="text-align: center">';
+            $html .= '<td  colspan="' . $this->colspan . '" style="text-align: center" class="fullrow">';
             if (count($this->filters)) {
                 $html .= '<p class="alert alert-warning">';
                 $html .= 'Aucun' . ($isFemale ? 'e' : '') . ' ' . $label;

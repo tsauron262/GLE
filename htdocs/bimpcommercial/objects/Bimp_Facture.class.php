@@ -1877,11 +1877,11 @@ class Bimp_Facture extends BimpComm
             if ($this->isActionAllowed('useRemise') && $this->canSetAction('useRemise')) {
 //                $discount_amount = (float) $this->getSocAvailableDiscountsAmounts();
 //                if ($discount_amount) {
-                    $html .= '<button class="btn btn-default" onclick="' . $this->getJsActionOnclick('useRemise', array(), array(
-                                'form_name' => 'use_remise'
-                            )) . '">';
-                    $html .= BimpRender::renderIcon('fas_file-import', 'iconLeft') . 'Appliquer un avoir disponible';
-                    $html .= '</button>';
+                $html .= '<button class="btn btn-default" onclick="' . $this->getJsActionOnclick('useRemise', array(), array(
+                            'form_name' => 'use_remise'
+                        )) . '">';
+                $html .= BimpRender::renderIcon('fas_file-import', 'iconLeft') . 'Appliquer un avoir disponible';
+                $html .= '</button>';
 //                }
             }
 
@@ -2528,7 +2528,8 @@ class Bimp_Facture extends BimpComm
     public function onValidate()
     {
         if ($this->isLoaded()) {
-            $this->set('fk_statut', Facture::STATUS_VALIDATED);
+            // A ce stade on doit être sûr que la validation est ok. 
+            $this->fetch($this->id);
             $this->majStatusOtherPiece();
 
             $lines = $this->getLines('not_text');
@@ -2615,6 +2616,13 @@ class Bimp_Facture extends BimpComm
                     $this->dol_object->update_price(1);
                     $this->fetch((int) $this->id);
                 }
+
+//                $this->printData();
+//                $this->hydrateDolObject();
+//                echo '<pre>';
+//                print_r($this->dol_object);
+//                echo '</pre>';
+//                $this->update();
             }
 
             $this->checkIsPaid();
@@ -2998,7 +3006,7 @@ class Bimp_Facture extends BimpComm
                     $this->setObjectAction('classifyPaid');
                 }
             } elseif ($paye) {
-                $res = $this->setObjectAction('reopen');
+                $this->setObjectAction('reopen');
             }
         }
     }
@@ -3092,7 +3100,7 @@ class Bimp_Facture extends BimpComm
         $contacts = $this->dol_object->liste_contact(-1, 'external', 0, 'BILLING');
         foreach ($contacts as $contact) {
             if ($contact['socid'] != $this->getData("fk_soc"))
-                $errors[] = 'Validation impossible, contact client adresse de facturation diférente du client de la facture';
+                $errors[] = 'Validation impossible, contact client adresse de facturation différente du client de la facture';
         }
 
         if (!count($errors)) {

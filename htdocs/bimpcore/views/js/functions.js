@@ -310,9 +310,17 @@ function setCommonEvents($container) {
                     if ($foldableContainer.hasClass('open')) {
                         $foldableContainer.removeClass('open').addClass('closed');
                         $foldableContainer.children('.foldable_content').slideUp(250);
+                        var onclose = $foldableContainer.attr('onclose');
+                        if (typeof (onclose) === 'string' && onclose) {
+                            eval(onclose.replace('$(this)', '$foldableContainer'));
+                        }
                     } else {
                         $foldableContainer.removeClass('closed').addClass('open');
                         $foldableContainer.children('.foldable_content').slideDown(250);
+                        var onopen = $foldableContainer.attr('onopen');
+                        if (typeof (onopen) === 'string' && onopen) {
+                            eval(onopen.replace('$(this)', '$foldableContainer'));
+                        }
                     }
                 }
             });

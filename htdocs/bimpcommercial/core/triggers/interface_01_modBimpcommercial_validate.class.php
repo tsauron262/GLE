@@ -21,9 +21,6 @@
 include_once DOL_DOCUMENT_ROOT . '/core/triggers/dolibarrtriggers.class.php';
 include_once DOL_DOCUMENT_ROOT . '/bimpvalidateorder/class/bimpvalidateorder.class.php';
 
-/**
- *  Class of triggers for validateorder module
- */
 class Interfacevalidate extends DolibarrTriggers
 {
 
@@ -34,8 +31,7 @@ class Interfacevalidate extends DolibarrTriggers
     {
         global $conf;
         $errors = array();
-
-
+        
         if ($action == 'ORDER_VALIDATE' || $action == 'PROPAL_VALIDATE' || $action == 'BILL_VALIDATE') {
             if (!is_object($object->thirdparty)) {
                 $object->thirdparty = new Societe($this->db);
@@ -52,7 +48,6 @@ class Interfacevalidate extends DolibarrTriggers
                 $bimp_object->dol_object->statut = $prev_statut;
             }
         }
-
 
         if ($action == "ORDER_CREATE") {
             $object->fetchObjectLinked();

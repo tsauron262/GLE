@@ -2808,7 +2808,7 @@ class SynopsisHoliday extends Holiday {
     }
 
     function recrediteSold() {
-        global $langs;
+        global $langs,$user;
         if (!is_array($this->fk_user)) {
             $tabUser = array($this->fk_user);
         } else {
@@ -2820,8 +2820,8 @@ class SynopsisHoliday extends Holiday {
         $userHoliday = $fk_user;
             if ($this->type_conges == 0) {
                 $soldes = $this->getCpforUser($fk_user, $this->date_debut, $this->date_fin, $this->halfday, true);
-                if (isset($solde['error'])) {
-                    $error = $solde['error'];
+                if (isset($soldes['error'])) {
+                    $error = $soldes['error'];
                 } else {
                     $nbHolidayDeducted = $this->getConfCP('nbHolidayDeducted');
                     // solde année en cours:

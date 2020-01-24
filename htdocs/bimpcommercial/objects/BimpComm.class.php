@@ -576,8 +576,13 @@ class BimpComm extends BimpDolObject
                 $ids = array();
                 $empty = false;
 
-                foreach ($values as $value) {
-                    if ((int) $value) {
+                foreach ($values as $idx => $value) {
+                    if ($value === 'current') {
+                        global $user; 
+                        if (BimpObject::objectLoaded($user)) {
+                            $ids[] = (int) $user->id;
+                        }
+                    } elseif ((int) $value) {
                         $ids[] = (int) $value;
                     } else {
                         $empty = true;

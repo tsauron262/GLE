@@ -51,6 +51,13 @@ class BC_List extends BC_Panel
         $this->params_def['filters_panel'] = array();
         $this->params_def['filters_panel_values'] = array('data_type' => 'array', 'compile' => true, 'default' => array());
         $this->params_def['filters_panel_open'] = array('data_type' => 'bool', 'default' => 0);
+        $this->params_def['id_default_filters'] = array('data_type' => 'id', 'default' => 0);
+
+        $full_reload = BimpTools::getValue('full_reload', 0);
+
+        if ($full_reload) {
+            $this->no_ajax_params = true;
+        }
 
         if (is_null($id_parent)) {
             $parent_id_property = $object->getParentIdProperty();
@@ -89,31 +96,61 @@ class BC_List extends BC_Panel
 
             if ($this->params['configurable']) {
                 global $user;
-                $this->userConfig = $this->object->getListConfig(2, $user->id, $this->name);
+
+                $id_config = BimpTools::getValue('param_id_config', 0);
+                if ((int) $id_config) {
+                    $this->userConfig = BimpCache::getBimpObjectInstance('bimpcore', 'ListConfig', (int) $id_config);
+                    if (BimpObject::objectLoaded($this->userConfig)) {
+                        $this->userConfig->setAsCurrent();
+                    }
+                }
+
+                if (!BimpObject::objectLoaded($this->userConfig)) {
+                    BimpObject::loadClass('bimpcore', 'ListConfig');
+                    $this->userConfig = ListConfig::getUserCurrentConfig($user->id, $this->object, static::$type, $this->name);
+                }
+
                 if (BimpObject::objectLoaded($this->userConfig)) {
-                    if (!BimpTools::isSubmit('param_sort_field')) {
+                    if (!BimpTools::isSubmit('param_sort_field') || $full_reload) {
                         $sort_field = $this->userConfig->getData('sort_field');
                         if (!is_null($sort_field)) {
                             $this->params['sort_field'] = $sort_field;
                         }
                     }
-                    if (!BimpTools::isSubmit('param_sort_way')) {
+                    if (!BimpTools::isSubmit('param_sort_way') || $full_reload) {
                         $sort_way = $this->userConfig->getData('sort_way');
                         if (!is_null($sort_way)) {
                             $this->params['sort_way'] = $sort_way;
                         }
                     }
-                    if (!BimpTools::isSubmit('param_sort_option')) {
+                    if (!BimpTools::isSubmit('param_sort_option') || $full_reload) {
                         $sort_option = $this->userConfig->getData('sort_option');
                         if (!is_null($sort_option)) {
                             $this->params['sort_option'] = $sort_option;
                         }
                     }
-                    if (!BimpTools::isSubmit('param_n')) {
+                    if (!BimpTools::isSubmit('param_n') || $full_reload) {
                         $n = $this->userConfig->getData('nb_items');
                         if (!is_null($n)) {
                             $this->params['n'] = $n;
                         }
+                    }
+
+                    $filters_open = $this->userConfig->getData('filters_open');
+                    if (!is_null($filters_open)) {
+                        $this->params['filters_panel_open'] = (int) $filters_open;
+                    }
+
+                    if (array_key_exists('search_open', $this->params)) {
+                        $search_open = $this->userConfig->getData('search_open');
+                        if (!is_null($search_open)) {
+                            $this->params['search_open'] = (int) $search_open;
+                        }
+                    }
+
+                    $id_default_filters = (int) $this->userConfig->getData('id_default_filters');
+                    if ($id_default_filters) {
+                        $this->params['id_default_filters'] = $id_default_filters;
                     }
 
                     $this->params['total_row'] = (int) $this->userConfig->getData('total_row');
@@ -337,7 +374,7 @@ class BC_List extends BC_Panel
 
         $this->bc_filtersPanel = new BC_FiltersPanel($this->object, static::$type, $this->name, $this->identifier, $this->params['filters_panel']);
 
-        if (BimpTools::isSubmit('filters_panel_values')) {
+        if (BimpTools::isSubmit('filters_panel_values') && !BimpTools::getValue('full_reload', 0)) {
             $values = array(
                 'fields'   => array(),
                 'children' => array()
@@ -375,8 +412,10 @@ class BC_List extends BC_Panel
                     }
                 }
             }
-            
+
             $this->bc_filtersPanel->setFiltersValues($values);
+        } elseif ((int) $this->params['id_default_filters']) {
+            $this->bc_filtersPanel->loadSavedValues((int) $this->params['id_default_filters']);
         } elseif (!empty($this->params['filters_panel_values'])) {
             $this->bc_filtersPanel->setFiltersValues($this->params['filters_panel_values']);
         }
@@ -386,10 +425,10 @@ class BC_List extends BC_Panel
 
     protected function fetchItems()
     {
-        if(method_exists($this->object, "beforeListFetchItems"))
-                $this->object->beforeListFetchItems($this);
-        
-        
+        if (method_exists($this->object, "beforeListFetchItems"))
+            $this->object->beforeListFetchItems($this);
+
+
         $this->fetchFiltersPanelValues();
 
         if (!$this->isOk()) {

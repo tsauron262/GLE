@@ -386,34 +386,6 @@ forms:
               no_container: 1
               content: 
                   callback: renderListConfigColsInput
-        
-    save_list_filters: 
-        title: Enregistret les filtres
-        icon: fas_save
-        rows: 
-            - custom: 1
-              label: Type liste
-              hidden: 1
-              input_name: list_type
-              input: 
-                  type: hidden
-            - custom: 1
-              label: Nom liste
-              hidden: 1
-              input_name: list_name
-              input: 
-                  type: hidden
-            - custom: 1
-              label: Nom panel
-              hidden: 1
-              input_name: panel_name
-              input: 
-                  type: hidden
-            - custom: 1
-              label: Nom
-              input_name: name
-              input: 
-                  type: text
               
     move_file: 
         title: Déplacer un fichier

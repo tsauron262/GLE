@@ -151,9 +151,11 @@ fields:
         object: user_author
         input: 
             type: hidden
-        filter: 
+        search: 
             input: 
                 type: search_user
+        filter: 
+            type: user
     fk_user_valid: 
         label: Validée par
         dol_prop: user_valid_id
@@ -571,7 +573,7 @@ filters_panels:
                 field: id_commercial
                 label: Commercial
                 data_type: id_object
-                type: value
+                type: user
                 input: 
                     type: search_user
                     include_empty: 1
@@ -683,6 +685,8 @@ lists:
               icon: fas_trash-alt
               onclick: deleteSelectedObjects('list_id', $(this))
         n: 10
+        sort_field: rowid
+        sort_way: desc
         add_form_name: default
         edit_btn: 1
         edit_form: default

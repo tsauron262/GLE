@@ -598,6 +598,8 @@ class BimpController
 
                 die($json);
             } else {
+                echo $method;
+                exit;
                 $errors[] = 'Requête inconnue: "' . $action . '"';
             }
         } else {
@@ -1285,6 +1287,8 @@ class BimpController
         $rows_html = '';
         $pagination_html = '';
         $filters_panel_html = '';
+        $thead_html = '';
+        $colspan = 0;
 
         $id_parent = BimpTools::getValue('id_parent', null);
         if (!$id_parent) {
@@ -1294,6 +1298,8 @@ class BimpController
         $object_name = BimpTools::getValue('object_name');
         $list_name = BimpTools::getValue('list_name', 'default');
         $list_id = BimpTools::getValue('list_id', null);
+        $full_reload = (int) BimpTools::getValue('full_reload', 0);
+
         $modal_format = 'large';
 
         if (is_null($object_name) || !$object_name) {
@@ -1301,6 +1307,11 @@ class BimpController
         }
 
         if (!count($errors)) {
+            if ($full_reload) {
+                if (isset($_POST['filters_panel_values'])) {
+                    unset($_POST['filters_panel_values']);
+                }
+            }
             $object = BimpObject::getInstance($module, $object_name);
             $list = new BC_ListTable($object, $list_name, 1, $id_parent);
             $modal_format = $list->params['modal_format'];
@@ -1317,6 +1328,14 @@ class BimpController
             $pagination_html = $list->renderPagination();
             $filters_panel_html = $list->renderFiltersPanel();
 
+            if ($full_reload) {
+                $thead_html .= $list->renderHeaderRow();
+                $thead_html .= $list->renderSearchRow();
+                $thead_html .= $list->renderAddObjectRow();
+            }
+
+            $colspan = $list->colspan;
+
             if (count($list->errors)) {
                 $msg = 'Erreurs lors de la génération d\'une liste' . "\n";
                 $msg .= 'Module: ' . $module . "\n";
@@ -1332,8 +1351,146 @@ class BimpController
             'rows_html'          => $rows_html,
             'pagination_html'    => $pagination_html,
             'filters_panel_html' => $filters_panel_html,
+            'thead_html'         => $thead_html,
             'list_id'            => $list_id,
+            'colspan'            => $colspan,
             'request_id'         => BimpTools::getValue('request_id', 0)
+        );
+    }
+
+    protected function ajaxProcessLoadListUserConfigsList()
+    {
+        $errors = array();
+        $html = '';
+        $list_id = '';
+
+        $module = BimpTools::getValue('module', $this->module);
+        $object_name = BimpTools::getValue('object_name');
+        $list_type = BimpTools::getValue('list_type', '');
+        $list_name = BimpTools::getValue('list_name', 'default');
+        $id_user = (int) BimpTools::getValue('id_user', 0);
+
+        if (!$list_type) {
+            $errors[] = 'Type de liste absent';
+        }
+
+        if (is_null($object_name) || !$object_name) {
+            $errors[] = 'Type d\'objet absent';
+        }
+
+        if (!$id_user) {
+            $errors[] = 'ID de l\'utilisateur absent';
+        }
+
+        if (!count($errors)) {
+            $object = BimpObject::getInstance($module, $object_name);
+            $instance = BimpObject::getInstance('bimpcore', 'ListConfig');
+            $instance->validateArray(array(
+                'obj_module' => $module,
+                'obj_name'   => $object_name,
+                'list_type'  => $list_type,
+                'list_name'  => $list_name
+            ));
+            $list = new BC_ListTable($instance);
+
+            $list->addFieldFilterValue('obj_module', $module);
+            $list->addFieldFilterValue('obj_name', $object_name);
+            $list->addFieldFilterValue('list_type', $list_type);
+            $list->addFieldFilterValue('list_name', $list_name);
+
+            $list->params['add_form_values']['fields']['owner_type'] = 2;
+            $list->params['add_form_values']['fields']['id_owner'] = $id_user;
+
+            $list_path = BC_List::getConfigPath($object, $list_name, $list_type);
+
+            if ($list_path) {
+                if ($instance->hasPagination()) {
+                    $list->params['add_form_values']['fields']['nb_items'] = $object->getConf($list_path . '/n', 10, false, 'int');
+                }
+                if ($instance->isListSortable()) {
+                    $list->params['add_form_values']['fields']['sort_field'] = $object->getConf($list_path . '/sort_field', $object->getPrimary());
+                    $list->params['add_form_values']['fields']['sort_way'] = $object->getConf($list_path . '/sort_way', 'desc');
+                    $list->params['add_form_values']['fields']['sort_option'] = $object->getConf($list_path . '/sort_option', '');
+                }
+            }
+
+            $list->params['list_filters'][] = array(
+                'name'   => 'owner',
+                'filter' => array(
+                    'custom' => '((a.owner_type = 2 AND a.id_owner = ' . $id_user . ') OR (a.owner_type = 1 AND a.id_owner IN (SELECT ugu.fk_usergroup FROM ' . MAIN_DB_PREFIX . 'usergroup_user ugu WHERE ugu.fk_user = ' . $id_user . ')))'
+                )
+            );
+
+            $html = $list->renderHtml();
+            $list_id = $list->identifier;
+        }
+
+        return array(
+            'errors'     => $errors,
+            'html'       => $html,
+            'list_id'    => $list_id,
+            'request_id' => BimpTools::getValue('request_id', 0)
+        );
+    }
+
+    protected function ajaxProcessLoadUserListFiltersList()
+    {
+        $errors = array();
+        $html = '';
+        $list_id = '';
+
+        $module = BimpTools::getValue('module', $this->module);
+        $object_name = BimpTools::getValue('object_name');
+        $panel_name = BimpTools::getValue('panel_name', 'default');
+        $id_user = (int) BimpTools::getValue('id_user', 0);
+
+        if (is_null($object_name) || !$object_name) {
+            $errors[] = 'Type d\'objet absent';
+        } else {
+            $object = BimpObject::getInstance($module, $object_name);
+
+            if (!is_a($object, $object_name)) {
+                $errors[] = 'L\'objet "' . $object_name . '" n\'existe pas dans le module "' . $module . '"';
+            }
+        }
+
+        if (!$id_user) {
+            $errors[] = 'ID de l\'utilisateur absent';
+        }
+
+        if (!count($errors)) {
+            $instance = BimpObject::getInstance('bimpcore', 'ListFilters');
+            $instance->validateArray(array(
+                'obj_module' => $module,
+                'obj_name'   => $object_name,
+                'panel_name' => $panel_name
+            ));
+
+            $list = new BC_ListTable($instance);
+
+            $list->addFieldFilterValue('obj_module', $module);
+            $list->addFieldFilterValue('obj_name', $object_name);
+            $list->addFieldFilterValue('panel_name', $panel_name);
+
+            $list->params['add_form_values']['fields']['owner_type'] = 2;
+            $list->params['add_form_values']['fields']['id_owner'] = $id_user;
+
+            $list->params['list_filters'][] = array(
+                'name'   => 'owner',
+                'filter' => array(
+                    'custom' => ListFilters::getOwnerFilterCustomSql($id_user)
+                )
+            );
+
+            $html = $list->renderHtml();
+            $list_id = $list->identifier;
+        }
+
+        return array(
+            'errors'     => $errors,
+            'html'       => $html,
+            'list_id'    => $list_id,
+            'request_id' => BimpTools::getValue('request_id', 0)
         );
     }
 
@@ -2023,7 +2180,7 @@ class BimpController
         $i++;
 
         ignore_user_abort(0);
-        
+
         $bimp_fixe_tabs = new FixeTabs();
         $bimp_fixe_tabs->init();
 

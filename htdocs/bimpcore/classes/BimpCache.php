@@ -150,7 +150,7 @@ class BimpCache
             $sql .= BimpTools::getSqlWhere($filters);
 
             $rows = self::getBdb()->executeS($sql, 'array');
-            
+
             if (!is_null($rows) && count($rows)) {
                 if (count($rows) > 1) {
                     if (!empty($filters) && $delete_if_multiple) {
@@ -894,13 +894,53 @@ class BimpCache
             $rows = self::getBdb()->getRows('usergroup', '1', null, 'object', array('rowid', 'nom'), 'nom', 'asc');
             if (!is_null($rows)) {
                 foreach ($rows as $r) {
-
                     self::$cache[$cache_key][$r->rowid] = $r->nom;
                 }
             }
         }
 
         return self::getCacheArray($cache_key, $include_empty);
+    }
+
+    public static function getUserUserGroupsArray($id_user, $include_empty = 0)
+    {
+        $cache_key = 'user_' . $id_user . '_usergroups_array';
+
+        if (!isset(self::$cache[$cache_key])) {
+            if ($include_empty)
+                self::$cache[$cache_key] = array("" => "");
+            else
+                self::$cache[$cache_key] = array();
+
+            $groups = self::getUserGroupsArray();
+            $rows = self::getBdb()->getRows('usergroup_user', 'fk_user = ' . (int) $id_user, null, 'array', array('fk_usergroup'));
+            if (!is_null($rows)) {
+                foreach ($rows as $r) {
+                    if (array_key_exists((int) $r['fk_usergroup'], $groups)) {
+                        self::$cache[$cache_key][(int) $r['fk_usergroup']] = $groups[(int) $r['fk_usergroup']];
+                    }
+                }
+            }
+        }
+
+        return self::getCacheArray($cache_key, $include_empty);
+    }
+
+    public static function getUserUserGroupsList($id_user)
+    {
+        $cache_key = 'user_' . $id_user . '_usergroups_list';
+
+        if (!isset(self::$cache[$cache_key])) {
+            self::$cache[$cache_key] = array();
+            $rows = self::getBdb()->getRows('usergroup_user', 'fk_user = ' . (int) $id_user, null, 'array', array('fk_usergroup'));
+            if (!is_null($rows)) {
+                foreach ($rows as $r) {
+                    self::$cache[$cache_key][] = (int) $r['fk_usergroup'];
+                }
+            }
+        }
+
+        return self::$cache[$cache_key];
     }
 
     public static function getUserCentresArray()
@@ -940,9 +980,9 @@ class BimpCache
         return array();
     }
 
-    public static function getUserListFiltersArray(BimpObject $object, $id_user, $list_type, $list_name, $panel_name, $include_empty = false)
+    public static function getUserListFiltersArray(BimpObject $object, $id_user, $panel_name, $include_empty = false)
     {
-        $cache_key = $object->module . '_' . $object->object_name . '_' . $list_name . '_' . $list_type . '_' . $panel_name . '_filters_panel_user_' . $id_user;
+        $cache_key = $object->module . '_' . $object->object_name . '_' . $panel_name . '_filters_panel_user_' . $id_user;
 
         if (!isset(self::$cache[$cache_key])) {
             self::$cache[$cache_key] = array();
@@ -950,12 +990,38 @@ class BimpCache
             $instance = BimpObject::getInstance('bimpcore', 'ListFilters');
 
             $rows = $instance->getList(array(
-                'owner_type' => 2,
-                'id_owner'   => (int) $id_user,
                 'obj_module' => $object->module,
                 'obj_name'   => $object->object_name,
-                'list_type'  => $list_type,
-                'list_name'  => $list_name,
+                'panel_name' => $panel_name,
+                'owner'      => array(
+                    'custom' => ListFilters::getOwnerFilterCustomSql((int) $id_user)
+                )
+                    ), null, null, 'id', 'asc', 'array', array('id', 'name'));
+
+            if (!is_null($rows)) {
+                foreach ($rows as $r) {
+                    self::$cache[$cache_key][(int) $r['id']] = $r['name'];
+                }
+            }
+        }
+
+        return self::getCacheArray($cache_key, $include_empty);
+    }
+
+    public static function getUsergroupListFiltersArray(BimpObject $object, $id_usergroup, $panel_name, $include_empty = false)
+    {
+        $cache_key = $object->module . '_' . $object->object_name . '_' . $panel_name . '_filters_panel_usergroup_' . $id_usergroup;
+
+        if (!isset(self::$cache[$cache_key])) {
+            self::$cache[$cache_key] = array();
+
+            $instance = BimpObject::getInstance('bimpcore', 'ListFilters');
+
+            $rows = $instance->getList(array(
+                'owner_type' => ListFilters::TYPE_GROUP,
+                'id_owner'   => (int) $id_usergroup,
+                'obj_module' => $object->module,
+                'obj_name'   => $object->object_name,
                 'panel_name' => $panel_name
                     ), null, null, 'id', 'asc', 'array', array('id', 'name'));
 

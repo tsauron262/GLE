@@ -84,9 +84,7 @@ class BContract_contrat extends BimpDolObject {
         'facture_fourn' => 'Facture fournisseur', 
         //'propal' => 'Proposition commercial'
     ];
-    
-    
-    
+
     public static $dol_module = 'contract';
     
     function __construct($module, $object_name) {
@@ -94,6 +92,35 @@ class BContract_contrat extends BimpDolObject {
 
         $this->redirectMode = 4;
         return parent::__construct($module, $object_name);
+    }
+    
+    public function cronContrat() {
+        
+        // Vérifier tous les contrats à clore.
+        //$all = $this->getInstance('bimp')
+        
+        foreach($this->getList(['statut' => 1]) as $contrat) {
+            
+            print_r($contrat);
+            
+        }
+        
+        
+        // Vérifier tous les contrats pour faire la relance aux commeciaux
+        
+        // Vérifier tout les contrats a facturé et envoyer aux commerciaux.
+        
+    }
+    
+    public function isClosDansCombienDeTemps() {
+        
+        $aujourdhui = new DateTime();
+        $finContrat = $this->getEndDate();
+        $diff = $aujourdhui->diff($finContrat);
+        if(!$diff->invert) {
+            return $diff->d;
+        }
+        return 0;
     }
     
     public function actionUpdateSyntec() {
@@ -1179,6 +1206,7 @@ class BContract_contrat extends BimpDolObject {
                 //$intervale_days = 14;
                 
                 $renderAlert = true;
+                $hold= false;
                 if($intervale_days < 365) {
                     $html .= '<div class="object_header_infos">';
                     if($intervale_days <= 365 && $intervale_days > 90) {
@@ -1191,10 +1219,23 @@ class BContract_contrat extends BimpDolObject {
                     } else {
                         $alerte_type = 'danger';
                     }
+                    
+                    if(!$this->getData('duree_mois') || !$this->getData('date_start')) {
+                        
+                        
+                        
+                        $val = $this->db->getMax('contratdet', 'date_fin_validite', 'fk_contrat = ' . $this->id);
+                        
+                        $date_fin = new DateTime($val);
+                        
+                        $html .= BimpRender::renderAlerts('<h5>Ceci est un ancien contrat dont la date d\'expiration est le : <b> '.$date_fin->format('d / m / Y').' </b></h5> ', 'info', false);
+                        $renderAlert = false;
+                        $hold = true;
+                    }
 
                     if($renderAlert)
                         $html .= BimpRender::renderAlerts('Ce contrat expire dans <strong>'.$intervale_days.' jours</strong>', $alerte_type, false);
-                    else
+                    elseif(!$hold)
                         $html .= 'Ce contrat expire dans <strong>'.$intervale_days.' jours</strong>';
                     $html .= '</div>';
                 }
@@ -1227,19 +1268,7 @@ class BContract_contrat extends BimpDolObject {
     public function relance_renouvellement_commercial() {
   
     }
-    
-    public function cronContrat() {
-        
-        // Vérifier tous les contrats à clore.
-        
-        
-        
-        // Vérifier tous les contrats pour faire la relance aux commeciaux
-        
-        // Vérifier tout les contrats a facturé et envoyer aux commerciaux.
-        
-    }
-    
+
 //    public function getEmailUsersFromArray()
 //    {
 //        global $user, $langs, $conf;

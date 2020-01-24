@@ -3,6 +3,40 @@
 class BContract_echeancier extends BimpObject {
 
     public function cronEcheancier() {
+        // recuperer tous les echeancier passer
+        $echeanciers = $this->getList();
+        $aujourdui = new DateTime();
+        foreach ($echeanciers as $echeancier) {
+            $next = new Datetime($echeancier['next_facture_date']);
+            $diff = $aujourdui->diff($next);
+            $msg = null;
+            $parent = $this->getInstance('bimpcontract', 'BContract_contrat', $echeancier['id_contrat']);
+            if ($this->isEnRetard()) {
+                $msg = "Bonjour,<br />L'échéancier du contrat N°" . $parent->getNomUrl() . ' est en retard de facturation de ' . $diff->d . ' Jours<br /> Merci de faire le nécéssaire pour régulariser la facturation';
+            }
+//            if(!is_null($msg))
+//                mailSyn2("Echéancier du contrat N°" . $parent->getData('ref'), 'al.bernard@bimp.fr', 'admin@bimp.fr', $msg);
+        }
+    }
+
+    public function isEnRetard() {
+        $aujourdui = new DateTime();
+        $next = new Datetime($this->getData('next_facture_date'));
+        $diff = $aujourdui->diff($next);
+        if ($this->getData('next_facture_date') > 0 && $diff->invert == 1 && $diff->d > 0) {
+            return 1;
+        }
+        return 0;
+    }
+
+    public function isClosDansCombienDeTemps() {
+        
+        $parent = $this->getParentInstance();
+        $aujourdhui = new DateTime();
+        $finContrat = $parent->getEndDate();
+        $diff = $aujourdhui->diff($finContrat);
+        
+        return ($diff->invert == 1 || $diff->d == 0) ? 1 : 0;
         
     }
 
@@ -154,9 +188,6 @@ class BContract_echeancier extends BimpObject {
 
     public function displayEcheancier($data) {
         global $user;
-
-
-
         $instance_facture = $this->getInstance('bimpcommercial', 'Bimp_Facture');
         $parent = $this->getParentInstance();
         $html = '';
@@ -263,33 +294,32 @@ class BContract_echeancier extends BimpObject {
             if ($parent->is_not_finish() && $user->rights->facture->creer) {
                 $html .= '<div class="panel-footer"><div class="btn-group"><button type="button" class="btn btn-default" aria-haspopup="true" aria-expanded="false" onclick="' . $this->getJsLoadModalForm('create_perso', "Créer une facture personalisée ou une facturation de plusieurs périodes") . '"><i class="fa fa-plus-square-o iconLeft"></i>Créer une facture personalisée ou une facturation de plusieurs périodes</button></div></div>';
             }
-            
         }
-        
+
         $html .= "<br/>"
-                    . "<table style='float:right' class='border' border='1'>"
-                    . "<tr> <th style='border-right: 1px solid black; border-top: 1px solid white; border-left: 1px solid white; width: 20%'></th>  <th style='background-color:#ed7c1c;color:white;text-align:center'>Montant HT</th> <th style='background-color:#ed7c1c;color:white;text-align:center'>Montant TTC</th> </tr>"
-                    . "<tr> <th style='background-color:#ed7c1c;color:white;text-align:center'>Contrat</th> <td style='text-align:center'><b>" . price($parent->getTotalContrat()) . " €</b></td> <td style='text-align:center'><b> " . price($parent->getTotalContrat() * 1.20) . " €</b></td> </tr>"
-                    . "<tr > <th  style='background-color:#ed7c1c;color:white;text-align:center'>Facturé</th> <td style='text-align:center'><b class='important' > " . price($parent->getTotalDejaPayer()) . " € </b></td> <td style='text-align:center'><b class='important'> " . price($parent->getTotalDejaPayer() * 1.20) . " €</b></td> </tr>";
+                . "<table style='float:right' class='border' border='1'>"
+                . "<tr> <th style='border-right: 1px solid black; border-top: 1px solid white; border-left: 1px solid white; width: 20%'></th>  <th style='background-color:#ed7c1c;color:white;text-align:center'>Montant HT</th> <th style='background-color:#ed7c1c;color:white;text-align:center'>Montant TTC</th> </tr>"
+                . "<tr> <th style='background-color:#ed7c1c;color:white;text-align:center'>Contrat</th> <td style='text-align:center'><b>" . price($parent->getTotalContrat()) . " €</b></td> <td style='text-align:center'><b> " . price($parent->getTotalContrat() * 1.20) . " €</b></td> </tr>"
+                . "<tr > <th  style='background-color:#ed7c1c;color:white;text-align:center'>Facturé</th> <td style='text-align:center'><b class='important' > " . price($parent->getTotalDejaPayer()) . " € </b></td> <td style='text-align:center'><b class='important'> " . price($parent->getTotalDejaPayer() * 1.20) . " €</b></td> </tr>";
 
-            if ($parent->getTotalDejaPayer(true) == $parent->getTotalContrat()) {
-                $html .= "<tr > <th  style='background-color:#ed7c1c;color:white;text-align:center'>Payé</th> <td style='text-align:center'><b class='success'> " . price($parent->getTotalDejaPayer(true)) . " € </b></td> <td style='text-align:center'><b class='success'> " . price($parent->getTotalDejaPayer(true) * 1.20) . " €</b></td> </tr>";
-            } else {
-                $html .= "<tr > <th  style='background-color:#ed7c1c;color:white;text-align:center'>Payé</th> <td style='text-align:center'><b class='danger'> " . price($parent->getTotalDejaPayer(true)) . " € </b></td> <td style='text-align:center'><b class='danger'> " . price($parent->getTotalDejaPayer(true) * 1.20) . " €</b></td> </tr>";
-            }
+        if ($parent->getTotalDejaPayer(true) == $parent->getTotalContrat()) {
+            $html .= "<tr > <th  style='background-color:#ed7c1c;color:white;text-align:center'>Payé</th> <td style='text-align:center'><b class='success'> " . price($parent->getTotalDejaPayer(true)) . " € </b></td> <td style='text-align:center'><b class='success'> " . price($parent->getTotalDejaPayer(true) * 1.20) . " €</b></td> </tr>";
+        } else {
+            $html .= "<tr > <th  style='background-color:#ed7c1c;color:white;text-align:center'>Payé</th> <td style='text-align:center'><b class='danger'> " . price($parent->getTotalDejaPayer(true)) . " € </b></td> <td style='text-align:center'><b class='danger'> " . price($parent->getTotalDejaPayer(true) * 1.20) . " €</b></td> </tr>";
+        }
 
-            if ($parent->getTotalContrat() - $parent->getTotalDejaPayer() == 0) {
-                $html .= "<tr > <th  style='background-color:#ed7c1c;color:white;text-align:center'>Reste à facturer</th> <td style='text-align:center'><b class='success'> " . price($parent->getTotalContrat() - $parent->getTotalDejaPayer()) . " € </b></td> <td style='text-align:center'><b class='success'> " . price(($parent->getTotalContrat() - $parent->getTotalDejaPayer()) * 1.20) . " €</b></td> </tr>";
-            } else {
-                $html .= "<tr > <th  style='background-color:#ed7c1c;color:white;text-align:center'>Reste à facturer</th> <td style='text-align:center'><b class='danger'> " . price($parent->getTotalContrat() - $parent->getTotalDejaPayer()) . " € </b></td> <td style='text-align:center'><b class='danger'> " . price(($parent->getTotalContrat() - $parent->getTotalDejaPayer()) * 1.20) . " €</b></td> </tr>";
-            }
+        if ($parent->getTotalContrat() - $parent->getTotalDejaPayer() == 0) {
+            $html .= "<tr > <th  style='background-color:#ed7c1c;color:white;text-align:center'>Reste à facturer</th> <td style='text-align:center'><b class='success'> " . price($parent->getTotalContrat() - $parent->getTotalDejaPayer()) . " € </b></td> <td style='text-align:center'><b class='success'> " . price(($parent->getTotalContrat() - $parent->getTotalDejaPayer()) * 1.20) . " €</b></td> </tr>";
+        } else {
+            $html .= "<tr > <th  style='background-color:#ed7c1c;color:white;text-align:center'>Reste à facturer</th> <td style='text-align:center'><b class='danger'> " . price($parent->getTotalContrat() - $parent->getTotalDejaPayer()) . " € </b></td> <td style='text-align:center'><b class='danger'> " . price(($parent->getTotalContrat() - $parent->getTotalDejaPayer()) * 1.20) . " €</b></td> </tr>";
+        }
 
-            if ($parent->getTotalContrat() - $parent->getTotalDejaPayer(true) == 0) {
-                $html .= "<tr> <th style='background-color:#ed7c1c;color:white;text-align:center'>Reste à payer</th> <td style='text-align:center'><b class='success'> 0 € </b></td> <td style='text-align:center'><b class='success'>0 €</b></td> </tr>";
-            } else {
-                $html .= "<tr> <th style='background-color:#ed7c1c;color:white;text-align:center'>Reste à payer</th> <td style='text-align:center'><b class='danger'> " . price($parent->getTotalContrat() - $parent->getTotalDejaPayer(true)) . " € </b></td> <td style='text-align:center'><b class='danger'> " . price(($parent->getTotalContrat(true) * 1.20) - ($parent->getTotalDejaPayer(true) * 1.20)) . " €</b></td> </tr>";
-            }
-            $html .= "</table>";
+        if ($parent->getTotalContrat() - $parent->getTotalDejaPayer(true) == 0) {
+            $html .= "<tr> <th style='background-color:#ed7c1c;color:white;text-align:center'>Reste à payer</th> <td style='text-align:center'><b class='success'> 0 € </b></td> <td style='text-align:center'><b class='success'>0 €</b></td> </tr>";
+        } else {
+            $html .= "<tr> <th style='background-color:#ed7c1c;color:white;text-align:center'>Reste à payer</th> <td style='text-align:center'><b class='danger'> " . price($parent->getTotalContrat() - $parent->getTotalDejaPayer(true)) . " € </b></td> <td style='text-align:center'><b class='danger'> " . price(($parent->getTotalContrat(true) * 1.20) - ($parent->getTotalDejaPayer(true) * 1.20)) . " €</b></td> </tr>";
+        }
+        $html .= "</table>";
 
 
         return $html;
@@ -335,13 +365,13 @@ class BContract_echeancier extends BimpObject {
     }
 
     public function displayFactureEmises() {
-        
+
         $class = 'danger';
         $class_periode = 'danger';
         $parent = $this->getParentInstance();
-        
-        if($parent->getData('duree_mois') > 0) {
-            if($parent->isLoaded()) {
+
+        if ($parent->getData('duree_mois') > 0) {
+            if ($parent->isLoaded()) {
                 $reste_periode = $parent->reste_periode();
                 $nombre_total_facture = $parent->getData('duree_mois') / $parent->getData('periodicity');
                 $nombre_fature_send = count(getElementElement('contrat', 'facture', $this->getData('id_contrat')));
@@ -349,35 +379,33 @@ class BContract_echeancier extends BimpObject {
                 $popover_periode = $reste_periode . ' ';
                 $popover_periode .= ($reste_periode > 1) ? 'périodes' : 'période';
                 $popover_periode .= ' encore à facturer';
-                
+
                 $affichage_nombre_facture_total = $nombre_total_facture;
-                
-                $popover = 'Facture émises ('.$nombre_fature_send.') / Nombre période ('.$nombre_total_facture.') ';
-                
-                
+
+                $popover = 'Facture émises (' . $nombre_fature_send . ') / Nombre période (' . $nombre_total_facture . ') ';
+
+
                 if (($nombre_fature_send > 0 && $nombre_fature_send < $nombre_total_facture) && (ceil($reste_periode) > 0 && $nombre_fature_send > 0)) {
                     $class = "warning";
-                    if($nombre_fature_send + $reste_periode != $nombre_total_facture) {
+                    if ($nombre_fature_send + $reste_periode != $nombre_total_facture) {
                         $review_view = true;
                     }
-                    
-                } elseif (($nombre_fature_send == $nombre_total_facture) || ($reste_periode < 1) ) {
+                } elseif (($nombre_fature_send == $nombre_total_facture) || ($reste_periode < 1)) {
                     $class = 'success';
                     $affichage_nombre_facture_total = $nombre_fature_send;
                     $popover = 'Facturation terminée';
                 }
-                
-                if(!$review_view)
-                    $returned_data = '<b class="' . $class . ' bs-popover" '.BimpRender::renderPopoverData($popover, 'top').' >' . '<i class="fas fa5-file-invoice-dollar iconLeft" ></i>' . $nombre_fature_send . ' / ' . $affichage_nombre_facture_total . '' . '</b>';
+
+                if (!$review_view)
+                    $returned_data = '<b class="' . $class . ' bs-popover" ' . BimpRender::renderPopoverData($popover, 'top') . ' >' . '<i class="fas fa5-file-invoice-dollar iconLeft" ></i>' . $nombre_fature_send . ' / ' . $affichage_nombre_facture_total . '' . '</b>';
                 else
-                    $returned_data = '<b class="' . $class . ' bs-popover" '.BimpRender::renderPopoverData('Factures émises (' . $nombre_fature_send . ') / Nombre de périodes (' . ($reste_periode + 1) . ') au lieu de ' . $nombre_total_facture . ' périodes théorique', 'top').' >' . '<i class="fas fa5-file-invoice-dollar iconLeft" ></i>' . $nombre_fature_send . ' / ' . ($reste_periode + 1) . '' . '</b>';
-                
-                if($reste_periode > 0 && $reste_periode <= $nombre_total_facture) {
+                    $returned_data = '<b class="' . $class . ' bs-popover" ' . BimpRender::renderPopoverData('Factures émises (' . $nombre_fature_send . ') / Nombre de périodes (' . ($reste_periode + 1) . ') au lieu de ' . $nombre_total_facture . ' périodes théorique', 'top') . ' >' . '<i class="fas fa5-file-invoice-dollar iconLeft" ></i>' . $nombre_fature_send . ' / ' . ($reste_periode + 1) . '' . '</b>';
+
+                if ($reste_periode > 0 && $reste_periode <= $nombre_total_facture) {
                     $class_periode = "warning";
-                    $returned_data .= ' <b class="' . $class_periode . ' bs-popover" '.BimpRender::renderPopoverData($popover_periode, 'top').' >' . '<i style="margin-left:30px" class="fas fa-hourglass-half iconLeft"></i>' . $reste_periode. '</b>';
+                    $returned_data .= ' <b class="' . $class_periode . ' bs-popover" ' . BimpRender::renderPopoverData($popover_periode, 'top') . ' >' . '<i style="margin-left:30px" class="fas fa-hourglass-half iconLeft"></i>' . $reste_periode . '</b>';
                 }
-                
-                } else {
+            } else {
                 $returned_data = "<b class='danger'>Ce contrat n'existe plus</b>";
             }
         } else {
@@ -385,51 +413,38 @@ class BContract_echeancier extends BimpObject {
         }
         return $returned_data;
     }
-    
+
     public function displayNextFactureDate() {
-        
+
         $next = $this->getData('next_facture_date');
         $parent = $this->getParentInstance();
-        if($next != 0 && $parent->getData('duree_mois') > 0) {
+        if ($next != 0 && $parent->getData('duree_mois') > 0) {
             $alert = "";
             $dateTime = new DateTime($next);
-            
+
             return '<b>' . $dateTime->format('d / m / Y') . '</b>';
-        } elseif($parent->getData('duree_mois') <= 0){
+        } elseif ($parent->getData('duree_mois') <= 0) {
             return '<b class="info" >Il n\'y à pas de facturation pour ce contrat</b>';
         }
-        
+
         return '<b class="important" >Echéancier totalement facturé</b>';
-        
-        
     }
-    
+
     public function displayRetard() {
         $parent = $this->getParentInstance();
-        $alert = "<b class='success bs-popover' ".BimpRender::renderPopoverData('Facturation à jour').">".BimpRender::renderIcon('check')."</b>";
+        $alert = "<b class='success bs-popover' " . BimpRender::renderPopoverData('Facturation à jour') . ">" . BimpRender::renderIcon('check') . "</b>";
         $next = $this->getData('next_facture_date');
         $dateTime = new DateTime($next);
         $toDay = new DateTime();
-        if($toDay->diff($dateTime)->invert == 1 && $next != 0) {
-            
+        if ($this->isEnRetard()) {
             $popover = BimpRender::renderPopoverData('Retard de facturation de ' . $toDay->diff($dateTime)->d . ' Jours', 'top');
-            
-            $alert = '<b class="danger bs-popover" '.$popover.' >'.BimpRender::renderIcon('warning').'</b>';
+            $alert = '<b class="danger bs-popover" ' . $popover . ' >' . BimpRender::renderIcon('warning') . '</b>';
         }
-        
-        if($parent->getData('duree_mois') > 0)
+
+        if ($parent->getData('duree_mois') > 0)
             return $alert;
         else
             return '';
-        
     }
 
-    public function cron_create_facture() {
-        // recuperer tous les echeancier passer
-
-        $echeanciers = $this->getList();
-        foreach ($echeanciers as $echeancier) {
-            $echeancier->create_facture(true);
-        }
-    }
 }

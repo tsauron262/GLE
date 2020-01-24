@@ -3915,6 +3915,8 @@ class Bimp_Facture extends BimpComm
 
     public static function sendInvoiceDraftWhithMail()
     {
+        global $conf;
+        $conf->entity = 1;
         $date = new DateTime();
         $nbDay = 5;
         $date->sub(new DateInterval('P' . $nbDay . 'D'));

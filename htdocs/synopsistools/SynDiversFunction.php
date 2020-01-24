@@ -657,12 +657,14 @@ function asPosition($str) {
 function mailSyn2($subject, $to, $from, $msg, $filename_list = array(), $mimetype_list = array(), $mimefilename_list = array(), $addr_cc = "", $addr_bcc = "", $deliveryreceipt = 0, $msgishtml = 1, $errors_to = '', $css = '') {
     global $dolibarr_main_url_root, $conf;
 
+            dol_syslog('lalalala1'.$mail,3);
     $subject = str_replace(array($dolibarr_main_url_root, $_SERVER['SERVER_NAME'].DOL_URL_ROOT), DOL_URL_ROOT, $subject);
     $msg = str_replace(array($dolibarr_main_url_root, $_SERVER['SERVER_NAME'].DOL_URL_ROOT), DOL_URL_ROOT, $msg);
 
     $subject = str_replace(DOL_URL_ROOT, $dolibarr_main_url_root, $subject);
     $msg = str_replace(DOL_URL_ROOT . "/", $dolibarr_main_url_root . "/", $msg);
 
+            dol_syslog('lalalala2'.$mail,3);
     $mailOk = true;
 
     if ($from == ''){
@@ -674,6 +676,7 @@ function mailSyn2($subject, $to, $from, $msg, $filename_list = array(), $mimetyp
         
         $from .= '>';
     }
+            dol_syslog('lalalala3'.$mail,3);
 
     $toReplay = "Tommy SAURON <tommy@drsi.fr>";
     $ccAdmin = "";
@@ -689,6 +692,7 @@ function mailSyn2($subject, $to, $from, $msg, $filename_list = array(), $mimetyp
         $to = $toReplay;
         $mailOk = false;
     }
+            dol_syslog('lalalala4'.$mail,3);
 //    if (!$headers) {
 //        $headers = 'MIME-Version: 1.0' . "\r\n";
 //        $headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
@@ -699,13 +703,18 @@ function mailSyn2($subject, $to, $from, $msg, $filename_list = array(), $mimetyp
     $msg = str_replace("\n", "<br/>", $msg);
     if (isset($to) && $to != '') {
 //        mail($to, $sujet, $msg, $headers);
-//        require_once DOL_DOCUMENT_ROOT . '/core/class/CMailFile.class.php';
-//        $mailfile = new CMailFile($subject, $to, $from, $msg, $filename_list, $mimetype_list, $mimefilename_list, $addr_cc, $addr_bcc, $deliveryreceipt, $msgishtml, $errors_to, $css);
-//        $return = $mailfile->sendfile();
+            dol_syslog('lalalala5'.$mail,3);
+        require_once DOL_DOCUMENT_ROOT . '/core/class/CMailFile.class.php';
+        $mailfile = new CMailFile($subject, $to, $from, $msg, $filename_list, $mimetype_list, $mimefilename_list, $addr_cc, $addr_bcc, $deliveryreceipt, $msgishtml, $errors_to, $css);
+        $return = $mailfile->sendfile();
+        
+            dol_syslog('lalalala6'.$mail,3);
         if (!$return || !$mailOk)
             $_SESSION['error']["Mail non envoyé"] = 1;
         else
             $_SESSION['error']["Mail envoyé"] = 0;
+        
+            dol_syslog('lalalala7'.$mail,3);
         return ($return && $mailOk);
     }
 }

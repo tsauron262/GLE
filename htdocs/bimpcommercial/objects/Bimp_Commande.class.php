@@ -144,17 +144,23 @@ class Bimp_Commande extends BimpComm
                     $errors[] = 'ID de la commande absent';
                     return 0;
                 }
+
+                $soc = $this->getChildObject('client');
+                if (!BimpObject::objectLoaded($soc)) {
+                    $errors[] = 'Client absent ou invalide';
+                } elseif ($this->getData('ef_type') != 'M') {
+                    $soc->canBuy($errors);
+                }
+
                 if ($status !== Commande::STATUS_DRAFT) {
                     $errors[] = $invalide_error;
-                    return 0;
                 } else {
                     $lines = $this->getChildrenObjects('lines');
                     if (!count($lines)) {
                         $errors[] = 'Aucune ligne enregistrée pour cette commande';
-                        return 0;
                     }
                 }
-                return 1;
+                return (count($errors) ? 0 : 1);
 
             case 'modify':
                 if (!$this->isLoaded()) {
@@ -248,6 +254,63 @@ class Bimp_Commande extends BimpComm
         return parent::isFieldEditable($field, $force_edit);
     }
 
+    public function isValidatable(&$errors = array())
+    {
+        if (parent::isValidatable($errors)) {
+            $client = $this->getChildObject('client');
+            if (!BimpObject::objectLoaded($client)) {
+                $errors[] = 'Client absent';
+            } elseif ($this->getData('ef_type') != 'M') {
+                $client->canBuy($errors);
+            }
+
+            if (!count($errors) && !BimpDebug::isActive('bimpcommercial/no_validate') && !defined('NOT_VERIF')) {
+                if ($this->getData('ef_type') !== 'M' && !(int) BimpCore::getConf('NOT_FORCE_CONTACT')) {
+                    // Vérif du contact facturation: 
+                    $tabConatact = $this->dol_object->getIdContact('external', 'BILLING2');
+                    if (count($tabConatact) < 1) {
+                        $errors[] = 'Contact destinataire email facture absent';
+                    } else {
+                        global $langs;
+                        foreach ($tabConatact as $contactId) {
+                            BimpTools::loadDolClass('contact');
+                            $contactObj = new Contact($this->db->db);
+                            $contactObj->fetch($contactId);
+                            if (stripos($contactObj->email, "@") < 1) {
+                                $errors[] = 'Le contact facturation "' . $contactObj->getFullName($langs) . '" n\'a pas d\'email';
+                            }
+                        }
+                    }
+
+                    // Vérif validité commande: 
+                    global $user;
+                    // todo: checker module activé. 
+                    include_once DOL_DOCUMENT_ROOT . '/bimpvalidateorder/class/bimpvalidateorder.class.php';
+                    $bvo = new BimpValidateOrder($this->db->db);
+                    if ($bvo->checkValidateRights($user, $this->dol_object) < 1) {
+                        $errors = array_merge($errors, BimpTools::getDolEventsMsgs(array('errors'), true));
+                        if (!count($errors)) {
+                            $errors[] = 'Cette commande ne peut pas être validée';
+                        }
+                    }
+                }
+            }
+        }
+
+        return (count($errors) ? 0 : 1);
+    }
+
+    public function isUnvalidatable(&$errors = array())
+    {
+        $this->isActionAllowed('modify', $errors);
+
+        if (!$this->canSetAction('modify')) {
+            $errors[] = 'Vous n\'avez pas la permission';
+        }
+
+        return parent::isUnvalidatable($errors);
+    }
+
     public function isLogistiqueActive()
     {
         if (in_array((int) $this->getData('fk_statut'), self::$logistique_active_status) && !in_array((int) $this->getData('logistique_status'), array(0, 6))) {
@@ -293,6 +356,14 @@ class Bimp_Commande extends BimpComm
         }
 
         return (count($errors) ? 0 : 1);
+    }
+
+    public function isDeletable($force_delete = false)
+    {
+        if ((int) $this->getData('fk_statut') > 0) {
+            return (int) $this->isUnvalidatable();
+        }
+        return (int) parent::isDeletable($force_delete);
     }
 
     // Getters: 
@@ -2405,7 +2476,7 @@ class Bimp_Commande extends BimpComm
                     if ($new_status == 3) {
                         $idComm = $this->getIdCommercial();
                         $mail = BimpTools::getMailOrSuperiorMail($idComm);
-                        
+
 
                         $infoClient = "";
                         $client = $this->getChildObject('client');
@@ -3000,6 +3071,76 @@ class Bimp_Commande extends BimpComm
     }
 
     // Overrides BimpComm:
+
+    public function onCreate(&$warnings = array())
+    {
+        // Attention: Alimenter $errors annulera la création. 
+        $errors = array();
+
+        if (!$this->isLoaded($warnings)) {
+            return $errors;
+        }
+
+        $items = BimpTools::getDolObjectLinkedObjectsListByTypes($this->dol_object, $this->db, array('propal'));
+
+        if (isset($items['propal'])) {
+            foreach ($items['propal'] as $id_propal) {
+                $propal = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', (int) $id_propal);
+                if (BimpObject::objectLoaded($propal)) {
+                    // Création de la ligne de l'intitulé de la propale d'origine si nécessaire: 
+                    if (BimpObject::objectLoaded($propal)) {
+                        $line = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureLine');
+                        $line->validateArray(array(
+                            'id_obj'             => (int) $this->id,
+                            'type'               => ObjectLine::LINE_TEXT,
+                            'linked_id_object'   => (int) $propal->id,
+                            'linked_object_name' => 'propal_origin_label',
+                        ));
+                        $line->qty = 1;
+                        $line->desc = 'Selon notre devis ' . $propal->getRef();
+                        $line->create($w, true);
+                    }
+                }
+            }
+        }
+
+        return $errors;
+    }
+
+    public function onValidate(&$warnings = array())
+    {
+        // Attention: Alimenter $errors annulera la validation. 
+        $errors = array();
+
+        $infoClient = "";
+        $client = $this->getChildObject('client');
+        if (BimpObject::objectLoaded($client)) {
+            $infoClient = " du client " . $client->dol_object->getNomUrl(1);
+        }
+
+        $contacts = $this->dol_object->liste_contact(-1, 'internal', 0, 'SALESREPFOLL');
+        foreach ($contacts as $contact) {
+            mailSyn2("Commande Validée", $contact['email'], "gle@bimp.fr", "Bonjour, votre commande " . $this->dol_object->getNomUrl(1) . $infoClient . " est validée.");
+        }
+
+        foreach ($this->dol_object->lines as $line) {
+            if (stripos($line->ref, "REMISECRT") !== false) {
+                $this->dol_object->array_options['options_crt'] = 2;
+                $this->dol_object->updateExtraField('crt');
+            }
+            if (stripos($line->desc, "Applecare") !== false) {
+                $this->dol_object->array_options['options_apple_care'] = 2;
+                $this->dol_object->updateExtraField('apple_care');
+            }
+        }
+
+        $res_errors = $this->createReservations();
+        if (count($res_errors)) {
+            $warnings[] = BimpTools::getMsgFromArray($res_errors, 'Des erreurs sont survenues lors de la création des réservations');
+        }
+
+        return $errors;
+    }
 
     public function checkObject($context = '', $field = '')
     {

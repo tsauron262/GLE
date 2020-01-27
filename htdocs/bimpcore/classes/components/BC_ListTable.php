@@ -1403,7 +1403,7 @@ class BC_ListTable extends BC_List
                     if ($row['cols'][$col_name]['col_style']) {
                         $html .= $row['cols'][$col_name]['col_style'];
                     }
-                    $html .= '"' . ($row['params']['single_cell'] ? ' colspan="' . count($this->cols) . '" class="fullrow"' : '') . '>';
+                    $html .= '"' . ($row['params']['single_cell'] ? ' colspan="' . count($this->cols) . '"' : '') . '>';
                     if ((int) $row['cols'][$col_name]['show']) {
                         $html .= (isset($row['cols'][$col_name]['content']) ? $row['cols'][$col_name]['content'] : '');
                     }

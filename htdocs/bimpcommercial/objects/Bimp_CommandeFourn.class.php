@@ -214,7 +214,7 @@ class Bimp_CommandeFourn extends BimpComm
         }
         return parent::isActionAllowed($action);
     }
-
+    
     public function isLogistiqueActive()
     {
         if (in_array((int) $this->getData('fk_statut'), self::$logistique_active_status)) {
@@ -1123,9 +1123,9 @@ class Bimp_CommandeFourn extends BimpComm
         }
     }
 
-    public function onValidate()
+    public function onValidate(&$warnings = array())
     {
-        if ($this->isLoaded()) {
+        if ($this->isLoaded($warnings)) {
             // Mise à jour des PA courant des produits: 
             $products = array();
 
@@ -1183,6 +1183,8 @@ class Bimp_CommandeFourn extends BimpComm
                 }
             }
         }
+        
+        return array();
     }
 
     // Actions:

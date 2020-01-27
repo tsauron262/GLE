@@ -115,6 +115,86 @@ class BimpComm extends BimpDolObject
         return parent::isFieldEditable($field, $force_edit);
     }
 
+    public function isValidatable(&$errors = array())
+    {
+        if (!$this->isLoaded($errors)) {
+            return 0;
+        }
+
+//        $errors[] = 'ICI';
+        // Vérif des lignes: 
+        $lines = $this->getLines('not_text');
+        if (!count($lines)) {
+            $errors[] = 'Aucune ligne ajoutée  ' . $this->getLabel('to') . ' (Hors text)';
+            return 0;
+        }
+
+        $this->areLinesValid($errors);
+        
+        if (!BimpCore::getConf("NOT_USE_ENTREPOT") && !(int) $this->getData('entrepot')) {
+            $errors[] = 'Aucun entrepôt associé';
+        }
+
+        if (!count($errors)) {
+            if (in_array($this->object_name, array('Bimp_Propal', 'Bimp_Commande', 'Bimp_Facture'))) {
+                global $user;
+                $client = $this->getChildObject('client');
+                if (!BimpObject::objectLoaded($client)) {
+                    $errors[] = 'Client absent';
+                } else {
+                    // Vérif de l'encours client: 
+                    $actuel = $client->dol_object->get_OutstandingBill();
+
+                    if ($this->object_name === 'Bimp_Facture') {
+                        $actuel -= $this->dol_object->total_ttc;
+                    }
+                    $max = $client->dol_object->outstanding_limit;
+                    $futur = $actuel + $this->dol_object->total_ttc;
+
+                    if ($max > 0 && $this->dol_object->total_ttc > 0 && $max < $futur) {
+                        $msg = "Montant encours client dépassé. Maximum : " . price($max) . " €. Actuel :" . price($actuel) . " €. Necessaire : " . price($futur) . " €.";
+                        $errors[] = $msg;
+                    }
+
+                    // Vérif commercial suivi: 
+                    $tabConatact = $this->dol_object->getIdContact('internal', 'SALESREPFOLL');
+                    if (count($tabConatact) < 1) {
+                        $tabComm = $client->dol_object->getSalesRepresentatives($user);
+                        if (count($tabComm) > 0) {
+                            $this->dol_object->add_contact($tabComm[0]['id'], 'SALESREPFOLL', 'internal');
+                        } elseif ((int) BimpCore::getConf('BIMPCOMM_user_as_default_commercial', 1)) {
+                            $this->dol_object->add_contact($user->id, 'SALESREPFOLL', 'internal');
+                        } else {
+                            $errors[] = 'Pas de Commercial Suivi';
+                        }
+                    }
+
+                    // Vérif contact signataire: 
+                    $tabConatact = $this->dol_object->getIdContact('internal', 'SALESREPSIGN');
+                    if (count($tabConatact) < 1) {
+                        $this->dol_object->add_contact($user->id, 'SALESREPSIGN', 'internal');
+                    }
+
+                    // Vérif conditions de réglement: 
+                    // Attention pas de conditions de reglement sur les factures acomptes
+                    if ($this->object_name !== 'Bimp_Facture') {
+                        $cond_reglement = $this->getData('fk_cond_reglement');
+                        if (in_array((int) $cond_reglement, array(0, 39)) || $cond_reglement == "VIDE") {
+                            $errors[] = 'Conditions de réglement absentes';
+                        }
+                    }
+                }
+            }
+        }
+
+        return (count($errors) ? 0 : 1);
+    }
+
+    public function isUnvalidatable(&$errors = array())
+    {
+        return (count($errors) ? 0 : 1);
+    }
+
     public function isActionAllowed($action, &$errors = array())
     {
         switch ($action) {
@@ -578,7 +658,7 @@ class BimpComm extends BimpDolObject
 
                 foreach ($values as $idx => $value) {
                     if ($value === 'current') {
-                        global $user; 
+                        global $user;
                         if (BimpObject::objectLoaded($user)) {
                             $ids[] = (int) $user->id;
                         }
@@ -2483,43 +2563,6 @@ class BimpComm extends BimpDolObject
         return $errors;
     }
 
-//    public function actionAddContrat($data, &$success) {
-//                
-//        $new_contrat = $this->getInstance('bimpcontract', 'BContract_contrat');
-//        $new_contrat->set('fk_soc', $data['fk_soc']);
-//        $new_contrat->set('date_start', $data['valid_start']);
-//        $new_contrat->set('objet_contrat', $data['objet_contrat']);
-//        $new_contrat->set('fk_commercial_signature', $data['commercial_signature']);
-//        $new_contrat->set('fk_commercial_suivi', $data['commercial_suivi']);
-//        $new_contrat->set('moderegl', $data['fk_mode_reglement']);
-//        $new_contrat->set('gti', $data['gti']);
-//        $new_contrat->set('duree_mois', $data["duree_mois"]);
-//        $new_contrat->set('periodicity', $data['periodicity']);
-//        $new_contrat->set('tacite', $data['re_new']);
-//        
-//        if($data['use_syntec']) {
-//            $new_contrat->set('syntec', BimpCore::getConf('current_indice_syntec'));
-//        }
-//        if($new_contrat->create()) {
-//            foreach($this->dol_object->lines as $line) {
-//                if($line->fk_product && $line->fk_product_type == 1) {
-//                    $produit = $this->getInstance('bimpcore', 'Bimp_Product', $line->fk_product);
-//                    $end = new DateTime($data['valid_start']);
-//                    $end->add(new DateInterval("P" . $data['duree_mois'] . "M"));
-//                    $new_contrat->dol_object->addline($line->product_desc, $line->subprice, $line->qty, $line->tva_tx,0,0, $line->fk_product, $line->remise_percent, $data['valid_start'], $end->format("Y-m-d"));
-//                }
-//            }
-//            addElementElement('commande', 'contrat', $this->id, $new_contrat->id);
-//        }
-//        
-//        return [
-//            "success_callback" => "window.location.href = \"".DOL_URL_ROOT."/bimpcontract/?fc=contrat&id=".$new_contrat->id."\"",
-//            "errors" => $errors,
-//            "warnings" => $warnings
-//        ];
-//        
-//    }
-//    
     public function createLinesFromOrigin($origin, $params = array())
     {
         $errors = array();
@@ -2843,24 +2886,6 @@ class BimpComm extends BimpDolObject
         }
 
         return $errors;
-    }
-
-    public function onChildSave($child)
-    {
-        if ($this->isLoaded()) {
-            if (is_a($child, 'objectLine')) {
-                $this->processRemisesGlobales();
-            }
-        }
-    }
-
-    public function onChildDelete($child)
-    {
-        if ($this->isLoaded()) {
-            if (is_a($child, 'objectLine')) {
-                $this->processRemisesGlobales();
-            }
-        }
     }
 
     public function checkEquipmentsAttribution(&$errors = array())
@@ -3189,8 +3214,9 @@ class BimpComm extends BimpDolObject
                                 $line->tva_tx = (float) $discount->tva_tx;
                                 $line->id_remise_except = (int) $discount->id;
                                 $line->remise = 0;
-                                
+
                                 if ($this->object_name === 'Bimp_Commande' && (int) $this->getData('fk_statut') !== 0) {
+                                    echo 'ici'; 
                                     $line->qty = 0;
                                     $line->set('qty_modif', 1);
                                 }
@@ -3262,6 +3288,46 @@ class BimpComm extends BimpDolObject
         }
 
         return $errors;
+    }
+
+    // post process: 
+
+    public function onCreate(&$warnings = array())
+    {
+        return array();
+    }
+
+    public function onDelete(&$warnings = array())
+    {
+        return array();
+    }
+
+    public function onValidate(&$warnings = array())
+    {
+        return array('LA');
+    }
+
+    public function onUnvalidate(&$warnings = array())
+    {
+        return array();
+    }
+
+    public function onChildSave($child)
+    {
+        if ($this->isLoaded()) {
+            if (is_a($child, 'objectLine')) {
+                $this->processRemisesGlobales();
+            }
+        }
+    }
+
+    public function onChildDelete($child)
+    {
+        if ($this->isLoaded()) {
+            if (is_a($child, 'objectLine')) {
+                $this->processRemisesGlobales();
+            }
+        }
     }
 
     // Actions:

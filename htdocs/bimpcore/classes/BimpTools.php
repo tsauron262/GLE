@@ -1830,7 +1830,7 @@ class BimpTools
                     $msg .= "\t" . '- ' . htmlentities($m);
                 }
             } else {
-                $msg .= "\t" . '- ' . $msgs;
+                $msg .= ($title ? "\t" . '- ' : '') . $msgs;
             }
         } else {
             if ($title) {
@@ -1844,7 +1844,7 @@ class BimpTools
                 }
                 $msg .= '</ul>';
             } else {
-                $msg .= '&nbsp;&nbsp;&nbsp;&nbsp;- ' . $msgs;
+                $msg .= ($title ? '&nbsp;&nbsp;&nbsp;&nbsp;- ' : '') . $msgs;
             }
         }
 
@@ -1890,19 +1890,19 @@ class BimpTools
 
         return $current_value;
     }
-    
+
     public static function overrideArray($array, $override)
     {
         if (!is_array($array)) {
             $array = array();
         }
-        
+
         if (is_array($override)) {
             foreach ($override as $key => $value) {
                 $array[$key] = $value;
             }
         }
-        
+
         return $array;
     }
 
@@ -2207,21 +2207,20 @@ class BimpTools
     public static function bloqueDebloque($type, $bloque = true)
     {
         $file = static::getFileBloqued($type);
-        if ($bloque){
-            $random = rand(0,10000000);
-            $text = "Yes".$random;
+        if ($bloque) {
+            $random = rand(0, 10000000);
+            $text = "Yes" . $random;
             file_put_contents($file, $text);
             sleep(0.400);
             $text2 = file_get_contents($file);
-            if($text == $text2)
+            if ($text == $text2)
                 return 1;
-            else{//conflit
-                mailSyn2("Conflit de ref évité", "dev@bimp.fr", "admin@bimp.fr", "Attention : Un conflit de ref de type ".$type." a été évité");
+            else {//conflit
+                mailSyn2("Conflit de ref évité", "dev@bimp.fr", "admin@bimp.fr", "Attention : Un conflit de ref de type " . $type . " a été évité");
                 self::sleppIfBloqued($type);
                 return static::bloqueDebloque($type, $bloque);
             }
-        }
-        elseif (is_file($file))
+        } elseif (is_file($file))
             return unlink($file);
     }
 
@@ -2257,19 +2256,19 @@ class BimpTools
         } else
             return 0;
     }
-    
-    
-    public static function getMailOrSuperiorMail($idComm){
+
+    public static function getMailOrSuperiorMail($idComm)
+    {
         $userT = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $idComm);
         $ok = true;
-        if($userT->getData("statut") < 1)
+        if ($userT->getData("statut") < 1)
             $ok = false;
-        if($ok && $userT->getData('email') != '')
+        if ($ok && $userT->getData('email') != '')
             return $userT->getData('email');
-        
-        if($userT->getData('fk_user') > 0)
+
+        if ($userT->getData('fk_user') > 0)
             return static::getMailOrSuperiorMail($userT->getData('fk_user'));
-        
+
         return "admin@bimp.fr";
     }
 }

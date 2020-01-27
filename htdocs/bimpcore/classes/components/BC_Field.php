@@ -79,6 +79,7 @@ class BC_Field extends BimpComponent
         $this->params_def['history'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['extra'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['has_total'] = array('data_type' => 'bool', 'default' => 0);
+        $this->params_def['no_dol_prop'] = array('data_type' => 'bool', 'default' => 0);
 
         $this->edit = $edit;
         $this->force_edit = $force_edit;

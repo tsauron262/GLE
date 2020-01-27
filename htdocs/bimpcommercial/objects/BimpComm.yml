@@ -167,7 +167,7 @@ fields:
             input: 
                 type: search_user
     date_valid:
-        type: date
+        type: datetime
         label: Date Validation
     total: 
         label: Total TTC

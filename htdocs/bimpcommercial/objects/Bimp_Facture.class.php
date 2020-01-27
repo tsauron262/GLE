@@ -2657,6 +2657,7 @@ class Bimp_Facture extends BimpComm
                     $prop->classifybilled($user);
                 }
             }
+
             $this->checkIsPaid();
         }
 

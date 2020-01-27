@@ -3916,10 +3916,12 @@ class BimpObject extends BimpCache
                     }
                     $this->dol_object->array_options['options_' . $extrafield] = $this->getDolValue($field, $value);
                 } else {
-                    $prop = $this->getConf('fields/' . $field . '/dol_prop', $field);
-                    if (is_null($prop)) {
-                        $errors[] = 'Erreur de configuration: propriété de l\'objet Dolibarr non définie pour le champ "' . $field . '"';
-                    } if (property_exists($this->dol_object, $prop)) {
+                    $prop = '';
+                    if (!(int) $this->getConf('fields/' . $field . '/no_dol_prop', 0)) {
+                        $prop = $this->getConf('fields/' . $field . '/dol_prop', $field);
+                    }
+
+                    if ($prop && property_exists($this->dol_object, $prop)) {
                         $this->dol_object->{$prop} = $this->getDolValue($field, $value);
                     } elseif ($this->field_exists($field) && !$this->isExtraField($field)) {
                         $bimpObjectFields[$field] = $value;
@@ -3939,8 +3941,9 @@ class BimpObject extends BimpCache
 
         $errors = array();
 
-        if (!isset($this->dol_object->id) && isset($this->dol_object->rowid))
+        if (!isset($this->dol_object->id) && isset($this->dol_object->rowid)) {
             $this->dol_object->id = $this->dol_object->rowid;
+        }
 
         $this->id = $this->dol_object->id;
 
@@ -3956,10 +3959,11 @@ class BimpObject extends BimpCache
                     $value = $this->dol_object->array_options['options_' . $extrafield];
                 }
             } else {
-                $prop = $this->getConf('fields/' . $field . '/dol_prop', $field);
-                if (is_null($prop)) {
-                    $errors[] = 'Erreur de configuration: propriété de l\'objet Dolibarr non définie pour le champ "' . $field . '"';
-                } elseif (property_exists($this->dol_object, $prop)) {
+                if (!(int) $this->getConf('fields/' . $field . '/no_dol_prop', 0)) {
+                    $prop = $this->getConf('fields/' . $field . '/dol_prop', $field);
+                }
+
+                if ($prop && property_exists($this->dol_object, $prop)) {
                     $value = $this->dol_object->{$prop};
                 } elseif ($this->field_exists($field) && !$this->isExtraField($field)) {
                     $bimpObjectFields[] = $field;

@@ -295,14 +295,14 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
     }
     
     
-    function fetchImeiPetit(){
+    function fetchImeiPetit($nbParUser = 10){
         global $db;
         
         $sql = $db->query("SELECT MAX(u.rowid) as idUser, gsx_acti_token FROM `llx_user` u, llx_user_extrafields ue WHERE u.rowid = ue.`fk_object` and gsx_acti_token != '' GROUP by `gsx_acti_token`");
         while($ln = $db->fetch_object($sql)) {
             $this->initGsx($ln->idUser);
 
-            $this->fetchEquipmentsImei(3);
+            $this->fetchEquipmentsImei($nbParUser);
         }
         
         

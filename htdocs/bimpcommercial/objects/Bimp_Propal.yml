@@ -273,7 +273,7 @@ forms:
             - custom: 1
               label: Renouvellement
               input_name: re_new
-              value: 12
+              value: 1
               input:
                   type: select
                   options:

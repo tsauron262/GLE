@@ -1057,7 +1057,7 @@ class BimpDocumentPDF extends BimpModelPDF
             if (!$this->hideReduc && $line->remise_percent) {
                 if (BimpObject::objectLoaded($bimpLine)) {
                     $remise_infos = $bimpLine->getRemiseTotalInfos();
-                    $this->total_remises += (float) $remise_infos['line_amount_ht'] + (float) $remise_infos['global_amount_ttc'] + $remise_infos['ext_global_amount_ttc'];
+                    $this->total_remises += (float) $remise_infos['line_amount_ht'] + (float) $remise_infos['global_amount_ht'] + $remise_infos['ext_global_amount_ht'];
                 } else {
                     $this->total_remises += ((float) $line->subprice * ((float) $line->remise_percent / 100)) * (float) $line->qty;
                 }

@@ -1481,7 +1481,7 @@ class Bimp_FactureFourn extends BimpComm
             $mail = $userCreate->email;
 //            if ($mail == '')
                 $mail = "tommy@bimp.fr";
-                echo $obj->getNomUrl();
+            require_once(DOL_DOCUMENT_ROOT."/synopsistools/SynDiversFunction.php");
             if (mailSyn2('Facture fournisseur brouillon à régulariser', $mail, 'admin@bimp.fr', 'Bonjour, vous avez laissé une facture fournisseur en l’état de brouillon depuis plus de ' . $nbDay . ' jour(s) : ' . $obj->getNomUrl() . ' <br/>Merci de bien vouloir la régulariser au plus vite.'))
                 $i++;
         }

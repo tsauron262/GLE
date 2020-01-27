@@ -667,7 +667,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 // Ligne 2
                 $pdf->SetFont('', 'B', 7);
                 $pdf->Cell($W * 2, 8, "Annule et remplace contrat :", 1, null, 'L', true);
-                $pdf->SetFont('', '', 7);
+                $pdf->SetFont('', '', 6);
                 $pdf->Cell($W * 1.5, 8, $contrat->ref_ext, 1, null, 'L', true);
                 $pdf->SetFont('', 'B', 7);
                 $pdf->Cell($W * 1.5, 8, "Durée :", 1, null, 'L', true);

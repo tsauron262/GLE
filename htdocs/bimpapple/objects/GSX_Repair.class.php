@@ -274,12 +274,13 @@ class GSX_Repair extends BimpObject
                     $serial = $sav->getSerial();
                     if ($serial == $kbb_number) {
                         $this->updateField('new_serial', $kgb_number);
+                        
+                        $equipment = $sav->getChildObject('equipment');
+                        if (BimpObject::objectLoaded($equipment)) {
+                            $equipment->updateField('serial', $kgb_number);
+                        }
                     }
 
-                    $equipment = $sav->getChildObject('equipment');
-                    if (BimpObject::objectLoaded($equipment)) {
-                        $equipment->updateField('serial', $kgb_number);
-                    }
                 }
 
                 $errors = $this->processRepairRequestOutcome($result, $warnings, array('REPAIR_TYPE'));

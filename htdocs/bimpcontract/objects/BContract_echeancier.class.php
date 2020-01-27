@@ -60,7 +60,7 @@ class BContract_echeancier extends BimpObject {
         $returnedArray = Array();
 
         for ($rp = 1; $rp <= $reste_periode; $rp++) {
-            $returnedArray[$dateTime_end_date->format('Y-m-d H:i:s')] = $dateTime_end_date->format('d / m / Y');
+            $returnedArray[$dateTime_end_date->format('Y-m-d H:i:s')] = $dateTime_end_date->format('d/m/Y');
             $start->add(new DateInterval("P" . $parent->getData('periodicity') . 'M'));
             $for_return_array_end_date = date('Y-m-d', mktime(0, 0, 0, $start->format('m') + 1, 0, $start->format('Y')));
             $dateTime_end_date = new DateTime($for_return_array_end_date);
@@ -155,7 +155,7 @@ class BContract_echeancier extends BimpObject {
             $dateEnd = new DateTime($data['date_end']);
 
 
-            if ($instance->dol_object->addline("Facturation pour la période du <b>" . $dateStart->format('d / m / Y') . "</b> au <b>" . $dateEnd->format('d / m / Y') . "</b><br /><br />" . $desc, (double) $data['total_ht'], 1, 20, 0, 0, 0, 0, $data['date_start'], $data['date_end'], 0, 0, '', 'HT', 0, 1) > 0) {
+            if ($instance->dol_object->addline("Facturation pour la période du <b>" . $dateStart->format('d/m/Y') . "</b> au <b>" . $dateEnd->format('d/m/Y') . "</b><br /><br />" . $desc, (double) $data['total_ht'], 1, 20, 0, 0, 0, 0, $data['date_start'], $data['date_end'], 0, 0, '', 'HT', 0, 1) > 0) {
                 $success = 'Facture créer avec succès';
                 addElementElement("contrat", "facture", $parent->id, $instance->id);
 
@@ -220,7 +220,7 @@ class BContract_echeancier extends BimpObject {
                 $dateFin = New DateTime();
                 $dateDebut->setTimestamp($facture->dol_object->lines[0]->date_start);
                 $dateFin->setTimestamp($facture->dol_object->lines[0]->date_end);
-                $html .= '<td style="text-align:center" >Du <b>' . $dateDebut->format("d / m / Y") . '</b> au <b>' . $dateFin->format('d / m / Y') . '</b></td>';
+                $html .= '<td style="text-align:center" >Du <b>' . $dateDebut->format("d/m/Y") . '</b> au <b>' . $dateFin->format('d/m/Y') . '</b></td>';
                 $html .= '<td style="text-align:center"><b>' . price($facture->getData('total')) . ' €</b> </td>'
                         . '<td style="text-align:center"><b>' . price($facture->getData('tva')) . ' € </b></td>'
                         . '<td style="text-align:center"><b>' . price($facture->getData('total_ttc')) . ' €</b> </td>'
@@ -422,9 +422,9 @@ class BContract_echeancier extends BimpObject {
             $alert = "";
             $dateTime = new DateTime($next);
 
-            return '<b>' . $dateTime->format('d / m / Y') . '</b>';
+            return '<b>' . $dateTime->format('d/m/Y') . '</b>';
         } elseif ($parent->getData('duree_mois') <= 0) {
-            return '<b class="info" >Il n\'y à pas de facturation pour ce contrat</b>';
+            return '<b class="info" >Ce contrat n’est pas facturé par un échéancier</b>';
         }
 
         return '<b class="important" >Echéancier totalement facturé</b>';

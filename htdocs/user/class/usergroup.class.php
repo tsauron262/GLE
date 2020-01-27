@@ -272,6 +272,8 @@ class UserGroup extends CommonObject
 		dol_syslog(get_class($this)."::addrights $rid, $allmodule, $allperms, $entity");
 		$error=0;
 		$whereforadd='';
+                
+                $this->oldcopy = clone($this);
 
 		$this->db->begin();
 

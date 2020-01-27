@@ -571,6 +571,7 @@ class BimpDocumentPDF extends BimpModelPDF
         }
 
         $remises_globales = array();
+        $remises_globalesHt = array();
         $bimpLines = array();
 
         if (BimpObject::objectLoaded($this->bimpCommObject) && is_a($this->bimpCommObject, 'BimpComm')) {
@@ -706,9 +707,11 @@ class BimpDocumentPDF extends BimpModelPDF
                             foreach ($remises_infos['remises_globales'] as $id_rg => $rg_data) {
                                 if (!isset($remises_globales[(int) $id_rg])) {
                                     $remises_globales[(int) $id_rg] = 0;
+                                    $remises_globalesHt[(int) $id_rg] = 0;
                                 }
 
                                 $remises_globales[(int) $id_rg] += (float) $rg_data['amount_ttc'];
+                                $remises_globalesHt[(int) $id_rg] += (float) $rg_data['amount_ht'];
                             }
                         }
                     } else {
@@ -835,8 +838,8 @@ class BimpDocumentPDF extends BimpModelPDF
                 );
                 if (!$this->hideTtc)
                     $row['total_ttc'] = BimpTools::displayMoneyValue(-$rg_amount_ttc, '');
-                else
-                    $row['total_ht'] = BimpTools::displayMoneyValue(-$rg_amount_ttc, '');
+                if(isset($remises_globalesHt[$id_rg]))
+                    $row['total_ht'] = BimpTools::displayMoneyValue(-$remises_globalesHt[$id_rg], '');
 //                if (!$this->hideReduc)
 //                    $row['pu_remise'] = BimpTools::displayMoneyValue(-$rg_amount_ttc, '');
 
@@ -1057,7 +1060,7 @@ class BimpDocumentPDF extends BimpModelPDF
             if (!$this->hideReduc && $line->remise_percent) {
                 if (BimpObject::objectLoaded($bimpLine)) {
                     $remise_infos = $bimpLine->getRemiseTotalInfos();
-                    $this->total_remises += (float) $remise_infos['line_amount_ht'] + (float) $remise_infos['global_amount_ttc'] + $remise_infos['ext_global_amount_ttc'];
+                    $this->total_remises += (float) $remise_infos['line_amount_ht'] + (float) $remise_infos['global_amount_ht'] + $remise_infos['ext_global_amount_ht'];
                 } else {
                     $this->total_remises += ((float) $line->subprice * ((float) $line->remise_percent / 100)) * (float) $line->qty;
                 }

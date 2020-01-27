@@ -42,15 +42,17 @@ class test_sav
         $this->initGsx();
     }
     
-    function initGsx(){
+    function initGsx($idUser = 0){
         $error = array();
         $this->repair = new GSX_Repair('bimpapple', 'GSX_Repair');
-        if(!$this->repair->initGsx($error)){
+        if($idUser > 0 || !$this->repair->initGsx($error)){
+            if($idUser == 0)
+                $idUser = 242;
             global $user, $db, $conf;
             $conf->entity = 1;
             $user = new User($db);
-            $user->fetch(242);
-            $user->fetch_optionals(242);
+            $user->fetch($idUser);
+            $user->fetch_optionals($idUser);
             if(!$this->repair->initGsx($error, true)){
                 $this->output .= " Non authentifié sur GSX ! ";
             }
@@ -294,10 +296,15 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
     
     
     function fetchImeiPetit(){
+        global $db;
         
-        $this->initGsx();
+        $sql = $db->query("SELECT MAX(u.rowid) as idUser, gsx_acti_token FROM `llx_user` u, llx_user_extrafields ue WHERE u.rowid = ue.`fk_object` and gsx_acti_token != '' GROUP by `gsx_acti_token`");
+        while($ln = $db->fetch_object($sql)) {
+            $this->initGsx($ln->idUser);
+
+            $this->fetchEquipmentsImei(3);
+        }
         
-        $this->fetchEquipmentsImei(30);
         
         
         $this->output .= ' ' . $this->nbImei . ' n° IMEI corrigé(s).';

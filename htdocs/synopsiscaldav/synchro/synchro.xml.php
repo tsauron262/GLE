@@ -26,7 +26,10 @@ while ($ligne = $db->fetch_object($result))
             $tabUser[] = array($ligne->login, $ligne->email);
 
 foreach($tabUser as $user){
-    $filter = "VEVENT [20180101T000000Z;20250315T000000Z] : STATUS!=CANCELLED";
+//    $filter = "VEVENT [20180101T000000Z;20250315T000000Z] : STATUS!=CANCELLED";
+    
+    
+    $filter = "VEVENT [20190101T000000Z;20250315T000000Z] : STATUS!=CANCELLED";
     if(isset($user[1]) && $user[0] != "" && $user[1] != "")
         $tabU[] = array("ID" => array("Left" => 
                                 array("Host" => "erp.bimp.fr",

@@ -1294,7 +1294,7 @@ class Equipment extends BimpObject
 
     public function moveToPlace($type, $id, $code_mvt, $stock_label, $force = 0, $date = null)
     {
-        if ($force == 1 and $this->getData('id_package')) {
+        if ($force == 1 and 0 < (int) $this->getData('id_package')) {
             $this->updateField('id_package', 0);
             $this->addNote('Sortie du package pour déplacement automatique');
             $stock_label .= ' Sortie du package pour déplacement automatique';

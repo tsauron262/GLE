@@ -129,7 +129,6 @@ class BimpComm extends BimpDolObject
             return 0;
         }
 
-        $this->areLinesValid($errors);
         
         if (!BimpCore::getConf("NOT_USE_ENTREPOT") && !(int) $this->getData('entrepot')) {
             $errors[] = 'Aucun entrepôt associé';

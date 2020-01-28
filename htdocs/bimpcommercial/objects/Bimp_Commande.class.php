@@ -257,6 +257,9 @@ class Bimp_Commande extends BimpComm
     public function isValidatable(&$errors = array())
     {
         if (parent::isValidatable($errors)) {
+            $this->areLinesValid($errors);
+            
+            
             $client = $this->getChildObject('client');
             if (!BimpObject::objectLoaded($client)) {
                 $errors[] = 'Client absent';

@@ -49,6 +49,7 @@ class BC_CustomFilter extends BC_Filter
         $label = '';
 
         switch ($this->params['type']) {
+            case 'user': 
             case 'value':
                 $input_type = $this->object->getConf($this->config_path . '/input/type', '');
                 if ($input_type === 'select') {
@@ -140,6 +141,7 @@ class BC_CustomFilter extends BC_Filter
         $errors = array();
 
         $values = self::getConvertedValues($this->params['type'], $this->values);
+        
         $this->object->getCustomFilterSqlFilters($this->field_name, $values, $filters, $joins, $errors);
 
         $current_bc = $prev_bc;

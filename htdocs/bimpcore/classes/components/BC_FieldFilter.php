@@ -230,13 +230,9 @@ class BC_FieldFilter extends BC_Filter
             $current_bc = $prev_bc;
             return $errors;
         }
-
-//        echo $this->field->name . '<pre>';
-//        print_r($this->values);
-//        echo '</pre>' . $this->params['type'] . '<br/>';
-
+        
         $values = self::getConvertedValues($this->params['type'], $this->values);
-
+        
         switch ($this->params['type']) {
             case 'value':
             case 'user':

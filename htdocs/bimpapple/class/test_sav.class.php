@@ -318,6 +318,9 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
 
         $gsx = GSX_v2::getInstance();
         $bdb = BimpCache::getBdb();
+        
+        if($nb < 1)
+            $nb = 1;
 
         if ($gsx->logged) {
             $equipment = BimpObject::getInstance('bimpequipment', 'Equipment');

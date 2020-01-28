@@ -1228,7 +1228,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
 
                                     if ($code_config) {
                                         foreach ($serials as $serial) {
-                                            $isImei = (preg_match("/[0-9]/", $serial)) ? true : false;
+                                            $isImei = (!preg_match("/[a-zA-Z]/", $serial))? true : false;
                                             if (!$isImei && !preg_match('/^.+' . preg_quote($code_config) . '$/', $serial)) {
                                                 $code_config_errors[] = $serial;
                                             }

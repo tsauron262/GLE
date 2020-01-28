@@ -460,7 +460,7 @@ class BL_CommandeFournReception extends BimpObject
         $html .= '<td style="width: 220px" class="serial" data-serial="' . $serial . '">';
         $html .= $serial;
 
-        $isImei = (preg_match("/[0-9]/", $serial)) ? true : false;
+        $isImei = (!preg_match("/[a-zA-Z]/", $serial)) ? true : false;
 
 
         if (!$isImei && $code_config && !preg_match('/^.+' . preg_quote($code_config) . '$/', $serial)) {
@@ -653,7 +653,7 @@ class BL_CommandeFournReception extends BimpObject
                             $nSerialsKo = 0;
                             if ($code_config) {
                                 foreach ($reception_data['serials'] as $serial_data) {
-                                    if (isset($serial_data['serial']) && (string) $serial_data['serial'] && !preg_match("/[0-9]/", $serial_data['serial']) && !preg_match('/^.+' . preg_quote($code_config) . '$/', $serial_data['serial'])) {
+                                    if (isset($serial_data['serial']) && (string) $serial_data['serial'] && preg_match("/[a-zA-Z]/", $serial_data['serial']) && !preg_match('/^.+' . preg_quote($code_config) . '$/', $serial_data['serial'])) {
                                         $nSerialsKo++;
                                     }
                                 }

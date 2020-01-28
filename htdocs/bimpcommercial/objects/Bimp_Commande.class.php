@@ -149,7 +149,7 @@ class Bimp_Commande extends BimpComm
                 if (!BimpObject::objectLoaded($soc)) {
                     $errors[] = 'Client absent ou invalide';
                 } elseif ($this->getData('ef_type') != 'M') {
-//                    $soc->canBuy($errors);
+                    $soc->canBuy($errors);
                 }
 
                 if ($status !== Commande::STATUS_DRAFT) {

@@ -12,7 +12,8 @@ class ListConfig extends BimpObject
 
     public function canEditGroupConfigs()
     {
-        return 1;
+        global $user;
+        return (int) $user->admin;
     }
     
     public function canEdit()

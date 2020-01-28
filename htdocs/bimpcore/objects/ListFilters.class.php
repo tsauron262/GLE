@@ -12,7 +12,8 @@ class ListFilters extends BimpObject
 
     public function canEditGroupFilters()
     {
-        return 1;
+        global $user;
+        return (int) $user->admin;
     }
     
     public function canEdit()

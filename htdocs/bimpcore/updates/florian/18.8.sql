@@ -19,5 +19,3 @@ CREATE TABLE IF NOT EXISTS `llx_bimpcore_list_current_config` (
 
 ALTER TABLE `llx_bimpcore_list_current_config`
   ADD UNIQUE KEY `user_list_config` (`id_user`,`obj_module`,`obj_name`,`list_type`,`list_name`,`id_config`);
-
--- TO DO: DELETE filters list_type / list_name

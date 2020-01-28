@@ -1510,8 +1510,8 @@ class BS_SAV extends BimpObject
             case self::BS_SAV_ATT_CLIENT:
                 if (is_null($propal)) {
                     $errors[] = $error_msg . ' (Proposition commerciale absente)';
-                } elseif ($propal_status !== 0) {
-                    $errors[] = $error_msg . ' (statut de la proposition commerciale invalide)';
+//                } elseif ($propal_status !== 0) {
+//                    $errors[] = $error_msg . ' (statut de la proposition commerciale invalide)';
                 } elseif (!(string) $this->getData('diagnostic')) {
                     $errors[] = $error_msg . '. Le champ "Diagnostic" doit être complété';
                 } elseif (in_array($current_status, array(self::BS_SAV_DEVIS_ACCEPTE, self::BS_SAV_FERME))) {

@@ -31,7 +31,7 @@ $returnData = str_replace(" < ", " ", $returnData);
 $returnData = str_replace(" > ", " ", $returnData);
 
 $result = simplexml_load_string($returnData);
-//print_r($result);echo('fin');
+//echo "<pre>"; print_r($result);echo('fin');
 
 
 if(stripos($result->header->reportinformation->reporttype, "Error") !== false){
@@ -62,22 +62,28 @@ function getJsonReduit($result){
     
     $adress = "".$summary->postaladdress->address." ".$summary->postaladresse->additiontoaddress;
     
+    $note = "";
+    $limit = 0;
     foreach(array("", "2013") as $annee){
-        if($note != "")
-            $note .= "\n";
+//        if($note != "")
+//            $note .= "\n";
         $champ = "rating".$annee;
         if($summary->$champ > 0){
-            if($annee != "")
-                if($note != "")
-                    $note .= "[Note de ".$annee."]";
-                else
-                    $note .= "[Attention note de ".$annee."]";
+            $note = dol_print_date(dol_now()) .($annee == ''? '' : '(Methode '.$annee.')')." : ".$summary->$champ ."/100";
+//            if($annee != "")
+//                if($note != "")
+//                    $note .= "[Note de ".$annee."]";
+//                else
+//                    $note .= "[Attention note de ".$annee."]";
             foreach(array("", "desc1", "desc2") as $champ2){
                 $champT = $champ.$champ2;
                 if(isset($summary->$champT))
-                    $note .= " ". $summary->$champT;
+                    $note .= " ". str_replace($summary->$champ, "", $summary->$champT);
             }
         }
+        $champ2 = "creditlimit".$annee;
+        if(isset($summary->$champ2))
+            $limit = $summary->$champ2;
     }
     
     $tabCodeP = explode(" ", $summary->postaladdress->distributionline);
@@ -114,7 +120,7 @@ function getJsonReduit($result){
         "CodeP" => "".$codeP,
         "Ville" => "".$ville,
         "Siret" => "".$siret,
-        "limit" => "".price(intval($summary->creditlimit)),
+        "limit" => "".price(intval($limit)),
         "tradename" => "".$summary->tradename,
         "info" => ""."",
         "Capital" => "".str_replace(" Euros", "", $summary->sharecapital));

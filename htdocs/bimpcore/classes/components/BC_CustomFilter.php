@@ -49,6 +49,12 @@ class BC_CustomFilter extends BC_Filter
         $label = '';
 
         switch ($this->params['type']) {
+            case 'user':
+                if ($value === 'current') {
+                    $label = 'Utilisateur connecté';
+                    break;
+                }
+
             case 'value':
                 $input_type = $this->object->getConf($this->config_path . '/input/type', '');
                 if ($input_type === 'select') {
@@ -114,8 +120,8 @@ class BC_CustomFilter extends BC_Filter
                     $label = 'Utilisateur connecté';
                 }
                 break;
-                
-            default: 
+
+            default:
                 $label = parent::getFilterValueLabel($value);
                 break;
         }
@@ -140,6 +146,7 @@ class BC_CustomFilter extends BC_Filter
         $errors = array();
 
         $values = self::getConvertedValues($this->params['type'], $this->values);
+
         $this->object->getCustomFilterSqlFilters($this->field_name, $values, $filters, $joins, $errors);
 
         $current_bc = $prev_bc;

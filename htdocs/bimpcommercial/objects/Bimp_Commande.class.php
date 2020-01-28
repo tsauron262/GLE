@@ -258,8 +258,8 @@ class Bimp_Commande extends BimpComm
     {
         if (parent::isValidatable($errors)) {
             $this->areLinesValid($errors);
-            
-            
+
+
             $client = $this->getChildObject('client');
             if (!BimpObject::objectLoaded($client)) {
                 $errors[] = 'Client absent';
@@ -436,22 +436,28 @@ class Bimp_Commande extends BimpComm
             }
 
 //            // Valider
-            if ($this->isActionAllowed('validate')) {
-                if ($this->canSetAction('validate')) {
-                    $buttons[] = array(
-                        'label'   => 'Valider',
-                        'icon'    => 'fas_check',
-                        'onclick' => $this->getJsActionOnclick('validate', array(), array(
-                            'confirm_msg' => 'Veuillez confirmer la validation de cette commande'
-                        ))
-                    );
-                } else {
+            if ($status === 0) {
+                $errors = array();
+                if ($this->isActionAllowed('validate', $errors)) {
+                    if ($this->canSetAction('validate')) {
+                        $buttons[] = array(
+                            'label'   => 'Valider',
+                            'icon'    => 'fas_check',
+                            'onclick' => $this->getJsActionOnclick('validate', array(), array(
+                                'confirm_msg' => 'Veuillez confirmer la validation de cette commande'
+                            ))
+                        );
+                    } else {
+                        $errors = 'Vous n\'avez pas la permission';
+                    }
+                }
+                if (count($errors)) {
                     $buttons[] = array(
                         'label'    => 'Valider',
                         'icon'     => 'fas_check',
                         'onclick'  => '',
                         'disabled' => 1,
-                        'popover'  => 'Vous n\'avez pas la permission'
+                        'popover'  => BimpTools::getMsgFromArray($errors)
                     );
                 }
             }

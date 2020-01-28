@@ -323,6 +323,7 @@ function getAllListFieldsFilters($filters, with_open_value) {
 
             if (parseInt($container.data('new_value_set'))) {
                 switch ($container.data('type')) {
+                    case 'user': 
                     case 'value':
                     case 'value_part':
                         filter.values.push($container.find('[name="add_' + field_name + '_filter"]').val());

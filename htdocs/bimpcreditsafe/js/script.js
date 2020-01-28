@@ -30,7 +30,7 @@ function InfoSoc(elem,elem2) {
         $("#name_alias_input").val(result.tradename);
         $("#idprof3").val(result.Naf);
         if($("#options_notecreditsafe").length > 0)
-            $("#options_notecreditsafe").val("Limite : "+result.limit+" €\nNote : " + result.Note+"\n" + result.info);
+            $("#options_notecreditsafe").val("Limite : "+result.limit+" €\n" + result.Note+"\n" + result.info);
         else
             $("#name_alias_input").val("Note : " + result.Note); 
         if(result.Siret != this.elem.val() && result.Siret != this.elem2.val())

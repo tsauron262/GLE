@@ -3304,7 +3304,7 @@ class BimpComm extends BimpDolObject
 
     public function onValidate(&$warnings = array())
     {
-        return array('LA');
+        return array();
     }
 
     public function onUnvalidate(&$warnings = array())

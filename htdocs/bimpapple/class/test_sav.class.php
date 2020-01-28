@@ -349,6 +349,12 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                     if (!$imei) {
                         $imei = 'n/a';
                     }
+                    if (!$imei2) {
+                        $imei2 = 'n/a';
+                    }
+                    if (!$meid) {
+                        $meid = 'n/a';
+                    }
 
                     $data = array(
                         'imei' => $imei,

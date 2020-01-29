@@ -124,7 +124,7 @@ class BimpComm extends BimpDolObject
 //        $errors[] = 'ICI';
         // Vérif des lignes: 
         $lines = $this->getLines('not_text');
-        if (!count($lines)) {
+        if (!count($lines) && !is_a($this, 'BS_SavPropal')) {
             $errors[] = 'Aucune ligne ajoutée  ' . $this->getLabel('to') . ' (Hors text)';
             return 0;
         }

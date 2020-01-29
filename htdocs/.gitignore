@@ -19,7 +19,8 @@
 /cabinetmed*
 /webmail*
 /conf/conf.php
-/subtotal/
-/TODO_romain.txt
-/.gitignore
-/htdocs/theme/eldy/style.css.php
+/subtotal*
+/abricot*
+/nomenclature*
+/of/
+/workstation/

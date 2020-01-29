@@ -72,6 +72,7 @@ function printBookmarksList($aDb, $aLangs)
 
 		$ret.= '<!-- form with POST method by default, will be replaced with GET for external link by js -->'."\n";
 		$ret.= '<form id="actionbookmark" name="actionbookmark" method="POST" action="">';
+        $ret.= '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
 		$ret.= '<select name="bookmark" id="boxbookmark" class="flat boxcombo vmenusearchselectcombo" alt="Bookmarks">';
 		$ret.= '<option hidden value="listbookmarks" class="optiongrey" selected rel="'.DOL_URL_ROOT.'/bookmarks/list.php">'.$langs->trans('Bookmarks').'</option>';
 	    $ret.= '<option value="listbookmark" class="optionblue" rel="'.dol_escape_htmltag(DOL_URL_ROOT.'/bookmarks/list.php').'" ';
@@ -116,7 +117,7 @@ function printBookmarksList($aDb, $aLangs)
 
 		$ret.=ajax_combobox('boxbookmark');
 
-		$ret.='<script type="text/javascript">
+		$ret.='<script>
 	        	$(document).ready(function () {';
 		$ret.='    jQuery("#boxbookmark").change(function() {
 		            var urlselected = jQuery("#boxbookmark option:selected").attr("rel");
@@ -150,4 +151,3 @@ function printBookmarksList($aDb, $aLangs)
 
 	return $ret;
 }
-

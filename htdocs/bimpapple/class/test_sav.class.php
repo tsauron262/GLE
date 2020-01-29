@@ -149,7 +149,7 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                                 echo $messErreur;
                                 $mailTech .= ",tommy@bimp.fr";
                                 if (isset($_GET['envoieMail'])) {
-//                                    mailSyn2("Sav non fermé dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $messErreur);
+                                    mailSyn2("Sav non fermé dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $messErreur);
                                     $this->nbMail++;
                                 }
                             }
@@ -165,7 +165,7 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
 
                                 $mailTech .= ", tommy@bimp.fr";
                                 if (isset($_GET['envoieMail'])) {
-//                                    mailSyn2("Sav non RFPU dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $messErreur);
+                                    mailSyn2("Sav non RFPU dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $messErreur);
                                     $this->nbMail++;
                                 }
                             }
@@ -239,7 +239,7 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                             }
                             $mailTech .= ', tommy@bimp.fr';
                             if (isset($_GET['envoieMail'])) {
-//                                mailSyn2("Sav non RFPU dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $messErreur);
+                                mailSyn2("Sav non RFPU dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $messErreur);
                                 $this->nbMail++;
                             }
                         }

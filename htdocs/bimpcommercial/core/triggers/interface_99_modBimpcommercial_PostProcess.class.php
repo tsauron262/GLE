@@ -51,7 +51,8 @@ class InterfacePostProcess extends BimpCommTriggers
             if (BimpObject::objectLoaded($bimp_object)) {
                 $errors = $bimp_object->onDelete();
                 if (count($errors)) {
-                    setEventMessages(BimpTools::getMsgFromArray($errors), null, 'errors');
+                    $this->errors= $errors;
+//                    setEventMessages(BimpTools::getMsgFromArray($errors), null, 'errors');
                     return -1;
                 }
             }

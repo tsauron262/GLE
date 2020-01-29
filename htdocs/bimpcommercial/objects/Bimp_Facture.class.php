@@ -3165,8 +3165,10 @@ class Bimp_Facture extends BimpComm
 
             $id_entrepot = (int) $this->getData('entrepot');
 
-            // Check parameters
-            // Check for mandatory prof id (but only if country is than than ours)
+            if (!$id_entrepot) {
+                $errors[] = 'Entrepôt absent';
+            }
+
             if ($mysoc->country_id > 0 && $this->dol_object->thirdparty->country_id == $mysoc->country_id) {
                 for ($i = 1; $i <= 6; $i++) {
                     $idprof_mandatory = 'SOCIETE_IDPROF' . ($i) . '_INVOICE_MANDATORY';
@@ -3177,31 +3179,10 @@ class Bimp_Facture extends BimpComm
                 }
             }
 
-            $qualified_for_stock_change = 0;
-            if (empty($conf->global->STOCK_SUPPORTS_SERVICES)) {
-                $qualified_for_stock_change = $this->dol_object->hasProductsOrServices(2);
-            } else {
-                $qualified_for_stock_change = $this->dol_object->hasProductsOrServices(1);
-            }
-
-            // Check for warehouse
-            // todo: checker si les stocks doivent être corrigés ou non selon le type de la facture.
-            if ((int) $this->getData('type') != Facture::TYPE_DEPOSIT && !empty($conf->global->STOCK_CALCULATE_ON_BILL) && $qualified_for_stock_change) {
-                if (!$id_entrepot) {
-                    $errors[] = $langs->trans('ErrorFieldRequired', $langs->transnoentitiesnoconv("Warehouse"));
-                }
-            }
-
-            if (!count($errors)) {
-                $today = date('Y-m-d');
-                if (!$this->canFactureAutreDate() && $this->getData('datef') != $today) {
-                    $warnings[] = "Attention la date a été modifiée à la date du jour.";
-                    $errors = $this->updateField('datef', $today);
-                }
-            }
-
             if (!count($errors)) {
                 $result = $this->dol_object->validate($user, '', $id_entrepot);
+                $fac_warnings = BimpTools::getDolEventsMsgs(array('warnings'));
+
                 if ($result >= 0) {
                     // Define output language
                     if (empty($conf->global->MAIN_DISABLE_PDF_AUTOUPDATE)) {
@@ -3220,9 +3201,24 @@ class Bimp_Facture extends BimpComm
                         if ($result <= 0) {
                             $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Des erreurs sont survenues lors de la génération du document PDF');
                         }
+
+                        $today = date('Y-m-d');
+                        if (!$this->canFactureAutreDate() && $this->getData('datef') != $today) {
+                            $warnings[] = "Attention la date a été modifiée à la date du jour.";
+                            $errors = $this->updateField('datef', $today);
+                        }
                     }
                 } else {
-                    $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de la validation');
+                    $fac_errors = BimpTools::getDolEventsMsgs(array('errors'));
+
+                    if (!count($fac_errors)) {
+                        $fac_errors[] = BimpTools::ucfirst($this->getLabel('the')) . ' ne peut pas être validé' . $this->e();
+                    }
+                    $errors[] = BimpTools::getMsgFromArray($fac_errors);
+                }
+
+                if (count($fac_warnings)) {
+                    $warnings[] = BimpTools::getMsgFromArray($fac_warnings);
                 }
             }
         }

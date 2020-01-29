@@ -9,41 +9,46 @@ class InterfacePostProcess extends BimpCommTriggers
     {
         global $conf;
         $errors = array();
+        $warnings = array();
 
         $object_name = '';
         $action_name = '';
 
-        $bimpObject = $this->getBimpCommObject($action, $object, $object_name, $action_name);
+        $bimpObject = $this->getBimpCommObject($action, $object, $object_name, $action_name, $warnings);
 
         if (BimpObject::objectLoaded($bimpObject)) {
-            $warnings = array();
-            
-            switch ($action_name) {
-                case 'CREATE':
-                    $errors = $bimpObject->onCreate($warnings);
-                    break;
+            $obj_errors = BimpTools::getErrorsFromDolObject($object);
+            if (empty($obj_errors)) {
+                switch ($action_name) {
+                    case 'CREATE':
+                        $errors = $bimpObject->onCreate($warnings);
+                        break;
 
-                case 'VALIDATE':
-                    $errors = $bimpObject->onValidate($warnings);
-                    break;
+                    case 'VALIDATE':
+                        $errors = $bimpObject->onValidate($warnings);
+                        break;
 
-                case 'UNVALIDATE':
-                    $errors = $bimpObject->onUnvalidate($warnings);
-                    break;
+                    case 'UNVALIDATE':
+                        $errors = $bimpObject->onUnvalidate($warnings);
+                        break;
 
-                case 'DELETE':
-                    $errors = $bimpObject->onDelete($warnings);
-                    break;
+                    case 'DELETE':
+                        $errors = $bimpObject->onDelete($warnings);
+                        break;
+                }
+
+                if (count($warnings)) {
+                    setEventMessages(BimpTools::getMsgFromArray($warnings), null, 'warnings');
+                }
+
+                if (count($errors)) {
+                    setEventMessages(BimpTools::getMsgFromArray($errors), null, 'errors');
+                    return -1;
+                }
             }
-
-            if (count($warnings)) {
-                setEventMessages(BimpTools::getMsgFromArray($warnings), null, 'warnings');
-            }
-            
-            if (count($errors)) {
-                setEventMessages(BimpTools::getMsgFromArray($errors), null, 'errors');
-                return -1;
-            }
+        } elseif (count($warnings)) {
+            setEventMessages(BimpTools::getMsgFromArray($warnings), null, 'warnings');
+            return 0;
         }
 
         if ($action == 'PAYMENT_CUSTOMER_DELETE') {

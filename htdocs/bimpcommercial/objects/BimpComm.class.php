@@ -121,7 +121,6 @@ class BimpComm extends BimpDolObject
             return 0;
         }
 
-//        $errors[] = 'ICI';
         // Vérif des lignes: 
         $lines = $this->getLines('not_text');
         if (!count($lines)) {
@@ -129,7 +128,6 @@ class BimpComm extends BimpDolObject
             return 0;
         }
 
-        
         if (!BimpCore::getConf("NOT_USE_ENTREPOT") && !(int) $this->getData('entrepot')) {
             $errors[] = 'Aucun entrepôt associé';
         }
@@ -3215,7 +3213,7 @@ class BimpComm extends BimpDolObject
                                 $line->remise = 0;
 
                                 if ($this->object_name === 'Bimp_Commande' && (int) $this->getData('fk_statut') !== 0) {
-                                    echo 'ici'; 
+                                    echo 'ici';
                                     $line->qty = 0;
                                     $line->set('qty_modif', 1);
                                 }
@@ -3335,6 +3333,8 @@ class BimpComm extends BimpDolObject
     {
         $errors = array();
         $warnings = array();
+        $infos = array();
+
         $success = BimpTools::ucfirst($this->getLabel('')) . ' validé';
 
         if ($this->isLabelFemale()) {
@@ -3354,7 +3354,23 @@ class BimpComm extends BimpDolObject
                 $this->dol_object->generateDocument($this->getModelPdf(), $langs);
             }
         } else {
-            $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object, null, null, $warnings), 'Des erreurs sont survenues lors de la validation ' . $this->getLabel('of_the'));
+            $obj_errors = BimpTools::getDolEventsMsgs(array('errors'));
+
+            if (!count($obj_errors)) {
+                $obj_errors[] = BimpTools::ucfirst($this->getLabel('the')) . ' ne peut pas être validé' . $this->e();
+            }
+            $errors[] = BimpTools::getMsgFromArray($obj_errors);
+        }
+
+        $obj_warnings = BimpTools::getDolEventsMsgs(array('warnings'));
+
+        if (!empty($obj_warnings)) {
+            $warnings[] = BimpTools::getMsgFromArray($obj_warnings);
+        }
+
+        $obj_infos = BimpTools::getDolEventsMsgs(array('mesgs'));
+        if (!empty($obj_infos)) {
+            $infos[] = BimpTools::getMsgFromArray($obj_infos);
         }
 
         return array(

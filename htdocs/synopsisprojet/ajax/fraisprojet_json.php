@@ -160,7 +160,7 @@ switch ($action)
                        ".MAIN_DB_PREFIX."user.rowid as acheteurId,
                        dateAchat,
                        montantHT as cout,
-                       ".MAIN_DB_PREFIX."facture_fourn.facnumber as factureRef,
+                       ".MAIN_DB_PREFIX."facture_fourn.ref as factureRef,
                        ".MAIN_DB_PREFIX."commande_fournisseur.ref as commandRef,
                        ".MAIN_DB_PREFIX."facture_fourn.rowid as factureId,
                        ".MAIN_DB_PREFIX."commande_fournisseur.rowid as commandId

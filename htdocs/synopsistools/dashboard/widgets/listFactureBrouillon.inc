@@ -24,7 +24,7 @@ function widget_listFactureBrouillon() {
   $table2 = '<p>';
 
 
-    $sql  = "SELECT f.facnumber, f.rowid, f.total_ttc, f.type,";
+    $sql  = "SELECT f.ref, f.rowid, f.total_ttc, f.type,";
     $sql.= " s.nom, s.rowid as socid";
     if (!$user->rights->societe->client->voir && !$socid) $sql .= ", sc.fk_soc, sc.fk_user ";
     $sql .= " FROM ".MAIN_DB_PREFIX."facture as f, ".MAIN_DB_PREFIX."societe as s";
@@ -70,7 +70,7 @@ function widget_listFactureBrouillon() {
                 {
                     $table .= '<tr class='.$arrCss[$bool].'>
                             <td  nowrap="nowrap">';
-                    $facturestatic->ref=$res->facnumber;
+                    $facturestatic->ref=$res->ref;
                     $facturestatic->id=$res->rowid;
                     $facturestatic->type=$res->type;
                     $table .= $facturestatic->getNomUrl(1,'');
@@ -80,7 +80,7 @@ function widget_listFactureBrouillon() {
                 }
                 $table2 .= '<tr class='.$arrCss[$bool].'>
                         <td  nowrap="nowrap">';
-                $facturestatic->ref=$res->facnumber;
+                $facturestatic->ref=$res->ref;
                 $facturestatic->id=$res->rowid;
                 $facturestatic->type=$res->type;
                 $table2 .= $facturestatic->getNomUrl(1,'');

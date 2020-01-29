@@ -178,7 +178,7 @@ class mod_facture_mercure2 extends ModeleNumRefFactures
         //if ($facture->type == 2) $where.= " AND type = 2";
         //else $where.=" AND type != 2";
 
-        $numFinal=get_next_value($db,$mask,'facture','facnumber',$where,$objsoc,$facture->date,$mode);
+        $numFinal=get_next_value($db,$mask,'facture','ref',$where,$objsoc,$facture->date,$mode);
         if (! preg_match('/([0-9])+/',$numFinal)) $this->error = $numFinal;
 
         return  $numFinal;

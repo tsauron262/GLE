@@ -177,7 +177,7 @@ class BimpStatsFacture {
         $ind = 0;
 
         foreach ($facids as $fact) {
-            $sql = 'SELECT f.rowid as fac_id, prop.rowid as prop_id, f.facnumber as fac_number, f.fk_statut as fac_statut,';
+            $sql = 'SELECT f.rowid as fac_id, prop.rowid as prop_id, f.ref as fac_number, f.fk_statut as fac_statut,';
             $sql .= ' s.rowid as soc_id, s.nom as soc_nom,';
             $sql .= ' p.rowid as pai_id, p.ref as pai_ref,';
             $sql .= ' e.centre as centre2, e.type as type, e.entrepot as fk_entrepot2,';

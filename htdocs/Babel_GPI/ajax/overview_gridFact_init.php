@@ -48,7 +48,7 @@ $limit = $_GET['rows'];
 
  $requete = "
        SELECT rowid as id,
-              facnumber,
+              ref,
               date_format(datef,'%Y-%m-%d %H:%i:%s') as datef,
               fk_statut,
               (SELECT count(*) from ".MAIN_DB_PREFIX."facturedet WHERE fk_facture=id) as totEleme
@@ -71,7 +71,7 @@ $limit = $_GET['rows'];
     {
         echo "<row id='". $row[id]."'>";
         echo "<cell>". $row[id]."</cell>";
-        echo "<cell><![CDATA[". $row[facnumber]."]]></cell>";
+        echo "<cell><![CDATA[". $row[ref]."]]></cell>";
         echo "<cell><![CDATA[". $row[datef]."]]></cell>";
         echo "<cell><![CDATA[". $row[fk_statut]."]]></cell>";
         echo "<cell><![CDATA[". $row[totEleme]."]]></cell>";

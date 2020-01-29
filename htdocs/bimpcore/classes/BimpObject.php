@@ -20,7 +20,7 @@ class BimpObject extends BimpCache
     );
     public static $numeric_types = array('id', 'id_parent', 'id_object', 'int', 'float', 'money', 'percent', 'bool', 'qty');
     public static $name_properties = array('public_name', 'name', 'nom', 'label', 'libelle', 'title', 'titre', 'description');
-    public static $ref_properties = array('ref', 'reference', 'code', 'facnumber');
+    public static $ref_properties = array('ref', 'reference', 'code', 'ref');
     public static $status_properties = array('status', 'fk_statut', 'statut');
     public $use_commom_fields = false;
     public $use_positions = false;

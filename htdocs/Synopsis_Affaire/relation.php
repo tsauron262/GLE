@@ -159,10 +159,10 @@ function drawGraph($affaire)
         while ($res2=$db->fetch_object($sql2))
         {
              $graph->addNode(
-               $res2->facnumber,
+               $res2->ref,
                array(
                  'URL'   => DOL_URL_ROOT.'/facture.php?id='.$res2->rowid,
-                 'label' => ''.$res2->facnumber,
+                 'label' => ''.$res2->ref,
                  'shape' => 'ellipse',
                  'fontsize' => '10',
                  'color' => 'purple',
@@ -171,7 +171,7 @@ function drawGraph($affaire)
              );
               $graph->addEdge(
               array(
-                 $res->ref => $res2->facnumber
+                 $res->ref => $res2->ref
                ),
                array(
                  'label' => "   ".date('d/m/Y',strtotime($res1->datef))."   ",

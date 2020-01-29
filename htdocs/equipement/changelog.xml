@@ -41,7 +41,7 @@
 </Version>
 <Version Number="3.7.+1.5.2" MonthVersion="2015-07"> 
 	<change type='add'>import serial use carriage return as __N__ and tabs as __B__</change>
-	<change type='fix'>bad fields (facnumber instead ref in facture_fourn) on list </change>
+	<change type='fix'>bad fields (ref instead ref in facture_fourn) on list </change>
 </Version>
 <Version Number="3.8.+1.6.0" MonthVersion="2015-08"> 
 	<change type='fix'>some little bug on list</change>

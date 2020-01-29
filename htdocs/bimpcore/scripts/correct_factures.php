@@ -95,14 +95,14 @@ if (!is_null($rows)) {
 
                             if (!is_null($pr) && ((float) $pr['buy_price_ht'] || (int) $pr['fk_product_fournisseur_price'])) {
 //                                if ((float) $pr['buy_price_ht']) {
-//                                    echo $facture->getData('facnumber') . ': ligne ' . $line->id . ' - ' . $line->desc . '. PA HT: ' . $pr['buy_price_ht'];
+//                                    echo $facture->getData('ref') . ': ligne ' . $line->id . ' - ' . $line->desc . '. PA HT: ' . $pr['buy_price_ht'];
 //                                    echo '<br/>';
 //                                    $n1++;
 //                                } elseif ((int) $pr['fk_product_fournisseur_price']) {
 //                                    $pfp = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ProductFournPrice', (int) $pr['fk_product_fournisseur_price']);
 //                                    if (BimpObject::objectLoaded($pfp)) {
 //                                        $price = (float) $pfp->getData('price');
-//                                        echo '<strong>' . $facture->getData('facnumber') . ': ligne ' . $line->id . ' - ' . $line->desc . '. PA HT: ' . $price . '</strong>';
+//                                        echo '<strong>' . $facture->getData('ref') . ': ligne ' . $line->id . ' - ' . $line->desc . '. PA HT: ' . $price . '</strong>';
 //                                        echo '<br/>';
 //                                        $n2++;
 //                                    }

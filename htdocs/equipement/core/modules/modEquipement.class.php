@@ -276,7 +276,7 @@ class modequipement extends DolibarrModules
 		'e.numversion'=>"Text",'e.datec'=>"Date",'e.fk_statut'=>'Statut','e.description'=>"Text",
 		'e.dateo'=>"Date",'e.datee'=>"Date",'e.fk_etatequipement'=>"List:c_equipement_etat:libelle",'e.numimmocompta'=>"Text",
 		'e.fk_soc_fourn'=>"List:societe:nom",'e.fk_soc_client'=>"List:societe:nom",
-		'e.fk_facture_fourn'=>"List:facture_fourn:ref_ext",'e.fk_facture'=>"List:facture:facnumber",
+		'e.fk_facture_fourn'=>"List:facture_fourn:ref_ext",'e.fk_facture'=>"List:facture:ref",
 		'e.fk_entrepot'=>"List:entrepot:label",'ee.datec'=>"Date",'ee.duree'=>"Duree",'ee.description'=>"Text",
 		'ee.fk_equipementevt_type'=>"List:c_equipementevt_type:libelle",'ee.dateo'=>"Date",'ee.datee'=>"Date",
 		'ee.fulldayevent'=>"Boolean",'ee.total_ht'=>"Number",

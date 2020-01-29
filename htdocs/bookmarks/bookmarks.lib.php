@@ -28,12 +28,10 @@
  * @param 	Translate	$aLangs		Object lang
  * @return	string
  */
-function printBookmarksList($aDb, $aLangs)
+function printBookmarksList()
 {
-	global $conf, $user;
+	global $conf, $user, $db, $langs;
 
-	$db = $aDb;
-	$langs = $aLangs;
 
 	$ret = '<div class="menu_top"></div>'."\n";
 

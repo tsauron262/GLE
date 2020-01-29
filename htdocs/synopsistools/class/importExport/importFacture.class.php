@@ -28,7 +28,7 @@ class importFacture extends import8sens {
                         foreach($tabF as $idLn => $ln){
                             $tabLn = explode("\t", $ln);
                             if($idLn > 1 && isset($tabLn[2])){
-                                $req = "UPDATE llx_facture set codeCli8Sens = '".$tabLn[1]."', Collab8sens = '".$tabLn[2]."', extraparams = 2 WHERE extraparams = 1 AND facnumber = '".$tabLn[0]."'";
+                                $req = "UPDATE llx_facture set codeCli8Sens = '".$tabLn[1]."', Collab8sens = '".$tabLn[2]."', extraparams = 2 WHERE extraparams = 1 AND ref = '".$tabLn[0]."'";
                                 echo $req."<br/>";
                                 $db->query($req);
                             }

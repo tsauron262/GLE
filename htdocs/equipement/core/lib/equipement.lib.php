@@ -609,7 +609,7 @@ function select_facture($selected='', $clientid, $htmlname='fk_fact_client', $sh
 	if (empty($hidetext)) print $langs->trans("RefFactClient").': ';
 	
 	// boucle sur les factures
-	$sql = "SELECT rowid, facnumber, datef, total_ttc";
+	$sql = "SELECT rowid, ref, datef, total_ttc";
 	$sql.= " FROM ".MAIN_DB_PREFIX."facture";
 	$sql.= " where fk_soc=".$clientid ;
 	//$sql.= " and statut >= 1";
@@ -631,7 +631,7 @@ function select_facture($selected='', $clientid, $htmlname='fk_fact_client', $sh
 				$obj = $db->fetch_object($resql);
 				print '<option value="'.$obj->rowid.'"';
 				if ($obj->rowid == $selected) print ' selected="selected"';
-				print ">".$obj->facnumber." - ".dol_print_date($obj->datef, 'day')." - ".price($obj->total_ttc)."</option>";
+				print ">".$obj->ref." - ".dol_print_date($obj->datef, 'day')." - ".price($obj->total_ttc)."</option>";
 				$i++;
 			}
 			print '</select>';

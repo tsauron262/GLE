@@ -2276,7 +2276,7 @@ class Bimp_CommandeLine extends ObjectLine
                         $facture = 0;
                     }
 
-                    $html .= '<tr id="commande_line_facture_' . $id_facture . '_row" class="facture_row" data-id_facture="' . $id_facture . '" data-facture_ref="' . ($facture ? $facture->getData('facnumber') : '') . '">';
+                    $html .= '<tr id="commande_line_facture_' . $id_facture . '_row" class="facture_row" data-id_facture="' . $id_facture . '" data-facture_ref="' . ($facture ? $facture->getData('ref') : '') . '">';
                     $html .= '<td style="width: 250px;">';
                     if ($facture) {
                         $card = new BC_Card($facture, null, 'light');
@@ -3775,7 +3775,7 @@ class Bimp_CommandeLine extends ObjectLine
             $check_errors = $this->checkFactureData($qty, $equipments, (int) $facture_data['id_facture']);
 
             if (count($check_errors)) {
-                $errors[] = BimpTools::getMsgFromArray($check_errors, 'Facture "' . $facture->getData('facnumber') . '"');
+                $errors[] = BimpTools::getMsgFromArray($check_errors, 'Facture "' . $facture->getData('ref') . '"');
                 continue;
             }
 
@@ -3797,7 +3797,7 @@ class Bimp_CommandeLine extends ObjectLine
 
             if (count($fac_errors)) {
                 $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $facture_data['id_facture']);
-                $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Erreurs lors de la mise à jour de la facture "' . $facture->getData('facnumber') . '" (ID: ' . $facture->id . ')');
+                $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Erreurs lors de la mise à jour de la facture "' . $facture->getData('ref') . '" (ID: ' . $facture->id . ')');
                 continue;
             }
 
@@ -3805,10 +3805,10 @@ class Bimp_CommandeLine extends ObjectLine
             $line_warnings = array();
             $line_errors = $this->setFactureData((int) $facture->id, $qty, $equipments, $line_warnings, false);
             if (count($line_errors)) {
-                $errors[] = BimpTools::getMsgFromArray($line_errors, 'Erreurs lors de l\'enregistrement des données pour la facture "' . $facture->getData('facnumber') . '"');
+                $errors[] = BimpTools::getMsgFromArray($line_errors, 'Erreurs lors de l\'enregistrement des données pour la facture "' . $facture->getData('ref') . '"');
             }
             if (count($line_warnings)) {
-                $warnings[] = BimpTools::getMsgFromArray($line_warnings, 'Erreurs lors de l\'enregistrement des données pour la facture "' . $facture->getData('facnumber') . '"');
+                $warnings[] = BimpTools::getMsgFromArray($line_warnings, 'Erreurs lors de l\'enregistrement des données pour la facture "' . $facture->getData('ref') . '"');
             }
         }
 

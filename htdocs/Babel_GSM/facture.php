@@ -34,7 +34,7 @@ $gsm->MainInit();
 
 print '<TABLE  style=\'max-width:"90%"\' class="nobordernopadding">';
 //Liste les propal, le montant total HT, le status
-$requete = "SELECT ".MAIN_DB_PREFIX."facture.facnumber," .
+$requete = "SELECT ".MAIN_DB_PREFIX."facture.ref," .
         "          ".MAIN_DB_PREFIX."facture.fk_soc, " .
         "          ".MAIN_DB_PREFIX."facture.total," .
         "          ".MAIN_DB_PREFIX."facture.datec," .
@@ -66,7 +66,7 @@ if ($resql)
             $pair=true;
             print "<TR class='impair'>";
         }
-        print "    <TD align='left'><A href='facture_detail.php?facture_id=".$res->rowid."'>".img_object($langs->trans("showBill"),"bill")."&nbsp;" .$res->facnumber."</A>";
+        print "    <TD align='left'><A href='facture_detail.php?facture_id=".$res->rowid."'>".img_object($langs->trans("showBill"),"bill")."&nbsp;" .$res->ref."</A>";
         $soc = new Societe($db);
         $soc->fetch($res->fk_soc);
         $socname = $soc->nom;

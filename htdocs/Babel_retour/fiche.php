@@ -580,7 +580,7 @@ EOF;
             }
             if ($retour->element_type=='facture')
             {
-                $requete = "SELECT rowid, facnumber as ref, unix_timestamp(datef) as dc FROM ".MAIN_DB_PREFIX."facture WHERE fk_soc=".$retour->soc->id;
+                $requete = "SELECT rowid, ref as ref, unix_timestamp(datef) as dc FROM ".MAIN_DB_PREFIX."facture WHERE fk_soc=".$retour->soc->id;
                 $sql = $db->query($requete);
                 $secondSelect = "<SELECT name='element_id' id='element_id'>";
                 while($res = $db->fetch_object($sql))

@@ -362,7 +362,7 @@ print $soc->nom;
     $langs->load('bills');
     $facturestatic = new FactureFournisseur($db);
 
-    $sql = 'SELECT p.rowid,p.libelle,p.facnumber,p.fk_statut, p.datef as df, total_ttc as amount, paye';
+    $sql = 'SELECT p.rowid,p.libelle,p.ref,p.fk_statut, p.datef as df, total_ttc as amount, paye';
     $sql.= ' FROM '.MAIN_DB_PREFIX.'facture_fourn as p';
     $sql.= ' WHERE p.fk_soc = '.$soc->id;
     $sql.= ' ORDER BY p.datef DESC';
@@ -386,7 +386,7 @@ print $soc->nom;
             print '<tr '.$bc[$var].'>';
             print '<td>';
             print '<a href="facture/card.php?facid='.$obj->rowid.'">';
-            print img_object($langs->trans('ShowBill'),'bill').' '.$obj->facnumber.'</a> '.dol_trunc($obj->libelle,14).'</td>';
+            print img_object($langs->trans('ShowBill'),'bill').' '.$obj->ref.'</a> '.dol_trunc($obj->libelle,14).'</td>';
             print '<td align="center" >'.dol_print_date($db->jdate($obj->df),'day').'</td>';
             print '<td align="right" >'.price($obj->amount).'</td>';
             print '<td align="right" >'.$facturestatic->LibStatut($obj->paye,$obj->fk_statut,5).'</td>';

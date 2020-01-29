@@ -186,7 +186,7 @@ if ($result)
 	print_liste_field_titre($langs->trans("Product"), $_SERVER["PHP_SELF"], "p.ref", "", $urlparam, '', $sortfield, $sortorder);
 	print_liste_field_titre($langs->trans("NumVersion"), $_SERVER["PHP_SELF"], "e.numversion", "", $urlparam, '', $sortfield, $sortorder);
 	print_liste_field_titre($langs->trans("Fournisseur"), $_SERVER["PHP_SELF"], "sfou.nom", "", $urlparam, '', $sortfield, $sortorder);
-	print_liste_field_titre($langs->trans("RefFactFourn"), $_SERVER["PHP_SELF"], "ff.facnumber","", $urlparam, '', $sortfield, $sortorder);
+	print_liste_field_titre($langs->trans("RefFactFourn"), $_SERVER["PHP_SELF"], "ff.ref","", $urlparam, '', $sortfield, $sortorder);
 	print_liste_field_titre($langs->trans("EquipementQty"), $_SERVER["PHP_SELF"], "scli.nom","", $urlparam, '', $sortfield, $sortorder);
 	print_liste_field_titre($langs->trans("Dateo"), $_SERVER["PHP_SELF"], "e.dateo", "", $urlparam, '', $sortfield, $sortorder);
 	print_liste_field_titre($langs->trans("Datee"), $_SERVER["PHP_SELF"], "e.datee", "", $urlparam, '', $sortfield, $sortorder);

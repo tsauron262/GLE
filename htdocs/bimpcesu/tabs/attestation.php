@@ -127,7 +127,7 @@ if ($socid > 0) {
     if (!empty($conf->facture->enabled) && $user->rights->facture->lire) {
         $facturestatic = new Facture($db);
 
-        $sql = 'SELECT f.rowid as facid, f.facnumber, f.type, f.amount';
+        $sql = 'SELECT f.rowid as facid, f.ref, f.type, f.amount';
         $sql .= ', f.total as total_ht';
         $sql .= ', f.tva as total_tva';
         $sql .= ', f.total_ttc';
@@ -165,7 +165,7 @@ if ($socid > 0) {
                 print "<tr " . $bc[$var] . ">";
                 print '<td class="nowrap">';
                 $facturestatic->id = $objp->facid;
-                $facturestatic->ref = $objp->facnumber;
+                $facturestatic->ref = $objp->ref;
                 $facturestatic->type = $objp->type;
                 $facturestatic->total_ht = $objp->total_ht;
                 $facturestatic->total_tva = $objp->total_tva;

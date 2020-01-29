@@ -56,7 +56,7 @@ switch ($action)
                 if ($user->rights->facture->lire)
                 {
                     $requete = "SELECT rowid,
-                                       facnumber as ref,
+                                       ref as ref,
                                        unix_timestamp(datef) as df
                                   FROM ".MAIN_DB_PREFIX."facture
                                  WHERE fk_soc = ".$socid;
@@ -172,7 +172,7 @@ switch ($action)
         if ($user->rights->facture->lire)
         {
             $requete = "SELECT rowid,
-                               facnumber as ref,
+                               ref as ref,
                                unix_timestamp(datef) as df
                           FROM ".MAIN_DB_PREFIX."facture
                          WHERE fk_soc = ".$socid;

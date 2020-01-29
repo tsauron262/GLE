@@ -252,7 +252,7 @@ class commandeController extends BimpCommController
 //        $html = '';
 //        $facture = $commande->getChildObject('facture');
 //        if (BimpObject::objectLoaded($facture)) {
-//            $ref = $facture->getData('facnumber');
+//            $ref = $facture->getData('ref');
 //            $label = '';
 //            $shipment = BimpObject::getInstance('bimpreservation', 'BL_CommandeShipment');
 //            if (count($shipment->getList(array(

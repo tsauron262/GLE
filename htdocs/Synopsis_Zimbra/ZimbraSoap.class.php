@@ -3033,7 +3033,7 @@ class Zimbra {
         //Attn soc KO
         $db = $this->db;
         $requete = "SELECT " . MAIN_DB_PREFIX . "facture.rowid,
-                           " . MAIN_DB_PREFIX . "facture.facnumber as ref,
+                           " . MAIN_DB_PREFIX . "facture.ref as ref,
                            " . MAIN_DB_PREFIX . "facture.datec,
                            " . MAIN_DB_PREFIX . "facture.paye,
                            " . MAIN_DB_PREFIX . "facture.datef,
@@ -3135,7 +3135,7 @@ class Zimbra {
         //Attn soc KO
         $db = $this->db;
         $requete = "SELECT " . MAIN_DB_PREFIX . "facture.rowid,
-                           " . MAIN_DB_PREFIX . "facture.facnumber as ref,
+                           " . MAIN_DB_PREFIX . "facture.ref as ref,
                            " . MAIN_DB_PREFIX . "facture.datec,
                            " . MAIN_DB_PREFIX . "facture.paye,
                            " . MAIN_DB_PREFIX . "facture.datef,
@@ -3238,7 +3238,7 @@ class Zimbra {
         if ($resqlPre = $this->db->query($requetePre)) {
             while ($objPai = $db->fetch_object($resqlPre)) {
                 $requete = "SELECT " . MAIN_DB_PREFIX . "facture.rowid,
-                                   " . MAIN_DB_PREFIX . "facture.facnumber as ref,
+                                   " . MAIN_DB_PREFIX . "facture.ref as ref,
                                    " . MAIN_DB_PREFIX . "facture.datec,
                                    " . MAIN_DB_PREFIX . "facture.paye,
                                    " . MAIN_DB_PREFIX . "facture.datef,
@@ -3442,7 +3442,7 @@ class Zimbra {
         if ($resqlPre = $this->db->query($requetePre)) {
             while ($objPai = $db->fetch_object($resqlPre)) {
                 $requete = "SELECT " . MAIN_DB_PREFIX . "facture_fourn.rowid,
-                               " . MAIN_DB_PREFIX . "facture_fourn.facnumber as ref,
+                               " . MAIN_DB_PREFIX . "facture_fourn.ref as ref,
                                " . MAIN_DB_PREFIX . "facture_fourn.datec,
                                " . MAIN_DB_PREFIX . "facture_fourn.paye,
                                " . MAIN_DB_PREFIX . "facture_fourn.datef,
@@ -3546,7 +3546,7 @@ class Zimbra {
         //Attn soc KO
         $db = $this->db;
         $requete = "SELECT " . MAIN_DB_PREFIX . "facture_fourn.rowid,
-                           " . MAIN_DB_PREFIX . "facture_fourn.facnumber as ref,
+                           " . MAIN_DB_PREFIX . "facture_fourn.ref as ref,
                            " . MAIN_DB_PREFIX . "facture_fourn.datec,
                            " . MAIN_DB_PREFIX . "facture_fourn.paye,
                            " . MAIN_DB_PREFIX . "facture_fourn.datef,

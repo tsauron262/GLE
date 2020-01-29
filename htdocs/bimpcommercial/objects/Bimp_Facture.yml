@@ -58,9 +58,6 @@ objects:
                 field_value: id_entrepot_commission
                     
 fields: 
-    facnumber: 
-        label: Référence
-        dol_prop: ref
     exported:
         label: Etat comptable
         type: int
@@ -183,8 +180,6 @@ fields:
             array: statut_export
     douane_number:
         label: N° Douane
-        
-    ref: unset
     fk_availability: unset
     fk_input_reason: unset
        
@@ -659,8 +654,6 @@ filters_panels:
                 label: Revalorisations acceptées
                 type: range
                 data_type: money
-            ref: 
-                field: facnumber
             total_ht:
                 field: total
             total_ttc: 
@@ -681,8 +674,6 @@ filters_panels:
                 field: douane_number
             
 lists_cols: 
-    ref: 
-        field: facnumber
     type: 
         field: type
     centre: 
@@ -836,7 +827,7 @@ lists:
 cards: 
     default: 
         title: 
-            field_value: facnumber
+            field_value: ref
         status: fk_statut
         view_btn: 1
         fields: 
@@ -850,7 +841,7 @@ cards:
                   
     light: 
         title: 
-            field_value: facnumber
+            field_value: ref
         status: fk_statut
         view_btn: 0
         fields: 
@@ -862,7 +853,7 @@ cards:
 searches:
     default: 
         fields_search: 
-            - a.facnumber
+            - a.ref
             - ef.libelle
             - s.nom
         joins:
@@ -875,6 +866,6 @@ searches:
                 on: a.fk_soc = s.rowid
                 alias: s
         fields_return: 
-            - a.facnumber
+            - a.ref
             - s.nom
-        label_syntaxe: '<a.facnumber> (Client: <s.nom>)'
+        label_syntaxe: '<a.ref> (Client: <s.nom>)'

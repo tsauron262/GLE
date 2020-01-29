@@ -58,7 +58,7 @@ ALTER TABLE llx_facture_fourn DROP INDEX uk_facture_fourn;
 ALTER TABLE llx_facture_fourn DROP INDEX uk_facture_fourn_ref;
 UPDATE llx_facture_fourn set ref = NULL where ref = '';
 ALTER TABLE llx_facture_fourn ADD UNIQUE INDEX uk_facture_fourn_ref (ref, entity);
-ALTER TABLE llx_facture_fourn CHANGE COLUMN facnumber ref_supplier varchar(50);
+ALTER TABLE llx_facture_fourn CHANGE COLUMN ref ref_supplier varchar(50);
 ALTER TABLE llx_facture_fourn ADD UNIQUE INDEX uk_facture_fourn_ref_supplier (ref_supplier, fk_soc, entity);
 
 

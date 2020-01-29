@@ -72,7 +72,7 @@ function widget_listChargeAPayer() {
                     }
                     $table2 .= '<tr class='.$arrCss[$bool].'>
                             <td  nowrap="nowrap">';
-                    $facturestatic->ref=$res->facnumber;
+                    $facturestatic->ref=$res->ref;
                     $facturestatic->id=$res->rowid;
                     $facturestatic->type=$res->type;
                     $table2 .= $facturestatic->getNomUrl(1,'');

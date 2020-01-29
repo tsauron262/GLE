@@ -163,7 +163,7 @@ class BTC_export_paiement extends BTC_export {
                     'etablissement' => ['001', 3],
                     'axe' => ['', 2],
                     'num_echeance' => ['0', 2],
-                    'facture' => [$facture->getData('facnumber'), 35],
+                    'facture' => [$facture->getData('ref'), 35],
                     'date_reference_externe' => ['01011900', 8],
                     'date_creation' => [$date->format('dmY'), 8],
                     'societe' => ['', 3],

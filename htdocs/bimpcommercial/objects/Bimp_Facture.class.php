@@ -1237,12 +1237,12 @@ class Bimp_Facture extends BimpComm
 
     public function getRef($withGeneric = true)
     {
-        return $this->getData('facnumber');
+        return $this->getData('ref');
     }
 
     public function getRefProperty()
     {
-        return 'facnumber';
+        return 'ref';
     }
 
     public function getModelPdf()

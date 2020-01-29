@@ -278,7 +278,7 @@ if ($type == 'Affaire' && $id > 0)
                 case 'facture':{
                     $color=$arrColor[5];
                     $requete = "SELECT f.rowid,
-                                       f.facnumber as ref,
+                                       f.ref as ref,
                                        f.UNIX_TIMESTAMP(datef) as dc,
                                        f.UNIX_TIMESTAMP(date_valid) as dv,
                                        f.UNIX_TIMESTAMP(date_lim_reglement) as dlr
@@ -343,7 +343,7 @@ if ($type == 'Affaire' && $id > 0)
                 case 'facture fournisseur':{
                     $color=$arrColor[6];
                     $requete = "SELECT f.rowid,
-                                       f.facnumber as ref,
+                                       f.ref as ref,
                                        UNIX_TIMESTAMP(f.datef) as dc,
                                        UNIX_TIMESTAMP(f.date_valid) as dv,
                                        UNIX_TIMESTAMP(f.date_lim_reglement) as dlr

@@ -25,9 +25,9 @@ $formmargin = new FormMargin($db);
 
 BimpTools::loadDolClass('compta/facture', 'facture');
 
-$where = '`facnumber` LIKE \'FAS1901-%\' AND `datec` >= \'2019-01-17 00:00:00\' AND `datec` < \'2019-01-18 00:00:00\'';
+$where = '`ref` LIKE \'FAS1901-%\' AND `datec` >= \'2019-01-17 00:00:00\' AND `datec` < \'2019-01-18 00:00:00\'';
 $rows = $bdb->getRows('facture', $where, null, 'array', array(
-    'rowid', 'facnumber', 'fk_soc', 'total'
+    'rowid', 'ref', 'fk_soc', 'total'
         ));
 
 // Afficher marge pour process. 
@@ -102,7 +102,7 @@ foreach ($toDelete as $id_soc => $soc_data) {
             $marge = $margin_infos['total_margin'];
         }
 
-        $delete_txt .= ' - ' . $r['rowid'] . ' => ' . $r['facnumber'] . ': ' . $r['total'] . '  -  MARGE : ' . $marge . "\n";
+        $delete_txt .= ' - ' . $r['rowid'] . ' => ' . $r['ref'] . ': ' . $r['total'] . '  -  MARGE : ' . $marge . "\n";
     }
 }
 
@@ -127,7 +127,7 @@ foreach ($toProcess as $id_soc => $soc_data) {
             $marge = $margin_infos['total_margin'];
         }
 
-        $process_txt .= ' - ' . $r['rowid'] . ' => ' . $r['facnumber'] . ': ' . $r['total'] . '  -  MARGE : ' . $marge . "\n";
+        $process_txt .= ' - ' . $r['rowid'] . ' => ' . $r['ref'] . ': ' . $r['total'] . '  -  MARGE : ' . $marge . "\n";
     }
 }
 

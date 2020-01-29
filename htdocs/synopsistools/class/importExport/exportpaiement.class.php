@@ -54,16 +54,16 @@ class exportpaiement extends export8sens {
       } */
 
     public function exportPaiementNormal() {
-        $result = $this->db->query("SELECT p.*, s.nom as name, code_client, ba.label as labB, ba.account_number as compte, cp.libelle as libP, facnumber, codeCli8Sens, Collab8sens, pf.rowid as pfid FROM `llx_paiement` p, llx_facture f, llx_paiement_facture pf, llx_societe s, `llx_c_paiement` cp, llx_bank b, llx_bank_account ba WHERE ba.rowid = b.fk_account AND b.rowid = fk_bank AND cp.id = p.fk_paiement AND s.rowid = f.fk_soc AND pf.`fk_paiement` = p.rowid AND pf.`fk_facture` = f.rowid " . $this->where);
+        $result = $this->db->query("SELECT p.*, s.nom as name, code_client, ba.label as labB, ba.account_number as compte, cp.libelle as libP, ref, codeCli8Sens, Collab8sens, pf.rowid as pfid FROM `llx_paiement` p, llx_facture f, llx_paiement_facture pf, llx_societe s, `llx_c_paiement` cp, llx_bank b, llx_bank_account ba WHERE ba.rowid = b.fk_account AND b.rowid = fk_bank AND cp.id = p.fk_paiement AND s.rowid = f.fk_soc AND pf.`fk_paiement` = p.rowid AND pf.`fk_facture` = f.rowid " . $this->where);
         $tabPaiement = $tabPfId = array();
         //$tabPaiement[] = array("JorCode" => "Code journal", "EcrRef" => "Référence", "EcrDate" => "Date", "EcrCpt" => "Compte écriture", "EcrLib" => "Libellé Ecriture", "EcrDebit" => "Débit", "EcrCredit" => "Crédit", "EcrSolde" => "Solde", "EcrLettrage" => "Lettrage/Pointage", "EcrIsMark" => "Lettrée");
         while ($ligne = $this->db->fetch_object($result)) {
             $credit = str_replace(".", ",", ($ligne->amount < 0) ? 0 : $ligne->amount);
             $debit = str_replace(".", ",", ($ligne->amount < 0) ? -$ligne->amount : 0);
             $solde = -$ligne->amount;
-            $libOp = suppr_accents($ligne->name." ".$ligne->libP." Paiement " . $ligne->facnumber);
+            $libOp = suppr_accents($ligne->name." ".$ligne->libP." Paiement " . $ligne->ref);
             $tabPaiement[] = array("EcrPiece" => "", "JorCode" => $ligne->labB, "EcrRef" => $ligne->code_client, "EcrDate" => dol_print_date($ligne->datec, "%d/%m/%Y"), "EcrGCptCode" => $ligne->compte, /* "EcrCpt" => "remise de paiement", */ "EcrLib" => $libOp, "EcrDebit" => $credit, "EcrCredit" => $debit, /* "EcrSolde" => -$solde, */ "EcrLettrage" => "", "PcvGpriID" => "");
-            $tabPaiement[] = array("EcrPiece" => $ligne->facnumber, "JorCode" => $ligne->labB, "EcrRef" => $ligne->code_client, "EcrDate" => dol_print_date($ligne->datec, "%d/%m/%Y"), "EcrGCptCode" => "411" . $ligne->codeCli8Sens, /* "EcrCpt" => "411071719-GD", */ "EcrLib" => $libOp, "EcrDebit" => $debit, "EcrCredit" => $credit, /* "EcrSolde" => $solde, */ "EcrLettrage" => $ligne->facnumber, "PcvGpriID" => $ligne->Collab8sens);
+            $tabPaiement[] = array("EcrPiece" => $ligne->ref, "JorCode" => $ligne->labB, "EcrRef" => $ligne->code_client, "EcrDate" => dol_print_date($ligne->datec, "%d/%m/%Y"), "EcrGCptCode" => "411" . $ligne->codeCli8Sens, /* "EcrCpt" => "411071719-GD", */ "EcrLib" => $libOp, "EcrDebit" => $debit, "EcrCredit" => $credit, /* "EcrSolde" => $solde, */ "EcrLettrage" => $ligne->ref, "PcvGpriID" => $ligne->Collab8sens);
             $tabPfId[] = $ligne->pfid;
         }
         if (count($tabPaiement) > 0) {

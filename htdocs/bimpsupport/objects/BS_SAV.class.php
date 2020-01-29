@@ -299,7 +299,7 @@ class BS_SAV extends BimpObject
         if ($id_facture_account) {
             $facture = $this->getChildObject('facture_acompte');
             if (BimpObject::objectLoaded($facture)) {
-                $ref = $facture->getData('facnumber');
+                $ref = $facture->getData('ref');
                 if (file_exists(DOL_DATA_ROOT . '/facture/' . $ref . '/' . $ref . '.pdf')) {
                     $url = DOL_URL_ROOT . '/document.php?modulepart=facture&file=' . htmlentities('/' . $ref . '/' . $ref . '.pdf');
                     $js .= 'window.open("' . $url . '");';
@@ -3811,7 +3811,7 @@ class BS_SAV extends BimpObject
 
                                                 $bimpFacture->dol_object->generateDocument(self::$facture_model_pdf, $langs);
 
-                                                $ref = $bimpFacture->getData('facnumber');
+                                                $ref = $bimpFacture->getData('ref');
                                                 if (file_exists(DOL_DATA_ROOT . '/facture/' . $ref . '/' . $ref . '.pdf')) {
                                                     $url = DOL_URL_ROOT . '/document.php?modulepart=facture&file=' . htmlentities('/' . $ref . '/' . $ref . '.pdf');
                                                 }

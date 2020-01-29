@@ -129,7 +129,7 @@ dol_fiche_head($head, 'societe', $langs->trans("AssociatedEquipement"), 0, "equi
 $sql = "SELECT";
 $sql.= " e.ref, e.rowid, e.fk_statut, e.fk_product, p.ref as refproduit, e.fk_entrepot, ent.label,";
 $sql.= " e.fk_soc_fourn, sfou.nom as CompanyFourn, e.fk_facture_fourn, ff.ref as refFactureFourn,";
-$sql.= " e.fk_soc_client, scli.nom as CompanyClient, e.fk_facture, f.facnumber as refFacture,";
+$sql.= " e.fk_soc_client, scli.nom as CompanyClient, e.fk_facture, f.ref as refFacture,";
 $sql.= " e.datee, e.dateo, ee.libelle as etatequiplibelle, e.numversion";
 $sql.= " FROM ".MAIN_DB_PREFIX."societe as scli ";
 $sql.= " , ".MAIN_DB_PREFIX."equipement as e";
@@ -150,7 +150,7 @@ if ($search_company_fourn)	$sql .= " AND sfou.nom like '%".$db->escape($search_c
 if ($search_reffact_fourn)	$sql .= " AND ff.ref like '%".$db->escape($search_reffact_fourn)."%'";
 if ($search_entrepot)		$sql .= " AND ent.label like '%".$db->escape($search_entrepot)."%'";
 if ($search_company_client)	$sql .= " AND scli.nom like '%".$db->escape($search_company_client)."%'";
-if ($search_reffact_client)	$sql .= " AND f.facnumber like '%".$db->escape($search_reffact_client)."%'";
+if ($search_reffact_client)	$sql .= " AND f.ref like '%".$db->escape($search_reffact_client)."%'";
 if ($search_etatequipement>0)	$sql .= " AND e.fk_etatequipement =".$search_etatequipement;
 
 $sql.= " ORDER BY ".$sortfield." ".$sortorder;
@@ -183,9 +183,9 @@ if ($result) {
 	print_liste_field_titre($langs->trans("Ref"), $_SERVER["PHP_SELF"], "e.ref", "", $urlparam, '', $sortfield, $sortorder);
 	print_liste_field_titre($langs->trans("NumVersion"), $_SERVER["PHP_SELF"], "e.numversion", "", $urlparam,'', $sortfield, $sortorder);
 	print_liste_field_titre($langs->trans("Fournisseur"), $_SERVER["PHP_SELF"], "sfou.nom", "", $urlparam,'', $sortfield, $sortorder);
-	print_liste_field_titre($langs->trans("RefFactFourn"), $_SERVER["PHP_SELF"], "ff.facnumber", "", $urlparam,'', $sortfield, $sortorder);
+	print_liste_field_titre($langs->trans("RefFactFourn"), $_SERVER["PHP_SELF"], "ff.ref", "", $urlparam,'', $sortfield, $sortorder);
 	print_liste_field_titre($langs->trans("Entrepot"), $_SERVER["PHP_SELF"], "ent.label", "", $urlparam,'', $sortfield, $sortorder);
-	print_liste_field_titre($langs->trans("RefFactClient"), $_SERVER["PHP_SELF"], "f.facnumber", "", $urlparam,'', $sortfield, $sortorder);
+	print_liste_field_titre($langs->trans("RefFactClient"), $_SERVER["PHP_SELF"], "f.ref", "", $urlparam,'', $sortfield, $sortorder);
 	print_liste_field_titre($langs->trans("Dateo"), $_SERVER["PHP_SELF"], "e.dateo", "", $urlparam,'', $sortfield, $sortorder);
 	print_liste_field_titre($langs->trans("Datee"), $_SERVER["PHP_SELF"], "e.datee", "", $urlparam, '', $sortfield, $sortorder);
 	print_liste_field_titre($langs->trans("EtatEquip"), $_SERVER["PHP_SELF"], "e.fk_etatequipement", "", $urlparam, '', $sortfield, $sortorder);

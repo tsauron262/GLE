@@ -30,7 +30,7 @@ function widget_listFactureImpayee() {
     {
         $facturestatic=new Facture($db);
 
-        $sql = "SELECT f.rowid, f.facnumber, f.fk_statut, f.type, f.total, f.total_ttc, ";
+        $sql = "SELECT f.rowid, f.ref, f.fk_statut, f.type, f.total, f.total_ttc, ";
         $sql.= "f.date_lim_reglement as datelimite,";
         $sql.= " sum(pf.amount) as am,";
         $sql.= " s.nom, s.rowid as socid";
@@ -41,8 +41,8 @@ function widget_listFactureImpayee() {
         $sql.= " WHERE s.rowid = f.fk_soc AND f.paye = 0 AND f.fk_statut = 1";
         if (!$user->rights->societe->client->voir && !$socid) $sql .= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
         if ($socid) $sql .= " AND f.fk_soc = ".$socid;
-        $sql.= " GROUP BY f.rowid, f.facnumber, f.fk_statut, f.total, f.total_ttc, s.nom, s.rowid";
-        $sql.= " ORDER BY f.datef ASC, f.facnumber ASC";
+        $sql.= " GROUP BY f.rowid, f.ref, f.fk_statut, f.total, f.total_ttc, s.nom, s.rowid";
+        $sql.= " ORDER BY f.datef ASC, f.ref ASC";
         $sql .= " LIMIT 50";
 
 //$table .= $sql;
@@ -82,7 +82,7 @@ function widget_listFactureImpayee() {
                 while ($res =$db->fetch_object($resql))
                 {
 
-                    $facturestatic->ref=$res->facnumber;
+                    $facturestatic->ref=$res->ref;
                     $facturestatic->id=$res->rowid;
                     $facturestatic->type=$res->type;
 
@@ -93,8 +93,8 @@ function widget_listFactureImpayee() {
                             $table .= '<tr class='.$arrCss[$bool].'>
                                     <td  nowrap="nowrap">';
                             $table .= $facturestatic->getNomUrl(1,'');;
-                            $filename=sanitize_string($res->facnumber);
-                            $filedir=$conf->facture->dir_output . '/' . sanitize_string($res->facnumber);
+                            $filename=sanitize_string($res->ref);
+                            $filedir=$conf->facture->dir_output . '/' . sanitize_string($res->ref);
                             $urlsource=$_SERVER['PHP_SELF'].'?facid='.$res->rowid;
                             if ($res->datelimite < (time() - $conf->facture->client->warning_delay)) $table .= img_warning($langs->trans("Late"));
                             $table .= $formfile->getDocumentsLink('facture',$filename,$filedir);
@@ -112,8 +112,8 @@ function widget_listFactureImpayee() {
                     $table2 .= '<tr class='.$arrCss[$bool].'>
                             <td  nowrap="nowrap">';
                     $table2 .= $facturestatic->getNomUrl(1,'');;
-                    $filename=sanitize_string($res->facnumber);
-                    $filedir=$conf->facture->dir_output . '/' . sanitize_string($res->facnumber);
+                    $filename=sanitize_string($res->ref);
+                    $filedir=$conf->facture->dir_output . '/' . sanitize_string($res->ref);
                     $urlsource=$_SERVER['PHP_SELF'].'?facid='.$res->rowid;
                     if ($res->datelimite < (time() - $conf->facture->client->warning_delay)) $table2 .= img_warning($langs->trans("Late"));
                     $table2 .= $formfile->getDocumentsLink('facture',$filename,$filedir);

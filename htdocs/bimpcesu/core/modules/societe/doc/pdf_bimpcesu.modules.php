@@ -342,7 +342,7 @@ class pdf_bimpcesu extends ModeleBimpcesu
         
         $sql = 'SELECT f.rowid as facid, f.fk_mode_reglement as mr';
         $sql .= ', fd.description';
-        $sql .= ', fd.total_ttc as total_ttc';
+        $sql .= ', fd.total_ttc as total_ttc, f.ref';
         $sql .= " FROM " . MAIN_DB_PREFIX . "societe s," . MAIN_DB_PREFIX . "facture f," . MAIN_DB_PREFIX . "facturedet fd";
         $sql .= " WHERE f.fk_soc = s.rowid AND s.rowid = " . $object->id;
         $sql .= " AND f.datef BETWEEN '" . $dateD . "' AND '" . $dateF ."'";
@@ -365,7 +365,7 @@ class pdf_bimpcesu extends ModeleBimpcesu
               //$var = !$var;
               
               $facturestatic->id = $objp->facid;
-              $facturestatic->ref = $objp->facnumber;
+              $facturestatic->ref = $objp->ref;
               $facturestatic->type = $objp->type;
               $facturestatic->total_ttc = $objp->total_ttc;
               $facturestatic->mr = $objp->mr;

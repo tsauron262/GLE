@@ -43,7 +43,7 @@ array_push($arrFilter,
 if ($showFactureFourn){
 
     $requete = "SELECT rowid,
-                       facnumber,
+                       ref,
                        fk_soc,
                        datec,
                        datef,
@@ -70,8 +70,8 @@ if ($showFactureFourn){
                 {
                    $arrRes = $BCalc->pushDateArr(
                                           $res->datec,
-                                          "Créat. de " . "".$res->facnumber."" . " (".$soc->nom.")",
-                                          "Cr&eacute;ation de la facture fournisseur" . $res->facnumber . "<BR><P>" . $res->note. "<BR><P>" . $res->note_public,
+                                          "Créat. de " . "".$res->ref."" . " (".$soc->nom.")",
+                                          "Cr&eacute;ation de la facture fournisseur" . $res->ref . "<BR><P>" . $res->note. "<BR><P>" . $res->note_public,
                                           $res->ref,
                                           $id,
                                           "FactureFourn",
@@ -86,8 +86,8 @@ if ($showFactureFourn){
                 {
                     $arrRes = $BCalc->pushDateArr(
                                           $res->datef,
-                                          "Date fact fourn " . "".$res->facnumber."" . " (".$soc->nom.")",
-                                          "Facture fournisseur " . $res->facnumber . "<BR><P>" . $res->note. "<BR><P>" . $res->note_public,
+                                          "Date fact fourn " . "".$res->ref."" . " (".$soc->nom.")",
+                                          "Facture fournisseur " . $res->ref . "<BR><P>" . $res->note. "<BR><P>" . $res->note_public,
                                           $res->ref,
                                           $id,
                                           "FactureFourn",
@@ -102,8 +102,8 @@ if ($showFactureFourn){
                 {
                     $arrRes = $BCalc->pushDateArr(
                                           $res->date_valid,
-                                          "Valid de " . "".$res->facnumber."" . " (".$soc->nom.")",
-                                          "Validation de la Facture Fournisseur " . $res->facnumber . "<BR><P>" . $res->note. "<BR><P>" . $res->note_public,
+                                          "Valid de " . "".$res->ref."" . " (".$soc->nom.")",
+                                          "Validation de la Facture Fournisseur " . $res->ref . "<BR><P>" . $res->note. "<BR><P>" . $res->note_public,
                                           $res->ref,
                                           $id,
                                           "FactureFourn",
@@ -118,8 +118,8 @@ if ($showFactureFourn){
                 {
                     $arrRes = $BCalc->pushDateArr(
                                           $res->date_lim_reglement,
-                                          "Lim de " . "".$res->facnumber."" . " (".$soc->nom.")",
-                                          "Date limite du réeacute;glement de la Facture fournisseur " . $res->facnumber . "<BR><P>" . $res->note. "<BR><P>" . $res->note_public,
+                                          "Lim de " . "".$res->ref."" . " (".$soc->nom.")",
+                                          "Date limite du réeacute;glement de la Facture fournisseur " . $res->ref . "<BR><P>" . $res->note. "<BR><P>" . $res->note_public,
                                           $res->ref,
                                           $id,
                                           "FactureFourn",

@@ -30,7 +30,7 @@ function widget_listFactureFournImpayee() {
     {
         $facturestatic=new FactureFournisseur($db);
 
-        $sql = "SELECT ff.rowid, ff.ref as facnumber, ff.fk_statut, ff.fk_statut, ff.libelle, ff.total_ht, ff.total_ttc,";
+        $sql = "SELECT ff.rowid, ff.ref as ref, ff.fk_statut, ff.fk_statut, ff.libelle, ff.total_ht, ff.total_ttc,";
         $sql.= " sum(pf.amount) as am, ff.type, ff.paye,";
         $sql.= " s.nom, s.rowid as socid";
         if (!$user->rights->societe->client->voir && !$socid) $sql .= ", sc.fk_soc, sc.fk_user ";
@@ -80,7 +80,7 @@ function widget_listFactureFournImpayee() {
                 while ($res =$db->fetch_object($resql))
                 {
 
-                    $facturestatic->ref=$res->facnumber;
+                    $facturestatic->ref=$res->ref;
                     $facturestatic->id=$res->rowid;
                     $facturestatic->type=$res->type;
 

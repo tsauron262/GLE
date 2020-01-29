@@ -268,7 +268,7 @@ EOF;
             {
                 while ($res=$db->fetch_object($resql))
                 {
-                    $optgroup[2]["f".$res->rowid]=$res->facnumber ." (".round($res->total,0)." &euro;)";
+                    $optgroup[2]["f".$res->rowid]=$res->ref ." (".round($res->total,0)." &euro;)";
                 }
             }
 

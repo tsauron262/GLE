@@ -20,7 +20,7 @@ echo '<body>';
 global $db;
 $bdb = new BimpDb($db);
 
-$rows = $bdb->getRows('facture', '`facnumber` LIKE \'(PROVACS%\'', null, 'array', array('rowid'));
+$rows = $bdb->getRows('facture', '`ref` LIKE \'(PROVACS%\'', null, 'array', array('rowid'));
 
 $f = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
 BimpTools::loadDolClass('compta/paiement', 'paiement');

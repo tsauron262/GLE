@@ -24,7 +24,7 @@ function widget_listFactureCess() {
   $table2 = '<p>';
 
 
-    $sql  = "SELECT f.facnumber, f.rowid, f.total as total_ht, f.type, f.fk_statut, ";
+    $sql  = "SELECT f.ref, f.rowid, f.total as total_ht, f.type, f.fk_statut, ";
     $sql.= " s.nom, s.rowid as socid";
     if (!$user->rights->societe->client->voir && !$socid) $sql .= ", sc.fk_soc, sc.fk_user ";
     $sql .= " FROM ".MAIN_DB_PREFIX."facture as f, ".MAIN_DB_PREFIX."societe as s";
@@ -71,7 +71,7 @@ function widget_listFactureCess() {
                 {
                     $table .= '<tr class='.$arrCss[$bool].'>
                             <td  nowrap="nowrap">';
-                    $facturestatic->ref=$res->facnumber;
+                    $facturestatic->ref=$res->ref;
                     $facturestatic->id=$res->rowid;
                     $facturestatic->type=$res->type;
                     $facturestatic->statut = $res->fk_statut;
@@ -83,7 +83,7 @@ function widget_listFactureCess() {
                 }
                 $table2 .= '<tr class='.$arrCss[$bool].'>
                         <td  nowrap="nowrap">';
-                $facturestatic->ref=$res->facnumber;
+                $facturestatic->ref=$res->ref;
                 $facturestatic->id=$res->rowid;
                 $facturestatic->type=$res->type;
                 $facturestatic->statut = $res->fk_statut;

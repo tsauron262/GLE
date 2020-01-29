@@ -101,7 +101,7 @@
     //
     //
     //    //Facture Fourn
-    //    $requete = "SELECT rowid, facnumber as ref, total_ht FROM ".MAIN_DB_PREFIX."facture_fourn WHERE fk_soc = ".$id;
+    //    $requete = "SELECT rowid, ref as ref, total_ht FROM ".MAIN_DB_PREFIX."facture_fourn WHERE fk_soc = ".$id;
     //    $sql = $db->query($requete);
     //    if ($sql)
     //    {
@@ -119,7 +119,7 @@
     //    }
     //
     //    //Facture
-    //    $requete = "SELECT rowid, facnumber as ref, total_ht FROM ".MAIN_DB_PREFIX."facture WHERE fk_soc = ".$id;
+    //    $requete = "SELECT rowid, ref as ref, total_ht FROM ".MAIN_DB_PREFIX."facture WHERE fk_soc = ".$id;
     //    $sql = $db->query($requete);
     //    if ($sql)
     //    {

@@ -201,7 +201,7 @@ if ($result > 0) {
 if ($result < 0)  {
 	dol_print_error('', $discount->error);
 }
-print $form->showrefnav($object, 'ref', '', 1, 'facnumber', 'ref', $morehtmlref);
+print $form->showrefnav($object, 'ref', '', 1, 'ref', 'ref', $morehtmlref);
 print '</td></tr>';
 
 // Third party
@@ -217,7 +217,7 @@ print '<br><br>';
 $sql = "SELECT";
 $sql.= " e.ref, e.rowid, e.fk_statut, e.fk_product, p.ref as refproduit, e.fk_entrepot, ent.label,";
 $sql.= " e.fk_soc_fourn, sfou.nom as CompanyFourn, e.fk_facture_fourn, ff.ref as refFactureFourn,";
-$sql.= " e.fk_facture, f.facnumber as refFacture, e.quantity,";
+$sql.= " e.fk_facture, f.ref as refFacture, e.quantity,";
 $sql.= " e.datee, e.dateo, ee.libelle as etatequiplibelle";
 
 $sql.= " FROM ".MAIN_DB_PREFIX."equipement as e";
@@ -274,7 +274,7 @@ if ($result)
 					"", $urlparam, '', $sortfield, $sortorder
 	);
 	print_liste_field_titre(
-					$langs->trans("RefFactFourn"), $_SERVER["PHP_SELF"], "ff.facnumber",
+					$langs->trans("RefFactFourn"), $_SERVER["PHP_SELF"], "ff.ref",
 					"", $urlparam, '', $sortfield, $sortorder
 	);
 	print_liste_field_titre(

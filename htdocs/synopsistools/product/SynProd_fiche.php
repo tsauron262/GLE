@@ -1649,7 +1649,7 @@ if ($object->id && ($action == '' || $action == 'view') && $object->status)
         // Liste de Mes factures
         print '<tr><td'.($user->rights->societe->client->voir?' width="50%"':'').' valign="top">';
 
-        $sql = "SELECT s.nom, s.rowid as socid, f.rowid as factureid, f.facnumber, f.datef as df";
+        $sql = "SELECT s.nom, s.rowid as socid, f.rowid as factureid, f.ref, f.datef as df";
         $sql.= " FROM ".MAIN_DB_PREFIX."societe as s, ".MAIN_DB_PREFIX."facture as f";
         $sql.= " WHERE f.fk_soc = s.rowid";
         $sql.= " AND f.entity = ".$conf->entity;
@@ -1675,7 +1675,7 @@ if ($object->id && ($action == '' || $action == 'view') && $object->status)
                     print '<input type="hidden" name="action" value="addinfacture">';
                     print "<tr $bc[$var]>";
                     print "<td nowrap>";
-                    print "<a href=\"../compta/facture.php?facid=".$objp->factureid."\">".img_object($langs->trans("ShowBills"),"bill")." ".$objp->facnumber."</a></td>\n";
+                    print "<a href=\"../compta/facture.php?facid=".$objp->factureid."\">".img_object($langs->trans("ShowBills"),"bill")." ".$objp->ref."</a></td>\n";
                     print "<td><a href=\"../comm/card.php?socid=".$objp->socid."\">".dol_trunc($objp->nom,18)."</a></td>\n";
                     print "<td nowrap=\"nowrap\">".dol_print_date($db->jdate($objp->df),"%d %b")."</td>\n";
                     print '<td><input type="hidden" name="factureid" value="'.$objp->factureid.'">';
@@ -1713,7 +1713,7 @@ if ($object->id && ($action == '' || $action == 'view') && $object->status)
             // Liste de Autres factures
             $var=true;
 
-            $sql = "SELECT s.nom, s.rowid as socid, f.rowid as factureid, f.facnumber, f.datef as df";
+            $sql = "SELECT s.nom, s.rowid as socid, f.rowid as factureid, f.ref, f.datef as df";
             $sql.= " FROM ".MAIN_DB_PREFIX."societe as s, ".MAIN_DB_PREFIX."facture as f";
             $sql.= " WHERE f.fk_soc = s.rowid";
             $sql.= " AND f.entity = ".$conf->entity;
@@ -1739,7 +1739,7 @@ if ($object->id && ($action == '' || $action == 'view') && $object->status)
                         print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
                         print '<input type="hidden" name="action" value="addinfacture">';
                         print "<tr ".$bc[$var].">";
-                        print "<td><a href=\"../compta/facture.php?facid=".$objp->factureid."\">$objp->facnumber</a></td>\n";
+                        print "<td><a href=\"../compta/facture.php?facid=".$objp->factureid."\">$objp->ref</a></td>\n";
                         print "<td><a href=\"../comm/card.php?socid=".$objp->socid."\">".dol_trunc($objp->nom,24)."</a></td>\n";
                         print "<td colspan=\"2\">".$langs->trans("Qty");
                         print "</td>";

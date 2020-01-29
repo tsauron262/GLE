@@ -244,8 +244,8 @@ class BTC_export extends BimpObject {
                 }
                 $piece = $this->getInstance('bimpcommercial', 'Bimp_Facture', $facture->rowid);
                 if($error > 0) {
-                    $this->log('FACTURE CLIENT', $facture->facnumber, $file);
-                    $this->write_logs("***EXPORTATION*** " . date('d/m/Y H:i:s') . " => USER : " . $user->login . " => FACTURE:  " . $facture->facnumber . "\n", false);
+                    $this->log('FACTURE CLIENT', $facture->ref, $file);
+                    $this->write_logs("***EXPORTATION*** " . date('d/m/Y H:i:s') . " => USER : " . $user->login . " => FACTURE:  " . $facture->ref . "\n", false);
                     if(is_null($ref)) {
                         $piece->updateField('exported', 1);
                     }
@@ -283,7 +283,7 @@ class BTC_export extends BimpObject {
     
     protected function get_facture_client_for_export($ref, $since = false) {
         if(!is_null($ref)) {
-            return $this->db->getRows('facture', 'facnumber="'.$ref.'"');
+            return $this->db->getRows('facture', 'ref="'.$ref.'"');
         } elseif ($since) {
             return $this->db->getRows('facture', 'exported = 0 AND fk_statut IN(1,2) AND type != 3 AND datef BETWEEN "'.BimpCore::getConf("BIMPtoCEGID_start_current_trimestre").'" AND "'.date("Y-m-d").'"', $this->sql_limit);            
         } else {

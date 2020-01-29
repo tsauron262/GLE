@@ -337,9 +337,9 @@ class BContract_echeancier extends BimpObject {
 
         if ($instance->dol_object->delete($user) > 0) {
             $this->updateField('next_facture_date', $new_next_date->format('Y-m-d 00:00:00'));
-            $success = "Facture " . $instance->getData('facnumber') . ' supprimée avec succès';
+            $success = "Facture " . $instance->getData('ref') . ' supprimée avec succès';
         } else {
-            $errors = "Facture " . $instance->getData('facnumber') . ' n\'à pas été supprimée';
+            $errors = "Facture " . $instance->getData('ref') . ' n\'à pas été supprimée';
             ;
         }
 

@@ -629,7 +629,7 @@ function saveCommandeLineFactures($button, id_line) {
                 data.id_facture = parseInt($row.data('id_facture'));
                 data.qty = parseFloat($row.find('input.line_facture_qty').val());
                 if (isNaN(data.qty)) {
-                    bimp_msg('Quantités invalides pour la facture "' + $row.data('facnumber') + '"<br/>Veuillez corriger', 'danger', null, true);
+                    bimp_msg('Quantités invalides pour la facture "' + $row.data('ref') + '"<br/>Veuillez corriger', 'danger', null, true);
                     return;
                 }
 

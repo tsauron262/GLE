@@ -246,7 +246,7 @@ class commandeController extends reservationController
         $html = '';
         $facture = $commande->getChildObject('facture');
         if (BimpObject::objectLoaded($facture)) {
-            $ref = $facture->getData('facnumber');
+            $ref = $facture->getData('ref');
             $label = '';
             $shipment = BimpObject::getInstance('bimpreservation', 'BR_CommandeShipment');
             if (count($shipment->getList(array(

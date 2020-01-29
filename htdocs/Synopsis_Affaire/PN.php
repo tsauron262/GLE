@@ -365,9 +365,9 @@ EOF;
                     {
                         $fac = new Facture($db);
                         $fac->fetch($res1->fk_facture);
-                        $venteArr[$dateU][$res->facnumber] .= "    <td class=".$class." nowrap>".$fac->getNomUrl(1);
-                        $venteArr[$dateU][$res->facnumber] .= "    <td class=".$class." nowrap>".price($fac->total_ht);
-                        $venteArr[$dateU][$res->facnumber] .= "    <td align=right class=".$class." nowrap>".$fac->getLibStatut(5);
+                        $venteArr[$dateU][$res->ref] .= "    <td class=".$class." nowrap>".$fac->getNomUrl(1);
+                        $venteArr[$dateU][$res->ref] .= "    <td class=".$class." nowrap>".price($fac->total_ht);
+                        $venteArr[$dateU][$res->ref] .= "    <td align=right class=".$class." nowrap>".$fac->getLibStatut(5);
                         $atleastone=true;
                         $totalFac += $fac->total_ht;
                         $remArray['facture'][$res1->fk_facture]=1;
@@ -393,14 +393,14 @@ EOF;
             {
                     $tmpSoc = new Societe($db);
                     $tmpSoc->fetch($res->fk_soc);
-                    $venteArr[$dateU][$res->facnumber].= "<tr><td align=center class='".$class."' style='padding: 0px;'>".$tmpSoc->getNomUrl(1)."</td>";
-                    $venteArr[$dateU][$res->facnumber].= "    <td class='".$class."' colspan=5 align=center>-";
-                    $venteArr[$dateU][$res->facnumber].= "    <td class='".$class."' colspan=3 align=center>-";
+                    $venteArr[$dateU][$res->ref].= "<tr><td align=center class='".$class."' style='padding: 0px;'>".$tmpSoc->getNomUrl(1)."</td>";
+                    $venteArr[$dateU][$res->ref].= "    <td class='".$class."' colspan=5 align=center>-";
+                    $venteArr[$dateU][$res->ref].= "    <td class='".$class."' colspan=3 align=center>-";
                     $fac = new Facture($db);
                     $fac->fetch($res->rowid);
-                    $venteArr[$dateU][$res->facnumber] .= "    <td class=".$class." nowrap>".$fac->getNomUrl(1);
-                    $venteArr[$dateU][$res->facnumber] .= "    <td class=".$class." nowrap>".price($fac->total_ht);
-                    $venteArr[$dateU][$res->facnumber] .= "    <td class=".$class." nowrap align=right>".$fac->getLibStatut(5)."";
+                    $venteArr[$dateU][$res->ref] .= "    <td class=".$class." nowrap>".$fac->getNomUrl(1);
+                    $venteArr[$dateU][$res->ref] .= "    <td class=".$class." nowrap>".price($fac->total_ht);
+                    $venteArr[$dateU][$res->ref] .= "    <td class=".$class." nowrap align=right>".$fac->getLibStatut(5)."";
                     $totalFac += $fac->total_ht;
                     $remArray['facture'][$res->rowid]=1;
             }
@@ -464,7 +464,7 @@ EOF;
                         ".MAIN_DB_PREFIX."commande_fournisseur.fk_statut,
                         ".MAIN_DB_PREFIX."commande_fournisseur.ref,
                         unix_timestamp(".MAIN_DB_PREFIX."commande_fournisseur.date_commande) as date_commandeU,
-                        ".MAIN_DB_PREFIX."facture_fourn.facnumber as fref,
+                        ".MAIN_DB_PREFIX."facture_fourn.ref as fref,
                         ".MAIN_DB_PREFIX."facture_fourn.rowid as frowid,
                         ".MAIN_DB_PREFIX."facture_fourn.fk_statut as ffk_statut,
                         ".MAIN_DB_PREFIX."facture_fourn.total_ht as ftotal_ht
@@ -550,7 +550,7 @@ EOF;
             $faFourn=new FactureFournisseur($db);
             $faFourn->id=$res->rowid;
             $faFourn->statut = $res->fk_statut;
-            $faFourn->ref = $res->facnumber;
+            $faFourn->ref = $res->ref;
             if ($faFourn->type != 2)
             {
                 $totFa+=$res->ftotal_ht;

@@ -238,7 +238,7 @@ if ($object->id) {
             $filearray = array();
             while ($result = $db->fetch_object($resql2)) {
                 if ($typeElem == "facture")
-                    $result->ref = $result->facnumber;
+                    $result->ref = $result->ref;
                 $result->ref = str_replace("/", "_", $result->ref);
                 $upload_dir2 = $dolibarr_main_data_root ."/". $nomDossier . "/" . $result->ref;
                 $filearray = dol_dir_list($upload_dir2, "all", 1, '', '', 'name', null, 1);

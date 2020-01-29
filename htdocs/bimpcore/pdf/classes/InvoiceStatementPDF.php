@@ -91,7 +91,7 @@ class InvoiceStatementPDF extends BimpDocumentPDF
             $total_facture += round($instance->getData("total_ttc"), 2);
             $html .= '<tr>';
             $date_in_facture = new DateTime($instance->getData('datef'));
-            $html .= '<td>'.$instance->getData('facnumber').'</td>';
+            $html .= '<td>'.$instance->getData('ref').'</td>';
             $html .= '<td>'.$instance->getData('libelle').'</td>';
             $html .= '<td>'.$date_in_facture->format('d/m/Y').'</td>';
             $date_in_facture = new DateTime($instance->getData('date_lim_reglement'));

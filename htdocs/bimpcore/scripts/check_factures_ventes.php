@@ -19,7 +19,7 @@ $bdb = new BimpDb($db);
 
 $date = date('Y-m-d');
 
-$sql = 'SELECT f.rowid as id,f.facnumber as ref,f.note_private  as note FROM ' . MAIN_DB_PREFIX . 'facture f';
+$sql = 'SELECT f.rowid as id,f.ref as ref,f.note_private  as note FROM ' . MAIN_DB_PREFIX . 'facture f';
 $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'facture_extrafields fef ON f.rowid = fef.fk_object';
 $sql .= ' WHERE f.datec > \'' . $date . '\' AND fef.type = \'M\'';
 

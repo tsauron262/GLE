@@ -137,7 +137,7 @@ class BordereauChequeBlochet_csv extends ModeleChequeReceipts
 		{
                     $facObject = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $ln->facid);
                     $restant = $facObject->getRemainToPay(true);
-                    $facture = $facObject->getData('facnumber');
+                    $facture = $facObject->getData('ref');
                     $totFact = $facObject->getData('total_ttc');
                     
                     $codeCli = $ln->code_client;

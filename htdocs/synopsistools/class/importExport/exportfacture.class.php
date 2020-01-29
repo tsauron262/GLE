@@ -18,7 +18,7 @@ class exportfacture extends export8sens {
     public $output = "Rien";
     public $error = "";
     public $tabIgnore = array();
-    private $where = " AND fact.fk_statut > 0 AND close_code is null AND (fact.extraparams < 1 || fact.extraparams is NULL) AND fact.total != 0  AND facnumber NOT LIKE '%PROV%' GROUP BY fact.rowid";
+    private $where = " AND fact.fk_statut > 0 AND close_code is null AND (fact.extraparams < 1 || fact.extraparams is NULL) AND fact.total != 0  AND ref NOT LIKE '%PROV%' GROUP BY fact.rowid";
 
     public function __construct($db, $sortie = 'html') {
         parent::__construct($db);
@@ -188,12 +188,12 @@ WHERE fe.fk_object = fact.rowid AND fe.`type` = 'S' AND el.targettype = 'facture
 
     public function getFactDontExport() {
         $this->pathExport = DOL_DATA_ROOT . "/test/";
-        $result = $this->db->query("SELECT fact.rowid as id, facnumber "
+        $result = $this->db->query("SELECT fact.rowid as id, ref "
                 . "FROM `" . MAIN_DB_PREFIX . "facture` fact "
                 . "WHERE 1 " . $this->where);
         $facts = "";
         while ($ligne = $this->db->fetch_object($result)) {
-            $facts .= $ligne->facnumber . " - ";
+            $facts .= $ligne->ref . " - ";
         }
         if ($facts != "")
             if(!defined("MODE_TEST"))
@@ -221,7 +221,7 @@ WHERE fe.fk_object = fact.rowid AND fe.`type` = 'S' AND el.targettype = 'facture
 
 
             $tabFact = $tabFactDet = array();
-            $tabFact[] = array("E" => "E", "code_client" => $societe->code_client, "nom" => $societe->name, "phone" => $societe->phone, "address" => $societe->address, "zip" => $societe->zip, "town" => $societe->town, "facnumber" => $facture->ref, "date" => dol_print_date($facture->date, "%d-%m-%Y"), "email" => $societe->email, "total" => price($facture->total_ht), "total_ttc" => price($facture->total_ttc), "id8Sens" => $this->id8sens);
+            $tabFact[] = array("E" => "E", "code_client" => $societe->code_client, "nom" => $societe->name, "phone" => $societe->phone, "address" => $societe->address, "zip" => $societe->zip, "town" => $societe->town, "ref" => $facture->ref, "date" => dol_print_date($facture->date, "%d-%m-%Y"), "email" => $societe->email, "total" => price($facture->total_ht), "total_ttc" => price($facture->total_ttc), "id8Sens" => $this->id8sens);
             $facture->fetch_lines();
             foreach ($facture->lines as $line) {
                 $type = $this->getRef($line);

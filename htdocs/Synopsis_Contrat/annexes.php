@@ -345,7 +345,7 @@ function infoContrat($contrat) {
         $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "facture WHERE fk_soc = " . $contrat->socid;
         if ($resql = $db->query($requete)) {
             while ($res = $db->fetch_object($resql)) {
-                $optgroup[2]["f" . $res->rowid] = $res->facnumber . " (" . round($res->total, 0) . " &euro;)";
+                $optgroup[2]["f" . $res->rowid] = $res->ref . " (" . round($res->total, 0) . " &euro;)";
             }
         }
 

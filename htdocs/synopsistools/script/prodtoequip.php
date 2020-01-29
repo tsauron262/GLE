@@ -212,10 +212,10 @@ $savok = 0;
     $req = "UPDATE `llx_bs_sav` SET "
             . "id_facture_acompte = (SELECT MAX(f.rowid) "
             . "FROM `llx_facture` f, llx_element_element "
-            . "WHERE sourcetype = 'propal' AND targettype = 'facture' AND fk_source = id_propal AND fk_target = f.rowid AND f.`facnumber` LIKE 'AC%') "
+            . "WHERE sourcetype = 'propal' AND targettype = 'facture' AND fk_source = id_propal AND fk_target = f.rowid AND f.`ref` LIKE 'AC%') "
             . "WHERE `id_propal` > 0 AND `id_facture_acompte` < 1";
 
-    $req2 = "UPDATE `llx_bs_sav` SET id_facture = (SELECT MAX(f.rowid) FROM `llx_facture` f, llx_element_element WHERE sourcetype = 'propal' AND targettype = 'facture' AND fk_source = id_propal AND fk_target = f.rowid AND f.`facnumber` LIKE 'FA%') WHERE `id_propal` > 0 AND `id_facture` < 1";
+    $req2 = "UPDATE `llx_bs_sav` SET id_facture = (SELECT MAX(f.rowid) FROM `llx_facture` f, llx_element_element WHERE sourcetype = 'propal' AND targettype = 'facture' AND fk_source = id_propal AND fk_target = f.rowid AND f.`ref` LIKE 'FA%') WHERE `id_propal` > 0 AND `id_facture` < 1";
     $req3 = "UPDATE `llx_bs_sav` SET `id_discount` = (SELECT rowid FROM `llx_societe_remise_except` WHERE `fk_facture_source` = id_facture_acompte) WHERE `id_facture_acompte` > 0;";
     $req4 = 'UPDATE `llx_bs_sav` SET `pword_admin`="x" WHERE `pword_admin` = ""';
     $db->query($req);

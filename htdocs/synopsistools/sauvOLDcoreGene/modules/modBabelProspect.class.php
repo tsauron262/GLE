@@ -231,7 +231,7 @@ class modBabelProspect extends DolibarrModules
                     //2 ajoute les boites pour tous les utlisateurs
                     $requete1 = "INSERT into ".MAIN_DB_PREFIX."boxes (rowid,box_id,position,box_order,fk_user) VALUES (".$this->numero.$i.", $objp->rowid, $this->numero, '".$arr[$i][2]."', 0)";
                     $resql1 = $db->query($requete1);
-                    //$sql = "SELECT f.facnumber, f.total,f.datef as df, f.rowid as facid, f.fk_user_author, f.paye";
+                    //$sql = "SELECT f.ref, f.total,f.datef as df, f.rowid as facid, f.fk_user_author, f.paye";
                     //$sql .= " FROM ".MAIN_DB_PREFIX."facture as f, ".MAIN_DB_PREFIX."fa_pr as fp WHERE fp.fk_facture = f.rowid AND f.fk_soc = 1";
             }
         }

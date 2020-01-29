@@ -767,7 +767,7 @@ function displayGridFacture()
                     hidden: true
                 }, {
                     name: 'ref',
-                    index: 'facnumber',
+                    index: 'ref',
                     width: 100,
                     align: "center"
                 }, {

@@ -29,7 +29,7 @@ function widget_listPrelevementFacture() {
     if ($user->rights->prelevement->bons->lire)
     {
 
-        $sql = "SELECT f.facnumber, f.rowid, s.nom, s.rowid as socid";
+        $sql = "SELECT f.ref, f.rowid, s.nom, s.rowid as socid";
         if (!$user->rights->societe->client->voir && !$socid) $sql .= ", sc.fk_soc, sc.fk_user";
         $sql .= " FROM ".MAIN_DB_PREFIX."facture as f, ".MAIN_DB_PREFIX."societe as s";
         if (!$user->rights->societe->client->voir && !$socid) $sql .= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
@@ -64,13 +64,13 @@ function widget_listPrelevementFacture() {
               if ($i < 10)
               {
                   $table .=  '<tr '.$bc[$var].'><td>';
-                  $table .=  '<a href="'.DOL_URL_ROOT.'/compta/facture/prelevement.php?facid='.$obj->rowid.'">'.img_file().' '.$obj->facnumber.'</a></td>';
+                  $table .=  '<a href="'.DOL_URL_ROOT.'/compta/facture/prelevement.php?facid='.$obj->rowid.'">'.img_file().' '.$obj->ref.'</a></td>';
                   $table .=  '<td><a href="'.DOL_URL_ROOT.'/soc.php?socid='.$obj->socid.'">'.img_object($langs->trans("ShowCompany"),'company').' '.$obj->nom.'</a></td>';
                   $table .=  '</tr>';
               }
 
               $table2 .=  '<tr '.$bc[$var].'><td>';
-              $table2 .=  '<a href="'.DOL_URL_ROOT.'/compta/facture/prelevement.php?facid='.$obj->rowid.'">'.img_file().' '.$obj->facnumber.'</a></td>';
+              $table2 .=  '<a href="'.DOL_URL_ROOT.'/compta/facture/prelevement.php?facid='.$obj->rowid.'">'.img_file().' '.$obj->ref.'</a></td>';
               $table2 .=  '<td><a href="'.DOL_URL_ROOT.'/soc.php?socid='.$obj->socid.'">'.img_object($langs->trans("ShowCompany"),'company').' '.$obj->nom.'</a></td>';
               $table2 .=  '</tr>';
 

@@ -22,14 +22,14 @@ class synopsisexport {
     public function exportFactureSav($print = true) {
         if($print)
         echo "Debut export : <br/>";
-//        $result = $this->db->query("SELECT code_client, nom, phone, address, zip, town, facnumber, DATE_FORMAT(fact.datec, '%d-%m-%Y') as date, fact.rowid as factid 
+//        $result = $this->db->query("SELECT code_client, nom, phone, address, zip, town, ref, DATE_FORMAT(fact.datec, '%d-%m-%Y') as date, fact.rowid as factid 
 //, email , total, total_ttc, id8Sens FROM  `" . MAIN_DB_PREFIX . "facture` fact, " . MAIN_DB_PREFIX . "societe soc
 //LEFT JOIN " . MAIN_DB_PREFIX . "element_element el, " . MAIN_DB_PREFIX . "user_extrafields ue, " . MAIN_DB_PREFIX . "synopsischrono_view_105 chrono 
 // WHERE `fk_object` = IF(chrono.Technicien > 0, chrono.Technicien, fact.fk_user_author) AND el.targettype = 'facture' AND el.sourcetype = 'propal' AND el.fk_source = chrono.propalid AND fk_target = fact.rowid
 //  AND  fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut = 2 AND  close_code is null AND paye = 1 AND extraparams is null GROUP BY fact.rowid");
 
 
-//        $result = $this->db->query("SELECT code_client, nom, phone, address, zip, town, facnumber, DATE_FORMAT(fact.datec, '%d-%m-%Y') as date, fact.rowid as factid 
+//        $result = $this->db->query("SELECT code_client, nom, phone, address, zip, town, ref, DATE_FORMAT(fact.datec, '%d-%m-%Y') as date, fact.rowid as factid 
 //, email , total, total_ttc, idtech8sens as id8Sens, chronoT.Centre FROM  `" . MAIN_DB_PREFIX . "facture` fact
 //
 //
@@ -41,10 +41,10 @@ class synopsisexport {
 //, " . MAIN_DB_PREFIX . "societe soc
 //WHERE   fact.fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut > 0 AND  close_code is null "/* AND paye = 1 */ . " AND extraparams is null AND total != 0 GROUP BY fact.rowid");
 
-        $result = $this->db->query("SELECT code_client, nom, phone, address, zip, town, facnumber, DATE_FORMAT(fact.datec, '%d-%m-%Y') as date, fact.rowid as factid , email , fact.total, fact.total_ttc, idtech8sens as id8Sens, chronoT.Centre "
+        $result = $this->db->query("SELECT code_client, nom, phone, address, zip, town, ref, DATE_FORMAT(fact.datec, '%d-%m-%Y') as date, fact.rowid as factid , email , fact.total, fact.total_ttc, idtech8sens as id8Sens, chronoT.Centre "
                 . "FROM `" . MAIN_DB_PREFIX . "facture` fact, " . MAIN_DB_PREFIX . "element_element el , " . MAIN_DB_PREFIX . "propal prop, " . MAIN_DB_PREFIX . "synopsischrono chrono , " . MAIN_DB_PREFIX . "synopsischrono_chrono_105 chronoT , " . MAIN_DB_PREFIX . "user_extrafields ue , " . MAIN_DB_PREFIX . "societe soc "
                 . "WHERE fact.fk_soc = soc.rowid AND fact.fk_statut > 0 AND close_code is null AND (fact.extraparams < 1 || fact.extraparams is NULL) AND fact.total != 0 AND el.targettype = 'facture' AND el.sourcetype = 'propal' AND fk_target = fact.rowid AND prop.rowid = el.fk_source AND prop.fk_statut != 3 AND prop.rowid = chrono.propalid AND chronoT.id = chrono.id AND `fk_object` = IF(chronoT.Technicien > 0, chronoT.Technicien, fact.fk_user_author) "
-                . "AND facnumber NOT LIKE '%PROV%' GROUP BY fact.rowid");
+                . "AND ref NOT LIKE '%PROV%' GROUP BY fact.rowid");
 
         while ($ligne = $this->db->fetch_object($result)) {
             $this->annulExport = false;
@@ -63,13 +63,13 @@ class synopsisexport {
             $return = $return1 . $return2;
 //            echo $return;
             if (!$this->annulExport) {
-                $this->sortie($return, $ligne->facnumber, "factureSav", $ligne->factid, $print);
+                $this->sortie($return, $ligne->ref, "factureSav", $ligne->factid, $print);
 
                 if ($print)
-                    echo "<br/>Facture : " . $ligne->facnumber . " exporté.<br/>";
+                    echo "<br/>Facture : " . $ligne->ref . " exporté.<br/>";
             }
             else 
-                echo "Export de " . $ligne->facnumber . " annule.</br>";
+                echo "Export de " . $ligne->ref . " annule.</br>";
         }
         if($print)
         echo "Fin export : <br/>";
@@ -142,7 +142,7 @@ class synopsisexport {
             $partReq1 = "SELECT COUNT(DISTINCT(chrono.id)) as NB_PC";
             $partReqFin = " LIMIT 0,10000";
             $chargeAccompte = false;
-//            $partReq5 = " FROM  " . MAIN_DB_PREFIX . "synopsischrono_view_105 chrono LEFT JOIN " . MAIN_DB_PREFIX . "propal propal on chrono.propalId = propal.rowid LEFT JOIN  " . MAIN_DB_PREFIX . "element_element on sourcetype = 'propal' AND targettype = 'facture' AND fk_source = propal.rowid LEFT JOIN " . MAIN_DB_PREFIX . "facture fact ON fact.rowid = fk_target AND fact.facnumber LIKE 'FA%' WHERE fact.close_code is null AND ";
+//            $partReq5 = " FROM  " . MAIN_DB_PREFIX . "synopsischrono_view_105 chrono LEFT JOIN " . MAIN_DB_PREFIX . "propal propal on chrono.propalId = propal.rowid LEFT JOIN  " . MAIN_DB_PREFIX . "element_element on sourcetype = 'propal' AND targettype = 'facture' AND fk_source = propal.rowid LEFT JOIN " . MAIN_DB_PREFIX . "facture fact ON fact.rowid = fk_target AND fact.ref LIKE 'FA%' WHERE fact.close_code is null AND ";
         } else {
             $totalAchat = "SUM((factdet.buy_price_ht*factdet.qty))";
 //            $totalAchat = "SUM((if(factdet.total_ht < 0 and factdet.buy_price_ht > 0,-factdet.buy_price_ht*factdet.qty,factdet.buy_price_ht*factdet.qty)))";
@@ -161,15 +161,15 @@ class synopsisexport {
         $partReq5 .= " LEFT JOIN  " . MAIN_DB_PREFIX . "societe soc on  soc.rowid = propal.fk_soc ";
 //        $partReq5 .= " LEFT JOIN  " . MAIN_DB_PREFIX . "element_element el on  el.sourcetype = 'propal' AND el.targettype = 'facture' AND el.fk_source = propal.rowid ";
         $partReq5 .= " LEFT JOIN  " . MAIN_DB_PREFIX . "element_element el2 on  el2.sourcetype = 'propal' AND el2.targettype = 'facture' AND el2.fk_source = propal.rowid ";
-        $partReq5 .= " LEFT JOIN " . MAIN_DB_PREFIX . "facture fact2 ON fact2.close_code is null AND fact2.rowid = el2.fk_target AND (fact2.facnumber LIKE 'AC%' || fact2.facnumber LIKE 'FA%' || fact2.facnumber LIKE 'AV%')";
-        $partReq5 .= " LEFT JOIN " . MAIN_DB_PREFIX . "facture fact ON fact.close_code is null AND fact.rowid = el2.fk_target AND fact.facnumber LIKE 'FA%' ";
+        $partReq5 .= " LEFT JOIN " . MAIN_DB_PREFIX . "facture fact2 ON fact2.close_code is null AND fact2.rowid = el2.fk_target AND (fact2.ref LIKE 'AC%' || fact2.ref LIKE 'FA%' || fact2.ref LIKE 'AV%')";
+        $partReq5 .= " LEFT JOIN " . MAIN_DB_PREFIX . "facture fact ON fact.close_code is null AND fact.rowid = el2.fk_target AND fact.ref LIKE 'FA%' ";
         $partReq5 .= " LEFT JOIN " . MAIN_DB_PREFIX . "facturedet factdet ON factdet.fk_facture = fact2.rowid  AND (factdet.subprice != 0 || factdet.buy_price_ht != 0) " . $tableSus . " WHERE ";
 
         $partReq1 .= ", MAX(fact.date_valid) as Date_Facture ";
 
         if ($typeAff2 == "fact") {
             $partReq1 = "SELECT CONCAT(soc.nom, CONCAT('|', soc.rowid)) as objSoc, "
-                    . "CONCAT(facnumber,CONCAT('|', fact.rowid)) as objFact, "
+                    . "CONCAT(ref,CONCAT('|', fact.rowid)) as objFact, "
                     . "fact.total,"
                     . "SUM(det.total_ht - (det.buy_price_ht * det.qty)) as total_marge, "
                     . "fact.fk_statut";
@@ -189,7 +189,7 @@ class synopsisexport {
             $partReq5 .= " WHERE soc.rowid = fact.fk_soc AND det.fk_facture = fact.rowid AND fact.close_code is null AND (propal.fk_statut < 3 || propal.fk_statut IS NULL || propal.fk_statut = 4) AND ";
             $partReqFin = " GROUP BY p1.rowid, fact.rowid ORDER BY fact.rowid LIMIT 0,200000";
             $chargeAccompte = false;
-//            $partReq5 = " FROM  " . MAIN_DB_PREFIX . "synopsischrono_view_105 chrono LEFT JOIN " . MAIN_DB_PREFIX . "propal propal on chrono.propalId = propal.rowid LEFT JOIN  " . MAIN_DB_PREFIX . "element_element on sourcetype = 'propal' AND targettype = 'facture' AND fk_source = propal.rowid LEFT JOIN " . MAIN_DB_PREFIX . "facture fact ON fact.rowid = fk_target AND fact.facnumber LIKE 'FA%' WHERE fact.close_code is null AND ";
+//            $partReq5 = " FROM  " . MAIN_DB_PREFIX . "synopsischrono_view_105 chrono LEFT JOIN " . MAIN_DB_PREFIX . "propal propal on chrono.propalId = propal.rowid LEFT JOIN  " . MAIN_DB_PREFIX . "element_element on sourcetype = 'propal' AND targettype = 'facture' AND fk_source = propal.rowid LEFT JOIN " . MAIN_DB_PREFIX . "facture fact ON fact.rowid = fk_target AND fact.ref LIKE 'FA%' WHERE fact.close_code is null AND ";
         }
 
 
@@ -226,7 +226,7 @@ class synopsisexport {
                 $this->statLigneFacture($titre, $partReq1 . $partReq5 . $where . " AND chrono.id in (" . implode(",", $tabChrono) . ") " . $partReqFin);
 
 
-//            echo "<br/>Facture : " . $ligne['facnumber'] . " exporté.<br/>";
+//            echo "<br/>Facture : " . $ligne['ref'] . " exporté.<br/>";
             }
         } elseif ($typeAff == "parTypeGar") {
             $result = $this->db->query("SELECT Type_garantie as description, id FROM " . MAIN_DB_PREFIX . "synopsischrono_chrono_101");
@@ -251,7 +251,7 @@ class synopsisexport {
                 $this->statLigneFacture($titre, $partReq1 . $partReq5 . $where . " AND chrono.id in (" . implode(",", $tabChrono) . ") " . $partReqFin);
 
 
-//            echo "<br/>Facture : " . $ligne['facnumber'] . " exporté.<br/>";
+//            echo "<br/>Facture : " . $ligne['ref'] . " exporté.<br/>";
             }
         } elseif ($typeAff == "parCentre" || $centre) {
 //            $req = "SELECT label, valeur, propalid
@@ -286,7 +286,7 @@ WHERE  `list_refid` =11 AND ct.Centre = ls.valeur AND ct.id = chrono.id";
 //                break;
                 $this->statLigneFacture($titre, $partReq1 . $partReq5 . $where . " AND propal.fk_statut != 3 AND propal.rowid IN ('" . implode("','", $val) . "') " . $partReqFin);
 //                $this->statLigneFacture($titre, $partReq1 . $partReq5 . $where . " AND CentreVal = '" . $val . "' " . $partReqFin);
-//            echo "<br/>Facture : " . $ligne['facnumber'] . " exporté.<br/>";
+//            echo "<br/>Facture : " . $ligne['ref'] . " exporté.<br/>";
             }
         } else {
             $this->statLigneFacture("Stat", $partReq1 . $partReq5 . $where . $partReqFin);
@@ -457,7 +457,7 @@ WHERE  `list_refid` =11 AND ct.Centre = ls.valeur AND ct.id = chrono.id";
                                 $this->annulExport = true;
                             }
                         } else{
-                            mailSyn("jc.cannet@bimp.fr", "Facture sans Centre", "Bonjour, la facture ".$ligne->facnumber." na pas de centre, elle ne peut donc pas étre exporté vers 8Sens. Cordialement.");
+                            mailSyn("jc.cannet@bimp.fr", "Facture sans Centre", "Bonjour, la facture ".$ligne->ref." na pas de centre, elle ne peut donc pas étre exporté vers 8Sens. Cordialement.");
                             dol_syslog("Pas d'id tech, pas de centre pour export facture " . print_r($ligne, 1), 3);
                             $this->annulExport =true;
                         }

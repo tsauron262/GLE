@@ -278,7 +278,7 @@ if (isset($_REQUEST['actionEtat'])) {
 //            $totHt = $chrono->propal->total_ht;
 //            $totTtc = $chrono->propal->total_ttc;
 //            $tabT = $chrono->propal->InvoiceArrayList($chrono->propal->id);
-//            if (isset($tabT[0]) && isset($tabT[0]->facnumber) && stripos($tabT[0]->facnumber, "AC") !== false) {
+//            if (isset($tabT[0]) && isset($tabT[0]->ref) && stripos($tabT[0]->ref, "AC") !== false) {
 //                $totHt += $tabT[0]->total;
 //                $totTtc += $tabT[0]->total*1.2;
 //            } 
@@ -499,16 +499,16 @@ function envoieMail($type, $chrono, $obj, $toMail, $fromMail, $tel, $nomMachine,
             if (count($tabT) > 0) {
                 $facture = new Facture($db);
                 $facture->fetch($tabT[count($tabT) - 1]['d']);
-                $facture->facnumber = $facture->ref;
+                $facture->ref = $facture->ref;
             }
         }
         //Envoie mail
         $tabFileFact = $tabFileFact2 = $tabFileFact3 = array();
-        $fileProp = DOL_DATA_ROOT . "/facture/" . $facture->facnumber . "/" . $facture->facnumber . ".pdf";
+        $fileProp = DOL_DATA_ROOT . "/facture/" . $facture->ref . "/" . $facture->ref . ".pdf";
         if (is_file($fileProp)) {
             $tabFileFact[] = $fileProp;
             $tabFileFact2[] = ".pdf";
-            $tabFileFact3[] = $facture->facnumber . ".pdf";
+            $tabFileFact3[] = $facture->ref . ".pdf";
         }
 
         mailSyn2("Fermeture du dossier " . $chrono->ref, $toMail, $fromMail, "Nous vous remercions d'avoir choisi Bimp pour votre '" . $nomMachine . "'.

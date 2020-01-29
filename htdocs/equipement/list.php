@@ -162,7 +162,7 @@ $sql = "SELECT";
 $sql.= " e.ref, e.rowid, e.fk_statut, e.fk_product, p.ref as refproduit, p.label as labelproduit,";
 $sql.= " e.fk_entrepot, e.quantity,";
 $sql.= " e.fk_soc_fourn, sfou.nom as CompanyFourn, e.fk_facture_fourn, ff.ref as refFactureFourn,";
-$sql.= " e.fk_soc_client, scli.nom as CompanyClient, e.fk_facture, f.facnumber as refFacture,";
+$sql.= " e.fk_soc_client, scli.nom as CompanyClient, e.fk_facture, f.ref as refFacture,";
 $sql.= " e.datee, e.dateo, e.dated, ee.libelle as etatequiplibelle, e.numversion ";
 
 $sql.= " FROM ".MAIN_DB_PREFIX."equipement as e";
@@ -183,7 +183,7 @@ if ($sall) {
 	$sql .= " OR sfou.nom like '%".$db->escape($sall)."%'";
 	$sql .= " OR ff.ref like '%".$db->escape($sall)."%'";
 	$sql .= " OR scli.nom like '%".$db->escape($sall)."%'";
-	$sql .= " OR f.facnumber like '%".$db->escape($sall)."%'";
+	$sql .= " OR f.ref like '%".$db->escape($sall)."%'";
 	$sql .= " )";
 } else {
 	if ($search_ref)				$sql .= " AND e.ref like '%".$db->escape($search_ref)."%'";
@@ -193,7 +193,7 @@ if ($sall) {
 	if ($search_company_fourn)		$sql .= " AND sfou.nom like '%".$db->escape($search_company_fourn)."%'";
 	if ($search_reffact_fourn)		$sql .= " AND ff.ref like '%".$db->escape($search_reffact_fourn)."%'";
 	if ($search_company_client)		$sql .= " AND scli.nom like '%".$db->escape($search_company_client)."%'";
-	if ($search_reffact_client)		$sql .= " AND f.facnumber like '%".$db->escape($search_reffact_client)."%'";
+	if ($search_reffact_client)		$sql .= " AND f.ref like '%".$db->escape($search_reffact_client)."%'";
 }
 if ($search_entrepot >=0)		$sql .= " AND ent.rowid =".$search_entrepot;
 if ($search_etatequipement>=0)	$sql .= " AND e.fk_etatequipement =".$search_etatequipement;
@@ -231,10 +231,10 @@ if ($result) {
 	print_liste_field_titre($langs->trans("RefProduit").'<br>'.$langs->trans("Label"), $_SERVER["PHP_SELF"],"p.ref","", $urlparam,'', $sortfield, $sortorder);
 	print_liste_field_titre($langs->trans("NumVersion"), $_SERVER["PHP_SELF"],"e.numversion","", $urlparam,'', $sortfield, $sortorder);
 	print_liste_field_titre($langs->trans("FournisseurFactFourn") , $_SERVER["PHP_SELF"],"sfou.nom","", $urlparam,'align="left" width=200px', $sortfield, $sortorder);
-	//print_liste_field_titre($langs->trans("FF"), $_SERVER["PHP_SELF"],"ff.facnumber","", $urlparam,'', $sortfield, $sortorder);
+	//print_liste_field_titre($langs->trans("FF"), $_SERVER["PHP_SELF"],"ff.ref","", $urlparam,'', $sortfield, $sortorder);
 	print_liste_field_titre($langs->trans("Entrepot"), $_SERVER["PHP_SELF"],"ent.label","", $urlparam,'align="left" width=150px', $sortfield, $sortorder);
 	print_liste_field_titre($langs->trans("CompanyClientFactCli"), $_SERVER["PHP_SELF"],"scli.nom","", $urlparam,'align="left" width=200px', $sortfield, $sortorder);
-	//print_liste_field_titre($langs->trans("FC"), $_SERVER["PHP_SELF"],"f.facnumber","", $urlparam,'', $sortfield, $sortorder);
+	//print_liste_field_titre($langs->trans("FC"), $_SERVER["PHP_SELF"],"f.ref","", $urlparam,'', $sortfield, $sortorder);
 	print_liste_field_titre($langs->trans("Dateo"), $_SERVER["PHP_SELF"],"e.dateo","", $urlparam,'align="center" width=100px', $sortfield, $sortorder);
 	print_liste_field_titre($langs->trans("Datee"), $_SERVER["PHP_SELF"],"e.datee","", $urlparam,'align="center" width=100px', $sortfield, $sortorder);
 	if ($conf->global->EQUIPEMENT_USEDLUODATE == 1) 

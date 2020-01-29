@@ -8,7 +8,7 @@ require_once __DIR__ . '/../Bimp_Lib.php';
 //llxHeader();
 
 $i=0;
-$sql = $db->query("SELECT rowid FROM `".MAIN_DB_PREFIX."facture` WHERE `date_valid` > '2019-06-30 00:00:00' AND fk_user_comm = 0 AND `facnumber` LIKE 'AV%'");
+$sql = $db->query("SELECT rowid FROM `".MAIN_DB_PREFIX."facture` WHERE `date_valid` > '2019-06-30 00:00:00' AND fk_user_comm = 0 AND `ref` LIKE 'AV%'");
 while($ln = $db->fetch_object($sql)){
     
     

@@ -67,7 +67,7 @@ objects:
                     
     apple_parts: 
         relation: hasMany
-        delete: 1
+        delete: 0
         instance: 
             bimp_object: BS_ApplePart       
             
@@ -76,6 +76,20 @@ objects:
         delete: 1
         instance: 
             bimp_object: BS_Pret
+            
+    issues: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: BS_Issue
+            
+#    diagnostics: 
+#        relation: hasMany
+#        delete: 1
+#        instance: 
+#            bimp_object: 
+#                module: bimpapple
+#                name: GSX_Diagnostic
             
 associations: 
     propales:
@@ -120,13 +134,7 @@ fields:
         object: equipment
         required: 1
         input: 
-            type: search_list
-            search_list:
-                table: be_equipment e
-                field_return_value: e.id
-                field_return_label: e.serial
-                fields_search: e.serial,e.id,e.product_label
-            help: Numéro de série ou ID d'un équipement
+            card: default
         create_form: light
     id_entrepot:
         label: Entrepot (stock)
@@ -151,9 +159,6 @@ fields:
         object: client
         required: 1
         input: 
-            type: search_societe
-            societe_type: customer
-            help: Entrez le nom ou la référence d'un client pour effectuer une recherche
             card: default
         search:
             input: 
@@ -329,6 +334,16 @@ forms:
             - field: id_client
             - field: id_contact
             - field: id_equipment
+            - custom: 1
+              label: Conserver l'équipement dans son emplacement actuel
+              input_name: keep_equipment_current_place
+              data_type: bool
+              content: 
+                  callback: renderEquipmentPlaceOptionInput
+              display_if: 
+                  field_name: id_equipment
+                  hide_values: 0,
+              depends_on: id_equipment
             - field: symptomes
             - field: id_contrat
             - field: prioritaire
@@ -418,6 +433,12 @@ forms:
               input: 
                   type: toggle
               value: 1
+            - custom: 1
+              label: Replacer l'équipement dans son emplacement précédent
+              input_name: put_equipment_on_prev_place
+              data_type: bool
+              content: 
+                  callback: renderEquipmentPlaceOptionInput
                   
     close_refused: 
         title: Fermeture
@@ -558,6 +579,19 @@ forms:
                   hide_values: 0,
               value: 6
               
+    gsx_token: 
+        title: Authentification GSX
+        rows: 
+            - custom: 1
+              label: GSX API Token 
+              input_name: token
+              input: 
+                  type: text
+                  help: Veuillez vous athentifier sur le site Apple GSX puis copier-coller le token obtenu. 
+                  extra_content: 
+                      callback: renderGsxTokenInputExtraContent
+              required: 1          
+              
 fields_tables: 
     infos: 
         title: Informations
@@ -686,6 +720,7 @@ views:
                   list: 
                       name: default
                       children: prets
+                      
     infos:
         title: 
             callback: getRef
@@ -694,17 +729,40 @@ views:
         objects_change_reload: BS_SavProduct,BS_ApplePart,Bimp_Paiement
         rows:
             - cols: 
-                  - type: fields_table
-                    col_lg: 6
-                    col_md: 6
-                    fields_table: 
-                        name: infos
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  fields_table: 
+                      name: infos
                   
-                  - type: fields_table
-                    col_lg: 6
-                    col_md: 6
-                    fields_table:
-                        name: client
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  fields_table:
+                      name: client
+            - cols: 
+                - type: custom
+                  col_lg: 6
+                  col_md: 6
+                  custom: 
+                      callback: renderPropalesList            
+                      
+    propal: 
+        panel: 0
+        rows: 
+            - cols: 
+                - type: custom
+                  custom: 
+                      callback: renderPropalView
+            - cols: 
+                - type: custom
+                  custom: 
+                      callback: renderApplePartsList
+            - cols: 
+                - type: custom
+                  custom: 
+                      callback: renderLoadPartsButton
+            
     materiel:
         panel: 0
         rows:    
@@ -858,9 +916,15 @@ searches:
     default: 
         fields_search: 
             - e.serial
+            - e.imei
             - a.ref
             - s.nom
             - r.repair_confirm_number
+            - r.repair_number
+        fields_return: 
+            - a.ref
+            - s.nom
+        label_syntaxe: '<a.ref> (<s.nom>)'
         joins: 
             - table: be_equipment
               on: a.id_equipment = e.id
@@ -871,7 +935,7 @@ searches:
             - table: bimp_gsx_repair
               alias: r
               on: a.id = r.id_sav
-              
+                      
 pages: 
     default: 
         nav_tabs: 

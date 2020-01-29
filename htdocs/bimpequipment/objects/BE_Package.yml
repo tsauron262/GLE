@@ -54,7 +54,7 @@ forms:
               input_name: qty
               input: 
                   type: qty
-              min: 1
+              min: 0
               decimals: 0
               
             - custom: 1
@@ -83,6 +83,39 @@ forms:
               value: 0
               required: 1
               
+    move_product: 
+        rows: 
+            - custom: 1
+              label: Produit(s) à déplacer
+              input_name: product
+              content: 
+                  callback: displayProductsToRemove
+
+            - custom: 1
+              label: Package de destination
+              input_name: id_package_dest
+              data_type: id_object
+              input: 
+                  type: select
+                  options: 
+                      callback: getAllPackagesArray
+              required: 1
+
+              
+            - custom: 1
+              label: Quantité
+              data_type: qty
+              input_name: qty
+              input: 
+                  type: qty
+              min: 1
+              max: 
+                  callback: getQuantityMaxProduct
+              decimals: 0
+              value: 1
+
+
+              
     remove_equipment: 
         rows: 
             - custom: 1
@@ -105,6 +138,23 @@ forms:
               display_if: 
                   field_name: keep_place
                   show_values: 0
+                  
+    move_equipment: 
+        rows: 
+            - custom: 1
+              label: Equipement(s) à retirer
+              input_name: equipments
+              content: 
+                  callback: displayEquipmentsToRemove
+            - custom: 1
+              label: Package de destination
+              input_name: id_package_dest
+              data_type: id_object
+              input: 
+                  type: select
+                  options: 
+                      callback: getAllPackagesArray
+              required: 1
             
 views:
     default: 
@@ -169,6 +219,12 @@ filters_panel:
             place_date:
                 field: date
                 child: places
+            place_date_end:
+                custom: 1
+                field: place_date_end
+                data_type: date
+                label: Date de départ (emplacement)
+                type: date_range
                 
 lists:
     default: 

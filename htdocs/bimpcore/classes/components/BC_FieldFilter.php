@@ -81,7 +81,10 @@ class BC_FieldFilter extends BC_Filter
 
             if (is_null($this->params['type'])) {
                 $items = null;
-                if (isset($this->field->params['values']) && !empty($this->field->params['values'])) {
+                $input_type = $this->object->getConf('fields/' . $this->field->name . '/input/type', '');
+                if ($input_type === 'search_user') {
+                    $this->params['type'] = 'user';
+                } elseif (isset($this->field->params['values']) && !empty($this->field->params['values'])) {
                     if (count($this->field->params['values']) <= 10) {
                         $this->params['type'] = 'check_list';
                         $items = $this->field->params['values'];
@@ -140,6 +143,11 @@ class BC_FieldFilter extends BC_Filter
 
         switch ($this->params['type']) {
             case 'value':
+            case 'user':
+                if ($this->params['type'] === 'user' && $value === 'current') {
+                    $label = 'Utilisateur connecté';
+                    break;
+                }
                 if ($this->field->params['type'] === 'id_object') {
                     $this->field->display_name = 'ref_nom';
                 }
@@ -149,39 +157,48 @@ class BC_FieldFilter extends BC_Filter
                 break;
 
             case 'value_part':
-                if (in_array($this->params['part_type'], array('beginning', 'middle'))) {
-                    $label .= '... ';
-                }
-                $label .= $value;
-                if (in_array($this->params['part_type'], array('middle', 'end'))) {
-                    $label .= ' ...';
-                }
+                $label = self::getValuePartLabel($value, $this->params['part_type']);
                 break;
 
             case 'range':
             case 'date_range':
-                if (is_array($value) && (isset($value['min']) || isset($value['max']))) {
-                    $label .= 'Min: <strong>';
-                    if (!isset($value['min']) || $value['min'] === '') {
-                        $label .= '-&infin;';
-                    } else {
-                        $this->field->value = $value['min'];
-                        $label .= $this->field->displayValue();
-                    }
-
-                    $label .= '</strong><br/>Max: <strong>';
-
-                    if (!isset($value['max']) || $value['max'] === '') {
-                        $label .= '&infin;';
-                    } else {
-                        $this->field->value = $value['max'];
-                        $label .= $this->field->displayValue();
-                    }
-
-                    $label .= '</strong>';
-                } else {
-                    $label = '<span class="danger">Valeurs invalides</valeur>';
+                $is_dates = false;
+                if ($this->params['type'] === 'date_range') {
+                    $is_dates = true;
                 }
+                if (is_array($value)) {
+                    $label = '';
+                    if (isset($value['period']) && is_array($value['period']) && !empty($value['period'])) {
+                        $label = self::getDateRangePeriodLabel($value['period']);
+                        $value = self::convertDateRangePeriodValue($value['period']);
+                    }
+                    if ((isset($value['min']) || isset($value['max']))) {
+                        $label .= ($is_dates ? 'Du' : 'Min') . ': <strong>';
+                        if (!isset($value['min']) || $value['min'] === '') {
+                            $label .= '-&infin;';
+                        } else {
+                            $this->field->value = $value['min'];
+                            $label .= $this->field->displayValue();
+                        }
+
+                        $label .= '</strong><br/>';
+                        $label .= ($is_dates ? 'Au' : 'Max') . ': <strong>';
+                        if (!isset($value['max']) || $value['max'] === '') {
+                            $label .= '&infin;';
+                        } else {
+                            $this->field->value = $value['max'];
+                            $label .= $this->field->displayValue();
+                        }
+
+                        $label .= '</strong>';
+                        break;
+                    }
+                }
+                $label = '<span class="danger">Valeurs invalides</valeur>';
+                break;
+
+            default:
+                $label = parent::getFilterValueLabel($value);
                 break;
         }
 
@@ -213,10 +230,13 @@ class BC_FieldFilter extends BC_Filter
             $current_bc = $prev_bc;
             return $errors;
         }
-
+        
+        $values = self::getConvertedValues($this->params['type'], $this->values);
+        
         switch ($this->params['type']) {
             case 'value':
-                foreach ($this->values as $value) {
+            case 'user':
+                foreach ($values as $value) {
                     if (BimpTools::checkValueByType($this->field->params['type'], $value)) {
                         $or_field[] = $value;
                     } else {
@@ -227,48 +247,19 @@ class BC_FieldFilter extends BC_Filter
 
             case 'value_part':
                 foreach ($this->values as $value) {
-                    $value = (string) $value;
-                    if ($value !== '') {
-                        $or_field[] = array(
-                            'part_type' => $this->params['part_type'],
-                            'part'      => $value
-                        );
-                    }
+                    $or_field[] = self::getValuePartSqlFilter($value, $this->params['part_type'], $errors);
                 }
                 break;
 
             case 'date_range':
+                foreach ($this->values as $value) {
+                    $or_field[] = $this->getRangeSqlFilter($value, $errors, true);
+                }
+                break;
+
             case 'range':
                 foreach ($this->values as $value) {
-                    if (is_array($value)) {
-                        if (isset($value['max']) && $value['max'] !== '') {
-                            if (preg_match('/^\d{4}\-\d{2}\-\d{2}$/', $value['max'])) {
-                                $value['max'] .= ' 23:59:59';
-                            }
-                        }
-                        if (isset($value['min']) || isset($value['max'])) {
-                            if ($value['min'] !== '' && $value['max'] === '') {
-                                $or_field[] = array(
-                                    'operator' => '>=',
-                                    'value'    => $value['min']
-                                );
-                            } elseif ($value['max'] !== '' && $value['min'] === '') {
-                                $or_field[] = array(
-                                    'operator' => '<=',
-                                    'value'    => $value['max']
-                                );
-                            } else {
-                                $or_field[] = array(
-                                    'min' => $value['min'],
-                                    'max' => $value['max']
-                                );
-                            }
-                        } else {
-                            $errors[] = 'Valeurs minimales et maximales absentes';
-                        }
-                    } else {
-                        $errors[] = 'Valeur invalide: "' . $value . '"';
-                    }
+                    $or_field[] = $this->getRangeSqlFilter($value, $errors);
                 }
                 break;
 
@@ -315,8 +306,6 @@ class BC_FieldFilter extends BC_Filter
         }
 
         $onclick = 'addFieldFilterValue($(this), \'' . $this->field->name . '\');';
-
-//        $add_btn_html .= BimpRender::renderRowButton('Ajouter', 'fas_plus-circle', $onclick);
         $add_btn_html = '<div style="text-align: right; margin: 2px 0">';
         $add_btn_html .= '<button type="button" class="btn btn-default btn-small" onclick="' . $onclick . '">';
         $add_btn_html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Ajouter';
@@ -324,6 +313,13 @@ class BC_FieldFilter extends BC_Filter
         $add_btn_html .= '</div>';
 
         switch ($this->params['type']) {
+            case 'user':
+                $html .= '<div style="text-align: center">';
+                $html .= '<span class="btn btn-default btn-small" onclick="addFieldFilterCustomValue($(this), \'current\')">';
+                $html .= BimpRender::renderIcon('fas_user', 'iconLeft') . 'Utilisateur connecté' . BimpRender::renderIcon('fas_plus-circle', 'iconRight');
+                $html .= '</span>';
+                $html .= '</div>';
+
             case 'value':
                 $bc_input = new BC_Input($this->object, $this->field->params['type'], $input_name, $input_path, null, $this->field->params);
                 $html .= $bc_input->renderHtml();
@@ -340,17 +336,12 @@ class BC_FieldFilter extends BC_Filter
                 if ($type === 'datetime') {
                     $type = 'date';
                 }
-                $html .= BimpInput::renderInput($type . '_range', $input_name);
-                $html .= $add_btn_html;
+                $html .= $this->renderDateRangeInput($type . '_range', $input_name, $add_btn_html);
                 break;
 
             case 'range':
                 $bc_input = new BC_Input($this->object, $this->field->params['type'], $input_name, $input_path, null, $this->field->params);
-//                $input_type = $bc_input->params['type'];
                 $input_options = $bc_input->getOptions();
-//
-//                $html .= '<span class="range_input_label">Min: </span>' . BimpInput::renderInput($input_type, $input_name . '_min', '', $input_options);
-//                $html .= '<span class="range_input_label">Max: </span>' . BimpInput::renderInput($input_type, $input_name . '_max', '', $input_options);
 
                 $input_options = array(
                     'data' => array(
@@ -373,7 +364,7 @@ class BC_FieldFilter extends BC_Filter
                 }
                 $html .= BimpInput::renderInput('check_list', $input_name, $this->values, array(
                             'items'              => $this->params['items'],
-                            'select_all_buttons' => 0
+                            'select_all_buttons' => 1
                 ));
                 break;
         }

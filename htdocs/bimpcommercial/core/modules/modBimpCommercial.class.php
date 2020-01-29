@@ -264,6 +264,55 @@ class modBimpCommercial extends DolibarrModules
 
 		$r++;
                 
+                $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
+		$this->rights[$r][1] = 'Editeur HTML ligne comm';	// Permission label
+		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
+		$this->rights[$r][4] = 'editHtml';				// In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+//		$this->rights[$r][5] = 'write';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+
+		$r++;
+                
+                $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
+		$this->rights[$r][1] = 'Voir reval';	// Permission label
+		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
+		$this->rights[$r][4] = 'reval';				// In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+		$this->rights[$r][5] = 'read';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+
+		$r++;
+                
+                $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
+		$this->rights[$r][1] = 'Créer reval';	// Permission label
+		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
+		$this->rights[$r][4] = 'reval';				// In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+		$this->rights[$r][5] = 'write';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+
+		$r++;
+                
+                $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
+		$this->rights[$r][1] = 'Valider reval';	// Permission label
+		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
+		$this->rights[$r][4] = 'reval';				// In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+		$this->rights[$r][5] = 'valid';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+
+		$r++;
+                
+                $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
+		$this->rights[$r][1] = 'Edite zone de Vente';	// Permission label
+		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
+		$this->rights[$r][4] = 'edit_zone_vente';				// In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+//		$this->rights[$r][5] = 'valid';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+
+		$r++;
+                
+                $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
+		$this->rights[$r][1] = 'Edite date facture';	// Permission label
+		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
+		$this->rights[$r][4] = 'edit_date_facture';				// In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+//		$this->rights[$r][5] = 'valid';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+
+		$r++;
+                
+                
                 
 
 		// Main menu entries
@@ -354,10 +403,18 @@ class modBimpCommercial extends DolibarrModules
                 
                 require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
                 $name = 'module_version_'.strtolower($this->name);
+                // Se fais que lors de l'installation du module
                 if(BimpCore::getConf($name) == "") {
                     BimpCore::setConf($name, floatval($this->version));
                     $this->_load_tables('/'.strtolower($this->name).'/sql/');
+                    $extrafields = new ExtraFields($this->db);//a:1:{s:7:"options";a:1:{s:37:"socpeople:lastname:rowid::fk_soc=$ID$";N;}}
+                    $extrafields->addExtraField('contact_default', 'Contact email facturation par défaut', 'sellist', 100, '', 'societe', 0, 0, 0, 'a:1:{s:7:"options";a:1:{s:37:"socpeople:lastname:rowid::fk_soc=$ID$";N;}}', 1, '', 1);
                 }
+                
+                //contact commercial
+//                $sql[]="INSERT INTO `".MAIN_DB_PREFIX."c_type_contact`(`element`, `source`, `code`, `libelle`, `active`) VALUES ('propal', 'internal','SALESREPSIGN','Commercial', '1');";
+//                $sql[]="INSERT INTO `".MAIN_DB_PREFIX."c_type_contact`(`element`, `source`, `code`, `libelle`, `active`) VALUES ('commande', 'internal','SALESREPSIGN','Commercial', '1');";
+//                $sql[]="INSERT INTO `".MAIN_DB_PREFIX."c_type_contact`(`element`, `source`, `code`, `libelle`, `active`) VALUES ('facture', 'internal','SALESREPSIGN','Commercial', '1');";
                 
 
                 // Propales: 
@@ -382,44 +439,44 @@ class modBimpCommercial extends DolibarrModules
                 $sql[] = "UPDATE " . MAIN_DB_PREFIX . "menu SET `url`='/bimpcommercial/index.php?fc=tabCommercial&amp;mainmenu=commercial&amp;leftmenu=' WHERE `type` LIKE 'top' AND `mainmenu` LIKE 'commercial'";
 
 		//$this->_load_tables('/bimpcommercial/sql/');
-                
-                $extrafields = new ExtraFields($this->db);
-                $extrafields->addExtraField('crt', 'Remise CRT', 'varchar', 1, 10, 'product');
-                $extrafields->addExtraField('ref_constructeur', 'Réf. constructeur', 'int', 1, 255, 'product');
-                $extrafields->addExtraField('pa_prevu', 'Prix d\'achat HT prévu', 'decimal', 1, '24,8', 'product', 0, 0, 0);
-                $extrafields->addExtraField('infos_pa', 'Informations prix d\'achat', 'text', 1, 2000, 'product');
-                
-                $extrafields->addExtraField('zone_vente', 'Zone de vente', 'int', 1, 255, 'propal', 0, 0, 1);
-                $extrafields->addExtraField('zone_vente', 'Zone de vente', 'int', 1, 255, 'commande', 0, 0, 1);
-                $extrafields->addExtraField('zone_vente', 'Zone de vente', 'int', 1, 255, 'facture', 0, 0, 1);
-                
-                $extrafields->addExtraField('zone_vente', 'Zone de vente', 'int', 1, 255, 'commande_fournisseur', 0, 0, 1);
-                $extrafields->addExtraField('zone_vente', 'Zone de vente', 'int', 1, 255, 'facture_fourn', 0, 0, 1);
-                
-                $extrafields->addExtraField('pdf_hide_pu', 'Masquer les prix unitaires dans le PDF', 'boolean', 1, 1, 'propal', 0, 0, 0);
-                $extrafields->addExtraField('pdf_hide_pu', 'Masquer les prix unitaires dans le PDF', 'boolean', 1, 1, 'commande', 0, 0, 0);
-                $extrafields->addExtraField('pdf_hide_pu', 'Masquer les prix unitaires dans le PDF', 'boolean', 1, 1, 'facture', 0, 0, 0);
-                
-                $extrafields->addExtraField('pdf_hide_reduc', 'Masquer les réductions dans le PDF', 'boolean', 1, 1, 'propal', 0, 0, 0);
-                $extrafields->addExtraField('pdf_hide_reduc', 'Masquer les réductions dans le PDF', 'boolean', 1, 1, 'commande', 0, 0, 0);
-                $extrafields->addExtraField('pdf_hide_reduc', 'Masquer les réductions dans le PDF', 'boolean', 1, 1, 'facture', 0, 0, 0);
-                
-                $extrafields->addExtraField('pdf_hide_total', 'Masquer les totaux dans le PDF', 'boolean', 1, 1, 'propal', 0, 0, 0);
-                $extrafields->addExtraField('pdf_hide_total', 'Masquer les totaux dans le PDF', 'boolean', 1, 1, 'commande', 0, 0, 0);
-                $extrafields->addExtraField('pdf_hide_total', 'Masquer les totaux dans le PDF', 'boolean', 1, 1, 'facture', 0, 0, 0);
-                
-                $extrafields->addExtraField('pdf_hide_ttc', 'Masquer la colonne total TTC dans le PDF', 'boolean', 1, 1, 'propal', 0, 0, 0);
-                $extrafields->addExtraField('pdf_hide_ttc', 'Masquer la colonne total TTC dans le PDF', 'boolean', 1, 1, 'commande', 0, 0, 0);
-                $extrafields->addExtraField('pdf_hide_ttc', 'Masquer la colonne total TTC dans le PDF', 'boolean', 1, 1, 'facture', 0, 0, 0);
-                
-                $extrafields->addExtraField('ignore_compta', 'Ignorer', 'boolean', 1, 1, 'facture', 0, 0, 0);
-                
-                // Nécessaire pour valider tous les produits actuels seulement si le champ validate n\'existe pas déjà (Etant donné qu'on défini la valeur par défaut à 0): 
-                if (!$this->db->num_rows($this->db->query('SELECT `rowid` FROM '.MAIN_DB_PREFIX.'extrafields WHERE elementtype = \'product\' AND `name` = \'validate\''))) {
-                    $extrafields->addExtraField('validate', 'Validé', 'boolean', 1, 1, 'product', 0, 0, 0);
-                    
-                    $this->db->query('UPDATE ' . MAIN_DB_PREFIX . 'product_extrafields SET `validate` = 1 WHERE 1');
-                }
+//                
+//                $extrafields = new ExtraFields($this->db);
+//                $extrafields->addExtraField('crt', 'Remise CRT', 'varchar', 1, 10, 'product');
+//                $extrafields->addExtraField('ref_constructeur', 'Réf. constructeur', 'int', 1, 255, 'product');
+//                $extrafields->addExtraField('pa_prevu', 'Prix d\'achat HT prévu', 'decimal', 1, '24,8', 'product', 0, 0, 0);
+//                $extrafields->addExtraField('infos_pa', 'Informations prix d\'achat', 'text', 1, 2000, 'product');
+//                
+//                $extrafields->addExtraField('zone_vente', 'Zone de vente', 'int', 1, 255, 'propal', 0, 0, 1);
+//                $extrafields->addExtraField('zone_vente', 'Zone de vente', 'int', 1, 255, 'commande', 0, 0, 1);
+//                $extrafields->addExtraField('zone_vente', 'Zone de vente', 'int', 1, 255, 'facture', 0, 0, 1);
+//                
+//                $extrafields->addExtraField('zone_vente', 'Zone de vente', 'int', 1, 255, 'commande_fournisseur', 0, 0, 1);
+//                $extrafields->addExtraField('zone_vente', 'Zone de vente', 'int', 1, 255, 'facture_fourn', 0, 0, 1);
+//                
+//                $extrafields->addExtraField('pdf_hide_pu', 'Masquer les prix unitaires dans le PDF', 'boolean', 1, 1, 'propal', 0, 0, 0);
+//                $extrafields->addExtraField('pdf_hide_pu', 'Masquer les prix unitaires dans le PDF', 'boolean', 1, 1, 'commande', 0, 0, 0);
+//                $extrafields->addExtraField('pdf_hide_pu', 'Masquer les prix unitaires dans le PDF', 'boolean', 1, 1, 'facture', 0, 0, 0);
+//                
+//                $extrafields->addExtraField('pdf_hide_reduc', 'Masquer les réductions dans le PDF', 'boolean', 1, 1, 'propal', 0, 0, 0);
+//                $extrafields->addExtraField('pdf_hide_reduc', 'Masquer les réductions dans le PDF', 'boolean', 1, 1, 'commande', 0, 0, 0);
+////                $extrafields->addExtraField('pdf_hide_reduc', 'Masquer les réductions dans le PDF', 'boolean', 1, 1, 'facture', 0, 0, 0);
+//                
+//                $extrafields->addExtraField('pdf_hide_total', 'Masquer les totaux dans le PDF', 'boolean', 1, 1, 'propal', 0, 0, 0);
+//                $extrafields->addExtraField('pdf_hide_total', 'Masquer les totaux dans le PDF', 'boolean', 1, 1, 'commande', 0, 0, 0);
+////                $extrafields->addExtraField('pdf_hide_total', 'Masquer les totaux dans le PDF', 'boolean', 1, 1, 'facture', 0, 0, 0);
+//                
+//                $extrafields->addExtraField('pdf_hide_ttc', 'Masquer la colonne total TTC dans le PDF', 'boolean', 1, 1, 'propal', 0, 0, 0);
+//                $extrafields->addExtraField('pdf_hide_ttc', 'Masquer la colonne total TTC dans le PDF', 'boolean', 1, 1, 'commande', 0, 0, 0);
+////                $extrafields->addExtraField('pdf_hide_ttc', 'Masquer la colonne total TTC dans le PDF', 'boolean', 1, 1, 'facture', 0, 0, 0);
+//                
+//                $extrafields->addExtraField('ignore_compta', 'Ignorer', 'boolean', 1, 1, 'facture', 0, 0, 0);
+//                
+//                // Nécessaire pour valider tous les produits actuels seulement si le champ validate n\'existe pas déjà (Etant donné qu'on défini la valeur par défaut à 0): 
+//                if (!$this->db->num_rows($this->db->query('SELECT `rowid` FROM '.MAIN_DB_PREFIX.'extrafields WHERE elementtype = \'product\' AND `name` = \'validate\''))) {
+//                    $extrafields->addExtraField('validate', 'Validé', 'boolean', 1, 1, 'product', 0, 0, 0);
+//                    
+//                    $this->db->query('UPDATE ' . MAIN_DB_PREFIX . 'product_extrafields SET `validate` = 1 WHERE 1');
+//                }
 
 		return $this->_init($sql, $options);
 	}

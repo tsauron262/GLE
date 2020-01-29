@@ -12,6 +12,7 @@ class BimpCore
             '/bimpcore/views/js/bootstrap.min.js',
             '/bimpcore/views/js/bootstrap-datetimepicker.js',
             '/bimpcore/views/js/functions.js',
+            '/bimpcore/views/js/scroller.js',
             '/bimpcore/views/js/ajax.js',
 //            '/bimpcore/views/js/component.js',
             '/bimpcore/views/js/modal.js',
@@ -25,7 +26,6 @@ class BimpCore
             '/bimpcore/views/js/statsList.js',
             '/bimpcore/views/js/page.js',
             '/bimpcore/views/js/table2csv.js'
-
         ),
         'css' => array(
             '/includes/jquery/plugins/jpicker/css/jPicker-1.1.6.css',
@@ -40,7 +40,11 @@ class BimpCore
         $html = '';
         if (!self::$filesInit) {
             foreach (self::$files['css'] as $css_file) {
-                $html .= '<link type="text/css" rel="stylesheet" href="' . DOL_URL_ROOT   . $css_file . '"/>';
+                $url = self::getFileUrl($css_file);
+
+                if ($url) {
+                    $html .= '<link type="text/css" rel="stylesheet" href="' . $url . '"/>';
+                }
             }
 
             global $user;
@@ -52,14 +56,86 @@ class BimpCore
             $html .= '</script>';
 
             foreach (self::$files['js'] as $js_file) {
-                $html .= '<script type="text/javascript" src="' . DOL_URL_ROOT  . $js_file . '"></script>';
+                $url = self::getFileUrl($js_file);
+
+                if ($url) {
+                    $html .= '<script type="text/javascript" src="' . $url . '"></script>';
+                }
             }
 
             self::$filesInit = true;
         }
+
         if ($echo)
             echo $html;
+
         return $html;
+    }
+
+    public static function getFileUrl($file_path, $use_tms = true)
+    {
+        $url = '';
+
+        if (preg_match('/^\/+(.+)$/', $file_path, $matches)) {
+            $file_path = $matches[1];
+        }
+
+        if (file_exists(DOL_DOCUMENT_ROOT . '/' . $file_path)) {
+            if ($use_tms && (int) BimpCore::getConf('use_files_tms')) {
+                $pathinfo = pathinfo($file_path);
+
+                if (strpos($pathinfo['dirname'], '/views/') !== false) {
+                    $tms = filemtime(DOL_DOCUMENT_ROOT . '/' . $file_path);
+
+                    if ($tms !== false) {
+                        $out_file = $pathinfo['dirname'] . '/' . $pathinfo['filename'] . '_tms_' . $tms . '.' . $pathinfo['extension'];
+
+                        if (preg_match('/^\/+(.+)$/', $out_file, $matches)) {
+                            $out_file = $matches[1];
+                        }
+
+                        if (!file_exists(DOL_DOCUMENT_ROOT . '/' . $out_file)) {
+                            // Suppr du fichier existant: 
+                            $dir = DOL_DOCUMENT_ROOT . '/' . $pathinfo['dirname'];
+                            foreach (scandir($dir) as $f) {
+                                if (in_array($f, array('.', '..'))) {
+                                    continue;
+                                }
+
+                                if (preg_match('/^' . preg_quote($pathinfo['filename']) . '_tms_\d+\.' . preg_quote($pathinfo['extension']) . '$/', $f)) {
+                                    unlink($dir . '/' . $f);
+                                }
+                            }
+
+                            if (!copy(DOL_DOCUMENT_ROOT . '/' . $file_path, DOL_DOCUMENT_ROOT . '/' . $out_file)) {
+                                dol_syslog('Echec création du fichier "' . DOL_DOCUMENT_ROOT . '/' . $out_file . '" - Vérifier les droits', E_ERROR);
+                            }
+                        }
+
+                        if (file_exists(DOL_DOCUMENT_ROOT . '/' . $out_file)) {
+                            $url = $out_file;
+                        }
+                    }
+                }
+            }
+
+            if (!$url) {
+                $url = $file_path;
+            }
+        }
+
+        if ($url) {
+            $prefixe = DOL_URL_ROOT;
+            if ($prefixe == "/")
+                $prefixe = "";
+            elseif ($prefixe != "")
+                $prefixe .= "/";
+
+            return $prefixe . $url;
+        }
+
+        dol_syslog('FICHIER ABSENT: "' . DOL_DOCUMENT_ROOT . '/' . $file_path . '"', E_ERROR);
+        return '';
     }
 
     public static function getConfCache()
@@ -77,23 +153,24 @@ class BimpCore
         return self::$conf_cache;
     }
 
-    public static function getConf($name)
+    public static function getConf($name, $default = null)
     {
         $cache = self::getConfCache();
-        
-        if(isset(self::$conf_cache_not_exist[$name]))
-            return null;
+
+        if (isset(self::$conf_cache_not_exist[$name])) {
+            return $default;
+        }
 
         if (!isset($cache[$name])) {
             $value = BimpCache::getBdb()->getValue('bimpcore_conf', 'value', '`name` = \'' . $name . '\'');
             if (!is_null($value)) {
                 self::$conf_cache[$name] = $value;
                 return $value;
-            }
-            else
+            } else {
                 self::$conf_cache_not_exist[$name] = $name;
+            }
 
-            return null;
+            return $default;
         }
 
         return self::$conf_cache[$name];
@@ -149,7 +226,7 @@ class BimpCore
                     'value' => json_encode($versions)
                         ), '`name` = \'bimpcore_version\'');
             }
-                        
+
 
             self::$conf_cache['bimpcore_version'] = $versions;
         }
@@ -184,8 +261,8 @@ class BimpCore
     public static function getParam($full_path, $default_value = '', $type = 'string')
     {
         if (is_null(self::$config)) {
-            if (!file_exists(DOL_DATA_ROOT. '/bimpcore/config.yml')) {
-                copy(DOL_DOCUMENT_ROOT.'/bimpcore/default_config.yml', DOL_DATA_ROOT.'/bimpcore/config.yml');
+            if (!file_exists(DOL_DATA_ROOT . '/bimpcore/config.yml')) {
+                copy(DOL_DOCUMENT_ROOT . '/bimpcore/default_config.yml', DOL_DATA_ROOT . '/bimpcore/config.yml');
             }
             if (file_exists(DOL_DATA_ROOT . '/bimpcore/config.yml')) {
                 self::$config = new BimpConfig(DOL_DATA_ROOT . '/bimpcore/', 'config.yml', new BimpObject('', ''));
@@ -204,20 +281,20 @@ class BimpCore
         $updates = array();
 
         $cache = self::getConfCache();
-        
+
         foreach ($cache as $name => $value) {
             if (preg_match('/^module_version_(.+)$/', $name, $matches)) {
                 $module = $matches[1];
-                
-                $dir = DOL_DOCUMENT_ROOT.'/'.$module.'/sql';
+
+                $dir = DOL_DOCUMENT_ROOT . '/' . $module . '/sql';
                 if (file_exists($dir) && is_dir($dir)) {
                     $files = scandir($dir);
-                    
+
                     foreach ($files as $f) {
                         if (in_array($f, array('.', '..'))) {
                             continue;
                         }
-                        
+
                         if (preg_match('/^(\d+\.\d)\.sql$/', $f, $matches2)) {
                             if ((float) $matches2[1] > (float) $value) {
                                 if (!isset($updates[$module])) {

@@ -40,7 +40,9 @@ class pdf_contrat_courrier_BIMP_renvois extends ModeleSynopsiscontrat {
     public function addLogo(&$pdf, $size) {
         global $conf;
         $logo = $conf->mycompany->dir_output . '/logos/' . $this->emetteur->logo;
-        $pdf->Image($logo, 0, 10, 0, $size, '', '', '', false, 250, 'L');
+        if(is_file($logo)) {
+            $pdf->Image($logo, 0, 10, 0, $size, '', '', '', false, 250, 'L');
+        }
     }
 
     public function ChapterTitle($num, $title) {
@@ -83,7 +85,7 @@ class pdf_contrat_courrier_BIMP_renvois extends ModeleSynopsiscontrat {
         $this->pdf->Ln();
     }
     function write_file($contrat, $outputlangs = '') {
-        global $user, $langs, $conf;
+        global $user, $langs, $conf, $mysoc;
         if (!is_object($outputlangs))
             $outputlangs = $langs;
         $outputlangs->load("main");
@@ -157,9 +159,10 @@ class pdf_contrat_courrier_BIMP_renvois extends ModeleSynopsiscontrat {
                 $client = new Societe($this->db);
                 $client->fetch($contrat->socid);
                 
+                $pdf->setY(60);
                 $pdf->SetFont('', 'B', 10);
                 $pdf->Cell($W, 4, "", 0, null, 'C', true);
-                $pdf->Cell($W, 4, $client->nom, 0, null, 'C', true);
+                $pdf->Cell($W, 4, $client->nom, 0, null, 'L', true);
                 $pdf->SetFont('', '', 9);
                 
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "", 0, 'C');
@@ -169,22 +172,22 @@ class pdf_contrat_courrier_BIMP_renvois extends ModeleSynopsiscontrat {
                     $contact = new Contact($this->db);
                     $contact->fetch($id_contact);
                     $pdf->Cell($W, 4, "", 0, null, 'C', true);
-                    $pdf->Cell($W, 4, "Contact : " . $contact->lastname . " " . $contact->firstname, 0, null, 'C', true);
+                    $pdf->Cell($W, 4, $contact->lastname . " " . $contact->firstname, 0, null, 'L', true);
                     $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
                 }
                 $pdf->Cell($W, 4, "", 0, null, 'C', true);
-                $pdf->Cell($W, 4, $client->address, 0, null, 'C', true);
+                $pdf->Cell($W, 4, $client->address, 0, null, 'L', true);
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
                 $pdf->Cell($W, 4, "", 0, null, 'C', true);
-                $pdf->Cell($W, 4, $client->zip . ' ' . $client->town, 0, null, 'C', true);
+                $pdf->Cell($W, 4, $client->zip . ' ' . $client->town, 0, null, 'L', true);
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 16, '', 0, 'C');
-                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, 'Le ......./......./.......', 0, 'L');
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, 'Le ' . date('d / m / Y'), 0, 'L');
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 10, '', 0, 'C');
-                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, 'Object : contrat N°' . $contrat->ref, 0, 'L');
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, 'Objet : contrat N°' . $contrat->ref, 0, 'L');
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, 'Code client : ' . $client->code_client, 0, 'L');
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 16, '', 0, 'C');
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 10, 'Madame, Monsieur, ', 0, 'L');
-                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 10, 'Veillez trouvez ci joint le contrat citer en object.', 0, 'L');
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 10, 'Veillez trouvez ci-joint le contrat cité en objet.', 0, 'L');
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 10, 'Merci de parapher chaque page et de nous retourner notre exemplaire dûment rempli et signé, afin de finaliser votre dossier', 0, 'L');
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 10, 'Bimp reste à votre disposition pour tout renseignement complémentaire.', 0, 'L');
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 10, 'Nous vous prions d\'agréer, Madame, Monsieur, l\'expression de nos sincères salutations.', 0, 'L');

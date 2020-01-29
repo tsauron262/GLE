@@ -30,13 +30,13 @@ class BimpValidateOrder {
         ),
         "C" => array(
             "comm" => array(62 => 100, 201 => 100, 65 => 100),
-            "fi" => array(81 => array(0, 1000000000000), 68 => array(0000, 100000000000), 284 => array(0000, 100000000000), 65 => array(100000, 100000000000), 285 => array(0000, 100000000000)),
+            "fi" => array(21 => array(0, 1000000000000), 81 => array(0, 1000000000000), 68 => array(0000, 100000000000), 65 => array(100000, 100000000000)),
         ),
         "M" => array(
             "comm_mini" => 30,
             "fi_mini" => 10000000,
-            "comm" => array(89 => 100, 283 => 100, 62 => 100, 65 => 100),
-            "fi" => array(89 => array(0, 1000000000000), 283 => array(0000, 100000000000), 65 => array(100000, 100000000000)),
+            "comm" => array(171 => 100, 89 => 100, 283 => 100, 62 => 100, 65 => 100),
+            "fi" => array(171 => array(0, 1000000000000), 89 => array(0, 1000000000000), 283 => array(0000, 100000000000), 65 => array(100000, 100000000000)),
         )
     );
 
@@ -62,11 +62,11 @@ class BimpValidateOrder {
         if (defined('MOD_DEV') && (int) MOD_DEV) {
             return 1;
         }
-
+        
         $updateValFin = $updateValComm = false;
         $ok = true;
         $id_responsiblesFin = $id_responsiblesComm = array();
-        $sql = $this->db->query("SELECT `validFin`, `validComm` FROM `llx_commande` WHERE `rowid` = " . $order->id);
+        $sql = $this->db->query("SELECT `validFin`, `validComm` FROM `".MAIN_DB_PREFIX."commande` WHERE `rowid` = " . $order->id);
         $result = $this->db->fetch_object($sql);
 
         if ($result->validFin < 1) {
@@ -83,12 +83,9 @@ class BimpValidateOrder {
                 if (!$error) {
                     setEventMessages("Un mail a été envoyé à un responsable pour qu'il valide cette commande financièrement.", null, 'warnings');
                 } else
-                    $this->errors[] = '2 Envoi d\'email impossible '.$id_responsible;
+                    $this->errors[] = '2 Envois d\'email impossibles '.$id_responsible;
             }
         }
-
-
-
 
         if ($result->validComm < 1) {
             $id_responsiblesComm = $this->checkAutorisationCommmerciale($user, $order);
@@ -113,13 +110,6 @@ class BimpValidateOrder {
             setEventMessages("Validation non permise", null, "errors");
 
 
-
-
-
-
-
-
-
         if (!$ok) {
             $this->db->rollback();
             global $conf;
@@ -128,25 +118,23 @@ class BimpValidateOrder {
                 $test = "commande:rowid=" . $order->id . " && fk_statut>0";
                 $tasks = $task->getList(array('test_ferme' => $test));
                 if (count($tasks) == 0) {
-                    $tab = array("src" => $user->email, "dst" => "validationcommande@bimp.fr", "subj" => "Validation commande " . $order->ref, "txt" => "Merci de validé la commande " . $order->getNomUrl(1), "test_ferme" => $test);
+                    $tab = array("src" => $user->email, "dst" => "validationcommande@bimp.fr", "subj" => "Validation commande " . $order->ref, "txt" => "Merci de valider la commande " . $order->getNomUrl(1), "test_ferme" => $test);
                     $this->errors = array_merge($this->errors, $task->validateArray($tab));
                     $this->errors = array_merge($this->errors, $task->create());
                 }
             }
         }
         if ($updateValFin) {
-            $this->db->query("UPDATE llx_commande SET validFin = 1 WHERE rowid = " . $order->id);
+            $this->db->query("UPDATE ".MAIN_DB_PREFIX."commande SET validFin = 1 WHERE rowid = " . $order->id);
             setEventMessages('Validation Financiére OK', array(), 'mesgs');
         }
         if ($updateValComm) {
-            $this->db->query("UPDATE llx_commande SET validComm = 1 WHERE rowid = " . $order->id);
+            $this->db->query("UPDATE ".MAIN_DB_PREFIX."commande SET validComm = 1 WHERE rowid = " . $order->id);
             setEventMessages('Validation Commerciale OK', array(), 'mesgs');
         }
+        
         if (!$ok)
             $this->db->commit();
-
-
-
 
         if (sizeof($this->errors) > 0) {
             setEventMessages(null, $this->errors, 'errors');
@@ -155,24 +143,6 @@ class BimpValidateOrder {
 
         if (!$ok)
             return -1;
-
-        $contacts = $order->liste_contact(-1, 'internal', 0, 'SALESREPFOLL');
-        foreach ($contacts as $contact)
-            mailSyn2("Commande Validée", $contact['email'], "gle@bimp.fr", "Bonjour, votre commande " . $order->getNomUrl(1) . " est validée.");
-
-
-
-        foreach ($order->lines as $line) {
-            if (stripos($line->ref, "REMISECRT") !== false) {
-                $order->array_options['options_crt'] = 2;
-                $order->updateExtraField('crt');
-            }
-            if (stripos($line->desc, "Applecare") !== false) {
-                $order->array_options['options_apple_care'] = 2;
-                $order->updateExtraField('apple_care');
-            }
-        }
-
 
         return 1;
     }

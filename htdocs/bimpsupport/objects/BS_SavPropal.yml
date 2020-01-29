@@ -51,7 +51,7 @@ views:
     sav: 
         title: Devis
         icon: fas_file-invoice
-        objects_change_reload: BS_SAV,BS_SavPropalLine,BS_ApplePart,ObjectLineRemise
+        objects_change_reload: BS_SAV,BS_SavPropalLine,BS_ApplePart,ObjectLineRemise,BS_Issue,GSX_Repair,RemiseGlobale
         rows: 
             - cols: 
                 - type: fields_table
@@ -67,6 +67,9 @@ views:
                   col_sm: 12
                   rows: 
                       - cols: 
+                          - type: custom
+                            custom: 
+                                callback: renderRemisesGlobalesList
                           - type: fields_table
                             fields_table: 
                                 name: totals

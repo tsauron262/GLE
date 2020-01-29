@@ -93,6 +93,14 @@ class ActionsBimpcore
         $this->resprints = $html;
         return 0;
     }
+    
+    
+    function addSearchEntry($parameters, &$object, &$action, $hookmanager) {
+        global $langs;
+	$hookmanager->resArray['searchintolivraison']=array('position' => 49, 'img'=>"generic", 'text'=>img_object("Expédition", "generic") ." ". $langs->trans("Expédition"), 'url'=>DOL_URL_ROOT.'/bimpcommercial/index.php?fc=commandes&search=1&object=shipment&sall='.GETPOST('q'), 'label'=>'Expédition');
+	$hookmanager->resArray['searchintoreception']=array('position' => 50, 'img'=>"generic", 'text'=>img_object("Reception", "generic") ." ". $langs->trans("Reception"), 'url'=>DOL_URL_ROOT.'/bimpcommercial/index.php?fc=commandesFourn&search=1&object=reception&sall='.GETPOST('q'), 'label'=>'Reception');
+        return 0;
+    }
 }
 
 //require_once(DOL_DOCUMENT_ROOT."/bimptheme/main.inc.php");

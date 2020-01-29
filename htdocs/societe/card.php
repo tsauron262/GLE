@@ -1462,6 +1462,13 @@ else
         print '</tr>';
 
         print '</table>'."\n";
+        
+	print " <script>
+                $(document).ready(function(){
+                    $('#options_id_condition_paiement > option[value=0]').remove();
+                    $('#options_id_condition_paiement').val(2);
+                });
+            </script>";
 
         dol_fiche_end();
 

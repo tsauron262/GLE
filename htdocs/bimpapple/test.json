@@ -1,0 +1,70 @@
+{
+    "questionDetails":
+            [
+                {
+                    "templateId": "T603211", 
+                    "trees":
+                            [
+                                {
+                                    "treeId": "TREE66872", 
+                                    "questions":
+                                            [
+                                                {
+                                                    "questionId": "Q65876", 
+                                                    "answers":
+                                                            [
+                                                                {
+                                                                    "answerPhrase": "TEST"
+                                                                }
+                                                            ], 
+                                                    "questionPhrase": "Document the reported issue and how the issue occurred according to the customer."
+                                                }, 
+                                                {
+                                                    "questionId": "Q65878", 
+                                                    "answers":
+                                                            [
+                                                                {
+                                                                    "answerId": "A20062", 
+                                                                    "questions":
+                                                                            [
+                                                                                {
+                                                                                    "questionId": "Q65877", 
+                                                                                    "answers":
+                                                                                            [
+                                                                                                {
+                                                                                                    "answerPhrase": "TEST TEST"
+                                                                                                }
+                                                                                            ], 
+                                                                                    "questionPhrase": "Document the damage using the customer's own words."
+                                                                                }
+                                                                            ]
+                                                                }
+                                                            ], 
+                                                    "questionPhrase": "Was property external to the Apple computer, accessory, or device damaged?"
+                                                }, 
+                                                {
+                                                    "questionId": "Q65879", 
+                                                    "answers":
+                                                            [
+                                                                {
+                                                                    "answerId": "A20063"
+                                                                }
+                                                            ], 
+                                                    "questionPhrase": "Was there discomfort or injury?"
+                                                }, 
+                                                {
+                                                    "questionId": "Q66009", 
+                                                    "answers":
+                                                            [
+                                                                {
+                                                                    "answerId": "A20063"
+                                                                }
+                                                            ], 
+                                                    "questionPhrase": "Read but do not ask the customer; Based on the questions asked, documentation reviewed, and any consultation paths available, do you believe this is a potential safety issue?"
+                                                }
+                                            ]
+                                }
+                            ]
+                }
+            ]
+}

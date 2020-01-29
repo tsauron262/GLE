@@ -53,5 +53,12 @@ sections:
                   list: 
                       panel: 1
                       object: mvts
+        fondsFermeture:
+            label: Fonds a la fermeture
+            sections: 
+                - type: custom
+                  custom: 
+                      callback: 
+                          method: renderFondsFermeture
                       
         

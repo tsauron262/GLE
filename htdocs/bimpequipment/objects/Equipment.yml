@@ -127,12 +127,20 @@ fields:
         
     serial: 
         label: Numéro de série
-        type: string
         size: 128
         required: 1
         search:
             type: value_part
             part_type: beginning
+            
+    imei: 
+        label: N° IMEI
+        
+    imei2: 
+        label: N° IMEI2
+        
+    meid: 
+        label: N° MEID
         
     ref_immo: 
         label: Réf. immobilisation
@@ -272,6 +280,9 @@ fields_tables:
         icon: info-circle
         rows:
             - field: serial
+            - field: imei
+            - field: imei2
+            - field: meid
             - field: ref_immo
             - label: Disponibilité
               value: 
@@ -378,6 +389,9 @@ forms:
     default:
         rows: 
             - field: serial
+            - field: imei
+            - field: imei2
+            - field: meid
             - field: id_product
               show: 
                   callback: isNotLoaded
@@ -402,6 +416,9 @@ forms:
         force_edit: 1
         rows:
             - field: serial
+            - field: imei
+            - field: imei2
+            - field: meid
             - field: id_product
               show: 
                   callback: isNotLoaded
@@ -416,6 +433,9 @@ forms:
     light_place: 
         rows: 
             - field: serial
+            - field: imei
+            - field: imei2
+            - field: meid
             - field: id_product
             - field: product_label
             - field: type
@@ -432,6 +452,12 @@ filters_panel:
                 field: id_product
             serial: 
                 field: serial
+            imei: 
+                field: imei
+            imei2: 
+                field: imei2
+            meid: 
+                field: meid
             date_purchase: 
                 field: date_purchase
             date_vente:
@@ -470,6 +496,12 @@ filters_panel:
             place_date:
                 field: date
                 child: places
+            place_date_end:
+                custom: 1
+                field: place_date_end
+                data_type: date
+                label: Date de départ (emplacement)
+                type: date_range
             
 lists_cols: 
     id:
@@ -491,6 +523,15 @@ lists_cols:
             type: value_part
     serial:
         field: serial
+    imei: 
+        label: IMEI
+        field: imei
+    imei2: 
+        label: IMEI2
+        field: imei2
+    meid: 
+        label: MEID
+        field: meid
     place: 
         label: Emplacement
         value:
@@ -528,6 +569,15 @@ lists_cols:
     prix_achat:
         field: prix_achat
         has_total: 1
+    oldSn:
+        custom: 1
+        label: Ancien SN
+        value: 
+            callback:  displayOldSn
+    date_purchase:
+        field: date_purchase
+    date_create:
+        field: date_create
 
 lists:
     default: 
@@ -628,9 +678,9 @@ lists:
         
     inventaireManquant:
         extends: inventaire
-        cols:
-            place: unset
-            place2: unset
+#        cols:
+#            place: unset
+#            place2: unset
         bulk_actions:
             - label: Déplacer dans Vols
               icon: fas_trash-alt
@@ -647,11 +697,18 @@ lists:
               onclick: setSelectedObjectsAction($(this), 'list_id', 'removeInventaire', {}, '', 'Retirer de l\'inventaire ?', true)
               
 searches:
-    default: 
+    default:
         has_serial: 1
         fields_search: 
             - a.product_label
             - a.serial
+            - CONCAT('S', a.serial)
+            - a.imei
+            - a.imei2
+            - a.meid
+        fields_return: 
+            - a.serial
+        label_syntaxe: '<a.serial>'
         
 cards: 
     default: 
@@ -660,9 +717,12 @@ cards:
             - icon: fas_box
               label: Produit
               value: 
-                  callback: 
+                  callback:
                       method: displayProduct
-                      params: 
+                      params:
                           - nom_url
             - icon: barcode
               field: serial
+            - field: imei
+            - field: imei2
+            - field: meid

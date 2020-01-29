@@ -116,6 +116,8 @@ fields:
         label: Date d'échéance
         dol_prop: date_echeance
         type: date
+    date_valid: 
+        type: date
     fk_user_author: 
         dol_prop: unset
     fk_user_valid: 
@@ -131,15 +133,15 @@ fields:
         values: 
             array: comptes
     exported:
-        label: Comptabilisée
+        label: Etat comptable
         type: int
+        values:
+            array: exportedStatut
         
     fk_availability: unset
     fk_input_reason: unset
     ref_client: unset
     total: unset
-    remise_globale: unset
-    remise_globale_label: unset
     tx_marge: unset
     tx_marque: unset
     
@@ -201,6 +203,7 @@ fields_tables:
                   field_value: fk_facture_source
             - field: zone_vente
               edit: 1
+            - field: exported
                   
     client: 
         title: Fournisseur
@@ -255,7 +258,6 @@ filters_panels:
                 field: paye
                 
             availability: unset
-            remise_globale: unset
             ref_client: unset
             
 lists_cols: 
@@ -348,4 +350,20 @@ cards:
 searches:
     default: 
         fields_search: 
-            - ref
+            - a.ref
+            - ef.libelle
+            - s.nom
+            - a.ref_supplier
+        joins:
+            ef: 
+                table: commande_fournisseur_extrafields
+                on: a.rowid = ef.fk_object
+                alias: ef
+            s: 
+                table: societe
+                on: a.fk_soc = s.rowid
+                alias: s
+        fields_return: 
+            - a.ref
+            - s.nom
+        label_syntaxe: '<a.ref> (Fourn: <s.nom>)'

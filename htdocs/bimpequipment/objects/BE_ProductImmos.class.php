@@ -175,35 +175,7 @@ class BE_ProductImmos extends Bimp_Product
                     self::$currentFilters['place_date'] = $values;
                     $or_field = array();
                     foreach ($this->values as $value) {
-                        if (is_array($value)) {
-                            if (isset($value['max']) && $value['max'] !== '') {
-                                if (preg_match('/^\d{4}\-\d{2}\-\d{2}$/', $value['max'])) {
-                                    $value['max'] .= ' 23:59:59';
-                                }
-                            }
-                            if (isset($value['min']) || isset($value['max'])) {
-                                if ($value['min'] !== '' && $value['max'] === '') {
-                                    $or_field[] = array(
-                                        'operator' => '>=',
-                                        'value'    => $value['min']
-                                    );
-                                } elseif ($value['max'] !== '' && $value['min'] === '') {
-                                    $or_field[] = array(
-                                        'operator' => '<=',
-                                        'value'    => $value['max']
-                                    );
-                                } else {
-                                    $or_field[] = array(
-                                        'min' => $value['min'],
-                                        'max' => $value['max']
-                                    );
-                                }
-                            } else {
-                                $errors[] = 'Valeurs minimales et maximales absentes';
-                            }
-                        } else {
-                            $errors[] = 'Valeur invalide: "' . $value . '"';
-                        }
+                        $or_field[] = BC_Filter::getRangeSqlFilter($value, $errors);
                     }
 
                     if (!empty($or_field)) {
@@ -221,6 +193,44 @@ class BE_ProductImmos extends Bimp_Product
                     }
                 }
                 break;
+                
+//            case 'place_date_end':
+//                $joins['place'] = array(
+//                    'table' => 'be_package_place',
+//                    'on'    => 'place.id_package = a.id',
+//                    'alias' => 'place'
+//                );
+//                $joins['next_place'] = array(
+//                    'table' => 'be_package_place',
+//                    'on'    => 'next_place.id_package = a.id',
+//                    'alias' => 'next_place'
+//                );
+//                $filters['next_place_position'] = array('custom' => 'next_place.position = (place.position - 1)');
+//
+//                $or_field = array();
+//                foreach ($values as $value) {
+//                    $or_field[] = BC_Filter::getRangeSqlFilter($value, $errors);
+//                }
+//
+//                if (!empty($or_field)) {
+//                    $filters['next_place.date'] = array(
+//                        'or_field' => $or_field
+//                    );
+//                }
+//                if (!empty($or_field)) {
+//                        $filters['or_next_place_date'] = array(
+//                            'or' => array(
+//                                'ppl_client' => array(
+//                                    'custom' => '((ef.serialisable = 0 || ef.serialisable IS NULL) AND ' . $this->getPlacePositionSqlFilter('ppl') . ' AND ' . BimpTools::getSqlFilter('ppl.date', array('or_field' => $or_field)) . ')'
+//                                ),
+//                                'epl_client' => array(
+//                                    'custom' => '(ef.serialisable = 1 AND ' . $this->getPlacePositionSqlFilter('epl') . ' AND ' . BimpTools::getSqlFilter('epl.date', array('or_field' => $or_field)) . ')'
+//                                )
+//                            )
+//                        );
+//                        $this->getPlacesJoins($joins);
+//                    }
+//                break;
         }
     }
 

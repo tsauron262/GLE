@@ -202,12 +202,12 @@ class pdf_bimpsupport_pc extends ModeleBimpSupport
 
             $pdf->SetXY('16', '53.8');
             $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 8);
-            $pdf->MultiCell(50, 6, dol_print_date($sav->getData('date_create')), 0, 'L');
+            $pdf->MultiCell(50, 6, dol_print_date($this->db->jdate($sav->getData('date_create'))), 0, 'L');
 
             if ((int) $sav->getData('user_create') > 0) {
                 $user_author = $sav->getChildObject('user_create');
                 $pdf->SetXY('41', '53.5');
-                $pdf->MultiCell(100, 6, $user_author->getFullName($langs), 0, 'L');
+                $pdf->MultiCell(100, 6, $user_author->firstname, 0, 'L');
             }
 
             if ($sav->getData('prestataire_number') != "") {
@@ -274,34 +274,33 @@ class pdf_bimpsupport_pc extends ModeleBimpSupport
             $cgv = "";
             $cgv.= "-La société BIMP ne peut pas être tenue responsable de la perte éventuelle de données, quelque soit le support.\n\n";
 
-            $prixRefusOrdi = "49";
+            $prixRefus = "49";
             if ($conf->global->MAIN_INFO_SOCIETE_NOM == "MY-MULTIMEDIA")
-                $prixRefusOrdi = "39";
+                $prixRefus = "39";
 
-            if (stripos($product_label, "Iphone") !== false || stripos($product_label, "XXXX") !== false) {
-                $cgv .= "-Les frais de prise en charge diagnostic de 29€ TTC sont à régler à la dépose de votre materiel hors garantie. En cas d'acceptation du devis ces frais seront déduits.\n\n";
-                $cgv.="-Les problèmes logiciels, la récupération de données ou la réparation materiel liées à une mauvaise utilisation (liquide, chute, etc...), ne sont pas couverts parla GARANTIE APPLE. Un devis sera alors établi et des frais de 29€ TTC seront alors facturés en cas de refus de celui-ci." . "\n\n";
-                $cgv.="-Des frais de 29€ TTC seront automatiquement facturés, si lors de l'expertise il s'avère que des pièces de contre façon ont été installées.\n\n";
-            } else {
-                $cgv .= "-Les problèmes logiciels, la récupératon de données ou la réparation matériel liée à une mauvaise utilisation (liquide, chute,etc...), ne sont pas couverts par la GARANTIE APPLE.\n\n";
-                $cgv.="-Les frais de prise en charge diagnostic de " . $prixRefusOrdi . "€ TTC sont à régler à la dépose de votre materiel hors garantie. En cas d'acceptation du devis ces frais seront déduits.\n\n";
-            }
-//                $pdf->SetX(6);
-//                $pdf->MultiCell(145, 6, $cgv, 0, 'L');
-//                $pdf->SetX(6);
-            $cgv.= "-Le client s'engage à venir récupérer son bien dans un délai d'un mois après mise à disposition, émission d'un devis. Après expiration de ce délai, ce dernier accepte des frais de garde de 4€ par jour.\n\n";
+            
+            $isIphone = false;
+            if (stripos($product_label, "Iphone") !== false || stripos($product_label, "XXXX") !== false || stripos($product_label, "***") !== false) 
+                $isIphone = true;
+            if($isIphone)
+                $prixRefus = "29";
+            
+            
+            $cgv .= "-Les frais de prise en charge diagnotic de ".$prixRefus."€ TTC sont à régler pour tout matériel  hors garantie. En cas d’acceptation du devis ces frais seront déduits.\n\n";
+            $cgv.="-Les problèmes logiciels, la récupération de données ou la réparation matériel liées à une mauvaise utilisation (liquide, chute, etc...), ne sont pas couverts par la GARANTIE APPLE; Un devis sera alors établi et des frais de ".$prixRefus."€ TTC seront facturés en cas de refus de celui-ci." . "\n\n";
+            $cgv.="-Des frais de ".$prixRefus."€TTC seront automatiquement facturés, si lors de l’expertise il s’avère que  des pièces de contre façon ont été installées.\n\n";
+            $cgv.= "-Le client s’engage à venir récupérer son bien dans un délai d’un mois après mise à disposition,émission d’un devis. Après expiration de ce délai, ce dernier accepte des frais de garde de 4€ par jour.\n\n";
 
-            $cgv .= "-Comme l’autorise la loi du 31 décembre 1903, modifiée le 22 juin 2016, les produits qui n'auront pas 
-été retirés dans le délai de un an pourront être détruit, après accord du tribunal.\n
--BIMP n’accepte plus les réglements par chèques. Les modes de réglements acceptés sont: 
-en espèces (plafond maximun de 1000€), en carte bleue\n\n";
+            $cgv .= "-Comme l’autorise la loi du 31 décembre 1903, modifiée le 22 juin 2016, les produits qui n'auront pas été retirés dans le délai de un an pourront être détruit, après accord du tribunal.\n\n";
+            $cgv .= "-BIMP n’accepte plus les réglements par chèques. Les modes de réglements acceptés sont: en espèces (plafond maximun de 1000 €), en carte bleue.\n\n";
 
 
-            if ((int) $sav->getData('prioritaire') && stripos($product_label, "Iphone") === false) {
+            if ((int) $sav->getData('prioritaire')) {
                 $pdf->SetXY('62', '111.5');
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 20);
                 $pdf->SetTextColor(255, 102, 0);
                 $pdf->MultiCell(100, 6, "Prise en charge urgente", 0, 'L');
+                if($isIphone)
                 $cgv .= "-J'accepte les frais de 96 TTC de prise en charge urgente";
             }
 

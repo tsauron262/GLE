@@ -151,6 +151,7 @@ class BimpTools
         switch (get_class($object)) {
             case 'CommandeFournisseur':
                 return DOL_URL_ROOT . '/fourn/commande/card.php?id=' . $id_object;
+
             case 'FactureFournisseur':
                 return DOL_URL_ROOT . '/fourn/facture/card.php?facid=' . $id_object;
 
@@ -668,7 +669,7 @@ class BimpTools
         }
     }
 
-    public static function getNextRef($table, $field, $prefix = '')
+    public static function getNextRef($table, $field, $prefix = '', $numCaractere = null)
     {
 
         $prefix = str_replace("{AA}", date('y'), $prefix);
@@ -683,7 +684,7 @@ class BimpTools
 
 
 //        $max = BimpCache::getBdb()->getMax($table, $field, $where);
-        $max = BimpCache::getBdb()->getMax($table, $field, $where . "  AND LENGTH(ref) = (SELECT MAX(LENGTH(" . $field . ")) as max FROM `" . MAIN_DB_PREFIX . $table . "`   WHERE " . $where . ")");
+        $max = BimpCache::getBdb()->getMax($table, $field, $where . "  AND LENGTH(" . $field . ") = (SELECT MAX(LENGTH(" . $field . ")) as max FROM `" . MAIN_DB_PREFIX . $table . "`   WHERE " . $where . ")");
 
         if ((string) $max) {
             if (preg_match('/^' . $prefix . '([0-9]+)$/', $max, $matches)) {
@@ -693,6 +694,17 @@ class BimpTools
             }
         } else {
             $num = 1;
+        }
+
+        if ($numCaractere > 0) {
+            $diff = $numCaractere - strlen($num);
+            if ($diff < 0)
+                die("impossible trop de caractére BimpTools::GetNextRef");
+            else {
+                for ($i = 0; $i < $diff; $i++) {
+                    $num = "0" . $num;
+                }
+            }
         }
 
         return $prefix . $num;
@@ -709,6 +721,23 @@ class BimpTools
         if (!file_exists($root_dir)) {
             if (!mkdir($root_dir, 0777)) {
                 return 'Echec de la création du dossier "' . $root_dir . '"';
+            }
+        }
+
+        if (is_string($dir_tree)) {
+            $array = explode('/', $dir_tree);
+            $dir_tree = array();
+
+            foreach ($array as $key => $value) {
+                if (!(string) $value) {
+                    unset($array[$key]);
+                }
+            }
+
+            while ($dirname = array_pop($array)) {
+                $dir_tree = array(
+                    $dirname => $dir_tree
+                );
             }
         }
 
@@ -892,19 +921,23 @@ class BimpTools
     {
         $sql = 'SELECT ';
 
-        if (!is_null($return_fields) && is_array($return_fields) && count($return_fields)) {
-            $first_loop = true;
-            foreach ($return_fields as $field) {
-                if (!$first_loop) {
-                    $sql .= ', ';
-                } else {
-                    $first_loop = false;
+        if (!is_null($return_fields)) {
+            if (is_array($return_fields) && count($return_fields)) {
+                $first_loop = true;
+                foreach ($return_fields as $field) {
+                    if (!$first_loop) {
+                        $sql .= ', ';
+                    } else {
+                        $first_loop = false;
+                    }
+                    if (preg_match('/\./', $field)) {
+                        $sql .= $field;
+                    } elseif (!is_null($default_alias) && $default_alias) {
+                        $sql .= $default_alias . '.' . $field;
+                    }
                 }
-                if (preg_match('/\./', $field)) {
-                    $sql .= $field;
-                } elseif (!is_null($default_alias) && $default_alias) {
-                    $sql .= $default_alias . '.' . $field;
-                }
+            } elseif (is_string($return_fields)) {
+                $sql .= $return_fields;
             }
         } else {
             $sql .= '*';
@@ -1042,8 +1075,9 @@ class BimpTools
                 $sql .= '`' . $field . '`';
             }
 
-            if (isset($filter['IN']))
+            if (isset($filter['IN'])) {
                 $filter['in'] = $filter['IN'];
+            }
 
             if (is_array($filter)) {
                 if (isset($filter['min']) || isset($filter['max'])) {
@@ -1420,6 +1454,45 @@ class BimpTools
         return $value;
     }
 
+    public static function value2String($value, $no_html = false)
+    {
+        if (is_bool($value)) {
+            if ($value) {
+                if ($no_html) {
+                    return 'OUI';
+                } else {
+                    return '<span class="success">OUI</span>';
+                }
+            } else {
+                if ($no_html) {
+                    return 'NON';
+                } else {
+                    return '<span class="danger">NON</span>';
+                }
+            }
+        }
+
+        if (preg_match('/^(\d{4}\-\d{2}\-\d{2}).?(\d{2}:\d{2}:\d{2})?.*$/', $value, $matches)) {
+            if (preg_match('/^1970\-01\-01.*$/', $value)) {
+                return '';
+            }
+
+            $datetime = $matches[1];
+            if (isset($matches[2]) && $matches[2] && $matches[2] !== '00:00:00') {
+                $datetime .= $matches[2];
+            }
+
+            $dt = new DateTime($datetime);
+            if (isset($matches[2]) && $matches[2] && $matches[2] !== '00:00:00') {
+                return $dt->format('d / m / Y H:i:s');
+            } else {
+                return $dt->format('d / m / Y');
+            }
+        }
+
+        return $value;
+    }
+
     // Gestion des durées:
 
     public static function getTimeDataFromSeconds($total_seconds)
@@ -1701,6 +1774,39 @@ class BimpTools
         return $n;
     }
 
+    public static function utf8_encode($value)
+    {
+        // Encodage récursif si $value = array() 
+
+        if (is_array($value)) {
+            foreach ($value as $key => $subValue) {
+                $value[$key] = self::utf8_encode($subValue);
+            }
+
+            return $value;
+        }
+
+        if (is_string($value)) {
+            $value = utf8_encode($value);
+        }
+
+        return $value;
+    }
+
+    public static function addZeros($str, $nbCarac)
+    {
+        // Ajoute des zéros en début de chaîne de manière à obtenir $nbCarac caractères. 
+        $str = '' . $str;
+        if (strlen($str) < $nbCarac) {
+            $n = ($nbCarac - strlen($str));
+            while ($n > 0) {
+                $str = '0' . $str;
+                $n--;
+            }
+        }
+        return $str;
+    }
+
     // Traitements sur des array: 
 
     public static function getMsgFromArray($msgs, $title = '', $no_html = false)
@@ -1724,7 +1830,7 @@ class BimpTools
                     $msg .= "\t" . '- ' . htmlentities($m);
                 }
             } else {
-                $msg .= "\t" . '- ' . $msgs;
+                $msg .= ($title ? "\t" . '- ' : '') . $msgs;
             }
         } else {
             if ($title) {
@@ -1738,7 +1844,7 @@ class BimpTools
                 }
                 $msg .= '</ul>';
             } else {
-                $msg .= '&nbsp;&nbsp;&nbsp;&nbsp;- ' . $msgs;
+                $msg .= ($title ? '&nbsp;&nbsp;&nbsp;&nbsp;- ' : '') . $msgs;
             }
         }
 
@@ -1752,6 +1858,48 @@ class BimpTools
                 if ($val == $value) {
                     unset($array[$key]);
                 }
+            }
+        }
+
+        return $array;
+    }
+
+    public static function getArrayValueFromPath($array, $path, $value2String = false, $no_html = false)
+    {
+        $keys = explode('/', $path);
+
+        $current_value = null;
+
+        foreach ($keys as $key) {
+            if (is_null($current_value)) {
+                if (isset($array[$key])) {
+                    $current_value = $array[$key];
+                } else {
+                    return null;
+                }
+            } elseif (isset($current_value[$key])) {
+                $current_value = $current_value[$key];
+            } else {
+                return null;
+            }
+        }
+
+        if ($value2String) {
+            $current_value = self::value2String($current_value);
+        }
+
+        return $current_value;
+    }
+
+    public static function overrideArray($array, $override)
+    {
+        if (!is_array($array)) {
+            $array = array();
+        }
+
+        if (is_array($override)) {
+            foreach ($override as $key => $value) {
+                $array[$key] = $value;
             }
         }
 
@@ -2059,10 +2207,21 @@ class BimpTools
     public static function bloqueDebloque($type, $bloque = true)
     {
         $file = static::getFileBloqued($type);
-        if ($bloque)
-            file_put_contents($file, "Yes");
-        elseif (is_file($file))
-            unlink($file);
+        if ($bloque) {
+            $random = rand(0, 10000000);
+            $text = "Yes" . $random;
+            file_put_contents($file, $text);
+            sleep(0.400);
+            $text2 = file_get_contents($file);
+            if ($text == $text2)
+                return 1;
+            else {//conflit
+                mailSyn2("Conflit de ref évité", "dev@bimp.fr", "admin@bimp.fr", "Attention : Un conflit de ref de type " . $type . " a été évité");
+                self::sleppIfBloqued($type);
+                return static::bloqueDebloque($type, $bloque);
+            }
+        } elseif (is_file($file))
+            return unlink($file);
     }
 
     public static function getFileBloqued($type)
@@ -2091,9 +2250,25 @@ class BimpTools
                 $text = "Attention bloquage de plus de " . $nbMax . " secondes voir pour type : " . $type;
                 dol_syslog("ATTENTION " . $text, 3);
                 mailSyn2("Bloquage anormal", "dev@bimp.fr", "admin@bimp.fr", "Attention : " . $text);
-                die($text);
+                static::bloqueDebloque($type, false);
+                return 0;
             }
         } else
             return 0;
+    }
+
+    public static function getMailOrSuperiorMail($idComm)
+    {
+        $userT = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $idComm);
+        $ok = true;
+        if ($userT->getData("statut") < 1)
+            $ok = false;
+        if ($ok && $userT->getData('email') != '')
+            return $userT->getData('email');
+
+        if ($userT->getData('fk_user') > 0)
+            return static::getMailOrSuperiorMail($userT->getData('fk_user'));
+
+        return "admin@bimp.fr";
     }
 }

@@ -71,7 +71,7 @@ class modBimptask extends DolibarrModules {
 
         // Possible values for version are: 'development', 'experimental', 'dolibarr', 'dolibarr_deprecated' or a version string like 'x.y.z'
         $this->version = '1.0';
-        // Key used in llx_const table to save module status enabled/disabled (where MYMODULE is value of property name of module in uppercase)
+        // Key used in const table to save module status enabled/disabled (where MYMODULE is value of property name of module in uppercase)
         $this->const_name = 'MAIN_MODULE_' . strtoupper($this->name);
         // Name of image file used for this module.
         // If file is in theme/yourtheme/img directory under name object_pictovalue.png, use this->picto='pictovalue'
@@ -304,7 +304,7 @@ class modBimptask extends DolibarrModules {
         
         
         
-        $sql[] = 'CREATE TABLE `llx_bimp_task` (
+        $sql[] = 'CREATE TABLE `'.MAIN_DB_PREFIX.'bimp_task` (
   `id` int(11) PRIMARY KEY NOT NULL AUTO_INCREMENT,
   `src` varchar(127) NOT NULL,
   `dst` varchar(127) NOT NULL,

@@ -1035,14 +1035,14 @@ class BC_Vente extends BimpObject
         $html .= '<div class="col-lg-4">';
         $html .= '<button id="ventePaiementCBButton" type="button" class="ventePaiementButton btn btn-default btn-large"';
         $html .= ' onclick="displayNewPaiementForm($(this));" data-code="CG">';
-        $html .= '<i class="fa fas fa-envelope iconLeft"></i>Chéque Gallerie';
+        $html .= BimpRender::renderIcon('fas_money-check', 'iconLeft') . 'Chéque Galerie';
         $html .= '</button>';
         $html .= '</div>';
 
         $html .= '<div class="col-lg-4">';
         $html .= '<button id="ventePaiementCBButton" type="button" class="ventePaiementButton btn btn-default btn-large"';
         $html .= ' onclick="displayNewPaiementForm($(this));" data-code="no">';
-        $html .= '<i class="fa fa-times-circle iconLeft"></i>Financement';
+        $html .= BimpRender::renderIcon('fas_hand-holding-usd', 'iconLeft') . 'Financement';
         $html .= '</button>';
         $html .= '</div>';
 
@@ -1083,7 +1083,7 @@ class BC_Vente extends BimpObject
         $id_cond = (int) $this->getData('id_cond_reglement');
         $html .= '<div id="condReglement" style="font-size: 14px">';
         $html .= '<span style="font-weight: bold">Condition de réglement : </span>';
-        $html .= '<select id="condReglementSelect" name="condReglementSelect"  disabled>';
+        $html .= '<select id="condReglementSelect" name="condReglementSelect"  ' . (!BimpCore::getConf('use_mode_reglement_caisse') ? 'disabled' : '') . '>';
         foreach ($this->getCond_reglementsArray() as $id => $label) {
             $html .= '<option value="' . $id . '"' . ((int) $id === $id_cond ? ' selected=""' : '') . '>' . $label . '</option>';
         }
@@ -1156,7 +1156,7 @@ class BC_Vente extends BimpObject
             if (!array_key_exists($code, BC_VentePaiement::$codes)) {
                 $html .= BimpRender::renderAlerts('Type de paiement invalide');
             } else {
-                $html .= '<i class="fa fa-' . BC_VentePaiement::$codes[$code]['icon'] . '"></i>';
+                $html .= BimpRender::renderIcon(BC_VentePaiement::$codes[$code]['icon']);
                 $html .= BC_VentePaiement::$codes[$code]['label'];
             }
             $html .= '</div>';
@@ -1520,7 +1520,8 @@ class BC_Vente extends BimpObject
         }
 
         // Check validation du produit: 
-        if (!(int) $product->getData('validate')) {
+        $errors2 = array();
+        if (!(int) $product->isVendable($errors2, true, false)) {
             $html .= '<div style="margin: 10px 0">';
             $msg = 'Attention: ce produit n\'est pas validé. La vente ne pourra pas être validée.<br/>';
             $msg .= 'Un e-mail a été envoyé pour validation d\'urgence.<br/>';
@@ -1697,18 +1698,8 @@ class BC_Vente extends BimpObject
                 if (!count($article_errors)) {
                     $html .= $this->renderCartProductLine($article, $product);
 
-                    if (!(int) $product->getData('validate')) {
-                        $msg = 'Bonjour, ' . "\n\n";
-                        $msg .= 'Le produit ' . $product->getNomUrl(0) . ' a été ajouté à une vente en caisse alors qu\'il n\'est pas validé.' . "\n";
-                        $msg .= 'Une validation d\'urgence est nécessaire pour finaliser la vente' . "\n\n";
-                        $msg .= 'Cordialement.';
-                        if (mailSyn2("[URGENT] Demande de validation de produit en urgence", "achat@bimp.fr", null, $msg, array(), array(), array(), 'dev@bimp.fr')) {
-                            if ($product->getData('date_ask_valid') == null or $product->getData('date_ask_valid') == '') {
-                                $datetime = new DateTime();
-                                $product->updateField('date_ask_valid', $datetime->format('Y-m-d H:i:s'));
-                            }
-                        }
-                    }
+                    $errors2 = array();
+                    $product->isVendable($errors2, true);
                 }
             }
             if (count($article_errors)) {
@@ -2294,7 +2285,7 @@ class BC_Vente extends BimpObject
 
         $facture->validateArray(array(
             'type'              => Facture::TYPE_STANDARD,
-            'ef_type'           => BimpCore::getConf('bimpcaisse_secteur_code'),
+            'ef_type'           => $caisse->getSecteur_code(),
             'entrepot'          => (int) $this->getData('id_entrepot'),
             'datef'             => date('Y-m-d'),
             'fk_soc'            => $id_client,
@@ -2382,7 +2373,7 @@ class BC_Vente extends BimpObject
             $line->tva_tx = (float) $return->getData('tva_tx');
             $line->pu_ht = (float) BimpTools::calculatePriceTaxEx((float) $return->getData('unit_price_tax_in'), $line->tva_tx);
 
-            $line_errors = $line->create();
+            $line_errors = $line->create($warnings, true);
 
             if (count($line_errors)) {
                 $warnings[] = BimpTools::getMsgFromArray($line_errors, 'Echec de l\'ajout du retour #' . $return->id . ' à la facture');
@@ -2468,7 +2459,7 @@ class BC_Vente extends BimpObject
             }
 
             $line_warnings = array();
-            $line_errors = $line->create($line_warnings);
+            $line_errors = $line->create($line_warnings, true);
 
             if (count($line_warnings)) {
                 $warnings[] = BimpTools::getMsgFromArray($line_warnings, 'Article #' . $article->id . ': erreurs suite à la création de la ligne de facture');
@@ -2496,7 +2487,9 @@ class BC_Vente extends BimpObject
             }
         }
 
-        // Validation de la facture:         
+        // Validation de la facture:  
+        //forcage du droit 
+        $user->rights->facture->creer = 1;
         if ($facture->dol_object->validate($user) <= 0) {
             $msg = 'Echec de la validation de la facture';
             $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($facture->dol_object), $msg);

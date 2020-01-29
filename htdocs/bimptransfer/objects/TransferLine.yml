@@ -4,25 +4,15 @@ parent_module: bimptransfer
 parent_object: Transfer
 parent_id_property: id_transfer
 
-object:
+labels: 
+    name: ligne de transfert
+    name_plur: lignes de transfert
+    is_female: 1
     
-
 fields: 
-    quantity_sent:
-        label: Quantité envoyé
-        type: int
-                
-    quantity_received:
-        label: Quantité reçu
-        type: int
-        
-    quantity_transfered:
-        label: Quantité transféré
-        type: int
-
     id_transfer:
-        label: Id transfert
-        type: id_object
+        label: Transfert
+        type: id_parent
         object: transfer
         
     id_product:
@@ -34,9 +24,22 @@ fields:
         label: Équipement
         type: id_object
         object: equipment
+        
+    quantity_sent:
+        label: Quantité envoyée
+        type: int
+                
+    quantity_received:
+        label: Quantité reçue
+        type: int
+        
+    quantity_transfered:
+        label: Quantité transférée
+        type: int
 
 lists:
     default:
+       title: Lignes de transfert
        objects_change_reload: Transfer
        delete_btn: 1
        update_btn: 1
@@ -52,7 +55,7 @@ lists:
                edit: 1
            quantity_received: 
                field: quantity_received
-               label: Quantité reçu (brouillon)
+               label: Quantité reçue (brouillon)
                edit: 1
            quantity_transfered: 
                field: quantity_transfered
@@ -87,12 +90,14 @@ lists:
                field: quantity_sent
            quantity_transfered: 
                field: quantity_transfered
+               
     dash_board_reception:
        extends: prod
        objects_change_reload: Transfer
        cols:
            id_warehouse_dest: unset
            status: unset
+           
     dash_board_send:
        extends: prod
        objects_change_reload: Transfer

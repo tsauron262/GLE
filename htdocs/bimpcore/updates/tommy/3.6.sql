@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bc_caisse` ADD `secteur_code` VARCHAR(10) NOT NULL DEFAULT ''

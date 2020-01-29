@@ -22,7 +22,7 @@ class BC_Card extends BimpComponent
         $this->params_def['title'] = array('default' => 'nom', 'data_type' => 'any');
         $this->params_def['status'] = array('default' => '');
         $this->params_def['image'] = array();
-        $this->params_def['view_btn'] = array('data_type' => 'bool', 'default' => 0);
+        $this->params_def['view_btn'] = array('data_type' => 'bool', 'default' => 1);
         $this->params_def['fields'] = array('type' => 'keys');
 
         global $current_bc;
@@ -337,8 +337,15 @@ class BC_Card extends BimpComponent
                 'value' => '<a href="http://' . $this->display_object->url . '" title="Site web" target="_blank">' . $this->display_object->url . '</a>'
             );
         }
+        
+        if (isset($this->display_object->note_public) && $this->display_object->note_public != "") {
+            $fields[] = array(
+                'icon'  => 'info',
+                'value' => $this->display_object->note_public
+            );
+        }
 
-        return self::renderCard($this->display_object, $title, $img_url, $fields, true);
+        return self::renderCard($this->display_object, $title, $img_url, $fields, $this->params['view_btn']);
     }
 
     public function renderContactCard()
@@ -428,7 +435,7 @@ class BC_Card extends BimpComponent
             );
         }
 
-        return self::renderCard($this->display_object, $title, $img_url, $fields, true);
+        return self::renderCard($this->display_object, $title, $img_url, $fields, $this->params['view_btn']);
     }
 
     public function renderUserCard()
@@ -522,7 +529,7 @@ class BC_Card extends BimpComponent
             );
         }
 
-        return self::renderCard($this->display_object, $title, $img_url, $fields, true);
+        return self::renderCard($this->display_object, $title, $img_url, $fields, $this->params['view_btn']);
     }
 
     public function renderProductCard()
@@ -542,7 +549,7 @@ class BC_Card extends BimpComponent
 
         $title = $this->display_object->label;
 
-        return self::renderCard($this->display_object, $title, $img_url, $fields, true);
+        return self::renderCard($this->display_object, $title, $img_url, $fields, $this->params['view_btn']);
     }
 
     public function renderPropalCard()
@@ -567,7 +574,7 @@ class BC_Card extends BimpComponent
             );
         }
 
-        return self::renderCard($this->display_object, $this->display_object->ref, null, $fields, true);
+        return self::renderCard($this->display_object, $this->display_object->ref, null, $fields, $this->params['view_btn']);
     }
 
     public function renderFactureCard()
@@ -592,7 +599,7 @@ class BC_Card extends BimpComponent
             );
         }
 
-        return self::renderCard($this->display_object, $this->display_object->ref, null, $fields, true);
+        return self::renderCard($this->display_object, $this->display_object->ref, null, $fields, $this->params['view_btn']);
     }
 
     public static function renderCard($object, $title, $img_url = '', $fields = array(), $view_btn = false, $status = null)

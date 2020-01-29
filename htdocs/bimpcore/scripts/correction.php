@@ -24,7 +24,7 @@ echo '<body>';
 global $db;
 $bdb = new BimpDb($db);
 
-$sql = 'SELECT b.fk_propal as id_obj, b.rang as position, a.id FROM llx_bs_sav_propal_line a LEFT JOIN llx_propaldet b ON a.id_line = b.rowid';
+$sql = 'SELECT b.fk_propal as id_obj, b.rang as position, a.id FROM '.MAIN_DB_PREFIX.'bs_sav_propal_line a LEFT JOIN '.MAIN_DB_PREFIX.'propaldet b ON a.id_line = b.rowid';
 
 $rows = $bdb->executeS($sql, 'array');
 

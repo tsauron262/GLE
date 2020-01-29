@@ -16,7 +16,7 @@ class Bimp_FactureLine extends ObjectLine
     public function canCreate()
     {
         global $user;
-        if ($user->rights->facture->paiement) {
+        if (/* $user->rights->facture->paiement */$user->rights->bimpcommercial->factureAnticipe) {
             return 1;
         }
 
@@ -29,9 +29,24 @@ class Bimp_FactureLine extends ObjectLine
         return array();
     }
 
+    public function isRemiseEditable()
+    {
+        return $this->isParentDraft();
+    }
+
     public function isFieldEditable($field, $force_edit = false)
     {
         switch ($field) {
+            case 'pa_editable':
+                return 1;
+
+            case 'remise_crt':
+            case 'remise_crt_percent':
+                if (!$this->isParentDraft()) {
+                    return 0;
+                }
+                break;
+
             case 'qty':
                 if (!$force_edit) {
                     if ($this->getData('linked_object_name') === 'commande_line') {
@@ -84,6 +99,29 @@ class Bimp_FactureLine extends ObjectLine
         }
 
         return $buttons;
+    }
+
+    // Getters données: 
+
+    public function getPaWithRevalorisations()
+    {
+        $pa = $this->pa_ht;
+
+        if ($this->isLoaded()) {
+            $revals = BimpCache::getBimpObjectObjects('bimpfinanc', 'BimpRevalorisation', array(
+                        'id_facture_line' => (int) $this->id,
+                        'type'            => 'correction_pa',
+                        'status'          => array(
+                            'in' => array(0, 1)
+                        )
+            ));
+
+            foreach ($revals as $reval) {
+                $pa -= (float) $reval->getData('amount');
+            }
+        }
+
+        return $pa;
     }
 
     // Affichages: 
@@ -172,15 +210,14 @@ class Bimp_FactureLine extends ObjectLine
                         $equipment->update($warnings, true);
                     }
                 }
-
-                $this->calcPaByEquipments();
             }
+
+            $this->checkPrixAchat();
         }
     }
 
     public function onSave(&$errors = array(), &$warnings = array())
     {
-
         if ($this->isLoaded()) {
             if ($this->getData('linked_object_name') === 'commande_line') {
                 $facture = $this->getParentInstance();
@@ -190,65 +227,250 @@ class Bimp_FactureLine extends ObjectLine
                 }
 
                 $commLine = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $this->getData('linked_id_object'));
-
-                $rg = BimpCache::findBimpObjectInstance('bimpcommercial', 'ObjectLineRemise', array(
-                            'id_object_line'    => (int) $this->id,
-                            'object_type'       => 'facture',
-                            'is_remise_globale' => 1
-                                ), true);
-
-                $new_rate = 0;
-
                 if (BimpObject::objectLoaded($commLine)) {
-                    $new_rate = (float) $commLine->getFactureLineRemiseGlobaleRate((int) $this->getData('id_obj'));
+                    $commande = $commLine->getParentInstance();
 
-                    if (!$new_rate) {
-                        if (BimpObject::objectLoaded($rg)) {
-                            $rg->delete();
-                        }
-                    } else {
-                        if (!BimpObject::objectLoaded($rg)) {
-                            $commande = $commLine->getParentInstance();
-
-                            $rg = BimpObject::getInstance('bimpcommercial', 'ObjectLineRemise');
-                            $rg_errors = $rg->validateArray(array(
-                                'id_object_line'    => (int) $this->id,
-                                'object_type'       => 'facture',
-                                'label'             => 'Part de la remise globale sur la commande ' . (BimpObject::objectLoaded($commande) ? $commande->getRef() : ' (inconnue)'),
-                                'type'              => 1,
-                                'percent'           => $new_rate,
-                                'is_remise_globale' => 1
-                            ));
-
-                            if (!count($rg_errors)) {
-                                $rg_warnings = array();
-                                $rg_errors = $rg->create($rg_warnings, true);
-
-                                if (count($rg_warnings)) {
-                                    $warnings[] = BimpTools::getMsgFromArray($rg_warnings, 'Erreurs lors de la création de la remise globale');
-                                }
-                            }
-
-                            if (count($rg_errors)) {
-                                $errors[] = BimpTools::getMsgFromArray($rg_errors, 'Echec de la création de la remise globale');
-                            }
-                        } elseif ((float) $rg->getData('percent') !== $new_rate) {
-                            $rg->set('percent', $new_rate);
-                            $rg_warnings = array();
-                            $rg_errors = $rg->update($rg_warnings, true);
-                            if (count($rg_warnings)) {
-                                $warnings[] = BimpTools::getMsgFromArray($rg_warnings, 'Erreurs lors de la mise à jour de la remise globale');
-                            }
-                            if (count($rg_errors)) {
-                                $errors[] = BimpTools::getMsgFromArray($rg_errors, 'Echec de la mise à jour de la remise globale');
-                            }
-                        }
+                    if (BimpObject::objectLoaded($commande)) {
+                        $commande->processFacturesRemisesGlobales();
                     }
                 }
             }
+
+            $this->checkPrixAchat();
         }
 
         parent::onSave($errors, $warnings);
+    }
+
+    public function onEquipmentAttributed($id_equipment)
+    {
+        if ($this->isLoaded()) {
+            $facture = $this->getParentInstance();
+
+            if (BimpObject::objectLoaded($facture) && (int) $facture->getData('fk_statut') > 0) {
+                $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+                if (BimpObject::objectLoaded($equipment)) {
+                    $pu_ht = (float) $this->getUnitPriceHTWithRemises();
+                    $pu_ttc = BimpTools::calculatePriceTaxIn($pu_ht, (float) $this->tva_tx);
+
+                    $equipment->set('prix_vente', $pu_ttc);
+                    $equipment->set('vente_tva_tx', (float) $this->tva_tx);
+                    $equipment->set('date_vente', date('Y-m-d H:i:s'));
+                    $equipment->set('id_facture', (int) $this->getData('id_obj'));
+
+                    $warnings = array();
+                    $equipment->update($warnings, true);
+                }
+            }
+        }
+    }
+
+    public function checkPrixAchat()
+    {
+        $errors = array();
+        if ($this->isLoaded($errors)) {
+            $pa_ht = $this->calcPrixAchat();
+            $errors = $this->updatePrixAchat($pa_ht);
+        }
+        return $errors;
+    }
+
+    public function calcPrixAchat($date = null, &$details = array(), &$errors = array())
+    {
+        $pa_ht = (float) $this->pa_ht;
+        $fullQty = (float) $this->getFullQty();
+
+        if (is_null($date)) {
+            $facture = $this->getParentInstance();
+            if (BimpObject::objectLoaded($facture)) {
+                $date = $facture->getData('datec');
+            } else {
+                $date = '';
+            }
+        }
+
+        if ((int) $this->getData('type') === self::LINE_PRODUCT && (int) $this->getData('pa_editable') && $fullQty > 0) {
+            $product = $this->getProduct();
+            if (BimpObject::objectLoaded($product)) {
+                if ($product->isSerialisable()) {
+                    $cur_pa_ht = null;
+                    $errors = array_merge($errors, $this->calcPaByEquipments(false, $date, $pa_ht, $cur_pa_ht, $details));
+                } else {
+                    $commande_line = null;
+                    if ($this->getData('linked_object_name') === 'commande_line' && (int) $this->getData('linked_id_object')) {
+                        $commande_line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $this->getData('linked_id_object'));
+                    }
+
+                    $def_pa_ht = 0;
+                    $def_pa_label = '';
+
+                    if ((int) $product->getData('no_fixe_prices')) {
+                        if (BimpObject::objectLoaded($commande_line)) {
+                            $comm_ref = (string) $this->db->getValue('commande', 'ref', 'rowid = ' . (int) $commande_line->getData('id_obj'));
+
+                            if ($comm_ref) {
+                                $def_pa_ht = (float) $commande_line->pa_ht;
+                                $def_pa_label = 'PA commande client ' . $comm_ref;
+                            }
+                        }
+
+                        if (!$def_pa_ht) {
+                            $def_pa_ht = (float) $this->pa_ht;
+                            $def_pa_label = 'PA enregistré dans cette ligne de facture';
+                        }
+                    } else {
+                        $def_pa_ht = (float) $product->getCurrentPaHt(null, true, $date);
+                        if ($date) {
+                            $dt = new DateTime($date);
+                            $def_pa_label = 'PA courant du produit au ' . $dt->format('d / m / Y');
+                        } else {
+                            $def_pa_label = 'PA courant du produit';
+                        }
+                    }
+
+                    $remain_qty = $fullQty;
+                    $total_achats = 0;
+
+                    if (BimpObject::objectLoaded($commande_line)) {
+                        // Recherche des PA réels dans les factures fourn, BR et commandes fourn.
+                        $comm_fourn_lines = BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_CommandeFournLine', array(
+                                    'linked_object_name' => 'commande_line',
+                                    'linked_id_object'   => (int) $commande_line->id
+                        ));
+
+                        foreach ($comm_fourn_lines as $cf_line) {
+                            $comm_fourn_data = $this->db->getRow('commande_fournisseur', 'rowid = ' . (int) $cf_line->getData('id_obj'), array('ref', 'fk_statut'), 'array');
+
+                            if (is_null($comm_fourn_data)) {
+                                continue;
+                            }
+
+                            $cf_line_remain_qty = (float) $cf_line->qty;
+                            if ($cf_line_remain_qty > $remain_qty) {
+                                $cf_line_remain_qty = $remain_qty;
+                            }
+
+                            if (!$cf_line_remain_qty) {
+                                continue;
+                            }
+
+                            $remain_qty -= $cf_line_remain_qty;
+                            $cf_line_pu_ht = (float) $cf_line->getUnitPriceHTWithRemises();
+
+                            $fac_fourn_lines = BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_FactureFournLine', array(
+                                        'linked_object_name' => 'commande_fourn_line',
+                                        'linked_id_object'   => (int) $cf_line->id
+                            ));
+
+                            // Vérification des lignes de factures fourn: 
+                            foreach ($fac_fourn_lines as $ff_line) {
+                                $ff_line_qty = (float) $ff_line->getFullQty();
+                                if ($ff_line_qty > $cf_line_remain_qty) {
+                                    $ff_line_qty = $cf_line_remain_qty;
+                                }
+
+                                if (!$ff_line_qty) {
+                                    continue;
+                                }
+
+                                $fac_fourn_data = $this->db->getRow('facture_fourn', 'rowid = ' . (int) $ff_line->getData('id_obj'), array('ref', 'fk_statut'), 'array');
+                                if (!is_null($fac_fourn_data)) {
+                                    $total_achats += ($ff_line->pu_ht * $ff_line_qty);
+                                    $detail = 'PA Facture fournisseur ' . $fac_fourn_data['ref'];
+                                    if ((int) $fac_fourn_data['fk_statut'] === 0) {
+                                        $detail .= ' <span class="warning">(non validée)</span>';
+                                    }
+                                    $detail .= ' pour ' . $ff_line_qty . ' unité(s) : ' . BimpTools::displayMoneyValue((float) $ff_line->pu_ht);
+                                    $details[] = $detail;
+                                    $cf_line_remain_qty -= $ff_line_qty;
+                                }
+                            }
+
+                            if ($cf_line_remain_qty > 0) {
+                                // Vérification des réceptions validées non facturées: 
+                                $receptions = $cf_line->getData('receptions');
+                                foreach ($receptions as $id_reception => $reception_data) {
+                                    if (!isset($reception_data['received']) || !(int) $reception_data['received']) {
+                                        continue;
+                                    }
+
+                                    $br_values = $this->db->getRow('bl_commande_fourn_reception', 'id = ' . (int) $id_reception, array('num_reception', 'ref', 'status', 'id_facture'), 'array');
+                                    if (!is_null($br_values)) {
+                                        $br_qty = (float) $reception_data['qty'];
+                                        if ($br_qty > $cf_line_remain_qty) {
+                                            $br_qty = $cf_line_remain_qty;
+                                        }
+
+                                        if (!$br_qty) {
+                                            continue;
+                                        }
+
+                                        // Calcul PA moyen de la réception: 
+                                        $br_total_qty = 0;
+                                        $br_total_amount = 0;
+                                        if (isset($reception_data['qties'])) {
+                                            foreach ($reception_data['qties'] as $qty_data) {
+                                                $br_total_qty += (float) $qty_data['qty'];
+                                                $pu_ht = (float) (isset($qty_data['pu_ht']) ? $qty_data['pu_ht'] : $cf_line_pu_ht);
+                                                $br_total_amount += ((float) $qty_data['qty'] * $pu_ht);
+                                            }
+                                        }
+
+                                        if ($br_total_qty > 0) {
+                                            $pu_moyen = $br_total_amount / $br_total_qty;
+                                            $detail = 'PA réception n°' . $br_values['num_reception'] . ' - ' . $br_values['ref'];
+                                            $detail .= ' (Commande fournisseur ' . $comm_fourn_data['ref'] . ')';
+                                            $detail .= ' pour ' . $br_qty . ' unité(s) - Moyenne: ' . BimpTools::displayMoneyValue($pu_moyen);
+                                            $details[] = $detail;
+                                            $cf_line_remain_qty -= $br_qty;
+                                            $total_achats += ($pu_moyen * $br_qty);
+                                        }
+                                    }
+                                }
+
+                                // Attribution du PA commande fourn pour les qtés restantes: 
+                                if ($cf_line_remain_qty > 0) {
+                                    $total_achats += ($cf_line_pu_ht * $cf_line_remain_qty);
+                                    $detail = 'PA Commande fournisseur ' . $comm_fourn_data['ref'];
+                                    if ((int) $comm_fourn_data['fk_statut'] === 0) {
+                                        $detail .= ' <span class="warning">(non validée)</span>';
+                                    }
+                                    $detail .= ' pour ' . $cf_line_remain_qty . ' unité(s) : ' . BimpTools::displayMoneyValue($cf_line_pu_ht);
+                                    $details[] = $detail;
+                                }
+                            }
+                        }
+                    }
+
+                    // Attribution du PA par défaut pour les qtés restantes: 
+                    if ($remain_qty > 0) {
+                        $total_achats += ($def_pa_ht * $remain_qty);
+                        $details[] = $def_pa_label . ' pour ' . $remain_qty . ' unité(s) : ' . BimpTools::displayMoneyValue($def_pa_ht);
+                    }
+
+                    $pa_ht = $total_achats / $fullQty;
+                }
+            }
+        } else {
+            $details[] = 'PA enregistré dans la ligne de facture : ' . BimpTools::displayMoneyValue((float) $this->pa_ht);
+        }
+
+        return $pa_ht;
+    }
+
+    public function findValidPrixAchat($date = '')
+    {
+        if (!$date) {
+            $date = $this->getData('datec');
+        }
+
+        $details = array();
+        $pa_ht = (float) $this->calcPrixAchat($date, $details);
+
+        return array(
+            'pa_ht'  => $pa_ht,
+            'origin' => BimpTools::getMsgFromArray($details)
+        );
     }
 
     public function updatePrixAchat($new_pa_ht)
@@ -257,7 +479,7 @@ class Bimp_FactureLine extends ObjectLine
 
         if ($this->isLoaded($errors)) {
             $qty = (float) $this->getFullQty();
-            if ($qty && (float) $new_pa_ht !== (float) $this->pa_ht) {
+            if ($qty) {
                 $facture = $this->getParentInstance();
 
                 if (!BimpObject::objectLoaded($facture)) {
@@ -321,53 +543,42 @@ class Bimp_FactureLine extends ObjectLine
         return $errors;
     }
 
-    public function onEquipmentAttributed($id_equipment)
-    {
-        if ($this->isLoaded()) {
-            $facture = $this->getParentInstance();
-
-            if (BimpObject::objectLoaded($facture) && (int) $facture->getData('fk_statut') > 0) {
-                $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
-                if (BimpObject::objectLoaded($equipment)) {
-                    $pu_ht = (float) $this->getUnitPriceHTWithRemises();
-                    $pu_ttc = BimpTools::calculatePriceTaxIn($pu_ht, (float) $this->tva_tx);
-
-                    $equipment->set('prix_vente', $pu_ttc);
-                    $equipment->set('vente_tva_tx', (float) $this->tva_tx);
-                    $equipment->set('date_vente', date('Y-m-d H:i:s'));
-                    $equipment->set('id_facture', (int) $this->getData('id_obj'));
-
-                    $warnings = array();
-                    $equipment->update($warnings, true);
-                }
-            }
-        }
-    }
-
     // Overrides: 
 
     public function create(&$warnings = array(), $force_create = false)
     {
         $errors = array();
+        $details = array();
 
-        if ((int) $this->getData('type') === self::LINE_PRODUCT) {
-            $product = $this->getProduct();
-            if (!BimpObject::objectLoaded($product)) {
-                $errors[] = 'Produit absent';
-            } else {
-                $new_pa = (float) $product->getCurrentPaHt();
-
-                if ($new_pa) {
-                    $this->pa_ht = $new_pa;
-                    $this->id_fourn_price = 0;
-                }
-            }
-        }
+        $this->pa_ht = (float) $this->calcPrixAchat(date('Y-m-d H:i:s'), $details, $errors);
+        $this->id_fourn_price = 0;
 
         if (count($errors)) {
             return $errors;
         }
 
         $errors = parent::create($warnings, $force_create);
+    }
+
+    public function delete(&$warnings = array(), $force_delete = false)
+    {
+        $commLine = null;
+        $id_facture = (int) $this->getData('id_obj');
+
+        if ($this->isLoaded()) {
+            if ($this->getData('linked_object_name') === 'commande_line' && (int) $this->getData('linked_id_object')) {
+                $commLine = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $this->getData('linked_id_object'));
+            }
+        }
+
+        $errors = parent::delete($warnings, $force_delete);
+
+        if (!count($errors)) {
+            if (BimpObject::objectLoaded($commLine)) {
+                $commLine->onFactureDelete($id_facture);
+            }
+        }
+
+        return $errors;
     }
 }

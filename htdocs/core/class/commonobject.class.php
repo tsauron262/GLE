@@ -780,6 +780,10 @@ abstract class CommonObject
 		// Socpeople must have already been added by some trigger, then we have to check it to avoid DB_ERROR_RECORD_ALREADY_EXISTS error
 		$TListeContacts=$this->liste_contact(-1, $source);
 		$already_added=false;
+                
+//                echo '<pre>';
+//                print_r($TListeContacts);
+//                die();
 		if(!empty($TListeContacts)) {
 			foreach($TListeContacts as $array_contact) {
 				if($array_contact['status'] == 4 && $array_contact['id'] == $fk_socpeople && $array_contact['fk_c_type_contact'] == $id_type_contact) {

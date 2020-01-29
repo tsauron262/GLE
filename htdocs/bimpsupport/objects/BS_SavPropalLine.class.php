@@ -337,13 +337,23 @@ class BS_SavPropalLine extends Bimp_PropalLine
 
     public function delete(&$warnings = array(), $force_delete = false)
     {
-        $sav_errors = $this->updateSav();
+        $is_garantie = ($this->getData('linked_object_name') === 'sav_garantie');
 
-        if (count($sav_errors)) {
-            $warnings[] = BimpTools::getMsgFromArray($sav_errors, 'Des erreurs sont survenues lors de la mise à jour du SAV');
+        $propal = $this->getParentInstance();
+        if (BimpObject::objectLoaded($propal)) {
+            $sav = $propal->getSav();
         }
 
         $errors = parent::delete($warnings, $force_delete);
+
+        if (!count($errors)) {
+            if (!$is_garantie) {
+                $sav_error = $sav->processPropalGarantie();
+                if ($sav_error) {
+                    $warnings[] = $sav_error;
+                }
+            }
+        }
 
         return $errors;
     }

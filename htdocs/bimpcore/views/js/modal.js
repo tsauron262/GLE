@@ -87,7 +87,7 @@ function BimpModal($modal) {
         modal.$contents.find('.modal_content').each(function () {
             var idx = parseInt($(this).data('idx'));
             if (idx) {
-                modal.removeContent(idx, false);
+                modal.removeContent(idx, false, false);
             }
         });
 
@@ -95,9 +95,30 @@ function BimpModal($modal) {
         modal.hide();
     };
 
-    this.removeContent = function (idx, check_contents) {
+    this.removeContent = function (idx, check_contents, display_remaining_content) {
         if (typeof (check_contents) === 'undefined') {
             check_contents = true;
+        }
+        if (typeof (display_remaining_content) === 'undefined') {
+            display_remaining_content = true;
+        }
+
+        if (display_remaining_content && modal.idx === idx) {
+            var hasPrev = false;
+            var hasNext = false;
+            modal.$contents.find('.modal_content').each(function () {
+                var cur_idx = parseInt($(this).data('idx'));
+                if (cur_idx < idx) {
+                    hasPrev = true;
+                } else if (cur_idx > idx) {
+                    hasNext = true;
+                }
+            });
+            if (hasPrev) {
+                this.displayPrev();
+            } else if (hasNext) {
+                this.displayNext();
+            }
         }
 
         modal.$titles.find('#modal_title_' + idx).remove();
@@ -189,7 +210,7 @@ function BimpModal($modal) {
             modal.$contents.find('.modal_content').hide();
             $content.fadeIn(250);
         } else {
-            modal.removeContent(idx);
+            modal.removeContent(idx, false);
         }
 
         modal.checkContents();
@@ -242,7 +263,7 @@ function BimpModal($modal) {
     };
 
     this.loadAjaxContent = function ($button, ajax_action, ajax_data, title, loading_text, success_callback, ajax_params, modal_format) {
-        if ($button.hasClass('disabled')) {
+        if ($button != null && $button.hasClass('disabled')) {
             return;
         }
 
@@ -366,6 +387,9 @@ function BimpModal($modal) {
         if (idx !== modal.idx) {
             html += ' style="display: none"';
         }
+
+        html += 'data-modal_idx="' + idx + '"';
+
         html += '>' + label + '</button>';
         modal.$footer.append(html);
     };
@@ -428,6 +452,26 @@ function BimpModal($modal) {
                     break;
             }
         }
+    };
+
+    this.getContent = function (modal_idx) {
+        return modal.$contents.find('#modal_content_' + modal_idx);
+    };
+
+    this.scrollTop = function () {
+        bimpScroller.newScrollValue(0, modal.$modal.find('.modal-body'), modal.$modal.$contents);
+    };
+
+    this.scrollBottom = function () {
+        bimpScroller.newScrollToBottom(modal.$modal.find('.modal-body'), modal.$contents);
+    };
+
+    this.scrollUp = function () {
+
+    };
+
+    this.scrollDown = function () {
+
     };
 }
 

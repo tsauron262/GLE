@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+    <request name="repairCreate">
+        <label>Création d'une réparation</label>
+        <datas>
+            <data name="repairType" required="1" values="repair_types" default="CIN">
+                <label>Type de réparation</label>
+            </data>
+            
+            <data name="questions" donotprocess="1"></data>
+            
+            <data name="serviceNonRepairType" required="0">
+                <display_if input_name="repairType" show_values="SVNR"></display_if>
+            </data>
+            <data name="techId" required="0"></data>
+            <data name="repairClassification" required="0"></data>
+            <data name="referenceNumber" required="0"></data>
+            <data name="purchaseOrderNumber" required="1"></data>
+            <data name="reservationId" required="0"></data>
+            <data name="coverageOption" required="0"></data>
+            <data name="unitReceivedDateTime" required="1"></data>
+            <data name="consumerLaw" required="0"></data>
+            <data name="boxRequired" required="0">
+                <display_if input_name="repairType" show_values="MINS,MINC,WUMS,WUMC"></display_if>
+            </data>
+            <data name="addressCosmeticDamage" required="0"></data>
+            <data name="loanerStockUnavailable" required="0"></data>
+            <data name="repairFlags" required="0">
+                <datas>
+                    <data name="requestReviewByApple" required="0"></data>
+                    <data name="markComplete" required="0"></data>
+                </datas>
+            </data>
+            
+            <data name="account" required="0">
+                <display_if input_name="repairType" show_values="MINS,MINC,WUMS,WUMC"></display_if>
+                <datas>
+                    <data name="soldtoContactEmail" required="0"></data>
+                    <data name="soldToContactPhone" required="0"></data>
+                </datas>
+            </data>
+            
+            <data name="customer" required="1">
+                <datas>
+                    <data name="firstName" required="1"></data>
+                    <data name="lastName" required="1"></data>
+                    <data name="companyName" required="0"></data>
+                    <data name="emailAddress" required="1"></data>
+                    <data name="primaryPhone" required="1"></data>
+                    <data name="secondaryPhone" required="0"></data>
+                    <data name="secondaryContact" required="0"></data>
+                    <data name="sendSMSOnPrimaryPhone" required="0" default="0"></data>
+                    <data name="primarySMSProvider" required="0">
+                        <display_if input_name="customer_sendSMSOnPrimaryPhone" show_values="1"></display_if>
+                    </data>
+                    <data name="type" required="0" default="CONSUMER">
+                        <label>Type de client</label>
+                        <values>
+                            <val val="VAR">VAR</val>
+                            <val val="CONSUMER">CONSUMER</val>
+                            <val val="BUSINESS">BUSINESS</val>
+                            <val val="EDUCATION">EDUCATION</val>
+                        </values>
+                    </data>
+                    <data name="address" required="1" multiple="1" maxitems="1">
+                        <label>Adresse du client</label>
+                        <datas>
+                            <data name="line1" required="1"></data>
+                            <data name="line2" required="0"></data>
+                            <data name="line3" required="0"></data>
+                            <data name="line4" required="0"></data>
+                            <data name="postalCode" required="1"></data>
+                            <data name="city" required="1"></data>
+                            <data name="countryCode" required="1"></data>
+                            <data name="county" required="0">
+                                <display_if input_name="customer_address_countryCode_idx" hide_values="FRA"></display_if>
+                            </data>
+                            <data name="stateCode" required="1">
+                                <display_if input_name="customer_address_countryCode_idx" hide_values="FRA"></display_if>
+                            </data>
+                        </datas>
+                    </data>
+                </datas>
+            </data>
+            
+            <data name="device" required="1">
+                <datas>
+                    <data name="id" required="1">
+                        <label>Numéro de série</label>
+                    </data>
+                </datas>
+            </data>
+            
+            <data name="componentIssues" required="1" multiple="1" maxitems="6">
+                <datas>
+                    <data name="componentCode" required="1"></data>
+                    <data name="issueCode" required="1"></data>
+                    <data name="reproducibility" required="0"></data>
+                    <data name="priority" required="1"></data>
+                    <data name="type" required="1" default="CUST">
+                        <label>Problème</label>
+                        <values>
+                            <val val="TECH">Constaté et vérifié par le technicien</val>
+                            <val val="CUST">Rapporté par le client</val>
+                        </values>
+                    </data>
+                    <data name="order"></data>
+                </datas>
+            </data>
+            
+            <data name="parts" required="0" multiple="1" maxitems="25">
+                <datas>
+                    <data name="part_label" donotprocess="1"></data>
+                    <data name="number" required="1"></data>
+                    <data name="partUsed" required="0"></data>
+                    <data name="coverageOption" required="0"></data>
+                    <data name="pricingOption" required="0"></data>
+                    <data name="fromConsignedStock" required="0"></data>
+                    <data name="kgbDeviceDetail" required="0">
+                        <datas>
+                            <data name="id" required="1">
+                                <label>Nouveau numéro de série</label>
+                            </data>
+                        </datas>
+                    </data>
+                    <data name="componentIssue" required="0">
+                        <datas>
+                            <data name="componentCode" required="1"></data>
+                            <data name="issueCode" required="1"></data>
+                            <data name="reproducibility" required="1"></data>
+                        </datas>
+                    </data>
+                </datas>
+            </data>
+            
+            <data name="loaners" required="0" multiple="1" maxitems="25">
+                <datas>
+                    <data name="partUsed" required="1"></data>
+                    <data name="returnStatusCode" required="0"></data>
+                    <data name="partNumber" required="1"></data>
+                    <data name="fromConsignedStock" required="1"></data>
+                    <data name="componentIssue" required="0">
+                        <datas>
+                            <data name="componentCode" required="1"></data>
+                            <data name="issueCode" required="1"></data>
+                            <data name="reproducibility" required="0"></data>
+                        </datas>
+                    </data>                    
+                </datas>
+            </data>
+            
+            <data name="notes" required="1" multiple="1" maxitems="50">
+                <datas>
+                    <data name="type" required="1" values="repair_note_types"></data>
+                    <data name="content" required="1"></data>
+                </datas>
+            </data>
+            
+            <data name="attachments" required="0" multiple="1" maxitems="3">
+                <datas>
+                    <data name="fileOrigin" donotprocess="1" default="sav"></data>
+                    <data name="savFile" donotprocess="1">
+                        <display_if input_name="attachments_fileOrigin_idx" show_values="sav"></display_if>
+                    </data>
+                    <data name="file" donotprocess="1">
+                        <display_if input_name="attachments_fileOrigin_idx" show_values="user"></display_if>
+                    </data>
+                    <data name="type" required="1">
+                        <values>
+                            <val val="POP">POP</val>
+                            <val val="REPAIR">REPAIR</val>
+                        </values>
+                    </data>
+                </datas>
+            </data>
+            
+            <!--<data name="questionDetails" required="0" multiple="1" maxitems="200"></data>-->
+        </datas>
+    </request>
+</root>

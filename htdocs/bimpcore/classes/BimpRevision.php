@@ -143,7 +143,8 @@ class BimpRevisionPropal extends BimpRevision
 
         $newId = $object->createFromClone($socid, $hookmanager);
         if ($newId > 0) {
-            self::setLienRevision($oldRef, $oldId, $newId);
+            $newRef = self::convertRef($oldRef, "propal");
+            self::setLienRevision($oldRef, $oldId, $newId, $newRef);
             $result = $db->query("SELECT * FROM " . MAIN_DB_PREFIX . "bs_sav WHERE id_propal = " . $oldId);
             if ($db->num_rows($result) > 0) {
                 $ligne = $db->fetch_object($result);
@@ -163,6 +164,24 @@ class BimpRevisionPropal extends BimpRevision
             $tab = getElementElement("propal", null, $oldId, null, 0);
             foreach ($tab as $ligne)
                 addElementElement($ligne['ts'], $ligne['td'], $newId, $ligne['d'], 0);
+            
+            $dir = DOL_DATA_ROOT.'/propale/'.$oldRef."/";
+            $dir2 = DOL_DATA_ROOT.'/propale/'.$newRef."/";
+
+            if(is_dir($dir)){
+                $cdir = scandir($dir);
+                foreach ($cdir as $key => $value)
+                {
+                    if(!is_dir($dir2))
+                        mkdir ($dir2);
+                    
+                    if (!in_array($value,array(".","..")))
+                    {
+                        link($dir.$value, $dir2.$value);
+                    }
+                }
+            }
+            
 
             return $newId;
         }

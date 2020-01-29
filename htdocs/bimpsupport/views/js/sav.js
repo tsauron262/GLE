@@ -93,10 +93,7 @@ function loadGSXView($button, id_sav) {
     var $container = $('#gsxResultContainer');
     var serial = $gsxForm.find('#gsx_equipment_serial').val();
     if (/^S?[A-Z0-9]{11,12}$/.test(serial) || /^S?[0-9]{15}$/.test(serial)) {
-        BimpAjax('loadGSXView', {
-            serial: serial,
-            id_sav: id_sav
-        }, $container, {
+        var params = {
             append_html: true,
             display_processing: true,
             processing_msg: 'Chargement en cours',
@@ -108,37 +105,77 @@ function loadGSXView($button, id_sav) {
                     $container: bimpAjax.$resultContainer
                 }));
             }
-        });
+        };
+
+        if (typeof (use_gsx_v2) !== 'undefined' && use_gsx_v2) {
+            GsxAjax('gsxLoadSavGsxView', {
+                serial: serial,
+                id_sav: id_sav
+            }, $container, params);
+        } else {
+            BimpAjax('loadGSXView', {
+                serial: serial,
+                id_sav: id_sav
+            }, $container, params);
+        }
     } else {
         $container.html('<p class="alert alert-danger">Numéro de série invalide</p>');
     }
 
 }
 
+function setSavEquipmentInputEvents($input) {
+    if ($.isOk($input)) {
+        if (!parseInt($input.data('sav_equipment_input_events_init'))) {
+            $input.change(function () {
+                var $container = $input.findParentByClass('inputContainer');
+                if ($container.length) {
+                    $container.find('div.equipmentAjaxInfos').remove();
+                    var html = '<div class="equipmentAjaxInfos" style="display: none"></div>';
+                    $container.append(html);
+
+                    var params = {
+                        $container: $container,
+                        display_success: false,
+                        display_errors: true,
+                        display_warnings: true,
+                        display_processing: true,
+                        processing_padding: 0,
+                        append_html: true,
+                        processing_msg: ''
+                    };
+
+                    if (typeof (use_gsx_v2) !== 'undefined' && use_gsx_v2) {
+                        GsxAjax('gsxGetEquipmentEligibility', {
+                            id_equipment: $input.val()
+                        }, $container.find('.equipmentAjaxInfos'), params);
+                    } else {
+                        params.url = dol_url_root + '/bimpequipment/index.php';
+                        BimpAjax('getEquipmentGsxInfos', {
+                            id_equipment: $input.val()
+                        }, $container.find('.equipmentAjaxInfos'), params);
+                    }
+                }
+            });
+            $input.data('sav_equipment_input_events_init', 1);
+        }
+    }
+}
+
 function onSavFormLoaded($form) {
     var $input = $form.find('[name="id_equipment"]');
     if ($input.length) {
-        $input.change(function () {
-            var $container = $input.findParentByClass('inputContainer');
-            if ($container.length) {
-                $container.find('div.equipmentAjaxInfos').remove();
-                var html = '<div class="equipmentAjaxInfos" style="display: none"></div>';
-                $container.append(html);
-                BimpAjax('getEquipmentGsxInfos', {
-                    id_equipment: $input.val()
-                }, $container.find('.equipmentAjaxInfos'), {
-                    url: dol_url_root + '/bimpequipment/index.php',
-                    $container: $container,
-                    display_success: false,
-                    display_errors: false,
-                    display_processing: true,
-                    processing_padding: 0,
-                    append_html: true,
-                    processing_msg: ''
-                });
-            }
-        });
+        setSavEquipmentInputEvents($input);
     }
+
+    $('body').on('inputReloaded', function (e) {
+        if ($.isOk(e.$form) && e.$form.hasClass('BS_SAV_form')) {
+            if ($.isOk(e.$input) && e.input_name === 'id_equipment') {
+                setSavEquipmentInputEvents(e.$input);
+                e.$input.change();
+            }
+        }
+    });
 }
 
 $(document).ready(function () {

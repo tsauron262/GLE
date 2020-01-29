@@ -6,6 +6,7 @@ fields:
     remise_pa: unset
     remise_crt: unset
     remise_crt_percent: unset
+    hide_in_pdf: unset
     
 forms: 
     fournline: 
@@ -14,6 +15,17 @@ forms:
                 field: type
                 show: 
                     callback: isNotLoaded
+            type_edit: 
+                custom: 1
+                show: 
+                    callback: isLoaded
+                hidden: 1
+                input: 
+                    type: hidden
+                input_name: type
+                data_type: 1
+                value: 
+                    field_value: type
             product: 
                 custom: 1
                 label: Produit
@@ -32,8 +44,6 @@ forms:
                     callback: isProductEditable
             fourn_price: 
                 custom: 1
-#                show: 
-#                    callback: isNotLoaded  
                 label: Prix d'achat
                 input_name: id_fourn_price
                 data_type: id_object
@@ -68,10 +78,11 @@ forms:
                 label: Prix d'achat unitaire
                 input_name: pa_except
                 data_type: money
-                input: 
-                    type: text
-                value: 
-                    prop: pu_ht
+                content: 
+                    callback: 
+                        method: renderLineInput
+                        params: 
+                            - pa_except
                 display_if: 
                     fields_names: id_fourn_price,type
                     id_fourn_price: 
@@ -300,6 +311,7 @@ lists_cols:
                     
     remise_crt: unset
     remise_pa: unset
+    hide_in_pdf: unset
     
 filters_panels: 
     default: 

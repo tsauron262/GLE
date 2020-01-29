@@ -1,0 +1,24 @@
+h1{
+    text-align:center;
+}
+.border{
+    border: solid black 1px;
+}
+
+table {
+    padding: 0;
+}
+
+.bold {
+    font-weight: bold;   
+}
+
+.addresses_section {
+    font-size: 10px;
+}
+
+.sender_address {
+    /*background-color: #F0F0F0;*/
+    padding: 10px;
+    font-size: 8px;
+}

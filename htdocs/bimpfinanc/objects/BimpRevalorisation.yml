@@ -51,7 +51,7 @@ fields:
         type: id_object
         object: facture
         input: 
-            type: search_object
+            card: light
         required: 1
         
     id_facture_line:
@@ -93,14 +93,18 @@ fields:
         
     amount: 
         label: Montant unitaire
+        input: 
+            help: Indiquez le montant unitaire à soustraire du prix d'achat.</br>(Valeur négative si le prix d'achat doit être augmenté).
         type: money
+        unsigned: 0
         required: 1
         
     qty: 
         label: Qté
         type: qty
         decimals: 4
-        default_value: 0
+        default_value: 
+            callback: getDefaultQty
         
     status: 
         label: Statut
@@ -137,6 +141,7 @@ forms:
             - field: type
             - field: date
             - field: amount
+              label: Différence unitaire à corriger
             - field: qty
             - field: note
         
@@ -352,4 +357,4 @@ lists:
             desc: 
             total: 
             status:  
-            commissions: 
+            commissions:

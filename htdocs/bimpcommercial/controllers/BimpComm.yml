@@ -10,6 +10,7 @@ js:
     1: /bimpequipment/views/js/equipment.js
     2: /bimpcommercial/views/js/object_line.js
     3: /bimpcommercial/views/js/paiement.js
+    4: /bimpcommercial/views/js/bimpcomm.js
     
 objects: 
     bimp_comm: 
@@ -75,7 +76,13 @@ sections:
                                               name: default
                                               panel: 1
                                               object: bimp_comm
-                                              children: files
+                                              children: files                                  
+                                    - cols: 
+                                        - type: custom
+                                          custom:
+                                            callback: 
+                                              method: renderExtraFile
+                                              object: bimp_comm
                                               
                     - type: custom
                       custom: 

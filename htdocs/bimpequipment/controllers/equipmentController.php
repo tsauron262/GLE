@@ -78,7 +78,14 @@ class equipmentController extends BimpController
             'request_id' => BimpTools::getValue('request_id', 0)
         )));
     }
-
+    
+    
+    public function displayHead()
+    {
+        require_once(DOL_DOCUMENT_ROOT."/bimpapple/classes/GSX_v2.php");
+        echo GSX_v2::renderJsVars();
+    }
+    
     protected function ajaxProcessGetEquipmentGsxInfos()
     {
         $errors = array();

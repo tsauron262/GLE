@@ -2,10 +2,6 @@
 
 class BimpRevalorisation extends BimpObject
 {
-    public function canView() {
-        global $user;
-        return $user->rights->bimpequipment->inventory->close;
-    }
 
     public static $status_list = array(
         0 => array('label' => 'En Attente', 'icon' => 'fas_hourglass-start', 'classes' => array('warning')),
@@ -20,6 +16,29 @@ class BimpRevalorisation extends BimpObject
 
     // Gestion des droits user: 
 
+    public function canCreate()
+    {
+        global $user;
+        return ($user->admin || $user->rights->bimpcommercial->reval->write);
+    }
+
+    public function canEdit()
+    {
+        return (int) $this->canCreate();
+    }
+
+    public function canValid()
+    {
+        global $user;
+        return ($user->admin || $user->rights->bimpcommercial->reval->valid);
+    }
+
+    public function canView()
+    {
+        global $user;
+        return ($user->admin || $user->rights->bimpcommercial->reval->read);
+    }
+
     public function canDelete()
     {
         global $user;
@@ -32,8 +51,7 @@ class BimpRevalorisation extends BimpObject
         switch ($action) {
             case 'process':
             case 'cancelProcess':
-//                todo: 
-                return 1;
+                return $this->canValid();
 
             case 'addToCommission':
             case 'removeFromUserCommission':
@@ -255,6 +273,24 @@ class BimpRevalorisation extends BimpObject
     public function getTotal()
     {
         return (float) $this->getData('amount') * (float) $this->getData('qty');
+    }
+
+    public function getDefaultQty()
+    {
+        if (!$this->isLoaded()) {
+            if ((int) $this->getData('id_facture_line')) {
+                $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureLine', (int) $this->getData('id_facture_line'));
+                if (BimpObject::objectLoaded($line)) {
+                    return (float) $line->qty;
+                }
+            }
+        }
+        
+        if (isset($this->data['qty'])) { // Pas de $this->getData('qty') sinon boucle infinie... 
+            return (float) $this->data['qty'];
+        }
+        
+        return 0;
     }
 
     // Getters params: 

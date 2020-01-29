@@ -8,6 +8,11 @@ class ObjectLineRemise extends BimpObject
 
     // Getters - Ovveride BimpObject
 
+    public function canCreate()
+    {
+        return 1;
+    }
+
     public function isParentEditable()
     {
         $parent = $this->getParentInstance();
@@ -147,10 +152,7 @@ class ObjectLineRemise extends BimpObject
         }
 
         if (!$parent->isEditable($force_update)) {
-            $msg = BimpTools::ucfirst($parent->getLabel('the')) . ' ne peut pas être modifié';
-            if ($parent->isLabelFemale()) {
-                $msg .= 'e';
-            }
+            $msg = BimpTools::ucfirst($parent->getLabel('the')) . ' ne peut pas être modifié' . $parent->e();
             $msg .= '. Il n\'est pas possible d\'éditer cette remise';
             return array($msg);
         }

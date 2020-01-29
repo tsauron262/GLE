@@ -376,6 +376,23 @@ forms:
               input: 
                   type: qty
               value: 1
+              
+    pdf: 
+        rows: 
+            - custom: 1
+              label: Chiffré
+              data_type: bool
+              input_name: chiffre
+              input: 
+                  type: toggle
+              value: 1
+            - custom: 1
+              label: Detail
+              data_type: bool
+              input_name: detail
+              input: 
+                  type: toggle
+              value: 1
                   
 fields_tables: 
     data: 
@@ -647,3 +664,19 @@ cards:
               display: nom_url
             - label: Infos
               field: info
+
+searches:
+    default: 
+        fields_search: 
+            - a.ref
+            - c.ref
+            - s.nom
+        joins:
+            commande: 
+                table: commande
+                on: c.rowid = a.id_commande_client
+                alias: c
+            s: 
+                table: societe
+                on: c.fk_soc = s.rowid
+                alias: s

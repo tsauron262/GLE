@@ -447,7 +447,7 @@ class BimpStatsFacture {
         
         if($name == 'type' && count($out) < 2){
             $out = array();
-            $sql = $this->db->query("SELECT * FROM `llx_bimp_c_secteur` WHERE 1");
+            $sql = $this->db->query("SELECT * FROM `".MAIN_DB_PREFIX."bimp_c_secteur` WHERE 1");
             while($ln = $this->db->fetch_object($sql)){
                 $out[$ln->clef] = $ln->valeur;
             }

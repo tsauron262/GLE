@@ -31,7 +31,7 @@ $txt = urldecode($_REQUEST['txt']);
 
 if($_REQUEST["old"]){
     $commande = new Commande($db);
-    $sql = $db->query("SELECT rowid FROM `llx_commande` WHERE `validComm` > 0 AND (`validFin` < 1 || validFin is NULL) AND fk_statut = 0 ORDER BY `llx_commande`.`tms` DESC");
+    $sql = $db->query("SELECT rowid FROM `".MAIN_DB_PREFIX."commande` WHERE `validComm` > 0 AND (`validFin` < 1 || validFin is NULL) AND fk_statut = 0 ORDER BY `".MAIN_DB_PREFIX."commande`.`tms` DESC");
     while($ln=$db->fetch_object($sql)){
         $commande->fetch($ln->rowid);
         $commande->valid($user);
@@ -46,10 +46,10 @@ if($_REQUEST["old"]){
 
 if (!($dst != "" && $src != "" && $subj != "" && $txt != "")) {
 //    echo "Pas de données <pre>".print_r($_REQUEST,1);
-    $sql = $db->query("SELECT * FROM llx_bimp_task2");
+    $sql = $db->query("SELECT * FROM ".MAIN_DB_PREFIX."bimp_task2");
     while ($ln = $db->fetch_object($sql)) {
         if (traiteTask($ln->dst, $ln->src, $ln->subj, $ln->txt)) {
-            $db->query("DELETE FROM llx_bimp_task2 WHERE id =" . $ln->id);
+            $db->query("DELETE FROM ".MAIN_DB_PREFIX."bimp_task2 WHERE id =" . $ln->id);
             echo "<br/>Tache 2 id : " . $ln->id;
         }
     }
@@ -78,6 +78,9 @@ function traiteTask($dst, $src, $subj, $txt) {
     if (isset($matches[0])) {
         $idTask = str_replace($const, "", $matches[0]);
     }
+    
+    if($dst == "sms-apple@bimp.fr")
+        $idTask= 25350;
 
     $tabTxt = explode("-------------", $txt);
     $tabTxt = explode("\n> ", $tabTxt[0]);
@@ -86,7 +89,7 @@ function traiteTask($dst, $src, $subj, $txt) {
     
     
     $user = new User($db);
-    $sql = $db->query("SELECT u.rowid FROM `llx_user` u, llx_user_extrafields ue WHERE ue.fk_object = u.rowid AND (email LIKE '".$src."' || ue.alias LIKE '%".$src."%')");
+    $sql = $db->query("SELECT u.rowid FROM `".MAIN_DB_PREFIX."user` u, ".MAIN_DB_PREFIX."user_extrafields ue WHERE ue.fk_object = u.rowid AND (email LIKE '".$src."' || ue.alias LIKE '%".$src."%')");
     if($db->num_rows($sql) > 0){
         $ln = $db->fetch_object($sql);
         $user->fetch($ln->rowid);
@@ -115,6 +118,8 @@ function traiteTask($dst, $src, $subj, $txt) {
         $tab = array("obj_type" => "bimp_object", "obj_module" => "bimptask", "obj_name" => "BIMP_Task", "id_obj" => $idTask, "type_author" => "3", "email" => $src, "visibility" => 4, "content" => $txt);
         $errors = array_merge($errors, $note->validateArray($tab));
         $errors = array_merge($errors, $note->create());
+        
+//        $errors = array_merge($errors, $task->addNote($txt, 4, 0, 0, $src, 3));
     }
 
     if (count($errors) > 0) {

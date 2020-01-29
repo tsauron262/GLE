@@ -44,9 +44,10 @@ fields:
     id_client: 
         label: Client
         type: id_parent
+        object: client
         input: 
-            type: search_societe
-            societe_type: customer
+            type: search_object
+            card: default
         display_if: 
             field_name: id_sav
             show_values: 0
@@ -54,13 +55,6 @@ fields:
         label: SAV
         type: id_object
         object: sav
-        input: 
-            type: search_list
-            search_list:
-                table: bs_sav s
-                field_return_value: s.id
-                field_return_label: s.ref
-                fields_search: s.id,s.ref
         default_value: 0
     id_entrepot: 
         label: Entrepot
@@ -115,10 +109,13 @@ forms:
         rows: 
             - field: id_sav
               hidden: 1
+            - field: id_entrepot
+              hidden: 1
             - field: date_begin
             - field: date_end
             - field: caution
             - association: equipments
+              depends_on: id_entrepot
             - object: products
               multiple: 1
 

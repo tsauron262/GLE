@@ -26,26 +26,38 @@ $content_request = $_REQUEST['fc'];
                         ?>
                         <li <?= ($content_request == 'ticket') ? 'class="active"' : "" ?> >
                             <a href="client.php?fc=tickets">
-                                <i class="pe-7s-paperclip"></i>
+                                <i class="pe-7s-ticket"></i>
                                 <p><?= $langs->trans('menuTickets') ?></p>
                             </a>
                         </li>
                         <?php
                         if ($activate_page) {
                             ?>
-
+                            <li <?= ($content_request == 'inter') ? 'class="active"' : "" ?> >
+                            <a href="client.php?fc=inters">
+                                <i class="pe-7s-config"></i>
+                                <p><?= $langs->trans('menuInter') ?></p>
+                            </a>
+                        </li>
+                        <li <?= ($content_request == 'facture') ? 'class="active"' : "" ?>>
+                                <a href="client.php?fc=facture">
+                                    <i class="pe-7s-file"></i>
+                                    <p><?= $langs->trans('menuFacture') ?></p>
+                                </a>
+                            </li>
+                        <li <?= ($content_request == 'serials_imei') ? 'class="active"' : "" ?>>
+                                <a href="client.php?fc=serials_imei">
+                                    <i class="pe-7s-search"></i>
+                                    <p><?= $langs->trans('menuSerialsImei') ?></p>
+                                </a>
+                            </li>
                             <li <?= ($content_request == 'contrat') ? 'class="active"' : "" ?> >
                                 <a href="client.php?fc=contrat">
                                     <i class="pe-7s-graph"></i>
                                     <p><?= $langs->trans('menuContrat') ?></p>
                                 </a>
                             </li>
-                            <li <?= ($content_request == 'facture') ? 'class="active"' : "" ?>>
-                                <a href="client.php?fc=facture">
-                                    <i class="pe-7s-file"></i>
-                                    <p><?= $langs->trans('menuFacture') ?></p>
-                                </a>
-                            </li>
+                            
                             <li <?= ($content_request == 'devis') ? 'class="active"' : "" ?>>
                                 <a href="client.php?fc=devis">
                                     <i class="pe-7s-file"></i>
@@ -55,7 +67,7 @@ $content_request = $_REQUEST['fc'];
                             <?php
                         }
                         ?>
-
+                            
                         <?php
                         //if (count($couverture) > 0) {
                         ?>

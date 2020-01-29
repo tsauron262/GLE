@@ -1,0 +1,212 @@
+
+table: bl_inventory_2
+controller: inventory2
+icon: fas_clipboard-list
+
+header_btn:
+    callback: getActionsButtons
+
+header_list_name: default
+header_edit_form: default
+
+list_page_url: 
+    controller: index
+            
+labels:
+    name: inventaire
+
+objects:
+    lines:
+        relation: hasMany
+        instance: 
+            bimp_object: InventoryLine2
+        delete: 
+            callback: isAdmin
+    warehouse_type: 
+        relation: hasMany
+        instance: 
+            bimp_object: InventoryWarehouse
+        delete: 
+            callback: isAdmin
+            
+                
+fields: 
+    fk_warehouse:
+        label: Entrepôt
+        type: id_object
+        object: entrepot
+        default_value: 0
+        input:
+            type: search_entrepot 
+
+    date_opening: 
+        label: Date d'ouverture
+        type: datetime
+        required: 0
+        search:
+            type: date_range
+            
+    date_closing_partially: 
+        label: Date de fermeture partielle
+        type: datetime
+        required: 0
+        search:
+            type: date_range
+            
+    date_closing: 
+        label: Date de fermeture
+        type: datetime
+        required: 0
+        search:
+            type: date_range
+            
+    status:
+        label: Statut
+        type: int
+        values: 
+            array: status_list
+        edit: 0
+        
+    type: 
+        label: Type
+        type: int
+        values: 
+            array: types
+        edit: 0
+
+        
+fields_tables: 
+    default: 
+        footer_extra_btn:
+            callback: getActionsButtons
+        panel: 1
+        title: Informations
+        icon: info-circle
+        rows:
+            - field: fk_warehouse
+              display: nom_url
+            - field: type
+            - field: date_opening
+            - field: date_closing_partially
+            - field: date_closing
+            - field: user_create
+            - label: Mouvements
+              value: 
+                  callback: renderMouvementTrace
+            - label: Package vol
+              value: 
+                  callback: renderPackageInventory
+            
+views:
+    default:
+        edit_form: Aucun
+        objects_change_reload: lines
+        edit_form: default
+        delete_btn: 1
+        rows:
+            - cols: 
+                  - type: fields_table
+                    col_lg: 7
+                    col_md: 8
+                    col_sm: 12
+                    fields_table:
+                        name: default  
+                        
+                  - type: rows
+                    col_lg: 4
+                    col_md: 5
+                    col_sm: 12
+                    rows: 
+                        - cols: 
+                            - type: object_common_fields
+            
+forms:
+    default:
+        title: Création inventaire
+        rows: 
+            - custom: 1
+              label: Entrepôt / Type
+              input_name: warehouse_and_type
+              input: 
+                  type: custom
+                  content: 
+                      callback: 
+                          method: renderWarehouseAndType
+                  multiple: 1
+              required: 1
+            
+    confirm_close_partially: 
+        rows: 
+            - custom: 1
+              label: Date du mouvement de stock
+              input_name: date_mouvement
+              type: datetime
+              input:
+                type: datetime
+                display_now: 1
+            - custom: 1
+              label: Opérations
+              input_name: inut
+              content: 
+                callback: renderDifferenceProduct
+            - custom: 1
+              label: Mouvement de stock uniquement sur produit scanné
+              input_name: only_scanned
+              data_type: bool
+              input: 
+                  type: toggle
+              value: 0
+                
+    confirm_close: 
+        rows: 
+            - custom: 1
+              label: Remarques
+              input_name: inut
+              content: 
+                callback: renderDifferenceEquipment
+            
+lists:
+    default:
+        checkboxes: 1
+        sort_field: id
+        sort_way: desc
+        n: 10
+        list_filters: 
+            callback:
+                method: getListFilters
+        add_form_name: default
+        view_btn: 1
+        page_btn: 1
+        delete_btn: 1
+        modal_view: default
+        cols:
+            id:
+                label: ID
+                field: id
+                min_width: 60px
+            status:
+                label: Statut
+                field: status
+            fk_warehouse:
+                field: fk_warehouse
+                display: nom_url
+            date_opening:
+                field: date_opening
+            date_closing_partially:
+                field: date_closing_partially
+            date_closing:
+                field: date_closing
+        
+cards: 
+    default: 
+        title: nom
+        status: status
+        fields: 
+            - label: Ouvert le
+              field: date_opening
+            - label: Fermé partiellement le
+              field: date_closing
+            - label: Fermé le
+              field: date_closing
+        view_btn: 1
+    

@@ -49,6 +49,12 @@ class BC_CustomFilter extends BC_Filter
         $label = '';
 
         switch ($this->params['type']) {
+            case 'user':
+                if ($value === 'current') {
+                    $label = 'Utilisateur connecté';
+                    break;
+                }
+
             case 'value':
                 $input_type = $this->object->getConf($this->config_path . '/input/type', '');
                 if ($input_type === 'select') {
@@ -76,26 +82,47 @@ class BC_CustomFilter extends BC_Filter
 
             case 'range':
             case 'date_range':
-                if (is_array($value) && (isset($value['min']) || isset($value['max']))) {
-                    $label .= 'Min: <strong>';
-                    if (!isset($value['min']) || $value['min'] === '') {
-                        $label .= '-&infin;';
-                    } else {
-                        $label .= BimpTools::displayValueByType($value['min'], $this->params['data_type']);
-                    }
-
-                    $label .= '</strong><br/>Max: <strong>';
-
-                    if (!isset($value['max']) || $value['max'] === '') {
-                        $label .= '&infin;';
-                    } else {
-                        $label .= BimpTools::displayValueByType($value['max'], $this->params['data_type']);
-                    }
-
-                    $label .= '</strong>';
-                } else {
-                    $label = '<span class="danger">Valeurs invalides</valeur>';
+                $is_dates = false;
+                if ($this->params['type'] === 'date_range') {
+                    $is_dates = true;
                 }
+                if (is_array($value)) {
+                    $label = '';
+                    if (isset($value['period']) && is_array($value['period']) && !empty($value['period'])) {
+                        $label = self::getDateRangePeriodLabel($value['period']);
+                        $value = self::convertDateRangePeriodValue($value['period']);
+                    }
+                    if (isset($value['min']) || isset($value['max'])) {
+                        $label .= ($is_dates ? 'Du' : 'Min') . ': <strong>';
+                        if (!isset($value['min']) || $value['min'] === '') {
+                            $label .= '-&infin;';
+                        } else {
+                            $label .= BimpTools::displayValueByType($value['min'], $this->params['data_type']);
+                        }
+
+                        $label .= '</strong><br/>';
+                        $label .= ($is_dates ? 'Au' : 'Max') . ': <strong>';
+
+                        if (!isset($value['max']) || $value['max'] === '') {
+                            $label .= '&infin;';
+                        } else {
+                            $label .= BimpTools::displayValueByType($value['max'], $this->params['data_type']);
+                        }
+                        $label .= '</strong>';
+                        break;
+                    }
+                }
+                $label = '<span class="danger">Valeurs invalides</span>';
+                break;
+
+            case 'user':
+                if ($value === 'current') {
+                    $label = 'Utilisateur connecté';
+                }
+                break;
+
+            default:
+                $label = parent::getFilterValueLabel($value);
                 break;
         }
 
@@ -118,7 +145,9 @@ class BC_CustomFilter extends BC_Filter
 
         $errors = array();
 
-        $this->object->getCustomFilterSqlFilters($this->field_name, $this->values, $filters, $joins, $errors);
+        $values = self::getConvertedValues($this->params['type'], $this->values);
+
+        $this->object->getCustomFilterSqlFilters($this->field_name, $values, $filters, $joins, $errors);
 
         $current_bc = $prev_bc;
         return $errors;
@@ -152,6 +181,13 @@ class BC_CustomFilter extends BC_Filter
         $add_btn_html .= '</div>';
 
         switch ($this->params['type']) {
+            case 'user':
+                $html .= '<div style="text-align: center">';
+                $html .= '<span class="btn btn-default btn-small" onclick="addFieldFilterCustomValue($(this), \'current\')">';
+                $html .= BimpRender::renderIcon('fas_user', 'iconLeft') . 'Utilisateur connecté' . BimpRender::renderIcon('fas_plus-circle', 'iconRight');
+                $html .= '</span>';
+                $html .= '</div>';
+
             case 'value':
                 $bc_input = new BC_Input($this->object, $this->params['data_type'], $input_name, $input_path);
                 $html .= $bc_input->renderHtml();
@@ -168,8 +204,7 @@ class BC_CustomFilter extends BC_Filter
                 if ($type === 'datetime') {
                     $type = 'date';
                 }
-                $html .= BimpInput::renderInput($type . '_range', $input_name);
-                $html .= $add_btn_html;
+                $html .= $this->renderDateRangeInput($type . '_range', $input_name, $add_btn_html);
                 break;
 
             case 'range':

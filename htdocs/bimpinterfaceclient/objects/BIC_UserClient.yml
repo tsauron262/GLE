@@ -21,8 +21,7 @@ objects:
                     
     tickets:
         instance:
-            bimp_object: 
-                name: BIC_UserTickets
+            bimp_object: BIC_UserTickets
 
 header_btn: 
     callback: getActionsButtons

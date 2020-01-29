@@ -1,0 +1,1 @@
+ALTER TABLE `llx_contratdet` ADD `serials` LONGTEXT NULL DEFAULT NULL;

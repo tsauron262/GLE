@@ -15,21 +15,32 @@ class BimpProductCurPa extends BimpObject
     public static function getProductCurPa($id_product, $date = '')
     {
         if ((int) $id_product) {
-            $sql = 'SELECT `id` FROM ' . MAIN_DB_PREFIX . 'bimp_product_cur_pa';
+            $sql = 'SELECT * FROM ' . MAIN_DB_PREFIX . 'bimp_product_cur_pa';
             $sql .= ' WHERE `id_product` = ' . (int) $id_product;
-            if ($date) {
-                $sql .= ' AND `date_from` < \'' . $date . '\'';
-                $sql .= ' AND (`date_to` IS NULL OR `date_to` > \'' . $date . '\')';
-            } else {
-                $sql .= ' AND `date_from` = (';
-                $sql .= 'SELECT MAX(`date_from`) FROM ' . MAIN_DB_PREFIX . 'bimp_product_cur_pa';
-                $sql .= ' WHERE `id_product` = ' . (int) $id_product;
-                $sql .= ') ORDER BY `id` DESC LIMIT 1';
+            $sql .= ' ORDER BY `date_from` DESC';
+
+            if (!(string) $date) {
+                $sql .= ' LIMIT 1';
             }
 
             $res = self::getBdb()->executeS($sql, 'array');
 
-            if (isset($res[0]['id'])) {
+            $id_pa = 0;
+            if (!(string) $date) {
+                if (isset($res[0]['id'])) {
+                    $id_pa = (int) $res[0]['id'];
+                }
+            } elseif (is_array($res)) {
+                // On fait en sorte que si $date est inférieur au plus petit date_from trouvé, ce soit ce dernier qui soit retourné
+                foreach ($res as $r) {
+                    $id_pa = (int) $r['id'];
+                    if ($r['date_from'] < $date && (!(string) $r['date_to'] || $r['date_to']) > $date) {
+                        break;
+                    }
+                }
+            }
+
+            if ($id_pa) {
                 $pa = BimpCache::getBimpObjectInstance('bimpcore', 'BimpProductCurPa', (int) $res[0]['id']);
                 if (BimpObject::objectLoaded($pa)) {
                     return $pa;
@@ -40,14 +51,37 @@ class BimpProductCurPa extends BimpObject
         return null;
     }
 
-    public static function getProductCurPaAmount($id_product)
+    public static function getProductCurPaAmount($id_product, $date = '')
     {
-        $curPa = self::getProductCurPa($id_product);
-        if (BimpObject::objectLoaded($curPa)) {
-            return (float) $curPa->getData('amount');
+        $pa = null;
+
+        if ((int) $id_product) {
+            $sql = 'SELECT id, amount, date_from, date_to FROM ' . MAIN_DB_PREFIX . 'bimp_product_cur_pa';
+            $sql .= ' WHERE `id_product` = ' . (int) $id_product;
+            $sql .= ' ORDER BY `date_from` DESC';
+
+            if (!(string) $date) {
+                $sql .= ' LIMIT 1';
+            }
+
+            $res = self::getBdb()->executeS($sql, 'array');
+
+            if (!(string) $date) {
+                if (isset($res[0]['amount'])) {
+                    $pa = (float) $res[0]['amount'];
+                }
+            } elseif (is_array($res)) {
+                // On fait en sorte que si $date est inférieur au plus petit date_from trouvé, ce soit ce dernier qui soit retourné
+                foreach ($res as $r) {
+                    $pa = (float) $r['amount'];
+                    if ($r['date_from'] < $date && (!(string) $r['date_to'] || $r['date_to']) > $date) {
+                        break;
+                    }
+                }
+            }
         }
 
-        return 0;
+        return $pa;
     }
 
     // Affichage: 

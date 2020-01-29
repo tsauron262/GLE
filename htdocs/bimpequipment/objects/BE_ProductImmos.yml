@@ -81,9 +81,13 @@ filters_panels:
                 field: place_date
                 data_type: date
                 type: date_range
+#            place_date_end:
+#                custom: 1
+#                field: place_date_end
+#                data_type: date
+#                label: Date de départ emplacement
+#                type: date_range
                 
-                
-                    
 lists_cols: 
     qty_immos: 
         field: qty

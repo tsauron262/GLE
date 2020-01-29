@@ -143,6 +143,8 @@ class BimpDb
     {
         if (file_exists($file)) {
             $sql = file_get_contents($file);
+            $sql = str_replace("llx_", MAIN_DB_PREFIX, $sql);
+            $sql = str_replace("MAIN_DB_PREFIX", MAIN_DB_PREFIX, $sql);
             if ($sql) {
                 $tabSql = explode(";", $sql);
                 foreach ($tabSql as $req) {
@@ -277,6 +279,20 @@ class BimpDb
 
         if (isset($result[0]['sum'])) {
             return $result[0]['sum'];
+        }
+
+        return 0;
+    }
+
+    public function getCount($table, $where = '1', $primary = 'id')
+    {
+        $sql = 'SELECT COUNT(DISTINCT `' . $primary . '`) as nb_rows FROM ' . MAIN_DB_PREFIX . $table;
+        $sql .= ' WHERE ' . $where;
+
+        $result = $this->executeS($sql, 'array');
+
+        if (isset($result[0]['nb_rows'])) {
+            return (int) $result[0]['nb_rows'];
         }
 
         return 0;

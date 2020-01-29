@@ -9,10 +9,10 @@ class BimpPDF extends TCPDF
     protected $header = '';
     protected $footer = '';
     protected $pagination = '';
-    public $topMargin = 40;
+    public $topMargin = 42;
     public $sideMargin = 10;
     public $headerMargin = 10;
-    public $footerMargin = 20;
+    public $footerMargin = 30;
     public static $mmPerPx = 0.353; // Pour 72 dpi
     public static $pxPerMm = 2.835;
     public $addCgvPages = true;
@@ -122,6 +122,7 @@ class BimpPDF extends TCPDF
     }
 
     // Outils: 
+    
     public function addVMargin($margin)
     {
         $this->SetY($this->GetY() + $margin);

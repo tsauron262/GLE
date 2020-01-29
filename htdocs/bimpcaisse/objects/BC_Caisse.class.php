@@ -11,7 +11,7 @@ class BC_Caisse extends BimpObject
         72  => '72 dpi',
         100 => '100 dpi',
         200 => '200 dpi',
-        300 => '300dpi'
+        300 => '300 dpi'
     );
     public static $windowWidthByDpi = array(
         72  => 596,
@@ -274,6 +274,18 @@ class BC_Caisse extends BimpObject
 
         return $errors;
     }
+    
+    public function getSecteur_code(){
+        if($this->getData("secteur_code"))
+            return $this->getData("secteur_code");
+        
+        return $this->getSecteur_code_default();
+    }
+    
+    
+    public function getSecteur_code_default(){
+        return BimpCore::getConf('bimpcaisse_secteur_code');
+    }
 
     public function disconnectAllUsers()
     {
@@ -331,6 +343,32 @@ class BC_Caisse extends BimpObject
                 $update_errors = $this->update();
                 if (count($update_errors)) {
                     $errors[] = BimpTools::getMsgFromArray($update_errors, 'Echec de la mise à jour du fonds de caisse (Nouveau montant: ' . $fonds . ')');
+                }
+            }
+        }
+
+        return $errors;
+    }
+
+    public static function onPaiementDelete($id_paiement, $code_mode_paiement, $amount)
+    {
+        $errors = array();
+
+        $bc_paiement = BimpCache::findBimpObjectInstance('bimpcaisse', 'BC_Paiement', array(
+                    'id_paiement' => (int) $id_paiement
+                        ), true);
+        if (BimpObject::objectLoaded($bc_paiement)) {
+            $caisse = $bc_paiement->getChildObject('caisse');
+            $errors = $bc_paiement->delete($warnings, false);
+
+            if (!count($errors)) {
+                if (BimpObject::objectLoaded($caisse)) {
+                    if ($code_mode_paiement === 'LIQ') {
+                        // Correction du fonds de caisse
+                        $fonds = (float) $caisse->getData('fonds');
+                        $fonds -= (float) $amount;
+                        $caisse->updateField('fonds', $fonds);
+                    }
                 }
             }
         }

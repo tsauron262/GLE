@@ -16,6 +16,8 @@ class BimpPDF_Table
     public $table_classes = array();
     public $table_styles = array();
     public $remove_empty_cols = true;
+    public $title = '';
+    public $new_page_title = '';
 
     public function __construct($pdf, $borders = true)
     {
@@ -111,7 +113,6 @@ class BimpPDF_Table
         if ($cellpadding < 0.5)
             $cellpadding = 0.5;
 
-
         $html = '';
         $html .= '<table class="' . $class . '';
         foreach ($this->table_classes as $tableClass) {
@@ -189,7 +190,7 @@ class BimpPDF_Table
             }
 
 
-            
+
             if (is_object($row['object'])) {
                 $content .= $this->addDEEEandRPCP($key, $row['object'], $row['qte'], str_replace("%", "", $row['tva']));
             }
@@ -218,7 +219,7 @@ class BimpPDF_Table
         $htmlAv = '<br/><span style="text-align:right;font-style: italic; font-size: 5px; font-weight: bold;">';
         $htmlAp = '</span>';
         $eco = 0;
-        $coefTaxe = (100+$taxe)/100;
+        $coefTaxe = (100 + $taxe) / 100;
         if (isset($object->array_options['options_deee']) && $object->array_options['options_deee'] > 0)
             $eco = $object->array_options['options_deee'];
 
@@ -229,7 +230,7 @@ class BimpPDF_Table
         if ($key == "total_ht" && $eco > 0)
             $content .= $htmlAv . price($eco * $qty) . $htmlAp;
         if ($key == "total_ttc" && $eco > 0)
-            $content .= $htmlAv . price($eco * $qty *$coefTaxe) . $htmlAp;
+            $content .= $htmlAv . price($eco * $qty * $coefTaxe) . $htmlAp;
 
 
 
@@ -267,6 +268,11 @@ class BimpPDF_Table
 
         if (!count($cols)) {
             return;
+        }
+
+        // Affichage du titre: 
+        if ($this->title) {
+            $this->pdf->writeHTML($this->title . '<br/>');
         }
 
         // Calcul de la largeur des colonnes:
@@ -325,6 +331,13 @@ class BimpPDF_Table
 
             if ($page > $current_page) {
                 $this->pdf->newPage();
+
+                if ($this->new_page_title) {
+                    $this->pdf->writeHTML($this->new_page_title . '<br/>');
+                } elseif ($this->title) {
+                    $this->pdf->writeHTML($this->title . '<br/>');
+                }
+
                 $this->writeHeader($cols);
                 $this->writeRow($this->pdf, $cols, $row, $class);
 

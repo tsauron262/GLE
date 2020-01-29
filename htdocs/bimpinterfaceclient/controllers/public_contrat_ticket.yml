@@ -12,6 +12,10 @@ objects:
     tickets:
         instance:
             bimp_object: BIC_UserTickets
+            
+#    serial_imei:
+#        instance:
+#            bimp_object: BIC_Serials_Imei
                 
 sections:
     - type: object_header
@@ -35,4 +39,12 @@ sections:
                     panel: 1
                     name: interface_client
                     object: tickets
+#          - id: serials_imeis
+#            title: Numéros de série
+#            struct:
+#                type: list
+#                list:
+#                    panel: 1
+#                    name: contrat
+#                    object: serial_imei
                 

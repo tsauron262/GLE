@@ -8,7 +8,7 @@ llxHeader();
 
 
 
-$sql = $db->query('SELECT email FROM `llx_societe`  WHERE rowid IN (SELECT id_client FROM `llx_bs_sav` WHERE status != 999 AND code_centre = "P")');
+$sql = $db->query('SELECT email FROM `'.MAIN_DB_PREFIX.'societe`  WHERE rowid IN (SELECT id_client FROM `'.MAIN_DB_PREFIX.'bs_sav` WHERE status != 999 AND code_centre = "P")');
 
 $tabMail = array();
 while($ln = $db->fetch_object($sql)){

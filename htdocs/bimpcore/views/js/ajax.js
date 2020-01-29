@@ -31,11 +31,11 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
     this.$resultContainer = $resultContainer;
     this.$button = null;
 
+    // Paramètres par défaut: 
     this.request_id = request_id;
     this.url = ajaxRequestsUrl;
     this.type = 'POST';
     this.dataType = 'json';
-
 
     this.display_success = true;
     this.display_errors = true;
@@ -59,12 +59,15 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
 
     this.processing_padding = 60;
 
+    this.modal_scroll_bottom = false;
+
     this.success = function () {
     };
 
     this.error = function () {
     };
 
+    // Surchage des paramètres par défaut: 
     if (typeof (params) === 'object') {
         for (i in params) {
             bimpAjax[i] = params[i];
@@ -85,8 +88,9 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
 
     bimpAjax.url += "&context=" + context;
 
+    // Affichage du message de chargement ou suppression du contenu actuel si nécessaire
     if (this.display_processing) {
-        if (this.$resultContainer) {
+        if ($.isOk(this.$resultContainer)) {
             var process_html = '<div class="content-loading" style="padding: ' + this.processing_padding + 'px;">';
             process_html += '<div class="loading-spin"><i class="fa fa-spinner fa-spin"></i></div>';
             process_html += '<p class="loading-text">' + this.processing_msg + '</p>';
@@ -102,6 +106,10 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
         if (this.$resultContainer) {
             this.$resultContainer.html('').slideUp(250);
         }
+    }
+
+    if (this.modal_scroll_bottom) {
+        bimpModal.scrollBottom();
     }
 
     this.display_result_errors = function (errors) {
@@ -139,6 +147,11 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
                 bimp_msg(msg, 'danger');
             } else {
                 bimp_msg(msg, 'danger', bimpAjax.$resultContainer);
+                if (bimpAjax.modal_scroll_bottom) {
+                    setTimeout(function () {
+                        bimpModal.scrollBottom();
+                    }, 260);
+                }
             }
         }
     };
@@ -165,6 +178,11 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
                 bimp_msg(msg, 'warning');
             } else {
                 bimp_msg(msg, 'warning', bimpAjax.$resultContainer);
+                if (bimpAjax.modal_scroll_bottom) {
+                    setTimeout(function () {
+                        bimpModal.scrollBottom();
+                    }, 260);
+                }
             }
         }
     };
@@ -186,6 +204,11 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
                 bimp_msg(msg, 'success');
             } else {
                 bimp_msg(msg, 'success', bimpAjax.$resultContainer);
+                if (bimpAjax.modal_scroll_bottom) {
+                    setTimeout(function () {
+                        bimpModal.scrollBottom();
+                    }, 260);
+                }
             }
         }
     };
@@ -245,6 +268,9 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
                                             if (result.success_callback && typeof (result.success_callback) === 'string') {
                                                 eval(result.success_callback);
                                             }
+                                            if (bimpAjax.modal_scroll_bottom) {
+                                                bimpModal.scrollBottom();
+                                            }
                                         });
                                     });
                                 } else {
@@ -252,7 +278,6 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
                                     setCommonEvents(bimpAjax.$resultContainer);
                                     setInputsEvents(bimpAjax.$resultContainer);
                                 }
-
                             } else {
                                 if (bimpAjax.append_html_transition) {
                                     no_callbacks = true;
@@ -265,6 +290,9 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
                                             }
                                             if (result.success_callback && typeof (result.success_callback) === 'string') {
                                                 eval(result.success_callback);
+                                            }
+                                            if (bimpAjax.modal_scroll_bottom) {
+                                                bimpModal.scrollBottom();
                                             }
                                         });
                                     });
@@ -283,7 +311,9 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
                             modal_title = result.modal_title;
                         }
 
-                        bimpModal.newContent(modal_title, result.modal_html, false, '', null);
+                        setTimeout(function () {
+                            bimpModal.newContent(modal_title, result.modal_html, false, '', null);
+                        }, 750);
                     }
 
                     if (!no_callbacks) {
@@ -299,6 +329,10 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
 
                 if ((typeof (result.warnings) !== 'undefined') && result.warnings && result.warnings.length) {
                     bimpAjax.display_result_warnings(result.warnings);
+                }
+
+                if (bimpAjax.modal_scroll_bottom) {
+                    bimpModal.scrollBottom();
                 }
 
                 if ($.isOk(bimpAjax.$button)) {

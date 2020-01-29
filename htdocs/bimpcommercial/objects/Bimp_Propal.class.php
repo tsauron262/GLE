@@ -19,6 +19,7 @@ class Bimp_Propal extends BimpComm
         4 => array('label' => 'Facturée (fermée)', 'icon' => 'check', 'classes' => array('success')),
     );
     public $redirectMode = 4; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
+    public $acomptes_allowed = true;
 
     // Gestion des droits users
 
@@ -28,7 +29,7 @@ class Bimp_Propal extends BimpComm
         if (isset($user->rights->propal->creer)) {
             return (int) $user->rights->propal->creer;
         }
-        return 1;
+        return 0;
     }
 
     public function canEdit()
@@ -69,6 +70,8 @@ class Bimp_Propal extends BimpComm
                 return 0;
 
             case 'modify':
+                return (int) $user->admin;
+
             case 'review':
                 return $this->can("edit");
 
@@ -99,7 +102,7 @@ class Bimp_Propal extends BimpComm
         global $conf;
         $status = $this->getData('fk_statut');
 
-        if (in_array($action, array('modify', 'modify', 'review', 'close', 'reopen', 'sendEmail', 'createOrder', 'createContract', 'createInvoice', 'classifyBilled'))) {
+        if (in_array($action, array('validate', 'modify', 'review', 'close', 'reopen', 'sendEmail', 'createOrder', 'createContract', 'createInvoice', 'classifyBilled'))) {
             if (!$this->isLoaded()) {
                 $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
                 return 0;
@@ -116,17 +119,16 @@ class Bimp_Propal extends BimpComm
             case 'validate':
                 if (!BimpObject::objectLoaded($soc)) {
                     $errors[] = 'Client absent';
-                    return 0;
                 }
                 if ($status !== Propal::STATUS_DRAFT) {
-                    $errors[] = 'Statut actuel ' . $this->getLabel('of_the') . ' invalide';
-                    return 0;
+                    $errors[] = BimpTools::ucfirst($this->getLabel('the')) . ' n\'est pas au statut brouillon';
                 }
-                if (!count($this->dol_object->lines)) {
-                    $errors[] = 'Aucune ligne enregistrée pour ' . $this->getLabel('this');
-                    return 0;
+
+                $lines = $this->getLines('not_text');
+                if (!count($lines)) {
+                    $errors[] = 'Aucune ligne enregistrée pour ' . $this->getLabel('this') . ' (Hors text)';
                 }
-                return 1;
+                return (count($errors) ? 0 : 1);
 
             case 'modify':
             case 'close':
@@ -147,12 +149,8 @@ class Bimp_Propal extends BimpComm
                         $errors[] = ucfirst($this->getLabel('this')) . ' est liée au SAV ' . $sav->getNomUrl(0, 1, 1, 'default') . '. Veuillez utiliser le bouton réviser depuis la fiche SAV';
                     }
                 }
-                if ($status === Propal::STATUS_SIGNED) {
-                    $errors[] = ucfirst($this->getLabel('this')) . ' est signée';
-                }
-
-                if ($status === Propal::STATUS_BILLED) {
-                    $errors[] = ucfirst($this->getLabel('this')) . ' est facturée';
+                if ($status !== Propal::STATUS_VALIDATED) {
+                    $errors[] = ucfirst($this->getLabel('the')) . ' n\'a pas le statut validée';
                 }
 
                 $where = '`fk_source` = ' . $this->id . ' AND `sourcetype` = \'propal\'';
@@ -305,7 +303,7 @@ class Bimp_Propal extends BimpComm
 
     public function getActionsButtons()
     {
-        global $langs;
+        global $langs, $conf;
         $langs->load('propal');
 
         $buttons = parent::getActionsButtons();
@@ -323,48 +321,46 @@ class Bimp_Propal extends BimpComm
                 $status = (int) $status;
 
                 // Valider:
-                if ($this->isActionAllowed('validate')) {
-                    if ($this->canSetAction('validate')) {
-                        $buttons[] = array(
-                            'label'   => 'Valider',
-                            'icon'    => 'check',
-                            'onclick' => $this->getJsActionOnclick('validate', array(), array(
-                                'confirm_msg' => 'Veuillez confirmer la validation ' . $this->getLabel('of_this')
-                            ))
-                        );
-                    } else {
+                if ($status === 0) {
+                    $errors = array();
+                    if ($this->isActionAllowed('validate', $errors)) {
+                        if ($this->canSetAction('validate')) {
+                            $buttons[] = array(
+                                'label'   => 'Valider',
+                                'icon'    => 'check',
+                                'onclick' => $this->getJsActionOnclick('validate', array(), array(
+                                    'confirm_msg' => 'Veuillez confirmer la validation ' . $this->getLabel('of_this')
+                                ))
+                            );
+                        } else {
+                            $errors = 'Vous n\'avez pas la permission de valider cette proposition commerciale';
+                        }
+                    }
+                    if (count($errors)) {
                         $buttons[] = array(
                             'label'    => 'Valider',
                             'icon'     => 'check',
                             'onclick'  => '',
                             'disabled' => 1,
-                            'popover'  => 'Vous n\'avez pas la permission de valider cette proposition commerciale'
+                            'popover'  => BimpTools::getMsgFromArray($errors)
                         );
                     }
                 }
 
                 // Modifier
-//                if ($this->isActionAllowed('modify')) {
-//                    if ($this->canSetAction('modify') && $user->admin) {
-//                        $buttons[] = array(
-//                            'label'   => 'Modifier',
-//                            'icon'    => 'fas_undo',
-//                            'onclick' => $this->getJsActionOnclick('modify', array())
-//                        );
-//                    } else {
-//                        $buttons[] = array(
-//                            'label'    => 'Modifier',
-//                            'icon'     => 'fas_undo',
-//                            'onclick'  => '',
-//                            'disabled' => 1,
-//                            'popover'  => 'Vous n\'avez pas la permission de modifier cette proposition commerciale'
-//                        );
-//                    }
-//                }
+                if ($this->isActionAllowed('modify')) {
+                    if ($this->canSetAction('modify')) {
+                        $buttons[] = array(
+                            'label'   => 'Modifier',
+                            'icon'    => 'fas_undo',
+                            'onclick' => $this->getJsActionOnclick('modify', array())
+                        );
+                    }
+                }
+
                 // Réviser: 
                 if ($status > 0) {
                     $errors = array();
-                    $msg = '';
                     if ($this->isActionAllowed('review', $errors)) {
                         if ($this->canSetAction('review')) {
                             $buttons[] = array(
@@ -375,18 +371,16 @@ class Bimp_Propal extends BimpComm
                                 ))
                             );
                         } else {
-                            $msg = 'Vous n\'avez pas la permission';
+                            $errors = 'Vous n\'avez pas la permission';
                         }
-                    } else {
-                        $msg = BimpTools::getMsgFromArray($errors);
                     }
-                    if ($msg) {
+                    if (count($errors)) {
                         $buttons[] = array(
                             'label'    => 'Réviser',
                             'icon'     => 'fas_undo',
                             'onclick'  => '',
                             'disabled' => 1,
-                            'popover'  => $msg
+                            'popover'  => BimpTools::getMsgFromArray($errors)
                         );
                     }
                 }
@@ -423,12 +417,23 @@ class Bimp_Propal extends BimpComm
                                 'pdf_hide_ttc'       => $this->getData('pdf_hide_ttc'),
                                 'pdf_periodicity'    => $this->getData('pdf_periodicity'),
                                 'pdf_periods_number' => $this->getData('pdf_periods_number'),
+                                'note_public'        => addslashes(htmlentities($this->getData('note_public'))),
+                                'note_private'       => addslashes(htmlentities($this->getData('note_private'))),
                                 'origin'             => 'propal',
                                 'origin_id'          => (int) $this->id,
                                 'close_propal'       => 1
                             )
                         );
-                        $onclick = $commande->getJsLoadModalForm('default', 'Création d\\\'une commande (Signature préalable de la proposition commerciale)', $values, '', 'redirect');
+                        $onclick = "";
+                        $msg = "";
+                        $files = $this->getFilesArray();
+                        if (count($files) < 2)
+                            $msg = addslashes("Il semblerait qu'il n'y ait pas de devis signé dans la section documents. Etes-vous sûr de vouloir continuer ?");
+                        if ($msg != "")
+                            $onclick .= "if ( confirm( '" . $msg . "' ) ) {";
+                        $onclick .= $commande->getJsLoadModalForm('default', 'Création d\\\'une commande (Signature préalable de la proposition commerciale)', $values, '', 'redirect');
+                        if ($msg != "")
+                            $onclick .= "}";
 
                         $buttons[] = array(
                             'label'   => BimpRender::renderIcon('fas_dolly', 'iconLeft') . 'Accepter et créer commande',
@@ -493,6 +498,8 @@ class Bimp_Propal extends BimpComm
                             'fk_mode_reglement' => (int) $this->getData('fk_mode_reglement'),
                             'fk_availability'   => (int) $this->getData('fk_availability'),
                             'fk_input_reason'   => (int) $this->getData('fk_input_reason'),
+                            'note_public'       => addslashes(htmlentities($this->getData('note_public'))),
+                            'note_private'      => addslashes(htmlentities($this->getData('note_private'))),
                             'date_commande'     => date('Y-m-d'),
                             'date_livraison'    => $this->getData('date_livraison'),
                             'libelle'           => $this->getData('libelle'),
@@ -500,7 +507,17 @@ class Bimp_Propal extends BimpComm
                             'origin_id'         => (int) $this->id,
                         )
                     );
-                    $onclick = $commande->getJsLoadModalForm('default', 'Création d\\\'une commande', $values, '', 'redirect');
+                    $onclick = "";
+                    $msg = "";
+                    $files = $this->getFilesArray();
+                    if (count($files) < 2)
+                        $msg = addslashes("Il semblerait qu'il n'y ait pas de devis signé dans la section documents. Etes-vous sûr de vouloir continuer ?");
+                    if ($msg != "")
+                        $onclick .= "if ( confirm( '" . $msg . "' ) ) {";
+                    $onclick .= $commande->getJsLoadModalForm('default', 'Création d\\\'une commande', $values, '', 'redirect');
+                    if ($msg != "")
+                        $onclick .= "}";
+
                     $buttons[] = array(
                         'label'   => 'Créer une commande',
                         'icon'    => 'fas_dolly',
@@ -508,16 +525,16 @@ class Bimp_Propal extends BimpComm
                     );
                 }
 
-                // Créer contrat:
-                if ($this->isActionAllowed('createContract') && $this->canSetAction('createContract')) {
-                    $url = DOL_URL_ROOT . '/contrat/card.php?action=create&origin=propal&originid=' . $this->id . '&socid=' . (int) $this->getData('fk_soc');
-                    $buttons[] = array(
-                        'label'   => 'Créer un contrat',
-                        'icon'    => 'fas_file-signature',
-//                        'onclick' => $this->getJsActionOnclick('createContract')
-                        'onclick' => 'window.location = \'' . $url . '\''
-                    );
-                }
+//                // Créer contrat:
+//                if ($this->isActionAllowed('createContract') && $this->canSetAction('createContract')) {
+//                    $url = DOL_URL_ROOT . '/contrat/card.php?action=create&origin=propal&originid=' . $this->id . '&socid=' . (int) $this->getData('fk_soc');
+//                    $buttons[] = array(
+//                        'label'   => 'Créer un contrat',
+//                        'icon'    => 'fas_file-signature',
+////                        'onclick' => $this->getJsActionOnclick('createContract')
+//                        'onclick' => 'window.location = \'' . $url . '\''
+//                    );
+//                }
 //                
                 // Créer facture / avoir
                 if ($this->isActionAllowed('createInvoice') && $this->canSetAction('createInvoice')) {
@@ -551,6 +568,25 @@ class Bimp_Propal extends BimpComm
                         ))
                     );
                 }
+            }
+            //Créer un contrat
+            if ($conf->contrat->enabled && ($status == 1 || $status == 2 || $status = 4)) {
+                $buttons[] = array(
+                    'label'   => 'Créer un contrat',
+                    'icon'    => 'fas_file-signature',
+                    'onclick' => $this->getJsActionOnclick('createContrat', array(), array(
+                        'form_name' => "contrat"
+                            )
+                    )
+                );
+            } else {
+                $buttons[] = array(
+                    'label'    => 'Créer un contrat',
+                    'icon'     => 'fas_file-contract',
+                    'onclick'  => '',
+                    'disabled' => 1,
+                    'popover'  => 'Vous n\'avez pas la permission'
+                );
             }
         }
 
@@ -654,6 +690,8 @@ class Bimp_Propal extends BimpComm
 
     public function review($check = true, &$errors = array(), &$warnings = array())
     {
+        global $user, $langs;
+
         $errors = array();
         if ($check) {
             if (!$this->isActionAllowed('review', $errors)) {
@@ -677,14 +715,26 @@ class Bimp_Propal extends BimpComm
             return 0;
         }
 
-        $newPropal->set('remise_globale_label', $this->getData('remise_globale_label'));
         $newPropal->set('zone_vente', $this->getData('zone_vente'));
         $pw = array();
         $newPropal->update($pw, true);
 
-        $lines = $this->getLines();
-
         $totHt = (float) $this->dol_object->total_ht;
+
+        // Ajout des notes: 
+        $this->addNote('Proposition commerciale mise en révision le ' . date('d / m / Y') . ' par ' . $user->getFullName($langs) . "\n" . 'Révision: ' . $newPropal->getRef());
+        $newPropal->addNote('Révision de la proposition: ' . $this->getRef());
+
+        // Copie des lignes: 
+        $warnings = array_merge($warnings, $newPropal->createLinesFromOrigin($this, array(
+                    'is_review' => true
+        )));
+
+        // Copie des contacts: 
+        $newPropal->copyContactsFromOrigin($this, $warnings);
+
+        // Copie des remises globales:
+        $newPropal->copyRemisesGlobalesFromOrigin($this, $warnings);
 
         // Ajout de la ligne "Proposition commerciale révisée" dans la propale actuelle: 
         $line = BimpObject::getInstance('bimpcommercial', 'Bimp_PropalLine');
@@ -697,7 +747,7 @@ class Bimp_Propal extends BimpComm
         $line->validateArray(array(
             'id_obj'    => (int) $this->id,
             'type'      => ObjectLine::LINE_FREE,
-            'deletable' => 0,
+            'deletable' => 1,
             'editable'  => 0,
             'remisable' => 0
         ));
@@ -711,76 +761,6 @@ class Bimp_Propal extends BimpComm
 
         if (count($line_warnings)) {
             $warnings[] = BimpTools::getMsgFromArray($line_warnings, 'Erreurs suite à la création de la ligne "révision"');
-        }
-
-        global $user, $langs;
-        $this->addNote('Proposition commerciale mise en révision le ' . date('d / m / Y') . ' par ' . $user->getFullName($langs) . "\n" . 'Révision: ' . $newPropal->getRef());
-        $newPropal->addNote('Révision de la proposition: ' . $this->getRef());
-
-        // Copie des lignes: 
-        $newLines = array();
-        foreach ($lines as $line) {
-            $remises = $line->getRemises();
-            $newLine = clone $line;
-
-            $newLine->id = null;
-            $newLine->set('id', 0);
-            $newLine->set('id_line', 0);
-            $newLine->set('id_parent_line', 0);
-            $newLine->remise = 0;
-            $newLine->setIdParent($new_id_propal);
-
-            $newLine_warnings = array();
-            $newLine_errors = $newLine->create($newLine_warnings, true);
-
-            if (count($newLine_warnings)) {
-                $warnings[] = BimpTools::getMsgFromArray($newLine_warnings, 'Erreurs suite à la copie de la ligne n° ' . $line->getData('position'));
-            }
-
-            if (count($newLine_errors)) {
-                $warnings[] = BimpTools::getMsgFromArray($newLine_errors, 'Echec de la copie de la ligne n°' . $line->getData('position'));
-            } else {
-                $newLines[(int) $line->id] = $newLine->id;
-                if (count($remises)) {
-                    $i = 0;
-                    foreach ($remises as $remise) {
-                        $i++;
-                        $newRemise = clone $remise;
-                        $newRemise->id = null;
-                        $newRemise->set('id', 0);
-                        $newRemise->set('id_object_line', $newLine->id);
-
-                        $newRemise_warnings = array();
-                        $newRemise_errors = $newRemise->create($newRemise_warnings, true);
-
-                        if (count($newRemise_errors)) {
-                            $warnings[] = BimpTools::getMsgFromArray($newRemise_errors, 'Echec de la création ' . $newRemise->getLabel('of_the') . ' n°' . $i);
-                        }
-                        if (count($newRemise_warnings)) {
-                            $warnings[] = BimpTools::getMsgFromArray($newRemise_warnings, 'Erreurs suite à la création ' . $newRemise->getLabel('of_the') . ' n°' . $i);
-                        }
-                    }
-                }
-            }
-        }
-
-        // Attribution des lignes parentes: 
-        foreach ($lines as $line) {
-            $id_parent_line = (int) $line->getData('id_parent_line');
-
-            if ($id_parent_line) {
-                if (isset($newLines[(int) $line->id]) && (int) $newLines[(int) $line->id] && isset($newLines[$id_parent_line]) && (int) $newLines[$id_parent_line]) {
-                    $line_instance = BimpCache::getBimpObjectInstance($this->module, $this->object_name . 'Line', (int) $newLines[(int) $line->id]);
-                    if (BimpObject::objectLoaded($line_instance)) {
-                        $line_instance->updateField('id_parent_line', (int) $newLines[(int) $id_parent_line]);
-                    }
-                }
-            }
-        }
-
-        // Ajout de la remise globale: 
-        if ((float) $this->getData('remise_globale')) {
-            $newPropal->setRemiseGlobalePercent((float) $this->getData('remise_globale'));
         }
 
         return $new_id_propal;
@@ -930,6 +910,26 @@ class Bimp_Propal extends BimpComm
             'warnings'         => $warnings,
             'success_callback' => 'window.location = \'' . $url . '\''
         );
+    }
+
+    public function actionCreateContrat($data, &$success = '')
+    {
+        $instance = $this->getInstance('bimpcontract', 'BContract_contrat');
+
+        $id_new_contrat = 0;
+        $id_new_contrat = $instance->createFromPropal($this, $data);
+
+        if ($id_new_contrat > 0) {
+            $callback = 'window.location.href = "' . DOL_URL_ROOT . '/bimpcontract/index.php?fc=contrat&id=' . $id_new_contrat . '"';
+        } else {
+            $errors[] = "Le contrat n\'à pas été créer";
+        }
+
+        return [
+            'success_callback' => $callback,
+            'warnings'         => array(),
+            'errors'           => $errors
+        ];
     }
 
     // Overrides BimpObject: 

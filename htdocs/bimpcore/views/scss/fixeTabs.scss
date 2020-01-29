@@ -16,7 +16,29 @@
         text-align: right;
         display: block;
         background-color: transparent;
-        
+        padding-right: 36px;
+
+        & > .fixe_tabs_loading {
+            display: none;
+            position: absolute;
+            right: 16px;
+            bottom: 15px;
+            font-size: 14px;
+        }
+
+        & > .fixe_tabs_refresh_btn {
+            @include transition(all 0.3s ease);
+            position: absolute;
+            right: 16px;
+            bottom: 15px;
+            font-size: 14px;
+            cursor: pointer;
+
+            &:hover {
+                color: $primary;
+            }
+        }
+
         .fixe_tab_caption {
             @include transition (all 0.3s ease);
 
@@ -47,19 +69,19 @@
             }
         }
     }
-    
+
     #bimp_fixe_tabs_contents {
         display: none;
         background-color: #fff;
         box-shadow: 0 0 4px $gray-dark;
         z-index: 1001;
-        
+
         .fixe_tab_content {
             background-color: $gray-light;
             display: none;
             padding: 8px;
             text-align: right;
-            
+
             div {
                 text-align: left;
             }

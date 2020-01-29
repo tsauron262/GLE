@@ -28,3 +28,13 @@ lists:
         bulk_actions:
             0: 
                 label: supprimer les fournisseurs sélectionnés
+
+searches: 
+    default:
+        fields_search: 
+            3: a.code_fournisseur
+        fields_return: 
+            1: a.code_fournisseur
+        label_syntaxe: <a.code_fournisseur> - <a.nom>
+        filters: 
+            a.fournisseur: 1

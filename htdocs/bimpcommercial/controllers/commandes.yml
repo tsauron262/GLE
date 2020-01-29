@@ -11,8 +11,9 @@ objects:
             
     shipment: 
         instance: 
-            module: bimplogistique
-            name: BL_CommandeShipment
+            bimp_object: 
+                module: bimplogistique
+                name: BL_CommandeShipment
             
     commades_lines:
         instance: 

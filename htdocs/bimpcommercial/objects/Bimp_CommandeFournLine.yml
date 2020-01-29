@@ -91,6 +91,28 @@ fields:
                 params: 
                     - to_receive
         
+    qty_billed: 
+        label: Qté facturé
+        type: qty
+        default_value: 0
+        display: 
+            badge: 
+                type: callback
+                method: displayQty
+                params: 
+                    - billed
+        
+    qty_to_billed: 
+        label: Qté à facturé
+        type: qty
+        default_value: 0
+        display: 
+            badge: 
+                type: callback
+                method: displayQty
+                params: 
+                    - to_billed
+        
 forms: 
     qty_modified: 
         rows: 
@@ -136,6 +158,10 @@ filters_panels:
                 field: qty_to_receive
             qty_received:
                 field: qty_received
+            qty_billed:
+                field: qty_billed
+            qty_to_billed:
+                field: qty_to_billed
                 
 lists_cols: 
     qties: 
@@ -159,6 +185,18 @@ lists_cols:
     qty_to_receive: 
         label: Qté à récep. 
         field: qty_to_receive
+        display: badge
+        min_width: 60px
+        max_width: 60px
+    qty_billed: 
+        label: Qté fact. 
+        field: qty_billed
+        display: badge
+        min_width: 60px
+        max_width: 60px
+    qty_to_billed: 
+        label: Qté à fact. 
+        field: qty_to_billed
         display: badge
         min_width: 60px
         max_width: 60px
@@ -249,3 +287,4 @@ lists:
                 child: dol_line
             qty_total:
             qty_to_receive:
+            qty_to_billed:

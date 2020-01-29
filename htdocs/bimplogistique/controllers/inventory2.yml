@@ -1,0 +1,100 @@
+bootstrap: 1
+
+title: 
+    callback: getPageTitle
+js:
+    - /bimplogistique/views/js/inventory2.js
+    
+objects:
+    inventory2:
+        instance: 
+            bimp_object: Inventory2
+            id_object:
+                request: id
+    inventory_line2: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: InventoryLine2
+
+sections:
+    - type: tabs
+      tabs: 
+        default:
+          label: Fiche
+          sections:
+           - type: object_header
+             object_header:
+                object: inventory2
+           - type: view
+             view:
+                panel: 1
+                object: inventory2
+           - type: list
+             list: 
+                  name: inventory
+                  children: warehouse_type
+                  title: Entrepôt/type
+                  object: inventory2
+           - type: custom
+             custom: 
+                  callback: 
+                      method: renderNotesList
+                      object: inventory2
+                      params:
+                          - 1
+        scan:
+          label: Scan
+          sections:
+               - type: object_header
+                 object_header:
+                    object: inventory2
+               - type: custom
+                 custom: 
+                      callback:
+                          method: renderInputs
+                          object: inventory2
+               - type: list
+                 list: 
+                      name: default
+                      children: lines
+                      title: Ligne d'inventaire
+                      object: inventory2
+        stock:
+          label: Stock
+          sections:
+               - type: object_header
+                 object_header:
+                    object: inventory2
+               - type: custom
+                 custom: 
+                      callback:
+                          object: inventory2
+                          method: renderStock
+
+
+        diff:
+          show:
+            callback: 
+              method: isAdmin
+              object: inventory2
+
+          label: Différence
+          sections:
+               - type: object_header
+                 object_header:
+                    object: inventory2
+               - type: custom
+                 custom: 
+                      callback:
+                          object: inventory2
+                          method: renderDifferenceTab
+                          
+    - type: buttons
+      buttons:
+          - label: Liste d'inventaire 2
+            url:
+                controller: index
+            icon_before: chevron-left
+            classes: 
+                array: btn,btn-primary

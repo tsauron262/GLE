@@ -6,12 +6,12 @@ require_once DOL_DOCUMENT_ROOT . '/includes/nusoap/lib/nusoap.php';
 
 
 
-$siret = GETPOST("siren");// "403554181";//"320387483";   
+$siret = GETPOST("siren");// "403554181";//"320387483";  
+$mode = GETPOST("mode");
 $siren = substr($siret, 0,9);
 
 
 
-//header("Content-type: text/xml");
 
 $xml_data = file_get_contents('request.xml');
 
@@ -24,36 +24,15 @@ $link = 'https://www.creditsafe.fr/getdata/service/CSFRServices.asmx';
 	$sClient = new SoapClient($link."?wsdl", array('trace' => 1));
 	$returnData = $sClient->GetData(array("requestXmlStr" =>str_replace("SIREN", str_replace(" ", "", $siren), $xml_data)));
         
-        
-//	//AFFICHE LA RÉPONSE 
-//	echo "<pre>"; print_r($returnData);
-//	
-//	//AFFICHE LA REQUËTE XML
-//	echo "REQUEST:<br/>" . htmlentities(str_ireplace('><', ">\n<", $sClient->__getLastRequest())) . "<br/><br/><br/>";
-//	
-//	//AFFICHE LA RÉPONSE XML
-//	echo "Response:<br/>" . htmlentities(str_ireplace('><', ">\n<", $sClient->__getLastResponse())) . "<br/>";
-//        
-//        die;
-//        
-//        
-//        
-//        
-//
-//$xml_data = "requestXmlStr=".str_replace("SIREN", str_replace(" ", "", $siren), $xml_data);
-//
-//
-//$context = stream_context_create(array('http'=>array(
-//    'method' => 'POST',
-//    'content' => $xml_data
-//)));
-//$returnData = file_get_contents($link, false, $context);
 
 $returnData = htmlspecialchars_decode($returnData->GetDataResult);
 $returnData = str_replace("&", "et", $returnData);
+$returnData = str_replace(" < ", " ", $returnData);
+$returnData = str_replace(" > ", " ", $returnData);
 
 $result = simplexml_load_string($returnData);
-//print_r($returnData);die;
+//echo "<pre>"; print_r($result);echo('fin');
+
 
 if(stripos($result->header->reportinformation->reporttype, "Error") !== false){
     //echo json_encode($result);
@@ -62,6 +41,17 @@ if(stripos($result->header->reportinformation->reporttype, "Error") !== false){
     echo json_encode (array("Erreur"=> "".$result->body->errors->errordetail->code));  
 }
 else{
+    if($mode != "xml")
+        echo getJsonReduit($result);
+    else{
+        header("Content-type: text/xml");
+        print_r($returnData);die();
+    }
+}
+
+
+
+function getJsonReduit($result){
     $summary = $result->body->company->summary;
     $base = $result->body->company->baseinformation;
     $branches = $base->branches->branch;
@@ -72,22 +62,28 @@ else{
     
     $adress = "".$summary->postaladdress->address." ".$summary->postaladresse->additiontoaddress;
     
+    $note = "";
+    $limit = 0;
     foreach(array("", "2013") as $annee){
-        if($note != "")
-            $note .= "\n";
+//        if($note != "")
+//            $note .= "\n";
         $champ = "rating".$annee;
         if($summary->$champ > 0){
-            if($annee != "")
-                if($note != "")
-                    $note .= "[Note de ".$annee."]";
-                else
-                    $note .= "[Attention note de ".$annee."]";
+            $note = dol_print_date(dol_now()) .($annee == ''? '' : '(Methode '.$annee.')')." : ".$summary->$champ ."/100";
+//            if($annee != "")
+//                if($note != "")
+//                    $note .= "[Note de ".$annee."]";
+//                else
+//                    $note .= "[Attention note de ".$annee."]";
             foreach(array("", "desc1", "desc2") as $champ2){
                 $champT = $champ.$champ2;
                 if(isset($summary->$champT))
-                    $note .= " ". $summary->$champT;
+                    $note .= " ". str_replace($summary->$champ, "", $summary->$champT);
             }
         }
+        $champ2 = "creditlimit".$annee;
+        if(isset($summary->$champ2))
+            $limit = $summary->$champ2;
     }
     
     $tabCodeP = explode(" ", $summary->postaladdress->distributionline);
@@ -105,7 +101,7 @@ else{
     foreach($branches as $branche){
         if($branche->companynumber == $siret || ($siret == $siren && stripos($branche->type, "Siège") !== false)){
             $adress = $branche->full_address->address;
-            $nom = $branche->full_address->name;
+            //$nom = $branche->full_address->name;
             $codeP = $branche->postcode;
             $ville = $branche->municipality;
             $siret = $branche->companynumber;
@@ -124,10 +120,10 @@ else{
         "CodeP" => "".$codeP,
         "Ville" => "".$ville,
         "Siret" => "".$siret,
-        "limit" => "".price(intval($summary->creditlimit)),
+        "limit" => "".price(intval($limit)),
         "tradename" => "".$summary->tradename,
         "info" => ""."",
         "Capital" => "".str_replace(" Euros", "", $summary->sharecapital));
 //    $return = $result;
-    echo json_encode($return);
+    return json_encode($return);
 }

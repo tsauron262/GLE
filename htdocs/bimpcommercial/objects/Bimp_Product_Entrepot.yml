@@ -39,7 +39,6 @@ objects:
         instance: 
             id_object: 
                 field_value: gamme
-        
                 
 fields: 
     fk_entrepot: 
@@ -143,6 +142,14 @@ lists_cols:
     fk_product: 
         field: fk_product
         display: nom_url_libelle
+    ref_prod: 
+        label: Ref produit
+        field: ref
+        child: product
+    label_prod: 
+        label: Libellé produit
+        field: label
+        child: product
     reel: 
         field: reel
     stockShowRoom:
@@ -180,6 +187,29 @@ lists_cols:
     price:
         child: product
         field: price
+    stock_desire: 
+        label: Stock desire
+        value: 
+            callback: displayStockDesire
+    stock_alert: 
+        label: Stock Alert
+        value: 
+            callback: displayStockAlert
+    categorie:
+        child: product
+        field: categorie
+    collection:
+        child: product
+        field: collection
+    nature:
+        child: product
+        field: nature
+    famille:
+        child: product
+        field: famille
+    gamme:
+        child: product
+        field: gamme
                 
 lists: 
     default: 
@@ -257,3 +287,18 @@ filters_panels:
                 type: check_list
                 items: 
                   1: OUI
+            categorie:
+                child: product
+                field: categorie
+            collection:
+                child: product
+                field: collection
+            nature:
+                child: product
+                field: nature
+            famille:
+                child: product
+                field: famille
+            gamme:
+                child: product
+                field: gamme

@@ -10,8 +10,6 @@ class BC_Search extends BimpComponent
     public function __construct(BimpObject $object, $name, $search_value)
     {
         $this->params_def['has_serial'] = array('data_type' => 'bool', 'default' => 0);
-        $this->params_def['fields_search'] = array('data_type' => 'array', 'default' => array());
-        $this->params_def['joins'] = array('type' => 'definitions', 'defs_type' => 'join', 'multiple' => 1);
         $this->params_def['list_name'] = array('default' => 'default');
 
         global $current_bc;
@@ -51,51 +49,27 @@ class BC_Search extends BimpComponent
 
     public function searchItems()
     {
-        $primary = $this->object->getPrimary();
-
-        $filters = array(
-            'or_search' => array('or' => array())
-        );
-
-        if (!is_array($this->params['fields_search'])) {
-            $this->params['fields_search'] = array($this->params['fields_search']);
-        }
-
-        foreach ($this->params['fields_search'] as $field) {
-            // todo
-//            if ($this->object->isDolobject()) {
-//                if (preg_match('/.*\.(.*)/', $field, $matches)) {
-//                    $field_name = $matches[1];
-//                } else {
-//                    $field_name = '';
-//                }
-//                if (!$this->object->dol_field_exists($field_name)) {
-//                    continue;
-//                }
-//            }
-            $filters['or_search']['or'][$field] = array(
-                'part_type' => 'middle',
-                'part'      => addslashes($this->search_value)
-            );
-        }
-
-        $items = $this->object->getList($filters, null, 1, $primary, 'ASC', 'array', array(
-            $primary
-                ), $this->params['joins']);
-
-        if (!count($items)) {
-            if ((int) $this->params['has_serial']) {
-                if (preg_match('/^[sS](.*)$/', $this->search_value, $matches)) {
-                    $this->search_value = $matches[1];
-                    return $this->searchItems();
-                }
-            }
-        }
-
         $list = array();
 
-        foreach ($items as $item) {
-            $list[] = $item[$primary];
+        if ($this->isOk() && is_a($this->object, 'BimpObject')) {
+            $items = $this->object->getSearchResults($this->name, $this->search_value, array(
+                'max_results' => 0
+            ));
+
+            if (!count($items)) {
+                if ((int) $this->params['has_serial']) {
+                    if (preg_match('/^[sS](.*)$/', $this->search_value, $matches)) {
+                        $this->search_value = $matches[1];
+                        return $this->searchItems();
+                    }
+                }
+            }
+
+            $list = array();
+
+            foreach ($items as $item) {
+                $list[] = (int) $item['id'];
+            }
         }
 
         return $list;
@@ -137,6 +111,7 @@ class BC_Search extends BimpComponent
         $list->params['positions'] = 0;
         $list->params['checkboxes'] = 0;
         $list->params['add_object_row'] = 0;
+        $list->params['n'] = 50;
 
         $list->addFieldFilterValue($primary, array(
             'IN' => implode(',', $items)

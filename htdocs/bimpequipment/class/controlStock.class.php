@@ -67,7 +67,7 @@ class controlStock{
                         }
                         
                         
-                        $sql2 = $this->db->query("SELECT count(*) as nb, sum(value) as value FROM `llx_stock_mouvement` WHERE fk_entrepot = ".$idEn." AND fk_product = ".$idPr);
+                        $sql2 = $this->db->query("SELECT count(*) as nb, sum(value) as value FROM `".MAIN_DB_PREFIX."stock_mouvement` WHERE fk_entrepot = ".$idEn." AND fk_product = ".$idPr);
                         $ln2 = $this->db->fetch_object($sql2);
                         
                         $text =  $millieuText." ATTENTION ".$ope." d'equipement (".$nbE." | ".implode(" ", $tabSerials).") que de prod (".$nbS.") total des mouvement (".$ln2->value.")<br/>";
@@ -111,13 +111,13 @@ class controlStock{
     
     
     private function getEntrepot(){
-        $sql = $this->db->query("SELECT `rowid`, `ref` FROM `llx_entrepot`");// WHERE ref LIKE 'SAV%'");
+        $sql = $this->db->query("SELECT `rowid`, `ref` FROM `".MAIN_DB_PREFIX."entrepot`");// WHERE ref LIKE 'SAV%'");
         while($ligne = $this->db->fetch_object($sql))
                 $this->entrepot[$ligne->rowid] = $ligne->ref;
     }
     
     private function getProductSerialisable(){
-        $sql = $this->db->query("SELECT p.rowid, p.label as label, ref FROM `llx_product` p, llx_product_extrafields pe WHERE p.rowid = pe.fk_object AND pe.serialisable = 1");
+        $sql = $this->db->query("SELECT p.rowid, p.label as label, ref FROM `".MAIN_DB_PREFIX."product` p, ".MAIN_DB_PREFIX."product_extrafields pe WHERE p.rowid = pe.fk_object AND pe.serialisable = 1");
         while($ligne = $this->db->fetch_object($sql))
                 $this->prodS[$ligne->rowid] = $ligne->ref." ".$ligne->label;
     }
@@ -125,8 +125,8 @@ class controlStock{
     
     private function getEquipmentNonSerialisable(){
         $this->equipNonS = array();
-        $sql = $this->db->query("SELECT serial, id_product FROM `llx_be_equipment` be, `llx_be_equipment_place` bep WHERE bep.id_equipment = be.id AND bep.`type` = 2 AND bep.`position` = 1 AND be.id_product > 0 AND be.id_product NOT IN (SELECT pe.fk_object FROM llx_product_extrafields pe WHERE pe.serialisable = 1)");
-//        $sql = $this->db->query("SELECT serial FROM llx_product_extrafields pe, `llx_be_equipment` be WHERE be.id_product = pe.fk_object AND pe.serialisable = 0");
+        $sql = $this->db->query("SELECT serial, id_product FROM `".MAIN_DB_PREFIX."be_equipment` be, `".MAIN_DB_PREFIX."be_equipment_place` bep WHERE bep.id_equipment = be.id AND bep.`type` = 2 AND bep.`position` = 1 AND be.id_product > 0 AND be.id_product NOT IN (SELECT pe.fk_object FROM ".MAIN_DB_PREFIX."product_extrafields pe WHERE pe.serialisable = 1)");
+//        $sql = $this->db->query("SELECT serial FROM ".MAIN_DB_PREFIX."product_extrafields pe, `".MAIN_DB_PREFIX."be_equipment` be WHERE be.id_product = pe.fk_object AND pe.serialisable = 0");
         while($ligne = $this->db->fetch_object($sql))
                 $this->equipNonS[$ligne->id_product][] = $ligne->serial;
     }
@@ -134,7 +134,7 @@ class controlStock{
     
     
 //    private function getNbEquip($prod, $entrepot){
-//        $sql = $this->db->query("SELECT COUNT(*) as nb FROM `llx_be_equipment` be, `llx_be_equipment_place` bep WHERE be.id = bep.`id_equipment` AND bep.type = 2 AND position = 1 AND `id_entrepot` = ".$entrepot." AND id_product = ".$prod);
+//        $sql = $this->db->query("SELECT COUNT(*) as nb FROM `".MAIN_DB_PREFIX."be_equipment` be, `".MAIN_DB_PREFIX."be_equipment_place` bep WHERE be.id = bep.`id_equipment` AND bep.type = 2 AND position = 1 AND `id_entrepot` = ".$entrepot." AND id_product = ".$prod);
 //        while($ligne = $this->db->fetch_object($sql))
 //                return $ligne->nb;
 //        return 0;
@@ -143,7 +143,7 @@ class controlStock{
 //    
 //    
 //    private function getStockProd($prod, $entrepot){
-//        $sql = $this->db->query("SELECT reel as nb FROM `llx_product_stock` WHERE `fk_entrepot` = ".$entrepot." AND fk_product = ".$prod);
+//        $sql = $this->db->query("SELECT reel as nb FROM `".MAIN_DB_PREFIX."product_stock` WHERE `fk_entrepot` = ".$entrepot." AND fk_product = ".$prod);
 //        while($ligne = $this->db->fetch_object($sql))
 //                return $ligne->nb;
 //        return 0;
@@ -152,7 +152,7 @@ class controlStock{
     
     private function getStocksProds(){
         $result = array();
-        $sql = $this->db->query("SELECT reel as nb, fk_entrepot, fk_product FROM `llx_product_stock`");
+        $sql = $this->db->query("SELECT reel as nb, fk_entrepot, fk_product FROM `".MAIN_DB_PREFIX."product_stock`");
         while($ligne = $this->db->fetch_object($sql))
                 $result[$ligne->fk_entrepot][$ligne->fk_product] = $ligne->nb;
         return $result;
@@ -162,7 +162,7 @@ class controlStock{
     
     private function getNbEquips(){
         $result = array();
-        $sql = $this->db->query("SELECT COUNT(*) as nb, `id_entrepot`, id_product FROM `llx_be_equipment` be, `llx_be_equipment_place` bep WHERE be.id = bep.`id_equipment` AND bep.type = 2 AND position = 1 GROUP BY `id_entrepot`, id_product ");
+        $sql = $this->db->query("SELECT COUNT(*) as nb, `id_entrepot`, id_product FROM `".MAIN_DB_PREFIX."be_equipment` be, `".MAIN_DB_PREFIX."be_equipment_place` bep WHERE be.id = bep.`id_equipment` AND bep.type = 2 AND position = 1 GROUP BY `id_entrepot`, id_product ");
         
         while($ligne = $this->db->fetch_object($sql))
                 $result[$ligne->id_entrepot][$ligne->id_product] = $ligne->nb;
@@ -172,12 +172,12 @@ class controlStock{
     private function getTabSerials($idEn, $idPr, $ope){
         $return = array();
         if($ope == "+"){
-            $sql = $this->db->query("SELECT `serial` FROM `llx_be_equipment` be, `llx_be_equipment_place` bp WHERE bp.`id_equipment` = be.id AND `position` = 1 AND id_product = ".$idPr." AND bp.`type` = 2 AND `id_entrepot` = ".$idEn);
+            $sql = $this->db->query("SELECT `serial` FROM `".MAIN_DB_PREFIX."be_equipment` be, `".MAIN_DB_PREFIX."be_equipment_place` bp WHERE bp.`id_equipment` = be.id AND `position` = 1 AND id_product = ".$idPr." AND bp.`type` = 2 AND `id_entrepot` = ".$idEn);
             while($ln = $this->db->fetch_object($sql)){
                 $html = "<span style='color:";
 
                 //Toute les sortie
-                    $sql2 = $this->db->query("SELECT count(*) as nb, sum(value) as value FROM `llx_stock_mouvement` WHERE `label` LIKE '%".$ln->serial."%' AND fk_entrepot = ".$idEn." AND fk_product = ".$idPr."");
+                    $sql2 = $this->db->query("SELECT count(*) as nb, sum(value) as value FROM `".MAIN_DB_PREFIX."stock_mouvement` WHERE `label` LIKE '%".$ln->serial."%' AND fk_entrepot = ".$idEn." AND fk_product = ".$idPr."");
                     $ln2 = $this->db->fetch_object($sql2);
     //            if($ope == "+"){
                     if($ln2->value == 1)
@@ -191,9 +191,9 @@ class controlStock{
 //        else{
             $sql2 = $this->db->query("SELECT count(*) as nb, sum(value) as value, serial 
 
-FROM llx_be_equipment_place ep, `llx_be_equipment` e 
+FROM ".MAIN_DB_PREFIX."be_equipment_place ep, `".MAIN_DB_PREFIX."be_equipment` e 
 
-LEFT JOIN `llx_stock_mouvement` sm 
+LEFT JOIN `".MAIN_DB_PREFIX."stock_mouvement` sm 
 ON sm.`label` LIKE concat('%', concat(serial, '%')) AND sm.`fk_product` = e.`id_product`
 
 WHERE e.id = `id_equipment` AND `position` > 1 AND ep.`type` = 2 AND `id_entrepot` = ".$idEn." AND id_product = ".$idPr." AND sm.`fk_entrepot` = ep.`id_entrepot`

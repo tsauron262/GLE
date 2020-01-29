@@ -37,6 +37,7 @@ class importProd extends importCat {
 //            } else {
                 $sql = $this->db->query("SELECT rowid as id FROM llx_product WHERE ref = '" . $ln['ArtCode'] . "'");
                 if ($this->db->num_rows($sql) == 0) {
+                    $this->error("Ref " . $ln['ArtCode'] . "inconnue");
                     if (/*$this->isProdActif($ln)*/1) {
                         $this->tabResult["inc"] ++;
                         $this->updateProd($this->addProd($ln), $ln);
@@ -131,13 +132,19 @@ class importProd extends importCat {
             $this->traiteChamp("barcode", $ln['ArtCodeBarre']);
             
 //            if(!isset($_REQUEST['light'])){
-                $this->getAllCat();
-
-                $this->traiteCat1("Gamme", $ln["ArtGammeEnu"]);
-                $this->traiteCat1("Categorie", $ln["ArtCategEnu"]);
-                $this->traiteCat1("Nature", $ln["ArtNatureEnu"]);
-                $this->traiteCat1("Collection", $ln["ArtCollectEnu"]);
-                $this->traiteCat1("Famille", $ln["ArtFamilleEnu"]);
+//                $this->getAllCat();
+//
+//                $this->traiteCat1("Gamme", $ln["ArtGammeEnu"]);
+//                $this->traiteCat1("Categorie", $ln["ArtCategEnu"]);
+//                $this->traiteCat1("Nature", $ln["ArtNatureEnu"]);
+//                $this->traiteCat1("Collection", $ln["ArtCollectEnu"]);
+//                $this->traiteCat1("Famille", $ln["ArtFamilleEnu"]);
+                
+            $this->traiteChamp("options_gamme", $ln["ArtGammeEnu"]);
+                $this->traiteChamp("options_categorie", $ln["ArtCategEnu"]);
+                $this->traiteChamp("options_nature", $ln["ArtNatureEnu"]);
+                $this->traiteChamp("options_collection", $ln["ArtCollectEnu"]);
+                $this->traiteChamp("options_famille", $ln["ArtFamilleEnu"]);
 //            }
 
 

@@ -715,16 +715,16 @@ function mailSyn($to, $sujet, $text, $headers = null, $cc = '') {
 }
 
 function synGetDebug(){
-    $debugT = debug_backtrace();
+    $debugT = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
                     foreach($debugT as $id=>$ln){
                         if($ln['function'] != "synGetDebug"){
                             $debug[$id] = $debugT[$id];
-                            foreach($debug [$id]['args'] as $id2=>$ln2)
-                                if(is_object($ln2))
-                                $debug [$id]['args'][$id2] = get_class($ln2);
-
-                            if(is_object($debug [$id]['object']))
-                                $debug [$id]['object'] = get_class($debug [$id]['object']);
+//                            foreach($debug [$id]['args'] as $id2=>$ln2)
+//                                if(is_object($ln2))
+//                                $debug [$id]['args'][$id2] = get_class($ln2);
+//
+//                            if(is_object($debug [$id]['object']))
+//                                $debug [$id]['object'] = get_class($debug [$id]['object']);
                         }
                     }
                     return print_r($debug,1);

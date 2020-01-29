@@ -166,6 +166,13 @@ forms:
               input_name: date_to
               input: 
                   type: date    
+            - custom: 1
+              label: Répartir le CA
+              input_name: distribute_ca
+              data_type: bool
+              input: 
+                  type: toggle
+              value: 1
         
 fields_tables: 
     infos: 
@@ -218,6 +225,9 @@ views:
 filters_panels: 
     default: 
         filters: 
+            client:
+                field: fk_soc
+                child: facture
             dates: 
                 field: date
             entrepot: 
@@ -273,6 +283,18 @@ filters_panels:
                     type: select
                     options: 
                         callback: getCategoriesArray
+            categorie:
+                field: categorie
+                child: product
+            collection:
+                field: collection
+                child: product
+            nature:
+                field: nature
+                child: product
+            famille:
+                field: famille
+                child: product
         
 lists_cols: 
     facture: 
@@ -331,6 +353,18 @@ lists_cols:
         label: Type matériel
         value: 
             callback: displayTypeMateriel
+    categorie:
+        field: categorie
+        child: product
+    collection:
+        field: collection
+        child: product
+    nature:
+        field: nature
+        child: product
+    famille:
+        field: famille
+        child: product
     
 lists: 
     default: 

@@ -1,4 +1,8 @@
 table: bimp_gsx_repair
+icon: fas_tools
+header_delete_btn: 0
+header_btn: 
+    callback: getActionsButtons
 
 labels: 
     name: réparation GSX
@@ -72,6 +76,29 @@ forms:
                       prop: 
                           name: lookupNumbers
                           is_static: 1
+                          
+    part_update: 
+        title: Mise à jour du numéro de série
+        icon: fas_pen
+        rows: 
+            - custom: 1
+              hidden: 1
+              label: Sequence number
+              input_name: sequence_number
+              data_type: int
+              input: 
+                  type: hidden
+            - custom: 1
+              label: Numéro de série actuel (KBB)
+              input_name: kbb_number
+              input: 
+                  type: text
+            - custom: 1
+              label: Nouveau numéro de série (KGB)
+              input_name: kgb_number
+              input: 
+                  type: text
+              required: 1
             
 fields_tables:
     infos: 
@@ -80,7 +107,12 @@ fields_tables:
         rows: 
             - field: date_create
             - field: repair_number
+            - label: type
+              value: 
+                  callback: displayRepairType
             - field: repair_confirm_number
+              show: 
+                  callback: is_v1
             - field: serial
               label: N° de série initial
             - field: new_serial
@@ -98,10 +130,35 @@ fields_tables:
             - field: date_closed
             - field: reimbursed
             
+    gsx_v2_infos: 
+        title: Informations
+        icon: info-circle
+        rows: 
+            - label: type
+              value: 
+                  callback: displayRepairType
+            - field: serial
+              label: N° de série initial
+            - field: new_serial
+            - field: total_from_order
+            - field: ready_for_pick_up
+            - field: repair_complete
+            - field: closed
+            - field: canceled
+            - field: date_closed
+            - field: reimbursed
+            
 views: 
     default:
+        panel: 0
         title: nom
         rows:
+            - cols: 
+                  - type: object_header
+            - cols: 
+                  - type: custom
+                    custom: 
+                        callback: displayViewMsgs
             - cols: 
                   - type: fields_table
                     col_lg: 6
@@ -117,3 +174,29 @@ views:
                   - type: custom
                     custom:
                         callback: renderActions
+                        
+    gsx_v2: 
+        panel: 0
+        objects_change_reload: BS_SAV,BS_SavPropalLine,BS_ApplePart
+        rows: 
+            - cols: 
+                  - type: object_header
+            - cols: 
+                - type: custom
+                  custom: 
+                      callback: renderPropalReviewInfos
+            - cols: 
+                  - type: fields_table
+                    col_lg: 6
+                    col_md: 6
+                    fields_table: 
+                        name: gsx_v2_infos
+                  - type: custom
+                    col_lg: 6
+                    col_md: 6
+                    custom: 
+                        callback: renderLookupInfos
+            - cols: 
+                  - type: custom
+                    custom: 
+                        callback: renderRepairParts

@@ -95,7 +95,7 @@ $search_remove_btn=GETPOST('button_removefilter','alpha');
 
 $type=GETPOST('type','alpha');
 $optioncss=GETPOST('optioncss','alpha');
-$mode=GETPOST("mode",'');
+$mode=GETPOST("mode");
 
 $diroutputmassaction=$conf->societe->dir_output . '/temp/massgeneration/'.$user->id;
 

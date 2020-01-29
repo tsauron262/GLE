@@ -78,13 +78,6 @@ objects:
                 name: BimpProductCurPa
         
 fields: 
-    fk_user_modif:
-        label: Utilisateur modification
-        type: id_object
-        object: user
-    datec:
-        type: date
-        label: Date Création
     ref: 
         label: Réf.
         
@@ -138,6 +131,13 @@ fields:
         display_if: 
             field_name: no_fixe_prices
             show_values: 0
+        
+    deee: 
+        label: ecotaxe
+        dol_extra_field: 1
+        type: money
+        decimals: 4
+        default_value: 4
         
     pmp: 
         label: Prix d'achat moyen pondéré
@@ -335,59 +335,39 @@ fields:
         type: text
         dol_extra_field: 1
         
-#    best_buy_price:
-#        label: Meilleur prix d'achat
-#        type: money
-#        extra: 1
-        
     seuil_stock_alerte:
         label: Limite stock pour alerte
-        type: int
-        edit: 1
+        type: qty
+        decimals: 4
+        min: none
+        unsigned: 0
 
     desiredstock:
         label: Stock désiré optimal
-        type: int
-        edit: 1
+        type: qty
+        decimals: 4
+        unsigned: 0
+        min: none
         
     physical_stock:
         label: Stock physique
         type: int
         extra: 1
-        
-    doli_search_prod:
-        label: Produit
-        input: 
-            type: search_product
-            filter_type: product
-            help: Entrez la référence ou l'id du produit à faire fusionner dans celui-ci. (celui que vous voulez supprimer)
-        extra: 1
-        
-    product_categories: 
-        label: Catégories produit
-        extra: 1
-        type: items_list
-        items_data_type: id_object
-        object: category
-
-        
+                        
     localtax1_tx:
         label: Taxe locale 1
         type: money
         dol_extra_field: 1
-
         
     localtax1_type:
         label: Type de taxe locale 1
         type: int
         dol_extra_field: 1
-
         
     localtax2_tx:
         label: Taxe locale 2
         type: money
         dol_extra_field: 1
-
         
     localtax2_type:
         label: Type de taxe locale 2
@@ -427,8 +407,128 @@ fields:
         label: Pas de prix fixes
         type: bool 
         default_value: 0
-
+        
+    categorie:
+        label: Categorie
+        dol_extra_field: 1
+        type: int
+        values:
+            callback: 
+                method: getValues8sens
+                params:
+                    - categorie
+                    
+    collection:
+        label: Collection
+        dol_extra_field: 1
+        type: int
+        values:
+            callback: 
+                method: getValues8sens
+                params:
+                    - collection
+                    
+    nature:
+        label: Nature
+        dol_extra_field: 1
+        type: int
+        values:
+            callback: 
+                method: getValues8sens
+                params:
+                    - nature
+                    
+    famille:
+        label: Famille
+        dol_extra_field: 1
+        type: int
+        values:
+            callback: 
+                method: getValues8sens
+                params:
+                    - famille
+                    
+    gamme:
+        label: Gamme
+        dol_extra_field: 1
+        type: int
+        values:
+            callback: 
+                method: getValues8sens
+                params:
+                    - gamme
+                    
+    fk_user_modif:
+        label: Utilisateur modification
+        type: id_object
+        object: user
+        
+    datec:
+        type: date
+        label: Date Création
+        
+    cto: 
+        label: CTO
+        dol_extra_field: 1
+        
+    code_config:
+        label: Code configuration
+        dol_extra_field: 1
+    
+    type_compta:
+        label: Classement forcé en compta
+        dol_extra_field: 1
+        values:
+            array: type_compta
+        
 forms: 
+    # Utiliser plutôt "default" que "card" pour le formulaire principal 
+    # Important car tout objet doit avoir un formulaire par défaut s'il est éditable.
+    default: 
+        rows:
+            - field: ref
+            - field: code_config
+            - field: label
+            - field: description
+            - field: fk_product_type
+            - field: type2
+            - field: type_compta
+            - field: barcode
+            - field: customcode
+            - field: accountancy_code_buy
+            - field: accountancy_code_sell
+            - field: price
+            - field: tva_tx
+            - field: deee
+            - field: rpcp
+            - field: crt
+            - field: gamme
+            - field: categorie
+            - field: collection
+            - field: nature
+            - field: famille
+            - field: note
+            - field: fk_country
+            - field: url
+            - field: seuil_stock_alerte
+            - field: desiredstock
+            # Measure
+#            - field: weight
+#            - field: weight_units
+#            - field: length
+#            - field: length_units
+#            - field: width
+#            - field: width_units
+#            - field: height
+#            - field: height_units
+#            - field: surface
+#            - field: surface_units
+#            - field: volume
+#            - field: volume_units
+
+    card:
+        extends: default
+        
     light: 
         force_edit: 1
         rows: 
@@ -461,6 +561,16 @@ forms:
             - field: serialisable
             - field: note
             - field: zone_pr
+            
+    lightFourn:
+        extends: light
+        rows:
+            mailValid:
+              custom: 1
+              label: Demande de validation
+              input_name: mailValid
+              input: 
+                  type: toggle
             
     etiquettes: 
         title: Générer des etiquettes
@@ -504,52 +614,6 @@ forms:
               content: 
                   callback: renderMergeKeptProductInput
               depends_on: id_merged_product                  
-              
-    card:
-        rows:
-            # Infos
-            - field: ref
-            - field: label
-            - field: description
-            - field: fk_product_type
-            - field: type2
-            - field: barcode
-            - field: customcode
-            - field: accountancy_code_buy
-            - field: accountancy_code_sell
-            - field: note
-            - field: fk_default_warehouse
-              display: nom_url
-            - field: deee
-            - field: cur_pa_ht
-            # Infos +
-            - field: url
-#            - field: stock
-            - field: fk_country
-            - field: product_categories
-            - field: localtax1_tx
-            - field: localtax1_type
-            - field: localtax2_tx
-            - field: localtax2_type
-#            - field: ref_constructeur
-            - field: crt
-            - field: rpcp
-            - field: price
-            - field: seuil_stock_alerte
-            - field: desiredstock
-            # Measure
-            - field: weight
-            - field: weight_units
-            - field: length
-            - field: length_units
-            - field: width
-            - field: width_units
-            - field: height
-            - field: height_units
-            - field: surface
-            - field: surface_units
-            - field: volume
-            - field: volume_units
         
 fields_tables: 
     infos: 
@@ -557,9 +621,12 @@ fields_tables:
         icon: fas_info-circle
         rows:  
             - field: ref
+            - field: code_config
             - field: label
             - field: fk_product_type
             - field: type2
+              edit: 1
+            - field: type_compta
               edit: 1
             - field: barcode
             - field: customcode
@@ -594,6 +661,11 @@ fields_tables:
         icon: plus
         edit: 1
         rows:
+            - field: gamme
+            - field: categorie
+            - field: collection
+            - field: nature
+            - field: famille
             - field: url
             - field: stock
             - field: fk_country
@@ -653,7 +725,9 @@ fields_tables:
         icon: fas_box-open
         rows:
             - field: seuil_stock_alerte
+              edit: 1
             - field: desiredstock
+              edit: 1
             - field: stock
             - custom: 1
               label: Stock virtuel
@@ -790,6 +864,7 @@ filters_panels:
     default: 
         filters: 
             - field: ref
+            - field: code_config
             - field: label
             - field: fk_product_type
             - field: stock
@@ -798,38 +873,49 @@ filters_panels:
             - field: barcode
             - field: serialisable
             - field: remisable
+            - field: validate
             - field: tosell
             - field: tobuy
             - field: no_fixe_prices
             - field: datec
-            - custom: 1
-              label: Catégorie (1)
-              field: categ1
-              type: value
-              input:
-                  type: select
-                  options: 
-                      callback: getCategoriesArray
-            - custom: 1
-              label: Catégorie (2)
-              field: categ2
-              type: value
-              input:
-                  type: select
-                  options: 
-                      callback: getCategoriesArray
-            - custom: 1
-              label: Catégorie (3)
-              field: categ3
-              type: value
-              input:
-                  type: select
-                  options: 
-                      callback: getCategoriesArray
+#            - custom: 1
+#              label: Catégorie (1)
+#              field: categ1
+#              type: value
+#              input:
+#                  type: select
+#                  options: 
+#                      callback: getCategoriesArray
+#            - custom: 1
+#              label: Catégorie (2)
+#              field: categ2
+#              type: value
+#              input:
+#                  type: select
+#                  options: 
+#                      callback: getCategoriesArray
+#            - custom: 1
+#              label: Catégorie (3)
+#              field: categ3
+#              type: value
+#              input:
+#                  type: select
+#                  options: 
+#                      callback: getCategoriesArray
+            - field: gamme
+            - field: categorie
+            - field: collection
+            - field: nature
+            - field: famille
+            - field: seuil_stock_alerte
       
 lists_cols: 
     ref: 
         field: ref
+    stock_picto: 
+        label: Stock Picto
+        value:
+            callback: displayStock_picto
     ref_short: 
         label: Réf. fabricant
         value: 
@@ -866,6 +952,21 @@ lists_cols:
         field: cur_pa_ht
     tosell:
         field: tosell
+    gamme:
+        field: gamme
+    categorie:
+        field: categorie
+    collection:
+        field: collection
+    nature:
+        field: nature
+    famille:
+        field: famille
+    seuil_stock: 
+        label: Lim. stock
+        field: seuil_stock_alerte
+    code_config:
+        field: code_config
                 
 lists: 
     default: 
@@ -946,15 +1047,48 @@ lists:
                 value: 
                     callback: 
                         method: displayStockInventorySr      
+                        
 cards: 
     default: 
         view_btn: 1
         fields: 
             - field: ref
+            - field: fk_product_type
+            - field: price
+            - field: tva_tx
+            
+    detailed: 
+        view_btn: 1
+        fields: 
+            - field: ref
+            - field: fk_product_type
             - field: barcode
+            - field: price
+            - field: tva_tx
+            - field: serialisable
+            - field: validate
             
 searches:
     default: 
         fields_search: 
-            - label
-            - ref
+            - a.label
+            - a.ref
+            - a.barcode
+        fields_return:
+            - a.ref
+            - a.label
+            - REPLACE(ROUND(a.price,2),'.',',') as price
+            - a.stock
+        label_syntaxe: '<ref> - <label> - <price> € HT - Stock: [REDIFNEG]<stock>[/REDIFNEG]'
+        
+    tosell: 
+        extends: default
+        filters: 
+            a.tosell: 1
+            
+    tobuy: 
+        extends: default
+        filters: 
+            a.tobuy: 1
+            
+        

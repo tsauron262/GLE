@@ -154,7 +154,7 @@ forms:
             
 #           *** Temporaire: 
             - custom: 1
-              label: S'agit-il d'une réception de Septembre? 
+              label: S'agit-il d'une réception de Décembre? 
               input_type: string
               input_name: is_sept
               input: 
@@ -368,3 +368,20 @@ cards:
               display: nom_url
             - label: Infos
               field: info
+
+       
+searches:
+    default: 
+        fields_search: 
+            - a.ref
+            - cf.ref
+            - s.nom
+        joins:
+            commande_fourn: 
+                table: commande_fournisseur
+                on: cf.rowid = a.id_commande_fourn
+                alias: cf
+            s: 
+                table: societe
+                on: cf.fk_soc = s.rowid
+                alias: s

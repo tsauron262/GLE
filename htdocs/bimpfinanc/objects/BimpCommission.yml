@@ -60,6 +60,14 @@ fields:
         label: Total marges
         type: money
         default_value: 0
+    total_pa:
+        label: Total Achat
+        type: money
+        default_value: 0
+    total_ca:
+        label: Total CA
+        type: money
+        default_value: 0
     status: 
         label: Statut
         type: int
@@ -195,6 +203,7 @@ filters_panel:
     default: 
         filters: 
             - field: id_user
+            - field: id_entrepot
             - field: date
             - field: status
 
@@ -209,10 +218,37 @@ lists_cols:
         field: total_marges
     status: 
         field: status
-    ecarts: 
-        label: Ecarts secteurs
+#    ecarts: 
+#        label: Ecarts secteurs
+#        value: 
+#            callback: displaySecteursErrors
+#    amounts:
+#        label: CA
+#        value:
+#            callback: 
+#                method: displayAmount
+#                params: 
+#                    - total_ca
+    amounts:
+        field: total_ca
+    total_pa:
+        field: total_pa
+    tx_marque:
+        label: Taux de marque
         value: 
-            callback: displaySecteursErrors
+          callback:
+              method: displayTaux
+              params: 
+                  -  marque
+                
+#                    
+#    tx_marque:               
+#        label: Taux de marque
+#        value: 
+#          callback: 
+#              method: displayAmount
+#              params: 
+#                  - tx_marque
 
 lists: 
     default: 
@@ -246,6 +282,8 @@ lists:
             owner: 
             marges: 
             status: 
+            amounts:
+            tx_marque:
             ecarts: 
             
     user: 

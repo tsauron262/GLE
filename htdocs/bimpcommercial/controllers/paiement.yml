@@ -1,0 +1,17 @@
+bootstrap: 1
+
+objects:
+    paiement:
+        instance:
+            bimp_object: Bimp_Paiement
+            id_object:
+                request: id
+            
+sections:
+    - type: object_header
+      object_header: 
+          object: paiement
+    - type: nav_tabs
+      nav_tabs: 
+          - id: fiche_paiement
+            title: Fiche

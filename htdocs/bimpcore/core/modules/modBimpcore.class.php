@@ -267,6 +267,9 @@ class modBimpcore extends DolibarrModules
                 $extrafields->addExtraField('secteur', 'Secteur', 'sellist', 1, 12, 'user', 0, 0, '', array('options'=>array('bimp_c_secteur:valeur:clef'=>'')), 0, '', 1);
                 $extrafields->addExtraField('secteur', 'Secteur', 'sellist', 1, 12, 'usergroup', 0, 0, '', array('options'=>array('bimp_c_secteur:valeur:clef'=>'')), 0, '', 1);
                 
+                $extrafields->addExtraField('gsx_acti_token', 'Token d\'activation GSX', 'varchar', 1, 255, 'user', 0, 0, '');
+                $extrafields->addExtraField('gsx_auth_token', 'Token d\'authentification GSX', 'varchar', 1, 255, 'user', 0, 0, '');
+                
 		return $this->_init($sql, $options);
 	}
 

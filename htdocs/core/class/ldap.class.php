@@ -580,6 +580,7 @@ class Ldap
 			{
 				// This function currently only works with LDAPv3
 				$result = $this->rename($olddn, $newrdn, $newparent, $user, true);
+                                $result = $this->modify($dn, $info, $user);
 			}
 			else
 			{

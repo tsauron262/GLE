@@ -36,7 +36,7 @@ class BC_Field extends BimpComponent
         'number'     => array(
             'min'      => array('data_type' => 'float'),
             'max'      => array('data_type' => 'float'),
-            'unsigned' => array('data_type' => 'bool', 'default' => 1),
+            'unsigned' => array('data_type' => 'bool', 'default' => 0),
             'decimals' => array('data_type' => 'int', 'default' => 2)
         ),
         'money'      => array(
@@ -79,6 +79,7 @@ class BC_Field extends BimpComponent
         $this->params_def['history'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['extra'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['has_total'] = array('data_type' => 'bool', 'default' => 0);
+        $this->params_def['no_dol_prop'] = array('data_type' => 'bool', 'default' => 0);
 
         $this->edit = $edit;
         $this->force_edit = $force_edit;
@@ -142,6 +143,7 @@ class BC_Field extends BimpComponent
         }
 
         if ($this->edit) {
+            
             if ($this->params['editable'] && $this->object->canEditField($this->name) && $this->object->isFieldEditable($this->name, $this->force_edit)) {
                 $html .= $this->renderInput();
             } else {

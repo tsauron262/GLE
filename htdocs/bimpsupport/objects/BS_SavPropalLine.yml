@@ -252,7 +252,7 @@ forms:
                       
 lists: 
     default: 
-        objects_change_reload: BS_SAV,BS_SavPropal,BS_ApplePart,ObjectLineRemise
+        objects_change_reload: BS_SAV,BS_SavPropal,BS_ApplePart,ObjectLineRemise,BS_Issue,GSX_Repair
         add_form_name: sav
         edit_form: 
             callback: getListEditForm

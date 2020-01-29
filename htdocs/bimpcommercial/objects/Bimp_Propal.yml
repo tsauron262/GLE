@@ -180,9 +180,6 @@ forms:
             - field: zone_vente
               show: 
                   callback: isLoaded
-            - field: remise_globale_label
-              show: 
-                  callback: hasRemiseGlobale
             - field: note_private
             - field: note_public
             
@@ -216,6 +213,109 @@ forms:
             - field: ef_type
             - field: datep
             - field: date_livraison
+    
+    contrat:
+        rows:
+            - field: fk_soc
+              edit: 0
+            - custom: 1
+              label: Annule et remplace
+              input_name: ref_ext
+              input:
+                  type: text
+                  help: A remplire en cas de renouvellement d'un ancien contrat
+            - custom: 1
+              label: Début de validité du contrat
+              required: 1
+              input_name: valid_start
+              input:
+                  type: date
+                  display_now: 1
+            - custom: 1
+              label: Durée en mois
+              input_name: duree_mois
+              input:
+                  type: qty
+              value: 12
+            - custom: 1
+              label: Périodicitée de facturation
+              input_name: periodicity
+              input: 
+                  type: select
+                  options:
+                      1: Mensuel
+                      3: Trimestriel 
+                      6: Semestriel
+                      12: Annuel
+            - custom: 1
+              label: Objet du contrat
+              input_name: objet_contrat
+              input:
+                  type: select
+                  options:
+                      CT: Contrat global
+                      CMA: Contrat de maintenance
+                      CST: Contrat de support téléphonique
+                      CMO: Contrat de monitoring
+                      CSP: Contrat de spare
+                      CDP: Contrat de délégation du personel
+            - custom: 1
+              label: Delai d'intervention
+              input_name: gti
+              value: 8
+              input:
+                  type: select
+                  options:
+                      0:
+                      4: 4 heures ouvrées
+                      6: 6 heures ouvrées
+                      8: 8 heures ouvrées        
+            - custom: 1
+              label: Renouvellement
+              input_name: re_new
+              value: 1
+              input:
+                  type: select
+                  options:
+                      0: Non
+                      1: Tacite 1 fois
+                      2: Tacite 2 fois
+                      3: Tacite 3 fois
+                      12: Sur proposition
+            - field: fk_mode_reglement
+            - custom: 1
+              label: Utiliser l'indice SYNTEC
+              value: 1
+              input_name: use_syntec
+              input: 
+                  type: toggle
+            - custom: 1
+              label: Commercial signature
+              input_name: commercial_signature
+              type: value
+              value:
+                  prop:
+                    name: id
+                    object:
+                        global: user
+              input: 
+                type: search_user
+            - custom: 1
+              label: Commercial suivi du contrat
+              input_name: commercial_suivi
+              type: value
+              value:
+                  prop:
+                    name: id
+                    object:
+                        global: user
+              input: 
+                type: search_user
+            - custom: 1
+              label: Note particulière au contrat
+              input_name: note_public
+              input:
+                  type: html
             
 fields_tables: 
     infos: 
@@ -283,10 +383,6 @@ fields_tables:
               edit: 1
             - field: pdf_proforma
               edit: 1
-            - field: remise_globale_label
-              edit: 1
-              show: 
-                  callback: hasRemiseGlobale
             - label: Fichier PDF
               value: 
                   callback: displayPDFButton
@@ -302,11 +398,11 @@ fields_tables:
             
 views: 
     default: 
-        objects_change_reload: Bimp_PropalLine,ObjectLineRemise,BimpFile
+        objects_change_reload: Bimp_PropalLine,ObjectLineRemise,BimpFile,RemiseGlobale
     content_infos: 
-        objects_change_reload: Bimp_PropalLine,ObjectLineRemise,BimpFile
+        objects_change_reload: Bimp_PropalLine,ObjectLineRemise,BimpFile,RemiseGlobale
     full: 
-        objects_change_reload: Bimp_PropalLine,ObjectLineRemise,BimpFile
+        objects_change_reload: Bimp_PropalLine,ObjectLineRemise,BimpFile,RemiseGlobale
      
 lists_cols: 
     date_create: 
@@ -374,7 +470,7 @@ cards:
             - label: Fichier PDF
               value: 
                   callback: displayPDFButton
-        
+
 searches:
     default: 
         fields_search: 
@@ -382,9 +478,15 @@ searches:
             - ef.libelle
             - s.nom
         joins:
-            - table: propal_extrafields
-              on: a.rowid = ef.fk_object
-              alias: ef
-            - table: societe
-              on: a.fk_soc = s.rowid
-              alias: s
+            ef: 
+                table: propal_extrafields
+                on: a.rowid = ef.fk_object
+                alias: ef
+            s: 
+                table: societe
+                on: a.fk_soc = s.rowid
+                alias: s
+        fields_return: 
+            - a.ref
+            - s.nom
+        label_syntaxe: '<a.ref> (Client: <s.nom>)'

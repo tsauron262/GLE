@@ -277,6 +277,28 @@ class Bimp_CommandeFournLine extends FournObjectLine
         return $qty;
     }
 
+    public function getBilledQty($id_reception = null)
+    {
+        $receptions = $this->getData('receptions');
+
+        $qty = 0;
+
+        foreach ($receptions as $id_r => $reception_data) {
+            if (!is_null($id_reception) && ((int) $id_r !== (int) $id_reception)) {
+                continue;
+            }
+
+            $reception = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeFournReception', (int) $id_r);
+            if (!BimpObject::objectLoaded($reception) || (int) $reception->getData('status') !== BL_CommandeFournReception::BLCFR_RECEPTIONNEE) {
+                continue;
+            }
+            if ($reception->getData('id_facture'))
+                $qty += (float) $reception_data['qty'];
+        }
+
+        return $qty;
+    }
+
     public function getReceptionData($id_reception)
     {
         $receptions = $this->getData('receptions');
@@ -540,6 +562,38 @@ class Bimp_CommandeFournLine extends FournObjectLine
             );
         }
 
+        if (1) {
+            $commandeCliLine = BimpObject::getInstance("bimpcommercial", "Bimp_CommandeLine");
+            $filters = array();
+            $comm = $this->getParentInstance();
+            $filters['cd.fk_product'] = $this->id_product;
+            $filters['cex.entrepot'] = $comm->getData("entrepot");
+            $filters['a.qty_to_ship'] = array("operator" => ">", "value" => 0);
+            $joins = array();
+
+            $joins['commandedet'] = array(
+                'table' => 'commandedet',
+                'on'    => 'cd.rowid = a.id_line',
+                'alias' => 'cd'
+            );
+            $joins['commextra'] = array(
+                'table' => 'commande_extrafields',
+                'on'    => 'cex.fk_object = a.id_obj',
+                'alias' => 'cex'
+            );
+
+
+            $buttons[] = array(
+                'label'   => 'Voir les commandes client',
+                'icon'    => 'fas_glasses',
+                'onclick' => $commandeCliLine->getJsLoadModalList('general', array(
+                    'title'         => 'Commande client utilisable',
+                    'extra_filters' => $filters,
+                    'extra_joins'   => $joins
+                ))
+            );
+        }
+
         $product = $this->getProduct();
 
         if (BimpObject::objectLoaded($product)) {
@@ -651,6 +705,17 @@ class Bimp_CommandeFournLine extends FournObjectLine
 
                         if ($link) {
                             $html .= ($html ? '<br/><br/>' : '') . $link;
+
+
+                            $reservations = $line->getReservations();
+                            $nb = 0;
+                            foreach ($reservations as $resa) {
+                                if ($resa->getData('status') < 200) {
+                                    $nb += $resa->getData('qty');
+                                }
+                            }
+                            $html .= '<br/>';
+                            $html .= 'Reste à réserver : ' . $nb;
                         }
                     }
                 }
@@ -688,6 +753,16 @@ class Bimp_CommandeFournLine extends FournObjectLine
                         $html .= '&nbsp;&nbsp;&nbsp;<a href="' . $url . '" target="_blank">Logistique' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight') . '</a>';
                         $html .= '<br/>';
                         $html .= 'Ligne n°' . $line->getData('position');
+
+                        $reservations = $line->getReservations();
+                        $nb = 0;
+                        foreach ($reservations as $resa) {
+                            if ($resa->getData('status') < 200) {
+                                $nb += $resa->getData('qty');
+                            }
+                        }
+                        $html .= '<br/>';
+                        $html .= 'Reste à réserver : ' . $nb;
                     } else {
                         $html .= BimpRender::renderAlerts('Erreur: Commande absente pour la ligne de commande d\'ID ' . $id_line);
                     }
@@ -814,21 +889,21 @@ class Bimp_CommandeFournLine extends FournObjectLine
 
         $html .= '</span>';
 
-//        // Qté facturée: 
-//        $qty_billed = (float) $this->getBilledQty();
-//        if ($qty_billed <= 0) {
-//            $class = 'danger';
-//        } elseif ($qty_billed < $total_qty) {
-//            $class = 'warning';
-//        } else {
-//            $class = 'success';
-//        }
-//        $html .= '<span class="bs-popover ' . $class . '" style="display: inline-block; margin-left: 15px"';
-//        $html .= BimpRender::renderPopoverData('Qtés ajoutées à une facture');
-//        $html .= '>';
-//        $html .= BimpRender::renderIcon('fas_file-invoice-dollar', 'iconLeft');
-//        $html .= $qty_billed;
-//        $html .= '</span>';
+        // Qté facturée: 
+        $qty_billed = (float) $this->getBilledQty();
+        if ($qty_billed <= 0) {
+            $class = 'danger';
+        } elseif ($qty_billed < $total_qty) {
+            $class = 'warning';
+        } else {
+            $class = 'success';
+        }
+        $html .= '<span class="bs-popover ' . $class . '" style="display: inline-block; margin-left: 15px"';
+        $html .= BimpRender::renderPopoverData('Qtés ajoutées à une facture');
+        $html .= '>';
+        $html .= BimpRender::renderIcon('fas_file-invoice-dollar', 'iconLeft');
+        $html .= $qty_billed;
+        $html .= '</span>';
 
         return $html;
     }
@@ -1115,7 +1190,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
         return array();
     }
 
-    public function checkReceptionData($id_reception, $data)
+    public function checkReceptionData($id_reception, $data, &$code_config_errors = null)
     {
         $errors = array();
 
@@ -1144,6 +1219,23 @@ class Bimp_CommandeFournLine extends FournObjectLine
                         }
                         if (count($serials)) {
                             $errors = $this->checkReceptionSerials($serials, $id_reception);
+
+                            if (is_array($code_config_errors) && !count($errors)) {
+                                $product = $this->getProduct();
+
+                                if (BimpObject::objectLoaded($product) && preg_match('/^APP\-.+$/', $product->getRef())) {
+                                    $code_config = (string) $product->getData('code_config');
+
+                                    if ($code_config) {
+                                        foreach ($serials as $serial) {
+                                            $isImei = (!preg_match("/[a-zA-Z]/", $serial))? true : false;
+                                            if (!$isImei && !preg_match('/^.+' . preg_quote($code_config) . '$/', $serial)) {
+                                                $code_config_errors[] = $serial;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 } else {
@@ -1256,7 +1348,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
             foreach ($serials_checked as $serial) {
                 if ($equipment->find(array(
                             'id_product' => $id_product,
-                            'serial'     => $serial
+                            'serial'     => static::traiteSerialApple($serial)
                                 ), true)) {
                     $place = $equipment->getCurrentPlace();
 
@@ -1613,50 +1705,6 @@ class Bimp_CommandeFournLine extends FournObjectLine
                     // Màj statuts.
                     $line->addReceivedQty((int) $reception_data['qty'], $new_status);
                 }
-
-                // Mise à jour du prix d'achat moyen pondéré pour la ligne de commande client si non sérialisable: 
-                if (!$isSerialisable) {
-                    $pa_total = 0;
-                    $pa_qty = 0;
-
-                    if (isset($reception_data['qties'])) {
-                        foreach ($reception_data['qties'] as $qty_data) {
-                            if (isset($qty_data['pu_ht']) && isset($qty_data['qty'])) {
-                                $pa_total += ((float) $qty_data['pu_ht'] * (float) $qty_data['qty']);
-                                $pa_qty += (float) $qty_data['qty'];
-                            }
-                        }
-                    }
-
-                    if ($pa_qty < (float) $reception_data['qty']) {
-                        $pa_total += (((float) $reception_data['qty'] - $pa_qty) * (float) $this->getUnitPriceHTWithRemises());
-                    }
-
-                    if ((float) $reception_data['qty'] > 0) {
-                        $pa_moyen = $pa_total / (float) $reception_data['qty'];
-                    } else {
-                        $pa_moyen = 0;
-                    }
-
-                    $line_qty = (float) $line->getFullQty();
-                    if ($pa_moyen && $line_qty) {
-                        $line_pa = (float) $line->pa_ht;
-//                        $remise_pa = (float) $line->getData('remise_pa');
-//                        if ($remise_pa) {
-//                            $line_pa -= ((float) $line->pa_ht * ($remise_pa / 100));
-//                        }
-
-                        $new_line_pa = (float) ((((float) $line_pa * ($line_qty - (float) $reception_data['qty'])) + ($pa_moyen * (float) $reception_data['qty'])) / $line_qty);
-
-//                        if ($remise_pa) {
-//                            $new_line_pa = ($new_line_pa / (1 - ($remise_pa / 100)));
-//                        }
-
-                        if ($new_line_pa !== (float) $line->pa_ht) {
-                            $line->setPrixAchat($new_line_pa);
-                        }
-                    }
-                }
             }
         }
 
@@ -1670,6 +1718,8 @@ class Bimp_CommandeFournLine extends FournObjectLine
 
         if (count($up_errors)) {
             $errors[] = BimpTools::getMsgFromArray($up_errors, 'Erreurs lors de la mise à jour de la ligne de commande fournisseur');
+        } elseif (!$isReturn) {
+            $this->checkFactureClientLinesPA();
         }
 
         $this->checkQties();
@@ -1749,7 +1799,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
 
                                     if (count($eq_errors)) {
                                         $msg = BimpTools::getMsgFromArray($eq_errors, 'Echec de la suppression de l\'équipement "' . $equipment->getData('serial') . '" (ID: ' . $equipment->id . ')');
-                                        $warnings[] = $msg;
+                                        $errors[] = $msg;
                                         dol_syslog('Annulation réception ' . $reception->getRef() . ' - Commande Fourn ' . $commande_fourn->getRef() . ' - ' . $msg, LOG_ERR);
                                     }
 
@@ -1799,7 +1849,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
                     }
                 }
             } else {
-                if ((float) $reception_data['qty'] > 0) {
+                if ((float) $reception_data['qty'] > 0 || (float) $reception_data['qty'] < 0) {
                     // Traitement de la réservation correspondante: 
                     if ($id_commande_client_line) {
                         if (isset($reception_data['assign_to_commande_client']) && (int) $reception_data['assign_to_commande_client']) {
@@ -1824,7 +1874,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
                     if (!count($errors)) {
                         // Retrait du stock:
                         if (BimpObject::objectLoaded($product)) {
-                            $stock_label = 'Annulation réception n°' . $reception->getData('num_reception') . ' BR: ' . $reception->getData('ref') . ' - Commande fournisseur: ' . $commande_fourn->getData('ref');
+                            $stock_label = 'Annulation réception n°' . $reception->getData('num_reception') . ((float) $reception_data['qty'] < 0 ? ' (Retour au fournisseur)' : '') . ' BR: ' . $reception->getData('ref') . ' - Commande fournisseur: ' . $commande_fourn->getData('ref');
                             $code_mvt = 'ANNUL_CMDF_' . $commande_fourn->id . '_LN_' . $this->id . '_RECEP_' . $reception->id;
 
                             if ($product->dol_object->correct_stock($user, $id_entrepot, (int) $reception_data['qty'], 1, $stock_label, 0, $code_mvt, "order_supplier", $commande_fourn->id) <= 0) {
@@ -1834,59 +1884,23 @@ class Bimp_CommandeFournLine extends FournObjectLine
                             }
                         }
                     }
-
-                    // Mise à jour du prix d'achat moyen pondéré pour la ligne de commande client si non sérialisable: 
-
-                    if ($id_commande_client_line) {
-                        $pa_total = 0;
-                        $pa_qty = 0;
-
-                        if (isset($reception_data['qties'])) {
-                            foreach ($reception_data['qties'] as $qty_data) {
-                                if (isset($qty_data['pu_ht']) && isset($qty_data['qty'])) {
-                                    $pa_total += ((float) $qty_data['pu_ht'] * (float) $qty_data['qty']);
-                                    $pa_qty += (float) $qty_data['qty'];
-                                }
-                            }
-                        }
-
-                        if ($pa_qty < (float) $reception_data['qty']) {
-                            $pa_total += (((float) $reception_data['qty'] - $pa_qty) * (float) $this->getUnitPriceHTWithRemises());
-                        }
-
-                        $line_qty = (float) $commande_line->getFullQty();
-                        if ($pa_total && $line_qty) {
-                            $line_pa = (float) $commande_line->pa_ht;
-//                            $remise_pa = (float) $commande_line->getData('remise_pa');
-//                            if ($remise_pa) {
-//                                $line_pa -= ($line_pa * ($remise_pa / 100));
-//                            }
-
-                            $new_line_pa = (float) ((((float) $line_pa * $line_qty) - $pa_total) / ($line_qty - (float) $reception_data['qty']));
-
-
-//                            if ($remise_pa) {
-//                                $new_line_pa = ($new_line_pa / (1 - ($remise_pa / 100)));
-//                            }
-
-                            if ($new_line_pa !== (float) $commande_line->pa_ht) {
-                                $commande_line->setPrixAchat($new_line_pa);
-                            }
-                        }
-                    }
                 }
             }
 
-            $receptions = $this->getData('receptions');
+            if (!count($errors)) {
+                $receptions = $this->getData('receptions');
 
-            $reception_data['received'] = 0;
-            $reception_data['equipments'] = array();
-            $receptions[(int) $id_reception] = $reception_data;
+                $reception_data['received'] = 0;
+                $reception_data['equipments'] = array();
+                $receptions[(int) $id_reception] = $reception_data;
 
-            $up_errors = $this->updateField('receptions', $receptions);
+                $up_errors = $this->updateField('receptions', $receptions);
 
-            if (count($up_errors)) {
-                $errors[] = BimpTools::getMsgFromArray($up_errors);
+                if (count($up_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($up_errors);
+                } elseif (!$isReturn) {
+                    $this->checkFactureClientLinesPA();
+                }
             }
         }
 
@@ -1935,12 +1949,28 @@ class Bimp_CommandeFournLine extends FournObjectLine
                         $to_receive_qty = $fullQty - $received_qty;
                     }
 
-                    if ($received_qty !== (float) $this->getData('qty_received')) {
+                    if (isset($status_forced['invoice']) && (int) $status_forced['invoice'] && $cmd_status === 5) {
+                        $billed_qty = $fullQty;
+                        $to_billed_qty = 0;
+                    } else {
+                        $billed_qty = abs((float) $this->getBilledQty(null));
+                        $to_billed_qty = $fullQty - $billed_qty;
+                    }
+
+                    if ($received_qty != (float) $this->getData('qty_received')) {
                         $this->updateField('qty_received', $received_qty, null, true);
                     }
 
-                    if ($to_receive_qty !== (float) $this->getData('qty_to_receive')) {
+                    if ($to_receive_qty != (float) $this->getData('qty_to_receive')) {
                         $this->updateField('qty_to_receive', $to_receive_qty, null, true);
+                    }
+
+                    if ($billed_qty != (float) $this->getData('qty_billed')) {
+                        $this->updateField('qty_billed', $billed_qty, null, true);
+                    }
+
+                    if ($to_billed_qty != (float) $this->getData('qty_to_billed')) {
+                        $this->updateField('qty_to_billed', $to_billed_qty, null, true);
                     }
                 }
             } else {
@@ -1966,9 +1996,26 @@ class Bimp_CommandeFournLine extends FournObjectLine
         }
     }
 
-    public function checkCommandeClientLinePrixAchat($qty, $pa_ht)
+    public function checkFactureClientLinesPA()
     {
-        
+        if (!$this->isLoaded()) {
+            return;
+        }
+
+        if ($this->getData('linked_object_name') === 'commande_line' && (int) $this->getData('linked_id_object')) {
+            $comm_line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $this->getData('linked_id_object'));
+
+            if (BimpObject::objectLoaded($comm_line)) {
+                $fac_lines = BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_FactureLine', array(
+                            'linked_object_name' => 'commande_line',
+                            'linked_id_object'   => (int) $comm_line->id
+                ));
+
+                foreach ($fac_lines as $fac_line) {
+                    $fac_line->checkPrixAchat();
+                }
+            }
+        }
     }
 
     // Actions: 

@@ -449,6 +449,30 @@ class BimpFile extends BimpObject
         return parent::getList($filters, $n, $p, $order_by, $order_way, $return, $return_fields, $joins);
     }
 
+    public function beforeListFetchItems(BC_List $list)
+    {
+        if (!$this->isLoaded()) {
+            $filters = array();
+            if (isset($list->params['list_filters'])) {
+                foreach ($list->params['list_filters']as $filtre) {
+                    if (stripos($filtre['name'], 'parent_module') !== false)
+                        $filters['parent_module'] = $filtre['filter'];
+                    elseif (stripos($filtre['name'], 'parent_object_name') !== false)
+                        $filters['parent_object_name'] = $filtre['filter'];
+                    elseif (stripos($filtre['name'], 'id_parent') !== false)
+                        $filters['id_parent'] = $filtre['filter'];
+                }
+            }
+
+
+            if (isset($filters['parent_module']) &&
+                    isset($filters['parent_object_name']) &&
+                    isset($filters['id_parent'])) {
+                $this->checkObjectFiles($filters['parent_module'], $filters['parent_object_name'], $filters['id_parent']);
+            }
+        }
+    }
+
     public function validate()
     {
         $name = $this->getData('file_name');

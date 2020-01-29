@@ -13,7 +13,28 @@ sections:
     - type: object_header
       object_header: 
           object: fichinter
-      
-    - type: view
-      view: 
-          object: fichinter
+    - type: nav_tabs
+      nav_tabs: 
+          - id: card
+            title: Fiche
+            struct: 
+                type: rows
+                rows: 
+                    - cols: 
+                        - type: view
+                          view: 
+                              object: fichinter
+
+          - id: files
+            title: Fichiers
+            struct: 
+                type: rows
+                rows: 
+                    - cols: 
+                        - type: list
+                          list: 
+                              title: Fichier joints
+                              name: default
+                              panel: 1
+                              object: fichinter
+                              children: files 

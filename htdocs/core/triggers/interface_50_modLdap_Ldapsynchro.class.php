@@ -62,7 +62,7 @@ class InterfaceLdapsynchro extends DolibarrTriggers
 		require_once DOL_DOCUMENT_ROOT."/user/class/usergroup.class.php";
 
 		$result=0;
-
+                
 		// Users
 		if ($action == 'USER_CREATE')
 		{
@@ -84,7 +84,7 @@ class InterfaceLdapsynchro extends DolibarrTriggers
 				if ($result < 0) $this->error="ErrorLDAP ".$ldap->error." <pre>".print_r($info,1)." dn : ".$dn;
 			}
 		}
-		elseif ($action == 'USER_MODIFY')
+		elseif ($action == 'USER_MODIFY' || $action == "USER_ENABLEDISABLE")
 		{
 			dol_syslog("Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->id);
 			if (! empty($conf->global->LDAP_SYNCHRO_ACTIVE) && $conf->global->LDAP_SYNCHRO_ACTIVE === 'dolibarr2ldap')
@@ -96,7 +96,8 @@ class InterfaceLdapsynchro extends DolibarrTriggers
 				{
 					if (empty($object->oldcopy) || ! is_object($object->oldcopy))
 					{
-						dol_syslog("Trigger ".$action." was called by a function that did not set previously the property ->oldcopy onto object", LOG_WARNING);
+                                                $debug = synGetDebug();
+						dol_syslog("Trigger ".$action." was called by a function that did not set previously the property ->oldcopy onto object".$debug, LOG_WARNING);
 						$object->oldcopy = clone $object;
 					}
 

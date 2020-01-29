@@ -28,7 +28,7 @@ class BR_Reservation extends BimpObject
         303 => array('label' => 'Reservation annulée', 'icon' => 'times', 'classes' => array('success')),
         304 => array('label' => 'Livré au client', 'icon' => 'sign-out', 'classes' => array('success')),
     );
-    public static $commande_status = array(0, 2, 3, 100, 101, 200, 250, 300, 303);
+    public static $commande_status = array(0, 2, 3, 100, 101, 200, 300, 303); // 250
     public static $transfert_status = array(201, 301, 303);
     public static $temp_status = array(202, 302, 303);
     public static $sav_status = array(203, 303, 304);
@@ -312,7 +312,11 @@ class BR_Reservation extends BimpObject
 
     public function getStatusListArray()
     {
-        $type = (int) $this->getData('type');
+        return self::getStatusListArrayStatic((int) $this->getData('type'));
+    }
+
+    public static function getStatusListArrayStatic($type)
+    {
         $status = array();
 
         switch ($type) {
@@ -905,11 +909,11 @@ class BR_Reservation extends BimpObject
                         $errors[] = 'Entrepôt absent';
                     }
                 } else {
+                    $is_apple_prod = preg_match('/^APP\-.+$/', $product->getRef());
                     BimpObject::loadClass('bimpequipment', 'Equipment');
                     $equipments = Equipment::getAvailableEquipmentsArray((int) $entrepot->id, (int) $product->id);
                     $values = array();
                     $hidden = false;
-                    ;
 
                     if (!count($equipments)) {
                         $html .= BimpRender::renderAlerts('Aucun équipement disponible dans l\'entrepôt ' . $entrepot->getNomUrl(1), 'warning');
@@ -931,8 +935,8 @@ class BR_Reservation extends BimpObject
                     $content = '<div style="display: ' . ($hidden ? 'none' : 'inline-block') . '; margin-right: 15px;">';
                     $content .= '<span class="small">Numéro de série: </span><br/>';
                     $content .= BimpInput::renderInput('text', 'search_serial', '', array(
-                                'style' => 'border: 1px solid #DCDCDC',
-//                                'extra_class' => 'auto_focus'
+                                'style'       => 'border: 1px solid #DCDCDC',
+                                'extra_class' => ($is_apple_prod ? 'apple_prod' : '')
                     ));
                     $content .= '</div>';
 

@@ -5,12 +5,14 @@ class BS_ApplePart extends BimpObject
 
     private static $tabRefCommenceIos = array("661-05511", "DN661", "FD661", "NF661", "RA", "RB", "RC", "RD", "RE", "RG", "SA", "SB", "SC", "SD", "SE", "X661", "XB", "XC", "XD", "XE", "XF", "XG", "ZD661", "ZK661", "ZP661");
     private static $tabDescCommenceIos = array("SVC,IPOD", "Ipod nano");
-    private static $tabRefCommenceIosDouble = array("661", "Z661");
+    private static $tabRefCommenceIosDouble = array("661", "Z661", "B661");
     private static $tabDescCommenceIosDouble = array("iphone", "BAT,IPHONE", "SVC,IPHONE"); //design commence par
     private static $tabDescContientIosDouble = array("Ipad", "Ipad Pro", "Ipad mini", "Apple Watc", "Ipad Air", "iPhone 7"); //design contient
     private static $tabRefCommenceBatterie = array("661-04577", "661-04576", "661-08917", "661-02909", "661-04479", "661-04579", "661-04580", "661-04581", "661-04582", "661-05421", "661-05755", "661-08935", "661-8216", "661-04578"); //Prix a 59
-    private static $tabRefCommenceBatterieX = array("661-08932", "661-10565", "661-10850", "661-11035"); //Prix a 84
-    private static $tabRefCommencePrixEcran = array("661-11232" => array("184,25"), "661-07285" => array("142,58"), "661-07286" => array("142,58"), "661-07287" => array("142,58"), "661-07288" => array("142,58"), "661-07289" => array("159,25"), "661-07290" => array("159,25"), "661-07291" => array("159,25"), "661-07292" => array("159,25"), "661-07293" => array("142,58"), "661-07294" => array("142,58"), "661-07295" => array("142,58"), "661-07296" => array("142,58"), "661-07297" => array("159,25"), "661-07298" => array("159,25"), "661-07299" => array("159,25"), "661-07300" => array("159,25"), "661-08933" => array("142,58"), "661-08934" => array("142,58"), "661-09081" => array("142,58"), "661-10102" => array("142,58"), "661-09032" => array("159,25"), "661-09033" => array("159,25"), "661-09034" => array("159,25"), "661-10103" => array("159,25"), "661-09294" => array("259,25"), "661-13114" => array("259,25"), "661-10608" => array("259,25"), "661-11037" => array("300,91"));
+    private static $tabRefCommenceBatterieX = array("661-08932", "661-10565", "661-10850", "661-11035", //X
+        "661-13574", "661-13569", "661-13624"); //11   Prix a 84
+    private static $tabRefCommencePrixEcran = array("661-11232" => array("184,25"), "661-07285" => array("142,58"), "661-07286" => array("142,58"), "661-07287" => array("142,58"), "661-07288" => array("142,58"), "661-07289" => array("159,25"), "661-07290" => array("159,25"), "661-07291" => array("159,25"), "661-07292" => array("159,25"), "661-07293" => array("142,58"), "661-07294" => array("142,58"), "661-07295" => array("142,58"), "661-07296" => array("142,58"), "661-07297" => array("159,25"), "661-07298" => array("159,25"), "661-07299" => array("159,25"), "661-07300" => array("159,25"), "661-08933" => array("142,58"), "661-08934" => array("142,58"), "661-09081" => array("142,58"), "661-10102" => array("142,58"), "661-09032" => array("159,25"), "661-09033" => array("159,25"), "661-09034" => array("159,25"), "661-10103" => array("159,25"), "661-09294" => array("259,25"), "661-13114" => array("259,25"), "661-10608" => array("259,25"), "661-11037" => array("300,91"),
+        /* new */ "661-14098" => array("184,25"), "661-14096" => array("259,25"), "661-14099" => array("300.9166666666"));
     public static $componentsTypes = array(
         0   => 'Général',
         1   => 'Visuel',
@@ -30,7 +32,39 @@ class BS_ApplePart extends BimpObject
     );
     protected static $compTIACodes = null;
 
-    // Getters: 
+    // Droits user: 
+
+    public function canDelete()
+    {
+        global $user;
+        return (int) $user->rights->BimpSupport->read;
+    }
+
+    // Getters booléens: 
+
+    public function isCartEditable()
+    {
+        return 1;
+    }
+
+    public function isPropalEditable()
+    {
+        $sav = $this->getParentInstance();
+        if (BimpObject::objectLoaded($sav)) {
+            return (int) $sav->isPropalEditable();
+        }
+        return 0;
+    }
+
+    public function isFieldEditable($field, $force_edit = false)
+    {
+        if (in_array($field, array('qty', 'stock_price', 'exchange_price', 'out_of_warranty', 'price_type', 'not_invoiced'))) {
+            return (int) $this->isPropalEditable();
+        }
+        return (int) parent::isFieldEditable($field, $force_edit);
+    }
+
+    // Getters array: 
 
     public static function getCompTIACodes()
     {
@@ -96,6 +130,50 @@ class BS_ApplePart extends BimpObject
         return GSX_CompTIA::getCompTIAModifiers();
     }
 
+    public function getReproducibiliesArray()
+    {
+        if (!class_exists('GSX_v2')) {
+            require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_v2.php';
+        }
+
+        return GSX_v2::$reproducibilities;
+    }
+
+    public function getSavIssuesArray()
+    {
+        if ($this->isLoaded()) {
+            $sav = $this->getParentInstance();
+            if (BimpObject::objectLoaded($sav)) {
+                return $sav->getIssuesArray(true);
+            }
+        }
+
+        return array();
+    }
+
+    // Getters config: 
+
+    public function getNoIssueExtaButtons()
+    {
+        $buttons = array();
+
+        if ($this->isLoaded()) {
+            if (!(int) $this->getData('id_issue')) {
+                $buttons[] = array(
+                    'label'   => 'Attribuer à un problème composant',
+                    'icon'    => 'fas_arrow-circle-right',
+                    'onclick' => $this->getJsActionOnclick('attributeToIssue', array(), array(
+                        'form_name' => 'select_issue'
+                    ))
+                );
+            }
+        }
+
+        return $buttons;
+    }
+
+    // Getters données
+
     public static function getCategProdApple($ref, $desc)
     {
         $type = "autre";
@@ -141,15 +219,27 @@ class BS_ApplePart extends BimpObject
         return $type;
     }
 
-    public function isCartEditable()
+    public function getPrice()
     {
-//        $sav = $this->getParentInstance();
-//        if (!is_null($sav) && $sav->isLoaded()) {
-//            return (int) $sav->isPropalEditable();
-//        }
-//        return 0;
-        return 1;
+        $type = $this->getData('price_type');
+
+        switch ($type) {
+            case 'EXCHANGE':
+                return (float) $this->getData('exchange_price');
+
+            case 'STOCK':
+                return (float) $this->getData('stock_price');
+
+            default:
+                $priceOptions = $this->getData('price_options');
+                if (isset($priceOptions[$type]['price'])) {
+                    return (float) $priceOptions[$type]['price'];
+                }
+                return 0;
+        }
     }
+
+    // Traitements: 
 
     public function checkPrice($no_update = false)
     {
@@ -198,43 +288,25 @@ class BS_ApplePart extends BimpObject
         }
     }
 
-    public function getPrice()
+    public function convertPrix($type, $prix, $ref, $desc = '')
     {
-        $type = $this->getData('price_type');
-
-        switch ($type) {
-            case 'EXCHANGE':
-                return (float) $this->getData('exchange_price');
-
-            case 'STOCK':
-                return (float) $this->getData('stock_price');
-
-            default:
-                $priceOptions = $this->getData('price_options');
-                if (isset($priceOptions[$type]['price'])) {
-                    return (float) $priceOptions[$type]['price'];
-                }
-                return 0;
-        }
+        return self::convertPrixStatic($type, $prix, $ref, $this->getData('price_type'));
     }
 
-    // Traitements: 
-
-    public function convertPrix($type, $prix, $ref, $desc)
+    public static function convertPrixStatic($type, $prix, $ref, $price_type = 'STOCK')
     {
         $coefPrix = 1;
         $constPrix = 0;
         $newPrix = 0;
 
-
         //Application des coef et constantes
         if ($type == "ios") {
             $constPrix = 45;
-        } elseif ($type == "batt" && $this->getData('price_type') == "EXCHANGE") {
+        } elseif ($type == "batt" && $price_type == "EXCHANGE") {
             $newPrix = 49.16666666;
-        } elseif ($type == "battX" && $this->getData('price_type') == "EXCHANGE") {
+        } elseif ($type == "battX" && $price_type == "EXCHANGE") {
             $newPrix = 70;
-        } elseif ($type == "ecran" && $this->getData('price_type') == "EXCHANGE") {
+        } elseif ($type == "ecran" && $price_type == "EXCHANGE") {
             foreach (self::$tabRefCommencePrixEcran as $refT => $tabInfo)
                 if ($ref == $refT)
                     $newPrix = str_replace(",", ".", $tabInfo[0]);
@@ -262,7 +334,144 @@ class BS_ApplePart extends BimpObject
         return $prix;
     }
 
+    public function checkIsNotInvoiced()
+    {
+        if (!BimpCore::getConf('use_gsx_v2')) {
+            return 0;
+        }
+
+        if (!(int) $this->getData('is_tier')) {
+            $sav = $this->getParentInstance();
+            if (BimpObject::objectLoaded($sav)) {
+                if ((int) $sav->hasTierParts()) {
+                    return 1;
+                }
+            }
+        }
+
+        return 0;
+    }
+
+    public function setPropalLinePrices($line)
+    {
+        if ($this->isLoaded() && is_a($line, 'ObjectLine')) {
+            $type = self::getCategProdApple($this->getData('part_number'), $this->getData('label'));
+
+            if ((int) $this->getData('not_invoiced')) {
+                $this->pa_ht = 0;
+                $line->pu_ht = 0;
+            } else {
+                $line->pa_ht = $this->getPrice();
+                $line->pu_ht = $this->convertPrix($type, $line->pa_ht, $this->getData('part_number'), $this->getData('label'));
+            }
+        }
+    }
+
+    public function onSavPartsChange()
+    {
+        $errors = array();
+
+        if ($this->isLoaded($errors)) {
+            $not_invoiced = $this->checkIsNotInvoiced();
+            if ($not_invoiced !== (int) $this->getInitData('not_invoiced')) {
+                $this->set('not_invoiced', $not_invoiced);
+                $part_warnings = array();
+                $part_errors = $this->update($part_warnings);
+
+                if (count($part_warnings)) {
+                    $errors[] = BimpTools::getMsgFromArray($part_warnings, 'Erreur suite à la mise à jour du composant "' . $this->getData('part_number') . '"');
+                }
+                if (count($part_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($part_errors, 'Echec de la mise à jour du composant "' . $this->getData('part_number') . '"');
+                }
+            }
+        }
+
+        return $errors;
+    }
+
+    public function setPrice($new_price)
+    {
+        $type = $this->getData('price_type');
+
+        switch ($type) {
+            case 'EXCHANGE':
+                $this->set('exchange_price', (float) $new_price);
+                break;
+
+            case 'STOCK':
+                $this->set('stock_price', (float) $new_price);
+                break;
+
+            default:
+                $priceOptions = $this->getData('price_options');
+                if (isset($priceOptions[$type]['price'])) {
+                    $priceOptions[$type]['price'] = (float) $new_price;
+                    $this->set('price_options', $priceOptions);
+                }
+                break;
+        }
+    }
+
+    // Actions: 
+
+    public function actionAttributeToIssue($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Attribution au problème composant effectuée avec succès';
+
+        if ($this->isLoaded($errors)) {
+            $sav = $this->getParentInstance();
+            if (!BimpObject::objectLoaded($sav)) {
+                $errors[] = 'ID du SAV absent';
+            } else {
+                $id_issue = (isset($data['id_issue']) ? (int) $data['id_issue'] : 0);
+
+                if (!$id_issue) {
+                    $errors[] = 'Aucun problème composant sélectionné';
+                } else {
+                    $errors = $this->updateField('id_issue', $id_issue, null, true);
+                }
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
     // Overrides: 
+
+    public function validate()
+    {
+        $this->checkPrice(true);
+
+        if (BimpCore::getConf('use_gsx_v2')) {
+            $is_tier = 0;
+            if ((int) $this->getData('id_issue')) {
+                $issue = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_Issue', (int) $this->getData('id_issue'));
+                if (BimpObject::objectLoaded($issue)) {
+                    $is_tier = (int) $issue->isTierPart();
+                }
+            }
+            $this->set('is_tier', $is_tier);
+            $this->set('component_code', '');
+            $this->set('comptia_code', '');
+            $this->set('comptia_modifier', '');
+            $this->set('not_invoiced', (int) $this->checkIsNotInvoiced());
+        } else {
+            if ($this->getData('component_code') === ' ') {
+                $this->set('component_code', 0);
+                $this->set('comptia_code', '000');
+                $this->set('is_tier', 0);
+                $this->set('not_invoiced', 0);
+            }
+        }
+
+        return parent::validate();
+    }
 
     public function create(&$warnings = array(), $force_create = false)
     {
@@ -278,13 +487,6 @@ class BS_ApplePart extends BimpObject
         if (count($errors)) {
             return $errors;
         }
-
-        if ($this->getData('component_code') === ' ') {
-            $this->set('component_code', 0);
-            $this->set('comptia_code', '000');
-        }
-
-        $this->checkPrice(true);
 
         $errors = parent::create($warnings, $force_create);
 
@@ -309,32 +511,34 @@ class BS_ApplePart extends BimpObject
                     if ((int) $this->getData('no_order')) {
                         $label .= ' APPRO';
                     }
-                    $line->pa_ht = $this->getPrice();
+
+                    $type = self::getCategProdApple($this->getData('part_number'), $this->getData('label'));
+
                     $line->desc = $label;
                     $line->qty = (int) $this->getData('qty');
                     $line->tva_tx = 20;
 
-                    $type = self::getCategProdApple($this->getData('part_number'), $this->getData('label'));
-                    $line->pu_ht = $this->convertPrix($type, $line->pa_ht, $this->getData('part_number'), $this->getData('label'));
+                    $this->setPropalLinePrices($line);
+
+                    $line_warnings = array();
+                    $line_errors = $line->create($line_warnings, true);
+
+                    if (count($line_warnings)) {
+                        $warnings[] = BimpTools::getMsgFromArray($line_warnings, 'Erreurs suite à la création de la ligne du devis');
+                    }
 
                     if ($type == "ecran" && isset(self::$tabRefCommencePrixEcran[$this->getData('part_number')][1])) {
                         $lineT = BimpObject::getInstance("bimpsupport", "BS_SavPropalLine");
                         $lineT->id_product = self::$tabRefCommencePrixEcran[$this->getData('part_number')][1];
                         $values = array("type" => 1, "id_obj" => $sav->getData('id_propal'));
                         $errorsT = $lineT->validateArray($values);
-                        if (count($errorsT) == 0)
+                        if (!count($errorsT)) {
                             $errorsT = $lineT->create();
+                        }
 
                         if (count($errorsT)) {
-                            $errors = array_merge($errors, $errorsT);
+                            $warnings[] = BimpTools::getMsgFromArray($errorsT);
                         }
-                    }
-
-                    $line_warnings = array();
-                    $line_errors = $line->create($line_warnings, true);
-
-                    if (count($line_warnings)) {
-                        $line_errors = array_merge($line_errors, $line_warnings);
                     }
                 }
             }
@@ -354,9 +558,14 @@ class BS_ApplePart extends BimpObject
                             'type'           => (int) ObjectLineRemise::OL_REMISE_PERCENT,
                             'percent'        => $remise_percent
                         ));
-                        $remise_errors = $remise->create($warnings, true);
+
+                        $remise_warnings = array();
+                        $remise_errors = $remise->create($remise_warnings, true);
                         if (count($remise_errors)) {
-                            $errors[] = BimpTools::getMsgFromArray($remise_errors, 'Echec de la création de la remise client par défaut');
+                            $warnings[] = BimpTools::getMsgFromArray($remise_errors, 'Echec de la création de la remise client par défaut');
+                        }
+                        if (count($remise_warnings)) {
+                            $warnings[] = BimpTools::getMsgFromArray($remise_warnings, 'Erreurs suite à la création de la remise client par défaut');
                         }
                     }
                 }
@@ -380,13 +589,6 @@ class BS_ApplePart extends BimpObject
         if (count($errors)) {
             return $errors;
         }
-
-        if ($this->getData('component_code') === ' ') {
-            $this->set('component_code', 0);
-            $this->set('comptia_code', '000');
-        }
-
-        $this->checkPrice(true);
 
         $errors = parent::update($warnings, $force_update);
 
@@ -422,39 +624,28 @@ class BS_ApplePart extends BimpObject
                     if ((int) $this->getData('no_order')) {
                         $label .= ' APPRO';
                     }
-                    if (!$id_line) {
-                        $line->desc = $this->getData('label');
-                    }
-                    $line->pa_ht = $this->getPrice();
+                    $line->desc = $label;
                     $line->qty = (int) $this->getData('qty');
                     $line->tva_tx = 20;
-                    $type = self::getCategProdApple($this->getData('part_number'), $this->getData('label'));
-                    $line->pu_ht = $this->convertPrix($type, $line->pa_ht, $this->getData('part_number'), $this->getData('label'));
+
+                    $this->setPropalLinePrices($line);
 
                     $line_warnings = array();
 
                     if ($id_line) {
-                        if ($line->isEditable(true)) {
-                            $line_errors = $line->update($line_warnings, true);
-                        }
+                        $line_errors = $line->update($line_warnings, true);
                     } else {
                         $line_errors = $line->create($line_warnings, true);
                     }
 
                     if (count($line_warnings)) {
-                        $line_errors = array_merge($line_errors, $line_warnings);
+                        $warnings[] = BimpTools::getMsgFromArray($line_warnings, 'Erreur suite à la ' . ($id_line ? 'mise à jour' : 'création') . ' de la ligne du devis');
                     }
                 }
             }
 
-
             if (count($line_errors)) {
-                if ($id_line) {
-                    $title = 'Des erreurs sont survenues lors de la mise à jour de la ligne du devis';
-                } else {
-                    $title = 'Des erreurs sont survenues lors de la création de la ligne du devis';
-                }
-                $warnings[] = BimpTools::getMsgFromArray($line_errors, $title);
+                $warnings[] = BimpTools::getMsgFromArray($line_errors, 'Echec de la ' . ($id_line ? 'mise à jour' : 'création') . ' de la ligne du devis');
             }
         }
 
@@ -487,20 +678,12 @@ class BS_ApplePart extends BimpObject
                         $warnings[] = BimpTools::getMsgFromArray($line_errors, 'Echec de la suppression de la ligne du devis');
                     }
                     if (count($line_warnings)) {
-                        $warnings[] = BimpTools::getMsgFromArray($line_warnings, 'Des erreurs sont survenues suite à la suppression de la ligne du devis');
+                        $warnings[] = BimpTools::getMsgFromArray($line_warnings, 'Erreurs suite à la suppression de la ligne du devis');
                     }
                 }
             }
         }
 
         return $errors;
-    }
-
-    // Gestion des droits user: 
-
-    public function canDelete()
-    {
-        global $user;
-        return (int) $user->rights->BimpSupport->read;
     }
 }

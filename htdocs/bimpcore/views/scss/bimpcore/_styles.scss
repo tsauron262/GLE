@@ -48,7 +48,8 @@
             z-index: 10100!important;
         }
     }
-    .side-nav {
+    .side-nav,
+    .side-nav-vert {
         z-index: 9960!important;
     }
 
@@ -66,6 +67,7 @@
 
         #tmenu_tooltip,
         .side-nav,
+        .side-nav-vert,
         #but-menu,
         #id-top .login_block {
             display: none;
@@ -354,8 +356,8 @@ i.iconRight {
 }
 
 .btn-small {
-    font-size: 11px;
-    padding: 3px 5px;
+    font-size: 11px!important;
+    padding: 3px 5px!important;
 
     i {
         font-size: 12px;
@@ -624,9 +626,9 @@ i.iconRight {
     }
 
     .modal-body {
-        padding-bottom: 60px;
         overflow-y: auto;
-
+        padding-bottom: 60px;
+        
         .page_modal_img {
             max-width: 100%;
             height: auto;
@@ -844,6 +846,81 @@ i.iconRight {
     }
 }
 
+/*Array Content*/
+
+.array_content_container {
+    margin-top: 10px;
+
+    & > .array_content_caption {
+        font-weight: bold;
+        padding: 5px 0;
+    }
+
+    & > .array_content {
+        padding-left: 15px;
+
+        & > .array_content_row {
+            & > .array_content_label {
+                font-weight: bold;
+            }
+        }
+    }
+
+    &.foldable {
+        & > .array_content_caption {
+            cursor: pointer;
+
+            & > span.title:after {
+                font-family: 'FA5S';
+                content: '\f078';
+                margin-left: 12px;
+                margin-right: 12px;
+            }
+        }
+
+        & > .folding_buttons {
+            margin: 5px 0;
+
+            & > span.open_all,
+            & > span.close_all {
+                @include transition(all 0,3s ease);
+                font-size: 11px;
+                font-weight: normal;
+                color: #B3B3B3;
+                margin-left: 10px;
+                cursor: pointer;
+                font-style: italic;
+
+                &:hover {
+                    color: #3c3c3c;
+                    font-weight: bold;
+                }
+            }
+        }
+
+        &.open {
+            & > .array_content_caption > span.title:after {
+                content: '\f078';
+            }
+            & > .array_content_caption > span.title:hover:after {
+                content: '\f077';
+            }
+        }
+
+        &.closed {
+            & > .array_content_caption > span.title:after {
+                content: '\f054';
+            }
+            & > .array_content_caption > span.title:hover:after {
+                content: '\f078';
+            }
+
+            & > .array_content {
+                display: none;
+            }   
+        }
+    }
+}
 
 /*Tiny Popups*/
 

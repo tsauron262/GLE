@@ -273,7 +273,7 @@ class Bimp_Vente extends BimpObject
 
     // Traitements : 
 
-    public function generateAppleCSV($dateFrom, $dateTo, &$errors = array())
+    public function generateAppleCSV($dateFrom, $dateTo, $distribute_ca = false, &$errors = array())
     {
         set_time_limit(600000);
 
@@ -281,17 +281,21 @@ class Bimp_Vente extends BimpObject
 
         if (!$id_category) {
             $errors[] = 'ID de la catégorie "APPLE" non configurée';
-            return '';
+            return array(
+                'filename' => '',
+                'html'     => ''
+            );
         }
 
         $product = BimpObject::getInstance('bimpcore', 'Bimp_Product');
+
         $products_list = $product->getList(array(
-            'cp.fk_categorie' => (int) $id_category
-                ), null, null, 'id', 'asc', 'array', array('rowid', 'ref', 'cur_pa_ht', 'pmp'), array(
-            'cp' => array(
-                'alias' => 'cp',
-                'table' => 'categorie_product',
-                'on'    => 'a.rowid = cp.fk_product'
+            'ef.collection' => (int) $id_category
+                ), null, null, 'rowid', 'asc', 'array', array('rowid', 'ref', 'price', 'no_fixe_prices', 'pmp', 'cur_pa_ht'), array(
+            'ef' => array(
+                'alias' => 'ef',
+                'table' => 'product_extrafields',
+                'on'    => 'a.rowid = ef.fk_object'
             )
         ));
 
@@ -382,23 +386,34 @@ VQ - Collège
 
 ";' . "\n";
 
+        BimpObject::loadClass('bimpcore', 'BimpProductCurPa');
         $entrepots = BimpCache::getEntrepotsShipTos();
+        $entrepots[-9999] = "1683245";
+        $shiptos_data = array();
 
+        $total_ca = 0;
         foreach ($products_list as $p) {
             $entrepots_data = $product->getAppleCsvData($dateFrom, $dateTo, $entrepots, $p['rowid']);
 
-            $pa_ht = (float) $p['cur_pa_ht'];
+            if ((int) $p['no_fixe_prices']) {
+                $pa_ht = 0;
+            } else {
+                $pa_ht = (float) $p['cur_pa_ht'];
 
-            if (!$pa_ht) {
-                $pa_ht = (float) $p['pmp'];
-                if (!$pa_ht) {
-                    $sql = 'SELECT price FROM ' . MAIN_DB_PREFIX . 'product_fournisseur_price WHERE';
-                    $sql .= ' fk_product = ' . (int) $p['rowid'];
-                    $sql .= ' AND tms = (SELECT MAX(tms) FROM ' . MAIN_DB_PREFIX . 'product_fournisseur_price WHERE fk_product = ' . (int) $p['rowid'] . ')';
+                if (is_null($pa_ht)) {
+                    if (!$pa_ht) {
+                        $sql = 'SELECT price FROM ' . MAIN_DB_PREFIX . 'product_fournisseur_price WHERE';
+                        $sql .= ' fk_product = ' . (int) $p['rowid'];
+                        $sql .= ' ORDER BY tms DESC LIMIT 1';
 
-                    $result = $this->db->executeS($sql);
-                    if (isset($result[0]->price)) {
-                        $pa_ht = (float) $result[0]->price;
+                        $result = $this->db->executeS($sql);
+                        if (isset($result[0]->price)) {
+                            $pa_ht = (float) $result[0]->price;
+                        } elseif (isset($p['pmp'])) {
+                            $pa_ht = (float) $p['pmp'];
+                        } else {
+                            $pa_ht = 0;
+                        }
                     }
                 }
             }
@@ -410,14 +425,48 @@ VQ - Collège
                     $data['stock'] = 0;
                 if ($data['stock_showroom'] < 0)
                     $data['stock_showroom'] = 0;
+
                 if ((int) $data['ventes'] || (int) $data['stock'] || (int) $data['stock_showroom']) {
+                    if (!isset($shiptos_data[$ship_to])) {
+                        $shiptos_data[$ship_to] = array(
+                            'total_ca' => 0,
+                            'products' => array()
+                        );
+                    }
+
+                    $shiptos_data[$ship_to]['products'][(int) $p['rowid']] = array(
+                        'ref'            => $p['ref'],
+                        'pu_ht'          => $p['price'],
+                        'pa_ht'          => $pa_ht,
+                        'ventes'         => $data['ventes'],
+                        'stock'          => $data['stock'],
+                        'stock_showroom' => $data['stock_showroom']
+                    );
+
+                    $product_ca = (float) $data['ventes'] * (float) $pa_ht;
+                    $shiptos_data[$ship_to]['total_ca'] += $product_ca;
+                    $total_ca += $product_ca;
+                }
+            }
+        }
+
+        $html = '';
+        if ($distribute_ca) {
+            $shiptos = explode(',', BimpCore::getConf('csv_apple_distribute_ca_shiptos'));
+            $shiptos_data = $this->distributeCaForShiptos($total_ca, $shiptos_data, $shiptos, 80, $html);
+        }
+
+        foreach ($products_list as $p) {
+            foreach ($shiptos_data as $shipTo => $shipToData) {
+                if (isset($shipToData['products'][(int) $p['rowid']])) {
+                    $prod = $shipToData['products'][(int) $p['rowid']];
                     $file_str .= implode(';', array(
-                                $ship_to,
-                                preg_replace('/^APP\-(.*)$/', '$1', $p['ref']),
-                                $data['ventes'],
+                                $shipTo,
+                                preg_replace('/^APP\-(.*)$/', '$1', $prod['ref']),
+                                $prod['ventes'],
                                 0,
-                                $data['stock'],
-                                $data['stock_showroom'],
+                                $prod['stock'],
+                                $prod['stock_showroom'],
                                 0,
                                 0,
                                 0,
@@ -425,9 +474,8 @@ VQ - Collège
                                 0,
                                 '',
                                 '',
-                                $pa_ht
+                                $prod['pa_ht']
                             )) . "\n";
-//                    break 2;
                 }
             }
         }
@@ -445,13 +493,198 @@ VQ - Collège
 
         if (!file_put_contents($dir . '/' . $fileName, $file_str)) {
             $errors[] = 'Echec de la création du fichier CSV';
-            return '';
         }
 
-        return $fileName;
+        return array(
+            'filename' => $fileName,
+            'html'     => $html
+        );
     }
 
-    // Actions : 
+    public function distributeCaForShiptos($total_ca, $shipTosData, $shiptos, $percent, &$html = '')
+    {
+        if (!(float) $total_ca) {
+            $html .= BimpRender::renderAlerts('CA total: 0,00 €');
+            return $shipTosData;
+        }
+
+        $total_ca_v1 = 0;
+        $total_ca_v2 = 0;
+
+        $v1_shipTos = array();
+        $v2_shipTos = array();
+
+        foreach ($shipTosData as $shipTo => $shipToData) {
+            $data = array(
+                'shipTo'   => $shipTo,
+                'products' => array()
+            );
+            foreach ($shipToData['products'] as $id_p => $p) {
+                $data['products'][] = $id_p;
+            }
+            $data['nProds'] = (count($data['products']) - 1);
+
+            if (in_array($shipTo, $shiptos)) {
+                $total_ca_v2 += (float) $shipToData['total_ca'];
+                $v2_shipTos[] = $data;
+            } else {
+                $total_ca_v1 += (float) $shipToData['total_ca'];
+                $v1_shipTos[] = $data;
+            }
+
+            if ((float) $shipToData['total_ca']) {
+                $shipTosData[$shipTo]['ca_tx'] = $shipToData['total_ca'] / $total_ca;
+            } else {
+                $shipTosData[$shipTo]['ca_tx'] = 0;
+            }
+        }
+
+        $rate = 80;
+        $v2 = ($total_ca_v2 / $total_ca) * 100;
+
+        // Ajustement aléatoire du % v2: 
+        $adjust = (rand(0, 500) / 100);
+        if ((int) rand(0, 1)) {
+            $adjust *= -1;
+        }
+        $rate += $adjust;
+
+        $html .= '<h3>Distribution du CA</h3>';
+
+        $html .= '<br/><span class="bold">CA total: </span>' . BimpTools::displayMoneyValue($total_ca) . '<br/>';
+        $html .= '<span class="bold">Pourcentage du CA pour la distribution dans v2: </span>' . BimpTools::displayFloatValue($rate) . '<br/>';
+        $html .= '<span class="small">(Avec ajustement aléatoire entre +5% et -5%)</span><br/>';
+
+        $html .= '<h4>Valeurs initiales</h4>';
+        $html .= '<table class="bimp_list_table">';
+        $html .= '<thead>';
+        $html .= '<tr>';
+        $html .= '<th>ShipTo</th>';
+        $html .= '<th>CA</th>';
+        $html .= '<th>%</th>';
+        $html .= '</tr>';
+        $html .= '</thead>';
+        $html .= '<tbody>';
+        foreach ($shipTosData as $shipTo => $shipToData) {
+            $html .= '<tr>';
+            $html .= '<td>' . $shipTo . '</td>';
+            $html .= '<td>' . BimpTools::displayMoneyValue($shipToData['total_ca']) . '</td>';
+            $html .= '<td>' . BimpTools::displayFloatValue((float) $shipToData['ca_tx'] * 100, 2) . '%</td>';
+            $html .= '</tr>';
+        }
+        $html .= '<tr>';
+        $html .= '<td>Total V1</td>';
+        $html .= '<td>' . BimpTools::displayMoneyValue($total_ca_v1) . '</td>';
+        $html .= '<td>' . BimpTools::displayFloatValue(($total_ca_v1 / $total_ca) * 100, 2) . '%</td>';
+        $html .= '</tr>';
+        $html .= '<td>Total V2</td>';
+        $html .= '<td>' . BimpTools::displayMoneyValue($total_ca_v2) . '</td>';
+        $html .= '<td>' . BimpTools::displayFloatValue(($total_ca_v2 / $total_ca) * 100, 2) . '%</td>';
+        $html .= '</tr>';
+        $html .= '</tbody>';
+        $html .= '</table>';
+        $html .= '<br/>';
+
+        $nV1 = count($v1_shipTos) - 1;
+        $nV2 = count($v2_shipTos) - 1;
+
+        $floor = (float) (BimpCore::getConf('csv_apple_sueil_v1', 2) / 100);
+        $ceil = (float) (BimpCore::getConf('csv_apple_plafond_v2', 10) / 100);
+
+        $n = 0;
+        while ($v2 < $rate) {
+            $n++;
+            if ($n > 50000) {
+                break; // protection boucle infinie
+            }
+
+            // ShipTos aléatoires dans v1 et v2;
+            $v1_idx = rand(0, $nV1);
+            $v2_idx = rand(0, $nV2);
+            if (isset($v1_shipTos[$v1_idx]) && isset($v2_shipTos[$v2_idx])) {
+                $v1_shipTo = $v1_shipTos[$v1_idx]['shipTo'];
+                $v2_shipTo = $v2_shipTos[$v2_idx]['shipTo'];
+
+                if (!empty($v1_shipTos[$v1_idx]['products'])) {
+                    // Produit de V1 aléatoire: 
+                    $prod_idx = rand(0, $v1_shipTos[$v1_idx]['nProds']);
+                    $id_product = (isset($v1_shipTos[$v1_idx]['products'][$prod_idx]) ? (int) $v1_shipTos[$v1_idx]['products'][$prod_idx] : 0);
+                    if ($id_product &&
+                            isset($shipTosData[$v1_shipTo]['products'][$id_product]) &&
+                            isset($shipTosData[$v2_shipTo]['products'][$id_product])) {
+                        $v1_prod = $shipTosData[$v1_shipTo]['products'][$id_product];
+                        $v2_prod = $shipTosData[$v2_shipTo]['products'][$id_product];
+
+                        if ((int) $v1_prod['ventes'] > 0) {
+                            // Qty aléatoire à transférer (max: 10). 
+                            $max = ((int) $v1_prod['ventes'] > 10 ? 10 : (int) $v1_prod['ventes']);
+                            $qty = rand(1, $max);
+                            $v1_diff = (float) $v1_prod['pa_ht'] * $qty;
+                            $v2_diff = (float) $v2_prod['pa_ht'] * $qty;
+
+                            $shipTosData[$v1_shipTo]['products'][$id_product]['ventes'] -= $qty;
+                            $shipTosData[$v2_shipTo]['products'][$id_product]['ventes'] += $qty;
+
+                            $shipTosData[$v1_shipTo]['total_ca'] -= $v1_diff;
+                            $shipTosData[$v2_shipTo]['total_ca'] += $v2_diff;
+
+                            $total_ca_v1 -= $v1_diff;
+                            $total_ca_v2 += $v2_diff;
+
+                            $v2 = ($total_ca_v2 / $total_ca) * 100;
+
+                            if ((float) ($shipTosData[$v1_shipTo]['total_ca'] / $total_ca) <= $floor) {
+                                unset($v1_shipTos[$v1_idx]);
+                                sort($v1_shipTos);
+                                $nV1--;
+                            }
+
+                            if ((float) ($shipTosData[$v2_shipTo]['total_ca'] / $total_ca) >= $ceil) {
+                                unset($v2_shipTos[$v2_idx]);
+                                sort($v2_shipTos);
+                                $nV2--;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        $html .= '<h4>Valeurs après distribution</h4>';
+        $html .= '<table class="bimp_list_table">';
+        $html .= '<thead>';
+        $html .= '<tr>';
+        $html .= '<th>ShipTo</th>';
+        $html .= '<th>CA</th>';
+        $html .= '<th>%</th>';
+        $html .= '</tr>';
+        $html .= '</thead>';
+        $html .= '<tbody>';
+        foreach ($shipTosData as $shipTo => $shipToData) {
+            $shipToData['ca_tx'] = $shipToData['total_ca'] / $total_ca;
+            $html .= '<tr>';
+            $html .= '<td>' . $shipTo . '</td>';
+            $html .= '<td>' . BimpTools::displayMoneyValue($shipToData['total_ca']) . '</td>';
+            $html .= '<td>' . BimpTools::displayFloatValue((float) $shipToData['ca_tx'] * 100, 2) . '%</td>';
+            $html .= '</tr>';
+        }
+        $html .= '<tr>';
+        $html .= '<td>Total V1</td>';
+        $html .= '<td>' . BimpTools::displayMoneyValue($total_ca_v1) . '</td>';
+        $html .= '<td>' . BimpTools::displayFloatValue(($total_ca_v1 / $total_ca) * 100, 2) . '%</td>';
+        $html .= '</tr>';
+        $html .= '<td>Total V2</td>';
+        $html .= '<td>' . BimpTools::displayMoneyValue($total_ca_v2) . '</td>';
+        $html .= '<td>' . BimpTools::displayFloatValue(($total_ca_v2 / $total_ca) * 100, 2) . '%</td>';
+        $html .= '</tr>';
+        $html .= '</tbody>';
+        $html .= '</table>';
+        $html .= '<br/>';
+
+        return $shipTosData;
+    }
+
+    // Actions :
 
     public function actionGenerateAppleCSV($data, &$success)
     {
@@ -462,6 +695,7 @@ VQ - Collège
 
         $date_from = isset($data['date_from']) ? $data['date_from'] : date('Y-m-d');
         $date_to = isset($data['date_to']) ? $data['date_to'] : '';
+        $distribute_ca = isset($data['distribute_ca']) ? $data['distribute_ca'] : 0;
 
         if (!$date_to) {
             $dt = new DateTime($date_from);
@@ -469,12 +703,20 @@ VQ - Collège
             $date_to = $dt->format('Y-m-d');
         }
 
-        $file_name = $this->generateAppleCSV($date_from, $date_to, $errors);
+        $result = $this->generateAppleCSV($date_from, $date_to, $distribute_ca, $errors);
 
-        if ($file_name && file_exists(DOL_DATA_ROOT . '/bimpcore/apple_csv/' . date('Y') . '/' . $file_name)) {
-            $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . htmlentities('apple_csv/' . date('Y') . '/' . $file_name);
+        if (isset($result['filename']) && $result['filename']) {
+            $file_name = $result['filename'];
+            if (file_exists(DOL_DATA_ROOT . '/bimpcore/apple_csv/' . date('Y') . '/' . $file_name)) {
+                $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . htmlentities('apple_csv/' . date('Y') . '/' . $file_name);
+                $success_callback = 'window.open(\'' . $url . '\');';
+            }
+        }
 
-            $success_callback = 'window.open(\'' . $url . '\')';
+        $html = (isset($result['html']) ? $result['html'] : '');
+
+        if ($html) {
+            $success_callback .= 'setTimeout(function() {bimpModal.newContent(\'Distribution\', \'' . $html . '\', false, \'\', $());}, 1000);';
         }
 
         return array(

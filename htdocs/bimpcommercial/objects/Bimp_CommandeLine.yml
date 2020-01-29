@@ -333,6 +333,13 @@ filters_panels:
             logistique_status: 
                 field: logistique_status
                 child: parent
+            reservations_status: 
+                custom: 1
+                label: Statut réservation
+                field: reservations_status
+                type: check_list
+                items: 
+                    array: reservationsStatus
             qty_total: 
                 field: qty_total
             qty_to_ship:
@@ -415,10 +422,10 @@ lists_cols:
 lists: 
     default: 
         objects_change_reload: ObjectLineRemise,Bimp_Commande
-        add_btn: 
-            callback: isCreatable
-        edit_btn: 
-            callback: isParentEditable
+#        add_btn: 
+#            callback: isCreatable
+#        edit_btn: 
+#            callback: isEditable
             
     logistique:
         checkboxes: 1

@@ -13,6 +13,7 @@ force_extrafields_update: 1
 table: facture
 controller: facture
 icon: fas_file-invoice-dollar
+
 list_page_url: 
     controller: factures
 
@@ -61,10 +62,12 @@ fields:
         label: Référence
         dol_prop: ref
     exported:
-        label: Comptabilisée
+        label: Etat comptable
         type: int
+        values: 
+            array: exportedStatut
     ignore_compta:
-        label: Ignorée
+        label: Ignorée en compta
         type: bool
         dol_extra_field: 1
     type: 
@@ -117,7 +120,8 @@ fields:
     fk_user_author: 
         dol_prop: user_author
     fk_user_valid: 
-        dol_prop: user_valid
+        dol_prop: unset
+        no_dol_prop: 1
     paye: 
         label: Paye
         type: bool
@@ -128,24 +132,24 @@ fields:
         type: bool
         default_value: 0
         sortable: 0
-    pdf_hide_reduc: 
-        label: Masquer les remises dans le PDF
-        dol_extra_field: 1
-        type: bool
-        default_value: 0
-        sortable: 0
-    pdf_hide_total: 
-        label: Masquer les totaux dans le PDF
-        dol_extra_field: 1
-        type: bool
-        default_value: 0 
-        sortable: 0
-    pdf_hide_ttc:
-        label: Masquer le TTC dans le PDF
-        dol_extra_field: 1
-        type: bool
-        default_value: 0
-        sortable: 0
+#    pdf_hide_reduc: 
+#        label: Masquer les remises dans le PDF
+#        dol_extra_field: 1
+#        type: bool
+#        default_value: 0
+#        sortable: 0
+#    pdf_hide_total: 
+#        label: Masquer les totaux dans le PDF
+#        dol_extra_field: 1
+#        type: bool
+#        default_value: 0 
+#        sortable: 0
+#    pdf_hide_ttc:
+#        label: Masquer le TTC dans le PDF
+#        dol_extra_field: 1
+#        type: bool
+#        default_value: 0
+#        sortable: 0
     marge: 
         label: Marge
         type: money
@@ -160,12 +164,31 @@ fields:
         type: id_object
         object: entrepot_commission
         default_value: 0
+    multicurrency_total_ht:
+        label: TOTAL HT (compta)
+        type: money
+    multicurrency_total_ttc:
+        label: TOTAL TTC (compta)
+        type: money
+    multicurrency_total_tva:
+        label: TOTAL TVA (compta)
+        type: money
+    fk_facture_source:
+        label: Facture source
+        type: id
+    statut_export:
+        label: Statut export
+        type: int
+        values: 
+            array: statut_export
+    douane_number:
+        label: N° Douane
+        
     ref: unset
     fk_availability: unset
     fk_input_reason: unset
-    total_ht: unset
        
-forms:     
+forms: 
     default: 
         msgs: 
             callback: renderCreateWarning
@@ -311,26 +334,26 @@ forms:
                     callback: isEditable
             pdf_hide_pu: 
                 field: pdf_hide_pu 
-            pdf_hide_reduc: 
-                field: pdf_hide_reduc
-            pdf_hide_total: 
-                field: pdf_hide_total
-            pdf_hide_ttc: 
-                field: pdf_hide_ttc
+#            pdf_hide_reduc: 
+#                field: pdf_hide_reduc
+#            pdf_hide_total: 
+#                field: pdf_hide_total
+#            pdf_hide_ttc: 
+#                field: pdf_hide_ttc
             model_pdf: 
                 field: model_pdf
             zone_vente: 
                 field: zone_vente
                 show: 
                     callback: isLoaded
-            remise_globale_label: 
-                field: remise_globale_label
-                show: 
-                    callback: hasRemiseGlobale
             note_private: 
                 field: note_private
             note_public: 
                 field: note_public
+            statut_export:
+                field: statut_export
+            douane_number:
+                field: douane_number
             
     refacture: 
         extends: default
@@ -492,7 +515,29 @@ forms:
                   type: select
                   options: 
                       array: draftCommissions
-                                    
+                      
+    check_pa: 
+        modal_format: large
+        title: Vérification des prix d\'achat
+        rows: 
+#            - custom: 1
+#              label: Prix d'achat attendus
+#              input_name: type_check
+#              input: 
+#                  type: select
+#                  options: 
+#                      create: Prix d'achat des produits en cours à la date de création de la facture
+#                      validate: Prix d'achat des produits en cours à la date de validation de la facture
+#                      current: Prix d'achat actuels des produits
+#              value: create
+            
+            - custom: 1
+              label: Résultat
+              input_name: result
+              content: 
+                  callback: renderCheckPaForm
+#              depends_on: type_check
+                                  
 fields_tables: 
     infos: 
         rows: 
@@ -524,6 +569,14 @@ fields_tables:
               display: nom_url
               show: 
                   callback: showEntrepotCommission
+#            - label: Zone de vente
+#              value:
+#                  callback: displayZoneVenteField
+            - field: exported
+            - field: statut_export
+              edit: 1
+            - field: douane_number
+              edit: 1
     
     client: 
         rows: 
@@ -551,16 +604,12 @@ fields_tables:
         rows: 
             - field: pdf_hide_pu
               edit: 1
-            - field: pdf_hide_reduc
-              edit: 1
-            - field: pdf_hide_total
-              edit: 1
-            - field: pdf_hide_ttc
-              edit: 1
-            - field: remise_globale_label
-              edit: 1
-              show: 
-                  callback: hasRemiseGlobale
+#            - field: pdf_hide_reduc
+#              edit: 1
+#            - field: pdf_hide_total
+#              edit: 1
+#            - field: pdf_hide_ttc
+#              edit: 1
             - label: Fichier PDF
               value: 
                   callback: displayPDFButton
@@ -576,11 +625,11 @@ fields_tables:
             
 views: 
     default: 
-        objects_change_reload: Bimp_FactureLine,Bimp_Paiement,ObjectLineRemise,BimpFile,BimpRevalorisation
+        objects_change_reload: Bimp_FactureLine,Bimp_Paiement,ObjectLineRemise,BimpFile,BimpRevalorisation,RemiseGlobale
     content_infos: 
-        objects_change_reload: Bimp_FactureLine,Bimp_Paiement,ObjectLineRemise,BimpFile,BimpRevalorisation
+        objects_change_reload: Bimp_FactureLine,Bimp_Paiement,ObjectLineRemise,BimpFile,BimpRevalorisation,RemiseGlobale
     full: 
-        objects_change_reload: Bimp_FactureLine,Bimp_Paiement,ObjectLineRemise,BimpFile,BimpRevalorisation
+        objects_change_reload: Bimp_FactureLine,Bimp_Paiement,ObjectLineRemise,BimpFile,BimpRevalorisation,RemiseGlobale
         
 filters_panels: 
     default: 
@@ -590,16 +639,46 @@ filters_panels:
                 show: 1
             date_lim_reglement:
                 field: date_lim_reglement
+            datef:
+                field: datef
+            revals_prevues: 
+                custom: 1
+                field: revals_prevues
+                label: Revalorisations prévues
+                type: range
+                data_type: money
+            revals_brouillons: 
+                custom: 1
+                field: revals_brouillons
+                label: Revalorisations en attente
+                type: range
+                data_type: money
+            revals_ok: 
+                custom: 1
+                field: revals_ok
+                label: Revalorisations acceptées
+                type: range
+                data_type: money
             ref: 
                 field: facnumber
             total_ht:
                 field: total
             total_ttc: 
                 field: total_ttc
-            igonre_compta:
+            ignore_compta:
                 field: ignore_compta
-                
+            tech_sav: 
+                custom: 1
+                field: tech_sav
+                label: Technicien SAV
+                type: value
+                input: 
+                    type: search_user
             availability: unset
+            statut_export:
+                field: statut_export
+            douane_number:
+                field: douane_number
             
 lists_cols: 
     ref: 
@@ -639,6 +718,27 @@ lists_cols:
     marge:
         field: marge
         has_total: 1
+    revalOk:
+        label: Reval. OK
+        value: 
+            callback: 
+                method: displayReval
+                params: 
+                    - ok
+    revalOkPlusMarge:
+        label: Marge + Reval. OK
+        value: 
+            callback: 
+                method: displayReval
+                params: 
+                    - ok+marge
+    revalPrevuPlusMarge:
+        label: Marge + Reval. prévues
+        value: 
+            callback: 
+                method: displayReval
+                params: 
+                    - prevu+marge
     secteur_comm_check: 
         label: Secteur
         value: 
@@ -647,6 +747,12 @@ lists_cols:
         label: Reste à payer
         value: 
             callback: displayRemainToPay
+    statut_export:
+        field: statut_export
+        edit: 1
+    douane_number:
+        field: douane_number
+        edit: 1
     
 lists: 
     default: 
@@ -657,6 +763,10 @@ lists:
         sort_field: datec
         sort_way: desc
         add_btn_label: Créer une nouvelle facture
+        bulk_actions:
+            - label: supprimer les factures sélectionnées
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this))
         add_form_values: 
             fields: 
                 entrepot: 
@@ -741,10 +851,10 @@ cards:
     light: 
         title: 
             field_value: facnumber
+        status: fk_statut
         view_btn: 0
         fields: 
             - field: total_ttc
-            - field: fk_statut
             - label: Payé
               value: 
                   callback: displayPaid
@@ -752,4 +862,19 @@ cards:
 searches:
     default: 
         fields_search: 
-            - facnumber
+            - a.facnumber
+            - ef.libelle
+            - s.nom
+        joins:
+            ef: 
+                table: facture_extrafields
+                on: a.rowid = ef.fk_object
+                alias: ef
+            s: 
+                table: societe
+                on: a.fk_soc = s.rowid
+                alias: s
+        fields_return: 
+            - a.facnumber
+            - s.nom
+        label_syntaxe: '<a.facnumber> (Client: <s.nom>)'

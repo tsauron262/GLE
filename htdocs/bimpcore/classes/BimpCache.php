@@ -65,7 +65,7 @@ class BimpCache
         return self::cacheExists('bimp_object_' . $module . '_' . $object_name . '_' . $id_object);
     }
 
-    public static function getBimpObjectInstance($module, $object_name, $id_object, $parent = null)
+    public static function getBimpObjectInstance($module, $object_name, $id_object = null, $parent = null)
     {
         // Pas très propre mais seule solution trouvée: 
         if ($object_name === 'Bimp_Propal' && (int) $id_object) {
@@ -180,7 +180,7 @@ class BimpCache
                 return null;
             }
 
-            return self::getBimpObjectInstance($module, $object_name, $id_object);
+            return BimpObject::getInstance($module, $object_name, $id_object);
         }
 
         return null;
@@ -258,40 +258,51 @@ class BimpCache
         return null;
     }
 
-    public static function getObjectFilesArray($object, $with_deleted = false)
+    public static function getObjectFilesArray($module, $object_name, $id_object, $with_deleted = false, $with_icons = false)
     {
-        if (BimpObject::objectLoaded($object)) {
-            if (is_a($object, 'BimpObject')) {
-                $cache_key = $object->module . '_' . $object->object_name . '_' . $object->id . '_files';
-                if ($with_deleted) {
-                    $cache_key .= '_with_deleted';
+        if ((int) $id_object) {
+            $file = BimpObject::getInstance("bimpcore", "BimpFile");
+            $file->checkObjectFiles($module, $object_name, $id_object);
+
+            $cache_key = $module . '_' . $object_name . '_' . $id_object . '_files';
+            if ($with_deleted) {
+                $cache_key .= '_with_deleted';
+            }
+            if ($with_icons) {
+                $cache_key .= '_with_icons';
+            }
+
+            if (!isset(self::$cache[$cache_key])) {
+                self::$cache[$cache_key] = array();
+
+                $where = '`parent_module` = \'' . $module . '\'';
+                $where .= ' AND `parent_object_name` = \'' . $object_name . '\'';
+                $where .= ' AND `id_parent` = ' . (int) $id_object;
+
+                if (!$with_deleted) {
+                    $where .= ' AND `deleted` = 0';
                 }
-                if (!isset(self::$cache[$cache_key])) {
-                    self::$cache[$cache_key] = array();
 
-                    $where = '`parent_module` = \'' . $object->module . '\'';
-                    $where .= ' AND `parent_object_name` = \'' . $object->object_name . '\'';
-                    $where .= ' AND `id_parent` = ' . (int) $object->id;
+                $rows = self::getBdb()->getRows('bimpcore_file', $where, null, 'array', array('id', 'file_name', 'file_ext'), 'id', 'asc');
 
-                    if (!$with_deleted) {
-                        $where .= ' AND `deleted` = 0';
-                    }
+                if (!is_null($rows)) {
+                    foreach ($rows as $r) {
+                        $file_name = $r['file_name'] . '.' . $r['file_ext'];
 
-                    $rows = self::getBdb()->getRows('bimpcore_file', $where, null, 'array', array('id', 'file_name', 'file_ext'), 'id', 'asc');
-
-                    if (!is_null($rows)) {
-                        foreach ($rows as $r) {
-                            $file_name = $r['file_name'] . '.' . $r['file_ext'];
-                            self::$cache[$cache_key][(int) $r['id']] = BimpRender::renderIcon(BimpTools::getFileIcon($file_name), 'iconLeft') . BimpTools::getFileType($file_name) . ' - ' . $file_name;
+                        if ($with_icons) {
+                            self::$cache[$cache_key][(int) $r['id']] = array(
+                                'label' => $file_name,
+                                'icon'  => BimpTools::getFileIcon($file_name)
+                            );
+                        } else {
+                            self::$cache[$cache_key][(int) $r['id']] = BimpTools::getFileType($file_name) . ' - ' . $file_name;
                         }
                     }
                 }
-
-                return self::$cache[$cache_key];
             }
-        }
 
-        return array();
+            return self::$cache[$cache_key];
+        }
     }
 
     public static function getExtraFieldsArray($element)
@@ -823,7 +834,7 @@ class BimpCache
 
     // User: 
 
-    public static function getUsersArray($include_empty = 0)
+    public static function getUsersArray($include_empty = 0, $empty_label = '')
     {
         global $conf, $langs;
 
@@ -838,11 +849,6 @@ class BimpCache
             $cache_key .= '_active_only';
         }
         if (!isset(self::$cache[$cache_key])) {
-            if ($include_empty)
-                self::$cache[$cache_key] = array("" => "");
-            else
-                self::$cache[$cache_key] = array();
-
             if ($active_only) {
                 $where = '`statut` != 0';
             } else {
@@ -871,7 +877,7 @@ class BimpCache
             }
         }
 
-        return self::getCacheArray($cache_key, $include_empty);
+        return self::getCacheArray($cache_key, $include_empty, 0, $empty_label);
     }
 
     public static function getUserGroupsArray($include_empty = 1)
@@ -888,13 +894,53 @@ class BimpCache
             $rows = self::getBdb()->getRows('usergroup', '1', null, 'object', array('rowid', 'nom'), 'nom', 'asc');
             if (!is_null($rows)) {
                 foreach ($rows as $r) {
-
                     self::$cache[$cache_key][$r->rowid] = $r->nom;
                 }
             }
         }
 
         return self::getCacheArray($cache_key, $include_empty);
+    }
+
+    public static function getUserUserGroupsArray($id_user, $include_empty = 0)
+    {
+        $cache_key = 'user_' . $id_user . '_usergroups_array';
+
+        if (!isset(self::$cache[$cache_key])) {
+            if ($include_empty)
+                self::$cache[$cache_key] = array("" => "");
+            else
+                self::$cache[$cache_key] = array();
+
+            $groups = self::getUserGroupsArray();
+            $rows = self::getBdb()->getRows('usergroup_user', 'fk_user = ' . (int) $id_user, null, 'array', array('fk_usergroup'));
+            if (!is_null($rows)) {
+                foreach ($rows as $r) {
+                    if (array_key_exists((int) $r['fk_usergroup'], $groups)) {
+                        self::$cache[$cache_key][(int) $r['fk_usergroup']] = $groups[(int) $r['fk_usergroup']];
+                    }
+                }
+            }
+        }
+
+        return self::getCacheArray($cache_key, $include_empty);
+    }
+
+    public static function getUserUserGroupsList($id_user)
+    {
+        $cache_key = 'user_' . $id_user . '_usergroups_list';
+
+        if (!isset(self::$cache[$cache_key])) {
+            self::$cache[$cache_key] = array();
+            $rows = self::getBdb()->getRows('usergroup_user', 'fk_user = ' . (int) $id_user, null, 'array', array('fk_usergroup'));
+            if (!is_null($rows)) {
+                foreach ($rows as $r) {
+                    self::$cache[$cache_key][] = (int) $r['fk_usergroup'];
+                }
+            }
+        }
+
+        return self::$cache[$cache_key];
     }
 
     public static function getUserCentresArray()
@@ -934,9 +980,9 @@ class BimpCache
         return array();
     }
 
-    public static function getUserListFiltersArray(BimpObject $object, $id_user, $list_type, $list_name, $panel_name, $include_empty = false)
+    public static function getUserListFiltersArray(BimpObject $object, $id_user, $panel_name, $include_empty = false)
     {
-        $cache_key = $object->module . '_' . $object->object_name . '_' . $list_name . '_' . $list_type . '_' . $panel_name . '_filters_panel_user_' . $id_user;
+        $cache_key = $object->module . '_' . $object->object_name . '_' . $panel_name . '_filters_panel_user_' . $id_user;
 
         if (!isset(self::$cache[$cache_key])) {
             self::$cache[$cache_key] = array();
@@ -944,12 +990,38 @@ class BimpCache
             $instance = BimpObject::getInstance('bimpcore', 'ListFilters');
 
             $rows = $instance->getList(array(
-                'owner_type' => 2,
-                'id_owner'   => (int) $id_user,
                 'obj_module' => $object->module,
                 'obj_name'   => $object->object_name,
-                'list_type'  => $list_type,
-                'list_name'  => $list_name,
+                'panel_name' => $panel_name,
+                'owner'      => array(
+                    'custom' => ListFilters::getOwnerFilterCustomSql((int) $id_user)
+                )
+                    ), null, null, 'id', 'asc', 'array', array('id', 'name'));
+
+            if (!is_null($rows)) {
+                foreach ($rows as $r) {
+                    self::$cache[$cache_key][(int) $r['id']] = $r['name'];
+                }
+            }
+        }
+
+        return self::getCacheArray($cache_key, $include_empty);
+    }
+
+    public static function getUsergroupListFiltersArray(BimpObject $object, $id_usergroup, $panel_name, $include_empty = false)
+    {
+        $cache_key = $object->module . '_' . $object->object_name . '_' . $panel_name . '_filters_panel_usergroup_' . $id_usergroup;
+
+        if (!isset(self::$cache[$cache_key])) {
+            self::$cache[$cache_key] = array();
+
+            $instance = BimpObject::getInstance('bimpcore', 'ListFilters');
+
+            $rows = $instance->getList(array(
+                'owner_type' => ListFilters::TYPE_GROUP,
+                'id_owner'   => (int) $id_usergroup,
+                'obj_module' => $object->module,
+                'obj_name'   => $object->object_name,
                 'panel_name' => $panel_name
                     ), null, null, 'id', 'asc', 'array', array('id', 'name'));
 
@@ -1239,6 +1311,22 @@ class BimpCache
         return self::$cache[$cache_key];
     }
 
+    public static function getProductsTagsByTypeArray($type, $include_empty = true)
+    {
+        $cache_key = 'products_tags_' . $type;
+
+        if (!isset(self::$cache[$cache_key])) {
+            $rows = self::getBdb()->getRows('bimp_c_values8sens', '`type` = \'' . $type . '\'', null, 'array', array('id', 'label'), 'label', 'ASC');
+            if (is_array($rows)) {
+                foreach ($rows as $r) {
+                    self::$cache[$cache_key][$r['id']] = $r['label'];
+                }
+            }
+        }
+
+        return self::getCacheArray($cache_key, $include_empty);
+    }
+
     // Emails: 
 
     public static function getEmailTemplatesArray($email_type, $include_empty = false)
@@ -1290,14 +1378,18 @@ class BimpCache
 
     // Divers: 
 
-    public static function getTaxes($id_country = 1)
+    public static function getTaxes($id_country = 1, $active_only = true, $include_empty = false)
     {
         $id_country = (int) $id_country;
         $cache_key = 'taxes_' . $id_country;
 
+        if ($active_only) {
+            $cache_key .= '_active_only';
+        }
+
         if (!isset(self::$cache[$cache_key])) {
             self::$cache[$cache_key] = array();
-            $rows = self::getBdb()->getRows('c_tva', '`fk_pays` = ' . $id_country . ' AND `active` = 1', null, 'array', array('rowid', 'taux'));
+            $rows = self::getBdb()->getRows('c_tva', '`fk_pays` = ' . $id_country . ($active_only ? ' AND `active` = 1' : ''), null, 'array', array('rowid', 'taux'));
             if (!is_null($rows)) {
                 foreach ($rows as $r) {
                     self::$cache[$cache_key][(int) $r['rowid']] = $r['taux'];
@@ -1305,7 +1397,29 @@ class BimpCache
             }
         }
 
-        return self::$cache[$cache_key];
+        return self::getCacheArray($cache_key, $include_empty);
+    }
+
+    public static function getTaxesByRates($id_country = 1, $active_only = true, $include_empty = false)
+    {
+        $id_country = (int) $id_country;
+        $cache_key = 'taxes_' . $id_country . '_by_rates';
+
+        if ($active_only) {
+            $cache_key .= '_active_only';
+        }
+
+        if (!isset(self::$cache[$cache_key])) {
+            self::$cache[$cache_key] = array();
+            $rows = self::getBdb()->getRows('c_tva', '`fk_pays` = ' . $id_country . ($active_only ? ' AND `active` = 1' : ''), null, 'array', array('rowid', 'taux', 'note'));
+            if (!is_null($rows)) {
+                foreach ($rows as $r) {
+                    self::$cache[$cache_key][$r['taux']] = BimpTools::displayFloatValue((float) $r['taux'], 1) . '% - ' . $r['note'];
+                }
+            }
+        }
+
+        return self::getCacheArray($cache_key, $include_empty);
     }
 
     public static function getCentres()
@@ -1725,6 +1839,4 @@ class BimpCache
 
         return self::$cache[$cache_key];
     }
-    
-    
 }

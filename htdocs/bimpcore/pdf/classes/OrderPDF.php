@@ -550,23 +550,28 @@ class BLPDF extends OrderPDF
         global $conf;
 
         $table = new BimpPDF_AmountsTable($this->pdf);
-        $table->addColDef('code_article', 'Code article', 30);
+//        $table->addColDef('code_article', 'Code article', 30);
         $table->addColDef('dl', 'DL', 10, 'text-align: center;', '', 'text-align: center;');
         $table->addColDef('ral', 'RAL', 10, 'text-align: center;', '', 'text-align: center;');
-        $table->cols_def['desc']['width_mm'] = 75;
+        $table->cols_def['desc']['width_mm'] = 105;
         $table->cols_def['tva']['width_mm'] = 15;
         $table->cols_def['qte']['width_mm'] = 10;
         $table->cols_def['qte']['style'] = 'text-align: center;';
         $table->cols_def['qte']['head_style'] = 'text-align: center;';
 
-        $table->setCols(array('code_article', 'desc', 'pu_ht', 'tva', 'total_ht', 'qte', 'dl', 'ral'));
+        if (!isset($_GET['chiffre']) || $_GET['chiffre'] == 1)
+            $table->setCols(array('code_article', 'desc', 'pu_ht', 'tva', 'total_ht', 'qte', 'dl', 'ral'));
+        else {
+            $table->setCols(array('code_article', 'desc', 'qte', 'dl', 'ral'));
+            $this->hideTotal = 1;
+        }
 
         BimpTools::loadDolClass('product');
 
         BimpObject::loadClass('bimpreservation', 'BR_Reservation');
         $qties = $this->shipment->getPDFQtiesAndSerials();
 
-        $i = 0;
+        $i = -1;
 
         $bimpLines = array();
 
@@ -577,9 +582,8 @@ class BLPDF extends OrderPDF
         }
 
         foreach ($this->object->lines as &$line) {
+            $i++;
             $bimpLine = isset($bimpLines[(int) $line->id]) ? $bimpLines[(int) $line->id] : null;
-
-
 
             if ($this->object->type != 3 && ($line->desc == "(DEPOSIT)" || stripos($line->desc, 'Acompte') === 0)) {
 //                $acompteHt = $line->subprice * (float) $line->qty;
@@ -594,6 +598,14 @@ class BLPDF extends OrderPDF
                 continue;
             }
 
+            if (BimpObject::objectLoaded($bimpLine) && $bimpLine->field_exists('hide_in_pdf')) {
+                if ((int) $bimpLine->getData('type') === ObjectLine::LINE_TEXT || ((float) $bimpLine->pu_ht * (float) $bimpLine->getFullQty() == 0)) {
+                    if ((int) $bimpLine->getData('hide_in_pdf')) {
+                        continue;
+                    }
+                }
+            }
+
             $product = null;
             if (!is_null($line->fk_product) && $line->fk_product) {
                 $product = new Product($this->db);
@@ -603,18 +615,19 @@ class BLPDF extends OrderPDF
                 }
             }
 
-            $desc = $this->getLineDesc($line, $product);
 
+            $hide_product_label = BimpObject::objectLoaded($bimpLine) ? (int) $bimpLine->getData('hide_product_label') : 0;
+
+            $desc = $this->getLineDesc($line, $product, $hide_product_label);
 
             if ((BimpObject::objectLoaded($bimpLine) && (int) $bimpLine->getData('type') === ObjectLine::LINE_TEXT) ||
                     (!BimpObject::objectLoaded($bimpLine) && $line->subprice == 0 && !(int) $line->fk_product)) {
                 if (!$desc) {
-                    $i++;
                     unset($product);
                     $product = null;
                     continue;
                 } else {
-                    $row['code_article'] = array(
+                    $row['desc'] = array(
                         'colspan' => 99,
                         'content' => $desc,
                         'style'   => 'font-weight: bold; background-color: #F5F5F5;'
@@ -639,15 +652,14 @@ class BLPDF extends OrderPDF
                     }
                 }
                 $row = array(
-                    'code_article' => (!is_null($product) ? $product->ref : ''),
-                    'desc'         => $desc,
-                    'pu_ht'        => pdf_getlineupexcltax($this->object, $i, $this->langs),
+//                    'code_article' => (!is_null($product) ? $product->ref : ''),
+                    'desc'  => $desc,
+                    'pu_ht' => pdf_getlineupexcltax($this->object, $i, $this->langs),
                 );
 
 
                 if ($this->hideReduc && $line->remise_percent) {
                     $pu_ht = (float) ($line->subprice - ($line->subprice * ($line->remise_percent / 100)));
-
                     $row['pu_ht'] = price($pu_ht, 0, $this->langs);
                 } else {
                     $pu_ht = (float) $line->subprice;
@@ -718,11 +730,27 @@ class BLPDF extends OrderPDF
                 }
 
                 $this->tva[$line->tva_tx] += $tva_line;
+
+                if (BimpObject::objectLoaded($bimpLine)) {
+                    if ((int) $bimpLine->getData('force_qty_1')) {
+                        if ((float) $qty > 0) {
+                            $row['pu_ht'] = price($pu_ht * $qty, 0, $this->langs);
+                            $row['qte'] = 1;
+                        } elseif ((float) $qty < 0) {
+                            $row['pu_ht'] = price($pu_ht * ($qty * -1), 0, $this->langs);
+                            $row['qte'] = -1;
+                        } else {
+                            continue;
+                        }
+                        $row['dl'] = 0;
+                        $row['ral'] = 0;
+                    }
+                }
             }
 
-            $table->rows[] = $row;
+            if (!isset($_GET['detail']) || $_GET['detail'] == 1 || $row['qte'] > 0)
+                $table->rows[] = $row;
 
-            $i++;
             unset($product);
             $product = null;
         }

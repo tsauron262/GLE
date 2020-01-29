@@ -30,7 +30,7 @@ function InfoSoc(elem,elem2) {
         $("#name_alias_input").val(result.tradename);
         $("#idprof3").val(result.Naf);
         if($("#options_notecreditsafe").length > 0)
-            $("#options_notecreditsafe").val("Limite : "+result.limit+" €\nNote : " + result.Note+"\n" + result.info);
+            $("#options_notecreditsafe").val("Limite : "+result.limit+" €\n" + result.Note+"\n" + result.info);
         else
             $("#name_alias_input").val("Note : " + result.Note); 
         if(result.Siret != this.elem.val() && result.Siret != this.elem2.val())
@@ -59,14 +59,21 @@ function InfoSoc(elem,elem2) {
             moi.checkData("siret");
         });
         
-        var isParticulier = ($("#typent_id").length == 0 || this.typeTier.val() == 8);
+        var isParticulier = (this.typeTier.length == 0 || this.typeTier.val() == 8);
+        
+        
+        var isInFrance = (this.pays.length == 0 || this.pays.val() == 1 || this.pays.val() == 0);
         
         var actu = this.elem.val();
         if(actu == "")
             actu = this.elem2.val();
         for(var i = 0; i< 5; i++)
             actu = actu.replace(" ", "").replace("-", "");
-        if(!isParticulier && (actu == "" || !this.isSiretSiren(actu))){
+        
+        
+        console.log('Isparticulier '+isParticulier);
+        console.log('isInFrance '+isInFrance);
+        if(!isParticulier && isInFrance && (actu == "" || !this.isSiretSiren(actu))){
             this.promptSiren(actu);
         }
     }
@@ -101,8 +108,11 @@ function InfoSoc(elem,elem2) {
         }
         else{
             if(siren.length == 14)
-                this.elem2.val(siren);
-            this.elem.val(siren);
+                siret = siren;
+            else
+                siret = siren + "0001X";
+            this.elem.val(siren.substr(0,9));
+            this.elem2.val(siret);
             this.checkData("siret");
         }
     }

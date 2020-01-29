@@ -85,8 +85,6 @@ class BordereauChequeBlochet extends ModeleChequeReceipts
 	 */
 	function write_file($object, $_dir, $number, $outputlangs)
 	{
-            echo '<pre>'; print_r( synGetDebug());
-            print_r($this->lines);die;
 		global $user,$conf,$langs,$hookmanager;
 
         if (! is_object($outputlangs)) $outputlangs=$langs;
@@ -332,7 +330,7 @@ class BordereauChequeBlochet extends ModeleChequeReceipts
 		for ($j = 0; $j < $num; $j++)
 		{
 		    $lineinpage++;
-echo '<pre>';print_r($this->lines[$j]);die;
+                    
 			$pdf->SetXY(1, $this->tab_top + 10 + $yp);
 			$pdf->MultiCell(8, $this->line_height, $j+1, 0, 'R', 0);
 

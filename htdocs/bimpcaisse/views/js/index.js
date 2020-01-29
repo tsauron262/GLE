@@ -304,10 +304,10 @@ function openCaisse($button, confirm_fonds) {
     }
 
     var fonds = parseFloat($form.find('[name="fonds"]').val());
-    if (!fonds) {
-        bimp_msg('Veuillez indiquer le montant du fonds de caisse', 'warning', null, true);
-        return;
-    }
+//    if (!fonds) {
+//        bimp_msg('Veuillez indiquer le montant du fonds de caisse', 'warning', null, true);
+//        return;
+//    }
 
     BimpAjax('openCaisse', {
         id_caisse: id_caisse,
@@ -347,10 +347,10 @@ function closeCaisse($button, confirm_fonds) {
     }
 
     var fonds = parseFloat($form.find('[name="fonds"]').val());
-    if (!fonds) {
-        bimp_msg('Veuillez indiquer le montant du fonds de caisse', 'warning', null, true);
-        return;
-    }
+//    if (!fonds) {
+//        bimp_msg('Veuillez indiquer le montant du fonds de caisse', 'warning', null, true);
+//        return;
+//    }
 
     BimpAjax('closeCaisse', {
         id_caisse: id_caisse,
@@ -822,6 +822,7 @@ function saveClient() {
         display_success: false,
         success: function (result, bimpAjax) {
             if (typeof (result.html) !== 'undefined' && result.html) {
+                $('#venteClientFormContainer').find('[name="id_client_search"]').val('');
                 $('#venteClientViewContainer').html(result.html).slideDown(250);
                 bimpAjax.$container.slideUp(250);
             }
@@ -1122,6 +1123,7 @@ function saveArticleRemiseCrtPercent($input) {
         saveObjectField('bimpcaisse', 'BC_VenteArticle', id_article, 'remise_crt_percent', remise_crt_percent);
     }
 }
+
 // Retours vente: 
 
 function loadReturnForm($button) {

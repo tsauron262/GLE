@@ -109,7 +109,7 @@ a.btn {
     }
 }
 .btn-light-primary {
-    @include button-variant($gray-dark, #fff, #fff);
+    @include button-variant($btn-default-color, #fff, #fff);
     &:hover {
         color: $primary!important;
         background-color: #fff!important;
@@ -117,7 +117,7 @@ a.btn {
     }
 }
 .btn-light-success {
-    @include button-variant($gray-dark, #fff, #fff);
+    @include button-variant($btn-default-color, #fff, #fff);
     &:hover {
         color: $success!important;
         background-color: #fff!important;
@@ -125,7 +125,7 @@ a.btn {
     }
 }
 .btn-light-info {
-    @include button-variant($gray-dark, #fff, #fff);
+    @include button-variant($btn-default-color, #fff, #fff);
     &:hover {
         color: $info!important;
         background-color: #fff!important;
@@ -133,7 +133,7 @@ a.btn {
     }
 }
 .btn-light-warning {
-    @include button-variant($gray-dark, #fff, #fff);
+    @include button-variant($btn-default-color, #fff, #fff);
     &:hover {
         color: $warning!important;
         background-color: #fff!important;
@@ -141,7 +141,7 @@ a.btn {
     }
 }
 .btn-light-danger {
-    @include button-variant($gray-dark, #fff, #fff);
+    @include button-variant($btn-default-color, #fff, #fff);
     &:hover {
         color: $danger!important;
         background-color: #fff!important;

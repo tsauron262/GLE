@@ -17,18 +17,18 @@ class BS_SavPropal extends Bimp_Propal
         $buttons = array();
 
         // Remise globale: 
-        if ($this->isActionAllowed('setRemiseGlobale') && $this->canSetAction('setRemiseGlobale')) {
-            $buttons[] = array(
-                'label'       => 'Remise globale',
-                'icon_before' => 'percent',
-                'classes'     => array('btn', 'btn-default'),
-                'attr'        => array(
-                    'onclick' => $this->getJsActionOnclick('setRemiseGlobale', array('remise_globale' => (float) $this->getData('remise_globale')), array(
-                        'form_name' => 'remise_globale'
-                    ))
-                )
-            );
-        }
+//        if ($this->isActionAllowed('setRemiseGlobale') && $this->canSetAction('setRemiseGlobale')) {
+//            $buttons[] = array(
+//                'label'       => 'Remise globale',
+//                'icon_before' => 'percent',
+//                'classes'     => array('btn', 'btn-default'),
+//                'attr'        => array(
+//                    'onclick' => $this->getJsActionOnclick('setRemiseGlobale', array('remise_globale' => (float) $this->getData('remise_globale')), array(
+//                        'form_name' => 'remise_globale'
+//                    ))
+//                )
+//            );
+//        }
 
         return $buttons;
     }
@@ -52,5 +52,14 @@ class BS_SavPropal extends Bimp_Propal
         }
 
         return '';
+    }
+
+    public function getFilesArray($with_deleted = 0)
+    {
+        if ($this->isLoaded()) {
+            return BimpCache::getObjectFilesArray('bimpcommercial', 'Bimp_Propal', $this->id, $with_deleted);
+        }
+
+        return array();
     }
 }

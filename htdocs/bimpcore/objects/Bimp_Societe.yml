@@ -18,6 +18,22 @@ fields:
         required: 1
     name_alias: 
         label: Nom alternatif
+    is_subsidiary:
+        label: Filliale du groupe
+        type: bool
+        dol_extra_field: 1
+    accounting_account:
+        label: Compte comptable client de la filliale
+        type: int
+        dol_extra_field: 1
+    is_salarie:
+        label: Client salarié
+        type: bool
+        dol_extra_field: 1
+    accounting_account_fournisseur:
+        label: Compte comptable fournisseur de la filliale
+        type: int
+        dol_extra_field: 1       
     status:
         label: Etat
         type: int
@@ -26,6 +42,15 @@ fields:
                 0: Clos
                 1: Ouvert
         default_value: 1
+        
+    origine:
+        label: Origine
+        dol_extra_field: 1
+        type: int
+        values: 
+            array: demandReasons
+        input: 
+            type: select_input_reasons
     client: 
         label: Prospect / Client
         type: int
@@ -171,12 +196,12 @@ fields:
 #    remise_client: 
 #        label: Remise
 #        type: int
-#    mode_reglement: 
-#        label: Mode de réglement
-#        type: int
-#    cond_reglement: 
-#        label: Conditions de réglement
-#        type: int
+    mode_reglement: 
+        label: Mode de réglement
+        type: int
+    cond_reglement_id: 
+        label: Conditions de réglement
+        type: int
 #    mode_reglement_supplier:
 #        label: Mode de réglement fournisseur
 #        type: int
@@ -196,6 +221,11 @@ fields:
         type: text
         input: 
             note: 1
+            
+    num_sepa:
+        label: Numéro SEPA
+        type: string
+        dol_extra_field: 1
         
 #    *** Champs non gérés: ***
 #    entity
@@ -234,6 +264,7 @@ fields_tables:
             - field: code_client
             - field: barcode
             - field: code_compta
+            - field: num_sepa
             
     contact: 
         title: Informations de contact
@@ -362,6 +393,8 @@ lists:
         icon: fas_building
         add_btn_label: Nouvelle société
         checkboxes: 1
+        configurable: 1
+        filters_panel: default
         bulk_actions:
             - label: supprimer les société sélectionnées
               icon: fas_trash-alt
@@ -389,14 +422,148 @@ lists:
                 field: town
             code:
                 field: code_client
+            origine:
+                field: origine
+       
                 
+                
+lists_cols: 
+    id: 
+        field: id
+    nom:
+        field: nom
+    name_alias:
+        field: name_alias
+    email: 
+        field: email
+    phone:
+        field: phone
+    address:
+        field: address
+    zip:
+        field: zip
+    town: 
+        field: town
+    origine:
+        field: origine
+    accounting_account:
+        field: accounting_account
+    accounting_account_fournisseur:
+        field: accounting_account_fournisseur
+    is_salarie:
+        field: is_salarie
+    status:
+        field: status
+    client:
+        field: client
+    fournisseur:
+        field: fournisseur
+    code_client:
+        field: code_client
+    code_fournisseur:
+        field: code_fournisseur
+    code_compta:
+        field: code_compta
+    code_compta_fournisseur:
+        field: code_compta_fournisseur
+    fk_pays:
+        field: fk_pays
+    fk_departement:
+        field: fk_departement
+    siren:
+        field: siren
+    siret:
+        field: siret
+    ape:
+        field: ape
+    exported:
+        field: exported
+    mode_reglement:
+        field: mode_reglement
+    cond_reglement_id:
+        field: cond_reglement_id
+    num_sepa:
+        field: num_sepa
+    note_private:
+        field: note_private
+    note_public:
+        field: note_public
+        
+        
+filters_panels: 
+    default: 
+        filters: 
+            rowid: 
+                field: rowid
+            nom:
+                field: nom
+            name_alias:
+                field: name_alias
+            email: 
+                field: email
+            phone:
+                field: phone
+            address:
+                field: address
+            zip:
+                field: zip
+            town: 
+                field: town
+            origine:
+                field: origine
+            accounting_account:
+                field: accounting_account
+            accounting_account_fournisseur:
+                field: accounting_account_fournisseur
+            is_salarie:
+                field: is_salarie
+            status:
+                field: status
+            client:
+                field: client
+            fournisseur:
+                field: fournisseur
+            code_client:
+                field: code_client
+            code_fournisseur:
+                field: code_fournisseur
+            code_compta:
+                field: code_compta
+            code_compta_fournisseur:
+                field: code_compta_fournisseur
+            fk_pays:
+                field: fk_pays
+            fk_departement:
+                field: fk_departement
+            siren:
+                field: siren
+            siret:
+                field: siret
+            ape:
+                field: ape
+            exported:
+                field: exported
+            mode_reglement:
+                field: mode_reglement
+            cond_reglement_id:
+                field: cond_reglement_id
+            num_sepa:
+                field: num_sepa
+            note_private:
+                field: note_private
+            note_public:
+                field: note_public  
 cards: 
     default: 
         type: societe_card
         view_btn: 1
         
-searches:
-    default: 
+searches: 
+    default:
         fields_search: 
-            - label
-            - ref
+            - a.rowid
+            - a.nom
+            - a.name_alias
+        fields_return: 
+            0: a.nom
+            1: a.name_alias

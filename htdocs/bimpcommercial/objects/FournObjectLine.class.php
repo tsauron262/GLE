@@ -6,6 +6,8 @@ class FournObjectLine extends ObjectLine
 {
 
     public $ref_supplier = '';
+    public static $product_search_name = 'default'; //'tobuy';
+    public static $tva_free = true;
     public static $product_line_data = array(
         'id_product'     => array('label' => 'Produit / Service', 'type' => 'int', 'required' => 1, 'default' => null),
         'id_fourn_price' => array('label' => 'Prix d\'achat fournisseur', 'type' => 'int', 'required' => 0, 'default' => null),
@@ -86,6 +88,24 @@ class FournObjectLine extends ObjectLine
 
         $html = '';
         switch ($field) {
+            case 'id_fourn_price':
+                $html = '<input type="hidden" name="' . $field . '" value="' . (int) $this->id_fourn_price . '"/>';
+                if (!(int) $this->id_fourn_price) {
+                    $html .= 'Prix d\'achat personnalisé';
+                } else {
+                    $pfp = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ProductFournPrice', (int) $this->id_fourn_price);
+                    if (BimpObject::objectLoaded($pfp)) {
+                        $html .= $pfp->getNomUrl(1, 1, 1, 'default') . ' : ' . $pfp->displayData('price');
+                    } else {
+                        $html .= BimpRender::renderAlerts('Le prix d\'achat d\'ID ' . $this->id_fourn_price . ' n\'existe plus');
+                    }
+                }
+                break;
+
+            case 'pa_except':
+                $html .= BimpTools::displayMoneyValue((float) $this->pu_ht);
+                break;
+
             case 'ref_supplier':
                 $html .= (string) $this->ref_supplier;
                 break;
@@ -99,9 +119,22 @@ class FournObjectLine extends ObjectLine
 
     public function renderLineInput($field, $attribute_equipment = false, $prefixe = '', $force_edit = false)
     {
+        if (!$this->isFieldEditable($field, $force_edit)) {
+            return $this->displayLineData($field);
+        }
+
         $html = '';
 
         switch ($field) {
+            case 'pa_except':
+                $value = $this->pu_ht;
+                return BimpInput::renderInput('text', $prefixe . 'pa_except', (float) $value, array(
+                            'data' => array(
+                                'data_type' => 'number',
+                                'decimals'  => 4
+                            )
+                ));
+
             case 'id_fourn_price':
                 $value = $this->getValueByProduct('id_fourn_price');
                 $values = $this->getProductFournisseursPricesArray(true, 'Prix d\'achat exceptionnel');
@@ -226,11 +259,16 @@ class FournObjectLine extends ObjectLine
                         if (!BimpObject::objectLoaded($product)) {
                             $errors[] = 'Le produit d\'ID ' . $this->id_product . ' n\'existe pas';
                         } else {
-                            if ((int) $product->getData('fk_product_type') === 0) {
-                                $qty_str = (string) $this->qty;
+                            $statut = $product->getData('tobuy');
+                            if($statut == 0)
+                                $errors[] = 'Le produit ' . $product->getData('ref') . ' est hors achat';
+                            else{
+                                if ((int) $product->getData('fk_product_type') === 0) {
+                                    $qty_str = (string) $this->qty;
 
-                                if (preg_match('/.*\..*/', $qty_str)) {
-                                    $errors[] = 'Les quantités décimales ne sont autorisées que pour les produits de type "Service". Veuillez corriger';
+                                    if (preg_match('/.*\..*/', $qty_str)) {
+                                        $errors[] = 'Les quantités décimales ne sont autorisées que pour les produits de type "Service". Veuillez corriger';
+                                    }
                                 }
                             }
                         }
@@ -303,5 +341,17 @@ class FournObjectLine extends ObjectLine
                 $this->pa_ht = $this->force_pa_ht;
         }
         return $errors;
+    }
+  
+    public function create(&$warnings = array(), $force_create = false)
+    {
+        $errors = array();
+//        if($this->getData('type') == self::LINE_PRODUCT){
+//            $prod = $this->getChildObject('product');
+//            if(!$prod->isAchetable($errors,false,false))
+//                    return $errors;
+//        }
+
+        return parent::create($warnings, $force_create);
     }
 }

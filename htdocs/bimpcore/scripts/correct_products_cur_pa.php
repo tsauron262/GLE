@@ -99,8 +99,8 @@ foreach ($list as $id_p) {
 
             $counts = '';
 
-            $sql = 'SELECT COUNT(DISTINCT a.rowid) as nb FROM llx_propal a';
-            $sql .= ' LEFT JOIN llx_propaldet l ON a.rowid = l.fk_propal';
+            $sql = 'SELECT COUNT(DISTINCT a.rowid) as nb FROM '.MAIN_DB_PREFIX.'propal a';
+            $sql .= ' LEFT JOIN '.MAIN_DB_PREFIX.'propaldet l ON a.rowid = l.fk_propal';
             $sql .= ' WHERE l.fk_product = ' . (int) $id_p;
             $sql .= ' AND a.datec >= \'' . $date_min . '\' AND a.datec < \'' . $date_max . '\'';
             $sql .= ' AND l.buy_price_ht != ' . (float) $new_pa;
@@ -111,8 +111,8 @@ foreach ($list as $id_p) {
                 $counts .= $res[0]['nb'] . ' prop - ';
             }
 
-            $sql = 'SELECT COUNT(DISTINCT a.rowid) as nb FROM llx_commande a';
-            $sql .= ' LEFT JOIN llx_commandedet l ON a.rowid = l.fk_commande';
+            $sql = 'SELECT COUNT(DISTINCT a.rowid) as nb FROM '.MAIN_DB_PREFIX.'commande a';
+            $sql .= ' LEFT JOIN '.MAIN_DB_PREFIX.'commandedet l ON a.rowid = l.fk_commande';
             $sql .= ' WHERE l.fk_product = ' . (int) $id_p;
             $sql .= ' AND a.date_creation >= \'' . $date_min . '\' AND a.date_creation < \'' . $date_max . '\'';
             $sql .= ' AND l.buy_price_ht != ' . (float) $new_pa;
@@ -123,8 +123,8 @@ foreach ($list as $id_p) {
                 $counts .= $res[0]['nb'] . ' cmdes - ';
             }
 
-            $sql = 'SELECT COUNT(DISTINCT a.rowid) as nb FROM llx_facture a';
-            $sql .= ' LEFT JOIN llx_facturedet l ON a.rowid = l.fk_facture';
+            $sql = 'SELECT COUNT(DISTINCT a.rowid) as nb FROM '.MAIN_DB_PREFIX.'facture a';
+            $sql .= ' LEFT JOIN '.MAIN_DB_PREFIX.'facturedet l ON a.rowid = l.fk_facture';
             $sql .= ' WHERE l.fk_product = ' . (int) $id_p;
             $sql .= ' AND a.datec >= \'' . $date_min . '\' AND a.datec < \'' . $date_max . '\'';
             $sql .= ' AND l.buy_price_ht != ' . (float) $new_pa;
@@ -136,8 +136,8 @@ foreach ($list as $id_p) {
                 $counts .= $res[0]['nb'] . ' fac non comm - ';
             }
 
-            $sql = 'SELECT COUNT(DISTINCT a.rowid) as nb FROM llx_facture a';
-            $sql .= ' LEFT JOIN llx_facturedet l ON a.rowid = l.fk_facture';
+            $sql = 'SELECT COUNT(DISTINCT a.rowid) as nb FROM '.MAIN_DB_PREFIX.'facture a';
+            $sql .= ' LEFT JOIN '.MAIN_DB_PREFIX.'facturedet l ON a.rowid = l.fk_facture';
             $sql .= ' WHERE l.fk_product = ' . (int) $id_p;
             $sql .= ' AND a.datec >= \'' . $date_min . '\' AND a.datec < \'' . $date_max . '\'';
             $sql .= ' AND l.buy_price_ht != ' . (float) $new_pa;

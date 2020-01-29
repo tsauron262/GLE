@@ -319,7 +319,7 @@ if ($result)
 		print '<tr class="oddeven">';
 
 		// Picto and label of permission
-		print '<td class="maxwidthonsmartphone tdoverflowonsmartphone">'.img_object('',$picto,'class="pictoobjectwidth"').' '.$objMod->getName().'</td>';
+		print '<td class="maxwidthonsmartphone tdoverflowonsmartphone">'.img_object('',$picto,'class="pictoobjectwidth"').' '.$objMod->getName().' <a target="_blank" href="'.DOL_URL_ROOT.'/bimpcore/?fc=admin&tab=droit&id_right='.$obj->id.'&id_user='.$object->id.'"> +</a></td>';
 
         // Permission and tick
         if (! empty($object->admin) && ! empty($objMod->rights_admin_allowed))    // Permission granted because admin

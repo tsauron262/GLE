@@ -17,7 +17,7 @@ labels:
     name: commande
     is_female: 1
         
-objects: 
+objects:
     lines: 
         instance: 
             bimp_object: Bimp_CommandeLine
@@ -216,8 +216,6 @@ fields:
         default_value: 0
         input: 
             type: search_user
-        
-    total: unset
     
     id_client_facture: 
         label: Client facturation
@@ -285,6 +283,8 @@ fields:
         min: 0
         decimals: 0
         default_value: 0
+        
+    total: unset
         
 fields_tables: 
     infos: 
@@ -356,10 +356,6 @@ fields_tables:
               edit: 1
             - field: pdf_periods_number
               edit: 1
-            - field: remise_globale_label
-              edit: 1
-              show: 
-                  callback: hasRemiseGlobale
             - label: Fichier PDF
               value: 
                   callback: displayPDFButton
@@ -375,11 +371,11 @@ fields_tables:
                   
 views: 
     default: 
-        objects_change_reload: Bimp_CommandeLine,ObjectLineRemise,BimpFile
+        objects_change_reload: Bimp_CommandeLine,ObjectLineRemise,BimpFile,RemiseGlobale
     content_infos: 
-        objects_change_reload: Bimp_CommandeLine,ObjectLineRemise,BimpFile
+        objects_change_reload: Bimp_CommandeLine,ObjectLineRemise,BimpFile,RemiseGlobale
     full: 
-        objects_change_reload: Bimp_CommandeLine,ObjectLineRemise,BimpFile
+        objects_change_reload: Bimp_CommandeLine,ObjectLineRemise,BimpFile,RemiseGlobale
     commandes_fourn: 
         title: Liste des commandes fournisseurs
         icon: fas_cart-arrow-down
@@ -429,10 +425,6 @@ forms:
                   callback: isLoaded
             - field: note_private
             - field: note_public
-            - field: remise_globale
-              hidden: 1
-              input: 
-                  type: hidden
             - custom: 1
               hidden: 1
               label: Elément d'origine
@@ -456,7 +448,8 @@ forms:
                   type: hidden
               value: 
                   request: param_values/fields/close_propal
-                  
+    
+
     duplicate:
         rows: 
             2: 
@@ -722,6 +715,10 @@ filters_panels:
                 field: date_livraison
             reval:
                 field: revalorisation
+            validComm:
+                field: validComm
+            validFin:
+                field: validFin
             
 lists_cols: 
     date_create: 
@@ -816,7 +813,7 @@ cards:
             - label: Fichier PDF
               value: 
                   callback: displayPDFButton
-                  
+
 searches:
     default: 
         fields_search: 
@@ -824,10 +821,15 @@ searches:
             - ef.libelle
             - s.nom
         joins:
-            - table: propal_extrafields
-              on: a.rowid = ef.fk_object
-              alias: ef
-            - table: societe
-              on: a.fk_soc = s.rowid
-              alias: s
-
+            ef: 
+                table: commande_extrafields
+                on: a.rowid = ef.fk_object
+                alias: ef
+            s: 
+                table: societe
+                on: a.fk_soc = s.rowid
+                alias: s
+        fields_return: 
+            - a.ref
+            - s.nom
+        label_syntaxe: '<a.ref> (Client: <s.nom>)'

@@ -26,27 +26,30 @@ class BimpCommission extends BimpObject
     public function canCreate()
     {
         global $user;
-        return $user->rights->bimpcommercial->commission->write;
+        return ($user->admin || $user->rights->bimpcommercial->commission->write);
     }
+
     public function canEdit()
     {
         return (int) $this->canCreate();
     }
-    
-    public function canView() {
+
+    public function canView()
+    {
         global $user;
-        return $user->rights->bimpcommercial->commission->read;
+        return ($user->admin || $user->rights->bimpcommercial->commission->read);
     }
 
     public function canSetAction($action)
     {
+        global $user;
         switch ($action) {
             case 'createCommissions';
             case 'validate':
                 return (int) $this->can('create');
 
             case 'reopen':
-                return (int) $this->can('delete');
+                return (int) $user->admin;//$this->can('delete');
         }
 
         return (int) parent::canSetAction($action);
@@ -445,6 +448,20 @@ class BimpCommission extends BimpObject
     }
 
     // Affichages: 
+
+    public function displayTaux($type = "marque")
+    {
+        $totM = $this->getData('total_marges');
+
+        if ($totM == 0)
+            $val = 0;
+        elseif ($type == "marque") {
+            $val = ($totM / $this->getData('total_ca')) * 100;
+        } else {
+            $val = ($totM / $this->getData('total_pa')) * 100;
+        }
+        return BimpTools::displayFloatValue((float) $val, 4, ',', true) . ' %';
+    }
 
     public function displayAmount($amount_type)
     {

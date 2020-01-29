@@ -155,6 +155,48 @@ function loadModalForm($button, data, title, successCallback, on_save) {
     }, {}, 'medium');
 }
 
+function appendModalForm(html, form_id, buttons, title) {
+    if (typeof (html) !== 'string' || !html) {
+        return;
+    }
+
+    if (typeof (title) === 'undefined') {
+        title = '';
+    }
+
+    if (buttons === 'default') {
+        buttons = [{
+                label: '<i class="fas fa5-save iconLeft"></i>Enregistrer',
+                onclick: 'saveObjectFromForm(\'' + form_id + '\')',
+                type: 'primary',
+                classes: 'save_object_button'
+            }];
+    } else if (typeof (buttons) === 'undefined') {
+        buttons = [];
+    }
+
+    bimpModal.newContent(title, html);
+
+    var modal_idx = bimpModal.idx;
+    var $form = bimpModal.$contents.find('#modal_content_' + modal_idx).find('#' + form_id);
+    if ($.isOk($form)) {
+        $form.data('modal_idx', modal_idx);
+        bimpModal.removeComponentContent($form.attr('id'));
+
+        for (var i in buttons) {
+            if (buttons[i].type === 'undefined') {
+                buttons[i].type = 'primary';
+            }
+            if (buttons[i].classes === 'undefined') {
+                buttons[i].classes = 'save_object_button';
+            }
+            bimpModal.addButton(buttons[i].label, buttons[i].onclick, buttons[i].type, buttons[i].classes, modal_idx);
+        }
+
+        onFormLoaded($form);
+    }
+}
+
 function reloadForm(form_id) {
     var $form = $('#' + form_id);
     if (!$form.length) {
@@ -231,11 +273,11 @@ function closeForm(form_id) {
 
     var $modal = $form.findParentByClass('modal');
     if ($.isOk($modal)) {
-//        var modal_idx = parseInt($form.data('modal_idx'));
-//        if (modal_idx) {
-//            bimpModal.removeContent(modal_idx);
-//        }
-        bimpModal.clearAllContents();
+        var modal_idx = parseInt($form.data('modal_idx'));
+        if (modal_idx) {
+            bimpModal.removeContent(modal_idx);
+        }
+//        bimpModal.clearAllContents();
     } else {
         var $container = $('#' + form_id + '_container');
         if ($container.length) {
@@ -607,6 +649,16 @@ function reloadObjectInput(form_id, input_name, fields, keep_new_value) {
         }
     }
 
+    if ($.isOk($container)) {
+        var $parent = $container.parent();
+        var reload_idx = parseInt($parent.data('reload_idx'));
+        if (isNaN(reload_idx)) {
+            reload_idx = 0;
+        }
+        reload_idx++;
+        $parent.data('reload_idx', reload_idx);
+    }
+
     var data = {
         form_id: form_id,
         module: $form.data('module'),
@@ -633,15 +685,27 @@ function reloadObjectInput(form_id, input_name, fields, keep_new_value) {
         $form: $form,
         $container: $container,
         input_name: input_name,
+        reload_idx: reload_idx,
         error_msg: 'Echec du chargement du champ',
         display_success: false,
         success: function (result, bimpAjax) {
             if (typeof (result.html) !== 'undefined') {
                 var $form = $('#' + result.form_id);
                 var $parent = bimpAjax.$container.parent();
+                var parent_reload_idx = parseInt($parent.data('reload_idx'));
+                if (isNaN(parent_reload_idx)) {
+                    parent_reload_idx = 0;
+                }
+
+                if (parent_reload_idx > bimpAjax.reload_idx) {
+                    // Un nouveau reload a eut lieu entre temps... 
+                    return;
+                }
+
                 $parent.html(result.html).slideDown(250, function () {
                     $parent.removeAttr('style');
                 });
+
                 setCommonEvents($parent);
                 setInputContainerEvents($parent.find('.inputContainer'));
                 setInputsEvents($parent);
@@ -1350,6 +1414,66 @@ function removeSubObjectForm($button) {
     }
 }
 
+function addFormGroupMultipleItem($button, inputName) {
+    var $container = $button.findParentByClass('formInputGroup');
+    if (!$.isOk($container)) {
+        bimp_msg('Une erreur est survenue. opération impossible', 'danger', null, true);
+        return;
+    }
+
+    if ($container.data('field_name') !== inputName) {
+        bimp_msg('Une erreur est survenue. opération impossible ici', 'danger', null, true);
+        return;
+    }
+
+    var max_items = parseInt($container.data('max_items'));
+
+    if (!isNaN(max_items) && max_items > 0) {
+        if ($container.children('.formGroupMultipleItems').children('.formGroupMultipleItem').length >= max_items) {
+            bimp_msg('Vous ne pouvez ajouter que ' + max_items + ' élément(s)', 'warning', null, true);
+            return;
+        }
+    }
+
+    var $template = $container.children('div.dataInputTemplate');
+    var $index = $container.find('[name="' + inputName + '_nextIdx"]');
+    if ($template.length) {
+        if ($index.length) {
+            var html = $template.html();
+            var index = parseInt($index.val());
+            var regex = new RegExp('idx', 'g');
+            html = html.replace(regex, index);
+            index++;
+            var $list = $container.find('div.formGroupMultipleItems');
+            var $form = $container.findParentByTag('form');
+            if ($list.length) {
+                $list.append(html);
+                var $item = $list.find('.formGroupMultipleItem').last();
+                setInputsEvents($item);
+                setCommonEvents($item);
+                if ($form.length) {
+                    setContainerDisplayIfEvents($form, $item);
+                }
+                $index.val(index);
+                return;
+            }
+        }
+    }
+}
+
+function removeFormGroupMultipleItem($button) {
+    if ($.isOk($button)) {
+        var $container = $button.findParentByClass('formGroupMultipleItem');
+
+        if ($.isOk($container)) {
+            $container.remove();
+            return;
+        }
+    }
+
+    bimp_msg('Une erreur est survenue, opération abandonnée (Conteneur absent ou invalide)', 'danger', null, true);
+}
+
 function searchZipTown($input) {
     if (!$.isOk($input)) {
         return;
@@ -1464,6 +1588,9 @@ function resetInputValue($container) {
                     $container.find('.search_list_input').val('');
                     $container.find('.search_input_selected_label').hide().find('span').html('');
                 }
+                if ($container.find('.search_object_input_container').length) {
+                    $container.find('.search_object_input_container').find('.search_object_input').find('input').val('');
+                }
             }
         }
     }
@@ -1499,6 +1626,305 @@ function onCheckListMaxInputChange($container, $input) {
             $container.find('.check_list_max_label').text(max);
             checkCheckList($container);
         }
+    }
+}
+
+function calcTotalCompteurCaisse($container) {
+    if (!$.isOk($container)) {
+        return;
+    }
+
+    var total = 0;
+    var $inputs = $container.find('input.compteur_caisse_input');
+    $inputs.each(function () {
+        var val = parseInt($(this).val());
+        if (!isNaN(val)) {
+            total += val * parseFloat($(this).data('value'));
+        }
+    });
+
+    total = Math.round10(total, -2);
+
+    $container.find('.compteur_caisse_total').text(total);
+    $container.find('.compteur_caisse_total_input').val(total).change();
+}
+
+function selectChecklistItem($container, label) {
+    if (!$.isOk($container)) {
+        bimp_msg('Erreur: liste de choix non trouvée', 'danger');
+        return;
+    }
+
+    var check = false;
+
+    $container.find('.check_list_item').each(function () {
+        var $item = $(this);
+        if ($item.find('label').text().toLowerCase().indexOf(label.toLowerCase()) !== -1 || ("S"+$item.find('label').text()).toLowerCase().indexOf(label.toLowerCase()) !== -1) {
+            if (!check) {
+                var $cb = $item.find('input[type=checkbox]');
+                if ($cb.length) {
+                    if ($cb.prop('checked')) {
+                        bimp_msg('L\'option "' + label + '" est déjà sélectionnée', 'warning', null, true);
+                    } else {
+                        $cb.prop('checked', true);
+                        $container.children('.check_list_search_input').children('input').change();
+                    }
+                }
+                check = true;
+            }
+        }
+    });
+
+    if (!check) {
+        bimp_msg('Option "' + label + '" non trouvée', 'warning', null, true);
+    }
+}
+
+function onChecklistSearchInputChange($input) {
+    if ($.isOk($input)) {
+        var val = $input.val();
+        var $container = $input.findParentByClass('check_list_search_input');
+        var choices = [];
+        if (typeof (val) === 'string' && val !== '') {
+            if ($.isOk($container)) {
+                var regex1 = new RegExp('^(.*)(' + val + ')(.*)$', 'i');
+                var regex2 = '';
+                if (/^S.+$/i.test(val)) {
+                    regex2 = new RegExp('^(.*)(' + val.replace(/^S(.+)$/i, '$1') + ')(.*)$', 'i');
+                }
+                $container.findParentByClass('check_list_container').find('.check_list_item').each(function () {
+                    if (!$(this).children('input[type=checkbox]').prop('checked')) {
+                        var text = $(this).children('label').text();
+                        if (text) {
+                            if (regex1.test(text)) {
+                                choices.push(text.replace(regex1, '$1<strong>$2</strong>$3'));
+                            } else if (regex2 && regex2.test(text)) {
+                                choices.push(text.replace(regex2, '$1<strong>$2</strong>$3'));
+                            }
+                        }
+                    }
+                });
+                if (choices.length) {
+                    displayInputChoices($input, choices, function ($btn) {
+                        if ($.isOk($btn)) {
+                            var label = $btn.html();
+                            label = label.replace('<strong>', '');
+                            label = label.replace('</strong>', '');
+                            var $checkList = $btn.findParentByClass('check_list_container');
+                            $input.addClass('noEnterCheck');
+                            selectChecklistItem($checkList, label);
+                        }
+                    });
+                }
+            }
+        }
+
+        if (!choices.length) {
+            $container.find('.input_choices').remove();
+        }
+    }
+}
+
+function displayInputChoices($input, choices, onItemSelected) {
+    if (!$.isOk($input)) {
+        return;
+    }
+
+    if (typeof (choices) !== 'undefined' && choices.length) {
+        var input_name = $input.attr('name');
+        var container_id = input_name + '_input_choices';
+        var html = '<div class="input_choices hideOnClickOut" id="' + container_id + '">';
+
+        for (var i in choices) {
+            var label = '';
+            var data = [];
+            var card = '';
+
+            if (typeof (choices[i]) === 'string') {
+                label = choices[i];
+            } else if (typeof (choices[i]) === 'object') {
+                label = choices[i].label;
+                if (typeof (choices[i].data) !== 'undefined') {
+                    data = choices[i].data;
+                }
+                if (typeof (choices[i].card) !== 'undefined') {
+                    card = choices[i].card;
+                }
+            }
+
+            if (label) {
+                html += '<span class="btn btn-light-primary input_choice';
+                if (card) {
+                    html += ' bs-popover';
+                }
+                html += '"';
+
+                if (card) {
+                    data['toggle'] = 'popover';
+                    data['trigger'] = 'hover';
+                    data['container'] = 'body';
+                    data['placement'] = 'bottom';
+                    data['html'] = 'true';
+                    data['content'] = card;
+                }
+
+                for (var name in data) {
+                    html += ' data-' + name + '="' + data[name] + '"';
+                }
+
+                html += '>' + label + '</span>';
+            }
+        }
+
+        html += '</div>';
+
+        $input.parent().find('#' + container_id).remove();
+        $input.after(html);
+        setInputChoicesEvents($input, onItemSelected);
+    }
+}
+
+function loadSearchObjectResults($input, idx) {
+    if ($.isOk($input)) {
+        setTimeout(function () {
+            if (parseInt($input.data('idx')) === idx) {
+                var val = $input.val();
+                var display_results = true;
+                if ($.isOk($input.findParentByClass('searchInputContainer'))) {
+                    display_results = false;
+                } else if ($.isOk($input.findParentByClass('bimp_filter_input_container'))) {
+                    display_results = false;
+                } else if ($.isOk($input.findParentByClass('singleLineForm'))) {
+                    display_results = false;
+                } else if (!parseInt($input.data('display_results'))) {
+                    display_results = false;
+                }
+                if (val) {
+                    var $parent = $input.findParentByClass('search_object_input');
+                    if ($.isOk($parent)) {
+                        $parent.children('.spinner').animate({'opacity': 1}, {'duration': 50});
+                        var ajax_data = $input.data('ajax_data');
+                        ajax_data.search_value = val;
+                        $input.data('last_results_idx', idx);
+                        BimpAjax('getSearchObjectResults', ajax_data, null, {
+                            results_idx: idx,
+                            $input: $input,
+                            $parent: $parent,
+                            display_success: false,
+                            display_results: display_results,
+                            success: function (result, bimpAjax) {
+                                if (parseInt(bimpAjax.results_idx) !== parseInt($input.data('last_results_idx'))) {
+                                    return;
+                                }
+                                $parent.children('.spinner').animate({'opacity': 0}, {'duration': 50});
+                                bimpAjax.$parent.find('.input_choices').remove();
+
+                                if (typeof (result.results) === 'object') {
+                                    var choices = [];
+
+                                    for (var i in result.results) {
+                                        choices.push({
+                                            label: result.results[i].label,
+                                            data: {
+                                                value: result.results[i].id
+                                            },
+                                            card: result.results[i].card
+                                        });
+                                    }
+
+                                    if (choices.length) {
+                                        displayInputChoices(bimpAjax.$input, choices, function ($btn) {
+                                            $('body').find('.popover.fade').remove();
+                                            if ($.isOk($btn)) {
+                                                var id_object = parseInt($btn.data('value'));
+                                                if (!id_object) {
+                                                    bimp_msg('Erreur: ID de l\'objet absent', 'danger');
+                                                } else {
+                                                    var $container = $btn.findParentByClass('search_object_input_container');
+                                                    if (!$.isOk($container)) {
+                                                        bimp_msg('Erreur technique: conteneur absent', 'danger');
+                                                    } else {
+                                                        var html = '';
+                                                        var card = '';
+                                                        var label = '';
+
+                                                        if ($btn.hasClass('bs-popover')) {
+                                                            card = $btn.data('content');
+                                                        }
+
+                                                        if (card) {
+                                                            html = card;
+                                                        } else {
+                                                            label = $btn.html();
+                                                        }
+
+                                                        if (!html) {
+                                                            html = '<span class="success"><i class="fas fa5-check iconLeft"></i></span>';
+                                                            if (label) {
+                                                                html += label;
+                                                            } else {
+                                                                html = 'Objet #' + id_object;
+                                                            }
+                                                        }
+
+                                                        if (bimpAjax.display_results) {
+                                                            var $result = $container.children('.search_object_result');
+
+                                                            if ($result.length) {
+                                                                if ($container.children('.no_item_selected').css('display') !== 'none') {
+                                                                    $container.children('.no_item_selected').fadeOut(250, function () {
+                                                                        $result.html(html).fadeIn(250);
+                                                                    });
+                                                                } else {
+                                                                    $result.fadeOut(250, function () {
+                                                                        $result.html(html).fadeIn(250);
+                                                                    });
+                                                                }
+                                                            }
+                                                        }
+
+                                                        var input_name = $container.data('input_name');
+                                                        if (input_name) {
+                                                            $container.find('[name="' + input_name + '"]').val(id_object).change();
+
+                                                            if (bimpAjax.display_results) {
+                                                                $container.find('[name="' + input_name + '_search"]').val('');
+                                                            } else {
+                                                                $container.find('[name="' + input_name + '_search"]').val($btn.text());
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        });
+                                    }
+                                }
+                            },
+                            error: function () {
+                                $parent.children('.spinner').animate({'opacity': 0}, {'duration': 50});
+                            }
+                        });
+                    }
+                } else {
+                    var $container = $input.findParentByClass('search_object_input_container');
+                    if ($.isOk($container)) {
+                        var input_name = $container.data('input_name');
+                        if (input_name) {
+                            $container.find('[name="' + input_name + '"]').val(0).change();
+                            if (display_results && $container.children('.no_item_selected').css('display') === 'none') {
+                                $container.children('.search_object_result').fadeOut(250, function () {
+                                    $(this).html('');
+                                    $container.children('.no_item_selected').fadeIn(250);
+                                });
+                            } else {
+                                // Par précaution: 
+                                $container.children('.search_object_result').html('').hide();
+                            }
+                        }
+                    }
+                }
+            }
+        }, 350);
     }
 }
 
@@ -1670,39 +2096,7 @@ function setFormEvents($form) {
         return;
     }
 
-    // Gestion automatique des affichages d'options supplémentaires lorsque certains input prennent certaines valeurs.
-    // placer les champs optionnels dans un container avec class="display_if". 
-    // Et Attributs: 
-    // data-input_name=nom_input_a_checker (string)
-    // data-show_values=valeur(s)_pour_afficher_container (string ou objet)
-    // data-hide_values=valeur(s)_pour_masquer_container (string ou objet)
-
-    $form.find('.display_if').each(function () {
-        var $container = $(this);
-        var input_name = $container.data('input_name');
-        if (input_name) {
-            var $input = $form.find('[name=' + input_name + ']');
-            if ($input.length) {
-                $input.change(function () {
-                    toggleInputDisplay($container, $(this));
-                });
-            }
-        } else {
-            var inputs_names = $container.data('inputs_names');
-            if (inputs_names) {
-                inputs_names += '';
-                inputs_names = inputs_names.split(',');
-                for (var i in inputs_names) {
-                    var $input = $form.find('[name="' + inputs_names[i] + '"]');
-                    if ($input.length) {
-                        $input.change(function () {
-                            toggleInputDisplay($container, $(this));
-                        });
-                    }
-                }
-            }
-        }
-    });
+    setContainerDisplayIfEvents($form, $form);
 
     resetInputDisplay($form);
     setInputsEvents($form);
@@ -1725,6 +2119,49 @@ function setFormEvents($form) {
         e.preventDefault();
         e.stopPropagation();
         submitForm($form.attr('id'));
+    });
+}
+
+function setContainerDisplayIfEvents($form, $container) {
+    // Gestion automatique des affichages d'options supplémentaires lorsque certains input prennent certaines valeurs.
+    // placer les champs optionnels dans un container avec class="display_if". 
+    // Et Attributs: 
+    // data-input_name=nom_input_a_checker (string)
+    // data-show_values=valeur(s)_pour_afficher_container (string ou objet)
+    // data-hide_values=valeur(s)_pour_masquer_container (string ou objet)
+
+    if (!$.isOk($container) || !$.isOk($form)) {
+        return;
+    }
+
+    $container.find('.display_if').each(function () {
+        var $displayIf = $(this);
+        if (!parseInt($displayIf.data('display_if_events_init'))) {
+            var input_name = $displayIf.data('input_name');
+            if (input_name) {
+                var $input = $form.find('[name=' + input_name + ']');
+                if ($input.length) {
+                    $input.change(function () {
+                        toggleInputDisplay($displayIf, $(this));
+                    });
+                }
+            } else {
+                var inputs_names = $displayIf.data('inputs_names');
+                if (inputs_names) {
+                    inputs_names += '';
+                    inputs_names = inputs_names.split(',');
+                    for (var i in inputs_names) {
+                        var $input = $form.find('[name="' + inputs_names[i] + '"]');
+                        if ($input.length) {
+                            $input.change(function () {
+                                toggleInputDisplay($displayIf, $(this));
+                            });
+                        }
+                    }
+                }
+            }
+            $displayIf.data('display_if_events_init', 1);
+        }
     });
 }
 
@@ -1833,9 +2270,19 @@ function setInputContainerEvents($inputContainer) {
 
 function setInputsEvents($container) {
     var in_modal = $.isOk($container.findParentByClass('modal'));
+    $container.find('input').add($container.find('textarea')).focus(function () {
+        if (typeof (text_input_focused) !== 'undefined') {
+            text_input_focused = true;
+        }
+    }).blur(function () {
+        if (typeof (text_input_focused) !== 'undefined') {
+            text_input_focused = false;
+        }
+    });
     $container.find('select').each(function () {
         if (!$(this).data('select_2_converted')) {
             if (!$.isOk($(this).findParentByClass('subObjectFormTemplate')) &&
+                    !$.isOk($(this).findParentByClass('dataInputTemplate')) &&
                     !$(this).hasClass('no_select2')) {
                 if ($(this).hasClass('select2-hidden-accessible')) {
                     $(this).select2('destroy');
@@ -2205,6 +2652,32 @@ function setInputsEvents($container) {
                 });
             });
 
+            var $input = $checkListContainer.find('.check_list_search_input').find('input');
+
+            if ($input.length) {
+                $input.change(function () {
+                    onChecklistSearchInputChange($(this));
+                });
+
+                $input.click(function (e) {
+                    e.stopPropagation();
+                    $input.change();
+                });
+
+                $input.keyup(function (e) {
+                    if ($(this).hasClass('noEnterCheck')) {
+                        $(this).removeClass('noEnterCheck');
+                    } else {
+                        if (e.key === 'Enter' || e.key === 'Tab') {
+                            selectChecklistItem($(this).findParentByClass('check_list_container'), $(this).val());
+                            $(this).val('').change();
+                        } else if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') {
+                            onChecklistSearchInputChange($(this));
+                        }
+                    }
+                });
+            }
+
             checkCheckList($checkListContainer);
             $(this).data('check_list_events_init', 1);
         }
@@ -2250,6 +2723,33 @@ function setInputsEvents($container) {
             });
 
             $(this).data('compteur_event_init', 1);
+        }
+    });
+    $container.find('.search_object_input_container').each(function () {
+        if (!parseInt($(this).data('search_object_input_events_init'))) {
+            var $input = $(this).children('.search_object_input').children('input');
+
+            if ($input.length) {
+                $input.keyup(function (e) {
+                    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp' && e.key !== 'Enter') {
+                        e.preventDefault();
+                        var idx = parseInt($input.data('idx'));
+                        if (isNaN(idx)) {
+                            idx = 0;
+                        }
+                        idx++;
+                        $input.data('idx', idx);
+                        loadSearchObjectResults($input, idx);
+                    }
+                }).keydown(function (e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    }
+                });
+            }
+
+            $(this).data('search_object_input_events_init', 1);
         }
     });
 }
@@ -2511,24 +3011,94 @@ function setSortableMultipleValuesHandlesEvents($container) {
     }
 }
 
-function calcTotalCompteurCaisse($container) {
-    if (!$.isOk($container)) {
-        return;
-    }
+function setInputChoicesEvents($input, onItemSelected) {
+    if ($.isOk($input)) {
+        if (!parseInt($input.data('input_choices_events_init'))) {
+            $input.unbind('keydown');
+            $input.keydown(function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
 
-    var total = 0;
-    var $inputs = $container.find('input.compteur_caisse_input');
-    $inputs.each(function () {
-        var val = parseInt($(this).val());
-        if (!isNaN(val)) {
-            total += val * parseFloat($(this).data('value'));
+                var $choices = $input.parent().find('.input_choices');
+                if ($.isOk($choices)) {
+                    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        var $btn = $choices.find('.btn');
+                        if ($btn.length) {
+                            var n = 0;
+                            var i = 1;
+                            $btn.each(function () {
+                                if (!n) {
+                                    if ($(this).hasClass('selected')) {
+                                        n = i;
+                                    }
+                                }
+                                i++;
+                            });
+                            if (e.key === 'ArrowDown') {
+                                if (!n) {
+                                    n = 1;
+                                } else {
+                                    n++;
+                                }
+                                if (n > $btn.length) {
+                                    n = 1;
+                                }
+                            } else {
+                                if (n) {
+                                    n--;
+                                }
+                                if (!n) {
+                                    n = $btn.length;
+                                }
+                            }
+                            var $new = $choices.find('.btn').eq(n - 1);
+                            if ($new.length) {
+                                $btn.removeClass('selected');
+                                $new.addClass('selected');
+                            }
+                        }
+                    } else if (e.key === 'Enter') {
+                        var $btn = $choices.find('.btn.selected');
+                        if ($btn.length === 1) {
+                            $btn.click();
+                            $choices.remove();
+                        }
+                    }
+                }
+            }).keyup(function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            });
+            $input.data('input_choices_events_init', 1);
         }
-    });
 
-    total = Math.round10(total, -2);
+        var $choices = $input.parent().find('.input_choices');
+        if ($choices.length) {
+            if (!parseInt($choices.data('input_choices_events_init'))) {
+                $choices.find('.btn').each(function () {
+                    $(this).click(function (e) {
+                        e.stopPropagation();
 
-    $container.find('.compteur_caisse_total').text(total);
-    $container.find('.compteur_caisse_total_input').val(total).change();
+                        if (typeof (onItemSelected) === 'function') {
+                            onItemSelected($(this));
+                        } else {
+                            $input.val($(this).html());
+                        }
+                        $choices.remove();
+                    });
+                });
+
+                setCommonEvents($choices.parent());
+                $choices.data('input_choices_events_init', 1);
+            }
+        }
+    }
 }
 
 $(document).ready(function () {

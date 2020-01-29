@@ -18,6 +18,9 @@ fields:
     statut: 
         label: Statut
         type: int
+    datec:
+        label: Créer le
+        type: date
     datep: 
         label: Date
         type: date
@@ -41,6 +44,9 @@ fields:
     note: 
         label: Note
         type: text
+    exported:
+        label: Comptabilisée
+        type: int
         
 #    Champs extra: 
     type: 
@@ -48,9 +54,6 @@ fields:
         values: 
             array: modeReglements
         extra: 1   
-    exported:
-        label: Comptabilisée
-        type: int
     
 forms: 
     default: 
@@ -241,6 +244,7 @@ lists_cols:
                 type: search_object
                 options: 
                     object: facture
+                    card: light
     client: 
         label: Client
         value: 

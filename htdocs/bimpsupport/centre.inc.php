@@ -18,7 +18,7 @@ global $tabCentre;
         "P"     => array("09 71 002 450", "sav66@bimp.fr", "Perpignan", 215, "1187559", "66000", "Perpignan", "9 Boulevard Georges Clemenceau", 40),
         "N"     => array("04 66 842 974", "sav30@bimp.fr", "Nîmes", 217, "1187562", "30900", "Nîmes", "Centre commercial Cap Costière, 400 Avenue Claude Baillet", 39),
         "MONTP" => array("04 67 555 111", "sav34@bimp.fr", "Montpellier", 218, "1187561", "34000", "Montpellier", "36 Rue Saint-Guilhem", 38),
-        "MAU"   => array("04 67 222 143", "sav341@bimp.fr", "Mauguio", 221, "1187560", "34130", "Mauguio", "39 Rue René Fonck", 37),
+        "MAU"   => array("04 67 222 333", "sav341@bimp.fr", "Mauguio", 221, "1187560", "34130", "Mauguio", "39 Rue René Fonck", 37),
         "BB"    => array("09 53 01 39 84", "sav01@bimp.fr", "Bourg-en-Bresse", 58, "1199659", "01000", "Bourg-en-Bresse", "20 Avenue des granges barde", 1)
     );
 

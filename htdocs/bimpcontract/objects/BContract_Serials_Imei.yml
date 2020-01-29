@@ -1,0 +1,129 @@
+
+table: bcontract_serials
+
+labels:
+    name: Numéro de série et IMEI
+    name_plur: Numéros de série et IMEIs
+
+
+objects:
+    contrat:
+        instance:
+            bimp_object:
+                module: bimpcontract
+                name: BContract_contrat
+            id_object:
+                field_value: id_contrat        
+    
+    equipment:
+        instance:
+            bimp_object:
+                module: bimpequipment
+                name: Equipment
+            id_object:
+                field_value: id_equipment
+
+fields:
+    id_contrat:
+        label: Contrat N°
+        type: id_object
+        object: contrat
+    id_line:
+        label: Ligne du contrat
+        type: int
+    serial:
+        label: N° de série
+        type: string
+    imei:
+        label: N° IMEI
+        type: string
+    id_equipment:
+        label: Equipement BIMP
+        type: id_object
+        object: equipment
+
+lists:
+    default:
+        configurable: 0
+        enable_search: 0
+        enable_sort: 0
+        filters_panel: default
+        add_object_row: 0
+        filters_panel_open: 0
+        edit_btn: 1
+        edit_form: modif
+        extra_btn: 
+            callback: getDefaultListExtraButtons
+        cols:
+            id_contrat:
+                field: id_contrat
+            serial:
+                field: serial
+            imei:
+                field: imei
+            id_equipment:
+                field: id_equipment
+            etat_couverture:
+                label: Etat de la couverture
+                value:
+                    callback: contrat_is_open
+    
+    contrat:
+        extends: default
+        filters_panel: unset
+        list_filters:
+            callback: getFilterList
+        cols:
+            id_contrat: unset
+            
+    bimp:
+        checkboxes: 1
+        add_form_name: add
+        extends: default
+        extra_btn: unset
+        list_filters:
+            callback: getFilterList
+        cols:
+            id_contrat: unset
+            service:
+                label: Service associé
+                value:
+                    callback: getAssociateService
+
+forms:
+    add:
+        rows:
+            - custom: 1
+              label: Service associé aux numéro de série
+              input_name: attached_service
+              input: 
+                type: select
+              values: 
+                callback: list_service
+            - custom: 1
+              label: Séparateur de numéro de série
+              input_name: attached_serials_separator
+              input: 
+                type: select
+              values:
+                  array: type_separator
+            - custom: 1
+              label: Liste des numéros de série
+              input_name: attached_serials
+              input: 
+                type: html
+    
+    modif:
+        rows:
+            - field: serial
+                
+                
+        
+filters_panels: 
+    default: 
+        show: 1
+        filters: 
+            serial: 
+                field: serial
+            imei:
+                field: imei

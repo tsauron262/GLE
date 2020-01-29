@@ -10,7 +10,8 @@ class Bimp_Product_Entrepot extends BimpObject
 
     public function __construct($module, $object_name)
     {
-        $this->dateBilan = date('2019-10-01 00:00:01');
+//        $this->dateBilan = date('2019-10-01 00:00:01');
+        $this->dateBilan = date('2020-01-01 00:00:01');
         if (is_null(static::$product_instance)) {
             static::$product_instance = BimpObject::getInstance('bimpcore', 'Bimp_Product');
         }
@@ -124,7 +125,7 @@ class Bimp_Product_Entrepot extends BimpObject
         $html = '';
         $html .= 'Produits/Entrepot';
         if($this->dateBilan)
-            $html .= ' date de valeur  < '.dol_print_date ($this->dateBilan). ' (Stock Date, Stock show room, Nb Ventes, Ventes a NB mois)';
+            $html .= ' date de valeur  < '.dol_print_date ($this->db->db->jdate($this->dateBilan)). ' (Stock Date, Stock show room, Nb Ventes, Ventes a NB mois)';
         return $html;
     }
 
@@ -313,5 +314,31 @@ class Bimp_Product_Entrepot extends BimpObject
         }
 
         return $fields;
+    }
+    
+    public function displayStockDesire(){
+        $stockAlert = $this->getStockAlert();
+        if(isset($stockAlert[$this->getData("fk_product")]) && isset($stockAlert[$this->getData("fk_product")][$this->getData("fk_entrepot")]))
+            return $stockAlert[$this->getData("fk_product")][$this->getData("fk_entrepot")]['desiredstock'];
+        return 0;
+    }
+    public function displayStockAlert(){
+        $stockAlert = $this->getStockAlert();
+        if(isset($stockAlert[$this->getData("fk_product")]) && isset($stockAlert[$this->getData("fk_product")][$this->getData("fk_entrepot")]))
+            return $stockAlert[$this->getData("fk_product")][$this->getData("fk_entrepot")]['seuil_stock_alerte'];
+        return 0;
+    }
+    
+    public function getStockAlert(){
+        $clef = "stockAlertEntrepot";
+        if(!isset(BimpCache::$cache[$clef])){
+            BimpCache::$cache[$clef] = array();
+            $sql = $this->db->db->query("SELECT * FROM `".MAIN_DB_PREFIX."product_warehouse_properties`");
+            while ($ln = $this->db->db->fetch_object($sql)){
+                BimpCache::$cache[$clef][$ln->fk_product][$ln->fk_entrepot] = array("seuil_stock_alerte"=>$ln->seuil_stock_alerte, "desiredstock"=>$ln->desiredstock);
+            }
+        }
+            
+        return BimpCache::$cache[$clef];
     }
 }

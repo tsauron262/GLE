@@ -1,8 +1,12 @@
 bootstrap: 1
 table: contratdet
 
+parent_module: bimpcontract
 parent_id_property: fk_contrat
 parent_object: BContract_contrat
+
+header_btn: 
+    callback: getActionsButtons
 
 dol_object: 
     instance: 
@@ -41,7 +45,7 @@ fields:
         label: Contrat
         type: int
     fk_product:
-        label: produit
+        label: Produit
         type: id_object
         object: produit
         required: 1
@@ -54,9 +58,11 @@ fields:
                 type: search_product
                 societe_type: customer    
     qty:
-        label: Qté service
+        label: Qté
         type: qty
         default_value: 1
+    serials:
+        label: N° de série
     price_ht:
         label: P.U HT
         type: money
@@ -74,19 +80,6 @@ fields:
     remise:
         label: Total remise
         type: money
-    # Extrafields
-    serials:
-        label: Numéros de série
-        dol_extra_field: 1
-        type: string
-        input:
-            help: Merci de séparer les numéros de série par une virgule (,)
-    nb_materiel:
-        label: Qté matériel
-        dol_extra_field: 1
-        default_value: 0
-        type: qty
-
 lists: 
     default: 
         title: Lignes du contrat
@@ -96,7 +89,6 @@ lists:
         n: 20
         checkbox: 1
         add_object_row: 0
-        update_btn: 1
         edit_btn: 1
         edit_form: default
         add_form_name: add
@@ -121,10 +113,14 @@ lists:
                 field: price_ht
             total_ttc:
                 field: total_ttc
-            nb_materiel:
-                field: nb_materiel
-            serials:
-                field: serials
+    interface_client:
+        edit_btn: 0
+        extends: default
+        cols:
+            fk_product: unset
+            qty: unset
+        list_filters: 
+            callback: getListFilters
 forms:
     default:
         rows:
@@ -141,18 +137,41 @@ forms:
             
     add:
         rows:
-            - field: description
             - field: fk_product
-            - field: qty
-            - custom: 1
-              input:
-                  type: qty
-              label: Nb matériel
-              value: 0
               input_name: nb_materiel
-            - field: serials
+            - field: qty
             - field: remise_percent
             - field: tva_tx
+    add_serial:
+        rows:
+            - custom: 1
+              label: Numéros de séries
+              input_name: serials
+              value:
+                  callback: 
+                      method: displaySerialsList
+                      params:
+                          - 1
+              input:
+                  type: textarea
+                  help: Merci de séparer les numéros de séries par un saut de ligne
+    rebase_serial:
+        rows:
+            - custom: 1
+              label: Numéro de série à remplacer
+              input_name: old_serial
+              input: 
+                  type: select
+              values: 
+                  array: 
+                    callback: getArraySerials
+            - custom: 1
+              label: Nouveau numéro de série
+              input_name: new_serial
+              required: 1
+              input: 
+                  type: text
+              
 
 fields_tables:
     infos:
@@ -160,13 +179,16 @@ fields_tables:
         rows:
             - field: fk_product
               display: nom
-            - field: price_ht
-              label: Prix unitaire hors-taxe
-            - field: qty
-              label: Quantitée dans le contrat
-            - field: nb_materiel
-              label: Nombre de matériels couverts par ce service
-            
+              label: Service
+#            - field: price_ht
+#              label: Prix unitaire hors-taxe
+#            - field: qty
+#              label: Quantitée dans le contrat
+#            - field: nb_materiel
+#              label: Nombre de matériels couverts par ce service
+            - label: Numéro(s) de série lié(s) à cette ligne de service
+              value: 
+                  callback: displaySerialsList
 
 views:
     default: 

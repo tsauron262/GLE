@@ -1,5 +1,4 @@
 <?php
-
 /*
  * * BIMP-ERP by Synopsis et DRSI
  *
@@ -31,6 +30,20 @@ llxHeader();
 //    echo "<script>$(window).on('load', function() {initSynchServ(idActionMax);});</script>";
 
 $text=$langs->trans("Tools")." Synopsis";
+
+
+if(GETPOST('action') == "addProdCatExtra"){
+    $extrafields = new ExtraFields($db);
+    $extrafields->addExtraField('gamme', 'Gamme', 'varchar', 100, 255, 'product');
+    $extrafields->addExtraField('categorie', 'Categorie', 'varchar', 100, 255, 'product');
+    $extrafields->addExtraField('nature', 'Nature', 'varchar', 100, 255, 'product');
+    $extrafields->addExtraField('collection', 'Collection', 'varchar', 100, 255, 'product');
+    $extrafields->addExtraField('famille', 'Famille', 'varchar', 100, 255, 'product');
+    
+    
+    echo "extra OK";
+}
+
 
 print load_fiche_titre($text);
 if (isset($user->rights->SynopsisTools->Global->phpMyAdmin)) {

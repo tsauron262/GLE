@@ -208,7 +208,7 @@ class pdf_bimpsupport_pret extends ModeleBimpSupport
                                 $pdf->SetXY(5, $y);
                                 $pdf->MultiCell(28, 6, $product->ref, 0, 'C');
                                 $pdf->SetXY(35, $y);
-                                $pdf->MultiCell(60, 6, $product->label . " (" . $equipment->getData('serial') . ")", 0, 'C');
+                                $pdf->MultiCell(60, 6, substr($product->label, 0, 40) . " (" . $equipment->getData('serial') . ")", 0, 'C');
                                 $pdf->SetXY(97, $y);
                                 $pdf->MultiCell(33, 6, price($product->price), 0, 'C');
                                 $pdf->SetXY(127, $y);
@@ -232,7 +232,7 @@ class pdf_bimpsupport_pret extends ModeleBimpSupport
                             $pdf->SetXY(5, $y);
                             $pdf->MultiCell(28, 6, $equipment->getData('serial'), 0, 'C');
                             $pdf->SetXY(35, $y);
-                            $pdf->MultiCell(60, 6, $equipment->getData('product_label'), 0, 'C');
+                            $pdf->MultiCell(60, 6, substr($equipment->getData('product_label'), 0, 40) . " (" . $equipment->getData('serial') . ")", 0, 'C');
                             $pdf->SetXY(97, $y);
                             $pdf->MultiCell(33, 6, price($price_ht), 0, 'C');
                             $pdf->SetXY(127, $y);

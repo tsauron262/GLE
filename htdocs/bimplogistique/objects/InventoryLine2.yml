@@ -1,0 +1,97 @@
+table: bl_inventory_det_2
+
+parent_module: bimplogistique
+parent_object: Inventory
+parent_id_property: fk_inventory
+
+#object:
+#    warehouse_type: 
+#        relation: hasOne
+#        delete: 0
+#        instance: 
+#            bimp_object: 
+#                module: bimplogistique
+#                name: InventoryWarehouse
+#            id_object: 
+#                field_value: fk_warehouse_type
+    
+fields: 
+    qty:
+        label: Quantité
+        type: int
+                
+    fk_inventory:
+        label: Id de l'inventaire
+        type: id_object
+        object: inventory
+        
+    fk_product:
+        label: Produit
+        type: id_object
+        object: product
+
+    fk_equipment:
+        label: Équipement
+        type: id_object
+        object: equipment
+        
+    fk_warehouse_type:
+        label: Entrepôt/Type
+#        type: id_object
+#        object: warehouse_type
+#        content: 
+#            callback: renderWarehouseTypeName
+        
+lists:
+    default:
+       objects_change_reload: Inventory
+       delete_btn: 1
+       sort_field: id
+       sort_way: desc
+       n: 50
+       cols:
+           fk_product: 
+               field: fk_product
+               display: nom_url
+           fk_equipment: 
+               field: fk_equipment
+               display: nom_url
+           qty: 
+               field: qty
+               
+           fk_warehouse_type:
+               label: Entrepôt/Type
+               value:
+                   callback: renderWarehouseTypeName
+               
+#           fk_warehouse_type:
+#               field: fk_warehouse_type
+#               value: renderWarehouseTypeName
+#              object: warehouse_type
+#              label: Entrepôt/type
+#              callback: renderName
+
+#           nb_scanned:
+#               label: TODO entrepot/type
+#               object: warehouse_type
+#               value: TODO
+
+#           fk_warehouse_type: 
+#              custom: 1
+#              object: warehouse_type
+#              label: Entrepôt/Type
+#              content: 
+#                  callback: renderWarehouseType
+           date_create:
+               field: date_create
+           user_create:
+               field: user_create
+               
+    equipment:
+        extends: default
+        cols:
+            qty: unset
+            fk_warehouse:
+                field: fk_warehouse
+                child: parent
+                display: nom_url

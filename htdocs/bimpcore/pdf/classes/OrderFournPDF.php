@@ -27,6 +27,8 @@ class OrderFournPDF extends BimpDocumentPDF
         $this->pdf->addCgvPages = false;
 
         $this->target_label = 'Fournisseur';
+
+        $this->hideReduc = true;
     }
 
     protected function initData()
@@ -85,7 +87,7 @@ class OrderFournPDF extends BimpDocumentPDF
                             if ($entrepot->zip) {
                                 $html .= $entrepot->zip . ' ';
                             } else {
-                                $html .= '<span style="color: #A00000; font-weight: bold">Code postal non défini</span> ';
+                                $html .= '<span style="color: #A00000; font-weight: bold">Code postal non défini</span>';
                             }
                             if ($entrepot->town) {
                                 $html .= $entrepot->town;
@@ -133,10 +135,14 @@ class OrderFournPDF extends BimpDocumentPDF
                     break;
 
                 case Bimp_CommandeFourn::DELIV_DIRECT:
-                    $id_contact = (int) $this->bimpCommObject->getIdContactLivraison();
+                    $id_contact = (int) $this->bimpCommObject->getIdContact();
                     if ($id_contact) {
                         $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $id_contact);
                         if (BimpObject::objectLoaded($contact)) {
+                            $soc = $contact->getParentInstance();
+                            if (BimpObject::objectLoaded($soc) && $soc->isCompany()) {
+                                $html .= '<span style="font-weight: bold">' . $soc->getData('nom') . '</span><br/>';
+                            }
                             $html .= '<span style="font-weight: bold">' . $contact->getData('firstname') . ' ' . $contact->getData('lastname') . '</span><br/>';
                             $html .= $contact->getData('address') . '<br/>';
                             $html .= $contact->getData('zip') . ' ' . $contact->getData('town') . '<br/>';

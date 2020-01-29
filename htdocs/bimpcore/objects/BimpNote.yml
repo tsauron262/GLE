@@ -102,7 +102,8 @@ fields:
             array: userGroups
     auto:
         label: Note Auto
-        type: boolean
+#        type: boolean => n'existe pas !! 
+        type: bool
         default_value: 0
         
 forms: 

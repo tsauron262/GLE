@@ -46,6 +46,7 @@
             }
         }
     }
+    
     .formGroupButtons {
         display: block;
         text-align: right;
@@ -55,7 +56,9 @@
         }
     }
 
-    &.subObjectForm {
+    &.subObjectForm,
+    .formGroupMultipleItem {
+        margin-bottom: 10px; 
         border: 1px solid #969696;
         padding: 10px;
     }
@@ -115,6 +118,8 @@
         .select2 {
             min-width: 160px;
         }
+
+
     }
 }
 
@@ -215,6 +220,10 @@ input, select {
     background-color: #fff;
     color: #3C3C3C;
     @include transition(all 0.5s ease);
+}
+
+.elect2-selection__rendered {
+    text-align: left;
 }
 
 .inputContainer.value_required,
@@ -374,20 +383,40 @@ select.switch {
         }
     }
 }
-.search_input_results {
+
+.search_input_results,
+.input_choices {
     position: absolute;
     z-index: 99999;
     background-color: #fff;
     min-width: 120px;
     box-shadow: 4px 4px 4px #505050;
     padding: 0 15px;
-
-    button {
+    overflow-y: auto;
+    max-height: 600px;
+    
+    button,
+    .btn {
         display: block;
         width: 100%;
         text-align: left;
     }
 }
+
+.search_object_input {
+    .input_choices {
+        min-width: 320px;
+    }
+}
+.search_input_selected_label {
+    font-weight: bold;
+    color: $gray-dark;
+
+    i.fa-check {
+        color: $success;
+    }
+}
+
 .switchOption {
     &.selected {
         color: #fff!important;
@@ -522,14 +551,6 @@ select.switch {
     display: none;
     margin: 10px 0;
 }
-.search_input_selected_label {
-    font-weight: bold;
-    color: $gray-dark;
-
-    i.fa-check {
-        color: $success;
-    }
-}
 
 .texarea_values {
     padding-left: 10px;
@@ -583,12 +604,47 @@ input[type=text].large_input {
     }
 }
 
+.search_object_input_container {
+    .search_object_input {
+        & > .search_icon {
+            margin-left: 6px;
+        }
+        & > .spinner {
+            opacity: 0;
+
+            i {
+                font-size: 16px;
+                color: $info;
+            }
+        } 
+    }
+
+    .search_object_result {
+        margin-top: 15px;
+    }
+}
+
 /*Check lists:*/ 
 
 .check_list_container {
     max-height: 450px;
     overflow-y: auto;
     margin: 10px;
+
+    & > .check_list_search_input {
+        padding: 5px;
+        background-color: #DCDCDC;
+        max-width: 320px;
+
+        & > span.searchIcon {
+            display: inline-block;
+            width: 10%;
+        }
+
+        & > input {
+            width: 85%!important;
+        }
+    }
 }
 .check_list_item,
 .check_list_group_caption {
@@ -683,6 +739,7 @@ input[type=text].large_input {
 
     border-left: 1px dotted #B4B4B4;
 }
+
 /*Free Forms*/
 
 .freeForm {
@@ -767,6 +824,10 @@ input[type=text].large_input {
 }
 
 .bimp_form {
+    label {
+        font-weight: bold;
+    }
+
     .bimp_form_row {
         width: 100%;
         margin-bottom: 10px;
@@ -812,6 +873,20 @@ input[type=text].large_input {
             width: 250px !important;
             max-width: 100%!important;
         }
+
+        .search_object_input_container {
+            display: inline-block;
+
+            input {
+                min-width: 220px;
+            }
+
+            .search_icon,
+            .search_object_result,
+            .no_item_selected {
+                display: none!important;
+            }
+        }
     }
 
     .inputContainer {
@@ -823,4 +898,22 @@ input[type=text].large_input {
             display: none;
         }
     }
+}
+
+/*Eléments masqués*/
+
+.searchInputContainer,
+.bimp_filter_input_container {
+    .search_object_input_container {
+        .search_icon,
+        .spinner,
+        .search_object_result,
+        .no_item_selected {
+            display: none!important;
+        }
+    }
+
+    .check_list_search_input {
+        display: none!important;
+    }   
 }

@@ -284,7 +284,7 @@ class BS_Ticket extends BimpObject
             )
         );
 
-        $key = '(SELECT COUNT(DISTINCT cdet.rowid) FROM llx_contratdet cdet WHERE cdet.fk_contrat = a.rowid AND (cdet.date_cloture IS NULL OR cdet.date_cloture > NOW()))';
+        $key = '(SELECT COUNT(DISTINCT cdet.rowid) FROM '.MAIN_DB_PREFIX.'contratdet cdet WHERE cdet.fk_contrat = a.rowid AND (cdet.date_cloture IS NULL OR cdet.date_cloture > NOW()))';
         $filters[$key] = array(
             'operator' => '>',
             'value'    => '0'

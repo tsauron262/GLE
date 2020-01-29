@@ -111,6 +111,8 @@ class SavRestitutePDF extends PropalSavPDF
     {
         parent::initData();
 
+        $this->pdf->addCgvPages = false;
+        
         if (BimpObject::objectLoaded($this->object) && BimpObject::objectLoaded($this->sav)) {
             Propal::STATUS_BILLED;
             $line = new PropaleLigne($this->db);
@@ -119,8 +121,42 @@ class SavRestitutePDF extends PropalSavPDF
         }
     }
 
-    public function getPaymentInfosHtml()
-    {
-        return '';
+    public function getBottomRightHtml(){
+        $html = '<br/>';
+        $html .= '<table style="width: 95%" cellpadding="3">';
+
+        /* if (!is_null($this->contact) && isset($this->contact->id) && $this->contact->id) {
+          $html .= '<tr>';
+          $html .= '<td style="text-align: center;">' . $this->contact->lastname . ' ' . $this->contact->firstname;
+          $html .= (isset($this->contact->poste) && $this->contact->poste ? ' - ' . $this->contact->poste : '') . '</td>';
+          $html .= '</tr>';
+          } */
+
+        $html .= '<tr>';
+//        $html .= '<td style="text-align: center;">Cachet, Date, Signature et mention <b>"Bon pour Commande"</b></td>';
+        $html .= '<td style="text-align:center;"><i><b>Je reconnais avoir récupéré ce jour mon matériel :</b></i></td>';
+
+        $html .= '<td></td>';
+        $html .= '</tr>';
+        $html .= '<tr>';
+        $html .= '<td>Nom :</td>';
+
+        $html .= '<td rowspan="4" style="border-top-color: #505050; border-left-color: #505050; border-right-color: #505050; border-bottom-color: #505050;"><br/><br/><br/><br/><br/></td>';
+        $html .= '</tr>';
+
+        $html .= '<tr>';
+        $html .= '<td>Prénom :</td>';
+        $html .= '</tr>';
+
+        $html .= '<tr>';
+        $html .= '<td>Date :</td>';
+        $html .= '</tr>';
+
+        $html .= '</table>';
+        return $html;
+    }
+    
+    public function getBottomLeftHtml(){
+        
     }
 }

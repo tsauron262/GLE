@@ -150,18 +150,34 @@ function getListData($list) {
     if ($listFilters.length) {
         if ($listFilters.data('list_identifier') === $list.attr('id')) {
             data['filters_panel_values'] = getAllListFieldsFilters($listFilters);
+
+            var $input = $listFilters.find('select[name="id_filters_to_load"]');
+            if ($input.length) {
+                var id_list_filters = parseInt($input.val());
+                if (id_list_filters && !isNaN(id_list_filters)) {
+                    data['id_current_list_filters'] = id_list_filters;
+                }
+            }
         }
     }
 
     return data;
 }
 
-function reloadObjectList(list_id, callback) {
+function reloadObjectList(list_id, callback, full_reload, id_config) {
     var $list = $('#' + list_id);
 
     if (!$list.length) {
 //        console.error('Erreur technique: identifiant de la liste invalide (' + list_id + '). Echec du rechargement de la liste');
         return;
+    }
+
+    if (typeof (full_reload) === 'undefined') {
+        full_reload = false;
+    }
+
+    if (typeof (id_config) === 'undefined') {
+        id_config = 0;
     }
 
     $list.find('.headerTools').find('.loadingIcon').css('opacity', 1);
@@ -170,6 +186,14 @@ function reloadObjectList(list_id, callback) {
     var object_name = $list.data('object_name');
 
     var data = getListData($list);
+
+    if (full_reload) {
+        data['full_reload'] = 1;
+    }
+
+    if (id_config) {
+        data['param_id_config'] = id_config;
+    }
 
     // Envoi requête:
     var error_msg = 'Une erreur est sruvenue. La liste des ';
@@ -180,15 +204,33 @@ function reloadObjectList(list_id, callback) {
     }
     error_msg += ' n\'a pas pu être rechargée';
 
+    // Permet d'éviter un écrasement du HTML si un nouveau refresh est demandé avant le retour ajax.
+    // Uile notamment lorsque l'utilisateur sélectionne plusieurs filtres d'affilé
+    var refresh_idx = parseInt($list.data('refresh_idx'));
+    if (isNaN(refresh_idx)) {
+        refresh_idx = 0;
+    }
+    refresh_idx++;
+    $list.data('refresh_idx', refresh_idx);
+
     BimpAjax('loadObjectList', data, null, {
         $list: $list,
+        refresh_idx,
+        full_reload: full_reload,
         $resultContainer: $resultContainer,
         display_success: false,
         error_msg: error_msg,
         success: function (result, bimpAjax) {
-            $list.find('.headerTools').find('.loadingIcon').css('opacity', 0);
+            bimpAjax.$list.find('.headerTools').find('.loadingIcon').css('opacity', 0);
             if (result.rows_html) {
+                var cur_idx = parseInt($list.data('refresh_idx'));
+
+                if (!isNaN(cur_idx) && cur_idx > bimpAjax.refresh_idx) {
+                    return;
+                }
+
                 hidePopovers($list);
+
                 bimpAjax.$list.find('tbody.listRows').html(result.rows_html);
                 if (result.pagination_html) {
                     bimpAjax.$list.find('.listPagination').each(function () {
@@ -214,7 +256,26 @@ function reloadObjectList(list_id, callback) {
                     bimpAjax.$list.find('.headerTools').find('.openFiltersPanelButton').removeClass('action-close').addClass('action-open').hide();
                 }
 
-                onListRefeshed(bimpAjax.$list);
+                if (bimpAjax.full_reload) {
+                    if (result.thead_html) {
+                        bimpAjax.$list.find('thead.listTableHead').html(result.thead_html);
+                    }
+                }
+
+                if (typeof (result.colspan) !== 'undefined') {
+                    var colspan = parseInt(result.colspan);
+
+                    if (!isNaN(colspan)) {
+                        $list.find('td.fullrow').attr('colspan', colspan);
+                    }
+                }
+
+                if (bimpAjax.full_reload) {
+                    bimpAjax.$list.data('loaded_event_processed', 0);
+                    onListLoaded(bimpAjax.$list);
+                } else {
+                    onListRefeshed(bimpAjax.$list);
+                }
 
                 if (typeof (callback) === 'function') {
                     callback(true);
@@ -232,6 +293,23 @@ function reloadObjectList(list_id, callback) {
             }
         }
     });
+}
+
+function loadListConfig($button, id_config) {
+    var $list = $button.findParentByClass('object_list_table');
+
+    if (!$.isOk($list)) {
+        bimp_msg('Erreur: liste non trouvée', 'danger', null, true);
+        return;
+    }
+
+    if ($button.hasClass('disabled')) {
+        return;
+    }
+
+    $button.addClass('disabled');
+
+    reloadObjectList($list.attr('id'), null, true, id_config);
 }
 
 function loadModalList(module, object_name, list_name, id_parent, $button, title, extra_data, extra_filters, extra_joins) {
@@ -257,11 +335,11 @@ function loadModalList(module, object_name, list_name, id_parent, $button, title
     if (extra_data) {
         data['extra_data'] = extra_data;
     }
-    
+
     if (extra_filters) {
         data['extra_filters'] = extra_filters;
     }
-    
+
     if (extra_joins) {
         data['extra_joins'] = extra_joins;
     }
@@ -295,9 +373,11 @@ function loadModalFormFromList(list_id, form_name, $button, id_object, id_parent
         'id_parent': id_parent
     };
 
-    var $values_input = $list.find('input[name=' + form_name + '_add_form_values]');
-    if ($values_input.length) {
-        data['param_values'] = $values_input.val();
+    if (!id_object) {
+        var $values_input = $list.find('input[name=' + form_name + '_add_form_values]');
+        if ($values_input.length) {
+            data['param_values'] = $values_input.val();
+        }
     }
 
     var $asso_filters_input = $list.find('input[name=param_associations_filters]');
@@ -778,6 +858,30 @@ function setSelectedObjectsAction($button, list_id, action, extra_data, form_nam
     }
 }
 
+function loadListUserConfigsModalList($button, list_id, id_user) {
+    var $list = $('#' + list_id);
+
+    if (!$.isOk($list)) {
+        bimp_msg('Erreur: liste non trouvée pour l\'identifiant "' + list_id + '"', 'danger');
+        return;
+    }
+
+    bimpModal.loadAjaxContent($button, 'loadListUserConfigsList', {
+        module: $list.data('module'),
+        object_name: $list.data('object_name'),
+        list_type: $list.data('type'),
+        list_name: $list.data('name'),
+        id_user: id_user
+    }, 'Gestion des configurations de la liste', 'Chargement', function (result, bimpAjax) {
+        var $new_list = bimpAjax.$resultContainer.find('#' + result.list_id);
+        if ($new_list.length) {
+            $new_list.data('modal_idx', bimpAjax.$resultContainer.data('idx'));
+            bimpModal.removeComponentContent($new_list.attr('id'));
+            onListLoaded($new_list);
+        }
+    }, {}, 'large');
+}
+
 // Actions:
 
 function cancelObjectRowModifications(list_id, id_object, $button) {
@@ -999,33 +1103,40 @@ function checkListWidth($list) {
         return;
     }
 
-    var offset = 5;
-
     if ($(window).width() > 1270) {
-        var $filtersPanel = $list.find('.listFiltersPanelContainer');
+        var $filters = $list.find('.listFiltersPanelContainer');
         var $table = $list.find('.objectlistTableContainer').children('.objectlistTable');
 
         var width = 0;
 
-        if ($filtersPanel.length && $filtersPanel.css('display') !== 'none') {
-            width += $filtersPanel.width();
-        }
-
         if ($table.length) {
-            width += $table.width();
+            $table.parent().removeAttr('style');
+            width += $table.width() + 12;
         }
 
-        var panel_width = $panelBody.width();
+        if ($filters.length && $filters.css('display') !== 'none') {
+            $filters.removeAttr('style');
 
-        if (width > panel_width) {
-            offset = Math.round(panel_width - width);
+            if ($filters.width() > 300) {
+                $filters.attr('style', 'width: 300px!important');
+            }
+
+            width += $filters.width() + 12;
+
+            $list.css({
+                'width': width + 'px'
+            });
+
+            if ($table.length) {
+                var table_width = width - $filters.width() - 24;
+                $table.parent().attr('style', 'width: ' + table_width + 'px!important');
+            }
+        } else {
+            $list.css({
+                'width': 'auto'
+            });
         }
     }
-
-    $list.find('tr.headerRow').find('.listPopup').each(function () {
-        $(this).css('margin-right', offset + 'px');
-    });
-
 }
 
 // Gestion des inputs:
@@ -1087,6 +1198,7 @@ function resetListSearchInputs(list_id) {
             $(this).parent().find('.datepicker_value').val('');
         });
         $row.find('.search_input_selected_label').html('').hide();
+        $row.find('.search_object_input').find('input').val('');
     }
     reloadObjectList(list_id);
 }
@@ -1103,6 +1215,7 @@ function onListLoaded($list) {
 
         var $table = $list.find('table.objectlistTable');
         var $tbody = $list.find('tbody.listRows');
+        var list_id = $list.attr('id');
 
         if ($tbody.find('tr.objectListItemRow').length > 10) {
             $list.find('tr.listFooterButtons').show();
@@ -1114,12 +1227,19 @@ function onListLoaded($list) {
 //        $(this).attr('target', '_blank');
             var link_title = $(this).attr('title');
             if (link_title) {
+                $(this).popover('destroy');
+                $(this).removeClass('classfortooltip');
                 $(this).removeAttr('title');
                 $(this).popover({
                     trigger: 'hover',
                     content: link_title,
                     placement: 'bottom',
-                    html: true
+                    html: true,
+                    container: '#' + list_id,
+                    viewport: {
+                        selector: 'window',
+                        padding: 0
+                    }
                 });
             }
         });
@@ -1137,23 +1257,28 @@ function onListLoaded($list) {
                         $table.findParentByClass('objectlistTableContainer').removeClass('col-md-12').removeClass('col-lg-12').addClass('col-md-9').addClass('col-lg-10');
                         $filtersPanel.stop().fadeIn(150);
                         $(this).removeClass('action-open').addClass('action-close');
+                        checkListWidth($list);
                     } else {
                         $filtersPanel.stop().fadeOut(150, function () {
                             $table.findParentByClass('objectlistTableContainer').removeClass('col-md-9').removeClass('col-lg-10').addClass('col-md-12').addClass('col-lg-12');
+                            checkListWidth($list);
                         });
                         $(this).removeClass('action-close').addClass('action-open');
                     }
-                    checkListWidth($list);
                 }
             });
             $tools.find('.openSearchRowButton').click(function () {
                 var $searchRow = $list.find('.listSearchRow');
                 if ($searchRow.length) {
                     if ($(this).hasClass('action-open')) {
-                        $searchRow.stop().fadeIn(150);
+                        $searchRow.stop().fadeIn(150, function () {
+                            checkListWidth($list);
+                        });
                         $(this).removeClass('action-open').addClass('action-close');
                     } else {
-                        $searchRow.stop().fadeOut(150);
+                        $searchRow.stop().fadeOut(150, function () {
+                            checkListWidth($list);
+                        });
                         $(this).removeClass('action-close').addClass('action-open');
                     }
                 }
@@ -1162,10 +1287,14 @@ function onListLoaded($list) {
                 var $addRow = $list.find('.addObjectRow');
                 if ($addRow.length) {
                     if ($(this).hasClass('action-open')) {
-                        $addRow.stop().fadeIn(150);
+                        $addRow.stop().fadeIn(150, function () {
+                            checkListWidth($list);
+                        });
                         $(this).removeClass('action-open').addClass('action-close');
                     } else {
-                        $addRow.stop().fadeOut(150);
+                        $addRow.stop().fadeOut(150, function () {
+                            checkListWidth($list);
+                        });
                         $(this).removeClass('action-close').addClass('action-open');
                     }
                 }
@@ -1295,6 +1424,8 @@ function onListRefeshed($list) {
 //        $(this).attr('target', '_blank');
 //    });
 
+    var list_id = $list.attr('id');
+
     var $tbody = $list.find('tbody.listRows');
 
     if ($tbody.find('tr.objectListItemRow').length > 10) {
@@ -1307,12 +1438,19 @@ function onListRefeshed($list) {
 //        $(this).attr('target', '_blank');
         var link_title = $(this).attr('title');
         if (link_title) {
+            $(this).popover('destroy');
+            $(this).removeClass('classfortooltip');
             $(this).removeAttr('title');
             $(this).popover({
                 trigger: 'hover',
                 content: link_title,
                 placement: 'bottom',
-                html: true
+                html: true,
+                container: '#' + list_id,
+                viewport: {
+                    selector: 'window',
+                    padding: 0
+                }
             });
         }
     });

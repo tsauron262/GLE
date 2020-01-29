@@ -1,4 +1,5 @@
 <?php
+
 class FixeTabs
 {
 
@@ -7,22 +8,22 @@ class FixeTabs
     public $modules = array("bimptask", "bimpsupport", "bimpmsg");
     public $objs = array();
 
-    public function __construct() {
+    public function __construct()
+    {
         global $user;
-        foreach($this->modules as $module){
-            $file = DOL_DOCUMENT_ROOT."/".$module."/fixeTabs.php";
-            if(is_file($file)){
+        foreach ($this->modules as $module) {
+            $file = DOL_DOCUMENT_ROOT . "/" . $module . "/fixeTabs.php";
+            if (is_file($file)) {
                 require_once($file);
-                $class = "FixeTabs_".$module;
+                $class = "FixeTabs_" . $module;
                 $obj = new $class($this, $user);
-                if($obj->can("view"))
+                if ($obj->can("view"))
                     $this->objs[] = $obj;
-            }
-            else
-                dol_syslog ("Fichier introuvable ".$file,3);
+            } else
+                dol_syslog("Fichier introuvable " . $file, 3);
         }
     }
-    
+
     public function addTab($id, $caption, $content, $classes = array())
     {
         $this->tabs[] = array(
@@ -35,28 +36,30 @@ class FixeTabs
 
     public function can($right)
     {
-        foreach($this->objs as $obj)
-            if($obj->can($right))
+        foreach ($this->objs as $obj)
+            if ($obj->can($right))
                 return 1;
-        
+
         return 0;
     }
 
     public function init()
     {
-        foreach($this->objs as $obj){
+        foreach ($this->objs as $obj) {
             $obj->init();
         }
     }
 
     public function displayHead($echo = true)
     {
-        $html =  '<link type="text/css" rel="stylesheet" href="' . DOL_URL_ROOT . '/bimpcore/views/css/fixeTabs.css"/>';
-        $html .= '<script type="text/javascript" src="' . DOL_URL_ROOT . '/bimpcore/views/js/fixeTabs.js"></script>';
-        foreach($this->objs as $obj)
+        $html = '<link type="text/css" rel="stylesheet" href="' . BimpCore::getFileUrl('/bimpcore/views/css/fixeTabs.css') . '"/>';
+        $html .= '<script type="text/javascript" src="' . BimpCore::getFileUrl('/bimpcore/views/js/fixeTabs.js') . '"></script>';
+
+        foreach ($this->objs as $obj) {
             $html .= $obj->displayHead();
-        
-        if($echo)
+        }
+
+        if ($echo)
             echo $html;
         return $html;
     }
@@ -70,6 +73,17 @@ class FixeTabs
         }
 
         $html .= '<div id="bimp_fixe_tabs_captions">';
+
+        $html .= '<div class="fixe_tabs_loading">';
+        $html .= '<i class="fa fa-spinner fa-spin"></i>';
+        $html .= '</div>';
+
+        $html .= '<div class="fixe_tabs_refresh_btn">';
+        $html .= '<span onclick="bimpFixeTabs.hold = false;bimpFixeTabs.active = true;bimpFixeTabs.reload();">';
+        $html .= BimpRender::renderIcon('fas_sync');
+        $html .= '</span>';
+        $html .= '</div>';
+
         foreach ($this->tabs as $tab) {
             $html .= '<div class="fixe_tab_caption';
             if (count($tab['classes'])) {

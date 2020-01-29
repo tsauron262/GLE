@@ -2,6 +2,7 @@
 
 BimpTools::loadDolClass('compta/facture', 'facture');
 
+//require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/objects/BimpComm.class.php';
 class Bimp_Paiement extends BimpObject
 {
 
@@ -10,11 +11,64 @@ class Bimp_Paiement extends BimpObject
     public static $paiement_factures_types = array(Facture::TYPE_STANDARD, Facture::TYPE_DEPOSIT, Facture::TYPE_REPLACEMENT, Facture::TYPE_SITUATION);
     public static $rbt_factures_type = array(Facture::TYPE_CREDIT_NOTE);
 
+    const STATUS_COMMENCER = 1;
+
+    public static $status_list = [
+        self::STATUS_COMMENCER => ['label' => 'Commencer', 'classes' => ['warning'], 'icon' => 'hourglass-start']
+    ];
+
     public function __construct($module, $object_name)
     {
         $this->useCaisse = (int) BimpCore::getConf('use_caisse_for_payments');
 
         parent::__construct($module, $object_name);
+    }
+
+    // Droits user: 
+
+    public function canEdit()
+    {
+//        if($this->getData('exported') == 1) { // CanXXX : seulement les droits user!
+//            return 0;
+//        }
+        return 1;
+    }
+
+    public function canDelete()
+    {
+        return $this->canEdit();
+    }
+
+    // Getters booléens: 
+
+    public function isEditable($force_edit = false, &$errors = array())
+    {
+        if ($this->isLoaded()) {
+            if ($this->getData('exported') == 1) {
+                $errors[] = 'Paiement exporté en compta';
+                return 0;
+            }
+
+            if ($this->useCaisse) {
+                $bc_paiement = BimpCache::findBimpObjectInstance('bimpcaisse', 'BC_Paiement', array(
+                            'id_paiement' => (int) $this->id
+                                ), true);
+                if (BimpObject::objectLoaded($bc_paiement)) {
+                    $p_errors = array();
+                    if (!$bc_paiement->isEditable($force_edit, $p_errors)) {
+                        $errors[] = BimpTools::getMsgFromArray($p_errors);
+                        return 0;
+                    }
+                }
+            }
+        }
+
+        return 1;
+    }
+
+    public function isDeletable($force_delete = false, &$errors = array())
+    {
+        return $this->isEditable($force_delete, $errors);
     }
 
     // Getters: 
@@ -569,6 +623,22 @@ class Bimp_Paiement extends BimpObject
         }
 
         return null;
+    }
+
+    // Traitements: 
+
+    public function onDelete()
+    {
+        $errors = array();
+
+        if ($this->isDeletable(false, $errors)) {
+            if ($this->useCaisse) {
+                BimpObject::loadClass('bimpcaisse', 'BC_Caisse');
+                $errors = array_merge($errors, BC_Caisse::onPaiementDelete($this->id, $this->dol_object->type_code, (float) $this->getData('amount')));
+            }
+        }
+
+        return $errors;
     }
 
     // Overrides: 

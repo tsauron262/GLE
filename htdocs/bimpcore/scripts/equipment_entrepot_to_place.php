@@ -22,7 +22,7 @@ $tabInfo = getTabInfo();
     $i = 0;
 foreach($tabInfo as $infos){
     
-    $req = "SELECT DISTINCT (a.id) FROM llx_be_equipment a LEFT JOIN llx_be_equipment_place places ON a.id = places.id_equipment WHERE places.position = 1 AND places.id_entrepot = ".$infos['entrepotSource']." AND places.type = 2 ORDER BY a.date_create";
+    $req = "SELECT DISTINCT (a.id) FROM ".MAIN_DB_PREFIX."be_equipment a LEFT JOIN ".MAIN_DB_PREFIX."be_equipment_place places ON a.id = places.id_equipment WHERE places.position = 1 AND places.id_entrepot = ".$infos['entrepotSource']." AND places.type = 2 ORDER BY a.date_create";
 
     $sql = $db->query($req);
     $errors = array();
@@ -46,7 +46,7 @@ foreach($tabInfo as $infos){
 //    }
     
     
-    $req2 = "SELECT *  FROM `llx_product_stock` WHERE `fk_entrepot` = ".$infos['entrepotSource']." AND reel > 0";
+    $req2 = "SELECT *  FROM `".MAIN_DB_PREFIX."product_stock` WHERE `fk_entrepot` = ".$infos['entrepotSource']." AND reel > 0";
     
     $sql2 = $db->query($req2);
     $package = null;

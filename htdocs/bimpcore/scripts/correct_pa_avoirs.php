@@ -16,8 +16,8 @@ $bdb = new BimpDb($db);
 
 set_time_limit(1200);
 
-$sql = 'SELECT l.rowid, l.buy_price_ht, l.subprice FROM llx_facturedet l';
-$sql .= ' LEFT JOIN llx_facture f ON f.rowid = l.fk_facture ';
+$sql = 'SELECT l.rowid, l.buy_price_ht, l.subprice FROM '.MAIN_DB_PREFIX.'facturedet l';
+$sql .= ' LEFT JOIN '.MAIN_DB_PREFIX.'facture f ON f.rowid = l.fk_facture ';
 $sql .= ' WHERE f.type = 2 AND ((l.subprice < 0 AND l.buy_price_ht > 0) OR (l.subprice > 0 AND l.buy_price_ht < 0))';
 
 $rows = $bdb->executeS($sql, 'array');

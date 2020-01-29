@@ -30,7 +30,7 @@ $bdb = new BimpDb($db);
 $db = $bdb->db;
 
 
-$query = "SELECT `rowid`, `tms`, `datem`, `fk_product`, `fk_entrepot`, `value`, label FROM `llx_stock_mouvement` WHERE `origintype` LIKE 'facture' AND tms > '2019-07-01' AND `label` NOT LIKE '%Vente #%' AND `label` NOT LIKE '%#corrig%' ORDER BY `llx_stock_mouvement`.`value` ASC";
+$query = "SELECT `rowid`, `tms`, `datem`, `fk_product`, `fk_entrepot`, `value`, label FROM `".MAIN_DB_PREFIX."stock_mouvement` WHERE `origintype` LIKE 'facture' AND tms > '2019-07-01' AND `label` NOT LIKE '%Vente #%' AND `label` NOT LIKE '%#corrig%' ORDER BY `".MAIN_DB_PREFIX."stock_mouvement`.`value` ASC";
 $sql = $db->query($query);
 
 while ($ln = $db->fetch_object($sql)){
@@ -46,7 +46,7 @@ while ($ln = $db->fetch_object($sql)){
     }
     
     $prod->correct_stock($user, $ln->fk_entrepot, $val, $movement, "#correction de ".$text);
-    $db->query("UPDATE llx_stock_mouvement SET label = '#corrigé ".$text."' WHERE rowid = ".$ln->rowid);
+    $db->query("UPDATE ".MAIN_DB_PREFIX."stock_mouvement SET label = '#corrigé ".$text."' WHERE rowid = ".$ln->rowid);
     echo($text."<br/>");
 }
 

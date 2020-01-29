@@ -2609,8 +2609,27 @@ class User extends CommonObject
                 $info['postalCode'] = ($this->zip != "")? $this->zip : "00000";
                 $info['street'] = ($this->town != "")? $this->town : "nc";
                 
+                if($this->array_options['options_date_e'] > 0)
+                    $info['hireDate'] = dol_print_date($this->array_options['options_date_e'], '%Y%m%d')."000000Z";
+                else
+                    $info['hireDate'] = "19800101000000Z";
+               //$info['hireDate'] = "";
+                if($this->employee)
+                    $info['employeeType'] = 'SALARIE';
+                else
+                    $info['employeeType'] = 'NONE';
                 
-                $info['objectclass'] = array_merge($info['objectclass'], array("shadowAccount", "amavisAccount", "mailUser"));
+                $info['manager'] = "";
+                if($this->fk_user > 0){
+                    $userR = new User($this->db);
+                    $userR->fetch($this->fk_user);
+                    if($userR->email != ''){
+                        $infoT = $userR->_load_ldap_info();
+                        $info['manager'] = $userR->_load_ldap_dn($infoT);
+                    }
+                }
+                
+                $info['objectclass'] = array_merge($info['objectclass'], array("shadowAccount", "amavisAccount", "mailUser", "erpUser"));
                 $info ['accountstatus'] = ($this->statut == 1)? "active" : "disabled";
                 $info ['enabledservice'] = array();
                 
@@ -2666,7 +2685,8 @@ class User extends CommonObject
                 }
                 
 
-                if(isset($this->array_options['options_alias'])){
+                $info['shadowAddress'] = array();
+                if($this->statut == 1 && isset($this->array_options['options_alias'])){
 //                    $this->array_options['options_alias'] = str_replace("bimp.fr", "synopsis-erp.com", $this->array_options['options_alias']);
                     $this->array_options['options_alias'] = str_replace(array("\r\n","\r","\n","\\r","\\n","\\r\\n"), ",", $this->array_options['options_alias']);
                      $this->array_options['options_alias']= nl2br($this->array_options['options_alias']);
@@ -2682,7 +2702,13 @@ class User extends CommonObject
                 
                 $info['telephonenumber'] = $this->office_phone != "" ? $this->office_phone  : "n/c";
                 $info['mobile'] = $this->user_mobile != "" ? $this->user_mobile  : "n/c";
-
+                
+                
+                foreach(array('telephonenumber', 'mobile') as $nom)
+                        if($info[$nom] == "" || $info[$nom] == " ")
+                            $info[$nom] = "N/C";
+                            //unset($info[$nom]);
+                
 		return $info;
 	}
 

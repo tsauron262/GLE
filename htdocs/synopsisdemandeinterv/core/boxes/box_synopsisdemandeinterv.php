@@ -154,7 +154,7 @@ class box_synopsisdemandeinterv extends ModeleBoxes {
                     $y++;
 
                     $this->info_box_contents[$i][$y] = array('align' => 'right',
-                        'text' => dol_print_date($objp->datei, 'day'),
+                        'text' => dol_print_date($db->jdate($objp->datei), 'day'),
                     );
                     $y++;
 

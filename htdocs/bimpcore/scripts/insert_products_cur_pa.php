@@ -17,6 +17,9 @@ BimpCore::displayHeaderFiles();
 global $db;
 $bdb = new BimpDb($db);
 
+echo 'SCRIPT DESACTIVE';
+exit;
+
 $list = BimpCache::getBimpObjectList('bimpcore', 'Bimp_Product', array(
             'no_fixe_prices' => 0,
 //            'rowid'          => 131312
@@ -164,7 +167,7 @@ foreach ($list as $id_product) {
                     echo BimpRender::renderAlerts(BimpTools::getMsgFromArray($err, 'PROD #' . $id_prod));
                     break;
                 }
-                
+
                 $date_to = $data['datec'];
 
                 if ($data['datec'] < '2019-07-01 23:59:59') {
@@ -176,12 +179,15 @@ foreach ($list as $id_product) {
     }
 
     if (is_null($date_to) || $date_to > '2019-07-01 23:59:59') {
-        $pmp = (float) $product->getData('pmp');
-        if ($pmp) {
+        $pa = (float) $product->getData('cur_pa_ht');
+        if (!$pa) {
+            $pa = (float) $product->getData('pmp');
+        }
+        if ($pa) {
             $curPa = BimpObject::getInstance('bimpcore', 'BimpProductCurPa');
             $err = $curPa->validateArray(array(
                 'id_product' => (int) $id_product,
-                'amount'     => $pmp,
+                'amount'     => $pa,
                 'date_from'  => '2019-07-01 00:00:00',
                 'origin'     => 'pmp'
             ));
@@ -193,6 +199,57 @@ foreach ($list as $id_product) {
             }
             if (count($err)) {
                 echo BimpRender::renderAlerts(BimpTools::getMsgFromArray($err, 'PROD #' . $id_prod));
+            }
+        }
+    }
+
+    // On check la dernière commande validée: 
+    $date = '';
+    $curPa = $product->getCurrentPaObject(false);
+    if (BimpObject::objectLoaded($curPa)) {
+        $date = (string) $curPa->getData('date_from');
+    }
+
+    $sql = 'SELECT c.rowid as id_commande, c.fk_soc, c.date_valid, l.subprice as pu_ht FROM ' . MAIN_DB_PREFIX . 'commande_fournisseur c';
+    $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commande_fournisseurdet l ON l.fk_commande = c.rowid';
+    $sql .= ' WHERE c.fk_statut IN (1,2,3,4,5)';
+    $sql .= ' AND c.date_valid > \'' . $date . '\'';
+    $sql .= ' AND l.fk_product = ' . (int) $id_product;
+    $sql .= ' ORDER BY c.date_valid DESC LIMIT 1';
+
+    $result = $bdb->executeS($sql, 'array');
+
+
+    if (isset($result[0]) && !empty($result[0])) {
+        $result = $result[0];
+        if ((float) $result['pu_ht']) {
+            if (!BimpObject::objectLoaded($curPa) || (round((float) $result['pu_ht'], 2) !== round((float) $curPa->getData('amount'), 2))) {
+                $id_fp = (int) $product->findFournPriceIdForPaHt((float) $result['pu_ht'], (int) $result['fk_soc']);
+
+                $newCurPa = BimpObject::getInstance('bimpcore', 'BimpProductCurPa');
+                $err = $newCurPa->validateArray(array(
+                    'id_product'     => (int) $id_product,
+                    'amount'         => (float) $result['pu_ht'],
+                    'date_from'      => $result['date_valid'],
+                    'origin'         => 'commande_fourn',
+                    'id_origin'      => (int) $result['id_commande'],
+                    'id_fourn_price' => (int) $id_fp
+                ));
+
+                if (!count($err)) {
+                    $err = $newCurPa->create($w, true);
+                }
+                if (count($err)) {
+                    echo BimpRender::renderAlerts(BimpTools::getMsgFromArray($err, 'PROD #' . $id_prod));
+                } else {
+                    if (BimpObject::objectLoaded($curPa)) {
+                        $err = $curPa->updateField('date_to', $result['date_valid']);
+                        if (count($err)) {
+                            echo BimpRender::renderAlerts(BimpTools::getMsgFromArray($err, 'PROD #' . $id_prod . ': échec maj date_to old pa'));
+                        }
+                    }
+//                    echo 'PROD ' . $id_product . ': new pa (' . $result['pu_ht'] . ') FROM comm #' . $result['id_commande'] . '<br/>';
+                }
             }
         }
     }

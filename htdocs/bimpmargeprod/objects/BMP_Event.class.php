@@ -3385,7 +3385,7 @@ class BMP_Event extends Abstract_margeprod
         )));
 
         $sql .= ' WHERE ' . (int) $id_type_montant . ' IN (';
-        $sql .= 'SELECT c.id_type_montant FROM llx_bmp_calc_montant_type_montant c WHERE c.id_calc_montant = a.id';
+        $sql .= 'SELECT c.id_type_montant FROM '.MAIN_DB_PREFIX.'bmp_calc_montant_type_montant c WHERE c.id_calc_montant = a.id';
         $sql .= ')';
         $sql .= ' AND a.active = 1 AND b.active = 1 AND b.id_event = ' . (int) $this->id;
 

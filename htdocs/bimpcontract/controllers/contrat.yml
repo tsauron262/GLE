@@ -7,8 +7,12 @@ objects:
             bimp_object: BContract_contrat
             id_object:
                 request: id
-
-
+    serials:
+        instance:
+            bimp_object: BContract_Serials_Imei
+    
+    
+    
 sections:
     - type: object_header
       object_header: 
@@ -31,6 +35,13 @@ sections:
                     panel: 1
                     object: contrat
                     name: lines
+#          - id: serials
+#            title: N° de série / N° IMEI
+#            struct:
+#                type: list
+#                list:
+#                    name: bimp
+#                    object: serials
           - id: contact_adresse_contrat
             title: Contact / Adresse
             struct: 

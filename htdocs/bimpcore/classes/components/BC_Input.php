@@ -57,13 +57,15 @@ class BC_Input extends BimpComponent
         ),
         'check_list'                  => array(
             'items'              => array('data_type' => 'array', 'default' => array(), 'compile' => true),
-            'select_all_buttons' => array('data_type' => 'bool', 'default' => 1)
+            'select_all_buttons' => array('data_type' => 'bool', 'default' => 1),
+            'search_input'       => array('data_type' => 'bool', 'default' => 0)
         ),
         'custom'                      => array(
             'content' => array('default' => '')
         ),
         'search_user'                 => array(
-            'include_empty' => array('data_type' => 'bool', 'default' => 0)
+            'include_empty' => array('data_type' => 'bool', 'default' => 0),
+            'empty_label'   => array('default' => '')
         ),
         'search_product'              => array(
             'filter_type' => array('data_type' => 'any', 'default' => 0)
@@ -118,7 +120,11 @@ class BC_Input extends BimpComponent
             'has_commissions_only' => array('data_type' => 'bool', 'default' => 0)
         ),
         'search_object'               => array(
-            'object' => array('default' => '')
+            'object'          => array('default' => ''),
+            'search_name'     => array('default' => 'default'),
+            'card'            => array('default', ''),
+            'max_results'     => array('data_type' => 'int', 'default' => 200),
+            'display_results' => array('data_type' => 'bool', 'default' => 1)
         )
     );
 
@@ -271,22 +277,31 @@ class BC_Input extends BimpComponent
                 $decimals = 0;
                 switch ($this->data_type) {
                     case 'percent':
-                        $min = '0';
-                        $max = '100';
-
                     case 'money':
                     case 'float':
-                        $decimals = isset($this->field_params['decimals']) ? $this->field_params['decimals'] : 2;
-
                     case 'qty':
-                        $decimals = isset($this->field_params['decimals']) ? $this->field_params['decimals'] : 0;
-
                     case 'int':
+                        switch ($this->data_type) {
+                            case 'percent':
+                                $min = '0';
+                                $max = '100';
+                                $decimals = isset($this->field_params['decimals']) ? $this->field_params['decimals'] : 2;
+                                break;
+
+                            case 'money':
+                            case 'float':
+                                $decimals = isset($this->field_params['decimals']) ? $this->field_params['decimals'] : 2;
+                                break;
+
+                            case 'qty':
+                                $decimals = isset($this->field_params['decimals']) ? $this->field_params['decimals'] : 0;
+                                break;
+                        }
                         $options['data']['data_type'] = 'number';
                         $options['data']['decimals'] = $decimals;
                         $options['data']['min'] = isset($this->field_params['min']) ? $this->field_params['min'] : $min;
                         $options['data']['max'] = isset($this->field_params['max']) ? $this->field_params['max'] : $max;
-                        $options['data']['unsigned'] = isset($this->field_params['unsigned']) ? $this->field_params['unsigned'] : 0;
+                        $options['data']['unsigned'] = isset($this->field_params['unsigned']) ? (int) $this->field_params['unsigned'] : 0;
                         break;
 
                     case 'string':
@@ -333,6 +348,7 @@ class BC_Input extends BimpComponent
             case 'check_list':
                 $options['items'] = isset($this->params['items']) ? $this->params['items'] : array();
                 $options['select_all_buttons'] = isset($this->params['select_all_buttons']) ? $this->params['select_all_buttons'] : 1;
+                $options['search_input'] = isset($this->params['search_input']) ? (int) $this->params['search_input'] : 0;
                 break;
 
             case 'items_list':
@@ -356,10 +372,15 @@ class BC_Input extends BimpComponent
                         $options['object'] = $object;
                     }
                 }
+                $options['search_name'] = isset($this->params['search_name']) ? $this->params['search_name'] : 'default';
+                $options['card'] = isset($this->params['card']) ? $this->params['card'] : '';
+                $options['max_results'] = isset($this->params['max_results']) ? (int) $this->params['max_results'] : 200;
+                $options['display_results'] = isset($this->params['display_results']) ? (int) $this->params['display_results'] : 1;
                 break;
 
             case 'search_user':
                 $options['include_empty'] = isset($this->params['include_empty']) ? $this->params['include_empty'] : 0;
+                $options['empty_label'] = isset($this->params['empty_label']) ? $this->params['empty_label'] : '';
                 break;
 
             case 'search_product':
@@ -593,8 +614,11 @@ class BC_Input extends BimpComponent
             if ($module && $object_name) {
                 $extra_data['object_module'] = $module;
                 $extra_data['object_name'] = $object_name;
-                $extra_data['card'] = $this->params['card'];
-                $extra_data['display_card_mode'] = $this->display_card_mode;
+
+                if ($this->params['type'] !== 'search_object') {
+                    $extra_data['card'] = $this->params['card'];
+                    $extra_data['display_card_mode'] = $this->display_card_mode;
+                }
             }
         }
 

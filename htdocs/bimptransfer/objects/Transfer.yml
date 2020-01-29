@@ -19,53 +19,36 @@ objects:
         instance: 
             bimp_object: TransferLine
         delete: 1
+        
+    entrepot_src: 
+        extends: entrepot
+        instance: 
+            id_object: 
+                field_value: id_warehouse_source
                 
-fields: 
-    # ces champs sont insérés de base par BimpObject (Ici, les paramètres suivants sont de toute manière écrasés à la création de l'objet) 
-#    user_create: 
-#        label: Auteur
-#        type: id_object
-#        object: user
-#        input: 
-#            type: search_user
-#            include_empty: 1
-#        default_value: 0
-#    user_update: 
-#        label: Utilisateur MAJ
-#        type: id_object
-#        object: user
-#        default_value: 0        
+    entrepot_dest: 
+        extends: entrepot
+        instance: 
+            id_object: 
+                field_value: id_warehouse_dest
+                
+fields:     
     id_warehouse_source:
         label: Entrepôt de départ
         type: id_object
-        object: entrepot
+        object: entrepot_src
         default_value: 0
         required: 1
-        input:
-            # On utilise plutôt ce type d'input pour les entrepôts, c'est celui dont tout le monde a l'habitude... 
-            type: search_entrepot 
-#            type: search_list
-#            search_list: 
-#                table: entrepot
-#                field_return_value: rowid
-#                field_return_label: ref,lieu
-#                label_syntaxe: <label_1> - <label_2>
-#                fields_search: rowid,ref,lieu
+        input: 
+            type: search_entrepot
                 
     id_warehouse_dest:
         label: Entrepôt d'arrivée
         type: id_object
-        object: entrepot
+        object: entrepot_dest
         default_value: 0
         input:
-            type: search_entrepot 
-#            type: search_list
-#            search_list: 
-#                table: entrepot
-#                field_return_value: rowid
-#                field_return_label: ref,lieu
-#                label_syntaxe: <label_1> - <label_2>
-#                fields_search: rowid,ref,lieu
+            type: search_entrepot
         
     date_opening: 
         label: Date d'ouverture
@@ -119,16 +102,25 @@ views:
                     col_md: 8
                     col_sm: 12
                     fields_table:
-                        name: default  
+                        name: default
                         
-                  - type: rows
-                    col_lg: 4
-                    col_md: 5
+    full: 
+        objects_change_reload: lines
+        edit_form: default
+        delete_btn: 1
+        rows:
+            - cols: 
+                  - type: object_header
+                  - type: fields_table
+                    col_lg: 7
+                    col_md: 8
                     col_sm: 12
-                    rows: 
-                        - cols: 
-                            - type: object_common_fields
-            
+                    fields_table:
+                        name: default
+                  - type: list
+                    list: 
+                        name: default
+                        children: lines
 forms:
     add:
         rows: 
@@ -161,7 +153,9 @@ lists:
             callback: userIsAdmin
         view_btn: 1
         page_btn: 1
-        modal_view: default
+        modal_view: full
+        extra_btn: 
+            callback: getListExtraButtons
         cols:
             id:
                 label: ID
@@ -189,6 +183,7 @@ lists:
        cols:
         status: unset
         id_warehouse_source: unset
+        
 cards: 
     default: 
         title: nom

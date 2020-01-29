@@ -43,6 +43,11 @@ class InterfaceBimpbimp extends DolibarrTriggers {
             
             $msg .= "<br/>Nous lui souhaitons la bienvenue.<br/><br/>Bien cordialement";
             
+            $msg .= '<br/><br/><strong><a href="http://www.bimp.fr/contact"><strong>Le service RH<br />
+0 812 211 211</strong></a></strong><br />
+<strong><a href="http://www.bimp.fr/contact"><strong>2 Rue des Erables 69760 Limonest</strong></a></strong>';
+            $msg .= '<br/><strong><span style="color:#ff9300"><span style="font-size:36px">Bimp</span><span style="font-size:x-large">&nbsp;</span></span></strong><span style="font-size:x-large"><span style="color:#919191">Groupe LDLC</span></span>';
+            
             mailSyn2("Nouveau Collaborateur", "go@bimp.fr", "rh@bimp.fr", $msg);
         }
     }

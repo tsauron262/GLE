@@ -28,6 +28,12 @@ objects:
             bimp_object: 
                 module: bimpcommercial
                 name: Bimp_Vente
+    droitUser:
+        instance: 
+            bimp_object: Bimp_User_Rights
+    droitGroupUser:
+        instance: 
+            bimp_object: Bimp_UserGroup_Rights
             
 sections:
     - type: tabs
@@ -86,3 +92,27 @@ sections:
                 - type: custom
                   custom: 
                       callback: renderScriptsTabContent
+                      
+        droit:
+            label: Droits
+            sections:
+                - type: custom
+                  custom: 
+                      callback: 
+                          method: renderTabs
+                          params: 
+                            - renderRightsTab
+                            - droit
+                        
+        testSpeed:
+            label: Test SPEED
+            sections:
+                - type: custom
+                  custom: 
+                      callback: 
+                          method: renderTabs
+                          params: 
+                            - renderTestTab
+                            - testSpeed
+            
+                            

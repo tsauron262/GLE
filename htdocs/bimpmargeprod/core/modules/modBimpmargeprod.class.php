@@ -64,7 +64,7 @@ class modBimpmargeprod extends DolibarrModules
 		$this->description = "BIMP Marge de production";
 		// Possible values for version are: 'development', 'experimental', 'dolibarr' or 'dolibarr_deprecated' or version
 		$this->version = '1.0';
-		// Key used in llx_const table to save module status enabled/disabled (where MYMODULE is value of property name of module in uppercase)
+		// Key used in ".MAIN_DB_PREFIX."const table to save module status enabled/disabled (where MYMODULE is value of property name of module in uppercase)
 		$this->const_name = 'MAIN_MODULE_'.strtoupper($this->name);
 		// Where to store the module in setup page (0=common,1=interface,2=others,3=very specific)
 		$this->special = 0;
@@ -272,10 +272,10 @@ class modBimpmargeprod extends DolibarrModules
                 $tabTva = array(2462 => 20, 14 => 5.5, 15 => 0, 16 => 2.1, 17 => 7);
                 
                 foreach($tabTva as $oldId => $taux){
-                    $sql2 = $this->db->query("SELECT rowid  FROM `llx_c_tva` WHERE `taux` = ".$taux." AND fk_pays = 1");
+                    $sql2 = $this->db->query("SELECT rowid  FROM `".MAIN_DB_PREFIX."c_tva` WHERE `taux` = ".$taux." AND fk_pays = 1");
                     if($this->db->num_rows($sql2)> 0){
                         $ln = $this->db->fetch_object($sql2);
-                        $sql[] = "UPDATE llx_bmp_type_montant SET id_taxe = ".$ln->rowid." WHERE id_taxe =".$oldId;
+                        $sql[] = "UPDATE ".MAIN_DB_PREFIX."bmp_type_montant SET id_taxe = ".$ln->rowid." WHERE id_taxe =".$oldId;
                     }
                 }
                 

@@ -9,14 +9,31 @@ labels:
     name_plur: pièces Apple
     is_female: 1
     
+objects: 
+    issue: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpsupport
+                name: BS_Issue
+            id_object: 
+                field_value: id_issue
+            
 fields: 
     id_sav: 
         label: SAV
         type: id_parent
+    id_issue: 
+        label: Problème
+        type: id_object
+        objec: issue
     label: 
         label: Libellé
     part_number:
-        label: Numéro
+        label: Référence
+    new_part_number: 
+        label: Nouvelle ref. 
     comptia_code: 
         label: Code CompTIA
         values: 
@@ -49,7 +66,7 @@ fields:
     no_order: 
         label: Commande de stock
         type: bool
-        default_value: 
+        default_value: 0
     price_options: 
         label: Prix Spéciaux
         type: json
@@ -58,7 +75,56 @@ fields:
         values: 
             array: price_types
         default_value: EXCHANGE
-            
+    is_tier: 
+        label: Composant tiers
+        type: bool
+        default_value: 0
+    not_invoiced: 
+        label: Non facturé
+        type: bool
+        default_value: 0
+
+forms: 
+    select_issue: 
+        title: Attribution à un problème composant
+        rows: 
+            - custom: 1
+              label: Problème composant
+              input_name: id_issue
+              data_type: id
+              required: 1
+              input: 
+                  type: select
+                  options: 
+                      callback: getSavIssuesArray
+                      
+fields_tables: 
+    default: 
+        panel: 1
+        panel_header: 0
+        rows: 
+            - field: part_number
+            - field: new_part_number
+            - field: label
+            - field: qty
+              edit: 1
+            - field: price_type
+              edit: 1
+            - field: out_of_warranty
+              edit: 1
+            - field: no_order
+              edit: 1
+            - field: is_tier
+            - field: not_invoiced
+
+views: 
+    default: 
+        modal_format: small
+        rows: 
+            - cols: 
+                - type: fields_table
+                  fields_table: default
+                  
 lists: 
     default: 
         title: Panier de composants Apple
@@ -109,4 +175,51 @@ lists:
                 field: no_order
                 edit: 
                     callback: isCartEditable
-                
+                    
+    gsx_v2:
+        title: Composants Apple
+        icon: shopping-basket
+        checkboxes:
+            callback: isCartEditable
+        bulk_actions:
+            - label: supprimer les composants sélectionnés
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this))
+        enable_search: 0
+        sort_field: id
+        sort_way: asc
+        n: 25
+        delete_btn: 
+            callback: isCartEditable
+        update_btn: 1
+        cols: 
+            label: 
+                label: Nom
+                field: label
+            num: 
+                label: Réf.
+                field: part_number
+            qty: 
+                label: Qté
+                field: qty
+                edit: 
+                    callback: isCartEditable
+            out_of_warranty: 
+                field: out_of_warranty
+                edit: 
+                    callback: isCartEditable
+            price: 
+                field: price_type
+                edit: 
+                    callback: isCartEditable
+            no_order: 
+                field: no_order
+                edit: 
+                    callback: isCartEditable
+        
+    no_issue: 
+        extends: gsx_v2
+        title: Composants Apple (ancienne version)
+        extra_btn: 
+            callback: getNoIssueExtaButtons
+        

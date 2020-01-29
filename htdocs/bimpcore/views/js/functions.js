@@ -1,6 +1,7 @@
 // Notifications:
 var bimp_msg_enable = true;
 var ctrl_down = false;
+var text_input_focused = false;
 var bimp_decode_textarea = null;
 
 var notifications_remove_delay = 3000;
@@ -9,11 +10,11 @@ function bimp_msg(msg, className, $container, auto_hide) {
     if (!bimp_msg_enable) {
         return;
     }
-    
+
     if (typeof (className) === 'undefined') {
         className = 'info';
     }
-    
+
     if (typeof (auto_hide) === 'undefined') {
         auto_hide = false;
     }
@@ -112,14 +113,14 @@ function bimp_notify(content) {
 }
 
 function bimp_notify_error(content) {
-        var html = '<div class="danger" style="text-align: center; font-size: 18px; margin: 30px 0">';
-        html += '<i class="fas fa5-exclamation-triangle iconLeft"></i>Une erreur inattendue est survenue';
-        html += '</div>';
-        html += '<h3>Informations reçues: </h3>';
-        html += '<div>';
-        html += content;
-        html += '</div>';
-        bimp_notify(html);
+    var html = '<div class="danger" style="text-align: center; font-size: 18px; margin: 30px 0">';
+    html += '<i class="fas fa5-exclamation-triangle iconLeft"></i>Une erreur inattendue est survenue';
+    html += '</div>';
+    html += '<h3>Informations reçues: </h3>';
+    html += '<div>';
+    html += content;
+    html += '</div>';
+    bimp_notify(html);
 }
 
 // Notifications: 
@@ -232,6 +233,22 @@ function loadImageModal($button, src, title) {
     bimpModal.loadImage($button, src, title);
 }
 
+// Popovers: 
+
+function hidePopovers($container) {
+    $container.find('.bs-popover').each(function () {
+        $(this).popover('hide');
+    });
+}
+
+function resetPopovers($container) {
+    $container.find('.bs-popover').each(function () {
+        var options = $(this).data('bs.popover').options;
+        $(this).popover('destroy');
+        $(this).popover(options);
+    });
+}
+
 // Actions: 
 
 function toggleFoldableSection($caption) {
@@ -279,12 +296,6 @@ function toggleElementDisplay($element, $button) {
     }
 }
 
-function hidePopovers($container) {
-    $container.find('.bs-popover').each(function () {
-        $(this).popover('hide');
-    });
-}
-
 // Evenements: 
 
 function setCommonEvents($container) {
@@ -299,9 +310,17 @@ function setCommonEvents($container) {
                     if ($foldableContainer.hasClass('open')) {
                         $foldableContainer.removeClass('open').addClass('closed');
                         $foldableContainer.children('.foldable_content').slideUp(250);
+                        var onclose = $foldableContainer.attr('onclose');
+                        if (typeof (onclose) === 'string' && onclose) {
+                            eval(onclose.replace('$(this)', '$foldableContainer'));
+                        }
                     } else {
                         $foldableContainer.removeClass('closed').addClass('open');
                         $foldableContainer.children('.foldable_content').slideDown(250);
+                        var onopen = $foldableContainer.attr('onopen');
+                        if (typeof (onopen) === 'string' && onopen) {
+                            eval(onopen.replace('$(this)', '$foldableContainer'));
+                        }
                     }
                 }
             });
@@ -361,6 +380,51 @@ function setCommonEvents($container) {
             }
         });
     });
+
+    // foldable array contents: 
+    $container.find('.array_content_container.foldable').each(function () {
+        if (!parseInt($(this).data('foldable_array_content_container_init'))) {
+            $(this).children('.array_content_caption').children('span.title').click(function () {
+                var $foldableContainer = $(this).findParentByClass('array_content_container');
+                if ($.isOk($foldableContainer)) {
+                    if ($foldableContainer.hasClass('open')) {
+                        $foldableContainer.children('.array_content').slideUp(250, function () {
+                            $foldableContainer.removeClass('open').addClass('closed');
+                        });
+                    } else {
+                        $foldableContainer.children('.array_content').slideDown(250, function () {
+                            $foldableContainer.removeClass('closed').addClass('open');
+                        });
+                    }
+                }
+            });
+
+            $(this).children('.folding_buttons').children('span.open_all').click(function () {
+                var $foldableContainer = $(this).findParentByClass('array_content_container');
+                if ($.isOk($foldableContainer)) {
+                    $foldableContainer.find('.array_content').each(function () {
+                        $(this).slideDown(250, function () {
+                            $(this).findParentByClass('array_content_container').removeClass('closed').addClass('open');
+                        });
+                    });
+                }
+            });
+
+            $(this).children('.folding_buttons').children('span.close_all').click(function () {
+                var $foldableContainer = $(this).findParentByClass('array_content_container');
+                if ($.isOk($foldableContainer)) {
+                    $foldableContainer.find('.array_content').each(function () {
+                        $(this).slideUp(250, function () {
+                            $(this).findParentByClass('array_content_container').removeClass('open').addClass('closed');
+                        });
+                    });
+                }
+            });
+
+            $(this).data('foldable_array_content_container_init', 1);
+        }
+    });
+
     // Popup
     $container.find('.displayPopupButton').each(function () {
         if (!parseInt($(this).data('popup_btn_event_init'))) {
@@ -452,15 +516,29 @@ function setCommonEvents($container) {
                 if ($li.length && $li.parent('ul').data('navtabs_id') === 'maintabs') {
                     var prev = '' + e.relatedTarget;
                     prev = prev.replace(/^.*#(.*)$/, '$1');
-
+                    var wndScrollTop = $(window).scrollTop();
                     var $prevLi = $('a[href="#' + prev + '"]').parent('li');
-                    $prevLi.data('scrollTop', parseInt($(window).scrollTop()));
+                    $prevLi.data('scrollTop', parseInt(wndScrollTop));
+
+//                    if (wndScrollTop > $li.position().top) {
+//                        $(window).scrollTop($li.position().top);
+//                    }
                     var scrollTop = parseInt($li.data('scrollTop'));
-                    if (!isNaN(scrollTop)) {
-                        $(window).scrollTop(scrollTop);
-                    } else if (object_header_scroll_trigger && $(window).scrollTop() > object_header_scroll_trigger) {
-                        $(window).scrollTop(object_header_scroll_trigger + 1);
+//                    bimp_msg(scrollTop);
+                    if (isNaN(scrollTop)) {
+                        if (wndScrollTop > $li.position().top) {
+                            scrollTop = $li.position().top;
+                        } else {
+                            scrollTop = wndScrollTop;
+                        }
+                        $li.data('scrollTop', scrollTop);
                     }
+
+//                    if (object_header_scroll_trigger && scrollTop < object_header_scroll_trigger) {
+//                        $(window).scrollTop(object_header_scroll_trigger + 1);
+//                    } else {
+//                        $(window).scrollTop(scrollTop);
+//                    }
                 }
 
                 var $content = $('#' + tab_id);
@@ -479,7 +557,11 @@ function setCommonEvents($container) {
             placement: 'bottom',
             html: true,
             trigger: 'hover',
-            content: $(this).data('title')
+            content: $(this).data('title'),
+            viewport: {
+                selector: 'window',
+                padding: 0
+            }
         });
     });
 
@@ -986,6 +1068,7 @@ $(document).ready(function () {
     $('body').click(function (e) {
         $(this).find('.hideOnClickOut').hide();
         $(this).find('.bs-popover').popover('hide');
+        $(this).find('.popover.fade').remove();
     });
 
     // Notifications: 
@@ -1011,21 +1094,26 @@ $(document).ready(function () {
     });
 
     $('body').keydown(function (e) {
-        if (e.key === 'Control') {
+        if (e.key === 'Alt') {
             ctrl_down = true;
             $(this).find('.object_page_header').each(function () {
                 setObjectHeaderPosition($(this));
             });
-        } else if (ctrl_down) {
+        } else if (ctrl_down && !text_input_focused) {
             if (e.key === 'ArrowRight') {
                 navTabNext('maintabs');
             } else if (e.key === 'ArrowLeft') {
                 navTabPrev('maintabs');
+            } else if (e.key === 'ArrowUp') {
+                $(window).scrollTop(0);
+            } else if (e.key === 'ArrowDown') {
+                var maxScroll = $('body').height() - $(window).height();
+                $(window).scrollTop(maxScroll);
             }
         }
     });
     $('body').keyup(function (e) {
-        if (e.key === 'Control') {
+        if (e.key === 'Alt') {
             ctrl_down = false;
             $(this).find('.object_page_header').each(function () {
                 setObjectHeaderPosition($(this));

@@ -4,61 +4,220 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/objects/BimpDolObject.class.php';
 require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
 
-class Transfer extends BimpDolObject {
+class Transfer extends BimpDolObject
+{
 
     CONST STATUS_SENDING = 0;
     CONST STATUS_RECEPTING = 1;
     CONST STATUS_CLOSED = 2;
 
     public static $status_list = Array(
-        self::STATUS_SENDING => Array('label' => 'En cours d\'envoi', 'classes' => Array('success'), 'icon' => 'fas_cogs'),
+        self::STATUS_SENDING   => Array('label' => 'En cours d\'envoi', 'classes' => Array('success'), 'icon' => 'fas_cogs'),
         self::STATUS_RECEPTING => Array('label' => 'En cours de réception', 'classes' => Array('warning'), 'icon' => 'fas_arrow-alt-circle-down'),
-        self::STATUS_CLOSED => Array('label' => 'Fermé', 'classes' => Array('danger'), 'icon' => 'fas_times')
+        self::STATUS_CLOSED    => Array('label' => 'Fermé', 'classes' => Array('danger'), 'icon' => 'fas_times')
     );
 
-    public function canDelete() {
+    // Droits Users: 
+
+    public function canDelete()
+    {
         global $user;
         return ($user->rights->bimptransfer->admin || $this->getData("user_create") == $user->id);
     }
 
-    public function update(&$warnings = array(), $force_update = false) {
-        $status = (int) $this->getData('status');
+    public function canEditField($field_name)
+    {
+        global $user;
+        if ($field_name == 'status')
+            return 0;
+        if ($field_name == 'id_warehouse_dest' && !$this->isDeletable())
+            return 0;
 
-        // Draft
-        if ($status == self::STATUS_SENDING) {
-            $this->updateField("date_opening", '');
-            $this->updateField("date_closing", '');
-            // Open
-        } elseif ($status == self::STATUS_RECEPTING) {
-            $this->updateField("date_opening", date("Y-m-d H:i:s"));
-            $this->updateField("date_closing", '');
-        } elseif ($status == self::STATUS_CLOSED) {
-            $this->updateField("date_closing", date("Y-m-d H:i:s"));
-        } else {
-            $warnings[] = "Statut non reconnu, value = " . $status;
-        }
-
-        if (sizeof($warnings) == 0)
-            $errors = parent::update($warnings);
-
-        return $errors;
+        return parent::canEditField($field_name);
     }
 
-    public function actionClose($params) {
-        $errors = array();
-        foreach ($this->getLines() as $line) {
-            if (((int) $line->getData('quantity_sent') - $line->getData('quantity_received')) > 0)
-                $errors = array_merge($errors, $line->cancelReservation());
-        }
-        if (count($errors) == 0)
-            $errors = array_merge($errors, $this->updateField("status", self::STATUS_CLOSED));
-        else {
-            print_r($errors);
-        }
-        return $errors;
+    // Getters booléens: 
+
+    public function isEditable($force_edit = false)
+    {
+        if ($this->getData('status') == Transfer::STATUS_CLOSED)
+            return 0;
+
+        return parent::isEditable($force_edit);
     }
 
-    public function renderAddInputs() {
+    public function isDeletable($force_delete = false)
+    {
+        if ($this->isLoaded()) {
+            foreach ($this->getLines() as $line) {
+                if ($line->getData("quantity_transfered") > 0 || $line->getData("quantity_received") > 0)
+                    return 0;
+            }
+        }
+        return 1;
+    }
+
+    public function isGood()
+    {
+        if ($this->isLoaded()) {
+            foreach ($this->getLines() as $line) {
+                if ($line->getData("quantity_transfered") < $line->getData("quantity_sent"))
+                    return 0;
+            }
+            return 1;
+        }
+        return 0;
+    }
+
+    public function userIsAdmin()
+    {
+        global $user;
+        return $user->rights->bimptransfer->admin;
+    }
+
+    public function userIsAdminOrStatusSending()
+    {
+        return (int) ($this->userIsAdmin() or (int) $this->getData('status') == (int) Transfer::STATUS_SENDING);
+    }
+
+    public function hasLines()
+    {
+        if ($this->isLoaded()) {
+            if ((int) $this->db->getCount('bt_transfer_det', '`id_transfer` = ' . (int) $this->id)) {
+                return 1;
+            }
+        }
+
+        return 0;
+    }
+
+    // Getters Données: 
+
+    public function getAllWarehouses()
+    {
+        // TODO est-ce que cette fonction existe quelque part ?
+        // OUI:
+        return BimpCache::getEntrepotsArray();
+    }
+
+    public function getActionsButtons()
+    {
+        global $user;
+        $buttons = array();
+        if (!$this->isLoaded())
+            return $buttons;
+
+        if ($this->getData('status') == Transfer::STATUS_RECEPTING) {
+            if ($user->rights->bimptransfer->admin || $this->isGood()) {
+                $buttons[] = array(
+                    'label'   => 'Terminer le transfert',
+                    'icon'    => 'fas_window-close',
+                    'onclick' => $this->getJsActionOnclick('setSatut', array("status" => Transfer::STATUS_CLOSED), array(
+                        'success_callback' => 'function(result) {reloadTransfertLines(); removeInputs()}',
+                    ))
+                );
+            }
+        }
+        if ($user->rights->bimptransfer->admin || $this->getData('status') == Transfer::STATUS_RECEPTING) {
+            $buttons[] = array(
+                'label'   => 'Transférer',
+                'icon'    => 'fas_box',
+                'onclick' => $this->getJsActionOnclick('doTransfer', array(), array(
+                    'success_callback' => 'function(result) {reloadTransfertLines();}',
+                ))
+            );
+        }
+        if ($user->rights->bimptransfer->admin) {
+            $buttons[] = array(
+                'label'   => 'Réceptionner tous les produits envoyés',
+                'icon'    => 'fas_arrow-alt-circle-down',
+                'onclick' => $this->getJsActionOnclick('doTransfer', array('total' => true), array(
+                    'success_callback' => 'function(result) {reloadTransfertLines();}',
+                ))
+            );
+            if ($this->getData('status') == Transfer::STATUS_RECEPTING)
+                $buttons[] = array(
+                    'label'   => 'Revenir en mode envoi',
+                    'icon'    => 'fas_undo',
+                    'onclick' => $this->getJsActionOnclick('setSatut', array("status" => Transfer::STATUS_SENDING), array(
+                        'success_callback' => 'function(result) {reloadTransfertLines();}',
+                    ))
+                );
+        }
+        if ($this->getData('status') == Transfer::STATUS_SENDING) {
+            $buttons[] = array(
+                'label'   => 'Valider envoi',
+                'icon'    => 'fas_check-circle',
+                'onclick' => $this->getJsActionOnclick('setSatut', array("status" => Transfer::STATUS_RECEPTING), array(
+                    'success_callback' => 'function(result) {reloadTransfertLines();}',
+                ))
+            );
+        }
+
+        if ($this->hasLines()) {
+            $buttons[] = array(
+                'label'   => 'Bon de transfert',
+                'icon'    => 'fas_file-pdf',
+                'onclick' => 'window.open(\'' . DOL_URL_ROOT . '/bimptransfer/pdf.php?id_transfer=' . (int) $this->id . '\')'
+            );
+        }
+
+        return $buttons;
+    }
+
+    public function getListExtraButtons()
+    {
+        $buttons = array();
+
+        if ($this->isLoaded()) {
+            if ($this->hasLines()) {
+                $buttons[] = array(
+                    'label'   => 'Bon de transfert',
+                    'icon'    => 'fas_file-pdf',
+                    'onclick' => 'window.open(\'' . DOL_URL_ROOT . '/bimptransfer/pdf.php?id_transfer=' . $this->id . '\')'
+                );
+            }
+        }
+
+        return $buttons;
+    }
+
+    public function getLines()
+    {
+        // TRANSFERT LINES
+        $return = array();
+        $transfer_lines_obj = BimpObject::getInstance('bimptransfer', 'TransferLine');
+        $transfer_lines = $transfer_lines_obj->getList(array(
+            'id_transfer' => $this->getData('id')
+                ), null, null, 'date_create', 'desc', 'array', array(
+            'id',
+            'id_product',
+            'id_equipment',
+            'quantity_sent',
+            'quantity_received',
+            'quantity_transfered'
+        ));
+        // Update all reservation for this transfer
+        foreach ($transfer_lines as $t_line) {
+            $transfer_lines_obj = BimpCache::getBimpObjectInstance('bimptransfer', 'TransferLine', $t_line['id']);
+            $return[] = $transfer_lines_obj;
+        }
+        return $return;
+    }
+
+    // Affichage / Rendus HTML: 
+
+    public function displayIsGood()
+    {
+        if ($this->isGood()) {
+            return '<span class="success">OUI</span>';
+        }
+
+        return '</span class="danger">NON</span>';
+    }
+
+    public function renderAddInputs()
+    {
         global $user;
         $html = '';
 
@@ -79,8 +238,8 @@ class Transfer extends BimpDolObject {
 
                 $html = BimpRender::renderPanel($header_table, $html, '', array(
                             'foldable' => false,
-                            'type' => 'secondary',
-                            'icon' => 'fas_plus-circle',
+                            'type'     => 'secondary',
+                            'icon'     => 'fas_plus-circle',
                 ));
             }
         }
@@ -88,75 +247,10 @@ class Transfer extends BimpDolObject {
         return $html;
     }
 
-    public function getActionsButtons() {
-        global $user;
-        $buttons = array();
-        if (!$this->isLoaded())
-            return $buttons;
+    // Traitements: 
 
-        if ($this->getData('status') == Transfer::STATUS_RECEPTING) {
-            if ($user->rights->bimptransfer->admin || $this->isGood()) {
-                $buttons[] = array(
-                    'label' => 'Terminer le transfert',
-                    'icon' => 'fas_window-close',
-                    'onclick' => $this->getJsActionOnclick('setSatut', array("status" => Transfer::STATUS_CLOSED), array(
-                        'success_callback' => 'function(result) {reloadTransfertLines(); removeInputs()}',
-                    ))
-                );
-            }
-        }
-        if ($user->rights->bimptransfer->admin || $this->getData('status') == Transfer::STATUS_RECEPTING) {
-            $buttons[] = array(
-                'label' => 'Transférer',
-                'icon' => 'fas_box',
-                'onclick' => $this->getJsActionOnclick('doTransfer', array(), array(
-                    'success_callback' => 'function(result) {reloadTransfertLines();}',
-                ))
-            );
-        }
-        if ($user->rights->bimptransfer->admin) {
-            $buttons[] = array(
-                'label' => 'Réceptionner tous les produits envoyés',
-                'icon' => 'fas_arrow-alt-circle-down',
-                'onclick' => $this->getJsActionOnclick('doTransfer', array('total' => true), array(
-                    'success_callback' => 'function(result) {reloadTransfertLines();}',
-                ))
-            );
-            if ($this->getData('status') == Transfer::STATUS_RECEPTING)
-                $buttons[] = array(
-                    'label' => 'Revenir en mode envoi',
-                    'icon' => 'fas_undo',
-                    'onclick' => $this->getJsActionOnclick('setSatut', array("status" => Transfer::STATUS_SENDING), array(
-                        'success_callback' => 'function(result) {reloadTransfertLines();}',
-                    ))
-                );
-        }
-        if ($this->getData('status') == Transfer::STATUS_SENDING) {
-            $buttons[] = array(
-                'label' => 'Valider envoi',
-                'icon' => 'fas_check-circle',
-                'onclick' => $this->getJsActionOnclick('setSatut', array("status" => Transfer::STATUS_RECEPTING), array(
-                    'success_callback' => 'function(result) {reloadTransfertLines();}',
-                ))
-            );
-        }
-
-        return $buttons;
-    }
-
-    public function actionSetSatut($data = array(), &$success = '') {
-        if ($data['status'] == Transfer::STATUS_CLOSED)
-            $errors = $this->prepareClose();
-
-        if (sizeof($errors) == 0) {
-            $this->updateField("status", $data['status']);
-            $this->update();
-        }
-        
-        return $errors;
-    }
-
-    public function prepareClose() {
+    public function prepareClose()
+    {
         $errors = array();
 
         $transfer_lines_obj = BimpObject::getInstance('bimptransfer', 'TransferLine');
@@ -176,7 +270,10 @@ class Transfer extends BimpDolObject {
         return $errors;
     }
 
-    public function actionDoTransfer($data = array(), &$success = '') {
+    // Actions: 
+
+    public function actionDoTransfer($data = array(), &$success = '')
+    {
         $errors = array();
 
         // Test if warehouse dest is set
@@ -199,104 +296,62 @@ class Transfer extends BimpDolObject {
         return $errors;
     }
 
-    public function canEditField($field_name) {
-        global $user;
-        if ($field_name == 'status')
-            return 0;
-        if ($field_name == 'id_warehouse_dest' && !$this->isDeletable())
-            return 0;
-
-        return parent::canEditField($field_name);
-    }
-
-    public function isEditable($force_edit = false) {
-        if ($this->getData('status') == Transfer::STATUS_CLOSED)
-            return 0;
-
-        return parent::isEditable($force_edit);
-    }
-
-    public function isDeletable($force_delete = false) {
-        if($this->isLoaded()){
-            foreach ($this->getLines() as $line) {
-                if ($line->getData("quantity_transfered") > 0 || $line->getData("quantity_received") > 0)
-                    return 0;
-            }
-        }
-        return 1;
-    }
-
-    public function isGood() {
+    public function actionClose($data = array(), &$success = '')
+    {
+        $errors = array();
         foreach ($this->getLines() as $line) {
-            if ($line->getData("quantity_transfered") < $line->getData("quantity_sent"))
-                return 0;
+            if (((int) $line->getData('quantity_sent') - (int) $line->getData('quantity_received')) > 0)
+                $errors = array_merge($errors, $line->cancelReservation());
         }
-        return 1;
+        if (count($errors) == 0)
+            $errors = array_merge($errors, $this->updateField("status", self::STATUS_CLOSED));
+        else {
+            print_r($errors);
+        }
+        return $errors;
     }
 
-    public function displayIsGood() {
-        if ($this->isGood()) {
-            return '<span class="success">OUI</span>';
+    public function actionSetSatut($data = array(), &$success = '')
+    {
+        if ($data['status'] == Transfer::STATUS_CLOSED)
+            $errors = $this->prepareClose();
+
+        if (sizeof($errors) == 0) {
+            $this->updateField("status", $data['status']);
+            $this->update();
         }
 
-        return '</span class="danger">NON</span>';
+        return $errors;
     }
 
-    public function getLines() {
-        // TRANSFERT LINES
-        $return = array();
-        $transfer_lines_obj = BimpObject::getInstance('bimptransfer', 'TransferLine');
-        $transfer_lines = $transfer_lines_obj->getList(array(
-            'id_transfer' => $this->getData('id')
-                ), null, null, 'date_create', 'desc', 'array', array(
-            'id',
-            'id_product',
-            'id_equipment',
-            'quantity_sent',
-            'quantity_received',
-            'quantity_transfered'
-        ));
-        // Update all reservation for this transfer
-        foreach ($transfer_lines as $t_line) {
-            $transfer_lines_obj = BimpCache::getBimpObjectInstance('bimptransfer', 'TransferLine', $t_line['id']);
-            $return[] = $transfer_lines_obj;
-        }
-        return $return;
-    }
+    // Overrides: 
 
-    public function userIsAdmin() {
-        global $user;
-        return $user->rights->bimptransfer->admin;
-    }
-
-    public function userIsAdminOrStatusSending() {
-        return (int) ($this->userIsAdmin() or (int) $this->getData('status') == (int) Transfer::STATUS_SENDING);
-    }
-
-    // TODO enlever le bouton plutôt que le désactiver pour ceux qui n'ont pas le droit
-
-    public function create(&$warnings = array(), $force_create = false) {
-//        if (!$this->userIsAdmin()) {
-//            $warnings[] = "Vous n'avez pas les droits de créer un transfert.";
-//            return;
-//        }
+    public function create(&$warnings = array(), $force_create = false)
+    {
         return parent::create($warnings, $force_create);
     }
 
-    // TODO est-ce que cette fonction existe quelque part ?
-    public function getAllWarehouses() {
-        $warehouses = array();
+    public function update(&$warnings = array(), $force_update = false)
+    {
+        $status = (int) $this->getData('status');
 
-        $sql = 'SELECT rowid, ref, lieu';
-        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'entrepot';
-
-        $result = $this->db->db->query($sql);
-        if ($result and mysqli_num_rows($result) > 0) {
-            while ($obj = $this->db->db->fetch_object($result)) {
-                $warehouses[$obj->rowid] = $obj->ref . ' - ' . $obj->lieu;
-            }
+        // Draft
+        if ($status == self::STATUS_SENDING) {
+            $this->updateField("date_opening", '');
+            $this->updateField("date_closing", '');
+            // Open
+        } elseif ($status == self::STATUS_RECEPTING) {
+            $this->updateField("date_opening", date("Y-m-d H:i:s"));
+            $this->updateField("date_closing", '');
+        } elseif ($status == self::STATUS_CLOSED) {
+            $this->updateField("date_closing", date("Y-m-d H:i:s"));
+        } else {
+            $warnings[] = "Statut non reconnu, value = " . $status;
         }
-        return $warehouses;
-    }
 
+        if (sizeof($warnings) == 0)
+            $errors = parent::update($warnings);
+
+        return $errors;
+    }
 }

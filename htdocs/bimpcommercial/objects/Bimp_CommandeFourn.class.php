@@ -19,6 +19,8 @@ class Bimp_CommandeFourn extends BimpComm
     public static $external_contact_type_required = false;
     public static $internal_contact_type_required = false;
     public static $discount_lines_allowed = false;
+    public static $remise_globale_allowed = false;
+    public static $cant_edit_zone_vente_secteurs = array();
     public static $status_list = array(
         0 => array('label' => 'Brouillon', 'icon' => 'fas_file-alt', 'classes' => array('warning')),
         1 => array('label' => 'Validée', 'icon' => 'fas_check', 'classes' => array('info')),
@@ -828,21 +830,6 @@ class Bimp_CommandeFourn extends BimpComm
         return static::$types_entrepot;
     }
 
-    // Getters données: 
-
-    public function getIdContactLivraison()
-    {
-        if ($this->isLoaded()) {
-            $contacts = $this->dol_object->getIdContact('external', 'SHIPPING');
-
-            if (isset($contacts[0])) {
-                return (int) $contacts[0];
-            }
-        }
-
-        return 0;
-    }
-
     // Rendus HTML - overrides BimpObject:
 
     public function renderHeaderExtraLeft()
@@ -1091,7 +1078,7 @@ class Bimp_CommandeFourn extends BimpComm
             )
         ));
 
-        if (count($lines) && count($receptions)) {
+        if (count($lines)) {
             $has_billed = 0;
             $all_billed = 1;
 
@@ -1136,9 +1123,10 @@ class Bimp_CommandeFourn extends BimpComm
         }
     }
 
-    public function onValidate()
+    public function onValidate(&$warnings = array())
     {
-        if ($this->isLoaded()) {
+        if ($this->isLoaded($warnings)) {
+            // Mise à jour des PA courant des produits: 
             $products = array();
 
             $lines = $this->getLines('not_text');
@@ -1164,6 +1152,10 @@ class Bimp_CommandeFourn extends BimpComm
 
                 $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $id_product);
 
+                if ((int) $product->getData('no_fixe_prices')) {
+                    continue;
+                }
+
                 $id_fp = 0;
 
                 if (BimpObject::objectLoaded($product)) {
@@ -1172,7 +1164,14 @@ class Bimp_CommandeFourn extends BimpComm
 
                 $product->setCurrentPaHt($pa_ht, $id_fp, 'commande_fourn', (int) $this->id);
             }
+
+            // Mise à jour des PA des lignes de factures associées: 
+            foreach ($lines as $line) {
+                $line->checkFactureClientLinesPA();
+            }
         }
+
+        return array();
     }
 
     // Actions:
@@ -1208,6 +1207,16 @@ class Bimp_CommandeFourn extends BimpComm
 
         global $user, $conf, $langs;
 
+
+
+        $lines = $this->getLines('not_text');
+        foreach ($lines as $line) {
+            $prod = $line->getChildObject('product');
+            if ($prod->isLoaded())
+                if (!$prod->isAchetable($errors, false, false))
+                    return array('errors' => $errors);
+        }
+
         $result = $this->dol_object->approve($user, (int) $this->getData('entrepot'), 0);
         if ($result > 0) {
             if (empty($conf->global->MAIN_DISABLE_PDF_AUTOUPDATE)) {
@@ -1217,6 +1226,10 @@ class Bimp_CommandeFourn extends BimpComm
         } else {
             $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object, null, null, $warnings), 'Des erreurs sont survenues lors de l\'approbation ' . $this->getLabel('of_this'));
         }
+
+
+
+
         return array(
             'errors'           => $errors,
             'warnings'         => $warnings,
@@ -1817,6 +1830,10 @@ class Bimp_CommandeFourn extends BimpComm
                             } else {
                                 $errors = $this->updateField('status_forced', $status_forced);
                             }
+                            if ($data['invoice_status'] == 2) {
+                                $this->updateField("billed", 1);
+                            } else
+                                $this->updateField("billed", 0);
                         }
                     }
                     break;
@@ -1841,7 +1858,7 @@ class Bimp_CommandeFourn extends BimpComm
         if (isset($data['type']) && (int) $data['type'] === 1) {
             if (isset($data['tiers_type_contact']) && (int) $data['tiers_type_contact'] &&
                     BimpTools::getTypeContactCodeById((int) $data['tiers_type_contact']) === 'SHIPPING') {
-                if ((int) $this->getIdContactLivraison()) {
+                if ((int) $this->getIdContact()) {
                     $errors[] = 'Un contact livraison a déjà été ajouté';
                 }
             }
@@ -1877,7 +1894,7 @@ class Bimp_CommandeFourn extends BimpComm
                     break;
 
                 case self::DELIV_DIRECT:
-                    if (!(int) $this->getIdContactLivraison()) {
+                    if (!(int) $this->getIdContact()) {
                         $this->msgs['warnings'][] = 'Veullez ajouter un contact livraison';
                     }
                     break;

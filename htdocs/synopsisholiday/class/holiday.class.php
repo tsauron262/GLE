@@ -2632,8 +2632,8 @@ class SynopsisHoliday extends Holiday {
 
                 date_default_timezone_set("GMT");
 
-                $ac->datep = $dateBegin->format('Y-m-d H:i:s');
-                $ac->datef = $dateEnd->format('Y-m-d H:i:s');
+                $ac->datep = $this->db->jdate($dateBegin->format('Y-m-d H:i:s'));
+                $ac->datef = $this->db->jdate($dateEnd->format('Y-m-d H:i:s'));
                 $ac->note = $this->LibStatut($this->statut) . ' - ' . (isset($substitute) ? 'Remplaçant: ' . dolGetFirstLastname($substitute->firstname, $substitute->lastname . '.') : 'Aucun rempaçant désigné.');
 
                 $result = $ac->update($updateUser);
@@ -2718,8 +2718,8 @@ class SynopsisHoliday extends Holiday {
                 $dateBegin->setTime(14-self::$decalageHeure, 0, 0);
                 $dateEnd->setTime(19-self::$decalageHeure, 59, 59);
             }
-            $ac->datep = $dateBegin->format('Y-m-d H:i:s');
-            $ac->datef = $dateEnd->format('Y-m-d H:i:s');
+            $ac->datep = $this->db->jdate($dateBegin->format('Y-m-d H:i:s'));
+            $ac->datef = $this->db->jdate($dateEnd->format('Y-m-d H:i:s'));
             $ac->note = $this->LibStatut($this->statut) . ' - ' . (isset($substitute) ? 'Remplaçant: ' . $substitute->firstname . ' ' . $substitute->lastname : 'Aucun rempaçant désigné.');
             $result = $ac->add($updateUser);
             if ($result < 0)
@@ -2808,7 +2808,7 @@ class SynopsisHoliday extends Holiday {
     }
 
     function recrediteSold() {
-        global $langs;
+        global $langs,$user;
         if (!is_array($this->fk_user)) {
             $tabUser = array($this->fk_user);
         } else {
@@ -2820,8 +2820,8 @@ class SynopsisHoliday extends Holiday {
         $userHoliday = $fk_user;
             if ($this->type_conges == 0) {
                 $soldes = $this->getCpforUser($fk_user, $this->date_debut, $this->date_fin, $this->halfday, true);
-                if (isset($solde['error'])) {
-                    $error = $solde['error'];
+                if (isset($soldes['error'])) {
+                    $error = $soldes['error'];
                 } else {
                     $nbHolidayDeducted = $this->getConfCP('nbHolidayDeducted');
                     // solde année en cours:

@@ -108,7 +108,7 @@ class indexController extends BimpController
             $html .= '<i class="fa fa-calculator"></i>';
             $html .= '<div class="headerBlockTitle">Caisse:</div>';
             $html .= '<div class="headerBlockContent">';
-            $html .= $caisse->getData('name');
+            $html .= $caisse->getData('name'). " (".$caisse->getSecteur_code().")";
             $html .= '</div>';
             $html .= '</div>';
         }
@@ -322,7 +322,7 @@ class indexController extends BimpController
 
                 $rows[] = array(
                     'label' => 'Caisse',
-                    'input' => '<strong>' . $caisse->getData('name') . '</strong>'
+                    'input' => '<strong>' . $caisse->getData('name') . ' au '. dol_print_date(dol_now()).'</strong>'
                 );
 
                 $rows[] = array(
@@ -533,9 +533,9 @@ class indexController extends BimpController
         if (!$id_caisse) {
             $errors[] = 'Aucune caisse sélectionnée';
         }
-        if (!$fonds) {
-            $errors[] = 'Montant du fonds de caisse non renseigné';
-        }
+//        if (!$fonds) {
+//            $errors[] = 'Montant du fonds de caisse non renseigné';
+//        }
 
         BimpObject::loadClass('bimpcaisse', 'BC_Caisse');
         $id_user_caisse = (int) BC_Caisse::getUserCaisse((int) $user->id);
@@ -616,12 +616,12 @@ class indexController extends BimpController
             }
         }
 
-        die(json_encode(array(
+        return array(
             'errors'             => $errors,
             'html'               => $html,
             'need_confirm_fonds' => $need_confirm_fonds,
             'request_id'         => BimpTools::getValue('request_id', 0),
-        )));
+        );
     }
 
     protected function ajaxProcessCloseCaisse()
@@ -646,9 +646,9 @@ class indexController extends BimpController
         if (!$id_caisse) {
             $errors[] = 'Aucune caisse sélectionnée';
         }
-        if (!$fonds) {
-            $errors[] = 'Montant du fonds de caisse non renseigné';
-        }
+//        if (!$fonds) {
+//            $errors[] = 'Montant du fonds de caisse non renseigné';
+//        }
 
         if (!count($errors)) {
             $caisse = BimpCache::getBimpObjectInstance($this->module, 'BC_Caisse', $id_caisse);
@@ -659,55 +659,77 @@ class indexController extends BimpController
                 if (is_null($session) || !$session->isLoaded()) {
                     $errors[] = 'Session de caisse invalide';
                 } else {
-                    $current_fonds = (float) $caisse->getData('fonds');
-
-                    if ($fonds !== $current_fonds) {
-                        if (!$confirm_fonds) {
-                            $msg = 'Un écart avec le fonds de caisse théorique a été constaté (Fonds actuel: ' . BimpTools::displayMoneyValue($current_fonds, 'EUR') . ').<br/>';
-                            $msg .= 'Confirmez-vous le montant du fonds de caisse indiqué?';
-                            $html = BimpRender::renderAlerts($msg, 'warning');
-                            $need_confirm_fonds = 1;
-                        } else {
-                            global $user;
-                            $msg = 'Correction du fonds de caisse suite à un différentiel constaté à la fermeture par ' . $user->getNomUrl();
-                            $correction_errors = $caisse->correctFonds($fonds, $msg);
-                            if (count($correction_errors)) {
-                                $errors[] = BimpTools::getMsgFromArray($correction_errors, 'Echec de la correction du fonds de caisse');
-                            } else {
-                                $fonds = $caisse->getSavedData('fonds');
-                            }
-                            $caisse->set('fonds', $fonds);
+                    if(!count($errors)) {
+                        if(1){
+                            $bc_vente = BimpObject::getInstance('bimpcaisse', 'BC_Vente');
+                            $filters = array();
+                            $filters['id_caisse'] = array($caisse->id);
+                            $filters['id_caisse_session'] = array($session->id);
+                            $list = $bc_vente->getList($filters);
+                            foreach($list as $infoVente)
+                                if($infoVente['status'] == 1)
+                                    $nbBr++;
+                            if($nbBr > 0)
+                                $errors[] = "Abandonnez toutes les ventes à l’état brouillon au préalable. (".$nbBr.")";
                         }
                     }
+                    
+                    
+                    
+                    
+                    
+                    
+                    if(!count($errors)) {
+                        $current_fonds = (float) $caisse->getData('fonds');
 
-                    // Fermeture de la session: 
-                    if (!$need_confirm_fonds) {
-                        $session->set('date_closed', date('Y-m-d H:i:s'));
-                        $session->set('id_user_closed', (int) $user->id);
-                        $session->set('fonds_end', $fonds);
-                        $session_errors = $session->update();
-                        if (!count($session_errors)) {
-                            $caisse->set('id_current_session', 0);
-                            $caisse->set('status', 0);
-                            $session_errors = $caisse->update();
+                        if ($fonds !== $current_fonds) {
+                            if (!$confirm_fonds) {
+                                $msg = 'Un écart avec le fonds de caisse théorique a été constaté (Fonds actuel: ' . BimpTools::displayMoneyValue($current_fonds, 'EUR') . ').<br/>';
+                                $msg .= 'Confirmez-vous le montant du fonds de caisse indiqué?';
+                                $html = BimpRender::renderAlerts($msg, 'warning');
+                                $need_confirm_fonds = 1;
+                            } else {
+                                global $user;
+                                $msg = 'Correction du fonds de caisse suite à un différentiel constaté à la fermeture par ' . $user->getNomUrl();
+                                $correction_errors = $caisse->correctFonds($fonds, $msg);
+                                if (count($correction_errors)) {
+                                    $errors[] = BimpTools::getMsgFromArray($correction_errors, 'Echec de la correction du fonds de caisse');
+                                } else {
+                                    $fonds = $caisse->getSavedData('fonds');
+                                }
+                                $caisse->set('fonds', $fonds);
+                            }
                         }
-                        if (count($session_errors)) {
-                            $errors[] = BimpTools::getMsgFromArray($session_errors, 'Echec de la fermeture de la caisse');
-                        } else {
-                            $errors = array_merge($errors, $caisse->disconnectAllUsers());
 
-                            $html = BimpRender::renderAlerts('Fermeture de la caisse "' . $caisse->getData('name') . '" effectuée avec succès', 'success');
+                        // Fermeture de la session: 
+                        if (!$need_confirm_fonds) {
+                            $session->set('date_closed', date('Y-m-d H:i:s'));
+                            $session->set('id_user_closed', (int) $user->id);
+                            $session->set('fonds_end', $fonds);
+                            $session_errors = $session->update();
+                            if (!count($session_errors)) {
+                                $caisse->set('id_current_session', 0);
+                                $caisse->set('status', 0);
+                                $session_errors = $caisse->update();
+                            }
+                            if (count($session_errors)) {
+                                $errors[] = BimpTools::getMsgFromArray($session_errors, 'Echec de la fermeture de la caisse');
+                            } else {
+                                $errors = array_merge($errors, $caisse->disconnectAllUsers());
 
-                            $recap_url = DOL_URL_ROOT . '/bimpcore/view.php?module=bimpcaisse&object_name=BC_CaisseSession&id_object=' . $session->id . '&view=recap';
-                            $recap_width = BC_Caisse::$windowWidthByDpi[(int) $caisse->getData('printer_dpi')];
-//                            $recap_url = 'window.open(\'' . $url . '\', \'Récapitulatif session de caisse\', "menubar=no, status=no, width=' . BC_Caisse::$windowWidthByDpi[(int) $caisse->getData('printer_dpi')] . ', height=900");';
+                                $html = BimpRender::renderAlerts('Fermeture de la caisse "' . $caisse->getData('name') . '" effectuée avec succès', 'success');
+
+                                $recap_url = DOL_URL_ROOT . '/bimpcore/view.php?module=bimpcaisse&object_name=BC_CaisseSession&id_object=' . $session->id . '&view=recap';
+                                $recap_width = BC_Caisse::$windowWidthByDpi[(int) $caisse->getData('printer_dpi')];
+    //                            $recap_url = 'window.open(\'' . $url . '\', \'Récapitulatif session de caisse\', "menubar=no, status=no, width=' . BC_Caisse::$windowWidthByDpi[(int) $caisse->getData('printer_dpi')] . ', height=900");';
+                            }
                         }
                     }
                 }
             }
         }
 
-        die(json_encode(array(
+        return array(
             'errors'             => $errors,
             'html'               => $html,
             'need_confirm_fonds' => $need_confirm_fonds,
@@ -715,7 +737,7 @@ class indexController extends BimpController
             'request_id'         => BimpTools::getValue('request_id', 0),
             'recap_url'          => $recap_url,
             'recap_width'        => $recap_width
-        )));
+        );
     }
 
     public function ajaxProcessLoadNewVente()
@@ -756,12 +778,12 @@ class indexController extends BimpController
             }
         }
 
-        die(json_encode(array(
+        return array(
             'errors'     => $errors,
             'html'       => $html,
             'request_id' => BimpTools::getValue('request_id', 0),
             'vente_data' => $data
-        )));
+        );
     }
 
     public function ajaxProcessLoadVenteData()
@@ -782,11 +804,11 @@ class indexController extends BimpController
             }
         }
 
-        die(json_encode(array(
+        return array(
             'errors'     => $errors,
             'vente_data' => $data,
             'request_id' => BimpTools::getValue('request_id', 0)
-        )));
+        );
     }
 
     public function ajaxProcessLoadVente()
@@ -832,12 +854,12 @@ class indexController extends BimpController
             }
         }
 
-        die(json_encode(array(
+        return array(
             'errors'     => $errors,
             'html'       => $html,
             'request_id' => BimpTools::getValue('request_id', 0),
             'vente_data' => $data
-        )));
+        );
     }
 
     protected function ajaxProcessSaveVenteStatus()
@@ -902,7 +924,7 @@ class indexController extends BimpController
             }
         }
 
-        die(json_encode(array(
+        return array(
             'errors'          => $errors,
             'validate_errors' => $validate_errors,
             'validate'        => $validate,
@@ -910,7 +932,7 @@ class indexController extends BimpController
             'ticket_html'     => $ticket_html,
             'ticket_errors'   => $ticket_errors,
             'request_id'      => BimpTools::getValue('request_id', 0),
-        )));
+        );
     }
 
     protected function ajaxProcessSaveCommercial()
@@ -942,11 +964,11 @@ class indexController extends BimpController
             }
         }
 
-        die(json_encode(array(
+        return array(
             'errors'     => $errors,
             'success'    => 'Commercial de la vente enregistré avec succès',
             'request_id' => BimpTools::getValue('request_id', 0),
-        )));
+        );
     }
 
     protected function ajaxProcessSaveNotePlus()
@@ -974,11 +996,11 @@ class indexController extends BimpController
             }
         }
 
-        die(json_encode(array(
+        return array(
             'errors'     => $errors,
             'success'    => 'Note de la vente enregistrée avec succès',
             'request_id' => BimpTools::getValue('request_id', 0),
-        )));
+        );
     }
 
     protected function ajaxProcessSaveCondReglement()
@@ -1013,12 +1035,12 @@ class indexController extends BimpController
             }
         }
 
-        die(json_encode(array(
+        return array(
             'errors'     => $errors,
             'success'    => 'Conditions de réglement mises à jour avec succès',
             'vente_data' => $vente_data,
             'request_id' => BimpTools::getValue('request_id', 0),
-        )));
+        );
     }
 
     protected function ajaxProcessSaveVenteHt()
@@ -1055,12 +1077,12 @@ class indexController extends BimpController
             }
         }
 
-        die(json_encode(array(
+        return array(
             'errors'     => $errors,
             'success'    => 'Mise à jour des conditions de vente effectuée avec succès',
             'vente_data' => $vente_data,
             'request_id' => BimpTools::getValue('request_id', 0),
-        )));
+        );
     }
 
     public function ajaxProcessSaveClient()
@@ -1103,12 +1125,12 @@ class indexController extends BimpController
             }
         }
 
-        die(json_encode(array(
+        return array(
             'errors'         => $errors,
             'html'           => $html,
             'discounts_html' => $discounts_html,
             'request_id'     => BimpTools::getValue('request_id', 0),
-        )));
+        );
     }
 
     public function ajaxProcessSaveContact()
@@ -1141,11 +1163,11 @@ class indexController extends BimpController
             }
         }
 
-        die(json_encode(array(
+        return array(
             'errors'     => $errors,
             'html'       => $html,
             'request_id' => BimpTools::getValue('request_id', 0),
-        )));
+        );
     }
 
     public function ajaxProcessFindProduct()
@@ -1180,13 +1202,13 @@ class indexController extends BimpController
             }
         }
 
-        die(json_encode(array(
+        return array(
             'errors'      => $errors,
             'request_id'  => BimpTools::getValue('request_id', 0),
             'cart_html'   => $result['cart_html'],
             'result_html' => $result['result_html'],
             'vente_data'  => $vente_data
-        )));
+        );
     }
 
     public function ajaxProcessSelectArticle()
@@ -1226,12 +1248,12 @@ class indexController extends BimpController
             }
         }
 
-        die(json_encode(array(
+        return array(
             'errors'     => $errors,
             'request_id' => BimpTools::getValue('request_id', 0),
             'html'       => $html,
             'vente_data' => $vente_data
-        )));
+        );
     }
 
     public function ajaxProcessSaveArticleQty()
@@ -1281,13 +1303,13 @@ class indexController extends BimpController
             }
         }
 
-        die(json_encode(array(
+        return array(
             'errors'     => $errors,
             'vente_data' => $vente_data,
             'total_ttc'  => $total_ttc,
             'stock'      => $stock,
             'request_id' => BimpTools::getValue('request_id', 0),
-        )));
+        );
     }
 
     public function ajaxProcessRemoveArticle()
@@ -1326,11 +1348,11 @@ class indexController extends BimpController
             }
         }
 
-        die(json_encode(array(
+        return array(
             'errors'     => $errors,
             'vente_data' => $vente_data,
             'request_id' => BimpTools::getValue('request_id', 0),
-        )));
+        );
     }
 
     public function ajaxProcessDeleteRemise()
@@ -1366,11 +1388,11 @@ class indexController extends BimpController
             }
         }
 
-        die(json_encode(array(
+        return array(
             'errors'     => $errors,
             'request_id' => BimpTools::getValue('request_id', 0),
             'vente_data' => $vente_data
-        )));
+        );
     }
 
     public function ajaxProcessAddPaiement()
@@ -1410,12 +1432,12 @@ class indexController extends BimpController
             }
         }
 
-        die(json_encode(array(
+        return array(
             'errors'     => $errors,
             'request_id' => BimpTools::getValue('request_id', 0),
             'html'       => $html,
             'vente_data' => $vente_data
-        )));
+        );
     }
 
     public function ajaxProcessDeletePaiement()
@@ -1452,20 +1474,20 @@ class indexController extends BimpController
             }
         }
 
-        die(json_encode(array(
+        return array(
             'errors'     => $errors,
             'request_id' => BimpTools::getValue('request_id', 0),
             'html'       => $html,
             'vente_data' => $vente_data
-        )));
+        );
     }
 
     protected function ajaxProcessLoadCaisseSelect()
     {
-        die(json_encode(array(
+        return array(
             'html'       => $this->renderCaisseSelect(),
             'request_id' => BimpTools::getValue('request_id', 0)
-        )));
+        );
     }
 
     protected function ajaxProcessSearchEquipmentToReturn()
@@ -1547,12 +1569,12 @@ class indexController extends BimpController
             }
         }
 
-        die(json_encode(array(
+        return array(
             'errors'     => $errors,
             'warnings'   => $warnings,
             'equipments' => $equipments,
             'request_id' => BimpTools::getValue('request_id', 0)
-        )));
+        );
     }
 
     protected function ajaxProcessRemoveReturn()
@@ -1591,10 +1613,10 @@ class indexController extends BimpController
             }
         }
 
-        die(json_encode(array(
+        return array(
             'errors'     => $errors,
             'vente_data' => $vente_data,
             'request_id' => BimpTools::getValue('request_id', 0),
-        )));
+        );
     }
 }

@@ -13,6 +13,13 @@ class BL_CommandeFournReception extends BimpObject
         self::BLCFR_ANNULEE      => array('label' => 'Annulée', 'icon' => 'times', 'classes' => array('danger'))
     );
 
+    // Droits user: 
+
+    public function canEdit()
+    {
+        return 1;
+    }
+
     // Getters booléens: 
 
     public function isFieldEditable($field, $force_edit = false)
@@ -44,6 +51,10 @@ class BL_CommandeFournReception extends BimpObject
                 }
                 if ((int) $this->getData('status') !== self::BLCFR_RECEPTIONNEE) {
                     $errors[] = 'La réception n\'a pas le statut "réceptionnée"';
+                    return 0;
+                }
+                if ((int) $this->getData('id_facture')) {
+                    $errors[] = 'Cette réception a été facturée';
                     return 0;
                 }
                 $commande = $this->getParentInstance();
@@ -81,31 +92,35 @@ class BL_CommandeFournReception extends BimpObject
         if (!$this->isLoaded()) {
             $errors[] = 'ID de la réception absent';
         } else {
-            $commande = $this->getParentInstance();
-            if (!BimpObject::objectLoaded($commande)) {
-                $errors[] = 'ID de la commande fournisseur absent';
+            if ((int) $this->getData('id_facture')) {
+                $errors[] = 'Cette réception a été facturée';
             } else {
-                BimpObject::loadClass('bimpcommercial', 'ObjectLine');
-                $lines = $commande->getChildrenObjects('lines', array(
-                    'type' => array(
-                        'in' => array(ObjectLine::LINE_PRODUCT, ObjectLine::LINE_FREE)
-                    )
-                ));
+                $commande = $this->getParentInstance();
+                if (!BimpObject::objectLoaded($commande)) {
+                    $errors[] = 'ID de la commande fournisseur absent';
+                } else {
+                    BimpObject::loadClass('bimpcommercial', 'ObjectLine');
+                    $lines = $commande->getChildrenObjects('lines', array(
+                        'type' => array(
+                            'in' => array(ObjectLine::LINE_PRODUCT, ObjectLine::LINE_FREE)
+                        )
+                    ));
 
-                $check = true;
+                    $check = true;
 
-                foreach ($lines as $line) {
-                    $line_errors = array();
-                    if (!$line->isReceptionCancellable($this->id, $line_errors)) {
-                        $check = false;
+                    foreach ($lines as $line) {
+                        $line_errors = array();
+                        if (!$line->isReceptionCancellable($this->id, $line_errors)) {
+                            $check = false;
+                        }
+
+                        if (count($line_errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n°' . $line->getData('position'));
+                        }
                     }
 
-                    if (count($line_errors)) {
-                        $errors[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n°' . $line->getData('position'));
-                    }
+                    return ((count($errors) || !$check) ? 0 : 1);
                 }
-
-                return ((count($errors) || !$check) ? 0 : 1);
             }
         }
 
@@ -265,7 +280,16 @@ class BL_CommandeFournReception extends BimpObject
                         break;
                     }
                     if (in_array(0, $values)) {
+                        $joins['parent2'] = array(
+                            'alias' => 'parent2',
+                            'table' => 'commande_fournisseur',
+                            'on'    => 'parent2.rowid = a.id_commande_fourn'
+                        );
                         $filters['a.id_facture'] = 0;
+                        $filters['parent2.invoice_status'] = array(
+                            'operator' => '<',
+                            'value'    => 2
+                        );
                     }
                     if (in_array(1, $values)) {
                         $filters['a.id_facture'] = array(
@@ -430,10 +454,22 @@ class BL_CommandeFournReception extends BimpObject
         return $html;
     }
 
-    public function renderLineSerialInputs($line, $serial, $pu_ht, $tva_tx)
+    public function renderLineSerialInputs($line, $serial, $pu_ht, $tva_tx, $code_config = '')
     {
         $html = '';
-        $html .= '<td style="width: 220px" class="serial" data-serial="' . $serial . '">' . $serial . '</td>';
+        $html .= '<td style="width: 220px" class="serial" data-serial="' . $serial . '">';
+        $html .= $serial;
+
+        $isImei = (!preg_match("/[a-zA-Z]/", $serial)) ? true : false;
+
+
+        if (!$isImei && $code_config && !preg_match('/^.+' . preg_quote($code_config) . '$/', $serial)) {
+            $html .= '<br/>';
+            $html .= '<span class="danger">';
+            $html .= BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . 'Les 4 derniers caractères ne correspondent pas au code configuration (' . $code_config . ')';
+            $html .= '</span>';
+        }
+        $html .= '</td>';
         $html .= '<td style="width: 120px">';
         $html .= BimpInput::renderInput('text', 'line_' . $line->id . '_reception_' . $this->id . '_serial_' . $serial . '_pu_ht', $pu_ht, array(
                     'addon_right' => BimpRender::renderIcon('fas_euro-sign'),
@@ -607,8 +643,27 @@ class BL_CommandeFournReception extends BimpObject
                     if (!$isReturn) {
                         // *** Edition / ajout des nouveaux numéros de série: ***
 
+                        $code_config = '';
+
+                        if (preg_match('/^APP\-.+$/', $product->getRef())) {
+                            $code_config = (string) $product->getData('code_config');
+                        }
+
                         if (isset($reception_data['serials']) && !empty($reception_data['serials'])) {
+                            $nSerialsKo = 0;
+                            if ($code_config) {
+                                foreach ($reception_data['serials'] as $serial_data) {
+                                    if (isset($serial_data['serial']) && (string) $serial_data['serial'] && preg_match("/[a-zA-Z]/", $serial_data['serial']) && !preg_match('/^.+' . preg_quote($code_config) . '$/', $serial_data['serial'])) {
+                                        $nSerialsKo++;
+                                    }
+                                }
+                            }
+
                             // Liste des N° de série déjà ajoutés: 
+                            $html .= '<span class="bold">' . count($reception_data['serials']) . ' numéro(s) de série ajouté(s)</span>';
+                            if ($nSerialsKo > 0) {
+                                $html .= BimpRender::renderAlerts('Attention: ' . $nSerialsKo . ' numéro(s) de série ne correspondent pas au code configuration du produit (' . $code_config . ')', 'warning');
+                            }
                             $html .= '<table class="bimp_list_table">';
                             $html .= '<tbody>';
 
@@ -617,7 +672,7 @@ class BL_CommandeFournReception extends BimpObject
                                     $pu_ht = (isset($serial_data['pu_ht']) ? (float) $serial_data['pu_ht'] : $line_pu_ht);
                                     $tva_tx = (isset($serial_data['tva_tx']) ? (float) $serial_data['tva_tx'] : (float) $line->tva_tx);
                                     $html .= '<tr class="line_' . $line->id . '_serial_data">';
-                                    $html .= $this->renderLineSerialInputs($line, $serial_data['serial'], $pu_ht, $tva_tx);
+                                    $html .= $this->renderLineSerialInputs($line, $serial_data['serial'], $pu_ht, $tva_tx, $code_config);
                                     $html .= '</tr>';
                                 }
                             }
@@ -688,6 +743,7 @@ class BL_CommandeFournReception extends BimpObject
                             // Liste des équipements déjà ajoutés: 
                             $id_entrepot = (int) $commandeFourn->getData('entrepot');
 
+                            $html .= '<span class="bold">' . count($reception_data['return_equipments']) . ' équipement(s) à retourner sélectionné(s)</span>';
                             $html .= '<table class="bimp_list_table">';
                             $html .= '<tbody>';
 
@@ -829,6 +885,15 @@ class BL_CommandeFournReception extends BimpObject
                 if ($isSerialisable) {
                     if (!$isReturn) {
                         // *** Affichage équipements reçus: ***
+                        $html .= '<tr>';
+                        $html .= '<td colspan="4">';
+                        if (count($reception_data['equipments'])) {
+                            $html .= '<span class="bold">' . count($reception_data['equipments']) . ' équipements ajouté(s)</span>';
+                        } else {
+                            $html .= BimpRender::renderAlerts('Aucun équipement ajouté', 'info');
+                        }
+                        $html .= '</td>';
+                        $html .= '</tr>';
                         foreach ($reception_data['equipments'] as $id_equipment => $equipment_data) {
                             $html .= '<tr>';
                             $html .= '<td style="width: 220px">';
@@ -847,7 +912,15 @@ class BL_CommandeFournReception extends BimpObject
                         }
                     } else {
                         // *** Affichage équipements retournés: ***
-                        $html .= '<tr><td colspan="4"><span class="danger">Equipements retournés:</span></td></tr>';
+                        $html .= '<tr>';
+                        $html .= '<td colspan="4">';
+                        if (count($reception_data['return_equipments'])) {
+                            $html .= '<tr><td colspan="4"><span class="danger">' . count($reception_data['return_equipments']) . ' équipements retournés</span></td></tr>';
+                        } else {
+                            $html .= BimpRender::renderAlerts('Aucun équipement à retourner ajouté', 'info');
+                        }
+                        $html .= '</td>';
+                        $html .= '</tr>';
                         foreach ($reception_data['return_equipments'] as $id_equipment => $equipment_data) {
                             $html .= '<tr>';
                             $html .= '<td style="width: 220px">';
@@ -1146,7 +1219,7 @@ class BL_CommandeFournReception extends BimpObject
         return $lines_data;
     }
 
-    public function checkLinesData($lines_data)
+    public function checkLinesData($lines_data, &$code_config_errors = null)
     {
         $errors = array();
 
@@ -1155,9 +1228,20 @@ class BL_CommandeFournReception extends BimpObject
             if (!BimpObject::objectLoaded($line)) {
                 $errors[] = 'La ligne de commande fournisseur d\'ID ' . $id_line . ' n\'existe pas';
             } else {
-                $line_errors = $line->checkReceptionData((int) $this->id, $line_data);
+                $code_config_serials_errors = array();
+                $line_errors = $line->checkReceptionData((int) $this->id, $line_data, $code_config_serials_errors);
                 if (count($line_errors)) {
                     $errors[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n°' . $line->getData('position'));
+                } elseif (is_array($code_config_errors) && count($code_config_serials_errors)) {
+                    $product = $line->getProduct();
+                    if (BimpObject::objectLoaded($product)) {
+                        $code_config = (string) $product->getData('code_config');
+                        if ($code_config) {
+                            $title = 'Ligne n°' . $line->getData('position') . ' (produit ' . $product->getRef() . '): ' . count($code_config_serials_errors);
+                            $title .= ' numéro(s) de série ne correspondent pas au code configuration du produit (' . $code_config . ')';
+                            $code_config_errors[] = BimpTools::getMsgFromArray($code_config_serials_errors, $title);
+                        }
+                    }
                 }
             }
         }
@@ -1172,7 +1256,7 @@ class BL_CommandeFournReception extends BimpObject
         if (count($errors)) {
             return $errors;
         }
-        
+
         foreach ($lines_data as $id_line => $line_data) {
             $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFournLine', (int) $id_line);
             if (BimpObject::objectLoaded($line)) {
@@ -1307,7 +1391,7 @@ class BL_CommandeFournReception extends BimpObject
 
         if (!count($errors)) {
             $this->set('status', self::BLCFR_BROUILLON);
-            $this->update();
+            $errors = array_merge($errors, $this->update());
         }
 
         $this->onLinesChange();
@@ -1386,7 +1470,25 @@ class BL_CommandeFournReception extends BimpObject
             $lines_data = $this->processLinesFormData($data, $errors);
 
             if (!count($errors)) {
-                $errors = $this->checkLinesData($lines_data);
+                $codes_config_errors = array();
+                $errors = $this->checkLinesData($lines_data, $codes_config_errors);
+
+                if (!count($errors) && count($codes_config_errors) && (!isset($data['force_validation']) || !(int) $data['force_validation'])) {
+                    $data['force_validation'] = 1;
+                    $onclick = $this->getJsActionOnclick('validateReception', $data, array(
+                        'success_callback' => 'function() {bimpModal.clearCurrentContent();}'
+                    ));
+
+                    $msg = BimpTools::getMsgFromArray($codes_config_errors);
+                    $msg .= '<br/><span class="btn btn-default" onclick="' . $onclick . '">';
+                    $msg .= BimpRender::renderIcon('fas_check', 'iconLeft') . 'Forcer la validation';
+                    $msg .= '</span>';
+                    $msg .= '<br/><span style="font-weight: bold">';
+                    $msg .= 'ATTENTION: si vous effectuez une modification, veuillez utiliser le bouton "Valider" ci-dessous';
+                    $msg .= '</span>';
+
+                    $errors[] = $msg;
+                }
 
                 if (!count($errors)) {
                     $errors = $this->saveLinesData($lines_data);
@@ -1397,7 +1499,7 @@ class BL_CommandeFournReception extends BimpObject
                         // Temporaire :
                         if ($is_sept === 'oui') {
                             $info = $this->getData('info');
-                            $this->updateField('info', 'SEPTEMBRE 2019' . ($info ? "\n\n" . $info : ''));
+                            $this->updateField('info', 'DECEMBRE 2019' . ($info ? "\n\n" . $info : ''));
                         }
                         // ************
 
@@ -1477,7 +1579,7 @@ class BL_CommandeFournReception extends BimpObject
                 }
 
                 if (count($rec_errors)) {
-                    $errors[] = BimpTools::getMsgFromArray($rec_warnings, 'Echec de la création de la nouvelle réception');
+                    $errors[] = BimpTools::getMsgFromArray(array_merge($rec_errors, $rec_warnings), 'Echec de la création de la nouvelle réception');
                 }
             }
 
@@ -1501,11 +1603,17 @@ class BL_CommandeFournReception extends BimpObject
                         if (isset($line_data['items'])) {
                             foreach ($line_data['items'] as $item_value) {
                                 if (!$isReturn) {
+                                    $serial = '';
                                     if ((int) $this->getData('status') === self::BLCFR_RECEPTIONNEE) {
                                         // Equipements: 
                                         if (isset($reception_data['equipments'][(int) $item_value])) {
                                             $new_reception_data['equipments'][(int) $item_value] = $reception_data['equipments'][(int) $item_value];
                                             unset($reception_data['equipments'][(int) $item_value]);
+
+                                            $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $item_value);
+                                            if (BimpObject::objectLoaded($equipment)) {
+                                                $serial = $equipment->getData('serial');
+                                            }
                                         } else {
                                             $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $item_value);
                                             if (!BimpObject::objectLoaded($equipment)) {
@@ -1515,11 +1623,16 @@ class BL_CommandeFournReception extends BimpObject
                                             }
                                         }
                                     } else {
+                                        $serial = $item_value;
+                                    }
+
+                                    if ($serial) {
                                         // Serials: 
                                         foreach ($reception_data['serials'] as $key => $serial_data) {
-                                            if ($serial_data['serial'] === $item_value) {
+                                            if ($serial_data['serial'] === $serial) {
                                                 $new_reception_data['serials'][] = $reception_data['serials'][$key];
                                                 unset($reception_data['serials'][$key]);
+                                                break;
                                             }
                                         }
                                     }
@@ -1640,30 +1753,36 @@ class BL_CommandeFournReception extends BimpObject
     {
         $errors = array();
 
-        $commande = $this->getParentInstance();
+        $dateMAx = '2019-10-01';
+        if ($this->getData('date_received') < $dateMAx)
+            $errors[] = 'Date inférieur au ' . $dateMAx . ' creation impossible';
 
-        if (!BimpObject::objectLoaded($commande)) {
-            $errors[] = 'ID de la commande fournisseur absent';
-        } else {
-            $sql = 'SELECT MAX(num_reception) as num FROM ' . MAIN_DB_PREFIX . 'bl_commande_fourn_reception ';
-            $sql .= 'WHERE `id_commande_fourn` = ' . (int) $commande->id;
+        if (!count($errors)) {
+            $commande = $this->getParentInstance();
 
-            $result = $this->db->execute($sql);
-            $result = $this->db->db->fetch_object($result);
-
-            if (is_null($result) || !isset($result->num)) {
-                $num = 0;
+            if (!BimpObject::objectLoaded($commande)) {
+                $errors[] = 'ID de la commande fournisseur absent';
             } else {
-                $num = (int) $result->num;
+                $sql = 'SELECT MAX(num_reception) as num FROM ' . MAIN_DB_PREFIX . 'bl_commande_fourn_reception ';
+                $sql .= 'WHERE `id_commande_fourn` = ' . (int) $commande->id;
+
+                $result = $this->db->execute($sql);
+                $result = $this->db->db->fetch_object($result);
+
+                if (is_null($result) || !isset($result->num)) {
+                    $num = 0;
+                } else {
+                    $num = (int) $result->num;
+                }
+
+                $num++;
+
+                if (!(int) $this->getData('id_entrepot')) {
+                    $this->set('id_entrepot', (int) $commande->getData('entrepot'));
+                }
+
+                $this->set('num_reception', $num);
             }
-
-            $num++;
-
-            if (!(int) $this->getData('id_entrepot')) {
-                $this->set('id_entrepot', (int) $commande->getData('entrepot'));
-            }
-
-            $this->set('num_reception', $num);
         }
 
         if (count($errors)) {

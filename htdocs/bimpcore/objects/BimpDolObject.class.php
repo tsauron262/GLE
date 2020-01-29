@@ -50,8 +50,7 @@ class BimpDolObject extends BimpObject
             'success_callback' => $success_callback
         );
     }
-    
-    
+       
     public function renderLinkedObjectsTable($htmlP = '')
     {
         $html = '';
@@ -211,8 +210,6 @@ class BimpDolObject extends BimpObject
         return $html;
     }
 
-    
-    
     public function getModelPdf()
     {
         if ($this->field_exists('model_pdf')) {

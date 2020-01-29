@@ -1123,9 +1123,9 @@ class Bimp_CommandeFourn extends BimpComm
         }
     }
 
-    public function onValidate()
+    public function onValidate(&$warnings = array())
     {
-        if ($this->isLoaded()) {
+        if ($this->isLoaded($warnings)) {
             // Mise à jour des PA courant des produits: 
             $products = array();
 
@@ -1167,22 +1167,11 @@ class Bimp_CommandeFourn extends BimpComm
 
             // Mise à jour des PA des lignes de factures associées: 
             foreach ($lines as $line) {
-                if ($line->getData('linked_object_name') === 'commande_line' && (int) $line->getData('linked_id_object')) {
-                    $comm_line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $line->getData('linked_id_object'));
-
-                    if (BimpObject::objectLoaded($comm_line)) {                        
-                        $fac_lines = BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_FactureLine', array(
-                                    'linked_object_name' => 'commande_line',
-                                    'linked_id_object'   => (int) $comm_line->id
-                        ));
-
-                        foreach ($fac_lines as $fac_line) {
-                            $fac_line->checkPrixAchat();
-                        }
-                    }
-                }
+                $line->checkFactureClientLinesPA();
             }
         }
+
+        return array();
     }
 
     // Actions:

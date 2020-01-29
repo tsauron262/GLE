@@ -7,11 +7,16 @@ labels:
     is_female: 1
     
 fields: 
+    name: 
+        label: Nom
+        required: 1
+        
     owner_type: 
-        label: Type objet propriétaire
+        label: Type propriétaire
         values: 
             1: Groupe
             2: Utilisateur
+        required: 1
         
     id_owner: 
         label: Propriétaire
@@ -21,26 +26,55 @@ fields:
     obj_module: 
         label: Module
         required: 1
+        input: 
+            type: hidden
         
     obj_name: 
         label: Objet
         required: 1
+        input: 
+            type: hidden
         
+    list_type: 
+        label: Type de liste
+        required: 1
+        input: 
+            type: hidden
+            
     list_name: 
         label: Code liste
         default_value: default
+        required: 1
+        input: 
+            type: hidden
+        
+    is_default: 
+        label: Configuration par défaut pour cette liste
+        type: bool
+        default_value: 0
         
     cols: 
         label: Cols
-        type: list
+        type: items_list
+        input: 
+            type: custom
+            content: 
+                callback: renderColsInput
         
     sort_field: 
         label: Tri
+        type: string
+        values: 
+            array: objSortableFields
         default_value: id
         
     sort_option:
         label: Option de tri
-        default_value: 
+        type: string
+        values: 
+            array: objSortOptions
+        default_value: ''
+        depends_on: sort_field
         
     sort_way:
         label: Ordre
@@ -54,11 +88,10 @@ fields:
         type: int
         values: 
             10: 10
-            25: 25
+            20: 20
+            30: 30
+            40: 40
             50: 50
-            100: 100
-            250: 250
-            500: 500
         input: 
             type: switch_options
         default_value: 10
@@ -68,6 +101,103 @@ fields:
         type: bool
         default_value: 0
         
-#    filters: 
-#        label: Filtres
-#        type: json
+    id_default_filters: 
+        label: Filtres par défaut
+        type: id
+        values: 
+            array: ownerFilters
+        default_value: 0
+        depends_on: owner_type,id_group,obj_module,obj_name,list_type,list_name
+        
+    search_open: 
+        label: Barre de recherche ouverte par défaut
+        type: bool
+        default_value: 0
+    
+    filters_open: 
+        label: Panneau filtres ouvert par défaut
+        type: bool
+        default_value: 0
+        
+forms: 
+    default: 
+        rows: 
+            - field: obj_module
+            - field: obj_name
+            - field: list_type
+            - field: list_name
+            - field: name
+            - field: is_default
+            - field: owner_type
+            - custom: 1
+              label: Groupe
+              input_name: id_group
+              data_type: id
+              value: 
+                  callback: getIdGroup
+              content: 
+                  callback: renderGroupInput
+              display_if: 
+                  field_name: owner_type
+                  show_values: 1
+            - field: nb_items
+              show: 
+                  callback: hasPagination
+            - field: sort_field
+              show: 
+                  callback: isListSortable
+            - field: sort_option
+              show: 
+                  callback: isListSortable
+            - field: sort_way
+              show: 
+                  callback: isListSortable
+            - custom: 1
+              label: Colonnes
+              input_name: cols
+              no_container: 1
+              content: 
+                  callback: renderColsInput
+              show: 
+                  callback: hasCols
+            - field: total_row
+            - field: id_default_filters
+            - field: search_open
+              show: 
+                  callback: isListSearchable
+            - field: filters_open
+              show: 
+                  callback: hasFiltersPanel
+      
+lists: 
+    default: 
+        title: 
+            callback: getListTitle
+        configurable: 0
+        checkboxes: 1
+        enable_search: 0
+        enable_sort: 0
+        bulk_actions:
+            - label: supprimer les configurations sélectionnées
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this))
+        sort_field: id
+        sort_way: asc
+        n: 0
+        add_form_name: default
+        add_btn_label: Nouvelle configuration
+        edit_btn: 1
+        edit_form: default
+        delete_btn: 1
+        cols: 
+            name:
+                field: name
+            owner: 
+                label: Propriétaire
+                value: 
+                    callback: displayOwner
+            is_default: 
+                label: Utilisation
+                value: 
+                    callback: displayUtilisation
+                

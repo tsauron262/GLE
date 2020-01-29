@@ -6,6 +6,24 @@ labels:
     name_plur: enregistrements de filtres
     
 fields: 
+    obj_module: 
+        label: Module
+        required: 1
+        input:
+            type: hidden
+        
+    obj_name: 
+        label: Objet
+        required: 1
+        input:
+            type: hidden
+        
+    panel_name: 
+        label: Nom du panel
+        required: 1
+        input:
+            type: hidden
+        
     name: 
         label: Nom
         required: 1
@@ -22,26 +40,72 @@ fields:
         type: int
         required: 1
         
-    obj_module: 
-        label: Module
-        required: 1
-        
-    obj_name: 
-        label: Objet
-        required: 1
-        
-    list_type: 
-        label: Type de liste
-        required: 1
-        
-    list_name: 
-        label: Code liste
-        default_value: default
-        
-    panel_name: 
-        label: Nom du panel
-        default_value: default
-        
     filters: 
         label: filtres
         type: json
+        input: 
+            type: hidden
+        
+forms: 
+    default: 
+        rows: 
+            - custom: 1
+              hidden: 1
+              label: ID Filtres,
+              input_name: filters_id
+              input: 
+                  type: hidden
+            - field: obj_module
+            - field: obj_name
+            - field: panel_name
+            - field: filters
+            - field: name
+            - field: owner_type
+            - custom: 1
+              label: Groupe
+              data_type: id
+              content: 
+                  callback: renderGroupInput
+              display_if:
+                field_name: owner_type
+                show_values: 1
+            
+    edit: 
+        rows: 
+            - field: name
+            - field: owner_type
+            - custom: 1
+              label: Groupe
+              data_type: id
+              content: 
+                  callback: renderGroupInput
+              display_if:
+                field_name: owner_type
+                show_values: 1
+          
+        
+lists: 
+    default: 
+        title: 
+            callback: getListTitle
+        configurable: 0
+        checkboxes: 1
+        enable_search: 0
+        enable_sort: 0
+        bulk_actions:
+            - label: supprimer les filtres enregistrés sélectionnés
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this))
+        sort_field: id
+        sort_way: asc
+        n: 0
+        edit_btn: 1
+        edit_form: edit
+        delete_btn: 1
+        cols: 
+            name:
+                field: name
+            owner: 
+                label: Propriétaire
+                value: 
+                    callback: displayOwner

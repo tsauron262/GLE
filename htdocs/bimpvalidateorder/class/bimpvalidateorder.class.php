@@ -62,7 +62,7 @@ class BimpValidateOrder {
         if (defined('MOD_DEV') && (int) MOD_DEV) {
             return 1;
         }
-
+        
         $updateValFin = $updateValComm = false;
         $ok = true;
         $id_responsiblesFin = $id_responsiblesComm = array();
@@ -83,12 +83,9 @@ class BimpValidateOrder {
                 if (!$error) {
                     setEventMessages("Un mail a été envoyé à un responsable pour qu'il valide cette commande financièrement.", null, 'warnings');
                 } else
-                    $this->errors[] = '2 Envoi d\'email impossible '.$id_responsible;
+                    $this->errors[] = '2 Envois d\'email impossibles '.$id_responsible;
             }
         }
-
-
-
 
         if ($result->validComm < 1) {
             $id_responsiblesComm = $this->checkAutorisationCommmerciale($user, $order);
@@ -113,13 +110,6 @@ class BimpValidateOrder {
             setEventMessages("Validation non permise", null, "errors");
 
 
-
-
-
-
-
-
-
         if (!$ok) {
             $this->db->rollback();
             global $conf;
@@ -142,11 +132,9 @@ class BimpValidateOrder {
             $this->db->query("UPDATE ".MAIN_DB_PREFIX."commande SET validComm = 1 WHERE rowid = " . $order->id);
             setEventMessages('Validation Commerciale OK', array(), 'mesgs');
         }
+        
         if (!$ok)
             $this->db->commit();
-
-
-
 
         if (sizeof($this->errors) > 0) {
             setEventMessages(null, $this->errors, 'errors');
@@ -155,33 +143,6 @@ class BimpValidateOrder {
 
         if (!$ok)
             return -1;
-        
-        $infoClient = "";
-            
-        if(isset($order->socid)){                
-            require_once DOL_DOCUMENT_ROOT . '/core/lib/company.lib.php';
-            $societe = new Societe($this->db);
-            $societe->fetch($order->socid);
-            $infoClient = " du client ".$societe->getNomUrl(1);
-        }
-        
-        $contacts = $order->liste_contact(-1, 'internal', 0, 'SALESREPFOLL');
-        foreach ($contacts as $contact)
-            mailSyn2("Commande Validée", $contact['email'], "gle@bimp.fr", "Bonjour, votre commande " . $order->getNomUrl(1) .$infoClient. " est validée.");
-
-
-
-        foreach ($order->lines as $line) {
-            if (stripos($line->ref, "REMISECRT") !== false) {
-                $order->array_options['options_crt'] = 2;
-                $order->updateExtraField('crt');
-            }
-            if (stripos($line->desc, "Applecare") !== false) {
-                $order->array_options['options_apple_care'] = 2;
-                $order->updateExtraField('apple_care');
-            }
-        }
-
 
         return 1;
     }

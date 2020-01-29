@@ -632,7 +632,7 @@ class ObjectLine extends BimpObject
     public function getDescSearchFilters(&$filters, $value, &$joins = array(), $main_alias = 'a')
     {
 
-        $alias = self::$dol_line_table;
+        $alias = static::$dol_line_table;
 
         if (!isset($joins[$alias])) {
             $joins[$alias] = array(

@@ -398,7 +398,6 @@ table.objectlistTable {
 }
 
 tr.listSearchRow {
-    display: none;
     background-color: #DCDCDC;
 
     & > td {
@@ -756,6 +755,25 @@ td.buttons {
 
     i.loading {
         display: none;
+    }
+    
+    .bimp_filter_date_range_period {
+        font-size: 11px;
+        margin-bottom: 10px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #7D7D7D;
+        
+        input, select, .select2 {
+            display: inline-block;
+            font-size: 11px!important;
+            width: auto!important;
+            min-width: 30px!important;
+            width: 80px!important;
+            
+            &.qtyInput {
+                width: 30px!important;
+            }
+        }
     }
 }
 

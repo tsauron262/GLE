@@ -106,8 +106,9 @@ class Bimp_Societe extends BimpObject
         }
 
         if (count($errors))
-            return false;
-        return true;
+            return 0;
+        
+        return 1;
     }
 
     public function Luhn($numero, $longueur)

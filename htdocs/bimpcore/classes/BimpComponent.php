@@ -18,6 +18,7 @@ abstract class BimpComponent
     public $errors = array();
     public $infos = array();
     public $warnings = array();
+    public $no_ajax_params = false;
 
     public function __construct(BimpObject $object, $name = '', $path = '')
     {
@@ -132,7 +133,7 @@ abstract class BimpComponent
     public function fetchParam($name, $definitions, $path)
     {
         $errors = array();
-        $param = self::fetchParamStatic($this->object->config, $name, $definitions, $path, $errors);
+        $param = self::fetchParamStatic($this->object->config, $name, $definitions, $path, $errors, $this->no_ajax_params);
         if (count($errors)) {
             foreach ($errors as $e) {
                 $this->addTechnicalError($e);
@@ -141,7 +142,7 @@ abstract class BimpComponent
         return $param;
     }
 
-    public static function fetchParamsStatic(BimpConfig $config, $path, $definitions, &$errors = array())
+    public static function fetchParamsStatic(BimpConfig $config, $path, $definitions, &$errors = array(), $no_ajax_params = false)
     {
         $params = array();
         if (is_null($definitions) || is_null($config)) {
@@ -149,12 +150,12 @@ abstract class BimpComponent
         }
 
         foreach ($definitions as $name => $defs) {
-            $params[$name] = self::fetchParamStatic($config, $name, $definitions, $path, $errors);
+            $params[$name] = self::fetchParamStatic($config, $name, $definitions, $path, $errors, $no_ajax_params);
         }
         return $params;
     }
 
-    protected static function fetchParamStatic(BimpConfig $config, $name, $definitions, $path, &$errors = array())
+    protected static function fetchParamStatic(BimpConfig $config, $name, $definitions, $path, &$errors = array(), $no_ajax_params = false)
     {
         if (!isset($definitions[$name])) {
             $errors[] = 'Paramètre de configuration invalide: "' . $name . '" (définitions absentes)';
@@ -169,13 +170,15 @@ abstract class BimpComponent
 
         $param = null;
 
-        $request = isset($defs['request']) ? (bool) $defs['request'] : false;
-        if ($request) {
-            $json = isset($defs['json']) ? (bool) $defs['json'] : false;
-            if (BimpTools::isSubmit('param_' . $name)) {
-                $param = BimpTools::getValue('param_' . $name);
-                if ($json && !is_null($param) && is_string($param)) {
-                    $param = json_decode($param, true);
+        if (!$no_ajax_params) {
+            $request = isset($defs['request']) ? (bool) $defs['request'] : false;
+            if ($request) {
+                $json = isset($defs['json']) ? (bool) $defs['json'] : false;
+                if (BimpTools::isSubmit('param_' . $name)) {
+                    $param = BimpTools::getValue('param_' . $name);
+                    if ($json && !is_null($param) && is_string($param)) {
+                        $param = json_decode($param, true);
+                    }
                 }
             }
         }
@@ -395,22 +398,30 @@ abstract class BimpComponent
 
     // Méthodes statiques: 
 
-    public static function getConfigPath($object, $name)
+    public static function getConfigPath($object, $name, $type = null)
     {
         if (!is_a($object, 'BimpObject')) {
             return '';
+        }
+        
+        if (is_null($type)) {
+            $type = static::$type;
+        }
+        
+        if ($type === 'list_table') {
+            $type = 'list';
         }
 
         $path = '';
 
         if (!$name || $name === 'default') {
-            if ($object->config->isDefined(static::$type)) {
-                $path = static::$type;
-            } elseif ($object->config->isDefined(static::$type . 's' . '/default')) {
-                $path = static::$type . 's/default';
+            if ($object->config->isDefined($type)) {
+                $path = $type;
+            } elseif ($object->config->isDefined($type . 's' . '/default')) {
+                $path = $type . 's/default';
             }
         } else {
-            $path = static::$type . 's/' . $name;
+            $path = $type . 's/' . $name;
         }
 
         return $path;

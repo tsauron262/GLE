@@ -8,6 +8,7 @@ class BC_FiltersPanel extends BC_Panel
     public $list_type = '';
     public $list_name = '';
     public $list_identifier = '';
+    public $id_list_filters = 0;
     protected $values = array(
         'fields'   => array(),
         'children' => array()
@@ -40,6 +41,9 @@ class BC_FiltersPanel extends BC_Panel
 
         $this->values = $this->params['default_values'];
 
+        if (BimpTools::isSubmit('id_current_list_filters')) {
+            $this->id_list_filters = (int) BimpTools::getValue('id_current_list_filters', 0);
+        }
         $current_bc = $prev_bc;
     }
 
@@ -85,6 +89,7 @@ class BC_FiltersPanel extends BC_Panel
         if (!BimpObject::objectLoaded($listFilters)) {
             $errors[] = 'L\'enregistrement de filtres d\'ID ' . $id_list_filters . ' n\'existe pas';
         } else {
+            $this->id_list_filters = $id_list_filters;
             $values = $listFilters->getData('filters');
 
             if (is_array($values) && !empty($values)) {
@@ -200,17 +205,20 @@ class BC_FiltersPanel extends BC_Panel
             return $html;
         }
 
-        global $current_bc;
+        global $user, $current_bc;
+
         if (!is_object($current_bc)) {
             $current_bc = null;
         }
         $prev_bc = $current_bc;
         $current_bc = $this;
 
-
         $html .= '<div class="filters_toolbar align-right">';
         $html .= BimpRender::renderRowButton('Effacer tous les filtres', 'fas_eraser', 'removeAllListFilters(\'' . $this->identifier . '\')');
         $html .= BimpRender::renderRowButton('Enregistrer les filtres actuels', 'fas_save', 'saveListFilters($(this), \'' . $this->identifier . '\')');
+        if (BimpObject::objectLoaded($user)) {
+            $html .= BimpRender::renderRowButton('Liste des filtres enregistrés', 'fas_bars', 'loadUserListFiltersModalList($(this), \'' . $this->identifier . '\', ' . $user->id . ')');
+        }
         $html .= BimpRender::renderRowButton('Replier tous les filtres', 'fas_minus-square', 'hideAllFilters(\'' . $this->identifier . '\')');
         $html .= BimpRender::renderRowButton('Déplier tous les filtres', 'fas_plus-square', 'showAllFilters(\'' . $this->identifier . '\')');
         $html .= '</div>';
@@ -218,22 +226,30 @@ class BC_FiltersPanel extends BC_Panel
         global $user;
 
         if (BimpObject::objectLoaded($user)) {
-            $saves = BimpCache::getUserListFiltersArray($this->object, $user->id, $this->list_type, $this->list_name, $this->name);
+            $saves = BimpCache::getUserListFiltersArray($this->object, $user->id, $this->name, true);
 
             if (count($saves)) {
                 $html .= '<div class="load_saved_filters_container">';
                 $html .= '<span style="font-size: 12px;color: #8C8C8C;">Filtres enregistrés: </span>';
-                $html .= BimpInput::renderInput('select', 'id_filters_to_load', '', array(
+                $html .= BimpInput::renderInput('select', 'id_filters_to_load', (int) $this->id_list_filters, array(
                             'options' => $saves
                 ));
-                $html .= '<div style="text-align: right">';
-                $html .= '<button type="button" class="btn btn-default btn-small" onclick="deleteSavedFilters($(this), \'' . $this->identifier . '\');">';
-                $html .= BimpRender::renderIcon('fas_trash', 'iconLeft') . 'Supprimer';
-                $html .= '</button>';
-                $html .= '<button type="button" class="btn btn-default btn-small" onclick="loadSavedFilters($(this), \'' . $this->identifier . '\');">';
-                $html .= BimpRender::renderIcon('fas_download', 'iconLeft') . 'Charger';
-                $html .= '</button>';
-                $html .= '</div>';
+
+                if ((int) $this->id_list_filters) {
+                    $listFilters = BimpCache::getBimpObjectInstance('bimpcore', 'ListFilters', (int) $this->id_list_filters);
+                    if (BimpObject::objectLoaded($listFilters)) {
+                        $html .= '<div style="text-align: right">';
+                        if ($listFilters->can('edit')) {
+                            $html .= '<button type="button" class="btn btn-default btn-small" onclick="saveListFilters($(this), \'' . $this->identifier . '\', ' . $this->id_list_filters . ');">';
+                            $html .= BimpRender::renderIcon('fas_save', 'iconLeft') . 'Mettre à jour';
+                            $html .= '</button>';
+                        }
+                        $html .= '<button type="button" class="btn btn-default btn-small" onclick="loadSavedFilters(\'' . $this->identifier . '\', ' . $this->id_list_filters . ');">';
+                        $html .= BimpRender::renderIcon('fas_download', 'iconLeft') . 'Recharger';
+                        $html .= '</button>';
+                        $html .= '</div>';
+                    }
+                }
                 $html .= '</div>';
             }
         }

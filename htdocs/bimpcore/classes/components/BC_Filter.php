@@ -18,7 +18,13 @@ class BC_Filter extends BimpComponent
         'range'      => array(),
         'check_list' => array(
             'items' => array('data_type' => 'array')
-        )
+        ),
+        'user'       => array()
+    );
+    public static $periods = array(
+        'n' => 'Y',
+        'm' => 'M',
+        'j' => 'D'
     );
 
     public function __construct(BimpObject $object, $params, $values = array(), $path = '')
@@ -73,6 +79,10 @@ class BC_Filter extends BimpComponent
 
         switch ($this->params['type']) {
             case 'value':
+            case 'user':
+                if ($this->params['type'] === 'user' && $value === 'current') {
+                    $label = 'Utilisateur connecté';
+                }
                 $label = $value;
                 break;
 
@@ -109,6 +119,19 @@ class BC_Filter extends BimpComponent
                     $label = '<span class="danger">Valeurs invalides</valeur>';
                 }
                 break;
+
+            case 'check_list':
+                if (isset($this->params['items'][$value])) {
+                    if (is_string($this->params['items'][$value])) {
+                        $label = $this->params['items'][$value];
+                    } elseif (isset($this->params['items'][$value]['label'])) {
+                        $label = $this->params['items'][$value]['label'];
+                    }
+                }
+                if (!$label) {
+                    $label = 'Valeur: ' . $value;
+                }
+                break;
         }
 
         $current_bc = $prev_bc;
@@ -120,11 +143,15 @@ class BC_Filter extends BimpComponent
         return array();
     }
 
-    public static function getRangeSqlFilter($value, &$errors = array())
+    public static function getRangeSqlFilter($value, &$errors = array(), $is_dates = false)
     {
         $filter = array();
 
         if (is_array($value)) {
+            if ($is_dates && isset($value['period']) && is_array($value['period']) && !empty($value['period'])) {
+                $value = self::convertDateRangePeriodValue($value['period']);
+            }
+
             if (isset($value['max']) && $value['max'] !== '') {
                 if (preg_match('/^\d{4}\-\d{2}\-\d{2}$/', $value['max'])) {
                     $value['max'] .= ' 23:59:59';
@@ -166,8 +193,201 @@ class BC_Filter extends BimpComponent
                 'part'      => $value
             );
         }
-        
+
         return array();
+    }
+
+    public static function getValuePartLabel($value, $part_type)
+    {
+        $label = '';
+        if (in_array($part_type, array('beginning', 'middle'))) {
+            $label .= '... ';
+        }
+        $label .= $value;
+        if (in_array($part_type, array('middle', 'end'))) {
+            $label .= ' ...';
+        }
+        return $label;
+    }
+
+    public static function getDateRangePeriodLabel($value)
+    {
+        $label = '';
+        if (isset($value['qty']) && (int) $value['qty'] && isset($value['unit']) && (string) $value['unit']) {
+            if (isset($value['mode']) && $value['mode'] === 'rel') {
+                $label .= '-' . $value['qty'] . ' ';
+                switch ($value['unit']) {
+                    case 'n':
+                        $label .= 'an' . ((int) $value['qty'] > 1 ? 's' : '');
+                        break;
+
+                    case 'm':
+                        $label .= 'mois';
+                        break;
+
+                    case 'j':
+                        $label .= 'jour' . ((int) $value['qty'] > 1 ? 's' : '');
+                        break;
+                }
+            } else {
+                if ((int) $value['qty'] === 1) {
+                    switch ($value['unit']) {
+                        case 'n':
+                            $label .= 'Année en cours';
+                            break;
+
+                        case 'm':
+                            $label .= 'Mois en cours';
+                            break;
+
+                        case 'j':
+                            $label .= 'Ajourd\'hui';
+                            break;
+                    }
+                } else {
+                    $label = $value['qty'];
+                    switch ($value['unit']) {
+                        case 'n':
+                            $label .= ' dernières années';
+                            break;
+
+                        case 'm':
+                            $label .= ' derniers mois';
+                            break;
+
+                        case 'j':
+                            $label .= ' derniers jours';
+                            break;
+                    }
+                }
+            }
+        }
+
+        if (!$label) {
+            $label = '<span class="danger">Période invalide</span>';
+        }
+
+        if (isset($value['offset_qty']) && (int) $value['offset_qty'] && isset($value['offset_unit']) && (string) $value['offset_unit']) {
+            $label .= ' (-' . $value['offset_qty'] . ' ';
+            switch ($value['offset_unit']) {
+                case 'n':
+                    $label .= 'an' . ((int) $value['offset_qty'] > 1 ? 's' : '');
+                    break;
+
+                case 'm':
+                    $label .= 'mois';
+                    break;
+
+                case 'j':
+                    $label .= 'jour' . ((int) $value['offset_qty'] > 1 ? 's' : '');
+                    break;
+            }
+            $label .= ')';
+        }
+
+        $label .= '<br/>';
+
+        return $label;
+    }
+
+    public static function convertDateRangePeriodValue($value)
+    {
+        $from = '';
+        $to = '';
+
+
+        if (isset($value['qty']) && (int) $value['qty'] && isset($value['unit']) && (string) $value['unit']) {
+            if (!isset($value['mode']) || !(string) $value['mode']) {
+                $value['mode'] = 'abs';
+            }
+
+            $qty = (int) $value['qty'];
+
+            if ($value['mode'] === 'abs') {
+                $qty -= 1;
+            }
+
+            $interval = '';
+            if ($qty > 0) {
+                $interval = 'P' . $qty . self::$periods[$value['unit']];
+            }
+
+            $offset = '';
+            if (isset($value['offset_qty']) && (int) $value['offset_qty'] > 0 && isset($value['offset_unit']) && (string) $value['offset_unit']) {
+                $offset = 'P' . $value['offset_qty'] . self::$periods[$value['offset_unit']];
+            }
+
+            $dt_from = new DateTime();
+            $dt_to = new DateTime();
+
+            if ($interval) {
+                $dt_from->sub(new DateInterval($interval));
+            }
+
+            if ($offset) {
+                $dt_to->sub(new DateInterval($offset));
+                $dt_from->sub(new DateInterval($offset));
+            }
+
+            $from = $dt_from->format('Y-m-d');
+            $to = $dt_to->format('Y-m-d');
+
+            if ($value['mode'] === 'abs') {
+                $dt_now = new DateTime();
+                switch ($value['unit']) {
+                    case 'n':
+                        $from = $dt_from->format('Y') . '-01-01';
+                        if ($dt_to->format('Y') < $dt_now->format('Y')) {
+                            $to = $dt_to->format('Y') . '-12-31';
+                        }
+                        break;
+                    case 'm':
+                        $from = $dt_from->format('Y-m') . '-01';
+                        if ($dt_to->format('Y-m') < $dt_now->format('Y-m')) {
+                            $to = $dt_to->format('Y-m') . '-01';
+                            $dt_to = new DateTime($to);
+                            $dt_to->add(new DateInterval('P1M'));
+                            $dt_to->sub(new DateInterval('P1D'));
+                            $to = $dt_to->format('Y-m-d');
+                        }
+                        break;
+                }
+            }
+
+            $from .= ' 00:00:00';
+            $to .= ' 23:59:59';
+        }
+
+        return array(
+            'min' => $from,
+            'max' => $to
+        );
+    }
+
+    public static function getConvertedValues($filter_type, $values)
+    {
+        foreach ($values as $idx => $value) {
+            switch ($filter_type) {
+                case 'date_range':
+                    if (isset($value['period']) && is_array($value['period']) && !empty($value['period'])) {
+                        $values[$idx] = self::convertDateRangePeriodValue($value['period']);
+                    }
+                    break;
+
+                case 'user':
+                    if ($value === 'current') {
+                        global $user;
+                        if (!BimpObject::objectLoaded($user)) {
+                            unset($values[$idx]);
+                            break;
+                        }
+                        $values[$idx] = (int) $user->id;
+                    }
+                    break;
+            }
+        }
+
+        return $values;
     }
 
     public function renderHtml()
@@ -199,6 +419,10 @@ class BC_Filter extends BimpComponent
             $html .= ' data-' . $data_name . '="' . $data_value . '"';
         }
 
+        if ($this->params['type'] === 'check_list') {
+            $html .= ' onopen="hideFiltersValues($(this))"';
+            $html .= ' onclose="showFiltersValues($(this))"';
+        }
         $html .= '>';
 
         $html .= '<div class="bimp_filter_caption foldable_caption">';
@@ -214,12 +438,18 @@ class BC_Filter extends BimpComponent
 
         $html .= '</div>';
 
-        $html .= '<div class="bimp_filter_values_container">';
-        if (in_array($this->params['type'], array('value', 'value_part', 'range', 'date_range'))) {
-            foreach ($this->values as $value) {
-                $html .= $this->renderFilterValue($value);
-            }
+        $values_hidden = false;
+
+        if ($this->params['type'] === 'check_list' && $this->params['open']) {
+            $values_hidden = true;
         }
+
+        $html .= '<div class="bimp_filter_values_container"' . ($values_hidden ? ' style="display: none"' : '') . '>';
+//        if (in_array($this->params['type'], array('value', 'user', 'value_part', 'range', 'date_range'))) {
+        foreach ($this->values as $value) {
+            $html .= $this->renderFilterValue($value);
+        }
+//        }
         $html .= '</div>';
 
         $html .= '</div>';
@@ -272,6 +502,80 @@ class BC_Filter extends BimpComponent
     public function renderAddInput()
     {
         return '';
+    }
+
+    public function renderDateRangeInput($input_type, $input_name, $add_btn_html)
+    {
+        $html = '';
+
+        if ($input_type === 'date_range') {
+            $html .= '<div class="bimp_filter_date_range_period">';
+            $html .= '<div style="margin-top: 5px">';
+            $html .= 'Période passée: <br/>';
+            $html .= BimpInput::renderInput('qty', $input_name . '_period_qty', 0, array(
+                        'extra_class' => 'bimp_filter_date_range_period_qty',
+                        'data'        => array(
+                            'data_type' => 'number',
+                            'min'       => 0,
+                            'max'       => 'none',
+                            'unsigned'  => 1,
+                            'decimals'  => 0
+                        )
+            ));
+            $html .= BimpInput::renderInput('select', $input_name . '_period_unit', 'y', array(
+                        'extra_class' => 'bimp_filter_date_range_period_unit ',
+                        'options'     => array(
+                            'n' => 'Année(s)',
+                            'm' => 'Mois',
+                            'j' => 'Jour(s)',
+                        )
+            ));
+            $html .= '</div>';
+            $html .= '<div style="margin-top: 5px">';
+            $html .= 'Décalage (-): <br/>';
+            $html .= BimpInput::renderInput('qty', $input_name . '_period_offset_qty', 0, array(
+                        'extra_class' => 'bimp_filter_date_range_offset_qty',
+                        'data'        => array(
+                            'data_type' => 'number',
+                            'min'       => 0,
+                            'max'       => 'none',
+                            'unsigned'  => 1,
+                            'decimals'  => 0
+                        )
+            ));
+            $html .= BimpInput::renderInput('select', $input_name . '_period_offset_unit', 'y', array(
+                        'extra_class' => 'bimp_filter_date_range_offset_unit ',
+                        'options'     => array(
+                            'n' => 'Année(s)',
+                            'm' => 'Mois',
+                            'j' => 'Jour(s)',
+                        )
+            ));
+            $html .= '</div>';
+            $html .= '<div style="margin-top: 5px">';
+            $html .= 'Mode:';
+            $html .= BimpInput::renderInput('select', $input_name . '_period_mode', 'abs', array(
+                        'extra_class' => 'bimp_filter_date_range_period_mode ',
+                        'options'     => array(
+                            'abs' => 'Absolu',
+                            'rel' => 'Relatif'
+                        )
+            ));
+            $html .= '</div>';
+
+            $html .= '<div style="text-align: right; margin-top: 2px">';
+            $html .= '<button type="button" class="btn btn-default btn-small" onclick="addFieldFilterDateRangerPeriod($(this))">';
+            $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Ajouter';
+            $html .= '</button>';
+            $html .= '</div>';
+
+            $html .= '</div>';
+        }
+
+        $html .= BimpInput::renderInput($input_type, $input_name);
+        $html .= $add_btn_html;
+
+        return $html;
     }
 
     public static function getDefaultTypeFromDataType($data_type)

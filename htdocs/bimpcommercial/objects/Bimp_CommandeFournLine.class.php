@@ -1228,7 +1228,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
 
                                     if ($code_config) {
                                         foreach ($serials as $serial) {
-                                            $isImei = (preg_match("/[0-9]/", $serial))? true : false;
+                                            $isImei = (!preg_match("/[a-zA-Z]/", $serial))? true : false;
                                             if (!$isImei && !preg_match('/^.+' . preg_quote($code_config) . '$/', $serial)) {
                                                 $code_config_errors[] = $serial;
                                             }
@@ -1705,50 +1705,6 @@ class Bimp_CommandeFournLine extends FournObjectLine
                     // Màj statuts.
                     $line->addReceivedQty((int) $reception_data['qty'], $new_status);
                 }
-
-                // Mise à jour du prix d'achat moyen pondéré pour la ligne de commande client si non sérialisable: 
-                if (!$isSerialisable) {
-                    $pa_total = 0;
-                    $pa_qty = 0;
-
-                    if (isset($reception_data['qties'])) {
-                        foreach ($reception_data['qties'] as $qty_data) {
-                            if (isset($qty_data['pu_ht']) && isset($qty_data['qty'])) {
-                                $pa_total += ((float) $qty_data['pu_ht'] * (float) $qty_data['qty']);
-                                $pa_qty += (float) $qty_data['qty'];
-                            }
-                        }
-                    }
-
-                    if ($pa_qty < (float) $reception_data['qty']) {
-                        $pa_total += (((float) $reception_data['qty'] - $pa_qty) * (float) $this->getUnitPriceHTWithRemises());
-                    }
-
-                    if ((float) $reception_data['qty'] > 0) {
-                        $pa_moyen = $pa_total / (float) $reception_data['qty'];
-                    } else {
-                        $pa_moyen = 0;
-                    }
-
-                    $line_qty = (float) $line->getFullQty();
-                    if ($pa_moyen && $line_qty) {
-                        $line_pa = (float) $line->pa_ht;
-//                        $remise_pa = (float) $line->getData('remise_pa');
-//                        if ($remise_pa) {
-//                            $line_pa -= ((float) $line->pa_ht * ($remise_pa / 100));
-//                        }
-
-                        $new_line_pa = (float) ((((float) $line_pa * ($line_qty - (float) $reception_data['qty'])) + ($pa_moyen * (float) $reception_data['qty'])) / $line_qty);
-
-//                        if ($remise_pa) {
-//                            $new_line_pa = ($new_line_pa / (1 - ($remise_pa / 100)));
-//                        }
-
-                        if ($new_line_pa !== (float) $line->pa_ht) {
-                            $line->setPrixAchat($new_line_pa);
-                        }
-                    }
-                }
             }
         }
 
@@ -1762,6 +1718,8 @@ class Bimp_CommandeFournLine extends FournObjectLine
 
         if (count($up_errors)) {
             $errors[] = BimpTools::getMsgFromArray($up_errors, 'Erreurs lors de la mise à jour de la ligne de commande fournisseur');
+        } elseif (!$isReturn) {
+            $this->checkFactureClientLinesPA();
         }
 
         $this->checkQties();
@@ -1926,46 +1884,6 @@ class Bimp_CommandeFournLine extends FournObjectLine
                             }
                         }
                     }
-
-                    // Mise à jour du prix d'achat moyen pondéré pour la ligne de commande client si non sérialisable: 
-
-                    if ($id_commande_client_line) {
-                        $pa_total = 0;
-                        $pa_qty = 0;
-
-                        if (isset($reception_data['qties'])) {
-                            foreach ($reception_data['qties'] as $qty_data) {
-                                if (isset($qty_data['pu_ht']) && isset($qty_data['qty'])) {
-                                    $pa_total += ((float) $qty_data['pu_ht'] * (float) $qty_data['qty']);
-                                    $pa_qty += (float) $qty_data['qty'];
-                                }
-                            }
-                        }
-
-                        if ($pa_qty < (float) $reception_data['qty']) {
-                            $pa_total += (((float) $reception_data['qty'] - $pa_qty) * (float) $this->getUnitPriceHTWithRemises());
-                        }
-
-                        $line_qty = (float) $commande_line->getFullQty();
-                        if ($pa_total && $line_qty) {
-                            $line_pa = (float) $commande_line->pa_ht;
-//                            $remise_pa = (float) $commande_line->getData('remise_pa');
-//                            if ($remise_pa) {
-//                                $line_pa -= ($line_pa * ($remise_pa / 100));
-//                            }
-
-                            $new_line_pa = (float) ((((float) $line_pa * $line_qty) - $pa_total) / ($line_qty - (float) $reception_data['qty']));
-
-
-//                            if ($remise_pa) {
-//                                $new_line_pa = ($new_line_pa / (1 - ($remise_pa / 100)));
-//                            }
-
-                            if ($new_line_pa !== (float) $commande_line->pa_ht) {
-                                $commande_line->setPrixAchat($new_line_pa);
-                            }
-                        }
-                    }
                 }
             }
 
@@ -1980,6 +1898,8 @@ class Bimp_CommandeFournLine extends FournObjectLine
 
                 if (count($up_errors)) {
                     $errors[] = BimpTools::getMsgFromArray($up_errors);
+                } elseif (!$isReturn) {
+                    $this->checkFactureClientLinesPA();
                 }
             }
         }
@@ -2071,6 +1991,28 @@ class Bimp_CommandeFournLine extends FournObjectLine
                     if ((float) $this->getData('qty_to_receive')) {
                         $this->updateField('qty_to_receive', 0, null, true);
                     }
+                }
+            }
+        }
+    }
+
+    public function checkFactureClientLinesPA()
+    {
+        if (!$this->isLoaded()) {
+            return;
+        }
+
+        if ($this->getData('linked_object_name') === 'commande_line' && (int) $this->getData('linked_id_object')) {
+            $comm_line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $this->getData('linked_id_object'));
+
+            if (BimpObject::objectLoaded($comm_line)) {
+                $fac_lines = BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_FactureLine', array(
+                            'linked_object_name' => 'commande_line',
+                            'linked_id_object'   => (int) $comm_line->id
+                ));
+
+                foreach ($fac_lines as $fac_line) {
+                    $fac_line->checkPrixAchat();
                 }
             }
         }

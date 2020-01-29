@@ -128,17 +128,18 @@ class BimpObject extends BimpCache
 
         return null;
     }
-    
-    public function fetch_thirdparty(){
+
+    public function fetch_thirdparty()
+    {
         $tabPossible = array('societe', 'client');
-        
-        foreach($tabPossible as $posible){
+
+        foreach ($tabPossible as $posible) {
             $temp = $this->getChildObject($posible);
-            if(is_object($temp) && $temp->isLoaded()){
+            if (is_object($temp) && $temp->isLoaded()) {
                 $this->thirdparty = $temp->dol_object;
             }
         }
-        
+
         return false;
     }
 
@@ -2227,7 +2228,7 @@ class BimpObject extends BimpCache
                             $filters[$instance->getParentIdProperty()] = $this->id;
                         } elseif (empty($filters) || get_class($instance) == "BimpObject") {
                             $msg = 'Appel à getChildrenList() invalide' . "\n";
-                            $msg .= 'Obj: ' . $this->object_name . ' - instance: ' . $instance->object_name .' - class: ' . get_class($instance) . "\n";
+                            $msg .= 'Obj: ' . $this->object_name . ' - instance: ' . $instance->object_name . ' - class: ' . get_class($instance) . "\n";
                             $msg .= 'ERP: ' . DOL_URL_ROOT;
 
                             mailSyn2('ERREUR getChildren', 'dev@bimp.fr', 'no-replay@bimp.fr', $msg);
@@ -3915,10 +3916,12 @@ class BimpObject extends BimpCache
                     }
                     $this->dol_object->array_options['options_' . $extrafield] = $this->getDolValue($field, $value);
                 } else {
-                    $prop = $this->getConf('fields/' . $field . '/dol_prop', $field);
-                    if (is_null($prop)) {
-                        $errors[] = 'Erreur de configuration: propriété de l\'objet Dolibarr non définie pour le champ "' . $field . '"';
-                    } if (property_exists($this->dol_object, $prop)) {
+                    $prop = '';
+                    if (!(int) $this->getConf('fields/' . $field . '/no_dol_prop', 0)) {
+                        $prop = $this->getConf('fields/' . $field . '/dol_prop', $field);
+                    }
+
+                    if ($prop && property_exists($this->dol_object, $prop)) {
                         $this->dol_object->{$prop} = $this->getDolValue($field, $value);
                     } elseif ($this->field_exists($field) && !$this->isExtraField($field)) {
                         $bimpObjectFields[$field] = $value;
@@ -3938,8 +3941,9 @@ class BimpObject extends BimpCache
 
         $errors = array();
 
-        if (!isset($this->dol_object->id) && isset($this->dol_object->rowid))
+        if (!isset($this->dol_object->id) && isset($this->dol_object->rowid)) {
             $this->dol_object->id = $this->dol_object->rowid;
+        }
 
         $this->id = $this->dol_object->id;
 
@@ -3955,10 +3959,11 @@ class BimpObject extends BimpCache
                     $value = $this->dol_object->array_options['options_' . $extrafield];
                 }
             } else {
-                $prop = $this->getConf('fields/' . $field . '/dol_prop', $field);
-                if (is_null($prop)) {
-                    $errors[] = 'Erreur de configuration: propriété de l\'objet Dolibarr non définie pour le champ "' . $field . '"';
-                } elseif (property_exists($this->dol_object, $prop)) {
+                if (!(int) $this->getConf('fields/' . $field . '/no_dol_prop', 0)) {
+                    $prop = $this->getConf('fields/' . $field . '/dol_prop', $field);
+                }
+
+                if ($prop && property_exists($this->dol_object, $prop)) {
                     $value = $this->dol_object->{$prop};
                 } elseif ($this->field_exists($field) && !$this->isExtraField($field)) {
                     $bimpObjectFields[] = $field;
@@ -4525,8 +4530,16 @@ class BimpObject extends BimpCache
     public function resetPositions()
     {
         if ($this->getConf('positions', false, false, 'bool')) {
-            $filters = array();
             $parent_id_property = $this->getParentIdProperty();
+            if (method_exists($this, 'getPositionsFilters')) {
+                $filters = $this->getPositionsFilters();
+                if (is_null($filters)) {
+                    return;
+                }
+            } else {
+                $filters = array();
+            }
+
             if (!is_null($parent_id_property)) {
                 $id_parent = $this->getData($parent_id_property);
                 if (is_null($id_parent) || !$id_parent) {
@@ -4558,7 +4571,14 @@ class BimpObject extends BimpCache
         }
 
         if ($this->getConf('positions', false, false, 'bool')) {
-            $filters = array();
+            if (method_exists($this, 'getPositionsFilters')) {
+                $filters = $this->getPositionsFilters();
+                if (is_null($filters)) {
+                    return;
+                }
+            } else {
+                $filters = array();
+            }
             $parent_id_property = $this->getParentIdProperty();
             if (!is_null($parent_id_property)) {
                 $id_parent = $this->getData($parent_id_property);
@@ -4612,7 +4632,14 @@ class BimpObject extends BimpCache
     public function getNextPosition()
     {
         if ($this->getConf('positions', false, false, 'bool')) {
-            $filters = array();
+            if (method_exists($this, 'getPositionsFilters')) {
+                $filters = $this->getPositionsFilters();
+                if (is_null($filters)) {
+                    return 1;
+                }
+            } else {
+                $filters = array();
+            }
 
             $parent_id_property = $this->getParentIdProperty();
             if (!is_null($parent_id_property)) {
@@ -5261,47 +5288,6 @@ class BimpObject extends BimpCache
         }
 
         return BimpRender::renderAlerts($errors);
-    }
-
-    public function renderListConfigColsInput()
-    {
-        $html = '';
-
-        $list_name = BimpTools::getPostFieldValue('list_name');
-        $cols = $this->getListColsArray($list_name);
-
-        if (count($cols)) {
-            $owner_type = BimpTools::getPostFieldValue('owner_type', '');
-            $id_owner = BimpTools::getPostFieldValue('id_owner', 0);
-            $list_name = BimpTools::getPostFieldValue('list_name', 'default');
-
-            $values = array();
-            if ($owner_type && $id_owner) {
-                $userConfig = $this->getListConfig($owner_type, $id_owner, $list_name);
-                if (BimpObject::objectLoaded($userConfig)) {
-                    foreach (explode(',', $userConfig->getData('cols')) as $col_name) {
-                        if (isset($cols[$col_name])) {
-                            $values[$col_name] = $cols[$col_name];
-                        }
-                    }
-                } else {
-                    $bc_list = new BC_ListTable($this, $list_name);
-                    foreach ($bc_list->cols as $col_name) {
-                        if (isset($cols[$col_name])) {
-                            $values[$col_name] = $cols[$col_name];
-                        }
-                    }
-                }
-            }
-
-            $input = BimpInput::renderInput('select', 'cols_add_value', '', array('options' => $cols));
-            $content = BimpInput::renderMultipleValuesInput($this, 'cols', $input, $values, '', 0, 1, 1);
-            $html .= BimpInput::renderInputContainer('cols', '', $content, '', 0, 1, '', array('values_field' => 'cols'));
-        } else {
-            $html .= BimpRender::renderAlerts('Aucune option disponible', 'warnings');
-        }
-
-        return $html;
     }
 
     public function renderRemoveChildObjectButton($field, $reload_page = false)
@@ -6594,92 +6580,6 @@ class BimpObject extends BimpCache
                         }
                     }
                 }
-            }
-        }
-
-        return array(
-            'errors'   => $errors,
-            'warnings' => $warnings
-        );
-    }
-
-    public function actionSaveListFilters($data, &$success)
-    {
-        $errors = array();
-        $warnings = array();
-        $success = 'Filtres enregistrés avec succès';
-
-        if (!isset($data['list_type']) || !(string) $data['list_type']) {
-            $errors[] = 'Type de liste absent';
-        }
-        if (!isset($data['name']) || !(string) $data['name']) {
-            $errors[] = 'Veuillez spécifié un nom pour cet enregistrement';
-        }
-
-        if (!count($errors)) {
-            $owner_type = (isset($data['owner_type']) ? (int) $data['owner_type'] : 2);
-
-            $id_owner = 0;
-            if (!isset($data['id_owner']) || !(int) $data['id_owner']) {
-                if ($owner_type === 2) {
-                    global $user;
-
-                    if (!BimpObject::objectLoaded($user)) {
-                        $errors[] = 'Aucun utilisateur connecté';
-                    } else {
-                        $id_owner = $user->id;
-                    }
-                } else {
-                    $errors[] = 'ID du groupe propriétaire absent';
-                }
-            } else {
-                $id_owner = (int) $data['id_owner'];
-            }
-
-            $filters = (isset($data['filters']) && is_array($data['filters']) ? $data['filters'] : array());
-
-            $values = array(
-                'fields'   => array(),
-                'children' => array()
-            );
-            if (!empty($filters)) {
-                foreach ($filters['fields'] as $field_name => $filter) {
-                    if (isset($filter['values']) && is_array($filter['values']) && !empty($filter['values'])) {
-                        $values['fields'][$field_name] = $filter['values'];
-                    }
-                }
-                foreach ($filters['children'] as $child => $fields) {
-                    if (!isset($values['children'][$child])) {
-                        $values['children'][$child] = array();
-                    }
-
-                    foreach ($fields as $field_name => $filter)
-                        if (isset($filter['values']) && is_array($filter['values']) && !empty($filter['values'])) {
-                            $values['children'][$child][$field_name] = $filter['values'];
-                        }
-                }
-            }
-
-            if (count($values)) {
-                $listFilters = BimpObject::getInstance('bimpcore', 'ListFilters');
-
-                $errors = $listFilters->validateArray(array(
-                    'owner_type' => $owner_type,
-                    'name'       => (string) $data['name'],
-                    'id_owner'   => $id_owner,
-                    'obj_module' => $this->module,
-                    'obj_name'   => $this->object_name,
-                    'list_type'  => $data['list_type'],
-                    'list_name'  => (isset($data['list_name']) ? (string) $data['list_name'] : 'default'),
-                    'panel_name' => (isset($data['panel_name']) ? (string) $data['panel_name'] : 'default'),
-                    'filters'    => $values
-                ));
-
-                if (!count($errors)) {
-                    $errors = $listFilters->create($warnings);
-                }
-            } else {
-                $errors[] = 'Aucun filtre sélectionné';
             }
         }
 

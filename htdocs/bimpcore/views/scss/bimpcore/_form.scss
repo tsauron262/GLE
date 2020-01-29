@@ -222,6 +222,10 @@ input, select {
     @include transition(all 0.5s ease);
 }
 
+.elect2-selection__rendered {
+    text-align: left;
+}
+
 .inputContainer.value_required,
 .inputMultipleValuesContainer.value_required {
     border: 1px solid #ff0000;

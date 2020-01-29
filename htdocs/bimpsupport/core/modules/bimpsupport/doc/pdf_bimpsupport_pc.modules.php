@@ -295,11 +295,12 @@ class pdf_bimpsupport_pc extends ModeleBimpSupport
             $cgv .= "-BIMP n’accepte plus les réglements par chèques. Les modes de réglements acceptés sont: en espèces (plafond maximun de 1000 €), en carte bleue.\n\n";
 
 
-            if ((int) $sav->getData('prioritaire') && $isIphone) {
+            if ((int) $sav->getData('prioritaire')) {
                 $pdf->SetXY('62', '111.5');
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 20);
                 $pdf->SetTextColor(255, 102, 0);
                 $pdf->MultiCell(100, 6, "Prise en charge urgente", 0, 'L');
+                if($isIphone)
                 $cgv .= "-J'accepte les frais de 96 TTC de prise en charge urgente";
             }
 

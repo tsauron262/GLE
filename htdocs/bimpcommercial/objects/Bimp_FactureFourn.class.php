@@ -46,33 +46,6 @@ class Bimp_FactureFourn extends BimpComm
         return 1;
     }
 
-    public function update(&$warnings = array(), $force_update = false)
-    {
-        $errors = $this->checkDate();
-        if (count($errors))
-            return $errors;
-        $init_fk_account = (int) $this->getInitData('fk_account');
-        $fk_account = (int) $this->getData('fk_account');
-
-        $id_cond_reglement = (int) $this->getData('fk_cond_reglement');
-
-        $changeCondRegl = $id_cond_reglement !== (int) $this->getInitData('fk_cond_reglement');
-        $changeDateF = $this->getData('datef') != $this->getInitData('datef');
-
-        if ($changeCondRegl || $changeDateF) {
-            $this->dol_object->date = strtotime($this->getData('datef'));
-            $this->set('date_lim_reglement', BimpTools::getDateFromDolDate($this->dol_object->calculate_date_lim_reglement($id_cond_reglement)));
-        }
-
-        $errors = parent::update($warnings, $force_update);
-
-        if (!count($errors)) {
-            if ($fk_account !== $init_fk_account) {
-                $this->updateField('fk_account', $fk_account);
-            }
-        }
-    }
-
     public function isEditable($force_edit = false, &$errors = array())
     {
         if ($this->getData('exported') == 1)
@@ -85,26 +58,6 @@ class Bimp_FactureFourn extends BimpComm
     public function isFieldEditable($field, $force_edit = false)
     {
         return parent::isFieldEditable($field, $force_edit);
-    }
-
-    public function create(&$warnings = array(), $force_create = false)
-    {
-        $errors = $this->checkDate();
-        if (count($errors))
-            return $errors;
-
-        $this->dol_object->date = strtotime($this->getData('datef'));
-        $this->set('date_lim_reglement', BimpTools::getDateFromDolDate($this->dol_object->calculate_date_lim_reglement($this->getData('fk_cond_reglement'))));
-
-        return parent::create($warnings, $force_create);
-    }
-    
-    public function checkDate(){
-        $errors = array();
-//        $dateMAx = '2020-01-01';
-//        if ($this->getData('datef') < $dateMAx)
-//            $errors[] = 'Date inférieur au ' . $dateMAx . ' creation impossible';
-        return $errors;
     }
 
     public function isActionAllowed($action, &$errors = array())
@@ -958,9 +911,9 @@ class Bimp_FactureFourn extends BimpComm
 
     // Traitements: 
 
-    public function onCreate()
+    public function onCreate(&$warnings = array())
     {
-        if (!$this->isLoaded()) {
+        if (!$this->isLoaded($warnings)) {
             return;
         }
 
@@ -972,11 +925,13 @@ class Bimp_FactureFourn extends BimpComm
                 }
             }
         }
+
+        return array();
     }
 
-    public function onValidate()
+    public function onValidate(&$warnings = array())
     {
-        if ($this->isLoaded()) {
+        if ($this->isLoaded($warnings)) {
             $lines = $this->getLines('not_text');
             foreach ($lines as $line) {
                 // Maj des données d'achat des équipements:
@@ -1043,11 +998,13 @@ class Bimp_FactureFourn extends BimpComm
                 }
             }
         }
+
+        return array();
     }
 
-    public function onDelete()
+    public function onDelete(&$warnings = array())
     {
-        if ($this->isLoaded()) {
+        if ($this->isLoaded($warnings)) {
             $receptions = BimpCache::getBimpObjectObjects('bimplogistique', 'BL_CommandeFournReception', array(
                         'id_facture' => (int) $this->id
             ));
@@ -1056,6 +1013,7 @@ class Bimp_FactureFourn extends BimpComm
                 $reception->updateField('id_facture', 0);
             }
         }
+        return array();
     }
 
     public function convertToReduc($validate = true)
@@ -1182,6 +1140,15 @@ class Bimp_FactureFourn extends BimpComm
                 $this->setObjectAction('classifyPaid');
             }
         }
+    }
+
+    public function checkDate()
+    {
+        $errors = array();
+//        $dateMAx = '2020-01-01';
+//        if ($this->getData('datef') < $dateMAx)
+//            $errors[] = 'Date inférieur au ' . $dateMAx . ' creation impossible';
+        return $errors;
     }
 
     // Actions: 
@@ -1463,9 +1430,48 @@ class Bimp_FactureFourn extends BimpComm
 
         return $result;
     }
-    
-    
-    
+
+    public function create(&$warnings = array(), $force_create = false)
+    {
+        $errors = $this->checkDate();
+
+        if (count($errors)) {
+            return $errors;
+        }
+
+        $this->dol_object->date = strtotime($this->getData('datef'));
+        $this->set('date_lim_reglement', BimpTools::getDateFromDolDate($this->dol_object->calculate_date_lim_reglement($this->getData('fk_cond_reglement'))));
+
+        return parent::create($warnings, $force_create);
+    }
+
+    public function update(&$warnings = array(), $force_update = false)
+    {
+        $errors = $this->checkDate();
+        if (count($errors))
+            return $errors;
+        $init_fk_account = (int) $this->getInitData('fk_account');
+        $fk_account = (int) $this->getData('fk_account');
+
+        $id_cond_reglement = (int) $this->getData('fk_cond_reglement');
+
+        $changeCondRegl = $id_cond_reglement !== (int) $this->getInitData('fk_cond_reglement');
+        $changeDateF = $this->getData('datef') != $this->getInitData('datef');
+
+        if ($changeCondRegl || $changeDateF) {
+            $this->dol_object->date = strtotime($this->getData('datef'));
+            $this->set('date_lim_reglement', BimpTools::getDateFromDolDate($this->dol_object->calculate_date_lim_reglement($id_cond_reglement)));
+        }
+
+        $errors = parent::update($warnings, $force_update);
+
+        if (!count($errors)) {
+            if ($fk_account !== $init_fk_account) {
+                $this->updateField('fk_account', $fk_account);
+            }
+        }
+    }
+
     public static function sendInvoiceDraftWhithMail()
     {
         $date = new DateTime();
@@ -1477,11 +1483,11 @@ class Bimp_FactureFourn extends BimpComm
             $obj = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $ln->rowid);
             $userCreate = new User($this->db->db);
             $userCreate->fetch((int) $obj->getData('fk_user_author'));
-            
+
             $mail = $userCreate->email;
-//            if ($mail == '')
+            if ($mail == '')
                 $mail = "tommy@bimp.fr";
-                echo $obj->getNomUrl();
+            require_once(DOL_DOCUMENT_ROOT."/synopsistools/SynDiversFunction.php");
             if (mailSyn2('Facture fournisseur brouillon à régulariser', $mail, 'admin@bimp.fr', 'Bonjour, vous avez laissé une facture fournisseur en l’état de brouillon depuis plus de ' . $nbDay . ' jour(s) : ' . $obj->getNomUrl() . ' <br/>Merci de bien vouloir la régulariser au plus vite.'))
                 $i++;
         }

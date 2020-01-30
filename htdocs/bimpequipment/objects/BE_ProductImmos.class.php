@@ -350,7 +350,8 @@ class BE_ProductImmos extends Bimp_Product
             }
         }
 
-        return $alias . '.position = 1';
+        return '1';
+        //return $alias . '.position = 1';
     }
 
     public function getPlaceFiltersSql($alias)

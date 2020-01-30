@@ -69,7 +69,7 @@ ALTER TABLE llx_accounting_bookkeeping_tmp DROP COLUMN validated;
 ALTER TABLE llx_loan ADD COLUMN insurance_amount double(24,8) DEFAULT 0;
 
 ALTER TABLE llx_facture DROP INDEX idx_facture_uk_ref;
-ALTER TABLE llx_facture CHANGE ref ref VARCHAR(30) NOT NULL;
+ALTER TABLE llx_facture CHANGE facnumber ref VARCHAR(30) NOT NULL;
 ALTER TABLE llx_facture ADD UNIQUE INDEX uk_facture_ref (ref, entity);
 
 insert into llx_c_action_trigger (code,label,description,elementtype,rang) values ('TICKET_CREATE','Ticket created','Executed when a ticket is created','ticket',161);

@@ -450,11 +450,6 @@ class BE_Package extends BimpObject
         return $errors;
     }
 
-    public function removeEquipment($id_equipment, $id_entrepot)
-    {
-        
-    }
-
     /**
      * @param type $qty can be < 0
      */

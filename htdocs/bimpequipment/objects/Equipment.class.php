@@ -356,6 +356,17 @@ class Equipment extends BimpObject
         return 0;
     }
 
+    public function showProductInput()
+    {
+        if ($this->isLoaded()) {
+            if ((int) $this->getData('id_product')) {
+                return 0;
+            }
+        }
+
+        return 1;
+    }
+
     // Getters params: 
 
     public function getDefaultListExtraBtn()
@@ -948,6 +959,49 @@ class Equipment extends BimpObject
         return $label;
     }
 
+    public function displayPackage($display_name = 'default', $with_remove_button = true, $no_html = false, $display_input_value = true)
+    {
+        if ((int) $this->getData(('id_package'))) {
+            $html = $this->displayData('id_package', $display_name, $display_input_value, $no_html);
+
+            if ($this->isLoaded() && $with_remove_button) {
+                $package = BimpCache::getBimpObjectInstance('bimpequipment', 'BE_Package', (int) $this->getData('id_package'));
+                if (BimpObject::objectLoaded($package)) {
+                    $html .= '<div style="margin-top: 15px; text-align: right">';
+
+                    if ($package->isActionAllowed('moveEquipment') && $package->canSetAction('moveEquipment')) {
+                        $onclick = $package->getJsActionOnclick('moveEquipment', array(
+                            'id_equipment' => (int) $this->id
+                                ), array(
+                            'form_name'        => 'move_equipment',
+                            'success_callback' => 'function() {triggerObjectChange(\'bimpequipment\', \'Equipment\', ' . (int) $this->id . ')}'
+                        ));
+                        $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+                        $html .= BimpRender::renderIcon('fas_arrow-circle-right', 'iconLeft') . 'Changer de package';
+                        $html .= '</span>';
+                    }
+                    if ($package->isActionAllowed('removeEquipment') && $package->canSetAction('removeEquipment')) {
+                        $onclick = $package->getJsActionOnclick('removeEquipment', array(
+                            'id_equipment' => (int) $this->id
+                                ), array(
+                            'form_name'        => 'remove_equipment',
+                            'success_callback' => 'function() {triggerObjectChange(\'bimpequipment\', \'Equipment\', ' . (int) $this->id . ')}'
+                        ));
+                        $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+                        $html .= BimpRender::renderIcon('fas_times', 'iconLeft') . 'Retirer du package';
+                        $html .= '</span>';
+                    }
+
+                    $html .= '</div>';
+                }
+            }
+
+            return $html;
+        }
+
+        return '';
+    }
+
     // Traitements: 
 
     public function onNewPlace()
@@ -969,6 +1023,7 @@ class Equipment extends BimpObject
                 }
 
                 $this->updateField('ref_immo', $ref_immo);
+                $this->updateField('date_immo', date('Y-m-d'));
             }
 
             $product = $this->getChildObject('product');
@@ -1537,6 +1592,20 @@ class Equipment extends BimpObject
         }
 
         return parent::validate();
+    }
+
+    public function update(&$warnings = array(), $force_update = false)
+    {
+        $init_id_product = (int) $this->getInitData('id_product');
+
+        $errors = parent::update($warnings, $force_update);
+
+        if (!count($errors)) {
+            if (!$init_id_product && (int) $this->getData('id_product')) {
+                // Pour la gestion des stocks: 
+                $this->onNewPlace();
+            }
+        }
     }
 
     public function delete(&$warnings = array(), $force_delete = false)

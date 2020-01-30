@@ -1157,6 +1157,8 @@ class Bimp_FactureFourn extends BimpComm
     {
         $errors = array();
         $warnings = array();
+        $infos = array();
+
         $success = 'Facture fournisseur validée avec succès';
 
         if (!(int) $this->getData('entrepot')) {
@@ -1166,18 +1168,35 @@ class Bimp_FactureFourn extends BimpComm
             global $user, $conf, $langs;
 
             if ($this->dol_object->validate($user, '', (int) $this->getData('entrepot')) < 0) {
-                $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object, null, null, $warnings), 'Des erreurs sont survenues lors de la validation ' . $this->getLabel('of_the'));
+                $obj_errors = BimpTools::getDolEventsMsgs(array('errors'));
+
+                if (!count($obj_errors)) {
+                    $obj_errors[] = BimpTools::ucfirst($this->getLabel('the')) . ' ne peut pas être validé' . $this->e();
+                }
+                $errors[] = BimpTools::getMsgFromArray($obj_errors);
             } else {
                 if (empty($conf->global->MAIN_DISABLE_PDF_AUTOUPDATE)) {
                     $this->fetch($this->id);
                     $this->dol_object->generateDocument($this->getModelPdf(), $langs);
                 }
             }
+
+            $obj_warnings = BimpTools::getDolEventsMsgs(array('warnings'));
+
+            if (!empty($obj_warnings)) {
+                $warnings[] = BimpTools::getMsgFromArray($obj_warnings);
+            }
+
+            $obj_infos = BimpTools::getDolEventsMsgs(array('mesgs'));
+            if (!empty($obj_infos)) {
+                $infos[] = BimpTools::getMsgFromArray($obj_infos);
+            }
         }
 
         return array(
             'errors'   => $errors,
-            'warnings' => $warnings
+            'warnings' => $warnings,
+            'infos'    => $infos
         );
     }
 
@@ -1487,7 +1506,7 @@ class Bimp_FactureFourn extends BimpComm
             $mail = $userCreate->email;
             if ($mail == '')
                 $mail = "tommy@bimp.fr";
-            require_once(DOL_DOCUMENT_ROOT."/synopsistools/SynDiversFunction.php");
+            require_once(DOL_DOCUMENT_ROOT . "/synopsistools/SynDiversFunction.php");
             if (mailSyn2('Facture fournisseur brouillon à régulariser', $mail, 'admin@bimp.fr', 'Bonjour, vous avez laissé une facture fournisseur en l’état de brouillon depuis plus de ' . $nbDay . ' jour(s) : ' . $obj->getNomUrl() . ' <br/>Merci de bien vouloir la régulariser au plus vite.'))
                 $i++;
         }

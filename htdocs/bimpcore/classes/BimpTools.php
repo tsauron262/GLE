@@ -265,8 +265,8 @@ class BimpTools
             }
         }
 
-        $errors = array_merge($errors, self::getDolEventsMsgs(array('errors')));
-        $warnings = array_merge($warnings, self::getDolEventsMsgs(array('warnings')));
+        $errors = array_merge($errors, self::getDolEventsMsgs(array('errors'), false));
+        $warnings = array_merge($warnings, self::getDolEventsMsgs(array('warnings'), false));
 
         return $errors;
     }

@@ -259,7 +259,6 @@ class Bimp_Commande extends BimpComm
         if (parent::isValidatable($errors)) {
             $this->areLinesValid($errors);
 
-
             $client = $this->getChildObject('client');
             if (!BimpObject::objectLoaded($client)) {
                 $errors[] = 'Client absent';
@@ -291,7 +290,7 @@ class Bimp_Commande extends BimpComm
                     include_once DOL_DOCUMENT_ROOT . '/bimpvalidateorder/class/bimpvalidateorder.class.php';
                     $bvo = new BimpValidateOrder($this->db->db);
                     if ($bvo->checkValidateRights($user, $this->dol_object) < 1) {
-                        $errors = array_merge($errors, BimpTools::getDolEventsMsgs(array('errors'), true));
+                        $errors = array_merge($errors, $bvo->validation_errors);
                         if (!count($errors)) {
                             $errors[] = 'Cette commande ne peut pas être validée';
                         }
@@ -2612,6 +2611,8 @@ class Bimp_Commande extends BimpComm
     {
         $errors = array();
         $warnings = array();
+        $infos = array();
+
         $success = BimpTools::ucfirst($this->getLabel('')) . ' validé';
         if ($this->isLabelFemale()) {
             $success .= 'e';
@@ -2623,33 +2624,34 @@ class Bimp_Commande extends BimpComm
 
         $result = $this->dol_object->valid($user, (int) $this->getData('entrepot'));
 
+        $comm_errors = BimpTools::getDolEventsMsgs(array('errors'));
+        $comm_warnings = BimpTools::getDolEventsMsgs(array('warnings'));
+        $comm_infos = BimpTools::getDolEventsMsgs(array('mesgs'));
+
         if ($result > 0) {
             if (empty($conf->global->MAIN_DISABLE_PDF_AUTOUPDATE)) {
                 $this->fetch($this->id);
                 $this->dol_object->generateDocument($this->getModelPdf(), $langs);
             }
         } else {
-            $comm_errors = BimpTools::getErrorsFromDolObject($this->dol_object, null, null, $warnings);
-
-            if (!count($comm_errors)) {
-                if (!(int) $this->getData('validComm')) {
-                    $comm_errors[] = 'Commande en attente de validation commerciale';
-                }
-                if (!(int) $this->getData('validFin')) {
-                    $comm_errors[] = 'Commande en attente de validation financière';
-                }
-            }
-
             if (!count($comm_errors)) {
                 $errors[] = 'Echec de la validation pour une raison inconnue';
             } else {
-                $errors[] = BimpTools::getMsgFromArray($comm_errors, 'Des erreurs sont survenues lors de la validation ' . $this->getLabel('of_the'));
+                $errors[] = BimpTools::getMsgFromArray($comm_errors);
             }
+        }
+
+        if (count($comm_warnings)) {
+            $warnings[] = BimpTools::getMsgFromArray($comm_warnings);
+        }
+        if (count($comm_infos)) {
+            $infos[] = BimpTools::getMsgFromArray($comm_infos);
         }
 
         return array(
             'errors'           => $errors,
             'warnings'         => $warnings,
+            'infos'            => $infos,
             'success_callback' => $success_callback
         );
     }

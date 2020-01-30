@@ -35,6 +35,7 @@ class Interfacevalidate extends BimpCommTriggers
             }
 
             if (count($errors)) {
+                // Attention toute la remontée des erreurs est basée là-dessus (pour les BimpComm): 
                 setEventMessages(BimpTools::getMsgFromArray($errors, BimpTools::ucfirst($bimpObject->getLabel('the')) . ' ne peut pas être validé' . $bimpObject->e()), null, 'errors');
                 return -1;
             }

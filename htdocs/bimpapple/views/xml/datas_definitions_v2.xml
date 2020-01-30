@@ -143,7 +143,7 @@
         <label>Statuts réparation</label>
     </def>
     <def name="requestReviewByApple" type="bool">
-        <label>Requête vérifiée par Apple</label>
+        <label>Requête à vérifier par Apple</label>
     </def>
     <def name="markComplete" type="bool">
         <label>Marquer complète</label>

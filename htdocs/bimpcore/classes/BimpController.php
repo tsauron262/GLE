@@ -1307,11 +1307,11 @@ class BimpController
         }
 
         if (!count($errors)) {
-            if ($full_reload) {
-                if (isset($_POST['filters_panel_values'])) {
-                    unset($_POST['filters_panel_values']);
-                }
-            }
+//            if ($full_reload) {
+//                if (isset($_POST['filters_panel_values'])) {
+//                    unset($_POST['filters_panel_values']);
+//                }
+//            }
             $object = BimpObject::getInstance($module, $object_name);
             $list = new BC_ListTable($object, $list_name, 1, $id_parent);
             $modal_format = $list->params['modal_format'];

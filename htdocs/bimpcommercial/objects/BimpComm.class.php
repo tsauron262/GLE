@@ -3213,7 +3213,6 @@ class BimpComm extends BimpDolObject
                                 $line->remise = 0;
 
                                 if ($this->object_name === 'Bimp_Commande' && (int) $this->getData('fk_statut') !== 0) {
-                                    echo 'ici';
                                     $line->qty = 0;
                                     $line->set('qty_modif', 1);
                                 }

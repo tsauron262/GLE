@@ -374,7 +374,7 @@ class BC_List extends BC_Panel
 
         $this->bc_filtersPanel = new BC_FiltersPanel($this->object, static::$type, $this->name, $this->identifier, $this->params['filters_panel']);
 
-        if (BimpTools::isSubmit('filters_panel_values')) {
+        if (BimpTools::isSubmit('filters_panel_values') && (!BimpTools::getValue('param_id_config', 0) || !(int) $this->params['id_default_filters'])) {
             $values = array(
                 'fields'   => array(),
                 'children' => array()

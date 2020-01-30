@@ -1306,6 +1306,7 @@ function top_htmlhead($head, $title = '', $disablejs = 0, $disablehead = 0, $arr
 			print '<!-- Includes CSS for font awesome -->'."\n";
             print '<link rel="stylesheet" type="text/css" href="'.DOL_URL_ROOT.'/theme/common/fontawesome-5/css/all.min.css'.($ext ? '?'.$ext : '').'">'."\n";
             print '<link rel="stylesheet" type="text/css" href="'.DOL_URL_ROOT.'/theme/common/fontawesome-5/css/v4-shims.min.css'.($ext ? '?'.$ext : '').'">'."\n";
+            print '<link rel="stylesheet" type="text/css" href="' .DOL_URL_ROO.'/theme/common/fontawesome/css/font-awesome.min.css' . ($ext ? '?' . $ext : '') . '">' . "\n";
 		}
 
 		print '<!-- Includes CSS for Dolibarr theme -->'."\n";

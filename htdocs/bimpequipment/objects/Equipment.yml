@@ -176,6 +176,10 @@ fields:
         required: 0
         search:
             type: date_range
+            
+    date_immo: 
+        label: Date de première immobilisation
+        type: date
         
     warranty_type: 
         label: Type de garantie
@@ -284,6 +288,7 @@ fields_tables:
             - field: imei2
             - field: meid
             - field: ref_immo
+            - field: date_immo
             - label: Disponibilité
               value: 
                   callback: displayAvailability
@@ -310,14 +315,22 @@ fields_tables:
                       method: displayProduct
                       params: 
                           - card
-            - field: id_package
-              display: nom_url
+            - label: Package
+              value: 
+                  callback: 
+                      method: displayPackage
+                      params: 
+                          - nom_url
               show:
                   field_value: id_package
             - label: Type d'élément d'origine
               field: origin_element
+              show: 
+                  field_value: origin_id_element
             - field: origin_id_element
               label: Element d'origine
+              show: 
+                  field_value: origin_id_element
             - association: contrats
               edit: 1
     
@@ -394,11 +407,9 @@ forms:
             - field: meid
             - field: id_product
               show: 
-                  callback: isNotLoaded
+                  callback: showProductInput
             - field: product_label
             - field: type
-#            - field: available
-#            - field: return_available
             - field: date_purchase
             - field: prix_achat
             - field: achat_tva_tx
@@ -421,10 +432,9 @@ forms:
             - field: meid
             - field: id_product
               show: 
-                  callback: isNotLoaded
+                  callback: showProductInput
             - field: product_label
             - field: type
-#            - field: available
             - field: date_purchase
             - field: warranty_type
             - field: date_warranty_end
@@ -437,9 +447,10 @@ forms:
             - field: imei2
             - field: meid
             - field: id_product
+              show: 
+                  callback: showProductInput
             - field: product_label
             - field: type
-#            - field: available
             - field: date_purchase
             - field: warranty_type
             - field: date_warranty_end
@@ -471,7 +482,10 @@ filters_panel:
                 type: check_list
                 items: 
                     0: NON
-                    1: OUI                
+                    1: OUI  
+            date_immo: 
+                label: Date 1ère immobilisation
+                field: date_immo
             place_position: 
                 field: position
                 child: places
@@ -578,6 +592,9 @@ lists_cols:
         field: date_purchase
     date_create:
         field: date_create
+    date_immo: 
+        label: Date 1ère immo
+        field: date_immo
 
 lists:
     default: 

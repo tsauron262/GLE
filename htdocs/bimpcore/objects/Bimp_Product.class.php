@@ -28,11 +28,15 @@ class Bimp_Product extends BimpObject
     CONST TYPE_COMPTA_NONE = 0;
     CONST TYPE_COMPTA_PRODUIT = 1;
     CONST TYPE_COMPTA_SERVICE = 2;
+    CONST TYPE_COMPTA_PORT = 3;
+    CONST TYPE_COMPTA_COMM = 4;
     
     public static $type_compta = [
         self::TYPE_COMPTA_NONE => 'Aucun re-classement',
         self::TYPE_COMPTA_PRODUIT => 'Considéré comme produit',
-        self::TYPE_COMPTA_SERVICE => "Considéré comme service"
+        self::TYPE_COMPTA_SERVICE => "Considéré comme service",
+        self::TYPE_COMPTA_PORT => "Considéré comme frais de port",
+        self::TYPE_COMPTA_COMM => "Considéré comme commition"
     ];
     
     public static $units_weight = array();
@@ -49,6 +53,92 @@ class Bimp_Product extends BimpObject
         self::initUnits();
 
         parent::__construct($module, $object_name);
+    }
+    
+    public function getProductTypeCompta(){
+        $type_compta = $this->getData('type_compta');
+        
+        
+        if($type_compta > 0){
+            $type = $type_compta - 1;
+        }
+        else{
+            if($frais_de_port = $this->db->getRow('categorie_product', 'fk_categorie = 9705 AND fk_product = ' . $this->id) || $this->id == 129950)
+                    $type = 2;
+            else
+                $type = $this->getData('fk_product_type');
+        }
+        return $type;
+    }
+    
+    
+    public function getCodeComptableVente($zone_vente = 1, $force_type = -1){
+        if($force_type == -1){
+            if($this->getData('accountancy_code_sell') != '')
+                return $this->getData('accountancy_code_sell');
+
+            $type = $this->getProductTypeCompta();
+        }
+        else
+            $type = $force_type;
+        if($type == 0){//Produit
+            if($zone_vente == 1)
+                return BimpCore::getConf('BIMPTOCEGID_vente_produit_fr');
+            elseif($zone_vente == 2 || $zone_vente == 4)
+                return BimpCore::getConf('BIMPTOCEGID_vente_produit_ue');
+            elseif($zone_vente == 3)
+                return BimpCore::getConf('BIMPTOCEGID_vente_produit_ex');
+        }
+        elseif($type == 1){//service
+            if($zone_vente == 1)
+                return BimpCore::getConf('BIMPTOCEGID_vente_service_fr');
+            elseif($zone_vente == 2 || $zone_vente == 4)
+                return BimpCore::getConf('BIMPTOCEGID_vente_service_ue');
+            elseif($zone_vente == 3)
+                return BimpCore::getConf('BIMPTOCEGID_vente_service_ex');
+        }
+        elseif($type == 2){//Port
+            if($zone_vente == 1)
+                return BimpCore::getConf('BIMPTOCEGID_frais_de_port_vente_fr');
+            elseif($zone_vente == 2 || $zone_vente == 4)
+                return BimpCore::getConf('BIMPTOCEGID_frais_de_port_vente_ue');
+            elseif($zone_vente == 3)
+                return BimpCore::getConf('BIMPTOCEGID_frais_de_port_vente_ex');
+        }
+        elseif($type == 3){//commition
+            if($zone_vente == 1)
+                return BimpCore::getConf('BIMPTOCEGID_comissions_fr');
+            elseif($zone_vente == 2 || $zone_vente == 4)
+                return BimpCore::getConf('BIMPTOCEGID_comissions_ue');
+            elseif($zone_vente == 3)
+                return BimpCore::getConf('BIMPTOCEGID_comissions_ex');
+        }
+    }
+    public function getCodeComptableVenteTva($zone_vente = 1){
+        if($zone_vente == 1)
+            return BimpCore::getConf('BIMPTOCEGID_vente_tva_fr');
+        elseif($zone_vente == 2 || $zone_vente == 4)
+            return BimpCore::getConf('BIMPTOCEGID_vente_tva_ue');
+        return false;
+    }
+    public function getCodeComptableVenteDeee($zone_vente = 1){
+        if($zone_vente == 1)
+            return BimpCore::getConf('BIMPTOCEGID_vente_dee_fr');
+//        elseif($zone_vente == 2 || $zone_vente == 4)
+//            return BimpCore::getConf('BIMPTOCEGID_vente_dee_ue');
+        return false;
+    }
+    public function getCodeComptableAchat(){
+        
+        if($this->getData('accountancy_code_buy') != '')
+            return $this->getData('accountancy_code_buy');
+        
+        $type = $this->getProductTypeCompta();
+        
+        if($type == 0)
+            return BimpCore::getConf('BIMPTOCEGID_achat_produit_fr');
+        else
+            return BimpCore::getConf('BIMPTOCEGID_achat_service_fr');
     }
 
     public static function initUnits()

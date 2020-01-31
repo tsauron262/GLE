@@ -350,7 +350,8 @@ class BE_ProductImmos extends Bimp_Product
             }
         }
 
-        return $alias . '.position = 1';
+        return '1';
+        //return $alias . '.position = 1';
     }
 
     public function getPlaceFiltersSql($alias)
@@ -437,7 +438,7 @@ class BE_ProductImmos extends Bimp_Product
                 );
             }
         } else {
-            $filters[$alias . '.position'] = 1;
+//            $filters[$alias . '.position'] = 1;
         }
 
         if (isset(self::$currentFilters['place_type']) && !empty(self::$currentFilters['place_type'])) {

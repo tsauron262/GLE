@@ -266,9 +266,9 @@ class ListConfig extends BimpObject
 
     public function getListTitle()
     {
-        global $user;
+        global $user, $langs;
 
-        return (BimpObject::objectLoaded($user) ? $user->getFullName() . ': c' : 'C') . 'onfigurations de la liste';
+        return (BimpObject::objectLoaded($user) ? $user->getFullName($langs) . ': c' : 'C') . 'onfigurations de la liste';
     }
 
     public static function getUserCurrentConfig($id_user, $object, $list_type, $list_name)

@@ -267,7 +267,7 @@ class BimpInput
                 if ($display_labels) {
                     $html .= '<span class="toggle-label-off">' . $options['toggle_off'] . '</span>';
                 }
-                $html .= '<label class="toggle-slider" for="' . $input_id . '_toggle"></label>';
+                $html .= '<label class="toggle-slider '.(isset($options['disabled'])? 'disabled' : '').'" for="' . $input_id . '_toggle"></label>';
                 if ($display_labels) {
                     $html .= '<span class="toggle-label-on">' . $options['toggle_on'] . '</span>';
                 }

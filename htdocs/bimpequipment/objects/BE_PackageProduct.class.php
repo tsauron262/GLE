@@ -2,6 +2,14 @@
 
 class BE_PackageProduct extends BimpObject
 {
+    
+    public function displayCurrentPlace(){
+        if ($this->isLoaded()) {
+            $package = $this->getParentInstance();
+            return $package->displayCurrentPlace();
+        }
+        
+    }
 
     public function getListExtraButtons()
     {

@@ -1114,7 +1114,12 @@ class Bimp_Commande extends BimpComm
                                 'extra_class' => 'include_line'
                     ));
                     $body_html .= '</td>';
-                    $body_html .= '<td></td>';
+                    $body_html .= '<td>';
+                    $body_html .= BimpInput::renderInput('toggle', 'line_' . $line->id . '_facture_' . $id_facture . '_not_use', 1, array(
+                                'extra_class' => 'include_line',
+                                'disabled'    => 'true'
+                    ));
+                    $body_html .= '</td>';
                     $body_html .= '</tr>';
                     continue;
                 }

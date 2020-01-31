@@ -1956,50 +1956,77 @@ class GSX_Repair extends BimpObject
                                     $warnings[] = BimpTools::getMsgFromArray($part_errors, 'Erreurs lors de la mise à jour du prix pour le composant "' . $part['number'] . '"');
                                 }
                             } else {
-                                // Ajout au devis (pièce absente du panier) : 
+                                BimpObject::loadClass('bimpsupport', 'BS_ApplePart');
+                                $part_type = BS_ApplePart::getCategProdApple(isset($part['number']) ? $part['number'] : '', isset($part['desc']) ? $part['desc'] : '');
+                                $pu_ht = (float) BS_ApplePart::convertPrixStatic($part_type, (float) $part['new_price'], $part['number']);
+                                
                                 $desc = (isset($part['number']) && $part['number'] ? $part['number'] : '');
                                 if (isset($part['desc']) && $part['desc']) {
                                     $desc .= ($desc ? ' - ' : '') . $part['desc'];
                                 }
-
-                                $line = BimpObject::getInstance('bimpsupport', 'BS_SavPropalLine');
-
-                                $line->validateArray(array(
-                                    'id_obj'          => (int) $propal->id,
-                                    'type'            => BS_SavPropalLine::LINE_FREE,
-                                    'deletable'       => 1,
-                                    'editable'        => 1,
-                                    'out_of_warranty' => 1,
-                                    'remisable'       => 1
-                                ));
-
-                                BimpObject::loadClass('bimpsupport', 'BS_ApplePart');
-                                $part_type = BS_ApplePart::getCategProdApple(isset($part['number']) ? $part['number'] : '', isset($part['desc']) ? $part['desc'] : '');
-                                $pu_ht = (float) BS_ApplePart::convertPrixStatic($part_type, (float) $part['new_price'], $part['number']);
-
-                                $line->desc = $desc;
-                                $line->qty = 1;
-                                $line->pu_ht = $pu_ht;
-                                $line->pa_ht = (float) $part['new_price'];
-                                $line->tva_tx = 20;
-
-                                $line_warnings = array();
-                                $line_errors = $line->create($line_warnings, true);
-
-                                if (count($line_errors)) {
-                                    $warnings[] = BimpTools::getMsgFromArray($line_errors, 'Echec de l\'ajout du composant "' . $desc . '"');
-                                } else {
-                                    $success .= 'Ajout du composant "' . $desc . '" effectué avec succès<br/>';
+                                
+                                $id_line = (int) $this->db->getValue('propaldet', 'rowid', '`fk_propal` = ' . (int) $propal->id . ' AND `description` LIKE \'' . $desc . '\'');
+                                if($id_line > 0){
+                                    $propalLine = BimpCache::findBimpObjectInstance('bimpsupport', 'BS_SavPropalLine', array(
+                                        'id_line'      => (int) $id_line
+                                    ));
+                                    if($propalLine->isLoaded()){
+                                        $propalLine->validateArray(array(
+                                            'type'            => BS_SavPropalLine::LINE_FREE,
+                                            'deletable'       => 1,
+                                            'editable'        => 0,
+                                            'out_of_warranty' => ($pu_ht > 0)? 1 : 0,
+                                            'remisable'       => 0
+                                        ));
+                                        
+                                        
+                                        $propalLine->pa_ht = $part['new_price'];
+                                        $propalLine->pu_ht = $pu_ht;
+                                        $propalLine->tva_tx = 20;
+                                        $propalLine->qty = 1;
+                                        $propalLine->update();
+                                    }
                                 }
+                                else{
+                                    // Ajout au devis (pièce absente du panier) : 
 
-                                if (count($line_warnings)) {
-                                    $warnings[] = BimpTools::getMsgFromArray($line_warnings, 'Erreurs lors de l\'ajout du composant "' . $desc . '"');
+                                    $line = BimpObject::getInstance('bimpsupport', 'BS_SavPropalLine');
+
+                                    $line->validateArray(array(
+                                        'id_obj'          => (int) $propal->id,
+                                        'type'            => BS_SavPropalLine::LINE_FREE,
+                                        'deletable'       => 1,
+                                        'editable'        => 0,
+                                        'out_of_warranty' => ($part['new_price'] > 0)? 1 : 0,
+                                        'remisable'       => 0
+                                    ));
+
+
+                                    $line->desc = $desc;
+                                    $line->qty = 1;
+                                    $line->pu_ht = $pu_ht;
+                                    $line->pa_ht = (float) $part['new_price'];
+                                    $line->tva_tx = 20;
+
+                                    $line_warnings = array();
+                                    $line_errors = $line->create($line_warnings, true);
+
+                                    if (count($line_errors)) {
+                                        $warnings[] = BimpTools::getMsgFromArray($line_errors, 'Echec de l\'ajout du composant "' . $desc . '"');
+                                    } else {
+                                        $success .= 'Ajout du composant "' . $desc . '" effectué avec succès<br/>';
+                                    }
+
+                                    if (count($line_warnings)) {
+                                        $warnings[] = BimpTools::getMsgFromArray($line_warnings, 'Erreurs lors de l\'ajout du composant "' . $desc . '"');
+                                    }
                                 }
                             }
                         }
                     }
                 }
             }
+//            $errors = array_merge($errors , $sav->processPropalGarantie());
         }
 
         return array(

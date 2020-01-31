@@ -1582,8 +1582,9 @@ class Bimp_Commande extends BimpComm
 
         $items[] = '<button class="btn btn-light-default" onclick="setSelectedCommandeLinesReservationsStatus($(this), ' . $this->id . ', 2);">' . BimpRender::renderIcon('fas_exclamation-circle', 'iconLeft') . 'A réserver</button>';
         $items[] = '<button class="btn btn-light-default" onclick="setSelectedCommandeLinesReservationsStatus($(this), ' . $this->id . ', 200);">' . BimpRender::renderIcon('fas_lock', 'iconLeft') . 'Réserver</button>';
+        $items[] = '<button class="btn btn-light-default" onclick="setSelectedCommandeLinesReservationsStatus($(this), ' . $this->id . ', 4);">' . BimpRender::renderIcon('fas_arrow-circle-right', 'iconLeft') . 'En crous d\'appro. interne</button>';
         $items[] = '<button class="btn btn-light-default" onclick="setSelectedCommandeLinesReservationsStatus($(this), ' . $this->id . ', 0);">' . BimpRender::renderIcon('fas_undo', 'iconLeft') . 'Réinitialiser</button>';
-        $items[] = '<button class="btn btn-light-default" onclick="setSelectedCommandeLinesReservationsEquipmentsToShipment($(this), ' . $this->id . ');">' . BimpRender::renderIcon('fas_shipping-fast', 'iconLeft') . 'Attribuer les équipements</button>';
+        $items[] = '<button class="btn btn-light-default" onclick="setSelectedCommandeLinesReservationsEquipmentsToShipment($(this), ' . $this->id . ');">' . BimpRender::renderIcon('fas_shipping-fast', 'iconLeft') . 'Attribuer les équipements à une expédition</button>';
 
         $html .= BimpRender::renderDropDownButton('Status sélectionnés', $items, array(
                     'icon'       => 'far_check-square',
@@ -2932,18 +2933,24 @@ class Bimp_Commande extends BimpComm
                             $title .= 'statut "' . BR_Reservation::$status_list[(int) $reservation->getData('status')]['label'] . '"';
                             $warnings[] = $title . ': ce statut n\'est plus modifiable';
                         } else {
-                            $res_errors = array();
-
-                            if (!count($res_errors)) {
-                                $res_errors = $reservation->setNewStatus($status);
-                            }
-
-                            if (count($res_errors)) {
+                            if (in_array((int) $status, array(4)) && (int) $reservation->getData('status') >= 200) {
                                 $title = 'Ligne n° ' . $line->getData('position') . ': ';
                                 $title .= 'statut "' . BR_Reservation::$status_list[(int) $reservation->getData('status')]['label'] . '"';
-                                $warnings[] = BimpTools::getMsgFromArray($res_errors, $title);
+                                $warnings[] = $title . ': il n\'est pas possible de passer ce statut à "' . BR_Reservation::$status_list[4]['label'] . '"';
                             } else {
-                                $n_success++;
+                                $res_errors = array();
+
+                                if (!count($res_errors)) {
+                                    $res_errors = $reservation->setNewStatus($status);
+                                }
+
+                                if (count($res_errors)) {
+                                    $title = 'Ligne n° ' . $line->getData('position') . ': ';
+                                    $title .= 'statut "' . BR_Reservation::$status_list[(int) $reservation->getData('status')]['label'] . '"';
+                                    $warnings[] = BimpTools::getMsgFromArray($res_errors, $title);
+                                } else {
+                                    $n_success++;
+                                }
                             }
                         }
                     }

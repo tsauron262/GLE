@@ -31,6 +31,8 @@ function setSelectedCommandeLinesReservationsStatus($button, id_commande, new_st
             msg += 'la mise au statut "A réserver"';
         } else if (new_status === 200) {
             msg += 'réservation';
+        } else if (new_status === 4) {
+            msg += ' ma mise en attente d\'approvisionnement interne';
         } else {
             msg += 'le nouveau statut';
         }

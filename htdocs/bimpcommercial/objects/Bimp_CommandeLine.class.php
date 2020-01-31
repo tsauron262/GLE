@@ -1226,17 +1226,6 @@ class Bimp_CommandeLine extends ObjectLine
                 }
 
                 if (!empty($reservations)) {
-                    $html .= '<div class="smallActionsContainer">';
-                    $html .= '<span class="small-action" onclick="checkAll($(this).parent().parent(), \'.reservation_check\');">';
-                    $html .= BimpRender::renderIcon('fas_check-square', 'iconLeft') . 'Tout sélectionner';
-                    $html .= '</span>';
-                    $html .= '<span class="small-action" onclick="uncheckAll($(this).parent().parent(), \'.reservation_check\');">';
-                    $html .= BimpRender::renderIcon('far_square', 'iconLeft') . 'Tout désélectionner';
-                    $html .= '</span>';
-                    $html .= '</div>';
-                    $html .= '<table class="bimp_list_table Bimp_Commande_line_reservations_table">';
-                    $html .= '<tbody class="reservations_rows">';
-
                     $res_by_status = array();
 
                     foreach ($reservations as $reservation) {
@@ -1247,6 +1236,20 @@ class Bimp_CommandeLine extends ObjectLine
 
                         $res_by_status[$status][] = $reservation;
                     }
+
+                    if (count($reservations) > 1) {
+                        $html .= '<div class="smallActionsContainer">';
+                        $html .= '<span class="small-action" onclick="checkAll($(this).parent().parent(), \'.reservation_check\');">';
+                        $html .= BimpRender::renderIcon('fas_check-square', 'iconLeft') . 'Tout sélectionner';
+                        $html .= '</span>';
+                        $html .= '<span class="small-action" onclick="uncheckAll($(this).parent().parent(), \'.reservation_check\');">';
+                        $html .= BimpRender::renderIcon('far_square', 'iconLeft') . 'Tout désélectionner';
+                        $html .= '</span>';
+                        $html .= '</div>';
+                    }
+
+                    $html .= '<table class="bimp_list_table Bimp_Commande_line_reservations_table">';
+                    $html .= '<tbody class="reservations_rows">';
 
                     foreach ($res_by_status as $status => $res_list) {
                         $hidable = (count($res_list) > 10);

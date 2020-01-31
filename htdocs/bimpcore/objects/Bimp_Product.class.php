@@ -29,12 +29,14 @@ class Bimp_Product extends BimpObject
     CONST TYPE_COMPTA_PRODUIT = 1;
     CONST TYPE_COMPTA_SERVICE = 2;
     CONST TYPE_COMPTA_PORT = 3;
+    CONST TYPE_COMPTA_COMM = 4;
     
     public static $type_compta = [
         self::TYPE_COMPTA_NONE => 'Aucun re-classement',
         self::TYPE_COMPTA_PRODUIT => 'Considéré comme produit',
         self::TYPE_COMPTA_SERVICE => "Considéré comme service",
-        self::TYPE_COMPTA_PORT => "Considéré comme frais de port"
+        self::TYPE_COMPTA_PORT => "Considéré comme frais de port",
+        self::TYPE_COMPTA_COMM => "Considéré comme commition"
     ];
     
     public static $units_weight = array();
@@ -57,15 +59,12 @@ class Bimp_Product extends BimpObject
         $type_compta = $this->getData('type_compta');
         
         
-        
         if($type_compta > 0){
             $type = $type_compta - 1;
         }
         else{
             if($frais_de_port = $this->db->getRow('categorie_product', 'fk_categorie = 9705 AND fk_product = ' . $this->id) || $this->id == 129950)
                     $type = 2;
-            elseif($this->getData('ref') == "ZZCOMMISSION")
-                $type = 3;
             else
                 $type = $this->getData('fk_product_type');
         }

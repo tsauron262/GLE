@@ -71,14 +71,16 @@ class Bimp_Product extends BimpObject
         return $type;
     }
     
-    public function getCodeComptableVente($zone_vente = 1){
-        if($this->getData('accountancy_code_sell') != '')
-            return $this->getData('accountancy_code_sell');
-        
-        
-        
-        
-        $type = $this->getProductTypeCompta();
+    
+    public function getCodeComptableVente($zone_vente = 1, $force_type = -1){
+        if($force_type == -1){
+            if($this->getData('accountancy_code_sell') != '')
+                return $this->getData('accountancy_code_sell');
+
+            $type = $this->getProductTypeCompta();
+        }
+        else
+            $type = $force_type;
         if($type == 0){//Produit
             if($zone_vente == 1)
                 return BimpCore::getConf('BIMPTOCEGID_vente_produit_fr');

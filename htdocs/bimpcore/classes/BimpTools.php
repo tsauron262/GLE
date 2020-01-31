@@ -237,7 +237,7 @@ class BimpTools
         return '/test2/public/theme/common/nophoto.png';
     }
 
-    public static function getErrorsFromDolObject($object, $errors = null, $langs = null, &$warnings = array())
+    public static function getErrorsFromDolObject($object, $errors = null, $langs = null, &$warnings = array(), $with_events = false)
     {
         if (is_null($langs)) {
             global $langs;
@@ -265,8 +265,10 @@ class BimpTools
             }
         }
 
-        $errors = array_merge($errors, self::getDolEventsMsgs(array('errors'), false));
-        $warnings = array_merge($warnings, self::getDolEventsMsgs(array('warnings'), false));
+        if ($with_events) {
+            $errors = array_merge($errors, self::getDolEventsMsgs(array('errors'), false));
+            $warnings = array_merge($warnings, self::getDolEventsMsgs(array('warnings'), false));
+        }
 
         return $errors;
     }

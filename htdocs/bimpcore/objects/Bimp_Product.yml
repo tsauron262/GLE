@@ -313,11 +313,11 @@ fields:
         default_value: 0
         
     accountancy_code_sell:
-        label: Code comptable (Vente)
+        label: Code comptable Vente (Spécifique)
         type: string
         
     accountancy_code_buy:
-        label: Code comptable (Achat)
+        label: Code comptable Achat (Spécifique)
         type: string
         
     deee:
@@ -967,6 +967,18 @@ lists_cols:
         field: seuil_stock_alerte
     code_config:
         field: code_config
+    accountancy_code_sell:
+        field: accountancy_code_sell
+    accountancy_code_sell_reel:
+        label: Code Comptable Vente (Final)
+        value:
+            callback: getCodeComptableVente
+    accountancy_code_buy:
+        field: accountancy_code_buy
+    accountancy_code_buy_reel:
+        label: Code Comptable Achat (Final)
+        value:
+            callback: getCodeComptableAchat
                 
 lists: 
     default: 

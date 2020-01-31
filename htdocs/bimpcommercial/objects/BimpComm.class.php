@@ -1279,7 +1279,7 @@ class BimpComm extends BimpDolObject
             if ($id_soc) {
                 $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $id_soc);
                 if (BimpObject::objectLoaded($soc)) {
-                    if (in_array($this->object_name, array('Bimp_CommandeFourn', 'Bimp_FactureFourn')))
+                    if (in_array($this->object_name, array('Bimp_CommandeFourn', 'Bimp_FactureFourn')) && $soc->dol_object->mode_reglement_supplier_id)
                         return (int) $soc->dol_object->mode_reglement_supplier_id;
                     else
                         return (int) $soc->dol_object->mode_reglement_id;

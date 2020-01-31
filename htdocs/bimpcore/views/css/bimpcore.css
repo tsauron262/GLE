@@ -15239,6 +15239,11 @@ select.switch {
       transition: 250ms ease-in-out;
       background: linear-gradient(rgba(0, 0, 0, 0.07), rgba(255, 255, 255, 0.1)), #d0d0d0;
       box-shadow: 0 0.08em 0.15em -0.1em rgba(0, 0, 0, 0.5) inset, 0 0.05em 0.08em -0.01em rgba(255, 255, 255, 0.7), 0 0 0 0 rgba(68, 204, 102, 0.7) inset; }
+    
+    
+    .toggle-slider.disabled:before, .toggle-slider.disabled:after {
+        display:none;
+    }
   /* line 367, ../scss/bimpcore/_form.scss */
   .toggle:checked + span {
     color: #B4B4B4; }

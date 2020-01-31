@@ -51,12 +51,9 @@ class Bimp_Product extends BimpObject
         parent::__construct($module, $object_name);
     }
     
-    
-    public function getCodeComptableVente(){
+    public function getProductTypeCompta(){
         $type_compta = $this->getData('type_compta');
         
-        if($this->getData('accountancy_code_sell') != '')
-            return $this->getData('accountancy_code_sell');
         
         
         if($type_compta == 1){
@@ -68,28 +65,25 @@ class Bimp_Product extends BimpObject
         else{
             $type = $this->getData('fk_product_type');
         }
+        return $type;
+    }
+    
+    public function getCodeComptableVente(){
+        if($this->getData('accountancy_code_sell') != '')
+            return $this->getData('accountancy_code_sell');
         
+        $type = $this->getProductTypeCompta();
         if($type == 0)
             return BimpCore::getConf('BIMPTOCEGID_vente_produit_fr');
         else
             return BimpCore::getConf('BIMPTOCEGID_vente_service_fr');
     }
     public function getCodeComptableAchat(){
-        $type_compta = $this->getData('type_compta');
         
         if($this->getData('accountancy_code_buy') != '')
             return $this->getData('accountancy_code_buy');
         
-        
-        if($type_compta == 1){
-            $type = 0;
-        }
-        elseif($type_compta == 2){
-            $type = 1;
-        }
-        else{
-            $type = $this->getData('fk_product_type');
-        }
+        $type = $this->getProductTypeCompta();
         
         if($type == 0)
             return BimpCore::getConf('BIMPTOCEGID_achat_produit_fr');

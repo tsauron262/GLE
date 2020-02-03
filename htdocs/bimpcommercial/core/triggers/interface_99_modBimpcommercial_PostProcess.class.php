@@ -17,7 +17,7 @@ class InterfacePostProcess extends BimpCommTriggers
         $bimpObject = $this->getBimpCommObject($action, $object, $object_name, $action_name, $warnings);
 
         if (BimpObject::objectLoaded($bimpObject)) {
-            $obj_errors = BimpTools::getErrorsFromDolObject($object);
+            $obj_errors = BimpTools::getDolEventsMsgs(array('errors'), false);
             if (empty($obj_errors)) {
                 switch ($action_name) {
                     case 'CREATE':

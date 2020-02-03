@@ -16,8 +16,6 @@ class Interfacevalidate extends BimpCommTriggers
         $bimpObject = $this->getBimpCommObject($action, $object, $object_name, $action_name, $errors);
 
         if (BimpObject::objectLoaded($bimpObject)) {
-            BimpTools::resetDolObjectErrors($object);
-
             switch ($action_name) {
                 case 'VALIDATE':
                     $bimpObject->isValidatable($errors);

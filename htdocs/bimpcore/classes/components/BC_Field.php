@@ -143,7 +143,7 @@ class BC_Field extends BimpComponent
         }
 
         if ($this->edit) {
-            
+
             if ($this->params['editable'] && $this->object->canEditField($this->name) && $this->object->isFieldEditable($this->name, $this->force_edit)) {
                 $html .= $this->renderInput();
             } else {
@@ -440,6 +440,34 @@ class BC_Field extends BimpComponent
         return '';
     }
 
+    public function renderCsvOptionsInput($input_name, $value = '')
+    {
+        if (count($this->errors)) {
+            return BimpRender::renderAlerts($this->errors);
+        }
+
+        $html = '';
+        
+        $def_val = '';
+        
+        $options = $this->getNoHtmlOptions($def_val);
+        
+        if (!$value) {
+            $value = $def_val;
+        }
+        
+        if (!empty($options)) {
+            $html .= BimpInput::renderInput('select', $input_name, $value, array(
+                        'options'     => $options,
+                        'extra_class' => 'col_option'
+            ));
+        } else {
+            $html .= 'Valeur';
+        }
+
+        return $html;
+    }
+
     // Recherches: 
 
     public function getSearchData()
@@ -589,6 +617,71 @@ class BC_Field extends BimpComponent
 
         $current_bc = $prev_bc;
         return BimpInput::renderSearchInputContainer($input_name, $search_data['search_type'], $search_data['search_on_key_up'], 1, $content, $extra_data);
+    }
+
+    // Options d'affichage: 
+
+    public function getDisplayOptions()
+    {
+        // todo : terminer (+ implémenter dans ListConfig::renderColsOptionsInput()) 
+        $options = array(
+            'default' => 'Par défaut'
+        );
+
+        if ($this->isOk()) {
+            if (isset($this->params['values']) && !empty($this->params['values'])) {
+                $has_label = 0;
+                $has_icon = 0;
+                $all_has_icon = 1;
+                
+                foreach ($this->params['values'] as $value => $label) {
+                    if (is_array($label)) {
+                        if (isset($label['label'])) {
+                            $has_label = 1;
+                        }
+                        if (isset($label['icon'])) {
+                            $has_icon = 1;
+                        } else {
+                            $all_has_icon = 0;
+                        }
+                    } else {
+                        $has_label = 1;
+                        $all_has_icon = 0;
+                    }
+                }
+
+                if ($has_icon) {
+                    if ($has_label) {
+                        $options['icon_label'] = 'Icône et intitulé';
+                    }
+                    $options['icon_value'] = 'Icône et Identifiant';
+                }
+
+                if ($has_label) {
+                    $options['label'] = 'Intitulé';
+                }
+
+                $options['value'] = 'Identifiant';
+
+                if ($all_has_icon) {
+                    $options['icon'] = 'Icône';
+                }
+
+                if ($has_label) {
+                    $options['value_label'] = 'Identifiant et intitulé';
+                }
+
+                if ($has_label && $has_icon) {
+                    $options['icon_value_label'] = 'Icône, identifiant et intitulé';
+                }
+            } else {
+                switch ($this->params['type']) {
+                    
+                }
+            }
+        }
+
+        return $options;
     }
 
     //No-HTML: 

@@ -2932,7 +2932,11 @@ class BimpObject extends BimpCache
 
         $missing = false;
 
-        if ($type === 'items_list') {
+        if ($type === 'json') {
+            if (is_string($value)) {
+                $value = json_decode($value, 1);
+            }
+        } elseif ($type === 'items_list') {
             if (!is_array($value)) {
                 $delimiter = $this->getCurrentConf('items_delimiter', ',');
                 $value = explode($delimiter, $value);
@@ -5374,6 +5378,10 @@ class BimpObject extends BimpCache
         $list_name = BimpTools::getPostFieldValue('list_name', 'default');
 
         $bc_list = new BC_ListTable($this, $list_name);
+        $user_config_cols_options = array();
+        if (BimpObject::objectLoaded($bc_list->userConfig)) {
+            $user_config_cols_options = $bc_list->userConfig->getData('cols_options');
+        }
 
         if (count($bc_list->errors)) {
             return BimpRender::renderAlerts($bc_list->errors);
@@ -5412,30 +5420,21 @@ class BimpObject extends BimpCache
                 if (is_a($instance, 'BimpObject')) {
                     if ($instance->field_exists($col_params['field'])) {
                         $bc_field = new BC_Field($instance, $col_params['field']);
-                        if (count($bc_field->errors)) {
-                            $content = BimpRender::renderAlerts($bc_field->errors);
-                        } else {
-                            $label = $bc_field->params['label'];
-                            $value = '';
-                            $options = $bc_field->getNoHtmlOptions($value);
-
-                            if (!empty($options)) {
-                                $content = BimpInput::renderInput('select', 'col_' . $col_name . '_option', $value, array(
-                                            'options'     => $options,
-                                            'extra_class' => 'col_option'
-                                ));
-                            } else {
-                                $content .= 'Valeur';
-                            }
-                        }
+                        $label = $bc_field->params['label'];
+                        $content = $bc_field->renderCsvOptionsInput('col_' . $col_name . '_option', (isset($user_config_cols_options[$col_name]['csv_display']) ? $user_config_cols_options[$col_name]['csv_display'] : ''));
                     } else {
                         $content = BimpRender::renderAlerts('Le champ "' . $col_params['field'] . '" n\'existe pas dans l\'objet "' . $instance->getLabel() . '"');
                     }
                 } else {
                     $content = BimpRender::renderAlerts('Instance invalide');
                 }
-            } else {
+            }
+
+            if (!$label) {
                 $label = ((string) $col_params['label'] ? $col_params['label'] : $col_name);
+            }
+
+            if (!$content) {
                 $content = 'Valeur affichée';
             }
 

@@ -19,7 +19,7 @@ class BC_List extends BC_Panel
     public $final_filters = array();
     public $final_joins = array();
 
-    public function __construct(BimpObject $object, $path, $list_name = 'default', $level = 1, $id_parent = null, $title = null, $icon = null)
+    public function __construct(BimpObject $object, $path, $list_name = 'default', $level = 1, $id_parent = null, $title = null, $icon = null, $id_config = null)
     {
         global $current_bc;
         if (!is_object($current_bc)) {
@@ -95,17 +95,20 @@ class BC_List extends BC_Panel
             }
 
             if ($this->params['configurable']) {
-                global $user;
-
-                $id_config = BimpTools::getValue('param_id_config', 0);
-                if ((int) $id_config) {
+                if (!is_null($id_config) && (int) $id_config) {
                     $this->userConfig = BimpCache::getBimpObjectInstance('bimpcore', 'ListConfig', (int) $id_config);
-                    if (BimpObject::objectLoaded($this->userConfig)) {
-                        $this->userConfig->setAsCurrent();
+                } elseif (BimpTools::isSubmit('param_id_config')) {
+                    $id_config = BimpTools::getValue('param_id_config', 0);
+                    if ((int) $id_config) {
+                        $this->userConfig = BimpCache::getBimpObjectInstance('bimpcore', 'ListConfig', (int) $id_config);
+                        if (BimpObject::objectLoaded($this->userConfig)) {
+                            $this->userConfig->setAsCurrent();
+                        }
                     }
                 }
 
                 if (!BimpObject::objectLoaded($this->userConfig)) {
+                    global $user;
                     BimpObject::loadClass('bimpcore', 'ListConfig');
                     $this->userConfig = ListConfig::getUserCurrentConfig($user->id, $this->object, static::$type, $this->name);
                 }

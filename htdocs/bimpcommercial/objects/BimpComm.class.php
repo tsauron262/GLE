@@ -153,24 +153,7 @@ class BimpComm extends BimpDolObject
                         $errors[] = $msg;
                     }
 
-                    // Vérif commercial suivi: 
-                    $tabConatact = $this->dol_object->getIdContact('internal', 'SALESREPFOLL');
-                    if (count($tabConatact) < 1) {
-                        $tabComm = $client->dol_object->getSalesRepresentatives($user);
-                        if (count($tabComm) > 0) {
-                            $this->dol_object->add_contact($tabComm[0]['id'], 'SALESREPFOLL', 'internal');
-                        } elseif ((int) BimpCore::getConf('BIMPCOMM_user_as_default_commercial', 1)) {
-                            $this->dol_object->add_contact($user->id, 'SALESREPFOLL', 'internal');
-                        } else {
-                            $errors[] = 'Pas de Commercial Suivi';
-                        }
-                    }
-
-                    // Vérif contact signataire: 
-                    $tabConatact = $this->dol_object->getIdContact('internal', 'SALESREPSIGN');
-                    if (count($tabConatact) < 1) {
-                        $this->dol_object->add_contact($user->id, 'SALESREPSIGN', 'internal');
-                    }
+                    $errors = array_merge($errors, $this->checkContacts());
 
                     // Vérif conditions de réglement: 
                     // Attention pas de conditions de reglement sur les factures acomptes
@@ -3284,6 +3267,50 @@ class BimpComm extends BimpDolObject
         }
 
         return $errors;
+    }
+
+    public function checkContacts()
+    {
+        $errors = array();
+
+        if (in_array($this->object_name, array('Bimp_Propal', 'Bimp_Commande', 'Bimp_Facture'))) {
+            global $user;
+            $client = $this->getChildObject('client');
+            if (BimpObject::objectLoaded($client)) {
+                // Vérif commercial suivi: 
+                $tabConatact = $this->dol_object->getIdContact('internal', 'SALESREPFOLL');
+                if (count($tabConatact) < 1) {
+                    $ok = false;
+                    $tabComm = $client->dol_object->getSalesRepresentatives($user);
+                    if (count($tabComm) > 0) {
+                        $this->dol_object->add_contact($tabComm[0]['id'], 'SALESREPFOLL', 'internal');
+                        $ok = true;
+                    } elseif ((int) BimpCore::getConf('user_as_default_commercial', 1)) {
+                        $this->dol_object->add_contact($user->id, 'SALESREPFOLL', 'internal');
+                        $ok = true;
+                    } elseif ($this->object_name === 'Bimp_Facture' && (int) $this->getData('fk_facture_source')) {
+                        $fac_src = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $this->getData('fk_facture_source'));
+                        if (BimpObject::objectLoaded($fac_src)) {
+                            $contacts = $fac_src->dol_object->getIdContact('internal', 'SALESREPFOLL');
+                            if (count($contacts) > 0) {
+                                $this->dol_object->add_contact($contacts[0]['id'], 'SALESREPFOLL', 'internal');
+                                $ok = true;
+                            }
+                        }
+                    }
+
+                    if (!$ok) {
+                        $errors[] = 'Pas de Commercial Suivi';
+                    }
+                }
+
+                // Vérif contact signataire: 
+                $tabConatact = $this->dol_object->getIdContact('internal', 'SALESREPSIGN');
+                if (count($tabConatact) < 1) {
+                    $this->dol_object->add_contact($user->id, 'SALESREPSIGN', 'internal');
+                }
+            }
+        }
     }
 
     // post process: 

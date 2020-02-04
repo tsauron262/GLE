@@ -78,6 +78,8 @@ foreach($tabInfo as $infos){
             $errors = array_merge($errors, $package->addProduct($ln->fk_product, $ln->reel, $ln->fk_entrepot));
         }
     }
+    else
+        echo $req . "<br/>".$req2;
 }
 
 print_r($errors);
@@ -94,7 +96,7 @@ function getTabInfo(){
                             "entrepotSource" => 441,
                             "type" => 6,
                             "entrepot" => 50,
-                            "date" => "2019-06-30 00:00:01",
+                            "date" => "2020-02-04 00:00:01",
                       );
 
 

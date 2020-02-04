@@ -903,9 +903,9 @@ class BimpDocumentPDF extends BimpModelPDF
             $html .= ' Aucun escompte pour paiement anticipé ne sera accordé.';
             $html .= "</span>";
             $html .= "</p>";
-        }
 
-        $html .= '<p style="font-size: 6px; font-style: italic">Merci de noter systématiquement le n° de facture sur votre règlement.</p>';
+            $html .= '<p style="font-size: 6px; font-style: italic">Merci de noter systématiquement le n° de facture sur votre règlement.</p>';
+        }
 
         $this->writeContent($html);
     }

@@ -106,7 +106,7 @@ class Bimp_Product_Entrepot extends BimpObject
             $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'facture_fourn_extrafields fef ON f.rowid = fef.fk_object';
             $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'facture_fourn_det fl on f.rowid = fl.fk_facture_fourn';
             $sql .= ' WHERE f.fk_statut > 0 AND fl.fk_product = ' . (int) $this->getData('fk_product');
-            $sql .= ' AND fef.entrepot = ' . (int) $this->getData('fk_entrepot');
+//            $sql .= ' AND fef.entrepot = ' . (int) $this->getData('fk_entrepot');
 
             $res = $this->db->executeS($sql, 'array');
 

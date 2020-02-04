@@ -46,7 +46,7 @@ foreach($tabInfo as $infos){
 //    }
     
     
-    $req2 = "SELECT *  FROM `".MAIN_DB_PREFIX."product_stock` WHERE `fk_entrepot` = ".$infos['entrepotSource']." AND reel > 0";
+    $req2 = "SELECT *  FROM `".MAIN_DB_PREFIX."product_stock` WHERE `fk_entrepot` = ".$infos['entrepotSource'];//." AND reel > 0";
     
     $sql2 = $db->query($req2);
     $package = null;

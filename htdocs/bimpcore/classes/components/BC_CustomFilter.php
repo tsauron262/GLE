@@ -138,7 +138,7 @@ class BC_CustomFilter extends BC_Filter
         if (!is_object($current_bc)) {
             $current_bc = null;
         }
-        
+
         $prev_bc = $current_bc;
         $current_bc = $this;
 
@@ -186,9 +186,12 @@ class BC_CustomFilter extends BC_Filter
                 $html .= BimpRender::renderIcon('fas_user', 'iconLeft') . 'Utilisateur connecté' . BimpRender::renderIcon('fas_plus-circle', 'iconRight');
                 $html .= '</span>';
                 $html .= '</div>';
-                $html .= BimpInput::renderInput('search_user', $input_name, 0);
-                $html .= $add_btn_html;
-                break;
+
+                if (!$this->object->config->isDefined($input_path)) {
+                    $html .= BimpInput::renderInput('search_user', $input_name, 0);
+                    $html .= $add_btn_html;
+                    break;
+                }
 
             case 'value':
                 $bc_input = new BC_Input($this->object, $this->params['data_type'], $input_name, $input_path);

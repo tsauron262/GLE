@@ -74,6 +74,9 @@ class Bimp_Product extends BimpObject
     
     public function getCodeComptableVente($zone_vente = 1, $force_type = -1){
         if($force_type == -1){
+            if(!$this->isLoaded())
+                return '';
+            
             if($this->getData('accountancy_code_sell') != '')
                 return $this->getData('accountancy_code_sell');
 
@@ -130,6 +133,8 @@ class Bimp_Product extends BimpObject
     }
     public function getCodeComptableAchat(){
         
+        if(!$this->isLoaded())
+            return '';
         if($this->getData('accountancy_code_buy') != '')
             return $this->getData('accountancy_code_buy');
         

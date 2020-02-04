@@ -19,7 +19,7 @@ $bdb = new BimpDb($db);
 
 $sql = 'SELECT f.rowid FROM ' . MAIN_DB_PREFIX . 'facture f';
 $sql .= ' WHERE f.fk_facture_source > 0';
-$sql .= ' WHERE f.datec > \'2019-06-30\'';
+$sql .= ' AND f.datec > \'2019-06-30\'';
 $sql .= ' AND (SELECT COUNT(ec.fk_socpeople) FROM ' . MAIN_DB_PREFIX . 'element_contact ec';
 $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'c_type_contact tc ON tc.rowid = ec.fk_c_type_contact';
 $sql .= ' WHERE tc.element = \'facture\'';

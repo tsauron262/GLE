@@ -17,7 +17,7 @@ function addInputEvent(form_id, input_name, event, callback) {
     });
 }
 
-// Enregistrements ajax des objets: 
+// Enregistrements ajax des objets:
 
 function saveObjectFromForm(form_id, $button, successCallback, on_save) {
     var $resultContainer = $('#' + form_id + '_result');
@@ -38,6 +38,8 @@ function saveObjectFromForm(form_id, $button, successCallback, on_save) {
         bimp_msg('Erreur. Formulaire absent ou invalide', 'danger');
         return;
     }
+
+    prepareFormSubmit($form);
 
     if (!validateForm($form)) {
         return;
@@ -103,6 +105,30 @@ function saveObjectFromForm(form_id, $button, successCallback, on_save) {
             }
         }
     });
+}
+
+function prepareFormSubmit($form) {
+    if ($.isOk($form)) {
+        $form.find('.inputContainer').each(function () {
+            var data_type = $(this).data('data_type');
+            var field_name = $(this).data('field_name');
+            var field_prefix = $(this).data('field_prefix');
+
+            if (field_name) {
+                switch (data_type) {
+                    case 'json':
+                        var $input = $(this).find('[name="' + field_name + '"]');
+                        if (!$input.length) {
+                            var values = getJsonInputSubValues($(this), field_name, true);
+                            var val_str = JSON.stringify(values);
+                            val_str = val_str.replace(/"/g, '&quot;');
+                            $(this).prepend('<input type="hidden" name="' + field_prefix + field_name + '" value="' + val_str + '"/>');
+                        }
+                        break;
+                }
+            }
+        });
+    }
 }
 
 function loadModalForm($button, data, title, successCallback, on_save) {
@@ -896,6 +922,7 @@ function getInputValue($inputContainer) {
     }
 
     var field_name = $inputContainer.data('field_name');
+    var data_type = $inputContainer.data('data_type');
     var multiple = $inputContainer.data('multiple');
     var check_list = $inputContainer.find('.check_list_container').length;
     var value = '';
@@ -936,7 +963,51 @@ function getInputValue($inputContainer) {
             var html_value = $('#cke_' + field_name).find('iframe').contents().find('body').html();
             $inputContainer.find('[name="' + field_name + '"]').val(html_value);
         }
-        value = $inputContainer.find('[name="' + field_name + '"]').val();
+
+        if (typeof (data_type) === 'undefined') {
+            data_type = 'string';
+        }
+
+        switch (data_type) {
+            case 'json':
+                value = getJsonInputSubValues($inputContainer, field_name, false);
+                break;
+
+            default:
+                value = $inputContainer.find('[name="' + field_name + '"]').val();
+                break;
+        }
+    }
+
+    return value;
+}
+
+function getJsonInputSubValues($container, parent_name, remove_inputs) {
+    if (typeof (remove_inputs) === 'undefined') {
+        remove_inputs = false;
+    }
+    var value = {};
+
+    if ($.isOk($container)) {
+        $container.find('tr.bimp_json_input_value.' + parent_name + '_value').each(function () {
+            var value_name = $(this).data('value_name');
+            var input_name = $(this).data('input_name');
+
+            if (value_name) {
+                if (input_name) {
+                    var $input = $(this).find('[name="' + input_name + '"]');
+                    if ($input.length) {
+                        value[value_name] = $input.val();
+
+                        if (remove_inputs) {
+                            $input.remove();
+                        }
+                    }
+                } else {
+                    value[value_name] = getJsonInputSubValues($(this).next('tr'), parent_name + '_' + value_name, remove_inputs);
+                }
+            }
+        });
     }
 
     return value;
@@ -1659,7 +1730,7 @@ function selectChecklistItem($container, label) {
 
     $container.find('.check_list_item').each(function () {
         var $item = $(this);
-        if ($item.find('label').text().toLowerCase().indexOf(label.toLowerCase()) !== -1 || ("S"+$item.find('label').text()).toLowerCase().indexOf(label.toLowerCase()) !== -1) {
+        if ($item.find('label').text().toLowerCase().indexOf(label.toLowerCase()) !== -1 || ("S" + $item.find('label').text()).toLowerCase().indexOf(label.toLowerCase()) !== -1) {
             if (!check) {
                 var $cb = $item.find('input[type=checkbox]');
                 if ($cb.length) {
@@ -2072,14 +2143,6 @@ function onFormLoaded($form) {
         $('body').trigger($.Event('formLoaded', {
             $form: $form
         }));
-
-        $form.find('.fdsgsdkfgjsdlkj').each(function () {
-//            bimp_msg($(this).attr('name'));
-            $(this).focus(function (e) {
-                e.stopPropagation();
-            });
-            $(this).focus();
-        });
 
         var $modal = $form.findParentByClass('modal');
         if ($.isOk) {

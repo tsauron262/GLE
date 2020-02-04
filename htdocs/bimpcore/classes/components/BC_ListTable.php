@@ -47,7 +47,7 @@ class BC_ListTable extends BC_List
     protected $selected_rows = array();
     protected $totals = array();
 
-    public function __construct(BimpObject $object, $name = 'default', $level = 1, $id_parent = null, $title = null, $icon = null)
+    public function __construct(BimpObject $object, $name = 'default', $level = 1, $id_parent = null, $title = null, $icon = null, $id_config = null)
     {
         $this->params_def['checkboxes'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['total_row'] = array('data_type' => 'bool', 'default' => 0);
@@ -91,7 +91,7 @@ class BC_ListTable extends BC_List
             }
         }
 
-        parent::__construct($object, $path, $name, $level, $id_parent, $title, $icon);
+        parent::__construct($object, $path, $name, $level, $id_parent, $title, $icon, $id_config);
 
         if ($this->isObjectValid()) {
             if (!(int) $this->object->can("create")) {
@@ -622,6 +622,12 @@ class BC_ListTable extends BC_List
                 $html .= '<th class="positionHandle"' . (!$this->params['positions_open'] ? ' style="display: none"' : '') . '></th>';
             }
 
+            $user_config_cols_options = array();
+
+            if (BimpObject::objectLoaded($this->userConfig)) {
+                $user_config_cols_options = $this->userConfig->getData('cols_options');
+            }
+
             foreach ($this->cols as $col_name) {
                 $col_params = $this->getColParams($col_name);
 
@@ -632,6 +638,9 @@ class BC_ListTable extends BC_List
                     if (!is_a($field_object, 'BimpObject')) {
                         $field_object = null;
                     }
+                }
+                if (isset($user_config_cols_options[$col_name]['label'])) {
+                    $col_params['label'] = $user_config_cols_options[$col_name]['label'];
                 }
                 if (!$col_params['label']) {
                     if ($col_params['field'] && !is_null($field_object)) {
@@ -1168,9 +1177,15 @@ class BC_ListTable extends BC_List
                 $content .= '<div style="margin: 5px 0; font-weight: bold">';
                 $content .= $this->userConfig->getData('name');
                 if ($this->userConfig->can('edit')) {
-                    $content .= '&nbsp;&nbsp;&nbsp;<span class="btn btn-default btn-small" onclick="' . $this->userConfig->getJsLoadModalForm('default', 'Edition de la configuration #' . $this->userConfig->id) . '">';
+                    $content .= '<div style="margin-top: 5px; text-align: right">';
+                    $content .= '<button class="btn btn-default btn-small" onclick="' . $this->userConfig->getJsLoadModalForm('default', 'Edition de la configuration #' . $this->userConfig->id) . '" style="margin-right: 4px">';
                     $content .= BimpRender::renderIcon('fas_edit', 'iconLeft') . 'Editer';
-                    $content .= '</span>';
+                    $content .= '</button>';
+                    
+                    $content .= '<button class="btn btn-default btn-small" onclick="'.$this->userConfig->getJsLoadModalForm('cols_options', 'Configuration #' . $this->userConfig->id.' - Options des colonnes') . '">';
+                    $content .= BimpRender::renderIcon('fas_columns', 'iconLeft') . 'Options des colonnes';
+                    $content .= '</button>';
+                    $content .= '</div>';
                 }
                 $content .= '</div>';
 

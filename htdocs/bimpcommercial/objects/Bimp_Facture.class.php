@@ -3830,7 +3830,9 @@ class Bimp_Facture extends BimpComm
                 }
 
                 // Copie des contacts: 
-                $this->copyContactsFromOrigin($facture, $warnings);
+                if (BimpObject::objectLoaded($facture)) {
+                    $this->copyContactsFromOrigin($facture, $warnings);
+                }
                 break;
 
             case Facture::TYPE_STANDARD:

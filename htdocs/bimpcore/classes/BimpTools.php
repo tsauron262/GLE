@@ -1908,6 +1908,25 @@ class BimpTools
         return $array;
     }
 
+    public static function getMaxArrayDepth($array)
+    {
+        $max_depth = 1;
+
+        if (is_array($array)) {
+            foreach ($array as $value) {
+                if (is_array($value)) {
+                    $depth = self::getMaxArrayDepth($value) + 1;
+
+                    if ($depth > $max_depth) {
+                        $max_depth = $depth;
+                    }
+                }
+            }
+        }
+
+        return $max_depth;
+    }
+
     // Divers:
 
     public static function getContext()

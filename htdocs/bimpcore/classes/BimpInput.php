@@ -267,7 +267,7 @@ class BimpInput
                 if ($display_labels) {
                     $html .= '<span class="toggle-label-off">' . $options['toggle_off'] . '</span>';
                 }
-                $html .= '<label class="toggle-slider '.(isset($options['disabled'])? 'disabled' : '').'" for="' . $input_id . '_toggle"></label>';
+                $html .= '<label class="toggle-slider ' . (isset($options['disabled']) ? 'disabled' : '') . '" for="' . $input_id . '_toggle"></label>';
                 if ($display_labels) {
                     $html .= '<span class="toggle-label-on">' . $options['toggle_on'] . '</span>';
                 }
@@ -1546,7 +1546,44 @@ class BimpInput
     {
         $html = '';
 
+        return $html;
+    }
 
+    public static function renderJsonInput($data, $parent_name)
+    {
+        $html = '';
+
+        $html .= '<table class="bimp_list_table bimp_json_values_table">';
+        $html .= '<tbody class="headers_col">';
+        foreach ($data as $data_name => $subData) {
+            $input_name = (isset($subData['input_name']) ? $subData['input_name'] : '');
+            $label = (isset($subData['label']) ? $subData['label'] : $data_name);
+
+            $html .= '<tr id="'.$data_name.'" class="bimp_json_input_value ' . $parent_name . '_value"';
+            $html .= ' data-value_name="' . $data_name . '"';
+            $html .= ' data-input_name="' . $input_name . '"';
+            $html .= ' data-parent_name="' . $parent_name . '"';
+            $html .= '>';
+
+            if ($input_name) {
+                $html .= '<th>' . $label . '</th>';
+                $html .= '<td>';
+                $html .= (isset($subData['content']) ? $subData['content'] : '');
+                $html .= '</td>';
+            } elseif (isset($subData['children'])) {
+                $html .= '<td colspan="2" class="bimp_json_input_title">';
+                $html .= $label;
+                $html .= '</td></tr>';
+
+                $html .= '<tr>';
+                $html .= '<td colspan="2">';
+                $html .= self::renderJsonInput($subData['children'], $parent_name . '_' . $data_name);
+                $html .= '</td>';
+            }
+            $html .= '</tr>';
+        }
+        $html .= '</tbody>';
+        $html .= '</table>';
 
         return $html;
     }

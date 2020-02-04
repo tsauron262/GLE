@@ -315,4 +315,9 @@ class BimpCore
     {
         
     }
+
+    public static function loadPhpExcel()
+    {
+        require_once DOL_DOCUMENT_ROOT . '/bimpcore/libs/PHPExcel-1.8/Classes/PHPExcel.php';
+    }
 }

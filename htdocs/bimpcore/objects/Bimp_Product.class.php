@@ -711,7 +711,7 @@ class Bimp_Product extends BimpObject
         }
     }
 
-    public function getVentes($dateMin, $dateMax = null, $id_entrepot = null, $id_product = null, $tab_secteur = array())
+    public function getVentes($dateMin, $dateMax = null, $id_entrepot = null, $id_product = null, $tab_secteur = array(), $exlure_retour = false)
     {
         if (is_null($id_product) && $this->isLoaded()) {
             $id_product = $this->id;
@@ -729,11 +729,11 @@ class Bimp_Product extends BimpObject
             $dateMax = date('Y-m-d H:i:s');
         }
 
-        $cache_key = $dateMin . '-' . $dateMax . "-" . implode("/", $tab_secteur);
+        $cache_key = $dateMin . '-' . $dateMax . "-" . implode("/", $tab_secteur). '-'. $exlure_retour;
 
         if ((int) $id_product) {
             if (!isset(self::$ventes[$cache_key])) {
-                self::initVentes($dateMin, $dateMax, $tab_secteur);
+                self::initVentes($dateMin, $dateMax, $tab_secteur, $exlure_retour);
             }
 
             if (isset(self::$ventes[$cache_key][$id_product][$id_entrepot])) {
@@ -3009,7 +3009,7 @@ class Bimp_Product extends BimpObject
         //
     }
 
-    private static function initVentes($dateMin, $dateMax, $tab_secteur = array())
+    private static function initVentes($dateMin, $dateMax, $tab_secteur = array(), $exlure_retour = false)
     {
         global $db;
 //        self::$ventes = array(); // Ne pas déco ça effacerait d'autres données en cache pour d'autres dates. 
@@ -3017,6 +3017,8 @@ class Bimp_Product extends BimpObject
         $query = "SELECT `fk_product`, entrepot, sum(qty) as qty, sum(l.total_ht) as total_ht, sum(l.total_ttc) as total_ttc";
         $query .= " FROM `" . MAIN_DB_PREFIX . "facturedet` l, " . MAIN_DB_PREFIX . "facture f, " . MAIN_DB_PREFIX . "facture_extrafields e";
         $query .= " WHERE `fk_facture` = f.rowid AND e.fk_object = f.rowid AND fk_product > 0";
+        if($exlure_retour)
+            $query .= " AND qty > 0";
         $query .= " AND f.fk_statut > 0";
 
         if ($dateMin)

@@ -86,7 +86,7 @@ class Bimp_Product_Entrepot extends BimpObject
             $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'facture_extrafields fef ON f.rowid = fef.fk_object';
             $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'facturedet fl ON f.rowid = fl.fk_facture';
             $sql .= ' WHERE f.fk_statut > 0 AND fl.fk_product = ' . (int) $this->getData('fk_product');
-            $sql .= ' AND fef.entrepot = ' . (int) $this->getData('fk_entrepot');
+//            $sql .= ' AND fef.entrepot = ' . (int) $this->getData('fk_entrepot');
 
             $res = $this->db->executeS($sql, 'array');
 
@@ -136,7 +136,7 @@ class Bimp_Product_Entrepot extends BimpObject
             $dt->sub(new DateInterval('P' . $nb_month . 'M'));
             $dateMin = $dt->format('Y-m-d') . ' 00:00:00';
             $id_product = (int) $this->getData('fk_product');
-            $id_entrepot = ((int) $this->getData('fk_entrepot') ? (int) $this->getData('fk_entrepot') : null);
+//            $id_entrepot = ((int) $this->getData('fk_entrepot') ? (int) $this->getData('fk_entrepot') : null);
             $id_entrepot = null;//avoir toute les ventes de tous les depot
 
             $ventes = static::$product_instance->getVentes($dateMin, $this->dateBilan, $id_entrepot, $id_product);
@@ -250,6 +250,22 @@ class Bimp_Product_Entrepot extends BimpObject
                         'params' => array(
                             $nb_month,
                             'qty'
+                        )
+                    )
+                )
+            );
+        }
+
+        foreach (array(1, 3, 6, 12) as $nb_month) {
+            $cols['ventes_' . $nb_month . '_mois_qty_with_none_retour'] = array(
+                'label' => 'Vente à ' . $nb_month . ' mois (qté sans retour)',
+                'value' => array(
+                    'callback' => array(
+                        'method' => 'displayNbMonthVentes',
+                        'params' => array(
+                            $nb_month,
+                            'qty',
+                            1
                         )
                     )
                 )

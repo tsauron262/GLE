@@ -55,14 +55,14 @@ class productController extends BimpController
         
         $list->addJoin($object->dol_object->table_element_line, $condition, 'b');
         $list->addFieldFilterValue('b.fk_product', $id_product);
-        $list->params['n'] = 10000;
+        $list->params['n'] = 30;
         $html .= $list->renderHtml();
         
         
         $list = new BC_ListTable($object_child, 'global');
         $list->addJoin($object->dol_object->table_element_line, 'a.id_line = b.rowid', 'b');
         $list->addFieldFilterValue('b.fk_product', $id_product);
-        $list->params['n'] = 100;
+        $list->params['n'] = 30;
         $html .= $list->renderHtml();
 
         die(json_encode(array(

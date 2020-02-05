@@ -34,7 +34,7 @@ foreach($tabInfo as $info){
     $where = array();
     foreach($info[2] as $table)
         $where[] = 'rowid NOT IN (SELECT id_line FROM '.$table.')';
-    $req = 'SELECT DISTINCT(`'.$info[0].'`) as id FROM `'.$info[1].'` WHERE '.implode(' AND ', $where).' ORDER BY`rowid` DESC';
+    $req = 'SELECT DISTINCT(`'.$info[0].'`) as id FROM `'.$info[1].'` WHERE '.implode(' AND ', $where).' ORDER BY`rowid` ASC';
     $sql = $db->query($req);
     $tot= $db->num_rows($sql);
     $sql = $db->query($req.' LIMIT 0,1000');

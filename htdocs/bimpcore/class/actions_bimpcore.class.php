@@ -44,7 +44,7 @@ class ActionsBimpcore
         global $user;
         $text = "Societe ".$soc1->getData('nom').' ('.$soc1->getData('code_compta').' || '.$soc1->getData('code_compta_fournisseur').') fusionné dans '.$soc2->getData('nom').' ('.$soc2->getData('code_compta').' || '.$soc2->getData('code_compta_fournisseur').') par '.$user->getNomUrl;
         
-        mailSyn2('Fusion tier', 'tommy@bimp.fr, comptamaugio@bimp.fr, a.delauzun@bimp.fr', null, $text);
+        mailSyn2('Fusion tier', 'tommy@bimp.fr, comptaolys@bimp.fr, a.delauzun@bimp.fr', null, $text);
 
         return 0;
     }

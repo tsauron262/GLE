@@ -16,9 +16,13 @@ echo 'DEBUT <br/><br/>';
 
 global $db;
 
+$nb = GETPOST('nb');
+if($nb < 1)
+    $nb = 500;
+
 $html = '';
 $bimpComm = BimpCache::getBimpObjectInstance('bimpcommercial', 'BimpComm');
-$bimpComm->checkAllObjectLine(0, $html, 500);
+$bimpComm->checkAllObjectLine(0, $html, $nb);
 
 echo $html."<br/>";
 print_r($errors);

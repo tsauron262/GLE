@@ -2427,7 +2427,7 @@ class BimpComm extends BimpDolObject
                 if (!array_key_exists($id_dol_line, $bimp_lines) && method_exists($bimp_line, 'createFromDolLine')) {
                     $objectLine = BimpObject::getInstance($bimp_line->module, $bimp_line->object_name);
                     $objectLine->parent = $this;
-                    $line_errors = $objectLine->createFromDolLine((int) $this->id, $dol_line, $warnings);
+                    $line_errors = $objectLine->createFromDolLine((int) $this->id, $dol_line);
                     if (count($line_errors)) {
                         $errors[] = BimpTools::getMsgFromArray($line_errors, 'Des erreurs sont survenues lors de la récupération des données pour la ligne n° ' . $i);
                     }

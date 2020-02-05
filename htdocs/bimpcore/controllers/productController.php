@@ -13,8 +13,14 @@ class productController extends BimpController
         // Instance of object
         if($type_of_object == 'BContract_contrat')
             $object = BimpObject::getInstance('bimpcontract', $type_of_object);
-        else
+        else{
             $object = BimpObject::getInstance('bimpcommercial', $type_of_object);
+            if($id_product > 0){
+                $result = '';
+                $object->checkAllObjectLine($id_product, $result, 1000);
+                //voir peut etre un log dans quelques temps
+            }
+        }
 
         // Instance of object line
         if($type_of_object == 'BContract_contrat')

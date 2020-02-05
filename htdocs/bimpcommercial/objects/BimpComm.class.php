@@ -4067,7 +4067,7 @@ class BimpComm extends BimpDolObject
         $tabInfo = $errors = array();
         $sortie = '';
 
-        $tabInfo[] = array('fk_propal', 'llx_propaldet', array('llx_bimp_propal_line', 'llx_bs_sav_propal_line'), 'Bimp_Propal');
+//        $tabInfo[] = array('fk_propal', 'llx_propaldet', array('llx_bimp_propal_line', 'llx_bs_sav_propal_line'), 'Bimp_Propal');
         $tabInfo[] = array('fk_commande', 'llx_commandedet', 'llx_bimp_commande_line', 'Bimp_Commande');
         $tabInfo[] = array('fk_facture', 'llx_facturedet', 'llx_bimp_facture_line', 'Bimp_Facture');
         $tabInfo[] = array('fk_commande', 'llx_commande_fournisseurdet', 'llx_bimp_commande_fourn_line', 'Bimp_CommandeFourn');

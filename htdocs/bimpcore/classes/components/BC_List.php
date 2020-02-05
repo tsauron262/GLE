@@ -103,6 +103,7 @@ class BC_List extends BC_Panel
                         $this->userConfig = BimpCache::getBimpObjectInstance('bimpcore', 'ListConfig', (int) $id_config);
                         if (BimpObject::objectLoaded($this->userConfig)) {
                             $this->userConfig->setAsCurrent();
+                            $full_reload = true;
                         }
                     }
                 }
@@ -427,7 +428,7 @@ class BC_List extends BC_Panel
     }
 
     protected function fetchItems()
-    {
+    {        
         if (method_exists($this->object, "beforeListFetchItems"))
             $this->object->beforeListFetchItems($this);
 

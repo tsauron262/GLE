@@ -886,11 +886,13 @@ lists:
         filters_panel: default
         filters_panel_open: 1
         sort_field: id
-        sort_way: desc
         pagination: 1
         n: 10
         cols:
             parent:
+            fk_soc:
+                child: parent
+                field: fk_soc
             desc:
             pu_ht: 
             tva:

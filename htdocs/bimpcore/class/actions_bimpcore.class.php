@@ -43,7 +43,7 @@ class ActionsBimpcore
         $soc2 = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $parameters['soc_dest']);
         $text = "Societe ".$soc1->getData('nom').' ('.$soc1->getData('code_compta').') fusionné dans '.$soc2->getData('nom').' ('.$soc2->getData('code_compta').')';
         
-        mailSyn2('Fusion tier', 'tommy@bimp.fr, comptamaugio@bimp.fr', null, $text);
+        mailSyn2('Fusion tier', 'tommy@bimp.fr, comptamaugio@bimp.fr, a.delauzun@bimp.fr', null, $text);
 
         return 0;
     }

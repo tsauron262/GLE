@@ -18,9 +18,9 @@ class productController extends BimpController
 
         // Instance of object line
         if($type_of_object == 'BContract_contrat')
-            $object_child = BimpObject::getInstance('bimpcontract', $object->config->params['objects']['lines']['instance']);
+            $object_child = BimpObject::getInstance('bimpcontract', $object->config->params['objects']['lines']['instance']['bimp_object']);
         else
-            $object_child = BimpObject::getInstance('bimpcommercial', $object->config->params['objects']['lines']['instance']);
+            $object_child = BimpObject::getInstance('bimpcommercial', $object->config->params['objects']['lines']['instance']['bimp_object']);
 
         $list = new BC_ListTable($object);
         
@@ -52,9 +52,17 @@ class productController extends BimpController
                 $condition = 'a.rowid = b.fk_contrat';
                 break;
         }
+        
         $list->addJoin($object->dol_object->table_element_line, $condition, 'b');
         $list->addFieldFilterValue('b.fk_product', $id_product);
         $list->params['n'] = 10000;
+        $html .= $list->renderHtml();
+        
+        
+        $list = new BC_ListTable($object_child, 'global');
+        $list->addJoin($object->dol_object->table_element_line, 'a.id_line = b.rowid', 'b');
+        $list->addFieldFilterValue('b.fk_product', $id_product);
+        $list->params['n'] = 100;
         $html .= $list->renderHtml();
 
         die(json_encode(array(

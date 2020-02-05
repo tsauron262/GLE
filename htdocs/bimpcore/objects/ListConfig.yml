@@ -6,6 +6,16 @@ labels:
     name_plur: configurations de liste
     is_female: 1
     
+objects: 
+    default_filter: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: ListFilters
+            id_object: 
+                field_value: id_default_filters
 fields: 
     name: 
         label: Nom
@@ -42,11 +52,6 @@ fields:
             array: list_types
         input: 
             type: hidden
-        search:
-            input: 
-                type: select
-                options: 
-                    array: list_types
             
     list_name: 
         label: Code liste
@@ -110,11 +115,15 @@ fields:
         
     id_default_filters: 
         label: Filtres par défaut
-        type: id
+        type: id_object
+        object: default_filter
         values: 
             array: ownerFilters
         default_value: 0
         depends_on: owner_type,id_group,obj_module,obj_name,list_type,list_name
+        search: 
+            input: 
+                type: search_object
         
     search_open: 
         label: Barre de recherche ouverte par défaut
@@ -125,6 +134,11 @@ fields:
         label: Panneau filtres ouvert par défaut
         type: bool
         default_value: 0
+        
+    sheet_name: 
+        label: Nom de la feuille dans les fichiers excel
+        input: 
+            help: Max 30 caractères
         
     cols_options: 
         label: Options des colonnes
@@ -180,6 +194,7 @@ forms:
             - field: filters_open
               show: 
                   callback: hasFiltersPanel
+            - field: sheet_name
                   
     cols_options: 
         rows: 
@@ -202,12 +217,6 @@ forms:
                   help: Caractères aplhanumériques et tirets seulement
               value: 
                   callback: getDefaultBulkCsvFileName
-            - custom: 1
-              label: Séparateur
-              input_name: separator
-              input: 
-                  type: text
-              value: ';'
             - custom: 1
               label: En-têtes
               input_name: headers
@@ -242,6 +251,8 @@ lists_cols:
         label: Utilisation
         value: 
             callback: displayUtilisation
+    def_filters: 
+        field: id_default_filters
             
 filters_panels: 
     default: 
@@ -301,7 +312,7 @@ lists:
         extends: base
         title: Liste des configurations de liste utilisateurs
         filters_panel: default
-        filters_panel_open: 1   
+        filters_panel_open: 1
         bulk_actions: 
             1: 
                 label: Générer CSV
@@ -310,6 +321,7 @@ lists:
         configurable: 1
         enable_search: 1
         n: 10
+        sort_way: desc
         cols: 
             module: 
             obj_name: 
@@ -317,3 +329,4 @@ lists:
             list_name: 
             name:
             owner_nom_url: 
+            def_filters:

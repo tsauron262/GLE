@@ -772,7 +772,7 @@ class ListConfig extends BimpObject
         $success = 'Fichier Excel généré avec succès';
         $success_callback = '';
 
-        $id_configs = isset($data['id_objects']) ? $data['id_object'] : array();
+        $id_configs = isset($data['id_objects']) ? $data['id_objects'] : array();
         $file_name = isset($data['file_name']) ? $data['file_name'] : '';
         $headers = isset($data['headers']) ? (int) $data['headers'] : 1;
 
@@ -786,7 +786,7 @@ class ListConfig extends BimpObject
             $dir_error = BimpTools::makeDirectories(array(
                         'bimpcore' => 'lists_excel'
                             ), DOL_DATA_ROOT);
-            if (count($dir_error)) {
+            if ($dir_error) {
                 $errors[] = $dir_error;
             }
         }
@@ -799,6 +799,10 @@ class ListConfig extends BimpObject
 
             BimpCore::loadPhpExcel();
             $excel = new PHPExcel();
+
+            $fl = true;
+
+            $indexes = array();
 
             foreach ($id_configs as $id_config) {
                 $config = BimpCache::getBimpObjectInstance('bimpcore', 'ListConfig', (int) $id_config);
@@ -840,13 +844,32 @@ class ListConfig extends BimpObject
                     continue;
                 }
 
-                $sheet = $excel->createSheet();
-                $sheet->setCodeName(BimpTools::ucfirst($obj_instance->getLabel('name_plur')));
+                if (!$fl) {
+                    $sheet = $excel->createSheet();
+                } else {
+                    $sheet = $excel->getActiveSheet();
+                    $fl = false;
+                }
+
+                $title = substr($config->getData('sheet_name'), 0, 30);
+
+                if (!$title) {
+                    if (!isset($indexes[$obj_instance->module][$obj_instance->name])) {
+                        $index = 0;
+                    } else {
+                        $index = $indexes[$obj_instance->module][$obj_instance->name];
+                    }
+                    $index++;
+                    $title = substr(BimpTools::ucfirst($obj_instance->getLabel('name_plur')), 0, 27) . ' ' . $index;
+                    $indexes[$obj_instance->module][$obj_instance->name] = $index;
+                }
+
+                $sheet->setTitle($title);
 
                 $row = 1;
 
                 foreach ($rows as $r) {
-                    $col = 1;
+                    $col = 0;
                     $cols = explode(';', $r);
 
                     foreach ($cols as $cell) {
@@ -856,14 +879,12 @@ class ListConfig extends BimpObject
 
                     $row++;
                 }
-
-                $excel->addSheet($sheet);
             }
 
             $writer = PHPExcel_IOFactory::createWriter($excel, 'Excel2007');
             $writer->save($file_path);
 
-            $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . htmlentities('lists_excel/' . $file_name . '.csv');
+            $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . htmlentities('lists_excel/' . $file_name . '.xlsx');
             $success_callback = 'window.open(\'' . $url . '\')';
         }
 

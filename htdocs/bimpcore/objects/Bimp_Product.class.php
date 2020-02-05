@@ -1730,16 +1730,16 @@ class Bimp_Product extends BimpObject
 
 
         $stats_propale = $this->load_stats_propale();
-        $stats_prop_supplier = $this->load_stats_proposal_supplier();
+//        $stats_prop_supplier = $this->load_stats_proposal_supplier();
         $stats_command = $this->load_stats_commande();
         $stats_comm_fourn = $this->load_stats_commande_fournisseur();
         $stats_facture = $this->load_stats_facture();
         $stats_fact_fourn = $this->load_stats_facture_fournisseur();
         $stats_contrat = $this->load_stats_contrat();
 
-        $stats = array($stats_propale, $stats_prop_supplier, $stats_command,
-            $stats_comm_fourn, $stats_facture,
-            $stats_fact_fourn, $stats_contrat);
+        $stats = array($stats_propale, /*$stats_prop_supplier, */$stats_command,
+            $stats_facture, $stats_contrat, 
+            $stats_comm_fourn, $stats_fact_fourn);
 
         $body .= '<tbody>';
         foreach ($stats as $s) {
@@ -2492,43 +2492,43 @@ class Bimp_Product extends BimpObject
         }
     }
 
-    function load_stats_proposal_supplier($socid = 0)
-    {
-        global $user;
-
-        $sql = "SELECT COUNT(DISTINCT p.fk_soc) as nb_suppliers, COUNT(DISTINCT p.rowid) as nb,";
-        $sql .= " COUNT(pd.rowid) as nb_rows, SUM(pd.qty) as qty";
-        $sql .= " FROM " . MAIN_DB_PREFIX . "supplier_proposaldet as pd";
-        $sql .= ", " . MAIN_DB_PREFIX . "supplier_proposal as p";
-        $sql .= ", " . MAIN_DB_PREFIX . "societe as s";
-        if (!$user->rights->societe->client->voir && !$socid)
-            $sql .= ", " . MAIN_DB_PREFIX . "societe_commerciaux as sc";
-        $sql .= " WHERE p.rowid = pd.fk_supplier_proposal";
-        $sql .= " AND p.fk_soc = s.rowid";
-        $sql .= " AND p.entity IN (" . getEntity('supplier_proposal') . ")";
-        $sql .= " AND pd.fk_product = " . $this->id;
-        if (!$user->rights->societe->client->voir && !$socid)
-            $sql .= " AND p.fk_soc = sc.fk_soc AND sc.fk_user = " . $user->id;
-        //$sql.= " AND pr.fk_statut != 0";
-        if ($socid > 0)
-            $sql .= " AND p.fk_soc = " . $socid;
-
-        $result = $this->db->db->query($sql);
-        if ($result) {
-            $obj = $this->db->db->fetch_object($result);
-            $stats = array(
-                'id'        => 'Bimp_PropalFourn',
-                'name'      => 'Propositions commerciales fournisseurs',
-                'nb_object' => $obj->nb_suppliers,
-                'nb_ref'    => $obj->nb,
-                'qty'       => $obj->qty ? $obj->qty : 0
-            );
-            return $stats;
-        } else {
-            $this->error = $this->db->db->error();
-            return -1;
-        }
-    }
+//    function load_stats_proposal_supplier($socid = 0)
+//    {
+//        global $user;
+//
+//        $sql = "SELECT COUNT(DISTINCT p.fk_soc) as nb_suppliers, COUNT(DISTINCT p.rowid) as nb,";
+//        $sql .= " COUNT(pd.rowid) as nb_rows, SUM(pd.qty) as qty";
+//        $sql .= " FROM " . MAIN_DB_PREFIX . "supplier_proposaldet as pd";
+//        $sql .= ", " . MAIN_DB_PREFIX . "supplier_proposal as p";
+//        $sql .= ", " . MAIN_DB_PREFIX . "societe as s";
+//        if (!$user->rights->societe->client->voir && !$socid)
+//            $sql .= ", " . MAIN_DB_PREFIX . "societe_commerciaux as sc";
+//        $sql .= " WHERE p.rowid = pd.fk_supplier_proposal";
+//        $sql .= " AND p.fk_soc = s.rowid";
+//        $sql .= " AND p.entity IN (" . getEntity('supplier_proposal') . ")";
+//        $sql .= " AND pd.fk_product = " . $this->id;
+//        if (!$user->rights->societe->client->voir && !$socid)
+//            $sql .= " AND p.fk_soc = sc.fk_soc AND sc.fk_user = " . $user->id;
+//        //$sql.= " AND pr.fk_statut != 0";
+//        if ($socid > 0)
+//            $sql .= " AND p.fk_soc = " . $socid;
+//
+//        $result = $this->db->db->query($sql);
+//        if ($result) {
+//            $obj = $this->db->db->fetch_object($result);
+//            $stats = array(
+//                'id'        => 'Bimp_PropalFourn',
+//                'name'      => 'Propositions commerciales fournisseurs',
+//                'nb_object' => $obj->nb_suppliers,
+//                'nb_ref'    => $obj->nb,
+//                'qty'       => $obj->qty ? $obj->qty : 0
+//            );
+//            return $stats;
+//        } else {
+//            $this->error = $this->db->db->error();
+//            return -1;
+//        }
+//    }
 
     function load_stats_commande($socid = 0, $filtrestatut = '', $forVirtualStock = 0)
     {

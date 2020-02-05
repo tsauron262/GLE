@@ -14,11 +14,31 @@ echo '<body>';
 
 BimpCore::displayHeaderFiles();
 
-global $db;
+global $db, $user;
+
+if (!BimpObject::objectLoaded($user)) {
+    echo BimpRender::renderAlerts('Aucun utilisateur connecté');
+    exit;
+}
+
+if (!$user->admin) {
+    echo BimpRender::renderAlerts('Seuls les admin peuvent exécuter ce script');
+}
+
 $bdb = new BimpDb($db);
 
+if (!(int) BimPTools::getValue('exec', 0)) {
+    echo 'Desc <br/>';
+
+    $path = pathinfo(__FILE__);
+    echo '<a href="' . DOL_URL_ROOT . '/bimpcore/scripts/' . $path['basename'] . '?exec=1" class="btn btn-default">';
+    echo 'Lancer';
+    echo '</a>';
+    exit;
+}
 
 // Corps du script
+
 
 
 echo '<br/>FIN';

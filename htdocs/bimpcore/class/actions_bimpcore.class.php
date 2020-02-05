@@ -38,6 +38,12 @@ class ActionsBimpcore
         BimpTools::changeBimpObjectId($parameters['soc_origin'], $parameters['soc_dest'], 'bimpcore', 'Bimp_Client');
         BimpTools::changeBimpObjectId($parameters['soc_origin'], $parameters['soc_dest'], 'bimpcore', 'Bimp_Fournisseur');
         BimpTools::changeDolObjectId($parameters['soc_origin'], $parameters['soc_dest'], 'societe');
+        
+        $soc1 = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $parameters['soc_origin']);
+        $soc2 = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $parameters['soc_dest']);
+        $text = "Societe ".$soc1->getData('nom').' ('.$soc1->getData('code_compta').') fusionné dans '.$soc2->getData('nom').' ('.$soc2->getData('code_compta').')';
+        
+        mailSyn2('Fusion tier', 'tommy@bimp.fr, comptamaugio@bimp.fr', null, $text);
 
         return 0;
     }

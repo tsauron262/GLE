@@ -1,6 +1,7 @@
 <?php
 
 require_once DOL_DOCUMENT_ROOT . '/core/triggers/dolibarrtriggers.class.php';
+require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 
 /**
  *  Class of triggers for demo module

@@ -42,7 +42,7 @@ if(stripos($result->header->reportinformation->reporttype, "Error") !== false){
 }
 else{
     if($mode != "xml")
-        echo getJsonReduit($result);
+        echo getJsonReduit($result, $siret, $siren);
     else{
         header("Content-type: text/xml");
         print_r($returnData);die();
@@ -51,7 +51,7 @@ else{
 
 
 
-function getJsonReduit($result){
+function getJsonReduit($result, $siret, $siren){
     $summary = $result->body->company->summary;
     $base = $result->body->company->baseinformation;
     $branches = $base->branches->branch;

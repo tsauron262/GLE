@@ -31,10 +31,17 @@ objects:
     droitUser:
         instance: 
             bimp_object: Bimp_User_Rights
+            
     droitGroupUser:
         instance: 
             bimp_object: Bimp_UserGroup_Rights
             
+    lists_configs: 
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: ListConfig
+                
 sections:
     - type: tabs
       tabs: 
@@ -103,6 +110,15 @@ sections:
                           params: 
                             - renderRightsTab
                             - droit
+                            
+        lists_configs: 
+            label: Configuration des listes
+            sections: 
+                - type: list
+                  list: 
+                      panel: 1
+                      object: lists_configs
+                      name: globale
                         
         testSpeed:
             label: Test SPEED

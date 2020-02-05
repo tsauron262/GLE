@@ -83,14 +83,6 @@ objects:
         instance: 
             bimp_object: BS_Issue
             
-#    diagnostics: 
-#        relation: hasMany
-#        delete: 1
-#        instance: 
-#            bimp_object: 
-#                module: bimpapple
-#                name: GSX_Diagnostic
-            
 associations: 
     propales:
         object: propal
@@ -228,9 +220,6 @@ fields:
         label: Facture
         type: id_object
         object: facture
-#    date_problem: 
-#        label: Date problème
-#        type: datetime
     date_close: 
         label: Date / Heure Fin
         type: datetime

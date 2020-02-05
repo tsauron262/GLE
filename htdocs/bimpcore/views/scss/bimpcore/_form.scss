@@ -363,6 +363,15 @@ select.switch {
                 0 0 0 0 rgba(#4c6,.7) inset;
         }
     }
+    & + span + .toggle-slider.disabled {
+        &:before {
+            display:none;
+        }
+        
+        &:after {
+            display:none;
+        }
+    }
     &:checked {
         & + span {
             color: $gray;
@@ -740,6 +749,14 @@ input[type=text].large_input {
     border-left: 1px dotted #B4B4B4;
 }
 
+/*JSON Inputs*/
+
+.bimp_json_input_value {
+    .bimp_json_input_title {
+        font-size: 13px;
+        font-weight: bold;
+    }
+}
 /*Free Forms*/
 
 .freeForm {

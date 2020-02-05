@@ -153,7 +153,7 @@ class BE_Place extends BimpObject
                     if ($with_type) {
                         $html .= 'Client: ';
                     }
-                    $html .= $this->displayData('id_client', 'nom_url');
+                    $html .= $this->displayData('id_client', 'nom_url', false);
                     break;
 
                 case self::BE_PLACE_ENTREPOT:

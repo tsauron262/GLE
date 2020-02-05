@@ -2629,26 +2629,12 @@ class Bimp_Facture extends BimpComm
             // Classemement "facturé" des commandes et propales: 
             $facturee = true;
             $this->dol_object->fetchObjectLinked();
+
             if (isset($this->dol_object->linkedObjects['commande'])) {
                 foreach ($this->dol_object->linkedObjects['commande'] as $comm) {
-                    $facturee = false;
-                    $totalCom = $comm->total_ttc;
-                    $totalFact = 0;
-                    $comm->fetchObjectLinked();
-                    if (isset($comm->linkedObjects['facture'])) {
-                        foreach ($comm->linkedObjects['facture'] as $fact) {
-                            $totalFact += $fact->total_ttc;
-                        }
-                    }
-                    $diff = $totalCom - $totalFact;
-                    if ($diff < 0.02 && $diff > -0.02) {
-                        $facturee = true;
-                        $comm->classifybilled($user);
-                    }
-                    if (isset($comm->linkedObjects['propal']) && $facturee) {
-                        foreach ($comm->linkedObjects['propal'] as $prop) {
-                            $prop->classifybilled($user);
-                        }
+                    $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $comm->id);
+                    if (BimpObject::objectLoaded($commande)) {
+                        $commande->checkInvoiceStatus();
                     }
                 }
             }
@@ -2767,7 +2753,7 @@ class Bimp_Facture extends BimpComm
             'ref_client'        => $this->getData('ref_client'),
             'datef'             => $this->getData('datef'),
             'fk_account'        => (int) $this->getData('fk_account'),
-            'fk_cond_reglement' => (int) $this->getData('fk_cond_reglement')
+            'fk_cond_reglement' => (int) $this->getData('fk_cond_reglement'),
         ));
 
         $avoir->dol_object->fk_delivery_address = $this->dol_object->fk_delivery_address;
@@ -3844,7 +3830,9 @@ class Bimp_Facture extends BimpComm
                 }
 
                 // Copie des contacts: 
-                $this->copyContactsFromOrigin($facture, $warnings);
+                if (BimpObject::objectLoaded($facture)) {
+                    $this->copyContactsFromOrigin($facture, $warnings);
+                }
                 break;
 
             case Facture::TYPE_STANDARD:

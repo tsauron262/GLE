@@ -396,8 +396,7 @@ function saveListFilters($button, filters_id, id_list_filters) {
                     obj_module: $filters.data('module'),
                     obj_name: $filters.data('object_name'),
                     panel_name: $filters.data('name'),
-                    filters: filters,
-                    owner_type: 2
+                    filters: filters
                 }
             }
         }, 'Enregistrer les filtres actuels');

@@ -17,23 +17,27 @@ class InterfacePostProcess extends BimpCommTriggers
         $bimpObject = $this->getBimpCommObject($action, $object, $object_name, $action_name, $warnings);
 
         if (BimpObject::objectLoaded($bimpObject)) {
-            $obj_errors = BimpTools::getErrorsFromDolObject($object);
+            $obj_errors = BimpTools::getDolEventsMsgs(array('errors'), false);
             if (empty($obj_errors)) {
                 switch ($action_name) {
                     case 'CREATE':
-                        $errors = $bimpObject->onCreate($warnings);
+                        if(method_exists($bimpObject, 'onCreate'))
+                            $errors = $bimpObject->onCreate($warnings);
                         break;
 
                     case 'VALIDATE':
-                        $errors = $bimpObject->onValidate($warnings);
+                        if(method_exists($bimpObject, 'onValidate'))
+                            $errors = $bimpObject->onValidate($warnings);
                         break;
 
                     case 'UNVALIDATE':
-                        $errors = $bimpObject->onUnvalidate($warnings);
+                        if(method_exists($bimpObject, 'onUnvalidate'))
+                            $errors = $bimpObject->onUnvalidate($warnings);
                         break;
 
                     case 'DELETE':
-                        $errors = $bimpObject->onDelete($warnings);
+                        if(method_exists($bimpObject, 'onDelete'))
+                            $errors = $bimpObject->onDelete($warnings);
                         break;
                 }
 

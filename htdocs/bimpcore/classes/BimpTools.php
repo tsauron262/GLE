@@ -237,7 +237,7 @@ class BimpTools
         return '/test2/public/theme/common/nophoto.png';
     }
 
-    public static function getErrorsFromDolObject($object, $errors = null, $langs = null, &$warnings = array())
+    public static function getErrorsFromDolObject($object, $errors = null, $langs = null, &$warnings = array(), $with_events = false)
     {
         if (is_null($langs)) {
             global $langs;
@@ -265,8 +265,10 @@ class BimpTools
             }
         }
 
-        $errors = array_merge($errors, self::getDolEventsMsgs(array('errors'), false));
-        $warnings = array_merge($warnings, self::getDolEventsMsgs(array('warnings'), false));
+        if ($with_events) {
+            $errors = array_merge($errors, self::getDolEventsMsgs(array('errors'), false));
+            $warnings = array_merge($warnings, self::getDolEventsMsgs(array('warnings'), false));
+        }
 
         return $errors;
     }
@@ -1904,6 +1906,25 @@ class BimpTools
         }
 
         return $array;
+    }
+
+    public static function getMaxArrayDepth($array)
+    {
+        $max_depth = 1;
+
+        if (is_array($array)) {
+            foreach ($array as $value) {
+                if (is_array($value)) {
+                    $depth = self::getMaxArrayDepth($value) + 1;
+
+                    if ($depth > $max_depth) {
+                        $max_depth = $depth;
+                    }
+                }
+            }
+        }
+
+        return $max_depth;
     }
 
     // Divers:

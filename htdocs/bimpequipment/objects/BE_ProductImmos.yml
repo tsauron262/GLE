@@ -100,6 +100,9 @@ lists:
         configurable: 1
         filters_panel: immos
         filters_panel_open: 1
+        filters_panel_values: 
+            fields: 
+                
         sort_field: rowid
         sort_way: asc
         n: 10

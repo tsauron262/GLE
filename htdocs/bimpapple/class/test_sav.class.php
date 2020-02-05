@@ -326,7 +326,11 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
             $equipment = BimpObject::getInstance('bimpequipment', 'Equipment');
 
             $rows = $equipment->getList(array(
-                'imei' => ''
+                'imei'    => '',
+                'serial'  => array(
+                            'operator' => '!=',
+                            'value'    => '0'
+                          )
                     ), $nb, 1, 'id', 'desc', 'array', array('id', 'serial'));
 
             if (!empty($rows)) {

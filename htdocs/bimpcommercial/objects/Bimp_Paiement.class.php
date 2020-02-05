@@ -40,9 +40,8 @@ class Bimp_Paiement extends BimpObject
     }
 
     // Getters booléens: 
-
-    public function isEditable($force_edit = false, &$errors = array())
-    {
+    
+    public function isNormalementEditable($force_edit = false, &$errors = array()){
         if ($this->isLoaded()) {
             if ($this->getData('exported') == 1) {
                 $errors[] = 'Paiement exporté en compta';
@@ -61,6 +60,18 @@ class Bimp_Paiement extends BimpObject
                     }
                 }
             }
+        }
+        return 1;
+    }
+
+    public function isEditable($force_edit = false, &$errors = array())
+    {
+        if ($this->isLoaded()) {
+            global $user;
+            if($user->rights->bimpcommercial->adminPaiement)
+                return 1;
+            
+            return $this->isNormalementEditable($force_edit, $errors);
         }
 
         return 1;
@@ -635,6 +646,11 @@ class Bimp_Paiement extends BimpObject
             if ($this->useCaisse) {
                 BimpObject::loadClass('bimpcaisse', 'BC_Caisse');
                 $errors = array_merge($errors, BC_Caisse::onPaiementDelete($this->id, $this->dol_object->type_code, (float) $this->getData('amount')));
+            }
+            
+            if(!$this->isNormalementEditable()){//mode forcage
+                global $user;
+                mailSyn2 ('Suppression paiement forcée', 'tommy@bimp.fr, comptamaugio@bimp.fr', null, 'Bonjour un paiement '.$this->getData('ref'). ' a été supprimé par '.$user->getNomUrl(1). ($this->getData('exported')? ' Attention ce paiement été exporté' : ''));
             }
         }
 

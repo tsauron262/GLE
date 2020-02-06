@@ -227,16 +227,17 @@ fields:
         type: string
         dol_extra_field: 1
         
-#    secteuractivite:
-#        label: Secteur d'activité
-#        type: int
-#        values: 
-#            callback: 
-#               method: getListExtrafield
-#               params:
-#                   - secteuractivite
-#                   - societe
-#        dol_extra_field: 1
+    secteuractivite:
+        label: Secteur d'activité
+        type: int
+        values: 
+            callback: 
+               method: getListExtrafield
+               params:
+                   - secteuractivite
+                   - societe
+        dol_extra_field: 1
+        default_value: 0
         
 #    *** Champs non gérés: ***
 #    entity

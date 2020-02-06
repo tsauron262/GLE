@@ -483,6 +483,7 @@ filters_panel:
                 items: 
                     0: NON
                     1: OUI  
+                exclude_btn: 0
             date_immo: 
                 label: Date 1ère immobilisation
                 field: date_immo
@@ -516,6 +517,7 @@ filters_panel:
                 data_type: date
                 label: Date de départ (emplacement)
                 type: date_range
+                exclude_btn: 0
             
 lists_cols: 
     id:

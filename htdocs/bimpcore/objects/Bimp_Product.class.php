@@ -576,7 +576,7 @@ class Bimp_Product extends BimpObject
         return $buttons;
     }
 
-    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array())
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
     {
         switch ($field_name) {
             case 'categ1':
@@ -589,10 +589,12 @@ class Bimp_Product extends BimpObject
                     'on'    => $alias . '.fk_product = a.rowid'
                 );
                 $filters['cat_prod.fk_categorie'] = array(
-                    'in' => $values
+                    ($excluded ? 'not_' : '') . 'in' => $values
                 );
                 break;
         }
+        
+        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
     }
 
     public function getActionsButtons()

@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bimpcore_list_filters` ADD `excluded` TEXT NOT NULL DEFAULT '' AFTER `filters`; 

@@ -40,8 +40,9 @@ class Bimp_Paiement extends BimpObject
     }
 
     // Getters booléens: 
-    
-    public function isNormalementEditable($force_edit = false, &$errors = array()){
+
+    public function isNormalementEditable($force_edit = false, &$errors = array())
+    {
         if ($this->isLoaded()) {
             if ($this->getData('exported') == 1) {
                 $errors[] = 'Paiement exporté en compta';
@@ -68,9 +69,9 @@ class Bimp_Paiement extends BimpObject
     {
         if ($this->isLoaded()) {
             global $user;
-            if($user->rights->bimpcommercial->adminPaiement)
+            if ($user->rights->bimpcommercial->adminPaiement)
                 return 1;
-            
+
             return $this->isNormalementEditable($force_edit, $errors);
         }
 
@@ -171,7 +172,7 @@ class Bimp_Paiement extends BimpObject
         $filters['facture.fk_soc'] = $value;
     }
 
-    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array())
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
     {
         switch ($field_name) {
             case 'id_facture':
@@ -183,7 +184,7 @@ class Bimp_Paiement extends BimpObject
                     );
                 }
                 $filters['pf.fk_facture'] = array(
-                    'in' => $values
+                    ($excluded ? 'not_' : '') . 'in' => $values
                 );
                 break;
 
@@ -203,12 +204,12 @@ class Bimp_Paiement extends BimpObject
                     );
                 }
                 $filters['facture.fk_soc'] = array(
-                    'in' => $values
+                    ($excluded ? 'not_' : '') . 'in' => $values
                 );
                 break;
         }
 
-        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors);
+        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
     }
 
     public function getCustomFilterValueLabel($field_name, $value)
@@ -647,10 +648,10 @@ class Bimp_Paiement extends BimpObject
                 BimpObject::loadClass('bimpcaisse', 'BC_Caisse');
                 $errors = array_merge($errors, BC_Caisse::onPaiementDelete($this->id, $this->dol_object->type_code, (float) $this->getData('amount')));
             }
-            
-            if(!$this->isNormalementEditable()){//mode forcage
+
+            if (!$this->isNormalementEditable()) {//mode forcage
                 global $user;
-                mailSyn2 ('Suppression paiement forcée', 'tommy@bimp.fr, comptamaugio@bimp.fr', null, 'Bonjour un paiement '.$this->getData('ref'). ' a été supprimé par '.$user->getNomUrl(1). ($this->getData('exported')? ' Attention ce paiement été exporté' : ''));
+                mailSyn2('Suppression paiement forcée', 'tommy@bimp.fr, comptamaugio@bimp.fr', null, 'Bonjour un paiement ' . $this->getData('ref') . ' a été supprimé par ' . $user->getNomUrl(1) . ($this->getData('exported') ? ' Attention ce paiement été exporté' : ''));
             }
         }
 

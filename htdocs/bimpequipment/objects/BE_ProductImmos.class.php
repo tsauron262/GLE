@@ -56,8 +56,9 @@ class BE_ProductImmos extends Bimp_Product
         return $filters;
     }
 
-    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array())
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
     {
+        // Tous les boutons Exclure sont désactivés 
         switch ($field_name) {
             case 'place_position':
                 if (is_array($values) && !empty($values)) {
@@ -248,6 +249,8 @@ class BE_ProductImmos extends Bimp_Product
                 }
                 break;
         }
+        
+        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
     }
 
     public function getPlacesJoins(&$joins = array())

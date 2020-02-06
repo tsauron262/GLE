@@ -616,7 +616,7 @@ class BimpComm extends BimpDolObject
         return parent::getCustomFilterValueLabel($field_name, $value);
     }
 
-    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array())
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
     {
         switch ($field_name) {
             case 'id_product':
@@ -627,8 +627,12 @@ class BimpComm extends BimpDolObject
                     'table' => $line::$dol_line_table,
                     'on'    => $alias . '.' . $line::$dol_line_parent_field . ' = a.' . $this->getPrimary()
                 );
+                $key = 'in';
+                if ($excluded) {
+                    $key = 'not_in';
+                }
                 $filters[$alias . '.fk_product'] = array(
-                    'in' => $values
+                    $key => $values
                 );
                 break;
 
@@ -663,17 +667,26 @@ class BimpComm extends BimpDolObject
 
                 if (!empty($ids)) {
                     $sql = '(typecont.element = \'' . static::$dol_module . '\' AND typecont.source = \'internal\'';
-                    $sql .= ' AND typecont.code = \'SALESREPFOLL\' AND elemcont.fk_socpeople IN (' . implode(',', $ids) . '))';
+                    $sql .= ' AND typecont.code = \'SALESREPFOLL\' AND elemcont.fk_socpeople ' . ($excluded ? 'NOT ' : '') . 'IN (' . implode(',', $ids) . '))';
+
+                    if (!$empty && $excluded) {
+                        $sql .= ' OR (SELECT COUNT(ec2.fk_socpeople) FROM ' . MAIN_DB_PREFIX . 'element_contact ec2';
+                        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'c_type_contact tc2 ON tc2.rowid = ec2.fk_c_type_contact';
+                        $sql .= ' WHERE tc2.element = \'' . static::$dol_module . '\'';
+                        $sql .= ' AND tc2.source = \'internal\'';
+                        $sql .= ' AND tc2.code = \'SALESREPFOLL\'';
+                        $sql .= ' AND ec2.element_id = a.rowid) = 0';
+                    }
                 }
 
                 if ($empty) {
-                    $sql .= ($sql ? ' OR ' : '');
-                    $sql = '(SELECT COUNT(ec2.fk_socpeople) FROM ' . MAIN_DB_PREFIX . 'element_contact ec2';
+                    $sql .= ($sql ? ($excluded ? ' AND ' : ' OR ') : '');
+                    $sql .= '(SELECT COUNT(ec2.fk_socpeople) FROM ' . MAIN_DB_PREFIX . 'element_contact ec2';
                     $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'c_type_contact tc2 ON tc2.rowid = ec2.fk_c_type_contact';
                     $sql .= ' WHERE tc2.element = \'' . static::$dol_module . '\'';
                     $sql .= ' AND tc2.source = \'internal\'';
                     $sql .= ' AND tc2.code = \'SALESREPFOLL\'';
-                    $sql .= ' AND ec2.element_id = a.rowid) = 0';
+                    $sql .= ' AND ec2.element_id = a.rowid) ' . ($excluded ? '>' : '=') . ' 0';
                 }
 
                 if ($sql) {
@@ -685,7 +698,7 @@ class BimpComm extends BimpDolObject
                 break;
         }
 
-        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors);
+        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
     }
 
     // Getters données: 
@@ -2427,7 +2440,7 @@ class BimpComm extends BimpDolObject
                 if (!array_key_exists($id_dol_line, $bimp_lines) && method_exists($bimp_line, 'createFromDolLine')) {
                     $objectLine = BimpObject::getInstance($bimp_line->module, $bimp_line->object_name);
                     $objectLine->parent = $this;
-                    $line_errors = $objectLine->createFromDolLine((int) $this->id, $dol_line, $warnings);
+                    $line_errors = $objectLine->createFromDolLine((int) $this->id, $dol_line);
                     if (count($line_errors)) {
                         $errors[] = BimpTools::getMsgFromArray($line_errors, 'Des erreurs sont survenues lors de la récupération des données pour la ligne n° ' . $i);
                     }
@@ -4058,5 +4071,48 @@ class BimpComm extends BimpDolObject
         parent::onSave($errors, $warnings);
 
         $this->processRemisesGlobales();
+    }
+
+    // Méthodes statiques: 
+
+    public static function checkAllObjectLine($id_product, &$sortie = '', $nbMax = 10)
+    {
+        global $db;
+        $tabInfo = $errors = array();
+        $sortie = '';
+
+        $tabInfo[] = array('fk_propal', 'llx_propaldet', array('llx_bimp_propal_line', 'llx_bs_sav_propal_line'), 'Bimp_Propal');
+        $tabInfo[] = array('fk_commande', 'llx_commandedet', 'llx_bimp_commande_line', 'Bimp_Commande');
+        $tabInfo[] = array('fk_facture', 'llx_facturedet', 'llx_bimp_facture_line', 'Bimp_Facture');
+        $tabInfo[] = array('fk_commande', 'llx_commande_fournisseurdet', 'llx_bimp_commande_fourn_line', 'Bimp_CommandeFourn');
+        $tabInfo[] = array('fk_facture_fourn', 'llx_facture_fourn_det', 'llx_bimp_facture_fourn_line', 'Bimp_FactureFourn');
+
+        foreach ($tabInfo as $info) {
+            $i = 0;
+            if (!is_array($info[2]))
+                $info[2] = array($info[2]);
+            $where = array();
+            foreach ($info[2] as $table)
+                $where[] = 'rowid NOT IN (SELECT id_line FROM ' . $table . ')';
+            $req = 'SELECT DISTINCT(`' . $info[0] . '`) as id FROM `' . $info[1] . '` WHERE ' . implode(' AND ', $where) . ' ';
+
+            if ($id_product > 0)
+                $req .= ' AND fk_product = ' . $id_product;
+
+            $sql = $db->query($req);
+            $tot = $db->num_rows($sql);
+            $sql = $db->query($req . ' LIMIT 0,' . $nbMax);
+            while ($ln = $db->fetch_object($sql)) {
+                $comm = BimpCache::getBimpObjectInstance('bimpcommercial', $info[3], $ln->id);
+                if ($comm->isLoaded()) {
+                    $errors = array_merge($errors, $comm->checkLines());
+                    $i++;
+                }
+
+                BimpCache::$cache = array();
+            }
+            $sortie .= '<br/>fin ' . $i . ' / ' . $tot . ' corrections de ' . $info[1];
+        }
+        return $errors;
     }
 }

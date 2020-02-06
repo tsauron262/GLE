@@ -103,6 +103,7 @@ class BC_List extends BC_Panel
                         $this->userConfig = BimpCache::getBimpObjectInstance('bimpcore', 'ListConfig', (int) $id_config);
                         if (BimpObject::objectLoaded($this->userConfig)) {
                             $this->userConfig->setAsCurrent();
+                            $full_reload = true;
                         }
                     }
                 }
@@ -383,6 +384,11 @@ class BC_List extends BC_Panel
                 'children' => array()
             );
 
+            $excluded_values = array(
+                'fields'    => array(),
+                'children' => array()
+            );
+
             foreach (BimpTools::getValue('filters_panel_values/fields', array()) as $field_name => $filter) {
                 foreach ($this->bc_filtersPanel->params['filters'] as $key => $params) {
                     if (isset($params['field']) && $params['field'] === $field_name && !$params['child']) {
@@ -391,6 +397,9 @@ class BC_List extends BC_Panel
                         }
                         if (isset($filter['values'])) {
                             $values['fields'][$field_name] = $filter['values'];
+                        }
+                        if (isset($filter['excluded_values'])) {
+                            $excluded_values['fields'][$field_name] = $filter['excluded_values'];
                         }
                         continue 2;
                     }
@@ -410,13 +419,16 @@ class BC_List extends BC_Panel
                             if (isset($filter['values'])) {
                                 $values['children'][$child][$field_name] = $filter['values'];
                             }
+                            if (isset($filter['excluded_values'])) {
+                                $excluded_values['children'][$child][$field_name] = $filter['excluded_values'];
+                            }
                             continue 2;
                         }
                     }
                 }
             }
 
-            $this->bc_filtersPanel->setFiltersValues($values);
+            $this->bc_filtersPanel->setFiltersValues($values, $excluded_values);
         } elseif ((int) $this->params['id_default_filters']) {
             $this->bc_filtersPanel->loadSavedValues((int) $this->params['id_default_filters']);
         } elseif (!empty($this->params['filters_panel_values'])) {

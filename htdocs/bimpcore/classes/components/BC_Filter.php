@@ -8,6 +8,7 @@ class BC_Filter extends BimpComponent
     public static $config_required = false;
     public $identifier = '';
     public $values = array();
+    public $excluded_values = array();
     public $is_default = false;
     public $data = array();
     public static $type_params_def = array(
@@ -27,13 +28,18 @@ class BC_Filter extends BimpComponent
         'j' => 'D'
     );
 
-    public function __construct(BimpObject $object, $params, $values = array(), $path = '')
+    public function __construct(BimpObject $object, $params, $values = array(), $path = '', $excluded_values = array())
     {
         $this->params_def['type'] = array();
         $this->params_def['label'] = array();
         $this->params_def['open'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['default_values'] = array('data_type' => 'array', 'compile' => true, 'default' => array());
+        $this->params_def['default_excluded_values'] = array('data_type' => 'array', 'compile' => true, 'default' => array());
+        $this->params_def['add_btn'] = array('data_type' => 'bool', 'default' => 1);
+        $this->params_def['exclude_btn'] = array('data_type' => 'bool', 'default' => 1);
+
         $this->values = $values;
+        $this->excluded_values = $excluded_values;
 
         global $current_bc;
         if (!is_object($current_bc)) {
@@ -44,8 +50,9 @@ class BC_Filter extends BimpComponent
 
         parent::__construct($object, $params['name'], $path);
 
-        if (empty($values) && !empty($this->params['default_values'])) {
+        if (empty($values) && empty($this->excluded_values) && (!empty($this->params['default_values']) || !empty($this->params['default_excluded_values']))) {
             $this->values = $this->params['default_values'];
+            $this->excluded_values = $this->params['default_excluded_values'];
             $this->is_default = true;
         }
 
@@ -143,7 +150,7 @@ class BC_Filter extends BimpComponent
         return array();
     }
 
-    public static function getRangeSqlFilter($value, &$errors = array(), $is_dates = false)
+    public static function getRangeSqlFilter($value, &$errors = array(), $is_dates = false, $excluded = false)
     {
         $filter = array();
 
@@ -159,20 +166,37 @@ class BC_Filter extends BimpComponent
             }
             if (isset($value['min']) || isset($value['max'])) {
                 if ($value['min'] !== '' && $value['max'] === '') {
-                    $filter = array(
-                        'operator' => '>=',
-                        'value'    => $value['min']
-                    );
+                    if ($excluded) {
+                        $filter = array(
+                            'operator' => '<=',
+                            'value'    => $value['min']
+                        );
+                    } else {
+                        $filter = array(
+                            'operator' => '>=',
+                            'value'    => $value['min']
+                        );
+                    }
                 } elseif ($value['max'] !== '' && $value['min'] === '') {
-                    $filter = array(
-                        'operator' => '<=',
-                        'value'    => $value['max']
-                    );
+                    if ($excluded) {
+                        $filter = array(
+                            'operator' => '>=',
+                            'value'    => $value['max']
+                        );
+                    } else {
+                        $filter = array(
+                            'operator' => '<=',
+                            'value'    => $value['max']
+                        );
+                    }
                 } else {
                     $filter = array(
                         'min' => $value['min'],
                         'max' => $value['max']
                     );
+                    if ($excluded) {
+                        $filter['not'] = 1;
+                    }
                 }
             } else {
                 $errors[] = 'Valeurs minimales et maximales absentes';
@@ -184,14 +208,18 @@ class BC_Filter extends BimpComponent
         return $filter;
     }
 
-    public static function getValuePartSqlFilter($value, $part_type)
+    public static function getValuePartSqlFilter($value, $part_type, $excluded = false)
     {
         $value = (string) $value;
         if ($value !== '') {
-            return array(
+            $filter = array(
                 'part_type' => $part_type,
                 'part'      => $value
             );
+            if ($excluded) {
+                $filter['not'] = 1;
+            }
+            return $filter;
         }
 
         return array();
@@ -407,6 +435,7 @@ class BC_Filter extends BimpComponent
         if (!is_object($current_bc)) {
             $current_bc = null;
         }
+
         $prev_bc = $current_bc;
         $current_bc = $this;
 
@@ -445,11 +474,13 @@ class BC_Filter extends BimpComponent
         }
 
         $html .= '<div class="bimp_filter_values_container"' . ($values_hidden ? ' style="display: none"' : '') . '>';
-//        if (in_array($this->params['type'], array('value', 'user', 'value_part', 'range', 'date_range'))) {
         foreach ($this->values as $value) {
-            $html .= $this->renderFilterValue($value);
+            $html .= $this->renderFilterValue($value, false);
         }
-//        }
+
+        foreach ($this->excluded_values as $value) {
+            $html .= $this->renderFilterValue($value, true);
+        }
         $html .= '</div>';
 
         $html .= '</div>';
@@ -458,7 +489,7 @@ class BC_Filter extends BimpComponent
         return $html;
     }
 
-    public function renderFilterValue($value)
+    public function renderFilterValue($value, $excluded = false)
     {
         if (!$this->params['show']) {
             return '';
@@ -481,12 +512,12 @@ class BC_Filter extends BimpComponent
             }
 
             if ($this->is_default) {
-                $html .= '<div class="bimp_filter_value_default">';
+                $html .= '<div class="bimp_filter_value_default' . ($excluded ? ' excluded' : '') . '">';
                 $html .= 'Par défaut: <br/>';
                 $html .= $label;
                 $html .= '</div>';
             } else {
-                $html .= '<div class="bimp_filter_value" data-value="' . htmlentities($value) . '" onclick="editBimpFilterValue($(this))">';
+                $html .= '<div class="bimp_filter_value' . ($excluded ? ' excluded' : '') . '" data-value="' . htmlentities($value) . '" onclick="editBimpFilterValue($(this))">';
                 $html .= '<span class="bimp_filter_value_remove_btn" onclick="removeBimpFilterValue(event, $(this));">';
                 $html .= BimpRender::renderIcon('fas_times');
                 $html .= '</span>';
@@ -564,9 +595,16 @@ class BC_Filter extends BimpComponent
             $html .= '</div>';
 
             $html .= '<div style="text-align: right; margin-top: 2px">';
-            $html .= '<button type="button" class="btn btn-default btn-small" onclick="addFieldFilterDateRangerPeriod($(this))">';
-            $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Ajouter';
-            $html .= '</button>';
+            if ((int) $this->params['exclude_btn']) {
+                $html .= '<button type="button" class="btn btn-default-danger btn-small" onclick="addFieldFilterDateRangerPeriod($(this), true)">';
+                $html .= BimpRender::renderIcon('fas_times-circle', 'iconLeft') . 'Exclure';
+                $html .= '</button>';
+            }
+            if ((int) $this->params['add_btn']) {
+                $html .= '<button type="button" class="btn btn-default btn-small" onclick="addFieldFilterDateRangerPeriod($(this), false)">';
+                $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Ajouter';
+                $html .= '</button>';
+            }
             $html .= '</div>';
 
             $html .= '</div>';

@@ -40,7 +40,8 @@ filters_panels:
                 custom: 1
                 label: Position emplacement
                 field: place_position
-                type: range                
+                type: range             
+                exclude_btn: 0
             place_type:
                 custom: 1
                 label: Type emplacement
@@ -48,6 +49,7 @@ filters_panels:
                 type: check_list
                 items: 
                     array: placeTypes
+                exclude_btn: 0
             place_entrepot: 
                 custom: 1
                 label: Entrepôt emplacement
@@ -55,6 +57,7 @@ filters_panels:
                 type: value
                 input: 
                     type: search_entrepot
+                exclude_btn: 0
             place_user: 
                 custom: 1
                 label: Utilisateur emplacement
@@ -62,6 +65,7 @@ filters_panels:
                 type: user
                 input: 
                     type: search_user
+                exclude_btn: 0
             place_client: 
                 custom: 1
                 label: Client emplacement
@@ -70,23 +74,27 @@ filters_panels:
                 input: 
                     type: search_societe
                     societe_type: customer
+                exclude_btn: 0
             place_name: 
                 custom: 1
                 label: Nom libre emplacement
                 field: place_name
                 type: value_part
+                exclude_btn: 0
             place_date: 
                 custom: 1
                 label: Date arrivée emplacement
                 field: place_date
                 data_type: date
                 type: date_range
+                exclude_btn: 0
             place_date_end:
                 custom: 1
                 label: Date de départ emplacement
                 field: place_date_end
                 data_type: date
                 type: date_range
+                exclude_btn: 0
                 
 lists_cols: 
     qty_immos: 

@@ -913,7 +913,7 @@ class Bimp_Facture extends BimpComm
         return $buttons;
     }
 
-    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array())
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
     {
         switch ($field_name) {
             case 'revals_brouillons':
@@ -927,18 +927,25 @@ class Bimp_Facture extends BimpComm
                     case 'revals_ok': $status = '1';
                         break;
                 }
-                $or_field = array();
+                $revals_filters = array();
                 foreach ($values as $value) {
-                    $or_field[] = BC_Filter::getRangeSqlFilter($value, $errors);
+                    $revals_filters[] = BC_Filter::getRangeSqlFilter($value, $errors, false, $excluded);
                 }
 
-                if (!empty($or_field)) {
+                if (!empty($revals_filters)) {
                     $sql = '(SELECT SUM(reval.amount * reval.qty) FROM ' . MAIN_DB_PREFIX . 'bimp_revalorisation reval';
                     $sql .= ' WHERE reval.id_facture = a.rowid';
                     $sql .= ' AND reval.status IN (' . $status . '))';
-                    $filters[$sql] = array(
-                        'or_field' => $or_field
-                    );
+
+                    if ($excluded) {
+                        $filters[$sql] = array(
+                            'and' => $revals_filters
+                        );
+                    } else {
+                        $filters[$sql] = array(
+                            'or_field' => $revals_filters
+                        );
+                    }
                 }
                 break;
 
@@ -950,12 +957,12 @@ class Bimp_Facture extends BimpComm
                 );
 
                 $filters['sav.id_user_tech'] = array(
-                    'in' => $values
+                    ($excluded ? 'not_' : '') . 'in' => $values
                 );
                 break;
         }
 
-        return parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors);
+        return parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
     }
 
     // Getters Array: 

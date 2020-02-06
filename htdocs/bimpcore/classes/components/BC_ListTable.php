@@ -1566,6 +1566,9 @@ class BC_ListTable extends BC_List
         $prev_bc = $current_bc;
         $current_bc = $this;
 
+        $this->params['n'] = 0;
+        $this->params['p'] = 1;
+        
         if (is_null($this->items)) {
             $this->fetchItems();
         }
@@ -1613,7 +1616,6 @@ class BC_ListTable extends BC_List
             return $rows;
         }
 
-
         $nb = 0;
         foreach ($this->items as $item) {
             $nb++;
@@ -1622,8 +1624,6 @@ class BC_ListTable extends BC_List
             } elseif ($nb > 2) {
                 BimpCache::$cache = $cache_mem;
             }
-
-
 
             $line = '';
             $object = BimpCache::getBimpObjectInstance($this->object->module, $this->object->object_name, (int) $item[$primary], $this->parent);

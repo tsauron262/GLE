@@ -1084,6 +1084,9 @@ class BimpTools
             if (is_array($filter)) {
                 if (isset($filter['min']) || isset($filter['max'])) {
                     if (isset($filter['min']) && (string) $filter['min'] !== '' && isset($filter['max']) && (string) $filter['max'] !== '') {
+                        if (isset($filter['not'])) {
+                            $sql .= ' NOT';
+                        }
                         $sql .= ' BETWEEN ' . (is_string($filter['min']) ? '\'' . $filter['min'] . '\'' : $filter['min']);
                         $sql .= ' AND ' . (is_string($filter['max']) ? '\'' . $filter['max'] . '\'' : $filter['max']);
                     } elseif (isset($filter['min']) && (string) $filter['min'] !== '') {
@@ -1097,8 +1100,14 @@ class BimpTools
                     $sql .= ' ' . $filter['operator'] . ' ' . (is_string($filter['value']) ? '\'' . $filter['value'] . '\'' : $filter['value']);
                 } elseif (isset($filter['part_type']) && isset($filter['part'])) {
                     $filter['part'] = addslashes($filter['part']);
+                    if (isset($filter['not']) && (int) $filter['not']) {
+                        $sql .= ' NOT';
+                    }
                     $sql .= ' LIKE \'';
                     switch ($filter['part_type']) {
+                        case 'full': 
+                            break;
+                        
                         case 'beginning':
                             $sql .= $filter['part'] . '%';
                             break;

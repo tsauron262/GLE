@@ -171,7 +171,7 @@ table.objectlistTable {
             }
         }
     }
-    
+
     & > tbody.headers_col > tr > th {
         width: 160px;
     }
@@ -703,7 +703,7 @@ td.buttons {
         margin-bottom: 5px;
         background-color: #DCDCDC;
     }
-    
+
     .bimp_filter_input_container {
         .input-group {
             width: 100%;
@@ -737,7 +737,6 @@ td.buttons {
         }
 
         .bimp_filter_value_remove_btn {
-
             margin-left: 10px;
             color: #9EC5E6;;
             cursor: pointer;
@@ -745,6 +744,22 @@ td.buttons {
 
             &:hover {
                 color: #fff;
+            }
+        }
+
+        &.excluded {
+            background-color: #A60000;
+
+            &:hover {
+                background-color: #CC2929;
+            }
+
+            .bimp_filter_value_remove_btn {
+                color: #DBAFAF;
+
+                &:hover {
+                    color: #fff;
+                }
             }
         }
     }
@@ -756,20 +771,20 @@ td.buttons {
     i.loading {
         display: none;
     }
-    
+
     .bimp_filter_date_range_period {
         font-size: 11px;
         margin-bottom: 10px;
         padding-bottom: 10px;
         border-bottom: 1px solid #7D7D7D;
-        
+
         input, select, .select2 {
             display: inline-block;
             font-size: 11px!important;
             width: auto!important;
             min-width: 30px!important;
             width: 80px!important;
-            
+
             &.qtyInput {
                 width: 30px!important;
             }

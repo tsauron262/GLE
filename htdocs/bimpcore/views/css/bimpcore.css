@@ -9500,49 +9500,224 @@ a.btn.disabled, fieldset[disabled] a.btn {
   pointer-events: none; }
 
 /* line 69, ../scss/bootstrap/_buttons.scss */
-.btn-default {
+.btn-default,
+.btn-default-secondary,
+.btn-default-success,
+.btn-default-info,
+.btn-default-warning,
+.btn-default-danger {
   color: #282828 !important;
   background-color: #fff !important;
   border-color: #ccc !important; }
   /* line 11, ../scss/bootstrap/mixins/_buttons.scss */
-  .btn-default:focus, .btn-default.focus {
+  .btn-default:focus, .btn-default.focus,
+  .btn-default-secondary:focus,
+  .btn-default-secondary.focus,
+  .btn-default-success:focus,
+  .btn-default-success.focus,
+  .btn-default-info:focus,
+  .btn-default-info.focus,
+  .btn-default-warning:focus,
+  .btn-default-warning.focus,
+  .btn-default-danger:focus,
+  .btn-default-danger.focus {
     color: #282828 !important;
     background-color: #e6e6e6 !important;
     border-color: #8c8c8c !important; }
   /* line 17, ../scss/bootstrap/mixins/_buttons.scss */
-  .btn-default:hover {
+  .btn-default:hover,
+  .btn-default-secondary:hover,
+  .btn-default-success:hover,
+  .btn-default-info:hover,
+  .btn-default-warning:hover,
+  .btn-default-danger:hover {
     color: #282828;
     background-color: #e6e6e6 !important;
     border-color: #adadad !important; }
   /* line 22, ../scss/bootstrap/mixins/_buttons.scss */
-  .btn-default:active, .btn-default.active, .open > .btn-default.dropdown-toggle {
+  .btn-default:active, .btn-default.active, .open > .btn-default.dropdown-toggle,
+  .btn-default-secondary:active,
+  .btn-default-secondary.active, .open >
+  .btn-default-secondary.dropdown-toggle,
+  .btn-default-success:active,
+  .btn-default-success.active, .open >
+  .btn-default-success.dropdown-toggle,
+  .btn-default-info:active,
+  .btn-default-info.active, .open >
+  .btn-default-info.dropdown-toggle,
+  .btn-default-warning:active,
+  .btn-default-warning.active, .open >
+  .btn-default-warning.dropdown-toggle,
+  .btn-default-danger:active,
+  .btn-default-danger.active, .open >
+  .btn-default-danger.dropdown-toggle {
     color: #282828 !important;
     background-color: #e6e6e6 !important;
     border-color: #adadad !important; }
     /* line 29, ../scss/bootstrap/mixins/_buttons.scss */
-    .btn-default:active:hover, .btn-default:active:focus, .btn-default:active.focus, .btn-default.active:hover, .btn-default.active:focus, .btn-default.active.focus, .open > .btn-default.dropdown-toggle:hover, .open > .btn-default.dropdown-toggle:focus, .open > .btn-default.dropdown-toggle.focus {
+    .btn-default:active:hover, .btn-default:active:focus, .btn-default:active.focus, .btn-default.active:hover, .btn-default.active:focus, .btn-default.active.focus, .open > .btn-default.dropdown-toggle:hover, .open > .btn-default.dropdown-toggle:focus, .open > .btn-default.dropdown-toggle.focus,
+    .btn-default-secondary:active:hover,
+    .btn-default-secondary:active:focus,
+    .btn-default-secondary:active.focus,
+    .btn-default-secondary.active:hover,
+    .btn-default-secondary.active:focus,
+    .btn-default-secondary.active.focus, .open >
+    .btn-default-secondary.dropdown-toggle:hover, .open >
+    .btn-default-secondary.dropdown-toggle:focus, .open >
+    .btn-default-secondary.dropdown-toggle.focus,
+    .btn-default-success:active:hover,
+    .btn-default-success:active:focus,
+    .btn-default-success:active.focus,
+    .btn-default-success.active:hover,
+    .btn-default-success.active:focus,
+    .btn-default-success.active.focus, .open >
+    .btn-default-success.dropdown-toggle:hover, .open >
+    .btn-default-success.dropdown-toggle:focus, .open >
+    .btn-default-success.dropdown-toggle.focus,
+    .btn-default-info:active:hover,
+    .btn-default-info:active:focus,
+    .btn-default-info:active.focus,
+    .btn-default-info.active:hover,
+    .btn-default-info.active:focus,
+    .btn-default-info.active.focus, .open >
+    .btn-default-info.dropdown-toggle:hover, .open >
+    .btn-default-info.dropdown-toggle:focus, .open >
+    .btn-default-info.dropdown-toggle.focus,
+    .btn-default-warning:active:hover,
+    .btn-default-warning:active:focus,
+    .btn-default-warning:active.focus,
+    .btn-default-warning.active:hover,
+    .btn-default-warning.active:focus,
+    .btn-default-warning.active.focus, .open >
+    .btn-default-warning.dropdown-toggle:hover, .open >
+    .btn-default-warning.dropdown-toggle:focus, .open >
+    .btn-default-warning.dropdown-toggle.focus,
+    .btn-default-danger:active:hover,
+    .btn-default-danger:active:focus,
+    .btn-default-danger:active.focus,
+    .btn-default-danger.active:hover,
+    .btn-default-danger.active:focus,
+    .btn-default-danger.active.focus, .open >
+    .btn-default-danger.dropdown-toggle:hover, .open >
+    .btn-default-danger.dropdown-toggle:focus, .open >
+    .btn-default-danger.dropdown-toggle.focus {
       color: #282828 !important;
       background-color: #d4d4d4 !important;
       border-color: #8c8c8c !important; }
   /* line 37, ../scss/bootstrap/mixins/_buttons.scss */
-  .btn-default:active, .btn-default.active, .open > .btn-default.dropdown-toggle {
+  .btn-default:active, .btn-default.active, .open > .btn-default.dropdown-toggle,
+  .btn-default-secondary:active,
+  .btn-default-secondary.active, .open >
+  .btn-default-secondary.dropdown-toggle,
+  .btn-default-success:active,
+  .btn-default-success.active, .open >
+  .btn-default-success.dropdown-toggle,
+  .btn-default-info:active,
+  .btn-default-info.active, .open >
+  .btn-default-info.dropdown-toggle,
+  .btn-default-warning:active,
+  .btn-default-warning.active, .open >
+  .btn-default-warning.dropdown-toggle,
+  .btn-default-danger:active,
+  .btn-default-danger.active, .open >
+  .btn-default-danger.dropdown-toggle {
     background-image: none; }
   /* line 45, ../scss/bootstrap/mixins/_buttons.scss */
-  .btn-default.disabled:hover, .btn-default.disabled:focus, .btn-default.disabled.focus, .btn-default[disabled]:hover, .btn-default[disabled]:focus, .btn-default[disabled].focus, fieldset[disabled] .btn-default:hover, fieldset[disabled] .btn-default:focus, fieldset[disabled] .btn-default.focus {
+  .btn-default.disabled:hover, .btn-default.disabled:focus, .btn-default.disabled.focus, .btn-default[disabled]:hover, .btn-default[disabled]:focus, .btn-default[disabled].focus, fieldset[disabled] .btn-default:hover, fieldset[disabled] .btn-default:focus, fieldset[disabled] .btn-default.focus,
+  .btn-default-secondary.disabled:hover,
+  .btn-default-secondary.disabled:focus,
+  .btn-default-secondary.disabled.focus,
+  .btn-default-secondary[disabled]:hover,
+  .btn-default-secondary[disabled]:focus,
+  .btn-default-secondary[disabled].focus, fieldset[disabled]
+  .btn-default-secondary:hover, fieldset[disabled]
+  .btn-default-secondary:focus, fieldset[disabled]
+  .btn-default-secondary.focus,
+  .btn-default-success.disabled:hover,
+  .btn-default-success.disabled:focus,
+  .btn-default-success.disabled.focus,
+  .btn-default-success[disabled]:hover,
+  .btn-default-success[disabled]:focus,
+  .btn-default-success[disabled].focus, fieldset[disabled]
+  .btn-default-success:hover, fieldset[disabled]
+  .btn-default-success:focus, fieldset[disabled]
+  .btn-default-success.focus,
+  .btn-default-info.disabled:hover,
+  .btn-default-info.disabled:focus,
+  .btn-default-info.disabled.focus,
+  .btn-default-info[disabled]:hover,
+  .btn-default-info[disabled]:focus,
+  .btn-default-info[disabled].focus, fieldset[disabled]
+  .btn-default-info:hover, fieldset[disabled]
+  .btn-default-info:focus, fieldset[disabled]
+  .btn-default-info.focus,
+  .btn-default-warning.disabled:hover,
+  .btn-default-warning.disabled:focus,
+  .btn-default-warning.disabled.focus,
+  .btn-default-warning[disabled]:hover,
+  .btn-default-warning[disabled]:focus,
+  .btn-default-warning[disabled].focus, fieldset[disabled]
+  .btn-default-warning:hover, fieldset[disabled]
+  .btn-default-warning:focus, fieldset[disabled]
+  .btn-default-warning.focus,
+  .btn-default-danger.disabled:hover,
+  .btn-default-danger.disabled:focus,
+  .btn-default-danger.disabled.focus,
+  .btn-default-danger[disabled]:hover,
+  .btn-default-danger[disabled]:focus,
+  .btn-default-danger[disabled].focus, fieldset[disabled]
+  .btn-default-danger:hover, fieldset[disabled]
+  .btn-default-danger:focus, fieldset[disabled]
+  .btn-default-danger.focus {
     background-color: #fff !important;
     border-color: #ccc !important; }
   /* line 53, ../scss/bootstrap/mixins/_buttons.scss */
-  .btn-default .badge {
+  .btn-default .badge,
+  .btn-default-secondary .badge,
+  .btn-default-success .badge,
+  .btn-default-info .badge,
+  .btn-default-warning .badge,
+  .btn-default-danger .badge {
     color: #fff !important;
     background-color: #282828 !important; }
 
-/* line 75, ../scss/bootstrap/_buttons.scss */
+/* line 81, ../scss/bootstrap/_buttons.scss */
 .btn-default:hover {
   color: #fff !important;
   background-color: #EF7D00 !important;
   border-color: #EF7D00 !important; }
 
-/* line 80, ../scss/bootstrap/_buttons.scss */
+/* line 86, ../scss/bootstrap/_buttons.scss */
+.btn-default-secondary:hover {
+  color: #fff !important;
+  background-color: #636363 !important;
+  border-color: #636363 !important; }
+
+/* line 91, ../scss/bootstrap/_buttons.scss */
+.btn-default-success:hover {
+  color: #fff !important;
+  background-color: #348C41 !important;
+  border-color: #348C41 !important; }
+
+/* line 96, ../scss/bootstrap/_buttons.scss */
+.btn-default-info:hover {
+  color: #fff !important;
+  background-color: #3B6EA0 !important;
+  border-color: #3B6EA0 !important; }
+
+/* line 101, ../scss/bootstrap/_buttons.scss */
+.btn-default-warning:hover {
+  color: #fff !important;
+  background-color: #E69900 !important;
+  border-color: #E69900 !important; }
+
+/* line 106, ../scss/bootstrap/_buttons.scss */
+.btn-default-danger:hover {
+  color: #fff !important;
+  background-color: #A00000 !important;
+  border-color: #A00000 !important; }
+
+/* line 112, ../scss/bootstrap/_buttons.scss */
 .btn-primary {
   color: #fff !important;
   background-color: #EF7D00 !important;
@@ -9579,7 +9754,7 @@ a.btn.disabled, fieldset[disabled] a.btn {
     color: #EF7D00 !important;
     background-color: #fff !important; }
 
-/* line 83, ../scss/bootstrap/_buttons.scss */
+/* line 115, ../scss/bootstrap/_buttons.scss */
 .btn-secondary {
   color: #fff !important;
   background-color: #636363 !important;
@@ -9616,7 +9791,7 @@ a.btn.disabled, fieldset[disabled] a.btn {
     color: #636363 !important;
     background-color: #fff !important; }
 
-/* line 87, ../scss/bootstrap/_buttons.scss */
+/* line 119, ../scss/bootstrap/_buttons.scss */
 .btn-success {
   color: #fff !important;
   background-color: #348C41 !important;
@@ -9653,7 +9828,7 @@ a.btn.disabled, fieldset[disabled] a.btn {
     color: #348C41 !important;
     background-color: #fff !important; }
 
-/* line 91, ../scss/bootstrap/_buttons.scss */
+/* line 123, ../scss/bootstrap/_buttons.scss */
 .btn-info {
   color: #fff !important;
   background-color: #3B6EA0 !important;
@@ -9690,7 +9865,7 @@ a.btn.disabled, fieldset[disabled] a.btn {
     color: #3B6EA0 !important;
     background-color: #fff !important; }
 
-/* line 95, ../scss/bootstrap/_buttons.scss */
+/* line 127, ../scss/bootstrap/_buttons.scss */
 .btn-warning {
   color: #fff !important;
   background-color: #E69900 !important;
@@ -9727,7 +9902,7 @@ a.btn.disabled, fieldset[disabled] a.btn {
     color: #E69900 !important;
     background-color: #fff !important; }
 
-/* line 99, ../scss/bootstrap/_buttons.scss */
+/* line 131, ../scss/bootstrap/_buttons.scss */
 .btn-danger {
   color: #fff !important;
   background-color: #A00000 !important;
@@ -9764,7 +9939,7 @@ a.btn.disabled, fieldset[disabled] a.btn {
     color: #A00000 !important;
     background-color: #fff !important; }
 
-/* line 103, ../scss/bootstrap/_buttons.scss */
+/* line 135, ../scss/bootstrap/_buttons.scss */
 .btn-light-default {
   color: #282828 !important;
   background-color: #fff !important;
@@ -9800,13 +9975,13 @@ a.btn.disabled, fieldset[disabled] a.btn {
   .btn-light-default .badge {
     color: #fff !important;
     background-color: #282828 !important; }
-  /* line 105, ../scss/bootstrap/_buttons.scss */
+  /* line 137, ../scss/bootstrap/_buttons.scss */
   .btn-light-default:hover {
     color: #EF7D00 !important;
     background-color: #fff !important;
     border-color: #fff !important; }
 
-/* line 111, ../scss/bootstrap/_buttons.scss */
+/* line 143, ../scss/bootstrap/_buttons.scss */
 .btn-light-primary {
   color: #282828 !important;
   background-color: #fff !important;
@@ -9842,13 +10017,13 @@ a.btn.disabled, fieldset[disabled] a.btn {
   .btn-light-primary .badge {
     color: #fff !important;
     background-color: #282828 !important; }
-  /* line 113, ../scss/bootstrap/_buttons.scss */
+  /* line 145, ../scss/bootstrap/_buttons.scss */
   .btn-light-primary:hover {
     color: #EF7D00 !important;
     background-color: #fff !important;
     border-color: #fff !important; }
 
-/* line 119, ../scss/bootstrap/_buttons.scss */
+/* line 151, ../scss/bootstrap/_buttons.scss */
 .btn-light-success {
   color: #282828 !important;
   background-color: #fff !important;
@@ -9884,13 +10059,13 @@ a.btn.disabled, fieldset[disabled] a.btn {
   .btn-light-success .badge {
     color: #fff !important;
     background-color: #282828 !important; }
-  /* line 121, ../scss/bootstrap/_buttons.scss */
+  /* line 153, ../scss/bootstrap/_buttons.scss */
   .btn-light-success:hover {
     color: #348C41 !important;
     background-color: #fff !important;
     border-color: #fff !important; }
 
-/* line 127, ../scss/bootstrap/_buttons.scss */
+/* line 159, ../scss/bootstrap/_buttons.scss */
 .btn-light-info {
   color: #282828 !important;
   background-color: #fff !important;
@@ -9926,13 +10101,13 @@ a.btn.disabled, fieldset[disabled] a.btn {
   .btn-light-info .badge {
     color: #fff !important;
     background-color: #282828 !important; }
-  /* line 129, ../scss/bootstrap/_buttons.scss */
+  /* line 161, ../scss/bootstrap/_buttons.scss */
   .btn-light-info:hover {
     color: #3B6EA0 !important;
     background-color: #fff !important;
     border-color: #fff !important; }
 
-/* line 135, ../scss/bootstrap/_buttons.scss */
+/* line 167, ../scss/bootstrap/_buttons.scss */
 .btn-light-warning {
   color: #282828 !important;
   background-color: #fff !important;
@@ -9968,13 +10143,13 @@ a.btn.disabled, fieldset[disabled] a.btn {
   .btn-light-warning .badge {
     color: #fff !important;
     background-color: #282828 !important; }
-  /* line 137, ../scss/bootstrap/_buttons.scss */
+  /* line 169, ../scss/bootstrap/_buttons.scss */
   .btn-light-warning:hover {
     color: #E69900 !important;
     background-color: #fff !important;
     border-color: #fff !important; }
 
-/* line 143, ../scss/bootstrap/_buttons.scss */
+/* line 175, ../scss/bootstrap/_buttons.scss */
 .btn-light-danger {
   color: #282828 !important;
   background-color: #fff !important;
@@ -10010,20 +10185,20 @@ a.btn.disabled, fieldset[disabled] a.btn {
   .btn-light-danger .badge {
     color: #fff !important;
     background-color: #282828 !important; }
-  /* line 145, ../scss/bootstrap/_buttons.scss */
+  /* line 177, ../scss/bootstrap/_buttons.scss */
   .btn-light-danger:hover {
     color: #A00000 !important;
     background-color: #fff !important;
     border-color: #fff !important; }
 
-/* line 152, ../scss/bootstrap/_buttons.scss */
+/* line 184, ../scss/bootstrap/_buttons.scss */
 .btn.selected,
 .btn.selected:hover,
 .btn.selected:focus {
   color: #fff !important;
   background-color: #5897FB !important;
   border-color: #5897FB !important; }
-  /* line 160, ../scss/bootstrap/_buttons.scss */
+  /* line 192, ../scss/bootstrap/_buttons.scss */
   .btn.selected:disabled,
   .btn.selected:hover:disabled,
   .btn.selected:focus:disabled {
@@ -10031,60 +10206,60 @@ a.btn.disabled, fieldset[disabled] a.btn {
     background-color: #E6E6E6 !important;
     border-color: #E6E6E6 !important; }
 
-/* line 171, ../scss/bootstrap/_buttons.scss */
+/* line 203, ../scss/bootstrap/_buttons.scss */
 .btn-link {
   color: #EF7D00;
   font-weight: normal;
   border-radius: 0; }
-  /* line 176, ../scss/bootstrap/_buttons.scss */
+  /* line 208, ../scss/bootstrap/_buttons.scss */
   .btn-link, .btn-link:active, .btn-link.active, .btn-link[disabled], fieldset[disabled] .btn-link {
     background-color: transparent;
     -webkit-box-shadow: none;
     box-shadow: none; }
-  /* line 184, ../scss/bootstrap/_buttons.scss */
+  /* line 216, ../scss/bootstrap/_buttons.scss */
   .btn-link, .btn-link:hover, .btn-link:focus, .btn-link:active {
     border-color: transparent; }
-  /* line 190, ../scss/bootstrap/_buttons.scss */
+  /* line 222, ../scss/bootstrap/_buttons.scss */
   .btn-link:hover, .btn-link:focus {
     color: #a35500;
     text-decoration: underline;
     background-color: transparent; }
-  /* line 198, ../scss/bootstrap/_buttons.scss */
+  /* line 230, ../scss/bootstrap/_buttons.scss */
   .btn-link[disabled]:hover, .btn-link[disabled]:focus, fieldset[disabled] .btn-link:hover, fieldset[disabled] .btn-link:focus {
     color: #DCDCDC;
     text-decoration: none; }
 
-/* line 210, ../scss/bootstrap/_buttons.scss */
+/* line 242, ../scss/bootstrap/_buttons.scss */
 .btn-lg, .btn-group-lg > .btn {
   padding: 10px 16px;
   font-size: 17px;
   line-height: 1.33333;
   border-radius: 6px; }
 
-/* line 214, ../scss/bootstrap/_buttons.scss */
+/* line 246, ../scss/bootstrap/_buttons.scss */
 .btn-sm, .btn-group-sm > .btn {
   padding: 5px 10px;
   font-size: 12px;
   line-height: 1.5;
   border-radius: 3px; }
 
-/* line 218, ../scss/bootstrap/_buttons.scss */
+/* line 250, ../scss/bootstrap/_buttons.scss */
 .btn-xs, .btn-group-xs > .btn {
   padding: 1px 5px;
   font-size: 12px;
   line-height: 1.5;
   border-radius: 3px; }
 
-/* line 226, ../scss/bootstrap/_buttons.scss */
+/* line 258, ../scss/bootstrap/_buttons.scss */
 .btn-block {
   display: block;
   width: 100%; }
 
-/* line 232, ../scss/bootstrap/_buttons.scss */
+/* line 264, ../scss/bootstrap/_buttons.scss */
 .btn-block + .btn-block {
   margin-top: 5px; }
 
-/* line 240, ../scss/bootstrap/_buttons.scss */
+/* line 272, ../scss/bootstrap/_buttons.scss */
 input[type="submit"].btn-block,
 input[type="reset"].btn-block,
 input[type="button"].btn-block {
@@ -16435,34 +16610,50 @@ td.buttons {
       color: #9EC5E6;
       cursor: pointer;
       float: right; }
-      /* line 746, ../scss/bimpcore/_list.scss */
+      /* line 745, ../scss/bimpcore/_list.scss */
       .bimp_filter_container .bimp_filter_value .bimp_filter_value_remove_btn:hover,
       .bimp_filter_container .bimp_filter_value_default .bimp_filter_value_remove_btn:hover {
         color: #fff; }
-  /* line 752, ../scss/bimpcore/_list.scss */
+    /* line 750, ../scss/bimpcore/_list.scss */
+    .bimp_filter_container .bimp_filter_value.excluded,
+    .bimp_filter_container .bimp_filter_value_default.excluded {
+      background-color: #A60000; }
+      /* line 753, ../scss/bimpcore/_list.scss */
+      .bimp_filter_container .bimp_filter_value.excluded:hover,
+      .bimp_filter_container .bimp_filter_value_default.excluded:hover {
+        background-color: #CC2929; }
+      /* line 757, ../scss/bimpcore/_list.scss */
+      .bimp_filter_container .bimp_filter_value.excluded .bimp_filter_value_remove_btn,
+      .bimp_filter_container .bimp_filter_value_default.excluded .bimp_filter_value_remove_btn {
+        color: #DBAFAF; }
+        /* line 760, ../scss/bimpcore/_list.scss */
+        .bimp_filter_container .bimp_filter_value.excluded .bimp_filter_value_remove_btn:hover,
+        .bimp_filter_container .bimp_filter_value_default.excluded .bimp_filter_value_remove_btn:hover {
+          color: #fff; }
+  /* line 767, ../scss/bimpcore/_list.scss */
   .bimp_filter_container input[type=text] {
     width: 100%; }
-  /* line 756, ../scss/bimpcore/_list.scss */
+  /* line 771, ../scss/bimpcore/_list.scss */
   .bimp_filter_container i.loading {
     display: none; }
-  /* line 760, ../scss/bimpcore/_list.scss */
+  /* line 775, ../scss/bimpcore/_list.scss */
   .bimp_filter_container .bimp_filter_date_range_period {
     font-size: 11px;
     margin-bottom: 10px;
     padding-bottom: 10px;
     border-bottom: 1px solid #7D7D7D; }
-    /* line 766, ../scss/bimpcore/_list.scss */
+    /* line 781, ../scss/bimpcore/_list.scss */
     .bimp_filter_container .bimp_filter_date_range_period input, .bimp_filter_container .bimp_filter_date_range_period select, .bimp_filter_container .bimp_filter_date_range_period .select2 {
       display: inline-block;
       font-size: 11px !important;
       width: auto !important;
       min-width: 30px !important;
       width: 80px !important; }
-      /* line 773, ../scss/bimpcore/_list.scss */
+      /* line 788, ../scss/bimpcore/_list.scss */
       .bimp_filter_container .bimp_filter_date_range_period input.qtyInput, .bimp_filter_container .bimp_filter_date_range_period select.qtyInput, .bimp_filter_container .bimp_filter_date_range_period .select2.qtyInput {
         width: 30px !important; }
 
-/* line 780, ../scss/bimpcore/_list.scss */
+/* line 795, ../scss/bimpcore/_list.scss */
 .load_saved_filters_container {
   padding: 5px 0;
   margin: 5px 0;

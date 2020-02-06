@@ -619,12 +619,14 @@ class GSX_Repair extends BimpObject
         switch ($status) {
             case 'RFPU':
                 if ((int) $this->getData('ready_for_pick_up')) {
+                    mailSyn2('Passage a RFPU deja RFPU', 'tommy@bimp.fr, jc.cannet@bimp.fr', null, 'Attention SAV : '.$this->getData('id_sav'));
                     return array();
                 }
                 break;
 
             case 'SPCM':
                 if ((int) $this->getData('repair_complete')) {
+                    mailSyn2('Passage a Fermé deja Fermé', 'tommy@bimp.fr, jc.cannet@bimp.fr', null, 'Attention SAV : '.$this->getData('id_sav'));
                     return array();
                 }
                 break;
@@ -732,6 +734,8 @@ class GSX_Repair extends BimpObject
                 $this->updateField('ready_for_pick_up', 1);
             }
         }
+        else
+            mailSyn2('Changement de statut erreur', 'tommy@bimp.fr, jc.cannet@bimp.fr', null, 'Attention SAV : '.$this->getData('id_sav'). ' changement de statut erreur '.print_r($errors,1));
 
         return $errors;
     }

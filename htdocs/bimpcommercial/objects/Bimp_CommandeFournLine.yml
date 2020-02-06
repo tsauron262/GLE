@@ -242,6 +242,11 @@ lists:
             qties: 
             
                 
+    global: 
+        cols: 
+            qty_total:
+            qty_to_receive:
+            qty_to_billed:   
     general:
         list_filters: 
             - name: type

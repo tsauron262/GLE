@@ -271,10 +271,11 @@ class BL_CommandeFournReception extends BimpObject
         return $buttons;
     }
 
-    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array())
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
     {
         switch ($field_name) {
             case 'billed':
+                // Bouton Exclure désactivé
                 if (is_array($values) && !empty($values)) {
                     if (in_array(0, $values) && in_array(1, $values)) {
                         break;
@@ -300,6 +301,8 @@ class BL_CommandeFournReception extends BimpObject
                 }
                 break;
         }
+        
+        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
     }
 
     // Rendus HTML: 

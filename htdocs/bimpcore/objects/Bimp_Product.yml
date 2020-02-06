@@ -969,6 +969,20 @@ lists_cols:
         field: code_config
     accountancy_code_sell:
         field: accountancy_code_sell
+    accountancy_code_sell_ue:
+       label: Code Comptable Vente (UE)
+       value:
+           callback:
+               method: getCodeComptableVente
+               params:
+                   - 2
+    accountancy_code_sell_ex:
+       label: Code Comptable Vente (Export)
+       value:
+           callback:
+               method: getCodeComptableVente
+               params:
+                   - 3
     accountancy_code_sell_reel:
         label: Code Comptable Vente (Final)
         value:
@@ -979,7 +993,20 @@ lists_cols:
         label: Code Comptable Achat (Final)
         value:
             callback: getCodeComptableAchat
-                
+    accountancy_code_buy_ue:
+        label: Code Comptable Achat (UE)
+        value:
+            callback: 
+                method: getCodeComptableAchat
+                params:
+                    - 2
+    accountancy_code_buy_ex:
+        label: Code Comptable Achat (Export)
+        value:
+            callback: 
+                method: getCodeComptableAchat
+                params:
+                    - 3
 lists: 
     default: 
         title: Produits
@@ -1012,7 +1039,7 @@ lists:
             stock: 
             price: 
             tva: 
-            serialisable: 
+            serialisable:
                 
     inventory:
         extends: default

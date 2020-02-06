@@ -310,7 +310,7 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
         $this->output .= ' ' . $this->nbImei . ' n° IMEI corrigé(s).';
     }
 
-    function fetchEquipmentsImei($nb = 100)
+    function fetchEquipmentsImei($nb = 1)
     {
         if (!class_exists('GSX_v2')) {
             require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_v2.php';

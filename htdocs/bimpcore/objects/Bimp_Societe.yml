@@ -227,6 +227,17 @@ fields:
         type: string
         dol_extra_field: 1
         
+    secteuractivite:
+        label: Secteur d'activité
+        type: int
+        values: 
+            callback: 
+               method: getListExtrafield
+               params:
+                   - secteuractivite
+                   - societe
+        dol_extra_field: 1
+        
 #    *** Champs non gérés: ***
 #    entity
 #    ref_ext
@@ -552,7 +563,9 @@ filters_panels:
             note_private:
                 field: note_private
             note_public:
-                field: note_public  
+                field: note_public 
+            secteuractivite:
+                field: secteuractivite
 cards: 
     default: 
         type: societe_card

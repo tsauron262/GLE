@@ -139,7 +139,7 @@ class BContract_echeancier extends BimpObject {
         $instance->set('fk_account', 1);
         $instance->set('entrepot', 50);
         $instance->set('fk_cond_reglement', ($client->getData('cond_reglement')) ? $client->getData('cond_reglement') : 2);
-        $instance->set('fk_mode_reglement', ($client->getData('mode_reglement')) ? $client->getData('mode_reglement') : 2);
+        $instance->set('fk_mode_reglement', ($parent->getData('moderegl')) ? $parent->getData('moderegl') : 2);
         $instance->set('datef', date('Y-m-d H:i:s'));
         $instance->set('ef_type', $ef_type);
         $instance->set('model_pdf', 'bimpfact');
@@ -210,7 +210,19 @@ class BContract_echeancier extends BimpObject {
             $current_number_facture = 1;
             foreach ($data->factures_send as $element_element) {
                 $facture = $this->getInstance('bimpcommercial', 'Bimp_Facture', $element_element['d']);
-
+                // Voir si il y a des avoir sur cette facture
+//                $avoirs = $facture->dol_object->getListIdAvoirFromInvoice();
+//                if(count($avoirs)) {
+//                    foreach($avoirs as $num => $id) {
+//                        $avoirFacture = $this->getInstance('bimpcommercial', 'Bimp_Facture', $id);
+//                        if(in_array($avoirFacture->id, $avoirs)) {
+//                            echo 'cette facture à un avoir';
+//                        }
+//                    }
+//                    
+//                    print_r($avoirs);
+//                }
+                
                 if ($facture->getData('fk_statut') == 0) {
                     $can_create_next_facture = false;
                 }

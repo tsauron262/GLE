@@ -88,5 +88,12 @@ class transferController extends BimpController {
         }
         return $warehouses;
     }
-
+    
+    public function getPageTitle() {
+        $title = 'Transfert';
+        $id_transfer = (int) BimpTools::getValue('id');
+        $title .= '#' . $id_transfer;
+        return $title;
+    }
+    
 }

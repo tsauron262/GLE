@@ -469,6 +469,19 @@ class BimpObject extends BimpCache
     {
         return self::getObjectListConfig($this->module, $this->object_name, $owner_type, $id_owner, $list_name);
     }
+    
+    public function getListExtrafield($name, $type){
+        $return = array();
+        $return = array('mmm', 'ppp');
+        $sql = $this->db->db->query("SELECT * FROM `".MAIN_DB_PREFIX."extrafields` WHERE `name` LIKE '".$name."' AND `elementtype` = '".$type."'");
+        while($ln = $this->db->db->fetch_object($sql)){
+            $param = unserialize($ln->param);
+            if(isset($param['options']))
+                $return = $param['options'];
+        }
+        
+        return $return;
+    }
 
     public function getNameProperty()
     {

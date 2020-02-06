@@ -26,6 +26,7 @@ class ListFilters extends BimpObject
         
         return (int) parent::canEdit();
     }
+    
     public function canEditField($field_name)
     {
         switch ($field_name) {
@@ -203,10 +204,17 @@ class ListFilters extends BimpObject
                 'fields'   => array(),
                 'children' => array()
             );
+            $excluded_values = array(
+                'fields'   => array(),
+                'children' => array()
+            );
 
             foreach ($filters['fields'] as $field_name => $filter) {
                 if (isset($filter['values']) && is_array($filter['values']) && !empty($filter['values'])) {
                     $values['fields'][$field_name] = $filter['values'];
+                }
+                if (isset($filter['excluded_values']) && is_array($filter['excluded_values']) && !empty($filter['excluded_values'])) {
+                    $excluded_values['fields'][$field_name] = $filter['excluded_values'];
                 }
             }
 
@@ -214,15 +222,22 @@ class ListFilters extends BimpObject
                 if (!isset($values['children'][$child])) {
                     $values['children'][$child] = array();
                 }
+                if (!isset($values['children'][$child])) {
+                    $excluded_values['children'][$child] = array();
+                }
 
                 foreach ($fields as $field_name => $filter) {
                     if (isset($filter['values']) && is_array($filter['values']) && !empty($filter['values'])) {
                         $values['children'][$child][$field_name] = $filter['values'];
                     }
+                    if (isset($filter['excluded_values']) && is_array($filter['excluded_values']) && !empty($filter['excluded_values'])) {
+                        $excluded_values['children'][$child][$field_name] = $filter['excluded_values'];
+                    }
                 }
             }
 
             $this->set('filters', $values);
+            $this->set('excluded', $excluded_values);
         }
 
         return $errors;

@@ -586,6 +586,7 @@ filters_panels:
               items: 
                   1: OUI
                   0: NON
+              exclude_btn: 0
             
 lists: 
     default: 

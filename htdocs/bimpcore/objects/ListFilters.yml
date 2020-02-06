@@ -45,6 +45,12 @@ fields:
         type: json
         input: 
             type: hidden
+            
+    excluded: 
+        label: Valeurs exclus
+        type: json
+        input: 
+            type: hidden
         
 forms: 
     default: 

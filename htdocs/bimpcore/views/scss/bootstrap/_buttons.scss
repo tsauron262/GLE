@@ -66,7 +66,13 @@ a.btn {
 // Alternate buttons
 // --------------------------------------------------
 
-.btn-default {
+.btn-default,
+.btn-default-secondary,
+.btn-default-success,
+.btn-default-info,
+.btn-default-warning,
+.btn-default-danger
+{
     @include button-variant($btn-default-color, $btn-default-bg, $btn-default-border);
     &:hover {
 
@@ -77,6 +83,32 @@ a.btn {
     background-color: $primary!important;
     border-color: $primary!important;
 }
+.btn-default-secondary:hover {
+    color: #fff!important;
+    background-color: $secondary!important;
+    border-color: $secondary!important;
+}
+.btn-default-success:hover {
+    color: #fff!important;
+    background-color: $success!important;
+    border-color: $success!important;
+}
+.btn-default-info:hover {
+    color: #fff!important;
+    background-color: $info!important;
+    border-color: $info!important;
+}
+.btn-default-warning:hover {
+    color: #fff!important;
+    background-color: $warning!important;
+    border-color: $warning!important;
+}
+.btn-default-danger:hover {
+    color: #fff!important;
+    background-color: $danger!important;
+    border-color: $danger!important;
+}
+
 .btn-primary {
     @include button-variant($btn-primary-color, $btn-primary-bg, $btn-primary-border);
 }

@@ -71,15 +71,64 @@ class Bimp_Product extends BimpObject
         return $type;
     }
     
+    public function getCodeComptableAchat($zone_vente = 1, $force_type = - 1) {
+        if($force_type == -1) {
+            if(!$this->isLoaded())
+                return '';
+            if($this->getData('accountancy_code_buy') != '') {
+                return $this->getData('accountancy_code_buy');
+            }
+            $type = $this->getProductTypeCompta();
+        } else {
+            $type = $force_type;
+        }
+        if($type == 0) { // Produit
+            if($zone_vente == 1){
+                if($this->getData('tva_tx') == 0) {
+                    return BimpCore::getConf('BIMPTOCEGID_achat_tva_null');
+                }
+                return BimpCore::getConf('BIMPTOCEGID_achat_produit_fr');
+            } 
+            elseif($zone_vente == 2 || $zone_vente == 4)
+                return BimpCore::getConf('BIMPTOCEGID_achat_produit_ue');
+            elseif($zone_vente == 3)
+                return BimpCore::getConf('BIMPTOCEGID_achat_produit_ex');
+        } elseif($type == 1) { // Service
+            if($zone_vente == 1){
+                if($this->getData('tva_tx') == 0) {
+                    return BimpCore::getConf('BIMPTOCEGID_achat_tva_null_service');
+                }
+                return BimpCore::getConf('BIMPTOCEGID_achat_service_fr');
+            } 
+            elseif($zone_vente == 2 || $zone_vente == 4)
+                return BimpCore::getConf('BIMPTOCEGID_achat_service_ue');
+            elseif($zone_vente == 3)
+                return BimpCore::getConf('BIMPTOCEGID_achat_service_ex');
+        } elseif($type == 2) { // Frais de port
+            if($zone_vente == 1)
+                return BimpCore::getConf('BIMPTOCEGID_frais_de_port_achat_fr');
+            elseif($zone_vente == 2 || $zone_vente == 4)
+                return BimpCore::getConf('BIMPTOCEGID_frais_de_port_achat_ue');
+            elseif($zone_vente == 3)
+                return BimpCore::getConf('BIMPTOCEGID_frais_de_port_achat_ex');
+        } elseif($type == 3) { // Commission
+            if($zone_vente == 1)
+                return BimpCore::getConf('BIMPTOCEGID_comissions_fr');
+            elseif($zone_vente == 2 || $zone_vente == 4)
+                return BimpCore::getConf('BIMPTOCEGID_comissions_ue');
+            elseif($zone_vente == 3)
+                return BimpCore::getConf('BIMPTOCEGID_comissions_ex');
+        }
+    }
+    // ACHAT DE D3E juste pour la france
+    // ACHAT DE TVA JUSTe PAR AUTOLIQUIDATION - si on a un numéro intracom sur un pro UE
     
     public function getCodeComptableVente($zone_vente = 1, $force_type = -1){
         if($force_type == -1){
             if(!$this->isLoaded())
                 return '';
-            
             if($this->getData('accountancy_code_sell') != '')
                 return $this->getData('accountancy_code_sell');
-
             $type = $this->getProductTypeCompta();
         }
         else
@@ -135,21 +184,6 @@ class Bimp_Product extends BimpObject
 //            return BimpCore::getConf('BIMPTOCEGID_vente_dee_ue');
         return false;
     }
-    public function getCodeComptableAchat(){
-        
-        if(!$this->isLoaded())
-            return '';
-        if($this->getData('accountancy_code_buy') != '')
-            return $this->getData('accountancy_code_buy');
-        
-        $type = $this->getProductTypeCompta();
-        
-        if($type == 0)
-            return BimpCore::getConf('BIMPTOCEGID_achat_produit_fr');
-        else
-            return BimpCore::getConf('BIMPTOCEGID_achat_service_fr');
-    }
-
     public static function initUnits()
     {
         if (empty(self::$units_weight)) {

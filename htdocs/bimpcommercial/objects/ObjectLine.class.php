@@ -2027,7 +2027,10 @@ class ObjectLine extends BimpObject
                 } else {
                     $parent_status = (int) $parent->getData('fk_statut');
                     $this->parent->set("fk_statut", 0);
-                    $this->fetch($id, $this->parent);
+                    if (!$this->fetch($id, $this->parent)) {
+                        $errors[] = BimpTools::ucfirst($this->getLabel('the')) .' d\'ID '.$id.' semble avoir bien était enregistrée mais n\'a pas été trouvée';
+                        return $errors;
+                    }
 
                     if ($remisable && isset($line->remise_percent) && (float) $line->remise_percent) {
                         if (static::$parent_comm_type) {

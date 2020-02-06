@@ -4060,7 +4060,7 @@ class BimpComm extends BimpDolObject
         $this->processRemisesGlobales();
     }
     
-    
+    // Méthodes statiques: 
     
     public static function checkAllObjectLine($id_product, &$sortie = '', $nbMax = 10){
         global $db;
@@ -4094,6 +4094,8 @@ class BimpComm extends BimpDolObject
                     $errors = array_merge($errors, $comm->checkLines());
                     $i++;
                 }
+                
+                BimpCache::$cache = array();
             }
             $sortie .= '<br/>fin '.$i.' / '.$tot.' corrections de '.$info[1];
         }

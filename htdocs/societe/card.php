@@ -140,6 +140,15 @@ if (empty($reshook))
 			    // TODO Move the merge function into class of object.
 
 				$db->begin();
+                                
+                                
+                                /* moddrsi */
+                                $sql = $db->query('SELECT Count(*) as nb, `ref_fourn`, `fk_product` FROM `llx_product_fournisseur_price` WHERE `fk_soc` IN ('.$soc_origin_id.', '.$object->id.') GROUP BY `ref_fourn`, `fk_product` HAVING nb > 1');
+                                while($ln = $db->fetch_object($sql)){
+                                    $db->query('UPDATE `llx_product_fournisseur_price` SET ref_fourn = CONCAT(ref_fourn, "-B") WHERE fk_product = '.$ln->fk_product.' AND ref_fourn = "'.$ln->ref_fourn.'" AND fk_soc = '.$soc_origin_id.' ');
+                                }
+                                /* fmoddrsi*/
+                                
 
 				// Recopy some data
 				$object->client = $object->client | $soc_origin->client;

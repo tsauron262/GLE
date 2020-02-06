@@ -1575,6 +1575,7 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
                 . '<option value="">Déménagement</option>'
                 . '<option value="">Congés paternité </option>'
                 . '<option value="">Récupération </option>'
+                . '<option value="">HEURES DE DELEGATION </option>'
                 . '<option value="">Autres</option>'
                 . '</select>';
         print '</span><br/>';

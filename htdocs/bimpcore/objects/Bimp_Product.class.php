@@ -85,8 +85,12 @@ class Bimp_Product extends BimpObject
         else
             $type = $force_type;
         if($type == 0){//Produit
-            if($zone_vente == 1)
+            if($zone_vente == 1){
+                if($this->getData('tva_tx') == 0) {
+                    return BimpCore::getConf('BIMPTOCEGID_vente_tva_null');
+                }
                 return BimpCore::getConf('BIMPTOCEGID_vente_produit_fr');
+            } 
             elseif($zone_vente == 2 || $zone_vente == 4)
                 return BimpCore::getConf('BIMPTOCEGID_vente_produit_ue');
             elseif($zone_vente == 3)

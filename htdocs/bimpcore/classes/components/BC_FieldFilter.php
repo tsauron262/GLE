@@ -8,7 +8,7 @@ class BC_FieldFilter extends BC_Filter
     public $field = null;
     public $field_params = array();
 
-    public function __construct(BimpObject $object, $params, $panel_path = '', $values = array())
+    public function __construct(BimpObject $object, $params, $panel_path = '', $values = array(), $excluded_values = array())
     {
         global $current_bc;
         if (!is_object($current_bc)) {
@@ -56,13 +56,14 @@ class BC_FieldFilter extends BC_Filter
             }
         }
 
-        parent::__construct($object, $params, $values, $path);
+        parent::__construct($object, $params, $values, $path, $excluded_values);
 
         if ($this->base_object->config->isDefined($panel_path)) {
             $this->params = self::override_params($this->params, $this->base_object->config, $panel_path, $this->params_def);
 
-            if (empty($values) && !empty($this->params['default_values'])) {
+            if (empty($values) && empty($excluded_values) && (!empty($this->params['default_values']) || !empty($this->params['default_excluded_values']))) {
                 $this->values = $this->params['default_values'];
+                $this->excluded_values = $this->params['default_excluded_values'];
                 $this->is_default = true;
             }
 
@@ -220,7 +221,6 @@ class BC_FieldFilter extends BC_Filter
         $current_bc = $this;
 
         $errors = array();
-        $or_field = array();
 
         $filter_key = '';
         $field_name = $this->field->name;
@@ -230,9 +230,13 @@ class BC_FieldFilter extends BC_Filter
             $current_bc = $prev_bc;
             return $errors;
         }
-        
+
         $values = self::getConvertedValues($this->params['type'], $this->values);
-        
+        $excluded_values = self::getConvertedValues($this->params['type'], $this->excluded_values);
+
+        $and_field = array();
+        $or_field = array();
+
         switch ($this->params['type']) {
             case 'value':
             case 'user':
@@ -243,37 +247,75 @@ class BC_FieldFilter extends BC_Filter
                         $errors[] = 'Valeur invalide: "' . $value . '" (doit être de type: "' . BimpTools::getDataTypeLabel($this->field->params['type']) . '"';
                     }
                 }
+
+                foreach ($excluded_values as $value) {
+                    if (BimpTools::checkValueByType($this->field->params['type'], $value)) {
+                        $and_field[] = array(
+                            'operator' => '!=',
+                            'value'    => $value
+                        );
+                    } else {
+                        $errors[] = 'Valeur invalide: "' . $value . '" (doit être de type: "' . BimpTools::getDataTypeLabel($this->field->params['type']) . '"';
+                    }
+                }
                 break;
 
             case 'value_part':
-                foreach ($this->values as $value) {
-                    $or_field[] = self::getValuePartSqlFilter($value, $this->params['part_type'], $errors);
+                foreach ($values as $value) {
+                    $or_field[] = self::getValuePartSqlFilter($value, $this->params['part_type'], false);
+                }
+                foreach ($excluded_values as $value) {
+                    $and_field[] = self::getValuePartSqlFilter($value, $this->params['part_type'], true);
                 }
                 break;
 
             case 'date_range':
-                foreach ($this->values as $value) {
-                    $or_field[] = $this->getRangeSqlFilter($value, $errors, true);
+                foreach ($values as $value) {
+                    $or_field[] = $this->getRangeSqlFilter($value, $errors, true, false);
+                }
+                foreach ($excluded_values as $value) {
+                    $and_field[] = $this->getRangeSqlFilter($value, $errors, true, true);
                 }
                 break;
 
             case 'range':
-                foreach ($this->values as $value) {
-                    $or_field[] = $this->getRangeSqlFilter($value, $errors);
+                foreach ($values as $value) {
+                    $or_field[] = $this->getRangeSqlFilter($value, $errors, false, false);
+                }
+                foreach ($excluded_values as $value) {
+                    $and_field[] = $this->getRangeSqlFilter($value, $errors, false, true);
                 }
                 break;
 
             case 'check_list':
-                $filters[$filter_key] = array(
-                    'in' => $this->values
-                );
+                if (!empty($values)) {
+                    $filters[$filter_key] = array(
+                        'in' => $this->values
+                    );
+                }
+
+                if (!empty($excluded_values)) {
+                    $filters[$filter_key] = array(
+                        'not_in' => $this->values
+                    );
+                }
                 break;
         }
 
         if (!empty($or_field)) {
-            $filters[$filter_key] = array(
+            $and_field[] = array(
                 'or_field' => $or_field
             );
+        }
+
+        if (!empty($and_field)) {
+            if (count($and_field) > 1) {
+                $filters[$filter_key] = array(
+                    'and' => $and_field
+                );
+            } else {
+                $filters[$filter_key] = $and_field[0];
+            }
         }
 
         $current_bc = $prev_bc;
@@ -305,19 +347,37 @@ class BC_FieldFilter extends BC_Filter
             $input_path = 'fields/' . $this->field->name . '/input';
         }
 
-        $onclick = 'addFieldFilterValue($(this), \'' . $this->field->name . '\');';
         $add_btn_html = '<div style="text-align: right; margin: 2px 0">';
-        $add_btn_html .= '<button type="button" class="btn btn-default btn-small" onclick="' . $onclick . '">';
-        $add_btn_html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Ajouter';
-        $add_btn_html .= '</button>';
+        if ((int) $this->params['exclude_btn']) {
+            $add_btn_html .= '<button type="button" class="btn btn-default-danger btn-small" onclick="addFieldFilterValue($(this), true);">';
+            $add_btn_html .= BimpRender::renderIcon('fas_times-circle', 'iconLeft') . 'Exclure';
+            $add_btn_html .= '</button>';
+        }
+        if ((int) $this->params['add_btn']) {
+            $add_btn_html .= '<button type="button" class="btn btn-default btn-small" onclick="addFieldFilterValue($(this), false);">';
+            $add_btn_html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Ajouter';
+            $add_btn_html .= '</button>';
+        }
         $add_btn_html .= '</div>';
 
         switch ($this->params['type']) {
             case 'user':
-                $html .= '<div style="text-align: center">';
-                $html .= '<span class="btn btn-default btn-small" onclick="addFieldFilterCustomValue($(this), \'current\')">';
-                $html .= BimpRender::renderIcon('fas_user', 'iconLeft') . 'Utilisateur connecté' . BimpRender::renderIcon('fas_plus-circle', 'iconRight');
+                $html .= '<div style="Margin-bottom: 5px;padding-bottom: 5px; border-bottom: 1px solid #7D7D7D">';
+                $html .= '<span style="font-size: 11px">';
+                $html .= BimpRender::renderIcon('fas_user', 'iconLeft') . 'Utilisateur connecté:';
                 $html .= '</span>';
+                $html .= '<div style="margin-top: 4px; text-align: right">';
+                if ((int) $this->params['exclude_btn']) {
+                    $html .= '<span class="btn btn-default-danger btn-small" onclick="addFieldFilterCustomValue($(this), \'current\', true)">';
+                    $html .= BimpRender::renderIcon('fas_times-circle', 'iconLeft') . 'Exclure';
+                    $html .= '</span>';
+                }
+                if ((int) $this->params['add_btn']) {
+                    $html .= '<span class="btn btn-default btn-small" onclick="addFieldFilterCustomValue($(this), \'current\', false)">';
+                    $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Ajouter';
+                    $html .= '</span>';
+                }
+                $html .= '</div>';
                 $html .= '</div>';
 
             case 'value':

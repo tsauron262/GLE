@@ -159,7 +159,7 @@ class BL_CommandeShipment extends BimpObject
         return parent::getCustomFilterValueLabel($field_name, $value);
     }
 
-    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array())
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
     {
         switch ($field_name) {
             case 'id_product':
@@ -171,7 +171,7 @@ class BL_CommandeShipment extends BimpObject
                     'on'    => $alias . '.fk_commande = a.id_commande_client'
                 );
                 $filters[$alias . '.fk_product'] = array(
-                    'in' => $values
+                    ($excluded ? 'not_' : '') . 'in' => $values
                 );
                 return;
 
@@ -190,11 +190,12 @@ class BL_CommandeShipment extends BimpObject
                 $filters['typecont.source'] = 'internal';
                 $filters['typecont.code'] = 'SALESREPFOLL';
                 $filters['elemcont.fk_socpeople'] = array(
-                    'in' => $values
+                    ($excluded ? 'not_' : '') . 'in' => $values
                 );
                 return;
 
             case 'billed':
+                // Bouton Exclure désactivé
                 if (is_array($values) && !empty($values)) {
                     if (in_array(0, $values) && in_array(1, $values)) {
                         break;
@@ -221,7 +222,7 @@ class BL_CommandeShipment extends BimpObject
                 return;
         }
 
-        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors);
+        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
     }
 
     // Getters: 

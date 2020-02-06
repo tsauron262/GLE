@@ -225,6 +225,7 @@ filters_panel:
                 data_type: date
                 label: Date de départ (emplacement)
                 type: date_range
+                exclude_btn: 0
                 
 lists:
     default: 

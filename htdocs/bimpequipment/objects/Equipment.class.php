@@ -531,10 +531,11 @@ class Equipment extends BimpObject
         }
     }
 
-    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array())
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
     {
         switch ($field_name) {
             case 'in_package':
+                // Bouton Exclure désactivé
                 if (empty($values) || (in_array(0, $values) && in_array(1, $values))) {
                     // On ne filtre pas...
                     break;
@@ -551,6 +552,7 @@ class Equipment extends BimpObject
                 break;
 
             case 'place_date_end':
+                // Bouton Exclure désactivé
                 $joins['places'] = array(
                     'table' => 'be_equipment_place',
                     'on'    => 'places.id_equipment = a.id',
@@ -575,6 +577,8 @@ class Equipment extends BimpObject
                 }
                 break;
         }
+        
+        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
     }
 
     // Getters array: 

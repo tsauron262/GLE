@@ -181,7 +181,7 @@ class Bimp_Vente extends BimpObject
 
     // Getters: 
 
-    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array())
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
     {
         switch ($field_name) {
             case 'categ1':
@@ -194,10 +194,12 @@ class Bimp_Vente extends BimpObject
                     'on'    => $alias . '.fk_product = a.fk_product'
                 );
                 $filters['cat_prod.fk_categorie'] = array(
-                    'in' => $values
+                    ($excluded ? 'not_' : '') . 'in' => $values
                 );
                 break;
         }
+        
+        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
     }
 
     public function getListHeaderButtons()

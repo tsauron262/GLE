@@ -382,7 +382,7 @@ class Bimp_CommandeLine extends ObjectLine
         return $buttons;
     }
 
-    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array())
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
     {
         switch ($field_name) {
             case 'reservations_status':
@@ -390,25 +390,31 @@ class Bimp_CommandeLine extends ObjectLine
                     $sql = 'SELECT COUNT(DISTINCT reservation.id) FROM ' . MAIN_DB_PREFIX . 'br_reservation reservation';
                     $sql .= ' WHERE reservation.id_commande_client_line = a.id AND reservation.qty > 0 AND reservation.status = ';
 
-                    $or = array();
+                    $res_filters = array();
 
                     foreach ($values as $status) {
-                        $or['(' . $sql . $status . ')'] = array(
-                            'operator' => '>',
+                        $res_filters['(' . $sql . $status . ')'] = array(
+                            'operator' => ($excluded ? '=' : '>'),
                             'value'    => 0
                         );
                     }
 
-                    if (!empty($or)) {
-                        $filters['or_reservations_status'] = array(
-                            'or' => $or
-                        );
+                    if (!empty($res_filters)) {
+                        if ($excluded) {
+                            $filters['and_reservations_status'] = array(
+                                'and_fields' => $res_filters
+                            );
+                        } else {
+                            $filters['or_reservations_status'] = array(
+                                'or' => $res_filters
+                            );
+                        }
                     }
                 }
                 break;
         }
 
-        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors);
+        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
     }
 
     // Getters valeurs:

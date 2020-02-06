@@ -372,7 +372,7 @@ class ListConfig extends BimpObject
         parent::getCustomFilterValueLabel($field_name, $value);
     }
 
-    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array())
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
     {
         switch ($field_name) {
             case 'id_user':
@@ -380,20 +380,20 @@ class ListConfig extends BimpObject
                     'and_fields' => array(
                         'owner_type' => self::TYPE_USER,
                         'id_owner'   => array(
-                            'in' => $values
+                            ($excluded ? 'not_' : '') . 'in' => $values
                         )
                     )
                 );
                 break;
 
             case 'id_user_with_groups':
-                $filters['or_user'] = array(
-                    'or' => array(
+                $filters['user_group'] = array(
+                    ($excluded ? 'and_fields' : 'or') => array(
                         'and_user'  => array(
                             'and_fields' => array(
                                 'owner_type' => self::TYPE_USER,
                                 'id_owner'   => array(
-                                    'in' => $values
+                                    ($excluded ? 'not_' : '') . 'in' => $values
                                 )
                             )
                         ),
@@ -401,7 +401,7 @@ class ListConfig extends BimpObject
                             'and_fields' => array(
                                 'owner_type'   => self::TYPE_GROUP,
                                 'owner_custom' => array(
-                                    'custom' => 'id_owner IN (SELECT ugu.fk_usergroup FROM ' . MAIN_DB_PREFIX . 'usergroup_user ugu WHERE ugu.fk_user IN (' . implode(',', $values) . '))'
+                                    'custom' => 'id_owner ' . ($excluded ? 'NOT ' : '') . 'IN (SELECT ugu.fk_usergroup FROM ' . MAIN_DB_PREFIX . 'usergroup_user ugu WHERE ugu.fk_user IN (' . implode(',', $values) . '))'
                                 )
                             )
                         )
@@ -414,13 +414,13 @@ class ListConfig extends BimpObject
                     'and_fields' => array(
                         'owner_type' => self::TYPE_GROUP,
                         'id_owner'   => array(
-                            'in' => $values
+                            ($excluded ? 'not_' : '') . 'in' => $values
                         )
                     )
                 );
                 break;
         }
-        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors);
+        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
     }
 
     // Affichage: 

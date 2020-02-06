@@ -13,6 +13,10 @@ class BC_FiltersPanel extends BC_Panel
         'fields'   => array(),
         'children' => array()
     );
+    protected $excluded_values = array(
+        'fields'   => array(),
+        'children' => array()
+    );
 
     public function __construct(BimpObject $object, $list_type, $list_name, $list_identifier, $name = 'default')
     {
@@ -44,12 +48,12 @@ class BC_FiltersPanel extends BC_Panel
         if (BimpTools::isSubmit('id_current_list_filters')) {
             $this->id_list_filters = (int) BimpTools::getValue('id_current_list_filters', 0);
         }
-        
+
         $this->addIdentifierSuffix($list_type . '_' . $list_name);
         $current_bc = $prev_bc;
     }
 
-    public function setFiltersValues($values)
+    public function setFiltersValues($values, $exclude_values = array())
     {
         if (!isset($values['fields']) && !isset($values['children']) && !empty($values)) {
             $this->values['fields'] = $values;
@@ -62,6 +66,18 @@ class BC_FiltersPanel extends BC_Panel
         if (isset($values['children'])) {
             $this->values['children'] = $values['children'];
         }
+
+        if (!isset($exclude_values['fields']) && !isset($exclude_values['children']) && !empty($exclude_values)) {
+            $this->excluded_values['fields'] = $exclude_values;
+        }
+
+        if (isset($exclude_values['fields'])) {
+            $this->excluded_values['fields'] = $exclude_values['fields'];
+        }
+
+        if (isset($exclude_values['children'])) {
+            $this->excluded_values['children'] = $exclude_values['children'];
+        }
     }
 
     public function getValues($field, $child = '')
@@ -73,6 +89,20 @@ class BC_FiltersPanel extends BC_Panel
             }
         } elseif (isset($this->values['fields'][$field])) {
             $values = $this->values['fields'][$field];
+        }
+
+        return $values;
+    }
+
+    public function getExcludedValues($field, $child = '')
+    {
+        $values = array();
+        if ($child) {
+            if (isset($this->excluded_values['children'][$child][$field])) {
+                $values = $this->excluded_values['children'][$child][$field];
+            }
+        } elseif (isset($this->excluded_values['fields'][$field])) {
+            $values = $this->excluded_values['fields'][$field];
         }
 
         return $values;
@@ -93,9 +123,10 @@ class BC_FiltersPanel extends BC_Panel
         } else {
             $this->id_list_filters = $id_list_filters;
             $values = $listFilters->getData('filters');
+            $excluded = $listFilters->getData('excluded');
 
             if (is_array($values) && !empty($values)) {
-                $this->setFiltersValues($values);
+                $this->setFiltersValues($values, $excluded);
             } else {
                 $errors[] = 'Aucun filtre trouvé pour cet enregistrement';
             }
@@ -119,16 +150,16 @@ class BC_FiltersPanel extends BC_Panel
             if (isset($filter['show']) && !(int) $filter['show']) {
                 continue;
             }
-
             if (isset($filter['field']) && $filter['field']) {
                 $values = $this->getValues($filter['field'], isset($filter['child']) ? $filter['child'] : '');
+                $excluded = $this->getExcludedValues($filter['field'], isset($filter['child']) ? $filter['child'] : '');
                 $path = $this->config_path . '/filters/' . $key;
                 if ((int) $filter['custom']) {
-                    $bc_filter = new BC_CustomFilter($this->object, $filter, $path, $values);
+                    $bc_filter = new BC_CustomFilter($this->object, $filter, $path, $values, $excluded);
                 } else {
-                    $bc_filter = new BC_FieldFilter($this->object, $filter, $path, $values);
+                    $bc_filter = new BC_FieldFilter($this->object, $filter, $path, $values, $excluded);
                 }
-                if (!empty($bc_filter->values)) {
+                if (!empty($bc_filter->values) || !empty($bc_filter->excluded_values)) {
                     $filter_errors = $bc_filter->getSqlFilters($filters, $joins);
                     if (count($filter_errors)) {
                         $errors[] = BimpTools::getMsgFromArray($filter_errors, 'Filtre "' . $bc_filter->params['label'] . '"');
@@ -136,7 +167,11 @@ class BC_FiltersPanel extends BC_Panel
                 }
             }
         }
-
+        
+//        echo '<pre>';
+//        print_r($filters);
+//        echo '</pre>';
+        
         $current_bc = $prev_bc;
         return $errors;
     }
@@ -161,6 +196,64 @@ class BC_FiltersPanel extends BC_Panel
                 $this->values['fields'] = array();
             }
             $array = &$this->values['fields'];
+        }
+        if (!isset($array[$field_name])) {
+            $array[$field_name] = $values;
+            return;
+        }
+
+        if (!is_array($array[$field_name])) {
+            $array[$field_name] = array($array[$field_name]);
+        }
+
+        foreach ($values as $value) {
+            if (!is_array($value)) {
+                if (!in_array($value, $array[$field_name])) {
+                    $array[$field_name][] = $value;
+                }
+            } else {
+                $check = true;
+                foreach ($array[$field_name] as $val) {
+                    if (is_array($val)) {
+                        $check = false;
+                        foreach ($value as $key => $subVal) {
+                            if (!isset($val[$key]) || $val[$key] !== $subVal) {
+                                $check = true;
+                                break;
+                            }
+                        }
+                        if (!$check) {
+                            break;
+                        }
+                    }
+                }
+                if ($check) {
+                    $array[$field_name][] = $value;
+                }
+            }
+        }
+    }
+
+    public function addFieldFilterExcludedValues($field_name, $values, $child = '')
+    {
+        if (!is_array($values)) {
+            $values = array($values);
+        }
+
+        if ($child) {
+            if (!isset($this->excluded_values['children'])) {
+                $this->excluded_values['children'] = array();
+            }
+            if (!isset($this->excluded_values['children'][$child])) {
+                $this->excluded_values['children'][$child] = array();
+            }
+
+            $array = &$this->excluded_values['children'][$child];
+        } else {
+            if (!isset($this->excluded_values['fields'])) {
+                $this->excluded_values['fields'] = array();
+            }
+            $array = &$this->excluded_values['fields'];
         }
         if (!isset($array[$field_name])) {
             $array[$field_name] = $values;
@@ -263,11 +356,12 @@ class BC_FiltersPanel extends BC_Panel
 
             if (isset($filter['field']) && (string) $filter['field']) {
                 $values = $this->getValues($filter['field'], isset($filter['child']) ? $filter['child'] : '');
+                $excluded_values = $this->getExcludedValues($filter['field'], isset($filter['child']) ? $filter['child'] : '');
                 $path = $this->config_path . '/filters/' . $key;
                 if ((int) $filter['custom']) {
-                    $bc_filter = new BC_CustomFilter($this->object, $filter, $path, $values);
+                    $bc_filter = new BC_CustomFilter($this->object, $filter, $path, $values, $excluded_values);
                 } else {
-                    $bc_filter = new BC_FieldFilter($this->object, $filter, $path, $values);
+                    $bc_filter = new BC_FieldFilter($this->object, $filter, $path, $values, $excluded_values);
                 }
 
                 $html .= $bc_filter->renderHtml();

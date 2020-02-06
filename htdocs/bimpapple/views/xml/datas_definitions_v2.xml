@@ -145,9 +145,9 @@
     <def name="requestReviewByApple" type="bool">
         <label>Requête à vérifier par Apple</label>
     </def>
-    <def name="markComplete" type="bool">
+<!--    <def name="markComplete" type="bool">
         <label>Marquer complète</label>
-    </def>
+    </def>-->
     
     <!--parts-->
     <def name="parts" type="datasGroup" useCart="1" itemLabel="Composant">

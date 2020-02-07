@@ -535,7 +535,6 @@ lists:
             qty_total:
             qty_to_ship:
             qty_to_bill:
-                                
 #            tva:
 #            remise_crt:
 #                edit: 0
@@ -546,5 +545,7 @@ lists:
 #                field: total_ttc
 #                child: dol_line
 
+    logistic_fourn: 
+        extends: general
     
     

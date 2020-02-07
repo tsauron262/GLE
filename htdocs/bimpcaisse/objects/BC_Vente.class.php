@@ -547,7 +547,7 @@ class BC_Vente extends BimpObject
         return BimpRender::renderAlerts('Remise d\'ID ' . $id_discount . ' non trouvée');
     }
 
-    // Rendus HTML: 
+    // Rendus HTML:
 
     public function renderCreationViewHtml()
     {

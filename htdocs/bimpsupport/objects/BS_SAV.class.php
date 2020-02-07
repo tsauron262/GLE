@@ -1511,7 +1511,7 @@ class BS_SAV extends BimpObject
                 if (is_null($propal)) {
                     $errors[] = $error_msg . ' (Proposition commerciale absente)';
                 } elseif ($propal_status !== 1) {
-                    $errors[] = $error_msg . ' (statut de la proposition commerciale invalide '.$propal_status.')';
+                    $errors[] = $error_msg . ' (statut de la proposition commerciale invalide ' . $propal_status . ')';
                 } elseif (!(string) $this->getData('diagnostic')) {
                     $errors[] = $error_msg . '. Le champ "Diagnostic" doit être complété';
                 } elseif (in_array($current_status, array(self::BS_SAV_DEVIS_ACCEPTE, self::BS_SAV_FERME))) {
@@ -2331,8 +2331,8 @@ class BS_SAV extends BimpObject
 
         $errors = array();
         $error_msg = 'Echec de l\'envoi de la notification au client';
-        
-        
+
+
         if (!$msg_type) {
             if (BimpTools::isSubmit('msg_type')) {
                 $msg_type = BimpTools::getValue('msg_type');
@@ -2384,7 +2384,7 @@ class BS_SAV extends BimpObject
                 } elseif (in_array((int) $this->getData('status'), self::$need_propal_status)) {
                     $errors[] = 'Attention: PDF du devis non trouvé et donc non envoyé au client File : ' . $fileProp;
                     dol_syslog('SAV "' . $this->getRef() . '" - ID ' . $this->id . ': échec envoi du devis au client ' . print_r($errors, 1), LOG_ERR, 0, "_devissav");
-                } 
+                }
             } else {
                 unset($propal);
                 $propal = null;
@@ -3484,6 +3484,10 @@ class BS_SAV extends BimpObject
     {
         global $user, $langs;
         $errors = array();
+        $warnings = array();
+        $success = 'SAV Fermé avec succès';
+        $success_callback = '';
+
         $caisse = null;
         $payment_set = (isset($data['paid']) && (float) $data['paid'] && (isset($data['mode_paiement']) && (int) $data['mode_paiement'] > 0 && (int) $data['mode_paiement'] != 56));
 
@@ -3519,10 +3523,8 @@ class BS_SAV extends BimpObject
             return $errors;
         }
 
-        $success = 'SAV Fermé avec succès';
-        $url = '';
         $current_status = (int) $this->getInitData('status');
-        $warnings = array();
+
 
         if ((int) $this->getData('id_propal')) {
             $propal = $this->getChildObject('propal');
@@ -3741,6 +3743,16 @@ class BS_SAV extends BimpObject
                                     if (!BimpObject::objectLoaded($bimpFacture)) {
                                         $errors[] = 'La facture semble ne pas avoir été créée correctement';
                                     } else {
+                                        // Ajout du commercial: 
+                                        $id_commercial = (int) $this->getData('id_user_tech');
+                                        if (!$id_commercial) {
+                                            $id_commercial = (int) $user->id;
+                                        }
+
+                                        if ($id_commercial) {
+                                            $bimpFacture->dol_object->add_contact($id_commercial, 'SALESREPFOLL', 'internal');
+                                        }
+
                                         // Création des lignes: 
                                         $lines_errors = $bimpFacture->createLinesFromOrigin($propal);
 
@@ -3800,20 +3812,36 @@ class BS_SAV extends BimpObject
                                                     $warnings[] = BimpTools::getMsgFromArray($up_errors, 'Echec de l\'enregistrement de l\'ID de la facture (' . $bimpFacture->id . ')');
                                                 }
 
-                                                global $idAvoirFact;
-                                                if (isset($idAvoirFact) && $idAvoirFact > 0) {
-                                                    $up_errors = $this->updateField("id_facture_avoir", $idAvoirFact);
-                                                    $idAvoirFact = 0;
-                                                    if (count($up_errors)) {
-                                                        $warnings[] = BimpTools::getMsgFromArray($up_errors, 'Echec de l\'enregistrement de l\'ID de la facture (' . $bimpFacture->id . ')');
-                                                    }
-                                                }
-
                                                 $bimpFacture->dol_object->generateDocument(self::$facture_model_pdf, $langs);
 
                                                 $ref = $bimpFacture->getData('facnumber');
                                                 if (file_exists(DOL_DATA_ROOT . '/facture/' . $ref . '/' . $ref . '.pdf')) {
                                                     $url = DOL_URL_ROOT . '/document.php?modulepart=facture&file=' . htmlentities('/' . $ref . '/' . $ref . '.pdf');
+                                                    $success_callback .= 'window.open("' . $url . '");';
+                                                }
+
+                                                global $idAvoirFact;
+                                                if (isset($idAvoirFact) && (int) $idAvoirFact) {
+                                                    $up_errors = $this->updateField("id_facture_avoir", $idAvoirFact);
+                                                    if (count($up_errors)) {
+                                                        $idAvoirFact = 0;
+                                                        $warnings[] = BimpTools::getMsgFromArray($up_errors, 'Echec de l\'enregistrement de l\'ID de l\'avoir (' . $idAvoirFact . ')');
+                                                    }
+
+                                                    if ($idAvoirFact) {
+                                                        $avoir = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $idAvoirFact);
+                                                        if (BimpObject::objectLoaded($avoir)) {
+                                                            $avoir_ref = $avoir->getRef();
+                                                            if ($avoir_ref && file_exists(DOL_DATA_ROOT . '/facture/' . $avoir_ref . '/' . $avoir_ref . '.pdf')) {
+                                                                $url = DOL_URL_ROOT . '/document.php?modulepart=facture&file=' . htmlentities('/' . $avoir_ref . '/' . $avoir_ref . '.pdf');
+                                                                $success_callback .= 'window.open("' . $url . '");';
+                                                            } else {
+                                                                $warnings[] = 'Echec de la génération du PDF de l\'avoir';
+                                                            }
+                                                        }
+                                                    }
+
+                                                    $idAvoirFact = 0;
                                                 }
 
                                                 if (isset($data['send_msg']) && $data['send_msg']) {
@@ -3877,7 +3905,7 @@ class BS_SAV extends BimpObject
         return array(
             'errors'           => $errors,
             'warnings'         => $warnings,
-            'success_callback' => ($url ? 'window.open("' . $url . '");' : '')
+            'success_callback' => $success_callback
         );
     }
 

@@ -1287,6 +1287,7 @@ class BimpController
         $rows_html = '';
         $pagination_html = '';
         $filters_panel_html = '';
+        $active_filters_html = '';
         $thead_html = '';
         $colspan = 0;
 
@@ -1327,6 +1328,7 @@ class BimpController
             $rows_html = $list->renderRows();
             $pagination_html = $list->renderPagination();
             $filters_panel_html = $list->renderFiltersPanel();
+            $active_filters_html = $list->renderActiveFilters(true);
 
             if ($full_reload) {
                 $thead_html .= $list->renderHeaderRow();
@@ -1347,14 +1349,15 @@ class BimpController
         }
 
         return array(
-            'errors'             => $errors,
-            'rows_html'          => $rows_html,
-            'pagination_html'    => $pagination_html,
-            'filters_panel_html' => $filters_panel_html,
-            'thead_html'         => $thead_html,
-            'list_id'            => $list_id,
-            'colspan'            => $colspan,
-            'request_id'         => BimpTools::getValue('request_id', 0)
+            'errors'              => $errors,
+            'rows_html'           => $rows_html,
+            'pagination_html'     => $pagination_html,
+            'filters_panel_html'  => $filters_panel_html,
+            'active_filters_html' => $active_filters_html,
+            'thead_html'          => $thead_html,
+            'list_id'             => $list_id,
+            'colspan'             => $colspan,
+            'request_id'          => BimpTools::getValue('request_id', 0)
         );
     }
 

@@ -19,10 +19,10 @@ class ObjectLine extends BimpObject
 
     public $desc = null;
     public $id_product = null;
+    public $product_type = 0;
     public $qty = 1;
     public $pu_ht = null;
     public $tva_tx = null;
-    public $product_type = 0;
     public $pa_ht = null;
     public $id_fourn_price = null;
     public $remise = null;

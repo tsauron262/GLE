@@ -52,6 +52,7 @@ class BC_List extends BC_Panel
         $this->params_def['filters_panel_values'] = array('data_type' => 'array', 'compile' => true, 'default' => array());
         $this->params_def['filters_panel_open'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['id_default_filters'] = array('data_type' => 'id', 'default' => 0);
+        $this->params_def['display_active_filters'] = array('data_type' => 'bool', 'default' => 1);
 
         $full_reload = BimpTools::getValue('full_reload', 0);
 
@@ -157,6 +158,7 @@ class BC_List extends BC_Panel
                         $this->params['id_default_filters'] = $id_default_filters;
                     }
 
+                    $this->params['display_active_filters'] = (int) $this->userConfig->getData('active_filters');
                     $this->params['total_row'] = (int) $this->userConfig->getData('total_row');
                 }
             }
@@ -385,7 +387,7 @@ class BC_List extends BC_Panel
             );
 
             $excluded_values = array(
-                'fields'    => array(),
+                'fields'   => array(),
                 'children' => array()
             );
 
@@ -442,7 +444,6 @@ class BC_List extends BC_Panel
     {
         if (method_exists($this->object, "beforeListFetchItems"))
             $this->object->beforeListFetchItems($this);
-
 
         $this->fetchFiltersPanelValues();
 
@@ -731,6 +732,28 @@ class BC_List extends BC_Panel
         }
 
         return $this->bc_filtersPanel->renderHtml();
+    }
+
+    public function renderActiveFilters($content_only = false)
+    {
+        $html = '';
+        $filters_html = '';
+
+        if ((int) $this->params['display_active_filters']) {
+            if (is_object($this->bc_filtersPanel)) {
+                $filters_html = $this->bc_filtersPanel->renderActiveFilters();
+            }
+        }
+
+        if (!$content_only) {
+            $html .= '<div class="list_active_filters"' . ($filters_html ? '' : ' style="display: none"') . '>';
+            $html .= $filters_html;
+            $html .= '</div>';
+        } else {
+            return $filters_html;
+        }
+
+        return $html;
     }
 
     public function getHeaderButtons()

@@ -2,15 +2,15 @@ table: bs_sav
 controller: sav
 icon: wrench
 
-header_list_name: default
-
 list_page_url: 
     controller: index
     url_params: 
         tab: sav
         id_entrepot: 
             field_value: id_entrepot
-
+            
+header_list_name: default
+header_edit_form: edit
 header_btn: 
     callback: getViewExtraBtn
         
@@ -365,11 +365,6 @@ forms:
               input: 
                   type: toggle
               value: 1
-              
-#              NE PAS DECOMMENTER: les prêts ne sont plus des objets enfant de SAV
-#            - object: prets 
-#              multiple: 1
-#              depends_on: code_centre
             
     edit: 
         rows: 

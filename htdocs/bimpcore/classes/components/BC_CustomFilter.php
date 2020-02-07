@@ -28,7 +28,7 @@ class BC_CustomFilter extends BC_Filter
         parent::__construct($object, $params, $values, $path, $excluded_values);
 
         $this->data['field_name'] = $this->field_name;
-        $this->identifier . '_field_' . $this->field_name;
+        $this->identifier .= '_field_' . $this->field_name;
 
         $current_bc = $prev_bc;
     }

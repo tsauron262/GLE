@@ -16,6 +16,7 @@ objects:
                 name: ListFilters
             id_object: 
                 field_value: id_default_filters
+                
 fields: 
     name: 
         label: Nom
@@ -125,6 +126,11 @@ fields:
             input: 
                 type: search_object
         
+    active_filters: 
+        label: Afficher les filtres actifs
+        type: bool
+        default_value: 1
+        
     search_open: 
         label: Barre de recherche ouverte par défaut
         type: bool
@@ -188,6 +194,7 @@ forms:
                   callback: hasCols
             - field: total_row
             - field: id_default_filters
+            - field: active_filters
             - field: search_open
               show: 
                   callback: isListSearchable
@@ -276,8 +283,7 @@ filters_panels:
               type: value
               input: 
                   type: search_group
-              
-                    
+                
 lists: 
     base: 
         checkboxes: 1

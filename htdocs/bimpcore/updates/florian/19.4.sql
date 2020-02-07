@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bimpcore_list_config` ADD `active_filters` BOOLEAN NOT NULL DEFAULT TRUE AFTER `id_default_filters`; 

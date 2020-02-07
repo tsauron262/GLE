@@ -298,6 +298,70 @@ function removeBimpFilterValue(e, $button) {
     }
 }
 
+function removeBimpFilterValueFromActiveFilters($button, filters_id, field_name, child_name, value, excluded) {
+    if ($button.hasClass('disabled')) {
+        return;
+    }
+
+    var $filters = $('#' + filters_id);
+
+    if (!$.isOk($filters)) {
+        bimp_msg('Erreur: panneau filtre non trouvé', 'danger', null, true);
+        return;
+    }
+
+    $button.addClass('disabled');
+
+    var done = false;
+    $filters.find('.bimp_filter_container').each(function () {
+        if (!done) {
+            var $container = $(this);
+            var container_child_name = $container.data('child_name');
+            if (typeof (container_child_name) === 'undefined') {
+                container_child_name = '';
+            }
+            if ($container.data('field_name') === field_name && container_child_name === child_name) {
+                if ($container.data('type') === 'check_list') {
+                    var $input = $container.find('input.check_list_item_input[value="' + value + '"]');
+                    if ($input.length) {
+                        $input.prop('checked', false).change();
+                        done = true;
+                    }
+                } else {
+                    $container.find('.bimp_filter_value').each(function () {
+                        if (!done) {
+                            var $value = $(this);
+                            var val = $value.data('value');
+
+                            if (typeof (val) === 'object') {
+                                val = JSON.stringify(val);
+                            }
+                            if (val == value) {
+                                if ((excluded && $value.hasClass('excluded')) || (!excluded && !$value.hasClass('excluded'))) {
+                                    $value.remove();
+                                    done = true;
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+        }
+    });
+
+    if (done) {
+        var $value = $button.findParentByClass('filter_value');
+        $value.remove();
+        $('body').trigger($.Event('listFiltersChange', {
+            $filters: $filters
+        }));
+    } else {
+        bimp_msg('Filtre actif non trouvé', 'danger', null, true);
+    }
+
+    $filters.find();
+}
+
 function getAllListFieldsFilters($filters, with_open_value) {
     if (typeof (with_open_value) === 'undefined') {
         with_open_value = true;

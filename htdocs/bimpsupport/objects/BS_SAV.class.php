@@ -3882,7 +3882,10 @@ class BS_SAV extends BimpObject
                 foreach ($list as $item) {
                     $repair = BimpCache::getBimpObjectInstance('bimpapple', 'GSX_Repair', (int) $item['id']);
                     if ($repair->isLoaded()) {
-                        $tmp = $repair->close(true, false);
+                        if($repair->getData('ready_for_pick_up'))
+                            $tmp = $repair->close(true, false);
+                        else//on passe d'abord en RFPU
+                            $rep_errors = $repair->updateStatus();
                         if (isset($tmp['errors']))
                             $rep_errors = $tmp['errors'];
                         else {

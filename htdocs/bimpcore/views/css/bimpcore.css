@@ -16659,6 +16659,61 @@ td.buttons {
   margin: 5px 0;
   border-top: 1px solid #282828; }
 
+/*Filtres actifs:*/
+/* line 803, ../scss/bimpcore/_list.scss */
+.list_active_filters {
+  background-color: #F0F0F0;
+  padding: 4px;
+  margin-bottom: 5px; }
+  /* line 808, ../scss/bimpcore/_list.scss */
+  .list_active_filters .list_active_filters_title {
+    font-size: 13px;
+    font-weight: bold; }
+  /* line 813, ../scss/bimpcore/_list.scss */
+  .list_active_filters .filter_active_values {
+    display: inline-block;
+    vertical-align: top;
+    margin: 0 3px;
+    padding: 4px;
+    font-size: 11px; }
+    /* line 820, ../scss/bimpcore/_list.scss */
+    .list_active_filters .filter_active_values .filter_label {
+      font-weight: bold;
+      font-size: 12px; }
+    /* line 825, ../scss/bimpcore/_list.scss */
+    .list_active_filters .filter_active_values .relation {
+      font-weight: bold;
+      font-size: 10px; }
+    /* line 832, ../scss/bimpcore/_list.scss */
+    .list_active_filters .filter_active_values .included_values .filter_value,
+    .list_active_filters .filter_active_values .excluded_values .filter_value {
+      color: #fff;
+      padding: 5px 15px 5px 5px;
+      margin: 2px 0; }
+      /* line 837, ../scss/bimpcore/_list.scss */
+      .list_active_filters .filter_active_values .included_values .filter_value .remove_btn,
+      .list_active_filters .filter_active_values .excluded_values .filter_value .remove_btn {
+        margin-left: 5px;
+        cursor: pointer;
+        float: right;
+        margin-right: -10px; }
+        /* line 843, ../scss/bimpcore/_list.scss */
+        .list_active_filters .filter_active_values .included_values .filter_value .remove_btn:hover,
+        .list_active_filters .filter_active_values .excluded_values .filter_value .remove_btn:hover {
+          color: #fff; }
+    /* line 851, ../scss/bimpcore/_list.scss */
+    .list_active_filters .filter_active_values .included_values .filter_value {
+      background-color: #3E88D2; }
+      /* line 854, ../scss/bimpcore/_list.scss */
+      .list_active_filters .filter_active_values .included_values .filter_value .remove_btn {
+        color: #9EC5E6; }
+    /* line 861, ../scss/bimpcore/_list.scss */
+    .list_active_filters .filter_active_values .excluded_values .filter_value {
+      background-color: #A60000; }
+      /* line 864, ../scss/bimpcore/_list.scss */
+      .list_active_filters .filter_active_values .excluded_values .filter_value .remove_btn {
+        color: #DBAFAF; }
+
 /* line 2, ../scss/bimpcore/_view.scss */
 .panel-secondary .panel-secondary {
   /*border-color: #c8c8c8;*/ }

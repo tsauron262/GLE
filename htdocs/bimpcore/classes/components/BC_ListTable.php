@@ -518,6 +518,8 @@ class BC_ListTable extends BC_List
             $html .= '<div class="objectlistTableContainer ' . ((int) $this->params['filters_panel_open'] ? 'col-xs-12 col-sm-12 col-md-9 col-lg-10' : 'col-xs-12') . '">';
         }
 
+        $html .= $this->renderActiveFilters();
+
         $html .= '<table class="noborder objectlistTable" style="border: none; min-width: ' . ($this->colspan * 80) . 'px" width="100%">';
         $html .= '<thead class="listTableHead">';
 
@@ -1181,8 +1183,8 @@ class BC_ListTable extends BC_List
                     $content .= '<button class="btn btn-default btn-small" onclick="' . $this->userConfig->getJsLoadModalForm('default', 'Edition de la configuration #' . $this->userConfig->id) . '" style="margin-right: 4px">';
                     $content .= BimpRender::renderIcon('fas_edit', 'iconLeft') . 'Editer';
                     $content .= '</button>';
-                    
-                    $content .= '<button class="btn btn-default btn-small" onclick="'.$this->userConfig->getJsLoadModalForm('cols_options', 'Configuration #' . $this->userConfig->id.' - Options des colonnes') . '">';
+
+                    $content .= '<button class="btn btn-default btn-small" onclick="' . $this->userConfig->getJsLoadModalForm('cols_options', 'Configuration #' . $this->userConfig->id . ' - Options des colonnes') . '">';
                     $content .= BimpRender::renderIcon('fas_columns', 'iconLeft') . 'Options des colonnes';
                     $content .= '</button>';
                     $content .= '</div>';
@@ -1568,7 +1570,7 @@ class BC_ListTable extends BC_List
 
         $this->params['n'] = 0;
         $this->params['p'] = 1;
-        
+
         if (is_null($this->items)) {
             $this->fetchItems();
         }

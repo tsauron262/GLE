@@ -244,6 +244,16 @@ function reloadObjectList(list_id, callback, full_reload, id_config) {
                     });
                 }
 
+                if (result.active_filters_html) {
+                    bimpAjax.$list.find('.list_active_filters').each(function () {
+                        $(this).html(result.active_filters_html).show();
+                    });
+                } else {
+                    bimpAjax.$list.find('.list_active_filters').each(function () {
+                        $(this).hide().html('');
+                    });
+                }
+
                 if (result.filters_panel_html) {
                     bimpAjax.$list.find('.listFiltersPanelContainer').each(function () {
                         $(this).html(result.filters_panel_html);

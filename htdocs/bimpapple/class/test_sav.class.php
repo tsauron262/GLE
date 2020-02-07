@@ -222,7 +222,8 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                         $this->repair->update();
                         $this->nbOk++;
                     } else {
-                        if (count($this->repair->updateStatus('RFPU')) == 0) {
+                        $erreurSOAP = $this->repair->updateStatus('RFPU');
+                        if (count($erreurSOAP) == 0) {
                             echo "Semble avoir été passer dans GSX a RFPU<br/>";
                             $this->nbOk++;
                         } else {

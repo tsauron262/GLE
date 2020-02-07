@@ -188,7 +188,7 @@ class GSX_Repair extends BimpObject
         $buttons = array();
 
         if ($this->isLoaded() && $this->use_gsx_v2) {
-            if (!(int) $this->getData('ready_for_pick_up')) {
+            if (!(int) $this->getData('ready_for_pick_up') && !(int) $this->getData('canceled')) {
                 $confirm = 'Attention, la réparation va être marquée &quote;Ready For Pick up&quote; (prête pour enlèvement) auprès du service GSX d\\\'Apple. Veuillez confirmer';
                 $onclick = $this->getJsGsxAjaxOnClick('gsxRepairAction', array(
                     'id_repair' => (int) $this->id,
@@ -202,7 +202,7 @@ class GSX_Repair extends BimpObject
                     'type'    => 'danger',
                     'onclick' => $onclick
                 );
-            } elseif (!(int) $this->getData('repair_complete')) {
+            } elseif (!(int) $this->getData('repair_complete') && !(int) $this->getData('canceled')) {
                 $confirm = 'Attention, la réparation va être indiquée comme complète auprès du service GSX d\\\'Apple. Veuillez confirmer';
                 $onclick = $this->getJsGsxAjaxOnClick('gsxRepairAction', array(
                     'id_repair' => (int) $this->id,
@@ -216,7 +216,7 @@ class GSX_Repair extends BimpObject
                     'type'    => 'danger',
                     'onclick' => $onclick
                 );
-            } elseif (!(int) $this->getData('reimbursed')) {
+            } elseif (!(int) $this->getData('reimbursed') && !(int) $this->getData('canceled')) {
                 $confirm = 'Veuillez confirmer';
                 $onclick = '';
                 $buttons[] = array(
@@ -1027,6 +1027,8 @@ class GSX_Repair extends BimpObject
             if ($this->initGsx($errors)) {
                 if ((int) $this->getData('repair_complete')) {
                     $errors[] = 'Cette réparation a déjà été fermée';
+                } elseif ((int) $this->getData('canceled')) {
+                    $errors[] = 'Cette réparation est annulée';
                 } else {
                     $check = true;
                     if ($checkRepair) {
@@ -2076,9 +2078,16 @@ class GSX_Repair extends BimpObject
 
     public function actionEndRepair($data, &$success)
     {
-        $success = 'Le statut de la réparation a été mis à jour avec succès';
+        if ((int) $this->getData('canceled')) {
+            $success = 'Cette réparation est annulée';
+            
+            return 1;
+        }
+        else{
+            $success = 'Le statut de la réparation a été mis à jour avec succès';
 
-        return $this->updateStatus();
+            return $this->updateStatus();
+        }
     }
 
     public function actionMarkRepairAsReimbursed($data, &$success)

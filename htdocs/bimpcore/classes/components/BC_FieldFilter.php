@@ -119,7 +119,7 @@ class BC_FieldFilter extends BC_Filter
             if ($this->child_name) {
                 $this->identifier .= '_child_' . $this->child_name;
             }
-            $this->identifier . '_field_' . $this->field->name;
+            $this->identifier .= '_field_' . $this->field->name;
         } else {
             $this->errors[] = 'Champ associé invalide';
         }

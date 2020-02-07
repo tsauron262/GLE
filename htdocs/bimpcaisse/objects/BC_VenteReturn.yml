@@ -37,6 +37,12 @@ fields:
             field_name: show_equipment
             show_values: 1
         
+    type: 
+        label: Type
+        type: id
+        values: 
+            array: types
+            
     qty: 
         label: Quantité
         type: qty
@@ -74,6 +80,8 @@ fields:
 forms: 
     default: 
         rows: 
+            - field: type
+              required: 1
             - field: id_product
             - custom: 1
               label: Afficher équipement
@@ -113,6 +121,8 @@ lists:
         sort_way: desc
         n: 10
         cols:
+            type: 
+                field: type
             product: 
                 label: Produit
                 value: 

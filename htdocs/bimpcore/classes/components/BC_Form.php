@@ -345,6 +345,10 @@ class BC_Form extends BC_Panel
 
         $label = (isset($params['label']) && $params['label']) ? $params['label'] : $field->params['label'];
         $required = (!is_null($params['required']) ? (int) $params['required'] : (int) $field->params['required']);
+        if ($required && !$field->params['required']) {
+            $field->params['required'] = 1;
+        }
+
         $input_type = $this->object->getConf('fields/' . $field_name . '/input/type', 'text', false);
         $display_if = (bool) (!is_null($params['display_if']));
         if (!$display_if) {

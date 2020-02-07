@@ -185,9 +185,32 @@ class BContract_echeancier extends BimpObject {
             'errors' => $errors,
         );
     }
+    
+    public function actionDelete($data, &$success) {
+        $parent = $this->getParentInstance();
+        if(count(getElementElement('contrat', 'facture', $parent->id))) {
+            $errors = "Vous ne pouvez pas supprimer cet échéancier car il y à une facture dans celui-ci";
+        } else {
+            if($this->db->delete('bcontract_prelevement', 'id = ' . $this->id)) {
+                $success = "Echéancier supprimé avec succès";
+            } else {
+                $errors = 'Une erreur est survenu lors de la suppression de l\'échéancier';
+            }
+        }
+        return [
+            'errors' => $errors,
+            'warnings' => $warnings,
+            'success' => $success
+        ];
+    }
 
     public function displayEcheancier($data) {
         global $user;
+        
+        if(!$this->isLoaded()) {
+            return BimpRender::renderAlerts("Ce contrat ne comporte pas d'échéancier car il à été facturé par un autre moyen", 'info', false);
+        }
+        
         $instance_facture = $this->getInstance('bimpcommercial', 'Bimp_Facture');
         $parent = $this->getParentInstance();
         $html = '';
@@ -303,8 +326,12 @@ class BContract_echeancier extends BimpObject {
             $html .= '</tbody>';
             $html .= '</table>';
 
-            if ($parent->is_not_finish() && $user->rights->facture->creer) {
-                $html .= '<div class="panel-footer"><div class="btn-group"><button type="button" class="btn btn-default" aria-haspopup="true" aria-expanded="false" onclick="' . $this->getJsLoadModalForm('create_perso', "Créer une facture personalisée ou une facturation de plusieurs périodes") . '"><i class="fa fa-plus-square-o iconLeft"></i>Créer une facture personalisée ou une facturation de plusieurs périodes</button></div></div>';
+            if (($parent->is_not_finish() && $user->rights->facture->creer) || ($user->admin || $user->id == 460)) {
+                $html .= '<div class="panel-footer">';
+                if($user->admin || $user->id == 460)
+                    $html .= '<div class="btn-group"><button type="button" class="btn btn-danger bs-popover" '.BimpRender::renderPopoverData('Supprimer l\'échéancier').' aria-haspopup="true" aria-expanded="false" onclick="' . $this->getJsActionOnclick('delete') . '"><i class="fa fa-times"></i></button></div>';
+                $html .= '<div class="btn-group"><button type="button" class="btn btn-default" aria-haspopup="true" aria-expanded="false" onclick="' . $this->getJsLoadModalForm('create_perso', "Créer une facture personalisée ou une facturation de plusieurs périodes") . '"><i class="fa fa-plus-square-o iconLeft"></i>Créer une facture personalisée ou une facturation de plusieurs périodes</button></div>';
+                $html .= '</div>';
             }
         }
 

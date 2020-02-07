@@ -2462,6 +2462,10 @@ class Bimp_Facture extends BimpComm
             $this->dol_object->update_price();
             $this->dol_object->fetch((int) $this->id);
             $this->hydrateFromDolObject();
+            
+            if (!$this->isValidatable($errors)) {
+                return $errors;
+            }
 
             $lines = $this->getLines('not_text');
             $total_ttc_wo_discounts = (float) $this->getTotalTtcWithoutDiscountsAbsolutes();
@@ -2486,6 +2490,9 @@ class Bimp_Facture extends BimpComm
 
             if (!round($total_ttc, 2) && !$has_amounts_lines) {
                 $errors[] = 'Aucune ligne avec montant non nul ajoutée à cette facture';
+            }
+            
+            if (count($errors)) {
                 return $errors;
             }
 

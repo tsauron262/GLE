@@ -142,6 +142,10 @@ fields:
         type: id_object
         object: facture
         default_value: 0
+    marge: 
+        label: Marge
+        type: money
+        default_value: 0
     
     date_commande:
         label: Date
@@ -703,6 +707,8 @@ lists_cols:
     date_create: 
         field: date_creation
         date_commande:
+    marge: 
+        field: marge
     date_commande: 
         field: date_commande
     date_livraison: 

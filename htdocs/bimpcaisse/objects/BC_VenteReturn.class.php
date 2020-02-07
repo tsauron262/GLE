@@ -3,7 +3,16 @@
 class BC_VenteReturn extends BimpObject
 {
 
-    public function getLabel()
+    const TYPE_RETOUR = 1;
+    const TYPE_RACHAT = 2;
+
+    public static $types = array(
+        0                 => '',
+        self::TYPE_RETOUR => 'Retour produit vendu',
+        self::TYPE_RACHAT => 'Rachat'
+    );
+
+    public function getLabel($with_type = false)
     {
         $label = '';
 
@@ -13,6 +22,18 @@ class BC_VenteReturn extends BimpObject
 //            $label .= ' - ' . $equipment->getData('serial');
         } elseif ((int) $this->getData('id_product')) {
             $label = $this->displayData('id_product', 'nom', false, true);
+        }
+
+        if ($with_type) {
+            switch ($this->getData('type')) {
+                case self::TYPE_RETOUR:
+                    $label .= ' (RETOUR)';
+                    break;
+
+                case self::TYPE_RACHAT:
+                    $label .= ' (RACHAT)';
+                    break;
+            }
         }
 
         return $label;
@@ -130,11 +151,11 @@ class BC_VenteReturn extends BimpObject
                 $errors[] = 'Aucun produit n\'est associé à l\'équipement ' . $equipment->getData('serial');
                 return $errors;
             }
-            
+
             if (!$equipment->isAvailable(0, $errors)) {
                 return $errors;
             }
-            
+
             $prix_ht = 0;
             $prix_ttc = 0;
             $tva_tx = (float) $product->dol_object->tva_tx;
@@ -162,7 +183,7 @@ class BC_VenteReturn extends BimpObject
                 return array('Aucun produit sélectionné');
             }
 
-            $result = $this->db->getValue('bc_vente_return', 'id', '`id_vente` = ' . (int) $vente->id . ' AND `id_product` = ' . (int) $this->getData('id_product'));
+            $result = $this->db->getValue('bc_vente_return', 'id', '`id_vente` = ' . (int) $vente->id . ' AND `id_product` = ' . (int) $this->getData('id_product') . ' AND `type` = ' . (int) $this->getData('type'));
 
             if (!is_null($result)) {
                 return array('Ce produit a déjà été ajouté aux retours');

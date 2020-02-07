@@ -1520,7 +1520,7 @@ class indexController extends BimpController
 
             $currentReturnedEquipments = $vente->getCurrentReturnedEquipments();
             $list = Equipment::findEquipments($serial);
-
+            
             if (count($list)) {
                 foreach ($list as $id_equipment) {
                     if (in_array($id_equipment, $currentReturnedEquipments)) {
@@ -1544,6 +1544,7 @@ class indexController extends BimpController
                     }
 
                     $eq_warnings = $equipment->checkPlaceForReturn($id_client);
+                    
                     $place = $equipment->getCurrentPlace();
 
                     $label = $product->getRef() . ' - NS: ' . $equipment->getData('serial');

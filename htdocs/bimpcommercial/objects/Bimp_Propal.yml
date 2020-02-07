@@ -61,6 +61,10 @@ fields:
     date_livraison: 
         label: Date de livraison
         type: date
+    marge: 
+        label: Marge
+        type: money
+        default_value: 0
     model_pdf: 
         default_value: bimpdevis
     pdf_hide_pu: 
@@ -415,6 +419,8 @@ lists_cols:
     livraison: 
         field: date_livraison
         label: Livraison
+    marge: 
+        field: marge
            
 filters_panels: 
     default: 

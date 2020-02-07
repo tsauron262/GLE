@@ -226,7 +226,7 @@ class BC_Vente extends BimpObject
 
             $returns[] = array(
                 'id_return'     => (int) $return->id,
-                'label'         => $return->getLabel(),
+                'label'         => $return->getLabel(true),
                 'qty'           => $qty,
                 'unit_price'    => BimpTools::displayMoneyValue($price_ttc, 'EUR'),
                 'unit_price_ht' => BimpTools::displayMoneyValue((float) $return->getData('unit_price_tax_ex'), 'EUR'),
@@ -547,7 +547,7 @@ class BC_Vente extends BimpObject
         return BimpRender::renderAlerts('Remise d\'ID ' . $id_discount . ' non trouvée');
     }
 
-    // Rendus HTML: 
+    // Rendus HTML:
 
     public function renderCreationViewHtml()
     {
@@ -2342,6 +2342,7 @@ class BC_Vente extends BimpObject
             $equipment = null;
             $product = null;
             $serial = '';
+            $type_return = (int) $return->getData('type');
 
             if ((int) $return->getData('id_equipment')) {
                 $equipment = $return->getChildObject('equipment');
@@ -2368,11 +2369,31 @@ class BC_Vente extends BimpObject
             ));
 
             $line->id_product = (int) $product->id;
-            $line->desc = ' (RETOUR) ' . $product->getRef() . ' - ' . $product->getName() . ($serial ? ' - N° de série: ' . $serial : '');
+            $line->desc = '(' . ($type_return === 2 ? 'RACHAT' : 'RETOUR') . ') ' . $product->getRef() . ' - ' . $product->getName() . ($serial ? ' - N° de série: ' . $serial : '');
             $line->qty = ((int) $return->getData('qty') * -1);
             $line->tva_tx = (float) $return->getData('tva_tx');
             $line->pu_ht = (float) BimpTools::calculatePriceTaxEx((float) $return->getData('unit_price_tax_in'), $line->tva_tx);
 
+            $pa_ht = 0;
+
+            switch ((int) $return->getData('type')) {
+                case BC_VenteReturn::TYPE_RETOUR:
+                default:
+                    if (BimpObject::objectLoaded($equipment)) {
+                        $pa_ht = (float) $equipment->getData('prix_achat');
+                    }
+
+                    if (!$pa_ht) {
+                        $pa_ht = $product->getCurrentPaHt();
+                    }
+                    break;
+
+                case BC_VenteReturn::TYPE_RACHAT:
+                    $pa_ht = (float) $line->pu_ht;
+                    break;
+            }
+
+            $line->pa_ht = $pa_ht;
             $line_errors = $line->create($warnings, true);
 
             if (count($line_errors)) {
@@ -2452,11 +2473,17 @@ class BC_Vente extends BimpObject
                 $line->tva_tx = (float) $article->getData('tva_tx');
             }
 
-            $pfp = $product->getCurrentFournPriceObject();
-            if (BimpObject::objectLoaded($pfp)) {
-                $line->id_fourn_price = $pfp->id;
-                $line->pa_ht = (float) $pfp->getData('price');
+            $pa_ht = 0;
+
+            if (BimpObject::objectLoaded($equipment)) {
+                $pa_ht = (float) $equipment->getData('prix_achat');
             }
+
+            if (!$pa_ht && BimpObject::objectLoaded($product)) {
+                $pa_ht = (float) $product->getCurrentPaHt();
+            }
+
+            $line->pa_ht = $pa_ht;
 
             $line_warnings = array();
             $line_errors = $line->create($line_warnings, true);

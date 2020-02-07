@@ -884,7 +884,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
         return 0;
     }
     
-    public function display_cgv($pdf, $nb = 8) {
+    public function display_cgv($pdf, $nb = 9) {
         $current = 1;
         for($i=1; $i <= $nb; $i++) {
             $affiche_paraphe = true;

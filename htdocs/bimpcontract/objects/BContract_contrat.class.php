@@ -874,7 +874,7 @@ class BContract_contrat extends BimpDolObject {
         
         $create = false;
         
-        if(!$instance->find(Array('id_contrat' => $this->id))) {
+        if(!$instance->find(Array('id_contrat' => $this->id)) && $this->getData('f_statut') != self::CONTRAT_STATUS_VALIDE) {
             $create = true;
         }
         

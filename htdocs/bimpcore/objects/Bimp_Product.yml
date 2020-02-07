@@ -970,38 +970,38 @@ lists_cols:
     accountancy_code_sell:
         field: accountancy_code_sell
     accountancy_code_sell_ue:
-       label: Code Comptable Vente (UE)
+       label: Code Comptable Vente (Final UE)
        value:
            callback:
                method: getCodeComptableVente
                params:
                    - 2
     accountancy_code_sell_ex:
-       label: Code Comptable Vente (Export)
+       label: Code Comptable Vente (Final Export)
        value:
            callback:
                method: getCodeComptableVente
                params:
                    - 3
     accountancy_code_sell_reel:
-        label: Code Comptable Vente (Final)
+        label: Code Comptable Vente (Final France)
         value:
             callback: getCodeComptableVente
     accountancy_code_buy:
         field: accountancy_code_buy
     accountancy_code_buy_reel:
-        label: Code Comptable Achat (Final)
+        label: Code Comptable Achat (Final France)
         value:
             callback: getCodeComptableAchat
     accountancy_code_buy_ue:
-        label: Code Comptable Achat (UE)
+        label: Code Comptable Achat (Final UE)
         value:
             callback: 
                 method: getCodeComptableAchat
                 params:
                     - 2
     accountancy_code_buy_ex:
-        label: Code Comptable Achat (Export)
+        label: Code Comptable Achat (Final Export)
         value:
             callback: 
                 method: getCodeComptableAchat

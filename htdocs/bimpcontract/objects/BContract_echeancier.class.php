@@ -213,6 +213,7 @@ class BContract_echeancier extends BimpObject {
         
         $instance_facture = $this->getInstance('bimpcommercial', 'Bimp_Facture');
         $parent = $this->getParentInstance();
+        $societe = $this->getInstance('bimpcore', "Bimp_Societe", $parent->getData('fk_soc'));
         $html = '';
         $html .= '<table class="noborder objectlistTable" style="border: none; min-width: 480px">';
         $html .= '<thead>';
@@ -359,6 +360,7 @@ class BContract_echeancier extends BimpObject {
             $html .= "<tr> <th style='background-color:#ed7c1c;color:white;text-align:center'>Reste à payer</th> <td style='text-align:center'><b class='danger'> " . price($parent->getTotalContrat() - $parent->getTotalDejaPayer(true)) . " € </b></td> <td style='text-align:center'><b class='danger'> " . price(($parent->getTotalContrat(true) * 1.20) - ($parent->getTotalDejaPayer(true) * 1.20)) . " €</b></td> </tr>";
         }
         $html .= "</table>";
+        $html .= '<h4>Client: '.$societe->getNomUrl().'</h4>';
 
 
         return $html;

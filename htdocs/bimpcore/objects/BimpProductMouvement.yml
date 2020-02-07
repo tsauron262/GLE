@@ -1,0 +1,208 @@
+table: stock_mouvement
+primary: rowid
+icon: fas_exchange-alt
+
+labels: 
+    name: Mouvement de stock
+    name_plur: Mouvements de stock
+    is_female: 0
+    
+objects:   
+    product: 
+        instance: 
+            id_object: 
+                field_value: fk_product
+            
+    entrepot: 
+        instance: 
+            id_object: 
+                field_value: fk_entrepot
+               
+    category: 
+        relation: none
+        delete: 0
+        instance: 
+            dol_object: 
+                module: categories
+                file: categorie
+
+    marque: 
+        extends: category
+        relation: hasOne
+        instance: 
+            id_object: 
+                field_value: marque
+                
+    gamme: 
+        extends: category
+        relation: hasOne
+        instance: 
+            id_object: 
+                field_value: gamme
+              
+                
+                
+fields: 
+    fk_entrepot: 
+        label: Entrepot
+        type: id_object
+        object: entrepot
+        values: 
+            array: entrepots
+    
+    fk_origin:
+        label: Id pièce d'origine
+        type: int
+           
+    origintype:
+        label: Type pièce d'origine
+        type: string
+        values: 
+           array: originetypes
+        
+    fk_product: 
+        label: Produit
+        type: id_object
+        object: product
+        input: 
+            type: search_product
+        display: 
+            nom_url_libelle: 
+                type: callback
+                method: displayProduct
+
+    product_categories: 
+        label: Catégories produit
+        extra: 1
+        type: items_list
+        items_data_type: id_object
+        object: category
+        
+    marque: 
+        label: Marque
+        extra: 1
+        type: id_object
+        object: marque
+        values: 
+            array: marques
+            
+    gamme: 
+        label: Gamme matériel
+        extra: 1
+        type: id_object
+        object: gamme
+        values: 
+            array: gammesMateriel
+        
+    type_materiel: 
+        label: Type matériel
+        value: 
+            callback: displayTypeMateriel
+            
+
+lists_cols:
+    fk_entrepot: 
+        field: fk_entrepot
+        display: nom_url
+    fk_product: 
+        field: fk_product
+        display: nom_url_libelle
+    marque: 
+        field: marque
+    gamme: 
+        field: gamme
+    type_materiel: 
+        label: Type matériel
+        value: 
+            callback: displayTypeMateriel
+        
+        
+lists: 
+    default: 
+        title: 
+            callback: displayTitre
+        icon: fas_box-open
+        checkboxes: 1
+        configurable: 1
+        filters_panel: default
+        sort_field: fk_entrepot
+        sort_way: desc
+        n: 50
+        cols: 
+            numero:
+                label: Réf
+                value:
+                    callback: displayId       
+            stockDate:
+                field: stockDate
+            fk_entrepot: 
+            fk_product: 
+            origin:
+                label: Origine
+                value:
+                    callback: displayOriginMvt
+#            marque: 
+#            gamme:
+#            type_materiel:
+
+        
+filters_panels: 
+    default: 
+        filters: 
+            origintype:
+                field: origintype
+            entrepot: 
+                field: fk_entrepot
+            product: 
+                field: fk_product
+            stock: 
+                field: reel
+            categ1:
+                custom: 1
+                label: Catégorie (1)
+                field: categ1
+                type: value
+                input:
+                    type: select
+                    options: 
+                        callback: getCategoriesArray
+            categ2:
+                custom: 1
+                label: Catégorie (2)
+                field: categ2
+                type: value
+                input:
+                    type: select
+                    options: 
+                        callback: getCategoriesArray
+            categ3:
+                custom: 1
+                label: Catégorie (3)
+                field: categ3
+                type: value
+                input:
+                    type: select
+                    options: 
+                        callback: getCategoriesArray
+            stockDateDifZero:
+                custom: 1
+                label: Stock a date <> 0
+                field: stockDateDifZero
+                type: check_list
+                items: 
+                  1: OUI
+            categorie:
+                child: product
+                field: categorie
+            collection:
+                child: product
+                field: collection
+            nature:
+                child: product
+                field: nature
+            famille:
+                child: product
+                field: famille
+            gamme:
+                child: product
+                field: gamme

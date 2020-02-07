@@ -111,13 +111,6 @@ class Bimp_Product extends BimpObject
                 return BimpCore::getConf('BIMPTOCEGID_frais_de_port_achat_ue');
             elseif($zone_vente == 3)
                 return BimpCore::getConf('BIMPTOCEGID_frais_de_port_achat_ex');
-        } elseif($type == 3) { // Commission
-            if($zone_vente == 1)
-                return BimpCore::getConf('BIMPTOCEGID_comissions_fr');
-            elseif($zone_vente == 2 || $zone_vente == 4)
-                return BimpCore::getConf('BIMPTOCEGID_comissions_ue');
-            elseif($zone_vente == 3)
-                return BimpCore::getConf('BIMPTOCEGID_comissions_ex');
         }
     }
     // ACHAT DE D3E juste pour la france
@@ -161,7 +154,15 @@ class Bimp_Product extends BimpObject
             elseif($zone_vente == 3)
                 return BimpCore::getConf('BIMPTOCEGID_frais_de_port_vente_ex');
         }
-        
+        elseif($type == 3){//commition
+            if($zone_vente == 1)
+                return BimpCore::getConf('BIMPTOCEGID_comissions_fr');
+            elseif($zone_vente == 2 || $zone_vente == 4)
+                return BimpCore::getConf('BIMPTOCEGID_comissions_ue');
+            elseif($zone_vente == 3)
+                return BimpCore::getConf('BIMPTOCEGID_comissions_ex');
+        }
+        return false;
     }
     public function getCodeComptableVenteTva($zone_vente = 1){
         if($zone_vente == 1)

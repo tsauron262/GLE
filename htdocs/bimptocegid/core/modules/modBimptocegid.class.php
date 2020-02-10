@@ -84,6 +84,7 @@ class modBimptocegid extends DolibarrModules {
         $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_vente_tva_fr", 44571000)';
         $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_vente_tva_ue", 44571200)';
         $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_vente_tva_null", 70750100)';
+        //$sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_vente_tva_null_service", 70650100)';
         $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_achat_tva_fr", 44566100)';
         $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_achat_tva_null", 60780000)';
         $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_achat_tva_null_service", 60480000)';
@@ -128,9 +129,9 @@ class modBimptocegid extends DolibarrModules {
         
         //Config
         $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_code_fournisseur_apple", "0000001000000000")';
-        
-        // Conf
+        $sql[] = 'INSERT INTO `'. MAIN_DB_PREFIX . 'bimpcore_conf` (`name`, `value`) VALUES ("BIMPTOCEGID_default_entrepot", 50)';
         $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPtoCEGID_start_current_trimestre", "2019-07-01")';
+        
         
         $extrafields = new ExtraFields($this->db);
         $extrafields->addExtrafield('type_compta', 'Classement du produit en comptabilitée', 'select', 200, null, 'product', 0, 0, 0, 'a:1:{s:7:"options";a:3:{i:0;s:11:"Pas de type";i:1;s:7:"Produit";i:2;s:7:"Service";}}', 1, null, 1);

@@ -146,7 +146,8 @@ class Inventory2 extends BimpDolObject
         $html .= '<p class="inputHelp">';
         $html .= 'Sélectionnez un entrepôt assoscié à son type puis cliquez sur "Ajouter"<br/>';
         $html .= '<strong>Attention ! </strong> Le premier couple entrepôt/type sera celui ';
-        $html .= 'dans lequel on placera les produits en trop lors des fermeture d\'inventaire.';
+        $html .= 'dans lequel on placera les produits en trop lors des fermeture d\'inventaire.<br/>';
+        $html .= 'C\'est également celui qui sera rempli en dernier lors des mouvements de stock.';
         $html .= '</p>';
 
         $html .= '<div style="display: none; margin-top: 10px">';
@@ -187,7 +188,7 @@ class Inventory2 extends BimpDolObject
         $errors = array();
         $status = (int) $data['status'];
         
-        $this->updateField("status", $status);
+//        $this->updateField("status", $status);
 
         // Open
         if ($status == self::STATUS_OPEN) {
@@ -275,11 +276,12 @@ class Inventory2 extends BimpDolObject
             if(!is_array($values))
                 continue;
             
-            if       ($values['diff'] < 0 and $qty_input == -$values['diff']) { // On en attends exactement cette quantité
+            if ($values['diff'] < 0 and $qty_input == -$values['diff']) { // On en attends exactement cette quantité
                 $this->createLine($id_product, 0, $qty_input, $fk_wt, $errors);
                 break;
             } elseif ($values['diff'] < 0 and $qty_input < -$values['diff']) { // On en attends + que ça dans ce stock
                 $this->createLine($id_product, 0, $qty_input, $fk_wt, $errors);
+                break;
             } elseif ($values['diff'] < 0 and $qty_input > -$values['diff']) { // On en attends pas autant
                 $qty_input += $values['diff'];
                 $this->createLine($id_product, 0, -$values['diff'], $fk_wt, $errors);
@@ -437,7 +439,7 @@ class Inventory2 extends BimpDolObject
             $filter = array('IN' => implode(',', array_keys($values)));
             $inventory_warehouse = BimpCache::getBimpObjectInstance($this->module, 'InventoryWarehouse', (int) $fk_wt);
             $html .= '<h3>' . $inventory_warehouse->renderName() . '</h3>';
-            $product = BimpObject::getInstance($this->module, 'ProductInventory');
+            $product = BimpObject::getInstance('bimpcore', 'Bimp_Product');
             $list = new BC_ListTable($product, 'inventory_stock');
             $list->addFieldFilterValue('rowid', $filter);
             $html .= $list->renderHtml();
@@ -464,7 +466,7 @@ class Inventory2 extends BimpDolObject
             }
             $filter = array('IN' => $ids_with_diff);
             $inventory_warehouse = BimpCache::getBimpObjectInstance($this->module, 'InventoryWarehouse', (int) $fk_wt);
-            $product = BimpObject::getInstance($this->module, 'ProductInventory');
+            $product = BimpObject::getInstance('bimpcore', 'Bimp_Product');
             $list = new BC_ListTable($product, 'inventory_stock', 1, null, 'Produits: ' . $inventory_warehouse->renderName());
             $list->identifier .= $fk_wt;
             $list->addFieldFilterValue('rowid', $filter);
@@ -530,16 +532,28 @@ class Inventory2 extends BimpDolObject
         $html = '';
 
         $diff = $this->getDiffProduct();
-        foreach ($diff as $fk_wt => $prods) {
+        
+        foreach ($diff as $wt => $prods) {
+            
+            $wt_obj = BimpCache::getBimpObjectInstance($this->module, 'InventoryWarehouse', $wt);
+            
+            $errors = '<h2>' . $wt_obj->renderName(). '</h2>' ;
+            $has_diff = false;
+
             foreach($prods as $id_product => $data) {
                 $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $id_product);
                 if($data['diff'] != 0) {
-                    $error = 'Le produit ' . $product->getData('ref') . ' a été scanné <strong>' . (float) $data['nb_scan'] .
+                    $has_diff = true;
+                    $errors .= 'Le produit ' . $product->getData('ref') . ' a été scanné <strong>' . (float) $data['nb_scan'] .
                             '</strong> fois et il est présent <strong>' . (float) $data['stock'] . '</strong> fois dans le stock ' .
-                            ' il va être modifié de <strong>' . (float) $data['diff'] . '</strong>.';
-                    $html .= BimpRender::renderAlerts($error, 'warning');
+                            ' il va être modifié de <strong>' . ((0 < (float) $data['diff']) ? '+' : '') . (float) $data['diff'] . '</strong>.<br/>';
                 }
             }
+            
+            if(!$has_diff)
+                $errors .= '<strong>OK !</strong>';
+            
+            $html .= BimpRender::renderAlerts($errors, 'warning');
         }
 
         return $html;
@@ -613,6 +627,8 @@ class Inventory2 extends BimpDolObject
     }
     
     public function close() {
+        $errors = array_merge($errors, $this->moveEquipments());
+
         return $this->getErrorsEquipment();
     }
     
@@ -627,18 +643,21 @@ class Inventory2 extends BimpDolObject
         
         if (!count($errors)) {
             $errors = array_merge($errors, $this->moveProducts($only_scanned));
-            $errors = array_merge($errors, $this->moveEquipments());
         }
        
         return $errors;
     }
     
+
     public function moveProducts($only_scanned) {
 
         $errors = array();
         $move_product_package = array();
         $move_product_stock = array();
         $package_dest = $this->getPackageInventory();
+        
+        $id_package_reserve = 550;
+        $move_product_ori_inco = array();
         
         if(!BimpObject::objectLoaded($package_dest)) {
             $errors[] = "Problème lors du chargement du package de l'inventaire.";
@@ -652,78 +671,144 @@ class Inventory2 extends BimpDolObject
             // Dans les package
             if((int) $wt->getData('type') != (int) BE_Place::BE_PLACE_ENTREPOT) {
                 $product_stock = $wt->getProductStock($only_scanned, 1);
-
-                foreach($product_stock as $id_product => $datas) {
+                $this->prepareMovePackage($product_stock, $product_scanned, $move_product_package);
                 
-                    // Calcul de la diff
-                    if(isset($product_scanned[$id_product]))
-                        $reste_scan = $product_scanned[$id_product] - $datas['qty'];
-                    else
-                        $reste_scan = -$datas['qty'];
-
-                    // On en a scanné au moins autant
-                    if(0 <= $reste_scan) {
-                        $product_scanned[$id_product] -= $datas['qty'];
-    //                    if($reste_scan == 0)
-    //                        unset($product_scanned[$id_product]);
-
-                    // On en a scanné moins
-                    } else {
-                        if(!isset($move_product_package[$datas['id_package']]))
-                            $move_product_package[$datas['id_package']] = array();
-                        $move_product_package[$datas['id_package']][$id_product] = $datas['qty'];
-                    }
-
-                } // Fin boucle sur product stock
+                foreach($product_scanned as $id => $qty)
+                    $move_product_ori_inco[$id] += $qty;
                 
             } else { // Ce n'est pas dans un package (donc dans stock)
                 
-                $product_stock = $wt->getProductStock($only_scanned);
-
-                foreach($product_stock as $id_product => $qty) {
-
-//                        $product_stock => $products[(int) $obj->id_product] = (int) $obj->qty;
-//                        
-                    // Calcul de la diff
-                    if(isset($product_scanned[$id_product]))
-                        $reste_scan = $product_scanned[$id_product] - $qty;
-                    else
-                        $reste_scan = -$qty;
-
-                    // On en a scanné au moins autant
-                    if(0 <= $reste_scan) {
-                        $product_scanned[$id_product] -= $qty;
-    //                    if($reste_scan == 0)
-    //                        unset($product_scanned[$id_product]);
-
-                    // On en a scanné moins
-                    } else {
-                        if(!isset($move_product_stock[$id_product]))
-                            $move_product_stock[$id_product] = 0;
-                        $move_product_stock[$id_product] += $qty;
-                    }
-                }
+                // TODO use that
+//                $diff = $this->getDiffProduct((int) $wt->getData('id'));
+//                $product_stock = $wt->getProductStock($only_scanned);
+                $this->prepareMoveStock($wt->getData('id'), /*$product_stock, $product_scanned, */$move_product_stock);
+                
+//                foreach($product_scanned as $id => $qty)
+//                    $move_product_stock[$id] += $qty;
             }
             
+            
+            
         } // Fin boucle sur WT
+
+        self::loadClass('bimpequipment', 'BE_Package');
         
-        self::loadClass('bimpequipment', 'BE_Package');/*) {
-            $errors[] = 'Erreur de chargement de la class package';
-            return $errors;
-        }*/
+        echo '<pre>';
+        echo 'scanné';
+        print_r($product_scanned);
+        echo 'package';
+        print_r($move_product_package);
+        echo 'stock';
+        print_r($move_product_stock);
+        echo 'move_product_ori_inco';
+        print_r($move_product_ori_inco);
+        die();
 
         // Package
         foreach ($move_product_package as $id_package => $products) {
             if(is_array($products) and !empty($products))
                 $errors = array_merge($errors, BE_Package::moveElements($id_package, (int) $package_dest->id, $products, array()));
+//              moveElements($id_package_src, $id_package_dest, $products = array(), $equipments = array())
         }
         
+        foreach ($move_product_ori_inco as $id_product => $qty)
+            $errors = array_merge($errors, BE_Package::moveElements($id_package_reserve, (int) $package_dest->id, $products, array()));
+        
+        // Package origine inconnue
+        
+        
         // Stock
-        foreach($move_product_stock as $id_product => $qty)
-            $errors = array_merge($errors, $package_dest->addProduct($id_product, $qty, $this->getData('fk_warehouse')));
+        foreach($move_product_stock as $id_wt => $prods_qty) {
+            
+            $wt = BimpCache::getBimpObjectInstance($this->module, 'InventoryWarehouse', $id_wt);
+            $fk_warehouse = (int) $wt->getData('fk_warehouse');
+            
+            foreach($prods_qty as $id_product => $qty)
+                $errors = array_merge($errors, $package_dest->addProduct($id_product, $qty, $fk_warehouse));
+            
+        }
         
         return $errors;
     }
+    
+    
+    /**
+     * Utilisé par moveProducts
+     */
+    private function prepareMoveStock($id_wt, &$move_product_stock) {
+        
+        $prods = $this->getDiffProduct($id_wt);
+        
+//        echo '<pre>';
+//        print_r($prods);
+//        die();
+        
+        foreach($prods as $id_prod => $data)
+            $move_product_stock[$id_wt][$id_prod] += -$data['diff'];
+                
+//        foreach($product_stock as $id_product => $qty) {
+//
+//            if(0 < $qty) {
+//                
+//                // Calcul de la diff
+//                if(isset($product_scanned[$id_product])) {
+//                    $reste_scan = $product_scanned[$id_product] - $qty;
+//                    $product_scanned[$id_product] -= $qty;
+//                } else
+//                    $reste_scan = -$qty;
+//
+//                // On en a scanné autant
+//                if(0 == $reste_scan) {
+//                    unset($product_scanned[$id_product]);
+//
+//                // On en a scanné moins
+//                } else {
+//                    if(!isset($move_product_stock[$id_product]))
+//                        $move_product_stock[$id_product] = 0;
+//                    $move_product_stock[$id_product] += $reste_scan;
+//                }
+//                
+//                
+//            } else {
+//
+//            }
+//        }
+    }
+    
+    /**
+     * Utilisé par moveProducts
+     */
+    private function prepareMovePackage($product_stock, &$product_scanned, &$move_product_package) {
+
+        foreach($product_stock as $id_product => $datas) {
+
+            if(0 < $datas['qty']) {
+                // Calcul de la diff
+                if(isset($product_scanned[$id_product]))
+                    $reste_scan = $product_scanned[$id_product] - $datas['qty'];
+                else
+                    $reste_scan = -$datas['qty'];
+
+                // On en a scanné autant
+                if($reste_scan == 0)
+                    unset($product_scanned[$id_product]);
+                // On en a scanné plus ou moins
+                else {
+                    if($reste_scan < 0)
+                        unset($product_scanned[$id_product]);
+                    
+                    if(!isset($move_product_package[$datas['id_package']]))
+                        $move_product_package[$datas['id_package']] = array();
+                    $move_product_package[$datas['id_package']][$id_product] = $reste_scan;
+                }
+            // Qty inférieur à 0
+            } else {
+                
+            }
+
+        }
+    }
+
     
     
     public function moveEquipments() {

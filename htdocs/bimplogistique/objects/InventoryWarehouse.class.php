@@ -70,7 +70,7 @@ class InventoryWarehouse extends BimpDolObject {
             if(is_array($filter_products))
                 $sql .= ' AND p.rowid    IN(' . implode(',', array_keys($filter_products)) . ')';
         }
-
+        
         $result = $this->db->db->query($sql);
         if ($result and mysqli_num_rows($result) > 0) {
             while ($obj = $this->db->db->fetch_object($result)) {
@@ -102,6 +102,7 @@ class InventoryWarehouse extends BimpDolObject {
         $sql .= ' GROUP BY fk_product';
         if(is_array($filter_products))
             $sql .= ' AND fk_product IN(' . implode(',', array_keys($filter_products)) . ')';
+
 
         $result = $this->db->db->query($sql);
         if ($result and mysqli_num_rows($result) > 0) {

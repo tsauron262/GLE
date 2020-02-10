@@ -432,6 +432,22 @@ class Bimp_Product extends BimpObject
 
     // Getters codes comptables: 
 
+    public function getProductTypeCompta()
+    {
+        $type_compta = $this->getData('type_compta');
+
+
+        if ($type_compta > 0) {
+            $type = $type_compta - 1;
+        } else {
+            if ($frais_de_port = $this->db->getRow('categorie_product', 'fk_categorie = 9705 AND fk_product = ' . $this->id) || $this->id == 129950)
+                $type = 2;
+            else
+                $type = $this->getData('fk_product_type');
+        }
+        return $type;
+    }
+
     public function getCodeComptableAchat($zone_vente = 1, $force_type = - 1)
     {
         if ($force_type == -1) {
@@ -936,22 +952,6 @@ class Bimp_Product extends BimpObject
     {
         // Utiliser ***impérativement*** le cache pour ce genre de requêtes         
         return self::getProductsTagsByTypeArray($type, $include_empty);
-    }
-
-    public function getProductTypeCompta()
-    {
-        $type_compta = $this->getData('type_compta');
-
-
-        if ($type_compta > 0) {
-            $type = $type_compta - 1;
-        } else {
-            if ($frais_de_port = $this->db->getRow('categorie_product', 'fk_categorie = 9705 AND fk_product = ' . $this->id) || $this->id == 129950)
-                $type = 2;
-            else
-                $type = $this->getData('fk_product_type');
-        }
-        return $type;
     }
 
     // Getters stocks:

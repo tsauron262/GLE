@@ -27,21 +27,27 @@ if (!$user->admin) {
 
 $bdb = new BimpDb($db);
 
+$where = '(`fk_origin` IS NULL OR `fk_origin` = 0)';
+//$where .= ' AND `inventorycode` != \'\' AND `inventorycode` IS NOT NULL';
+$where .= ' AND `inventorycode` LIKE \'CMDF%\'';
+$rows = $bdb->getRows('stock_mouvement', $where, null, 'array', array('rowid', 'inventorycode'), 'rowid', 'desc');
+
 if (!(int) BimPTools::getValue('exec', 0)) {
     echo 'Corrige l\'origine des mouvements de stock<br/><br/>';
 
-    $path = pathinfo(__FILE__);
-    echo '<a href="' . DOL_URL_ROOT . '/bimpcore/scripts/' . $path['basename'] . '?exec=1" class="btn btn-default">';
-    echo 'Lancer';
-    echo '</a>';
-    exit;
+    if (is_array && count($rows)) {
+        echo count($rows) . ' élément(s) à traiter <br/><br/>';
+        $path = pathinfo(__FILE__);
+        echo '<a href="' . DOL_URL_ROOT . '/bimpcore/scripts/' . $path['basename'] . '?exec=1" class="btn btn-default">';
+        echo 'Lancer';
+        echo '</a>';
+        exit;
+    }
+
+    echo BimpRender::renderAlerts('Aucun élément à traiter', 'info');
 }
 
 // Corps du script
-
-$where = '(`fk_origin` IS NULL OR `fk_origin` = 0)';
-$where .= ' AND `inventorycode` != \'\' AND `inventorycode` IS NOT NULL';
-$rows = $bdb->getRows('stock_mouvement', $where, null, 'array', array('rowid', 'inventorycode'), 'rowid', 'desc');
 
 foreach ($rows as $r) {
     $code = $r['inventorycode'];
@@ -71,7 +77,7 @@ foreach ($rows as $r) {
             }
             echo '<br/>';
         }
-        
+
         unset($comm);
         BimpCache::$cache = array();
     }

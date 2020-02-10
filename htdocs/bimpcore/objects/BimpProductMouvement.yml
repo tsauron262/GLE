@@ -101,8 +101,25 @@ fields:
     
     datem:
         label: Date du mouvement
-        type: date
-            
+        type: datetime
+        
+    type_mouvement:
+        label: Type du mouvement
+        type: int
+        values:
+            array: type_mouvement
+    
+    value:
+        label: Quantité
+        type: int
+    
+    inventorycode:
+        label: Code inventaire
+        type: string
+    
+    label:
+        label: Libellé mouvement
+        type: string
 
 lists_cols:
     fk_entrepot: 
@@ -140,11 +157,21 @@ lists:
             datem:
                 field: datem
             fk_entrepot: 
-            fk_product: 
+            fk_product:
+            inventorycode:
+                field: inventorycode
+            label:
+                field: label
             origin:
                 label: Origine
                 value:
                     callback: displayOriginMvt
+            value:
+                field: value
+            type_mouvement:
+                field: type_mouvement
+            
+            
 #            marque: 
 #            gamme:
 #            type_materiel:
@@ -159,54 +186,9 @@ filters_panels:
                 field: fk_entrepot
             product: 
                 field: fk_product
-            stock: 
-                field: reel
-            categ1:
-                custom: 1
-                label: Catégorie (1)
-                field: categ1
-                type: value
-                input:
-                    type: select
-                    options: 
-                        callback: getCategoriesArray
-            categ2:
-                custom: 1
-                label: Catégorie (2)
-                field: categ2
-                type: value
-                input:
-                    type: select
-                    options: 
-                        callback: getCategoriesArray
-            categ3:
-                custom: 1
-                label: Catégorie (3)
-                field: categ3
-                type: value
-                input:
-                    type: select
-                    options: 
-                        callback: getCategoriesArray
-            stockDateDifZero:
-                custom: 1
-                label: Stock a date <> 0
-                field: stockDateDifZero
-                type: check_list
-                items: 
-                  1: OUI
-            categorie:
-                child: product
-                field: categorie
-            collection:
-                child: product
-                field: collection
-            nature:
-                child: product
-                field: nature
-            famille:
-                child: product
-                field: famille
-            gamme:
-                child: product
-                field: gamme
+            inventorycode:
+                field: inventorycode
+            value:
+                field: value
+            
+

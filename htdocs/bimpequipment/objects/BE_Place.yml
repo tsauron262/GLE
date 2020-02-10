@@ -135,6 +135,16 @@ fields:
     code_mvt: 
         label: Code Mouvement de stock
         
+    origin: 
+        label: Origine
+        values: 
+            array: origins
+                
+    id_origin: 
+        label: ID origine
+        type: id
+        default_values: 0
+        
 lists:
     default: 
         title: Emplacements
@@ -160,3 +170,7 @@ lists:
             infos: 
                 field: infos
                 edit: 1
+            origin: 
+                label: Origine
+                value: 
+                    callback: displayOrigin

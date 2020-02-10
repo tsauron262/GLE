@@ -1613,7 +1613,9 @@ class Bimp_CommandeFournLine extends FournObjectLine
                             'date'         => date('Y-m-d H:i:s'),
                             'id_entrepot'  => (int) $entrepot->id,
                             'infos'        => $stock_label,
-                            'code_mvt'     => $code_mvt
+                            'code_mvt'     => $code_mvt,
+                            'origin'       => 'order_supplier',
+                            'id_origin'    => (int) $commande_fourn->id
                         ));
                         if (!count($pl_errors)) {
                             $pl_warnings = array();
@@ -1621,14 +1623,6 @@ class Bimp_CommandeFournLine extends FournObjectLine
                         }
                         if (count($pl_errors)) {
                             $errors[] = BimpTools::getMsgFromArray($pl_errors, 'Echec de la création de l\'emplacement pour le numéro de série "' . $equipment->getData('serial') . '"');
-
-                            // Commenté car si erreurs, la validation de la réception sera annulée
-//                        $msg = 'ECHEC CREATION EMPLACEMENT EQUIPEMENT - A CORRIGER MANUELLEMENT' . "\n";
-//                        $msg .= 'Plateforme: ' . DOL_URL_ROOT . ' - Equipement: ' . $equipment->id . ' - Entrepot: ' . $entrepot->id;
-//                        $msg .= 'Erreurs:' . "\n";
-//                        $msg .= print_r($pl_errors, 1);
-//                        dol_syslog($msg, LOG_ERR);
-//                        mailSyn2('[ERREUR]', 'debugerp@bimp.fr', 'BIMP<no-reply@bimp.fr>', $msg);
                         }
                     }
                 }
@@ -1661,7 +1655,9 @@ class Bimp_CommandeFournLine extends FournObjectLine
                         'date'         => date('Y-m-d H:i:s'),
                         'place_name'   => 'Retourné au fournisseur ' . $fourn_label,
                         'infos'        => '(Retour au fournisseur) ' . $stock_label,
-                        'code_mvt'     => $code_mvt
+                        'code_mvt'     => $code_mvt,
+                        'origin'       => 'order_supplier',
+                        'id_origin'    => (int) $commande_fourn->id
                     ));
                     if (!count($pl_errors)) {
                         $pl_warnings = array();
@@ -1826,7 +1822,9 @@ class Bimp_CommandeFournLine extends FournObjectLine
                                             'date'         => date('Y-m-d H:i:s'),
                                             'id_entrepot'  => (int) $id_entrepot,
                                             'infos'        => '(Retour fournisseur) ' . $stock_label,
-                                            'code_mvt'     => $code_mvt
+                                            'code_mvt'     => $code_mvt,
+                                            'origin'       => 'order_supplier',
+                                            'id_origin'    => (int) $commande_fourn->id
                                         ));
                                         if (!count($eq_errors)) {
                                             $eq_errors = $new_place->create($eq_warnings);

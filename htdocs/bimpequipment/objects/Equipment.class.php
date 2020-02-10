@@ -1033,13 +1033,15 @@ class Equipment extends BimpObject
             $product = $this->getChildObject('product');
             if (!defined('DONT_CHECK_SERIAL') && BimpObject::objectLoaded($product)) {
                 global $user;
+                
+                $origin = $new_place->getData('origin');
+                $id_origin = (int) $new_place->getData('id_origin');
 
                 $prev_place_element = '';
                 $prev_place_id_element = null;
 
                 $new_place_element = '';
                 $new_place_id_element = null;
-
 
                 $codemove = $new_place->getData('code_mvt');
                 if (is_null($codemove) || !$codemove) {
@@ -1087,7 +1089,7 @@ class Equipment extends BimpObject
                             $prev_place_element = 'entrepot';
                             $prev_place_id_element = (int) $prev_place->getData('id_entrepot');
                             if ((int) $prev_place->getData('type') === BE_Place::BE_PLACE_ENTREPOT) {
-                                if ($product->correct_stock($user, $prev_place_id_element, 1, 1, $label, 0, $codemove, $new_place_element, $new_place_id_element) <= 0) {
+                                if ($product->correct_stock($user, $prev_place_id_element, 1, 1, $label, 0, $codemove, (($origin && $id_origin) ? $origin : $new_place_element), (($origin && $id_origin) ? $id_origin : $new_place_id_element)) <= 0) {
                                     $msg = 'Echec de la mise à jour du stock pour le produit "' . $product->ref . ' - ' . $product->label . '" (ID: ' . $product->id . ')';
                                     dol_syslog('[ERREUR STOCK] ' . $msg . ' - Nouvel emplacement équipement #' . $this->id . ' - Produit #' . $product->id . ' - Qté à retirer: 1 - Entrepôt #' . $prev_place_id_element, LOG_ERR);
                                 }
@@ -1111,7 +1113,7 @@ class Equipment extends BimpObject
                 }
 
                 if ((int) $new_place->getData('type') === BE_Place::BE_PLACE_ENTREPOT) {
-                    if ($product->correct_stock($user, $new_place_id_element, 1, 0, $label, 0, $codemove, $prev_place_element, $prev_place_id_element) <= 0) {
+                    if ($product->correct_stock($user, $new_place_id_element, 1, 0, $label, 0, $codemove, (($origin && $id_origin) ? $origin : $prev_place_element), (($origin && $id_origin) ? $id_origin : $prev_place_id_element)) <= 0) {
                         $msg = 'Echec de la mise à jour du stock pour le produit "' . $product->ref . ' - ' . $product->label . '" (ID: ' . $product->id . ')';
                         dol_syslog('[ERREUR STOCK] ' . $msg . ' - Nouvel emplacement équipement #' . $this->id . ' - Produit #' . $product->id . ' - Qté à ajouter: 1 - Entrepôt #' . $new_place_id_element, LOG_ERR);
                     }

@@ -185,8 +185,12 @@ fields:
         label: Vente au prix hors-taxes
         type: bool
         default_value: 0
+        
     note_plus: 
-        label: Note
+        label: Note privée
+        
+    note_public: 
+        label: Note publique
         
 fields_tables: 
     infos: 
@@ -206,6 +210,7 @@ fields_tables:
               display: nom_url
             - field: id_cond_reglement
             - field: note_plus
+            - field: note_public
             - field: id_facture
               display: card
               show: 

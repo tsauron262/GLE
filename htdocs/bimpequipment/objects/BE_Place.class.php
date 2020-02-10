@@ -17,21 +17,28 @@ class BE_Place extends BimpObject
     const BE_PLACE_ENQUETE = 90;
 
     public static $types = array(
-        1 => 'Client',
-        2 => 'En Stock',
-        3 => 'Utilisateur',
-        4 => 'Champ libre',
-        5 => 'En Présentation',
-        6 => 'Vol',
-        7 => 'Matériel de prêt',
-        8 => 'SAV',
-        9 => 'Utilisation interne',
+        1  => 'Client',
+        2  => 'En Stock',
+        3  => 'Utilisateur',
+        4  => 'Champ libre',
+        5  => 'En Présentation',
+        6  => 'Vol',
+        7  => 'Matériel de prêt',
+        8  => 'SAV',
+        9  => 'Utilisation interne',
         90 => 'Enquête'
+    );
+    public static $origins = array(
+        ''               => '',
+        'commande'       => 'Commande client',
+        'vente'          => 'Vente en caisse',
+        'transfert'      => 'Transfert',
+        'order_supplier' => 'Commande fournisseur'
     );
     public static $entrepot_types = array(self::BE_PLACE_ENTREPOT, self::BE_PLACE_PRESENTATION, self::BE_PLACE_PRET, self::BE_PLACE_SAV, self::BE_PLACE_VOL, self::BE_PLACE_INTERNE, self::BE_PLACE_ENQUETE);
     public static $immos_types = array(self::BE_PLACE_USER, self::BE_PLACE_INTERNE);
 
-    // Getters booléens: 
+    // Getters booléens:
 
     public function isCreatable($force_create = false, &$errors = array())
     {
@@ -185,7 +192,25 @@ class BE_Place extends BimpObject
         return $html;
     }
 
-    // Overrides: 
+    public function displayOrigin()
+    {
+        if ($this->getData('origin') && (int) $this->getData('id_origin') && array_key_exists($this->getData('origin'), self::$origins)) {
+            switch ($this->getData('origin')) {
+                case 'order_supplier':
+                    $comm = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn', (int) $this->getData('id_origin'));
+                    if (BimpObject::objectLoaded($comm)) {
+                        return $comm->getNomUrl(1, 1, 1, 'full');
+                    } else {
+                        return BimpRender::renderAlerts('La commande fournisseur d\'ID ' . $this->getData('id_origin') . ' n\'existe plus', 'danger');
+                    }
+                    break;
+            }
+        }
+
+        return '';
+    }
+
+    // Overrides:
 
     public function validate()
     {

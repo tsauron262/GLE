@@ -277,7 +277,7 @@ class BTC_export extends BimpObject {
             //die();
             return $this->db->getRows('facture_fourn', 'exported = 0 AND fk_statut IN(1,2) AND datec BETWEEN "'.BimpCore::getConf("BIMPtoCEGID_start_current_trimestre").' 00:00:00" AND "'.$hier->format('Y-m-d').'"', $this->sql_limit);
         } else {
-            return $this->db->getRows('facture_fourn', 'exported = 0 AND fk_statut IN(1,2) AND datec BETWEEN "'.$this->date_export.' 00:00:00" AND "'.$this->date_export.' 23:59:59" OR date_valid = "'.$this->date_export.'"', $this->sql_limit);
+            return $this->db->getRows('facture_fourn', 'exported = 0 AND fk_statut IN(1,2) AND (datec BETWEEN "'.$this->date_export.' 00:00:00" AND "'.$this->date_export.' 23:59:59" OR date_valid = "'.$this->date_export.'")', $this->sql_limit);
         }
     }
     

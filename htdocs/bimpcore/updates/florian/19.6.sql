@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bc_vente` ADD `note_public` TEXT NOT NULL DEFAULT '' AFTER `note_plus`;

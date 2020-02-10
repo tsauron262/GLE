@@ -1852,6 +1852,11 @@ class BL_CommandeShipment extends BimpObject
 
         $commande->checkShipmentStatus();
 
+        if (!count($errors)) {
+            $ref = $this->getData('ref');
+            $commande->addLog('Expédition n°' . $this->getData('num_livraison') . ($ref ? ' (' . $ref . ')' : '') . ' validée');
+        }
+
         return $errors;
     }
 
@@ -1900,6 +1905,11 @@ class BL_CommandeShipment extends BimpObject
         }
 
         $this->onLinesChange();
+
+        if (!count($errors)) {
+            $ref = $this->getData('ref');
+            $commande->addLog('Expédition n°' . $this->getData('num_livraison') . ($ref ? ' (' . $ref . ')' : '') . ' annulée');
+        }
 
         return $errors;
     }
@@ -2508,6 +2518,22 @@ class BL_CommandeShipment extends BimpObject
                     }
                 }
             }
+        }
+
+        return $errors;
+    }
+
+    public function delete(&$warnings = array(), $force_delete = false)
+    {
+        $num = $this->getData('num_livraison');
+        $ref = $this->getData('ref');
+        $commande = $this->getParentInstance();
+
+        $errors = parent::delete($warnings, $force_delete);
+
+        if (!count($errors) && BimpObject::objectLoaded($commande)) {
+            $ref = $this->getData('ref');
+            $commande->addLog('Expédition n°' . $this->getData('num_livraison') . ($ref ? ' (' . $ref . ')' : '') . ' supprimée');
         }
 
         return $errors;

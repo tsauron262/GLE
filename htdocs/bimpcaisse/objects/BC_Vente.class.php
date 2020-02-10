@@ -557,30 +557,45 @@ class BC_Vente extends BimpObject
 
         $html .= '<div id="currentVenteErrors" class="col-lg-12"></div>';
 
-        // Choix Commercial: 
         $id_user_resp = (int) $this->getData('id_user_resp');
         if (!$id_user_resp) {
             global $user;
             $id_user_resp = $user->id;
         }
         $html .= '<div class="col-lg-12">';
-        $html .= '<div id="curVenteCommercial" class="venteSection">';
-        $html .= '<span style="font-weight: bold; font-size: 14px;">';
-        $html .= BimpRender::renderIcon('fas_user-circle', 'iconLeft');
-        $html .= 'Commercial: ';
-        $html .= '</span>';
-        $html .= BimpInput::renderInput('search_user', 'id_user_resp', $id_user_resp);
-
-        $html .= '<br/><span style="font-weight: bold; font-size: 14px;">';
-        $html .= BimpRender::renderIcon('pencil', 'iconLeft');
-        $html .= 'Note: ';
-        $html .= '</span>';
-        $html .= BimpInput::renderInput('text', 'note_plus', $this->getData('note_plus'));
+        $html .= '<div id="curVenteInfos" class="venteSection">';
 
         // Bouton "Actualiser": 
         $html .= '<span class="btn btn-default" style="float: right; display: inline-block; margin-top: -2px" onclick="Vente.refresh();">';
         $html .= BimpRender::renderIcon('fas_redo', 'iconLeft') . 'Actualiser la vente';
         $html .= '</span>';
+
+        // Choix Commercial: 
+        $html .= '<div class="curVenteInfo">';
+        $html .= '<span style="font-weight: bold; font-size: 14px;">';
+        $html .= BimpRender::renderIcon('fas_user-circle', 'iconLeft');
+        $html .= 'Commercial: ';
+        $html .= '</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+        $html .= BimpInput::renderInput('search_user', 'id_user_resp', $id_user_resp);
+        $html .= '</div>';
+
+        // Note privée: 
+        $html .= '<br/><div class="curVenteInfo">';
+        $html .= '<span style="font-weight: bold; font-size: 14px;">';
+        $html .= BimpRender::renderIcon('pencil', 'iconLeft');
+        $html .= 'Note privée: ';
+        $html .= '</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+        $html .= BimpInput::renderInput('text', 'note_plus', $this->getData('note_plus'));
+        $html .= '</div>';
+
+        // Note publique: 
+        $html .= '<br/><div class="curVenteInfo">';
+        $html .= '<span style="font-weight: bold; font-size: 14px;">';
+        $html .= BimpRender::renderIcon('pencil', 'iconLeft');
+        $html .= 'Note publique: ';
+        $html .= '</span>&nbsp;&nbsp;';
+        $html .= BimpInput::renderInput('text', 'note_public', $this->getData('note_public'));
+        $html .= '</div>';
 
         $html .= '</div>';
         $html .= '</div>';
@@ -2291,7 +2306,8 @@ class BC_Vente extends BimpObject
             'fk_soc'            => $id_client,
             'fk_account'        => $id_account,
             'fk_cond_reglement' => (int) $this->getData('id_cond_reglement'),
-            'note_private'      => $note
+            'note_private'      => $note,
+            'note_public'       => $this->getData('note_public')
         ));
 
         $errors = $facture->create($warnings, true);

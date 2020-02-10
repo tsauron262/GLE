@@ -207,6 +207,14 @@ fields:
         default_value: 1
         input: 
             help: Si vous indiquez "Hors-UE" ou "Union Européenne", tous les taux de TVA des lignes actuelles seront mis à 0 de manière irréversible.
+            
+    logs: 
+        label: Historique
+        type: text
+        input: 
+            rows: 3
+            auto_expand: 1
+        default_value: ''
     
 forms: 
     contact:
@@ -506,6 +514,10 @@ forms:
               required: 1
               input: 
                   type: text
+                  
+    logs: 
+        rows: 
+            - field: logs
 
 fields_tables: 
     infos: 
@@ -538,6 +550,7 @@ fields_tables:
         rows: 
             - field: note_public
             - field: note_private
+            - field: logs
     
 filters_panels: 
     default: 

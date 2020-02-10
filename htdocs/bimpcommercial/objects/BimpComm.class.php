@@ -68,6 +68,17 @@ class BimpComm extends BimpDolObject
         return 0;
     }
 
+    public function canEditField($field_name)
+    {
+        switch ($field_name) {
+            case 'logs':
+                global $user;
+                return (BimpObject::objectLoaded($user) && $user->admin ? 1 : 0);
+        }
+
+        return (int) parent::canEditField($field_name);
+    }
+
     // Getters booléens: 
 
     public function isDeletable($force_delete = false)
@@ -450,6 +461,15 @@ class BimpComm extends BimpDolObject
     {
         $buttons = array();
 
+        // Edition historique: 
+        if ($this->canEditField('logs')) {
+            $buttons[] = array(
+                'label'   => 'Editer logs',
+                'icon'    => 'fas_history',
+                'onclick' => $this->getJsLoadModalForm('logs', 'Editer les logs')
+            );
+        }
+
         // Ajout acompte: 
         if ($this->isActionAllowed('addAcompte') && $this->canSetAction('addAcompte')) {
             $id_mode_paiement = 0;
@@ -470,20 +490,20 @@ class BimpComm extends BimpDolObject
 
         $note = BimpObject::getInstance("bimpcore", "BimpNote");
         $buttons[] = array(
-            'label'   => 'Message logistique ',
-            'icon'    => 'far fa-paper-plane',
+            'label'   => 'Message logistique',
+            'icon'    => 'far_paper-plane',
             'onclick' => $note->getJsActionOnclick('repondre', array("obj_type" => "bimp_object", "obj_module" => $this->module, "obj_name" => $this->object_name, "id_obj" => $this->id, "type_dest" => $note::BN_DEST_GROUP, "fk_group_dest" => $note::BN_GROUPID_LOGISTIQUE, "content" => ""), array('form_name' => 'rep'))
         );
 
         $buttons[] = array(
-            'label'   => 'Message facturation ',
-            'icon'    => 'far fa-paper-plane',
+            'label'   => 'Message facturation',
+            'icon'    => 'far_paper-plane',
             'onclick' => $note->getJsActionOnclick('repondre', array("obj_type" => "bimp_object", "obj_module" => $this->module, "obj_name" => $this->object_name, "id_obj" => $this->id, "type_dest" => $note::BN_DEST_GROUP, "fk_group_dest" => $note::BN_GROUPID_FACT, "content" => "Bonjour, merci de bien vouloir facturer cette commande."), array('form_name' => 'rep'))
         );
 
         $buttons[] = array(
             'label'   => 'Relevé facturation client',
-            'icon'    => 'fas fa-ticket',
+            'icon'    => 'fas_ticket',
             'onclick' => $this->getJsActionOnclick('releverFacturation', array(), array(
                 'form_name' => 'releverFacturation'
             ))
@@ -3324,6 +3344,23 @@ class BimpComm extends BimpDolObject
                 }
             }
         }
+    }
+
+    public function addLog($text)
+    {
+        $errors = array();
+
+        if ($this->isLoaded($errors) && $this->field_exists('logs')) {
+            $logs = (string) $this->getData('logs');
+            if ($logs) {
+                $logs .= '<br/>';
+            }
+            global $user;
+            $logs .= ' - <strong>Le' . date('d / m / Y à H:i') . '</strong> par ' . $user->getFullName() . ': ' . $text;
+            $errors = $this->updateField('logs', $logs, null, true);
+        }
+
+        return $errors;
     }
 
     // post process: 

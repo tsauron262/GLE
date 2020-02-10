@@ -3043,6 +3043,10 @@ class Bimp_Commande extends BimpComm
             $this->set('logistique_status', 1);
 
             $errors = $this->update($warnings);
+
+            if (!count($errors)) {
+                $this->addLog('Logistique prise en charge');
+            }
         }
 
         $url = DOL_URL_ROOT . '/bimplogistique/index.php?fc=commande&id=' . $this->id;
@@ -3060,6 +3064,8 @@ class Bimp_Commande extends BimpComm
         $warnings = array();
         $success = 'Statut forcé enregistré avec succès';
 
+        $log = 'Changement du forçage des statuts: ';
+
         if (!count($errors)) {
             $status_forced = $this->getData('status_forced');
 
@@ -3074,11 +3080,14 @@ class Bimp_Commande extends BimpComm
                         if (!(int) $this->getData('logistique_status')) {
                             $this->updateField('logistique_status', 1);
                         }
+                        $log .= ' - logistique: aucun';
                     } else {
                         $status_forced['logistique'] = 1;
                         $sub_errors = $this->updateField('logistique_status', (int) $data['logistique_status']);
                         if (count($sub_errors)) {
                             $errors[] = BimpTools::getMsgFromArray($sub_errors, 'Echec de la mise à jour du statut logistique de la commande');
+                        } else {
+                            $log .= ' - logistique: ' . self::$logistique_status[(int) $data['logistique_status']];
                         }
                     }
                 }
@@ -3092,11 +3101,14 @@ class Bimp_Commande extends BimpComm
                         if (isset($status_forced['shipment'])) {
                             unset($status_forced['shipment']);
                         }
+                        $log .= ' - expédition: aucun';
                     } else {
                         $status_forced['shipment'] = 1;
                         $sub_errors = $this->updateField('shipment_status', (int) $data['shipment_status']);
                         if (count($sub_errors)) {
                             $errors[] = BimpTools::getMsgFromArray($sub_errors, 'Echec de la mise à jour du statut expédition de la commande');
+                        } else {
+                            $log .= ' - expédition: ' . self::$shipment_status[(int) $data['shipment_status']];
                         }
                     }
                 }
@@ -3110,11 +3122,14 @@ class Bimp_Commande extends BimpComm
                         if (isset($status_forced['invoice'])) {
                             unset($status_forced['invoice']);
                         }
+                        $log .= ' - facturation: aucun';
                     } else {
                         $status_forced['invoice'] = 1;
                         $sub_errors = $this->updateField('invoice_status', (int) $data['invoice_status']);
                         if (count($sub_errors)) {
                             $errors[] = BimpTools::getMsgFromArray($sub_errors, 'Echec de la mise à jour du statut facturation de la commande');
+                        } else {
+                            $log .= ' - facturation: ' . self::$shipment_status[(int) $data['shipment_status']];
                         }
                     }
                 }
@@ -3124,6 +3139,8 @@ class Bimp_Commande extends BimpComm
             $this->checkLogistiqueStatus();
             $this->checkShipmentStatus();
             $this->checkInvoiceStatus();
+
+            $this->addLog($log);
 
             $lines = $this->getLines('not_text');
             foreach ($lines as $line) {

@@ -98,6 +98,10 @@ fields:
         label: Type matériel
         value: 
             callback: displayTypeMateriel
+    
+    datem:
+        label: Date du mouvement
+        type: date
             
 
 lists_cols:
@@ -133,8 +137,8 @@ lists:
                 label: Réf
                 value:
                     callback: displayId       
-            stockDate:
-                field: stockDate
+            datem:
+                field: datem
             fk_entrepot: 
             fk_product: 
             origin:

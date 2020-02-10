@@ -196,6 +196,35 @@ forms:
                 decimals: 2
                 input: 
                     type: text
+                    
+    move_amount: 
+        title: Déplacer un montant d'une facture à une autre
+        rows: 
+            - custom: 1
+              label: Facture d'origine
+              input_name: id_facture_from
+              data_type: id
+              required: 1
+              input: 
+                  type: select
+                  options: 
+                      array: factures
+            - custom: 1
+              label: Montant à déplacer
+              input_name: amount_to_move
+              data_type: money
+              required: 1
+              content: 
+                  callback: renderAmountToMoveInput
+              depends_on: id_facture_from
+            - custom: 1
+              label: Facture de destination
+              input_name: id_facture_to
+              required: 1
+              input: 
+                  type: search_object
+                  object: facture
+                  card: detail
             
 filters_panels: 
     default: 

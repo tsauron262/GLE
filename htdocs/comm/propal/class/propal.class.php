@@ -1707,6 +1707,7 @@ class Propal extends CommonObject
                         /* mod drsi*/
                         BimpTools::sleppIfBloqued("numPropal");
                         BimpTools::bloqueDebloque("numPropal");
+                        $bloqued = true;
                         /*fmoddrsi*/
 			$num = $this->getNextNumRef($soc);
 		}
@@ -1723,9 +1724,7 @@ class Propal extends CommonObject
 
 		dol_syslog(get_class($this)."::valid", LOG_DEBUG);
 		$resql=$this->db->query($sql);
-                /*moddrsi*/
-                BimpTools::bloqueDebloque("numPropal", 0);
-                /*fmoddrsi*/
+                
 		if (! $resql)
 		{
 			dol_print_error($this->db);
@@ -1782,11 +1781,19 @@ class Propal extends CommonObject
 			$this->datev=$now;
 
 			$this->db->commit();
+                        /*moddrsi*/
+                        if($bloqued)
+                            BimpTools::bloqueDebloque("numPropal", 0);
+                        /*fmoddrsi*/
 			return 1;
 		}
 		else
 		{
 			$this->db->rollback();
+                        /*moddrsi*/
+                        if($bloqued)
+                            BimpTools::bloqueDebloque("numPropal", 0);
+                        /*fmoddrsi*/
 			return -1;
 		}
 	}

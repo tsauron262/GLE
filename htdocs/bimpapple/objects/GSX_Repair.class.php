@@ -250,9 +250,9 @@ class GSX_Repair extends BimpObject
                         'kgbDeviceDetail' => array(
                             'id' => $kgb_number
                         ),
-                        'kbbDeviceDetail' => array(
-                            'id' => $kbb_number
-                        )
+//                        'kbbDeviceDetail' => array(
+//                            'id' => $kbb_number
+//                        )
                     )
                 )
             );
@@ -262,7 +262,7 @@ class GSX_Repair extends BimpObject
                     'id' => $kbb_number
                 );
             }
-
+            
             $result = $this->gsx_v2->exec('repairUpdate', $params);
 
             if (!is_array($result) || empty($result)) {
@@ -272,7 +272,7 @@ class GSX_Repair extends BimpObject
 
                 if (BimpObject::objectLoaded($sav)) {
                     $serial = $sav->getSerial();
-                    if ($serial == $kbb_number) {
+                    if ($serial == $kbb_number || !$kbb_number) {
                         $this->updateField('new_serial', $kgb_number);
                         
                         $equipment = $sav->getChildObject('equipment');
@@ -1435,6 +1435,8 @@ class GSX_Repair extends BimpObject
                 'returnStatusCode'       => 'Code raison du retour',
                 'returnOrderNumber'      => 'N° de retour',
                 'returnTrackingNumber'   => 'N° de suivi du retour',
+                'kgbDeviceDetail'        => 'KGB',
+                'kbbDeviceDetail'        => 'KBB',
                 'returnPartReceivedDate' => 'Date de réception du retour'
                     ) as $path => $label) {
                         $value = BimpTools::getArrayValueFromPath($part, $path, true);
@@ -1442,7 +1444,10 @@ class GSX_Repair extends BimpObject
                             $has_lines = true;
                             $html .= '<tr>';
                             $html .= '<th>' . $label . '</th>';
-                            $html .= '<td>' . $value . '</td>';
+                            if(is_array($value))
+                                $html .= '<td>' . print_r($value,1) . '</td>';
+                            else
+                                $html .= '<td>' . $value . '</td>';
                             $html .= '</tr>';
                         }
                     }
@@ -1483,7 +1488,8 @@ class GSX_Repair extends BimpObject
                     $title = BimpRender::renderIcon('fas_box', 'iconLeft') . 'Composant ' . $part['number'];
                     $buttons = array();
 
-                    if (isset($part['returnStatusCode']) && $part['returnStatusCode'] &&
+                    $codeReturnAttendKBB = array('KBB');
+                    if (isset($part['returnStatusCode']) && in_array($part['returnStatusCode'], $codeReturnAttendKBB) &&
                             (!isset($part['kgbDeviceDetail']) || empty($part['kgbDeviceDetail']))) {
 
                         $values = array(

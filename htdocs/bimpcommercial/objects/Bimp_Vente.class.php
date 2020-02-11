@@ -450,7 +450,6 @@ VQ - Collège
                     $total_ca += $product_ca;
                 }
             }
-            break;
         }
         
         $html = '';

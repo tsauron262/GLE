@@ -330,6 +330,22 @@ lists:
                 display: nom_url
             datec:
                 field: datec
+            date_fin:
+                label: Date de fin du contrat
+                value: 
+                    callback:
+                        method: displayEndDate
+                        params:
+                            - value:
+                                callback:
+                                    method: getData
+                                    params:
+                                        - date_start
+                            - value:
+                                callback:
+                                    method: getData
+                                    params:
+                                        - duree_mois
             fk_user_author:
                 field: fk_user_author
             commercial:

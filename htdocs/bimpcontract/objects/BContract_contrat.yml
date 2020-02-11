@@ -78,6 +78,14 @@ objects:
                 name: Bimp_User
             id_object:
                 field_value: fk_commercial_suivi
+                
+    commercial_sign:
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: Bimp_User
+            id_object:
+                field_value: fk_commercial_signature
 
 table: contrat
 controller: contrat
@@ -206,6 +214,8 @@ fields:
     fk_commercial_signature:
         label: Commercial signataire
         dol_prop: commercial_signature_id
+        type: id_object
+        object: commercial_sign
         input: 
             type: search_user
             help: Choisir le commercial responssable de la signature du contrat
@@ -357,6 +367,8 @@ lists:
                 field: fk_user_author
             commercial:
                 field: fk_commercial_suivi
+            commercial_sign:
+                field: fk_commercial_signature
     
     client:
         extends: default

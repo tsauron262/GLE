@@ -128,6 +128,8 @@ class BContract_contrat extends BimpDolObject {
         $success = 'Contrat clos avec succès';
         if($this->dol_object->closeAll($user) >= 1) {
             $this->updateField('statut', self::CONTRAT_STATUS_CLOS);
+            $this->updateField('date_cloture', date('Y-m-d H:i:s'));
+            $this->updateField('fk_user_cloture',  $user->id);
         }
         
         return [
@@ -1226,8 +1228,20 @@ class BContract_contrat extends BimpDolObject {
 
                 $html .= '<div class="object_header_infos">';
                 $create = new DateTime($this->getData('datec'));
+
                 $html .= 'Créé le <strong >' . $create->format('d / m / Y') . '</strong>';
                 $html .= ' par <strong >' . $userCreationContrat->getNomUrl(1) . '</strong>';
+                
+                if($this->getData('fk_user_cloture')) {
+                    
+                    $dateCloture = new DateTime($this->getData('date_cloture'));
+                    $userCloture = new User($this->db->db);
+                    $userCloture->fetch($this->getData('fk_user_cloture'));
+                    
+                    $html .= '<br />Clos le <strong >' . $dateCloture->format('d / m / Y') . '</strong>';
+                $html .= ' par <strong >' . $userCloture->getNomUrl(1) . '</strong>';
+                }
+                
                 $html .= '</div>';
             }
             if($this->getData('statut') == self::CONTRAT_STATUS_VALIDE) {

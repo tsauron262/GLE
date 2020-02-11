@@ -230,6 +230,13 @@ fields:
                name: id
                object:
                    global: user
+    
+    date_cloture:
+        label: Clos le
+        type: datetime
+    fk_user_cloture:
+        label: Clos par
+        type: int
         
 fields_tables:
     infos:

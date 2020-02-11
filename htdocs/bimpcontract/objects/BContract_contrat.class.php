@@ -336,7 +336,7 @@ class BContract_contrat extends BimpDolObject {
                 );
             }
             
-            if(($user->admin || $user->id == 375 || $user->id == 460) && $this->getData('statut') != self::CONTRAT_STATUS_CLOS) {
+            if(($user->admin || $user->id == 375 || $user->id == 460) && $this->getData('statut') != self::CONTRAT_STATUS_CLOS && $this->getData('statut') != self::CONTRAT_STATUS_BROUILLON) {
                 
                 $buttons[] = array(
                     'label'   => 'Clôre le contrat',

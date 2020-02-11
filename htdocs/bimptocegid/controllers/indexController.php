@@ -275,6 +275,51 @@
                     $html .= '</td>';
                     $html .= '</tr>';
                 }
+                
+                $dir = DIR_SYNCH . 'exportCegid/BY_DATE/imported';
+                $scanned_directory_by_ref = array_diff(scandir($dir2), array('..', '.', 'imported'));
+                if($scanned_directory_by_ref) {
+                    foreach ($scanned_directory_by_ref as $file => $name) {
+                    $html .= '<tr>';
+                    $onclick = "window.open('".DOL_URL_ROOT."/bimptocegid/doc.php?folder=BY_REF&nom=".$name."')";
+
+
+
+                        $html .= '<td><a class="btn btn-default" onclick = "'.$onclick.'">';
+
+
+
+                        $html .= '<i class="' . BimpRender::renderIconClass(BimpTools::getFileIcon($name)) . ' iconLeft" ></i>';
+                        $html .= $name . '</a></td>';
+
+                        $html .= '<td>';
+                        if (is_file($dir."/". $name) && filesize($dir."/" . $name)) {
+                            $html .= filesize($dir."/" . $name).' b';
+                        } else {
+                            $html .= 'taille inconnue';
+                        }
+                        $html .= '</td>';
+
+                        $html .= '<td>';
+                        if(filemtime($dir."/".$name))
+                            $html .= date('d / m / Y H:i:s', filemtime($dir."/".$name));
+
+
+                        $html .= '</td>';
+
+
+                        $html .= '<td class="buttons">';
+
+                        $html .= '</td>';
+                        $html .= '</tr>';
+                    }
+                } else {
+                    $html .= '<tr>';
+                    $html .= '<td colspan="4">';
+                    $html .= BimpRender::renderAlerts('Aucun fichier TRA par date', 'info', false);
+                    $html .= '</td>';
+                    $html .= '</tr>';
+                }
                 $html .= '</tbody></table>';
             }
             

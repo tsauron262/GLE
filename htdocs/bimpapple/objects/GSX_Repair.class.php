@@ -262,7 +262,7 @@ class GSX_Repair extends BimpObject
                     'id' => $kbb_number
                 );
             }
-            dol_syslog('maj kbb : '.$params,3);
+            
             $result = $this->gsx_v2->exec('repairUpdate', $params);
 
             if (!is_array($result) || empty($result)) {

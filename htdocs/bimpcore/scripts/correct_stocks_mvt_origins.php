@@ -29,7 +29,12 @@ $bdb = new BimpDb($db);
 
 $where = '(`fk_origin` IS NULL OR `fk_origin` = 0)';
 //$where .= ' AND `inventorycode` != \'\' AND `inventorycode` IS NOT NULL';
-$where .= ' AND `inventorycode` LIKE \'ANNUL_CMDF%\'';
+$where .= ' AND (';
+$where .= '`inventorycode` LIKE \'CMDF%\'';
+$where .= ' OR `inventorycode` LIKE \'ANNUL_CMDF%\'';
+//$where .= ' OR `inventorycode` LIKE \'VENTE%\'';
+$where .= ')';
+
 $rows = $bdb->getRows('stock_mouvement', $where, null, 'array', array('rowid', 'inventorycode'), 'rowid', 'desc');
 
 if (!(int) BimPTools::getValue('exec', 0)) {
@@ -52,34 +57,39 @@ if (!(int) BimPTools::getValue('exec', 0)) {
 foreach ($rows as $r) {
     $code = $r['inventorycode'];
 
+    $origin = '';
+    $id_origin = 0;
+
     if (preg_match('/^(ANNUL_)?CMDF(\d+)_LN(\d+)_RECEP(\d+)$/', $code, $matches)) {
-        $comm = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn', (int) $matches[2]);
-        if (BimpObject::objectLoaded($comm)) {
-            echo 'Correction mvt #' . $r['rowid'] . ' (Commande fourn ' . $comm->getRef() . '): ';
+        $origin = 'order_supplier';
+        $id_origin = (int) $matches[2];
+    }
+//    elseif (preg_match('/^VENTE(\d+)_(ART|RET)(\d+)$/', $code, $matches)) {
+//        $origin = 'vente_caisse';
+//        $id_origin = (int) $matches[1];
+//    }
 
-            if ($bdb->update('stock_mouvement', array(
-                        'origintype' => 'order_supplier',
-                        'fk_origin'  => (int) $comm->id,
-                            ), 'rowid = ' . (int) $r['rowid']) <= 0) {
-                echo '[ECHEC] - ' . $bdb->db->lasterror();
-            } else {
-                echo 'OK';
+    if ($origin && $id_origin) {
+        echo 'Correction mvt #' . $r['rowid'] . ' (Origine: ' . $origin . ' #' . $id_origin . '): ';
 
-                $bdb->update('be_equipment_place', array(
-                    'origin'    => 'order_supplier',
-                    'id_origin' => (int) $comm->id
-                        ), 'code_mvt = \'' . $code . '\'');
+        if ($bdb->update('stock_mouvement', array(
+                    'origintype' => $origin,
+                    'fk_origin'  => $id_origin,
+                        ), 'rowid = ' . (int) $r['rowid']) <= 0) {
+            echo '[ECHEC] - ' . $bdb->db->lasterror();
+        } else {
+            echo 'OK';
+            $bdb->update('be_equipment_place', array(
+                'origin'    => $origin,
+                'id_origin' => $id_origin
+                    ), 'code_mvt = \'' . $code . '\'');
 
-                $bdb->update('be_package_place', array(
-                    'origin'    => 'order_supplier',
-                    'id_origin' => (int) $comm->id
-                        ), 'code_mvt = \'' . $code . '\'');
-            }
-            echo '<br/>';
+            $bdb->update('be_package_place', array(
+                'origin'    => $origin,
+                'id_origin' => $id_origin
+                    ), 'code_mvt = \'' . $code . '\'');
         }
-
-        unset($comm);
-        BimpCache::$cache = array();
+        echo '<br/>';
     }
 }
 

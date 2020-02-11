@@ -31,7 +31,7 @@ class BE_Place extends BimpObject
     public static $origins = array(
         ''               => '',
         'commande'       => 'Commande client',
-        'vente'          => 'Vente en caisse',
+        'vente_caisse'   => 'Vente en caisse',
         'transfert'      => 'Transfert',
         'order_supplier' => 'Commande fournisseur',
         'sav'            => 'SAV'
@@ -197,6 +197,16 @@ class BE_Place extends BimpObject
     {
         if ($this->getData('origin') && (int) $this->getData('id_origin') && array_key_exists($this->getData('origin'), self::$origins)) {
             switch ($this->getData('origin')) {
+                case 'vente_caisse':
+                    $vente = BimpCache::getBimpObjectInstance('bimpcaisse', 'BC_Vente', (int) $this->getData('id_origin'));
+                    if (BimpObject::objectLoaded($vente)) {
+                        return $vente->getNomUrl(1, 0, 1, 'default');
+                    } else {
+                        return BimpRender::renderAlerts('La vente d\'ID ' . $this->getData('id_origin') . ' n\'existe plus', 'danger');
+                    }
+
+                    break;
+
                 case 'order_supplier':
                     $comm = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn', (int) $this->getData('id_origin'));
                     if (BimpObject::objectLoaded($comm)) {

@@ -61,9 +61,9 @@ class CepaPDF extends BimpDocumentPDF
     }
 
     
-    public function write_file($object, $outputlangs, $srctemplatepath = '', $hidedetails = 0, $hidedesc = 0, $hideref = 0) {
-        
-        $this->init($object);
-        return 1;
-    }
+//    public function write_file($object, $outputlangs, $srctemplatepath = '', $hidedetails = 0, $hidedesc = 0, $hideref = 0) {
+//        
+//        $this->init($object);
+//        return 1;
+//    }
 }

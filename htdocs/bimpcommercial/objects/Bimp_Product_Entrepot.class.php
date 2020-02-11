@@ -8,6 +8,7 @@ class Bimp_Product_Entrepot extends BimpObject
     public static $product_instance = null;
     public static $modeStockDate = false;
     public static $modeStockShowRoom = false;
+    public static $modeVentes = false;
 
     public function __construct($module, $object_name)
     {
@@ -26,6 +27,9 @@ class Bimp_Product_Entrepot extends BimpObject
             static::$modeStockDate = true;
         if(in_array('stockShowRoom', $list->cols))
             static::$modeStockShowRoom = true;
+        if(in_array('ventes_qty', $list->cols) || in_array('ventes_ht', $list->cols))
+            static::$modeVentes = true;
+        
         
 //        echo "<pre>";print_r($list);die;
         
@@ -297,14 +301,16 @@ class Bimp_Product_Entrepot extends BimpObject
         );
 
         if ((int) $this->getData('fk_product')) {
-            $tabVentes = static::$product_instance->getVentes(null, $this->dateBilan, (int) $this->getData('fk_entrepot'), (int) $this->getData('fk_product'));
-            $derPv = static::$product_instance->getDerPv(null, $this->dateBilan, (int) $this->getData('fk_product'));
-            $fields['derPv'] = $derPv;
-            if ($tabVentes['qty'] > 0)
-                $fields['ventes_qty'] = $tabVentes['qty'];
+            if(static::$modeVentes){
+                $tabVentes = static::$product_instance->getVentes(null, $this->dateBilan, (int) $this->getData('fk_entrepot'), (int) $this->getData('fk_product'));
+                $derPv = static::$product_instance->getDerPv(null, $this->dateBilan, (int) $this->getData('fk_product'));
+                $fields['derPv'] = $derPv;
+                if ($tabVentes['qty'] > 0)
+                    $fields['ventes_qty'] = $tabVentes['qty'];
 
-            if ($tabVentes['total_ht'] > 0)
-                $fields['ventes_ht'] = $tabVentes['total_ht'];
+                if ($tabVentes['total_ht'] > 0)
+                    $fields['ventes_ht'] = $tabVentes['total_ht'];
+            }
 
             if(static::$modeStockShowRoom){
                 $stockShowRoom = static::$product_instance->getStockShoowRoom($this->dateBilan, (int) $this->getData('fk_entrepot'), (int) $this->getData('fk_product'));

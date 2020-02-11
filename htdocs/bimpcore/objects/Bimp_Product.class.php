@@ -769,7 +769,7 @@ class Bimp_Product extends BimpObject
             $dateMax = date('Y-m-d H:i:s');
         }
 
-        $cache_key = $dateMin . '-' . $dateMax . "-" . implode("/", $tab_secteur) . '-' . $exlure_retour;
+        $cache_key = $dateMin . '-' . $dateMax . "-" . implode("/", $tab_secteur) . '-' . (int) $exlure_retour;
 
         if ((int) $id_product) {
             if (!isset(self::$ventes[$cache_key])) {
@@ -3054,25 +3054,25 @@ class Bimp_Product extends BimpObject
         global $db;
 //        self::$ventes = array(); // Ne pas déco ça effacerait d'autres données en cache pour d'autres dates. 
 
-        $query = "SELECT `fk_product`, entrepot, sum(qty) as qty, sum(l.total_ht) as total_ht, sum(l.total_ttc) as total_ttc";
-        $query .= " FROM `" . MAIN_DB_PREFIX . "facturedet` l, " . MAIN_DB_PREFIX . "facture f, " . MAIN_DB_PREFIX . "facture_extrafields e";
-        $query .= " WHERE `fk_facture` = f.rowid AND e.fk_object = f.rowid AND fk_product > 0";
+        $query = "SELECT l.fk_product, e.entrepot, sum(l.qty) as qty, sum(l.total_ht) as total_ht, sum(l.total_ttc) as total_ttc";
+        $query .= " FROM " . MAIN_DB_PREFIX . "facturedet l, " . MAIN_DB_PREFIX . "facture f, " . MAIN_DB_PREFIX . "facture_extrafields e";
+        $query .= " WHERE l.fk_facture = f.rowid AND e.fk_object = f.rowid AND l.fk_product > 0";
         if ($exlure_retour)
-            $query .= " AND qty > 0";
+            $query .= " AND l.qty > 0";
         $query .= " AND f.fk_statut > 0";
 
         if ($dateMin)
-            $query .= " AND date_valid >= '" . $dateMin . "'";
+            $query .= " AND f.date_valid >= '" . $dateMin . "'";
 
         if ($dateMax)
-            $query .= " AND date_valid <= '" . $dateMax . "'";
+            $query .= " AND f.date_valid <= '" . $dateMax . "'";
 
         if (count($tab_secteur) > 0)
             $query .= " AND e.type IN ('" . implode("','", $tab_secteur) . "')";
 
-        $group_by .= " GROUP BY `fk_product`, entrepot";
+        $group_by .= " GROUP BY l.fk_product, e.entrepot";
 
-        $sql = $db->query($query . " AND `subprice` >= 0" . $group_by);
+        $sql = $db->query($query . " AND l.subprice >= 0" . $group_by);
 
         $cache_key = $dateMin . "-" . $dateMax . "-" . implode("/", $tab_secteur);
 
@@ -3096,7 +3096,7 @@ class Bimp_Product extends BimpObject
 //            self::$ventes[$cache_key][$ln->fk_product][null]['total_achats'] += $ln->total_achats;
         }
 
-        $sql2 = $db->query($query . " AND `subprice` < 0" . $group_by);
+        $sql2 = $db->query($query . " AND l.subprice < 0" . $group_by);
 
         while ($ln = $db->fetch_object($sql2)) {
             if (!isset(self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot])) {
@@ -3124,5 +3124,9 @@ class Bimp_Product extends BimpObject
             self::$ventes[$cache_key][$ln->fk_product][null]['total_ttc'] += $ln->total_ttc;
 //            self::$ventes[$cache_key][$ln->fk_product][null]['total_achats'] += $ln->total_achats;
         }
+        
+        echo '<pre>';
+        print_r(self::$ventes[$cache_key]);
+        exit;
     }
 }

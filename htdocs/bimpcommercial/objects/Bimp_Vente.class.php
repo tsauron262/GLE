@@ -452,11 +452,6 @@ VQ - Collège
             }
             break;
         }
-
-        echo '<pre>';
-        print_r($shiptos_data);
-        echo '</pre>';
-        exit;
         
         $html = '';
         if ($distribute_ca) {
@@ -702,7 +697,7 @@ VQ - Collège
         $success_callback = '';
 
         global $user;
-        if (!$user->id !== 1) {
+        if ($user->id != 1) {
             $errors[] = 'Debug en cours';
         } else {
             $date_from = isset($data['date_from']) ? $data['date_from'] : date('Y-m-d');

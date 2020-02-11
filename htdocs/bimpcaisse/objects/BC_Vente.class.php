@@ -2147,7 +2147,9 @@ class BC_Vente extends BimpObject
                             'id_client'    => (int) $id_client,
                             'infos'        => 'Vente #' . $this->id,
                             'date'         => date('Y-m-d H:i:s'),
-                            'code_mvt'     => $codemove . '_ART' . (int) $article->id
+                            'code_mvt'     => $codemove . '_ART' . (int) $article->id,
+//                            'origin'       => 'vente_caisse',
+//                            'id_origin'    => (int) $this->id
                         ));
                     } else {
                         $place_errors = $place->validateArray(array(
@@ -2156,7 +2158,9 @@ class BC_Vente extends BimpObject
                             'place_name'   => 'Equipement vendu (client non renseigné)',
                             'infos'        => 'Vente #' . $this->id,
                             'date'         => date('Y-m-d H:i:s'),
-                            'code_mvt'     => $codemove . '_ART' . (int) $article->id
+                            'code_mvt'     => $codemove . '_ART' . (int) $article->id,
+//                            'origin'       => 'vente_caisse',
+//                            'id_origin'    => (int) $this->id
                         ));
                     }
 
@@ -2173,7 +2177,7 @@ class BC_Vente extends BimpObject
                     $equipment->updateField('return_available', 1, null, true);
                 } else {
                     $product = $article->getChildObject('product');
-                    $result = $product->dol_object->correct_stock($user, $id_entrepot, (int) $article->getData('qty'), 1, 'Vente #' . $this->id, 0, $codemove . '_ART' . (int) $article->id, 'facture', $id_facture);
+                    $result = $product->dol_object->correct_stock($user, $id_entrepot, (int) $article->getData('qty'), 1, 'Vente #' . $this->id, 0, $codemove . '_ART' . (int) $article->id, 'facture', (int) $id_facture);
                     if ($result < 0) {
                         $msg = 'Echec de la mise à jour du stock pour le produit "' . $product->getRef() . ' - ' . $product->getName() . '" (ID: ' . $product->id . ')';
                         $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($product->dol_object), $msg);
@@ -2200,7 +2204,9 @@ class BC_Vente extends BimpObject
                                 'id_entrepot'  => (int) $id_defective_entrepot,
                                 'infos'        => 'Retour produit défectueux (Vente #' . $this->id . ')',
                                 'date'         => date('Y-m-d H:i:s'),
-                                'code_mvt'     => $codemove . '_RET' . (int) $return->id
+                                'code_mvt'     => $codemove . '_RET' . (int) $return->id,
+//                                'origin'       => 'vente_caisse',
+//                                'id_origin'    => (int) $this->id
                             ));
                         } else {
                             $place_errors = $place->validateArray(array(
@@ -2209,7 +2215,9 @@ class BC_Vente extends BimpObject
                                 'id_entrepot'  => (int) $id_entrepot,
                                 'infos'        => 'Retour produit (Vente #' . $this->id . ')',
                                 'date'         => date('Y-m-d H:i:s'),
-                                'code_mvt'     => $codemove . '_RET' . (int) $return->id
+                                'code_mvt'     => $codemove . '_RET' . (int) $return->id,
+//                                'origin'       => 'vente_caisse',
+//                                'id_origin'    => (int) $this->id
                             ));
                         }
                         if (!count($place_errors)) {
@@ -2226,9 +2234,9 @@ class BC_Vente extends BimpObject
                         $product = $return->getChildObject('product');
 
                         if ((int) $return->getData('defective')) {
-                            $result = $product->dol_object->correct_stock($user, $id_defective_entrepot, (int) $return->getData('qty'), 0, 'Retour produit Vente #' . $this->id, 0, $codemove . '_RET' . (int) $return->id, 'facture', $id_facture);
+                            $result = $product->dol_object->correct_stock($user, $id_defective_entrepot, (int) $return->getData('qty'), 0, 'Retour produit Vente #' . $this->id, 0, $codemove . '_RET' . (int) $return->id, 'facture', (int) $id_facture);
                         } else {
-                            $result = $product->dol_object->correct_stock($user, $id_entrepot, (int) $return->getData('qty'), 0, 'Retour produit Vente #' . $this->id, 0, $codemove . '_RET' . (int) $return->id, 'facture', $id_facture);
+                            $result = $product->dol_object->correct_stock($user, $id_entrepot, (int) $return->getData('qty'), 0, 'Retour produit Vente #' . $this->id, 0, $codemove . '_RET' . (int) $return->id, 'facture', (int) $id_facture);
                         }
 
                         if ($result < 0) {

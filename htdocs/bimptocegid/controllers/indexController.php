@@ -236,7 +236,7 @@
                 if($scanned_directory_by_ref) {
                     foreach ($scanned_directory_by_ref as $file => $name) {
                     $html .= '<tr>';
-                    $onclick = "window.open('".DOL_URL_ROOT."/bimptocegid/doc.php?folder=BY_REF&imported/nom=".$name."')";
+                    $onclick = "window.open('".DOL_URL_ROOT."/bimptocegid/doc.php?folder=BY_REF&nom=imported/".$name."')";
 
 
 
@@ -281,7 +281,7 @@
                 if($scanned_directory_by_ref) {
                     foreach ($scanned_directory_by_ref as $file => $name) {
                     $html .= '<tr>';
-                    $onclick = "window.open('".DOL_URL_ROOT."/bimptocegid/doc.php?folder=BY_DATE&imported/nom=".$name."')";
+                    $onclick = "window.open('".DOL_URL_ROOT."/bimptocegid/doc.php?folder=BY_DATE&nom=imported/".$name."')";
 
 
 

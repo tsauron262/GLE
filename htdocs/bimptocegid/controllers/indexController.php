@@ -277,7 +277,7 @@
                 }
                 
                 $dir = DIR_SYNCH . 'exportCegid/BY_DATE/imported';
-                $scanned_directory_by_ref = array_diff(scandir($dir2), array('..', '.', 'imported'));
+                $scanned_directory_by_ref = array_diff(scandir($dir), array('..', '.', 'imported'));
                 if($scanned_directory_by_ref) {
                     foreach ($scanned_directory_by_ref as $file => $name) {
                     $html .= '<tr>';

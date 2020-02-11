@@ -198,7 +198,7 @@ class Bimp_Vente extends BimpObject
                 );
                 break;
         }
-        
+
         parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
     }
 
@@ -450,8 +450,14 @@ VQ - Collège
                     $total_ca += $product_ca;
                 }
             }
+            break;
         }
 
+        echo '<pre>';
+        print_r($shiptos_data);
+        echo '</pre>';
+        exit;
+        
         $html = '';
         if ($distribute_ca) {
             $shiptos = explode(',', BimpCore::getConf('csv_apple_distribute_ca_shiptos'));
@@ -695,30 +701,35 @@ VQ - Collège
         $success = '';
         $success_callback = '';
 
-        $date_from = isset($data['date_from']) ? $data['date_from'] : date('Y-m-d');
-        $date_to = isset($data['date_to']) ? $data['date_to'] : '';
-        $distribute_ca = isset($data['distribute_ca']) ? $data['distribute_ca'] : 0;
+        global $user;
+        if (!$user->id !== 1) {
+            $errors[] = 'Debug en cours';
+        } else {
+            $date_from = isset($data['date_from']) ? $data['date_from'] : date('Y-m-d');
+            $date_to = isset($data['date_to']) ? $data['date_to'] : '';
+            $distribute_ca = isset($data['distribute_ca']) ? $data['distribute_ca'] : 0;
 
-        if (!$date_to) {
-            $dt = new DateTime($date_from);
-            $dt->sub(new DateInterval('P7D'));
-            $date_to = $dt->format('Y-m-d');
-        }
-
-        $result = $this->generateAppleCSV($date_from, $date_to, $distribute_ca, $errors);
-
-        if (isset($result['filename']) && $result['filename']) {
-            $file_name = $result['filename'];
-            if (file_exists(DOL_DATA_ROOT . '/bimpcore/apple_csv/' . date('Y') . '/' . $file_name)) {
-                $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . htmlentities('apple_csv/' . date('Y') . '/' . $file_name);
-                $success_callback = 'window.open(\'' . $url . '\');';
+            if (!$date_to) {
+                $dt = new DateTime($date_from);
+                $dt->sub(new DateInterval('P7D'));
+                $date_to = $dt->format('Y-m-d');
             }
-        }
 
-        $html = (isset($result['html']) ? $result['html'] : '');
+            $result = $this->generateAppleCSV($date_from, $date_to, $distribute_ca, $errors);
 
-        if ($html) {
-            $success_callback .= 'setTimeout(function() {bimpModal.newContent(\'Distribution\', \'' . $html . '\', false, \'\', $());}, 1000);';
+            if (isset($result['filename']) && $result['filename']) {
+                $file_name = $result['filename'];
+                if (file_exists(DOL_DATA_ROOT . '/bimpcore/apple_csv/' . date('Y') . '/' . $file_name)) {
+                    $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . htmlentities('apple_csv/' . date('Y') . '/' . $file_name);
+                    $success_callback = 'window.open(\'' . $url . '\');';
+                }
+            }
+
+            $html = (isset($result['html']) ? $result['html'] : '');
+
+            if ($html) {
+                $success_callback .= 'setTimeout(function() {bimpModal.newContent(\'Distribution\', \'' . $html . '\', false, \'\', $());}, 1000);';
+            }
         }
 
         return array(

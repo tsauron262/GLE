@@ -3074,7 +3074,7 @@ class Bimp_Product extends BimpObject
 
         $sql = $db->query($query . " AND l.subprice >= 0" . $group_by);
 
-        $cache_key = $dateMin . "-" . $dateMax . "-" . implode("/", $tab_secteur);
+        $cache_key = $dateMin . '-' . $dateMax . "-" . implode("/", $tab_secteur) . '-' . (int) $exlure_retour;
 
         while ($ln = $db->fetch_object($sql)) {
             self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['qty'] = $ln->qty;

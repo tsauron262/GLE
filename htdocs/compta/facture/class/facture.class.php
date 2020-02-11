@@ -2271,6 +2271,7 @@ class Facture extends CommonInvoice
                         /* mod drsi*/
                         BimpTools::sleppIfBloqued("numFact");
                         BimpTools::bloqueDebloque("numFact");
+                        $bloqued = true;
                         /*fmoddrsi*/
 			$num = $this->getNextNumRef($this->thirdparty);
 		}
@@ -2296,9 +2297,6 @@ class Facture extends CommonInvoice
 
 			dol_syslog(get_class($this)."::validate", LOG_DEBUG);
 			$resql=$this->db->query($sql);
-                        /*moddrsi*/
-                        BimpTools::bloqueDebloque("numFact", 0);
-                        /*fmoddrsi*/
 			if (! $resql)
 			{
 				dol_print_error($this->db);
@@ -2429,11 +2427,19 @@ class Facture extends CommonInvoice
 		if (! $error)
 		{
 			$this->db->commit();
+                        /*moddrsi*/
+                        if($bloqued)
+                            BimpTools::bloqueDebloque("numFact", 0);
+                        /*fmoddrsi*/
 			return 1;
 		}
 		else
 		{
 			$this->db->rollback();
+                        /*moddrsi*/
+                        if($bloqued)
+                            BimpTools::bloqueDebloque("numFact", 0);
+                        /*fmoddrsi*/
 			return -1;
 		}
 	}

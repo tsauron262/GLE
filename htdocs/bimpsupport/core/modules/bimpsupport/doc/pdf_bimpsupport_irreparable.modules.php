@@ -62,7 +62,7 @@ class pdf_bimpsupport_irreparable extends BimpDocumentPDF
 <p>Nous soussigné, ".($this->fromCompany->name == "OLYS" ? "Bimp OLYS SAS" : $this->fromCompany->name).", ".$this->fromCompany->address." - ".$this->fromCompany->zip." ".$this->fromCompany->town.", 
 agissant en qualité de revendeur informatique, 
 
-attestons que le produit :".$equipment->getProductLabel()."
+attestons que le produit : ".$equipment->getProductLabel()."
 N° de série : ".$equipment->getData('serial')."
 
 a fait l’objet d’un diagnostic par notre service technique et est considéré comme non réparable. 

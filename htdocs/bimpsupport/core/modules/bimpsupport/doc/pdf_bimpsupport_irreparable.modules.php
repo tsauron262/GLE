@@ -64,7 +64,7 @@ agissant en qualité de revendeur informatique,
 
 attestons que le produit :
 
-".$equipment->getData('product_label')."
+".$equipment->getProductLabel()."
 N° de série : ".$equipment->getData('serial')."
 
 a fait l’objet d’un diagnostic par notre service technique et est considéré comme non réparable. 

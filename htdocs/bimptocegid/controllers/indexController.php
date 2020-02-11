@@ -97,41 +97,41 @@
 
             $html .= '<tbody>';
             if($scanned_directory_by_date) {
-            foreach ($scanned_directory_by_date as $file => $name) {
-                $html .= '<tr>';
- 
-                $onclick = "window.open('".DOL_URL_ROOT."/bimptocegid/doc.php?folder=BY_DATE&nom=".$name."')";
-                $onclick_imported = $export->getJsActionOnclick('imported', array('nom' => $name, 'folder' => "BY_DATE/"), array(
-                        'confirm_msg'      => "Cette action est irrévessible, voullez vous continuer ?",
-                        'success_callback' => 'function() {bimp_reloadPage();}'
-                ));
-                    $html .= '<td><a class="btn btn-default" onclick = "'.$onclick.'">';
-                    
-                    
-                    
-                    $html .= '<i class="' . BimpRender::renderIconClass(BimpTools::getFileIcon($name)) . ' iconLeft" ></i>';
-                    $html .= $name . '</a></td>';
+                foreach ($scanned_directory_by_date as $file => $name) {
+                    $html .= '<tr>';
 
-                    $html .= '<td>';
-                    if (is_file($dir."/". $name) && filesize($dir."/" . $name)) {
-                        $html .= filesize($dir."/" . $name).' b';
-                    } else {
-                        $html .= 'taille inconnue';
-                    }
-                    $html .= '</td>';
-
-                    $html .= '<td>';
-                    if(filemtime($dir."/".$name))
-                        $html .= date('d / m / Y H:i:s', filemtime($dir."/".$name));
-                    $html .= '</td>';
+                    $onclick = "window.open('".DOL_URL_ROOT."/bimptocegid/doc.php?folder=BY_DATE&nom=".$name."')";
+                    $onclick_imported = $export->getJsActionOnclick('imported', array('nom' => $name, 'folder' => "BY_DATE/"), array(
+                            'confirm_msg'      => "Cette action est irrévessible, voullez vous continuer ?",
+                            'success_callback' => 'function() {bimp_reloadPage();}'
+                    ));
+                        $html .= '<td><a class="btn btn-default" onclick = "'.$onclick.'">';
 
 
-                    $html .= '<td class="buttons">';
 
-                    $html .= BimpRender::renderRowButton('Marquer comme importé dans Cégid', 'check', $onclick_imported);
-                    $html .= '</td>';
-                    $html .= '</tr>';
-            }
+                        $html .= '<i class="' . BimpRender::renderIconClass(BimpTools::getFileIcon($name)) . ' iconLeft" ></i>';
+                        $html .= $name . '</a></td>';
+
+                        $html .= '<td>';
+                        if (is_file($dir."/". $name) && filesize($dir."/" . $name)) {
+                            $html .= filesize($dir."/" . $name).' b';
+                        } else {
+                            $html .= 'taille inconnue';
+                        }
+                        $html .= '</td>';
+
+                        $html .= '<td>';
+                        if(filemtime($dir."/".$name))
+                            $html .= date('d / m / Y H:i:s', filemtime($dir."/".$name));
+                        $html .= '</td>';
+
+
+                        $html .= '<td class="buttons">';
+
+                        $html .= BimpRender::renderRowButton('Marquer comme importé dans Cégid', 'check', $onclick_imported);
+                        $html .= '</td>';
+                        $html .= '</tr>';
+                }
             }
             else {
                 $html .= '<tr>';
@@ -203,8 +203,7 @@
                     $html .= BimpRender::renderRowButton('Supprimer', 'trash', $onclick_delete);
                     $html .= '</td>';
                     $html .= '</tr>';
-            }
-            
+                }
             } else {
                 $html .= '<tr>';
                 $html .= '<td colspan="4">';
@@ -213,6 +212,116 @@
                 $html .= '</tr>';
             }
             $html .= '</tbody></table>';
+            
+            
+            
+            if(GETPOST('detail') == 'true'){
+                $dir = DIR_SYNCH . 'exportCegid/BY_REF/imported';
+
+                $scanned_directory_by_ref = array_diff(scandir($dir), array('..', '.', 'imported'));
+
+                $html .= '<h3>Liste des fichiers TRA importée</h3>';
+                $html .= '<table class="bimp_list_table">';
+
+                $html .= '<thead>';
+                $html .= '<tr>';
+                $html .= '<th>Fichier</th>';
+                $html .= '<th>Taille</th>';
+                $html .= '<th>Date</th>';
+                $html .= '<th></th>';
+                $html .= '</tr>';
+                $html .= '</thead>';
+
+                $html .= '<tbody>';
+                if($scanned_directory_by_ref) {
+                    foreach ($scanned_directory_by_ref as $file => $name) {
+                    $html .= '<tr>';
+                    $onclick = "window.open('".DOL_URL_ROOT."/bimptocegid/doc.php?folder=BY_REF&nom=imported/".$name."')";
+
+
+
+                        $html .= '<td><a class="btn btn-default" onclick = "'.$onclick.'">';
+
+
+
+                        $html .= '<i class="' . BimpRender::renderIconClass(BimpTools::getFileIcon($name)) . ' iconLeft" ></i>';
+                        $html .= $name . '</a></td>';
+
+                        $html .= '<td>';
+                        if (is_file($dir."/". $name) && filesize($dir."/" . $name)) {
+                            $html .= filesize($dir."/" . $name).' b';
+                        } else {
+                            $html .= 'taille inconnue';
+                        }
+                        $html .= '</td>';
+
+                        $html .= '<td>';
+                        if(filemtime($dir."/".$name))
+                            $html .= date('d / m / Y H:i:s', filemtime($dir."/".$name));
+
+
+                        $html .= '</td>';
+
+
+                        $html .= '<td class="buttons">';
+
+                        $html .= '</td>';
+                        $html .= '</tr>';
+                    }
+                } else {
+                    $html .= '<tr>';
+                    $html .= '<td colspan="4">';
+                    $html .= BimpRender::renderAlerts('Aucun fichier TRA par ref', 'info', false);
+                    $html .= '</td>';
+                    $html .= '</tr>';
+                }
+                
+                $dir = DIR_SYNCH . 'exportCegid/BY_DATE/imported';
+                $scanned_directory_by_ref = array_diff(scandir($dir), array('..', '.', 'imported'));
+                if($scanned_directory_by_ref) {
+                    foreach ($scanned_directory_by_ref as $file => $name) {
+                    $html .= '<tr>';
+                    $onclick = "window.open('".DOL_URL_ROOT."/bimptocegid/doc.php?folder=BY_DATE&nom=imported/".$name."')";
+
+
+
+                        $html .= '<td><a class="btn btn-default" onclick = "'.$onclick.'">';
+
+
+
+                        $html .= '<i class="' . BimpRender::renderIconClass(BimpTools::getFileIcon($name)) . ' iconLeft" ></i>';
+                        $html .= $name . '</a></td>';
+
+                        $html .= '<td>';
+                        if (is_file($dir."/". $name) && filesize($dir."/" . $name)) {
+                            $html .= filesize($dir."/" . $name).' b';
+                        } else {
+                            $html .= 'taille inconnue';
+                        }
+                        $html .= '</td>';
+
+                        $html .= '<td>';
+                        if(filemtime($dir."/".$name))
+                            $html .= date('d / m / Y H:i:s', filemtime($dir."/".$name));
+
+
+                        $html .= '</td>';
+
+
+                        $html .= '<td class="buttons">';
+
+                        $html .= '</td>';
+                        $html .= '</tr>';
+                    }
+                } else {
+                    $html .= '<tr>';
+                    $html .= '<td colspan="4">';
+                    $html .= BimpRender::renderAlerts('Aucun fichier TRA par date', 'info', false);
+                    $html .= '</td>';
+                    $html .= '</tr>';
+                }
+                $html .= '</tbody></table>';
+            }
             
             return $html;
             

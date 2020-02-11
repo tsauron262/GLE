@@ -26,6 +26,7 @@ class Bimp_Product extends BimpObject
         'TTC' => 'TTC'
     );
 
+    
     CONST TYPE_COMPTA_NONE = 0;
     CONST TYPE_COMPTA_PRODUIT = 1;
     CONST TYPE_COMPTA_SERVICE = 2;

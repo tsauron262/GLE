@@ -3124,9 +3124,5 @@ class Bimp_Product extends BimpObject
             self::$ventes[$cache_key][$ln->fk_product][null]['total_ttc'] += $ln->total_ttc;
 //            self::$ventes[$cache_key][$ln->fk_product][null]['total_achats'] += $ln->total_achats;
         }
-        
-        echo '<pre>';
-        print_r(self::$ventes[$cache_key]);
-        exit;
     }
 }

@@ -136,8 +136,8 @@ lists_cols:
         label: Type matériel
         value: 
             callback: displayTypeMateriel
-        
-        
+    
+            
 lists: 
     default: 
         title: 
@@ -166,6 +166,10 @@ lists:
                 label: Origine
                 value:
                     callback: displayOriginMvt
+            reason:
+                label: Raison
+                value:
+                    callback: displayReasonMvt
             value:
                 field: value
             type_mouvement:
@@ -188,6 +192,8 @@ filters_panels:
                 field: fk_product
             inventorycode:
                 field: inventorycode
+            label:
+                field: label
             value:
                 field: value
             

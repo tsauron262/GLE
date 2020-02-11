@@ -22,6 +22,12 @@ filters_panels:
             ref:
                 field: ref
                 show: 1
+            statut:
+                field: statut
+            commercial:
+                field: fk_commercial_suivi
+            client:
+                field: fk_soc
 objects:
     client:
         instance:
@@ -64,7 +70,14 @@ objects:
                 module: bimpcore
                 name: Bimp_User
             id_object:
-                field_value: fk_user_author       
+                field_value: fk_user_author
+    commercial:
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: Bimp_User
+            id_object:
+                field_value: fk_commercial_suivi
 
 table: contrat
 controller: contrat
@@ -206,6 +219,8 @@ fields:
     fk_commercial_suivi:
         label: Commercial suivi
         dol_prop: commercial_suivi_id
+        type: id_object
+        object: commercial
         input: 
             type: search_user
             help: Choisir le commercial responssable du suivi du contrat
@@ -318,9 +333,7 @@ lists:
             fk_user_author:
                 field: fk_user_author
             commercial:
-                label: Commercial
-                value:
-                    callback: displayCommercial
+                field: fk_commercial_suivi
     
     client:
         extends: default

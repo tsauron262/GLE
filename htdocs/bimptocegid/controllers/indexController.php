@@ -142,7 +142,9 @@
             }
             $html .= '</tbody></table>';
             
-            $scanned_directory_by_ref = array_diff(scandir(DIR_SYNCH . 'exportCegid/BY_REF'), array('..', '.', 'imported'));
+            
+            $dir = DIR_SYNCH . 'exportCegid/BY_REF';
+            $scanned_directory_by_ref = array_diff(scandir($dir), array('..', '.', 'imported'));
             
             $html .= '<h3>Liste des fichiers TRA par REF</h3>';
             $html .= '<table class="bimp_list_table">';
@@ -187,6 +189,10 @@
                     if ((int) $file['date']) {
                         $html .= date('d / m / Y H:i:s', $file['date']);
                     }
+                    elseif(filemtime($dir."/".$name))
+                        $html .= date('d / m / Y H:i:s', filemtime($dir."/".$name));
+                    
+                    
                     $html .= '</td>';
 
 

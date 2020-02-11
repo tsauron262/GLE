@@ -123,6 +123,21 @@ class BContract_contrat extends BimpDolObject {
         return 0;
     }
     
+    public function actionClose($data, &$success) {
+        global $user;
+        $success = 'Contrat clos avec succès';
+        if($this->dol_object->closeAll($user) >= 1) {
+            $this->updateField('statut', self::CONTRAT_STATUS_CLOS);
+        }
+        
+        return [
+            'errors' => $errors,
+            'warnings' => $warnings,
+            'success' => $success
+        ];
+        
+    }
+    
     public function actionUpdateSyntec() {
         $syntec = file_get_contents("https://syntec.fr/"); 
         if(preg_match('/<div class="indice-number"[^>]*>(.*)<\/div>/isU', $syntec, $matches)){
@@ -311,12 +326,26 @@ class BContract_contrat extends BimpDolObject {
                 );
             }
             
+            
+            
             if((($user->id == 232 || $user->id == 460 || $user->admin) && $this->getData('statut') == 1) && (!is_null($this->getData('date_contrat')))) {
                 $buttons[] = array(
                     'label'   => 'Dé-signer le contrat',
                     'icon'    => 'fas_sync',
                     'onclick' => $this->getJsActionOnclick('unSign', array(), array())
                 );
+            }
+            
+            if(($user->admin || $user->id == 375 || $user->id == 460) && $this->getData('statut') != self::CONTRAT_STATUS_CLOS && $this->getData('statut') != self::CONTRAT_STATUS_BROUILLON) {
+                
+                $buttons[] = array(
+                    'label'   => 'Clôre le contrat',
+                    'icon'    => 'fas_times',
+                    'onclick' => $this->getJsActionOnclick('close', array(), array(
+                        'confirm_msg'      => "Voulez vous clôre ce contrat ?",
+                    ))
+                );
+                
             }
             
             if($user->admin || $user->id == 460){
@@ -346,7 +375,8 @@ class BContract_contrat extends BimpDolObject {
 //            }
 //            
             
-            $buttons[] = array(
+            if($status != self::CONTRAT_STATUS_CLOS) {
+                $buttons[] = array(
                 'label'   => 'Générer le PDF du contrat',
                 'icon'    => 'fas_sync',
                 'onclick' => $this->getJsActionOnclick('generatePdf', array(), array())
@@ -356,6 +386,9 @@ class BContract_contrat extends BimpDolObject {
                 'icon'    => 'fas_sync',
                 'onclick' => $this->getJsActionOnclick('generatePdfCourrier', array(), array())
             );
+            }
+            
+            
 //            $buttons[] = array(
 //                'label'   => 'Générer le PDF de l\'échéancier',
 //                'icon'    => 'fas_sync',

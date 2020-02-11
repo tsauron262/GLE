@@ -47,7 +47,12 @@ class BContract_echeancier extends BimpObject {
     }
 
     public function canEdit() {
-        return false; // ToDo à faire les conditions
+        
+        $parent = $this->getParentInstance();
+        if($parent->getData('statut') == 2)
+            return false;
+        
+        return true;
     }
 
     public function renderlistEndPeriod() {
@@ -211,10 +216,15 @@ class BContract_echeancier extends BimpObject {
             return BimpRender::renderAlerts("Ce contrat ne comporte pas d'échéancier car il à été facturé par un autre moyen", 'info', false);
         }
         
+        $html = '';
+        if(!$this->canEdit()) {
+            $html = BimpRender::renderAlerts("Ce contrat est clos, aucune facture ne peut être emises", 'info', false);
+        }
+        
         $instance_facture = $this->getInstance('bimpcommercial', 'Bimp_Facture');
         $parent = $this->getParentInstance();
         $societe = $this->getInstance('bimpcore', "Bimp_Societe", $parent->getData('fk_soc'));
-        $html = '';
+        
         $html .= '<table class="noborder objectlistTable" style="border: none; min-width: 480px">';
         $html .= '<thead>';
         $html .= '<tr class="headerRow">';
@@ -229,23 +239,16 @@ class BContract_echeancier extends BimpObject {
         $html .= '</thead>';
         $html .= '<tbody class="listRows">';
         $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}';
-        $can_create_next_facture = true;
+        $can_create_next_facture = $this->canEdit() ? true : false;
         if ($data->factures_send) {
             $current_number_facture = 1;
             foreach ($data->factures_send as $element_element) {
                 $facture = $this->getInstance('bimpcommercial', 'Bimp_Facture', $element_element['d']);
-                // Voir si il y a des avoir sur cette facture
-//                $avoirs = $facture->dol_object->getListIdAvoirFromInvoice();
-//                if(count($avoirs)) {
-//                    foreach($avoirs as $num => $id) {
-//                        $avoirFacture = $this->getInstance('bimpcommercial', 'Bimp_Facture', $id);
-//                        if(in_array($avoirFacture->id, $avoirs)) {
-//                            echo 'cette facture à un avoir';
-//                        }
-//                    }
-//                    
-//                    print_r($avoirs);
+//                if($facture->getData('fk_facture_source')) {
+//                    $array_avoirs = ['facture' => $facture->id, 'avoir' => $facture->getData('fk_facture_source')];
+//                    continue;
 //                }
+                
                 
                 if ($facture->getData('fk_statut') == 0) {
                     $can_create_next_facture = false;
@@ -263,12 +266,12 @@ class BContract_echeancier extends BimpObject {
                         . '<td style="text-align:center">' . $facture->getNomUrl(1) . '</td>'
                         . '<td style="text-align:center">' . $paye . '</td>'
                         . '<td style="text-align:center; margin-right:10%">';
-                if ($facture->getData('fk_statut') == 0 && $user->rights->facture->validate) {
+                if ($facture->getData('fk_statut') == 0 && $user->rights->facture->validate && $this->canEdit()) {
                     $html .= '<span class="rowButton bs-popover" data-trigger="hover" data-placement="top"  data-content="Valider la facture" onclick="' . $this->getJsActionOnclick("validateFacture", array('id_facture' => $facture->id), array("success_callback" => $callback)) . '")"><i class="fa fa-check" ></i></span>';
                 } else {
                     $html .= '<span class="rowButton bs-popover" data-toggle="popover" data-trigger="hover" data-container="body" data-placement="top" data-content="Afficher la page dans un nouvel onglet" data-html="false" onclick="window.open(\'' . DOL_URL_ROOT . '/bimpcommercial/index.php?fc=facture&amp;id=' . $facture->id . '\');" data-original-title="" title=""><i class="fas fa5-external-link-alt"></i></span>';
                 }
-                if ($current_number_facture == count($data->factures_send) && $facture->getData('fk_statut') == 0 && $user->rights->facture->supprimer) {
+                if ($current_number_facture == count($data->factures_send) && $facture->getData('fk_statut') == 0 && $user->rights->facture->supprimer && $this->canEdit()) {
                     $html .= '<span class="rowButton bs-popover" data-trigger="hover" data-placement="top"  data-content="Supprimer la facture" onclick="' . $this->getJsActionOnclick("deleteFacture", array('id_facture' => $facture->id), array("success_callback" => $callback)) . '")"><i class="fa fa-times" ></i></span>';
                 }
 
@@ -314,7 +317,7 @@ class BContract_echeancier extends BimpObject {
                         . '<td style="text-align:center; margin-right:10%">';
                 if ($firstDinamycLine && $can_create_next_facture) {
                     // ICI NE PAS AFFICHER QUAND LA FACTURE EST PAS VALIDER
-                    if ($user->rights->facture->creer) {
+                    if ($user->rights->facture->creer && $this->canEdit()) {
                         $html .= '<span class="rowButton bs-popover" data-trigger="hover" data-placement="top"  data-content="Facturer la période" onclick="' . $this->getJsActionOnclick("createFacture", array('date_start' => $dateTime_start_mkTime->format('Y-m-d'), 'date_end' => $dateTime_end_mkTime->format('Y-m-d'), 'total_ht' => $amount), array("success_callback" => $callback)) . '")"><i class="fa fa-plus" ></i></span>';
                     }
                     $firstDinamycLine = false;
@@ -329,9 +332,11 @@ class BContract_echeancier extends BimpObject {
 
             if (($parent->is_not_finish() && $user->rights->facture->creer) || ($user->admin || $user->id == 460)) {
                 $html .= '<div class="panel-footer">';
-                if($user->admin || $user->id == 460)
+                if(($user->admin || $user->id == 460) && $this->canEdit()) {
                     $html .= '<div class="btn-group"><button type="button" class="btn btn-danger bs-popover" '.BimpRender::renderPopoverData('Supprimer l\'échéancier').' aria-haspopup="true" aria-expanded="false" onclick="' . $this->getJsActionOnclick('delete') . '"><i class="fa fa-times"></i></button></div>';
-                $html .= '<div class="btn-group"><button type="button" class="btn btn-default" aria-haspopup="true" aria-expanded="false" onclick="' . $this->getJsLoadModalForm('create_perso', "Créer une facture personalisée ou une facturation de plusieurs périodes") . '"><i class="fa fa-plus-square-o iconLeft"></i>Créer une facture personalisée ou une facturation de plusieurs périodes</button></div>';
+                } elseif($this->canEdit()) {
+                    $html .= '<div class="btn-group"><button type="button" class="btn btn-default" aria-haspopup="true" aria-expanded="false" onclick="' . $this->getJsLoadModalForm('create_perso', "Créer une facture personalisée ou une facturation de plusieurs périodes") . '"><i class="fa fa-plus-square-o iconLeft"></i>Créer une facture personalisée ou une facturation de plusieurs périodes</button></div>';
+                }
                 $html .= '</div>';
             }
         }
@@ -390,7 +395,12 @@ class BContract_echeancier extends BimpObject {
             'warnings' => $warnings
         );
     }
-
+    
+    public function parentGetData($field) {
+        $parent = $this->getInstance('bimpcontract', 'BContract_contrat', $this->getData('id_contrat'));
+        $returned_info = $parent->getData($field);
+    }
+    
     public function displayParentInfos($field, $module = null, $bimp_object = null) {
 
         $parent = $this->getParentInstance();

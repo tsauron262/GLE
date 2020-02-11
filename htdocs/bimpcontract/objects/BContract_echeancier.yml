@@ -11,7 +11,7 @@ objects:
             bimp_object: BContract_contrat
             id_object:
                 field_value: id_contrat
-            
+    
 fields:
     id_contrat:
         label: Numéro de contrat
@@ -26,7 +26,7 @@ fields:
     validate:
         label: Validation automatique des factures
         type: bool
-        
+
 lists:
     default:
         title: Récapitulatif des échéanciers contrat

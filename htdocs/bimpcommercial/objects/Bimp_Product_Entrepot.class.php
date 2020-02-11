@@ -6,6 +6,8 @@ class Bimp_Product_Entrepot extends BimpObject
     public $dateBilan = null;
     public $exludeIdDifZero = array();
     public static $product_instance = null;
+    public static $modeStockDate = false;
+    public static $modeStockShowRoom = false;
 
     public function __construct($module, $object_name)
     {
@@ -20,12 +22,21 @@ class Bimp_Product_Entrepot extends BimpObject
 
     public function beforeListFetchItems(BC_List $list)
     {
-        $prod = BimpObject::getInstance("bimpcore", "Bimp_Product");
-        $prod::initStockDate($this->dateBilan);
-        $data = $prod::insertStockDateNotZeroProductStock($this->dateBilan);
-        foreach ($data['stockDateZero'] as $tmp)
-            $this->exludeIdDifZero[] = $tmp;
-        $this->isInitSpecial = true;
+        if(in_array('stockDate', $list->cols))
+            static::$modeStockDate = true;
+        if(in_array('stockShowRoom', $list->cols))
+            static::$modeStockShowRoom = true;
+        
+//        echo "<pre>";print_r($list);die;
+        
+        if(static::$modeStockDate){
+            $prod = BimpObject::getInstance("bimpcore", "Bimp_Product");
+            $prod::initStockDate($this->dateBilan);
+            $data = $prod::insertStockDateNotZeroProductStock($this->dateBilan);
+            foreach ($data['stockDateZero'] as $tmp)
+                $this->exludeIdDifZero[] = $tmp;
+            $this->isInitSpecial = true;
+        }
     }
 
     // Getters: 
@@ -279,10 +290,10 @@ class Bimp_Product_Entrepot extends BimpObject
     public function fetchExtraFields()
     {
         $fields = array(
-            'ventes_qty'    => 0,
-            'ventes_ht'     => 0,
-            'stockShowRoom' => 0,
-            'cur_pa'        => 0
+//            'ventes_qty'    => 0,
+//            'ventes_ht'     => 0,
+//            'stockShowRoom' => 0,
+//            'cur_pa'        => 0
         );
 
         if ((int) $this->getData('fk_product')) {
@@ -295,13 +306,19 @@ class Bimp_Product_Entrepot extends BimpObject
             if ($tabVentes['total_ht'] > 0)
                 $fields['ventes_ht'] = $tabVentes['total_ht'];
 
-            $stockShowRoom = static::$product_instance->getStockShoowRoom($this->dateBilan, (int) $this->getData('fk_entrepot'), (int) $this->getData('fk_product'));
+            if(static::$modeStockShowRoom){
+                $stockShowRoom = static::$product_instance->getStockShoowRoom($this->dateBilan, (int) $this->getData('fk_entrepot'), (int) $this->getData('fk_product'));
+                if ($stockShowRoom > 0)
+                    $fields['stockShowRoom'] = $stockShowRoom;
+                else
+                    $fields['stockShowRoom'] = 0;
+            }
 
-            if ($stockShowRoom > 0)
-                $fields['stockShowRoom'] = $stockShowRoom;
-
-            $stockDate = static::$product_instance->getStockDate($this->dateBilan, (int) $this->getData('fk_entrepot'), (int) $this->getData('fk_product'));
-            $fields['stockDate'] = $stockDate;
+            
+            if(static::$modeStockDate){
+                $stockDate = static::$product_instance->getStockDate($this->dateBilan, (int) $this->getData('fk_entrepot'), (int) $this->getData('fk_product'));
+                $fields['stockDate'] = $stockDate;
+            }
 
             $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $this->getData('fk_product'));
             if (BimpObject::objectLoaded($prod)) {

@@ -196,5 +196,7 @@ filters_panels:
                 field: label
             value:
                 field: value
+            datem:
+                field: datem
             
 

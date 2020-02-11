@@ -696,9 +696,9 @@ VQ - Collège
         $success_callback = '';
 
         global $user;
-        if ($user->id != 1) {
-            $errors[] = 'Debug en cours';
-        } else {
+//        if ($user->id != 1) {
+//            $errors[] = 'Debug en cours';
+//        } else {
             $date_from = isset($data['date_from']) ? $data['date_from'] : date('Y-m-d');
             $date_to = isset($data['date_to']) ? $data['date_to'] : '';
             $distribute_ca = isset($data['distribute_ca']) ? $data['distribute_ca'] : 0;
@@ -724,7 +724,7 @@ VQ - Collège
             if ($html) {
                 $success_callback .= 'setTimeout(function() {bimpModal.newContent(\'Distribution\', \'' . $html . '\', false, \'\', $());}, 1000);';
             }
-        }
+//        }
 
         return array(
             'errors'           => $errors,

@@ -120,6 +120,10 @@ fields:
     label:
         label: Libellé mouvement
         type: string
+    fk_user_author:
+        label: Autheur
+        type: id_object
+        object: user
 
 lists_cols:
     fk_entrepot: 
@@ -174,6 +178,9 @@ lists:
                 field: value
             type_mouvement:
                 field: type_mouvement
+            fk_user_author:
+                field: fk_user_author
+                display: nom_url
             
             
 #            marque: 
@@ -198,5 +205,7 @@ filters_panels:
                 field: value
             datem:
                 field: datem
+            fk_user_author:
+                field: fk_user_author
             
 

@@ -311,9 +311,9 @@ class BContract_contrat extends BimpDolObject {
             $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}';
             if($this->getData('statut') == self::CONTRAT_STATUS_BROUILLON) {
                 $message_for_validation = "Voullez vous valider ce contrat ?";
-                if($this->getData('contrat_source')) {
+                if($this->getData('contrat_source') && $this->getData('ref_ext')) {
                     
-                    $message_for_validation = "Ceci est un avenant, voullez vous le valider ? Cette action entrainera la cloture définitive du contrat source";
+                    $message_for_validation = "Ceci est un avenant, voullez vous le valider ? Cette action entrainera la cloture définitive du contrat " . $this->getData('ref_ext');
                     
                 }
                 
@@ -540,27 +540,44 @@ class BContract_contrat extends BimpDolObject {
             $ref = $this->getData('ref');
         }
         
+        if($this->getData('contrat_source') && $this->getData('ref_ext')) {
+            $annule_remplace = $this->getInstance('bimpcontract', 'BContract_contrat');
+            if($annule_remplace->find(['ref' => $this->getData('ref_ext')])) {
+                if($annule_remplace->dol_object->closeAll($user)) {
+                    $annule_remplace->updateField('statut', self::CONTRAT_STATUS_CLOS);
+                } else {
+                    return "Impossible de fermé les lignes du contrat annulé et remplacé";
+                }
+            } else {
+                return "Impossible de charger le contrat annulé et remplacé";
+            }
+        }
+
         if($this->dol_object->validate($user, $ref) <= 0) {
             $success = 'Le contrat ' . $ref ;
             $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object));
             return 0;
         }
+            
+
+        
         
         if(!BimpTools::getValue('use_syntec')) {
             $this->updateField('syntec', null);
         }
         $date = new DateTime($this->getData('date_start'));
         $instance = $this->getInstance('bimpcontract', 'BContract_echeancier');
+        
+        
+
         $instance->set('id_contrat', $this->id);
         $instance->set('next_facture_date', $date->format('Y-m-d H:i:s'));
         $instance->set('next_facture_amount', $this->reste_a_payer());
         $instance->set('validate', 0);
         $instance->create();
-            
         
         $this->dol_object->activateAll($user);
         $this->actionGeneratePdf([], $success);
-        
     }
     
     public function actionFusion($data, &$success) {
@@ -1104,47 +1121,22 @@ class BContract_contrat extends BimpDolObject {
     
     public function actionCreateAvenant($data, &$success) {
         
-        //$avLetters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O"];
+        $avLetters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O"];
         
-        //$success = "L'avenant N°" . $this->getData('ref') . " à été créé avec succes";
-//        $contra_source = ($this->getData('contrat_source') ? $this->getData('contrat_source') : $this->id);
-//        $contrat_initial = $this->id;
-//        
-//        $first_contrat = $this;
-//        
-//        if($contrat_initial != $this->id) {
-//            $first_contrat = $this->getInstance('bimpcontract', 'BContract_contrat', $contrat_initial);
-//        }
-        
-//        $numero_next = $first_contrat->getListCount(['contrat_source' => $first_contrat->id]);
-//        
-//        
-//        $explodeRef = explode("-", $this->getData('ref'));
-//        $explodeRef[3] = "A";
-//        if(count($explodeRef) > 2) {
-//            if(count($explodeRef) == 1) {
-//                $next_ref = $explodeRef[0];
-//            } elseif(count($explodeRef) == 2) {
-//                $next_ref = $explodeRef[0] . "-" . $explodeRef[1];
-//            }
-//        } else {
-//            $next_ref = $first_contrat->getData('ref');
-//        }
-//        
-//        
-//        
-//        $next_ref .= "-" . $avLetters[$numero_next];
-//        
-//        echo $next_ref;
-//        
-//        if($clone = $this->dol_object->createFromClone($this->getData('fk_soc'))) {
-//            $next_contrat = $this->getInstance('bimpcontract', 'BContract_contrat', $clone);
-//            addElementElement('contrat', 'contrat', $this->id, $next_contrat->id);
-//            $next_contrat->updateField('contrat_source', $first_contrat->id);
-//            $next_contrat->updateField('date_contrat', NULL);
-//            $next_contrat->updateField('ref', $first_contrat->getData('ref') . "-" . $avLetters[$numero_next]);
-//            
-//        }
+        $contrat_source = ($this->getData('contrat_source') ? $this->getData('contrat_source') : $this->id);
+        $count = count($this->db->getRows('contrat_extrafields', 'contrat_source = ' . $contrat_source));
+        $explodeRef = explode("_", $this->getData('ref'));
+        $next_ref = $explodeRef[0] . '_' . $avLetters[$count];
+
+        if($clone = $this->dol_object->createFromClone($this->getData('fk_soc'))) {
+            $next_contrat = $this->getInstance('bimpcontract', 'BContract_contrat', $clone);
+            addElementElement('contrat', 'contrat', $this->id, $next_contrat->id);
+            $next_contrat->updateField('contrat_source', $contrat_source);
+            $next_contrat->updateField('date_contrat', NULL);
+            $next_contrat->updateField('ref_ext', $this->getData('ref'));
+            $next_contrat->updateField('ref', $next_ref);
+            $success = "L'avenant N°" . $next_ref . " à été créé avec succes";
+        }
     }
     
     public function getContratSource() {

@@ -1444,7 +1444,10 @@ class GSX_Repair extends BimpObject
                             $has_lines = true;
                             $html .= '<tr>';
                             $html .= '<th>' . $label . '</th>';
-                            $html .= '<td>' . $value . '</td>';
+                            if(is_array($value))
+                                $html .= '<td>' . print_r($value,1) . '</td>';
+                            else
+                                $html .= '<td>' . $value . '</td>';
                             $html .= '</tr>';
                         }
                     }

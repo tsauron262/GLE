@@ -1,6 +1,7 @@
 <?php
 
 ini_set('max_execution_time', 6000);
+
 //ini_set('memory_limit', '512M');
 
 class Bimp_Product extends BimpObject
@@ -24,21 +25,21 @@ class Bimp_Product extends BimpObject
         'HT'  => 'HT',
         'TTC' => 'TTC'
     );
+
     
     CONST TYPE_COMPTA_NONE = 0;
     CONST TYPE_COMPTA_PRODUIT = 1;
     CONST TYPE_COMPTA_SERVICE = 2;
     CONST TYPE_COMPTA_PORT = 3;
     CONST TYPE_COMPTA_COMM = 4;
-    
+
     public static $type_compta = [
-        self::TYPE_COMPTA_NONE => 'Aucun re-classement',
+        self::TYPE_COMPTA_NONE    => 'Aucun re-classement',
         self::TYPE_COMPTA_PRODUIT => 'Considéré comme produit',
         self::TYPE_COMPTA_SERVICE => "Considéré comme service",
-        self::TYPE_COMPTA_PORT => "Considéré comme frais de port",
-        self::TYPE_COMPTA_COMM => "Considéré comme commition"
+        self::TYPE_COMPTA_PORT    => "Considéré comme frais de port",
+        self::TYPE_COMPTA_COMM    => "Considéré comme commition"
     ];
-    
     public static $units_weight = array();
     public static $units_length = array();
     public static $units_surface = array();
@@ -54,130 +55,7 @@ class Bimp_Product extends BimpObject
 
         parent::__construct($module, $object_name);
     }
-    
-    public function getProductTypeCompta(){
-        $type_compta = $this->getData('type_compta');
-        
-        
-        if($type_compta > 0){
-            $type = $type_compta - 1;
-        }
-        else{
-            if($frais_de_port = $this->db->getRow('categorie_product', 'fk_categorie = 9705 AND fk_product = ' . $this->id) || $this->id == 129950)
-                    $type = 2;
-            else
-                $type = $this->getData('fk_product_type');
-        }
-        return $type;
-    }
-    
-    public function getCodeComptableAchat($zone_vente = 1, $force_type = - 1) {
-        if($force_type == -1) {
-            if(!$this->isLoaded())
-                return '';
-            if($this->getData('accountancy_code_buy') != '') {
-                return $this->getData('accountancy_code_buy');
-            }
-            $type = $this->getProductTypeCompta();
-        } else {
-            $type = $force_type;
-        }
-        if($type == 0) { // Produit
-            if($zone_vente == 1){
-                if($this->getData('tva_tx') == 0) {
-                    return BimpCore::getConf('BIMPTOCEGID_achat_tva_null');
-                }
-                return BimpCore::getConf('BIMPTOCEGID_achat_produit_fr');
-            } 
-            elseif($zone_vente == 2 || $zone_vente == 4)
-                return BimpCore::getConf('BIMPTOCEGID_achat_produit_ue');
-            elseif($zone_vente == 3)
-                return BimpCore::getConf('BIMPTOCEGID_achat_produit_ex');
-        } elseif($type == 1) { // Service
-            if($zone_vente == 1){
-                if($this->getData('tva_tx') == 0) {
-                    return BimpCore::getConf('BIMPTOCEGID_achat_tva_null_service');
-                }
-                return BimpCore::getConf('BIMPTOCEGID_achat_service_fr');
-            } 
-            elseif($zone_vente == 2 || $zone_vente == 4)
-                return BimpCore::getConf('BIMPTOCEGID_achat_service_ue');
-            elseif($zone_vente == 3)
-                return BimpCore::getConf('BIMPTOCEGID_achat_service_ex');
-        } elseif($type == 2) { // Frais de port
-            if($zone_vente == 1)
-                return BimpCore::getConf('BIMPTOCEGID_frais_de_port_achat_fr');
-            elseif($zone_vente == 2 || $zone_vente == 4)
-                return BimpCore::getConf('BIMPTOCEGID_frais_de_port_achat_ue');
-            elseif($zone_vente == 3)
-                return BimpCore::getConf('BIMPTOCEGID_frais_de_port_achat_ex');
-        }
-    }
-    // ACHAT DE D3E juste pour la france
-    // ACHAT DE TVA JUSTe PAR AUTOLIQUIDATION - si on a un numéro intracom sur un pro UE
-    
-    public function getCodeComptableVente($zone_vente = 1, $force_type = -1){
-        if($force_type == -1){
-            if(!$this->isLoaded())
-                return '';
-            if($this->getData('accountancy_code_sell') != '')
-                return $this->getData('accountancy_code_sell');
-            $type = $this->getProductTypeCompta();
-        }
-        else
-            $type = $force_type;
-        if($type == 0){//Produit
-            if($zone_vente == 1){
-                if($this->getData('tva_tx') == 0) {
-                    return BimpCore::getConf('BIMPTOCEGID_vente_tva_null');
-                }
-                return BimpCore::getConf('BIMPTOCEGID_vente_produit_fr');
-            } 
-            elseif($zone_vente == 2 || $zone_vente == 4)
-                return BimpCore::getConf('BIMPTOCEGID_vente_produit_ue');
-            elseif($zone_vente == 3)
-                return BimpCore::getConf('BIMPTOCEGID_vente_produit_ex');
-        }
-        elseif($type == 1){//service
-            if($zone_vente == 1)
-                return BimpCore::getConf('BIMPTOCEGID_vente_service_fr');
-            elseif($zone_vente == 2 || $zone_vente == 4)
-                return BimpCore::getConf('BIMPTOCEGID_vente_service_ue');
-            elseif($zone_vente == 3)
-                return BimpCore::getConf('BIMPTOCEGID_vente_service_ex');
-        }
-        elseif($type == 2){//Port
-            if($zone_vente == 1)
-                return BimpCore::getConf('BIMPTOCEGID_frais_de_port_vente_fr');
-            elseif($zone_vente == 2 || $zone_vente == 4)
-                return BimpCore::getConf('BIMPTOCEGID_frais_de_port_vente_ue');
-            elseif($zone_vente == 3)
-                return BimpCore::getConf('BIMPTOCEGID_frais_de_port_vente_ex');
-        }
-        elseif($type == 3){//commition
-            if($zone_vente == 1)
-                return BimpCore::getConf('BIMPTOCEGID_comissions_fr');
-            elseif($zone_vente == 2 || $zone_vente == 4)
-                return BimpCore::getConf('BIMPTOCEGID_comissions_ue');
-            elseif($zone_vente == 3)
-                return BimpCore::getConf('BIMPTOCEGID_comissions_ex');
-        }
-        return false;
-    }
-    public function getCodeComptableVenteTva($zone_vente = 1){
-        if($zone_vente == 1)
-            return BimpCore::getConf('BIMPTOCEGID_vente_tva_fr');
-        elseif($zone_vente == 2 || $zone_vente == 4)
-            return BimpCore::getConf('BIMPTOCEGID_vente_tva_ue');
-        return false;
-    }
-    public function getCodeComptableVenteDeee($zone_vente = 1){
-        if($zone_vente == 1)
-            return BimpCore::getConf('BIMPTOCEGID_vente_dee_fr');
-//        elseif($zone_vente == 2 || $zone_vente == 4)
-//            return BimpCore::getConf('BIMPTOCEGID_vente_dee_ue');
-        return false;
-    }
+
     public static function initUnits()
     {
         if (empty(self::$units_weight)) {
@@ -277,7 +155,7 @@ class Bimp_Product extends BimpObject
         }
 
         return parent::canSetAction($action);
-    }   
+    }
 
     public function canValidate()
     {
@@ -524,11 +402,6 @@ class Bimp_Product extends BimpObject
             }
         }
 
-
-
-
-
-
         return 1;
     }
 
@@ -556,6 +429,135 @@ class Bimp_Product extends BimpObject
     {
         global $conf;
         return (isset($conf->global->MAIN_MODULE_BIMPPRODUCTBROWSER) ? 1 : 0);
+    }
+
+    // Getters codes comptables: 
+
+    public function getProductTypeCompta()
+    {
+        $type_compta = $this->getData('type_compta');
+
+
+        if ($type_compta > 0) {
+            $type = $type_compta - 1;
+        } else {
+            if ($frais_de_port = $this->db->getRow('categorie_product', 'fk_categorie = 9705 AND fk_product = ' . $this->id) || $this->id == 129950)
+                $type = 2;
+            else
+                $type = $this->getData('fk_product_type');
+        }
+        return $type;
+    }
+
+    public function getCodeComptableAchat($zone_vente = 1, $force_type = - 1)
+    {
+        if ($force_type == -1) {
+            if (!$this->isLoaded())
+                return '';
+            if ($this->getData('accountancy_code_buy') != '') {
+                return $this->getData('accountancy_code_buy');
+            }
+            $type = $this->getProductTypeCompta();
+        } else {
+            $type = $force_type;
+        }
+        if ($type == 0) { // Produit
+            if ($zone_vente == 1) {
+                if ($this->getData('tva_tx') == 0) {
+                    return BimpCore::getConf('BIMPTOCEGID_achat_tva_null');
+                }
+                return BimpCore::getConf('BIMPTOCEGID_achat_produit_fr');
+            } elseif ($zone_vente == 2 || $zone_vente == 4)
+                return BimpCore::getConf('BIMPTOCEGID_achat_produit_ue');
+            elseif ($zone_vente == 3)
+                return BimpCore::getConf('BIMPTOCEGID_achat_produit_ex');
+        } elseif ($type == 1) { // Service
+            if ($zone_vente == 1) {
+                if ($this->getData('tva_tx') == 0) {
+                    return BimpCore::getConf('BIMPTOCEGID_achat_tva_null_service');
+                }
+                return BimpCore::getConf('BIMPTOCEGID_achat_service_fr');
+            } elseif ($zone_vente == 2 || $zone_vente == 4)
+                return BimpCore::getConf('BIMPTOCEGID_achat_service_ue');
+            elseif ($zone_vente == 3)
+                return BimpCore::getConf('BIMPTOCEGID_achat_service_ex');
+        } elseif ($type == 2) { // Frais de port
+            if ($zone_vente == 1)
+                return BimpCore::getConf('BIMPTOCEGID_frais_de_port_achat_fr');
+            elseif ($zone_vente == 2 || $zone_vente == 4)
+                return BimpCore::getConf('BIMPTOCEGID_frais_de_port_achat_ue');
+            elseif ($zone_vente == 3)
+                return BimpCore::getConf('BIMPTOCEGID_frais_de_port_achat_ex');
+        }
+    }
+
+    public function getCodeComptableVente($zone_vente = 1, $force_type = -1)
+    {
+        // ACHAT DE D3E juste pour la france
+        // ACHAT DE TVA JUSTe PAR AUTOLIQUIDATION - si on a un numéro intracom sur un pro UE
+
+        if ($force_type == -1) {
+            if (!$this->isLoaded())
+                return '';
+            if ($this->getData('accountancy_code_sell') != '')
+                return $this->getData('accountancy_code_sell');
+            $type = $this->getProductTypeCompta();
+        } else
+            $type = $force_type;
+        if ($type == 0) {//Produit
+            if ($zone_vente == 1) {
+                if ($this->getData('tva_tx') == 0) {
+                    return BimpCore::getConf('BIMPTOCEGID_vente_tva_null');
+                }
+                return BimpCore::getConf('BIMPTOCEGID_vente_produit_fr');
+            } elseif ($zone_vente == 2 || $zone_vente == 4)
+                return BimpCore::getConf('BIMPTOCEGID_vente_produit_ue');
+            elseif ($zone_vente == 3)
+                return BimpCore::getConf('BIMPTOCEGID_vente_produit_ex');
+        }
+        elseif ($type == 1) {//service
+            if ($zone_vente == 1)
+                return BimpCore::getConf('BIMPTOCEGID_vente_service_fr');
+            elseif ($zone_vente == 2 || $zone_vente == 4)
+                return BimpCore::getConf('BIMPTOCEGID_vente_service_ue');
+            elseif ($zone_vente == 3)
+                return BimpCore::getConf('BIMPTOCEGID_vente_service_ex');
+        }
+        elseif ($type == 2) {//Port
+            if ($zone_vente == 1)
+                return BimpCore::getConf('BIMPTOCEGID_frais_de_port_vente_fr');
+            elseif ($zone_vente == 2 || $zone_vente == 4)
+                return BimpCore::getConf('BIMPTOCEGID_frais_de_port_vente_ue');
+            elseif ($zone_vente == 3)
+                return BimpCore::getConf('BIMPTOCEGID_frais_de_port_vente_ex');
+        }
+        elseif ($type == 3) {//commition
+            if ($zone_vente == 1)
+                return BimpCore::getConf('BIMPTOCEGID_comissions_fr');
+            elseif ($zone_vente == 2 || $zone_vente == 4)
+                return BimpCore::getConf('BIMPTOCEGID_comissions_ue');
+            elseif ($zone_vente == 3)
+                return BimpCore::getConf('BIMPTOCEGID_comissions_ex');
+        }
+        return false;
+    }
+
+    public function getCodeComptableVenteTva($zone_vente = 1)
+    {
+        if ($zone_vente == 1)
+            return BimpCore::getConf('BIMPTOCEGID_vente_tva_fr');
+        elseif ($zone_vente == 2 || $zone_vente == 4)
+            return BimpCore::getConf('BIMPTOCEGID_vente_tva_ue');
+        return false;
+    }
+
+    public function getCodeComptableVenteDeee($zone_vente = 1)
+    {
+        if ($zone_vente == 1)
+            return BimpCore::getConf('BIMPTOCEGID_vente_dee_fr');
+//        elseif($zone_vente == 2 || $zone_vente == 4)
+//            return BimpCore::getConf('BIMPTOCEGID_vente_dee_ue');
+        return false;
     }
 
     // Getters params: 
@@ -621,7 +623,7 @@ class Bimp_Product extends BimpObject
                 );
                 break;
         }
-        
+
         parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
     }
 
@@ -768,7 +770,7 @@ class Bimp_Product extends BimpObject
             $dateMax = date('Y-m-d H:i:s');
         }
 
-        $cache_key = $dateMin . '-' . $dateMax . "-" . implode("/", $tab_secteur). '-'. $exlure_retour;
+        $cache_key = $dateMin . '-' . $dateMax . "-" . implode("/", $tab_secteur) . '-' . (int) $exlure_retour;
 
         if ((int) $id_product) {
             if (!isset(self::$ventes[$cache_key])) {
@@ -946,7 +948,7 @@ class Bimp_Product extends BimpObject
                 $this->getData('id') . '">Liste complète</a>)';
         return $html;
     }
-    
+
     public function getValues8sens($type, $include_empty = true)
     {
         // Utiliser ***impérativement*** le cache pour ce genre de requêtes         
@@ -1771,8 +1773,8 @@ class Bimp_Product extends BimpObject
         $stats_fact_fourn = $this->load_stats_facture_fournisseur();
         $stats_contrat = $this->load_stats_contrat();
 
-        $stats = array($stats_propale, /*$stats_prop_supplier, */$stats_command,
-            $stats_facture, $stats_contrat, 
+        $stats = array($stats_propale, /* $stats_prop_supplier, */ $stats_command,
+            $stats_facture, $stats_contrat,
             $stats_comm_fourn, $stats_fact_fourn);
 
         $body .= '<tbody>';
@@ -3053,27 +3055,27 @@ class Bimp_Product extends BimpObject
         global $db;
 //        self::$ventes = array(); // Ne pas déco ça effacerait d'autres données en cache pour d'autres dates. 
 
-        $query = "SELECT `fk_product`, entrepot, sum(qty) as qty, sum(l.total_ht) as total_ht, sum(l.total_ttc) as total_ttc";
-        $query .= " FROM `" . MAIN_DB_PREFIX . "facturedet` l, " . MAIN_DB_PREFIX . "facture f, " . MAIN_DB_PREFIX . "facture_extrafields e";
-        $query .= " WHERE `fk_facture` = f.rowid AND e.fk_object = f.rowid AND fk_product > 0";
-        if($exlure_retour)
-            $query .= " AND qty > 0";
+        $query = "SELECT l.fk_product, e.entrepot, sum(l.qty) as qty, sum(l.total_ht) as total_ht, sum(l.total_ttc) as total_ttc";
+        $query .= " FROM " . MAIN_DB_PREFIX . "facturedet l, " . MAIN_DB_PREFIX . "facture f, " . MAIN_DB_PREFIX . "facture_extrafields e";
+        $query .= " WHERE l.fk_facture = f.rowid AND e.fk_object = f.rowid AND l.fk_product > 0";
+        if ($exlure_retour)
+            $query .= " AND l.qty > 0";
         $query .= " AND f.fk_statut > 0";
 
         if ($dateMin)
-            $query .= " AND date_valid >= '" . $dateMin . "'";
+            $query .= " AND f.date_valid >= '" . $dateMin . "'";
 
         if ($dateMax)
-            $query .= " AND date_valid <= '" . $dateMax . "'";
+            $query .= " AND f.date_valid <= '" . $dateMax . "'";
 
         if (count($tab_secteur) > 0)
             $query .= " AND e.type IN ('" . implode("','", $tab_secteur) . "')";
 
-        $group_by .= " GROUP BY `fk_product`, entrepot";
+        $group_by .= " GROUP BY l.fk_product, e.entrepot";
 
-        $sql = $db->query($query . " AND `subprice` >= 0" . $group_by);
+        $sql = $db->query($query . " AND l.subprice >= 0" . $group_by);
 
-        $cache_key = $dateMin . "-" . $dateMax . "-" . implode("/", $tab_secteur);
+        $cache_key = $dateMin . '-' . $dateMax . "-" . implode("/", $tab_secteur) . '-' . (int) $exlure_retour;
 
         while ($ln = $db->fetch_object($sql)) {
             self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['qty'] = $ln->qty;
@@ -3095,7 +3097,7 @@ class Bimp_Product extends BimpObject
 //            self::$ventes[$cache_key][$ln->fk_product][null]['total_achats'] += $ln->total_achats;
         }
 
-        $sql2 = $db->query($query . " AND `subprice` < 0" . $group_by);
+        $sql2 = $db->query($query . " AND l.subprice < 0" . $group_by);
 
         while ($ln = $db->fetch_object($sql2)) {
             if (!isset(self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot])) {

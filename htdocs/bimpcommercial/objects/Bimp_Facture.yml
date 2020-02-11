@@ -854,10 +854,19 @@ cards:
         status: fk_statut
         view_btn: 0
         fields: 
-            - field: total_ttc
-            - label: Payé
-              value: 
-                  callback: displayPaid
+            total: 
+                field: total_ttc
+            paye: 
+                label: Payé
+                value: 
+                    callback: displayPaid
+                  
+    detail: 
+        extends: light
+        fields: 
+            client: 
+                field: fk_soc
+                display: nom_url
         
 searches:
     default: 

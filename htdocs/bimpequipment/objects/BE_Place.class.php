@@ -33,7 +33,8 @@ class BE_Place extends BimpObject
         'commande'       => 'Commande client',
         'vente'          => 'Vente en caisse',
         'transfert'      => 'Transfert',
-        'order_supplier' => 'Commande fournisseur'
+        'order_supplier' => 'Commande fournisseur',
+        'sav'            => 'SAV'
     );
     public static $entrepot_types = array(self::BE_PLACE_ENTREPOT, self::BE_PLACE_PRESENTATION, self::BE_PLACE_PRET, self::BE_PLACE_SAV, self::BE_PLACE_VOL, self::BE_PLACE_INTERNE, self::BE_PLACE_ENQUETE);
     public static $immos_types = array(self::BE_PLACE_USER, self::BE_PLACE_INTERNE);

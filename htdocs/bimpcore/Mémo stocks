@@ -1,0 +1,24 @@
+*** CODEMOVE Stocks:  ***
+
+Expédition / retours commandes: 
+CO{id_commande}_EXP{id_shipment}
+
+Annulation expéditions: 
+CO{id_commande}_EXP{id_shipment}_ANNUL
+
+Validation ventes en caisse:
+- Articles: VENTE{id_vente}_ART{id_article}
+- Retours: VENTE{id_vente}_RET{id_article}
+
+Nouvel emplacement (Code MVT non défini)
+EQ{id_equipment}_PLACE{id_place}
+
+RECEPTION COMMANDE FOURN: 
+'CMDF{id_commande_fourn}_LN{id_bimp_line}_RECEP{id_reception}
+
+ANNULATION RECEPTION COMMANDE FOURN: 
+ANNUL_CMDF{id_commande_fourn}_LN{id_bimp_commande_line}_RECEP{id_reception}
+
+Packages: 
+- Ajout produit: PACKAGE{id_package}_ADD
+- Retrait produit: PACKAGE{id_package}_REMOVE

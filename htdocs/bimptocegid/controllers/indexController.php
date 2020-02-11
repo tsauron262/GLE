@@ -80,7 +80,8 @@
             
             $html .= '<br /><br /><br />';
             
-            $scanned_directory_by_date = array_diff(scandir(DIR_SYNCH . 'exportCegid/BY_DATE'), array('..', '.', 'imported'));
+            $dir = DIR_SYNCH . 'exportCegid/BY_DATE';
+            $scanned_directory_by_date = array_diff(scandir($dirs), array('..', '.', 'imported'));
             
             $html .= '<h3>Liste des fichiers TRA par date</h3>';
             $html .= '<table class="bimp_list_table">';
@@ -112,17 +113,16 @@
                     $html .= $name . '</a></td>';
 
                     $html .= '<td>';
-                    if (is_file(DIR_SYNCH . 'exportCegid/BY_DATE/' . $name) && filesize(DIR_SYNCH . 'exportCegid/BY_DATE/' . $name)) {
-                        $html .= filesize(DIR_SYNCH . 'exportCegid/BY_DATE/' . $name);
+                    if (is_file($dir."/". $name) && filesize($dir."/" . $name)) {
+                        $html .= filesize($dir."/" . $name).' b';
                     } else {
                         $html .= 'taille inconnue';
                     }
                     $html .= '</td>';
 
                     $html .= '<td>';
-                    if ((int) $file['date']) {
-                        $html .= date('d / m / Y H:i:s', $file['date']);
-                    }
+                    if(filemtime($dir."/".$name))
+                        $html .= date('d / m / Y H:i:s', filemtime($dir."/".$name));
                     $html .= '</td>';
 
 
@@ -144,6 +144,7 @@
             
             
             $dir = DIR_SYNCH . 'exportCegid/BY_REF';
+            
             $scanned_directory_by_ref = array_diff(scandir($dir), array('..', '.', 'imported'));
             
             $html .= '<h3>Liste des fichiers TRA par REF</h3>';
@@ -178,18 +179,15 @@
                     $html .= $name . '</a></td>';
 
                     $html .= '<td>';
-                    if (isset($file['size']) && $file['size']) {
-                        $html .= $file['size'];
+                    if (is_file($dir."/". $name) && filesize($dir."/" . $name)) {
+                        $html .= filesize($dir."/" . $name).' b';
                     } else {
                         $html .= 'taille inconnue';
                     }
                     $html .= '</td>';
 
                     $html .= '<td>';
-                    if ((int) $file['date']) {
-                        $html .= date('d / m / Y H:i:s', $file['date']);
-                    }
-                    elseif(filemtime($dir."/".$name))
+                    if(filemtime($dir."/".$name))
                         $html .= date('d / m / Y H:i:s', filemtime($dir."/".$name));
                     
                     

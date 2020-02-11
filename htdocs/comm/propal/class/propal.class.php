@@ -1707,7 +1707,7 @@ class Propal extends CommonObject
                         /* mod drsi*/
                         BimpTools::sleppIfBloqued("numPropal");
                         BimpTools::bloqueDebloque("numPropal");
-                        $sbloqued = true;
+                        $bloqued = true;
                         /*fmoddrsi*/
 			$num = $this->getNextNumRef($soc);
 		}

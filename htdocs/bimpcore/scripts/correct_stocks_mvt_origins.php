@@ -29,7 +29,7 @@ $bdb = new BimpDb($db);
 
 $where = '(`fk_origin` IS NULL OR `fk_origin` = 0)';
 //$where .= ' AND `inventorycode` != \'\' AND `inventorycode` IS NOT NULL';
-$where .= ' AND `inventorycode` LIKE \'CMDF%\'';
+$where .= ' AND `inventorycode` LIKE \'ANNUL_CMDF%\'';
 $rows = $bdb->getRows('stock_mouvement', $where, null, 'array', array('rowid', 'inventorycode'), 'rowid', 'desc');
 
 if (!(int) BimPTools::getValue('exec', 0)) {
@@ -52,8 +52,8 @@ if (!(int) BimPTools::getValue('exec', 0)) {
 foreach ($rows as $r) {
     $code = $r['inventorycode'];
 
-    if (preg_match('/^CMDF(\d+)_LN(\d+)_RECEP(\d+)$/', $code, $matches)) {
-        $comm = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn', (int) $matches[1]);
+    if (preg_match('/^(ANNUL_)?CMDF(\d+)_LN(\d+)_RECEP(\d+)$/', $code, $matches)) {
+        $comm = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn', (int) $matches[2]);
         if (BimpObject::objectLoaded($comm)) {
             echo 'Correction mvt #' . $r['rowid'] . ' (Commande fourn ' . $comm->getRef() . '): ';
 

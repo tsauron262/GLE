@@ -1435,6 +1435,8 @@ class GSX_Repair extends BimpObject
                 'returnStatusCode'       => 'Code raison du retour',
                 'returnOrderNumber'      => 'N° de retour',
                 'returnTrackingNumber'   => 'N° de suivi du retour',
+                'kgbDeviceDetail'        => 'KGB',
+                'kbbDeviceDetail'        => 'KBB',
                 'returnPartReceivedDate' => 'Date de réception du retour'
                     ) as $path => $label) {
                         $value = BimpTools::getArrayValueFromPath($part, $path, true);

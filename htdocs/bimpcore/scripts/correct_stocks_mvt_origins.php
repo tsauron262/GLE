@@ -27,13 +27,15 @@ if (!$user->admin) {
 
 $bdb = new BimpDb($db);
 
-$where = '(`fk_origin` IS NULL OR `fk_origin` = 0)';
+//$where = '(`fk_origin` IS NULL OR `fk_origin` = 0)';
 //$where .= ' AND `inventorycode` != \'\' AND `inventorycode` IS NOT NULL';
-$where .= ' AND (';
-$where .= '`inventorycode` LIKE \'CMDF%\'';
-$where .= ' OR `inventorycode` LIKE \'ANNUL_CMDF%\'';
+//$where .= ' AND (';
+
+$where = '(`inventorycode` LIKE \'CO%_EXP%\' AND origintype != \'commande\')';
+//$where .= ' OR `inventorycode` LIKE \'CMDF%\'';
+//$where .= ' OR `inventorycode` LIKE \'ANNUL_CMDF%\'';
 //$where .= ' OR `inventorycode` LIKE \'VENTE%\'';
-$where .= ')';
+//$where .= ')';
 
 $rows = $bdb->getRows('stock_mouvement', $where, null, 'array', array('rowid', 'inventorycode'), 'rowid', 'desc');
 
@@ -60,21 +62,36 @@ foreach ($rows as $r) {
     $origin = '';
     $id_origin = 0;
 
-    if (preg_match('/^(ANNUL_)?CMDF(\d+)_LN(\d+)_RECEP(\d+)$/', $code, $matches)) {
-        $origin = 'order_supplier';
-        $id_origin = (int) $matches[2];
+    if (preg_match('/^CO(\d+)_EXP(\d+)(_ANNUL)?$/', $code, $matches)) {
+        $origin = 'commande';
+        $id_origin = (int) $matches[1];
+    } else {
+        echo $code . '<br/>';
     }
+
+//    elseif (preg_match('/^(ANNUL_)?CMDF(\d+)_LN(\d+)_RECEP(\d+)$/', $code, $matches)) {
+//        $origin = 'order_supplier';
+//        $id_origin = (int) $matches[2];
+//    }
 //    elseif (preg_match('/^VENTE(\d+)_(ART|RET)(\d+)$/', $code, $matches)) {
 //        $origin = 'vente_caisse';
 //        $id_origin = (int) $matches[1];
 //    }
 
     if ($origin && $id_origin) {
-        echo 'Correction mvt #' . $r['rowid'] . ' (Origine: ' . $origin . ' #' . $id_origin . '): ';
+        echo 'Correction mvt #' . $r['rowid'] . ' (Origine: ' . $origin . ' #' . $id_origin . ' - Code: ' . $code . '): ';
+//        echo '<br/>';
+//        continue;
 
+        if (!in_array($origin, array('vente_caisse', 'transfert', 'sav', 'package'))) {
+            $bdb->update('stock_mouvement', array(
+                'origintype' => $origin,
+                'fk_origin'  => $id_origin,
+                    ), 'rowid = ' . (int) $r['rowid']);
+        }
         if ($bdb->update('stock_mouvement', array(
-                    'origintype' => $origin,
-                    'fk_origin'  => $id_origin,
+                    'bimp_origin'    => $origin,
+                    'bimp_id_origin' => $id_origin,
                         ), 'rowid = ' . (int) $r['rowid']) <= 0) {
             echo '[ECHEC] - ' . $bdb->db->lasterror();
         } else {
@@ -90,6 +107,7 @@ foreach ($rows as $r) {
                     ), 'code_mvt = \'' . $code . '\'');
         }
         echo '<br/>';
+//        break;
     }
 }
 

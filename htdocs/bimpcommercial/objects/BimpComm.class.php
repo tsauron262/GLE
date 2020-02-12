@@ -3356,7 +3356,7 @@ class BimpComm extends BimpDolObject
                 $logs .= '<br/>';
             }
             global $user, $langs;
-            $logs .= ' - <strong>Le' . date('d / m / Y à H:i') . '</strong> par ' . $user->getFullName($langs) . ': ' . $text;
+            $logs .= ' - <strong>Le ' . date('d / m / Y à H:i') . '</strong> par ' . $user->getFullName($langs) . ': ' . $text;
             $errors = $this->updateField('logs', $logs, null, true);
         }
 

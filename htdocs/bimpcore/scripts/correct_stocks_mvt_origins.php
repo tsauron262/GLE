@@ -38,7 +38,8 @@ $where = '';
 //$where .= ' OR (`inventorycode` LIKE \'VENTE%\' AND (origintype != \'\' OR bimp_origin != \'vente_caisse\'))';
 //$where .= ' OR (`inventorycode` LIKE \'TR%\' AND (origintype != \'\' OR bimp_origin != \'transfert\'))';
 //$where .= ' OR ((`label` LIKE \'SAV%\' OR `label` LIKE \'Vente SAV%\') AND (origintype != \'\' OR bimp_origin != \'sav\'))';
-$where .= '((`inventorycode` LIKE \'PACKAGE%_ADD\' OR `inventorycode` LIKE \'PACKAGE%_REMOVE\' OR `inventorycode` LIKE \'AJOUT PACKAGE %\') AND (origintype != \'\' OR bimp_origin != \'package\'))';
+//$where .= ' OR ((`inventorycode` LIKE \'PACKAGE%_ADD\' OR `inventorycode` LIKE \'PACKAGE%_REMOVE\' OR `inventorycode` LIKE \'AJOUT PACKAGE %\') AND (origintype != \'\' OR bimp_origin != \'package\'))';
+$where .= ' (`inventorycode` LIKE \'PRET%\' AND (origintype != \'\' OR bimp_origin != \'pret\'))';
 
 //$where .= ' AND rowid = 48863';
 //$where .= ')';
@@ -193,44 +194,46 @@ foreach ($rows as $r) {
 //        } else {
 //            continue;
 //        }
+//    } elseif (preg_match('/^PACKAGE(\d+)_(ADD|REMOVE)$/', $code, $matches)) {
+//        $bimp_origin = 'package';
+//        $bimp_id_origin = (int) $matches[1];
+//
+//        if ($matches[2] === 'ADD') {
+//            $id_package = (int) $matches[1];
+//        }
+//    } elseif (preg_match('/^AJOUT PACKAGE (.+)$/', $code, $matches)) {
+//        $id_package = (int) $bdb->getValue('be_package', 'id', 'ref = \'' . $matches[1] . '\'');
+//
+//        if ($id_package) {
+//            $bimp_origin = 'package';
+//            $bimp_id_origin = $id_package;
+//            $code = 'PACKAGE' . $id_package . '_ADD';
+//        }
 //    }
-    if (preg_match('/^PACKAGE(\d+)_(ADD|REMOVE)$/', $code, $matches)) {
-        $bimp_origin = 'package';
+    if (preg_match('/^PRET(\d+)_\d+$/', $code, $matches)) {
+        $bimp_origin = 'pret';
         $bimp_id_origin = (int) $matches[1];
-
-        if ($matches[2] === 'ADD') {
-            $id_package = (int) $matches[1];
-        }
-    } elseif (preg_match('/^AJOUT PACKAGE (.+)$/', $code, $matches)) {
-        $id_package = (int) $bdb->getValue('be_package', 'id', 'ref = \'' . $matches[1] . '\'');
-
-        if ($id_package) {
-            $bimp_origin = 'package';
-            $bimp_id_origin = $id_package;
-            $code = 'PACKAGE' . $id_package . '_ADD';
-        }
     }
 
-    if ($id_package && !preg_match('/Emplacement de destination/', $r['label'])) {
-        $sql = 'SELECT id FROM ' . MAIN_DB_PREFIX . 'be_package_place ';
-        $sql .= 'WHERE date <= \'' . $r['datem'] . '\' ORDER BY date DESC LIMIT 1';
-
-        $res = $bdb->executeS($sql, 'array');
-
-        if (!isset($res[0]['id'])) {
-            $sql = 'SELECT id FROM ' . MAIN_DB_PREFIX . 'be_package_place ';
-            $sql .= 'WHERE date > \'' . $r['datem'] . '\' ORDER BY date ASC LIMIT 1';
-            $res = $bdb->executeS($sql, 'array');
-        }
-
-        if (isset($res[0]['id']) && (int) $res[0]['id']) {
-            $place = BimpCache::getBimpObjectInstance('bimpequipment', 'BE_PackagePlace', (int) $res[0]['id']);
-            if (BimpObject::objectLoaded($place)) {
-                $label .= ' - Emplacement de destination: ' . $place->getPlaceName();
-            }
-        }
-    }
-
+//    if ($id_package && !preg_match('/Emplacement de destination/', $r['label'])) {
+//        $sql = 'SELECT id FROM ' . MAIN_DB_PREFIX . 'be_package_place ';
+//        $sql .= 'WHERE date <= \'' . $r['datem'] . '\' ORDER BY date DESC LIMIT 1';
+//
+//        $res = $bdb->executeS($sql, 'array');
+//
+//        if (!isset($res[0]['id'])) {
+//            $sql = 'SELECT id FROM ' . MAIN_DB_PREFIX . 'be_package_place ';
+//            $sql .= 'WHERE date > \'' . $r['datem'] . '\' ORDER BY date ASC LIMIT 1';
+//            $res = $bdb->executeS($sql, 'array');
+//        }
+//
+//        if (isset($res[0]['id']) && (int) $res[0]['id']) {
+//            $place = BimpCache::getBimpObjectInstance('bimpequipment', 'BE_PackagePlace', (int) $res[0]['id']);
+//            if (BimpObject::objectLoaded($place)) {
+//                $label .= ' - Emplacement de destination: ' . $place->getPlaceName();
+//            }
+//        }
+//    }
     // UPDATES: 
     if ($dol_origin !== $r['origintype'] ||
             $dol_id_origin !== (int) $r['fk_origin'] ||

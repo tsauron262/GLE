@@ -136,7 +136,7 @@ class BContract_echeancier extends BimpObject {
         $linked_propal = $this->db->getValue('element_element', 'fk_source', 'targettype = "contrat" and fk_target = ' . $parent->id);
 
         $propal = $this->getInstance('bimpcommercial', 'Bimp_Propal', $linked_propal);
-        $ef_type = 'CT' . $propal->getData('ef_type');
+        $ef_type = ($propal->getData('ef_type') == "E") ? 'CTE': 'CTC';
         $instance = $this->getInstance('bimpcommercial', 'Bimp_Facture');
         $instance->set('fk_soc', $parent->getData('fk_soc'));
         $instance->set('libelle', 'Facture périodique du contrat N°' . $parent->getData('ref'));

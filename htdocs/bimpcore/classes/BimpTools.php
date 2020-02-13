@@ -2334,6 +2334,7 @@ class BimpTools
                 }
             }
         }
+        $this->resprints = "OK " . $i . ' mails';
         return $i.' mails envoyés';
     }
 }

@@ -40,7 +40,7 @@ class Bimp_Product extends BimpObject
         self::TYPE_COMPTA_PRODUIT => 'Considéré comme produit',
         self::TYPE_COMPTA_SERVICE => "Considéré comme service",
         self::TYPE_COMPTA_PORT    => "Considéré comme frais de port",
-        self::TYPE_COMPTA_COMM    => "Considéré comme commition"
+        self::TYPE_COMPTA_COMM    => "Considéré comme commission"
     ];
     public static $units_weight = array();
     public static $units_length = array();
@@ -533,7 +533,7 @@ class Bimp_Product extends BimpObject
             elseif ($zone_vente == 3)
                 return BimpCore::getConf('BIMPTOCEGID_frais_de_port_vente_ex');
         }
-        elseif ($type == 3) {//commition
+        elseif ($type == 3) {//commission
             if ($zone_vente == 1)
                 return BimpCore::getConf('BIMPTOCEGID_comissions_fr');
             elseif ($zone_vente == 2 || $zone_vente == 4)

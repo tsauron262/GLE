@@ -237,6 +237,18 @@ fields:
                    - societe
         dol_extra_field: 1
         default_value: 0
+    marche:
+        label: Marché potentiel
+        type: items_list
+        items_data_type: int
+        values: 
+            callback: 
+               method: getListExtrafield
+               params:
+                   - marche
+                   - societe
+        dol_extra_field: 1
+        default_value: 0
         
 #    *** Champs non gérés: ***
 #    entity
@@ -394,6 +406,7 @@ forms:
             - field: fax
             - field: skype
             - field: url
+            - field: secteuractivite
             
 lists:
     default: 
@@ -566,6 +579,8 @@ filters_panels:
                 field: note_public 
             secteuractivite:
                 field: secteuractivite
+            marche:
+                field: marche
 cards: 
     default: 
         type: societe_card

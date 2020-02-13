@@ -469,16 +469,20 @@ class BimpObject extends BimpCache
     {
         return self::getObjectListConfig($this->module, $this->object_name, $owner_type, $id_owner, $list_name);
     }
-
-    public function getListExtrafield($name, $type)
-    {
+    
+    public function getListExtrafield($name, $type, $withVide = true){
         $return = array();
-        $return = array('mmm', 'ppp');
-        $sql = $this->db->db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "extrafields` WHERE `name` LIKE '" . $name . "' AND `elementtype` = '" . $type . "'");
-        while ($ln = $this->db->db->fetch_object($sql)) {
+        $sql = $this->db->db->query("SELECT * FROM `".MAIN_DB_PREFIX."extrafields` WHERE `name` LIKE '".$name."' AND `elementtype` = '".$type."'");
+        while($ln = $this->db->db->fetch_object($sql)){
             $param = unserialize($ln->param);
             if (isset($param['options']))
                 $return = $param['options'];
+        }
+        if(!isset($return[0]) && $withVide){
+            $newReturn = array(0=>'');
+            foreach($return as $id =>$val)
+                $newReturn[$id] = $val;
+            $return = $newReturn;
         }
 
         return $return;
@@ -1330,6 +1334,12 @@ class BimpObject extends BimpCache
                 case 'time':
                 case 'datetime':
                     $value = BimpTools::getDateForDolDate($value);
+                    break;
+                case 'items_list':
+                    if(isset($value[0]) && $value[0] == '')
+                        unset($value[0]);
+                    if(is_array($value))
+                        $value = implode(",", $value);
                     break;
             }
         }

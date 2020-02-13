@@ -525,7 +525,7 @@ Conditions particulières aux iPhones
 
 La plupart de nos centres peuvent effectuer une réparation de votre écran d’iPhone sous 24h00. Pour savoir si votre centre SAV est éligible à ce type de réparation et qu’une plage de rendez-vous est disponible, consulter notre site à l’adresse suivante :
 
-<a href=\"https://www.bimp.fr/tarifs-sav/\">https://www.bimp.fr/tarifs-sav/</a>
+<a href=\"https://erp.bimp.fr/tarifs-sav.php\">Tarifs SAV</a>
 
 Nous proposons des services de sauvegarde des données, de protection de votre téléphone… venez nous rencontrer pour découvrir tous les services que nous pouvons vous proposer.
 Votre satisfaction est notre objectif, nous mettrons tout en œuvre pour vous satisfaire et réduire les délais d’immobilisation de votre produit Apple.

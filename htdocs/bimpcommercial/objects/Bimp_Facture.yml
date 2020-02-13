@@ -183,6 +183,14 @@ fields:
             array: statut_export
     douane_number:
         label: N° Douane
+    statut_relance:
+        label: Statut relance
+        type: int
+        values: 
+            array: statut_relance
+    nb_relance:
+        label: Nombre de relance
+        type: int
         
     ref: unset
     fk_availability: unset
@@ -577,6 +585,8 @@ fields_tables:
               edit: 1
             - field: douane_number
               edit: 1
+            - field: statut_relance
+            - field: nb_relance
     
     client: 
         rows: 
@@ -753,6 +763,10 @@ lists_cols:
     douane_number:
         field: douane_number
         edit: 1
+    statut_relance:
+        field: statut_relance
+    nb_relance:
+        field: nb_relance
     
 lists: 
     default: 

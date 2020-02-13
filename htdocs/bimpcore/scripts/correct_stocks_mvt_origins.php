@@ -35,10 +35,11 @@ $where = '';
 //$where .= ' OR (`inventorycode` LIKE \'CO%_EXP%\' AND origintype != \'commande\'))';
 //$where .= ' OR `inventorycode` LIKE \'CMDF%\'';
 //$where .= ' OR `inventorycode` LIKE \'ANNUL_CMDF%\'';
-$where .= '`inventorycode` LIKE \'VENTE%\'';
+//$where .= ' OR (`inventorycode` LIKE \'VENTE%\' AND (origintype != \'\' OR bimp_origin != \'vente_caisse\'))';
+$where .= '(`inventorycode` LIKE \'TR%\' AND (origintype != \'\' OR bimp_origin != \'transfert\'))';
 //$where .= ')';
 
-$rows = $bdb->getRows('stock_mouvement', $where, null, 'array', array('rowid', 'inventorycode', 'origintype', 'fk_origin', 'bimp_origin', 'bimp_id_origin'), 'rowid', 'desc');
+$rows = $bdb->getRows('stock_mouvement', $where, null, 'array', array('rowid', 'label', 'inventorycode', 'origintype', 'fk_origin', 'bimp_origin', 'bimp_id_origin'), 'rowid', 'desc');
 
 if (!(int) BimPTools::getValue('exec', 0)) {
     echo 'Corrige l\'origine des mouvements de stock<br/><br/>';
@@ -69,7 +70,7 @@ $details = (int) BimpTools::getValue('details', 0);
 
 foreach ($rows as $r) {
     $code = $r['inventorycode'];
-
+    $label = $r['label'];
     $dol_origin = '';
     $dol_id_origin = 0;
     $bimp_origin = '';
@@ -89,39 +90,74 @@ foreach ($rows as $r) {
 //        $origin = 'order_supplier';
 //        $id_origin = (int) $matches[2];
 //    }
-//    else
-    if (preg_match('/^VENTE(\d+)_(ART|RET)(\d+)$/', $code, $matches)) {
-        $bimp_origin = 'vente_caisse';
-        $bimp_id_origin = (int) $matches[1];
-    }
+//    elseif (preg_match('/^VENTE(\d+)_(ART|RET)(\d+)$/', $code, $matches)) {
+//        $bimp_origin = 'vente_caisse';
+//        $bimp_id_origin = (int) $matches[1];
+//    }
+    if (preg_match('/^TR.*$/', $code)) {
+        if (preg_match('/^TR\-(\d+)$/', $code, $matches)) {
+            $bimp_origin = 'transfert';
+            $bimp_id_origin = (int) $matches[1];
 
-    if (($dol_origin !== $r['origintype'] && $dol_id_origin !== (int) $r['fk_origin'])) {
-        if ($test || $details || $test_one) {
-            echo 'Correction dol origine mvt #' . $r['rowid'] . ' (Origine: ' . $dol_origin . ' #' . $dol_id_origin . ' - Code: ' . $code . ')<br/>';
-        }
-        if (!$test) {
-            if ($bdb->update('stock_mouvement', array(
-                        'origintype' => $dol_origin,
-                        'fk_origin'  => $dol_id_origin,
-                            ), 'rowid = ' . (int) $r['rowid']) <= 0) {
-                if (!$details && !$test) {
-                    echo 'Correction dol origine mvt #' . $r['rowid'] . ' (Origine: ' . $dol_origin . ' #' . $dol_id_origin . ' - Code: ' . $code . '): ';
+            if (preg_match('/^.*Produit "(.+)" - serial: "(.+)".*$/', $label, $matches2)) {
+                $ref_prod = $matches2[1];
+                $serial = $matches2[2];
+                $id_line = 0;
+
+                $id_prod = (int) $bdb->getValue('product', 'rowid', 'ref = \'' . $ref_prod . '\'');
+                if ($id_prod) {
+                    $id_equipment = (int) $bdb->getValue('be_equipment', 'id', 'serial = \'' . $serial . '\' AND id_product = ' . $id_prod);
+
+                    if ($id_equipment) {
+                        $id_line = $bdb->getValue('bt_transfer_det', 'id', 'id_transfer = ' . $bimp_id_origin . ' AND id_product = ' . $id_prod . ' AND id_equipment = ' . $id_equipment);
+
+                        if ($id_line) {
+                            $code = 'TR' . $bimp_id_origin . '_LN' . $id_line . '_EQ' . $id_equipment;
+                        }
+                    }
                 }
-                echo '<span class="danger">';
-                echo '[ECHEC] - ' . $bdb->db->lasterror();
-                echo '</span><br/>';
+
+                if (!$id_line) {
+                    $code = 'TR' . $bimp_id_origin;
+                }
+            } elseif (preg_match('/^.*\-ref:(.+)$/', $label, $matches2)) {
+                $id_prod = (int) $bdb->getValue('product', 'rowid', 'ref = \'' . $matches2[1] . '\'');
+                $id_line = 0;
+
+                if ($id_prod) {
+                    $id_line = (int) $bdb->getValue('bt_transfer_det', 'id', 'id_transfer = ' . $bimp_id_origin . ' AND id_product = ' . $id_prod);
+                }
+
+                if ($id_line) {
+                    $code = 'TR' . $bimp_id_origin . '_LN' . $id_line;
+                } else {
+                    $code = 'TR' . $bimp_id_origin;
+                }
             }
+        } elseif (preg_match('/^TR(\d+).*$/', $code, $matches)) {
+            $bimp_origin = 'transfert';
+            $bimp_id_origin = (int) $matches[1];
         }
     }
 
-    if ($bimp_origin !== $r['bimp_origin'] && $bimp_id_origin !== (int) $r['bimp_id_origin']) {
+    // UPDATES: 
+    if ($dol_origin !== $r['origintype'] ||
+            $dol_id_origin !== (int) $r['fk_origin'] ||
+            $bimp_origin !== $r['bimp_origin'] ||
+            $bimp_id_origin !== (int) $r['bimp_id_origin'] ||
+            $code !== $r['inventorycode'] ||
+            $label !== $r['label']) {
         if ($details || $test || $test_one) {
             echo 'Correction bimp origine mvt #' . $r['rowid'] . ' (Origine: ' . $bimp_origin . ' #' . $bimp_id_origin . ' - Code: ' . $code . ')<br/>';
         }
         if (!$test) {
             if ($bdb->update('stock_mouvement', array(
+                        'origintype'     => $dol_origin,
+                        'fk_origin'      => $dol_id_origin,
                         'bimp_origin'    => $bimp_origin,
                         'bimp_id_origin' => $bimp_id_origin,
+                        'inventorycode'  => $code,
+                        'label'          => $label
                             ), 'rowid = ' . (int) $r['rowid']) <= 0) {
                 if (!$details && !$test && !$test_one) {
                     echo 'Correction bimp origine mvt #' . $r['rowid'] . ' (Origine: ' . $bimp_origin . ' #' . $bimp_id_origin . ' - Code: ' . $code . '): ';
@@ -141,7 +177,7 @@ foreach ($rows as $r) {
                         ), 'code_mvt = \'' . $code . '\'');
             }
         }
-        
+
         if ($test_one) {
             break;
         }

@@ -32,17 +32,18 @@ $where = '';
 //$where .= ' AND `inventorycode` != \'\' AND `inventorycode` IS NOT NULL';
 //$where .= ' AND (';
 //$where .= ' OR (`inventorycode` LIKE \'inventory-id-%\' AND (origintype != \'\' OR bimp_origin != \'inventory\'))';
-$where .= '(`inventorycode` LIKE \'CO%_EXP%\' AND (origintype != \'commande\' OR bimp_origin != \'commande\'))';
+//$where .= ' OR (`inventorycode` LIKE \'CO%_EXP%\' AND (origintype != \'commande\' OR bimp_origin != \'commande\'))';
 //$where .= ' OR `inventorycode` LIKE \'CMDF%\'';
 //$where .= ' OR `inventorycode` LIKE \'ANNUL_CMDF%\'';
 //$where .= ' OR (`inventorycode` LIKE \'VENTE%\' AND (origintype != \'\' OR bimp_origin != \'vente_caisse\'))';
 //$where .= ' OR (`inventorycode` LIKE \'TR%\' AND (origintype != \'\' OR bimp_origin != \'transfert\'))';
-//$where .= ' OR (`label` LIKE \'SAV%\' OR `label` LIKE \'Vente SAV%\' AND (origintype != \'\' OR bimp_origin != \'sav\'))';
+//$where .= ' OR ((`label` LIKE \'SAV%\' OR `label` LIKE \'Vente SAV%\') AND (origintype != \'\' OR bimp_origin != \'sav\'))';
+$where .= '((`inventorycode` LIKE \'PACKAGE%_ADD\' OR `inventorycode` LIKE \'PACKAGE%_REMOVE\' OR `inventorycode` LIKE \'AJOUT PACKAGE %\') AND (origintype != \'\' OR bimp_origin != \'package\'))';
 
 //$where .= ' AND rowid = 48863';
 //$where .= ')';
 
-$rows = $bdb->getRows('stock_mouvement', $where, null, 'array', array('rowid', 'fk_product', 'label', 'inventorycode', 'origintype', 'fk_origin', 'bimp_origin', 'bimp_id_origin'), 'rowid', 'desc');
+$rows = $bdb->getRows('stock_mouvement', $where, null, 'array', null, 'rowid', 'desc');
 
 if (!(int) BimPTools::getValue('exec', 0)) {
     echo 'Corrige l\'origine des mouvements de stock<br/><br/>';
@@ -78,20 +79,19 @@ foreach ($rows as $r) {
     $dol_id_origin = 0;
     $bimp_origin = '';
     $bimp_id_origin = 0;
+    $id_package = 0;
 
 //    if (preg_match('/^inventory\-id\-(\d+)$/', $code, $matches)) {
 //        $dol_origin = '';
 //        $dol_id_origin = 0;
 //        $bimp_origin = 'inventory';
 //        $bimp_id_origin = (int) $matches[1];
-//    } else
-    if (preg_match('/^CO(\d+)_EXP(\d+)(_ANNUL)?$/', $code, $matches)) {
-        $dol_origin = 'commande';
-        $dol_id_origin = (int) $matches[1];
-        $bimp_origin = 'commande';
-        $bimp_id_origin = (int) $matches[1];
-    }
-//     elseif (preg_match('/^(ANNUL_)?CMDF(\d+)_LN(\d+)_RECEP(\d+)$/', $code, $matches)) {
+//    } elseif (preg_match('/^CO(\d+)_EXP(\d+)(_ANNUL)?$/', $code, $matches)) {
+//        $dol_origin = 'commande';
+//        $dol_id_origin = (int) $matches[1];
+//        $bimp_origin = 'commande';
+//        $bimp_id_origin = (int) $matches[1];
+//    } elseif (preg_match('/^(ANNUL_)?CMDF(\d+)_LN(\d+)_RECEP(\d+)$/', $code, $matches)) {
 //        $origin = 'order_supplier';
 //        $id_origin = (int) $matches[2];
 //    }
@@ -194,6 +194,42 @@ foreach ($rows as $r) {
 //            continue;
 //        }
 //    }
+    if (preg_match('/^PACKAGE(\d+)_(ADD|REMOVE)$/', $code, $matches)) {
+        $bimp_origin = 'package';
+        $bimp_id_origin = (int) $matches[1];
+
+        if ($matches[2] === 'ADD') {
+            $id_package = (int) $matches[1];
+        }
+    } elseif (preg_match('/^AJOUT PACKAGE (.+)$/', $code, $matches)) {
+        $id_package = (int) $bdb->getValue('be_package', 'id', 'ref = \'' . $matches[1] . '\'');
+
+        if ($id_package) {
+            $bimp_origin = 'package';
+            $bimp_id_origin = $id_package;
+            $code = 'PACKAGE' . $id_package . '_ADD';
+        }
+    }
+
+    if ($id_package && !preg_match('/Emplacement de destination/', $r['label'])) {
+        $sql = 'SELECT id FROM ' . MAIN_DB_PREFIX . 'be_package_place ';
+        $sql .= 'WHERE date <= \'' . $r['datem'] . '\' ORDER BY date DESC LIMIT 1';
+
+        $res = $bdb->executeS($sql, 'array');
+
+        if (!isset($res[0]['id'])) {
+            $sql = 'SELECT id FROM ' . MAIN_DB_PREFIX . 'be_package_place ';
+            $sql .= 'WHERE date > \'' . $r['datem'] . '\' ORDER BY date ASC LIMIT 1';
+            $res = $bdb->executeS($sql, 'array');
+        }
+
+        if (isset($res[0]['id']) && (int) $res[0]['id']) {
+            $place = BimpCache::getBimpObjectInstance('bimpequipment', 'BE_PackagePlace', (int) $res[0]['id']);
+            if (BimpObject::objectLoaded($place)) {
+                $label .= ' - Emplacement de destination: ' . $place->getPlaceName();
+            }
+        }
+    }
 
     // UPDATES: 
     if ($dol_origin !== $r['origintype'] ||

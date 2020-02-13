@@ -1,14 +1,12 @@
 *** CODEMOVE Stocks:  ***
 
-Expédition / retours commandes: 
-CO{id_commande}_EXP{id_shipment}
-
-Annulation expéditions: 
-CO{id_commande}_EXP{id_shipment}_ANNUL
+Commandes: 
+ - Expédition: CO{id_commande}_EXP{id_shipment}
+ - Annulation expédition: CO{id_commande}_EXP{id_shipment}_ANNUL
 
 Validation ventes en caisse:
 - Articles: VENTE{id_vente}_ART{id_article}
-- Retours: VENTE{id_vente}_RET{id_article}
+- Retours: VENTE{id_vente}_RET{id_retour}
 
 Nouvel emplacement (Code MVT non défini)
 EQ{id_equipment}_PLACE{id_place}
@@ -22,3 +20,20 @@ ANNUL_CMDF{id_commande_fourn}_LN{id_bimp_commande_line}_RECEP{id_reception}
 Packages: 
 - Ajout produit: PACKAGE{id_package}_ADD
 - Retrait produit: PACKAGE{id_package}_REMOVE
+- Changement emplacement: PACKAGE{id_package}_PLACE{id_package_place}
+
+SAV:
+- Création SAV{id_sav}_CREATE_EQ{id_equipment}
+- Restitution: SAV{id_sav}_CLOSE_EQ{id_equipment}
+- Vente Non serial: SAV{id_SAV}_LN{id_bimp_propal_line}
+- Vente Serial: SAV{id_sav}_LN{id_bimp_propal_line}_EQ{id_equipment}
+
+Transferts: 
+- Non serial: TR{id_transfert}_LN{id_ligne_transfert}
+- Serial: TR{id_transfert}_LN{id_ligne_transfert}_EQ{id_equipment}
+
+INVENTAIRE: 
+- inventory-id-{id_inventory}
+
+PRETS: 
+- {ref_pret}_{id_ligne_produit}

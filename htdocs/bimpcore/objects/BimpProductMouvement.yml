@@ -38,9 +38,7 @@ objects:
         relation: hasOne
         instance: 
             id_object: 
-                field_value: gamme
-              
-                
+                field_value: gamme   
                 
 fields: 
     fk_entrepot: 
@@ -64,40 +62,10 @@ fields:
         label: Produit
         type: id_object
         object: product
-        input: 
-            type: search_product
         display: 
             nom_url_libelle: 
                 type: callback
                 method: displayProduct
-
-    product_categories: 
-        label: Catégories produit
-        extra: 1
-        type: items_list
-        items_data_type: id_object
-        object: category
-        
-    marque: 
-        label: Marque
-        extra: 1
-        type: id_object
-        object: marque
-        values: 
-            array: marques
-            
-    gamme: 
-        label: Gamme matériel
-        extra: 1
-        type: id_object
-        object: gamme
-        values: 
-            array: gammesMateriel
-        
-    type_materiel: 
-        label: Type matériel
-        value: 
-            callback: displayTypeMateriel
     
     datem:
         label: Date du mouvement
@@ -120,10 +88,36 @@ fields:
     label:
         label: Libellé mouvement
         type: string
+        
     fk_user_author:
-        label: Autheur
+        label: Auteur
         type: id_object
         object: user
+        
+    bimp_origin: 
+        label: Origine
+        
+    bimp_id_origin: 
+        label: ID origine
+        type: id
+        default_value: 0
+        
+    # extras: 
+    marque: 
+        label: Marque
+        extra: 1
+        type: id_object
+        object: marque
+        values: 
+            array: marques
+            
+    gamme: 
+        label: Gamme matériel
+        extra: 1
+        type: id_object
+        object: gamme
+        values: 
+            array: gammesMateriel
 
 lists_cols:
     fk_entrepot: 
@@ -132,6 +126,7 @@ lists_cols:
     fk_product: 
         field: fk_product
         display: nom_url_libelle
+        min_width: 220px
     marque: 
         field: marque
     gamme: 
@@ -140,72 +135,93 @@ lists_cols:
         label: Type matériel
         value: 
             callback: displayTypeMateriel
+    origin: 
+        label: Origine
+        value: 
+            callback: displayOriginMvt
+        min_width: 180px        
+    numero:
+        field: id
+#        value:
+#            callback: displayId       
+    datem:
+        field: datem
+    inventorycode:
+        field: inventorycode
+    label:
+        field: label
+        min_width: 220px
+    reason:
+        label: Raison
+        value:
+            callback: displayReasonMvt
+    qty:
+        label: Qté
+        field: value
+        min_width: 30px
+    type_mouvement:
+        label: Type mvt
+        field: type_mouvement
+    fk_user_author:
+        field: fk_user_author
+        display: nom_url
     
-            
 lists: 
     default: 
-        title: 
-            callback: displayTitre
-        icon: fas_box-open
-        checkboxes: 1
+        icon: fas_exchange-alt
         configurable: 1
         filters_panel: default
-        sort_field: fk_entrepot
+        sort_field: rowid
         sort_way: desc
         n: 50
         cols: 
-            numero:
-                label: Réf
-                value:
-                    callback: displayId       
+            numero:    
             datem:
-                field: datem
             fk_entrepot: 
             fk_product:
             inventorycode:
-                field: inventorycode
             label:
-                field: label
             origin:
-                label: Origine
-                value:
-                    callback: displayOriginMvt
             reason:
-                label: Raison
-                value:
-                    callback: displayReasonMvt
-            value:
-                field: value
+            qty:
             type_mouvement:
-                field: type_mouvement
             fk_user_author:
-                field: fk_user_author
-                display: nom_url
-            
-            
-#            marque: 
-#            gamme:
-#            type_materiel:
 
-        
 filters_panels: 
     default: 
         filters: 
-            origintype:
-                field: origintype
             entrepot: 
                 field: fk_entrepot
             product: 
                 field: fk_product
+            origin_type: 
+                custom: 1
+                label: Type origine
+                field: origin_type
+                type: value
+                input: 
+                    type: select
+                    options: 
+                        array: originetypes
+            origin: 
+                custom: 1
+                label: Elément d'origine
+                type: value_part
+                field: origin
+                exclude_btn : 0
+                
+            datem:
+                field: datem
             inventorycode:
                 field: inventorycode
             label:
                 field: label
-            value:
+            qty:
                 field: value
-            datem:
-                field: datem
+            type_mouvement: 
+                field: type_mouvement
             fk_user_author:
                 field: fk_user_author
+                type: user
             
 

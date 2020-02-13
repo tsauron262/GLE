@@ -25,8 +25,10 @@ class Bimp_Product extends BimpObject
         'HT'  => 'HT',
         'TTC' => 'TTC'
     );
+    public static $bimp_stock_origins = array('vente_caisse', 'transfert', 'sav', 'package', 'inventory', 'pret');
 
-    
+    CONST STOCK_IN = 0;
+    CONST STOCK_OUT = 1;
     CONST TYPE_COMPTA_NONE = 0;
     CONST TYPE_COMPTA_PRODUIT = 1;
     CONST TYPE_COMPTA_SERVICE = 2;
@@ -2483,6 +2485,44 @@ class Bimp_Product extends BimpObject
         }
         if (count($del_warnings)) {
             $errors[] = BimpTools::getMsgFromArray($del_warnings, 'Erreurs lors de la suppression du produit "' . $prod_ref . '"');
+        }
+
+        return $errors;
+    }
+
+    public function correctStocks($id_entrepot, $qty, $movement, $code_move, $label, $origin = '', $id_origin = null)
+    {
+        $errors = array();
+
+        if ($this->isLoaded($errors)) {
+            global $user;
+
+            $isBimpOrigin = in_array($origin, self::$bimp_stock_origins);
+            if ($this->dol_object->correct_stock($user, $id_entrepot, $qty, $movement, $label, 0, $code_move, (!$isBimpOrigin ? $origin : ''), (!$isBimpOrigin ? $id_origin : null)) <= 0) {
+                $msg = 'Echec de la mise à jour du stock pour le produit "' . $this->getRef() . ' - ' . $this->getName() . '" (ID: ' . $this->id . ')';
+                $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), $msg);
+
+                $log = '[ERREUR STOCK]<br/>';
+                $log .= 'Produit #' . $this->id . ' - ' . $this->getRef() . '<br/>';
+                $log .= (!$movement ? 'Ajout' : 'Retrait') . ' de ' . $qty . ' unité(s)<br/>';
+                $log .= 'Libellé: ' . $label . '<br/>';
+                $log .= 'Code mouvement: ' . $code_move . '<br/>';
+                if ($origin) {
+                    $log .= 'Origine: ' . $origin . ' #' . $id_origin;
+                }
+                $log .= 'Erreurs: ' . BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object));
+                dol_syslog($log, LOG_ERR);
+            } else {
+                if ($origin && (int) $id_origin) {
+                    $result = $this->db->executeS('SELECT rowid FROM ' . MAIN_DB_PREFIX . 'stock_mouvement WHERE inventorycode = \'' . $code_move . '\' ORDER BY rowid DESC LIMIT 1', 'array');
+                    if (isset($result[0]['rowid']) && (int) $result[0]['rowid']) {
+                        $this->db->update('stock_mouvement', array(
+                            'bimp_origin'    => $origin,
+                            'bimp_id_origin' => $id_origin
+                                ), 'rowid = ' . (int) $result[0]['rowid']);
+                    }
+                }
+            }
         }
 
         return $errors;

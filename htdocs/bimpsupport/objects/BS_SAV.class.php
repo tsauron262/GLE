@@ -802,14 +802,18 @@ class BS_SAV extends BimpObject
 
     // Getters données: 
 
-    public function getNomUrl($withpicto = true)
+    public function getNomUrl($withpicto = true, $ref_only = true, $page_link = false, $modal_view = '')
     {
         if (!$this->isLoaded()) {
             return '';
         }
 
-        $statut = self::$status_list[$this->data["status"]];
-        return "<a href='" . $this->getUrl() . "'>" . '<span class="' . implode(" ", $statut['classes']) . '"><i class="' . BimpRender::renderIconClass($statut['icon']) . ' iconLeft"></i>' . $this->ref . '</span></a>';
+        if (!$modal_view) {
+            $statut = self::$status_list[$this->data["status"]];
+            return "<a href='" . $this->getUrl() . "'>" . '<span class="' . implode(" ", $statut['classes']) . '"><i class="' . BimpRender::renderIconClass($statut['icon']) . ' iconLeft"></i>' . $this->getRef() . '</span></a>';
+        }
+
+        return parent::getNomUrl($withpicto, $ref_only, $page_link, $modal_view);
     }
 
     protected function getNextNumRef()
@@ -3560,7 +3564,8 @@ class BS_SAV extends BimpObject
                         // Gestion des stocks et emplacements: 
                         $id_client = (int) $this->getData('id_client');
                         $id_entrepot = (int) $this->getData('id_entrepot');
-                        $codemove = dol_print_date(dol_now(), '%y%m%d%H%M%S');
+//                        $codemove = dol_print_date(dol_now(), '%y%m%d%H%M%S');
+                        $codemove = 'SAV' . $this->id . '_';
                         foreach ($this->getChildrenObjects('propal_lines') as $line) {
                             $product = $line->getProduct();
 
@@ -3579,16 +3584,22 @@ class BS_SAV extends BimpObject
                                                     'id_equipment' => (int) $eq_line->getData('id_equipment'),
                                                     'type'         => BE_Place::BE_PLACE_CLIENT,
                                                     'id_client'    => (int) $id_client,
-                                                    'infos'        => 'Vente SAV',
-                                                    'date'         => date('Y-m-d H:i:s')
+                                                    'infos'        => 'Vente ' . $this->getRef(),
+                                                    'date'         => date('Y-m-d H:i:s'),
+                                                    'code_mvt'     => $codemove . 'LN' . $line->id . '_EQ' . (int) $eq_line->getData('id_equipment'),
+                                                    'origin'       => 'sav',
+                                                    'id_origin'    => (int) $this->id
                                                 ));
                                             } else {
                                                 $place_errors = $place->validateArray(array(
                                                     'id_equipment' => (int) $eq_line->getData('id_equipment'),
                                                     'type'         => BE_Place::BE_PLACE_FREE,
                                                     'place_name'   => 'Equipement vendu (client non renseigné)',
-                                                    'infos'        => 'Vente SAV',
-                                                    'date'         => date('Y-m-d H:i:s')
+                                                    'infos'        => 'Vente ' . $this->getRef(),
+                                                    'date'         => date('Y-m-d H:i:s'),
+                                                    'code_mvt'     => $codemove . 'LN' . $line->id . '_EQ' . (int) $eq_line->getData('id_equipment'),
+                                                    'origin'       => 'sav',
+                                                    'id_origin'    => (int) $this->id
                                                 ));
                                             }
                                             if (!count($place_errors)) {
@@ -3611,10 +3622,9 @@ class BS_SAV extends BimpObject
                                         $warnings[] = BimpTools::getMsgFromArray($eq_line_errors, $error_msg);
                                     }
                                 } else {
-                                    $result = $product->dol_object->correct_stock($user, $id_entrepot, (int) $line->qty, 1, $this->getRef(), 0, $codemove);
-                                    if ($result < 0) {
-                                        $msg = 'Echec de la mise à jour du stock pour le produit "' . $product->getData('label') . '" (Ref: "' . $product->getRef() . '")';
-                                        $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($product->dol_object), $msg);
+                                    $stock_errors = $product->correctStocks($id_entrepot, (int) $line->qty, Bimp_Product::STOCK_OUT, $codemove . 'LN' . $line->id, 'Vente ' . $this->getRef(), 'sav', (int) $this->id);
+                                    if (count($stock_errors)) {
+                                        $warnings[] = BimpTools::getMsgFromArray($stock_errors);
                                     }
                                 }
                             }
@@ -3644,8 +3654,11 @@ class BS_SAV extends BimpObject
                                             'id_user'      => (int) $prev_place->getData('id_user'),
                                             'code_centre'  => $prev_place->getData('code_centre'),
                                             'place_name'   => $prev_place->getData('place_name'),
-                                            'infos'        => 'Restitution ' . $this->getData('ref'),
-                                            'date'         => date('Y-m-d H:i:s')
+                                            'infos'        => 'Restitution ' . $this->getData('ref') . ' (Remise dans l\'emplacement précédant)',
+                                            'date'         => date('Y-m-d H:i:s'),
+                                            'code_mvt'     => $codemove . 'CLOSE_EQ' . (int) $this->getData('id_equipment'),
+                                            'origin'       => 'sav',
+                                            'id_origin'    => (int) $this->id
                                         ));
                                         if (!count($place_errors)) {
                                             $place_errors = $place->create($w, true);
@@ -3658,8 +3671,11 @@ class BS_SAV extends BimpObject
                                             'id_equipment' => (int) $this->getData('id_equipment'),
                                             'type'         => BE_Place::BE_PLACE_CLIENT,
                                             'id_client'    => (int) $this->getData('id_client'),
-                                            'infos'        => 'Restitution ' . $this->getData('ref'),
-                                            'date'         => date('Y-m-d H:i:s')
+                                            'infos'        => 'Restitution ' . $this->getData('ref') . ' (Remise au client)',
+                                            'date'         => date('Y-m-d H:i:s'),
+                                            'code_mvt'     => $codemove . 'CLOSE_EQ' . (int) $this->getData('id_equipment'),
+                                            'origin'       => 'sav',
+                                            'id_origin'    => (int) $this->id
                                         ));
                                         if (!count($place_errors)) {
                                             $place_errors = $place->create($w, true);
@@ -3882,7 +3898,7 @@ class BS_SAV extends BimpObject
                 foreach ($list as $item) {
                     $repair = BimpCache::getBimpObjectInstance('bimpapple', 'GSX_Repair', (int) $item['id']);
                     if ($repair->isLoaded()) {
-                        if($repair->getData('ready_for_pick_up'))
+                        if ($repair->getData('ready_for_pick_up'))
                             $tmp = $repair->close(true, false);
                         else//on passe d'abord en RFPU
                             $rep_errors = $repair->updateStatus();
@@ -4287,7 +4303,10 @@ class BS_SAV extends BimpObject
                             'type'         => BE_Place::BE_PLACE_SAV,
                             'id_entrepot'  => (int) $this->getData('id_entrepot'),
                             'infos'        => 'Ouverture du SAV ' . $this->getData('ref'),
-                            'date'         => date('Y-m-d H:i:s')
+                            'date'         => date('Y-m-d H:i:s'),
+                            'code_mvt'     => 'SAV' . (int) $this->id . '_CREATE_EQ' . (int) $this->getData('id_equipment'),
+                            'origin'       => 'sav',
+                            'id_origin'    => (int) $this->id
                         ));
                         if (!count($place_errors)) {
                             $place_errors = $place->create();

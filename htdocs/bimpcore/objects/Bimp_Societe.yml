@@ -42,7 +42,6 @@ fields:
                 0: Clos
                 1: Ouvert
         default_value: 1
-        
     origine:
         label: Origine
         dol_extra_field: 1

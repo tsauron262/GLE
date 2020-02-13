@@ -1671,12 +1671,10 @@ class Bimp_CommandeFournLine extends FournObjectLine
             }
         } else {
             // Incrémentation des stocks produit: 
-            global $user;
-
             if (!$isReturn) {
-                $product->dol_object->correct_stock($user, $entrepot->id, (int) $reception_data['qty'], 0, $stock_label, 0, $code_mvt, "order_supplier", $commande_fourn->id);
+                $product->correctStocks($entrepot->id, (int) $reception_data['qty'], Bimp_Product::STOCK_IN, $code_mvt, $stock_label, 'order_supplier', (int) $commande_fourn->id);
             } else {
-                $product->dol_object->correct_stock($user, $entrepot->id, abs((int) $reception_data['qty']), 1, '(Retour au fournisseur) ' . $stock_label, 0, $code_mvt, "order_supplier", $commande_fourn->id);
+                $product->correctStocks($entrepot->id, abs((int) $reception_data['qty']), Bimp_Product::STOCK_OUT, $code_mvt, '(Retour au fournisseur) ' . $stock_label, 'order_supplier', (int) $commande_fourn->id);
             }
         }
 
@@ -1723,7 +1721,6 @@ class Bimp_CommandeFournLine extends FournObjectLine
     public function cancelReceptionValidation($id_reception, &$warnings = array())
     {
         $errors = array();
-        global $user;
 
         $reception_data = $this->getReceptionData($id_reception);
         $isReturn = ((float) $this->getFullQty() < 0);
@@ -1788,6 +1785,8 @@ class Bimp_CommandeFournLine extends FournObjectLine
 
                                     // Suppr de l'équipement 
                                     $eq_warnings = array();
+                                    $equipment->delete_origin = 'order_supplier';
+                                    $equipment->delete_id_origin = (int) $commande_fourn->id;
                                     $eq_errors = $equipment->delete($eq_warnings, true);
 
                                     if (count($eq_errors)) {
@@ -1871,11 +1870,9 @@ class Bimp_CommandeFournLine extends FournObjectLine
                         if (BimpObject::objectLoaded($product)) {
                             $stock_label = 'Annulation réception n°' . $reception->getData('num_reception') . ((float) $reception_data['qty'] < 0 ? ' (Retour au fournisseur)' : '') . ' BR: ' . $reception->getData('ref') . ' - Commande fournisseur: ' . $commande_fourn->getData('ref');
                             $code_mvt = 'ANNUL_CMDF_' . $commande_fourn->id . '_LN_' . $this->id . '_RECEP_' . $reception->id;
-
-                            if ($product->dol_object->correct_stock($user, $id_entrepot, (int) $reception_data['qty'], 1, $stock_label, 0, $code_mvt, "order_supplier", $commande_fourn->id) <= 0) {
-                                $msg = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($product->dol_object), 'Echec de la correction du stock');
-                                $errors[] = $msg;
-                                dol_syslog('[ERREUR STOCK] ' . 'Annulation réception #' . $reception->id . ' - Commande Fourn ' . $commande_fourn->id . ' - ' . $msg, LOG_ERR);
+                            $stock_errors = $product->correctStocks($id_entrepot, (int) $reception_data['qty'], Bimp_Product::STOCK_OUT, $code_mvt, $stock_label, 'order_supplier', $commande_fourn->id);
+                            if (count($stock_errors)) {
+                                $errors[] = BimpTools::getMsgFromArray($stock_errors);
                             }
                         }
                     }

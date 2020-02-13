@@ -139,11 +139,15 @@ fields:
         label: Origine
         values: 
             array: origins
+        input: 
+            type: hidden
                 
     id_origin: 
         label: ID origine
         type: id
         default_values: 0
+        input: 
+            type: hidden
         
 lists:
     default: 

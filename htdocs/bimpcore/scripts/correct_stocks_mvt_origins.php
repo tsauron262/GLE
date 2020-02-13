@@ -39,7 +39,10 @@ $where = '';
 //$where .= ' OR (`inventorycode` LIKE \'TR%\' AND (origintype != \'\' OR bimp_origin != \'transfert\'))';
 //$where .= ' OR ((`label` LIKE \'SAV%\' OR `label` LIKE \'Vente SAV%\') AND (origintype != \'\' OR bimp_origin != \'sav\'))';
 //$where .= ' OR ((`inventorycode` LIKE \'PACKAGE%_ADD\' OR `inventorycode` LIKE \'PACKAGE%_REMOVE\' OR `inventorycode` LIKE \'AJOUT PACKAGE %\') AND (origintype != \'\' OR bimp_origin != \'package\'))';
-$where .= ' (`inventorycode` LIKE \'PRET%\' AND (origintype != \'\' OR bimp_origin != \'pret\'))';
+//$where .= ' OR (`inventorycode` LIKE \'PRET%\' AND (origintype != \'\' OR bimp_origin != \'pret\'))';
+$where .= '(`inventorycode` LIKE \'EQ%_SUPPR\' AND (origintype = \'\' AND bimp_origin = \'\'))';
+$where .= ' OR (`inventorycode` LIKE \'EQ%_PLACE%\' AND bimp_origin = \'\')';
+$where .= ' OR (`inventorycode` LIKE \'PACKAGE%_PLACE%\' AND bimp_origin = \'\')';
 
 //$where .= ' AND rowid = 48863';
 //$where .= ')';
@@ -209,10 +212,18 @@ foreach ($rows as $r) {
 //            $bimp_id_origin = $id_package;
 //            $code = 'PACKAGE' . $id_package . '_ADD';
 //        }
+//    } elseif (preg_match('/^PRET(\d+)_\d+$/', $code, $matches)) {
+//        $bimp_origin = 'pret';
+//        $bimp_id_origin = (int) $matches[1];
 //    }
-    if (preg_match('/^PRET(\d+)_\d+$/', $code, $matches)) {
-        $bimp_origin = 'pret';
-        $bimp_id_origin = (int) $matches[1];
+    if (preg_match('/EQ(\d+)_SUPPR/', $code) || preg_match('/^EQ\d+_PLACE\d+$/', $code) || preg_match('/^PACKAGE\d+_PLACE\d+$/', $code)) {
+        if ((string) $r['bimp_origin']) {
+            continue;
+        }
+        $dol_origin = 'user';
+        $dol_id_origin = (int) $r['fk_user_author'];
+        $bimp_origin = 'user';
+        $bimp_id_origin = (int) $r['fk_user_author'];
     }
 
 //    if ($id_package && !preg_match('/Emplacement de destination/', $r['label'])) {

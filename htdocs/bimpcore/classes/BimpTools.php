@@ -1949,6 +1949,19 @@ class BimpTools
         return $str;
     }
 
+    public static function implodeArrayKeys($array, $delimiter = ',', $with_quotes = false)
+    {
+        $str = '';
+
+        if (is_array($array)) {
+            foreach ($array as $key => $value) {
+                $str .= ($str ? $delimiter : '') . ($with_quotes ? "'" : '') . $key . ($with_quotes ? "'" : '');
+            }
+        }
+
+        return $str;
+    }
+
     // Divers:
 
     public static function getContext()

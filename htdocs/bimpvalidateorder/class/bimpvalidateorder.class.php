@@ -303,9 +303,15 @@ class BimpValidateOrder
 
         $subject = "BIMP ERP - Demande de validation de commande client";
 
+
+        
         $msg = "Bonjour, \n\n";
         $msg .= "L'utilisateur $user->firstname $user->lastname souhaite que vous validiez la commande suivante : ";
         $msg .= $order->getNomUrl();
+        if($order->socid > 0){
+            $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $order->socid);
+            $msg .= ' du client '.$soc->getNomUrl();
+        }
         foreach ($this->extraMail as $extra) {
             $msg .= "\n\n" . $extra;
         }

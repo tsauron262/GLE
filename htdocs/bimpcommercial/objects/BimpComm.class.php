@@ -2518,6 +2518,7 @@ class BimpComm extends BimpDolObject
         $new_object->set('id', 0);
         $new_object->set('ref', '');
         $new_object->set('fk_statut', 0);
+        $new_object->set('logs', '');
 
         if ($this->dol_field_exists('zone_vente')) {
             $new_object->set('zone_vente', 1);
@@ -3355,8 +3356,8 @@ class BimpComm extends BimpDolObject
             if ($logs) {
                 $logs .= '<br/>';
             }
-            global $user;
-            $logs .= ' - <strong>Le' . date('d / m / Y à H:i') . '</strong> par ' . $user->getFullName() . ': ' . $text;
+            global $user, $langs;
+            $logs .= ' - <strong>Le ' . date('d / m / Y à H:i') . '</strong> par ' . $user->getFullName($langs) . ': ' . $text;
             $errors = $this->updateField('logs', $logs, null, true);
         }
 

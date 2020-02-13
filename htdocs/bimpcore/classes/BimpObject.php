@@ -475,7 +475,7 @@ class BimpObject extends BimpCache
         $sql = $this->db->db->query("SELECT * FROM `".MAIN_DB_PREFIX."extrafields` WHERE `name` LIKE '".$name."' AND `elementtype` = '".$type."'");
         while($ln = $this->db->db->fetch_object($sql)){
             $param = unserialize($ln->param);
-            if(isset($param['options']))
+            if (isset($param['options']))
                 $return = $param['options'];
         }
         if(!isset($return[0]) && $withVide){
@@ -484,7 +484,7 @@ class BimpObject extends BimpCache
                 $newReturn[$id] = $val;
             $return = $newReturn;
         }
-        
+
         return $return;
     }
 
@@ -1721,7 +1721,11 @@ class BimpObject extends BimpCache
                     $alias = 'a';
                 }
 
-                $filter_key = $alias . '.' . $field_name;
+                if ($field_name === 'id') {
+                    $filter_key = $alias . '.' . $this->getPrimary();
+                } else {
+                    $filter_key = $alias . '.' . $field_name;
+                }
 
                 $method = 'get' . ucfirst($field_name) . 'SearchFilters';
                 if (method_exists($this, $method)) {
@@ -6199,7 +6203,7 @@ class BimpObject extends BimpCache
         if ($withpicto && $this->params['icon']) {
             $label .= BimpRender::renderIcon($this->params['icon'], 'iconLeft');
         }
-        $ref = $this->getRef();
+        $ref = $this->getRef($ref_only);
 
         if (!$ref || !$ref_only) {
             $nom = $this->getInstanceNom($this);

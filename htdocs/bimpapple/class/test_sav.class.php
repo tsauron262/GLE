@@ -147,7 +147,7 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                                 $this->nbErr++;
                                 $messErreur = $this->displayError("N'arrive pas a être fermé", $ligne, $this->repair, $erreurSOAP);
                                 echo $messErreur;
-                                $mailTech .= ",tommy@bimp.fr";
+//                                $mailTech .= ",tommy@bimp.fr";
                                 if (isset($_GET['envoieMail'])) {
                                     mailSyn2("Sav non fermé dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $messErreur);
                                     $this->nbMail++;
@@ -163,7 +163,7 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                                 $messErreur = $this->displayError("N'arrive pas a être passé a RFPU dans GSX", $ligne, $this->repair, $erreurSOAP);
                                 echo $messErreur;
 
-                                $mailTech .= ", tommy@bimp.fr";
+//                                $mailTech .= ", tommy@bimp.fr";
                                 if (isset($_GET['envoieMail'])) {
                                     mailSyn2("Sav non RFPU dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $messErreur);
                                     $this->nbMail++;
@@ -238,7 +238,7 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                                 if ($user->statut == 1 && $user->email != "")
                                     $mailTech = $user->email;
                             }
-                            $mailTech .= ', tommy@bimp.fr';
+//                            $mailTech .= ', tommy@bimp.fr';
                             if (isset($_GET['envoieMail'])) {
                                 mailSyn2("Sav non RFPU dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $messErreur);
                                 $this->nbMail++;
@@ -327,12 +327,11 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
             $equipment = BimpObject::getInstance('bimpequipment', 'Equipment');
 
             $rows = $equipment->getList(array(
-                'imei'    => '',
                 'serial'  => array(
                             'operator' => '!=',
                             'value'    => '0'
                           )
-                    ), $nb, 1, 'id', 'desc', 'array', array('id', 'serial'));
+                    ), $nb, 1, 'imei2', 'asc', 'array', array('id', 'serial'));
 
             if (!empty($rows)) {
                 foreach ($rows as $r) {

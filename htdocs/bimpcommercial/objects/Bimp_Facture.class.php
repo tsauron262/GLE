@@ -37,6 +37,13 @@ class Bimp_Facture extends BimpComm
         2 => array('label' => 'Attestation Dédouanement Non Reçue'),
         3 => array('label' => 'Non déclarable'),
     );
+    public static $statut_relance = array(
+        0 => array('label' => 'Pas de relance'),
+        1 => array('label' => 'Pret pour relance'),
+        2 => array('label' => 'Relancée'),
+        9 => array('label' => 'Abandon relance'),
+        99 => array('label' => 'Succée relance')
+    );
 
     // Gestion des droits: 
 
@@ -81,6 +88,9 @@ class Bimp_Facture extends BimpComm
 
 
             case 'addContact':
+                return 1;
+                
+            case 'relance':
                 return 1;
 
             case 'cancel':
@@ -433,6 +443,11 @@ class Bimp_Facture extends BimpComm
                     return 0;
                 }
                 return 1;
+                
+            case 'relance':
+                if(!in_array($this->getData("statut_relance"), array(2,3)))
+                        return 0;
+                return 1;
 
             case 'removeFromEntrepotCommission':
                 if (!(int) $this->getData('id_entrepot_commission')) {
@@ -763,6 +778,19 @@ class Bimp_Facture extends BimpComm
                                 );
                             }
                         }
+                    }
+                }
+                
+                
+                
+                //Relancée
+                if ($remainToPay > 0){
+                    if ($this->isActionAllowed('relance') && $this->canSetAction('relance')) {
+                        $buttons[] = array(
+                            'label'   => $langs->trans('Relancer'),
+                            'icon'    => 'exclamation',
+                            'onclick' => $this->getJsActionOnclick('relance', array())
+                        );
                     }
                 }
             }
@@ -3657,6 +3685,33 @@ class Bimp_Facture extends BimpComm
             }
         }
 
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $succes_callback
+        );
+    }
+    
+    
+    public function actionRelance($data, &$success){
+        $success = "Relance effectuée avec succées";
+        $errors = $warnings = array();
+        $succes_callback = "";
+        if(!$this->isActionAllowed('relance'))
+                $errors[] = "Facturee non relancable";
+        if(!$this->canSetAction('relance'))
+                $errors[] = "Vous n epouvez pas relancee";
+        
+        if(!count($errors)){
+            $nb = $this->getData('nb_relance');
+
+
+            $nb++;
+            $this->updateField('nb_relance', $nb);
+            $this->addLog("Relance ".($nb)." effectuée");
+        }
+        
+        
         return array(
             'errors'           => $errors,
             'warnings'         => $warnings,

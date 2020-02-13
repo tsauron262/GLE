@@ -6,57 +6,19 @@ require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
 
 class TransferLine extends BimpObject
 {
-
-    public function create_2($id_transfer, $id_product, $id_equipment, $quantity_input, &$id_affected, $id_warehouse_source)
+    public function canEditField($field_name)
     {
         global $user;
-        $now = dol_now();
+        $transfer_status = $this->getParentStatus();
+        if ($field_name == 'quantity_received' and $transfer_status != Transfer::STATUS_RECEPTING and ! $user->rights->bimptransfer->admin)
+            return false;
 
-        // Create reservation
-        $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
-        // Is equipment
-        if ($id_equipment > 0) {
-            $errors = array_merge($errors, $reservation->validateArray(array(
-                        'id_entrepot'  => $id_warehouse_source,
-                        'status'       => 201, // Transfert en cours
-                        'type'         => 2, // 2 = transfert
-                        'id_equipment' => $id_equipment,
-                        'id_product'   => $id_product,
-                        'id_transfert' => $id_transfer,
-                        'date_from'    => dol_print_date($now, '%Y-%m-%d %H:%M:%S'),
-            )));
-            // Is product
-        } else {
-            $errors = array_merge($errors, $reservation->validateArray(array(
-                        'id_entrepot'  => $id_warehouse_source,
-                        'status'       => 201, // Transfert en cours
-                        'type'         => 2, // 2 = transfert
-                        'id_product'   => $id_product,
-                        'id_transfert' => $id_transfer,
-                        'qty'          => $quantity_input,
-                        'date_from'    => dol_print_date($now, '%Y-%m-%d %H:%M:%S'),
-            )));
-        }
-        $errors = array_merge($errors, $reservation->create());
+        if ($field_name == 'quantity_sent' and $transfer_status != Transfer::STATUS_SENDING and ! $user->rights->bimptransfer->admin)
+            return false;
 
-        // Create transfer line
-        $errors = array_merge($errors, $this->validateArray(array(
-                    'user_create'       => $user->id,
-                    'user_update'       => $user->id,
-                    'id_product'        => $id_product,
-                    'id_equipment'      => $id_equipment,
-                    'id_transfer'       => $id_transfer,
-                    'quantity_sent'     => $quantity_input,
-                    'quantity_received' => 0
-        )));
-
-        if (!$errors) {
-            $errors = array_merge($errors, parent::create());
-            $id_affected = $this->db->db->last_insert_id($this->getTable());
-        }
-        return $errors;
+        return parent::canEditField($field_name);
     }
-
+    
     public function canDelete()
     {
         if ($this->getData("quantity_transfered") == 0 && $this->getData("quantity_received") == 0)
@@ -217,7 +179,7 @@ class TransferLine extends BimpObject
         parent::update();
     }
 
-    function checkStock(&$quantity, $id_product, $id_equipment, $id_warehouse_source, $id_transfer)
+    public function checkStock(&$quantity, $id_product, $id_equipment, $id_warehouse_source, $id_transfer)
     {
         $errors = array();
         $parent = BimpCache::getBimpObjectInstance('bimptransfer', 'Transfer', $id_transfer);
@@ -236,7 +198,7 @@ class TransferLine extends BimpObject
         return $errors;
     }
 
-    function checkStockEquipment($id_equipment, $id_warehouse_source)
+    public function checkStockEquipment($id_equipment, $id_warehouse_source)
     {
 
         $sql = 'SELECT id';
@@ -255,7 +217,7 @@ class TransferLine extends BimpObject
         return 0;
     }
 
-    function delete(&$warnings = array(), $force_delete = false)
+    public function delete(&$warnings = array(), $force_delete = false)
     {
         $errors = array();
         if (count($errors) == 0)
@@ -266,12 +228,12 @@ class TransferLine extends BimpObject
         return $errors;
     }
 
-    function isEditable($force_edit = false)
+    public function isEditable($force_edit = false)
     {
         return $this->getParentInstance()->isEditable($force_edit);
     }
 
-    function checkStockProd($id_product, $id_warehouse_source)
+    public function checkStockProd($id_product, $id_warehouse_source)
     {
 
         $sql = 'SELECT reel';
@@ -288,7 +250,7 @@ class TransferLine extends BimpObject
         return 0;
     }
 
-    function update(&$warnings = array(), $force_update = false)
+    public function update(&$warnings = array(), $force_update = false)
     {
         if ($this->getData('quantity_received') > $this->getData('quantity_sent'))
             return array("Une ligne a une quantité reçu supérieure à une quantité envoyée.");
@@ -308,7 +270,6 @@ class TransferLine extends BimpObject
 
     public function transfer()
     {
-        global $user;
         $errors = array();
         $transfer = $this->getParentInstance();
 
@@ -317,74 +278,98 @@ class TransferLine extends BimpObject
             return $errors;
         }
 
-        $codemove = 'TR-' . $transfer->id;
+        $codemove = 'TR' . $transfer->id . '_LN' . $this->id;
 
-        $new_qty = $this->getData('quantity_received') - $this->getData('quantity_transfered');
+        $new_qty = (float) $this->getData('quantity_received') - (float) $this->getData('quantity_transfered');
         if ($new_qty == 0) {
             return;
         }
 
         $id_equipment = $this->getData('id_equipment');
-        // Equipment
+
         if ($id_equipment > 0) {
+            // Equipment: 
             $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
-            
+
+            $place_errors = array();
             if ($new_qty > 0) {
-                $errors = array_merge($errors, $equipment->moveToPlace(
-                        BE_Place::BE_PLACE_ENTREPOT,
-                        $transfer->getData('id_warehouse_dest'),
-                        $codemove,
-                        'Transfert de stock #' . $transfer->id,
-                        1));
-                
+                $place_errors = $equipment->moveToPlace(BE_Place::BE_PLACE_ENTREPOT, $transfer->getData('id_warehouse_dest'), $codemove . '_EQ' . $id_equipment, 'Transfert #' . $transfer->id, 1, null, 'transfert', (int) $transfer->id);
             } else {
-                $errors = array_merge($errors, $equipment->moveToPlace(
-                        BE_Place::BE_PLACE_ENTREPOT,
-                        $transfer->getData('id_warehouse_source'),
-                        $codemove.'_ANNUL',
-                        'Annulation transfert de stock #' . $transfer->id,
-                        1));
+                $place_errors = $equipment->moveToPlace(BE_Place::BE_PLACE_ENTREPOT, $transfer->getData('id_warehouse_source'), $codemove . '_EQ' . $id_equipment . '_ANNUL', 'Annulation transfert #' . $transfer->id, 1, null, 'transfert', (int) $transfer->id);
             }
-//            $errors = array_merge($errors, $emplacement->create());
-            // Product
         } else {
-            // Toujours passer par le cache pour les objets!
+            // Produit: 
             $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $this->getData('id_product'));
 
-            $label_move = $codemove . '-qty:' . $new_qty . '-ref:' . $product->getRef();
-            if ($product->dol_object->correct_stock($user, $transfer->getData('id_warehouse_source'), $new_qty, 1, $label_move, 0, $codemove, 'entrepot', $transfer->getData('id_warehouse_dest')) <= 0) {
-                $msg = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($product->dol_object), 'Echec du retrait des quantités du stock de départ');
-                $errors[] = $msg;
-                dol_syslog('[ERREUR STOCK] ' . $msg . ' - Transfert #' . $transfer->id . ' - Ligne #' . $this->id . ' - Qté: ' . $new_qty, LOG_ERR);
+            $label_move = 'Transfert #' . $transfer->id . ' - Produit ' . $product->getRef();
+            $stock_errors = $product->correctStocks((int) $transfer->getData('id_warehouse_source'), $new_qty, Bimp_Product::STOCK_OUT, $codemove, $label_move, 'transfert', (int) $transfer->id);
+            if (count($stock_errors)) {
+                $errors[] = BimpTools::getMsgFromArray($stock_errors, 'Ligne #' . $this->id);
             }
-            if ($product->dol_object->correct_stock($user, $transfer->getData('id_warehouse_dest'), $new_qty, 0, $label_move, 0, $codemove, 'entrepot', $transfer->getData('id_warehouse_source')) <= 0) {
-                $msg = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($product->dol_object), 'Echec de l\'ajout des quantités dans le stock d\'arrivée');
-                $errors[] = $msg;
-                dol_syslog('[ERREUR STOCK] ' . $msg . ' - Transfert #' . $transfer->id . ' - Ligne #' . $this->id . ' - Qté: ' . $new_qty, LOG_ERR);
+            $stock_errors = $product->correctStocks((int) $transfer->getData('id_warehouse_dest'), $new_qty, Bimp_Product::STOCK_IN, $codemove, $label_move, 'transfert', (int) $transfer->id);
+            if (count($stock_errors)) {
+                $errors[] = BimpTools::getMsgFromArray($stock_errors, 'Ligne #' . $this->id);
             }
         }
 
         if (!count($errors)) {
-            $errors = array_merge($errors, $this->set('quantity_transfered', $this->getData('quantity_received')));
-            $errors = array_merge($errors, $this->update());
-//            if (count($up_errors)) {
-//                $errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec de l\'enregistrement des quantités transférées');
-//            }
+            $this->set('quantity_transfered', $this->getData('quantity_received'));
+            $up_errors = $this->update($w, true);
+            if (count($up_errors)) {
+                $errors[] = BimpTools::getMsgFromArray($up_errors, 'Ligne #' . $this->id . ': échec de l\'enregistrement des quantités transférées');
+            }
         }
 
         return $errors;
     }
-
-    public function canEditField($field_name)
+    
+    public function create_2($id_transfer, $id_product, $id_equipment, $quantity_input, &$id_affected, $id_warehouse_source)
     {
         global $user;
-        $transfer_status = $this->getParentStatus();
-        if ($field_name == 'quantity_received' and $transfer_status != Transfer::STATUS_RECEPTING and ! $user->rights->bimptransfer->admin)
-            return false;
+        $now = dol_now();
 
-        if ($field_name == 'quantity_sent' and $transfer_status != Transfer::STATUS_SENDING and ! $user->rights->bimptransfer->admin)
-            return false;
+        // Create reservation
+        $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
+        // Is equipment
+        if ($id_equipment > 0) {
+            $errors = array_merge($errors, $reservation->validateArray(array(
+                        'id_entrepot'  => $id_warehouse_source,
+                        'status'       => 201, // Transfert en cours
+                        'type'         => 2, // 2 = transfert
+                        'id_equipment' => $id_equipment,
+                        'id_product'   => $id_product,
+                        'id_transfert' => $id_transfer,
+                        'date_from'    => dol_print_date($now, '%Y-%m-%d %H:%M:%S'),
+            )));
+            // Is product
+        } else {
+            $errors = array_merge($errors, $reservation->validateArray(array(
+                        'id_entrepot'  => $id_warehouse_source,
+                        'status'       => 201, // Transfert en cours
+                        'type'         => 2, // 2 = transfert
+                        'id_product'   => $id_product,
+                        'id_transfert' => $id_transfer,
+                        'qty'          => $quantity_input,
+                        'date_from'    => dol_print_date($now, '%Y-%m-%d %H:%M:%S'),
+            )));
+        }
+        $errors = array_merge($errors, $reservation->create());
 
-        return parent::canEditField($field_name);
+        // Create transfer line
+        $errors = array_merge($errors, $this->validateArray(array(
+                    'user_create'       => $user->id,
+                    'user_update'       => $user->id,
+                    'id_product'        => $id_product,
+                    'id_equipment'      => $id_equipment,
+                    'id_transfer'       => $id_transfer,
+                    'quantity_sent'     => $quantity_input,
+                    'quantity_received' => 0
+        )));
+
+        if (!$errors) {
+            $errors = array_merge($errors, parent::create());
+            $id_affected = $this->db->db->last_insert_id($this->getTable());
+        }
+        return $errors;
     }
 }

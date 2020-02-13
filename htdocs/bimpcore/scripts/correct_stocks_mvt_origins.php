@@ -157,7 +157,7 @@ foreach ($rows as $r) {
         $id_eq = 0;
 
         if (preg_match('/^.*serial: "(.+)".*$/', $label, $matches2)) {
-            $serial = $matches[1];
+            $serial = $matches2[1];
             $id_eq = (int) $bdb->getValue('be_equipment', 'id', '(serial = \'' . $serial . '\' OR concat("S", serial) = \'' . $serial . '\') AND id_product = ' . (int) $r['fk_product']);
             if ($id_eq) {
                 $id_propal_line = (int) $bdb->getValue('object_line_equipment', 'id_object_line', 'object_type = \'sav_propal\' AND id_equipment = ' . (int) $id_eq);

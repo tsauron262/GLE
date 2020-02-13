@@ -2301,4 +2301,35 @@ class BimpTools
 
         return "admin@bimp.fr";
     }
+    
+    
+    public static function mailGrouper($to, $from, $msg){
+        $dir = DOL_DATA_ROOT."/bimpcore/mailsGrouper/";
+        if(!is_dir($dir))
+            mkdir($dir);
+        if(!is_dir($dir))
+            return false;
+        $msg = "<br/><br/>".$msg;
+        $file = $dir.$to;
+            $file .= "$".$from;
+        $file .= "$.txt";
+        file_put_contents($file, $msg, FILE_APPEND);
+    }
+    
+    public static function envoieMailGrouper(){
+        $dir = DOL_DATA_ROOT."/bimpcore/mailsGrouper/";
+        if(!is_dir($dir))
+            mkdir($dir);
+        if(!is_dir($dir))
+            return false;
+        $files = scandir($dir);
+        foreach($files as $file){
+            $tabInfo = explode("$", $file);
+            if(isset($tabInfo[2])){
+                $msg = file_get_contents($dir.$file);
+                if(mailSyn2("Infos grouper Bimp-ERP", $tabInfo[0], $tabInfo[1], $msg))
+                    unlink ($dir.$file);
+            }
+        }
+    }
 }

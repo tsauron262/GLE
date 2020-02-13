@@ -2309,7 +2309,7 @@ class BimpTools
             mkdir($dir);
         if(!is_dir($dir))
             return false;
-        $msg = "<br/><br/>".$msg;
+        $msg = "<br/><br/>".dol_now()." : ". $msg;
         $file = $dir.$to;
             $file .= "$".$from;
         $file .= "$.txt";
@@ -2323,13 +2323,17 @@ class BimpTools
         if(!is_dir($dir))
             return false;
         $files = scandir($dir);
+        $i = 0;
         foreach($files as $file){
             $tabInfo = explode("$", $file);
             if(isset($tabInfo[2])){
                 $msg = file_get_contents($dir.$file);
-                if(mailSyn2("Infos grouper Bimp-ERP", $tabInfo[0], $tabInfo[1], $msg))
+                if(mailSyn2("Infos grouper Bimp-ERP", $tabInfo[0], $tabInfo[1], $msg)){
                     unlink ($dir.$file);
+                    $i++;
+                }
             }
         }
+        return $i.' mails envoyés';
     }
 }

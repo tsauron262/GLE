@@ -55,8 +55,9 @@ class BC_CustomFilter extends BC_Filter
                     break;
                 }
                 $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $value);
+                global $langs;
                 if (BimpObject::objectLoaded($user)) {
-                    return $user->dol_object->getFullName();
+                    return $user->dol_object->getFullName($langs);
                 }
 
             case 'value':

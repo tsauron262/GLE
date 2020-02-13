@@ -27,15 +27,15 @@ if (!$user->admin) {
 
 $bdb = new BimpDb($db);
 
+$where = '';
 //$where = '(`fk_origin` IS NULL OR `fk_origin` = 0)';
 //$where .= ' AND `inventorycode` != \'\' AND `inventorycode` IS NOT NULL';
 //$where .= ' AND (';
-
-$where = '(`inventorycode` LIKE \'inventory-id-%\' AND (origintype != \'\' OR bimp_origin != \'inventory\'))';
+//$where .= ' OR (`inventorycode` LIKE \'inventory-id-%\' AND (origintype != \'\' OR bimp_origin != \'inventory\'))';
 //$where .= ' OR (`inventorycode` LIKE \'CO%_EXP%\' AND origintype != \'commande\'))';
 //$where .= ' OR `inventorycode` LIKE \'CMDF%\'';
 //$where .= ' OR `inventorycode` LIKE \'ANNUL_CMDF%\'';
-//$where .= ' OR `inventorycode` LIKE \'VENTE%\'';
+$where .= '`inventorycode` LIKE \'VENTE%\'';
 //$where .= ')';
 
 $rows = $bdb->getRows('stock_mouvement', $where, null, 'array', array('rowid', 'inventorycode', 'origintype', 'fk_origin', 'bimp_origin', 'bimp_id_origin'), 'rowid', 'desc');
@@ -49,6 +49,12 @@ if (!(int) BimPTools::getValue('exec', 0)) {
         echo '<a href="' . DOL_URL_ROOT . '/bimpcore/scripts/' . $path['basename'] . '?exec=1" class="btn btn-default">';
         echo 'Lancer';
         echo '</a>';
+        echo ' <a href="' . DOL_URL_ROOT . '/bimpcore/scripts/' . $path['basename'] . '?exec=1&test=1" class="btn btn-default">';
+        echo 'TEST';
+        echo '</a>';
+        echo ' <a href="' . DOL_URL_ROOT . '/bimpcore/scripts/' . $path['basename'] . '?exec=1&test_one=1" class="btn btn-default">';
+        echo 'Exec one';
+        echo '</a>';
         exit;
     }
 
@@ -56,6 +62,10 @@ if (!(int) BimPTools::getValue('exec', 0)) {
 }
 
 // Corps du script
+// Params: 
+$test = (int) BimpTools::getValue('test', 0);
+$test_one = (int) BimpTools::getValue('test_one', 0);
+$details = (int) BimpTools::getValue('details', 0);
 
 foreach ($rows as $r) {
     $code = $r['inventorycode'];
@@ -65,13 +75,12 @@ foreach ($rows as $r) {
     $bimp_origin = '';
     $bimp_id_origin = 0;
 
-    if (preg_match('/^inventory\-id\-(\d+)$/', $code, $matches)) {
-        $dol_origin = '';
-        $dol_id_origin = 0;
-        $bimp_origin = 'inventory';
-        $bimp_id_origin = (int) $matches[1];
-    }
-//    elseif (preg_match('/^CO(\d+)_EXP(\d+)(_ANNUL)?$/', $code, $matches)) {
+//    if (preg_match('/^inventory\-id\-(\d+)$/', $code, $matches)) {
+//        $dol_origin = '';
+//        $dol_id_origin = 0;
+//        $bimp_origin = 'inventory';
+//        $bimp_id_origin = (int) $matches[1];
+//    } elseif (preg_match('/^CO(\d+)_EXP(\d+)(_ANNUL)?$/', $code, $matches)) {
 //        $dol_origin = 'commande';
 //        $dol_id_origin = (int) $matches[1];
 //        $bimp_origin = 'commande';
@@ -80,40 +89,47 @@ foreach ($rows as $r) {
 //        $origin = 'order_supplier';
 //        $id_origin = (int) $matches[2];
 //    }
-//    elseif (preg_match('/^VENTE(\d+)_(ART|RET)(\d+)$/', $code, $matches)) {
-//        $origin = 'vente_caisse';
-//        $id_origin = (int) $matches[1];
-//    }
+//    else
+    if (preg_match('/^VENTE(\d+)_(ART|RET)(\d+)$/', $code, $matches)) {
+        $bimp_origin = 'vente_caisse';
+        $bimp_id_origin = (int) $matches[1];
+    }
 
     if (($dol_origin !== $r['origintype'] && $dol_id_origin !== (int) $r['fk_origin'])) {
-        echo 'Correction dol origine mvt #' . $r['rowid'] . ' (Origine: ' . $dol_origin . ' #' . $dol_id_origin . ' - Code: ' . $code . '): ';
-        if (!(int) BimpTools::getValue('test', 0)) {
+        if ($test || $details || $test_one) {
+            echo 'Correction dol origine mvt #' . $r['rowid'] . ' (Origine: ' . $dol_origin . ' #' . $dol_id_origin . ' - Code: ' . $code . ')<br/>';
+        }
+        if (!$test) {
             if ($bdb->update('stock_mouvement', array(
                         'origintype' => $dol_origin,
                         'fk_origin'  => $dol_id_origin,
                             ), 'rowid = ' . (int) $r['rowid']) <= 0) {
+                if (!$details && !$test) {
+                    echo 'Correction dol origine mvt #' . $r['rowid'] . ' (Origine: ' . $dol_origin . ' #' . $dol_id_origin . ' - Code: ' . $code . '): ';
+                }
                 echo '<span class="danger">';
                 echo '[ECHEC] - ' . $bdb->db->lasterror();
-                echo '</span>';
-            } else {
-                echo 'OK';
+                echo '</span><br/>';
             }
         }
-        echo '<br/>';
     }
 
     if ($bimp_origin !== $r['bimp_origin'] && $bimp_id_origin !== (int) $r['bimp_id_origin']) {
-        echo 'Correction bimp origine mvt #' . $r['rowid'] . ' (Origine: ' . $bimp_origin . ' #' . $bimp_id_origin . ' - Code: ' . $code . '): ';
-        if (!(int) BimpTools::getValue('test', 0)) {
+        if ($details || $test || $test_one) {
+            echo 'Correction bimp origine mvt #' . $r['rowid'] . ' (Origine: ' . $bimp_origin . ' #' . $bimp_id_origin . ' - Code: ' . $code . ')<br/>';
+        }
+        if (!$test) {
             if ($bdb->update('stock_mouvement', array(
                         'bimp_origin'    => $bimp_origin,
                         'bimp_id_origin' => $bimp_id_origin,
                             ), 'rowid = ' . (int) $r['rowid']) <= 0) {
+                if (!$details && !$test && !$test_one) {
+                    echo 'Correction bimp origine mvt #' . $r['rowid'] . ' (Origine: ' . $bimp_origin . ' #' . $bimp_id_origin . ' - Code: ' . $code . '): ';
+                }
                 echo '<span class="danger">';
                 echo '[ECHEC] - ' . $bdb->db->lasterror();
-                echo '</span>';
+                echo '</span><br/>';
             } else {
-                echo 'OK';
                 $bdb->update('be_equipment_place', array(
                     'origin'    => $bimp_origin,
                     'id_origin' => $bimp_id_origin
@@ -125,7 +141,10 @@ foreach ($rows as $r) {
                         ), 'code_mvt = \'' . $code . '\'');
             }
         }
-        echo '<br/>';
+        
+        if ($test_one) {
+            break;
+        }
     }
 }
 

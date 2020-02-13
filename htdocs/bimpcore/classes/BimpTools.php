@@ -2309,7 +2309,7 @@ class BimpTools
             mkdir($dir);
         if(!is_dir($dir))
             return false;
-        $msg = "<br/><br/>". dol_print_date(dol_now())." : ". $msg;
+        $msg = "<br/><br/>". dol_print_date(dol_now(), '%d/%m/%Y %H:%M:%S')." : ". $msg;
         $file = $dir.$to;
             $file .= "$".$from;
         $file .= "$.txt";

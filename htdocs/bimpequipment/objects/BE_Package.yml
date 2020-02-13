@@ -158,6 +158,7 @@ forms:
             
 views:
     default: 
+        objects_change_reload: BE_PackagePlace
         rows: 
             - cols: 
                 - type: object_header

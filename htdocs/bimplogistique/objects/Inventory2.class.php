@@ -58,6 +58,7 @@ class Inventory2 extends BimpDolObject
         }
         return $errors;
     }
+    
     public function checkBeforeCreate(&$warnings) {
 
         $filters = array(
@@ -724,7 +725,6 @@ class Inventory2 extends BimpDolObject
         
         return $errors;
     }
-    
     
     public function moveEquipments() {
         

@@ -20,6 +20,16 @@ objects:
             default: 
                 type: product_card
                 
+    bimp_product: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_Product
+            id_object: 
+                field_value: id_product
+                
     contrat:
         instance:
             id_object: unset

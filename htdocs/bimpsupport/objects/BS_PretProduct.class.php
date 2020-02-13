@@ -26,14 +26,14 @@ class BS_PretProduct extends BimpObject
                 if (!BimpObject::objectLoaded($pret)) {
                     $errors[] = 'ID du prêt absent';
                 } else {
-                    global $user;
                     $label = 'Prêt de matériel #' . $pret->id;
                     if (!is_null($label_ext)) {
                         $label .= ' - ' . $label_ext;
                     }
                     $codemove = $pret->getRef() . '_' . $this->id;
-                    if ($product->dol_object->correct_stock($user, (int) $pret->getData('id_entrepot'), $qty, 1, $label, 0, $codemove, '', 0) <= 0) {
-                        $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($product->dol_object));
+                    $stock_errors = $product->correctStocks((int) $pret->getData('id_entrepot'), $qty, Bimp_Product::STOCK_OUT, $codemove, $label, 'pret', (int) $pret->id);
+                    if (count($stock_errors)) {
+                        $errors[] = BimpTools::getMsgFromArray($stock_errors);
                     }
                 }
             }
@@ -65,7 +65,6 @@ class BS_PretProduct extends BimpObject
                 if (!BimpObject::objectLoaded($pret)) {
                     $errors[] = 'ID du prêt absent';
                 } else {
-                    global $user;
                     $label = 'Prêt de matériel #' . $pret->id;
                     if (!is_null($label_ext)) {
                         $label .= ' - ' . $label_ext;
@@ -73,8 +72,9 @@ class BS_PretProduct extends BimpObject
                         $label .= ' - Retour';
                     }
                     $codemove = $pret->getRef() . '_' . $this->id;
-                    if ($product->dol_object->correct_stock($user, (int) $pret->getData('id_entrepot'), $qty, 0, $label, 0, $codemove, '', 0) <= 0) {
-                        $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($product->dol_object));
+                    $stock_errors = $product->correctStocks((int) $pret->getData('id_entrepot'), $qty, Bimp_Product::STOCK_IN, $codemove, $label, 'pret', (int) $pret->id);
+                    if (count($stock_errors)) {
+                        $errors[] = BimpTools::getMsgFromArray($stock_errors);
                     }
                 }
             }

@@ -87,40 +87,44 @@ foreach ($rows as $r) {
 
     if (($dol_origin !== $r['origintype'] && $dol_id_origin !== (int) $r['fk_origin'])) {
         echo 'Correction dol origine mvt #' . $r['rowid'] . ' (Origine: ' . $dol_origin . ' #' . $dol_id_origin . ' - Code: ' . $code . '): ';
-//        if ($bdb->update('stock_mouvement', array(
-//                    'origintype' => $dol_origin,
-//                    'fk_origin'  => $dol_id_origin,
-//                        ), 'rowid = ' . (int) $r['rowid']) <= 0) {
-//            echo '<span class="danger">';
-//            echo '[ECHEC] - ' . $bdb->db->lasterror();
-//            echo '</span>';
-//        } else {
-//            echo 'OK';
-//        }
+        if (!(int) BimpTools::getValue('test', 0)) {
+            if ($bdb->update('stock_mouvement', array(
+                        'origintype' => $dol_origin,
+                        'fk_origin'  => $dol_id_origin,
+                            ), 'rowid = ' . (int) $r['rowid']) <= 0) {
+                echo '<span class="danger">';
+                echo '[ECHEC] - ' . $bdb->db->lasterror();
+                echo '</span>';
+            } else {
+                echo 'OK';
+            }
+        }
         echo '<br/>';
     }
 
     if ($bimp_origin !== $r['bimp_origin'] && $bimp_id_origin !== (int) $r['bimp_id_origin']) {
         echo 'Correction bimp origine mvt #' . $r['rowid'] . ' (Origine: ' . $bimp_origin . ' #' . $bimp_id_origin . ' - Code: ' . $code . '): ';
-//        if ($bdb->update('stock_mouvement', array(
-//                    'bimp_origin'    => $bimp_origin,
-//                    'bimp_id_origin' => $bimp_id_origin,
-//                        ), 'rowid = ' . (int) $r['rowid']) <= 0) {
-//            echo '<span class="danger">';
-//            echo '[ECHEC] - ' . $bdb->db->lasterror();
-//            echo '</span>';
-//        } else {
-//            echo 'OK';
-//            $bdb->update('be_equipment_place', array(
-//                'origin'    => $bimp_origin,
-//                'id_origin' => $bimp_id_origin
-//                    ), 'code_mvt = \'' . $code . '\'');
-//
-//            $bdb->update('be_package_place', array(
-//                'origin'    => $bimp_origin,
-//                'id_origin' => $bimp_id_origin
-//                    ), 'code_mvt = \'' . $code . '\'');
-//        }
+        if (!(int) BimpTools::getValue('test', 0)) {
+            if ($bdb->update('stock_mouvement', array(
+                        'bimp_origin'    => $bimp_origin,
+                        'bimp_id_origin' => $bimp_id_origin,
+                            ), 'rowid = ' . (int) $r['rowid']) <= 0) {
+                echo '<span class="danger">';
+                echo '[ECHEC] - ' . $bdb->db->lasterror();
+                echo '</span>';
+            } else {
+                echo 'OK';
+                $bdb->update('be_equipment_place', array(
+                    'origin'    => $bimp_origin,
+                    'id_origin' => $bimp_id_origin
+                        ), 'code_mvt = \'' . $code . '\'');
+
+                $bdb->update('be_package_place', array(
+                    'origin'    => $bimp_origin,
+                    'id_origin' => $bimp_id_origin
+                        ), 'code_mvt = \'' . $code . '\'');
+            }
+        }
         echo '<br/>';
     }
 }

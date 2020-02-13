@@ -32,12 +32,12 @@ $where = '';
 //$where .= ' AND `inventorycode` != \'\' AND `inventorycode` IS NOT NULL';
 //$where .= ' AND (';
 //$where .= ' OR (`inventorycode` LIKE \'inventory-id-%\' AND (origintype != \'\' OR bimp_origin != \'inventory\'))';
-//$where .= ' OR (`inventorycode` LIKE \'CO%_EXP%\' AND origintype != \'commande\'))';
+$where .= '(`inventorycode` LIKE \'CO%_EXP%\' AND (origintype != \'commande\' OR bimp_origin != \'commande\'))';
 //$where .= ' OR `inventorycode` LIKE \'CMDF%\'';
 //$where .= ' OR `inventorycode` LIKE \'ANNUL_CMDF%\'';
 //$where .= ' OR (`inventorycode` LIKE \'VENTE%\' AND (origintype != \'\' OR bimp_origin != \'vente_caisse\'))';
 //$where .= ' OR (`inventorycode` LIKE \'TR%\' AND (origintype != \'\' OR bimp_origin != \'transfert\'))';
-$where .= '(`label` LIKE \'SAV%\' OR `label` LIKE \'Vente SAV%\' AND (origintype != \'\' OR bimp_origin != \'sav\'))';
+//$where .= ' OR (`label` LIKE \'SAV%\' OR `label` LIKE \'Vente SAV%\' AND (origintype != \'\' OR bimp_origin != \'sav\'))';
 
 //$where .= ' AND rowid = 48863';
 //$where .= ')';
@@ -84,12 +84,14 @@ foreach ($rows as $r) {
 //        $dol_id_origin = 0;
 //        $bimp_origin = 'inventory';
 //        $bimp_id_origin = (int) $matches[1];
-//    } elseif (preg_match('/^CO(\d+)_EXP(\d+)(_ANNUL)?$/', $code, $matches)) {
-//        $dol_origin = 'commande';
-//        $dol_id_origin = (int) $matches[1];
-//        $bimp_origin = 'commande';
-//        $bimp_id_origin = (int) $matches[1];
-//    } elseif (preg_match('/^(ANNUL_)?CMDF(\d+)_LN(\d+)_RECEP(\d+)$/', $code, $matches)) {
+//    } else
+    if (preg_match('/^CO(\d+)_EXP(\d+)(_ANNUL)?$/', $code, $matches)) {
+        $dol_origin = 'commande';
+        $dol_id_origin = (int) $matches[1];
+        $bimp_origin = 'commande';
+        $bimp_id_origin = (int) $matches[1];
+    }
+//     elseif (preg_match('/^(ANNUL_)?CMDF(\d+)_LN(\d+)_RECEP(\d+)$/', $code, $matches)) {
 //        $origin = 'order_supplier';
 //        $id_origin = (int) $matches[2];
 //    }
@@ -140,59 +142,58 @@ foreach ($rows as $r) {
 //            $bimp_origin = 'transfert';
 //            $bimp_id_origin = (int) $matches[1];
 //        }
+//    } elseif (preg_match('/^(SAV[A-Z0-9]+)$/', $label, $matches)) {
+//        $ref_sav = $matches[1];
+//        $id_sav = (int) $bdb->getValue('bs_sav', 'id', 'ref = \'' . $ref_sav . '\'');
+//        if ($id_sav) {
+//            $bimp_origin = 'sav';
+//            $bimp_id_origin = $id_sav;
+//            $code = 'SAV' . $id_sav;
+//        } else {
+//            continue;
+//        }
+//    } elseif (preg_match('/^Vente SAV.+$/', $label, $matches)) {
+//        $id_sav = 0;
+//        $id_propal_line = 0;
+//        $id_eq = 0;
+//
+//        if (preg_match('/^.*serial: "(.+)".*$/', $label, $matches2)) {
+//            $serial = $matches2[1];
+//            $id_eq = (int) $bdb->getValue('be_equipment', 'id', '(serial = \'' . $serial . '\' OR concat("S", serial) = \'' . $serial . '\') AND id_product = ' . (int) $r['fk_product']);
+//            if ($id_eq) {
+//                $id_propal_line = (int) $bdb->getValue('object_line_equipment', 'id_object_line', 'object_type = \'sav_propal\' AND id_equipment = ' . (int) $id_eq);
+//                if ($id_propal_line) {
+//                    $id_propal = (int) $bdb->getValue('bs_sav_propal_line', 'id_obj', 'id = ' . (int) $id_propal_line);
+//                    if ($id_propal) {
+//                        $id_sav = (int) $bdb->getValue('bs_sav', 'id', 'id_propal = ' . (int) $id_propal);
+//                    }
+//                }
+//            }
+//        }
+//        if ($id_sav) {
+//            $code = 'SAV' . $id_sav;
+//            if ($id_propal_line) {
+//                $code .= '_LN' . $id_propal_line;
+//                if ($id_eq) {
+//                    $code .= '_EQ' . $id_eq;
+//                }
+//            }
+//            $bimp_origin = 'sav';
+//            $bimp_id_origin = $id_sav;
+//        } else {
+//            continue;
+//        }
+//    } elseif (preg_match('^(Ouverture du SAV|Restitution) (SAV[A-Z0-9]+)$', $label, $matches)) {
+//        $ref_sav = $matches[2];
+//        $id_sav = (int) $bdb->getValue('bs_sav', 'id', 'ref = \'' . $ref_sav . '\'');
+//        if ($id_sav) {
+//            $bimp_origin = 'sav';
+//            $bimp_id_origin = $id_sav;
+//            $code = 'SAV' . $id_sav;
+//        } else {
+//            continue;
+//        }
 //    }
-    if (preg_match('/^(SAV[A-Z0-9]+)$/', $label, $matches)) {
-        $ref_sav = $matches[1];
-        $id_sav = (int) $bdb->getValue('bs_sav', 'id', 'ref = \'' . $ref_sav . '\'');
-        if ($id_sav) {
-            $bimp_origin = 'sav';
-            $bimp_id_origin = $id_sav;
-            $code = 'SAV' . $id_sav;
-        } else {
-            continue;
-        }
-    } elseif (preg_match('/^Vente SAV.+$/', $label, $matches)) {
-        $id_sav = 0;
-        $id_propal_line = 0;
-        $id_eq = 0;
-
-        if (preg_match('/^.*serial: "(.+)".*$/', $label, $matches2)) {
-            $serial = $matches2[1];
-            $id_eq = (int) $bdb->getValue('be_equipment', 'id', '(serial = \'' . $serial . '\' OR concat("S", serial) = \'' . $serial . '\') AND id_product = ' . (int) $r['fk_product']);
-            if ($id_eq) {
-                $id_propal_line = (int) $bdb->getValue('object_line_equipment', 'id_object_line', 'object_type = \'sav_propal\' AND id_equipment = ' . (int) $id_eq);
-                if ($id_propal_line) {
-                    $id_propal = (int) $bdb->getValue('bs_sav_propal_line', 'id_obj', 'id = ' . (int) $id_propal_line);
-                    if ($id_propal) {
-                        $id_sav = (int) $bdb->getValue('bs_sav', 'id', 'id_propal = ' . (int) $id_propal);
-                    }
-                }
-            }
-        }
-        if ($id_sav) {
-            $code = 'SAV' . $id_sav;
-            if ($id_propal_line) {
-                $code .= '_LN' . $id_propal_line;
-                if ($id_eq) {
-                    $code .= '_EQ' . $id_eq;
-                }
-            }
-            $bimp_origin = 'sav';
-            $bimp_id_origin = $id_sav;
-        } else {
-            continue;
-        }
-    } elseif (preg_match('^(Ouverture du SAV|Restitution) (SAV[A-Z0-9]+)$', $label, $matches)) {
-        $ref_sav = $matches[2];
-        $id_sav = (int) $bdb->getValue('bs_sav', 'id', 'ref = \'' . $ref_sav . '\'');
-        if ($id_sav) {
-            $bimp_origin = 'sav';
-            $bimp_id_origin = $id_sav;
-            $code = 'SAV' . $id_sav;
-        } else {
-            continue;
-        }
-    }
 
     // UPDATES: 
     if ($dol_origin !== $r['origintype'] ||

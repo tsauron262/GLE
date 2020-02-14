@@ -3485,7 +3485,7 @@ class BS_SAV extends BimpObject
     }
 
     public function actionClose($data, &$success)
-    {
+    {        
         global $user, $langs;
         $errors = array();
         $warnings = array();
@@ -3502,23 +3502,28 @@ class BS_SAV extends BimpObject
 //            }
 //        }
 
-        if (count($errors)) {
-            return array(BimpTools::getMsgFromArray($errors, 'Il n\'est pas possible de fermer ce SAV:'));
-        }
+        if ($payment_set) {
+            if ($this->useCaisseForPayments) {
+                global $user;
 
-        if ($this->useCaisseForPayments && $payment_set) {
-            global $user;
-
-            $caisse = BimpObject::getInstance('bimpcaisse', 'BC_Caisse');
-            $id_caisse = (int) $caisse->getUserCaisse((int) $user->id);
-            if (!$id_caisse) {
-                $errors[] = 'Veuillez vous <a href="' . DOL_URL_ROOT . '/bimpcaisse/index.php" target="_blank">connecter à une caisse</a> pour l\'enregistrement du paiement de la facture';
-            } else {
-                $caisse = BimpCache::getBimpObjectInstance('bimpcaisse', 'BC_Caisse', $id_caisse);
-                if (!$caisse->isLoaded()) {
-                    $errors[] = 'La caisse à laquelle vous êtes connecté est invalide.';
+                $caisse = BimpObject::getInstance('bimpcaisse', 'BC_Caisse');
+                $id_caisse = (int) $caisse->getUserCaisse((int) $user->id);
+                if (!$id_caisse) {
+                    $errors[] = 'Veuillez vous <a href="' . DOL_URL_ROOT . '/bimpcaisse/index.php" target="_blank">connecter à une caisse</a> pour l\'enregistrement du paiement de la facture';
                 } else {
-                    $caisse->isValid($errors);
+                    $caisse = BimpCache::getBimpObjectInstance('bimpcaisse', 'BC_Caisse', $id_caisse);
+                    if (!$caisse->isLoaded()) {
+                        $errors[] = 'La caisse à laquelle vous êtes connecté est invalide.';
+                    } else {
+                        $caisse->isValid($errors);
+                    }
+                }
+            }
+            $type_paiement = $this->db->getValue('c_paiement', 'code', '`id` = ' . (int) $data['mode_paiement']);
+            if ($type_paiement === 'VIR') {
+                BimpObject::loadClass('bimpcommercial', 'Bimp_Paiement');
+                if (!Bimp_Paiement::canCreateVirement()) {
+                    $errors[] = 'Vous n\'avez pas la permission d\'enregistrer des paiements par virement';
                 }
             }
         }

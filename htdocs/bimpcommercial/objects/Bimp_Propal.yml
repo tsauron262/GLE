@@ -250,6 +250,7 @@ forms:
             - custom: 1
               label: Périodicitée de facturation
               input_name: periodicity
+              value: 12
               input:
                   type: select
                   options:

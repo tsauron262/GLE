@@ -142,7 +142,12 @@ class BContract_echeancier extends BimpObject {
         $instance->set('libelle', 'Facture du contrat N°' . $parent->getData('ref'));
         $instance->set('type', 0);
         $instance->set('fk_account', 1);
-        $instance->set('entrepot', ($parent->getData('entrepot')) ? $parent->getData('entrepot') : $propal->getData('entrepot'));
+        
+        if(!$parent->getData('entrepot')) {
+            return "La facture ne peut pas être créer car le contrat n'à pas d'entrepot";
+        }
+        
+        $instance->set('entrepot', $parent->getData('entrepot'));
         $instance->set('fk_cond_reglement', ($client->getData('cond_reglement')) ? $client->getData('cond_reglement') : 2);
         $instance->set('fk_mode_reglement', ($parent->getData('moderegl')) ? $parent->getData('moderegl') : 2);
         $instance->set('datef', date('Y-m-d H:i:s'));

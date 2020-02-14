@@ -656,7 +656,7 @@ class BimpCache
         if ((int) $id_societe) {
             $cache_key = 'societe_' . $id_societe . '_contacts_array';
             if (!isset(self::$cache[$cache_key])) {
-                self::$cache[$cache_key] = array("" => "");
+                self::$cache[$cache_key] = array("" => ""); // => Normalement on ne doit jamais inclure de valeurs vides dans le cache : c'est à ça que sert la variale $include_empty.
                 $where = '`fk_soc` = ' . (int) $id_societe;
                 $rows = self::getBdb()->getRows('socpeople', $where, null, 'array', array('rowid', 'firstname', 'lastname'));
                 if (!is_null($rows)) {

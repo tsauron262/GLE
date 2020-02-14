@@ -598,10 +598,23 @@ class BContract_contrat extends BimpDolObject {
     }
 
     /* RIGHTS */
-
+    
+    public function canEditField($field_name) {
+        switch($field_name) {
+            case 'entrepot':
+            case 'note_private':
+            case 'fk_soc_facturation':
+            case 'denounce':
+            case 'fk_commercial_signature':
+                return 1;
+                break;
+            default:
+                return 0;
+                break;
+        }
+    }
+    
     public function canEdit() {
-        if ($this->getData("statut") == self::CONTRAT_STATUS_CLOS || $this->getData('statut') == self::CONTRAT_STATUS_VALIDE || $this->getData('statut') == self::CONTRAT_STATUS_ACTIVER)
-            return 0;
         return 1;
     }
 

@@ -95,13 +95,14 @@ foreach ($rows as $r) {
             if ($pa_ht !== (float) $cur_pa_ht) {
                 echo ' - Nouveau PA: ' . $pa_ht;
                 if (!$test) {
-                    $errors = $facLine->updatePrixAchat($pa_ht);
-
-                    if (count($errors)) {
-                        echo BimpRender::renderAlerts($errors);
-                    } else {
-                        echo ' - <span class="success">OK</span>';
-                    }
+                    echo ' MAJ Désactivée';
+//                    $errors = $facLine->updatePrixAchat($pa_ht);
+//
+//                    if (count($errors)) {
+//                        echo BimpRender::renderAlerts($errors);
+//                    } else {
+//                        echo ' - <span class="success">OK</span>';
+//                    }
                 }
             } else {
                 echo '<span class="success">PA avec reval OK (' . $cur_pa_ht . ')</span>';

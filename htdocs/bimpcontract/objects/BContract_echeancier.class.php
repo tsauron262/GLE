@@ -139,7 +139,7 @@ class BContract_echeancier extends BimpObject {
         $ef_type = ($propal->getData('ef_type') == "E") ? 'CTE': 'CTC';
         $instance = $this->getInstance('bimpcommercial', 'Bimp_Facture');
         $instance->set('fk_soc', $parent->getData('fk_soc'));
-        $instance->set('libelle', 'Facture périodique du contrat N°' . $parent->getData('ref'));
+        $instance->set('libelle', 'Facture du contrat N°' . $parent->getData('ref'));
         $instance->set('type', 0);
         $instance->set('fk_account', 1);
         $instance->set('entrepot', 50);
@@ -365,7 +365,6 @@ class BContract_echeancier extends BimpObject {
             $html .= "<tr> <th style='background-color:#ed7c1c;color:white;text-align:center'>Reste à payer</th> <td style='text-align:center'><b class='danger'> " . price($parent->getTotalContrat() - $parent->getTotalDejaPayer(true)) . " € </b></td> <td style='text-align:center'><b class='danger'> " . price(($parent->getTotalContrat(true) * 1.20) - ($parent->getTotalDejaPayer(true) * 1.20)) . " €</b></td> </tr>";
         }
         $html .= "</table>";
-        $html .= '<h4>Client: '.$societe->getNomUrl().'</h4>';
 
 
         return $html;

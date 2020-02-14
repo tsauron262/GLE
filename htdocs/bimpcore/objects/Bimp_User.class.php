@@ -58,6 +58,12 @@ class Bimp_User extends BimpObject
     {
         return $this->getInstanceName();
     }
+    
+    public function getRef() {
+        
+        return $this->getName();
+        
+    }
 
     public function getInstanceName()
     {

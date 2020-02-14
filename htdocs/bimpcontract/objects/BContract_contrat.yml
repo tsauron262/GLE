@@ -28,6 +28,14 @@ filters_panels:
                 field: fk_commercial_suivi
             client:
                 field: fk_soc
+            commercialclient:
+                custom: 1
+                label: Commercial client
+                input:
+                    type: search_user
+                data_type: id_object
+                type: user
+                field: commercialclient
 objects:
     client:
         instance:
@@ -86,6 +94,7 @@ objects:
                 name: Bimp_User
             id_object:
                 field_value: fk_commercial_signature
+    
 
 table: contrat
 controller: contrat
@@ -139,7 +148,9 @@ fields:
     note_public:
         label: Note particulière au contrat
         type: html
-        
+    note_private:
+        label: Note privée
+        type: html
     # Extrafields
     date_start:
         label: Date d'effet du contrat
@@ -247,7 +258,7 @@ fields:
     fk_user_cloture:
         label: Clos par
         type: int
-        
+
 fields_tables:
     infos:
         panel: 0
@@ -297,15 +308,15 @@ fields_tables:
               edit: 0
             - field: denounce
               edit: 0
-            - label: Commercial
-              value:
-                  callback: displayCommercial
+            - field: fk_commercial_suivi
+            - field: fk_commercial_signature
     client: 
         panel: 0
         rows: 
             - field: fk_soc
               display: card
             - field: note_public
+            - field: note_private
    
               
                               
@@ -369,7 +380,15 @@ lists:
                 field: fk_commercial_suivi
             commercial_sign:
                 field: fk_commercial_signature
-    
+            commercialclient:
+                label: Commercial Client
+                value:
+                    callback: displayCommercialClient
+                search:
+                    input: 
+                        type: search_user
+                  
+
     client:
         extends: default
         cols:
@@ -486,9 +505,12 @@ forms:
             - field: moderegl
             - field: gti
             - field: syntec
+            - field: fk_commercial_suivi
+            - field: fk_commercial_signature
             - field: tacite
             - field: denounce
             - field: note_public
+            - field: note_private
     
     add_contrat:
         rows:

@@ -596,7 +596,7 @@ class BContract_contrat extends BimpDolObject {
     /* RIGHTS */
 
     public function canEdit() {
-        if ($this->getData("statut") == self::CONTRAT_STATUS_CLOS || $this->getData('statut') == self::CONTRAT_STATUS_VALIDE)
+        if ($this->getData("statut") == self::CONTRAT_STATUS_CLOS || $this->getData('statut') == self::CONTRAT_STATUS_VALIDE || $this->getData('statut') == self::CONTRAT_STATUS_ACTIVER)
             return 0;
         return 1;
     }

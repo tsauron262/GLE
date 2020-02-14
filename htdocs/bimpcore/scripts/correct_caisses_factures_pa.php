@@ -84,32 +84,33 @@ foreach ($rows as $r) {
     $facLine = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureLine', (int) $r['id_bimp_line']);
 
     if (BimpObject::objectLoaded($facLine)) {
+        echo 'Correction ligne #' . $facLine->id . ' - Fac #' . $r['fk_facture'] . ' ';
+
         $product = $facLine->getProduct();
 
         if (BimpObject::objectLoaded($product)) {
             $pa_ht = (float) $product->getCurrentPaHt(null, true, $r['datec']);
-            if ($pa_ht !== (float) $r['buy_price_ht']) {
-//                if ($test || $test_one) {
-                    echo 'Correction ligne #' . $facLine->id . ' - Fac #' . $r['fk_facture'] . ' - PA: ' . $pa_ht;
-//                }
+            $cur_pa_ht = (float) $facLine->getPaWithRevalorisations();
 
+            if ($pa_ht !== (float) $cur_pa_ht) {
+                echo ' - Nouveau PA: ' . $pa_ht;
                 if (!$test) {
-                    $errors = $facLine->updatePrixAchat($pa_ht);
-
-                    if (count($errors)) {
-//                        if (!$test_one) {
-//                            echo 'Correction ligne #' . $facLine->id . ' - Fac #' . $r['fk_facture'] . ': ' . $pa_ht . ': ';
-//                        }
-
-                        echo BimpRender::renderAlerts($errors);
-                    } else {
-                        echo ' OK';
-                    }
+                    echo ' MAJ Désactivée';
+//                    $errors = $facLine->updatePrixAchat($pa_ht);
+//
+//                    if (count($errors)) {
+//                        echo BimpRender::renderAlerts($errors);
+//                    } else {
+//                        echo ' - <span class="success">OK</span>';
+//                    }
                 }
-                
-                echo '<br/>';
+            } else {
+                echo '<span class="success">PA avec reval OK (' . $cur_pa_ht . ')</span>';
             }
+        } else {
+            echo '<span class="danger">Pas de produit</span>';
         }
+        echo '<br/>';
     } else {
         echo '<span class="danger">';
         echo 'BimpFactureLine non trouvée pour la ligne #' . $r['rowid'] . ' (Facture #' . $r['fk_facture'] . ')';

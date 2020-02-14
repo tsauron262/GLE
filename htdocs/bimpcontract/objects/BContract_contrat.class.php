@@ -109,6 +109,23 @@ class BContract_contrat extends BimpDolObject {
         // Vérifier tous les contrats pour faire la relance aux commeciaux
         // Vérifier tout les contrats a facturé et envoyer aux commerciaux.
     }
+    
+    public function addLog($text)
+    {
+        $errors = array();
+
+        if ($this->isLoaded($errors) && $this->field_exists('logs')) {
+            $logs = (string) $this->getData('logs');
+            if ($logs) {
+                $logs .= '<br/>';
+            }
+            global $user, $langs;
+            $logs .= ' - <strong> Le ' . date('d / m / Y à H:i') . '</strong> par ' . $user->getFullName($langs) . ': ' . $text;
+            $errors = $this->updateField('logs', $logs, null, true);
+        }
+
+        return $errors;
+    }
 
     public function actionActivateContrat($data, &$success) {
         $errors = [];
@@ -117,7 +134,7 @@ class BContract_contrat extends BimpDolObject {
             $this->updateField('statut', self::CONTRAT_STATUS_ACTIVER);
 
             $success = "Le contrat " . $this->getData('ref') . ' à été activé avec succès';
-
+            $this->addLog('Contrat activé');
             $echeancier = $this->getInstance('bimpcontract', 'BContract_echeancier');
             if (!$echeancier->find(['id_contrat' => $this->id])) {
                 $this->createEcheancier();
@@ -219,6 +236,7 @@ class BContract_contrat extends BimpDolObject {
             $this->updateField('statut', self::CONTRAT_STATUS_CLOS);
             $this->updateField('date_cloture', date('Y-m-d H:i:s'));
             $this->updateField('fk_user_cloture', $user->id);
+            $this->addLog('Contrat clos');
         }
 
         return [
@@ -529,6 +547,7 @@ class BContract_contrat extends BimpDolObject {
 
     public function actionUnSign() {
         if ($this->updateField('date_contrat', null)) {
+            $this->addLog('Contrat marqué comme non-signé');
             $success = 'Contrat dé-signer';
         }
 
@@ -604,6 +623,7 @@ class BContract_contrat extends BimpDolObject {
 
     public function actionSigned($data, &$success) {
         $success = 'Contrat signé avec succes';
+        $this->addLog('Contrat marqué comme signé');
         $this->updateField('date_contrat', date('Y-m-d HH:ii:ss'));
     }
 
@@ -638,6 +658,7 @@ class BContract_contrat extends BimpDolObject {
         }
 
         if ($this->dol_object->validate($user, $ref) <= 0) {
+            $this->addLog('Contrat validé');
             $success = 'Le contrat ' . $ref;
             $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object));
             return 0;
@@ -960,7 +981,7 @@ class BContract_contrat extends BimpDolObject {
         if ($this->isLoaded()) {
             $instance = $this->getInstance('bimpcontract', 'BContract_echeancier');
 
-            if ($this->getData('statut') < self::CONTRAT_STATUS_ACTIVER) {
+            if ($this->getData('statut') < self::CONTRAT_STATUS_ACTIVER || $instance->find(['id_contrat' => $this->id])) {
                 return BimpRender::renderAlerts('Le contrat n\'est pas activer', 'danger', false);
             }
             if (!$this->getData('date_start') || !$this->getData('periodicity') || !$this->getData('duree_mois')) {

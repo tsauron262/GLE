@@ -559,10 +559,14 @@ class BL_CommandeShipment extends BimpObject
             case 'id_client':
                 $id_client = 0;
                 foreach ($commandes as $id_commande => $commande) {
-                    if ($id_client && $id_client !== (int) $commande->getData('fk_soc')) {
+                    $id_client_comm = (int) $commande->getData('id_client_facture');
+                    if (!$id_client_comm) {
+                        $id_client_comm = (int) $commande->getData('fk_soc');
+                    }
+                    if ($id_client && $id_client_comm && $id_client !== $id_client_comm) {
                         return 0;
                     }
-                    $id_client = (int) $commande->getData('fk_soc');
+                    $id_client = (int) $id_client_comm;
                 }
                 return $id_client;
 

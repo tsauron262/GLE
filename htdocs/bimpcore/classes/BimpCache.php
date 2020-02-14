@@ -6,10 +6,10 @@ class BimpCache
 //    RÈGLES POUR LES NOMS DES MÉTHODES DE BIMPCACHE: 
 //    (Afin de connaître le return d'une méthode sans avoir à rentrer dedans) 
 //    
-//    getObjectsArray : renvoie un tableau sous la forme id => label
-//    getObjectList : renvoie un tableau d'IDs.
-//    getObjectData : renvoie un tableau de données
-//    getObjects : renvoie un tableau d'objets fetchés.                     
+//    geXXXArray : renvoie un tableau sous la forme id => label
+//    getXXXList : renvoie un tableau d'IDs.
+//    getXXXData : renvoie un tableau de données
+//    getXXXObjects : renvoie un tableau d'objets fetchés.                     
 //    
 //    /!\ Attention, il est ultra-important de faire en sorte que la cache_key soit unique!
 
@@ -656,7 +656,7 @@ class BimpCache
         if ((int) $id_societe) {
             $cache_key = 'societe_' . $id_societe . '_contacts_array';
             if (!isset(self::$cache[$cache_key])) {
-                self::$cache[$cache_key] = array("" => ""); // => Normalement on ne doit jamais inclure de valeurs vides dans le cache : c'est à ça que sert la variale $include_empty.
+                self::$cache[$cache_key] = array(0 => ""); // => Normalement on ne doit jamais inclure de valeurs vides dans le cache : c'est à ça que sert la variale $include_empty.
                 $where = '`fk_soc` = ' . (int) $id_societe;
                 $rows = self::getBdb()->getRows('socpeople', $where, null, 'array', array('rowid', 'firstname', 'lastname'));
                 if (!is_null($rows)) {

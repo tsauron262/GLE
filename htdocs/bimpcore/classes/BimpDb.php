@@ -158,7 +158,7 @@ class BimpDb
         return false;
     }
 
-    public function getRows($table, $where = '1', $limit = null, $return = 'object', $fields = null, $order_by = null, $order_way = null)
+    public function getRows($table, $where = '1', $limit = null, $return = 'object', $fields = null, $order_by = null, $order_way = null, $joins = array())
     {
         $sql = 'SELECT ';
 
@@ -170,17 +170,33 @@ class BimpDb
                 } else {
                     $fl = false;
                 }
-                $sql .= '`' . $field . '`';
+
+                if (!preg_match('/\./', $field)) {
+                    $sql .= '`' . $field . '`';
+                } else {
+                    $sql .= $field;
+                }
             }
         } else {
             $sql .= '*';
         }
 
         $sql .= ' FROM ' . MAIN_DB_PREFIX . $table;
+
+        foreach ($joins as $join) {
+            $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . $join['table'] . ' ' . $join['alias'];
+            $sql .= ' ON ' . $join['on'];
+        }
+
         $sql .= ' WHERE ' . $where;
 
         if (!is_null($order_by)) {
-            $sql .= ' ORDER BY `' . $order_by . '`';
+            $sql .= ' ORDER BY ';
+            if (!preg_match('/\./', $order_by)) {
+                $sql .= '`' . $order_by . '`';
+            } else {
+                $sql .= $order_by;
+            }
             if (!is_null($order_way)) {
                 $sql .= strtoupper($order_way);
             }

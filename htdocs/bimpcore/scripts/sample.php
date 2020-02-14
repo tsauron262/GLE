@@ -26,20 +26,39 @@ if (!$user->admin) {
 }
 
 $bdb = new BimpDb($db);
+$where = '';
+$rows = $bdb->getRows('table', $where, null, 'array', null, 'rowid', 'desc');
 
 if (!(int) BimPTools::getValue('exec', 0)) {
     echo 'Desc <br/>';
 
-    $path = pathinfo(__FILE__);
-    echo '<a href="' . DOL_URL_ROOT . '/bimpcore/scripts/' . $path['basename'] . '?exec=1" class="btn btn-default">';
-    echo 'Lancer';
-    echo '</a>';
+    if (is_array($rows) && count($rows)) {
+        echo count($rows) . ' élément(s) à traiter <br/><br/>';
+
+        $path = pathinfo(__FILE__);
+        echo ' <a href="' . DOL_URL_ROOT . '/bimpcore/scripts/' . $path['basename'] . '?exec=1&test=1" class="btn btn-default">';
+        echo 'Test';
+        echo '</a>';
+        echo ' <a href="' . DOL_URL_ROOT . '/bimpcore/scripts/' . $path['basename'] . '?exec=1&test_one=1" class="btn btn-default">';
+        echo 'Executer une entrée';
+        echo '</a>';
+        echo '<a href="' . DOL_URL_ROOT . '/bimpcore/scripts/' . $path['basename'] . '?exec=1" class="btn btn-default">';
+        echo 'Tout éxécuter';
+        echo '</a>';
+    }
+
+    echo BimpRender::renderAlerts('Aucun élément à traiter', 'info');
     exit;
 }
 
-// Corps du script
+$test = (int) BimpTools::getValue('test', 0);
+$test_one = (int) BimpTools::getValue('test_one', 0);
 
-
+foreach ($rowd as $r) {
+    if ($test_one) {
+        break;
+    }
+}
 
 echo '<br/>FIN';
 

@@ -95,6 +95,18 @@ objects:
             id_object:
                 field_value: fk_commercial_signature
     
+    entrepot: 
+        instance: 
+            id_object:
+                field_value: entrepot
+    
+    client_facturation:
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: Bimp_Societe
+            id_object:
+                field_value: fk_soc_facturation
 
 table: contrat
 controller: contrat
@@ -221,6 +233,21 @@ fields:
         required: 1
         values:
             array: objet_contrat
+    entrepot:
+        label: Entrepôt
+        dol_extra_field: 1
+        type: id_object
+        object: entrepot
+        required: 1
+        input: 
+            type: search_entrepot
+    
+    fk_soc_facturation:
+        label: Client pour facturation
+        type: id_object
+        object: client_facturation
+        input:
+            type: search_societe
         
     fk_commercial_signature:
         label: Commercial signataire
@@ -273,6 +300,9 @@ fields_tables:
               edit: 0
             - field: objet_contrat
               edit: 0
+            - field: entrepot
+              display: nom_url
+              edit: 0
             - label: Contrat initial
               value:
                   callback: getContratSource
@@ -317,6 +347,8 @@ fields_tables:
         panel: 0
         rows: 
             - field: fk_soc
+              display: card
+            - field: fk_soc_facturation
               display: card
             - field: note_public
             - field: note_private
@@ -501,8 +533,10 @@ forms:
               edit: 0
             - field: ref_ext
             - field: objet_contrat
+            - field: entrepot
             - field: fk_soc
               edit: 0
+            - field: fk_soc_facturation
             - field: date_start
             - field: duree_mois
             - field: periodicity

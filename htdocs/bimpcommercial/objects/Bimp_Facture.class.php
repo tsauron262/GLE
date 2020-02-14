@@ -42,7 +42,7 @@ class Bimp_Facture extends BimpComm
         1 => array('label' => 'Pret pour relance'),
         2 => array('label' => 'Relancée'),
         9 => array('label' => 'Abandon relance'),
-        99 => array('label' => 'Succée relance')
+        99 => array('label' => 'Succés relance')
     );
 
     // Gestion des droits: 

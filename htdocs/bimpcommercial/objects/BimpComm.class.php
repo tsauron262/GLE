@@ -36,7 +36,7 @@ class BimpComm extends BimpDolObject
         12 => 'an'
     );
     public static $exportedStatut = [
-        0   => ['label' => 'Non traitée en comptabilitée', 'classes' => ['danger'], 'icon' => 'times'],
+        0   => ['label' => 'Non traitée en comptabilité', 'classes' => ['danger'], 'icon' => 'times'],
         1   => ['label' => 'Comptabilisée', 'classes' => ['success'], 'icon' => 'check'],
         102 => ['label' => 'Comptabilisation suspendue', 'classes' => ['important'], 'icon' => 'refresh'],
         204 => ['label' => 'Non comptabilisable', 'classes' => ['warning'], 'icon' => 'times'],

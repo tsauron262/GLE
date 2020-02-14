@@ -17,6 +17,7 @@ class BContract_contrat extends BimpDolObject {
     CONST CONTRAT_STATUS_SIGNED = 10;
     CONST CONTRAT_STATUS_ACTIVER = 11;
     // Les périodicitées
+    CONST CONTRAT_PERIOD_AUCUNE = 0;
     CONST CONTRAT_PERIOD_MENSUELLE = 1;
     CONST CONTRAT_PERIOD_TRIMESTRIELLE = 3;
     CONST CONTRAT_PERIOD_SEMESTRIELLE = 6;
@@ -55,10 +56,12 @@ class BContract_contrat extends BimpDolObject {
         self::CONTRAT_DENOUNCE_OUI_HORS_DELAIS => Array('label' => 'OUI, HORS DELAIS', 'classes' => Array('danger'), 'icon' => 'fas_times'),
     );
     public static $period = Array(
+        
         self::CONTRAT_PERIOD_MENSUELLE => 'Mensuelle',
         self::CONTRAT_PERIOD_TRIMESTRIELLE => 'Trimestrielle',
         self::CONTRAT_PERIOD_SEMESTRIELLE => 'Semestrielle',
-        self::CONTRAT_PERIOD_ANNUELLE => 'Annuelle'
+        self::CONTRAT_PERIOD_ANNUELLE => 'Annuelle',
+        self::CONTRAT_PERIOD_AUCUNE => 'Aucune',
     );
     public static $gti = Array(
         self::CONTRAT_DELAIS_0_HEURES => '',
@@ -397,6 +400,7 @@ class BContract_contrat extends BimpDolObject {
     public function actionReopen() {
         // Fonction temporaire pour le moment TODO a modifier
         $this->updateField('statut', 0);
+        $this->addLog('Contrat ré-ouvert');
         //$sql = "DELETE FROM llx_bcontract_prelevement WHERE id_contrat = " . $this->id;
 
         $this->db->delete('bcontract_prelevement', 'id_contrat = ' . $this->id);
@@ -429,7 +433,7 @@ class BContract_contrat extends BimpDolObject {
 
             if ($status == self::CONTRAT_STATUS_VALIDE || $status == self::CONTRAT_STATUS_ACTIVER) {
 
-                if ($user->rights->contrat->desactiver) {
+                if ($user->rights->contrat->desactiver && $status == self::CONTRAT_STATUS_ACTIVER) {
 
                     $buttons[] = array(
                         'label' => 'Clôre le contrat',
@@ -644,22 +648,43 @@ class BContract_contrat extends BimpDolObject {
             $ref = $this->getData('ref');
         }
 
-        if ($this->getData('contrat_source') && $this->getData('ref_ext')) {
-            $annule_remplace = $this->getInstance('bimpcontract', 'BContract_contrat');
-            if ($annule_remplace->find(['ref' => $this->getData('ref_ext')])) {
-                if ($annule_remplace->dol_object->closeAll($user)) {
-                    $annule_remplace->updateField('statut', self::CONTRAT_STATUS_CLOS);
-                } else {
-                    return "Impossible de fermé les lignes du contrat annulé et remplacé";
-                }
-            } else {
-                return "Impossible de charger le contrat annulé et remplacé";
-            }
+        $have_serial = false;
+        $serials = [];
+        
+        $contrat_lines = $this->getInstance('bimpcontract', 'BContract_contratLine');
+        $lines = $contrat_lines->getList(['fk_contrat' => $this->id]);
+        
+        foreach($lines as $line) {
+            
+          $serials = json_decode($line['serials']);
+          
+          if(count($serials))
+              $have_serial = true;
+ 
         }
+                
+        if(!$have_serial)
+            return "Il doit y avoir au moin un numéro de série dans une des lignes du contrat";
+        if(!$this->getData('entrepot'))
+            return "Le contrat ne peut être validé sans entrepot";
 
-        if ($this->dol_object->validate($user, $ref) <= 0) {
+        if ($this->dol_object->validate($user, $ref) > 0) {
+            if ($this->getData('contrat_source') && $this->getData('ref_ext')) {
+                $annule_remplace = $this->getInstance('bimpcontract', 'BContract_contrat');
+                if ($annule_remplace->find(['ref' => $this->getData('ref_ext')])) {
+                    if ($annule_remplace->dol_object->closeAll($user)) {
+                        $annule_remplace->updateField('statut', self::CONTRAT_STATUS_CLOS);
+                    } else {
+                        return "Impossible de fermé les lignes du contrat annulé et remplacé";
+                    }
+                } else {
+                    return "Impossible de charger le contrat annulé et remplacé";
+                }
+            }
             $this->addLog('Contrat validé');
-            $success = 'Le contrat ' . $ref;
+            $success = 'Le contrat ' . $ref . " à été validé avec succès";
+            return 1;
+        } else {
             $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object));
             return 0;
         }
@@ -982,7 +1007,7 @@ class BContract_contrat extends BimpDolObject {
             $instance = $this->getInstance('bimpcontract', 'BContract_echeancier');
 
             if ($this->getData('statut') != self::CONTRAT_STATUS_ACTIVER && !$instance->find(['id_contrat' => $this->id])) {
-                return BimpRender::renderAlerts('Le contrat n\'est pas activer', 'danger', false);
+                return BimpRender::renderAlerts('Le contrat n\'est pas activé', 'danger', false);
             }
             if (!$this->getData('date_start') || !$this->getData('periodicity') || !$this->getData('duree_mois')) {
                 return BimpRender::renderAlerts("Le contrat a été créé avec l'ancienne méthode donc il ne comporte pas d'échéancier", 'warning', false);
@@ -1234,8 +1259,12 @@ class BContract_contrat extends BimpDolObject {
     public function createFromPropal($propal, $data) {
         //print_r($data); die();
         global $user;
+        
+        $commercial_for_entrepot = $this->getInstance('bimpcore', 'Bimp_User', $data['commercial_suivi']);
+
         $new_contrat = BimpObject::getInstance('bimpcontract', 'BContract_contrat');
         $new_contrat->set('fk_soc', $data['fk_soc']);
+        $new_contrat->set('entrepot', ($commercial_for_entrepot->getData('defaultentrepot')) ? $commercial_for_entrepot->getData('defaultentrepot') : null);
         $new_contrat->set('date_contrat', null);
         $new_contrat->set('date_start', $data['valid_start']);
         $new_contrat->set('objet_contrat', $data['objet_contrat']);

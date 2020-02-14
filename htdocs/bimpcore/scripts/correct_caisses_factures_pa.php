@@ -45,6 +45,8 @@ $where .= 'AND fl.qty < 0 AND fl.buy_price_ht = 0';
 
 $rows = $bdb->getRows('facturedet fl', $where, null, 'array', array('fl.*', 'f.datec'), 'fl.rowid', 'desc', $joins);
 
+echo $bdb->db->lasterror();
+
 if (!(int) BimPTools::getValue('exec', 0)) {
     echo 'Corrige les PA à 0 des factures pour les retours en caisse.<br/>';
 

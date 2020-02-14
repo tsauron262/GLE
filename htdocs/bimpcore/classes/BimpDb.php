@@ -198,7 +198,7 @@ class BimpDb
                 $sql .= $order_by;
             }
             if (!is_null($order_way)) {
-                $sql .= strtoupper($order_way);
+                $sql .= ' ' . strtoupper($order_way);
             }
         }
 

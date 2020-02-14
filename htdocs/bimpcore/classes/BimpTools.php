@@ -1105,9 +1105,9 @@ class BimpTools
                     }
                     $sql .= ' LIKE \'';
                     switch ($filter['part_type']) {
-                        case 'full': 
+                        case 'full':
                             break;
-                        
+
                         case 'beginning':
                             $sql .= $filter['part'] . '%';
                             break;
@@ -1936,6 +1936,32 @@ class BimpTools
         return $max_depth;
     }
 
+    public static function implodeWithQuotes($array, $delimiter = ',')
+    {
+        $str = '';
+
+        if (is_array($array)) {
+            foreach ($array as $value) {
+                $str .= ($str ? $delimiter : '') . "'" . $value . "'";
+            }
+        }
+
+        return $str;
+    }
+
+    public static function implodeArrayKeys($array, $delimiter = ',', $with_quotes = false)
+    {
+        $str = '';
+
+        if (is_array($array)) {
+            foreach ($array as $key => $value) {
+                $str .= ($str ? $delimiter : '') . ($with_quotes ? "'" : '') . $key . ($with_quotes ? "'" : '');
+            }
+        }
+
+        return $str;
+    }
+
     // Divers:
 
     public static function getContext()
@@ -2301,40 +2327,41 @@ class BimpTools
 
         return "admin@bimp.fr";
     }
-    
-    
-    public static function mailGrouper($to, $from, $msg){
-        $dir = DOL_DATA_ROOT."/bimpcore/mailsGrouper/";
-        if(!is_dir($dir))
+
+    public static function mailGrouper($to, $from, $msg)
+    {
+        $dir = DOL_DATA_ROOT . "/bimpcore/mailsGrouper/";
+        if (!is_dir($dir))
             mkdir($dir);
-        if(!is_dir($dir))
+        if (!is_dir($dir))
             return false;
-        $msg = "<br/><br/>". dol_print_date(dol_now(), '%d/%m/%Y %H:%M:%S')." : ". $msg;
-        $file = $dir.$to;
-            $file .= "$".$from;
+        $msg = "<br/><br/>" . dol_print_date(dol_now(), '%d/%m/%Y %H:%M:%S') . " : " . $msg;
+        $file = $dir . $to;
+        $file .= "$" . $from;
         $file .= "$.txt";
         file_put_contents($file, $msg, FILE_APPEND);
     }
-    
-    public static function envoieMailGrouper(){
-        $dir = DOL_DATA_ROOT."/bimpcore/mailsGrouper/";
-        if(!is_dir($dir))
+
+    public static function envoieMailGrouper()
+    {
+        $dir = DOL_DATA_ROOT . "/bimpcore/mailsGrouper/";
+        if (!is_dir($dir))
             mkdir($dir);
-        if(!is_dir($dir))
+        if (!is_dir($dir))
             return false;
         $files = scandir($dir);
         $i = 0;
-        foreach($files as $file){
+        foreach ($files as $file) {
             $tabInfo = explode("$", $file);
-            if(isset($tabInfo[2])){
-                $msg = file_get_contents($dir.$file);
-                if(mailSyn2("Infos grouper Bimp-ERP", $tabInfo[0], $tabInfo[1], $msg)){
-                    unlink ($dir.$file);
+            if (isset($tabInfo[2])) {
+                $msg = file_get_contents($dir . $file);
+                if (mailSyn2("Infos grouper Bimp-ERP", $tabInfo[0], $tabInfo[1], $msg)) {
+                    unlink($dir . $file);
                     $i++;
                 }
             }
         }
         $this->resprints = "OK " . $i . ' mails';
-        return $i.' mails envoyés';
+        return $i . ' mails envoyés';
     }
 }

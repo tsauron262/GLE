@@ -48,6 +48,12 @@ class Bimp_Paiement extends BimpObject
         return $this->canEdit();
     }
 
+    public static function canCreateVirement()
+    {
+        global $user;
+        return ($user->rights->bimpcommercial->adminPaiement ? 1 : 0);
+    }
+
     // Getters booléens: 
 
     public function isNormalementEditable($force_edit = false, &$errors = array())
@@ -1015,6 +1021,8 @@ class Bimp_Paiement extends BimpObject
             $errors[] = 'Mode paiement invalide';
         } elseif (!$use_caisse && $type_paiement === 'LIQ') {
             $errors[] = 'Le réglement en espèce n\'est possible que pour un paiement en caisse';
+        } elseif ($type_paiement === 'VIR' && !$this->canCreateVirement()) {
+            $errors[] = 'Vous n\'avez pas la permission d\'enregistrer des paiements par virement';
         }
 
         if (count($errors)) {

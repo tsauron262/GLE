@@ -9,13 +9,16 @@ Validation ventes en caisse:
 - Retours: VENTE{id_vente}_RET{id_retour}
 
 Nouvel emplacement (Code MVT non défini)
-EQ{id_equipment}_PLACE{id_place}
+- EQ{id_equipment}_PLACE{id_place}
+
+Suppr. équipement:
+- EQ{id_equipment}_SUPPR
 
 RECEPTION COMMANDE FOURN: 
-'CMDF{id_commande_fourn}_LN{id_bimp_line}_RECEP{id_reception}
+- 'CMDF{id_commande_fourn}_LN{id_bimp_line}_RECEP{id_reception}
 
 ANNULATION RECEPTION COMMANDE FOURN: 
-ANNUL_CMDF{id_commande_fourn}_LN{id_bimp_commande_line}_RECEP{id_reception}
+- ANNUL_CMDF{id_commande_fourn}_LN{id_bimp_commande_line}_RECEP{id_reception}
 
 Packages: 
 - Ajout produit: PACKAGE{id_package}_ADD

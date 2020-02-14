@@ -136,6 +136,112 @@ class BL_CommandeShipment extends BimpObject
         return (int) parent::canSetAction($action);
     }
 
+    // Getters params: 
+
+    public function getExtraBtn()
+    {
+        $buttons = array();
+
+        if ($this->isLoaded()) {
+
+            $commande = $this->getParentInstance();
+
+            if ((int) $this->getData('status') !== self::BLCS_ANNULEE) {
+                $buttons[] = array(
+                    'label'   => 'Produits / services inclus',
+                    'icon'    => 'fas_list',
+                    'onclick' => $this->getJsLoadModalView('lines', 'Expédition n°' . $this->getData('num_livraison') . ': produits / services inclus')
+                );
+            }
+
+            $reload_commande_header_callback = '';
+            if (BimpObject::objectLoaded($commande)) {
+                $reload_commande_header_callback = 'function() {reloadObjectHeader(' . $commande->getJsObjectData() . ')}';
+            }
+
+            if ($this->isActionAllowed('validateShipment')) {
+                $buttons[] = array(
+                    'label'   => 'Expédier',
+                    'icon'    => 'fas_sign-out-alt',
+                    'onclick' => $this->getJsActionOnclick('validateShipment', array(), array(
+                        'form_name'        => 'validation',
+                        'success_callback' => $reload_commande_header_callback
+                    ))
+                );
+            }
+
+            if ($this->isActionAllowed('cancelShipment')) {
+                $buttons[] = array(
+                    'label'   => 'Annuler l\'expédition',
+                    'icon'    => 'fas_times-circle',
+                    'onclick' => $this->getJsActionOnclick('cancelShipment', array(), array(
+                        'confirm_msg'      => 'Veuillez confirmer l\\\'annulation de l\\\'expédition. Cette opération est irréversible',
+                        'success_callback' => $reload_commande_header_callback
+                    ))
+                );
+            }
+
+            if ($this->isActionAllowed('createFacture') && $this->canSetAction('createFacture')) {
+                if (BimpObject::objectLoaded($commande)) {
+                    $cliFact = $commande->getClientFacture();
+                    if (!is_null($cliFact) && $cliFact->isLoaded())
+                        $idCliFact = $cliFact->id;
+                    else
+                        $idCliFact = $this->getIdClient();
+                    $buttons[] = array(
+                        'label'   => 'Créer une facture',
+                        'icon'    => 'fas_file-medical',
+                        'onclick' => $this->getJsActionOnclick('createFacture', array(
+                            'id_client'      => (int) $idCliFact,
+                            'id_contact'     => (int) $this->getcontact(),
+                            'libelle'        => addslashes(htmlentities($commande->getData('libelle'))),
+                            'cond_reglement' => (int) $commande->getData('fk_cond_reglement'),
+                            'note_public'    => addslashes(htmlentities($commande->getData('note_public'))),
+                            'note_private'   => addslashes(htmlentities($commande->getData('note_private')))
+                                ), array(
+                            'form_name'        => 'facture',
+                            'on_form_submit'   => 'function($form, extra_data) { return onShipmentFactureFormSubmit($form, extra_data); } ',
+                            'success_callback' => $reload_commande_header_callback
+                        ))
+                    );
+                }
+            } elseif ($this->isActionAllowed('editFacture') && $this->canSetAction('editFacture')) {
+                $buttons[] = array(
+                    'label'   => 'Editer la facture',
+                    'icon'    => 'fas_file-signature',
+                    'onclick' => $this->getJsActionOnclick('editFacture', array(), array(
+                        'form_name'        => 'facture_edit',
+                        'on_form_submit'   => 'function($form, extra_data) { return onShipmentFactureFormSubmit($form, extra_data); } ',
+                        'success_callback' => $reload_commande_header_callback
+                    ))
+                );
+            }
+
+            if ($this->isActionAllowed('generateVignettes')) {
+                $buttons[] = array(
+                    'label'   => 'Générer des vigettes',
+                    'icon'    => 'fas_sticky-note',
+                    'onclick' => $this->getJsActionOnclick('generateVignettes', array(), array(
+                        'form_name' => 'vignettes'
+                    ))
+                );
+            }
+        }
+
+        return $buttons;
+    }
+
+    public function getCommandesListbulkActions()
+    {
+        return array(
+            array(
+                'label'   => 'Créer une facture unique',
+                'icon'    => 'far_file-alt',
+                'onclick' => 'setSelectedObjectsAction($(this), \'list_id\', \'createBulkFacture\', {}, \'bulk_facture\', null, true, function($form, extra_data) {return onShipmentsBulkFactureFormSubmit($form, extra_data);})'
+            )
+        );
+    }
+
     // Getters Filtres: 
 
     public function getCustomFilterValueLabel($field_name, $value)
@@ -298,110 +404,6 @@ class BL_CommandeShipment extends BimpObject
         return 0;
     }
 
-    public function getExtraBtn()
-    {
-        $buttons = array();
-
-        if ($this->isLoaded()) {
-
-            $commande = $this->getParentInstance();
-
-            if ((int) $this->getData('status') !== self::BLCS_ANNULEE) {
-                $buttons[] = array(
-                    'label'   => 'Produits / services inclus',
-                    'icon'    => 'fas_list',
-                    'onclick' => $this->getJsLoadModalView('lines', 'Expédition n°' . $this->getData('num_livraison') . ': produits / services inclus')
-                );
-            }
-
-            $reload_commande_header_callback = '';
-            if (BimpObject::objectLoaded($commande)) {
-                $reload_commande_header_callback = 'function() {reloadObjectHeader(' . $commande->getJsObjectData() . ')}';
-            }
-
-            if ($this->isActionAllowed('validateShipment')) {
-                $buttons[] = array(
-                    'label'   => 'Expédier',
-                    'icon'    => 'fas_sign-out-alt',
-                    'onclick' => $this->getJsActionOnclick('validateShipment', array(), array(
-                        'form_name'        => 'validation',
-                        'success_callback' => $reload_commande_header_callback
-                    ))
-                );
-            }
-
-            if ($this->isActionAllowed('cancelShipment')) {
-                $buttons[] = array(
-                    'label'   => 'Annuler l\'expédition',
-                    'icon'    => 'fas_times-circle',
-                    'onclick' => $this->getJsActionOnclick('cancelShipment', array(), array(
-                        'confirm_msg'      => 'Veuillez confirmer l\\\'annulation de l\\\'expédition. Cette opération est irréversible',
-                        'success_callback' => $reload_commande_header_callback
-                    ))
-                );
-            }
-
-            if ($this->isActionAllowed('createFacture') && $this->canSetAction('createFacture')) {
-                if (BimpObject::objectLoaded($commande)) {
-                    $cliFact = $commande->getClientFacture();
-                    if (!is_null($cliFact) && $cliFact->isLoaded())
-                        $idCliFact = $cliFact->id;
-                    else
-                        $idCliFact = $this->getIdClient();
-                    $buttons[] = array(
-                        'label'   => 'Créer une facture',
-                        'icon'    => 'fas_file-medical',
-                        'onclick' => $this->getJsActionOnclick('createFacture', array(
-                            'id_client'      => (int) $idCliFact,
-                            'id_contact'     => (int) $this->getcontact(),
-                            'libelle'        => addslashes(htmlentities($commande->getData('libelle'))),
-                            'cond_reglement' => (int) $commande->getData('fk_cond_reglement'),
-                            'note_public'    => addslashes(htmlentities($commande->getData('note_public'))),
-                            'note_private'   => addslashes(htmlentities($commande->getData('note_private')))
-                                ), array(
-                            'form_name'        => 'facture',
-                            'on_form_submit'   => 'function($form, extra_data) { return onShipmentFactureFormSubmit($form, extra_data); } ',
-                            'success_callback' => $reload_commande_header_callback
-                        ))
-                    );
-                }
-            } elseif ($this->isActionAllowed('editFacture') && $this->canSetAction('editFacture')) {
-                $buttons[] = array(
-                    'label'   => 'Editer la facture',
-                    'icon'    => 'fas_file-signature',
-                    'onclick' => $this->getJsActionOnclick('editFacture', array(), array(
-                        'form_name'        => 'facture_edit',
-                        'on_form_submit'   => 'function($form, extra_data) { return onShipmentFactureFormSubmit($form, extra_data); } ',
-                        'success_callback' => $reload_commande_header_callback
-                    ))
-                );
-            }
-
-            if ($this->isActionAllowed('generateVignettes')) {
-                $buttons[] = array(
-                    'label'   => 'Générer des vigettes',
-                    'icon'    => 'fas_sticky-note',
-                    'onclick' => $this->getJsActionOnclick('generateVignettes', array(), array(
-                        'form_name' => 'vignettes'
-                    ))
-                );
-            }
-        }
-
-        return $buttons;
-    }
-
-    public function getCommandesListbulkActions()
-    {
-        return array(
-            array(
-                'label'   => 'Créer une facture unique',
-                'icon'    => 'far_file-alt',
-                'onclick' => 'setSelectedObjectsAction($(this), \'list_id\', \'createBulkFacture\', {}, \'bulk_facture\', null, true, function($form, extra_data) {return onShipmentsBulkFactureFormSubmit($form, extra_data);})'
-            )
-        );
-    }
-
     public function getName()
     {
         return 'Expédition n°' . $this->getData('num_livraison');
@@ -557,12 +559,29 @@ class BL_CommandeShipment extends BimpObject
             case 'id_client':
                 $id_client = 0;
                 foreach ($commandes as $id_commande => $commande) {
-                    if ($id_client && $id_client !== (int) $commande->getData('fk_soc')) {
+                    $id_client_comm = (int) $commande->getData('id_client_facture');
+                    if (!$id_client_comm) {
+                        $id_client_comm = (int) $commande->getData('fk_soc');
+                    }
+                    if ($id_client && $id_client_comm && $id_client !== $id_client_comm) {
                         return 0;
                     }
-                    $id_client = (int) $commande->getData('fk_soc');
+                    $id_client = (int) $id_client_comm;
                 }
                 return $id_client;
+
+            case 'id_contact':
+                $id_contact = 0;
+                foreach ($commandes as $id_commande => $commande) {
+                    $id_comm_contact = (int) $commande->getIdContact('external', 'BILLING');
+                    if ($id_contact && $id_comm_contact && $id_contact != $id_comm_contact) {
+                        return 0;
+                    }
+                    if ($id_comm_contact) {
+                        $id_contact = $id_comm_contact;
+                    }
+                }
+                return $id_contact;
 
             case 'id_entrepot':
                 $id_entrepot = 0;
@@ -624,6 +643,17 @@ class BL_CommandeShipment extends BimpObject
         }
 
         return '';
+    }
+
+    public function getBulkFactureClientContactsArray()
+    {
+        $id_client = $this->getBulkFactureValue('id_client');
+
+        if ($id_client) {
+            return self::getSocieteContactsArray($id_client, false);
+        }
+
+        return array();
     }
 
     // Affichages: 

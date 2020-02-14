@@ -3811,8 +3811,13 @@ class BimpComm extends BimpDolObject
             $errors[] = 'Date de paiement absent';
         }
 
-        if ($data['id_mode_paiement'] == 'VIR' && is_null($data['bank_account'])) {
-            $errors[] = "Le compte banqaire est obligatoire pour un virement bancaire";
+        if ($data['id_mode_paiement'] == 'VIR') {
+            BimpObject::loadClass('bimpcommercial', 'Bimp_Paiement');
+            if (!Bimp_Paiement::canCreateVirement()) {
+                $errors[] = 'Vous n\'avez pas la permission d\'enregistrer des paiements par virement';
+            } elseif (!$id_bank_account) {
+                $errors[] = "Le compte banqaire est obligatoire pour un virement bancaire";
+            }
         }
 
         if (!$id_mode_paiement) {

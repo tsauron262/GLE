@@ -5,6 +5,10 @@ icon: fas_boxes
 header_list_name: default
 header_edit_form: default
 
+
+header_btn: 
+    callback: getActionsButtons
+
 list_page_url: 
     controller: index
     url_params: 

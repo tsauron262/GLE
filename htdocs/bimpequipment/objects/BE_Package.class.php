@@ -1486,4 +1486,25 @@ class BE_Package extends BimpObject
 
         return parent::create($warnings, $force_create);
     }
+    
+    
+    public function getActionsButtons(){
+        $filters = $joins = array();
+        $filters['bimp_origin'] = 'package';
+        $filters['bimp_id_origin'] = $this->id;
+        $pp = BimpObject::getInstance('bimpcore', 'BimpProductMouvement');
+        $onclick = $pp->getJsLoadModalList('default', array(
+                'title'         => 'Détail mouvements package '.$this->getNomUrl(),
+                'extra_filters' => $filters,
+                'extra_joins'   => $joins
+            ));
+
+        $buttons[] = array(
+            'label'   => 'Détail mouvements',
+            'icon'    => 'fas_bars',
+            'onclick' => $onclick
+        );
+        
+        return $buttons;
+    }
 }

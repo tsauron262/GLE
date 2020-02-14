@@ -981,7 +981,7 @@ class BContract_contrat extends BimpDolObject {
         if ($this->isLoaded()) {
             $instance = $this->getInstance('bimpcontract', 'BContract_echeancier');
 
-            if ($this->getData('statut') < self::CONTRAT_STATUS_ACTIVER || $instance->find(['id_contrat' => $this->id])) {
+            if ($this->getData('statut') < self::CONTRAT_STATUS_ACTIVER && $instance->find(['id_contrat' => $this->id])) {
                 return BimpRender::renderAlerts('Le contrat n\'est pas activer', 'danger', false);
             }
             if (!$this->getData('date_start') || !$this->getData('periodicity') || !$this->getData('duree_mois')) {

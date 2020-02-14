@@ -105,8 +105,9 @@ foreach ($rows as $r) {
                     } else {
                         echo ' OK';
                     }
-                    echo '<br/>';
                 }
+                
+                echo '<br/>';
             }
         }
     } else {

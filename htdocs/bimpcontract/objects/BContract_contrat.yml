@@ -302,11 +302,9 @@ fields_tables:
               edit: 0
             - field: entrepot
               display: nom_url
-              edit: 1
             - label: Contrat initial
               value:
                   callback: getContratSource
-              edit: 0
             - field: date_start
               edit: 0
             - label: Date prochaine facture

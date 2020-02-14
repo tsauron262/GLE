@@ -302,7 +302,7 @@ fields_tables:
               edit: 0
             - field: entrepot
               display: nom_url
-              edit: 0
+              edit: 1
             - label: Contrat initial
               value:
                   callback: getContratSource

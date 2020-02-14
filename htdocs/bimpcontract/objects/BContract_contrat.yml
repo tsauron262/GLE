@@ -338,8 +338,8 @@ lists:
         sort_field: datec
         sort_way: desc
         n: 20
-        add_form_name: add_contrat
-        add_btn_label: Créer un nouveau contrat
+#        add_form_name: add_contrat
+#        add_btn_label: Créer un nouveau contrat
         edit_btn: 1
         edit_form: edit_contrat
         delete_btn: 0

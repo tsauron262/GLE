@@ -258,6 +258,9 @@ fields:
     fk_user_cloture:
         label: Clos par
         type: int
+    logs:
+        label: Logs contrat
+        type: text
 
 fields_tables:
     infos:
@@ -317,6 +320,7 @@ fields_tables:
               display: card
             - field: note_public
             - field: note_private
+            - field: logs
    
               
                               

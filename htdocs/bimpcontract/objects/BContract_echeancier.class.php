@@ -138,11 +138,11 @@ class BContract_echeancier extends BimpObject {
         $propal = $this->getInstance('bimpcommercial', 'Bimp_Propal', $linked_propal);
         $ef_type = ($propal->getData('ef_type') == "E") ? 'CTE': 'CTC';
         $instance = $this->getInstance('bimpcommercial', 'Bimp_Facture');
-        $instance->set('fk_soc', $parent->getData('fk_soc'));
+        $instance->set('fk_soc', ($parent->getData('fk_soc_facturation')) ? $parent->getData('fk_soc_facturation') : $parent->getData('fk_soc'));
         $instance->set('libelle', 'Facture du contrat N°' . $parent->getData('ref'));
         $instance->set('type', 0);
         $instance->set('fk_account', 1);
-        $instance->set('entrepot', $propal->getData('entrepot'));
+        $instance->set('entrepot', ($parent->getData('entrepot')) ? $parent->getData('entrepot') : $propal->getData('entrepot'));
         $instance->set('fk_cond_reglement', ($client->getData('cond_reglement')) ? $client->getData('cond_reglement') : 2);
         $instance->set('fk_mode_reglement', ($parent->getData('moderegl')) ? $parent->getData('moderegl') : 2);
         $instance->set('datef', date('Y-m-d H:i:s'));
@@ -253,7 +253,7 @@ class BContract_echeancier extends BimpObject {
                 if ($facture->getData('fk_statut') == 0) {
                     $can_create_next_facture = false;
                 }
-                $paye = ($facture->getData('paye') == 1) ? '<b class="success" >Payer</b>' : '<b class="danger" >Impayer</b>';
+                $paye = ($facture->getData('paye') == 1) ? '<b class="success" >Payée</b>' : '<b class="danger" >Impayée</b>';
                 $html .= '<tr class="objectListItemRow" >';
                 $dateDebut = New DateTime();
                 $dateFin = New DateTime();

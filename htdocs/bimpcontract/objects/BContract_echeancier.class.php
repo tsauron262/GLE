@@ -142,7 +142,7 @@ class BContract_echeancier extends BimpObject {
         $instance->set('libelle', 'Facture du contrat N°' . $parent->getData('ref'));
         $instance->set('type', 0);
         $instance->set('fk_account', 1);
-        $instance->set('entrepot', 50);
+        $instance->set('entrepot', $propal->getData('entrepot'));
         $instance->set('fk_cond_reglement', ($client->getData('cond_reglement')) ? $client->getData('cond_reglement') : 2);
         $instance->set('fk_mode_reglement', ($parent->getData('moderegl')) ? $parent->getData('moderegl') : 2);
         $instance->set('datef', date('Y-m-d H:i:s'));
@@ -211,16 +211,16 @@ class BContract_echeancier extends BimpObject {
 
     public function displayEcheancier($data) {
         global $user;
-        
+
         if(!$this->isLoaded()) {
-            return BimpRender::renderAlerts("Ce contrat ne comporte pas d'échéancier car il à été facturé par un autre moyen", 'info', false);
+            return BimpRender::renderAlerts("Ce contrat ne comporte pas d'échéancier pour le moment", 'info', false);
         }
         
         $html = '';
         if(!$this->canEdit()) {
             $html = BimpRender::renderAlerts("Ce contrat est clos, aucune facture ne peut être emises", 'info', false);
         }
-        
+
         $instance_facture = $this->getInstance('bimpcommercial', 'Bimp_Facture');
         $parent = $this->getParentInstance();
         $societe = $this->getInstance('bimpcore', "Bimp_Societe", $parent->getData('fk_soc'));

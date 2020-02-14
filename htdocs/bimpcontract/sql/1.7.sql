@@ -1,0 +1,1 @@
+ALTER TABLE `llx_contrat` ADD `fk_soc_facturation` INT(11) DEFAULT NULL;

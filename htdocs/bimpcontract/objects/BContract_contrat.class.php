@@ -605,7 +605,7 @@ class BContract_contrat extends BimpDolObject {
             case 'note_private':
             case 'fk_soc_facturation':
             case 'denounce':
-            case 'fk_commercial_signature':
+            case 'fk_commercial_suivi':
                 return 1;
                 break;
             default:

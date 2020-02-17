@@ -14,6 +14,7 @@ class GSX_Repair extends BimpObject
     public $gsx = null;
     public $gsx_v2 = null;
     public $use_gsx_v2 = false;
+    public $findInGsx = false;
     public static $lookupNumbers = array(
         'serialNumber' => 'Numéro de série',
         'repairNumber' => 'Numéro de réparation (repair #)',
@@ -188,7 +189,16 @@ class GSX_Repair extends BimpObject
         $buttons = array();
 
         if ($this->isLoaded() && $this->use_gsx_v2) {
-            if (!(int) $this->getData('ready_for_pick_up') && !(int) $this->getData('canceled')) {
+            if (!(int) $this->findInGsx && !(int) $this->getData('canceled')) {
+                $confirm = 'Attention, la réparation va être considérée comme annulée. Veuillez confirmer';
+                $onclick = $this->getJsActionOnclick('cancelRepair');
+                $buttons[] = array(
+                    'label'   => 'Classé Annulée',
+                    'icon'    => 'fas_check',
+                    'type'    => 'danger',
+                    'onclick' => $onclick
+                );
+            } elseif (!(int) $this->getData('ready_for_pick_up') && !(int) $this->getData('canceled')) {
                 $confirm = 'Attention, la réparation va être marquée &quote;Ready For Pick up&quote; (prête pour enlèvement) auprès du service GSX d\\\'Apple. Veuillez confirmer';
                 $onclick = $this->getJsGsxAjaxOnClick('gsxRepairAction', array(
                     'id_repair' => (int) $this->id,
@@ -393,6 +403,7 @@ class GSX_Repair extends BimpObject
                 if (!count($errors)) {
                     $data = $this->gsx_v2->repairDetails($repId);
                     if (is_array($data) && !empty($data)) {
+                        $this->findInGsx = true;
                         $this->repairLookUp = $data;
 
                         // Check type: 
@@ -2115,6 +2126,20 @@ class GSX_Repair extends BimpObject
         $success = 'Réparation fermée avec succès';
 
         return $this->close(true, $checkRepair);
+    }
+    
+    public function actionCancelRepair($data, &$success){
+        if ($this->isLoaded()) {
+            $success_callback = '';
+            $success = 'Réparation marqué annulée';
+            $errors = $this->updateField('canceled', "1");
+
+            return array(
+                'errors'           => $errors,
+                'success_callback' => $success_callback
+            );
+        }
+        return 0;
     }
 
     // Overrides: 

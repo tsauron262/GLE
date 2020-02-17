@@ -28,6 +28,11 @@ if (!$user->admin) {
 $bdb = new BimpDb($db);
 
 $joins = array(
+    'bfl' => array(
+        'table' => 'bimp_facture_line',
+        'alias' => 'bfl',
+        'on'    => 'bfl.id_line = fl.rowid'
+    ),
     'f'   => array(
         'table' => 'facture',
         'alias' => 'f',
@@ -37,13 +42,18 @@ $joins = array(
         'table' => 'facture_extrafields',
         'alias' => 'fef',
         'on'    => 'fef.fk_object = fl.fk_facture'
+    ),
+    'p'   => array(
+        'table' => 'product',
+        'alias' => 'p',
+        'on'    => 'p.rowid = fl.fk_product'
     )
 );
 
-$where = 'fef.type = \'M\'';
-$where .= 'AND fl.qty < 0 AND fl.buy_price_ht = 0';
+$where = 'f.datec > \'2019-06-30 23:59:59\'';
+$where .= 'AND fl.qty < 0 AND fl.buy_price_ht = 0 AND bfl.pa_editable = 1 AND fl.fk_product > 0 AND p.no_fixe_prices = 0';
 
-$rows = $bdb->getRows('facturedet fl', $where, null, 'array', array('fl.*', 'f.datec'), 'fl.rowid', 'desc', $joins);
+$rows = $bdb->getRows('facturedet fl', $where, null, 'array', array('fl.*', 'f.datec', 'bfl.id as id_bimp_line'), 'fl.rowid', 'desc', $joins);
 
 if (!(int) BimPTools::getValue('exec', 0)) {
     echo 'Corrige les PA à 0 des factures pour les retours en caisse.<br/>';
@@ -70,35 +80,37 @@ if (!(int) BimPTools::getValue('exec', 0)) {
 $test = (int) BimpTools::getValue('test', 0);
 $test_one = (int) BimpTools::getValue('test_one', 0);
 
-foreach ($rowd as $r) {
-    $facLine = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_FactureLine', array(
-                'id_line' => (int) $r['rowid']
-    ));
+foreach ($rows as $r) {
+    $facLine = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureLine', (int) $r['id_bimp_line']);
 
     if (BimpObject::objectLoaded($facLine)) {
+        echo 'Correction ligne #' . $facLine->id . ' - Fac #' . $r['fk_facture'] . ' ';
+
         $product = $facLine->getProduct();
 
         if (BimpObject::objectLoaded($product)) {
             $pa_ht = (float) $product->getCurrentPaHt(null, true, $r['datec']);
+            $cur_pa_ht = (float) $facLine->getPaWithRevalorisations();
 
-            if ($pa_ht !== (float) $r['buy_price_ht']) {
-                if ($test || $test_one) {
-                    echo 'Correction ligne #' . $facLine->id . ' - Fac #' . $r['fk_facture'] . ': ' . $pa_ht . '<br/>';
-                }
-                
+            if ($pa_ht !== (float) $cur_pa_ht) {
+                echo ' - Nouveau PA: ' . $pa_ht;
                 if (!$test) {
-                    $errors = $facLine->updatePrixAchat($pa_ht);
-                    
-                    if (count($errors)) {
-                        if (!$test_one) {
-                            echo 'Correction ligne #' . $facLine->id . ' - Fac #' . $r['fk_facture'] . ': ' . $pa_ht . ': ';
-                        }
-                        
-                        echo BimpRender::renderAlerts($errors);
-                    }
+                    echo ' MAJ Désactivée';
+//                    $errors = $facLine->updatePrixAchat($pa_ht);
+//
+//                    if (count($errors)) {
+//                        echo BimpRender::renderAlerts($errors);
+//                    } else {
+//                        echo ' - <span class="success">OK</span>';
+//                    }
                 }
+            } else {
+                echo '<span class="success">PA avec reval OK (' . $cur_pa_ht . ')</span>';
             }
+        } else {
+            echo '<span class="danger">Pas de produit</span>';
         }
+        echo '<br/>';
     } else {
         echo '<span class="danger">';
         echo 'BimpFactureLine non trouvée pour la ligne #' . $r['rowid'] . ' (Facture #' . $r['fk_facture'] . ')';

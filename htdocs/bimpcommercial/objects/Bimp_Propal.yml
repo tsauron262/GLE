@@ -43,6 +43,12 @@ objects:
         instance: 
             id_object: 
                 field_value: fk_user_cloture
+    
+    contrat:
+        instance:
+            bimp_object:
+                module: bimpcontract
+                name: BContract_contrat
                 
 fields:
     datec: 
@@ -244,25 +250,24 @@ forms:
             - custom: 1
               label: Périodicitée de facturation
               input_name: periodicity
-              input: 
+              value: 12
+              input:
                   type: select
                   options:
-                      1: Mensuel
-                      3: Trimestriel 
-                      6: Semestriel
-                      12: Annuel
+                      prop:
+                          object: contrat
+                          name: period
+                          is_static: 1
             - custom: 1
               label: Objet du contrat
               input_name: objet_contrat
               input:
                   type: select
                   options:
-                      CT: Contrat global
-                      CMA: Contrat de maintenance
-                      CST: Contrat de support téléphonique
-                      CMO: Contrat de monitoring
-                      CSP: Contrat de spare
-                      CDP: Contrat de délégation du personel
+                      prop:
+                          object: contrat
+                          name: objet_contrat
+                          is_static: 1
             - custom: 1
               label: Delai d'intervention
               input_name: gti
@@ -270,10 +275,10 @@ forms:
               input:
                   type: select
                   options:
-                      0:
-                      4: 4 heures ouvrées
-                      6: 6 heures ouvrées
-                      8: 8 heures ouvrées        
+                      prop:
+                          object: contrat
+                          name: gti
+                          is_static: 1       
             - custom: 1
               label: Renouvellement
               input_name: re_new
@@ -281,11 +286,10 @@ forms:
               input:
                   type: select
                   options:
-                      0: Non
-                      1: Tacite 1 fois
-                      2: Tacite 2 fois
-                      3: Tacite 3 fois
-                      12: Sur proposition
+                      prop:
+                          object: contrat
+                          name: renouvellement
+                          is_static: 1
             - field: fk_mode_reglement
             - custom: 1
               label: Utiliser l'indice SYNTEC
@@ -320,6 +324,21 @@ forms:
               input_name: note_public
               input:
                   type: html
+              value:
+                  callback:
+                      method: getData
+                      params:
+                          - note_public
+            - custom: 1
+              label: Note particulière au contrat
+              input_name: note_private
+              input:
+                  type: html
+              value:
+                  callback:
+                      method: getData
+                      params:
+                          - note_private
             
 fields_tables: 
     infos: 

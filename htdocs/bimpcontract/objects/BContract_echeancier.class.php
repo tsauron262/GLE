@@ -138,11 +138,16 @@ class BContract_echeancier extends BimpObject {
         $propal = $this->getInstance('bimpcommercial', 'Bimp_Propal', $linked_propal);
         $ef_type = ($propal->getData('ef_type') == "E") ? 'CTE': 'CTC';
         $instance = $this->getInstance('bimpcommercial', 'Bimp_Facture');
-        $instance->set('fk_soc', $parent->getData('fk_soc'));
-        $instance->set('libelle', 'Facture périodique du contrat N°' . $parent->getData('ref'));
+        $instance->set('fk_soc', ($parent->getData('fk_soc_facturation')) ? $parent->getData('fk_soc_facturation') : $parent->getData('fk_soc'));
+        $instance->set('libelle', 'Facture du contrat N°' . $parent->getData('ref'));
         $instance->set('type', 0);
         $instance->set('fk_account', 1);
-        $instance->set('entrepot', 50);
+        
+        if(!$parent->getData('entrepot')) {
+            return "La facture ne peut pas être créer car le contrat n'à pas d'entrepot";
+        }
+        
+        $instance->set('entrepot', $parent->getData('entrepot'));
         $instance->set('fk_cond_reglement', ($client->getData('cond_reglement')) ? $client->getData('cond_reglement') : 2);
         $instance->set('fk_mode_reglement', ($parent->getData('moderegl')) ? $parent->getData('moderegl') : 2);
         $instance->set('datef', date('Y-m-d H:i:s'));
@@ -211,16 +216,16 @@ class BContract_echeancier extends BimpObject {
 
     public function displayEcheancier($data) {
         global $user;
-        
+
         if(!$this->isLoaded()) {
-            return BimpRender::renderAlerts("Ce contrat ne comporte pas d'échéancier car il à été facturé par un autre moyen", 'info', false);
+            return BimpRender::renderAlerts("Ce contrat ne comporte pas d'échéancier pour le moment", 'info', false);
         }
         
         $html = '';
         if(!$this->canEdit()) {
             $html = BimpRender::renderAlerts("Ce contrat est clos, aucune facture ne peut être emises", 'info', false);
         }
-        
+
         $instance_facture = $this->getInstance('bimpcommercial', 'Bimp_Facture');
         $parent = $this->getParentInstance();
         $societe = $this->getInstance('bimpcore', "Bimp_Societe", $parent->getData('fk_soc'));
@@ -253,7 +258,7 @@ class BContract_echeancier extends BimpObject {
                 if ($facture->getData('fk_statut') == 0) {
                     $can_create_next_facture = false;
                 }
-                $paye = ($facture->getData('paye') == 1) ? '<b class="success" >Payer</b>' : '<b class="danger" >Impayer</b>';
+                $paye = ($facture->getData('paye') == 1) ? '<b class="success" >Payée</b>' : '<b class="danger" >Impayée</b>';
                 $html .= '<tr class="objectListItemRow" >';
                 $dateDebut = New DateTime();
                 $dateFin = New DateTime();
@@ -365,7 +370,6 @@ class BContract_echeancier extends BimpObject {
             $html .= "<tr> <th style='background-color:#ed7c1c;color:white;text-align:center'>Reste à payer</th> <td style='text-align:center'><b class='danger'> " . price($parent->getTotalContrat() - $parent->getTotalDejaPayer(true)) . " € </b></td> <td style='text-align:center'><b class='danger'> " . price(($parent->getTotalContrat(true) * 1.20) - ($parent->getTotalDejaPayer(true) * 1.20)) . " €</b></td> </tr>";
         }
         $html .= "</table>";
-        $html .= '<h4>Client: '.$societe->getNomUrl().'</h4>';
 
 
         return $html;

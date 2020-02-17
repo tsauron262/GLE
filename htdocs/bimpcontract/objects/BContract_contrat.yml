@@ -28,6 +28,14 @@ filters_panels:
                 field: fk_commercial_suivi
             client:
                 field: fk_soc
+            commercialclient:
+                custom: 1
+                label: Commercial client
+                input:
+                    type: search_user
+                data_type: id_object
+                type: user
+                field: commercialclient
 objects:
     client:
         instance:
@@ -86,6 +94,19 @@ objects:
                 name: Bimp_User
             id_object:
                 field_value: fk_commercial_signature
+    
+    entrepot: 
+        instance: 
+            id_object:
+                field_value: entrepot
+    
+    client_facturation:
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: Bimp_Societe
+            id_object:
+                field_value: fk_soc_facturation
 
 table: contrat
 controller: contrat
@@ -139,7 +160,9 @@ fields:
     note_public:
         label: Note particulière au contrat
         type: html
-        
+    note_private:
+        label: Note privée
+        type: html
     # Extrafields
     date_start:
         label: Date d'effet du contrat
@@ -210,6 +233,21 @@ fields:
         required: 1
         values:
             array: objet_contrat
+    entrepot:
+        label: Entrepôt
+        dol_extra_field: 1
+        type: id_object
+        object: entrepot
+        required: 1
+        input: 
+            type: search_entrepot
+    
+    fk_soc_facturation:
+        label: Client pour facturation
+        type: id_object
+        object: client_facturation
+        input:
+            type: search_societe
         
     fk_commercial_signature:
         label: Commercial signataire
@@ -247,7 +285,10 @@ fields:
     fk_user_cloture:
         label: Clos par
         type: int
-        
+    logs:
+        label: Logs contrat
+        type: text
+
 fields_tables:
     infos:
         panel: 0
@@ -259,10 +300,11 @@ fields_tables:
               edit: 0
             - field: objet_contrat
               edit: 0
+            - field: entrepot
+              display: nom_url
             - label: Contrat initial
               value:
                   callback: getContratSource
-              edit: 0
             - field: date_start
               edit: 0
             - label: Date prochaine facture
@@ -297,15 +339,18 @@ fields_tables:
               edit: 0
             - field: denounce
               edit: 0
-            - label: Commercial
-              value:
-                  callback: displayCommercial
+            - field: fk_commercial_suivi
+            - field: fk_commercial_signature
     client: 
         panel: 0
         rows: 
             - field: fk_soc
               display: card
+            - field: fk_soc_facturation
+              display: card
             - field: note_public
+            - field: note_private
+            - field: logs
    
               
                               
@@ -323,8 +368,8 @@ lists:
         sort_field: datec
         sort_way: desc
         n: 20
-        add_form_name: add_contrat
-        add_btn_label: Créer un nouveau contrat
+#        add_form_name: add_contrat
+#        add_btn_label: Créer un nouveau contrat
         edit_btn: 1
         edit_form: edit_contrat
         delete_btn: 0
@@ -369,7 +414,15 @@ lists:
                 field: fk_commercial_suivi
             commercial_sign:
                 field: fk_commercial_signature
-    
+            commercialclient:
+                label: Commercial Client
+                value:
+                    callback: displayCommercialClient
+                search:
+                    input: 
+                        type: search_user
+                  
+
     client:
         extends: default
         cols:
@@ -478,17 +531,22 @@ forms:
               edit: 0
             - field: ref_ext
             - field: objet_contrat
+            - field: entrepot
             - field: fk_soc
               edit: 0
+            - field: fk_soc_facturation
             - field: date_start
             - field: duree_mois
             - field: periodicity
             - field: moderegl
             - field: gti
             - field: syntec
+            - field: fk_commercial_suivi
+            - field: fk_commercial_signature
             - field: tacite
             - field: denounce
             - field: note_public
+            - field: note_private
     
     add_contrat:
         rows:

@@ -34,14 +34,14 @@ class BimpProductCurPa extends BimpObject
                 // On fait en sorte que si $date est inférieur au plus petit date_from trouvé, ce soit ce dernier qui soit retourné
                 foreach ($res as $r) {
                     $id_pa = (int) $r['id'];
-                    if ($r['date_from'] < $date && (!(string) $r['date_to'] || $r['date_to']) > $date) {
+                    if ($r['date_from'] < $date && (!(string) $r['date_to'] || $r['date_to'] > $date)) {
                         break;
                     }
                 }
             }
 
             if ($id_pa) {
-                $pa = BimpCache::getBimpObjectInstance('bimpcore', 'BimpProductCurPa', (int) $res[0]['id']);
+                $pa = BimpCache::getBimpObjectInstance('bimpcore', 'BimpProductCurPa', $id_pa);
                 if (BimpObject::objectLoaded($pa)) {
                     return $pa;
                 }

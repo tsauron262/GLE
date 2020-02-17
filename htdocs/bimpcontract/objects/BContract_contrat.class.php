@@ -48,7 +48,7 @@ class BContract_contrat extends BimpDolObject {
         self::CONTRAT_STATUS_BROUILLON => Array('label' => 'Brouillon', 'classes' => Array('warning'), 'icon' => 'fas_trash-alt'),
         self::CONTRAT_STATUS_VALIDE => Array('label' => 'Validé', 'classes' => Array('success'), 'icon' => 'fas_check'),
         self::CONTRAT_STATUS_CLOS => Array('label' => 'Clos', 'classes' => Array('danger'), 'icon' => 'fas_times'),
-        self::CONTRAT_STATUS_ACTIVER => Array('label' => 'En cours d\'exécution', 'classes' => Array('important'), 'icon' => 'fas_play'),
+        self::CONTRAT_STATUS_ACTIVER => Array('label' => 'Actif', 'classes' => Array('important'), 'icon' => 'fas_play'),
     );
     public static $denounce = Array(
         self::CONTRAT_DENOUNCE_NON => Array('label' => 'Non', 'classes' => Array('success'), 'icon' => 'fas_check'),
@@ -600,6 +600,10 @@ class BContract_contrat extends BimpDolObject {
     /* RIGHTS */
     
     public function canEditField($field_name) {
+        
+        if($this->getData('statut') == self::CONTRAT_STATUS_BROUILLON)
+            return 1;
+        
         switch($field_name) {
             case 'entrepot':
             case 'note_private':
@@ -633,7 +637,9 @@ class BContract_contrat extends BimpDolObject {
     }
 
     public function canDelete() {
-        return $this->canEdit();
+        if($this->getData('statut') != self::CONTRAT_STATUS_BROUILLON) 
+            return 0;
+        return 1;
     }
 
     /* ACTIONS */

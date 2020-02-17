@@ -700,11 +700,11 @@ class Bimp_Paiement extends BimpObject
         return $fields;
     }
 
-    public function getExtraFieldFilterKey($field, &$joins, $main_alias = 'a')
+    public function getExtraFieldFilterKey($field, &$joins, $main_alias = '')
     {
         switch ($field) {
             case 'type':
-                return $main_alias . '.fk_paiement';
+                return ($main_alias ? $main_alias : 'a') . '.fk_paiement';
         }
         return '';
     }

@@ -330,7 +330,7 @@ forms:
                       params:
                           - note_public
             - custom: 1
-              label: Note particulière au contrat
+              label: Note privée
               input_name: note_private
               input:
                   type: html

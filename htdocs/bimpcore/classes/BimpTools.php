@@ -2361,7 +2361,7 @@ class BimpTools
                 }
             }
         }
-        $this->resprints = "OK " . $i . ' mails';
-        return $i . ' mails envoyés';
+        $this->resprints = "OK " . $i . ' mails envoyés';
+        return 1;
     }
 }

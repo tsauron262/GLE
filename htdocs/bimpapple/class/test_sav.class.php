@@ -93,14 +93,19 @@ s.ref FROM `" . MAIN_DB_PREFIX . "bs_sav` s, `" . MAIN_DB_PREFIX . "bimp_gsx_rep
 WHERE r.`id_sav` = s.`id` AND `" . ($statut == "closed" ? "repair_complete" : "ready_for_pick_up") . "` = 0
 AND serial is not null
 AND canceled = 0
-AND DATEDIFF(now(), s.date_update) < 60 
-AND s.status = " . ($statut == "closed" ? "999" : "9");
-
+AND DATEDIFF(now(), s.date_update) < 60 ";
+        
+        if($statut == "closed"){
+            $req .= " AND (s.status = 999 || DATEDIFF(now(), s.date_terminer) > 5)";
+        }
+        else
+            $req .= " AND s.status = 9";
 
 
         $req .= " AND DATEDIFF(now(), s.date_update) < 100 ORDER BY `nbJ` DESC, s.id";
 
         $req .= " LIMIT 0,500";
+
         return $req;
     }
 

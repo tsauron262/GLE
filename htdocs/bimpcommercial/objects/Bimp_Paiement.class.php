@@ -704,7 +704,7 @@ class Bimp_Paiement extends BimpObject
     {
         switch ($field) {
             case 'type':
-                return $main_alias . '.fk_paiement';
+                return ($main_alias ? $main_alias : 'a') . '.fk_paiement';
         }
         return '';
     }

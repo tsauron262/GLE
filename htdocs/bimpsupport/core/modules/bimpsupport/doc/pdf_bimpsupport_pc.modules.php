@@ -288,7 +288,7 @@ class pdf_bimpsupport_pc extends ModeleBimpSupport
             
             $cgv .= "-Les frais de prise en charge diagnotic de ".$prixRefus."€ TTC sont à régler pour tout matériel  hors garantie. En cas d’acceptation du devis ces frais seront déduits.\n\n";
             $cgv.="-Les problèmes logiciels, la récupération de données ou la réparation matériel liées à une mauvaise utilisation (liquide, chute, etc...), ne sont pas couverts par la GARANTIE APPLE; Un devis sera alors établi et des frais de ".$prixRefus."€ TTC seront facturés en cas de refus de celui-ci." . "\n\n";
-            $cgv.="-Des frais de ".$prixRefus."€TTC seront automatiquement facturés, si lors de l’expertise il s’avère que  des pièces de contre façon ont été installées.\n\n";
+            $cgv.="-Des frais de ".$prixRefus."€ TTC seront automatiquement facturés, si lors de l’expertise il s’avère que  des pièces de contre façon ont été installées.\n\n";
             $cgv.= "-Le client s’engage à venir récupérer son bien dans un délai d’un mois après mise à disposition,émission d’un devis. Après expiration de ce délai, ce dernier accepte des frais de garde de 4€ par jour.\n\n";
 
             $cgv .= "-Comme l’autorise la loi du 31 décembre 1903, modifiée le 22 juin 2016, les produits qui n'auront pas été retirés dans le délai de un an pourront être détruit, après accord du tribunal.\n\n";

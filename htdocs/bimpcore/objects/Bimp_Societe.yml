@@ -512,6 +512,11 @@ lists_cols:
         field: note_private
     note_public:
         field: note_public
+    commercial:
+        label: Commercial
+        custom: 1
+        value: 
+            callback: displayCommercials
         
         
 filters_panels: 

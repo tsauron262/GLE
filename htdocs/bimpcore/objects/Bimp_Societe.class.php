@@ -21,6 +21,40 @@ class Bimp_Societe extends BimpObject
 
         parent::__construct($module, $object_name);
     }
+    
+    public function getIdCommercials(){
+        $return = array();
+        if($this->isLoaded()){
+            $sql = $this->db->db->query("SELECT fk_user FROM ".MAIN_DB_PREFIX."societe_commerciaux WHERE fk_soc = ".$this->id);
+            while ($ln = $this->db->db->fetch_object($sql)){
+                $return[] = $ln->fk_user;
+            }
+        }
+        return $return;
+    }
+    
+    public function displayCommercials()
+    {
+        global $modeCSV, $langs;
+        $return = array();
+        $ids = $this->getIdCommercials();
+        if (count($ids) > 0) {
+            BimpTools::loadDolClass('contact');
+            foreach($ids as $id){
+                $user = new User($this->db->db);
+                if ($user->fetch((int) $id) > 0) {
+                    if ($modeCSV)
+                        $return[] = $user->getFullName($langs);
+                    else
+                        $return[] = $user->getNomUrl(1) . BimpRender::renderObjectIcons($user);
+                }
+            }
+        }
+        if ($modeCSV)
+            return implode("\n", $return);
+        else
+            return implode("<br/>", $return);
+    }
 
     public function isCompany()
     {

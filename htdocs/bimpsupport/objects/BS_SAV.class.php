@@ -3470,6 +3470,9 @@ class BS_SAV extends BimpObject
 
         if (!count($errors)) {
             $errors = $this->setNewStatus(self::BS_SAV_A_RESTITUER);
+            
+            if (!count($errors))
+                $errors = $this->updateField('date_terminer', dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S'));
 
             if (!count($errors)) {
                 if ($msg_type && isset($data['send_msg']) && $data['send_msg']) {

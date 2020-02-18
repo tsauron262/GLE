@@ -311,6 +311,7 @@ class BimpValidateOrder
         if($order->socid > 0){
             $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $order->socid);
             $msg .= ' du client '.$soc->getNomUrl();
+            $subject .= ' du client '.$soc->getNomUrl();
         }
         foreach ($this->extraMail as $extra) {
             $msg .= "\n\n" . $extra;

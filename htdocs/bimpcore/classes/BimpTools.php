@@ -2362,6 +2362,6 @@ class BimpTools
             }
         }
         $this->output = "OK " . $i . ' mails envoyés';
-        return 1;
+        return 0;
     }
 }

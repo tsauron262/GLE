@@ -436,7 +436,9 @@ class BimpDolObject extends BimpObject
                     } else {
                         $formMail->substit['__LINES__'] = '';
                     }
-
+                    
+                    $formMail->substit['__LINK__'] = $this->getNomUrl(1);
+                    
                     $content = str_replace('\n', "\n", $template['content']);
 
                     if (dol_textishtml($content) && !dol_textishtml($formMail->substit['__SIGNATURE__'])) {

@@ -99,6 +99,7 @@ fields:
             card: default
         required: 1
         create_form: light
+        edit_form: default
     ref_client: 
         label: Référence client
     fk_cond_reglement: 

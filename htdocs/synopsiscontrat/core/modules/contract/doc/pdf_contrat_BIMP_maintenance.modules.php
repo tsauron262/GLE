@@ -458,7 +458,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $file = $dir . "/SPECIMEN.pdf";
             } else {
                 $propref = sanitize_string($contrat->ref);
-                $dir = $conf->contrat->dir_output . "/" . $propref;
+                $dir = $conf->contrat->dir_output . "/" . $contrat->ref;
                 $file = $dir . "/Contrat_BIMP_maintenance_" . date("d_m_Y") . "_CLIENT_" . $propref . ".pdf";
                 $file1 = $dir . "/Contrat_BIMP_maintenance_" . date("d_m_Y") . "_BIMP_" . $propref . ".pdf";
             }

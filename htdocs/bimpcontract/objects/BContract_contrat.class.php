@@ -7,8 +7,8 @@ require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
 class BContract_contrat extends BimpDolObject {
 
     //public $redirectMode = 4;
-    public static $email_type = '';
-
+    public static $email_type = 'contract';
+    
     //
     // Les status
     CONST CONTRAT_STATUS_BROUILLON = 0;
@@ -112,6 +112,14 @@ class BContract_contrat extends BimpDolObject {
         // Vérifier tous les contrats pour faire la relance aux commeciaux
         // Vérifier tout les contrats a facturé et envoyer aux commerciaux.
     }
+    
+    public function getDirOutput() {
+        global $conf;
+
+        return $conf->contrat->dir_output;
+    }
+    
+    
     
     public function addLog($text)
     {
@@ -412,6 +420,13 @@ class BContract_contrat extends BimpDolObject {
 
 
         if ($this->isLoaded() && BimpTools::getContext() != 'public') {
+            $buttons[] = array(
+                        'label'   => 'Envoyer par e-mail',
+                        'icon'    => 'envelope',
+                        'onclick' => $this->getJsActionOnclick('sendEmail', array(), array(
+                            'form_name' => 'email'
+                        ))
+                    );
             $status = $this->getData('statut');
             $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}';
             if ($this->getData('statut') == self::CONTRAT_STATUS_BROUILLON) {
@@ -932,12 +947,9 @@ class BContract_contrat extends BimpDolObject {
         if ($this->isLoaded()) {
             global $conf;
             $ref = $this->getRef();
-            if ($this->getData('statut') == self::CONTRAT_STATUS_BROUILLON) {
-                $ref = str_replace('(', "_", $ref);
-                $ref = str_replace(')', "_", $ref);
-            }
+            
 
-            $dir = $conf->contrat->dir_output . '/' . $ref;
+            $dir = $this->getFilesDir();
 
             if (!function_exists('dol_dir_list')) {
                 require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
@@ -1618,6 +1630,41 @@ class BContract_contrat extends BimpDolObject {
             return 1;
         }
         return 0;
+    }
+    
+     public function getJoinFilesValues()
+    {
+        $values = BimpTools::getValue('fields/join_files', array());
+
+        $id_main_pdf_file = (int) $this->getDocumentFileId();
+
+        if (!in_array($id_main_pdf_file, $values)) {
+            $values[] = $id_main_pdf_file;
+        }
+
+        $list = $this->getAllFiles();
+        $idSepa = 0;
+        $idSepaSigne = 0;
+        foreach ($list as $id => $elem) {
+            if (stripos($elem, "sepa")) { 
+                $idSepa = $id;
+                if (stripos($elem, "signe"))
+                    $idSepaSigne = $id;
+            }
+            if(stripos($elem, "Contrat_BIMP") !== FALSE) {
+                $values[] = $id;
+            }
+        }
+            
+
+
+        if ($idSepa > 0 && $idSepaSigne < 1)
+            $values[] = $idSepa;
+
+
+
+
+        return $values;
     }
 
 }

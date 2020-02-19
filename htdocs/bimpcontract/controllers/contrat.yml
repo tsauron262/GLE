@@ -1,6 +1,9 @@
 bootstrap: 1
 title: Bimp Contrat
 
+js: 
+    0: /bimpcommercial/views/js/mails.js
+
 objects:
     contrat:
         instance:

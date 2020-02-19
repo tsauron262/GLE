@@ -570,7 +570,10 @@ class Bimp_Propal extends BimpComm
                 }
             }
             //Créer un contrat
-            if ($conf->contrat->enabled && ($status == 1 || $status == 2 || $status = 4)) {
+            
+            $linked_contrat = getElementElement('propal', 'contrat', $this->id);
+            
+            if ($conf->contrat->enabled && ($status == 1 || $status == 2 || $status = 4) && !count($linked_contrat)) {
                 $buttons[] = array(
                     'label'   => 'Créer un contrat',
                     'icon'    => 'fas_file-signature',
@@ -579,7 +582,17 @@ class Bimp_Propal extends BimpComm
                             )
                     )
                 );
-            } else {
+            }
+            elseif(count($linked_contrat)) {
+                $buttons[] = array(
+                    'label'    => 'Créer un contrat',
+                    'icon'     => 'fas_file-contract',
+                    'onclick'  => '',
+                    'disabled' => 1,
+                    'popover'  => 'Un contrat exsite déjà pour cette proposition commercial'
+                );
+            }
+            else {
                 $buttons[] = array(
                     'label'    => 'Créer un contrat',
                     'icon'     => 'fas_file-contract',

@@ -655,10 +655,10 @@ class Bimp_Commande extends BimpComm
                 }
             }
 
-            // Marquée entièrement facturée: 
+            // Marqueer entièrement facturée: 
             if ($this->isActionAllowed('forceFacturee') && $this->canSetAction('forceFacturee')) {
                 $buttons[] = array(
-                    'label'   => 'Marquée "Entièrement facturée"',
+                    'label'   => 'Marquer "Entièrement facturée"',
                     'icon'    => 'far_check-square',
                     'onclick' => $this->getJsActionOnclick('forceFacturee', array(), array(
                         'confirm_msg' => 'Veuillez confirmer'

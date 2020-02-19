@@ -817,19 +817,22 @@ lists_cols:
                 params:
                     - total_ht
     total_ht_w_remises: 
-        label: Total HT (Avec remises)
-        value: 
-            callback: 
-                method: displayLineData
-                params:
-                    - total_ht_w_remises
+        field: total_ht
+        child: dol_line
+#        label: Total HT (Avec remises)
+#        value: 
+#            callback: 
+#                method: displayLineData
+#                params:
+#                    - total_ht_w_remises
     total_ttc: 
-        label: Total TTC
-        value: 
-            callback:
-                method: displayLineData
-                params:
-                    - total_ttc
+        field: total_ttc
+        child: dol_line
+#        value: 
+#            callback:
+#                method: displayLineData
+#                params:
+#                    - total_ttc
     margin: 
         label:
             callback: getMarginLabel

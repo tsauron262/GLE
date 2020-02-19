@@ -241,6 +241,7 @@ forms:
               input_name: id_contact
               data_type: id_object
               object: contact
+              edit_form: default
               create_form: default
               create_form_values:
                   fields: 

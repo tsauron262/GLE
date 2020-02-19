@@ -573,7 +573,12 @@ class Bimp_Propal extends BimpComm
             
             $linked_contrat = getElementElement('propal', 'contrat', $this->id);
             
-            if ($conf->contrat->enabled && ($status == 1 || $status == 2 || $status = 4) && !count($linked_contrat)) {
+            if(count($linked_contrat))
+                $popover = 'Un contrat exsite déjà pour cette proposition commercial';
+            if($this->getData('fk_statut') == 0)
+                $popover = "Vous ne pouvez pas créer de contrat car cette proposition commercial est au statut brouillon";
+            
+            if ($conf->contrat->enabled && ($this->getData('fk_statut') == 1 || $this->getData('fk_statut') == 2) && !count($linked_contrat)) {
                 $buttons[] = array(
                     'label'   => 'Créer un contrat',
                     'icon'    => 'fas_file-signature',
@@ -583,22 +588,13 @@ class Bimp_Propal extends BimpComm
                     )
                 );
             }
-            elseif(count($linked_contrat)) {
-                $buttons[] = array(
-                    'label'    => 'Créer un contrat',
-                    'icon'     => 'fas_file-contract',
-                    'onclick'  => '',
-                    'disabled' => 1,
-                    'popover'  => 'Un contrat exsite déjà pour cette proposition commercial'
-                );
-            }
             else {
                 $buttons[] = array(
                     'label'    => 'Créer un contrat',
                     'icon'     => 'fas_file-contract',
                     'onclick'  => '',
                     'disabled' => 1,
-                    'popover'  => 'Vous n\'avez pas la permission'
+                    'popover'  => $popover
                 );
             }
         }

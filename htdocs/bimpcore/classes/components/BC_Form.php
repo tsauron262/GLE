@@ -22,6 +22,9 @@ class BC_Form extends BC_Panel
         'create_form'        => array('default' => ''),
         'create_form_values' => array('data_type' => 'array'),
         'create_form_label'  => array('default' => 'Créer'),
+        'edit_form'        => array('default' => ''),
+        'edit_form_values' => array('data_type' => 'array'),
+        'edit_form_label'  => array('default' => 'Editer'),
         'display'            => array('default' => 'default'),
         'hidden'             => array('data_type' => 'bool', 'default' => 0),
         'required'           => array('data_type' => 'bool', 'default' => null),
@@ -734,7 +737,7 @@ class BC_Form extends BC_Panel
             if($params['create_form'])
                 $html .= self::renderLoadFormObjectButton($this->object, $this->identifier, $params['object'], $this->fields_prefix . $params['input_name'], $params['create_form'], $params['create_form_values'], $params['create_form_label']);
             if($params['edit_form'])
-                $html .= self::renderLoadFormObjectButton($this->object, $this->identifier, $params['object'], $this->fields_prefix . $params['input_name'], $params['edit_form'], $params['edit_form_values'], $params['edit_form_label']);
+                $html .= self::renderLoadFormObjectButton($this->object, $this->identifier, $params['object'], $this->fields_prefix . $params['input_name'], $params['edit_form'], $params['edit_form_values'], $params['edit_form_label'], true, null, '', -1);
         }
 
         if ($this->object->config->isDefined($row_path . '/input')) {
@@ -819,7 +822,7 @@ class BC_Form extends BC_Panel
 
             $html = '';
 
-            $html .= '<div style="text-align: right">';
+            $html .= '<div style="text-align: right; float: right;">';
 
             $onclick = '\'' . $title . '\', \'' . $result_input_name . '\', \'' . $parent_form_id . '\'';
             $onclick .= ', \'' . $object->module . '\', \'' . $object->object_name . '\'';

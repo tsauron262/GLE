@@ -112,6 +112,7 @@ class Bimp_Commande extends BimpComm
                 return 0;
 
             case 'linesFactureQties':
+            case 'forceFacturee':
 //                $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
 //                return (int) $facture->can('create');
                 return $user->rights->bimpcommercial->factureAnticipe;
@@ -655,10 +656,10 @@ class Bimp_Commande extends BimpComm
                 }
             }
 
-            // Marquée entièrement facturée: 
+            // Marqueer entièrement facturée: 
             if ($this->isActionAllowed('forceFacturee') && $this->canSetAction('forceFacturee')) {
                 $buttons[] = array(
-                    'label'   => 'Marquée "Entièrement facturée"',
+                    'label'   => 'Marquer "Entièrement facturée"',
                     'icon'    => 'far_check-square',
                     'onclick' => $this->getJsActionOnclick('forceFacturee', array(), array(
                         'confirm_msg' => 'Veuillez confirmer'

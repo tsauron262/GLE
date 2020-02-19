@@ -63,14 +63,17 @@ fields:
     total_ht: 
         label: Total HT
         type: money
+        has_total: 1
         
     total_tva: 
         label: Total TVA
         type: money
+        has_total: 1
         
     total_ttc: 
         label: Total TTC
         type: money
+        has_total: 1
         
     date_start: 
         label: Début

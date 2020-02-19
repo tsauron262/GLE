@@ -536,7 +536,12 @@ class BContract_contrat extends BimpDolObject {
     }
 
     public function actionDuplicate($data, &$success = Array()) {
-
+        $success = "Contrat cloner avec succès";
+        $warnings = [];
+        if (!$this->isLoaded()) {
+            return array('ID ' . $this->getLabel('of_the') . ' absent');
+        }
+        
         $new_contrat = clone $this;
         $new_contrat->id = null;
         $new_contrat->id = 0;
@@ -544,19 +549,9 @@ class BContract_contrat extends BimpDolObject {
         $new_contrat->set('fk_statut', 1);
         $new_contrat->set('ref', '');
         $new_contrat->set('date_contrat', null);
-
-        if ($new_contrat->create()) {
-            $success = "Contrat cloner avec succès";
-        }
-        return $errors[] = $new_contrat->getData('ref');
-        $errors = Array();
-
-        if (!$this->isLoaded()) {
-            return array('ID ' . $this->getLabel('of_the') . ' absent');
-        }
-
-
-
+        
+        $errors = $new_contrat->create();
+        
         return Array(
             'success' => $success,
             'errors' => $errors,
@@ -883,24 +878,22 @@ class BContract_contrat extends BimpDolObject {
     /* OTHERS FUNCTIONS */
 
     public function create(&$warnings = array(), $force_create = false) {
-
+        
+        $errors = [];
+        
         if (BimpTools::getValue('use_syntec') && !BimpTools::getValue('syntec')) {
-            return 'Vous devez rensseigner un indice syntec';
+            $errors[] = 'Vous devez rensseigner un indice syntec';
         }
 
         if ((BimpTools::getValue('tacite') == 1 || BimpTools::getValue('tacite') == 1 || BimpTools::getValue('tacite') == 3)) {
             if (BimpTools::getValue('duree_mois') != 12 && BimpTools::getValue('duree_mois') != 24 && BimpTools::getValue('duree_mois') != 36) {
-                return 'Vous ne pouvez pas demander un renouvellement TACITE pour des périodes différentes de (12, 24 ou 36 mois)';
+                $errors[] = 'Vous ne pouvez pas demander un renouvellement TACITE pour des périodes différentes de (12, 24 ou 36 mois)';
             }
         }
-        $errors = parent::create($warnings, $force_create);
-
-        $callback = "window.location.href = '" . DOL_URL_ROOT . "/bimpcontract/index.php?fc=contrat&id='" . $this->id . "';";
-        return [
-            'success_callback' => $callback,
-            'errors' => $errors,
-            'warnings' => $warnings
-        ];
+        if(!count($errors))
+            $errors = parent::create($warnings, $force_create);
+        
+        return $errors;
     }
 
     public function fetch($id, $parent = null) {
@@ -1314,7 +1307,8 @@ class BContract_contrat extends BimpDolObject {
         }
 //        echo '<pre>';
 //        print_r($commande->dol_object->lines); die();
-        if ($new_contrat->create() > 0) {
+        $errors = $new_contrat->create();
+        if (!count($errors)) {
             foreach ($propal->dol_object->lines as $line) {
                 $produit = $this->getInstance('bimpcore', 'Bimp_Product', $line->fk_product);
                 if ($produit->getData('fk_product_type') == 1 && $line->total_ht != 0) {
@@ -1346,20 +1340,6 @@ class BContract_contrat extends BimpDolObject {
             return -1;
         }
     }
-
-//    public function newRef($start_ref) {
-//        
-//        $count_contrat = count($this->db->getRows('contrat', "ref LIKE '%$start_ref%'")) + 1;
-//        
-//        if($count_contrat < 10) {
-//            $add_zero = "000";
-//        } elseif($count_contrat > 10 && $count_contrat < 100) {
-//            $add_zero = "00";
-//        } else {
-//            $add_zero = '0';
-//        }
-//        return $start_ref . $add_zero . $count_contrat;
-//    }
 
     public function renderHeaderExtraLeft() {
 

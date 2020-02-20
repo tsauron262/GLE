@@ -829,11 +829,11 @@ class BC_Form extends BC_Panel
             $onclick .= ', \'' . $form_name . '\', ' . $id_parent;
             $onclick .= ', ' . ($reload_input ? 'true' : 'false');
             $onclick .= ', $(this)';
-            $onclick .= ', null';
-            $onclick .= ', '.$id_object;
-            if (!is_null($form_values) && is_array($form_values)) {
+            if (!is_null($form_values) && is_array($form_values))
                 $onclick .= ', \'' . htmlentities(json_encode($form_values)) . '\'';
-            }
+            else
+                $onclick .= ', null';
+            $onclick .= ', '.$id_object;
             $html .= BimpRender::renderButton(array(
                         'icon_before' => 'plus-circle',
                         'label'       => $label,

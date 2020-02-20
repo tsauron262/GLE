@@ -393,7 +393,7 @@ function loadObjectFormFromForm(title, result_input_name, parent_form_id, module
             id_obj = cible.val();
         }));
         if(id_obj < 1){
-            bimp_msg('Rien a modifié, aucun objet séléctionné', 'danger');
+            bimp_msg('Rien a modifier, aucun objet séléctionné', 'danger');
             return;
         }
     }

@@ -609,7 +609,7 @@ fields_tables:
                  
     facturation:
         title: Facturation
-        icon: info-money
+        icon: fas_euro-sign
         rows: 
             - field: id_facture_acompte
               display: card

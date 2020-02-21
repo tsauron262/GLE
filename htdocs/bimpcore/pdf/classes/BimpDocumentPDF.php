@@ -36,6 +36,7 @@ class BimpDocumentPDF extends BimpModelPDF
     public $max_line_serials = 50;
     public $annexe_listings = array();
     public static $use_cgv = true;
+    public static $label_prime = "Apport externe";
 
     public function __construct($db)
     {
@@ -1414,8 +1415,8 @@ class BimpDocumentPDF extends BimpModelPDF
                     $prime = $this->object->array_options['options_prime'];
 
                     $html .= '<tr>';
-                    $html .= '<td style="background-color: #F0F0F0;">Prime CEE EDF</td>';
-                    $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . BimpTools::displayMoneyValue($prime, '');
+                    $html .= '<td style="background-color: #F0F0F0;">'.static::$label_prime.'</td>';
+                    $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . BimpTools::displayMoneyValue(-$prime, '');
                     $html .= '</td>';
                     $html .= '</tr>';
 

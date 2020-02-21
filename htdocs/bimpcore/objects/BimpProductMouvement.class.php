@@ -301,6 +301,7 @@ class BimpProductMouvement extends BimpObject
         $objet = '';
         $module = '';
         $label = '';
+        $labelReverse = '';
         $modal_view = 'default';
         $only_ref = 1;
 
@@ -435,7 +436,10 @@ class BimpProductMouvement extends BimpObject
     public function displayReasonMvt()
     {
         $infos = $this->getInfosOrigine();
-        $reason = $infos['label'];
+        if($this->getData('qty') < 0 && $infos['labelReverse'] != '')
+            $reason = $infos['labelReverse'];
+        else
+            $reason = $infos['label'];
         if ($reason == '') {
             $reason = 'Inconnue';
 

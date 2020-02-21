@@ -911,13 +911,12 @@ class BContract_contrat extends BimpDolObject {
             $ok = true;
             $res= scandir($dir);
             foreach ($res as $file){
-                echo $file;
                 if(!in_array($file, array(".", "..")))
                     if(!rename($dir.$file, $newdir.$file))
                         $ok = false;
             }
             if(!$ok)
-                die('impossible de déplcé : '.$dir.$file." to ".$newdir.$file);
+                mailSyn2 ("Probléme déplacement fichiers", 'tommy@bimp.fr', null, 'Probléme dep '.$dir.$file ." to ". $newdir.$file);
             else
                 rmdir($dir); 
         }

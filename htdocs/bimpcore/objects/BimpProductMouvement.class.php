@@ -443,11 +443,15 @@ class BimpProductMouvement extends BimpObject
         if ($reason == '') {
             $reason = 'Inconnue';
 
-            if (stripos($this->getData("label"), "Transfert de stock") === 0 || stripos($this->getData("label"), "TR-") === 0)
+            if (stripos($this->getData("label"), "Transfert de stock") !== false || stripos($this->getData("label"), "TR-") === 0)
                 $reason = 'Transfert';
             elseif (stripos($this->getData("label"), "Correction du stock") !== false
+                    || stripos($this->getData("label"), "tomm") !== false
                     || stripos($this->getData("label"), "correction Auto Stock") !== false
-                    || stripos($this->getData("label"), "CORRECTION ") === 0)
+                    || stripos($this->getData("label"), "CORRECTION ") === 0
+                    || stripos($this->getData("label"), "Suppression de l'équipement") === 0
+                    || stripos($this->getData("label"), "Inversion ") === 0
+                    || stripos($this->getData("label"), "Erreur ") === 0)
                 $reason = 'CORRECT';
             elseif (stripos($this->getData("label"), "#correction de Facture") === 0)
                 if($this->getData('value') < 0)
@@ -458,7 +462,10 @@ class BimpProductMouvement extends BimpObject
                 $reason = 'SAV';
             elseif (stripos($this->getData("label"), "Vol") !== false)
                 $reason = 'Vol';
-            elseif (stripos($this->getData("inventorycode"), 'inventory-id-') === 0)
+            elseif (stripos($this->getData("inventorycode"), 'inventory-id-') === 0
+                    || stripos($this->getData("label"), "Inventaire-") === 0
+                    || stripos($this->getData("label"), "Régul ") === 0
+                    || stripos($this->getData("label"), "Preparation inventaire") === 0)
                 $reason = 'Inventaire';
         }
 

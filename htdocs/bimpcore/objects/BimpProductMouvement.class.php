@@ -445,8 +445,15 @@ class BimpProductMouvement extends BimpObject
 
             if (stripos($this->getData("label"), "Transfert de stock") === 0 || stripos($this->getData("label"), "TR-") === 0)
                 $reason = 'Transfert';
-            elseif (stripos($this->getData("label"), "Correction du stock") !== false)
+            elseif (stripos($this->getData("label"), "Correction du stock") !== false
+                    || stripos($this->getData("label"), "correction Auto Stock") !== false
+                    || stripos($this->getData("label"), "CORRECTION ") === 0)
                 $reason = 'CORRECT';
+            elseif (stripos($this->getData("label"), "#correction de Facture") === 0)
+                if($this->getData('value') < 0)
+                    $reason = 'VENTE';
+                else
+                    $reason = 'RET VENTE';
             elseif (stripos($this->getData("label"), "SAV") !== false)
                 $reason = 'SAV';
             elseif (stripos($this->getData("label"), "Vol") !== false)

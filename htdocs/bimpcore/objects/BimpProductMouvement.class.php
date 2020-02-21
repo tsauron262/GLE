@@ -313,12 +313,14 @@ class BimpProductMouvement extends BimpObject
                 $module = 'bimpcommercial';
                 $label = 'Vente';
                 $modal_view = 'full';
+                $labelReverse = 'Ret Vente';
                 break;
 
             case 'commande':
                 $objet = 'Bimp_Commande';
                 $module = 'bimpcommercial';
                 $label = 'Vente';
+                $labelReverse = 'Ret Vente';
                 $modal_view = 'full';
                 break;
 
@@ -326,6 +328,7 @@ class BimpProductMouvement extends BimpObject
                 $objet = 'Bimp_CommandeFourn';
                 $module = 'bimpcommercial';
                 $label = 'Achat';
+                $labelReverse = 'Ret Achat';
                 $modal_view = 'full';
                 break;
 
@@ -340,6 +343,7 @@ class BimpProductMouvement extends BimpObject
                 $objet = 'Bimp_Societe';
                 $module = 'bimpcore';
                 $label = 'Vente';
+                $labelReverse = 'Ret Vente';
                 $only_ref = 0;
                 break;
 
@@ -354,6 +358,7 @@ class BimpProductMouvement extends BimpObject
                 $objet = 'BC_Vente';
                 $module = 'bimpcaisse';
                 $label = 'Vente en caisse';
+                $labelReverse = 'Ret Vente  Caisse';
                 $only_ref = 0;
                 break;
 
@@ -382,6 +387,7 @@ class BimpProductMouvement extends BimpObject
                 $objet = 'BS_Pret';
                 $module = 'bimpsupport';
                 $label = 'Prêt';
+                $labelReverse = 'Ret Pret';
                 $only_ref = 1;
                 break;
 
@@ -395,6 +401,7 @@ class BimpProductMouvement extends BimpObject
             'object'     => $objet,
             'module'     => $module,
             'label'      => $label,
+            'labelReverse'      => $labelReverse,
             'modal_view' => $modal_view,
             'ref_only'   => $only_ref,
             'origin'     => $origin,

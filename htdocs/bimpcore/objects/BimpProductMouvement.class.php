@@ -312,16 +312,16 @@ class BimpProductMouvement extends BimpObject
             case 'facture':
                 $objet = 'Bimp_Facture';
                 $module = 'bimpcommercial';
-                $label = 'Vente';
+                $labelReverse = 'Vente';
                 $modal_view = 'full';
-                $labelReverse = 'Ret Vente';
+                $label = 'Ret Vente';
                 break;
 
             case 'commande':
                 $objet = 'Bimp_Commande';
                 $module = 'bimpcommercial';
-                $label = 'Vente';
-                $labelReverse = 'Ret Vente';
+                $labelReverse = 'Vente';
+                $label = 'Ret Vente';
                 $modal_view = 'full';
                 break;
 
@@ -343,8 +343,8 @@ class BimpProductMouvement extends BimpObject
             case 'societe':
                 $objet = 'Bimp_Societe';
                 $module = 'bimpcore';
-                $label = 'Vente';
-                $labelReverse = 'Ret Vente';
+                $labelReverse = 'Vente';
+                $label = 'Ret Vente';
                 $only_ref = 0;
                 break;
 
@@ -358,8 +358,8 @@ class BimpProductMouvement extends BimpObject
             case 'vente_caisse':
                 $objet = 'BC_Vente';
                 $module = 'bimpcaisse';
-                $label = 'Vente en caisse';
-                $labelReverse = 'Ret Vente  Caisse';
+                $labelReverse = 'Vente en caisse';
+                $label = 'Ret Vente  Caisse';
                 $only_ref = 0;
                 break;
 
@@ -402,7 +402,7 @@ class BimpProductMouvement extends BimpObject
             'object'     => $objet,
             'module'     => $module,
             'label'      => $label,
-            'labelReverse'      => $labelReverse,
+            'labelReverse'=> $labelReverse,
             'modal_view' => $modal_view,
             'ref_only'   => $only_ref,
             'origin'     => $origin,
@@ -436,7 +436,7 @@ class BimpProductMouvement extends BimpObject
     public function displayReasonMvt()
     {
         $infos = $this->getInfosOrigine();
-        if($this->getData('qty') < 0 && $infos['labelReverse'] != '')
+        if($this->getData('value') < 0 && $infos['labelReverse'] != '')
             $reason = $infos['labelReverse'];
         else
             $reason = $infos['label'];
@@ -445,6 +445,12 @@ class BimpProductMouvement extends BimpObject
 
             if (stripos($this->getData("label"), "Transfert de stock") === 0 || stripos($this->getData("label"), "TR-") === 0)
                 $reason = 'Transfert';
+            elseif (stripos($this->getData("label"), "Correction du stock") !== false)
+                $reason = 'CORRECT';
+            elseif (stripos($this->getData("label"), "SAV") !== false)
+                $reason = 'SAV';
+            elseif (stripos($this->getData("label"), "Vol") !== false)
+                $reason = 'Vol';
             elseif (stripos($this->getData("inventorycode"), 'inventory-id-') === 0)
                 $reason = 'Inventaire';
         }

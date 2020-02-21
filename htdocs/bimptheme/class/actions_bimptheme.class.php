@@ -11,10 +11,6 @@ class Actionsbimptheme {
         
     }
     
-    function printLeftBlock(){
-        global $user;
-    }
-    
 
 }
 

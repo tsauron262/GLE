@@ -26,4 +26,29 @@ class InvoiceRgePDF extends InvoicePDF
         $this->header_vars['header_right'] = $header_right;
     }
 
+    
+    
+    
+    public function getTargetInfosHtml() {
+        $html = parent::getTargetInfosHtml();
+        
+        $contacts = $this->facture->getIdContact('external', 'CHANTIER');
+        if (isset($contacts[0]) && $contacts[0]) {
+            BimpTools::loadDolClass('contact');
+            $contact = new Contact($this->db);
+            if ($contact->fetch((int) $contacts[0]) > 0) {
+                $this->contactChantier = $contact;
+            }
+        }
+        if (isset($this->contactChantier) && is_object($this->contactChantier)) {
+            $html .= '<br/><div class="section_title" style="width: 40%; border-top: solid 1px #' . $this->primary . '; ">';
+            $html .= '<span style="color: #' . $this->primary . '">' . ('Adresse du chantier :') . '</span></div>';
+            $html .= '';
+            $html .= str_replace("\n", "<br/>", pdf_build_address($this->langs, $this->fromCompany, $this->thirdparty, $this->contactChantier, !is_null($this->contactChantier) ? 1 : 0, 'target'));
+        }
+        
+       
+        
+        return $html;
+    }
 }

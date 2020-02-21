@@ -4,6 +4,8 @@
 
 function initHeaderBimp(){
     define('NOREQUIREMENU', 1);
+    require(DOL_DOCUMENT_ROOT."/bimpcore/Bimp_Lib.php");
+    $jsCssBimp = BimpCore::displayHeaderFiles(false);
     if(!function_exists('llxHeader')){
         function llxHeader (){
             echo "header";

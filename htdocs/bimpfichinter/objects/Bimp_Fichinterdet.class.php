@@ -7,7 +7,7 @@ class Bimp_Fichinterdet extends ObjectInterDet
     
     
     public function __construct($module, $object_name) {
-        parent::__construct($module, $object_name);
+        return parent::__construct($module, $object_name);
     }
     
     
@@ -21,13 +21,16 @@ class Bimp_Fichinterdet extends ObjectInterDet
 
         return ' ';
     }
+    
 
-    
-    
+     
     public function create(&$warnings = array(), $force_create = false) {
-        parent::create($warnings, $force_create);
+        $this->dol_object->fk_typeinterv = $this->getData('fk_typeinterv');//bizarre mais necessaire
+        $errors  = parent::create($warnings, $force_create);
+        if(!count($errors))
+            $errors = $this->update($warnings, $force_create);
         
-        $this->update($warnings, $force_create);
+        return $errors;
     }
     
 

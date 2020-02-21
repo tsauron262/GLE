@@ -1407,6 +1407,27 @@ class BimpDocumentPDF extends BimpModelPDF
                 }
                 $html .= '</td>';
                 $html .= '</tr>';
+                
+                
+                
+                if(isset($this->object->array_options['options_prime']) && $this->object->array_options['options_prime'] > 0){
+                    $prime = $this->object->array_options['options_prime'];
+
+                    $html .= '<tr>';
+                    $html .= '<td style="background-color: #F0F0F0;">Prime CEE EDF</td>';
+                    $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . BimpTools::displayMoneyValue($prime, '');
+                    $html .= '</td>';
+                    $html .= '</tr>';
+
+                    $html .= '<tr>';
+                    $html .= '<td style="background-color: #DCDCDC;">Reste à charge</td>';
+                    $html .= '<td style="background-color: #DCDCDC; text-align: right;">' . BimpTools::displayMoneyValue($total_ttc-$prime, '');
+                    if ((int) $this->periodicity) {
+                        $html .= ' / ' . BimpComm::$pdf_periodicity_label_masc[(int) $this->periodicity];
+                    }
+                    $html .= '</td>';
+                    $html .= '</tr>';
+                }
             }
         }
 

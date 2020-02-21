@@ -212,6 +212,10 @@ fields:
         label: Historique
         type: html
         default_value: ''
+    prime:
+        label: Prime
+        type: money
+        dol_extra_field: 1
     
 forms: 
     contact:

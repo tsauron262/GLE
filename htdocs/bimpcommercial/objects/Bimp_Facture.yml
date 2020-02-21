@@ -70,10 +70,6 @@ fields:
         label: Ignorée en compta
         type: bool
         dol_extra_field: 1
-    prime:
-        label: Prime
-        type: money
-        dol_extra_field: 1
     type: 
         label: Type
         type: int

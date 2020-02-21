@@ -48,5 +48,30 @@ class PropalRgePDF extends PropalPDF
         
         return $html;
     }
+    
+    
+    
+    public function renderAfterLines()
+    {
+        $html = parent::renderAfterLines();
+        if(isset($this->object->array_options['options_prime']) && $this->object->array_options['options_prime'] > 0){
+            $html .= '<table cellpadding="20px"><tr><td>';
+    //        $html .= '<p style="font-size: 7px; color: #002E50">';
+            $html .= '<div style="text-indent: 15px; font-size: 7px; color: #002E50">';
+            $html .= "Tout ou partie des travaux relatifs à ce
+    devis ou bon de commande sont éligibles à une prime d’un
+    montant de ".price($this->object->array_options['options_prime'])." euros dont
+    EDF est à l’origine dans le cadre du dispositif des Certificats
+    d’Economie d'Energie. Le montant de cette prime ne pourra
+    être révisé à la baisse qu’en cas de modification du volume de
+    Certificats d’Economies d’Energie attaché à l’opération ou aux
+    opérations d’économies d’énergie ou de la situation de
+    précarité énergétique et ce, de manière proportionnelle.";
+            $html .= '</div>';
+    //        $html .= '</p>';
+            $html .= '</td></tr></table>';
+        }
+        $this->writeContent($html);
+    }
 
 }

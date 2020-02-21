@@ -4,7 +4,7 @@ require_once DOL_DOCUMENT_ROOT . '/bimpfichinter/objects/objectInter.class.php';
 
 class Bimp_Fichinter extends ObjectInter {
 
-    public $force_update_date_ln = true;
+    public $force_update_date_ln = false;
     public static $dol_module = 'fichinter';
     public $extraFetch = false;
     public static $nature_list = array(

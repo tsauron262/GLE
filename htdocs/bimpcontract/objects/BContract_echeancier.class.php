@@ -58,17 +58,28 @@ class BContract_echeancier extends BimpObject {
     public function renderlistEndPeriod() {
         $parent = $this->getParentInstance();
         $start = New DateTime($this->getData('next_facture_date'));
-        $for_return_array_end_date = date('Y-m-d', mktime(0, 0, 0, $start->format('m') + 1, 0, $start->format('Y')));
+//        $for_return_array_end_date = date('Y-m-d', mktime(0, 0, 0, $start->format('m') + 1, 0, $start->format('Y')));
+//        $for_return_array_end_date = $start->add(new DateInterval("P" . $parent->getData('periodicity') . 'M'));
+        
+        
+        $start->add(new DateInterval("P" . $parent->getData('periodicity') . 'M'));
+        $start->sub(new dateInterval('P1D'));
+        $for_return_array_end_date = $start->format('Y-m-d');
+        
         $for_return_array_start_date = date('Y-m-d', mktime(0, 0, 0, $start->format('m'), 1, $start->format('Y')));
         $dateTime_end_date = new DateTime($for_return_array_end_date);
         $reste_periode = $parent->reste_periode();
         $returnedArray = Array();
 
-        for ($rp = 1; $rp <= $reste_periode; $rp++) {
+        
+        $reste_periodeEntier = ceil($reste_periode);
+        for ($rp = 1; $rp <= $reste_periodeEntier; $rp++) {
             $returnedArray[$dateTime_end_date->format('Y-m-d H:i:s')] = $dateTime_end_date->format('d/m/Y');
             $start->add(new DateInterval("P" . $parent->getData('periodicity') . 'M'));
             $for_return_array_end_date = date('Y-m-d', mktime(0, 0, 0, $start->format('m') + 1, 0, $start->format('Y')));
             $dateTime_end_date = new DateTime($for_return_array_end_date);
+            if($parent->getEndDate() < $dateTime_end_date)
+                $dateTime_end_date = $parent->getEndDate();
         }
 
         return $returnedArray;
@@ -292,8 +303,8 @@ class BContract_echeancier extends BimpObject {
             $firstPassage = true;
             $firstDinamycLine = true;
 
-            $data->reste_periodeEntier = ceil($data->reste_periode);
-            for ($i = 1; $i <= $data->reste_periodeEntier; $i++) {
+            $reste_periodeEntier = ceil($data->reste_periode);
+            for ($i = 1; $i <= $reste_periodeEntier; $i++) {
                 $morceauPeriode = (($data->reste_periode - ($i-1)) >= 1)? 1 : (($data->reste_periode - ($i-1)));
                 if (!$firstPassage) {
                     $startedDate->add(new DateInterval("P" . $data->periodicity . "M"));

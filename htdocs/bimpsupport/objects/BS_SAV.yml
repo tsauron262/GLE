@@ -157,6 +157,7 @@ fields:
                 type: search_societe
                 societe_type: customer    
         create_form: light
+        edit_form: default
     id_contact:
         label: Contact
         type: id_object

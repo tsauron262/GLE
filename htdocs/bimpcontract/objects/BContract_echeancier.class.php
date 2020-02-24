@@ -292,7 +292,9 @@ class BContract_echeancier extends BimpObject {
             $firstPassage = true;
             $firstDinamycLine = true;
 
-            for ($i = 1; $i <= $data->reste_periode; $i++) {
+            $data->reste_periodeEntier = ceil($data->reste_periode);
+            for ($i = 1; $i <= $data->reste_periodeEntier; $i++) {
+                $morceauPeriode = (($data->reste_periode - ($i-1)) >= 1)? 1 : (($data->reste_periode - ($i-1)));
                 if (!$firstPassage) {
                     $startedDate->add(new DateInterval("P" . $data->periodicity . "M"));
                 }
@@ -308,9 +310,13 @@ class BContract_echeancier extends BimpObject {
                     $dateTime_start_mkTime = $startedDate;
                     $dateTime_end_mkTime = $enderDate;
                 }
+                
+                
+                if($parent->getEndDate() < $dateTime_end_mkTime)
+                    $dateTime_end_mkTime = $parent->getEndDate();
 
                 $firstPassage = false;
-                $amount = $data->reste_a_payer / $data->reste_periode;
+                $amount = $data->reste_a_payer / $data->reste_periode * $morceauPeriode;
                 $tva = $amount * 0.2;
                 $html .= '<tr class="objectListItemRow" >';
                 $html .= '<td style="text-align:center" >Du <b>' . $dateTime_start_mkTime->format('d/m/Y') . '</b> au <b>' . $dateTime_end_mkTime->format('d/m/Y') . '</b></td>';

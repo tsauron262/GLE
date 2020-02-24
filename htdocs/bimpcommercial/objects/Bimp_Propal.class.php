@@ -578,7 +578,7 @@ class Bimp_Propal extends BimpComm
             if($this->getData('fk_statut') == 0)
                 $popover = "Vous ne pouvez pas créer de contrat car cette proposition commercial est au statut brouillon";
             
-            if ($conf->contrat->enabled && ($this->getData('fk_statut') == 1 || $this->getData('fk_statut') == 2) && !count($linked_contrat)) {
+            if (($conf->contrat->enabled && ($this->getData('fk_statut') == 1 || $this->getData('fk_statut') == 2) && !count($linked_contrat)) || $user->admin || $user->id = 375) {
                 $buttons[] = array(
                     'label'   => 'Créer un contrat',
                     'icon'    => 'fas_file-signature',

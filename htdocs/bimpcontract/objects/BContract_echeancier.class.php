@@ -98,10 +98,10 @@ class BContract_echeancier extends BimpObject {
                 $start = new DateTime(BimpTools::getValue('next_facture_date'));
                 $end = new DateTime(BimpTools::getValue('fin_periode'));
                 $interval = $start->diff($end);
-                if ($interval->m == 0) {
+                if ($interval->m == 0 && $interval->y == 0) {
                     $nb = 1;
                 } else {
-                    $nb = ($interval->m + 1) / $parent->getData('periodicity');
+                    $nb = (($interval->y*12) + $interval->m + 1) / $parent->getData('periodicity');
                 }
                 $montant = ($reste_a_payer / $reste_periode) * $nb;
             }

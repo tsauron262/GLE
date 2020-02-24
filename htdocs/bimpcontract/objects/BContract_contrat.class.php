@@ -23,6 +23,7 @@ class BContract_contrat extends BimpDolObject {
     CONST CONTRAT_PERIOD_TRIMESTRIELLE = 3;
     CONST CONTRAT_PERIOD_SEMESTRIELLE = 6;
     CONST CONTRAT_PERIOD_ANNUELLE = 12;
+    CONST CONTRAT_PERIOD_TOTAL = 1200;
     // Les délais d'intervention
     CONST CONTRAT_DELAIS_0_HEURES = 0;
     CONST CONTRAT_DELAIS_4_HEURES = 4;
@@ -61,6 +62,7 @@ class BContract_contrat extends BimpDolObject {
         self::CONTRAT_PERIOD_TRIMESTRIELLE => 'Trimestrielle',
         self::CONTRAT_PERIOD_SEMESTRIELLE => 'Semestrielle',
         self::CONTRAT_PERIOD_ANNUELLE => 'Annuelle',
+        self::CONTRAT_PERIOD_TOTAL => 'Une fois',
         self::CONTRAT_PERIOD_AUCUNE => 'Aucune',
     );
     public static $gti = Array(

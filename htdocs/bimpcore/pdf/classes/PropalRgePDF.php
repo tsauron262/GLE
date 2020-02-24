@@ -73,5 +73,14 @@ class PropalRgePDF extends PropalPDF
         }
         $this->writeContent($html);
     }
+    
+    
+    public function getSenderInfosHtml() {
+        $html = parent::getSenderInfosHtml();
+        
+        $html .= '<span style="font-size: 9px">DÉCENNALE MAAF:143052607MMCE001 Chauray - 79036 NIORT.
+<br/>Numéro QUALIT ENR:46512 PAC BOIS CHAUFFAGE+' . '</span>';
+        return $html;
+    }
 
 }

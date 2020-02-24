@@ -343,9 +343,10 @@ class BContract_echeancier extends BimpObject {
 
             if (($parent->is_not_finish() && $user->rights->facture->creer) || ($user->admin || $user->id == 460)) {
                 $html .= '<div class="panel-footer">';
-                if(($user->admin || $user->id == 460) && $this->canEdit()) {
+                if(($user->admin) && $this->canEdit()) {
                     $html .= '<div class="btn-group"><button type="button" class="btn btn-danger bs-popover" '.BimpRender::renderPopoverData('Supprimer l\'échéancier').' aria-haspopup="true" aria-expanded="false" onclick="' . $this->getJsActionOnclick('delete') . '"><i class="fa fa-times"></i></button></div>';
-                } elseif($this->canEdit()) {
+                } 
+                if($this->canEdit()) {
                     $html .= '<div class="btn-group"><button type="button" class="btn btn-default" aria-haspopup="true" aria-expanded="false" onclick="' . $this->getJsLoadModalForm('create_perso', "Créer une facture personalisée ou une facturation de plusieurs périodes") . '"><i class="fa fa-plus-square-o iconLeft"></i>Créer une facture personalisée ou une facturation de plusieurs périodes</button></div>';
                 }
                 $html .= '</div>';

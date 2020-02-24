@@ -107,7 +107,7 @@ class BContract_echeancier extends BimpObject {
             }
 
             if ($montant > $parent->reste_a_payer()) {
-                return "Vous ne pouvez pas indiquer un montant suppérieur au reste à payer";
+                return "Vous ne pouvez pas indiquer un montant (".$montant.") suppérieur au reste à payer ".$parent->reste_a_payer();
             } elseif ($montant == 0) {
                 return "Vous ne pouvez pas indiquer un montant égale à 0";
             }

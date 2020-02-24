@@ -18,7 +18,7 @@ class PropalRgePDF extends PropalPDF
         if (file_exists($soc_logo_file)) {
             $sizes = dol_getImageSize($soc_logo_file, false);
             if (isset($sizes['width']) && (int) $sizes['width'] && isset($sizes['height']) && $sizes['height']) {
-                $tabTaille = $this->calculeWidthHieghtLogo($sizes['width'] / 3, $sizes['height'] / 3, 200, 50);
+                $tabTaille = $this->calculeWidthHieghtLogo($sizes['width'] / 3, $sizes['height'] / 3, 250, 90);
 
                 $header_right = '<img src="' . $soc_logo_file . '" width="' . $tabTaille[0] . 'px" height="' . $tabTaille[1] . 'px"/>';
             }
@@ -78,8 +78,9 @@ class PropalRgePDF extends PropalPDF
     public function getSenderInfosHtml() {
         $html = parent::getSenderInfosHtml();
         
-        $html .= '<span style="font-size: 9px">DÉCENNALE MAAF:143052607MMCE001 Chauray - 79036 NIORT.
-<br/>Numéro QUALIT ENR:46512 PAC BOIS CHAUFFAGE+' . '</span>';
+        $html .= '<span style="font-size: 9px"><br/>DÉCENNALE MAAF:143052607MMCE001
+<br/>Chauray - 79036 NIORT.
+<br/>Numéro QUALIT ENR/PAC/BOIS/CHAUFFAGE+ : 46512' . '</span>';
         return $html;
     }
 

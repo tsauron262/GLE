@@ -880,6 +880,9 @@ lists_cols:
     hide_in_pdf: 
         label: Masquer (PDF)
         field: hide_in_pdf
+    refProd:
+        field: ref
+        child: product
                         
 lists:      
     global:

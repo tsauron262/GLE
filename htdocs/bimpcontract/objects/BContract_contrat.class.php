@@ -148,7 +148,7 @@ class BContract_contrat extends BimpDolObject {
             $commercial = $this->getInstance('bimpcore', 'Bimp_User', $this->getData('fk_commercial_suivi'));
 
             if ($commercial->isLoaded()) {
-                mailSyn2('Contrat activé', 'facturationclients@bimp.fr', 'accueil@bimp.fr', "Merci de bien vouloir facturer le contrat n°" . $this->getNomUrl() . " pour " . $commercial->getNomUrl());
+                mailSyn2('Contrat activé', 'facturationclients@bimp.fr', 'admin@bimp.fr', "Merci de bien vouloir facturer le contrat n°" . $this->getNomUrl() . " pour " . $commercial->getNomUrl());
             } else {
                 $warnings[] = "Le mailm n'à pas pu être envoyé, merci de contacter directement la personne concernée";
             }
@@ -673,7 +673,7 @@ class BContract_contrat extends BimpDolObject {
         $this->updateField('date_contrat', date('Y-m-d HH:ii:ss'));
 
         if ($this->getData('statut') != self::CONTRAT_STATUS_ACTIVER)
-            mailSyn2("Contrat signé", 'contrat@bimp.fr', 'accueil@bimp.fr', 'Un contrat vient de passer au statut signé. Merci de bien vouloir l\'Activer <br /><b>Contrat : ' . $this->getNomUrl() . '</b>');
+            mailSyn2("Contrat signé", 'contrat@bimp.fr', 'admin@bimp.fr', 'Un contrat vient de passer au statut signé. Merci de bien vouloir l\'Activer <br /><b>Contrat : ' . $this->getNomUrl() . '</b>');
     }
 
     public function actionValidation($data, &$success) {

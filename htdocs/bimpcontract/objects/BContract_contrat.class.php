@@ -914,6 +914,31 @@ class BContract_contrat extends BimpDolObject {
     public function fetch($id, $parent = null) {
         $return = parent::fetch($id, $parent);
         $this->autoClose();
+        
+        
+        //verif des vieux fichiers joints
+        $dir = DOL_DATA_ROOT."/bimpcore/bimpcontract/BContract_contrat/".$this->id."/";
+        $newdir = DOL_DATA_ROOT."/contract/".$this->getData('ref')."/";
+        if(!is_dir($newdir))
+            mkdir($newdir);
+        
+        if(is_dir($dir) && is_dir($newdir)){
+            $ok = true;
+            $res= scandir($dir);
+            foreach ($res as $file){
+                if(!in_array($file, array(".", "..")))
+                    if(!rename($dir.$file, $newdir.$file))
+                        $ok = false;
+            }
+            if(!$ok)
+                mailSyn2 ("Probléme déplacement fichiers", 'tommy@bimp.fr', null, 'Probléme dep '.$dir.$file ." to ". $newdir.$file);
+            else
+                rmdir($dir); 
+        }
+        
+        
+        
+        
         return $return;
     }
 

@@ -192,6 +192,7 @@ forms:
                   callback: isLoaded
             - field: note_private
             - field: note_public
+            - field: prime
             
     close: 
         rows: 
@@ -419,6 +420,7 @@ fields_tables:
             - field: total_ht
             - field: tva
             - field: total
+            - field: prime
             
 views: 
     default: 

@@ -167,7 +167,7 @@ class ObjectInter extends extraFI{
     
     public function iAmAdminRedirect() {
         global $user;
-        if(in_array($user->id, array(1, 375, 35, 446, 277, 242, 42, 330, 62)))
+        if(in_array($user->id, array(1, 375, 35, 446, 277, 242, 42, 330, 62, 157, 206, 376)))
             return true;
         parent::iAmAdminRedirect();
     }  

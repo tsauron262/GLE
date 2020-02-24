@@ -1110,7 +1110,7 @@ class SynopsisfichinterLigne extends FichinterLigne{
         $sql.= ')';
         $sql.= " VALUES (" . $this->fk_fichinter . ",";
         $sql.= " '" . addslashes($this->desc) . "',";
-        $sql.= " '" . $this->db->idate($this->db->jdate($this->datei)) . "',";
+        $sql.= " '" . $this->db->idate($this->datei) . "',";
         $sql.= " " . $this->duration . ",";
         $sql.= ' ' . $rangToUse;
         $sql.= ')';
@@ -1212,7 +1212,7 @@ class SynopsisfichinterLigne extends FichinterLigne{
         // Mise a jour ligne en base
         $sql = "UPDATE " . MAIN_DB_PREFIX . "fichinterdet SET";
         $sql.= " description='" . addslashes($this->desc) . "'";
-        $sql.= ",date='" . $this->db->idate($this->db->jdate($this->datei))."'";//Non testé
+        $sql.= ",date='" . $this->db->idate($this->datei)."'";//Non testé
         $sql.= ",duree=" . $this->duration;
         $sql.= ",rang='" . $this->rang . "'";
         $sql.= " WHERE rowid = " . $this->rowid;

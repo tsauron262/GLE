@@ -362,6 +362,8 @@ forms:
                 field: statut_export
             douane_number:
                 field: douane_number
+            prime:
+                field: prime
             
     refacture: 
         extends: default
@@ -632,6 +634,7 @@ fields_tables:
             - field: total
             - field: tva
             - field: total_ttc
+            - field: prime
             
 views: 
     default: 

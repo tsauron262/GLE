@@ -2389,7 +2389,9 @@ class Bimp_CommandeLine extends ObjectLine
                     $html .= '<div class="buttonsContainer align-center">';
                     $onclick = $commande->getJsActionOnclick('linesFactureQties', array(
                         'new_facture'       => 1,
-                        'id_client'         => (int) $commande->getData('fk_soc'),
+                        'id_client_facture'         => (int) $commande->getData('fk_soc'),
+                        'note_public'         => htmlentities($commande->getData('note_public')),
+                        'note_private'         => htmlentities($commande->getData('note_private')),
                         'id_contact'        => (int) $commande->dol_object->contactid,
                         'id_cond_reglement' => (int) $commande->getData('fk_cond_reglement')
                             ), array(

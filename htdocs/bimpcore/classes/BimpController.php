@@ -1200,9 +1200,11 @@ class BimpController
                         $field = new BC_Field($object, $field_name, true);
                         $field->name_prefix = $field_prefix;
                         $field->display_card_mode = 'visible';
-                        if (($field->params['type'] === 'id_object' || ($field->params['type'] === 'items_list' && $field->params['items_data_type'] === 'id_object')) &&
-                                $field->params['create_form']) {
-                            $html .= BC_Form::renderCreateObjectButton($object, $form_id, $field->params['object'], $field_prefix . $field_name, $field->params['create_form'], $field->params['create_form_values'], $field->params['create_form_label'], true);
+                        if ($field->params['type'] === 'id_object' || ($field->params['type'] === 'items_list' && $field->params['items_data_type'] === 'id_object')){
+                            if($field->params['create_form'])
+                                $html .= BC_Form::renderLoadFormObjectButton($object, $form_id, $field->params['object'], $field_prefix . $field_name, $field->params['create_form'], $field->params['create_form_values'], $field->params['create_form_label'], true);
+                            if($field->params['edit_form'])
+                                $html .= BC_Form::renderLoadFormObjectButton($object, $form_id, $field->params['object'], $field_prefix . $field_name, $field->params['edit_form'], $field->params['edit_form_values'], $field->params['edit_form_label'], true, null, '', -1);
                         }
                         $html .= $field->renderInput();
                         unset($field);

@@ -20,13 +20,19 @@ class BC_Field extends BimpComponent
             'object'             => array('default' => ''),
             'create_form'        => array('default' => ''),
             'create_form_values' => array('data_type' => 'array'),
-            'create_form_label'  => array('default' => 'Créer')
+            'create_form_label'  => array('default' => 'Créer'),
+            'edit_form'        => array('default' => ''),
+            'edit_form_values' => array('data_type' => 'array'),
+            'edit_form_label'  => array('default' => 'Editer')
         ),
         'id_object'  => array(
             'object'             => array('default' => ''),
             'create_form'        => array('default' => ''),
             'create_form_values' => array('data_type' => 'array'),
             'create_form_label'  => array('default' => 'Créer'),
+            'edit_form'        => array('default' => ''),
+            'edit_form_values' => array('data_type' => 'array'),
+            'edit_form_label'  => array('default' => 'Editer')
         ),
         'items_list' => array(
             'items_data_type' => array('default' => 'string'),

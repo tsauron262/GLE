@@ -99,6 +99,7 @@ fields:
             card: default
         required: 1
         create_form: light
+        edit_form: default
     ref_client: 
         label: Référence client
     fk_cond_reglement: 
@@ -211,6 +212,10 @@ fields:
         label: Historique
         type: html
         default_value: ''
+    prime:
+        label: Prime
+        type: money
+        dol_extra_field: 1
     
 forms: 
     contact:
@@ -240,6 +245,7 @@ forms:
               input_name: id_contact
               data_type: id_object
               object: contact
+              edit_form: default
               create_form: default
               create_form_values:
                   fields: 

@@ -36,9 +36,9 @@ fields:
     rowid:
         label: Id
         type: int
-    fk_typeinterv:
-        label: Nature de l'inter
-        type: int
+#    fk_typeinterv:
+#        label: Nature de l'inter
+#        type: int
     datei:
         label: Date
         type: date

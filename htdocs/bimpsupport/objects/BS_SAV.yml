@@ -157,6 +157,7 @@ fields:
                 type: search_societe
                 societe_type: customer    
         create_form: light
+        edit_form: default
     id_contact:
         label: Contact
         type: id_object
@@ -609,7 +610,7 @@ fields_tables:
                  
     facturation:
         title: Facturation
-        icon: info-money
+        icon: fas_euro-sign
         rows: 
             - field: id_facture_acompte
               display: card

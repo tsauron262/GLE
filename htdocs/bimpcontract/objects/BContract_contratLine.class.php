@@ -125,7 +125,7 @@ class BContract_contratLine extends BContract_contrat {
                 $html .= '</tbody>';
                 $html .= '<table>';
             } else {
-                $html .= BimpRender::renderAlerts("Il n'y à pas de numéros de série dans cette ligne de service", 'info', false);
+                $html .= BimpRender::renderAlerts("Il n'y a pas de numéros de série dans cette ligne de service", 'info', false);
             }
         } else {
             foreach ($array as $serial) {

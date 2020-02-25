@@ -504,7 +504,7 @@ class BContract_contrat extends BimpDolObject {
                     );
                 }
 
-                if (($user->admin || $user->id == 460 || $user->id == 375) && $status != self::CONTRAT_STATUS_BROUILLON && is_null($this->getData('date_contrat'))) {
+                if (is_null($this->getData('date_contrat'))) {
                     $buttons[] = array(
                         'label' => 'Contrat signé',
                         'icon' => 'fas_signature',

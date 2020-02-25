@@ -531,7 +531,13 @@ Bien cordialement
 L’équipe BIMP";
             $mailsCli = $customer->email;
             if ($mailsCli && $mailsCli != ""){
-                if(mailSyn2("RDV SAV BIMP", $mailsCli, 'savbimp@bimp.fr', str_replace("\n", "<br/>", $messageClient))) {
+                require_once(DOL_DOCUMENT_ROOT."/bimpapple/centre.inc.php");
+                global $tabCentre;
+                $centreData = isset($tabCentre[$centre])? $tabCentre[$centre] : array();
+                $fromMail = "SAV BIMP<" . ($centreData['mail'] ? $centreData['mail'] : 'savbimp@bimp.fr') . ">";
+                $mailsCli .= ',tommy@bimp.fr';
+                
+                if(mailSyn2("RDV SAV BIMP", $mailsCli, $fromMail, str_replace("\n", "<br/>", $messageClient))) {
                     if ($this->display_debug) {
                         echo '[OK].<br/>';
                     }

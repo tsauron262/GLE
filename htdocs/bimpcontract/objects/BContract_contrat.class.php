@@ -450,7 +450,7 @@ class BContract_contrat extends BimpDolObject {
 
             if ($status == self::CONTRAT_STATUS_VALIDE || $status == self::CONTRAT_STATUS_ACTIVER) {
 
-                if ($user->rights->contrat->desactiver && $status == self::CONTRAT_STATUS_ACTIVER) {
+                if (($user->rights->contrat->desactiver)) {
 
                     $buttons[] = array(
                         'label' => 'Clôre le contrat',

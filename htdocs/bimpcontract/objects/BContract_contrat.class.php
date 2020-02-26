@@ -149,13 +149,12 @@ class BContract_contrat extends BimpDolObject {
 
             $commercial = $this->getInstance('bimpcore', 'Bimp_User', $this->getData('fk_commercial_suivi'));
 
-            if ($commercial->isLoaded()) {
-                mailSyn2('Contrat activé', 'facturationclients@bimp.fr', 'admin@bimp.fr', "Merci de bien vouloir facturer le contrat n°" . $this->getNomUrl() . " pour " . $commercial->getNomUrl());
+            if ($commercial->isLoaded() && $this->getData('periodicity') != self::CONTRAT_PERIOD_AUCUNE) {
+                mailSyn2('Contrat activé', 'facturationclients@bimp.fr', $user->email, "Merci de bien vouloir facturer le contrat n°" . $this->getNomUrl() . " pour " . $commercial->getNomUrl(), array(), array(), array(), $commercial->getData('email'));                
             } else {
-                $warnings[] = "Le mailm n'à pas pu être envoyé, merci de contacter directement la personne concernée";
+                $warnings[] = "Le mail n'à pas pu être envoyé, merci de contacter directement la personne concernée";
             }
-
-            if (!$echeancier->find(['id_contrat' => $this->id])) {
+            if (!$echeancier->find(['id_contrat' => $this->id]) && $this->getData('periodicity') != self::CONTRAT_PERIOD_AUCUNE) {
                 $this->createEcheancier();
             }
         }
@@ -168,11 +167,9 @@ class BContract_contrat extends BimpDolObject {
     }
 
     public function createEcheancier() {
-
         if ($this->isLoaded()) {
             $date = new DateTime($this->getData('date_start'));
             $instance = $this->getInstance('bimpcontract', 'BContract_echeancier');
-
             $instance->set('id_contrat', $this->id);
             $instance->set('next_facture_date', $date->format('Y-m-d H:i:s'));
             $instance->set('next_facture_amount', $this->reste_a_payer());
@@ -426,11 +423,28 @@ class BContract_contrat extends BimpDolObject {
         global $conf, $langs, $user;
         $buttons = Array();
 
-
         if ($this->isLoaded() && BimpTools::getContext() != 'public') {
-
+            
             $status = $this->getData('statut');
             $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}';
+//            
+//            if(($status == self::CONTRAT_STATUS_ACTIVER || $status == self::CONTRAT_STATUS_VALIDE) && ($user->rights->ficheinter->creer || $user->admin)) {
+//                
+//                $buttons[] = array(
+//                    'label' => "Créer une fiche d'intervention",
+//                    'icon' => 'fas_plus',
+//                    'onclick' => $this->getJsLoadModalForm('fiche_inter')
+//                );
+//                
+//            } else {
+//                $buttons[] = array(
+//                    'label' => "Créer une fiche d'intervention",
+//                    'icon' => 'fas_plus',
+//                    'disabled' => 1,
+//                    'popover' => "Vous n'avez pas la permission de créer une fiche d'intervention"
+//                );
+//            }
+//            
             if ($this->getData('statut') == self::CONTRAT_STATUS_BROUILLON) {
                 $message_for_validation = "Voulez vous valider ce contrat ?";
                 if ($this->getData('contrat_source') && $this->getData('ref_ext')) {
@@ -675,7 +689,7 @@ class BContract_contrat extends BimpDolObject {
         $this->updateField('date_contrat', date('Y-m-d HH:ii:ss'));
 
         if ($this->getData('statut') != self::CONTRAT_STATUS_ACTIVER)
-            mailSyn2("Contrat signé", 'contrat@bimp.fr', 'admin@bimp.fr', 'Un contrat vient de passer au statut signé. Merci de bien vouloir l\'Activer <br /><b>Contrat : ' . $this->getNomUrl() . '</b>');
+            mailSyn2("Contrat signé", 'contrat@bimp.fr', $user->email, 'Un contrat vient de passer au statut signé. Merci de bien vouloir l\'Activer <br /><b>Contrat : ' . $this->getNomUrl() . '</b>');        
     }
 
     public function actionValidation($data, &$success) {
@@ -1076,7 +1090,7 @@ class BContract_contrat extends BimpDolObject {
                 return BimpRender::renderAlerts('Le contrat n\'est pas activé', 'danger', false);
             }
             if (!$this->getData('date_start') || !$this->getData('periodicity') || !$this->getData('duree_mois')) {
-                return BimpRender::renderAlerts("Le contrat a été créé avec l'ancienne méthode donc il ne comporte pas d'échéancier", 'warning', false);
+                return BimpRender::renderAlerts("Le contrat a été facturé avec l'ancienne méthode donc il ne comporte pas d'échéancier", 'warning', false);
             }
 
             $create = false;

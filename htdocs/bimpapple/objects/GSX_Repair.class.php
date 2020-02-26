@@ -137,13 +137,13 @@ class GSX_Repair extends BimpObject
     public static function processRepairRequestOutcome($result, &$warnings = array(), $excluded_msgs_types = array())
     {
         $errors = array();
-
         if (isset($result['outcome'])) {
             if (isset($result['outcome']['reasons']))
                 $result['outcome'][] = $result['outcome'];
 
             foreach ($result['outcome'] as $outcome) {
                 if (isset($outcome['reasons'])) {
+                    $action = (isset($outcome['action']))? $outcome['action'] : null;
                     $msgs = array();
                     foreach ($outcome['reasons'] as $reason) {
                         if (isset($reason['type'])) {
@@ -151,9 +151,18 @@ class GSX_Repair extends BimpObject
                                 continue;
                             }
                             $msg = $reason['type'] . '<br/>';
+                            if(!isset($action))
+                                $action = $reason['type'];
                         }
+                        
                         foreach ($reason['messages'] as $message) {
                             $msg .= ' - ' . $message . '<br/>';
+                        }
+                        
+                        //Patch pour faire une erreur des probléme de localisatioin
+                        if(stripos($msg, "La fonctionnalité Localiser mon appareil est activée") !== false){
+                                $action = "ERROR";
+                                $msg .= "<script>alert('La fonctionnalité Localiser mon appareil est activée');</script>";
                         }
 
                         if ($reason['type'] === 'REPAIR_TYPE' && isset($reason['repairOptions'])) {
@@ -172,10 +181,10 @@ class GSX_Repair extends BimpObject
                         }
                         $msgs[] = $msg;
                     }
-                    if (!isset($outcome['action']) || in_array($outcome['action'], array('WARNING', 'MESSAGE', 'HOLD', 'REPAIR_TYPE'))) {
-                        $warnings[] = BimpTools::getMsgFromArray($msgs, $result['outcome']['action']);
+                    if (in_array($action, array('WARNING', 'MESSAGE', 'HOLD', 'REPAIR_TYPE'))){
+                        $warnings[] = BimpTools::getMsgFromArray($msgs, $action);
                     } else {
-                        $errors[] = BimpTools::getMsgFromArray($msgs, $result['outcome']['action']);
+                        $errors[] = BimpTools::getMsgFromArray($msgs, $action);
                     }
                 }
             }

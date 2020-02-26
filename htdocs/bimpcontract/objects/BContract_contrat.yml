@@ -142,7 +142,7 @@ fields:
         type: string
         label: Annule et remplace
         input:
-            help: A remplire en cas de renouvellement d'un ancien contrat - 15 caractères maximum
+            help: A remplir en cas de renouvellement d'un ancien contrat - 15 caractères maximum
     datec:
         label: Date du contrat
         type: date
@@ -229,12 +229,16 @@ fields:
             array: modeReglements
 
     objet_contrat:
-        label: Objet du contrat
+        label: Type du contrat
         type: string
         dol_extra_field: 1
         required: 1
         values:
             array: objet_contrat
+    buy_price_ht:
+        label: Prix d'achat HT
+        type: money
+        required: 1
     entrepot:
         label: Entrepôt
         dol_extra_field: 1
@@ -431,6 +435,9 @@ lists:
             fk_soc: unset
 
 forms:
+    fiche_inter:
+        rows:
+            
     email: 
         rows: 
             - custom: 1

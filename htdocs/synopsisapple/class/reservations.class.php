@@ -531,7 +531,7 @@ Bien cordialement
 L’équipe BIMP";
             $mailsCli = $customer->email;
             if ($mailsCli && $mailsCli != ""){
-                require_once(DOL_DOCUMENT_ROOT."/bimpapple/centre.inc.php");
+                require_once(DOL_DOCUMENT_ROOT."/bimpsupport/centre.inc.php");
                 global $tabCentre;
                 $centreData = isset($tabCentre[$centre])? $tabCentre[$centre] : array();
                 $fromMail = "SAV BIMP<" . ($centreData['mail'] ? $centreData['mail'] : 'savbimp@bimp.fr') . ">";

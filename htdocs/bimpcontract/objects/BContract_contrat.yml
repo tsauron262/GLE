@@ -142,7 +142,7 @@ fields:
         type: string
         label: Annule et remplace
         input:
-            help: A remplire en cas de renouvellement d'un ancien contrat - 15 caractères maximum
+            help: A remplir en cas de renouvellement d'un ancien contrat - 15 caractères maximum
     datec:
         label: Date du contrat
         type: date

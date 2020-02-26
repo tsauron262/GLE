@@ -155,7 +155,7 @@ class BContract_echeancier extends BimpObject {
         $instance->set('fk_account', 1);
         
         if(!$parent->getData('entrepot')) {
-            return "La facture ne peut pas être créer car le contrat n'à pas d'entrepot";
+            return "La facture ne peut pas être crée car le contrat n'a pas d'entrepôt";
         }
         
         $instance->set('entrepot', $parent->getData('entrepot'));

@@ -249,7 +249,7 @@ class BContract_echeancier extends BimpObject {
         $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Montant TVA</th>';
         $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Montant TTC</th>';
         $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Facture</th>';
-        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">&Eacute;tat de paiement</th>';
+        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">&Eacute;tat du paiement</th>';
         $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Action facture</th>';
         $html .= '</tr>';
         $html .= '</thead>';
@@ -269,7 +269,7 @@ class BContract_echeancier extends BimpObject {
                 if ($facture->getData('fk_statut') == 0) {
                     $can_create_next_facture = false;
                 }
-                $paye = ($facture->getData('paye') == 1) ? '<b class="success" >Payée</b>' : '<b class="danger" >Impayée</b>';
+                $paye = ($facture->getData('paye') == 1) ? '<b class="success" >Payée</b>' : '<b class="danger" >Impayé</b>';
                 $html .= '<tr class="objectListItemRow" >';
                 $dateDebut = New DateTime();
                 $dateFin = New DateTime();

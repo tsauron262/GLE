@@ -574,7 +574,7 @@ class Bimp_Propal extends BimpComm
             $linked_contrat = getElementElement('propal', 'contrat', $this->id);
             
             if(count($linked_contrat))
-                $popover = 'Un contrat exsite déjà pour cette proposition commercial';
+                $popover = 'Un contrat existe déjà pour cette proposition commerciale';
             if($this->getData('fk_statut') == 0)
                 $popover = "Vous ne pouvez pas créer de contrat car cette proposition commercial est au statut brouillon";
             

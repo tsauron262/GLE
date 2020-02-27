@@ -1992,8 +1992,11 @@ class Bimp_Facture extends BimpComm
     }
     
     public function displayPDFButton($display_generate = true, $with_ref = true, $btn_label = ''){
-        if($this->getData('fk_statut') > 0 && $this->getFileUrl($ref . '.pdf') == '')
-            $display_generate = false;
+        if($this->getData('fk_statut') > 0){
+            $ref = dol_sanitizeFileName($this->getRef());
+            if($this->getFileUrl($ref . '.pdf') != '')
+                $display_generate = false;
+        }
         
         return parent::displayPDFButton($display_generate, $with_ref, $btn_label);
     }

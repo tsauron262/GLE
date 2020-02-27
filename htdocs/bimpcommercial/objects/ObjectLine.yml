@@ -919,7 +919,7 @@ lists:
             callback: renderQuickAddForm
         enable_search: 1
         enable_sort: 1
-        pagination: 1
+        pagination: 0
         bulk_actions:
             - label: supprimer les lignes sélectionnées
               icon: fas_trash-alt

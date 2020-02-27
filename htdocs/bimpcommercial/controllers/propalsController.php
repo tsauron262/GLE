@@ -26,6 +26,7 @@ class propalsController extends BimpController
     {
         $list = 'default';
         $titre = 'Proposition commerciales';
+        $propal = BimpObject::getInstance('bimpcommercial', 'Bimp_Propal');
         if($this->socid){
             $societe = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $this->socid);
 
@@ -35,8 +36,14 @@ class propalsController extends BimpController
             $list = 'client';
             $titre .= ' du client "' . $societe->getData('code_client') . ' - ' . $societe->getData('nom');
         }
+        
+        if(isset($_REQUEST['fk_statut'])){
+            if(isset($propal::$status_list[GETPOST('fk_statut')]))
+            $titre .= ' au statut '.$propal::$status_list[GETPOST('fk_statut')]['label'];
+        }
+        
+        
 
-        $propal = BimpObject::getInstance('bimpcommercial', 'Bimp_Propal');
 
         $list = new BC_ListTable($propal, $list, 1, null, $titre);
         
@@ -44,6 +51,10 @@ class propalsController extends BimpController
         if($this->socid){
             $list->addFieldFilterValue('fk_soc', (int) $societe->id);
             $list->params['add_form_values']['fields']['fk_soc'] = (int) $societe->id;
+        }
+        
+        if(isset($_REQUEST['fk_statut'])){
+            $list->addFieldFilterValue('fk_statut', (int) GETPOST('fk_statut'));
         }
             return $list->renderHtml();
     }

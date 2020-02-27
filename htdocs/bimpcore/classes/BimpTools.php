@@ -2265,7 +2265,6 @@ class BimpTools
     public static function bloqueDebloque($type, $bloque = true, $nb = 1)
     {
         $file = static::getFileBloqued($type);
-        dol_syslog((($bloque)?"bloquage" : "debloquiage")." ".$file,3 );
         if ($bloque) {
             $random = rand(0, 10000000);
             $text = "Yes" . $random;

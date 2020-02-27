@@ -105,6 +105,8 @@ lists:
             fk_product:
                 field: fk_product
                 display: nom_url
+            subprice:
+                field: subprice
             qty:
                 field: qty
             tva_tx:
@@ -113,8 +115,6 @@ lists:
                 field: remise_percent
             remise:
                 field: remise
-            subprice:
-                field: subprice
             total_ttc:
                 field: total_ttc
             buy_price_ht:

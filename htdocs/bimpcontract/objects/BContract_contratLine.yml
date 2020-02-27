@@ -117,6 +117,8 @@ lists:
                 field: price_ht
             total_ttc:
                 field: total_ttc
+            buy_price_ht:
+                field: buy_price_ht
     interface_client:
         edit_btn: 0
         extends: default

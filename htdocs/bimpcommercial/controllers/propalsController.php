@@ -38,8 +38,12 @@ class propalsController extends BimpController
         }
         
         if(isset($_REQUEST['fk_statut'])){
-            if(isset($propal::$status_list[GETPOST('fk_statut')]))
-            $titre .= ' au statut '.$propal::$status_list[GETPOST('fk_statut')]['label'];
+            $filtres = explode(",", $_REQUEST['fk_statut']);
+            foreach($filtres as $val){
+                if(isset($propal::$status_list[$val]))
+                    $labels[] = $propal::$status_list[$val]['label'];
+            }
+            $titre .= ' au statut '.implode(' ou ', $labels);
         }
         
         
@@ -54,7 +58,8 @@ class propalsController extends BimpController
         }
         
         if(isset($_REQUEST['fk_statut'])){
-            $list->addFieldFilterValue('fk_statut', (int) GETPOST('fk_statut'));
+            $filtres = explode(",", $_REQUEST['fk_statut']);
+            $list->addFieldFilterValue('fk_statut', $filtres);
         }
             return $list->renderHtml();
     }

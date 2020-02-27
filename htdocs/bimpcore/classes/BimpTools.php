@@ -2260,21 +2260,28 @@ class BimpTools
         $_SESSION['context'] = $context;
     }
 
-    public static function bloqueDebloque($type, $bloque = true)
+    
+    public static $nbMax = 10;
+    public static function bloqueDebloque($type, $bloque = true, $nb = 1)
     {
         $file = static::getFileBloqued($type);
+        dol_syslog((($bloque)?"bloquage" : "debloquiage")." ".$file,3 );
         if ($bloque) {
             $random = rand(0, 10000000);
             $text = "Yes" . $random;
-            file_put_contents($file, $text);
+            if(!file_put_contents($file, $text))
+                    die('droit sur fichier incorrect : '.$file);
             sleep(0.400);
             $text2 = file_get_contents($file);
             if ($text == $text2)
                 return 1;
             else {//conflit
                 mailSyn2("Conflit de ref évité", "dev@bimp.fr", "admin@bimp.fr", "Attention : Un conflit de ref de type " . $type . " a été évité");
-                self::sleppIfBloqued($type);
-                return static::bloqueDebloque($type, $bloque);
+                $nb++;
+                if($nb > static::$nbMax)
+                    die('On arrete tout erreur 445834834857');
+                self::sleppIfBloqued($type, $nb);
+                return static::bloqueDebloque($type, $bloque, $nb);
             }
         } elseif (is_file($file))
             return unlink($file);
@@ -2296,17 +2303,16 @@ class BimpTools
 
     public static function sleppIfBloqued($type, $nb = 0)
     {
-        $nbMax = 10;
         $nb++;
         if (static::isBloqued($type)) {
-            if ($nb < $nbMax) {
+            if ($nb < static::$nbMax) {
                 sleep(1);
                 return static::sleppIfBloqued($type, $nb);
             } else {
-                $text = "Attention bloquage de plus de " . $nbMax . " secondes voir pour type : " . $type;
+                $text = "Attention bloquage de plus de " . static::$nbMax . " secondes voir pour type : " . $type;
                 dol_syslog("ATTENTION " . $text, 3);
                 mailSyn2("Bloquage anormal", "dev@bimp.fr", "admin@bimp.fr", "Attention : " . $text);
-                static::bloqueDebloque($type, false);
+                static::bloqueDebloque($type, false, $bn);
                 return 0;
             }
         } else

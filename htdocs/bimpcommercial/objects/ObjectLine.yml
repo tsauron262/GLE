@@ -917,9 +917,9 @@ lists:
         objects_change_reload: ObjectLineRemise,RemiseGlobale
         after_list_content: 
             callback: renderQuickAddForm
-        enable_search: 0
-        enable_sort: 0
-        pagination: 0
+        enable_search: 1
+        enable_sort: 1
+        pagination: 1
         bulk_actions:
             - label: supprimer les lignes sélectionnées
               icon: fas_trash-alt

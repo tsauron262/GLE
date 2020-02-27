@@ -434,9 +434,9 @@ lists:
         configurable: 1
         position: 1
         position_open: 1
-        enable_search: 0
-        enable_sort: 0Œ
-        pagination: 0
+        enable_search: 1
+        enable_sort: 1
+        pagination: 1
         sort_field: position
         sort_way: asc
         n: 0

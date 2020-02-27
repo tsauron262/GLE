@@ -148,9 +148,10 @@ class BContract_contrat extends BimpDolObject {
             $echeancier = $this->getInstance('bimpcontract', 'BContract_echeancier');
 
             $commercial = $this->getInstance('bimpcore', 'Bimp_User', $this->getData('fk_commercial_suivi'));
+            $client = $this->getInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
 
             if ($commercial->isLoaded() && $this->getData('periodicity') != self::CONTRAT_PERIOD_AUCUNE) {
-                mailSyn2('Contrat activé', 'facturationclients@bimp.fr', $user->email, "Merci de bien vouloir facturer le contrat n°" . $this->getNomUrl() . " pour " . $commercial->getNomUrl(), array(), array(), array(), $commercial->getData('email'));                
+                mailSyn2('Contrat activé', 'facturationclients@bimp.fr', $user->email, "Merci de bien vouloir facturer le contrat n°" . $this->getNomUrl() . " pour " . $commercial->getNomUrl() . '<br /><b>Client : ' . $client->getNomUrl() . ' </b>', array(), array(), array(), $commercial->getData('email'));                
             } else {
                 $warnings[] = "Le mail n'à pas pu être envoyé, merci de contacter directement la personne concernée";
             }
@@ -1361,8 +1362,7 @@ class BContract_contrat extends BimpDolObject {
         if ($data['use_syntec'] == 1) {
             $new_contrat->set('syntec', BimpCore::getConf('current_indice_syntec'));
         }
-//        echo '<pre>';
-//        print_r($commande->dol_object->lines); die();
+
         $errors = $new_contrat->create();
         if (!count($errors)) {
             foreach ($propal->dol_object->lines as $line) {

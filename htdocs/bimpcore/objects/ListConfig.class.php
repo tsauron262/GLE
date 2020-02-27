@@ -81,7 +81,7 @@ class ListConfig extends BimpObject
             $path = $this->getListObjConfigPath();
 
             if ($path) {
-                return (int) ((int) $obj->config->get($path . '/pagination', 1, false, 'bool') && (int) $obj->config->get($path . '/n', 10, false, 'int'));
+                return (int) ((int) $obj->config->get($path . '/pagination', 1, false, 'bool'));
             }
         }
 

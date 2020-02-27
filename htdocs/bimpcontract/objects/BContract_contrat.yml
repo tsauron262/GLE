@@ -235,10 +235,6 @@ fields:
         required: 1
         values:
             array: objet_contrat
-    buy_price_ht:
-        label: Prix d'achat HT
-        type: money
-        required: 1
     entrepot:
         label: Entrepôt
         dol_extra_field: 1

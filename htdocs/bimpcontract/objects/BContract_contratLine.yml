@@ -77,6 +77,10 @@ fields:
         label: Remise
         type: percent
         default_value: 0
+    buy_price_ht:
+        label: Prix d'achat HT
+        type: money
+        required: 1
     remise:
         label: Total remise
         type: money

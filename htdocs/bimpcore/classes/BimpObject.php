@@ -6811,6 +6811,9 @@ class BimpObject extends BimpCache
                     $objName = $this->dol_object->element;
                 $url .= "&socid=" . BimpTools::getValue("socid");
             }
+            if (BimpTools::getValue("viewstatut") != "") {
+                $url .= "&fk_statut=" . BimpTools::getValue("viewstatut");
+            }
 
 //            https://erp.bimp.fr/test11/bimpcommercial/index.php?search=1&object=propal&sall=PR1809-91794&fc=propals
         }

@@ -6814,6 +6814,12 @@ class BimpObject extends BimpCache
             if (BimpTools::getValue("viewstatut") != "") {
                 $url .= "&fk_statut=" . BimpTools::getValue("viewstatut");
             }
+            if (BimpTools::getValue("statut") != "") {
+                $url .= "&fk_statut=" . BimpTools::getValue("statut");
+            }
+            if (BimpTools::getValue("search_status") != "") {
+                $url .= "&fk_statut=" . BimpTools::getValue("search_status");
+            }
 
 //            https://erp.bimp.fr/test11/bimpcommercial/index.php?search=1&object=propal&sall=PR1809-91794&fc=propals
         }

@@ -535,7 +535,6 @@ L’équipe BIMP";
                 global $tabCentre;
                 $centreData = isset($tabCentre[$centre])? $tabCentre[$centre] : array();
                 $fromMail = "SAV BIMP<" . ($centreData[1] ? $centreData[1] : 'savbimp@bimp.fr') . ">";
-                $mailsCli .= ',tommy@bimp.fr';
                 
                 if(mailSyn2("RDV SAV BIMP", $mailsCli, $fromMail, str_replace("\n", "<br/>", $messageClient))) {
                     if ($this->display_debug) {

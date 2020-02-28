@@ -3082,7 +3082,8 @@ class BimpObject extends BimpCache
 
         $errors = array();
         foreach ($fields as $field => $params) {
-            $errors = array_merge($errors, $this->validateValue($field, isset($this->data[$field]) ? $this->data[$field] : null));
+            $value = $this->getData($field);
+            $errors = array_merge($errors, $this->validateValue($field, $value));
         }
         return $errors;
     }
@@ -3938,8 +3939,9 @@ class BimpObject extends BimpCache
     {
         $errors = array();
 
-        foreach ($this->data as $field => $value) {
+        foreach ($this->params['fields'] as $field) {
             if ($this->field_exists($field)) {
+                $value = $this->getData($field);
                 if ((int) $this->getConf('fields/' . $field . '/dol_extra_field', 0, false, 'bool')) {
                     if (preg_match('/^ef_(.*)$/', $field, $matches)) {
                         $extrafield = $matches[1];

@@ -648,6 +648,7 @@ class BContract_contrat extends BimpDolObject {
             case 'fk_commercial_suivi':
             case 'moderegl':
             case 'objet_contrat':
+            case 'ref_customer':
                 return 1;
                 break;
             default:
@@ -1359,6 +1360,7 @@ class BContract_contrat extends BimpDolObject {
         $new_contrat->set('note_public', $data['note_public']);
         $new_contrat->set('note_private', $data['note_private']);
         $new_contrat->set('ref_ext', $data['ref_ext']);
+        $new_contrat->set('ref_customer', $data['ref_customer']);
         if ($data['use_syntec'] == 1) {
             $new_contrat->set('syntec', BimpCore::getConf('current_indice_syntec'));
         }

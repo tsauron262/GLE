@@ -12,6 +12,9 @@ if (isset($_GET['actionTest'])) {
     if ($_GET['actionTest'] == "rfpuAuto") {
         $class->tentativeARestitueAuto();
     }
+    if ($_GET['actionTest'] == "fetchEquipmentsImei") {
+        $class->fetchEquipmentsImei();
+    }
 
 
     if ($_GET['actionTest'] == "global") {
@@ -330,13 +333,22 @@ AND DATEDIFF(now(), s.date_update) < 60 ";
 
         if ($gsx->logged) {
             $equipment = BimpObject::getInstance('bimpequipment', 'Equipment');
+            
+            $modeLabel = 1;
+            if($modeLabel)
+                $filtre = array(
+                    'id_product'  => 0,
+                    'product_label' => ''
+                );
+            else
+                $filtre = array(
+                    'serial'  => array(
+                                'operator' => '!=',
+                                'value'    => '0'
+                              )
+                        );
 
-            $rows = $equipment->getList(array(
-                'serial'  => array(
-                            'operator' => '!=',
-                            'value'    => '0'
-                          )
-                    ), $nb, 1, 'imei2', 'asc', 'array', array('id', 'serial'));
+            $rows = $equipment->getList($filtre, $nb, 1, 'imei2', 'asc', 'array', array('id', 'serial'));
 
             if (!empty($rows)) {
                 foreach ($rows as $r) {
@@ -370,6 +382,9 @@ AND DATEDIFF(now(), s.date_update) < 60 ";
                         'imei2' => $imei2,
                         'meid' => $meid
                     );
+                    
+                    if($modeLabel)
+                        $data['product_label'] = ($ids['productDescription'] != '')? $ids['productDescription'] : 'N/A';
 
                     if ($r['serial'] && $serial && $r['serial'] !== $serial) {
                         $data['serial'] = $serial;

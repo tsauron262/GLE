@@ -210,7 +210,7 @@ class BimpStatsFacture {
                         $sql .= ' fs.code_centre as centre1, fs.id_entrepot as fk_entrepot1, fs.id as sav_id, fs.ref as sav_ref,';
                         $sql .= ' eq.product_label as description, ';
                         $sql .= ' eq.serial as numero_serie, eq.warranty_type as type_garantie,';
-                        $sql .= ' re.repair_confirm_number as ggsx, re.repair_number as ggsx2, p.description as pdesc ';
+                        $sql .= ' re.repair_confirm_number as ggsx, re.repair_number as ggsx2, p.label as pdesc ';
 
                         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'bs_sav as fs';
                         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'be_equipment as eq ON eq.id = fs.id_equipment';

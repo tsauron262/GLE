@@ -162,8 +162,8 @@ class BimpComm extends BimpDolObject
                     $futur = $actuel + $this->dol_object->total_ttc;
 
                     if ($max > 0 && $this->dol_object->total_ttc > 0 && $max < $futur) {
-                        $msg = "Montant encours client dépassé. Maximum : " . price($max) . " €. Actuel :" . price($actuel) . " €. Necessaire : " . price($futur) . " €.";
-                        $errors[] = $msg;
+//                        $msg = "Montant encours client dépassé. Maximum : " . price($max) . " €. Actuel :" . price($actuel) . " €. Necessaire : " . price($futur) . " €.";
+//                        $errors[] = $msg;
                     }
 
                     $errors = BimpTools::merge_array($errors, $this->checkContacts());
@@ -2924,7 +2924,7 @@ class BimpComm extends BimpDolObject
                 }
             }
         }
-//        return $errors;
+        return $errors;
     }
 
     public function addLog($text)

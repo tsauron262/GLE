@@ -1373,7 +1373,8 @@ class BContract_contrat extends BimpDolObject {
                     $description = ($line->desc) ? $line->desc : $line->libelle;
                     $end_date = new DateTime($data['valid_start']);
                     $end_date->add(new DateInterval("P" . $data['duree_mois'] . "M"));
-                    $new_contrat->dol_object->addLine($description, $line->subprice, $line->qty, $line->tva_tx, 0, 0, $line->fk_product, $line->remise_percent, $data['valid_start'], $end_date->format('Y-m-d'), 'HT', 0.0, 0, null, 0, 0, null, $line->rang);
+                    $new_contrat->dol_object->pa_ht = $line->pa_ht; // BUG DéBILE DOLIBARR
+                    $new_contrat->dol_object->addLine($description, $line->subprice, $line->qty, $line->tva_tx, 0, 0, $line->fk_product, $line->remise_percent, $data['valid_start'], $end_date->format('Y-m-d'), 'HT', 0.0, 0, null, (float) $line->pa_ht, 0, null, $line->rang);
                 }
             }
             $contacts_suivi = $new_contrat->dol_object->liste_contact(-1, 'external', 0, 'BILLING2');

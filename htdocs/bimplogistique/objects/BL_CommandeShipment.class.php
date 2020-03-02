@@ -2530,7 +2530,7 @@ class BL_CommandeShipment extends BimpObject
 
                     $line_errors = $line->setShipmentData($this, $data, $line_warnings);
 
-                    $line_errors = array_merge($line_errors, $line_warnings);
+                    $line_errors = BimpTools::merge_array($line_errors, $line_warnings);
 
                     if (count($line_errors)) {
                         $warnings[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n°' . $line->getData('position') . ': erreurs lors de l\'enregistrement des quantités');

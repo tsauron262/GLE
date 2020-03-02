@@ -224,7 +224,7 @@ class BimpProductBrowser extends CommonObject {
                     for ($i = 0; $i < sizeof($filles); $i++) {
                         $newFilles = $filles[$i]->get_filles();
                         if (!empty($newFilles)) {
-                            $filles = array_merge($filles, $newFilles);
+                            $filles = BimpTools::merge_array($filles, $newFilles);
                         } else {
                             $result["catAChoisir"][$filles[$i]->id] = array("nom" => $filles[$i]->label, "id" => $filles[$i]->id);
                         }

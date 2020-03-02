@@ -237,7 +237,7 @@ class BC_List extends BC_Panel
                 $this->addError('Filtre invalide pour l\'association "' . $association . '"');
             }
         } else {
-            $this->errors = array_merge($this->errors, $bimpAsso->errors);
+            $this->errors = BimpTools::merge_array($this->errors, $bimpAsso->errors);
         }
     }
 
@@ -252,7 +252,7 @@ class BC_List extends BC_Panel
                 'id_associate' => (int) $id_associate
             );
         } else {
-            $this->errors = array_merge($this->errors, $bimpAsso->errors);
+            $this->errors = BimpTools::merge_array($this->errors, $bimpAsso->errors);
         }
     }
 
@@ -517,7 +517,7 @@ class BC_List extends BC_Panel
                         $sql .= BimpTools::getSqlWhere($bimp_asso->getSqlFilters($id_object, $id_associate, $alias));
                         $this->mergeFilter($this->object->getPrimary(), array($asso_filter['type'] => $sql));
                     } else {
-                        $this->errors[] = array_merge($this->errors, $bimp_asso->errors);
+                        $this->errors[] = BimpTools::merge_array($this->errors, $bimp_asso->errors);
                         $this->filters[$this->object->getPrimary()] = 0;
                     }
                 }

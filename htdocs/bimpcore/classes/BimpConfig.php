@@ -354,7 +354,7 @@ class BimpConfig
         }
 
         if (isset($current)) {
-            $current = array_merge($current, $params);
+            $current = BimpTools::merge_array($current, $params);
             return true;
         }
 

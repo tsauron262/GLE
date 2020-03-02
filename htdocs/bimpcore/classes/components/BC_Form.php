@@ -268,12 +268,12 @@ class BC_Form extends BC_Panel
                 if ($row_params['field']) {
                     $html .= $this->renderFieldRow($row_params['field'], $row_params);
                 } elseif ($row_params['association']) {
-                    $row_params = array_merge($row_params, parent::fetchParams($this->config_path . '/rows/' . $row, self::$association_params));
+                    $row_params = BimpTools::merge_array($row_params, parent::fetchParams($this->config_path . '/rows/' . $row, self::$association_params));
                     $html .= $this->renderAssociationRow($row_params);
                 } elseif ((int) $row_params['custom']) {
                     $html .= $this->renderCustomRow($row, $row_params);
                 } elseif ($row_params['object']) {
-                    $row_params = array_merge($row_params, parent::fetchParams($this->config_path . '/rows/' . $row, self::$object_params));
+                    $row_params = BimpTools::merge_array($row_params, parent::fetchParams($this->config_path . '/rows/' . $row, self::$object_params));
                     if (!(int) $row_params['on_edit'] && $this->object->isLoaded()) {
                         continue;
                     }
@@ -508,7 +508,7 @@ class BC_Form extends BC_Panel
 
         $html = '';
 
-        $params = array_merge($params, parent::fetchParams($this->config_path . '/rows/' . $row, self::$custom_row_params));
+        $params = BimpTools::merge_array($params, parent::fetchParams($this->config_path . '/rows/' . $row, self::$custom_row_params));
         if (is_array($params['value'])) {
             if ($params['data_type'] === 'json') {
                 $params['value'] = json_encode($params['value']);
@@ -723,7 +723,7 @@ class BC_Form extends BC_Panel
             }
 
             $params = $this->fetchParams($row_path, self::$row_params);
-            $params = array_merge($params, $this->fetchParams($row_path, self::$custom_row_params));
+            $params = BimpTools::merge_array($params, $this->fetchParams($row_path, self::$custom_row_params));
         }
 
 //        if ((is_null($params['value']) || $params['value'] === '') && isset($this->params['values']['fields'][$params['input_name']])) {

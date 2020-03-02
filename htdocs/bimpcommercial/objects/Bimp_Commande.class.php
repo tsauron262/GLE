@@ -315,7 +315,7 @@ class Bimp_Commande extends BimpComm
                     include_once DOL_DOCUMENT_ROOT . '/bimpvalidateorder/class/bimpvalidateorder.class.php';
                     $bvo = new BimpValidateOrder($this->db->db);
                     if ($bvo->checkValidateRights($user, $this->dol_object) < 1) {
-                        $errors = array_merge($errors, $bvo->validation_errors);
+                        $errors = BimpTools::merge_array($errors, $bvo->validation_errors);
                         if (!count($errors)) {
                             $errors[] = 'Cette commande ne peut pas être validée';
                         }
@@ -1694,7 +1694,7 @@ class Bimp_Commande extends BimpComm
             $lines = $this->getChildrenObjects('lines');
 
             foreach ($lines as $line) {
-                $errors = array_merge($errors, $line->checkReservations());
+                $errors = BimpTools::merge_array($errors, $line->checkReservations());
             }
         } else {
             $errors[] = 'ID de la commande absent';
@@ -1856,7 +1856,7 @@ class Bimp_Commande extends BimpComm
             if (!count($errors) && $isSerialisable && count($equipments)) {
                 $line_warnings = array();
                 $line_errors = $new_line->addReturnedEquipments($line_warnings, $equipments);
-                $line_errors = array_merge($line_errors, $line_warnings);
+                $line_errors = BimpTools::merge_array($line_errors, $line_warnings);
                 if (count($line_errors)) {
                     $msg = 'Erreur lors de l\'attribution ';
                     if (count($equipments > 1)) {
@@ -1884,7 +1884,7 @@ class Bimp_Commande extends BimpComm
             }
 
             if (!count($errors)) {
-                $warnings = array_merge($warnings, $this->deleteReservations());
+                $warnings = BimpTools::merge_array($warnings, $this->deleteReservations());
 
                 $lines = $this->getLines('not_text');
                 foreach ($lines as $line) {
@@ -1997,7 +1997,7 @@ class Bimp_Commande extends BimpComm
             }
         }
         if (!empty($this->dol_object->other_linked_objects) && is_array($this->dol_object->other_linked_objects)) {
-            $facture->dol_object->linked_objects = array_merge($facture->dol_object->linked_objects, $this->dol_object->other_linked_objects);
+            $facture->dol_object->linked_objects = BimpTools::merge_array($facture->dol_object->linked_objects, $this->dol_object->other_linked_objects);
         }
 
         $facture->dol_object->source = 0;
@@ -2193,7 +2193,7 @@ class Bimp_Commande extends BimpComm
 
                         $fac_line_errors = $fac_line->create($fac_line_warnings, true);
 
-                        $fac_line_errors = array_merge($fac_line_errors, $fac_line_warnings);
+                        $fac_line_errors = BimpTools::merge_array($fac_line_errors, $fac_line_warnings);
 
                         if (count($fac_line_errors)) {
                             $errors[] = BimpTools::getMsgFromArray($fac_line_errors, 'Echec de la création de la ligne de texte depuis la ligne de commande n°' . $line->getData('position') . ' (ID ' . $line->id . ')');
@@ -2232,7 +2232,7 @@ class Bimp_Commande extends BimpComm
 
                     $fac_line_errors = $fac_line->create($fac_line_warnings, true);
 
-                    $fac_line_errors = array_merge($fac_line_errors, $fac_line_warnings);
+                    $fac_line_errors = BimpTools::merge_array($fac_line_errors, $fac_line_warnings);
 
                     if (count($fac_line_errors)) {
                         $errors[] = BimpTools::getMsgFromArray($fac_line_errors, 'Echec de la création de la ligne de facture depuis la ligne de commande n°' . $line->getData('position') . ' (ID ' . $line->id . ')');
@@ -2262,7 +2262,7 @@ class Bimp_Commande extends BimpComm
 //
 //                            $remise_errors = $new_remise->create($remise_warnings, true);
 //
-//                            $remise_errors = array_merge($remise_errors, $remise_warnings);
+//                            $remise_errors = BimpTools::merge_array($remise_errors, $remise_warnings);
 //
 //                            if (count($remise_errors)) {
 //                                $errors[] = BimpTools::getMsgFromArray($remise_errors, 'Echec de la création d\'une remise pour la ligne de facture d\'ID ' . $fac_line->id);
@@ -2301,7 +2301,7 @@ class Bimp_Commande extends BimpComm
                     } else {
                         $fac_line_warnings = array();
                         $fac_line_errors = $fac_line->update($fac_line_warnings, true);
-                        $fac_line_errors = array_merge($fac_line_errors, $fac_line_warnings);
+                        $fac_line_errors = BimpTools::merge_array($fac_line_errors, $fac_line_warnings);
 
                         if (count($fac_line_errors)) {
                             $errors[] = BimpTools::getMsgFromArray($fac_line_errors, 'Echec de la mise à jour de la ligne de facture depuis la ligne de commande n°' . $line->getData('position') . ' (ID ' . $line->id . ')');
@@ -2346,7 +2346,7 @@ class Bimp_Commande extends BimpComm
                     $line_warnings = array();
 
                     $line_errors = $line->setFactureData((int) $facture->id, (float) $line_data['qty'], $equipments_set, $line_warnings, false);
-                    $line_errors = array_merge($line_errors, $line_warnings);
+                    $line_errors = BimpTools::merge_array($line_errors, $line_warnings);
                     if (count($line_errors)) {
                         $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec de l\'enregistrement des quantités facturées pour la ligne n°' . $line->getData('position') . ' (ID: ' . $line->id . ')');
                     }
@@ -3408,7 +3408,7 @@ class Bimp_Commande extends BimpComm
             foreach ($reservations as $res) {
                 $res_warnings = array();
                 $res_errors = $res->delete($res_warnings, true);
-                $res_errors = array_merge($res_errors, $res_warnings);
+                $res_errors = BimpTools::merge_array($res_errors, $res_warnings);
 
                 if (count($res_errors)) {
                     $warnings[] = BimpTools::getMsgFromArray($res_errors, 'Erreur lors de la suppression d\'une réservation');

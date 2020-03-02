@@ -741,7 +741,7 @@ class GSX_Repair extends BimpObject
 
             if (count($this->gsx->errors['soap']) > $n_soap_errors) {
                 $errors[] = 'Echec de la requête "' . $requestName . '" WSDL : ' . $this->gsx->wsdlUrl;
-                $errors = array_merge($errors, $this->gsx->errors['soap']);
+                $errors = BimpTools::merge_array($errors, $this->gsx->errors['soap']);
             }
 
             if (!isset($response[$clientRep]['repairConfirmation'])) {
@@ -970,7 +970,7 @@ class GSX_Repair extends BimpObject
 
         if (count($this->gsx->errors['soap']) > $n_soap_errors) {
             $errors[] = 'Echec de la requête "' . $requestName . '"';
-            $errors = array_merge($errors, $this->gsx->errors['soap']);
+            $errors = BimpTools::merge_array($errors, $this->gsx->errors['soap']);
         }
 
         $parts = null;
@@ -1168,7 +1168,7 @@ class GSX_Repair extends BimpObject
                 $response = $this->gsx->request($request, $client);
 
                 if (!isset($response[$client . 'Response']['repairConfirmationNumbers'])) {
-                    return array_merge($this->gsx->errors['soap'], array('Echec de la requête de fermeture de la réparation'));
+                    return BimpTools::merge_array($this->gsx->errors['soap'], array('Echec de la requête de fermeture de la réparation'));
                 }
             }
 
@@ -1179,7 +1179,7 @@ class GSX_Repair extends BimpObject
             $update_errors = $this->update();
             if (count($update_errors)) {
                 $errors[] = 'Echec de l\'enregistrement de la fermeture de la réparation en base de données';
-                return array_merge($errors, $update_errors);
+                return BimpTools::merge_array($errors, $update_errors);
             }
 
             return $this->repairDetails();
@@ -2059,7 +2059,7 @@ class GSX_Repair extends BimpObject
                     }
                 }
             }
-//            $errors = array_merge($errors , $sav->processPropalGarantie());
+//            $errors = BimpTools::merge_array($errors , $sav->processPropalGarantie());
         }
 
         return array(

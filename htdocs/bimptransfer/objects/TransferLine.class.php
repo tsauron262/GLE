@@ -31,7 +31,7 @@ class TransferLine extends BimpObject
         $errors = array();
         $tabReservations = $this->getReservations();
         foreach ($tabReservations as $reservation)
-            $errors = array_merge($errors, $reservation->setNewStatus(303));
+            $errors = BimpTools::merge_array($errors, $reservation->setNewStatus(303));
         return $errors;
     }
 
@@ -78,8 +78,8 @@ class TransferLine extends BimpObject
                 $reservation->updateField('qty', 0);
             $i++;
             if ($new_status != $reservation->getInitData('status')) {
-                $errors = array_merge($errors, $reservation->setNewStatus($new_status, $nb_reservation)); // $qty : faculatif, seulement pour les produits non sérialisés
-                $errors = array_merge($errors, $reservation->update());
+                $errors = BimpTools::merge_array($errors, $reservation->setNewStatus($new_status, $nb_reservation)); // $qty : faculatif, seulement pour les produits non sérialisés
+                $errors = BimpTools::merge_array($errors, $reservation->update());
             }
             if (sizeof($errors) > 0)
                 return $errors;
@@ -221,10 +221,10 @@ class TransferLine extends BimpObject
     {
         $errors = array();
         if (count($errors) == 0)
-            $errors = array_merge($errors, $this->cancelReservation());
+            $errors = BimpTools::merge_array($errors, $this->cancelReservation());
 
         if (count($errors) == 0)
-            $errors = array_merge($errors, parent::delete($warnings, $force_delete));
+            $errors = BimpTools::merge_array($errors, parent::delete($warnings, $force_delete));
         return $errors;
     }
 
@@ -332,7 +332,7 @@ class TransferLine extends BimpObject
         $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
         // Is equipment
         if ($id_equipment > 0) {
-            $errors = array_merge($errors, $reservation->validateArray(array(
+            $errors = BimpTools::merge_array($errors, $reservation->validateArray(array(
                         'id_entrepot'  => $id_warehouse_source,
                         'status'       => 201, // Transfert en cours
                         'type'         => 2, // 2 = transfert
@@ -343,7 +343,7 @@ class TransferLine extends BimpObject
             )));
             // Is product
         } else {
-            $errors = array_merge($errors, $reservation->validateArray(array(
+            $errors = BimpTools::merge_array($errors, $reservation->validateArray(array(
                         'id_entrepot'  => $id_warehouse_source,
                         'status'       => 201, // Transfert en cours
                         'type'         => 2, // 2 = transfert
@@ -353,10 +353,10 @@ class TransferLine extends BimpObject
                         'date_from'    => dol_print_date($now, '%Y-%m-%d %H:%M:%S'),
             )));
         }
-        $errors = array_merge($errors, $reservation->create());
+        $errors = BimpTools::merge_array($errors, $reservation->create());
 
         // Create transfer line
-        $errors = array_merge($errors, $this->validateArray(array(
+        $errors = BimpTools::merge_array($errors, $this->validateArray(array(
                     'user_create'       => $user->id,
                     'user_update'       => $user->id,
                     'id_product'        => $id_product,
@@ -367,7 +367,7 @@ class TransferLine extends BimpObject
         )));
 
         if (!$errors) {
-            $errors = array_merge($errors, parent::create());
+            $errors = BimpTools::merge_array($errors, parent::create());
             $id_affected = $this->db->db->last_insert_id($this->getTable());
         }
         return $errors;

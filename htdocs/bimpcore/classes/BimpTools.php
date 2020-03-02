@@ -43,6 +43,18 @@ class BimpTools
         }
         return 1;
     }
+    
+    public static function merge_array($array1, $array2){
+        if(!is_array($array1)){
+            dol_syslog("merge array pas un tableau array1",3);
+            return $array2;
+        }
+        if(!is_array($array2)){
+            dol_syslog("merge array pas un tableau array2",3);
+            return $array1;
+        }
+        return array_merge($array1, $array2);
+    }
 
     public static function getValue($key, $default_value = null, $decode = true)
     {
@@ -266,8 +278,8 @@ class BimpTools
         }
 
         if ($with_events) {
-            $errors = array_merge($errors, self::getDolEventsMsgs(array('errors'), false));
-            $warnings = array_merge($warnings, self::getDolEventsMsgs(array('warnings'), false));
+            $errors = BimpTools::merge_array($errors, self::getDolEventsMsgs(array('errors'), false));
+            $warnings = BimpTools::merge_array($warnings, self::getDolEventsMsgs(array('warnings'), false));
         }
 
         return $errors;
@@ -2026,7 +2038,7 @@ class BimpTools
         $return = array();
         foreach ($types as $type) {
             if (isset($_SESSION['dol_events'][$type])) {
-                $return = array_merge($_SESSION['dol_events'][$type], $return);
+                $return = BimpTools::merge_array($_SESSION['dol_events'][$type], $return);
                 if ($clean) {
                     unset($_SESSION['dol_events'][$type]);
                 }

@@ -41,7 +41,7 @@ class userController extends BimpController
 
         if (count($errors)) {
             $msg = 'Echec de la création de la période en cours pour cet utilisateur';
-            $errors = array_merge(array($msg), $errors);
+            $errors = BimpTools::merge_array(array($msg), $errors);
             $html .= BimpRender::renderAlerts($errors);
         }
 

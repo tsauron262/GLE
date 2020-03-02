@@ -106,10 +106,10 @@ class BC_Field extends BimpComponent
         }
 
         if (in_array($this->params['type'], array('qty', 'int', 'float', 'money', 'percent'))) {
-            $this->params = array_merge($this->params, parent::fetchParams($this->config_path, self::$type_params_def['number']));
+            $this->params = BimpTools::merge_array($this->params, parent::fetchParams($this->config_path, self::$type_params_def['number']));
         } elseif ($this->params['type'] === 'items_list') {
             if (isset($this->params['items_data_type']) && $this->params['items_data_type'] === 'id_object') {
-                $this->params = array_merge($this->params, parent::fetchParams($this->config_path, self::$type_params_def['id_object']));
+                $this->params = BimpTools::merge_array($this->params, parent::fetchParams($this->config_path, self::$type_params_def['id_object']));
             }
         }
 

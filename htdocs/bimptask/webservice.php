@@ -110,16 +110,16 @@ function traiteTask($dst, $src, $subj, $txt) {
         
         echo "<br/>Création task";
         $tab = array("src" => $src, "dst" => $dst, "subj" => $subj, "txt" => $txt, "test_ferme" => "");
-        $errors = array_merge($errors, $task->validateArray($tab));
-        $errors = array_merge($errors, $task->create());
+        $errors = BimpTools::merge_array($errors, $task->validateArray($tab));
+        $errors = BimpTools::merge_array($errors, $task->create());
     } else {
         echo "<br/>Création note, task : ".$idTask;
         $note = BimpObject::getInstance("bimpcore", "BimpNote");
         $tab = array("obj_type" => "bimp_object", "obj_module" => "bimptask", "obj_name" => "BIMP_Task", "id_obj" => $idTask, "type_author" => "3", "email" => $src, "visibility" => 4, "content" => $txt);
-        $errors = array_merge($errors, $note->validateArray($tab));
-        $errors = array_merge($errors, $note->create());
+        $errors = BimpTools::merge_array($errors, $note->validateArray($tab));
+        $errors = BimpTools::merge_array($errors, $note->create());
         
-//        $errors = array_merge($errors, $task->addNote($txt, 4, 0, 0, $src, 3));
+//        $errors = BimpTools::merge_array($errors, $task->addNote($txt, 4, 0, 0, $src, 3));
     }
 
     if (count($errors) > 0) {

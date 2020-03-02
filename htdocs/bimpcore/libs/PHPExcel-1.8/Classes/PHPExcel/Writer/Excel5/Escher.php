@@ -352,7 +352,7 @@ class PHPExcel_Writer_Excel5_Escher
                     $totalSize += strlen($spData);
                     $spOffsets[] = $totalSize;
                     
-                    $spTypes = array_merge($spTypes, $writer->getSpTypes());
+                    $spTypes = BimpTools::merge_array($spTypes, $writer->getSpTypes());
                 }
 
                 // write the record

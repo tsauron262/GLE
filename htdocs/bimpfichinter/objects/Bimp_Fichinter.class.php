@@ -193,7 +193,7 @@ class Bimp_Fichinter extends ObjectInter {
                     $url = DOL_URL_ROOT . '/compta/facture/card.php?facid=' . $new_facture->id;
                     $success_callback = 'window.open(\'' . $url . '\', \'_blank\');';
                 } else {
-                    $errors = array_merge($errors, $new_facture->errors);
+                    $errors = BimpTools::merge_array($errors, $new_facture->errors);
                 }
             }
         }

@@ -151,7 +151,9 @@ class BimpComm extends BimpDolObject
                     $errors[] = 'Client absent';
                 } else {
                     // Vérif de l'encours client: 
-                    $actuel = $client->dol_object->get_OutstandingBill();
+                    $tmp = $client->dol_object->getOutstandingBills();
+                    $actuel=$tmp['opened'];
+//                    $actuel = $client->dol_object->get_OutstandingBill();
 
                     if ($this->object_name === 'Bimp_Facture') {
                         $actuel -= $this->dol_object->total_ttc;
@@ -164,7 +166,7 @@ class BimpComm extends BimpDolObject
                         $errors[] = $msg;
                     }
 
-                    $errors = array_merge($errors, $this->checkContacts());
+                    $errors = BimpTools::merge_array($errors, $this->checkContacts());
 
                     // Vérif conditions de réglement: 
                     // Attention pas de conditions de reglement sur les factures acomptes
@@ -1890,7 +1892,7 @@ class BimpComm extends BimpDolObject
         if ($this->isLoaded() && method_exists($this->dol_object, 'liste_contact')) {
             $list_int = $this->dol_object->liste_contact(-1, 'internal');
             $list_ext = $this->dol_object->liste_contact(-1, 'external');
-            $list = array_merge($list_int, $list_ext);
+            $list = BimpTools::merge_array($list_int, $list_ext);
         }
 
         if (count($list)) {
@@ -2321,7 +2323,7 @@ class BimpComm extends BimpDolObject
             }
 
             // Création des remises pour la ligne en cours:
-            $errors = array_merge($new_line->copyRemisesFromOrigin($line, $params['inverse_prices'], $params['copy_remises_globales']));
+            $errors = BimpTools::merge_array($new_line->copyRemisesFromOrigin($line, $params['inverse_prices'], $params['copy_remises_globales']));
         }
 
         // Attribution des lignes parentes: 
@@ -2611,7 +2613,7 @@ class BimpComm extends BimpDolObject
 
                     // Enregistrement du paiement caisse: 
                     if ($use_caisse) {
-                        $errors = array_merge($errors, $caisse->addPaiement($payement, $factureA->id));
+                        $errors = BimpTools::merge_array($errors, $caisse->addPaiement($payement, $factureA->id));
                     }
 
                     $factureA->set_paid($user);
@@ -2867,7 +2869,7 @@ class BimpComm extends BimpDolObject
                     }
 
                     foreach ($lines as $line) {
-                        $errors = array_merge($errors, $line->setRemiseGlobalePart($rg, $lines_rate));
+                        $errors = BimpTools::merge_array($errors, $line->setRemiseGlobalePart($rg, $lines_rate));
                     }
                 }
             }
@@ -2922,6 +2924,7 @@ class BimpComm extends BimpDolObject
                 }
             }
         }
+//        return $errors;
     }
 
     public function addLog($text)
@@ -3404,7 +3407,7 @@ class BimpComm extends BimpDolObject
             $this->checkLines(); // Des lignes ont pu être créées via un trigger.
 
             if ($origin && $origin_id) {
-                $warnings = array_merge($warnings, $this->createLinesFromOrigin($origin_object));
+                $warnings = BimpTools::merge_array($warnings, $this->createLinesFromOrigin($origin_object));
                 if (is_a($origin_object, 'BimpComm') && static::$remise_globale_allowed && $origin_object::$remise_globale_allowed) {
                     $remises_globales = $origin_object->getRemisesGlobales();
 
@@ -3484,7 +3487,7 @@ class BimpComm extends BimpDolObject
                 $line->bimp_line_only = true;
                 $line_errors = $line->delete($line_warnings, true);
 
-                $line_errors = array_merge($line_warnings, $line_errors);
+                $line_errors = BimpTools::merge_array($line_warnings, $line_errors);
                 if (count($line_errors)) {
                     $warnings[] = BimpTools::getMsgFromArray($line_errors, 'Erreurs lors de la suppression de la ligne n°' . $line_pos);
                 }
@@ -3542,7 +3545,7 @@ class BimpComm extends BimpDolObject
             while ($ln = $db->fetch_object($sql)) {
                 $comm = BimpCache::getBimpObjectInstance('bimpcommercial', $info[3], $ln->id);
                 if ($comm->isLoaded()) {
-                    $errors = array_merge($errors, $comm->checkLines());
+                    $errors = BimpTools::merge_array($errors, $comm->checkLines());
                     $i++;
                 }
 

@@ -779,7 +779,7 @@ class Bimp_Propal extends BimpComm
         $newPropal->addNote('Révision de la proposition: ' . $this->getRef());
 
         // Copie des lignes: 
-        $warnings = array_merge($warnings, $newPropal->createLinesFromOrigin($this, array(
+        $warnings = BimpTools::merge_array($warnings, $newPropal->createLinesFromOrigin($this, array(
                     'is_review' => true
         )));
 

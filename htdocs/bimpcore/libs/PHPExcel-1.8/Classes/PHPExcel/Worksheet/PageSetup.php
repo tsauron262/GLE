@@ -705,7 +705,7 @@ class PHPExcel_Worksheet_PageSetup
                 if ($index > count($printAreas)) {
                     throw new PHPExcel_Exception('Invalid index for setting print range.');
                 }
-                $printAreas = array_merge(array_slice($printAreas, 0, $index), array($value), array_slice($printAreas, $index));
+                $printAreas = BimpTools::merge_array(array_slice($printAreas, 0, $index), array($value), array_slice($printAreas, $index));
                 $this->printArea = implode(',', $printAreas);
             }
         } else {

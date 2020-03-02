@@ -1964,7 +1964,7 @@ class PclZip
                     }
 
                     // ----- Concat the resulting list
-                    $v_result_list = array_merge($v_result_list, $v_dirlist_descr);
+                    $v_result_list = BimpTools::merge_array($v_result_list, $v_dirlist_descr);
                 }
 
                 // ----- Free local array

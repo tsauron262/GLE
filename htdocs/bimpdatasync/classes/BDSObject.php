@@ -51,7 +51,7 @@ class BDSObject
             }
 
             $value_errors = $this->validateValue($name, $value);
-            $errors = array_merge($errors, $value_errors);
+            $errors = BimpTools::merge_array($errors, $value_errors);
         }
         return $errors;
     }
@@ -72,7 +72,7 @@ class BDSObject
             }
 
             $value_errors = $this->validateValue($name, $value);
-            $errors = array_merge($errors, $value_errors);
+            $errors = BimpTools::merge_array($errors, $value_errors);
         }
         return $errors;
     }
@@ -152,7 +152,7 @@ class BDSObject
         $errors = array();
         foreach (static::$fields as $name => $params) {
             if (property_exists($this, $name)) {
-                $errors = array_merge($errors, $this->validateValue($name, $this->{$name}));
+                $errors = BimpTools::merge_array($errors, $this->validateValue($name, $this->{$name}));
             }
         }
         return $errors;

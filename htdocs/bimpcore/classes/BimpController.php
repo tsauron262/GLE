@@ -69,7 +69,7 @@ class BimpController
         $this->config = new BimpConfig($dir, $this->controller, $this);
 
         if ($this->config->errors) {
-            $this->errors = array_merge($this->errors, $this->config->errors);
+            $this->errors = BimpTools::merge_array($this->errors, $this->config->errors);
         }
 
         $this->addJsFile('/bimpcore/views/js/controller.js');
@@ -1974,7 +1974,7 @@ class BimpController
                 }
 
                 if (count($asso_errors)) {
-                    $errors = array_merge($errors, $asso_errors);
+                    $errors = BimpTools::merge_array($errors, $asso_errors);
                 } else {
                     $done[] = $i;
                 }
@@ -2191,7 +2191,7 @@ class BimpController
 
         $html = $bimp_fixe_tabs->render(true);
 
-        $errors = array_merge($bimp_fixe_tabs->errors, array(/* ici recup erreur global ou message genre application ferme dans 10min */));
+        $errors = BimpTools::merge_array($bimp_fixe_tabs->errors, array(/* ici recup erreur global ou message genre application ferme dans 10min */));
         $returnHtml = "";
         $hashCash = 'fixeTabsHtml' . $_POST['randomId']; //Pour ne regardé que sur l'ongelt actuel
         session_start();

@@ -1192,7 +1192,7 @@ class Bimp_CommandeFourn extends BimpComm
                 } else {
                     $success .= '<br/>' . $success2;
                 }
-                $result['warnings'] = array_merge($result['warnings'], $result2['warnings']);
+                $result['warnings'] = BimpTools::merge_array($result['warnings'], $result2['warnings']);
             }
         }
 

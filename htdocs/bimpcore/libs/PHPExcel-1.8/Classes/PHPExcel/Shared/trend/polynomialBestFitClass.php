@@ -134,7 +134,7 @@ class PHPExcel_Polynomial_Best_Fit extends PHPExcel_Best_Fit
 
     public function getCoefficients($dp = 0)
     {
-        return array_merge(array($this->getIntersect($dp)), $this->getSlope($dp));
+        return BimpTools::merge_array(array($this->getIntersect($dp)), $this->getSlope($dp));
     }
 
 

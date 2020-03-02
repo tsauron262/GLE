@@ -46,8 +46,8 @@ class PHPExcel_Calculation_MathTrig
         $factorArray = array();
         for ($i = $startVal; $i > 1; --$i) {
             if (($value % $i) == 0) {
-                $factorArray = array_merge($factorArray, self::factors($value / $i));
-                $factorArray = array_merge($factorArray, self::factors($i));
+                $factorArray = BimpTools::merge_array($factorArray, self::factors($value / $i));
+                $factorArray = BimpTools::merge_array($factorArray, self::factors($i));
                 if ($i <= sqrt($value)) {
                     break;
                 }

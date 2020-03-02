@@ -3588,7 +3588,7 @@ class PHPExcel_Calculation
                                 }
                             }
 
-                            $oData = array_merge(explode(':', $operand1Data['reference']), explode(':', $operand2Data['reference']));
+                            $oData = BimpTools::merge_array(explode(':', $operand1Data['reference']), explode(':', $operand2Data['reference']));
                             $oCol = $oRow = array();
                             foreach ($oData as $oDatum) {
                                 $oCR = PHPExcel_Cell::coordinateFromString($oDatum);

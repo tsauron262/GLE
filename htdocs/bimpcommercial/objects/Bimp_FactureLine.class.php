@@ -294,7 +294,7 @@ class Bimp_FactureLine extends ObjectLine
             if (BimpObject::objectLoaded($product)) {
                 if ($product->isSerialisable()) {
                     $cur_pa_ht = null;
-                    $errors = array_merge($errors, $this->calcPaByEquipments(false, $date, $pa_ht, $cur_pa_ht, $details));
+                    $errors = BimpTools::merge_array($errors, $this->calcPaByEquipments(false, $date, $pa_ht, $cur_pa_ht, $details));
                 } else {
                     $commande_line = null;
                     if ($this->getData('linked_object_name') === 'commande_line' && (int) $this->getData('linked_id_object')) {

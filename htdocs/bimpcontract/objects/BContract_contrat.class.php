@@ -1239,7 +1239,7 @@ class BContract_contrat extends BimpDolObject {
         if ($this->isLoaded() && method_exists($this->dol_object, 'liste_contact')) {
             $list_int = $this->dol_object->liste_contact(-1, 'internal');
             $list_ext = $this->dol_object->liste_contact(-1, 'external');
-            $list = array_merge($list_int, $list_ext);
+            $list = BimpTools::merge_array($list_int, $list_ext);
         }
 
         if (count($list)) {

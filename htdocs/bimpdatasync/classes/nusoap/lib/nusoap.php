@@ -1289,7 +1289,7 @@ class nusoap_base {
 
     $ns_string = '';
 
-	foreach(array_merge($this->namespaces,$namespaces) as $k => $v){
+	foreach(BimpTools::merge_array($this->namespaces,$namespaces) as $k => $v){
 
 		$ns_string .= " xmlns:$k=\"$v\"";
 
@@ -2107,7 +2107,7 @@ class nusoap_xmlschema extends nusoap_base  {
 
 		$this->enclosingNamespaces = $namespaces;
 
-		$this->namespaces = array_merge($this->namespaces, $namespaces);
+		$this->namespaces = BimpTools::merge_array($this->namespaces, $namespaces);
 
 
 
@@ -9316,7 +9316,7 @@ class wsdl extends nusoap_base {
 
 						isset($this->bindings[$binding]['operations'][$operation]['input']) ?
 
-						array_merge($this->bindings[$binding]['operations'][$operation]['input'], $this->portTypes[ $bindingData['portType'] ][$operation]['input']) :
+						BimpTools::merge_array($this->bindings[$binding]['operations'][$operation]['input'], $this->portTypes[ $bindingData['portType'] ][$operation]['input']) :
 
 						$this->portTypes[ $bindingData['portType'] ][$operation]['input'];
 
@@ -9324,7 +9324,7 @@ class wsdl extends nusoap_base {
 
 						isset($this->bindings[$binding]['operations'][$operation]['output']) ?
 
-						array_merge($this->bindings[$binding]['operations'][$operation]['output'], $this->portTypes[ $bindingData['portType'] ][$operation]['output']) :
+						BimpTools::merge_array($this->bindings[$binding]['operations'][$operation]['output'], $this->portTypes[ $bindingData['portType'] ][$operation]['output']) :
 
 						$this->portTypes[ $bindingData['portType'] ][$operation]['output'];
 
@@ -9782,7 +9782,7 @@ class wsdl extends nusoap_base {
 
 					    	}
 
-					    	$this->bindings[$this->currentBinding] = array_merge($this->bindings[$this->currentBinding], $attrs);
+					    	$this->bindings[$this->currentBinding] = BimpTools::merge_array($this->bindings[$this->currentBinding], $attrs);
 
 					    	break;
 
@@ -9838,7 +9838,7 @@ class wsdl extends nusoap_base {
 
 						    if (isset($this->bindings[$this->currentBinding]['operations'][$this->currentOperation][$this->opStatus])) {
 
-						        $this->bindings[$this->currentBinding]['operations'][$this->currentOperation][$this->opStatus] = array_merge($this->bindings[$this->currentBinding]['operations'][$this->currentOperation][$this->opStatus], $attrs);
+						        $this->bindings[$this->currentBinding]['operations'][$this->currentOperation][$this->opStatus] = BimpTools::merge_array($this->bindings[$this->currentBinding]['operations'][$this->currentOperation][$this->opStatus], $attrs);
 
 						    } else {
 
@@ -12066,7 +12066,7 @@ class wsdl extends nusoap_base {
 
 					$cols = ',' . sizeof($v);
 
-					$nv = array_merge($nv, $v);
+					$nv = BimpTools::merge_array($nv, $v);
 
 				}
 

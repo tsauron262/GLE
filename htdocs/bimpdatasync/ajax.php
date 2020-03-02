@@ -81,7 +81,7 @@ if (BDS_Tools::isSubmit('action')) {
                     foreach ($objects as $id_object) {
                         $object = new $object_name();
                         if ($object->fetch($id_object)) {
-                            $errors = array_merge($errors, $object->delete());
+                            $errors = BimpTools::merge_array($errors, $object->delete());
                         }
                         unset($object);
                     }

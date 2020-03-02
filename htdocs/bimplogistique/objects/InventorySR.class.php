@@ -138,14 +138,14 @@ class InventorySR extends BimpDolObject
         $errors = array();
 
         if ((int) $data['status'] == self::STATUS_PARTIALLY_CLOSED)
-            $errors = array_merge($errors, $this->closePartially());
+            $errors = BimpTools::merge_array($errors, $this->closePartially());
         
         if ((int) $data['status'] == self::STATUS_CLOSED)
-            $errors = array_merge($errors, $this->close());
+            $errors = BimpTools::merge_array($errors, $this->close());
 
         if (!count($errors)) {
             $this->updateField("status", $data['status']);
-            $errors = array_merge($errors, $this->update());
+            $errors = BimpTools::merge_array($errors, $this->update());
         }
 
         return $errors;
@@ -214,7 +214,7 @@ class InventorySR extends BimpDolObject
         $errors = array();
 
         if (!$this->equipmentIsOk())
-            $errors = array_merge($errors, $this->getErrorsEquipment());
+            $errors = BimpTools::merge_array($errors, $this->getErrorsEquipment());
 
         return $errors;
     }
@@ -632,7 +632,7 @@ WHERE  epl.position = 1 AND epl.id_entrepot=' . $this->getData('fk_warehouse') .
         if($qty_input < 0) {
             $out = $this->createLine($id_product, 0, $qty_input);
             $id_inventory_det = $out['id_inventory_det'];
-            $errors = array_merge($errors, $out['errors']);
+            $errors = BimpTools::merge_array($errors, $out['errors']);
             $msg .= $this->getMessageAdd($qty_input);
             return array('id_inventory_det' => $id_inventory_det, 'msg' => $msg, 'errors' => $errors);
         }
@@ -649,7 +649,7 @@ WHERE  epl.position = 1 AND epl.id_entrepot=' . $this->getData('fk_warehouse') .
             
             $out = $this->createLine($id_product, 0, $qty_insert);
             $id_inventory_det = $out['id_inventory_det'];
-            $errors = array_merge($errors, $out['errors']);
+            $errors = BimpTools::merge_array($errors, $out['errors']);
             $msg .= $this->getMessageAdd($qty_insert);
         }
 
@@ -671,7 +671,7 @@ WHERE  epl.position = 1 AND epl.id_entrepot=' . $this->getData('fk_warehouse') .
                         $qty_insert = $qty_input;
 
                     $out = $child->createLine($id_product, 0, $qty_insert);
-                    $errors = array_merge($errors, $out['errors']);
+                    $errors = BimpTools::merge_array($errors, $out['errors']);
                     $msg .= $child->getMessageAdd($qty_insert, 1);
                     $qty_input -= $qty_insert;
                 }
@@ -686,7 +686,7 @@ WHERE  epl.position = 1 AND epl.id_entrepot=' . $this->getData('fk_warehouse') .
             else{
                 $out = $this->createLine($id_product, 0, $qty_input);
                 $id_inventory_det = $out['id_inventory_det'];
-                $errors = array_merge($errors, $out['errors']);
+                $errors = BimpTools::merge_array($errors, $out['errors']);
             }
             $msg .= $this->getMessageAdd($qty_input);
         }
@@ -729,7 +729,7 @@ WHERE  epl.position = 1 AND epl.id_entrepot=' . $this->getData('fk_warehouse') .
                 return array('id_inventory_det' => 0, 'msg' => '', 'errors' => $errors);
             }
             $out = $this->createLine($id_product, $id_equipment, 1);
-            $errors = array_merge($errors, $out['errors']);
+            $errors = BimpTools::merge_array($errors, $out['errors']);
             $msg .= $this->getMessageAdd(1);
             $id_inventory_det = $out['id_inventory_det'];
             $inserted = true;
@@ -742,7 +742,7 @@ WHERE  epl.position = 1 AND epl.id_entrepot=' . $this->getData('fk_warehouse') .
                          return array('id_inventory_det' => 0, 'msg' => '', 'errors' => $errors);
                      }
                     $out = $child->createLine($id_product, $id_equipment, 1);
-                    $errors = array_merge($errors, $out['errors']);
+                    $errors = BimpTools::merge_array($errors, $out['errors']);
                     $msg .= $child->getMessageAdd(1, 1);
                     $inserted = true;
                     break;
@@ -757,7 +757,7 @@ WHERE  epl.position = 1 AND epl.id_entrepot=' . $this->getData('fk_warehouse') .
                  return array('id_inventory_det' => 0, 'msg' => '', 'errors' => $errors);
              }
             $out = $this->createLine($id_product, $id_equipment, 1);
-            $errors = array_merge($errors, $out['errors']);
+            $errors = BimpTools::merge_array($errors, $out['errors']);
             $msg .= $this->getMessageAdd(1);
         }
 
@@ -775,7 +775,7 @@ WHERE  epl.position = 1 AND epl.id_entrepot=' . $this->getData('fk_warehouse') .
         $errors = array();
         $inventory_line = BimpObject::getInstance($this->module, 'InventoryLineSR');
 
-        $errors = array_merge($errors, $inventory_line->validateArray(array(
+        $errors = BimpTools::merge_array($errors, $inventory_line->validateArray(array(
             'fk_inventory' => (int) $this->getData('id'),
             'fk_product'   => (int) $id_product,
             'fk_equipment' => (int) $id_equipment,
@@ -783,7 +783,7 @@ WHERE  epl.position = 1 AND epl.id_entrepot=' . $this->getData('fk_warehouse') .
         )));
 
         if (!count($errors)) {
-            $errors = array_merge($errors, $inventory_line->create());
+            $errors = BimpTools::merge_array($errors, $inventory_line->create());
         } else {
             $errors[] = "Erreur lors de la validation des données renseignées";
         }
@@ -882,7 +882,7 @@ WHERE  epl.position = 1 AND epl.id_entrepot=' . $this->getData('fk_warehouse') .
             if($qty == sizeof($ids_equipment)) {
                 foreach($ids_equipment as $id_equipment) {
                     $tab = $this->createLine($id_product, $id_equipment, 1);
-                    $errors = array_merge($errors, $tab[$errors]);
+                    $errors = BimpTools::merge_array($errors, $tab[$errors]);
                     $ids_inventory_det = $tab['id_inventory_det'];
                 }
             }

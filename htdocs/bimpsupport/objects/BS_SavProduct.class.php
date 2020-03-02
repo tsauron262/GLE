@@ -139,7 +139,7 @@ class BS_SavProduct extends BimpObject
 
             if (!count($errors) && !is_null($reservation)) {
                 $reservation->set('id_equipment', $id_equipment);
-                $errors = array_merge($errors, $reservation->update());
+                $errors = BimpTools::merge_array($errors, $reservation->update());
             }
         }
 

@@ -1876,7 +1876,7 @@ class BC_Vente extends BimpObject
                     if ($article->isLoaded()) {
                         $qty = (int) $article->getData('qty');
                         $article->set('qty', ($qty + 1));
-                        $errors = array_merge($errors, $article->update());
+                        $errors = BimpTools::merge_array($errors, $article->update());
                     } else {
                         $errors[] = 'Un article a déjà été ajouté au panier pour ce code-barres mais n\'a pas pu être mis à jour';
                     }
@@ -2083,7 +2083,7 @@ class BC_Vente extends BimpObject
 
             if (count($update_errors)) {
                 $errors[] = 'Echec de la mise à jour du statut de la vente';
-                $errors = array_merge($errors, $update_errors);
+                $errors = BimpTools::merge_array($errors, $update_errors);
                 return false;
             }
 
@@ -2645,7 +2645,7 @@ class BC_Vente extends BimpObject
                 $diff = $total_facture_ttc - $total_paid;
                 if ($diff < 0.01 && $diff > -0.01) {
                     if ($facture->dol_object->set_paid($user) < 0) {
-                        $warnings = array_merge($warnings, $facture->dol_object->error);
+                        $warnings = BimpTools::merge_array($warnings, $facture->dol_object->error);
                         $warnings[] = 'Echec de l\'enregistrement du statut "payée" pour cette facture';
                     }
                 }

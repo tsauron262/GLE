@@ -1022,7 +1022,7 @@ class BDS_SyncProcess extends BDS_Process
         }
 
         if (isset($result['errors']) && count($result['errors'])) {
-            $return['errors'] = array_merge($return['errors'], $result['errors']);
+            $return['errors'] = BimpTools::merge_array($return['errors'], $result['errors']);
         }
 
         $return['sync_objects'] = $sync_data->getObjectsForExport();

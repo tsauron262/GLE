@@ -75,8 +75,8 @@ class PHPExcel_Calculation_Statistical
                 unset($array2[$key]);
             }
         }
-        $array1 = array_merge($array1);
-        $array2 = array_merge($array2);
+        $array1 = BimpTools::merge_array($array1);
+        $array2 = BimpTools::merge_array($array2);
 
         return true;
     }

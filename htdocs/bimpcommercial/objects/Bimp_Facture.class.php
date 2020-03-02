@@ -2260,21 +2260,26 @@ class Bimp_Facture extends BimpComm
     public function renderCreateWarning()
     {
         if (!$this->isLoaded()) {
-            $html = '<p style="font-size: 16px">';
-            $html .= '<span style="font-size: 24px">';
-            $html .= BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
-            $html .= '</span>';
-            $html .= '<span class="bold">ATTENTION</span>, la création directe de facture est réservée à des cas exceptionnels et ne doit être utilisée qu\'en dernier recours.<br/>';
-            $html .= 'Pour les cas ordinaires, vous devez ';
-            $html .= '<span class="bold">impérativement passer par le processus de commande.</span>';
-            $html .= '</p>';
+            $html = '';
+            if(BimpCore::getConf('force_use_commande')){
+                $html = '<p style="font-size: 16px">';
+                $html .= '<span style="font-size: 24px">';
+                $html .= BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
+                $html .= '</span>';
+                $html .= '<span class="bold">ATTENTION</span>, la création directe de facture est réservée à des cas exceptionnels et ne doit être utilisée qu\'en dernier recours.<br/>';
+                $html .= 'Pour les cas ordinaires, vous devez ';
+                $html .= '<span class="bold">impérativement passer par le processus de commande.</span>';
+                $html .= '</p>';
+            }
 
-            return array(
-                array(
-                    'content' => $html,
-                    'type'    => 'warning'
-                )
-            );
+            if($html != ''){
+                return array(
+                    array(
+                        'content' => $html,
+                        'type'    => 'warning'
+                    )
+                );
+            }
         }
 
         return array();

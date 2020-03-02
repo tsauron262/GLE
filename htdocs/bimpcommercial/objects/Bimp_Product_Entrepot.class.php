@@ -13,7 +13,7 @@ class Bimp_Product_Entrepot extends BimpObject
     public function __construct($module, $object_name)
     {
 //        $this->dateBilan = date('2019-10-01 00:00:01');
-        $this->dateBilan = date('2020-01-01 00:00:01');
+        $this->dateBilan = date('2020-03-01 00:00:01');
         if (is_null(static::$product_instance)) {
             static::$product_instance = BimpObject::getInstance('bimpcore', 'Bimp_Product');
         }
@@ -27,7 +27,7 @@ class Bimp_Product_Entrepot extends BimpObject
             static::$modeStockDate = true;
         if(in_array('stockShowRoom', $list->cols))
             static::$modeStockShowRoom = true;
-        if(in_array('ventes_qty', $list->cols) || in_array('ventes_ht', $list->cols))
+        if(in_array('ventes_qty', $list->cols) || in_array('ventes_ht', $list->cols) || in_array('derPv', $list->cols))
             static::$modeVentes = true;
         
         

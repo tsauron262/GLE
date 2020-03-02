@@ -145,6 +145,9 @@ fields:
         label: Annule et remplace
         input:
             help: A remplir en cas de renouvellement d'un ancien contrat - 15 caractères maximum
+    ref_customer:
+        type: string
+        label: Référence client
     datec:
         label: Date du contrat
         type: date
@@ -301,6 +304,8 @@ fields_tables:
               label: Référence du contrat
               edit: 0
             - field: ref_ext
+              edit: 0
+            - field: ref_customer
               edit: 0
             - field: objet_contrat
               edit: 0
@@ -540,6 +545,7 @@ forms:
             - field: ref
               edit: 0
             - field: ref_ext
+            - field: ref_customer
             - field: objet_contrat
             - field: entrepot
             - field: fk_soc

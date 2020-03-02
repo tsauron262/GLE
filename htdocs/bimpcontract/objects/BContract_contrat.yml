@@ -36,6 +36,8 @@ filters_panels:
                 data_type: id_object
                 type: user
                 field: commercialclient
+            entrepot:
+                field: entrepot
 objects:
     client:
         instance:
@@ -143,6 +145,9 @@ fields:
         label: Annule et remplace
         input:
             help: A remplir en cas de renouvellement d'un ancien contrat - 15 caractères maximum
+    ref_customer:
+        type: string
+        label: Référence client
     datec:
         label: Date du contrat
         type: date
@@ -300,6 +305,8 @@ fields_tables:
               edit: 0
             - field: ref_ext
               edit: 0
+            - field: ref_customer
+              edit: 0
             - field: objet_contrat
               edit: 0
             - field: entrepot
@@ -389,6 +396,9 @@ lists:
                             - display
             statut:
                 field: statut
+            entrepot:
+                field: entrepot
+                display: nom_url 
             fk_soc:
                 field: fk_soc
                 display: nom_url
@@ -535,6 +545,7 @@ forms:
             - field: ref
               edit: 0
             - field: ref_ext
+            - field: ref_customer
             - field: objet_contrat
             - field: entrepot
             - field: fk_soc

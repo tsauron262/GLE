@@ -210,15 +210,17 @@ class BimpStatsFacture {
                         $sql .= ' fs.code_centre as centre1, fs.id_entrepot as fk_entrepot1, fs.id as sav_id, fs.ref as sav_ref,';
                         $sql .= ' eq.product_label as description, ';
                         $sql .= ' eq.serial as numero_serie, eq.warranty_type as type_garantie,';
-                        $sql .= ' re.repair_confirm_number as ggsx ';
+                        $sql .= ' re.repair_confirm_number as ggsx, re.repair_number as ggsx2, p.description as pdesc ';
 
                         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'bs_sav as fs';
                         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'be_equipment as eq ON eq.id = fs.id_equipment';
                         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'bimp_gsx_repair as re ON re.id_sav = fs.id';
+                        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'product as p ON p.rowid = eq.id_product';
                         if($fact[1] > 0)
                             $sql .= " WHERE fs.id = " . $fact[1];
                         else
                             $sql .= " WHERE fs.id_propal = " . $obj->prop_id;
+
                         $result2 = $this->db->query($sql);
                         if ($result2 and mysqli_num_rows($result2) > 0)
                             $obj2 = $this->db->fetch_object($result2);
@@ -244,7 +246,7 @@ class BimpStatsFacture {
                     else
                         $hash[$ind]['ct'] = 0;
                     $hash[$ind]['ty'] = ($obj->type != "0" and $obj->type != '' and $obj->type != false) ? $obj->type : 0;
-                    $hash[$ind]['equip_ref'] = (isset($obj2->description)) ? $obj2->description : '';
+                    $hash[$ind]['equip_ref'] = (isset($obj2->pdesc) && $obj2->pdesc != '') ? $obj2->pdesc : $obj2->description;
                     if ($obj2 AND $obj2->fk_entrepot1 != "0" and $obj2->fk_entrepot1 != '' and $obj2->fk_entrepot1 != false)
                         $hash[$ind]['fk_entrepot'] = $obj2->fk_entrepot1;
                     elseif ($obj->fk_entrepot2 != "0" and $obj->fk_entrepot2 != '' and $obj->fk_entrepot2 != false)
@@ -255,7 +257,7 @@ class BimpStatsFacture {
                     $hash[$ind]['type_garantie'] = (isset($obj2->type_garantie)) ? $obj2->type_garantie : '';
                     $hash[$ind]['sav_id'] = ($obj2 AND isset($obj2->sav_id)) ? $obj2->sav_id : '';
                     $hash[$ind]['sav_ref'] = ($obj2 AND isset($obj2->sav_ref)) ? $obj2->sav_ref : '';
-                    $hash[$ind]['ggsx'] = ($obj2 AND isset($obj2->ggsx)) ? $obj2->ggsx : '';
+                    $hash[$ind]['ggsx'] = ($obj2 AND isset($obj2->ggsx) && $obj2->ggsx != '') ? $obj2->ggsx : ($obj2 AND isset($obj2->ggsx2) && $obj2->ggsx2 != '')? $obj2->ggsx2 : '';
                     $hash[$ind]['prop_total'] = (isset($obj->prop_total)) ? $obj->prop_total : '';
                     $hash[$ind]['fact_date'] = (isset($obj->fact_date)) ? dol_print_date($this->db->jdate($obj->fact_date)) : '';
                     $ind++;

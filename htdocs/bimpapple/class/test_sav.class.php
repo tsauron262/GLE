@@ -13,7 +13,7 @@ if (isset($_GET['actionTest'])) {
         $class->tentativeARestitueAuto();
     }
     if ($_GET['actionTest'] == "fetchEquipmentsImei") {
-        $class->fetchEquipmentsImei();
+        $class->fetchEquipmentsImei((isset($_REQUEST['nb'])? $_REQUEST['nb'] : 10), true);
     }
 
 
@@ -319,7 +319,7 @@ AND DATEDIFF(now(), s.date_update) < 60 ";
         $this->output .= ' ' . $this->nbImei . ' n° IMEI corrigé(s).';
     }
 
-    function fetchEquipmentsImei($nb = 1)
+    function fetchEquipmentsImei($nb = 1, $modeLabel = 0)
     {
         if (!class_exists('GSX_v2')) {
             require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_v2.php';
@@ -334,7 +334,6 @@ AND DATEDIFF(now(), s.date_update) < 60 ";
         if ($gsx->logged) {
             $equipment = BimpObject::getInstance('bimpequipment', 'Equipment');
             
-            $modeLabel = 1;
             if($modeLabel)
                 $filtre = array(
                     'id_product'  => 0,

@@ -27,7 +27,7 @@ class Bimp_Product_Entrepot extends BimpObject
             static::$modeStockDate = true;
         if(in_array('stockShowRoom', $list->cols))
             static::$modeStockShowRoom = true;
-        if(in_array('ventes_qty', $list->cols) || in_array('ventes_ht', $list->cols))
+        if(in_array('ventes_qty', $list->cols) || in_array('ventes_ht', $list->cols) || in_array('derPv', $list->cols))
             static::$modeVentes = true;
         
         

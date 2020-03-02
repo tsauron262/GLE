@@ -36,6 +36,8 @@ filters_panels:
                 data_type: id_object
                 type: user
                 field: commercialclient
+            entrepot:
+                field: entrepot
 objects:
     client:
         instance:
@@ -389,6 +391,9 @@ lists:
                             - display
             statut:
                 field: statut
+            entrepot:
+                field: entrepot
+                display: nom_url 
             fk_soc:
                 field: fk_soc
                 display: nom_url

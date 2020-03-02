@@ -164,6 +164,7 @@ class BContract_echeancier extends BimpObject {
         $instance->set('datef', date('Y-m-d H:i:s'));
         $instance->set('ef_type', $ef_type);
         $instance->set('model_pdf', 'bimpfact');
+        $instance->set('ref_client', $parent->getData('ref_customer'));
         $lines = $this->getInstance('bimpcontract', 'BContract_contratLine');
         $desc = "<b><u>Services du contrat :</b></u>" . "<br /><br />";
         foreach ($lines->getList(['fk_contrat' => $parent->id]) as $idLine => $infos) {

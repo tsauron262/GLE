@@ -1373,6 +1373,13 @@ class Equipment extends BimpObject
                     } else {
                         $identifiers['imei'] = 'n/a';
                     }
+                    
+                    
+                    if (isset($data['device']['productDescription']) && $data['device']['productDescription']) {
+                        $identifiers['productDescription'] = $data['device']['productDescription'];
+                    } else {
+                        $identifiers['productDescription'] = '';
+                    }
 
                     if (isset($data['device']['identifiers']['imei2']) && $data['device']['identifiers']['imei2']) {
                         $identifiers['imei2'] = $data['device']['identifiers']['imei2'];

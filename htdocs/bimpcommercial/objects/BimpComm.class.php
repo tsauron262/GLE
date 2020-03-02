@@ -657,7 +657,7 @@ class BimpComm extends BimpDolObject
 
                 if ($sql) {
                     $filters['commercial_custom'] = array(
-                        'custom' => $sql
+                        'custom' => "(".$sql.")"
                     );
                 }
 

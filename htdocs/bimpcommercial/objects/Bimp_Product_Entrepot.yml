@@ -187,6 +187,9 @@ lists_cols:
     price:
         child: product
         field: price
+    price_ttc:
+        child: product
+        field: price_ttc
     stock_desire: 
         label: Stock desire
         value: 

@@ -140,11 +140,11 @@ class histoNavigation {
             $result = $obj->fetch($res->element_id);
             $conf->syslog->enabled = $sysLogActive;
             if ($result > 0 && $obj->id > 0) {
-//                $replace = ($tabMenu[0] ? '&mainmenu=' . $tabMenu[0] : '') . ($tabMenu[1] ? '&leftmenu=' . $tabMenu[1] : '') . '">';
-//                if ($res->element_type == "propal")
-//                    $nomUrl = str_replace('">', $replace, $obj->getNomUrl(1));
-//                else
-//                    $nomUrl = str_replace('">', $replace, $obj->getNomUrl(1, '', 20));
+                $replace = ($tabMenu[0] ? '&mainmenu=' . $tabMenu[0] : '') . ($tabMenu[1] ? '&leftmenu=' . $tabMenu[1] : '') . '">';
+                if ($res->element_type == "propal")
+                    $nomUrl = $obj->getNomUrl(1);
+                else
+                    $nomUrl = $obj->getNomUrl(1, '', 20);
                 if(isset($tabResult[2])){
                     $data = $tabResult[2];
                     if(isset($data['changeNomUrl']) && isset($data['changeNomUrl'][1])){

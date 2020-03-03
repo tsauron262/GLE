@@ -151,9 +151,9 @@ class InventoryExpected extends BimpObject {
             $eq = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
             
             if((int) $code_scan == 0)
-                $html .= 'Attendu ';
+                $html .= '<span class="error">Attendu</span>  ';
             elseif((int) $code_scan == 1)
-                $html .= 'Scanné  ';
+                $html .= '<span class="success">Scanné</span>  ';
             
             $html .= $eq->getNomUrl();
             $html .= '<br/>';

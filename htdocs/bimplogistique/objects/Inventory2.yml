@@ -193,7 +193,6 @@ forms:
               input_name: filter_inventory
               input: 
                   type: toggle
-              value: 0
 
             - custom: 1
               label: Filrer par produit

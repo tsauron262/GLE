@@ -136,166 +136,7 @@ class BL_CommandeShipment extends BimpObject
         return (int) parent::canSetAction($action);
     }
 
-    // Getters Filtres: 
-
-    public function getCustomFilterValueLabel($field_name, $value)
-    {
-        switch ($field_name) {
-            case 'id_product':
-                $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $value);
-                if (BimpObject::ObjectLoaded($product)) {
-                    return $product->getRef();
-                }
-                break;
-
-            case 'id_commercial':
-                $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $value);
-                if (BimpObject::ObjectLoaded($user)) {
-                    return $user->dol_object->getFullName();
-                }
-                break;
-        }
-
-        return parent::getCustomFilterValueLabel($field_name, $value);
-    }
-
-    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array())
-    {
-        switch ($field_name) {
-            case 'id_product':
-                $alias = "cd";
-                $table = "commande" . 'det';
-                $joins[$alias] = array(
-                    'alias' => $alias,
-                    'table' => $table,
-                    'on'    => $alias . '.fk_commande = a.id_commande_client'
-                );
-                $filters[$alias . '.fk_product'] = array(
-                    'in' => $values
-                );
-                return;
-
-            case 'id_commercial':
-                $joins['elemcont'] = array(
-                    'table' => 'element_contact',
-                    'on'    => 'elemcont.element_id = a.id_commande_client',
-                    'alias' => 'elemcont'
-                );
-                $joins['typecont'] = array(
-                    'table' => 'c_type_contact',
-                    'on'    => 'elemcont.fk_c_type_contact = typecont.rowid',
-                    'alias' => 'typecont'
-                );
-                $filters['typecont.element'] = "commande";
-                $filters['typecont.source'] = 'internal';
-                $filters['typecont.code'] = 'SALESREPFOLL';
-                $filters['elemcont.fk_socpeople'] = array(
-                    'in' => $values
-                );
-                return;
-
-            case 'billed':
-                if (is_array($values) && !empty($values)) {
-                    if (in_array(0, $values) && in_array(1, $values)) {
-                        break;
-                    }
-                    if (in_array(0, $values)) {
-                        $joins['parent2'] = array(
-                            'alias' => 'parent2',
-                            'table' => 'commande',
-                            'on'    => 'parent2.rowid = a.id_commande_client'
-                        );
-                        $filters['a.id_facture'] = 0;
-                        $filters['parent2.invoice_status'] = array(
-                            'operator' => '<',
-                            'value'    => 2
-                        );
-                    }
-                    if (in_array(1, $values)) {
-                        $filters['a.id_facture'] = array(
-                            'operator' => '>',
-                            'value'    => 0
-                        );
-                    }
-                }
-                return;
-        }
-
-        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors);
-    }
-
-    // Getters: 
-
-    public function getContactsArray()
-    {
-        $commande = $this->getChildObject('commande_client');
-
-        if (!BimpObject::objectLoaded($commande)) {
-            return array();
-        }
-
-        $commande = $commande->dol_object;
-
-        $contacts = array(
-            0 => 'Addresse de livraison de la commande'
-        );
-
-        if (!is_null($commande->socid) && $commande->socid) {
-            $where = '`fk_soc` = ' . (int) $commande->socid;
-            $rows = $this->db->getRows('socpeople', $where, null, 'array', array('rowid', 'firstname', 'lastname'));
-
-            if (!is_null($rows)) {
-                foreach ($rows as $r) {
-                    $contacts[(int) $r['rowid']] = BimpTools::ucfirst($r['firstname']) . ' ' . strtoupper($r['lastname']);
-                }
-            }
-        }
-
-        BimpTools::loadDolClass('contact');
-
-        $bill_contacts = $commande->getIdContact('external', 'BILLING');
-        if (!is_null($bill_contacts) && count($bill_contacts)) {
-            foreach ($bill_contacts as $id_contact) {
-                if (!array_key_exists((int) $id_contact, $contacts)) {
-                    $contact = new Contact($this->db->db);
-                    if ($contact->fetch((int) $id_contact) > 0) {
-                        $contacts[(int) $id_contact] = $contact->firstname . ' ' . $contact->lastname;
-                    }
-                    unset($contact);
-                }
-            }
-        }
-
-        $ship_contacts = $commande->getIdContact('external', 'SHIPPING');
-        if (!is_null($ship_contacts) && count($ship_contacts)) {
-            foreach ($ship_contacts as $id_contact) {
-                if (!array_key_exists((int) $id_contact, $contacts)) {
-                    $contact = new Contact($this->db->db);
-                    if ($contact->fetch((int) $id_contact) > 0) {
-                        $contacts[(int) $id_contact] = $contact->firstname . ' ' . $contact->lastname;
-                    }
-                    unset($contact);
-                }
-            }
-        }
-
-        return $contacts;
-    }
-
-    public function getIdClient()
-    {
-        if (BimpTools::isSubmit('extra_data/id_commande_client')) {
-            $this->set('id_commande_client', (int) BimpTools::getValue('extra_data/id_commande_client', 0));
-        }
-
-        $commande = $this->getParentInstance();
-
-        if (BimpObject::objectLoaded($commande)) {
-            return (int) $commande->dol_object->socid;
-        }
-
-        return 0;
-    }
+    // Getters params: 
 
     public function getExtraBtn()
     {
@@ -399,6 +240,168 @@ class BL_CommandeShipment extends BimpObject
                 'onclick' => 'setSelectedObjectsAction($(this), \'list_id\', \'createBulkFacture\', {}, \'bulk_facture\', null, true, function($form, extra_data) {return onShipmentsBulkFactureFormSubmit($form, extra_data);})'
             )
         );
+    }
+
+    // Getters Filtres: 
+
+    public function getCustomFilterValueLabel($field_name, $value)
+    {
+        switch ($field_name) {
+            case 'id_product':
+                $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $value);
+                if (BimpObject::ObjectLoaded($product)) {
+                    return $product->getRef();
+                }
+                break;
+
+            case 'id_commercial':
+                $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $value);
+                if (BimpObject::ObjectLoaded($user)) {
+                    return $user->dol_object->getFullName();
+                }
+                break;
+        }
+
+        return parent::getCustomFilterValueLabel($field_name, $value);
+    }
+
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
+    {
+        switch ($field_name) {
+            case 'id_product':
+                $alias = "cd";
+                $table = "commande" . 'det';
+                $joins[$alias] = array(
+                    'alias' => $alias,
+                    'table' => $table,
+                    'on'    => $alias . '.fk_commande = a.id_commande_client'
+                );
+                $filters[$alias . '.fk_product'] = array(
+                    ($excluded ? 'not_' : '') . 'in' => $values
+                );
+                return;
+
+            case 'id_commercial':
+                $joins['elemcont'] = array(
+                    'table' => 'element_contact',
+                    'on'    => 'elemcont.element_id = a.id_commande_client',
+                    'alias' => 'elemcont'
+                );
+                $joins['typecont'] = array(
+                    'table' => 'c_type_contact',
+                    'on'    => 'elemcont.fk_c_type_contact = typecont.rowid',
+                    'alias' => 'typecont'
+                );
+                $filters['typecont.element'] = "commande";
+                $filters['typecont.source'] = 'internal';
+                $filters['typecont.code'] = 'SALESREPFOLL';
+                $filters['elemcont.fk_socpeople'] = array(
+                    ($excluded ? 'not_' : '') . 'in' => $values
+                );
+                return;
+
+            case 'billed':
+                // Bouton Exclure désactivé
+                if (is_array($values) && !empty($values)) {
+                    if (in_array(0, $values) && in_array(1, $values)) {
+                        break;
+                    }
+                    if (in_array(0, $values)) {
+                        $joins['parent2'] = array(
+                            'alias' => 'parent2',
+                            'table' => 'commande',
+                            'on'    => 'parent2.rowid = a.id_commande_client'
+                        );
+                        $filters['a.id_facture'] = 0;
+                        $filters['parent2.invoice_status'] = array(
+                            'operator' => '<',
+                            'value'    => 2
+                        );
+                    }
+                    if (in_array(1, $values)) {
+                        $filters['a.id_facture'] = array(
+                            'operator' => '>',
+                            'value'    => 0
+                        );
+                    }
+                }
+                return;
+        }
+
+        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
+    }
+
+    // Getters: 
+
+    public function getContactsArray()
+    {
+        $commande = $this->getChildObject('commande_client');
+
+        if (!BimpObject::objectLoaded($commande)) {
+            return array();
+        }
+
+        $commande = $commande->dol_object;
+
+        $contacts = array(
+            0 => 'Addresse de livraison de la commande'
+        );
+
+        if (!is_null($commande->socid) && $commande->socid) {
+            $where = '`fk_soc` = ' . (int) $commande->socid;
+            $rows = $this->db->getRows('socpeople', $where, null, 'array', array('rowid', 'firstname', 'lastname'));
+
+            if (!is_null($rows)) {
+                foreach ($rows as $r) {
+                    $contacts[(int) $r['rowid']] = BimpTools::ucfirst($r['firstname']) . ' ' . strtoupper($r['lastname']);
+                }
+            }
+        }
+
+        BimpTools::loadDolClass('contact');
+
+        $bill_contacts = $commande->getIdContact('external', 'BILLING');
+        if (!is_null($bill_contacts) && count($bill_contacts)) {
+            foreach ($bill_contacts as $id_contact) {
+                if (!array_key_exists((int) $id_contact, $contacts)) {
+                    $contact = new Contact($this->db->db);
+                    if ($contact->fetch((int) $id_contact) > 0) {
+                        $contacts[(int) $id_contact] = $contact->firstname . ' ' . $contact->lastname;
+                    }
+                    unset($contact);
+                }
+            }
+        }
+
+        $ship_contacts = $commande->getIdContact('external', 'SHIPPING');
+        if (!is_null($ship_contacts) && count($ship_contacts)) {
+            foreach ($ship_contacts as $id_contact) {
+                if (!array_key_exists((int) $id_contact, $contacts)) {
+                    $contact = new Contact($this->db->db);
+                    if ($contact->fetch((int) $id_contact) > 0) {
+                        $contacts[(int) $id_contact] = $contact->firstname . ' ' . $contact->lastname;
+                    }
+                    unset($contact);
+                }
+            }
+        }
+
+        return $contacts;
+    }
+
+    public function getIdClient()
+    {
+        if (BimpTools::isSubmit('extra_data/id_commande_client')) {
+            $this->set('id_commande_client', (int) BimpTools::getValue('extra_data/id_commande_client', 0));
+        }
+
+        $commande = $this->getParentInstance();
+
+        if (BimpObject::objectLoaded($commande)) {
+            return (int) $commande->dol_object->socid;
+        }
+
+        return 0;
     }
 
     public function getName()
@@ -556,12 +559,29 @@ class BL_CommandeShipment extends BimpObject
             case 'id_client':
                 $id_client = 0;
                 foreach ($commandes as $id_commande => $commande) {
-                    if ($id_client && $id_client !== (int) $commande->getData('fk_soc')) {
+                    $id_client_comm = (int) $commande->getData('id_client_facture');
+                    if (!$id_client_comm) {
+                        $id_client_comm = (int) $commande->getData('fk_soc');
+                    }
+                    if ($id_client && $id_client_comm && $id_client !== $id_client_comm) {
                         return 0;
                     }
-                    $id_client = (int) $commande->getData('fk_soc');
+                    $id_client = (int) $id_client_comm;
                 }
                 return $id_client;
+
+            case 'id_contact':
+                $id_contact = 0;
+                foreach ($commandes as $id_commande => $commande) {
+                    $id_comm_contact = (int) $commande->getIdContact('external', 'BILLING');
+                    if ($id_contact && $id_comm_contact && $id_contact != $id_comm_contact) {
+                        return 0;
+                    }
+                    if ($id_comm_contact) {
+                        $id_contact = $id_comm_contact;
+                    }
+                }
+                return $id_contact;
 
             case 'id_entrepot':
                 $id_entrepot = 0;
@@ -623,6 +643,17 @@ class BL_CommandeShipment extends BimpObject
         }
 
         return '';
+    }
+
+    public function getBulkFactureClientContactsArray()
+    {
+        $id_client = $this->getBulkFactureValue('id_client');
+
+        if ($id_client) {
+            return self::getSocieteContactsArray($id_client, false);
+        }
+
+        return array();
     }
 
     // Affichages: 
@@ -1851,6 +1882,11 @@ class BL_CommandeShipment extends BimpObject
 
         $commande->checkShipmentStatus();
 
+        if (!count($errors)) {
+            $ref = $this->getData('ref');
+            $commande->addLog('Expédition n°' . $this->getData('num_livraison') . ($ref ? ' (' . $ref . ')' : '') . ' validée');
+        }
+
         return $errors;
     }
 
@@ -1899,6 +1935,11 @@ class BL_CommandeShipment extends BimpObject
         }
 
         $this->onLinesChange();
+
+        if (!count($errors)) {
+            $ref = $this->getData('ref');
+            $commande->addLog('Expédition n°' . $this->getData('num_livraison') . ($ref ? ' (' . $ref . ')' : '') . ' annulée');
+        }
 
         return $errors;
     }
@@ -2489,7 +2530,7 @@ class BL_CommandeShipment extends BimpObject
 
                     $line_errors = $line->setShipmentData($this, $data, $line_warnings);
 
-                    $line_errors = array_merge($line_errors, $line_warnings);
+                    $line_errors = BimpTools::merge_array($line_errors, $line_warnings);
 
                     if (count($line_errors)) {
                         $warnings[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n°' . $line->getData('position') . ': erreurs lors de l\'enregistrement des quantités');
@@ -2507,6 +2548,22 @@ class BL_CommandeShipment extends BimpObject
                     }
                 }
             }
+        }
+
+        return $errors;
+    }
+
+    public function delete(&$warnings = array(), $force_delete = false)
+    {
+        $num = $this->getData('num_livraison');
+        $ref = $this->getData('ref');
+        $commande = $this->getParentInstance();
+
+        $errors = parent::delete($warnings, $force_delete);
+
+        if (!count($errors) && BimpObject::objectLoaded($commande)) {
+            $ref = $this->getData('ref');
+            $commande->addLog('Expédition n°' . $this->getData('num_livraison') . ($ref ? ' (' . $ref . ')' : '') . ' supprimée');
         }
 
         return $errors;

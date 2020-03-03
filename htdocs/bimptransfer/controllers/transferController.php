@@ -22,7 +22,7 @@ class transferController extends BimpController {
         $id_warehouse_source = $transfer->getData('id_warehouse_source');
 
         if ($transfer->getData('status') == Transfer::STATUS_SENDING)
-            $errors = array_merge($errors, $transfert_line->checkStock($quantity_avaible, $id_product, $id_equipment, $id_warehouse_source, $id_transfer));
+            $errors = BimpTools::merge_array($errors, $transfert_line->checkStock($quantity_avaible, $id_product, $id_equipment, $id_warehouse_source, $id_transfer));
         else
             $quantity_avaible = 10000000;
 
@@ -42,17 +42,17 @@ class transferController extends BimpController {
                         $errors[] = "Il n'y a que " . $quantity_avaible . " unité(s) disponible(s) dans cet entrepôt, "
                                 . "or vous essayez d'en réserver " . $qteAResa . " pour ce transfert.";
                     } else {
-                        $errors = array_merge($errors, $transfert_lineObj->set('quantity_sent', (int) $new_qty_send));
-                        $errors = array_merge($errors, $transfert_lineObj->update());
+                        $errors = BimpTools::merge_array($errors, $transfert_lineObj->set('quantity_sent', (int) $new_qty_send));
+                        $errors = BimpTools::merge_array($errors, $transfert_lineObj->update());
                     }
                 } else {
-                    $errors = array_merge($errors, $transfert_line->create_2($id_transfer, $id_product, $id_equipment, $quantity_input, $id_affected, $id_warehouse_source));
+                    $errors = BimpTools::merge_array($errors, $transfert_line->create_2($id_transfer, $id_product, $id_equipment, $quantity_input, $id_affected, $id_warehouse_source));
                 }
             } else {//reception
                 if ($id_line) {
                     $transfert_lineObj = BimpCache::getBimpObjectInstance('bimptransfer', 'TransferLine', $id_line);
-                    $errors = array_merge($errors, $transfert_lineObj->set('quantity_received', (int) $transfert_lineObj->getData('quantity_received') + (int) $quantity_input));
-                    $errors = array_merge($errors, $transfert_lineObj->update());
+                    $errors = BimpTools::merge_array($errors, $transfert_lineObj->set('quantity_received', (int) $transfert_lineObj->getData('quantity_received') + (int) $quantity_input));
+                    $errors = BimpTools::merge_array($errors, $transfert_lineObj->update());
                 } else
                     $errors[] = "Produit non trouvé dans les envois.";
             }

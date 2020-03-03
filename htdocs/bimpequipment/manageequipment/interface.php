@@ -159,7 +159,7 @@ switch (GETPOST('action')) {
                 'orders' => $blstatic->getOrders(GETPOST('fk_warehouse'), 3, 4),
                 'right_caisse_admin' => $user->rights->bimpequipment->caisse_admin->read,
                 'right_caisse' => $user->rights->bimpequipment->caisse->read,
-                'errors' => array_merge($transferstatic->errors, $blstatic->errors)));
+                'errors' => BimpTools::merge_array($transferstatic->errors, $blstatic->errors)));
             break;
         }
 

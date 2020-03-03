@@ -1,0 +1,227 @@
+table: stock_mouvement
+primary: rowid
+icon: fas_exchange-alt
+
+labels: 
+    name: Mouvement de stock
+    name_plur: Mouvements de stock
+    is_female: 0
+    
+objects:   
+    product: 
+        instance: 
+            id_object: 
+                field_value: fk_product
+            
+    entrepot: 
+        instance: 
+            id_object: 
+                field_value: fk_entrepot
+               
+    category: 
+        relation: none
+        delete: 0
+        instance: 
+            dol_object: 
+                module: categories
+                file: categorie
+
+    marque: 
+        extends: category
+        relation: hasOne
+        instance: 
+            id_object: 
+                field_value: marque
+                
+    gamme: 
+        extends: category
+        relation: hasOne
+        instance: 
+            id_object: 
+                field_value: gamme   
+                
+fields: 
+    fk_entrepot: 
+        label: Entrepot
+        type: id_object
+        object: entrepot
+        values: 
+            array: entrepots
+    
+    fk_origin:
+        label: Id pièce d'origine
+        type: int
+           
+    origintype:
+        label: Type pièce d'origine
+        type: string
+        values: 
+           array: originetypes
+        
+    fk_product: 
+        label: Produit
+        type: id_object
+        object: product
+        display: 
+            nom_url_libelle: 
+                type: callback
+                method: displayProduct
+    
+    datem:
+        label: Date du mouvement
+        type: datetime
+        
+    type_mouvement:
+        label: Type du mouvement
+        type: int
+        values:
+            array: type_mouvement
+    
+    value:
+        label: Quantité
+        type: int
+    
+    inventorycode:
+        label: Code inventaire
+        type: string
+    
+    label:
+        label: Libellé mouvement
+        type: string
+        
+    fk_user_author:
+        label: Auteur
+        type: id_object
+        object: user
+        
+    bimp_origin: 
+        label: Origine
+        
+    bimp_id_origin: 
+        label: ID origine
+        type: id
+        default_value: 0
+        
+    # extras: 
+    marque: 
+        label: Marque
+        extra: 1
+        type: id_object
+        object: marque
+        values: 
+            array: marques
+            
+    gamme: 
+        label: Gamme matériel
+        extra: 1
+        type: id_object
+        object: gamme
+        values: 
+            array: gammesMateriel
+
+lists_cols:
+    fk_entrepot: 
+        field: fk_entrepot
+        display: nom_url
+    fk_product: 
+        field: fk_product
+        display: nom_url_libelle
+        min_width: 220px
+    marque: 
+        field: marque
+    gamme: 
+        field: gamme
+    type_materiel: 
+        label: Type matériel
+        value: 
+            callback: displayTypeMateriel
+    origin: 
+        label: Origine
+        value: 
+            callback: displayOriginMvt
+        min_width: 180px        
+    numero:
+        field: id
+#        value:
+#            callback: displayId       
+    datem:
+        field: datem
+    inventorycode:
+        field: inventorycode
+    label:
+        field: label
+        min_width: 220px
+    reason:
+        label: Raison
+        value:
+            callback: displayReasonMvt
+    qty:
+        label: Qté
+        field: value
+        min_width: 30px
+    type_mouvement:
+        label: Type mvt
+        field: type_mouvement
+    fk_user_author:
+        field: fk_user_author
+        display: nom_url
+    
+lists: 
+    default: 
+        icon: fas_exchange-alt
+        configurable: 1
+        filters_panel: default
+        sort_field: rowid
+        sort_way: desc
+        n: 50
+        cols: 
+            numero:    
+            datem:
+            fk_entrepot: 
+            fk_product:
+            inventorycode:
+            label:
+            origin:
+            reason:
+            qty:
+            type_mouvement:
+            fk_user_author:
+
+filters_panels: 
+    default: 
+        filters: 
+            entrepot: 
+                field: fk_entrepot
+            product: 
+                field: fk_product
+            origin_type: 
+                custom: 1
+                label: Type origine
+                field: origin_type
+                type: value
+                input: 
+                    type: select
+                    options: 
+                        array: originetypes
+            origin: 
+                custom: 1
+                label: Elément d'origine
+                type: value_part
+                field: origin
+                exclude_btn : 0
+                
+            datem:
+                field: datem
+            inventorycode:
+                field: inventorycode
+            label:
+                field: label
+            qty:
+                field: value
+            type_mouvement: 
+                field: type_mouvement
+            fk_user_author:
+                field: fk_user_author
+                type: user
+            
+

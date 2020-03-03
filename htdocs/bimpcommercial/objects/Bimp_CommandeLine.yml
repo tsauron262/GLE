@@ -434,8 +434,8 @@ lists:
         configurable: 1
         position: 1
         position_open: 1
-        enable_search: 0
-        enable_sort: 0Œ
+        enable_search: 1
+        enable_sort: 1
         pagination: 0
         sort_field: position
         sort_way: asc
@@ -535,7 +535,6 @@ lists:
             qty_total:
             qty_to_ship:
             qty_to_bill:
-                                
 #            tva:
 #            remise_crt:
 #                edit: 0
@@ -546,5 +545,7 @@ lists:
 #                field: total_ttc
 #                child: dol_line
 
+    logistic_fourn: 
+        extends: general
     
     

@@ -562,42 +562,39 @@ class Bimp_CommandeFournLine extends FournObjectLine
             );
         }
 
-        if (1) {
-            $commandeCliLine = BimpObject::getInstance("bimpcommercial", "Bimp_CommandeLine");
-            $filters = array();
-            $comm = $this->getParentInstance();
-            $filters['cd.fk_product'] = $this->id_product;
-            $filters['cex.entrepot'] = $comm->getData("entrepot");
-            $filters['a.qty_to_ship'] = array("operator" => ">", "value" => 0);
-            $joins = array();
+        $commandeCliLine = BimpObject::getInstance("bimpcommercial", "Bimp_CommandeLine");
+        $filters = array();
+        $comm = $this->getParentInstance();
+        $filters['cd.fk_product'] = $this->id_product;
+        $filters['cex.entrepot'] = $comm->getData("entrepot");
+        $filters['a.qty_to_ship'] = array("operator" => ">", "value" => 0);
+        $joins = array();
 
-            $joins['commandedet'] = array(
-                'table' => 'commandedet',
-                'on'    => 'cd.rowid = a.id_line',
-                'alias' => 'cd'
-            );
-            $joins['commextra'] = array(
-                'table' => 'commande_extrafields',
-                'on'    => 'cex.fk_object = a.id_obj',
-                'alias' => 'cex'
-            );
+        $joins['commandedet'] = array(
+            'table' => 'commandedet',
+            'on'    => 'cd.rowid = a.id_line',
+            'alias' => 'cd'
+        );
+        $joins['commextra'] = array(
+            'table' => 'commande_extrafields',
+            'on'    => 'cex.fk_object = a.id_obj',
+            'alias' => 'cex'
+        );
 
-
-            $buttons[] = array(
-                'label'   => 'Voir les commandes client',
-                'icon'    => 'fas_glasses',
-                'onclick' => $commandeCliLine->getJsLoadModalList('general', array(
-                    'title'         => 'Commande client utilisable',
-                    'extra_filters' => $filters,
-                    'extra_joins'   => $joins
-                ))
-            );
-        }
+        $buttons[] = array(
+            'label'   => 'Voir les commandes client',
+            'icon'    => 'fas_glasses',
+            'onclick' => $commandeCliLine->getJsLoadModalList('logistic_fourn', array(
+                'title'         => 'Commandes client utilisables',
+                'extra_filters' => $filters,
+                'extra_joins'   => $joins
+            ))
+        );
 
         $product = $this->getProduct();
 
         if (BimpObject::objectLoaded($product)) {
-            $buttons = array_merge($buttons, $product->getListsButtons((int) ceil($this->qty)));
+            $buttons = BimpTools::merge_array($buttons, $product->getListsButtons((int) ceil($this->qty)));
         }
 
         return $buttons;
@@ -1228,7 +1225,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
 
                                     if ($code_config) {
                                         foreach ($serials as $serial) {
-                                            $isImei = (!preg_match("/[a-zA-Z]/", $serial))? true : false;
+                                            $isImei = (!preg_match("/[a-zA-Z]/", $serial)) ? true : false;
                                             if (!$isImei && !preg_match('/^.+' . preg_quote($code_config) . '$/', $serial)) {
                                                 $code_config_errors[] = $serial;
                                             }
@@ -1477,7 +1474,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
             $reception->onLinesChange();
         }
 
-        $errors = array_merge($errors, $warnings);
+        $errors = BimpTools::merge_array($errors, $warnings);
 
         $this->checkQties();
 
@@ -1616,7 +1613,9 @@ class Bimp_CommandeFournLine extends FournObjectLine
                             'date'         => date('Y-m-d H:i:s'),
                             'id_entrepot'  => (int) $entrepot->id,
                             'infos'        => $stock_label,
-                            'code_mvt'     => $code_mvt
+                            'code_mvt'     => $code_mvt,
+                            'origin'       => 'order_supplier',
+                            'id_origin'    => (int) $commande_fourn->id
                         ));
                         if (!count($pl_errors)) {
                             $pl_warnings = array();
@@ -1624,14 +1623,6 @@ class Bimp_CommandeFournLine extends FournObjectLine
                         }
                         if (count($pl_errors)) {
                             $errors[] = BimpTools::getMsgFromArray($pl_errors, 'Echec de la création de l\'emplacement pour le numéro de série "' . $equipment->getData('serial') . '"');
-
-                            // Commenté car si erreurs, la validation de la réception sera annulée
-//                        $msg = 'ECHEC CREATION EMPLACEMENT EQUIPEMENT - A CORRIGER MANUELLEMENT' . "\n";
-//                        $msg .= 'Plateforme: ' . DOL_URL_ROOT . ' - Equipement: ' . $equipment->id . ' - Entrepot: ' . $entrepot->id;
-//                        $msg .= 'Erreurs:' . "\n";
-//                        $msg .= print_r($pl_errors, 1);
-//                        dol_syslog($msg, LOG_ERR);
-//                        mailSyn2('[ERREUR]', 'debugerp@bimp.fr', 'BIMP<no-reply@bimp.fr>', $msg);
                         }
                     }
                 }
@@ -1664,7 +1655,9 @@ class Bimp_CommandeFournLine extends FournObjectLine
                         'date'         => date('Y-m-d H:i:s'),
                         'place_name'   => 'Retourné au fournisseur ' . $fourn_label,
                         'infos'        => '(Retour au fournisseur) ' . $stock_label,
-                        'code_mvt'     => $code_mvt
+                        'code_mvt'     => $code_mvt,
+                        'origin'       => 'order_supplier',
+                        'id_origin'    => (int) $commande_fourn->id
                     ));
                     if (!count($pl_errors)) {
                         $pl_warnings = array();
@@ -1678,12 +1671,10 @@ class Bimp_CommandeFournLine extends FournObjectLine
             }
         } else {
             // Incrémentation des stocks produit: 
-            global $user;
-
             if (!$isReturn) {
-                $product->dol_object->correct_stock($user, $entrepot->id, (int) $reception_data['qty'], 0, $stock_label, 0, $code_mvt, "order_supplier", $commande_fourn->id);
+                $product->correctStocks($entrepot->id, (int) $reception_data['qty'], Bimp_Product::STOCK_IN, $code_mvt, $stock_label, 'order_supplier', (int) $commande_fourn->id);
             } else {
-                $product->dol_object->correct_stock($user, $entrepot->id, abs((int) $reception_data['qty']), 1, '(Retour au fournisseur) ' . $stock_label, 0, $code_mvt, "order_supplier", $commande_fourn->id);
+                $product->correctStocks($entrepot->id, abs((int) $reception_data['qty']), Bimp_Product::STOCK_OUT, $code_mvt, '(Retour au fournisseur) ' . $stock_label, 'order_supplier', (int) $commande_fourn->id);
             }
         }
 
@@ -1730,7 +1721,6 @@ class Bimp_CommandeFournLine extends FournObjectLine
     public function cancelReceptionValidation($id_reception, &$warnings = array())
     {
         $errors = array();
-        global $user;
 
         $reception_data = $this->getReceptionData($id_reception);
         $isReturn = ((float) $this->getFullQty() < 0);
@@ -1795,6 +1785,8 @@ class Bimp_CommandeFournLine extends FournObjectLine
 
                                     // Suppr de l'équipement 
                                     $eq_warnings = array();
+                                    $equipment->delete_origin = 'order_supplier';
+                                    $equipment->delete_id_origin = (int) $commande_fourn->id;
                                     $eq_errors = $equipment->delete($eq_warnings, true);
 
                                     if (count($eq_errors)) {
@@ -1829,7 +1821,9 @@ class Bimp_CommandeFournLine extends FournObjectLine
                                             'date'         => date('Y-m-d H:i:s'),
                                             'id_entrepot'  => (int) $id_entrepot,
                                             'infos'        => '(Retour fournisseur) ' . $stock_label,
-                                            'code_mvt'     => $code_mvt
+                                            'code_mvt'     => $code_mvt,
+                                            'origin'       => 'order_supplier',
+                                            'id_origin'    => (int) $commande_fourn->id
                                         ));
                                         if (!count($eq_errors)) {
                                             $eq_errors = $new_place->create($eq_warnings);
@@ -1876,11 +1870,9 @@ class Bimp_CommandeFournLine extends FournObjectLine
                         if (BimpObject::objectLoaded($product)) {
                             $stock_label = 'Annulation réception n°' . $reception->getData('num_reception') . ((float) $reception_data['qty'] < 0 ? ' (Retour au fournisseur)' : '') . ' BR: ' . $reception->getData('ref') . ' - Commande fournisseur: ' . $commande_fourn->getData('ref');
                             $code_mvt = 'ANNUL_CMDF_' . $commande_fourn->id . '_LN_' . $this->id . '_RECEP_' . $reception->id;
-
-                            if ($product->dol_object->correct_stock($user, $id_entrepot, (int) $reception_data['qty'], 1, $stock_label, 0, $code_mvt, "order_supplier", $commande_fourn->id) <= 0) {
-                                $msg = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($product->dol_object), 'Echec de la correction du stock');
-                                $errors[] = $msg;
-                                dol_syslog('[ERREUR STOCK] ' . 'Annulation réception #' . $reception->id . ' - Commande Fourn ' . $commande_fourn->id . ' - ' . $msg, LOG_ERR);
+                            $stock_errors = $product->correctStocks($id_entrepot, (int) $reception_data['qty'], Bimp_Product::STOCK_OUT, $code_mvt, $stock_label, 'order_supplier', $commande_fourn->id);
+                            if (count($stock_errors)) {
+                                $errors[] = BimpTools::getMsgFromArray($stock_errors);
                             }
                         }
                     }
@@ -2150,7 +2142,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
                     $reception_warnings = array();
                     $reception_errors = $this->setReceptionData($id_reception, $receptions[(int) $id_reception], false, $reception_warnings);
 
-                    $reception_errors = array_merge($reception_errors, $reception_warnings);
+                    $reception_errors = BimpTools::merge_array($reception_errors, $reception_warnings);
 
                     if (count($reception_errors)) {
                         $warnings[] = BimpTools::getMsgFromArray($reception_errors, 'Réception n°' . $reception->getData('num_reception') . ' (' . $reception->getData('ref') . ')');

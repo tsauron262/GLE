@@ -171,7 +171,7 @@ table.objectlistTable {
             }
         }
     }
-    
+
     & > tbody.headers_col > tr > th {
         width: 160px;
     }
@@ -703,7 +703,7 @@ td.buttons {
         margin-bottom: 5px;
         background-color: #DCDCDC;
     }
-    
+
     .bimp_filter_input_container {
         .input-group {
             width: 100%;
@@ -737,14 +737,29 @@ td.buttons {
         }
 
         .bimp_filter_value_remove_btn {
-
             margin-left: 10px;
-            color: #9EC5E6;;
+            color: #9EC5E6;
             cursor: pointer;
             float: right;
 
             &:hover {
                 color: #fff;
+            }
+        }
+
+        &.excluded {
+            background-color: #A60000;
+
+            &:hover {
+                background-color: #CC2929;
+            }
+
+            .bimp_filter_value_remove_btn {
+                color: #DBAFAF;
+
+                &:hover {
+                    color: #fff;
+                }
             }
         }
     }
@@ -756,20 +771,20 @@ td.buttons {
     i.loading {
         display: none;
     }
-    
+
     .bimp_filter_date_range_period {
         font-size: 11px;
         margin-bottom: 10px;
         padding-bottom: 10px;
         border-bottom: 1px solid #7D7D7D;
-        
+
         input, select, .select2 {
             display: inline-block;
             font-size: 11px!important;
             width: auto!important;
             min-width: 30px!important;
             width: 80px!important;
-            
+
             &.qtyInput {
                 width: 30px!important;
             }
@@ -781,4 +796,75 @@ td.buttons {
     padding: 5px 0;
     margin: 5px 0;
     border-top: 1px solid $gray-darker;
+}
+
+/*Filtres actifs:*/ 
+
+.list_active_filters {
+    background-color: #F0F0F0;
+    padding: 4px;
+    margin-bottom: 5px;
+
+    .list_active_filters_title {
+        font-size: 13px;
+        font-weight: bold;
+    }
+
+    .filter_active_values {
+        display: inline-block;
+        vertical-align: top;
+        margin: 0 3px;
+        padding: 4px;
+        font-size: 11px;
+
+        .filter_label {
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .relation {
+            font-weight: bold;
+            font-size: 10px;
+        }
+
+        .included_values,
+        .excluded_values {
+            .filter_value {
+                color: #fff;
+                padding: 5px 15px 5px 5px;
+                margin: 2px 0;
+
+                .remove_btn {
+                    margin-left: 5px;
+                    cursor: pointer;
+                    float: right;
+                    margin-right: -10px;
+
+                    &:hover {
+                        color: #fff;
+                    }
+                }
+            }
+        }
+
+        .included_values {
+            .filter_value {
+                background-color: #3E88D2;
+
+                .remove_btn {
+                    color: #9EC5E6;
+                }
+            }
+        }
+
+        .excluded_values {
+            .filter_value {
+                background-color: #A60000;
+
+                .remove_btn {
+                    color: #DBAFAF;
+                }
+            }
+        }
+    }
 }

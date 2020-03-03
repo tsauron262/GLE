@@ -37,6 +37,13 @@ class Bimp_Facture extends BimpComm
         2 => array('label' => 'Attestation Dédouanement Non Reçue'),
         3 => array('label' => 'Non déclarable'),
     );
+    public static $statut_relance = array(
+        0 => array('label' => 'Pas de relance'),
+        1 => array('label' => 'Pret pour relance'),
+        2 => array('label' => 'Relancée'),
+        9 => array('label' => 'Abandon relance'),
+        99 => array('label' => 'Succés relance')
+    );
 
     // Gestion des droits: 
 
@@ -81,6 +88,9 @@ class Bimp_Facture extends BimpComm
 
 
             case 'addContact':
+                return 1;
+                
+            case 'relance':
                 return 1;
 
             case 'cancel':
@@ -160,7 +170,7 @@ class Bimp_Facture extends BimpComm
 
     public function isFieldEditable($field, $force_edit = false)
     {
-        if (in_array($field, array('statut_export', 'douane_number')))
+        if (in_array($field, array('statut_export', 'douane_number', 'note_public')))
             return 1;
         if ((int) $this->getData('fk_statut') > 0 && ($field == 'datef'))
             return 0;
@@ -432,6 +442,11 @@ class Bimp_Facture extends BimpComm
                     $errors[] = 'La commission #' . $commission->id . ' n\'est plus au statut "brouillon"';
                     return 0;
                 }
+                return 1;
+                
+            case 'relance':
+                if(!in_array($this->getData("statut_relance"), array(2,3)))
+                        return 0;
                 return 1;
 
             case 'removeFromEntrepotCommission':
@@ -765,6 +780,19 @@ class Bimp_Facture extends BimpComm
                         }
                     }
                 }
+                
+                
+                
+                //Relancée
+                if ($remainToPay > 0){
+                    if ($this->isActionAllowed('relance') && $this->canSetAction('relance')) {
+                        $buttons[] = array(
+                            'label'   => $langs->trans('Relancer'),
+                            'icon'    => 'exclamation',
+                            'onclick' => $this->getJsActionOnclick('relance', array())
+                        );
+                    }
+                }
             }
 
             // Cloner: 
@@ -913,7 +941,7 @@ class Bimp_Facture extends BimpComm
         return $buttons;
     }
 
-    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array())
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
     {
         switch ($field_name) {
             case 'revals_brouillons':
@@ -927,18 +955,25 @@ class Bimp_Facture extends BimpComm
                     case 'revals_ok': $status = '1';
                         break;
                 }
-                $or_field = array();
+                $revals_filters = array();
                 foreach ($values as $value) {
-                    $or_field[] = BC_Filter::getRangeSqlFilter($value, $errors);
+                    $revals_filters[] = BC_Filter::getRangeSqlFilter($value, $errors, false, $excluded);
                 }
 
-                if (!empty($or_field)) {
+                if (!empty($revals_filters)) {
                     $sql = '(SELECT SUM(reval.amount * reval.qty) FROM ' . MAIN_DB_PREFIX . 'bimp_revalorisation reval';
                     $sql .= ' WHERE reval.id_facture = a.rowid';
                     $sql .= ' AND reval.status IN (' . $status . '))';
-                    $filters[$sql] = array(
-                        'or_field' => $or_field
-                    );
+
+                    if ($excluded) {
+                        $filters[$sql] = array(
+                            'and' => $revals_filters
+                        );
+                    } else {
+                        $filters[$sql] = array(
+                            'or_field' => $revals_filters
+                        );
+                    }
                 }
                 break;
 
@@ -950,12 +985,12 @@ class Bimp_Facture extends BimpComm
                 );
 
                 $filters['sav.id_user_tech'] = array(
-                    'in' => $values
+                    ($excluded ? 'not_' : '') . 'in' => $values
                 );
                 break;
         }
 
-        return parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors);
+        return parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
     }
 
     // Getters Array: 
@@ -1955,6 +1990,16 @@ class Bimp_Facture extends BimpComm
 
         return $html;
     }
+    
+    public function displayPDFButton($display_generate = true, $with_ref = true, $btn_label = ''){
+        if($this->getData('fk_statut') > 0){
+            $ref = dol_sanitizeFileName($this->getRef());
+            if($this->getFileUrl($ref . '.pdf') != '')
+                $display_generate = false;
+        }
+        
+        return parent::displayPDFButton($display_generate, $with_ref, $btn_label);
+    }
 
     public function renderContentExtraRight()
     {
@@ -2093,14 +2138,6 @@ class Bimp_Facture extends BimpComm
             $html .= BimpObject::getInstanceNomUrlWithIcons($client);
             $html .= '</div>';
         }
-        $id_contrat = $this->db->getValue('element_element', 'fk_source', 'sourcetype = "contrat" and targettype = "facture" and fk_target = ' . $this->id);
-        if ($id_contrat && $this->getData('fk_statut') == 0) {
-            $html .= '<div class="object_header_infos">';
-            $msg = "<h5>Cette facture est une facture de contrat. Pour le moment, merci de supprimer cette PROV à partir de l'échéancier et non <b>pas</b> depuis le bouton \"poubelle\" habituel. <b><i class='fas fa-exclamation-triangle'></i> TR&Egrave;S IMPORTANT</b></h5>";
-            $msg .= '<h5><b><a href="' . DOL_URL_ROOT . '/bimpcontract?fc=contrat&id=' . $id_contrat . '&navtab-maintabs=echeancier">Aller vers la page de l\'échéancier du contrat <i class="fas fa-arrow-right" ></i></a></b></h5>';
-            $html .= BimpRender::renderAlerts($msg, 'danger', false);
-            $html .= '</div>';
-        }
 
         return $html;
     }
@@ -2223,21 +2260,26 @@ class Bimp_Facture extends BimpComm
     public function renderCreateWarning()
     {
         if (!$this->isLoaded()) {
-            $html = '<p style="font-size: 16px">';
-            $html .= '<span style="font-size: 24px">';
-            $html .= BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
-            $html .= '</span>';
-            $html .= '<span class="bold">ATTENTION</span>, la création directe de facture est réservée à des cas exceptionnels et ne doit être utilisée qu\'en dernier recours.<br/>';
-            $html .= 'Pour les cas ordinaires, vous devez ';
-            $html .= '<span class="bold">impérativement passer par le processus de commande.</span>';
-            $html .= '</p>';
+            $html = '';
+            if(BimpCore::getConf('force_use_commande')){
+                $html = '<p style="font-size: 16px">';
+                $html .= '<span style="font-size: 24px">';
+                $html .= BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
+                $html .= '</span>';
+                $html .= '<span class="bold">ATTENTION</span>, la création directe de facture est réservée à des cas exceptionnels et ne doit être utilisée qu\'en dernier recours.<br/>';
+                $html .= 'Pour les cas ordinaires, vous devez ';
+                $html .= '<span class="bold">impérativement passer par le processus de commande.</span>';
+                $html .= '</p>';
+            }
 
-            return array(
-                array(
-                    'content' => $html,
-                    'type'    => 'warning'
-                )
-            );
+            if($html != ''){
+                return array(
+                    array(
+                        'content' => $html,
+                        'type'    => 'warning'
+                    )
+                );
+            }
         }
 
         return array();
@@ -2455,6 +2497,10 @@ class Bimp_Facture extends BimpComm
             $this->dol_object->update_price();
             $this->dol_object->fetch((int) $this->id);
             $this->hydrateFromDolObject();
+            
+            if (!$this->isValidatable($errors)) {
+                return $errors;
+            }
 
             $lines = $this->getLines('not_text');
             $total_ttc_wo_discounts = (float) $this->getTotalTtcWithoutDiscountsAbsolutes();
@@ -2479,6 +2525,9 @@ class Bimp_Facture extends BimpComm
 
             if (!round($total_ttc, 2) && !$has_amounts_lines) {
                 $errors[] = 'Aucune ligne avec montant non nul ajoutée à cette facture';
+            }
+            
+            if (count($errors)) {
                 return $errors;
             }
 
@@ -2629,26 +2678,12 @@ class Bimp_Facture extends BimpComm
             // Classemement "facturé" des commandes et propales: 
             $facturee = true;
             $this->dol_object->fetchObjectLinked();
+
             if (isset($this->dol_object->linkedObjects['commande'])) {
                 foreach ($this->dol_object->linkedObjects['commande'] as $comm) {
-                    $facturee = false;
-                    $totalCom = $comm->total_ttc;
-                    $totalFact = 0;
-                    $comm->fetchObjectLinked();
-                    if (isset($comm->linkedObjects['facture'])) {
-                        foreach ($comm->linkedObjects['facture'] as $fact) {
-                            $totalFact += $fact->total_ttc;
-                        }
-                    }
-                    $diff = $totalCom - $totalFact;
-                    if ($diff < 0.02 && $diff > -0.02) {
-                        $facturee = true;
-                        $comm->classifybilled($user);
-                    }
-                    if (isset($comm->linkedObjects['propal']) && $facturee) {
-                        foreach ($comm->linkedObjects['propal'] as $prop) {
-                            $prop->classifybilled($user);
-                        }
+                    $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $comm->id);
+                    if (BimpObject::objectLoaded($commande)) {
+                        $commande->checkInvoiceStatus();
                     }
                 }
             }
@@ -2701,6 +2736,15 @@ class Bimp_Facture extends BimpComm
 
             foreach ($shipments as $shipment) {
                 $shipment->updateField('id_facture', 0);
+            }
+            
+            $tabT = getElementElement('contrat', 'facture', null, $this->id);
+            foreach($tabT as $data) {
+                $echeancier = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_echeancier');
+                if($echeancier->find(['id_contrat' => $data['s']])) {
+                    $dateDebutFacture = $this->dol_object->lines[0]->date_start;
+                    $echeancier->onDeleteFacture($dateDebutFacture);
+                }
             }
         }
 
@@ -2767,7 +2811,7 @@ class Bimp_Facture extends BimpComm
             'ref_client'        => $this->getData('ref_client'),
             'datef'             => $this->getData('datef'),
             'fk_account'        => (int) $this->getData('fk_account'),
-            'fk_cond_reglement' => (int) $this->getData('fk_cond_reglement')
+            'fk_cond_reglement' => (int) $this->getData('fk_cond_reglement'),
         ));
 
         $avoir->dol_object->fk_delivery_address = $this->dol_object->fk_delivery_address;
@@ -3165,8 +3209,10 @@ class Bimp_Facture extends BimpComm
 
             $id_entrepot = (int) $this->getData('entrepot');
 
-            // Check parameters
-            // Check for mandatory prof id (but only if country is than than ours)
+            if (!$id_entrepot) {
+                $errors[] = 'Entrepôt absent';
+            }
+
             if ($mysoc->country_id > 0 && $this->dol_object->thirdparty->country_id == $mysoc->country_id) {
                 for ($i = 1; $i <= 6; $i++) {
                     $idprof_mandatory = 'SOCIETE_IDPROF' . ($i) . '_INVOICE_MANDATORY';
@@ -3177,31 +3223,10 @@ class Bimp_Facture extends BimpComm
                 }
             }
 
-            $qualified_for_stock_change = 0;
-            if (empty($conf->global->STOCK_SUPPORTS_SERVICES)) {
-                $qualified_for_stock_change = $this->dol_object->hasProductsOrServices(2);
-            } else {
-                $qualified_for_stock_change = $this->dol_object->hasProductsOrServices(1);
-            }
-
-            // Check for warehouse
-            // todo: checker si les stocks doivent être corrigés ou non selon le type de la facture.
-            if ((int) $this->getData('type') != Facture::TYPE_DEPOSIT && !empty($conf->global->STOCK_CALCULATE_ON_BILL) && $qualified_for_stock_change) {
-                if (!$id_entrepot) {
-                    $errors[] = $langs->trans('ErrorFieldRequired', $langs->transnoentitiesnoconv("Warehouse"));
-                }
-            }
-
-            if (!count($errors)) {
-                $today = date('Y-m-d');
-                if (!$this->canFactureAutreDate() && $this->getData('datef') != $today) {
-                    $warnings[] = "Attention la date a été modifiée à la date du jour.";
-                    $errors = $this->updateField('datef', $today);
-                }
-            }
-
             if (!count($errors)) {
                 $result = $this->dol_object->validate($user, '', $id_entrepot);
+                $fac_warnings = BimpTools::getDolEventsMsgs(array('warnings'));
+
                 if ($result >= 0) {
                     // Define output language
                     if (empty($conf->global->MAIN_DISABLE_PDF_AUTOUPDATE)) {
@@ -3220,9 +3245,24 @@ class Bimp_Facture extends BimpComm
                         if ($result <= 0) {
                             $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Des erreurs sont survenues lors de la génération du document PDF');
                         }
+
+                        $today = date('Y-m-d');
+                        if (!$this->canFactureAutreDate() && $this->getData('datef') != $today) {
+                            $warnings[] = "Attention la date a été modifiée à la date du jour.";
+                            $errors = $this->updateField('datef', $today);
+                        }
                     }
                 } else {
-                    $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de la validation');
+                    $fac_errors = BimpTools::getDolEventsMsgs(array('errors'));
+
+                    if (!count($fac_errors)) {
+                        $fac_errors[] = BimpTools::ucfirst($this->getLabel('the')) . ' ne peut pas être validé' . $this->e();
+                    }
+                    $errors[] = BimpTools::getMsgFromArray($fac_errors);
+                }
+
+                if (count($fac_warnings)) {
+                    $warnings[] = BimpTools::getMsgFromArray($fac_warnings);
                 }
             }
         }
@@ -3666,6 +3706,33 @@ class Bimp_Facture extends BimpComm
             'success_callback' => $succes_callback
         );
     }
+    
+    
+    public function actionRelance($data, &$success){
+        $success = "Relance effectuée avec succées";
+        $errors = $warnings = array();
+        $succes_callback = "";
+        if(!$this->isActionAllowed('relance'))
+                $errors[] = "Facturee non relancable";
+        if(!$this->canSetAction('relance'))
+                $errors[] = "Vous n epouvez pas relancee";
+        
+        if(!count($errors)){
+            $nb = $this->getData('nb_relance');
+
+
+            $nb++;
+            $this->updateField('nb_relance', $nb);
+            $this->addLog("Relance ".($nb)." effectuée");
+        }
+        
+        
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $succes_callback
+        );
+    }
 
     // Overrides BimpObject:
 
@@ -3848,7 +3915,9 @@ class Bimp_Facture extends BimpComm
                 }
 
                 // Copie des contacts: 
-                $this->copyContactsFromOrigin($facture, $warnings);
+                if (BimpObject::objectLoaded($facture)) {
+                    $this->copyContactsFromOrigin($facture, $warnings);
+                }
                 break;
 
             case Facture::TYPE_STANDARD:

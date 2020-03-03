@@ -7,6 +7,7 @@ class BE_ProductImmos extends Bimp_Product
 
 //    public static $place_types = null;
     public static $currentFilters = array();
+    public static $places_positions_filters_set = array();
     public $items = array();
 
     // Getters array: 
@@ -55,11 +56,28 @@ class BE_ProductImmos extends Bimp_Product
         return $filters;
     }
 
-    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array())
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
     {
+        // Tous les boutons Exclure sont désactivés 
         switch ($field_name) {
             case 'place_position':
-                self::$currentFilters['place_position'] = $values;
+                if (is_array($values) && !empty($values)) {
+                    self::$currentFilters['place_position'] = $values;
+                }
+
+                $filters['or_place_position'] = array(
+                    'or' => array(
+                        'ppl_position' => array(
+                            'custom' => '((ef.serialisable = 0 || ef.serialisable IS NULL) AND ' . $this->getPlacePositionSqlFilter('ppl').')'
+                        ),
+                        'epl_position' => array(
+                            'custom' => '(ef.serialisable = 1 AND ' . $this->getPlacePositionSqlFilter('epl').')'
+                        )
+                    )
+                );
+                self::$places_positions_filters_set['ppl'] = 1;
+                self::$places_positions_filters_set['epl'] = 1;
+                $this->getPlacesJoins($joins);
                 break;
 
             case 'place_type':
@@ -174,7 +192,7 @@ class BE_ProductImmos extends Bimp_Product
                 if (is_array($values) && !empty($values)) {
                     self::$currentFilters['place_date'] = $values;
                     $or_field = array();
-                    foreach ($this->values as $value) {
+                    foreach ($values as $value) {
                         $or_field[] = BC_Filter::getRangeSqlFilter($value, $errors);
                     }
 
@@ -193,45 +211,46 @@ class BE_ProductImmos extends Bimp_Product
                     }
                 }
                 break;
-                
-//            case 'place_date_end':
-//                $joins['place'] = array(
-//                    'table' => 'be_package_place',
-//                    'on'    => 'place.id_package = a.id',
-//                    'alias' => 'place'
-//                );
-//                $joins['next_place'] = array(
-//                    'table' => 'be_package_place',
-//                    'on'    => 'next_place.id_package = a.id',
-//                    'alias' => 'next_place'
-//                );
-//                $filters['next_place_position'] = array('custom' => 'next_place.position = (place.position - 1)');
-//
-//                $or_field = array();
-//                foreach ($values as $value) {
-//                    $or_field[] = BC_Filter::getRangeSqlFilter($value, $errors);
-//                }
-//
-//                if (!empty($or_field)) {
-//                    $filters['next_place.date'] = array(
-//                        'or_field' => $or_field
-//                    );
-//                }
-//                if (!empty($or_field)) {
-//                        $filters['or_next_place_date'] = array(
-//                            'or' => array(
-//                                'ppl_client' => array(
-//                                    'custom' => '((ef.serialisable = 0 || ef.serialisable IS NULL) AND ' . $this->getPlacePositionSqlFilter('ppl') . ' AND ' . BimpTools::getSqlFilter('ppl.date', array('or_field' => $or_field)) . ')'
-//                                ),
-//                                'epl_client' => array(
-//                                    'custom' => '(ef.serialisable = 1 AND ' . $this->getPlacePositionSqlFilter('epl') . ' AND ' . BimpTools::getSqlFilter('epl.date', array('or_field' => $or_field)) . ')'
-//                                )
-//                            )
-//                        );
-//                        $this->getPlacesJoins($joins);
-//                    }
-//                break;
+
+            case 'place_date_end':
+                if (is_array($values) && !empty($values)) {
+                    self::$currentFilters['place_date_end'] = $values;
+                    $or_field = array();
+                    foreach ($values as $value) {
+                        $or_field[] = BC_Filter::getRangeSqlFilter($value, $errors);
+                    }
+
+                    if (!empty($or_field)) {
+                        $this->getPlacesJoins($joins);
+                        $this->getNextPlacesJoins($joins);
+
+                        $filters['next_place_position'] = array(
+                            'or' => array(
+                                'ppl_next_position' => array(
+                                    'custom' => '((ef.serialisable = 0 || ef.serialisable IS NULL) AND ' . $this->getPlacePositionSqlFilter('ppl') . ' AND ppl_next.position = (ppl.position - 1))'
+                                ),
+                                'epl_next_position' => array(
+                                    'custom' => '(ef.serialisable = 1 AND ' . $this->getPlacePositionSqlFilter('epl') . ' AND epl_next.position = (epl.position - 1))'
+                                )
+                            )
+                        );
+
+                        $filters['or_next_place_date'] = array(
+                            'or' => array(
+                                'ppl_next_date_end' => array(
+                                    'custom' => '((ef.serialisable = 0 || ef.serialisable IS NULL) AND ' . $this->getPlacePositionSqlFilter('ppl') . ' AND ' . BimpTools::getSqlFilter('ppl_next.date', array('or_field' => $or_field)) . ')'
+                                ),
+                                'epl_next_date_end' => array(
+                                    'custom' => '(ef.serialisable = 1 AND ' . $this->getPlacePositionSqlFilter('epl') . ' AND ' . BimpTools::getSqlFilter('epl_next.date', array('or_field' => $or_field)) . ')'
+                                )
+                            )
+                        );
+                    }
+                }
+                break;
         }
+        
+        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
     }
 
     public function getPlacesJoins(&$joins = array())
@@ -266,8 +285,44 @@ class BE_ProductImmos extends Bimp_Product
         }
     }
 
+    public function getNextPlacesJoins(&$joins = array())
+    {
+        if (!isset($joins['pp'])) {
+            $joins['pp'] = array(
+                'alias' => 'pp',
+                'table' => 'be_package_product',
+                'on'    => 'pp.id_product = a.rowid'
+            );
+        }
+        if (!isset($joins['ppl_next'])) {
+            $joins['ppl_next'] = array(
+                'alias' => 'ppl_next',
+                'table' => 'be_package_place',
+                'on'    => 'ppl_next.id_package = pp.id_package'
+            );
+        }
+        if (!isset($joins['e'])) {
+            $joins['e'] = array(
+                'alias' => 'e',
+                'table' => 'be_equipment',
+                'on'    => 'e.id_product = a.rowid'
+            );
+        }
+        if (!isset($joins['epl_next'])) {
+            $joins['epl_next'] = array(
+                'alias' => 'epl_next',
+                'table' => 'be_equipment_place',
+                'on'    => 'epl_next.id_equipment = e.id'
+            );
+        }
+    }
+
     public function getPlacePositionSqlFilter($alias)
     {
+        if (isset(self::$places_positions_filters_set[$alias]) && (int) self::$places_positions_filters_set[$alias]) {
+            return '1';
+        }
+        
         if (isset(self::$currentFilters['place_position'])) {
             $or_field = array();
 
@@ -298,7 +353,8 @@ class BE_ProductImmos extends Bimp_Product
             }
         }
 
-        return $alias . '.position = 1';
+        return '1';
+        //return $alias . '.position = 1';
     }
 
     public function getPlaceFiltersSql($alias)
@@ -332,33 +388,41 @@ class BE_ProductImmos extends Bimp_Product
             }
             $sql .= ')';
         }
-        if (isset(self::$currentFilters['place_date']) && !empty(self::$currentFilters['place_date'])) {
-            $fl = true;
-            $sql .= ' AND (';
-            foreach (self::$currentFilters['place_date'] as $value) {
-                if (!is_array($value) || ((!isset($value['min']) || $value['min'] === '') && (!isset($value['max']) || $value['max'] === ''))) {
-                    continue;
-                }
 
-                if (preg_match('/^\d{4}\-\d{2}\-\d{2}$/', $value['max'])) {
-                    $value['max'] .= ' 23:59:59';
-                }
+        foreach (array(
+    'place_date',
+    'place_date_end'
+        ) as $filters_key) {
+            if (isset(self::$currentFilters[$filters_key]) && !empty(self::$currentFilters[$filters_key])) {
+                $suffixe = ($filters_key === 'place_date_end' ? '_next' : '');
 
-                if (!$fl) {
-                    $sql .= ' OR ';
-                } else {
-                    $fl = false;
-                }
+                $fl = true;
+                $sql .= ' AND (';
+                foreach (self::$currentFilters[$filters_key] as $value) {
+                    if (!is_array($value) || ((!isset($value['min']) || $value['min'] === '') && (!isset($value['max']) || $value['max'] === ''))) {
+                        continue;
+                    }
 
-                if (isset($value['min']) && $value['min'] !== '' && isset($value['max']) && $value['max'] !== '') {
-                    $sql .= $alias . '.date BETWEEN \'' . $value['min'] . '\' AND \'' . $value['max'] . '\'';
-                } elseif (isset($value['min']) && $value['min'] !== '') {
-                    $sql .= $alias . '.date >= \'' . $value['min'] . '\'';
-                } elseif (isset($value['max']) && $value['max'] !== '') {
-                    $sql .= $alias . '.date <= \'' . $value['max'] . '\'';
+                    if (preg_match('/^\d{4}\-\d{2}\-\d{2}$/', $value['max'])) {
+                        $value['max'] .= ' 23:59:59';
+                    }
+
+                    if (!$fl) {
+                        $sql .= ' OR ';
+                    } else {
+                        $fl = false;
+                    }
+
+                    if (isset($value['min']) && $value['min'] !== '' && isset($value['max']) && $value['max'] !== '') {
+                        $sql .= $alias . $suffixe . '.date BETWEEN \'' . $value['min'] . '\' AND \'' . $value['max'] . '\'';
+                    } elseif (isset($value['min']) && $value['min'] !== '') {
+                        $sql .= $alias . $suffixe . '.date >= \'' . $value['min'] . '\'';
+                    } elseif (isset($value['max']) && $value['max'] !== '') {
+                        $sql .= $alias . $suffixe . '.date <= \'' . $value['max'] . '\'';
+                    }
                 }
+                $sql .= ')';
             }
-            $sql .= ')';
         }
 
         return $sql;
@@ -377,7 +441,7 @@ class BE_ProductImmos extends Bimp_Product
                 );
             }
         } else {
-            $filters[$alias . '.position'] = 1;
+//            $filters[$alias . '.position'] = 1;
         }
 
         if (isset(self::$currentFilters['place_type']) && !empty(self::$currentFilters['place_type'])) {
@@ -425,6 +489,17 @@ class BE_ProductImmos extends Bimp_Product
                 );
             }
         }
+        if (isset(self::$currentFilters['place_date_end']) && !empty(self::$currentFilters['place_date_end'])) {
+            $or_field = array();
+            foreach (self::$currentFilters['place_date_end'] as $value) {
+                $or_field[] = $value;
+            }
+            if (!empty($or_field)) {
+                $filters[$alias . '_next.date'] = array(
+                    'or_field' => $or_field
+                );
+            }
+        }
     }
 
     public function getQtySql($id_product, $serialisable = 0)
@@ -434,13 +509,25 @@ class BE_ProductImmos extends Bimp_Product
             if (!empty(self::$currentFilters)) {
                 $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'be_package_place place ON place.id_package = pp.id_package';
             }
+            if (isset(self::$currentFilters['place_date_end']) && !empty(self::$currentFilters['place_date_end'])) {
+                $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'be_package_place place_next ON place_next.id_package = pp.id_package';
+            }
             $sql .= ' WHERE pp.id_product = ' . $id_product;
+            if (isset(self::$currentFilters['place_date_end']) && !empty(self::$currentFilters['place_date_end'])) {
+                $sql .= ' AND place_next.position = (place.position - 1)';
+            }
         } else {
             $sql = 'SELECT count(DISTINCT e.id) as qty FROM ' . MAIN_DB_PREFIX . 'be_equipment e';
             if (!empty(self::$currentFilters)) {
                 $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'be_equipment_place place ON place.id_equipment = e.id';
             }
+            if (isset(self::$currentFilters['place_date_end']) && !empty(self::$currentFilters['place_date_end'])) {
+                $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'be_equipment_place place_next ON place_next.id_equipment = e.id';
+            }
             $sql .= ' WHERE e.id_product = ' . $id_product;
+            if (isset(self::$currentFilters['place_date_end']) && !empty(self::$currentFilters['place_date_end'])) {
+                $sql .= ' AND place_next.position = (place.position - 1)';
+            }
         }
 
         if (!empty(self::$currentFilters)) {
@@ -462,12 +549,35 @@ class BE_ProductImmos extends Bimp_Product
                         'on'    => 'place.id_equipment = a.id',
                         'alias' => 'place'
                     );
+
+                    if (isset(self::$currentFilters['place_date_end']) && !empty(self::$currentFilters['place_date_end'])) {
+                        $joins['place_next'] = array(
+                            'table' => 'be_equipment_place',
+                            'on'    => 'place_next.id_equipment = a.id',
+                            'alias' => 'place_next'
+                        );
+
+                        $filters['next_place_position'] = array(
+                            'custom' => 'place_next.position = (place.position - 1)'
+                        );
+                    }
                 } else {
                     $joins['place'] = array(
                         'table' => 'be_package_place',
                         'on'    => 'place.id_package = a.id_package',
                         'alias' => 'place'
                     );
+                    if (isset(self::$currentFilters['place_date_end']) && !empty(self::$currentFilters['place_date_end'])) {
+                        $joins['place_next'] = array(
+                            'table' => 'be_package_place',
+                            'on'    => 'place_next.id_package = a.id_package',
+                            'alias' => 'place_next'
+                        );
+
+                        $filters['next_place_position'] = array(
+                            'custom' => 'place_next.position = (place.position - 1)'
+                        );
+                    }
                 }
 
                 $this->getPlaceFilters('place', $filters);
@@ -553,9 +663,16 @@ class BE_ProductImmos extends Bimp_Product
                 if (!empty(self::$currentFilters)) {
                     $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'be_equipment_place place ON place.id_equipment = e.id';
                 }
+                if (isset(self::$currentFilters['place_date_end']) && !empty(self::$currentFilters['place_date_end'])) {
+                    $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'be_equipment_place place_next ON place_next.id_equipment = e.id';
+                }
 
                 $sql .= ' WHERE e.id_product = ' . (int) $this->id;
                 $sql .= ' AND e.prix_achat != 0';
+
+                if (isset(self::$currentFilters['place_date_end']) && !empty(self::$currentFilters['place_date_end'])) {
+                    $sql .= ' AND place_next.position = (place.position - 1)';
+                }
 
                 if (!empty(self::$currentFilters)) {
                     $sql .= ' AND ' . $this->getPlaceFiltersSql('place');
@@ -571,8 +688,16 @@ class BE_ProductImmos extends Bimp_Product
                 if (!empty(self::$currentFilters)) {
                     $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'be_equipment_place place ON place.id_equipment = e.id';
                 }
+                if (isset(self::$currentFilters['place_date_end']) && !empty(self::$currentFilters['place_date_end'])) {
+                    $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'be_equipment_place place_next ON place_next.id_equipment = e.id';
+                }
+
                 $sql .= ' WHERE e.id_product = ' . (int) $this->id;
                 $sql .= ' AND e.prix_achat = 0';
+
+                if (isset(self::$currentFilters['place_date_end']) && !empty(self::$currentFilters['place_date_end'])) {
+                    $sql .= ' AND place_next.position = (place.position - 1)';
+                }
 
                 if (!empty(self::$currentFilters)) {
                     $sql .= ' AND ' . $this->getPlaceFiltersSql('place');

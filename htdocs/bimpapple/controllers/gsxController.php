@@ -1888,7 +1888,7 @@ class gsxController extends BimpController
     {
         if (is_null($this->gsx)) {
             $this->gsx = new GSX($this->isIphone);
-            return array_merge($this->gsx->errors['init'], $this->gsx->errors['soap']);
+            return BimpTools::merge_array($this->gsx->errors['init'], $this->gsx->errors['soap']);
         }
 
         return array();

@@ -196,7 +196,7 @@ class BimpInventory {
             if ($position != 1) {
                 $entrepot_name = $em->getEntrepotNameForEquipment($lp->equipmentId);
                 if ($entrepot_name == false) {
-                    $this->errors = array_merge($this->errors, $em->errors);
+                    $this->errors = BimpTools::merge_array($this->errors, $em->errors);
                 }
                 $doli_product = new Product($this->db);
                 $doli_product->fetch($lp->prodId);
@@ -385,7 +385,7 @@ class BimpInventory {
                     $result = $doliProd->correct_stock($user, $this->fk_entrepot, $diff, 0, $label, 0, $codemove, 'entrepot', $this->fk_entrepot);
                 }
                 if ($result == -1)
-                    $this->errors = array_merge($this->errors, $doliProd->errors);
+                    $this->errors = BimpTools::merge_array($this->errors, $doliProd->errors);
             }
         }
 
@@ -402,7 +402,7 @@ class BimpInventory {
                     'infos' => 'inventaire ' . $this->id,
                     'date' => dol_print_date($now, '%Y-%m-%d %H:%M:%S') // date et heure d'arrivée
                 ));
-                $this->errors = array_merge($this->errors, $emplacement->create());
+                $this->errors = BimpTools::merge_array($this->errors, $emplacement->create());
             }
         }
         $this->updateStatut($this::STATUT_CLOSED);

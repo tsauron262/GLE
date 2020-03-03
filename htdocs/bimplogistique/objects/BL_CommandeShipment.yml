@@ -305,6 +305,15 @@ forms:
                         params: 
                             - id_client
                 required: 1
+            contact: 
+                value: 
+                    callback: 
+                        method: getBulkFactureValue
+                        params: 
+                            - id_contact
+                input: 
+                    options: 
+                        callback: getBulkFactureClientContactsArray
             libelle: 
                 value: 
                     callback:
@@ -586,6 +595,7 @@ filters_panels:
               items: 
                   1: OUI
                   0: NON
+              exclude_btn: 0
             
 lists: 
     default: 
@@ -602,7 +612,7 @@ lists:
         update_btn: 1
         edit_form: edit
         modal_view: default
-        objects_change_reload: BR_Reservation,BR_ReservationShipment,BR_Service,BR_ServiceShipment
+        objects_change_reload: BR_Reservation
         extra_btn: 
             callback: getExtraBtn
         cols:

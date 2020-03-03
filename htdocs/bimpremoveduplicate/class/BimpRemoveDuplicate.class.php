@@ -190,12 +190,12 @@ class BimpRemoveDuplicateCustomer {
 
                     $custcats_ori = $static_cat->containing($soc_origin->id, 'customer', 'id');
                     $custcats = $static_cat->containing($soc_dest->id, 'customer', 'id');
-                    $custcats = array_merge($custcats, $custcats_ori);
+                    $custcats = BimpTools::merge_array($custcats, $custcats_ori);
                     $soc_dest->setCategories($custcats, 'customer');
 
                     $suppcats_ori = $static_cat->containing($soc_origin->id, 'supplier', 'id');
                     $suppcats = $static_cat->containing($soc_dest->id, 'supplier', 'id');
-                    $suppcats = array_merge($suppcats, $suppcats_ori);
+                    $suppcats = BimpTools::merge_array($suppcats, $suppcats_ori);
                     $soc_dest->setCategories($suppcats, 'supplier');
 
                     // If thirdparty has a new code that is same than origin, we clean origin code to avoid duplicate key from database unique keys.

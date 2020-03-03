@@ -135,11 +135,25 @@ fields:
     code_mvt: 
         label: Code Mouvement de stock
         
+    origin: 
+        label: Origine
+        values: 
+            array: origins
+        input: 
+            type: hidden
+                
+    id_origin: 
+        label: ID origine
+        type: id
+        default_values: 0
+        input: 
+            type: hidden
+        
 lists:
     default: 
         title: Emplacements
         icon: map-marker
-        objects_change_reload: BE_Place,BS_SAV
+        objects_change_reload: BE_Place,BS_SAV,BE_Package
         add_form_name: default
         add_btn_label: Nouvel emplacement
         sort_field: id
@@ -160,3 +174,7 @@ lists:
             infos: 
                 field: infos
                 edit: 1
+            origin: 
+                label: Origine
+                value: 
+                    callback: displayOrigin

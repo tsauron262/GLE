@@ -113,7 +113,7 @@ class BimpRender
         $classes = $config->get($path . '/classes', array(), false, 'array');
         if (count($classes)) {
             if (isset($params['classes'])) {
-                $params['classes'] = array_merge($params['classes'], $classes);
+                $params['classes'] = BimpTools::merge_array($params['classes'], $classes);
             } else {
                 $params['classes'] = $classes;
             }
@@ -121,7 +121,7 @@ class BimpRender
         $data = $config->get($path . '/data', array(), false, 'array');
         if (count($data)) {
             if (isset($params['data'])) {
-                $params['data'] = array_merge($params['data'], $data);
+                $params['data'] = BimpTools::merge_array($params['data'], $data);
             } else {
                 $params['data'] = $data;
             }
@@ -129,7 +129,7 @@ class BimpRender
         $attr = $config->get($path . '/attr', array(), false, 'array');
         if (count($attr)) {
             if (isset($params['attr'])) {
-                $params['attr'] = array_merge($params['attr'], $attr);
+                $params['attr'] = BimpTools::merge_array($params['attr'], $attr);
             } else {
                 $params['attr'] = $attr;
             }
@@ -137,7 +137,7 @@ class BimpRender
         $styles = $config->get($path . '/styles', array(), false, 'array');
         if (count($styles)) {
             if (isset($params['styles'])) {
-                $params['styles'] = array_merge($params['styles'], $styles);
+                $params['styles'] = BimpTools::merge_array($params['styles'], $styles);
             } else {
                 $params['styles'] = $styles;
             }

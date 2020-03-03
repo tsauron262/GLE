@@ -183,6 +183,14 @@ fields:
             array: statut_export
     douane_number:
         label: N° Douane
+    statut_relance:
+        label: Statut relance
+        type: int
+        values: 
+            array: statut_relance
+    nb_relance:
+        label: Nombre de relance
+        type: int
         
     ref: unset
     fk_availability: unset
@@ -354,6 +362,8 @@ forms:
                 field: statut_export
             douane_number:
                 field: douane_number
+            prime:
+                field: prime
             
     refacture: 
         extends: default
@@ -577,6 +587,8 @@ fields_tables:
               edit: 1
             - field: douane_number
               edit: 1
+            - field: statut_relance
+            - field: nb_relance
     
     client: 
         rows: 
@@ -622,6 +634,7 @@ fields_tables:
             - field: total
             - field: tva
             - field: total_ttc
+            - field: prime
             
 views: 
     default: 
@@ -695,6 +708,8 @@ lists_cols:
                 params: 
                     - 0
                     - 1
+    datef:
+        field: datef
     date_lim_reglement:
         field: date_lim_reglement
     total_ht: 
@@ -753,6 +768,10 @@ lists_cols:
     douane_number:
         field: douane_number
         edit: 1
+    statut_relance:
+        field: statut_relance
+    nb_relance:
+        field: nb_relance
     
 lists: 
     default: 
@@ -854,10 +873,19 @@ cards:
         status: fk_statut
         view_btn: 0
         fields: 
-            - field: total_ttc
-            - label: Payé
-              value: 
-                  callback: displayPaid
+            total: 
+                field: total_ttc
+            paye: 
+                label: Payé
+                value: 
+                    callback: displayPaid
+                  
+    detail: 
+        extends: light
+        fields: 
+            client: 
+                field: fk_soc
+                display: nom_url
         
 searches:
     default: 

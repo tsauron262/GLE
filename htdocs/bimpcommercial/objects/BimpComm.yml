@@ -99,6 +99,7 @@ fields:
             card: default
         required: 1
         create_form: light
+        edit_form: default
     ref_client: 
         label: Référence client
     fk_cond_reglement: 
@@ -207,6 +208,14 @@ fields:
         default_value: 1
         input: 
             help: Si vous indiquez "Hors-UE" ou "Union Européenne", tous les taux de TVA des lignes actuelles seront mis à 0 de manière irréversible.
+    logs: 
+        label: Historique
+        type: html
+        default_value: ''
+    prime:
+        label: Prime
+        type: money
+        dol_extra_field: 1
     
 forms: 
     contact:
@@ -236,6 +245,7 @@ forms:
               input_name: id_contact
               data_type: id_object
               object: contact
+              edit_form: default
               create_form: default
               create_form_values:
                   fields: 
@@ -506,6 +516,10 @@ forms:
               required: 1
               input: 
                   type: text
+                  
+    logs: 
+        rows: 
+            - field: logs
 
 fields_tables: 
     infos: 
@@ -538,6 +552,7 @@ fields_tables:
         rows: 
             - field: note_public
             - field: note_private
+            - field: logs
     
 filters_panels: 
     default: 

@@ -82,3 +82,7 @@ lists:
                 field: id_product
             qty:
                 field: qty
+            place: 
+                label: Emplacement
+                value: 
+                    callback: displayCurrentPlace

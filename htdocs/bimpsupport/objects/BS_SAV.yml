@@ -2,15 +2,15 @@ table: bs_sav
 controller: sav
 icon: wrench
 
-header_list_name: default
-
 list_page_url: 
     controller: index
     url_params: 
         tab: sav
         id_entrepot: 
             field_value: id_entrepot
-
+            
+header_list_name: default
+header_edit_form: edit
 header_btn: 
     callback: getViewExtraBtn
         
@@ -82,14 +82,6 @@ objects:
         delete: 1
         instance: 
             bimp_object: BS_Issue
-            
-#    diagnostics: 
-#        relation: hasMany
-#        delete: 1
-#        instance: 
-#            bimp_object: 
-#                module: bimpapple
-#                name: GSX_Diagnostic
             
 associations: 
     propales:
@@ -165,6 +157,7 @@ fields:
                 type: search_societe
                 societe_type: customer    
         create_form: light
+        edit_form: default
     id_contact:
         label: Contact
         type: id_object
@@ -228,9 +221,6 @@ fields:
         label: Facture
         type: id_object
         object: facture
-#    date_problem: 
-#        label: Date problème
-#        type: datetime
     date_close: 
         label: Date / Heure Fin
         type: datetime
@@ -326,6 +316,9 @@ fields:
         input: 
             type: hidden
         default_value: 0
+    date_terminer:
+        label: Date fin
+        type: datetime
     
 forms: 
     default:
@@ -376,11 +369,6 @@ forms:
               input: 
                   type: toggle
               value: 1
-              
-#              NE PAS DECOMMENTER: les prêts ne sont plus des objets enfant de SAV
-#            - object: prets 
-#              multiple: 1
-#              depends_on: code_centre
             
     edit: 
         rows: 
@@ -615,6 +603,15 @@ fields_tables:
             - field: prestataire_number
 #            - field: id_propal
 #              display: card
+            - label: Autre
+              value:
+                 callback: displayExtraSav
+            - field: date_terminer
+                 
+    facturation:
+        title: Facturation
+        icon: fas_euro-sign
+        rows: 
             - field: id_facture_acompte
               display: card
               show: 
@@ -627,9 +624,6 @@ fields_tables:
               display: card
               show: 
                   field_value: id_facture
-            - label: Autre
-              value:
-                 callback: displayExtraSav
               
     client: 
         title: Client
@@ -703,6 +697,12 @@ views:
                     col_md: 6
                     fields_table:
                         name: client
+                        
+                  - type: fields_table
+                    col_lg: 6
+                    col_md: 6
+                    fields_table:
+                        name: facturation
             - cols: 
                   - type: fields_table
                     col_lg: 6
@@ -740,6 +740,12 @@ views:
                   col_md: 6
                   fields_table:
                       name: client
+                  
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  fields_table:
+                      name: facturation
             - cols: 
                 - type: custom
                   col_lg: 6
@@ -835,6 +841,8 @@ lists_cols:
     id_facture:
         field: id_facture
         display: nom_url
+    date_terminer:
+        field: date_terminer
                         
 filters_panels: 
     default: 

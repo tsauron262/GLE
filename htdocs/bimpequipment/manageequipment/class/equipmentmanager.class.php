@@ -77,7 +77,7 @@ class EquipmentManager {
     function getStockAndSerial($entrepotId, $idProd, $serial) {
         $doliProd = new Product($this->db);
         $doliProd->fetch($idProd);
-        $this->errors = array_merge($this->errors, $doliProd->errors);
+        $this->errors = BimpTools::merge_array($this->errors, $doliProd->errors);
         $position = $this->getPositionEquipmentForEntrepot($serial, $entrepotId);
         if ($position == false && $serial != '') { // équipement connu mais jamais dans cet entrepôt
             $this->errors[] = "Cet équipement n'a jamais été dans cet entrepôt.";
@@ -121,7 +121,7 @@ class EquipmentManager {
                     $result = $doliProd->correct_stock($user, $entrepotId, -$prod['qtyMissing'], 1, $label, 0, $codemove, 'entrepot', $entrepotId);
                 }
                 if ($result == -1)
-                    $this->errors = array_merge($this->errors, $doliProd->errors);
+                    $this->errors = BimpTools::merge_array($this->errors, $doliProd->errors);
             }
         }
         return array('OK' => 'en dèv', 'errors' => $this->errors);

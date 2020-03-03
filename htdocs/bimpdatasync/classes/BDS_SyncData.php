@@ -363,7 +363,7 @@ class BDS_SyncData
         if (!is_null($id) && $id) {
             $sync_data_errors = $sync_data->delete();
             if (!is_null($errors) && count($sync_data_errors)) {
-                $errors = array_merge($errors, $sync_data_errors);
+                $errors = BimpTools::merge_array($errors, $sync_data_errors);
             }
         } else {
             if (!is_null($errors)) {

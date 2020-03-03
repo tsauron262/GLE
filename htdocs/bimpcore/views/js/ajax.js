@@ -187,6 +187,24 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
         }
     };
 
+    this.display_result_infos = function (infos) {
+        var msg = '';
+
+        if (typeof (infos) !== 'undefined') {
+            if (typeof (infos) === 'string') {
+                msg = infos;
+            } else if (typeof (infos) === 'object') {
+                for (var i in infos) {
+                    msg += infos[i] + '<br/>';
+                }
+            }
+        }
+
+        if (msg) {
+            bimp_msg(msg, 'info');
+        }
+    };
+
     this.display_result_success = function (result) {
         if (!bimpAjax.display_success) {
             return;
@@ -329,6 +347,9 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
 
                 if ((typeof (result.warnings) !== 'undefined') && result.warnings && result.warnings.length) {
                     bimpAjax.display_result_warnings(result.warnings);
+                }
+                if ((typeof (result.infos) !== 'undefined') && result.infos && result.infos.length) {
+                    bimpAjax.display_result_infos(result.infos);
                 }
 
                 if (bimpAjax.modal_scroll_bottom) {

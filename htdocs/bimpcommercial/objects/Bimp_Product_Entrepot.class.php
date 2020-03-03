@@ -2,31 +2,46 @@
 
 class Bimp_Product_Entrepot extends BimpObject
 {
-    
+
     public $dateBilan = null;
     public $exludeIdDifZero = array();
-
     public static $product_instance = null;
+    public static $modeStockDate = false;
+    public static $modeStockShowRoom = false;
+    public static $modeVentes = false;
 
     public function __construct($module, $object_name)
     {
 //        $this->dateBilan = date('2019-10-01 00:00:01');
-        $this->dateBilan = date('2020-01-01 00:00:01');
+        $this->dateBilan = date('2020-03-01 00:00:01');
         if (is_null(static::$product_instance)) {
             static::$product_instance = BimpObject::getInstance('bimpcore', 'Bimp_Product');
         }
 
         parent::__construct($module, $object_name);
     }
-    
-   public function beforeListFetchItems(BC_List $list){
-        $prod = BimpObject::getInstance("bimpcore", "Bimp_Product");
-        $prod::initStockDate($this->dateBilan);
-        $data = $prod::insertStockDateNotZeroProductStock($this->dateBilan);
-        foreach($data['stockDateZero'] as $tmp)
-            $this->exludeIdDifZero[] = $tmp;
-        $this->isInitSpecial = true;
-   }
+
+    public function beforeListFetchItems(BC_List $list)
+    {
+        if(in_array('stockDate', $list->cols))
+            static::$modeStockDate = true;
+        if(in_array('stockShowRoom', $list->cols))
+            static::$modeStockShowRoom = true;
+        if(in_array('ventes_qty', $list->cols) || in_array('ventes_ht', $list->cols) || in_array('derPv', $list->cols))
+            static::$modeVentes = true;
+        
+        
+//        echo "<pre>";print_r($list);die;
+        
+        if(static::$modeStockDate){
+            $prod = BimpObject::getInstance("bimpcore", "Bimp_Product");
+            $prod::initStockDate($this->dateBilan);
+            $data = $prod::insertStockDateNotZeroProductStock($this->dateBilan);
+            foreach ($data['stockDateZero'] as $tmp)
+                $this->exludeIdDifZero[] = $tmp;
+            $this->isInitSpecial = true;
+        }
+    }
 
     // Getters: 
 
@@ -35,7 +50,7 @@ class Bimp_Product_Entrepot extends BimpObject
         return 56;
     }
 
-    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array())
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
     {
         switch ($field_name) {
             case 'categ1':
@@ -48,18 +63,20 @@ class Bimp_Product_Entrepot extends BimpObject
                     'on'    => $alias . '.fk_product = a.fk_product'
                 );
                 $filters[$alias . '.fk_categorie'] = array(
-                    'in' => $values
+                    ($excluded ? 'not_' : '') . 'in' => $values
                 );
                 return;
+
             case 'stockDateDifZero':
-                if(count($this->exludeIdDifZero))
-                $filters['a.rowid'] = array(
-                    'not_in' => implode(",",$this->exludeIdDifZero)
-                );
+                if (count($this->exludeIdDifZero)) {
+                    $filters['a.rowid'] = array(
+                        'not_in' => implode(",", $this->exludeIdDifZero)
+                    );
+                }
                 return;
         }
 
-        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors);
+        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
     }
 
     // Affichage: 
@@ -86,7 +103,7 @@ class Bimp_Product_Entrepot extends BimpObject
             $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'facture_extrafields fef ON f.rowid = fef.fk_object';
             $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'facturedet fl ON f.rowid = fl.fk_facture';
             $sql .= ' WHERE f.fk_statut > 0 AND fl.fk_product = ' . (int) $this->getData('fk_product');
-            $sql .= ' AND fef.entrepot = ' . (int) $this->getData('fk_entrepot');
+//            $sql .= ' AND fef.entrepot = ' . (int) $this->getData('fk_entrepot');
 
             $res = $this->db->executeS($sql, 'array');
 
@@ -106,7 +123,7 @@ class Bimp_Product_Entrepot extends BimpObject
             $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'facture_fourn_extrafields fef ON f.rowid = fef.fk_object';
             $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'facture_fourn_det fl on f.rowid = fl.fk_facture_fourn';
             $sql .= ' WHERE f.fk_statut > 0 AND fl.fk_product = ' . (int) $this->getData('fk_product');
-            $sql .= ' AND fef.entrepot = ' . (int) $this->getData('fk_entrepot');
+//            $sql .= ' AND fef.entrepot = ' . (int) $this->getData('fk_entrepot');
 
             $res = $this->db->executeS($sql, 'array');
 
@@ -118,14 +135,13 @@ class Bimp_Product_Entrepot extends BimpObject
 
         return '';
     }
-    
-    
+
     public function displayTitre()
     {
         $html = '';
         $html .= 'Produits/Entrepot';
-        if($this->dateBilan)
-            $html .= ' date de valeur  < '.dol_print_date ($this->db->db->jdate($this->dateBilan)). ' (Stock Date, Stock show room, Nb Ventes, Ventes a NB mois)';
+        if ($this->dateBilan)
+            $html .= ' date de valeur  < ' . dol_print_date($this->db->db->jdate($this->dateBilan)) . ' (Stock Date, Stock show room, Nb Ventes, Ventes a NB mois)';
         return $html;
     }
 
@@ -136,8 +152,8 @@ class Bimp_Product_Entrepot extends BimpObject
             $dt->sub(new DateInterval('P' . $nb_month . 'M'));
             $dateMin = $dt->format('Y-m-d') . ' 00:00:00';
             $id_product = (int) $this->getData('fk_product');
-            $id_entrepot = ((int) $this->getData('fk_entrepot') ? (int) $this->getData('fk_entrepot') : null);
-            $id_entrepot = null;//avoir toute les ventes de tous les depot
+//            $id_entrepot = ((int) $this->getData('fk_entrepot') ? (int) $this->getData('fk_entrepot') : null);
+            $id_entrepot = null; //avoir toute les ventes de tous les depot
 
             $ventes = static::$product_instance->getVentes($dateMin, $this->dateBilan, $id_entrepot, $id_product);
             if (isset($ventes[$data])) {
@@ -256,35 +272,59 @@ class Bimp_Product_Entrepot extends BimpObject
             );
         }
 
+        foreach (array(1, 3, 6, 12) as $nb_month) {
+            $cols['ventes_' . $nb_month . '_mois_qty_with_none_retour'] = array(
+                'label' => 'Vente à ' . $nb_month . ' mois (qté sans retour)',
+                'value' => array(
+                    'callback' => array(
+                        'method' => 'displayNbMonthVentes',
+                        'params' => array(
+                            $nb_month,
+                            'qty',
+                            1
+                        )
+                    )
+                )
+            );
+        }
+
         $this->config->addParams('lists_cols', $cols);
     }
 
     public function fetchExtraFields()
     {
         $fields = array(
-            'ventes_qty'    => 0,
-            'ventes_ht'     => 0,
-            'stockShowRoom' => 0,
-            'cur_pa'        => 0
+//            'ventes_qty'    => 0,
+//            'ventes_ht'     => 0,
+//            'stockShowRoom' => 0,
+//            'cur_pa'        => 0
         );
 
         if ((int) $this->getData('fk_product')) {
-            $tabVentes = static::$product_instance->getVentes(null, $this->dateBilan, (int) $this->getData('fk_entrepot'), (int) $this->getData('fk_product'));
-            $derPv = static::$product_instance->getDerPv(null, $this->dateBilan, (int) $this->getData('fk_product'));
-            $fields['derPv'] = $derPv;
-            if ($tabVentes['qty'] > 0)
-                $fields['ventes_qty'] = $tabVentes['qty'];
+            if(static::$modeVentes){
+                $tabVentes = static::$product_instance->getVentes(null, $this->dateBilan, (int) $this->getData('fk_entrepot'), (int) $this->getData('fk_product'));
+                $derPv = static::$product_instance->getDerPv(null, $this->dateBilan, (int) $this->getData('fk_product'));
+                $fields['derPv'] = $derPv;
+                if ($tabVentes['qty'] > 0)
+                    $fields['ventes_qty'] = $tabVentes['qty'];
 
-            if ($tabVentes['total_ht'] > 0)
-                $fields['ventes_ht'] = $tabVentes['total_ht'];
+                if ($tabVentes['total_ht'] > 0)
+                    $fields['ventes_ht'] = $tabVentes['total_ht'];
+            }
 
-            $stockShowRoom = static::$product_instance->getStockShoowRoom($this->dateBilan, (int) $this->getData('fk_entrepot'), (int) $this->getData('fk_product'));
+            if(static::$modeStockShowRoom){
+                $stockShowRoom = static::$product_instance->getStockShoowRoom($this->dateBilan, (int) $this->getData('fk_entrepot'), (int) $this->getData('fk_product'));
+                if ($stockShowRoom > 0)
+                    $fields['stockShowRoom'] = $stockShowRoom;
+                else
+                    $fields['stockShowRoom'] = 0;
+            }
 
-            if ($stockShowRoom > 0)
-                $fields['stockShowRoom'] = $stockShowRoom;
             
-            $stockDate = static::$product_instance->getStockDate($this->dateBilan, (int) $this->getData('fk_entrepot'), (int) $this->getData('fk_product'));
-            $fields['stockDate'] = $stockDate;
+            if(static::$modeStockDate){
+                $stockDate = static::$product_instance->getStockDate($this->dateBilan, (int) $this->getData('fk_entrepot'), (int) $this->getData('fk_product'));
+                $fields['stockDate'] = $stockDate;
+            }
 
             $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $this->getData('fk_product'));
             if (BimpObject::objectLoaded($prod)) {
@@ -315,30 +355,34 @@ class Bimp_Product_Entrepot extends BimpObject
 
         return $fields;
     }
-    
-    public function displayStockDesire(){
+
+    public function displayStockDesire()
+    {
         $stockAlert = $this->getStockAlert();
-        if(isset($stockAlert[$this->getData("fk_product")]) && isset($stockAlert[$this->getData("fk_product")][$this->getData("fk_entrepot")]))
+        if (isset($stockAlert[$this->getData("fk_product")]) && isset($stockAlert[$this->getData("fk_product")][$this->getData("fk_entrepot")]))
             return $stockAlert[$this->getData("fk_product")][$this->getData("fk_entrepot")]['desiredstock'];
         return 0;
     }
-    public function displayStockAlert(){
+
+    public function displayStockAlert()
+    {
         $stockAlert = $this->getStockAlert();
-        if(isset($stockAlert[$this->getData("fk_product")]) && isset($stockAlert[$this->getData("fk_product")][$this->getData("fk_entrepot")]))
+        if (isset($stockAlert[$this->getData("fk_product")]) && isset($stockAlert[$this->getData("fk_product")][$this->getData("fk_entrepot")]))
             return $stockAlert[$this->getData("fk_product")][$this->getData("fk_entrepot")]['seuil_stock_alerte'];
         return 0;
     }
-    
-    public function getStockAlert(){
+
+    public function getStockAlert()
+    {
         $clef = "stockAlertEntrepot";
-        if(!isset(BimpCache::$cache[$clef])){
+        if (!isset(BimpCache::$cache[$clef])) {
             BimpCache::$cache[$clef] = array();
-            $sql = $this->db->db->query("SELECT * FROM `".MAIN_DB_PREFIX."product_warehouse_properties`");
-            while ($ln = $this->db->db->fetch_object($sql)){
-                BimpCache::$cache[$clef][$ln->fk_product][$ln->fk_entrepot] = array("seuil_stock_alerte"=>$ln->seuil_stock_alerte, "desiredstock"=>$ln->desiredstock);
+            $sql = $this->db->db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "product_warehouse_properties`");
+            while ($ln = $this->db->db->fetch_object($sql)) {
+                BimpCache::$cache[$clef][$ln->fk_product][$ln->fk_entrepot] = array("seuil_stock_alerte" => $ln->seuil_stock_alerte, "desiredstock" => $ln->desiredstock);
             }
         }
-            
+
         return BimpCache::$cache[$clef];
     }
 }

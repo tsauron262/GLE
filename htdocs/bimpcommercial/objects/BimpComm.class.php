@@ -10,9 +10,9 @@ class BimpComm extends BimpDolObject
     const BC_ZONE_HORS_UE = 3;
     const BC_ZONE_UE_SANS_TVA = 4;
 
-    public static $email_type = '';
+    
     public static $element_name = '';
-    public static $mail_event_code = '';
+    
     public static $external_contact_type_required = true;
     public static $internal_contact_type_required = true;
     public static $discount_lines_allowed = true;
@@ -36,7 +36,7 @@ class BimpComm extends BimpDolObject
         12 => 'an'
     );
     public static $exportedStatut = [
-        0   => ['label' => 'Non traitée en comptabilitée', 'classes' => ['danger'], 'icon' => 'times'],
+        0   => ['label' => 'Non traitée en comptabilité', 'classes' => ['danger'], 'icon' => 'times'],
         1   => ['label' => 'Comptabilisée', 'classes' => ['success'], 'icon' => 'check'],
         102 => ['label' => 'Comptabilisation suspendue', 'classes' => ['important'], 'icon' => 'refresh'],
         204 => ['label' => 'Non comptabilisable', 'classes' => ['warning'], 'icon' => 'times'],
@@ -66,6 +66,17 @@ class BimpComm extends BimpDolObject
         }
 
         return 0;
+    }
+
+    public function canEditField($field_name)
+    {
+        switch ($field_name) {
+            case 'logs':
+                global $user;
+                return (BimpObject::objectLoaded($user) && $user->admin ? 1 : 0);
+        }
+
+        return (int) parent::canEditField($field_name);
     }
 
     // Getters booléens: 
@@ -121,15 +132,13 @@ class BimpComm extends BimpDolObject
             return 0;
         }
 
-//        $errors[] = 'ICI';
         // Vérif des lignes: 
         $lines = $this->getLines('not_text');
-        if (!count($lines)) {
+        if (!count($lines) && !is_a($this, 'BS_SavPropal')) {
             $errors[] = 'Aucune ligne ajoutée  ' . $this->getLabel('to') . ' (Hors text)';
             return 0;
         }
 
-        
         if (!BimpCore::getConf("NOT_USE_ENTREPOT") && !(int) $this->getData('entrepot')) {
             $errors[] = 'Aucun entrepôt associé';
         }
@@ -142,7 +151,9 @@ class BimpComm extends BimpDolObject
                     $errors[] = 'Client absent';
                 } else {
                     // Vérif de l'encours client: 
-                    $actuel = $client->dol_object->get_OutstandingBill();
+                    $tmp = $client->dol_object->getOutstandingBills();
+                    $actuel=$tmp['opened'];
+//                    $actuel = $client->dol_object->get_OutstandingBill();
 
                     if ($this->object_name === 'Bimp_Facture') {
                         $actuel -= $this->dol_object->total_ttc;
@@ -151,28 +162,11 @@ class BimpComm extends BimpDolObject
                     $futur = $actuel + $this->dol_object->total_ttc;
 
                     if ($max > 0 && $this->dol_object->total_ttc > 0 && $max < $futur) {
-                        $msg = "Montant encours client dépassé. Maximum : " . price($max) . " €. Actuel :" . price($actuel) . " €. Necessaire : " . price($futur) . " €.";
-                        $errors[] = $msg;
+//                        $msg = "Montant encours client dépassé. Maximum : " . price($max) . " €. Actuel :" . price($actuel) . " €. Necessaire : " . price($futur) . " €.";
+//                        $errors[] = $msg;
                     }
 
-                    // Vérif commercial suivi: 
-                    $tabConatact = $this->dol_object->getIdContact('internal', 'SALESREPFOLL');
-                    if (count($tabConatact) < 1) {
-                        $tabComm = $client->dol_object->getSalesRepresentatives($user);
-                        if (count($tabComm) > 0) {
-                            $this->dol_object->add_contact($tabComm[0]['id'], 'SALESREPFOLL', 'internal');
-                        } elseif ((int) BimpCore::getConf('BIMPCOMM_user_as_default_commercial', 1)) {
-                            $this->dol_object->add_contact($user->id, 'SALESREPFOLL', 'internal');
-                        } else {
-                            $errors[] = 'Pas de Commercial Suivi';
-                        }
-                    }
-
-                    // Vérif contact signataire: 
-                    $tabConatact = $this->dol_object->getIdContact('internal', 'SALESREPSIGN');
-                    if (count($tabConatact) < 1) {
-                        $this->dol_object->add_contact($user->id, 'SALESREPSIGN', 'internal');
-                    }
+                    $errors = BimpTools::merge_array($errors, $this->checkContacts());
 
                     // Vérif conditions de réglement: 
                     // Attention pas de conditions de reglement sur les factures acomptes
@@ -360,14 +354,7 @@ class BimpComm extends BimpDolObject
         return $contacts;
     }
 
-    public function getEmailModelsArray()
-    {
-        if (!static::$email_type) {
-            return array();
-        }
-
-        return self::getEmailTemplatesArray(static::$email_type, true);
-    }
+    
 
     public function getSocAvailableDiscountsArray()
     {
@@ -388,50 +375,7 @@ class BimpComm extends BimpDolObject
         return array();
     }
 
-    public function getMailsToArray()
-    {
-        global $user, $langs;
-
-        $client = $this->getChildObject('client');
-
-        $emails = array(
-            ""           => "",
-            $user->email => $user->getFullName($langs) . " (" . $user->email . ")"
-        );
-
-        if ($this->isLoaded()) {
-            $contacts = $this->dol_object->liste_contact(-1, 'external');
-            foreach ($contacts as $item) {
-                if (!isset($emails[(int) $item['id']])) {
-                    $emails[(int) $item['id']] = $item['libelle'] . ': ' . $item['firstname'] . ' ' . $item['lastname'] . ' (' . $item['email'] . ')';
-                }
-            }
-        }
-
-        if (BimpObject::objectLoaded($client)) {
-            $client_emails = self::getSocieteEmails($client->dol_object);
-            if (is_array($client_emails)) {
-                foreach ($client_emails as $value => $label) {
-                    if (!isset($emails[$value])) {
-                        $emails[$value] = $label;
-                    }
-                }
-            }
-        }
-
-        if ($this->isLoaded()) {
-            $contacts = $this->dol_object->liste_contact(-1, 'internal');
-            foreach ($contacts as $item) {
-                if (!isset($emails[$item['email']])) {
-                    $emails[$item['email']] = $item['libelle'] . ': ' . $item['firstname'] . ' ' . $item['lastname'] . ' (' . $item['email'] . ')';
-                }
-            }
-        }
-
-        $emails['custom'] = 'Autre';
-
-        return $emails;
-    }
+    
 
     // Getters paramètres: 
 
@@ -469,6 +413,15 @@ class BimpComm extends BimpDolObject
     {
         $buttons = array();
 
+        // Edition historique: 
+        if ($this->canEditField('logs')) {
+            $buttons[] = array(
+                'label'   => 'Editer logs',
+                'icon'    => 'fas_history',
+                'onclick' => $this->getJsLoadModalForm('logs', 'Editer les logs')
+            );
+        }
+
         // Ajout acompte: 
         if ($this->isActionAllowed('addAcompte') && $this->canSetAction('addAcompte')) {
             $id_mode_paiement = 0;
@@ -489,20 +442,20 @@ class BimpComm extends BimpDolObject
 
         $note = BimpObject::getInstance("bimpcore", "BimpNote");
         $buttons[] = array(
-            'label'   => 'Message logistique ',
-            'icon'    => 'far fa-paper-plane',
+            'label'   => 'Message logistique',
+            'icon'    => 'far_paper-plane',
             'onclick' => $note->getJsActionOnclick('repondre', array("obj_type" => "bimp_object", "obj_module" => $this->module, "obj_name" => $this->object_name, "id_obj" => $this->id, "type_dest" => $note::BN_DEST_GROUP, "fk_group_dest" => $note::BN_GROUPID_LOGISTIQUE, "content" => ""), array('form_name' => 'rep'))
         );
 
         $buttons[] = array(
-            'label'   => 'Message facturation ',
-            'icon'    => 'far fa-paper-plane',
+            'label'   => 'Message facturation',
+            'icon'    => 'far_paper-plane',
             'onclick' => $note->getJsActionOnclick('repondre', array("obj_type" => "bimp_object", "obj_module" => $this->module, "obj_name" => $this->object_name, "id_obj" => $this->id, "type_dest" => $note::BN_DEST_GROUP, "fk_group_dest" => $note::BN_GROUPID_FACT, "content" => "Bonjour, merci de bien vouloir facturer cette commande."), array('form_name' => 'rep'))
         );
 
         $buttons[] = array(
             'label'   => 'Relevé facturation client',
-            'icon'    => 'fas fa-ticket',
+            'icon'    => 'fas_ticket',
             'onclick' => $this->getJsActionOnclick('releverFacturation', array(), array(
                 'form_name' => 'releverFacturation'
             ))
@@ -511,10 +464,6 @@ class BimpComm extends BimpDolObject
         return $buttons;
     }
 
-    public function getDirOutput()
-    {
-        return '';
-    }
 
     public function getDefaultListExtraButtons()
     {
@@ -635,7 +584,7 @@ class BimpComm extends BimpDolObject
         return parent::getCustomFilterValueLabel($field_name, $value);
     }
 
-    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array())
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
     {
         switch ($field_name) {
             case 'id_product':
@@ -646,8 +595,12 @@ class BimpComm extends BimpDolObject
                     'table' => $line::$dol_line_table,
                     'on'    => $alias . '.' . $line::$dol_line_parent_field . ' = a.' . $this->getPrimary()
                 );
+                $key = 'in';
+                if ($excluded) {
+                    $key = 'not_in';
+                }
                 $filters[$alias . '.fk_product'] = array(
-                    'in' => $values
+                    $key => $values
                 );
                 break;
 
@@ -682,29 +635,38 @@ class BimpComm extends BimpDolObject
 
                 if (!empty($ids)) {
                     $sql = '(typecont.element = \'' . static::$dol_module . '\' AND typecont.source = \'internal\'';
-                    $sql .= ' AND typecont.code = \'SALESREPFOLL\' AND elemcont.fk_socpeople IN (' . implode(',', $ids) . '))';
+                    $sql .= ' AND typecont.code = \'SALESREPFOLL\' AND elemcont.fk_socpeople ' . ($excluded ? 'NOT ' : '') . 'IN (' . implode(',', $ids) . '))';
+
+                    if (!$empty && $excluded) {
+                        $sql .= ' OR (SELECT COUNT(ec2.fk_socpeople) FROM ' . MAIN_DB_PREFIX . 'element_contact ec2';
+                        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'c_type_contact tc2 ON tc2.rowid = ec2.fk_c_type_contact';
+                        $sql .= ' WHERE tc2.element = \'' . static::$dol_module . '\'';
+                        $sql .= ' AND tc2.source = \'internal\'';
+                        $sql .= ' AND tc2.code = \'SALESREPFOLL\'';
+                        $sql .= ' AND ec2.element_id = a.rowid) = 0';
+                    }
                 }
 
                 if ($empty) {
-                    $sql .= ($sql ? ' OR ' : '');
-                    $sql = '(SELECT COUNT(ec2.fk_socpeople) FROM ' . MAIN_DB_PREFIX . 'element_contact ec2';
+                    $sql .= ($sql ? ($excluded ? ' AND ' : ' OR ') : '');
+                    $sql .= '(SELECT COUNT(ec2.fk_socpeople) FROM ' . MAIN_DB_PREFIX . 'element_contact ec2';
                     $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'c_type_contact tc2 ON tc2.rowid = ec2.fk_c_type_contact';
                     $sql .= ' WHERE tc2.element = \'' . static::$dol_module . '\'';
                     $sql .= ' AND tc2.source = \'internal\'';
                     $sql .= ' AND tc2.code = \'SALESREPFOLL\'';
-                    $sql .= ' AND ec2.element_id = a.rowid) = 0';
+                    $sql .= ' AND ec2.element_id = a.rowid) ' . ($excluded ? '>' : '=') . ' 0';
                 }
 
                 if ($sql) {
                     $filters['commercial_custom'] = array(
-                        'custom' => $sql
+                        'custom' => "(".$sql.")"
                     );
                 }
 
                 break;
         }
 
-        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors);
+        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
     }
 
     // Getters données: 
@@ -826,225 +788,6 @@ class BimpComm extends BimpDolObject
         if (userInGroupe(43, $user->id))
             return "M";
         return "";
-    }
-
-    public function getEmailUsersFromArray()
-    {
-        global $user, $langs, $conf;
-
-        $emails = array();
-
-        // User connecté: 
-
-        if (!empty($user->email)) {
-            $emails[$user->email] = $user->getFullName($langs) . ' (' . $user->email . ')';
-        }
-
-        if (!$user->admin)
-            return $emails;
-
-        if (!empty($user->email_aliases)) {
-            foreach (explode(',', $user->email_aliases) as $alias) {
-                $alias = trim($alias);
-                if ($alias) {
-                    $alias = str_replace('/</', '', $alias);
-                    $alias = str_replace('/>/', '', $alias);
-                    if (!isset($emails[$alias])) {
-                        $emails[$alias] = $user->getFullName($langs) . ' (' . $alias . ')';
-                    }
-                }
-            }
-        }
-
-        // Société: 
-
-        if (!empty($conf->global->MAIN_INFO_SOCIETE_MAIL)) {
-            $emails[$conf->global->MAIN_INFO_SOCIETE_MAIL] = $conf->global->MAIN_INFO_SOCIETE_NOM . ' (' . $conf->global->MAIN_INFO_SOCIETE_MAIL . ')';
-        }
-
-        if (!empty($conf->global->MAIN_INFO_SOCIETE_MAIL_ALIASES)) {
-            foreach (explode(',', $conf->global->MAIN_INFO_SOCIETE_MAIL_ALIASES) as $alias) {
-                $alias = trim($alias);
-                if ($alias) {
-                    $alias = str_replace('/</', '', $alias);
-                    $alias = str_replace('/>/', '', $alias);
-                    if (!isset($emails[$alias])) {
-                        $emails[$alias] = $conf->global->MAIN_INFO_SOCIETE_NOM . ' (' . $alias . ')';
-                    }
-                }
-            }
-        }
-
-        // Contacts pièce: 
-
-        if ($this->isLoaded()) {
-            $c_user = new User($this->db->db);
-            $contacts = $this->dol_object->liste_contact(-1, 'internal');
-            foreach ($contacts as $item) {
-                $c_user->fetch($item['id']);
-                if (BimpObject::objectLoaded($c_user)) {
-                    if (!empty($c_user->email) && !isset($emails[$c_user->email])) {
-                        $emails[$c_user->email] = $item['libelle'] . ': ' . $c_user->getFullName($langs) . ' (' . $c_user->email . ')';
-                    }
-
-                    if (!empty($c_user->email_aliases)) {
-                        foreach (explode(',', $c_user->email_aliases) as $alias) {
-                            $alias = trim($alias);
-                            if ($alias) {
-                                $alias = str_replace('/</', '', $alias);
-                                $alias = str_replace('/>/', '', $alias);
-                                if (!isset($emails[$alias])) {
-                                    $emails[$alias] = $item['libelle'] . ': ' . $c_user->getFullName($langs) . ' (' . $alias . ')';
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        return $emails;
-    }
-
-    public function getDocumentFileId()
-    {
-        if (!$this->isLoaded()) {
-            return 0;
-        }
-
-        $ref = dol_sanitizeFileName($this->getRef());
-        $where = '`parent_module` = \'' . $this->module . '\' AND `parent_object_name` = \'' . $this->object_name . '\' AND `id_parent` = ' . (int) $this->id;
-        $where .= ' AND `file_name` = \'' . $ref . '\' AND `file_ext` = \'pdf\'';
-
-        return (int) $this->db->getValue('bimpcore_file', 'id', $where);
-    }
-
-    public function getJoinFilesValues()
-    {
-        $values = BimpTools::getValue('fields/join_files', array());
-
-        $id_main_pdf_file = (int) $this->getDocumentFileId();
-
-        if (!in_array($id_main_pdf_file, $values)) {
-            $values[] = $id_main_pdf_file;
-        }
-
-        $list = $this->getAllFiles();
-        $idSepa = 0;
-        $idSepaSigne = 0;
-        foreach ($list as $id => $elem)
-            if (stripos($elem, "sepa")) {
-                $idSepa = $id;
-                if (stripos($elem, "signe"))
-                    $idSepaSigne = $id;
-            }
-
-
-        if ($idSepa > 0 && $idSepaSigne < 1)
-            $values[] = $idSepa;
-
-
-
-
-        return $values;
-    }
-
-    public function getAllFiles($withLink = true)
-    {
-        $objects = $this->getBimpObjectsLinked();
-        $list = $this->getFilesArray(0);
-        if ($withLink) {
-            foreach ($objects as $object) {
-                $list = $list + $object->getFilesArray(0);
-            }
-        }
-        return $list;
-    }
-
-    public function getEmailTopicByModel()
-    {
-        $topic = '';
-        $id_model = (int) BimpTools::getPostFieldValue('id_model', 0);
-
-        if ($id_model) {
-            $template = self::getEmailTemplateData($id_model);
-
-            if (!is_null($template)) {
-                if ($this->isLoaded()) {
-                    if (!class_exists('FormMail')) {
-                        require_once DOL_DOCUMENT_ROOT . '/core/class/html.formmail.class.php';
-                    }
-
-                    global $langs;
-
-                    $formMail = new FormMail($this->db->db);
-                    $formMail->setSubstitFromObject($this->dol_object, $langs);
-                    $formMail->substit['__LINES__'] = '';
-                    $topic = $template['topic'];
-                    $topic = make_substitutions($topic, $formMail->substit);
-
-                    $soc = $this->getChildObject("client");
-                    if (isset($soc) && is_object($soc)) {
-                        $formMail->setSubstitFromObject($soc->dol_object, $langs);
-                        $topic = make_substitutions($topic, $formMail->substit);
-                    }
-                    $soc = $this->getChildObject("societe");
-                    if (isset($soc) && is_object($soc)) {
-                        $formMail->setSubstitFromObject($soc->dol_object, $langs);
-                        $topic = make_substitutions($topic, $formMail->substit);
-                    }
-                }
-            }
-        }
-
-        return $topic;
-    }
-
-    public function getEmailContentByModel()
-    {
-        $content = '';
-        $id_model = (int) BimpTools::getPostFieldValue('id_model', 0);
-
-        if ($id_model) {
-            $template = self::getEmailTemplateData($id_model);
-
-            if (!is_null($template)) {
-                if ($this->isLoaded()) {
-                    if (!class_exists('FormMail')) {
-                        require_once DOL_DOCUMENT_ROOT . '/core/class/html.formmail.class.php';
-                    }
-
-                    global $langs;
-
-                    $formMail = new FormMail($this->db->db);
-                    $formMail->setSubstitFromObject($this->dol_object, $langs);
-
-                    if (isset($template['content_lines']) && $template['content_lines']) {
-                        $lines = '';
-                        foreach ($formMail->substit_lines as $substit_line) {
-                            $lines .= make_substitutions($template['content_lines'], $substit_line) . "\n";
-                        }
-                        $formMail->substit['__LINES__'] = $lines;
-                    } else {
-                        $formMail->substit['__LINES__'] = '';
-                    }
-
-                    $content = str_replace('\n', "\n", $template['content']);
-
-                    if (dol_textishtml($content) && !dol_textishtml($formMail->substit['__SIGNATURE__'])) {
-                        $formMail->substit['__SIGNATURE__'] = dol_nl2br($formMail->substit['__SIGNATURE__']);
-                    } else if (!dol_textishtml($content) && dol_textishtml($this->substit['__SIGNATURE__'])) {
-                        $content = dol_nl2br($content);
-                    }
-
-                    $content = make_substitutions($content, $formMail->substit);
-                    $content = preg_replace("/^(<br>)+/", "", $content);
-                    $content = preg_replace("/^\n+/", "", $content);
-                }
-            }
-        }
-
-        return $content;
     }
 
     public function getRemisesInfos()
@@ -1255,7 +998,7 @@ class BimpComm extends BimpDolObject
             if ($id_soc) {
                 $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $id_soc);
                 if (BimpObject::objectLoaded($soc)) {
-                    if (in_array($this->object_name, array('Bimp_CommandeFourn', 'Bimp_FactureFourn')))
+                    if (in_array($this->object_name, array('Bimp_CommandeFourn', 'Bimp_FactureFourn')) && $soc->dol_object->cond_reglement_supplier_id)
                         return (int) $soc->dol_object->cond_reglement_supplier_id;
                     else
                         return (int) $soc->dol_object->cond_reglement_id;
@@ -1281,7 +1024,7 @@ class BimpComm extends BimpDolObject
             if ($id_soc) {
                 $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $id_soc);
                 if (BimpObject::objectLoaded($soc)) {
-                    if (in_array($this->object_name, array('Bimp_CommandeFourn', 'Bimp_FactureFourn')))
+                    if (in_array($this->object_name, array('Bimp_CommandeFourn', 'Bimp_FactureFourn')) && $soc->dol_object->mode_reglement_supplier_id)
                         return (int) $soc->dol_object->mode_reglement_supplier_id;
                     else
                         return (int) $soc->dol_object->mode_reglement_id;
@@ -1422,10 +1165,7 @@ class BimpComm extends BimpDolObject
         return 0;
     }
 
-    public function getDefaultMailTo()
-    {
-        return array();
-    }
+    
 
     public function getTotal_paListTotal($filters = array(), $joins = array())
     {
@@ -1481,55 +1221,7 @@ class BimpComm extends BimpDolObject
         return array();
     }
 
-    public function getBimpObjectsLinked()
-    {
-        $objects = array();
-        if ($this->isLoaded()) {
-            if ($this->isDolObject()) {
-                foreach (BimpTools::getDolObjectLinkedObjectsList($this->dol_object, $this->db) as $item) {
-                    $id = $item['id_object'];
-                    $class = "";
-                    $label = "";
-                    $module = "bimpcommercial";
-                    switch ($item['type']) {
-                        case 'propal':
-                            $class = "Bimp_Propal";
-                            break;
-                        case 'facture':
-                            $class = "Bimp_Facture";
-                            break;
-                        case 'commande':
-                            $class = "Bimp_Commande";
-                            break;
-                        case 'order_supplier':
-                            $class = "Bimp_CommandeFourn";
-                            break;
-                        case 'invoice_supplier':
-                            $class = "Bimp_FactureFourn";
-                            break;
-                        default:
-                            break;
-                    }
-                    if ($class != "") {
-                        $objT = BimpCache::getBimpObjectInstance($module, $class, $id);
-//                        if ($objT->isLoaded()) { // Ne jamais faire ça: BimpCache renvoie null si l'objet n'existe pas => erreur fatale. 
-                        if (BimpObject::objectLoaded($objT)) {
-                            $objects[] = $objT;
-                        }
-                    }
-                }
-            }
-
-            $client = $this->getChildObject('client');
-
-            if ($client->isLoaded()) {
-                $objects[] = $client;
-            }
-        }
-
-
-        return $objects;
-    }
+    
 
     // Getters - Overrides BimpObject
 
@@ -1549,34 +1241,9 @@ class BimpComm extends BimpDolObject
         return '';
     }
 
-    public function getFilesDir()
-    {
-        if ($this->isLoaded()) {
-            $dir_output = $this->getDirOutput();
-            if ($dir_output) {
-                return $dir_output . '/' . dol_sanitizeFileName($this->getRef()) . '/';
-            }
-        }
+    
 
-        return '';
-    }
-
-    public function getFileUrl($file_name)
-    {
-        $dir = $this->getFilesDir();
-        if ($dir) {
-            if (file_exists($dir . $file_name)) {
-                if (isset(static::$files_module_part)) {
-                    $module_part = static::$files_module_part;
-                } else {
-                    $module_part = static::$dol_module;
-                }
-                return DOL_URL_ROOT . '/document.php?modulepart=' . $module_part . '&file=' . urlencode($this->getRef()) . '/' . urlencode($file_name);
-            }
-        }
-
-        return '';
-    }
+   
 
     // Setters:
 
@@ -1727,52 +1394,7 @@ class BimpComm extends BimpDolObject
         return BimpTools::displayMoneyValue($total);
     }
 
-    public function displayPDFButton($display_generate = true, $with_ref = true, $btn_label = '')
-    {
-        $html = '';
-        $ref = dol_sanitizeFileName($this->getRef());
-
-        if ($ref) {
-            $file_url = $this->getFileUrl($ref . '.pdf');
-            if ($file_url) {
-                $onclick = 'window.open(\'' . $file_url . '\');';
-                $html .= '<button type="button" class="btn btn-default" onclick="' . $onclick . '">';
-                $html .= '<i class="fas fa5-file-pdf ' . (($with_ref || $btn_label) ? 'iconLeft' : '') . '"></i>';
-                if ($with_ref) {
-                    $html .= $ref . '.pdf';
-                } elseif ($btn_label) {
-                    $html .= $btn_label;
-                }
-                $html .= '</button>';
-
-                if ($display_generate) {
-                    $onclick = 'toggleElementDisplay($(this).parent().find(\'.' . static::$dol_module . 'PdfGenerateContainer\'), $(this));';
-                    $html .= '<span class="btn btn-light-default open-close action-open bs-popover" onclick="' . $onclick . '"';
-                    $html .= BimpRender::renderPopoverData('Re-générer le document', 'top', 'false');
-                    $html .= '>';
-                    $html .= BimpRender::renderIcon('fas_sync');
-                    $html .= '</span>';
-                }
-            }
-
-            if ($display_generate) {
-                $models = $this->getModelsPdfArray();
-                if (count($models)) {
-                    $html .= '<div class="' . static::$dol_module . 'PdfGenerateContainer" style="' . ($file_url ? 'margin-top: 15px; display: none;' : '') . '">';
-                    $html .= BimpInput::renderInput('select', static::$dol_module . '_model_pdf', $this->getModelPdf(), array(
-                                'options' => $models
-                    ));
-                    $onclick = 'var model = $(this).parent(\'.' . static::$dol_module . 'PdfGenerateContainer\').find(\'[name=' . static::$dol_module . '_model_pdf]\').val();setObjectAction($(this), ' . $this->getJsObjectData() . ', \'generatePdf\', {model: model}, null, null, null, null);';
-                    $html .= '<button type="button" onclick="' . $onclick . '" class="btn btn-default">';
-                    $html .= '<i class="fas fa5-sync iconLeft"></i>Générer';
-                    $html .= '</button>';
-                    $html .= '</div>';
-                }
-            }
-        }
-
-        return $html;
-    }
+    
 
     public function getIdCommercial()
     {
@@ -1975,14 +1597,7 @@ class BimpComm extends BimpDolObject
         return $html;
     }
 
-    public function renderExtraFile()
-    {
-        $html = "";
-        $objects = $this->getBimpObjectsLinked();
-        foreach ($objects as $obj)
-            $html .= $this->renderListFileForObject($obj);
-        return $html;
-    }
+   
 
     public function renderFilesTable()
     {
@@ -2277,7 +1892,7 @@ class BimpComm extends BimpDolObject
         if ($this->isLoaded() && method_exists($this->dol_object, 'liste_contact')) {
             $list_int = $this->dol_object->liste_contact(-1, 'internal');
             $list_ext = $this->dol_object->liste_contact(-1, 'external');
-            $list = array_merge($list_int, $list_ext);
+            $list = BimpTools::merge_array($list_int, $list_ext);
         }
 
         if (count($list)) {
@@ -2347,29 +1962,7 @@ class BimpComm extends BimpDolObject
         return '';
     }
 
-    public function renderMailToInputs($input_name)
-    {
-        $emails = $this->getMailsToArray();
-
-        $html = '';
-
-        $html .= BimpInput::renderInput('select', $input_name . '_add_value', '', array(
-                    'options'     => $emails,
-                    'extra_class' => 'emails_select principal'
-        ));
-
-
-        $html .= '<p class="inputHelp selectMailHelp">';
-        $html .= 'Sélectionnez une adresse e-mail puis cliquez sur "Ajouter"';
-        $html .= '</p>';
-
-        $html .= '<div class="mail_custom_value" style="display: none; margin-top: 10px">';
-        $html .= BimpInput::renderInput('text', $input_name . '_add_value_custom', '');
-        $html .= '<p class="inputHelp">Entrez une adresse e-mail valide puis cliquez sur "Ajouter"</p>';
-        $html .= '</div>';
-
-        return $html;
-    }
+    
 
     public function renderRemisesGlobalesList()
     {
@@ -2446,7 +2039,7 @@ class BimpComm extends BimpDolObject
                 if (!array_key_exists($id_dol_line, $bimp_lines) && method_exists($bimp_line, 'createFromDolLine')) {
                     $objectLine = BimpObject::getInstance($bimp_line->module, $bimp_line->object_name);
                     $objectLine->parent = $this;
-                    $line_errors = $objectLine->createFromDolLine((int) $this->id, $dol_line, $warnings);
+                    $line_errors = $objectLine->createFromDolLine((int) $this->id, $dol_line);
                     if (count($line_errors)) {
                         $errors[] = BimpTools::getMsgFromArray($line_errors, 'Des erreurs sont survenues lors de la récupération des données pour la ligne n° ' . $i);
                     }
@@ -2504,6 +2097,7 @@ class BimpComm extends BimpDolObject
         $new_object->set('id', 0);
         $new_object->set('ref', '');
         $new_object->set('fk_statut', 0);
+        $new_object->set('logs', '');
 
         if ($this->dol_field_exists('zone_vente')) {
             $new_object->set('zone_vente', 1);
@@ -2729,7 +2323,7 @@ class BimpComm extends BimpDolObject
             }
 
             // Création des remises pour la ligne en cours:
-            $errors = array_merge($new_line->copyRemisesFromOrigin($line, $params['inverse_prices'], $params['copy_remises_globales']));
+            $errors = BimpTools::merge_array($new_line->copyRemisesFromOrigin($line, $params['inverse_prices'], $params['copy_remises_globales']));
         }
 
         // Attribution des lignes parentes: 
@@ -3019,7 +2613,7 @@ class BimpComm extends BimpDolObject
 
                     // Enregistrement du paiement caisse: 
                     if ($use_caisse) {
-                        $errors = array_merge($errors, $caisse->addPaiement($payement, $factureA->id));
+                        $errors = BimpTools::merge_array($errors, $caisse->addPaiement($payement, $factureA->id));
                     }
 
                     $factureA->set_paid($user);
@@ -3215,7 +2809,6 @@ class BimpComm extends BimpDolObject
                                 $line->remise = 0;
 
                                 if ($this->object_name === 'Bimp_Commande' && (int) $this->getData('fk_statut') !== 0) {
-                                    echo 'ici'; 
                                     $line->qty = 0;
                                     $line->set('qty_modif', 1);
                                 }
@@ -3276,7 +2869,7 @@ class BimpComm extends BimpDolObject
                     }
 
                     foreach ($lines as $line) {
-                        $errors = array_merge($errors, $line->setRemiseGlobalePart($rg, $lines_rate));
+                        $errors = BimpTools::merge_array($errors, $line->setRemiseGlobalePart($rg, $lines_rate));
                     }
                 }
             }
@@ -3284,6 +2877,68 @@ class BimpComm extends BimpDolObject
             foreach ($lines as $line) {
                 $line->checkRemisesGlobales();
             }
+        }
+
+        return $errors;
+    }
+
+    public function checkContacts()
+    {
+        $errors = array();
+
+        if (in_array($this->object_name, array('Bimp_Propal', 'Bimp_Commande', 'Bimp_Facture'))) {
+            global $user;
+            $client = $this->getChildObject('client');
+            if (BimpObject::objectLoaded($client)) {
+                // Vérif commercial suivi: 
+                $tabConatact = $this->dol_object->getIdContact('internal', 'SALESREPFOLL');
+                if (count($tabConatact) < 1) {
+                    $ok = false;
+                    $tabComm = $client->dol_object->getSalesRepresentatives($user);
+                    if (count($tabComm) > 0) {
+                        $this->dol_object->add_contact($tabComm[0]['id'], 'SALESREPFOLL', 'internal');
+                        $ok = true;
+                    } elseif ((int) BimpCore::getConf('user_as_default_commercial', 1)) {
+                        $this->dol_object->add_contact($user->id, 'SALESREPFOLL', 'internal');
+                        $ok = true;
+                    } elseif ($this->object_name === 'Bimp_Facture' && (int) $this->getData('fk_facture_source')) {
+                        $fac_src = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $this->getData('fk_facture_source'));
+                        if (BimpObject::objectLoaded($fac_src)) {
+                            $contacts = $fac_src->dol_object->getIdContact('internal', 'SALESREPFOLL');
+                            if (count($contacts) > 0) {
+                                $this->dol_object->add_contact($contacts[0]['id'], 'SALESREPFOLL', 'internal');
+                                $ok = true;
+                            }
+                        }
+                    }
+
+                    if (!$ok) {
+                        $errors[] = 'Pas de Commercial Suivi';
+                    }
+                }
+
+                // Vérif contact signataire: 
+                $tabConatact = $this->dol_object->getIdContact('internal', 'SALESREPSIGN');
+                if (count($tabConatact) < 1) {
+                    $this->dol_object->add_contact($user->id, 'SALESREPSIGN', 'internal');
+                }
+            }
+        }
+        return $errors;
+    }
+
+    public function addLog($text)
+    {
+        $errors = array();
+
+        if ($this->isLoaded($errors) && $this->field_exists('logs')) {
+            $logs = (string) $this->getData('logs');
+            if ($logs) {
+                $logs .= '<br/>';
+            }
+            global $user, $langs;
+            $logs .= ' - <strong>Le ' . date('d / m / Y à H:i') . '</strong> par ' . $user->getFullName($langs) . ': ' . $text;
+            $errors = $this->updateField('logs', $logs, null, true);
         }
 
         return $errors;
@@ -3335,6 +2990,8 @@ class BimpComm extends BimpDolObject
     {
         $errors = array();
         $warnings = array();
+        $infos = array();
+
         $success = BimpTools::ucfirst($this->getLabel('')) . ' validé';
 
         if ($this->isLabelFemale()) {
@@ -3354,7 +3011,23 @@ class BimpComm extends BimpDolObject
                 $this->dol_object->generateDocument($this->getModelPdf(), $langs);
             }
         } else {
-            $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object, null, null, $warnings), 'Des erreurs sont survenues lors de la validation ' . $this->getLabel('of_the'));
+            $obj_errors = BimpTools::getDolEventsMsgs(array('errors'));
+
+            if (!count($obj_errors)) {
+                $obj_errors[] = BimpTools::ucfirst($this->getLabel('the')) . ' ne peut pas être validé' . $this->e();
+            }
+            $errors[] = BimpTools::getMsgFromArray($obj_errors);
+        }
+
+        $obj_warnings = BimpTools::getDolEventsMsgs(array('warnings'));
+
+        if (!empty($obj_warnings)) {
+            $warnings[] = BimpTools::getMsgFromArray($obj_warnings);
+        }
+
+        $obj_infos = BimpTools::getDolEventsMsgs(array('mesgs'));
+        if (!empty($obj_infos)) {
+            $infos[] = BimpTools::getMsgFromArray($obj_infos);
         }
 
         return array(
@@ -3521,189 +3194,6 @@ class BimpComm extends BimpDolObject
         );
     }
 
-    public function actionSendEMail($data, &$success)
-    {
-        $errors = array();
-        $warnings = array();
-        $success = 'Email envoyé avec succès';
-
-        if (!isset($data['from']) || !(string) $data['from']) {
-            $errors[] = 'Emetteur absent';
-        } elseif (!BimpValidate::isEmail($data['from'])) {
-            $errors[] = 'L\'adresse email de l\'émetteur (' . $data['from'] . ') n\'est pas valide';
-        }
-
-        if (!isset($data['mail_to']) || !is_array($data['mail_to']) || !count($data['mail_to'])) {
-            $errors[] = 'Liste des destinataires absente';
-        }
-
-        if (!isset($data['mail_object']) || !(string) $data['mail_object']) {
-            $errors[] = 'Objet de l\'e-mail absent';
-        }
-
-        if (!isset($data['msg_html']) || !(string) $data['msg_html']) {
-            $errors[] = 'Veuillez saisir un message dans le corps de l\'e-mail';
-        }
-
-        if (!count($errors)) {
-            $from = $data['from'];
-            $to = '';
-            $cc = '';
-
-            foreach (array('mail_to', 'copy_to') as $type) {
-                if (isset($data[$type]) && is_array($data[$type])) {
-                    foreach ($data[$type] as $mail_to) {
-                        $name = '';
-                        $emails = '';
-                        if (preg_match('/^[0-9]+$/', '' . $mail_to)) {
-                            $contact = BimpObject::getInstance('bimpcore', 'Bimp_Contact', (int) $mail_to);
-                            if ($contact->isLoaded()) {
-                                if (!(string) $contact->getData('email')) {
-                                    $errors[] = 'Aucune adresse e-mail enregistrée pour le contact "' . $contact->getData('firstname') . ' ' . $contact->getData('lastname') . '"';
-                                } else {
-                                    $emails = $contact->getData('email');
-                                    $name = $contact->getData('firstname') . ' ' . $contact->getData('lastname');
-                                }
-                            } else {
-                                $errors[] = 'Le contact d\'ID ' . $mail_to . ' n\'existe pas';
-                            }
-                        } elseif ($mail_to === 'thirdparty') {
-                            $client = $this->getChildObject('client');
-                            if (BimpObject::objectLoaded($client)) {
-                                if (!(string) $client->getData('email')) {
-                                    $errors[] = 'Aucune adresse e-mail enregistrée pour le client';
-                                } else {
-                                    $name = $client->getData('nom');
-                                    $emails = $client->getData('email');
-                                }
-                            } else {
-                                $errors[] = 'Aucun client enregistré pour ' . $this->getLabel('this');
-                            }
-                        } elseif (is_string($mail_to)) {
-                            if (BimpValidate::isEmail($mail_to)) {
-                                $emails = $mail_to;
-                            } else {
-                                $errors[] = '"' . $mail_to . '" n\'est pas une adresse e-mail valide';
-                            }
-                        }
-
-                        if ($emails) {
-                            $emails = str_replace(' ', '', $emails);
-                            $emails = str_replace(';', ',', $emails);
-
-                            foreach (explode(',', $emails) as $email) {
-                                if ($name) {
-                                    switch ($type) {
-                                        case 'mail_to': $to .= ($to ? ', ' : '') . $name . ' <' . $email . '>';
-                                            break;
-
-                                        case 'copy_to': $cc .= ($cc ? ', ' : '') . $name . ' <' . $email . '>';
-                                            break;
-                                    }
-                                } else {
-                                    switch ($type) {
-                                        case 'mail_to': $to .= ($to ? ', ' : '') . $email;
-                                            break;
-
-                                        case 'copy_to': $cc .= ($cc ? ', ' : '') . $email;
-                                            break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            $filename_list = array();
-            $mimetype_list = array();
-            $mimefilename_list = array();
-
-            if (isset($data['join_files']) && is_array($data['join_files'])) {
-                foreach ($data['join_files'] as $id_file) {
-                    $file = BimpCache::getBimpObjectInstance('bimpcore', 'BimpFile', (int) $id_file);
-                    if ($file->isLoaded()) {
-                        $file_path = $file->getFilePath();
-                        $file_name = $file->getData('file_name') . '.' . $file->getData('file_ext');
-                        if (!file_exists($file_path)) {
-                            $errors[] = 'Le fichier "' . $file_name . '" n\'existe pas';
-                        } else {
-                            $filename_list[] = $file_path;
-                            $mimetype_list[] = dol_mimetype($file_name);
-                            $mimefilename_list[] = $file_name;
-                        }
-                    } else {
-                        $errors[] = 'Le fichier d\'ID ' . $id_file . ' n\'existe pas';
-                    }
-                }
-            }
-
-            if (!$from) {
-                $errors[] = 'Aucun expéditeur valide';
-            }
-
-            if (!$to) {
-                $errors[] = 'Aucun destinataire valide';
-            }
-
-            if (!count($errors)) {
-                $mail_object .= $data['mail_object'];
-
-                $deliveryreceipt = (isset($data['confirm_reception']) ? (int) $data['confirm_reception'] : 0);
-                if (mailSyn2($mail_object, $to, $from, $data['msg_html'], $filename_list, $mimetype_list, $mimefilename_list, $cc, '', $deliveryreceipt)) {
-                    if (static::$mail_event_code) {
-                        include_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
-                        global $user, $langs, $conf;
-                        $interface = new Interfaces($this->db->db);
-                        if ($interface->run_triggers(static::$mail_event_code, $this->dol_object, $user, $langs, $conf) < 0) {
-                            $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($interface), 'Echec de l\'enregistrement de l\'envoi du mail dans la liste des événements');
-                        }
-//                        global $user;
-//                        BimpTools::loadDolClass('comm/action', 'actioncomm', 'ActionComm');
-//                        $ac = new ActionComm($this->db->db);
-//                        $ac->code = static::$mail_event_code;
-//                        $ac->datep = dol_now();
-//                        $ac->authorid = (int) $user->id;
-//                        $ac->userownerid = (int) $user->id;
-//                        $ac->socid = (int) $this->getData('fk_soc');
-//                        $ac->label = BimpTools::ucfirst($this->getLabel()) . ' envoyé' . $this->e() . ' par e-mail';
-//                        $ac->elementid = (int) $this->id;
-//                        $ac->elementtype = static::$element_name;
-//
-//                        $note = 'Emetteur: ' . $from . '<br/>';
-//                        $note .= 'Destinataire: ' . $to . '<br/>';
-//                        if ($cc) {
-//                            $note .= 'Copie: ' . $cc . '<br/>';
-//                        }
-//                        $note .= '<br/>';
-//
-//                        $note .= 'Objet: ' . $mail_object . '<br/>';
-//                        $note .= 'Corps du message: <br/>';
-//                        $note .= $data['msg_html'] . '<br/>';
-//
-//                        if (!empty($mimefilename_list)) {
-//                            $note .= 'Fichiers joints: <br/>';
-//                            foreach ($mimefilename_list as $file_name) {
-//                                $note .= $file_name . '<br/>';
-//                            }
-//                        }
-//                        $ac->note = $note;
-//                        if ($ac->create($user) <= 0) {
-//                            $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($ac), 'Echec de l\'enregistrement de l\'envoi dans la liste des événements');
-//                        }
-                    }
-                } else {
-                    $errors[] = 'Echec de l\'envoi du mail';
-                }
-            }
-        }
-
-        return array(
-            'errors'   => $errors,
-            'warnings' => $warnings
-        );
-    }
-
     public function actionAddAcompte($data, &$success)
     {
         $errors = array();
@@ -3718,8 +3208,13 @@ class BimpComm extends BimpDolObject
             $errors[] = 'Date de paiement absent';
         }
 
-        if ($data['id_mode_paiement'] == 'VIR' && is_null($data['bank_account'])) {
-            $errors[] = "Le compte banqaire est obligatoire pour un virement bancaire";
+        if ($data['id_mode_paiement'] == 'VIR') {
+            BimpObject::loadClass('bimpcommercial', 'Bimp_Paiement');
+            if (!Bimp_Paiement::canCreateVirement()) {
+                $errors[] = 'Vous n\'avez pas la permission d\'enregistrer des paiements par virement';
+            } elseif (!$id_bank_account) {
+                $errors[] = "Le compte banqaire est obligatoire pour un virement bancaire";
+            }
         }
 
         if (!$id_mode_paiement) {
@@ -3912,7 +3407,7 @@ class BimpComm extends BimpDolObject
             $this->checkLines(); // Des lignes ont pu être créées via un trigger.
 
             if ($origin && $origin_id) {
-                $warnings = array_merge($warnings, $this->createLinesFromOrigin($origin_object));
+                $warnings = BimpTools::merge_array($warnings, $this->createLinesFromOrigin($origin_object));
                 if (is_a($origin_object, 'BimpComm') && static::$remise_globale_allowed && $origin_object::$remise_globale_allowed) {
                     $remises_globales = $origin_object->getRemisesGlobales();
 
@@ -3992,7 +3487,7 @@ class BimpComm extends BimpDolObject
                 $line->bimp_line_only = true;
                 $line_errors = $line->delete($line_warnings, true);
 
-                $line_errors = array_merge($line_warnings, $line_errors);
+                $line_errors = BimpTools::merge_array($line_warnings, $line_errors);
                 if (count($line_errors)) {
                     $warnings[] = BimpTools::getMsgFromArray($line_errors, 'Erreurs lors de la suppression de la ligne n°' . $line_pos);
                 }
@@ -4016,5 +3511,48 @@ class BimpComm extends BimpDolObject
         parent::onSave($errors, $warnings);
 
         $this->processRemisesGlobales();
+    }
+
+    // Méthodes statiques: 
+
+    public static function checkAllObjectLine($id_product, &$sortie = '', $nbMax = 10)
+    {
+        global $db;
+        $tabInfo = $errors = array();
+        $sortie = '';
+
+        $tabInfo[] = array('fk_propal', 'llx_propaldet', array('llx_bimp_propal_line', 'llx_bs_sav_propal_line'), 'Bimp_Propal');
+        $tabInfo[] = array('fk_commande', 'llx_commandedet', 'llx_bimp_commande_line', 'Bimp_Commande');
+        $tabInfo[] = array('fk_facture', 'llx_facturedet', 'llx_bimp_facture_line', 'Bimp_Facture');
+        $tabInfo[] = array('fk_commande', 'llx_commande_fournisseurdet', 'llx_bimp_commande_fourn_line', 'Bimp_CommandeFourn');
+        $tabInfo[] = array('fk_facture_fourn', 'llx_facture_fourn_det', 'llx_bimp_facture_fourn_line', 'Bimp_FactureFourn');
+
+        foreach ($tabInfo as $info) {
+            $i = 0;
+            if (!is_array($info[2]))
+                $info[2] = array($info[2]);
+            $where = array();
+            foreach ($info[2] as $table)
+                $where[] = 'rowid NOT IN (SELECT id_line FROM ' . $table . ')';
+            $req = 'SELECT DISTINCT(`' . $info[0] . '`) as id FROM `' . $info[1] . '` WHERE ' . implode(' AND ', $where) . ' ';
+
+            if ($id_product > 0)
+                $req .= ' AND fk_product = ' . $id_product;
+
+            $sql = $db->query($req);
+            $tot = $db->num_rows($sql);
+            $sql = $db->query($req . ' LIMIT 0,' . $nbMax);
+            while ($ln = $db->fetch_object($sql)) {
+                $comm = BimpCache::getBimpObjectInstance('bimpcommercial', $info[3], $ln->id);
+                if ($comm->isLoaded()) {
+                    $errors = BimpTools::merge_array($errors, $comm->checkLines());
+                    $i++;
+                }
+
+                BimpCache::$cache = array();
+            }
+            $sortie .= '<br/>fin ' . $i . ' / ' . $tot . ' corrections de ' . $info[1];
+        }
+        return $errors;
     }
 }

@@ -313,11 +313,11 @@ fields:
         default_value: 0
         
     accountancy_code_sell:
-        label: Code comptable (Vente)
+        label: Code comptable Vente (Spécifique)
         type: string
         
     accountancy_code_buy:
-        label: Code comptable (Achat)
+        label: Code comptable Achat (Spécifique)
         type: string
         
     deee:
@@ -553,10 +553,11 @@ forms:
             - field: description  
             - field: fk_product_type
             - field: type2
-            - field: no_fixe_prices
-            - field: price                  
+            - field: no_fixe_prices                
             - field: tva_tx
             - field: pa_prevu
+            - field: price
+              label: Prix de vente HT
             - field: infos_pa
             - field: serialisable
             - field: note
@@ -967,7 +968,46 @@ lists_cols:
         field: seuil_stock_alerte
     code_config:
         field: code_config
-                
+    accountancy_code_sell:
+        field: accountancy_code_sell
+    accountancy_code_sell_ue:
+       label: Code Comptable Vente (Final UE)
+       value:
+           callback:
+               method: getCodeComptableVente
+               params:
+                   - 2
+    accountancy_code_sell_ex:
+       label: Code Comptable Vente (Final Export)
+       value:
+           callback:
+               method: getCodeComptableVente
+               params:
+                   - 3
+    accountancy_code_sell_reel:
+        label: Code Comptable Vente (Final France)
+        value:
+            callback: getCodeComptableVente
+    accountancy_code_buy:
+        field: accountancy_code_buy
+    accountancy_code_buy_reel:
+        label: Code Comptable Achat (Final France)
+        value:
+            callback: getCodeComptableAchat
+    accountancy_code_buy_ue:
+        label: Code Comptable Achat (Final UE)
+        value:
+            callback: 
+                method: getCodeComptableAchat
+                params:
+                    - 2
+    accountancy_code_buy_ex:
+        label: Code Comptable Achat (Final Export)
+        value:
+            callback: 
+                method: getCodeComptableAchat
+                params:
+                    - 3
 lists: 
     default: 
         title: Produits
@@ -1000,7 +1040,7 @@ lists:
             stock: 
             price: 
             tva: 
-            serialisable: 
+            serialisable:
                 
     inventory:
         extends: default

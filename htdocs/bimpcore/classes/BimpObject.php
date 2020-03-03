@@ -469,6 +469,24 @@ class BimpObject extends BimpCache
     {
         return self::getObjectListConfig($this->module, $this->object_name, $owner_type, $id_owner, $list_name);
     }
+    
+    public function getListExtrafield($name, $type, $withVide = true){
+        $return = array();
+        $sql = $this->db->db->query("SELECT * FROM `".MAIN_DB_PREFIX."extrafields` WHERE `name` LIKE '".$name."' AND `elementtype` = '".$type."'");
+        while($ln = $this->db->db->fetch_object($sql)){
+            $param = unserialize($ln->param);
+            if (isset($param['options']))
+                $return = $param['options'];
+        }
+        if(!isset($return[0]) && $withVide){
+            $newReturn = array(0=>'');
+            foreach($return as $id =>$val)
+                $newReturn[$id] = $val;
+            $return = $newReturn;
+        }
+
+        return $return;
+    }
 
     public function getNameProperty()
     {
@@ -1317,6 +1335,12 @@ class BimpObject extends BimpCache
                 case 'datetime':
                     $value = BimpTools::getDateForDolDate($value);
                     break;
+                case 'items_list':
+                    if(isset($value[0]) && $value[0] == '')
+                        unset($value[0]);
+                    if(is_array($value))
+                        $value = implode(",", $value);
+                    break;
             }
         }
 
@@ -1642,7 +1666,7 @@ class BimpObject extends BimpCache
                         $assos_errors = $bimpAsso->addObjectAssociation($this->id, $params->id_object);
                         if ($assos_errors) {
                             $errors[] = 'Echec de l\'association ' . $this->getLabel('of_the') . ' avec ' . $obj->getLabel('the') . ' ' . $params->id_object;
-                            $errors = array_merge($errors, $assos_errors);
+                            $errors = BimpTools::merge_array($errors, $assos_errors);
                         }
                         unset($bimpAsso);
                     } elseif (isset($params->id_associate)) {
@@ -1650,7 +1674,7 @@ class BimpObject extends BimpCache
                         $assos_errors = $bimpAsso->addObjectAssociation($params->id_associate, $this->id);
                         if ($assos_errors) {
                             $errors[] = 'Echec de l\'association ' . $this->getLabel('of_the') . ' avec ' . BimpObject::getInstanceLabel($bimpAsso->associate, 'the') . ' ' . $params->id_associate;
-                            $errors = array_merge($errors, $assos_errors);
+                            $errors = BimpTools::merge_array($errors, $assos_errors);
                         }
                         unset($bimpAsso);
                     }
@@ -1679,7 +1703,7 @@ class BimpObject extends BimpCache
                                 'alias' => $child_name,
                                 'on'    => ($alias ? $alias : 'a') . '.' . $on_field . ' = ' . $child_name . '.' . $instance->getPrimary()
                             );
-                            $filters = array_merge($filters, $instance->getSearchFilters($joins, $child_fields, $child_name));
+                            $filters = BimpTools::merge_array($filters, $instance->getSearchFilters($joins, $child_fields, $child_name));
                         }
                     }
                 }
@@ -1697,7 +1721,11 @@ class BimpObject extends BimpCache
                     $alias = 'a';
                 }
 
-                $filter_key = $alias . '.' . $field_name;
+                if ($field_name === 'id') {
+                    $filter_key = $alias . '.' . $this->getPrimary();
+                } else {
+                    $filter_key = $alias . '.' . $field_name;
+                }
 
                 $method = 'get' . ucfirst($field_name) . 'SearchFilters';
                 if (method_exists($this, $method)) {
@@ -1855,7 +1883,7 @@ class BimpObject extends BimpCache
         $bimpHistory = BimpObject::getInstance('bimpcore', 'BimpHistory');
 
         foreach ($this->history as $field => $value) {
-            $errors = array_merge($errors, $bimpHistory->add($this, $field, $value));
+            $errors = BimpTools::merge_array($errors, $bimpHistory->add($this, $field, $value));
         }
 
         $this->history = array();
@@ -2859,7 +2887,7 @@ class BimpObject extends BimpCache
                 $value = $this->getCurrentConf('default_value', null);
             }
 
-            $errors = array_merge($errors, $this->validateValue($field, $value));
+            $errors = BimpTools::merge_array($errors, $this->validateValue($field, $value));
         }
 
         $associations = $this->getConf('associations', array(), false, 'array');
@@ -2896,7 +2924,7 @@ class BimpObject extends BimpCache
                 $value = $this->getCurrentConf('default_value');
             }
 
-            $errors = array_merge($errors, $this->validateValue($field, $value));
+            $errors = BimpTools::merge_array($errors, $this->validateValue($field, $value));
         }
 
         $this->config->setCurrentPath($prev_path);
@@ -2932,7 +2960,11 @@ class BimpObject extends BimpCache
 
         $missing = false;
 
-        if ($type === 'items_list') {
+        if ($type === 'json') {
+            if (is_string($value)) {
+                $value = json_decode($value, 1);
+            }
+        } elseif ($type === 'items_list') {
             if (!is_array($value)) {
                 $delimiter = $this->getCurrentConf('items_delimiter', ',');
                 $value = explode($delimiter, $value);
@@ -3050,7 +3082,8 @@ class BimpObject extends BimpCache
 
         $errors = array();
         foreach ($fields as $field => $params) {
-            $errors = array_merge($errors, $this->validateValue($field, isset($this->data[$field]) ? $this->data[$field] : null));
+            $value = $this->getData($field);
+            $errors = BimpTools::merge_array($errors, $this->validateValue($field, $value));
         }
         return $errors;
     }
@@ -3088,10 +3121,10 @@ class BimpObject extends BimpCache
         }
 
         if (!count($errors)) {
-            $warnings = array_merge($warnings, $this->saveAssociationsFromPost());
+            $warnings = BimpTools::merge_array($warnings, $this->saveAssociationsFromPost());
             $sub_result = $this->checkSubObjectsPost($force_edit);
             if (count($sub_result['errors'])) {
-                $warnings = array_merge($warnings, $sub_result['errors']);
+                $warnings = BimpTools::merge_array($warnings, $sub_result['errors']);
             }
             if ($sub_result['success_callback']) {
                 $success_callback .= $sub_result['success_callback'];
@@ -3149,7 +3182,7 @@ class BimpObject extends BimpCache
 
                                 $new_object = BimpObject::getInstance($object->module, $object->object_name);
                                 $result = $new_object->saveFromPost();
-                                $sub_errors = array_merge($result['errors'], $result['warnings']);
+                                $sub_errors = BimpTools::merge_array($result['errors'], $result['warnings']);
                                 if ($sub_errors) {
                                     $errors[] = BimpTools::getMsgFromArray($sub_errors, 'Des erreurs sont survenues lors de la création ' . $object->getLabel('of_the') . ' n° ' . $i);
                                 }
@@ -3174,12 +3207,12 @@ class BimpObject extends BimpCache
                             }
                             $new_object = BimpObject::getInstance($object->module, $object->object_name);
                             $result = $new_object->saveFromPost();
-                            $sub_errors = array_merge($result['errors'], $result['warnings']);
+                            $sub_errors = BimpTools::merge_array($result['errors'], $result['warnings']);
                             if ($sub_errors) {
                                 $errors[] = BimpTools::getMsgFromArray($sub_errors, 'Des erreurs sont survenues lors de la création ' . $object->getLabel('of_the'));
                             }
                             if (count($result['warnings'])) {
-                                $errors = array_merge($errors, $result['warnings']);
+                                $errors = BimpTools::merge_array($errors, $result['warnings']);
                             }
                             if ($result['success_callback']) {
                                 $success_callback = $result['success_callback'];
@@ -3275,8 +3308,8 @@ class BimpObject extends BimpCache
 
                     $this->initData = $this->data;
 
-                    $warnings = array_merge($warnings, $this->updateAssociations());
-                    $warnings = array_merge($warnings, $this->saveHistory());
+                    $warnings = BimpTools::merge_array($warnings, $this->updateAssociations());
+                    $warnings = BimpTools::merge_array($warnings, $this->saveHistory());
 
                     $parent = $this->getParentInstance();
                     if (!is_null($parent)) {
@@ -3371,14 +3404,14 @@ class BimpObject extends BimpCache
                         $this->initData = $this->data;
                         self::setBimpObjectInstance($this);
 
-                        $warnings = array_merge($warnings, $this->updateAssociations());
-                        $warnings = array_merge($warnings, $this->saveHistory());
+                        $warnings = BimpTools::merge_array($warnings, $this->updateAssociations());
+                        $warnings = BimpTools::merge_array($warnings, $this->saveHistory());
 
                         $parent = $this->getParentInstance();
 
                         if (!is_null($parent)) {
                             if (method_exists($parent, 'onChildSave')) {
-                                $warnings = array_merge($warnings, $parent->onChildSave($this));
+                                $warnings = BimpTools::merge_array($warnings, $parent->onChildSave($this));
                             }
                         }
 
@@ -3413,9 +3446,9 @@ class BimpObject extends BimpCache
             if (isset($this->associations[$association])) {
                 $bimpAsso = new BimpAssociation($this, $association);
                 if (count($bimpAsso->errors)) {
-                    $errors = array_merge($errors, $bimpAsso->errors);
+                    $errors = BimpTools::merge_array($errors, $bimpAsso->errors);
                 } else {
-                    $errors = array_merge($errors, $bimpAsso->setObjectAssociations($this->associations[$association]));
+                    $errors = BimpTools::merge_array($errors, $bimpAsso->setObjectAssociations($this->associations[$association]));
                 }
             }
         }
@@ -3449,7 +3482,7 @@ class BimpObject extends BimpCache
                 }
             }
             if (!$do_not_validate) {
-                $errors = array_merge($errors, $this->validateValue($field, $value));
+                $errors = BimpTools::merge_array($errors, $this->validateValue($field, $value));
             } else {
                 $this->data[$field] = $value;
             }
@@ -3476,7 +3509,7 @@ class BimpObject extends BimpCache
                     }
                 } elseif ($this->isExtraField($field)) {
                     // Cas d'un BimpObject extra field: 
-                    $errors = array_merge($errors, $this->updateExtraField($field, $db_value, $id_object));
+                    $errors = BimpTools::merge_array($errors, $this->updateExtraField($field, $db_value, $id_object));
                 } else {
                     // Cas d'un field ordinaire: 
                     $table = $this->getTable();
@@ -3518,7 +3551,7 @@ class BimpObject extends BimpCache
                     if (!is_null($parent)) {
                         // Trigger sur le parent: 
                         if (method_exists($parent, 'onChildSave')) {
-                            $warnings = array_merge($warnings, $parent->onChildSave($this));
+                            $warnings = BimpTools::merge_array($warnings, $parent->onChildSave($this));
                         }
                     }
 
@@ -3906,8 +3939,9 @@ class BimpObject extends BimpCache
     {
         $errors = array();
 
-        foreach ($this->data as $field => $value) {
+        foreach ($this->params['fields'] as $field) {
             if ($this->field_exists($field)) {
+                $value = $this->getData($field);
                 if ((int) $this->getConf('fields/' . $field . '/dol_extra_field', 0, false, 'bool')) {
                     if (preg_match('/^ef_(.*)$/', $field, $matches)) {
                         $extrafield = $matches[1];
@@ -5374,6 +5408,10 @@ class BimpObject extends BimpCache
         $list_name = BimpTools::getPostFieldValue('list_name', 'default');
 
         $bc_list = new BC_ListTable($this, $list_name);
+        $user_config_cols_options = array();
+        if (BimpObject::objectLoaded($bc_list->userConfig)) {
+            $user_config_cols_options = $bc_list->userConfig->getData('cols_options');
+        }
 
         if (count($bc_list->errors)) {
             return BimpRender::renderAlerts($bc_list->errors);
@@ -5412,30 +5450,21 @@ class BimpObject extends BimpCache
                 if (is_a($instance, 'BimpObject')) {
                     if ($instance->field_exists($col_params['field'])) {
                         $bc_field = new BC_Field($instance, $col_params['field']);
-                        if (count($bc_field->errors)) {
-                            $content = BimpRender::renderAlerts($bc_field->errors);
-                        } else {
-                            $label = $bc_field->params['label'];
-                            $value = '';
-                            $options = $bc_field->getNoHtmlOptions($value);
-
-                            if (!empty($options)) {
-                                $content = BimpInput::renderInput('select', 'col_' . $col_name . '_option', $value, array(
-                                            'options'     => $options,
-                                            'extra_class' => 'col_option'
-                                ));
-                            } else {
-                                $content .= 'Valeur';
-                            }
-                        }
+                        $label = $bc_field->params['label'];
+                        $content = $bc_field->renderCsvOptionsInput('col_' . $col_name . '_option', (isset($user_config_cols_options[$col_name]['csv_display']) ? $user_config_cols_options[$col_name]['csv_display'] : ''));
                     } else {
                         $content = BimpRender::renderAlerts('Le champ "' . $col_params['field'] . '" n\'existe pas dans l\'objet "' . $instance->getLabel() . '"');
                     }
                 } else {
                     $content = BimpRender::renderAlerts('Instance invalide');
                 }
-            } else {
+            }
+
+            if (!$label) {
                 $label = ((string) $col_params['label'] ? $col_params['label'] : $col_name);
+            }
+
+            if (!$content) {
                 $content = 'Valeur affichée';
             }
 
@@ -6176,7 +6205,7 @@ class BimpObject extends BimpCache
         if ($withpicto && $this->params['icon']) {
             $label .= BimpRender::renderIcon($this->params['icon'], 'iconLeft');
         }
-        $ref = $this->getRef();
+        $ref = $this->getRef($ref_only);
 
         if (!$ref || !$ref_only) {
             $nom = $this->getInstanceNom($this);
@@ -6783,6 +6812,15 @@ class BimpObject extends BimpCache
                 if (isset($this->dol_object) && isset($this->dol_object->element))
                     $objName = $this->dol_object->element;
                 $url .= "&socid=" . BimpTools::getValue("socid");
+            }
+            if (BimpTools::getValue("viewstatut") != "") {
+                $url .= "&fk_statut=" . BimpTools::getValue("viewstatut");
+            }
+            if (BimpTools::getValue("statut") != "") {
+                $url .= "&fk_statut=" . BimpTools::getValue("statut");
+            }
+            if (BimpTools::getValue("search_status") != "") {
+                $url .= "&fk_statut=" . BimpTools::getValue("search_status");
             }
 
 //            https://erp.bimp.fr/test11/bimpcommercial/index.php?search=1&object=propal&sall=PR1809-91794&fc=propals

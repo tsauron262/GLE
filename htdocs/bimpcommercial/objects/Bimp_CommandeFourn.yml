@@ -376,6 +376,7 @@ forms:
             ref_supplier:
                 custom: 1
                 label: Référence fournisseur
+                required: 1
                 input_name: ref_supplier
                 data_type: string
                 input: 
@@ -415,6 +416,8 @@ forms:
                 display_if: 
                     field_name: id_facture
                     show_values: 0
+                value: 
+                    callback: getCondReglementBySociete
             mode_reglement: 
                 custom: 1
                 label: Mode de réglement
@@ -425,6 +428,8 @@ forms:
                 display_if: 
                     field_name: id_facture
                     show_values: 0
+                value: 
+                    callback: getModeReglementBySociete
             note_publique: 
                 custom: 1
                 label: Note publique

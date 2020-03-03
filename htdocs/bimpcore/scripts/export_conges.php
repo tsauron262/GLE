@@ -18,8 +18,8 @@ BimpCore::displayHeaderFiles();
 global $db;
 $bdb = new BimpDb($db);
 
-$date_from = '2019-12-16';
-$date_to = '2020-01-19';
+$date_from = '2020-01-20';
+$date_to = '2020-02-16';
 
 $where = 'date_debut <= \'' . $date_to . '\'';
 $where .= ' AND date_fin >= \'' . $date_from . '\'';

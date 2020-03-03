@@ -656,7 +656,7 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
                     }
                     $categories_errors = $this->processImportProductCategories($product->id, $categories, true);
                     if (count($categories_errors)) {
-                        $errors = array_merge($errors, $categories_errors);
+                        $errors = BimpTools::merge_array($errors, $categories_errors);
                     }
                 }
 
@@ -664,7 +664,7 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
                 if (isset($data['images'])) {
                     $images_errors = $this->processImportProductImages($product, $data['images'], $sync_data, $this->parameters['ps_url']);
                     if (count($images_errors)) {
-                        $errors = array_merge($errors, $images_errors);
+                        $errors = BimpTools::merge_array($errors, $images_errors);
                     }
                 }
             }

@@ -17,21 +17,35 @@ class BE_Place extends BimpObject
     const BE_PLACE_ENQUETE = 90;
 
     public static $types = array(
-        1 => 'Client',
-        2 => 'En Stock',
-        3 => 'Utilisateur',
-        4 => 'Champ libre',
-        5 => 'En Présentation',
-        6 => 'Vol',
-        7 => 'Matériel de prêt',
-        8 => 'SAV',
-        9 => 'Utilisation interne',
+        1  => 'Client',
+        2  => 'En Stock',
+        3  => 'Utilisateur',
+        4  => 'Champ libre',
+        5  => 'En Présentation',
+        6  => 'Vol',
+        7  => 'Matériel de prêt',
+        8  => 'SAV',
+        9  => 'Utilisation interne',
         90 => 'Enquête'
+    );
+    public static $origins = array(
+        ''               => '',
+        'commande'       => 'Commande client',
+        'vente_caisse'   => 'Vente en caisse',
+        'transfert'      => 'Transfert',
+        'order_supplier' => 'Commande fournisseur',
+        'sav'            => 'SAV',
+        'facture'        => 'Facture',
+        'package'        => 'Package',
+        'user'           => 'Utilisateur',
+        'societe'        => 'Société',
+        'inventory'      => 'Inventaire',
+        'pret'           => 'Prêt'
     );
     public static $entrepot_types = array(self::BE_PLACE_ENTREPOT, self::BE_PLACE_PRESENTATION, self::BE_PLACE_PRET, self::BE_PLACE_SAV, self::BE_PLACE_VOL, self::BE_PLACE_INTERNE, self::BE_PLACE_ENQUETE);
     public static $immos_types = array(self::BE_PLACE_USER, self::BE_PLACE_INTERNE);
 
-    // Getters booléens: 
+    // Getters booléens:
 
     public function isCreatable($force_create = false, &$errors = array())
     {
@@ -120,6 +134,24 @@ class BE_Place extends BimpObject
                     $entrepot = $this->getChildObject('entrepot');
                     if (BimpObject::ObjectLoaded($entrepot)) {
                         $name = 'Entrepôt "' . $entrepot->lieu . '"';
+
+                        switch ($type) {
+                            case self::BE_PLACE_PRESENTATION:
+                                $name .= ' (Présentation)';
+                                break;
+                            case self::BE_PLACE_VOL:
+                                $name .= ' (Vol)';
+                                break;
+                            case self::BE_PLACE_SAV:
+                                $name .= ' (SAV)';
+                                break;
+                            case self::BE_PLACE_PRET:
+                                $name .= ' (Prêt)';
+                                break;
+                            case self::BE_PLACE_INTERNE:
+                                $name .= ' (Utilisation interne)';
+                                break;
+                        }
                     }
                     break;
 
@@ -153,7 +185,7 @@ class BE_Place extends BimpObject
                     if ($with_type) {
                         $html .= 'Client: ';
                     }
-                    $html .= $this->displayData('id_client', 'nom_url');
+                    $html .= $this->displayData('id_client', 'nom_url', false);
                     break;
 
                 case self::BE_PLACE_ENTREPOT:
@@ -167,6 +199,25 @@ class BE_Place extends BimpObject
                         $html .= 'Entrepôt: ';
                     }
                     $html .= $this->displayData('id_entrepot', 'nom_url');
+                    if ($with_type) {
+                        switch ($type) {
+                            case self::BE_PLACE_PRESENTATION:
+                                $html .= ' (Présentation)';
+                                break;
+                            case self::BE_PLACE_VOL:
+                                $html .= ' (Vol)';
+                                break;
+                            case self::BE_PLACE_SAV:
+                                $html .= ' (SAV)';
+                                break;
+                            case self::BE_PLACE_PRET:
+                                $html .= ' (Prêt)';
+                                break;
+                            case self::BE_PLACE_INTERNE:
+                                $html .= ' (Utilisation interne)';
+                                break;
+                        }
+                    }
                     break;
 
                 case self::BE_PLACE_USER:
@@ -185,7 +236,107 @@ class BE_Place extends BimpObject
         return $html;
     }
 
-    // Overrides: 
+    public function displayOrigin()
+    {
+        if ($this->getData('origin') && (int) $this->getData('id_origin') && array_key_exists($this->getData('origin'), self::$origins)) {
+            switch ($this->getData('origin')) {
+                case 'vente_caisse':
+                    $vente = BimpCache::getBimpObjectInstance('bimpcaisse', 'BC_Vente', (int) $this->getData('id_origin'));
+                    if (BimpObject::objectLoaded($vente)) {
+                        return $vente->getNomUrl(1, 0, 1, 'default');
+                    } else {
+                        return BimpRender::renderAlerts('La vente d\'ID ' . $this->getData('id_origin') . ' n\'existe plus', 'danger');
+                    }
+
+                    break;
+
+                case 'order_supplier':
+                    $comm = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn', (int) $this->getData('id_origin'));
+                    if (BimpObject::objectLoaded($comm)) {
+                        return $comm->getNomUrl(1, 1, 1, 'full');
+                    } else {
+                        return BimpRender::renderAlerts('La commande fournisseur d\'ID ' . $this->getData('id_origin') . ' n\'existe plus', 'danger');
+                    }
+                    break;
+
+                case 'commande':
+                    $comm = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $this->getData('id_origin'));
+                    if (BimpObject::objectLoaded($comm)) {
+                        return $comm->getNomUrl(1, 1, 1, 'full');
+                    } else {
+                        return BimpRender::renderAlerts('La commande d\'ID ' . $this->getData('id_origin') . ' n\'existe plus', 'danger');
+                    }
+                    break;
+
+                case 'facture':
+                    $fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $this->getData('id_origin'));
+                    if (BimpObject::objectLoaded($fac)) {
+                        return $fac->getNomUrl(1, 1, 1, 'full');
+                    } else {
+                        return BimpRender::renderAlerts('La facture d\'ID ' . $this->getData('id_origin') . ' n\'existe plus', 'danger');
+                    }
+                    break;
+
+                case 'sav':
+                    $sav = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SAV', (int) $this->getData('id_origin'));
+                    if (BimpObject::objectLoaded($sav)) {
+                        return $sav->getNomUrl(1, 1, 1, 'default');
+                    } else {
+                        return BimpRender::renderAlerts('Le SAV d\'ID ' . $this->getData('id_origin') . ' n\'existe plus', 'danger');
+                    }
+                    break;
+
+                case 'transfert':
+                    $transfert = BimpCache::getBimpObjectInstance('bimptransfer', 'Transfer', (int) $this->getData('id_origin'));
+                    if (BimpObject::objectLoaded($transfert)) {
+                        return $transfert->getNomUrl(1, 0, 1, 'default');
+                    } else {
+                        return BimpRender::renderAlerts('Le transfert d\'ID ' . $this->getData('id_origin') . ' n\'existe plus', 'danger');
+                    }
+                    break;
+
+                case 'user':
+                    $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->getData('id_origin'));
+                    if (BimpObject::objectLoaded($user)) {
+                        return $user->getNomUrl(1, 0, 1, 'default');
+                    } else {
+                        return BimpRender::renderAlerts('L\'utilisateur d\'ID ' . $this->getData('id_origin') . ' n\'existe plus', 'danger');
+                    }
+                    break;
+
+                case 'societe':
+                    $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', (int) $this->getData('id_origin'));
+                    if (BimpObject::objectLoaded($soc)) {
+                        return $soc->getNomUrl(1, 0, 1, 'default');
+                    } else {
+                        return BimpRender::renderAlerts('La société d\'ID ' . $this->getData('id_origin') . ' n\'existe plus', 'danger');
+                    }
+                    break;
+
+                case 'inventory':
+                    $inv = BimpCache::getBimpObjectInstance('bimplogistique', 'Inventory', (int) $this->getData('id_origin'));
+                    if (BimpObject::objectLoaded($inv)) {
+                        return $inv->getNomUrl(1, 1, 1, 'default');
+                    } else {
+                        return BimpRender::renderAlerts('L\'inventaire d\'ID ' . $this->getData('id_origin') . ' n\'existe plus', 'danger');
+                    }
+                    break;
+
+                case 'pret':
+                    $pret = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_Pret', (int) $this->getData('id_origin'));
+                    if (BimpObject::objectLoaded($pret)) {
+                        return $pret->getNomUrl(1, 1, 1, 'default');
+                    } else {
+                        return BimpRender::renderAlerts('Le prêt d\'ID ' . $this->getData('id_origin') . ' n\'existe plus', 'danger');
+                    }
+                    break;
+            }
+        }
+
+        return '';
+    }
+
+    // Overrides:
 
     public function validate()
     {

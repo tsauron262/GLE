@@ -429,7 +429,7 @@ class BR_reservationShipment extends BimpObject
                     }
                 }
                 $id_equipment = (int) $this->getData('id_equipment');
-                $errors = array_merge($errors, $reservation->setNewStatus(250, $modif_qty, ($id_equipment ? $id_equipment : null)));
+                $errors = BimpTools::merge_array($errors, $reservation->setNewStatus(250, $modif_qty, ($id_equipment ? $id_equipment : null)));
             } else {
                 $errors[] = 'Aucun produit disponible trouvé';
                 $this->updateField('qty', (int) $this->getData('qty') - (int) $modif_qty);
@@ -462,7 +462,7 @@ class BR_reservationShipment extends BimpObject
                             return $errors;
                         }
                     }
-                    $errors = array_merge($errors, $reservation->setNewStatus(200, $modif_qty, null));
+                    $errors = BimpTools::merge_array($errors, $reservation->setNewStatus(200, $modif_qty, null));
                 } else {
                     $errors[] = 'Aucun produit pouvant être retiré de l\'expédition trouvé';
                     $this->updateField('qty', (int) $this->getData('qty') + (int) $modif_qty);

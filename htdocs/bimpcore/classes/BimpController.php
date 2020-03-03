@@ -69,7 +69,7 @@ class BimpController
         $this->config = new BimpConfig($dir, $this->controller, $this);
 
         if ($this->config->errors) {
-            $this->errors = array_merge($this->errors, $this->config->errors);
+            $this->errors = BimpTools::merge_array($this->errors, $this->config->errors);
         }
 
         $this->addJsFile('/bimpcore/views/js/controller.js');
@@ -1200,9 +1200,11 @@ class BimpController
                         $field = new BC_Field($object, $field_name, true);
                         $field->name_prefix = $field_prefix;
                         $field->display_card_mode = 'visible';
-                        if (($field->params['type'] === 'id_object' || ($field->params['type'] === 'items_list' && $field->params['items_data_type'] === 'id_object')) &&
-                                $field->params['create_form']) {
-                            $html .= BC_Form::renderCreateObjectButton($object, $form_id, $field->params['object'], $field_prefix . $field_name, $field->params['create_form'], $field->params['create_form_values'], $field->params['create_form_label'], true);
+                        if ($field->params['type'] === 'id_object' || ($field->params['type'] === 'items_list' && $field->params['items_data_type'] === 'id_object')){
+                            if($field->params['create_form'])
+                                $html .= BC_Form::renderLoadFormObjectButton($object, $form_id, $field->params['object'], $field_prefix . $field_name, $field->params['create_form'], $field->params['create_form_values'], $field->params['create_form_label'], true);
+                            if($field->params['edit_form'])
+                                $html .= BC_Form::renderLoadFormObjectButton($object, $form_id, $field->params['object'], $field_prefix . $field_name, $field->params['edit_form'], $field->params['edit_form_values'], $field->params['edit_form_label'], true, null, '', -1);
                         }
                         $html .= $field->renderInput();
                         unset($field);
@@ -1287,6 +1289,7 @@ class BimpController
         $rows_html = '';
         $pagination_html = '';
         $filters_panel_html = '';
+        $active_filters_html = '';
         $thead_html = '';
         $colspan = 0;
 
@@ -1307,11 +1310,11 @@ class BimpController
         }
 
         if (!count($errors)) {
-            if ($full_reload) {
-                if (isset($_POST['filters_panel_values'])) {
-                    unset($_POST['filters_panel_values']);
-                }
-            }
+//            if ($full_reload) {
+//                if (isset($_POST['filters_panel_values'])) {
+//                    unset($_POST['filters_panel_values']);
+//                }
+//            }
             $object = BimpObject::getInstance($module, $object_name);
             $list = new BC_ListTable($object, $list_name, 1, $id_parent);
             $modal_format = $list->params['modal_format'];
@@ -1327,6 +1330,7 @@ class BimpController
             $rows_html = $list->renderRows();
             $pagination_html = $list->renderPagination();
             $filters_panel_html = $list->renderFiltersPanel();
+            $active_filters_html = $list->renderActiveFilters(true);
 
             if ($full_reload) {
                 $thead_html .= $list->renderHeaderRow();
@@ -1347,14 +1351,15 @@ class BimpController
         }
 
         return array(
-            'errors'             => $errors,
-            'rows_html'          => $rows_html,
-            'pagination_html'    => $pagination_html,
-            'filters_panel_html' => $filters_panel_html,
-            'thead_html'         => $thead_html,
-            'list_id'            => $list_id,
-            'colspan'            => $colspan,
-            'request_id'         => BimpTools::getValue('request_id', 0)
+            'errors'              => $errors,
+            'rows_html'           => $rows_html,
+            'pagination_html'     => $pagination_html,
+            'filters_panel_html'  => $filters_panel_html,
+            'active_filters_html' => $active_filters_html,
+            'thead_html'          => $thead_html,
+            'list_id'             => $list_id,
+            'colspan'             => $colspan,
+            'request_id'          => BimpTools::getValue('request_id', 0)
         );
     }
 
@@ -1969,7 +1974,7 @@ class BimpController
                 }
 
                 if (count($asso_errors)) {
-                    $errors = array_merge($errors, $asso_errors);
+                    $errors = BimpTools::merge_array($errors, $asso_errors);
                 } else {
                     $done[] = $i;
                 }
@@ -2186,7 +2191,7 @@ class BimpController
 
         $html = $bimp_fixe_tabs->render(true);
 
-        $errors = array_merge($bimp_fixe_tabs->errors, array(/* ici recup erreur global ou message genre application ferme dans 10min */));
+        $errors = BimpTools::merge_array($bimp_fixe_tabs->errors, array(/* ici recup erreur global ou message genre application ferme dans 10min */));
         $returnHtml = "";
         $hashCash = 'fixeTabsHtml' . $_POST['randomId']; //Pour ne regardé que sur l'ongelt actuel
         session_start();

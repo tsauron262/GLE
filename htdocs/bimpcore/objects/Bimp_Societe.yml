@@ -42,7 +42,6 @@ fields:
                 0: Clos
                 1: Ouvert
         default_value: 1
-        
     origine:
         label: Origine
         dol_extra_field: 1
@@ -227,6 +226,30 @@ fields:
         type: string
         dol_extra_field: 1
         
+    secteuractivite:
+        label: Secteur d'activité
+        type: int
+        values: 
+            callback: 
+               method: getListExtrafield
+               params:
+                   - secteuractivite
+                   - societe
+        dol_extra_field: 1
+        default_value: 0
+    marche:
+        label: Marché potentiel
+        type: items_list
+        items_data_type: int
+        values: 
+            callback: 
+               method: getListExtrafield
+               params:
+                   - marche
+                   - societe
+        dol_extra_field: 1
+        default_value: 0
+        
 #    *** Champs non gérés: ***
 #    entity
 #    ref_ext
@@ -383,6 +406,7 @@ forms:
             - field: fax
             - field: skype
             - field: url
+            - field: secteuractivite
             
 lists:
     default: 
@@ -488,6 +512,11 @@ lists_cols:
         field: note_private
     note_public:
         field: note_public
+    commercial:
+        label: Commercial
+        custom: 1
+        value: 
+            callback: displayCommercials
         
         
 filters_panels: 
@@ -552,7 +581,11 @@ filters_panels:
             note_private:
                 field: note_private
             note_public:
-                field: note_public  
+                field: note_public 
+            secteuractivite:
+                field: secteuractivite
+            marche:
+                field: marche
 cards: 
     default: 
         type: societe_card

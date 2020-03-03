@@ -13,7 +13,7 @@ class Interfacevalidate extends BimpCommTriggers
         $object_name = '';
         $action_name = '';
 
-        $bimpObject = $this->getBimpCommObject($action, $object, $object_name, $action_name);
+        $bimpObject = $this->getBimpCommObject($action, $object, $object_name, $action_name, $errors);
 
         if (BimpObject::objectLoaded($bimpObject)) {
             switch ($action_name) {
@@ -33,9 +33,13 @@ class Interfacevalidate extends BimpCommTriggers
             }
 
             if (count($errors)) {
-                setEventMessages(BimpTools::getMsgFromArray($errors), null, 'errors');
+                // Attention toute la remontée des erreurs est basée là-dessus (pour les BimpComm): 
+                setEventMessages(BimpTools::getMsgFromArray($errors, BimpTools::ucfirst($bimpObject->getLabel('the')) . ' ne peut pas être validé' . $bimpObject->e()), null, 'errors');
                 return -1;
             }
+        } elseif (count($errors)) {
+            setEventMessages(BimpTools::getMsgFromArray($errors), null, 'errors');
+            return -1;
         }
 
         return 0;

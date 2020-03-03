@@ -117,8 +117,8 @@ class BS_Note extends BimpObject
                         $client = $this->getInstance('bimpinterfaceclient', 'BIC_UserClient', $parent->getData('id_user_client'));
                     }
                     $liste_destinataires = Array($client->getData('email'));
-                    $liste_destinataires = array_merge($liste_destinataires, $client->get_dest('admin'));
-                    $liste_destinataires = array_merge($liste_destinataires, $client->get_dest('commerciaux'));
+                    $liste_destinataires = BimpTools::merge_array($liste_destinataires, $client->get_dest('admin'));
+                    $liste_destinataires = BimpTools::merge_array($liste_destinataires, $client->get_dest('commerciaux'));
                     
                     mailSyn2('BIMP-CLIENT : Note sur votre ticket', implode(', ', $liste_destinataires), 'noreply@bimp.fr', 'Une note a été créée sur votre ticket support : ' . $parent->getData('ticket_number'));
                     

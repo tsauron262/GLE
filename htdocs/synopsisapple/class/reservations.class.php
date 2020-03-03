@@ -514,18 +514,17 @@ Merci d’avoir pris rendez-vous dans notre Centre de Services Agrée Apple, nou
 Afin de préparer au mieux votre prise en charge, nous souhaitons attirer votre attention sur les points suivants :
 - Vous devez sauvegarder vos données car nous serons peut-être amenés à les effacer de votre appareil.
 
+- Vous devez désactiver la fonction « localiser » dans le menu iCloud avec votre mot de passe.
+
 - Le délai de traitement des réparations est habituellement de 7 jours.
 
 
 Conditions particulières aux iPhones
 
-- Vous devez désactiver la fonction « localiser mon iPhone » dans le menu iCloud de votre téléphone avec votre mot de passe iCloud.
 
 - Pour certains types de pannes sous garantie, un envoi de l’iPhone dans un centre Apple peut être nécessaire, entrainant un délai plus long (jusqu’à 10 jours ouvrés), dans ce cas un téléphone de prêt est possible (sous réserve de disponibilité). Si cela vous intéresse, merci de vous munir d’un chèque de caution.
 
-La plupart de nos centres peuvent effectuer une réparation de votre écran d’iPhone sous 24h00. Pour savoir si votre centre SAV est éligible à ce type de réparation et qu’une plage de rendez-vous est disponible, consulter notre site à l’adresse suivante :
-
-<a href=\"https://www.bimp.fr/tarifs-sav/\">https://www.bimp.fr/tarifs-sav/</a>
+La plupart de nos centres peuvent effectuer une réparation de votre écran d’iPhone sous 24h00. Pour savoir si votre centre SAV est éligible à ce type de réparation consultez nottre site internet.
 
 Nous proposons des services de sauvegarde des données, de protection de votre téléphone… venez nous rencontrer pour découvrir tous les services que nous pouvons vous proposer.
 Votre satisfaction est notre objectif, nous mettrons tout en œuvre pour vous satisfaire et réduire les délais d’immobilisation de votre produit Apple.
@@ -533,7 +532,12 @@ Bien cordialement
 L’équipe BIMP";
             $mailsCli = $customer->email;
             if ($mailsCli && $mailsCli != ""){
-                if(mailSyn2("RDV SAV BIMP", $mailsCli, '', str_replace("\n", "<br/>", $messageClient))) {
+                require_once(DOL_DOCUMENT_ROOT."/bimpsupport/centre.inc.php");
+                global $tabCentre;
+                $centreData = isset($tabCentre[$centre])? $tabCentre[$centre] : array();
+                $fromMail = "SAV BIMP<" . ($centreData[1] ? $centreData[1] : 'savbimp@bimp.fr') . ">";
+                
+                if(mailSyn2("RDV SAV BIMP", $mailsCli, $fromMail, str_replace("\n", "<br/>", $messageClient))) {
                     if ($this->display_debug) {
                         echo '[OK].<br/>';
                     }

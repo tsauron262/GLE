@@ -28,7 +28,7 @@
             <data name="repairFlags" required="0">
                 <datas>
                     <data name="requestReviewByApple" required="0"></data>
-                    <data name="markComplete" required="0"></data>
+                    <!--<data name="markComplete" required="0"></data>-->
                 </datas>
             </data>
             

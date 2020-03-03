@@ -232,6 +232,7 @@ filters_panel:
               items: 
                   1: OUI
                   0: NON
+              exclude_btn: 0
             - field: id_facture
               label: Facture fournisseur
             - field: total_ht
@@ -369,7 +370,6 @@ cards:
             - label: Infos
               field: info
 
-       
 searches:
     default: 
         fields_search: 

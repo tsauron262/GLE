@@ -1713,7 +1713,7 @@ class BF_Demande extends BimpObject
                         $fac_warnings = array();
                         $fac_errors = $facture->create($fac_warnings, true);
                         if (count($fac_warnings)) {
-                            $warnings = array_merge($warnings, $fac_warnings);
+                            $warnings = BimpTools::merge_array($warnings, $fac_warnings);
                         }
                     }
                     if (count($fac_errors)) {

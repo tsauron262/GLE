@@ -19,7 +19,7 @@ class BC_List extends BC_Panel
     public $final_filters = array();
     public $final_joins = array();
 
-    public function __construct(BimpObject $object, $path, $list_name = 'default', $level = 1, $id_parent = null, $title = null, $icon = null)
+    public function __construct(BimpObject $object, $path, $list_name = 'default', $level = 1, $id_parent = null, $title = null, $icon = null, $id_config = null)
     {
         global $current_bc;
         if (!is_object($current_bc)) {
@@ -52,6 +52,7 @@ class BC_List extends BC_Panel
         $this->params_def['filters_panel_values'] = array('data_type' => 'array', 'compile' => true, 'default' => array());
         $this->params_def['filters_panel_open'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['id_default_filters'] = array('data_type' => 'id', 'default' => 0);
+        $this->params_def['display_active_filters'] = array('data_type' => 'bool', 'default' => 1);
 
         $full_reload = BimpTools::getValue('full_reload', 0);
 
@@ -95,17 +96,21 @@ class BC_List extends BC_Panel
             }
 
             if ($this->params['configurable']) {
-                global $user;
-
-                $id_config = BimpTools::getValue('param_id_config', 0);
-                if ((int) $id_config) {
+                if (!is_null($id_config) && (int) $id_config) {
                     $this->userConfig = BimpCache::getBimpObjectInstance('bimpcore', 'ListConfig', (int) $id_config);
-                    if (BimpObject::objectLoaded($this->userConfig)) {
-                        $this->userConfig->setAsCurrent();
+                } elseif (BimpTools::isSubmit('param_id_config')) {
+                    $id_config = BimpTools::getValue('param_id_config', 0);
+                    if ((int) $id_config) {
+                        $this->userConfig = BimpCache::getBimpObjectInstance('bimpcore', 'ListConfig', (int) $id_config);
+                        if (BimpObject::objectLoaded($this->userConfig)) {
+                            $this->userConfig->setAsCurrent();
+                            $full_reload = true;
+                        }
                     }
                 }
 
                 if (!BimpObject::objectLoaded($this->userConfig)) {
+                    global $user;
                     BimpObject::loadClass('bimpcore', 'ListConfig');
                     $this->userConfig = ListConfig::getUserCurrentConfig($user->id, $this->object, static::$type, $this->name);
                 }
@@ -153,6 +158,7 @@ class BC_List extends BC_Panel
                         $this->params['id_default_filters'] = $id_default_filters;
                     }
 
+                    $this->params['display_active_filters'] = (int) $this->userConfig->getData('active_filters');
                     $this->params['total_row'] = (int) $this->userConfig->getData('total_row');
                 }
             }
@@ -231,7 +237,7 @@ class BC_List extends BC_Panel
                 $this->addError('Filtre invalide pour l\'association "' . $association . '"');
             }
         } else {
-            $this->errors = array_merge($this->errors, $bimpAsso->errors);
+            $this->errors = BimpTools::merge_array($this->errors, $bimpAsso->errors);
         }
     }
 
@@ -246,7 +252,7 @@ class BC_List extends BC_Panel
                 'id_associate' => (int) $id_associate
             );
         } else {
-            $this->errors = array_merge($this->errors, $bimpAsso->errors);
+            $this->errors = BimpTools::merge_array($this->errors, $bimpAsso->errors);
         }
     }
 
@@ -374,8 +380,13 @@ class BC_List extends BC_Panel
 
         $this->bc_filtersPanel = new BC_FiltersPanel($this->object, static::$type, $this->name, $this->identifier, $this->params['filters_panel']);
 
-        if (BimpTools::isSubmit('filters_panel_values') && !BimpTools::getValue('full_reload', 0)) {
+        if (BimpTools::isSubmit('filters_panel_values') && (!BimpTools::getValue('param_id_config', 0) || !(int) $this->params['id_default_filters'])) {
             $values = array(
+                'fields'   => array(),
+                'children' => array()
+            );
+
+            $excluded_values = array(
                 'fields'   => array(),
                 'children' => array()
             );
@@ -388,6 +399,9 @@ class BC_List extends BC_Panel
                         }
                         if (isset($filter['values'])) {
                             $values['fields'][$field_name] = $filter['values'];
+                        }
+                        if (isset($filter['excluded_values'])) {
+                            $excluded_values['fields'][$field_name] = $filter['excluded_values'];
                         }
                         continue 2;
                     }
@@ -407,13 +421,16 @@ class BC_List extends BC_Panel
                             if (isset($filter['values'])) {
                                 $values['children'][$child][$field_name] = $filter['values'];
                             }
+                            if (isset($filter['excluded_values'])) {
+                                $excluded_values['children'][$child][$field_name] = $filter['excluded_values'];
+                            }
                             continue 2;
                         }
                     }
                 }
             }
 
-            $this->bc_filtersPanel->setFiltersValues($values);
+            $this->bc_filtersPanel->setFiltersValues($values, $excluded_values);
         } elseif ((int) $this->params['id_default_filters']) {
             $this->bc_filtersPanel->loadSavedValues((int) $this->params['id_default_filters']);
         } elseif (!empty($this->params['filters_panel_values'])) {
@@ -427,7 +444,6 @@ class BC_List extends BC_Panel
     {
         if (method_exists($this->object, "beforeListFetchItems"))
             $this->object->beforeListFetchItems($this);
-
 
         $this->fetchFiltersPanelValues();
 
@@ -501,7 +517,7 @@ class BC_List extends BC_Panel
                         $sql .= BimpTools::getSqlWhere($bimp_asso->getSqlFilters($id_object, $id_associate, $alias));
                         $this->mergeFilter($this->object->getPrimary(), array($asso_filter['type'] => $sql));
                     } else {
-                        $this->errors[] = array_merge($this->errors, $bimp_asso->errors);
+                        $this->errors[] = BimpTools::merge_array($this->errors, $bimp_asso->errors);
                         $this->filters[$this->object->getPrimary()] = 0;
                     }
                 }
@@ -716,6 +732,28 @@ class BC_List extends BC_Panel
         }
 
         return $this->bc_filtersPanel->renderHtml();
+    }
+
+    public function renderActiveFilters($content_only = false)
+    {
+        $html = '';
+        $filters_html = '';
+
+        if ((int) $this->params['display_active_filters']) {
+            if (is_object($this->bc_filtersPanel)) {
+                $filters_html = $this->bc_filtersPanel->renderActiveFilters();
+            }
+        }
+
+        if (!$content_only) {
+            $html .= '<div class="list_active_filters"' . ($filters_html ? '' : ' style="display: none"') . '>';
+            $html .= $filters_html;
+            $html .= '</div>';
+        } else {
+            return $filters_html;
+        }
+
+        return $html;
     }
 
     public function getHeaderButtons()

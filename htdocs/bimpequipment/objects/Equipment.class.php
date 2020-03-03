@@ -356,6 +356,17 @@ class Equipment extends BimpObject
         return 0;
     }
 
+    public function showProductInput()
+    {
+        if ($this->isLoaded()) {
+            if ((int) $this->getData('id_product')) {
+                return 0;
+            }
+        }
+
+        return 1;
+    }
+
     // Getters params: 
 
     public function getDefaultListExtraBtn()
@@ -520,10 +531,11 @@ class Equipment extends BimpObject
         }
     }
 
-    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array())
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
     {
         switch ($field_name) {
             case 'in_package':
+                // Bouton Exclure désactivé
                 if (empty($values) || (in_array(0, $values) && in_array(1, $values))) {
                     // On ne filtre pas...
                     break;
@@ -540,6 +552,7 @@ class Equipment extends BimpObject
                 break;
 
             case 'place_date_end':
+                // Bouton Exclure désactivé
                 $joins['places'] = array(
                     'table' => 'be_equipment_place',
                     'on'    => 'places.id_equipment = a.id',
@@ -564,6 +577,8 @@ class Equipment extends BimpObject
                 }
                 break;
         }
+
+        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
     }
 
     // Getters array: 
@@ -948,6 +963,49 @@ class Equipment extends BimpObject
         return $label;
     }
 
+    public function displayPackage($display_name = 'default', $with_remove_button = true, $no_html = false, $display_input_value = true)
+    {
+        if ((int) $this->getData(('id_package'))) {
+            $html = $this->displayData('id_package', $display_name, $display_input_value, $no_html);
+
+            if ($this->isLoaded() && $with_remove_button) {
+                $package = BimpCache::getBimpObjectInstance('bimpequipment', 'BE_Package', (int) $this->getData('id_package'));
+                if (BimpObject::objectLoaded($package)) {
+                    $html .= '<div style="margin-top: 15px; text-align: right">';
+
+                    if ($package->isActionAllowed('moveEquipment') && $package->canSetAction('moveEquipment')) {
+                        $onclick = $package->getJsActionOnclick('moveEquipment', array(
+                            'id_equipment' => (int) $this->id
+                                ), array(
+                            'form_name'        => 'move_equipment',
+                            'success_callback' => 'function() {triggerObjectChange(\'bimpequipment\', \'Equipment\', ' . (int) $this->id . ')}'
+                        ));
+                        $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+                        $html .= BimpRender::renderIcon('fas_arrow-circle-right', 'iconLeft') . 'Changer de package';
+                        $html .= '</span>';
+                    }
+                    if ($package->isActionAllowed('removeEquipment') && $package->canSetAction('removeEquipment')) {
+                        $onclick = $package->getJsActionOnclick('removeEquipment', array(
+                            'id_equipment' => (int) $this->id
+                                ), array(
+                            'form_name'        => 'remove_equipment',
+                            'success_callback' => 'function() {triggerObjectChange(\'bimpequipment\', \'Equipment\', ' . (int) $this->id . ')}'
+                        ));
+                        $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+                        $html .= BimpRender::renderIcon('fas_times', 'iconLeft') . 'Retirer du package';
+                        $html .= '</span>';
+                    }
+
+                    $html .= '</div>';
+                }
+            }
+
+            return $html;
+        }
+
+        return '';
+    }
+
     // Traitements: 
 
     public function onNewPlace()
@@ -969,93 +1027,43 @@ class Equipment extends BimpObject
                 }
 
                 $this->updateField('ref_immo', $ref_immo);
+                $this->updateField('date_immo', date('Y-m-d'));
             }
 
-            $product = $this->getChildObject('product');
+            $product = $this->getChildObject('bimp_product');
+
             if (!defined('DONT_CHECK_SERIAL') && BimpObject::objectLoaded($product)) {
-                global $user;
+                $origin = $new_place->getData('origin');
+                $id_origin = (int) $new_place->getData('id_origin');
 
-                $prev_place_element = '';
-                $prev_place_id_element = null;
-
-                $new_place_element = '';
-                $new_place_id_element = null;
-
+                if (!$origin || !(int) $id_origin) {
+                    global $user;
+                    $origin = 'user';
+                    $id_origin = (int) $user->id;
+                }
 
                 $codemove = $new_place->getData('code_mvt');
                 if (is_null($codemove) || !$codemove) {
                     $codemove = 'EQ' . (int) $this->id . '_PLACE' . (int) $new_place->id;
                 }
+
                 $new_place_infos = $new_place->getData('infos');
-                $label = ($new_place_infos ? $new_place_infos . ' - ' : '') . 'Produit "' . $product->ref . '" - serial: "' . $this->getData('serial') . '"';
-
-                switch ((int) $new_place->getData('type')) {
-                    case BE_Place::BE_PLACE_CLIENT:
-                        $new_place_element = 'societe';
-                        $new_place_id_element = (int) $new_place->getData('id_client');
-                        break;
-
-                    case BE_Place::BE_PLACE_ENTREPOT:
-                    case BE_Place::BE_PLACE_PRESENTATION:
-                    case BE_Place::BE_PLACE_VOL:
-                    case BE_Place::BE_PLACE_PRET:
-                    case BE_Place::BE_PLACE_SAV:
-                    case BE_Place::BE_PLACE_INTERNE:
-                        $new_place_element = 'entrepot';
-                        $new_place_id_element = (int) $new_place->getData('id_entrepot');
-                        break;
-
-                    case BE_Place::BE_PLACE_USER:
-                        $new_place_element = 'user';
-                        $new_place_id_element = (int) $new_place->getData('id_user');
-                        break;
-                }
+                $label = ($new_place_infos ? $new_place_infos . ' - ' : '') . 'Produit "' . $product->getRef() . '" - serial: "' . $this->getData('serial') . '"';
 
                 if (isset($items[1])) {
                     $prev_place = BimpCache::getBimpObjectInstance($this->module, 'BE_Place', $items[1]['id']);
-                    switch ((int) $prev_place->getData('type')) {
-                        case BE_Place::BE_PLACE_CLIENT:
-                            $prev_place_element = 'societe';
-                            $prev_place_id_element = (int) $prev_place->getData('id_client');
-                            break;
-
-                        case BE_Place::BE_PLACE_ENTREPOT:
-                        case BE_Place::BE_PLACE_PRESENTATION:
-                        case BE_Place::BE_PLACE_VOL:
-                        case BE_Place::BE_PLACE_PRET:
-                        case BE_Place::BE_PLACE_SAV:
-                        case BE_Place::BE_PLACE_INTERNE:
-                            $prev_place_element = 'entrepot';
-                            $prev_place_id_element = (int) $prev_place->getData('id_entrepot');
-                            if ((int) $prev_place->getData('type') === BE_Place::BE_PLACE_ENTREPOT) {
-                                if ($product->correct_stock($user, $prev_place_id_element, 1, 1, $label, 0, $codemove, $new_place_element, $new_place_id_element) <= 0) {
-                                    $msg = 'Echec de la mise à jour du stock pour le produit "' . $product->ref . ' - ' . $product->label . '" (ID: ' . $product->id . ')';
-                                    dol_syslog('[ERREUR STOCK] ' . $msg . ' - Nouvel emplacement équipement #' . $this->id . ' - Produit #' . $product->id . ' - Qté à retirer: 1 - Entrepôt #' . $prev_place_id_element, LOG_ERR);
-                                }
-                            }
-                            break;
-
-                        case BE_Place::BE_PLACE_USER:
-                            $prev_place_element = 'user';
-                            $prev_place_id_element = (int) $prev_place->getData('id_user');
-                            break;
-                    }
-                } else {
-                    $prev_place_element = $this->getData('origin_element');
-                    if (in_array($prev_place_element, array(1, 2))) {
-                        $prev_place_element = 'societe';
-                    }
-                    $prev_place_id_element = $this->getData('origin_id_element');
-                    if (!$prev_place_id_element) {
-                        $prev_place_id_element = null;
+                    if (BimpObject::objectLoaded($prev_place)) {
+                        if ((int) $prev_place->getData('type') === BE_Place::BE_PLACE_ENTREPOT && (int) $prev_place->getData('id_entrepot')) {
+                            $product->correctStocks((int) $prev_place->getData('id_entrepot'), 1, Bimp_Product::STOCK_OUT, $codemove, $label . ' - Emplacement de destination: ' . $new_place->getPlaceName(), $origin, $id_origin);
+                        }
                     }
                 }
 
-                if ((int) $new_place->getData('type') === BE_Place::BE_PLACE_ENTREPOT) {
-                    if ($product->correct_stock($user, $new_place_id_element, 1, 0, $label, 0, $codemove, $prev_place_element, $prev_place_id_element) <= 0) {
-                        $msg = 'Echec de la mise à jour du stock pour le produit "' . $product->ref . ' - ' . $product->label . '" (ID: ' . $product->id . ')';
-                        dol_syslog('[ERREUR STOCK] ' . $msg . ' - Nouvel emplacement équipement #' . $this->id . ' - Produit #' . $product->id . ' - Qté à ajouter: 1 - Entrepôt #' . $new_place_id_element, LOG_ERR);
+                if ((int) $new_place->getData('type') === BE_Place::BE_PLACE_ENTREPOT && (int) $new_place->getData('id_entrepot')) {
+                    if (BimpObject::objectLoaded($prev_place)) {
+                        $label .= ' - Emplacement d\'origine: ' . $prev_place->getPlaceName();
                     }
+                    $product->correctStocks((int) $new_place->getData('id_entrepot'), 1, Bimp_Product::STOCK_IN, $codemove, $label, $origin, $id_origin);
                 }
             }
 
@@ -1278,30 +1286,33 @@ class Equipment extends BimpObject
 
         $package_dest = BimpCache::getBimpObjectInstance('bimpequipment', 'BE_Package', $id_package);
 
-        if (!$package_dest->isLoaded())
-            return array('l\'id du package est inconnu');
+        if (!$package_dest->isLoaded()) {
+            return array('Le package d\'ID ' . $id_package . ' n\'existe pas');
+        }
 
         if ($force == 1 and $this->getData('id_package'))
             $this->updateField('id_package', 0);
 
+
         if ($date == null)
             $date = date('Y-m-d H:i:s');
 
-        $errors = array_merge($errors, $package_dest->addEquipment($this->id, $code_mvt, $stock_label, $date, $warnings, 1));
+        $errors = BimpTools::merge_array($errors, $package_dest->addEquipment($this->id, $code_mvt, $stock_label, $date, $warnings, 1));
 
         return $errors;
     }
 
-    public function moveToPlace($type, $id, $code_mvt, $stock_label, $force = 0, $date = null)
+    public function moveToPlace($type, $id, $code_mvt, $stock_label, $force = 0, $date = null, $origin = '', $id_origin = 0, $id_contact = 0)
     {
         if ($force == 1 and 0 < (int) $this->getData('id_package')) {
             $this->updateField('id_package', 0);
             $this->addNote('Sortie du package pour déplacement automatique');
-            $stock_label .= ' Sortie du package pour déplacement automatique';
+            $stock_label .= ' - Sortie du package pour déplacement automatique';
         }
 
-        if ($date == null)
+        if (is_null($date) || !$date) {
             $date = date('Y-m-d H:i:s');
+        }
 
         $place = BimpObject::getInstance($this->module, 'BE_Place');
 
@@ -1310,16 +1321,27 @@ class Equipment extends BimpObject
             'type'         => $type,
             'date'         => $date,
             'infos'        => $stock_label,
-            'code_mvt'     => $code_mvt
+            'code_mvt'     => $code_mvt,
+            'origin'       => $origin,
+            'id_origin'    => $id_origin
         );
-        if (in_array($type, BE_Place::$entrepot_types))
-            $data['id_entrepot'] = $id;
-        elseif ($type == BE_Place::BE_PLACE_CLIENT)
-            $data['id_client'] = $id;
 
-        $errors = array_merge($errors, $place->validateArray($data));
-        if (!count($errors))
-            $errors = array_merge($errors, $place->create());
+        if (in_array($type, BE_Place::$entrepot_types)) {
+            $data['id_entrepot'] = $id;
+        } elseif ($type == BE_Place::BE_PLACE_CLIENT) {
+            $data['id_client'] = $id;
+            $data['id_contact'] = $id_contact;
+        } elseif ($type == BE_Place::BE_PLACE_USER) {
+            $data['id_user'] = $id;
+        }
+
+        $errors = $place->validateArray($data);
+
+        if (!count($errors)) {
+            $warnings = array();
+            $errors = $place->create($warnings, true);
+        }
+
         return $errors;
     }
 
@@ -1350,6 +1372,13 @@ class Equipment extends BimpObject
                         $identifiers['imei'] = $data['device']['identifiers']['imei'];
                     } else {
                         $identifiers['imei'] = 'n/a';
+                    }
+                    
+                    
+                    if (isset($data['device']['productDescription']) && $data['device']['productDescription']) {
+                        $identifiers['productDescription'] = $data['device']['productDescription'];
+                    } else {
+                        $identifiers['productDescription'] = '';
                     }
 
                     if (isset($data['device']['identifiers']['imei2']) && $data['device']['identifiers']['imei2']) {
@@ -1437,7 +1466,7 @@ class Equipment extends BimpObject
         if (!count($errors)) {
             foreach ($data['id_objects'] as $id) {
                 $obj = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $id);
-                $errors = array_merge($errors, $obj->moveToPlaceType($data['place_type'], $idI, 1));
+                $errors = BimpTools::merge_array($errors, $obj->moveToPlaceType($data['place_type'], $idI, 1));
             }
             $success_callback = 'bimp_reloadPage();';
         }
@@ -1460,7 +1489,7 @@ class Equipment extends BimpObject
             $success = "Retiré de l'inventaire " . $idI;
             foreach ($data['id_objects'] as $id) {
                 $obj = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $id);
-                $errors = array_merge($errors, $obj->removeInventaire($idI));
+                $errors = BimpTools::merge_array($errors, $obj->removeInventaire($idI));
             }
             $success_callback = 'bimp_reloadPage();';
         }
@@ -1539,6 +1568,20 @@ class Equipment extends BimpObject
         return parent::validate();
     }
 
+    public function update(&$warnings = array(), $force_update = false)
+    {
+        $init_id_product = (int) $this->getInitData('id_product');
+
+        $errors = parent::update($warnings, $force_update);
+
+        if (!count($errors)) {
+            if (!$init_id_product && (int) $this->getData('id_product')) {
+                // Pour la gestion des stocks: 
+                $this->onNewPlace();
+            }
+        }
+    }
+
     public function delete(&$warnings = array(), $force_delete = false)
     {
         $current_place = $this->getCurrentPlace();
@@ -1555,7 +1598,7 @@ class Equipment extends BimpObject
 
         if (!is_null($current_place) && $current_place->isLoaded()) {
             if ((int) $current_place->getData('type') === BE_Place::BE_PLACE_ENTREPOT) {
-                $product = $this->getChildObject('product');
+                $product = $this->getChildObject('bimp_product');
                 $id_entrepot = (int) $current_place->getData('id_entrepot');
                 $codemove = 'EQ' . $this->id . '_SUPPR';
                 $label = 'Suppression de l\'équipement ' . $this->id . ' - serial: ' . $this->getData('serial');
@@ -1565,11 +1608,16 @@ class Equipment extends BimpObject
         $errors = parent::delete($warnings, $force_delete);
 
         if (is_null($this->id) && $id_entrepot && BimpObject::objectLoaded($product)) {
-            global $user;
-            if ($product->correct_stock($user, $id_entrepot, 1, 1, $label, 0, $codemove, 'entrepot', $id_entrepot) <= 0) {
-                $msg = 'Echec de la mise à jour du stock pour le produit "' . $product->ref . ' - ' . $product->label . '" (ID: ' . $product->id . ')';
-                dol_syslog('[ERREUR STOCK] ' . $msg . ' - Suppression équipement #' . $this->id . ' - Produit #' . $product->id . ' - Qté à retirer: 1 - Entrepôt #' . $id_entrepot, LOG_ERR);
+            if (isset($this->delete_origin) && $this->delete_origin && isset($this->delete_id_origin) && (int) $this->delete_id_origin) {
+                $origin = $this->delete_origin;
+                $id_origin = (int) $this->delete_id_origin;
+            } else {
+                global $user;
+                $origin = 'user';
+                $id_origin = (int) $user->id;
             }
+            
+            $product->correctStocks($id_entrepot, 1, Bimp_Product::STOCK_OUT, $codemove, $label, $origin, $id_origin);
         }
 
         return $errors;

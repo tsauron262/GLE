@@ -36,6 +36,7 @@ class BimpDocumentPDF extends BimpModelPDF
     public $max_line_serials = 50;
     public $annexe_listings = array();
     public static $use_cgv = true;
+    public static $label_prime = "Apport externe";
 
     public function __construct($db)
     {
@@ -903,9 +904,9 @@ class BimpDocumentPDF extends BimpModelPDF
             $html .= ' Aucun escompte pour paiement anticipé ne sera accordé.';
             $html .= "</span>";
             $html .= "</p>";
-        }
 
-        $html .= '<p style="font-size: 6px; font-style: italic">Merci de noter systématiquement le n° de facture sur votre règlement.</p>';
+            $html .= '<p style="font-size: 6px; font-style: italic">Merci de noter systématiquement le n° de facture sur votre règlement.</p>';
+        }
 
         $this->writeContent($html);
     }
@@ -1407,6 +1408,27 @@ class BimpDocumentPDF extends BimpModelPDF
                 }
                 $html .= '</td>';
                 $html .= '</tr>';
+                
+                
+                
+                if(isset($this->object->array_options['options_prime']) && $this->object->array_options['options_prime'] > 0){
+                    $prime = $this->object->array_options['options_prime'];
+
+                    $html .= '<tr>';
+                    $html .= '<td style="background-color: #F0F0F0;">'.static::$label_prime.'</td>';
+                    $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . BimpTools::displayMoneyValue(-$prime, '');
+                    $html .= '</td>';
+                    $html .= '</tr>';
+
+                    $html .= '<tr>';
+                    $html .= '<td style="background-color: #DCDCDC;">Reste à charge</td>';
+                    $html .= '<td style="background-color: #DCDCDC; text-align: right;">' . BimpTools::displayMoneyValue($total_ttc-$prime, '');
+                    if ((int) $this->periodicity) {
+                        $html .= ' / ' . BimpComm::$pdf_periodicity_label_masc[(int) $this->periodicity];
+                    }
+                    $html .= '</td>';
+                    $html .= '</tr>';
+                }
             }
         }
 

@@ -453,12 +453,6 @@ forms:
                   type: text
                   help: Caractères aplhanumériques et tirets seulement
             - custom: 1
-              label: Séparateur
-              input_name: separator
-              input: 
-                  type: text
-              value: ';'
-            - custom: 1
               label: En-têtes
               input_name: headers
               data_type: bool

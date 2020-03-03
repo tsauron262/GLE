@@ -6,6 +6,17 @@ labels:
     name_plur: configurations de liste
     is_female: 1
     
+objects: 
+    default_filter: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: ListFilters
+            id_object: 
+                field_value: id_default_filters
+                
 fields: 
     name: 
         label: Nom
@@ -38,6 +49,8 @@ fields:
     list_type: 
         label: Type de liste
         required: 1
+        values: 
+            array: list_types
         input: 
             type: hidden
             
@@ -103,11 +116,20 @@ fields:
         
     id_default_filters: 
         label: Filtres par défaut
-        type: id
+        type: id_object
+        object: default_filter
         values: 
             array: ownerFilters
         default_value: 0
         depends_on: owner_type,id_group,obj_module,obj_name,list_type,list_name
+        search: 
+            input: 
+                type: search_object
+        
+    active_filters: 
+        label: Afficher les filtres actifs
+        type: bool
+        default_value: 1
         
     search_open: 
         label: Barre de recherche ouverte par défaut
@@ -118,6 +140,16 @@ fields:
         label: Panneau filtres ouvert par défaut
         type: bool
         default_value: 0
+        
+    sheet_name: 
+        label: Nom de la feuille dans les fichiers excel
+        input: 
+            help: Max 30 caractères
+        
+    cols_options: 
+        label: Options des colonnes
+        type: json
+        depends_on: cols
         
 forms: 
     default: 
@@ -162,42 +194,145 @@ forms:
                   callback: hasCols
             - field: total_row
             - field: id_default_filters
+            - field: active_filters
             - field: search_open
               show: 
                   callback: isListSearchable
             - field: filters_open
               show: 
                   callback: hasFiltersPanel
+            - field: sheet_name
+                  
+    cols_options: 
+        rows: 
+            - custom: 1
+              label: Options des colonnes
+              input_name: cols_options
+              data_type: json
+              content: 
+                  callback: renderColsOptionsInput
+              depends_on: cols
+              
+    bulk_csv: 
+        rows: 
+            - custom: 1
+              label: Nom du fichier
+              input_name: file_name
+              required: 1
+              input: 
+                  type: text
+                  help: Caractères aplhanumériques et tirets seulement
+              value: 
+                  callback: getDefaultBulkCsvFileName
+            - custom: 1
+              label: En-têtes
+              input_name: headers
+              data_type: bool
+              input: 
+                  type: toggle
+              value: 1
       
-lists: 
+lists_cols: 
+    module: 
+        field: obj_module
+    obj_name: 
+        field: obj_name
+    list_type: 
+        field: list_type
+    list_name: 
+        field: list_name
+    name:
+        field: name
+    owner: 
+        label: Propriétaire
+        value: 
+            callback: displayOwner
+    owner_nom_url: 
+        label: Propriétaire
+        value: 
+            callback:
+                method: displayOwner
+                params: 
+                    - 1
+    is_default: 
+        label: Utilisation
+        value: 
+            callback: displayUtilisation
+    def_filters: 
+        field: id_default_filters
+            
+filters_panels: 
     default: 
-        title: 
-            callback: getListTitle
-        configurable: 0
+        filters: 
+            - field: obj_module
+            - field: obj_name
+            - field: list_type
+            - field: list_name
+            - field: owner_type
+            - custom: 1
+              label: Utilisateur
+              field: id_user
+              type: user
+            - custom: 1
+              label: Utilisateur (groupes inclus) 
+              field: id_user_with_groups
+              type: user
+            - custom: 1
+              label: Groupe
+              field: id_group
+              type: value
+              input: 
+                  type: search_group
+                
+lists: 
+    base: 
         checkboxes: 1
-        enable_search: 0
-        enable_sort: 0
         bulk_actions:
             - label: supprimer les configurations sélectionnées
               icon: fas_trash-alt
               onclick: deleteSelectedObjects('list_id', $(this))
         sort_field: id
         sort_way: asc
-        n: 0
-        add_form_name: default
-        add_btn_label: Nouvelle configuration
         edit_btn: 1
         edit_form: default
         delete_btn: 1
+        extra_btn: 
+            callback: getListExtraButtons
+                    
+    default: 
+        extends: base
+        title: 
+            callback: getListTitle
+        configurable: 0
+        enable_search: 0
+        enable_sort: 0
+        add_form_name: default
+        add_btn_label: Nouvelle configuration
+        n: 0
         cols: 
             name:
-                field: name
             owner: 
-                label: Propriétaire
-                value: 
-                    callback: displayOwner
             is_default: 
-                label: Utilisation
-                value: 
-                    callback: displayUtilisation
-                
+            
+    globale: 
+        extends: base
+        title: Liste des configurations de liste utilisateurs
+        filters_panel: default
+        filters_panel_open: 1
+        bulk_actions: 
+            1: 
+                label: Générer CSV
+                icon: fas_file-excel
+                onclick: setSelectedObjectsAction($(this), 'list_id', 'generateBulkCsv', {}, 'bulk_csv', null, true)
+        configurable: 1
+        enable_search: 1
+        n: 10
+        sort_way: desc
+        cols: 
+            module: 
+            obj_name: 
+            list_type: 
+            list_name: 
+            name:
+            owner_nom_url: 
+            def_filters:

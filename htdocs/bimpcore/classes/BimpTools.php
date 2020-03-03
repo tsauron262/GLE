@@ -43,6 +43,18 @@ class BimpTools
         }
         return 1;
     }
+    
+    public static function merge_array($array1, $array2){
+        if(!is_array($array1)){
+            dol_syslog("merge array pas un tableau array1",3);
+            return $array2;
+        }
+        if(!is_array($array2)){
+            dol_syslog("merge array pas un tableau array2",3);
+            return $array1;
+        }
+        return array_merge($array1, $array2);
+    }
 
     public static function getValue($key, $default_value = null, $decode = true)
     {
@@ -237,7 +249,7 @@ class BimpTools
         return '/test2/public/theme/common/nophoto.png';
     }
 
-    public static function getErrorsFromDolObject($object, $errors = null, $langs = null, &$warnings = array())
+    public static function getErrorsFromDolObject($object, $errors = null, $langs = null, &$warnings = array(), $with_events = false)
     {
         if (is_null($langs)) {
             global $langs;
@@ -265,8 +277,10 @@ class BimpTools
             }
         }
 
-        $errors = array_merge($errors, self::getDolEventsMsgs(array('errors')));
-        $warnings = array_merge($warnings, self::getDolEventsMsgs(array('warnings')));
+        if ($with_events) {
+            $errors = BimpTools::merge_array($errors, self::getDolEventsMsgs(array('errors'), false));
+            $warnings = BimpTools::merge_array($warnings, self::getDolEventsMsgs(array('warnings'), false));
+        }
 
         return $errors;
     }
@@ -1082,6 +1096,9 @@ class BimpTools
             if (is_array($filter)) {
                 if (isset($filter['min']) || isset($filter['max'])) {
                     if (isset($filter['min']) && (string) $filter['min'] !== '' && isset($filter['max']) && (string) $filter['max'] !== '') {
+                        if (isset($filter['not'])) {
+                            $sql .= ' NOT';
+                        }
                         $sql .= ' BETWEEN ' . (is_string($filter['min']) ? '\'' . $filter['min'] . '\'' : $filter['min']);
                         $sql .= ' AND ' . (is_string($filter['max']) ? '\'' . $filter['max'] . '\'' : $filter['max']);
                     } elseif (isset($filter['min']) && (string) $filter['min'] !== '') {
@@ -1095,8 +1112,14 @@ class BimpTools
                     $sql .= ' ' . $filter['operator'] . ' ' . (is_string($filter['value']) ? '\'' . $filter['value'] . '\'' : $filter['value']);
                 } elseif (isset($filter['part_type']) && isset($filter['part'])) {
                     $filter['part'] = addslashes($filter['part']);
+                    if (isset($filter['not']) && (int) $filter['not']) {
+                        $sql .= ' NOT';
+                    }
                     $sql .= ' LIKE \'';
                     switch ($filter['part_type']) {
+                        case 'full':
+                            break;
+
                         case 'beginning':
                             $sql .= $filter['part'] . '%';
                             break;
@@ -1906,6 +1929,51 @@ class BimpTools
         return $array;
     }
 
+    public static function getMaxArrayDepth($array)
+    {
+        $max_depth = 1;
+
+        if (is_array($array)) {
+            foreach ($array as $value) {
+                if (is_array($value)) {
+                    $depth = self::getMaxArrayDepth($value) + 1;
+
+                    if ($depth > $max_depth) {
+                        $max_depth = $depth;
+                    }
+                }
+            }
+        }
+
+        return $max_depth;
+    }
+
+    public static function implodeWithQuotes($array, $delimiter = ',')
+    {
+        $str = '';
+
+        if (is_array($array)) {
+            foreach ($array as $value) {
+                $str .= ($str ? $delimiter : '') . "'" . $value . "'";
+            }
+        }
+
+        return $str;
+    }
+
+    public static function implodeArrayKeys($array, $delimiter = ',', $with_quotes = false)
+    {
+        $str = '';
+
+        if (is_array($array)) {
+            foreach ($array as $key => $value) {
+                $str .= ($str ? $delimiter : '') . ($with_quotes ? "'" : '') . $key . ($with_quotes ? "'" : '');
+            }
+        }
+
+        return $str;
+    }
+
     // Divers:
 
     public static function getContext()
@@ -1970,7 +2038,7 @@ class BimpTools
         $return = array();
         foreach ($types as $type) {
             if (isset($_SESSION['dol_events'][$type])) {
-                $return = array_merge($_SESSION['dol_events'][$type], $return);
+                $return = BimpTools::merge_array($_SESSION['dol_events'][$type], $return);
                 if ($clean) {
                     unset($_SESSION['dol_events'][$type]);
                 }
@@ -2204,21 +2272,27 @@ class BimpTools
         $_SESSION['context'] = $context;
     }
 
-    public static function bloqueDebloque($type, $bloque = true)
+    
+    public static $nbMax = 10;
+    public static function bloqueDebloque($type, $bloque = true, $nb = 1)
     {
         $file = static::getFileBloqued($type);
         if ($bloque) {
             $random = rand(0, 10000000);
             $text = "Yes" . $random;
-            file_put_contents($file, $text);
+            if(!file_put_contents($file, $text))
+                    die('droit sur fichier incorrect : '.$file);
             sleep(0.400);
             $text2 = file_get_contents($file);
             if ($text == $text2)
                 return 1;
             else {//conflit
                 mailSyn2("Conflit de ref évité", "dev@bimp.fr", "admin@bimp.fr", "Attention : Un conflit de ref de type " . $type . " a été évité");
-                self::sleppIfBloqued($type);
-                return static::bloqueDebloque($type, $bloque);
+                $nb++;
+                if($nb > static::$nbMax)
+                    die('On arrete tout erreur 445834834857');
+                self::sleppIfBloqued($type, $nb);
+                return static::bloqueDebloque($type, $bloque, $nb);
             }
         } elseif (is_file($file))
             return unlink($file);
@@ -2240,17 +2314,16 @@ class BimpTools
 
     public static function sleppIfBloqued($type, $nb = 0)
     {
-        $nbMax = 10;
         $nb++;
         if (static::isBloqued($type)) {
-            if ($nb < $nbMax) {
+            if ($nb < static::$nbMax) {
                 sleep(1);
                 return static::sleppIfBloqued($type, $nb);
             } else {
-                $text = "Attention bloquage de plus de " . $nbMax . " secondes voir pour type : " . $type;
+                $text = "Attention bloquage de plus de " . static::$nbMax . " secondes voir pour type : " . $type;
                 dol_syslog("ATTENTION " . $text, 3);
                 mailSyn2("Bloquage anormal", "dev@bimp.fr", "admin@bimp.fr", "Attention : " . $text);
-                static::bloqueDebloque($type, false);
+                static::bloqueDebloque($type, false, $bn);
                 return 0;
             }
         } else
@@ -2270,5 +2343,42 @@ class BimpTools
             return static::getMailOrSuperiorMail($userT->getData('fk_user'));
 
         return "admin@bimp.fr";
+    }
+
+    public static function mailGrouper($to, $from, $msg)
+    {
+        $dir = DOL_DATA_ROOT . "/bimpcore/mailsGrouper/";
+        if (!is_dir($dir))
+            mkdir($dir);
+        if (!is_dir($dir))
+            return false;
+        $msg = "<br/><br/>" . dol_print_date(dol_now(), '%d/%m/%Y %H:%M:%S') . " : " . $msg;
+        $file = $dir . $to;
+        $file .= "$" . $from;
+        $file .= "$.txt";
+        file_put_contents($file, $msg, FILE_APPEND);
+    }
+
+    public static function envoieMailGrouper()
+    {
+        $dir = DOL_DATA_ROOT . "/bimpcore/mailsGrouper/";
+        if (!is_dir($dir))
+            mkdir($dir);
+        if (!is_dir($dir))
+            return false;
+        $files = scandir($dir);
+        $i = 0;
+        foreach ($files as $file) {
+            $tabInfo = explode("$", $file);
+            if (isset($tabInfo[2])) {
+                $msg = file_get_contents($dir . $file);
+                if (mailSyn2("Infos grouper Bimp-ERP", $tabInfo[0], $tabInfo[1], $msg)) {
+                    unlink($dir . $file);
+                    $i++;
+                }
+            }
+        }
+        $this->output = "OK " . $i . ' mails envoyés';
+        return 0;
     }
 }

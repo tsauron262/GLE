@@ -45,6 +45,12 @@ fields:
         type: json
         input: 
             type: hidden
+            
+    excluded: 
+        label: Valeurs exclus
+        type: json
+        input: 
+            type: hidden
         
 forms: 
     default: 
@@ -62,6 +68,7 @@ forms:
             - field: name
             - field: owner_type
             - custom: 1
+              input_name: filters_group
               label: Groupe
               data_type: id
               content: 

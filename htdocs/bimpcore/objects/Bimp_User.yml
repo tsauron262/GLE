@@ -4,6 +4,7 @@ dol_object:
         
 table: user
 primary: rowid
+icon: fas_user-circle
 
 labels: 
     name: utilisateur

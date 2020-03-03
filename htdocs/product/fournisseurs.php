@@ -145,7 +145,7 @@ if (empty($reshook))
 	if ($action == 'updateprice')
 	{
 		$id_fourn=GETPOST("id_fourn");
-		if (empty($id_fourn)) $id_fourn=GETPOST("search_id_fourn");
+		if (empty($id_fourn) && is_int(GETPOST("search_id_fourn"))) $id_fourn=GETPOST("search_id_fourn");
 		$ref_fourn=GETPOST("ref_fourn");
 		if (empty($ref_fourn)) $ref_fourn=GETPOST("search_ref_fourn");
 		$quantity=GETPOST("qty");

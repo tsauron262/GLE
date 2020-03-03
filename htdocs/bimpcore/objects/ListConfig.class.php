@@ -7,6 +7,11 @@ class ListConfig extends BimpObject
     const TYPE_USER = 2;
 
     protected $obj_instance = null;
+    public static $list_types = array(
+        'list_table'  => 'Tableau',
+        'list_stats'  => 'Statistiques',
+        'list_custom' => 'Liste personnalisée'
+    );
 
     // Droits user:
 
@@ -15,7 +20,7 @@ class ListConfig extends BimpObject
         global $user;
         return (int) $user->admin;
     }
-    
+
     public function canEdit()
     {
         if ($this->isLoaded()) {
@@ -23,10 +28,10 @@ class ListConfig extends BimpObject
                 return $this->canEditGroupConfigs();
             }
         }
-        
+
         return (int) parent::canEdit();
     }
-    
+
     public function canEditField($field_name)
     {
         switch ($field_name) {
@@ -76,7 +81,7 @@ class ListConfig extends BimpObject
             $path = $this->getListObjConfigPath();
 
             if ($path) {
-                return (int) ((int) $obj->config->get($path . '/pagination', 1, false, 'bool') && (int) $obj->config->get($path . '/n', 10, false, 'int'));
+                return (int) ((int) $obj->config->get($path . '/pagination', 1, false, 'bool'));
             }
         }
 
@@ -266,9 +271,14 @@ class ListConfig extends BimpObject
 
     public function getListTitle()
     {
-        global $user;
+        global $user, $langs;
 
-        return (BimpObject::objectLoaded($user) ? $user->getFullName() . ': c' : 'C') . 'onfigurations de la liste';
+        return (BimpObject::objectLoaded($user) ? $user->getFullName($langs) . ': c' : 'C') . 'onfigurations de la liste';
+    }
+
+    public function getDefaultBulkCsvFileName()
+    {
+        return 'csv_' . date('Y-m-d_H-i');
     }
 
     public static function getUserCurrentConfig($id_user, $object, $list_type, $list_name)
@@ -332,26 +342,128 @@ class ListConfig extends BimpObject
         return null;
     }
 
+    // Getters params: 
+
+    public function getListExtraButtons()
+    {
+        $buttons = array();
+
+        if ($this->hasCols()) {
+            $buttons[] = array(
+                'label'   => 'Options des colonnes',
+                'icon'    => 'fas_columns',
+                'onclick' => $this->getJsLoadModalForm('cols_options', 'Options de colonnes')
+            );
+        }
+
+        return $buttons;
+    }
+
+    public function getCustomFilterValueLabel($field_name, $value)
+    {
+        switch ($field_name) {
+            case 'id_group':
+                $label = $this->db->getValue('usergroup', 'nom', 'rowid = ' . (int) $value);
+                if ($label) {
+                    return $label;
+                }
+                return $value;
+        }
+        parent::getCustomFilterValueLabel($field_name, $value);
+    }
+
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
+    {
+        switch ($field_name) {
+            case 'id_user':
+                $filters['and_user'] = array(
+                    'and_fields' => array(
+                        'owner_type' => self::TYPE_USER,
+                        'id_owner'   => array(
+                            ($excluded ? 'not_' : '') . 'in' => $values
+                        )
+                    )
+                );
+                break;
+
+            case 'id_user_with_groups':
+                $filters['user_group'] = array(
+                    ($excluded ? 'and_fields' : 'or') => array(
+                        'and_user'  => array(
+                            'and_fields' => array(
+                                'owner_type' => self::TYPE_USER,
+                                'id_owner'   => array(
+                                    ($excluded ? 'not_' : '') . 'in' => $values
+                                )
+                            )
+                        ),
+                        'and_group' => array(
+                            'and_fields' => array(
+                                'owner_type'   => self::TYPE_GROUP,
+                                'owner_custom' => array(
+                                    'custom' => 'id_owner ' . ($excluded ? 'NOT ' : '') . 'IN (SELECT ugu.fk_usergroup FROM ' . MAIN_DB_PREFIX . 'usergroup_user ugu WHERE ugu.fk_user IN (' . implode(',', $values) . '))'
+                                )
+                            )
+                        )
+                    )
+                );
+                break;
+
+            case 'id_group':
+                $filters['and_group'] = array(
+                    'and_fields' => array(
+                        'owner_type' => self::TYPE_GROUP,
+                        'id_owner'   => array(
+                            ($excluded ? 'not_' : '') . 'in' => $values
+                        )
+                    )
+                );
+                break;
+        }
+        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
+    }
+
     // Affichage: 
 
-    public function displayOwner()
+    public function displayOwner($nom_url = false)
     {
         if (!$this->isLoaded()) {
             return '';
         }
 
-        switch ($this->getData('owner_type')) {
-            case self::TYPE_USER:
-                return 'Utilisateur';
+        if ($nom_url) {
+            switch ($this->getData('owner_type')) {
+                case self::TYPE_USER:
+                    $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->getData('id_owner'));
+                    if (BimpObject::objectLoaded($user)) {
+                        return BimpObject::getInstanceNomUrl($user->dol_object);
+                    } else {
+                        return 'Utilisateur #' . $this->getData('id_owner');
+                    }
 
-            case self::TYPE_GROUP:
-                $groupe = (string) $this->db->getValue('usergroup', 'nom', 'rowid = ' . (int) $this->getData('id_owner'));
+                case self::TYPE_GROUP:
+                    $groupe = (string) $this->db->getValue('usergroup', 'nom', 'rowid = ' . (int) $this->getData('id_owner'));
 
-                if ($groupe) {
-                    return 'Groupe "' . $groupe . '"';
-                } else {
-                    return 'Groupe #' . $this->getData('id_owner');
-                }
+                    if ($groupe) {
+                        return 'Groupe "' . $groupe . '"';
+                    } else {
+                        return 'Groupe #' . $this->getData('id_owner');
+                    }
+            }
+        } else {
+            switch ($this->getData('owner_type')) {
+                case self::TYPE_USER:
+                    return 'Utilisateur';
+
+                case self::TYPE_GROUP:
+                    $groupe = (string) $this->db->getValue('usergroup', 'nom', 'rowid = ' . (int) $this->getData('id_owner'));
+
+                    if ($groupe) {
+                        return 'Groupe "' . $groupe . '"';
+                    } else {
+                        return 'Groupe #' . $this->getData('id_owner');
+                    }
+            }
         }
 
         return '';
@@ -463,7 +575,7 @@ class ListConfig extends BimpObject
     public function renderGroupInput()
     {
         $html = '';
-        
+
         $id_group = $this->getIdGroup();
 
         if ($this->canEditField('id_group')) {
@@ -525,6 +637,262 @@ class ListConfig extends BimpObject
         }
 
         return $html;
+    }
+
+    public function renderColsOptionsInput()
+    {
+        $html = '';
+
+        $list_cols = array();
+
+
+        $list_name = $this->getData('list_name');
+        $cols_options = $this->getData('cols_options');
+
+        $object = $this->getObjInstance();
+        $bc_list = new BC_ListTable($object, $list_name);
+
+        if ($list_name && is_a($object, 'BimpObject')) {
+            $list_cols = $object->getListColsArray($list_name);
+        }
+
+        if (count($list_cols)) {
+            $values = array();
+            if ($this->isLoaded()) {
+                $cols = $this->getData('cols');
+                $cols_options = $this->getData('cols_options');
+
+                if (is_array($cols)) {
+                    foreach ($cols as $col_name) {
+                        if (isset($list_cols[$col_name])) {
+                            $values[$col_name] = $list_cols[$col_name];
+                        }
+                    }
+                }
+            } else {
+                foreach ($bc_list->cols as $col_name) {
+                    if (isset($list_cols[$col_name])) {
+                        $values[$col_name] = $list_cols[$col_name];
+                    }
+                }
+            }
+        }
+
+        if (count($values)) {
+            $data = array();
+            foreach ($values as $col_name => $col_title) {
+                $csv_displays = '';
+
+                $col_params = $bc_list->getColParams($col_name);
+                $col_label = (isset($cols_options[$col_name]['label']) ? $cols_options[$col_name]['label'] : (isset($col_params['label']) ? $col_params['label'] : $col_name));
+                $col_options = array();
+                $col_displays = array();
+
+                if (isset($col_params['field']) && $col_params['field']) {
+                    $bc_field = null;
+                    $instance = null;
+                    if (isset($col_params['child']) && $col_params['child']) {
+                        if ($col_params['child'] === 'parent') {
+                            $instance = $object->getParentInstance();
+                        } else {
+                            $instance = $object->config->getObject('', $col_params['child']);
+                        }
+                    } else {
+                        $instance = $object;
+                    }
+
+                    if (is_a($instance, 'BimpObject')) {
+                        if ($instance->field_exists($col_params['field'])) {
+                            $bc_field = new BC_Field($instance, $col_params['field']);
+                            $col_displays = $bc_field->getDisplayOptions();
+                            $csv_displays = $bc_field->renderCsvOptionsInput('col_' . $col_name . '_csv_display', (isset($cols_options[$col_name]['csv_display']) ? $cols_options[$col_name]['csv_display'] : ''));
+                            if (!$col_label) {
+                                $col_label = $bc_field->params['label'];
+                            }
+                        } else {
+                            $csv_displays = BimpRender::renderAlerts('Le champ "' . $col_params['field'] . '" n\'existe pas dans l\'objet "' . $instance->getLabel() . '"');
+                        }
+                    } else {
+                        $csv_displays = BimpRender::renderAlerts('Instance invalide');
+                    }
+                }
+
+                if (!$col_label) {
+                    $col_label = $col_name;
+                }
+
+                if (!$csv_displays) {
+                    $csv_displays = 'Valeur affichée';
+                }
+
+                if (empty($col_displays)) {
+                    $col_displays['default'] = 'Par défaut';
+                }
+
+                $col_options['label'] = array(
+                    'label'      => 'Titre',
+                    'input_name' => 'col_' . $col_name . '_label',
+                    'content'    => BimpInput::renderInput('text', 'col_' . $col_name . '_label', $col_label)
+                );
+
+//                $col_options['display'] = array(
+//                    'label'      => 'Affichage',
+//                    'input_name' => 'col_' . $col_name . '_display',
+//                    'content'    => BimpInput::renderInput('select', 'col_' . $col_name . '_display', 'default', array(
+//                        'options' => $col_displays
+//                    ))
+//                );
+
+                $col_options['csv_display'] = array(
+                    'label'      => 'Valeur CSV',
+                    'input_name' => 'col_' . $col_name . '_csv_display',
+                    'content'    => $csv_displays
+                );
+
+                $data[$col_name] = array(
+                    'label'    => $col_title,
+                    'children' => $col_options
+                );
+            }
+
+            $html .= BimpInput::renderJsonInput($data, 'cols_options');
+        } else {
+            $html .= BimpRender::renderAlerts('Aucune option disponible', 'warnings');
+        }
+
+        return $html;
+    }
+
+    // Actions: 
+
+    public function actionGenerateBulkCsv($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Fichier Excel généré avec succès';
+        $success_callback = '';
+
+        $id_configs = isset($data['id_objects']) ? $data['id_objects'] : array();
+        $file_name = isset($data['file_name']) ? $data['file_name'] : '';
+        $headers = isset($data['headers']) ? (int) $data['headers'] : 1;
+
+        if (empty($id_configs)) {
+            $errors[] = 'Aucune configuration sélectionnée';
+        }
+
+        if (!$file_name) {
+            $errors[] = 'Veuillez spécifier un nom de fichier';
+        } else {
+            $dir_error = BimpTools::makeDirectories(array(
+                        'bimpcore' => 'lists_excel'
+                            ), DOL_DATA_ROOT);
+            if ($dir_error) {
+                $errors[] = $dir_error;
+            }
+        }
+
+        if (!count($errors)) {
+            set_time_limit(0);
+            ignore_user_abort(0);
+
+            $file_path = DOL_DATA_ROOT . '/bimpcore/lists_excel/' . $file_name . '.xlsx';
+
+            BimpCore::loadPhpExcel();
+            $excel = new PHPExcel();
+
+            $fl = true;
+
+            $indexes = array();
+
+            foreach ($id_configs as $id_config) {
+                $config = BimpCache::getBimpObjectInstance('bimpcore', 'ListConfig', (int) $id_config);
+
+                if (!BimpObject::objectLoaded($config)) {
+                    $warnings[] = 'La configuration d\'ID ' . $id_config . ' n\'existe pas.<br/>La liste correspondante n\'a pas été incluse dans le fichier';
+                    continue;
+                }
+
+                $config_label = '"' . $config->getData('name') . '" (' . $config->displayOwner() . ')';
+
+                if ($config->getData('list_type') !== 'list_table') {
+                    $warnings[] = 'La configuration ' . $config_label . ' ne correspond pas à une liste de type "Tableau".<br/>La liste correspondante n\'a pas été incluse dans le fichier';
+                }
+
+                $obj_instance = $config->getObjInstance();
+                $bc_list = new BC_ListTable($obj_instance, $config->getData('list_name'), 1, null, null, null, (int) $config->id);
+                if (!$bc_list->isOk()) {
+                    $warnings[] = BimpTools::getMsgFromArray($bc_list->errors, 'La configuration "' . $config_label . '" est invalide');
+                    continue;
+                }
+
+                $cols_options = $config->getData('cols_options');
+                $options = array();
+
+                if (is_array($cols_options)) {
+                    foreach ($cols_options as $col_name => $col_options) {
+                        if (isset($col_options['csv_display'])) {
+                            $options[$col_name] = $col_options['csv_display'];
+                        }
+                    }
+                }
+
+                $list_errors = array();
+                $rows = explode("\n", $bc_list->renderCsvContent(';', $options, $headers, $list_errors));
+
+                if (count($list_errors)) {
+                    $warnings[] = BimpTools::getMsgFromArray($list_errors, 'Erreur pour la configuration ' . $config_label);
+                    continue;
+                }
+
+                if (!$fl) {
+                    $sheet = $excel->createSheet();
+                } else {
+                    $sheet = $excel->getActiveSheet();
+                    $fl = false;
+                }
+
+                $title = substr($config->getData('sheet_name'), 0, 30);
+
+                if (!$title) {
+                    if (!isset($indexes[$obj_instance->module][$obj_instance->name])) {
+                        $index = 0;
+                    } else {
+                        $index = $indexes[$obj_instance->module][$obj_instance->name];
+                    }
+                    $index++;
+                    $title = substr(BimpTools::ucfirst($obj_instance->getLabel('name_plur')), 0, 27) . ' ' . $index;
+                    $indexes[$obj_instance->module][$obj_instance->name] = $index;
+                }
+
+                $sheet->setTitle($title);
+
+                $row = 1;
+
+                foreach ($rows as $r) {
+                    $col = 0;
+                    $cols = explode(';', $r);
+
+                    foreach ($cols as $cell) {
+                        $sheet->setCellValueByColumnAndRow($col, $row, $cell);
+                        $col++;
+                    }
+
+                    $row++;
+                }
+            }
+
+            $writer = PHPExcel_IOFactory::createWriter($excel, 'Excel2007');
+            $writer->save($file_path);
+
+            $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . htmlentities('lists_excel/' . $file_name . '.xlsx');
+            $success_callback = 'window.open(\'' . $url . '\')';
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $success_callback
+        );
     }
 
     // Overrides: 

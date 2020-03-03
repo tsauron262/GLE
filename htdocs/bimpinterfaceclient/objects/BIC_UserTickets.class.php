@@ -13,13 +13,13 @@ class BIC_UserTickets extends BS_Ticket {
         }
         
         if($filter_send == 'contrat') {
-            $filter = array_merge($filter, Array(Array('name' => 'id_contrat','filter' => $_REQUEST['id'])));
+            $filter = BimpTools::merge_array($filter, Array(Array('name' => 'id_contrat','filter' => $_REQUEST['id'])));
         }
         if($filter_send == 'user') {
             $idUser = BimpTools::getValue("id");
             if($idUser < 1)
                 $idUser = $userClient->id;
-            $filter = array_merge($filter, Array(Array('name' => 'id_user_client','filter' => $idUser)));
+            $filter = BimpTools::merge_array($filter, Array(Array('name' => 'id_user_client','filter' => $idUser)));
         }
         return $filter;        
     }
@@ -75,13 +75,17 @@ class BIC_UserTickets extends BS_Ticket {
                 $this->updateField('sujet', $add_sujet);
 
                     $liste_destinataires = Array($userClient->getData('email'));
-                    $liste_destinataires = array_merge($liste_destinataires, Array('hotline@bimp.fr'));
-                    $liste_destinataires = array_merge($liste_destinataires, $userClient->get_dest('admin'));
-                    $liste_destinataires = array_merge($liste_destinataires, $userClient->get_dest('commerciaux'));
+                    $liste_destinataires = BimpTools::merge_array($liste_destinataires, Array('hotline@bimp.fr'));
+                    $liste_destinataires = BimpTools::merge_array($liste_destinataires, $userClient->get_dest('admin'));
+                    $liste_destinataires = BimpTools::merge_array($liste_destinataires, $userClient->get_dest('commerciaux'));
 
                     $prio = 'Non Urgent'; $prio = ($this->getData('priorite') == 2) ? 'Urgent' : $prio; $prio = ($this->getData('priorite') == 3) ? 'Très Urgent' : $prio;
                     $impact = 'Faible'; $impact = ($this->getData('priorite') == 2) ? 'Moyen' : $impact; $impact = ($this->getData('priorite') == 3) ? 'Haut' : $impact;
                     $tmpContrat = $this->getInstance('bimpcontract', 'BContract_contrat', $this->getData('id_contrat'));
+                    $liste_destinataire_interne_contrat_spare = '';
+                    if($tmpContrat->getData('objet_contrat') == 'CSP') {
+                        $liste_destinataire_interne_contrat_spare = 'j.garnier@bimp.fr, l.gay@bimp.fr, tt.cao@bimp.fr';
+                    }
                     mailSyn2('BIMP-CLIENT : Création Ticket Support N°' . $this->getData('ticket_number'), implode(', ', $liste_destinataires), '',
                             '<h3>Ticket support numéro : '.$this->getData('ticket_number').'</h3>'
                             . 'Sujet du ticket : ' . $this->getData('sujet') . '<br />'
@@ -90,7 +94,7 @@ class BIC_UserTickets extends BS_Ticket {
                             . 'Contrat : ' . $tmpContrat->getData('ref') . '<br />'
                             . 'Priorité : ' . $prio . '<br />'
                             . 'Impact : ' . $impact . '<br />'
-                            );
+                            , array(), array(), array(), $liste_destinataire_interne_contrat_spare);
                     $tmpContrat = null;
             }
 //        } else {

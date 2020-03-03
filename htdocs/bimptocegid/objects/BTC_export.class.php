@@ -177,8 +177,8 @@ class BTC_export extends BimpObject {
             include_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
             $task = BimpObject::getInstance("bimptask", "BIMP_Task");
             $tab = array("src"=>"al.bernard@bimp.fr", "dst"=>"task0001@bimp.fr", "subj"=> $subj, "txt"=>$msg, "prio"=>20, "id_user_owner" => 460);
-            $this->errors = array_merge($this->errors, $task->validateArray($tab));
-            $this->errors = array_merge($this->errors, $task->createIfNotActif());
+            $this->errors = BimpTools::merge_array($this->errors, $task->validateArray($tab));
+            $this->errors = BimpTools::merge_array($this->errors, $task->createIfNotActif());
         }
     }
     
@@ -277,7 +277,7 @@ class BTC_export extends BimpObject {
             //die();
             return $this->db->getRows('facture_fourn', 'exported = 0 AND fk_statut IN(1,2) AND datec BETWEEN "'.BimpCore::getConf("BIMPtoCEGID_start_current_trimestre").' 00:00:00" AND "'.$hier->format('Y-m-d').'"', $this->sql_limit);
         } else {
-            return $this->db->getRows('facture_fourn', 'exported = 0 AND fk_statut IN(1,2) AND datec BETWEEN "'.$this->date_export.' 00:00:00" AND "'.$this->date_export.' 23:59:59" OR date_valid = "'.$this->date_export.'"', $this->sql_limit);
+            return $this->db->getRows('facture_fourn', 'exported = 0 AND fk_statut IN(1,2) AND (datec BETWEEN "'.$this->date_export.' 00:00:00" AND "'.$this->date_export.' 23:59:59" OR date_valid = "'.$this->date_export.'")', $this->sql_limit);
         }
     }
     

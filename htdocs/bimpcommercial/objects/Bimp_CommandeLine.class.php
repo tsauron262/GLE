@@ -382,7 +382,7 @@ class Bimp_CommandeLine extends ObjectLine
         return $buttons;
     }
 
-    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array())
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
     {
         switch ($field_name) {
             case 'reservations_status':
@@ -390,25 +390,31 @@ class Bimp_CommandeLine extends ObjectLine
                     $sql = 'SELECT COUNT(DISTINCT reservation.id) FROM ' . MAIN_DB_PREFIX . 'br_reservation reservation';
                     $sql .= ' WHERE reservation.id_commande_client_line = a.id AND reservation.qty > 0 AND reservation.status = ';
 
-                    $or = array();
+                    $res_filters = array();
 
                     foreach ($values as $status) {
-                        $or['(' . $sql . $status . ')'] = array(
-                            'operator' => '>',
+                        $res_filters['(' . $sql . $status . ')'] = array(
+                            'operator' => ($excluded ? '=' : '>'),
                             'value'    => 0
                         );
                     }
 
-                    if (!empty($or)) {
-                        $filters['or_reservations_status'] = array(
-                            'or' => $or
-                        );
+                    if (!empty($res_filters)) {
+                        if ($excluded) {
+                            $filters['and_reservations_status'] = array(
+                                'and_fields' => $res_filters
+                            );
+                        } else {
+                            $filters['or_reservations_status'] = array(
+                                'or' => $res_filters
+                            );
+                        }
                     }
                 }
                 break;
         }
 
-        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors);
+        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
     }
 
     // Getters valeurs:
@@ -1226,17 +1232,6 @@ class Bimp_CommandeLine extends ObjectLine
                 }
 
                 if (!empty($reservations)) {
-                    $html .= '<div class="smallActionsContainer">';
-                    $html .= '<span class="small-action" onclick="checkAll($(this).parent().parent(), \'.reservation_check\');">';
-                    $html .= BimpRender::renderIcon('fas_check-square', 'iconLeft') . 'Tout sélectionner';
-                    $html .= '</span>';
-                    $html .= '<span class="small-action" onclick="uncheckAll($(this).parent().parent(), \'.reservation_check\');">';
-                    $html .= BimpRender::renderIcon('far_square', 'iconLeft') . 'Tout désélectionner';
-                    $html .= '</span>';
-                    $html .= '</div>';
-                    $html .= '<table class="bimp_list_table Bimp_Commande_line_reservations_table">';
-                    $html .= '<tbody class="reservations_rows">';
-
                     $res_by_status = array();
 
                     foreach ($reservations as $reservation) {
@@ -1247,6 +1242,20 @@ class Bimp_CommandeLine extends ObjectLine
 
                         $res_by_status[$status][] = $reservation;
                     }
+
+                    if (count($reservations) > 1) {
+                        $html .= '<div class="smallActionsContainer">';
+                        $html .= '<span class="small-action" onclick="checkAll($(this).parent().parent(), \'.reservation_check\');">';
+                        $html .= BimpRender::renderIcon('fas_check-square', 'iconLeft') . 'Tout sélectionner';
+                        $html .= '</span>';
+                        $html .= '<span class="small-action" onclick="uncheckAll($(this).parent().parent(), \'.reservation_check\');">';
+                        $html .= BimpRender::renderIcon('far_square', 'iconLeft') . 'Tout désélectionner';
+                        $html .= '</span>';
+                        $html .= '</div>';
+                    }
+
+                    $html .= '<table class="bimp_list_table Bimp_Commande_line_reservations_table">';
+                    $html .= '<tbody class="reservations_rows">';
 
                     foreach ($res_by_status as $status => $res_list) {
                         $hidable = (count($res_list) > 10);
@@ -2380,7 +2389,9 @@ class Bimp_CommandeLine extends ObjectLine
                     $html .= '<div class="buttonsContainer align-center">';
                     $onclick = $commande->getJsActionOnclick('linesFactureQties', array(
                         'new_facture'       => 1,
-                        'id_client'         => (int) $commande->getData('fk_soc'),
+                        'id_client_facture'         => (int) $commande->getData('fk_soc'),
+                        'note_public'         => htmlentities($commande->getData('note_public')),
+                        'note_private'         => htmlentities($commande->getData('note_private')),
                         'id_contact'        => (int) $commande->dol_object->contactid,
                         'id_cond_reglement' => (int) $commande->getData('fk_cond_reglement')
                             ), array(
@@ -2732,7 +2743,7 @@ class Bimp_CommandeLine extends ObjectLine
                                     $reservation->set('qty', $qty);
                                     $res_warnings = array();
                                     $res_errors = $reservation->update($res_warnings, true);
-                                    $res_errors = array_merge($res_errors, $res_warnings);
+                                    $res_errors = BimpTools::merge_array($res_errors, $res_warnings);
 
                                     if (count($res_errors)) {
                                         $errors[] = BimpTools::getMsgFromArray($res_errors, 'Des erreurs sont survenues lors de la mise des quantités de la réservation pour la ligne n° ' . $this->getData('position'));
@@ -2761,7 +2772,7 @@ class Bimp_CommandeLine extends ObjectLine
                                     $res_warnings = array();
                                     if (!count($res_errors)) {
                                         $res_errors = $reservation->create($res_warnings, true);
-                                        $res_errors = array_merge($res_errors, $res_warnings);
+                                        $res_errors = BimpTools::merge_array($res_errors, $res_warnings);
                                     }
 
                                     if (count($res_errors)) {
@@ -3142,7 +3153,6 @@ class Bimp_CommandeLine extends ObjectLine
             return $errors;
         }
 
-        global $user;
         $shipment_data = $this->getShipmentData($shipment->id);
         $commande = $this->getParentInstance();
 
@@ -3196,25 +3206,10 @@ class Bimp_CommandeLine extends ObjectLine
                                         $reservation->update();
 
                                         // Mise à jour de l'emplacement de l'équipement: 
-                                        $equipment->moveToPlace(BE_Place::BE_PLACE_CLIENT, $id_client, $codemove, $stock_label, 1);
-
-//                                        $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
-//                                        $place_errors = $place->validateArray(array(
-//                                            'id_equipment' => $id_equipment,
-//                                            'type'         => BE_Place::BE_PLACE_CLIENT,
-//                                            'id_client'    => (int) $id_client,
-//                                            'id_contact'   => (int) $id_contact,
-//                                            'infos'        => $stock_label,
-//                                            'date'         => date('Y-m-d H:i:s'),
-//                                            'code_mvt'     => $codemove
-//                                        ));
-//                                        if (!count($place_errors)) {
-//                                            $place_errors = $place->create();
-//                                        }
+                                        $place_errors = $equipment->moveToPlace(BE_Place::BE_PLACE_CLIENT, $id_client, $codemove, $stock_label, 1, '', 'commande', (int) $commande->id, $id_contact);
 
                                         if (count($place_errors)) {
                                             $errors[] = BimpTools::getMsgFromArray($place_errors, 'Echec de la création du nouvel emplacement pour l\'équipement ' . $equipment->getData('serial') . ' (ID ' . $id_equipment . ')');
-                                            dol_syslog('[ERREUR STOCK] ' . 'Echec de la création du nouvel emplacement pour l\'équipement ' . $equipment->getData('serial') . ' (ID ' . $id_equipment . ') - Commande client: ' . $commande->getRef() . '(ID ' . $commande->id . ')', LOG_ERR);
                                         }
                                     }
                                 }
@@ -3240,10 +3235,9 @@ class Bimp_CommandeLine extends ObjectLine
                             $errors[] = BimpTools::getMsgFromArray($res_errors, 'Echec de la mise à jour du statut de la réservation d\'ID ' . $reservation->id);
                         } else {
                             // Retrait des stocks
-                            if ($product->dol_object->correct_stock($user, $id_entrepot, $shipment_data['qty'], 1, $stock_label, 0, $codemove, 'commande', $commande->id) <= 0) {
-                                $msg = 'Echec de la mise à jour des stocks pour le produit "' . $product->dol_object->ref . '" (ID ' . $product->id . ', quantités à retirer: ' . $shipment_data['qty'] . ')';
-                                $errors[] = $msg;
-                                dol_syslog('[ERREUR STOCK] ' . $msg, LOG_ERR);
+                            $stock_errors = $product->correctStocks($id_entrepot, $shipment_data['qty'], Bimp_Product::STOCK_OUT, $codemove, $stock_label, 'commande', (int) $commande->id);
+                            if (count($stock_errors)) {
+                                $errors[] = BimpTools::getMsgFromArray($stock_errors);
                             }
                         }
                     }
@@ -3295,17 +3289,19 @@ class Bimp_CommandeLine extends ObjectLine
                                         'id_entrepot'  => (int) $equipments_returned[(int) $id_equipment],
                                         'infos'        => $stock_label,
                                         'date'         => date('Y-m-d H:i:s'),
-                                        'code_mvt'     => $codemove
+                                        'code_mvt'     => $codemove,
+                                        'origin'       => 'commande',
+                                        'id_origin'    => (int) $commande->id
                                     ));
 
                                     if (!count($place_errors)) {
-                                        $place_errors = $place->create();
+                                        $warnings = array();
+                                        $place_errors = $place->create($warnings, true);
                                     }
 
                                     if (count($place_errors)) {
                                         $msg = BimpTools::getMsgFromArray($place_errors, 'Echec de la création du nouvel emplacement pour l\'équipement ' . $equipment->getData('serial') . ' (ID ' . $id_equipment . ')');
                                         $errors[] = $msg;
-                                        dol_syslog('[ERREUR STOCK] ' . $msg . ' - Commande client ' . $commande->getRef() . '(#' . $commande->id . ')' . ' - Expédition #' . $shipment->id, LOG_ERR);
                                     }
 
                                     $equipment->updateField('id_commande_line_return', 0);
@@ -3317,11 +3313,9 @@ class Bimp_CommandeLine extends ObjectLine
                         if (!isset($shipment_data['id_entrepot']) || !(int) $shipment_data['id_entrepot']) {
                             $errors[] = 'Entrepôt de destination absent';
                         } else {
-                            global $user;
-                            if ($product->dol_object->correct_stock($user, (int) $shipment_data['id_entrepot'], abs((float) $shipment_data['qty']), 0, $stock_label, 0, $codemove, 'commande', $commande->id) <= 0) {
-                                $msg = 'Retour produit - Echec de la mise à jour des stocks pour le produit "' . $product->dol_object->ref . '" (ID ' . $product->id . ', quantités à ajouter: ' . $shipment_data['qty'] . ')';
-                                $errors[] = $msg;
-                                dol_syslog('[ERREUR STOCK] ' . $msg . ' - Commande client ' . $commande->getRef() . '(#' . $commande->id . ')' . ' - Expédition #' . $shipment->id, LOG_ERR);
+                            $stock_errors = $product->correctStocks((int) $shipment_data['id_entrepot'], abs((float) $shipment_data['qty']), Bimp_Product::STOCK_IN, $codemove, $stock_label, 'commande', (int) $commande->id);
+                            if (count($stock_errors)) {
+                                $errors[] = BimpTools::getMsgFromArray($stock_errors);
                             }
                         }
                     }
@@ -3411,17 +3405,19 @@ class Bimp_CommandeLine extends ObjectLine
                                         'id_entrepot'  => $id_entrepot,
                                         'infos'        => $stock_label,
                                         'date'         => date('Y-m-d H:i:s'),
-                                        'code_mvt'     => $codemove
+                                        'code_mvt'     => $codemove,
+                                        'origin'       => 'commande',
+                                        'id_origin'    => (int) $commande->id
                                     ));
 
                                     if (!count($place_errors)) {
-                                        $place_errors = $place->create();
+                                        $warnings = array();
+                                        $place_errors = $place->create($warnings, true);
                                     }
 
                                     if (count($place_errors)) {
                                         $msg = BimpTools::getMsgFromArray($place_errors, 'Echec de la création du nouvel emplacement pour l\'équipement ' . $equipment->getData('serial') . ' (ID ' . $id_equipment . ')');
                                         $errors[] = $msg;
-                                        dol_syslog('[ERREUR STOCK] Annulation expédition #' . $shipment->id . ': ' . $msg . ' - Commande client: ' . $commande->getRef() . '(ID ' . $commande->id . ')', LOG_ERR);
                                     }
                                 }
                             }
@@ -3447,10 +3443,9 @@ class Bimp_CommandeLine extends ObjectLine
                         $errors[] = BimpTools::getMsgFromArray($res_errors, 'Echec de la mise à jour du statut de la réservation d\'ID ' . $reservation->id);
                     } else {
                         // Remise des stocks
-                        if ($product->dol_object->correct_stock($user, $id_entrepot, $shipment_data['qty'], 0, $stock_label, 0, $codemove, 'commande', $commande->id) <= 0) {
-                            $msg = 'Echec de la mise à jour des stocks pour le produit "' . $product->dol_object->label . '" (ID ' . $product->id . ', quantités à ajouter: ' . $shipment_data['qty'] . ')';
-                            $errors[] = $msg;
-                            dol_syslog('[ERREUR STOCK] Annulation expédition #' . $shipment->id . ': ' . $msg . ' - Commande client: ' . $commande->getRef() . '(ID ' . $commande->id . ')', LOG_ERR);
+                        $stock_errors = $product->correctStocks($id_entrepot, $shipment_data['qty'], Bimp_Product::STOCK_IN, $codemove, $stock_label, 'commande', (int) $commande->id);
+                        if (count($stock_errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($stock_errors);
                         }
                     }
                 }
@@ -3473,17 +3468,19 @@ class Bimp_CommandeLine extends ObjectLine
                                 'id_client'    => $id_client,
                                 'infos'        => $stock_label,
                                 'date'         => date('Y-m-d H:i:s'),
-                                'code_mvt'     => $codemove
+                                'code_mvt'     => $codemove,
+                                'origin'       => 'commande',
+                                'id_origin'    => (int) $commande->id
                             ));
 
                             if (!count($place_errors)) {
-                                $place_errors = $place->create();
+                                $warnings = array();
+                                $place_errors = $place->create($warnings, true);
                             }
 
                             if (count($place_errors)) {
                                 $msg = BimpTools::getMsgFromArray($place_errors, 'Echec de la création du nouvel emplacement pour l\'équipement ' . $equipment->getData('serial') . ' (ID ' . $id_equipment . ')');
                                 $errors[] = $msg;
-                                dol_syslog('[ERREUR STOCK] Annulation expédition #' . $shipment->id . ': ' . $msg . ' - Commande client: ' . $commande->getRef() . '(ID ' . $commande->id . ')', LOG_ERR);
                             }
 
                             $equipment->updateField('id_commande_line_return', (int) $this->id);
@@ -3492,11 +3489,9 @@ class Bimp_CommandeLine extends ObjectLine
                 } else {
                     // Retraits des stocks: 
                     if (isset($shipment_data['id_entrepot']) && (int) $shipment_data['id_entrepot']) {
-                        if ($product->dol_object->correct_stock($user, (int) $shipment_data['id_entrepot'], abs($shipment_data['qty']), 1, $stock_label, 0, $codemove, 'commande', $commande->id) <= 0) {
-                            $title = 'Echec de la mise à jour des stocks pour le produit "' . $product->dol_object->label . '" (ID ' . $product->id . ', quantités à retirer: ' . abs($shipment_data['qty']) . ')';
-                            $msg = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($product->dol_object), $title);
-                            $errors[] = $msg;
-                            dol_syslog('[ERREUR STOCK] Retour produit, Annulation expédition #' . $shipment->id . ' - ' . $msg . ' - Commande client: ' . $commande->getRef() . '(ID ' . $commande->id . ')', LOG_ERR);
+                        $stock_errors = $product->correctStocks((int) $shipment_data['id_entrepot'], abs($shipment_data['qty']), Bimp_Product::STOCK_OUT, $codemove, $stock_label, 'commande', (int) $commande->id);
+                        if (count($stock_errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($stock_errors);
                         }
                     }
                 }
@@ -3599,7 +3594,7 @@ class Bimp_CommandeLine extends ObjectLine
         } elseif (count($equipments) > (int) $remain_qty) {
             $errors[] = 'Il ne reste que ' . $remain_qty . ' équipements à assigner à cette expédition.<br/>Veuillez retirer ' . (abs($remain_qty) - count($equipments)) . ' unité(s).';
         } else {
-            $shipment_data['equipments'] = array_merge($shipment_data['equipments'], $equipments);
+            $shipment_data['equipments'] = BimpTools::merge_array($shipment_data['equipments'], $equipments);
 
             $shipments[(int) $id_shipment] = $shipment_data;
 
@@ -3884,54 +3879,6 @@ class Bimp_CommandeLine extends ObjectLine
         return array();
     }
 
-//    public function getFactureLineRemiseGlobaleRate($id_facture)
-//    {
-//        if ($this->isLoaded()) {
-//            $remises_infos = $this->getRemiseTotalInfos();
-//
-//            if ((float) $remises_infos['remise_globale_amount_ht']) {
-//                $full_qty = (float) $this->getFullQty();
-//                $done_qty = 0;
-//                $rg_amount_ht = (float) $remises_infos['remise_globale_amount_ht'];
-//
-//                // Déduction des parts de rg des qtés présentes dans les autres factures: 
-//
-//                $factures = $this->getData('factures');
-//
-//                foreach ($factures as $id_fac => $facture_data) {
-//                    if ((int) $id_fac === (int) $id_facture) {
-//                        continue;
-//                    }
-//
-//                    $sql = 'SELECT r.percent FROM ' . MAIN_DB_PREFIX . 'object_line_remise r ';
-//                    $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'bimp_facture_line l ON l.id = r.id_object_line';
-//                    $sql .= ' WHERE r.is_remise_globale = 1';
-//                    $sql .= ' AND l.id_obj = ' . (int) $id_fac;
-//                    $sql .= ' AND l.linked_object_name = \'commande_line\'';
-//                    $sql .= ' AND l.linked_id_object = ' . $this->id;
-//
-//                    $rows = $this->db->executeS($sql, 'array');
-//
-//                    if (is_array($rows)) {
-//                        foreach ($rows as $r) {
-//                            $done_qty += (float) $facture_data['qty'];
-//                            $rg_amount_ht -= $this->pu_ht * (float) $facture_data['qty'] * ((float) $r['percent'] / 100);
-//                            break; // on est censé n'avoir qu'une seule rg par ligne de facture. 
-//                        }
-//                    }
-//                }
-//
-//                // Calcul du nouveau taux pour les qtés restantes: 
-//                $remain_qty = $full_qty - $done_qty;
-//                $total_ht = (float) $this->pu_ht * $remain_qty;
-//                if ($total_ht) {
-//                    return ($rg_amount_ht / $total_ht) * 100;
-//                }
-//            }
-//        }
-//
-//        return 0;
-//    }
     // Traitements divers: 
 
     public function checkReturnedEquipment($id_equipment)
@@ -4302,7 +4249,7 @@ class Bimp_CommandeLine extends ObjectLine
                             $comm_warnings = array();
                             $comm_errors = $commande_fourn->create($warnings, true);
 
-                            $comm_errors = array_merge($comm_errors, $comm_warnings);
+                            $comm_errors = BimpTools::merge_array($comm_errors, $comm_warnings);
                             if (count($comm_errors)) {
                                 $errors[] = BimpTools::getMsgFromArray($comm_errors, 'Des erreurs sont survenues lors de la création de la commande fournisseur');
                             }
@@ -4338,7 +4285,7 @@ class Bimp_CommandeLine extends ObjectLine
 //                                    if (!count($rem_errors)) {
 //                                        $rem_warnings = array();
 //                                        $rem_errors = $remise->create($rem_warnings, true);
-//                                        $rem_errors = array_merge($rem_errors, $rem_warnings);
+//                                        $rem_errors = BimpTools::merge_array($rem_errors, $rem_warnings);
 //                                    }
 //
 //                                    if (count($rem_errors)) {

@@ -102,13 +102,13 @@ class Inventory2 extends BimpObject
         foreach($warehouse_and_type as $wt) {
             list($w, $t) = explode('_', $wt);
             $wt_obj = BimpObject::getInstance($this->module, 'InventoryWarehouse');
-            $errors = array_merge($errors, $wt_obj->validateArray(array(
+            $errors = BimpTools::merge_array($errors, $wt_obj->validateArray(array(
                 'fk_inventory' => (int) $this->getData('id'),
                 'fk_warehouse' => (int) $w,
                 'type'         => (int) $t,
                 'is_main'      => ((int) $w_main == (int) $w and (int) $t_main == (int) $t)  ? 1 : 0
             )));
-            $errors = array_merge($errors, $wt_obj->create());
+            $errors = BimpTools::merge_array($errors, $wt_obj->create());
         }
         
         return $errors;
@@ -118,15 +118,17 @@ class Inventory2 extends BimpObject
     /**
      * Attention, vérifier qu'il n'y ai pas un expected qui existe pour ce prod
      */
-    private function createExpected($has_filter, $ids_prod) {
+    private function createExpected($has_filter) {
         
         $errors = array();
+        
+        $allowed = $this->getAllowedProduct();
         
         foreach($this->getWarehouseType() as $wt) {
             
             // Products
             if($has_filter)
-                $prod_qty = $wt->getProductStock($ids_prod, 1);
+                $prod_qty = $wt->getProductStock($allowed, 1);
             else
                 $prod_qty = $wt->getProductStock(0, 1);
                         
@@ -148,7 +150,7 @@ class Inventory2 extends BimpObject
             
             // Equipments
             if($has_filter)
-                $pack_prod_eq = $wt->getEquipmentStock(2, $ids_prod);
+                $pack_prod_eq = $wt->getEquipmentStock(2, $allowed);
             else
                 $pack_prod_eq = $wt->getEquipmentStock(2);
                   
@@ -405,13 +407,13 @@ class Inventory2 extends BimpObject
         } elseif ($status == self::STATUS_PARTIALLY_CLOSED) {
             $this->updateField("date_closing_partially", date("Y-m-d H:i:s"));
             $only_scanned = BimpTools::getPostFieldValue('only_scanned');
-            $errors = array_merge($errors, $this->closePartially($only_scanned));
+            $errors = BimpTools::merge_array($errors, $this->closePartially($only_scanned));
             $date_mouvement = BimpTools::getPostFieldValue('date_mouvement');
             if (!$this->setDateMouvement($date_mouvement))
                 $errors[] = "Erreur lors de la définition de la date du mouvement";
         } elseif($status == self::STATUS_CLOSED) {
             $this->updateField("date_closing", date("Y-m-d H:i:s"));
-            $errors = array_merge($errors, $this->close());
+            $errors = BimpTools::merge_array($errors, $this->close());
         } else {
             $errors[] = "Statut non reconnu, valeur = " . $status;
         }
@@ -536,7 +538,7 @@ class Inventory2 extends BimpObject
     public function createLine($id_product, $id_equipment, $qty, $fk_warehouse_type, $fk_package, &$errors) {
         $inventory_line = BimpObject::getInstance($this->module, 'InventoryLine2');
 
-        $errors = array_merge($errors, $inventory_line->validateArray(array(
+        $errors = BimpTools::merge_array($errors, $inventory_line->validateArray(array(
             'fk_inventory'      => (int) $this->getData('id'),
             'fk_product'        => (int) $id_product,
             'fk_equipment'      => (int) $id_equipment,
@@ -546,7 +548,7 @@ class Inventory2 extends BimpObject
         )));
 
         if (!count($errors)) {
-            $errors = array_merge($errors, $inventory_line->create());
+            $errors = BimpTools::merge_array($errors, $inventory_line->create());
         } else
             $errors[] = "Erreur lors de la validation des données renseignées";
 
@@ -1041,12 +1043,12 @@ class Inventory2 extends BimpObject
         
         // Package
         foreach ($move_equipment_package as $id_package => $equipments)
-            $errors = array_merge($errors, BE_Package::moveElements($id_package, (int) $package_dest->id, array(), $equipments));
+            $errors = BimpTools::merge_array($errors, BE_Package::moveElements($id_package, (int) $package_dest->id, array(), $equipments));
         
         // Stock
         foreach ($move_equipment_stock as $id_equipment) {
             $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
-            $errors = array_merge($errors, $equipment->moveToPackage((int) $package_dest->id, $code_mouv, $label_mouv, 1));
+            $errors = BimpTools::merge_array($errors, $equipment->moveToPackage((int) $package_dest->id, $code_mouv, $label_mouv, 1));
         }
 
 
@@ -1147,12 +1149,14 @@ class Inventory2 extends BimpObject
     public function createPackageInventory() {
         $errors = array();
         $package = BimpObject::getInstance('bimpequipment', 'BE_Package');
-        $errors = array_merge($errors, $package->validateArray(array(
-                    'label' => 'Inventaire#' . $this->id
+        $errors = BimpTools::merge_array($errors, $package->validateArray(array(
+                    'label' => 'Inventaire#' . $this->id,
+                    'products' => array(),
+                    'equipments'    => array()
         )));
-        $errors = array_merge($errors, $package->create());
+        $errors = BimpTools::merge_array($errors, $package->create());
         
-        $errors = array_merge($errors, $package->addPlace($this->getData('fk_warehouse'), BE_Place::BE_PLACE_VOL, date('Y-m-d H:i:s'), 'Vol inventaire ' . $this->id, 'VolInv#' . $this->id . '.'));
+        $errors = BimpTools::merge_array($errors, $package->addPlace($this->getData('fk_warehouse'), BE_Place::BE_PLACE_VOL, date('Y-m-d H:i:s'), 'Vol inventaire ' . $this->id, 'VolInv#' . $this->id . '.'));
         
         $this->temp_package = $package->getData('id');
         

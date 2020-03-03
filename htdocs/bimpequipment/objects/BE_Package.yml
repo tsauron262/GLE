@@ -5,6 +5,10 @@ icon: fas_boxes
 header_list_name: default
 header_edit_form: default
 
+
+header_btn: 
+    callback: getActionsButtons
+
 list_page_url: 
     controller: index
     url_params: 
@@ -158,6 +162,7 @@ forms:
             
 views:
     default: 
+        objects_change_reload: BE_PackagePlace
         rows: 
             - cols: 
                 - type: object_header
@@ -225,6 +230,7 @@ filters_panel:
                 data_type: date
                 label: Date de départ (emplacement)
                 type: date_range
+                exclude_btn: 0
                 
 lists:
     default: 

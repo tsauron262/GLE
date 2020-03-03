@@ -802,14 +802,18 @@ class BS_SAV extends BimpObject
 
     // Getters données: 
 
-    public function getNomUrl($withpicto = true)
+    public function getNomUrl($withpicto = true, $ref_only = true, $page_link = false, $modal_view = '')
     {
         if (!$this->isLoaded()) {
             return '';
         }
 
-        $statut = self::$status_list[$this->data["status"]];
-        return "<a href='" . $this->getUrl() . "'>" . '<span class="' . implode(" ", $statut['classes']) . '"><i class="' . BimpRender::renderIconClass($statut['icon']) . ' iconLeft"></i>' . $this->ref . '</span></a>';
+        if (!$modal_view) {
+            $statut = self::$status_list[$this->data["status"]];
+            return "<a href='" . $this->getUrl() . "'>" . '<span class="' . implode(" ", $statut['classes']) . '"><i class="' . BimpRender::renderIconClass($statut['icon']) . ' iconLeft"></i>' . $this->getRef() . '</span></a>';
+        }
+
+        return parent::getNomUrl($withpicto, $ref_only, $page_link, $modal_view);
     }
 
     protected function getNextNumRef()
@@ -1511,7 +1515,7 @@ class BS_SAV extends BimpObject
                 if (is_null($propal)) {
                     $errors[] = $error_msg . ' (Proposition commerciale absente)';
                 } elseif ($propal_status !== 1) {
-                    $errors[] = $error_msg . ' (statut de la proposition commerciale invalide '.$propal_status.')';
+                    $errors[] = $error_msg . ' (statut de la proposition commerciale invalide ' . $propal_status . ')';
                 } elseif (!(string) $this->getData('diagnostic')) {
                     $errors[] = $error_msg . '. Le champ "Diagnostic" doit être complété';
                 } elseif (in_array($current_status, array(self::BS_SAV_DEVIS_ACCEPTE, self::BS_SAV_FERME))) {
@@ -1555,7 +1559,7 @@ class BS_SAV extends BimpObject
 
         if (!count($errors)) {
             if ($msg_type && $extra_data['send_msg'] || $msg_type === 'commercialRefuse') {
-                $warnings = array_merge($warnings, $this->sendMsg($msg_type));
+                $warnings = BimpTools::merge_array($warnings, $this->sendMsg($msg_type));
             }
         }
 
@@ -1649,7 +1653,7 @@ class BS_SAV extends BimpObject
 
                     // Enregistrement du paiement caisse: 
                     if ($this->useCaisseForPayments) {
-                        $errors = array_merge($errors, $caisse->addPaiement($payement, $factureA->id));
+                        $errors = BimpTools::merge_array($errors, $caisse->addPaiement($payement, $factureA->id));
                     }
 
                     $factureA->set_paid($user);
@@ -1787,10 +1791,10 @@ class BS_SAV extends BimpObject
                     $propal->dol_object->statut = 0;
                     $propal->dol_object->addline("Devis révisé", -($totHt) / (100 - $client->dol_object->remise_percent) * 100, 1, $tTva, 0, 0, 0, $client->dol_object->remise_percent, 'HT', 0, 0, 1, -1, 0, 0, 0, 0); //-$totPa);
 
-                    $errors = array_merge($errors, $this->setNewStatus(self::BS_SAV_EXAM_EN_COURS));
+                    $errors = BimpTools::merge_array($errors, $this->setNewStatus(self::BS_SAV_EXAM_EN_COURS));
                     global $user, $langs;
                     $this->addNote('Devis mis en révision le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs));
-                    $warnings = array_merge($warnings, $this->removeReservations());
+                    $warnings = BimpTools::merge_array($warnings, $this->removeReservations());
 
                     $this->updateField('id_propal', (int) $new_id_propal);
 
@@ -1798,7 +1802,7 @@ class BS_SAV extends BimpObject
                     $asso->addObjectAssociation((int) $new_id_propal);
 
                     // Copie des lignes: 
-                    $warnings = array_merge($warnings, $new_propal->createLinesFromOrigin($propal, array(
+                    $warnings = BimpTools::merge_array($warnings, $new_propal->createLinesFromOrigin($propal, array(
                                 'is_review' => true
                     )));
 
@@ -1972,7 +1976,7 @@ class BS_SAV extends BimpObject
 //            $error_label = 'mise à jour';
 //            $line_errors = $line->update($line_warnings, true);
 //        }
-//        $line_errors = array_merge($line_errors, $line_warnings);
+//        $line_errors = BimpTools::merge_array($line_errors, $line_warnings);
 //        if (count($line_errors)) {
 //            $errors[] = BimpTools::getMsgFromArray($line_errors, 'Des erreurs sont survenues lors de la ' . $error_label . ' de la ligne de prise en charge');
 //        }
@@ -2331,8 +2335,8 @@ class BS_SAV extends BimpObject
 
         $errors = array();
         $error_msg = 'Echec de l\'envoi de la notification au client';
-        
-        
+
+
         if (!$msg_type) {
             if (BimpTools::isSubmit('msg_type')) {
                 $msg_type = BimpTools::getValue('msg_type');
@@ -2384,7 +2388,7 @@ class BS_SAV extends BimpObject
                 } elseif (in_array((int) $this->getData('status'), self::$need_propal_status)) {
                     $errors[] = 'Attention: PDF du devis non trouvé et donc non envoyé au client File : ' . $fileProp;
                     dol_syslog('SAV "' . $this->getRef() . '" - ID ' . $this->id . ': échec envoi du devis au client ' . print_r($errors, 1), LOG_ERR, 0, "_devissav");
-                } 
+                }
             } else {
                 unset($propal);
                 $propal = null;
@@ -2637,7 +2641,7 @@ class BS_SAV extends BimpObject
             }
         }
 
-        $errors = array_merge($errors, bimpsupport_pdf_create($this->db->db, $this, 'sav', $file_type));
+        $errors = BimpTools::merge_array($errors, bimpsupport_pdf_create($this->db->db, $this, 'sav', $file_type));
 
         if (!count($errors)) {
             $ref = '';
@@ -3170,7 +3174,7 @@ class BS_SAV extends BimpObject
                 $this->updateField('id_user_tech', (int) $user->id);
 
                 if (isset($data['send_msg']) && (int) $data['send_msg']) {
-                    $warnings = array_merge($warnings, $this->sendMsg('debDiago'));
+                    $warnings = BimpTools::merge_array($warnings, $this->sendMsg('debDiago'));
                 }
             }
         }
@@ -3208,7 +3212,7 @@ class BS_SAV extends BimpObject
 
         define("NOT_VERIF", true);
 
-//        $errors = array_merge($errors, $this->createReservations());
+//        $errors = BimpTools::merge_array($errors, $this->createReservations());
 
         if (!count($errors)) {
             global $user, $langs;
@@ -3248,7 +3252,7 @@ class BS_SAV extends BimpObject
 
             if (!count($errors)) {
                 if (!is_null($new_status)) {
-                    $errors = array_merge($errors, $this->setNewStatus($new_status));
+                    $errors = BimpTools::merge_array($errors, $this->setNewStatus($new_status));
                 }
 
                 if (!(int) $this->getData('id_user_tech')) {
@@ -3258,7 +3262,7 @@ class BS_SAV extends BimpObject
                 $propal->hydrateFromDolObject();
 
                 if (isset($data['send_msg']) && (int) $data['send_msg']) {
-                    $warnings = array_merge($warnings, $this->sendMsg('Devis'));
+                    $warnings = BimpTools::merge_array($warnings, $this->sendMsg('Devis'));
                 }
             }
         }
@@ -3304,7 +3308,7 @@ class BS_SAV extends BimpObject
             $propal = $this->getChildObject('propal');
             $propal->dol_object->cloture($user, 3, "Auto via SAV");
             $this->removeReservations();
-            $warnings = array_merge($warnings, $this->sendMsg('commercialRefuse'));
+            $warnings = BimpTools::merge_array($warnings, $this->sendMsg('commercialRefuse'));
         }
         return array(
             'errors'   => $errors,
@@ -3466,6 +3470,9 @@ class BS_SAV extends BimpObject
 
         if (!count($errors)) {
             $errors = $this->setNewStatus(self::BS_SAV_A_RESTITUER);
+            
+            if (!count($errors))
+                $errors = $this->updateField('date_terminer', dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S'));
 
             if (!count($errors)) {
                 if ($msg_type && isset($data['send_msg']) && $data['send_msg']) {
@@ -3481,9 +3488,13 @@ class BS_SAV extends BimpObject
     }
 
     public function actionClose($data, &$success)
-    {
+    {        
         global $user, $langs;
         $errors = array();
+        $warnings = array();
+        $success = 'SAV Fermé avec succès';
+        $success_callback = '';
+
         $caisse = null;
         $payment_set = (isset($data['paid']) && (float) $data['paid'] && (isset($data['mode_paiement']) && (int) $data['mode_paiement'] > 0 && (int) $data['mode_paiement'] != 56));
 
@@ -3494,23 +3505,28 @@ class BS_SAV extends BimpObject
 //            }
 //        }
 
-        if (count($errors)) {
-            return array(BimpTools::getMsgFromArray($errors, 'Il n\'est pas possible de fermer ce SAV:'));
-        }
+        if ($payment_set) {
+            if ($this->useCaisseForPayments) {
+                global $user;
 
-        if ($this->useCaisseForPayments && $payment_set) {
-            global $user;
-
-            $caisse = BimpObject::getInstance('bimpcaisse', 'BC_Caisse');
-            $id_caisse = (int) $caisse->getUserCaisse((int) $user->id);
-            if (!$id_caisse) {
-                $errors[] = 'Veuillez vous <a href="' . DOL_URL_ROOT . '/bimpcaisse/index.php" target="_blank">connecter à une caisse</a> pour l\'enregistrement du paiement de la facture';
-            } else {
-                $caisse = BimpCache::getBimpObjectInstance('bimpcaisse', 'BC_Caisse', $id_caisse);
-                if (!$caisse->isLoaded()) {
-                    $errors[] = 'La caisse à laquelle vous êtes connecté est invalide.';
+                $caisse = BimpObject::getInstance('bimpcaisse', 'BC_Caisse');
+                $id_caisse = (int) $caisse->getUserCaisse((int) $user->id);
+                if (!$id_caisse) {
+                    $errors[] = 'Veuillez vous <a href="' . DOL_URL_ROOT . '/bimpcaisse/index.php" target="_blank">connecter à une caisse</a> pour l\'enregistrement du paiement de la facture';
                 } else {
-                    $caisse->isValid($errors);
+                    $caisse = BimpCache::getBimpObjectInstance('bimpcaisse', 'BC_Caisse', $id_caisse);
+                    if (!$caisse->isLoaded()) {
+                        $errors[] = 'La caisse à laquelle vous êtes connecté est invalide.';
+                    } else {
+                        $caisse->isValid($errors);
+                    }
+                }
+            }
+            $type_paiement = $this->db->getValue('c_paiement', 'code', '`id` = ' . (int) $data['mode_paiement']);
+            if ($type_paiement === 'VIR') {
+                BimpObject::loadClass('bimpcommercial', 'Bimp_Paiement');
+                if (!Bimp_Paiement::canCreateVirement()) {
+                    $errors[] = 'Vous n\'avez pas la permission d\'enregistrer des paiements par virement';
                 }
             }
         }
@@ -3519,10 +3535,8 @@ class BS_SAV extends BimpObject
             return $errors;
         }
 
-        $success = 'SAV Fermé avec succès';
-        $url = '';
         $current_status = (int) $this->getInitData('status');
-        $warnings = array();
+
 
         if ((int) $this->getData('id_propal')) {
             $propal = $this->getChildObject('propal');
@@ -3558,7 +3572,8 @@ class BS_SAV extends BimpObject
                         // Gestion des stocks et emplacements: 
                         $id_client = (int) $this->getData('id_client');
                         $id_entrepot = (int) $this->getData('id_entrepot');
-                        $codemove = dol_print_date(dol_now(), '%y%m%d%H%M%S');
+//                        $codemove = dol_print_date(dol_now(), '%y%m%d%H%M%S');
+                        $codemove = 'SAV' . $this->id . '_';
                         foreach ($this->getChildrenObjects('propal_lines') as $line) {
                             $product = $line->getProduct();
 
@@ -3577,16 +3592,22 @@ class BS_SAV extends BimpObject
                                                     'id_equipment' => (int) $eq_line->getData('id_equipment'),
                                                     'type'         => BE_Place::BE_PLACE_CLIENT,
                                                     'id_client'    => (int) $id_client,
-                                                    'infos'        => 'Vente SAV',
-                                                    'date'         => date('Y-m-d H:i:s')
+                                                    'infos'        => 'Vente ' . $this->getRef(),
+                                                    'date'         => date('Y-m-d H:i:s'),
+                                                    'code_mvt'     => $codemove . 'LN' . $line->id . '_EQ' . (int) $eq_line->getData('id_equipment'),
+                                                    'origin'       => 'sav',
+                                                    'id_origin'    => (int) $this->id
                                                 ));
                                             } else {
                                                 $place_errors = $place->validateArray(array(
                                                     'id_equipment' => (int) $eq_line->getData('id_equipment'),
                                                     'type'         => BE_Place::BE_PLACE_FREE,
                                                     'place_name'   => 'Equipement vendu (client non renseigné)',
-                                                    'infos'        => 'Vente SAV',
-                                                    'date'         => date('Y-m-d H:i:s')
+                                                    'infos'        => 'Vente ' . $this->getRef(),
+                                                    'date'         => date('Y-m-d H:i:s'),
+                                                    'code_mvt'     => $codemove . 'LN' . $line->id . '_EQ' . (int) $eq_line->getData('id_equipment'),
+                                                    'origin'       => 'sav',
+                                                    'id_origin'    => (int) $this->id
                                                 ));
                                             }
                                             if (!count($place_errors)) {
@@ -3609,10 +3630,9 @@ class BS_SAV extends BimpObject
                                         $warnings[] = BimpTools::getMsgFromArray($eq_line_errors, $error_msg);
                                     }
                                 } else {
-                                    $result = $product->dol_object->correct_stock($user, $id_entrepot, (int) $line->qty, 1, $this->getRef(), 0, $codemove);
-                                    if ($result < 0) {
-                                        $msg = 'Echec de la mise à jour du stock pour le produit "' . $product->getData('label') . '" (Ref: "' . $product->getRef() . '")';
-                                        $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($product->dol_object), $msg);
+                                    $stock_errors = $product->correctStocks($id_entrepot, (int) $line->qty, Bimp_Product::STOCK_OUT, $codemove . 'LN' . $line->id, 'Vente ' . $this->getRef(), 'sav', (int) $this->id);
+                                    if (count($stock_errors)) {
+                                        $warnings[] = BimpTools::getMsgFromArray($stock_errors);
                                     }
                                 }
                             }
@@ -3642,8 +3662,11 @@ class BS_SAV extends BimpObject
                                             'id_user'      => (int) $prev_place->getData('id_user'),
                                             'code_centre'  => $prev_place->getData('code_centre'),
                                             'place_name'   => $prev_place->getData('place_name'),
-                                            'infos'        => 'Restitution ' . $this->getData('ref'),
-                                            'date'         => date('Y-m-d H:i:s')
+                                            'infos'        => 'Restitution ' . $this->getData('ref') . ' (Remise dans l\'emplacement précédant)',
+                                            'date'         => date('Y-m-d H:i:s'),
+                                            'code_mvt'     => $codemove . 'CLOSE_EQ' . (int) $this->getData('id_equipment'),
+                                            'origin'       => 'sav',
+                                            'id_origin'    => (int) $this->id
                                         ));
                                         if (!count($place_errors)) {
                                             $place_errors = $place->create($w, true);
@@ -3656,8 +3679,11 @@ class BS_SAV extends BimpObject
                                             'id_equipment' => (int) $this->getData('id_equipment'),
                                             'type'         => BE_Place::BE_PLACE_CLIENT,
                                             'id_client'    => (int) $this->getData('id_client'),
-                                            'infos'        => 'Restitution ' . $this->getData('ref'),
-                                            'date'         => date('Y-m-d H:i:s')
+                                            'infos'        => 'Restitution ' . $this->getData('ref') . ' (Remise au client)',
+                                            'date'         => date('Y-m-d H:i:s'),
+                                            'code_mvt'     => $codemove . 'CLOSE_EQ' . (int) $this->getData('id_equipment'),
+                                            'origin'       => 'sav',
+                                            'id_origin'    => (int) $this->id
                                         ));
                                         if (!count($place_errors)) {
                                             $place_errors = $place->create($w, true);
@@ -3725,7 +3751,7 @@ class BS_SAV extends BimpObject
 
                                 $facture->linked_objects[$facture->origin] = $facture->origin_id;
                                 if (!empty($propal->dol_object->other_linked_objects) && is_array($propal->dol_object->other_linked_objects)) {
-                                    $facture->linked_objects = array_merge($facture->linked_objects, $propal->dol_object->other_linked_objects);
+                                    $facture->linked_objects = BimpTools::merge_array($facture->linked_objects, $propal->dol_object->other_linked_objects);
                                 }
 
                                 global $user;
@@ -3741,6 +3767,16 @@ class BS_SAV extends BimpObject
                                     if (!BimpObject::objectLoaded($bimpFacture)) {
                                         $errors[] = 'La facture semble ne pas avoir été créée correctement';
                                     } else {
+                                        // Ajout du commercial: 
+                                        $id_commercial = (int) $this->getData('id_user_tech');
+                                        if (!$id_commercial) {
+                                            $id_commercial = (int) $user->id;
+                                        }
+
+                                        if ($id_commercial) {
+                                            $bimpFacture->dol_object->add_contact($id_commercial, 'SALESREPFOLL', 'internal');
+                                        }
+
                                         // Création des lignes: 
                                         $lines_errors = $bimpFacture->createLinesFromOrigin($propal);
 
@@ -3781,7 +3817,7 @@ class BS_SAV extends BimpObject
                                                         }
 
                                                         if ($this->useCaisseForPayments) {
-                                                            $warnings = array_merge($warnings, $caisse->addPaiement($payement, $bimpFacture->id));
+                                                            $warnings = BimpTools::merge_array($warnings, $caisse->addPaiement($payement, $bimpFacture->id));
                                                         }
                                                     }
                                                 }
@@ -3800,24 +3836,40 @@ class BS_SAV extends BimpObject
                                                     $warnings[] = BimpTools::getMsgFromArray($up_errors, 'Echec de l\'enregistrement de l\'ID de la facture (' . $bimpFacture->id . ')');
                                                 }
 
-                                                global $idAvoirFact;
-                                                if (isset($idAvoirFact) && $idAvoirFact > 0) {
-                                                    $up_errors = $this->updateField("id_facture_avoir", $idAvoirFact);
-                                                    $idAvoirFact = 0;
-                                                    if (count($up_errors)) {
-                                                        $warnings[] = BimpTools::getMsgFromArray($up_errors, 'Echec de l\'enregistrement de l\'ID de la facture (' . $bimpFacture->id . ')');
-                                                    }
-                                                }
-
                                                 $bimpFacture->dol_object->generateDocument(self::$facture_model_pdf, $langs);
 
                                                 $ref = $bimpFacture->getData('facnumber');
                                                 if (file_exists(DOL_DATA_ROOT . '/facture/' . $ref . '/' . $ref . '.pdf')) {
                                                     $url = DOL_URL_ROOT . '/document.php?modulepart=facture&file=' . htmlentities('/' . $ref . '/' . $ref . '.pdf');
+                                                    $success_callback .= 'window.open("' . $url . '");';
+                                                }
+
+                                                global $idAvoirFact;
+                                                if (isset($idAvoirFact) && (int) $idAvoirFact) {
+                                                    $up_errors = $this->updateField("id_facture_avoir", $idAvoirFact);
+                                                    if (count($up_errors)) {
+                                                        $idAvoirFact = 0;
+                                                        $warnings[] = BimpTools::getMsgFromArray($up_errors, 'Echec de l\'enregistrement de l\'ID de l\'avoir (' . $idAvoirFact . ')');
+                                                    }
+
+                                                    if ($idAvoirFact) {
+                                                        $avoir = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $idAvoirFact);
+                                                        if (BimpObject::objectLoaded($avoir)) {
+                                                            $avoir_ref = $avoir->getRef();
+                                                            if ($avoir_ref && file_exists(DOL_DATA_ROOT . '/facture/' . $avoir_ref . '/' . $avoir_ref . '.pdf')) {
+                                                                $url = DOL_URL_ROOT . '/document.php?modulepart=facture&file=' . htmlentities('/' . $avoir_ref . '/' . $avoir_ref . '.pdf');
+                                                                $success_callback .= 'window.open("' . $url . '");';
+                                                            } else {
+                                                                $warnings[] = 'Echec de la génération du PDF de l\'avoir';
+                                                            }
+                                                        }
+                                                    }
+
+                                                    $idAvoirFact = 0;
                                                 }
 
                                                 if (isset($data['send_msg']) && $data['send_msg']) {
-                                                    $warnings = array_merge($warnings, $this->sendMsg('Facture'));
+                                                    $warnings = BimpTools::merge_array($warnings, $this->sendMsg('Facture'));
                                                 }
                                             }
                                         }
@@ -3854,7 +3906,10 @@ class BS_SAV extends BimpObject
                 foreach ($list as $item) {
                     $repair = BimpCache::getBimpObjectInstance('bimpapple', 'GSX_Repair', (int) $item['id']);
                     if ($repair->isLoaded()) {
-                        $tmp = $repair->close(true, false);
+                        if ($repair->getData('ready_for_pick_up'))
+                            $tmp = $repair->close(true, false);
+                        else//on passe d'abord en RFPU
+                            $rep_errors = $repair->updateStatus();
                         if (isset($tmp['errors']))
                             $rep_errors = $tmp['errors'];
                         else {
@@ -3877,7 +3932,7 @@ class BS_SAV extends BimpObject
         return array(
             'errors'           => $errors,
             'warnings'         => $warnings,
-            'success_callback' => ($url ? 'window.open("' . $url . '");' : '')
+            'success_callback' => $success_callback
         );
     }
 
@@ -4011,7 +4066,7 @@ class BS_SAV extends BimpObject
             $this->addNote('Attente pièce depuis le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs));
 
             if (isset($data['send_msg']) && (int) $data['send_msg']) {
-                $warnings = array_merge($warnings, $this->sendMsg('commOk'));
+                $warnings = BimpTools::merge_array($warnings, $this->sendMsg('commOk'));
             }
         }
 
@@ -4256,7 +4311,10 @@ class BS_SAV extends BimpObject
                             'type'         => BE_Place::BE_PLACE_SAV,
                             'id_entrepot'  => (int) $this->getData('id_entrepot'),
                             'infos'        => 'Ouverture du SAV ' . $this->getData('ref'),
-                            'date'         => date('Y-m-d H:i:s')
+                            'date'         => date('Y-m-d H:i:s'),
+                            'code_mvt'     => 'SAV' . (int) $this->id . '_CREATE_EQ' . (int) $this->getData('id_equipment'),
+                            'origin'       => 'sav',
+                            'id_origin'    => (int) $this->id
                         ));
                         if (!count($place_errors)) {
                             $place_errors = $place->create();
@@ -4274,7 +4332,7 @@ class BS_SAV extends BimpObject
 
             // Envoi du mail / sms:
             if (BimpTools::getValue('send_msg', 0)) {
-                $warnings = array_merge($warnings, $this->sendMsg('debut'));
+                $warnings = BimpTools::merge_array($warnings, $this->sendMsg('debut'));
             }
         }
 

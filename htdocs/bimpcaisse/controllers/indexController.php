@@ -108,7 +108,7 @@ class indexController extends BimpController
             $html .= '<i class="fa fa-calculator"></i>';
             $html .= '<div class="headerBlockTitle">Caisse:</div>';
             $html .= '<div class="headerBlockContent">';
-            $html .= $caisse->getData('name'). " (".$caisse->getSecteur_code().")";
+            $html .= $caisse->getData('name') . " (" . $caisse->getSecteur_code() . ")";
             $html .= '</div>';
             $html .= '</div>';
         }
@@ -322,7 +322,7 @@ class indexController extends BimpController
 
                 $rows[] = array(
                     'label' => 'Caisse',
-                    'input' => '<strong>' . $caisse->getData('name') . ' au '. dol_print_date(dol_now()).'</strong>'
+                    'input' => '<strong>' . $caisse->getData('name') . ' au ' . dol_print_date(dol_now()) . '</strong>'
                 );
 
                 $rows[] = array(
@@ -575,7 +575,7 @@ class indexController extends BimpController
                             $correction_errors = $caisse->correctFonds($fonds, $msg);
                             if (count($correction_errors)) {
                                 $errors[] = 'Echec de la correction du fonds de caisse';
-                                $errors = array_merge($errors, $correction_errors);
+                                $errors = BimpTools::merge_array($errors, $correction_errors);
                             } else {
                                 $fonds = $caisse->getSavedData('fonds');
                                 $caisse->set('fonds', $fonds);
@@ -659,27 +659,27 @@ class indexController extends BimpController
                 if (is_null($session) || !$session->isLoaded()) {
                     $errors[] = 'Session de caisse invalide';
                 } else {
-                    if(!count($errors)) {
-                        if(1){
+                    if (!count($errors)) {
+                        if (1) {
                             $bc_vente = BimpObject::getInstance('bimpcaisse', 'BC_Vente');
                             $filters = array();
                             $filters['id_caisse'] = array($caisse->id);
                             $filters['id_caisse_session'] = array($session->id);
                             $list = $bc_vente->getList($filters);
-                            foreach($list as $infoVente)
-                                if($infoVente['status'] == 1)
+                            foreach ($list as $infoVente)
+                                if ($infoVente['status'] == 1)
                                     $nbBr++;
-                            if($nbBr > 0)
-                                $errors[] = "Abandonnez toutes les ventes à l’état brouillon au préalable. (".$nbBr.")";
+                            if ($nbBr > 0)
+                                $errors[] = "Abandonnez toutes les ventes à l’état brouillon au préalable. (" . $nbBr . ")";
                         }
                     }
-                    
-                    
-                    
-                    
-                    
-                    
-                    if(!count($errors)) {
+
+
+
+
+
+
+                    if (!count($errors)) {
                         $current_fonds = (float) $caisse->getData('fonds');
 
                         if ($fonds !== $current_fonds) {
@@ -715,13 +715,13 @@ class indexController extends BimpController
                             if (count($session_errors)) {
                                 $errors[] = BimpTools::getMsgFromArray($session_errors, 'Echec de la fermeture de la caisse');
                             } else {
-                                $errors = array_merge($errors, $caisse->disconnectAllUsers());
+                                $errors = BimpTools::merge_array($errors, $caisse->disconnectAllUsers());
 
                                 $html = BimpRender::renderAlerts('Fermeture de la caisse "' . $caisse->getData('name') . '" effectuée avec succès', 'success');
 
                                 $recap_url = DOL_URL_ROOT . '/bimpcore/view.php?module=bimpcaisse&object_name=BC_CaisseSession&id_object=' . $session->id . '&view=recap';
                                 $recap_width = BC_Caisse::$windowWidthByDpi[(int) $caisse->getData('printer_dpi')];
-    //                            $recap_url = 'window.open(\'' . $url . '\', \'Récapitulatif session de caisse\', "menubar=no, status=no, width=' . BC_Caisse::$windowWidthByDpi[(int) $caisse->getData('printer_dpi')] . ', height=900");';
+                                //                            $recap_url = 'window.open(\'' . $url . '\', \'Récapitulatif session de caisse\', "menubar=no, status=no, width=' . BC_Caisse::$windowWidthByDpi[(int) $caisse->getData('printer_dpi')] . ', height=900");';
                             }
                         }
                     }
@@ -919,7 +919,7 @@ class indexController extends BimpController
                         $success = 'Vente abandonnée';
                     }
                     $vente->set('status', (int) $status);
-                    $errors = array_merge($errors, $vente->update());
+                    $errors = BimpTools::merge_array($errors, $vente->update());
                 }
             }
         }
@@ -998,7 +998,39 @@ class indexController extends BimpController
 
         return array(
             'errors'     => $errors,
-            'success'    => 'Note de la vente enregistrée avec succès',
+            'success'    => 'Note privée de la vente enregistrée avec succès',
+            'request_id' => BimpTools::getValue('request_id', 0),
+        );
+    }
+
+    protected function ajaxProcessSaveNotePublic()
+    {
+        $errors = array();
+        $id_vente = BimpTools::getValue('id_vente', 0);
+        $note_public = BimpTools::getValue('note_public', '');
+
+        if (!$id_vente) {
+            $errors[] = 'ID de la vente absent';
+        }
+
+
+        if (!count($errors)) {
+            $vente = BimpCache::getBimpObjectInstance($this->module, 'BC_Vente', (int) $id_vente);
+            if (!$vente->isLoaded()) {
+                $errors[] = 'Cette vente n\'existe plus';
+            } else {
+                if ($vente->getData('status') === 2) {
+                    $errors[] = 'Cette vente ne peut pas être modifée car elle a été validée';
+                } else {
+                    $vente->set('note_public', $note_public);
+                    $errors = $vente->update();
+                }
+            }
+        }
+
+        return array(
+            'errors'     => $errors,
+            'success'    => 'Note publique de la vente enregistrée avec succès',
             'request_id' => BimpTools::getValue('request_id', 0),
         );
     }
@@ -1544,6 +1576,7 @@ class indexController extends BimpController
                     }
 
                     $eq_warnings = $equipment->checkPlaceForReturn($id_client);
+
                     $place = $equipment->getCurrentPlace();
 
                     $label = $product->getRef() . ' - NS: ' . $equipment->getData('serial');

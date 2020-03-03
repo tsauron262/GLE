@@ -187,6 +187,9 @@ lists_cols:
     price:
         child: product
         field: price
+    price_ttc:
+        child: product
+        field: price_ttc
     stock_desire: 
         label: Stock desire
         value: 
@@ -287,6 +290,7 @@ filters_panels:
                 type: check_list
                 items: 
                   1: OUI
+                exclude_btn: 0
             categorie:
                 child: product
                 field: categorie

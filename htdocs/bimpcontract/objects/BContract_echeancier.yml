@@ -11,7 +11,7 @@ objects:
             bimp_object: BContract_contrat
             id_object:
                 field_value: id_contrat
-            
+    
 fields:
     id_contrat:
         label: Numéro de contrat
@@ -26,12 +26,12 @@ fields:
     validate:
         label: Validation automatique des factures
         type: bool
-        
+
 lists:
     default:
         title: Récapitulatif des échéanciers contrat
         icon: fas_euro
-        sort_field: id
+        sort_field: next_facture_date
         sort_way: desc
         n: 25
         delete_btn: 0
@@ -65,6 +65,9 @@ lists:
                 label: Etat facturation
                 value:
                     callback: displayRetard
+            next_facture_date:
+                label: Contrôle des prochaines factures
+                field: next_facture_date
                     
     client:
         extends: default

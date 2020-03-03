@@ -66,7 +66,7 @@ class BMP_TypeMontant extends Abstract_margeprod
         foreach ($list as $item) {
             $calc_montant = BimpCache::getBimpObjectInstance($this->module, 'BMP_CalcMontant', (int) $item['id']);
             if ($calc_montant->isLoaded()) {
-                $errors = array_merge($errors, $calc_montant->rebuildTypesMontantsCache());
+                $errors = BimpTools::merge_array($errors, $calc_montant->rebuildTypesMontantsCache());
             }
         }
 

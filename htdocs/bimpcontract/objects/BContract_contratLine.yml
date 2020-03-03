@@ -63,7 +63,7 @@ fields:
         default_value: 1
     serials:
         label: N° de série
-    price_ht:
+    subprice:
         label: P.U HT
         type: money
     tva_tx: 
@@ -77,6 +77,10 @@ fields:
         label: Remise
         type: percent
         default_value: 0
+    buy_price_ht:
+        label: Prix d'achat HT
+        type: money
+        required: 1
     remise:
         label: Total remise
         type: money
@@ -101,6 +105,8 @@ lists:
             fk_product:
                 field: fk_product
                 display: nom_url
+            subprice:
+                field: subprice
             qty:
                 field: qty
             tva_tx:
@@ -109,10 +115,10 @@ lists:
                 field: remise_percent
             remise:
                 field: remise
-            price_ht:
-                field: price_ht
             total_ttc:
                 field: total_ttc
+            buy_price_ht:
+                field: buy_price_ht
     interface_client:
         edit_btn: 0
         extends: default
@@ -180,7 +186,7 @@ fields_tables:
             - field: fk_product
               display: nom
               label: Service
-#            - field: price_ht
+#            - field: subprice
 #              label: Prix unitaire hors-taxe
 #            - field: qty
 #              label: Quantitée dans le contrat

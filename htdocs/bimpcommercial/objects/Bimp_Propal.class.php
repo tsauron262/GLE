@@ -525,6 +525,60 @@ class Bimp_Propal extends BimpComm
                     );
                 }
 
+                // Créer facture: 
+                if ($this->isActionAllowed('createInvoice') && $this->canSetAction('createInvoice')) {
+                    if(!BimpCore::getConf('force_use_commande')){
+                        $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
+                        $values = array(
+                            'fields' => array(
+                                'entrepot'          => (int) $this->getData('entrepot'),
+                                'ef_type'           => $this->getData('ef_type'),
+                                'fk_soc'            => (int) $this->getData('fk_soc'),
+                                'ref_client'        => $this->getData('ref_client'),
+                                'fk_cond_reglement' => (int) $this->getData('fk_cond_reglement'),
+                                'fk_mode_reglement' => (int) $this->getData('fk_mode_reglement'),
+                                'fk_availability'   => (int) $this->getData('fk_availability'),
+                                'fk_input_reason'   => (int) $this->getData('fk_input_reason'),
+                                'note_public'       => addslashes(htmlentities($this->getData('note_public'))),
+                                'note_private'      => addslashes(htmlentities($this->getData('note_private'))),
+                                'date_commande'     => date('Y-m-d'),
+                                'date_livraison'    => $this->getData('date_livraison'),
+                                'libelle'           => $this->getData('libelle'),
+                                'origin'            => 'propal',
+                                'origin_id'         => (int) $this->id,
+                            )
+                        );
+                        $onclick = "";
+                        $msg = "";
+                        $files = $this->getFilesArray();
+                        if (count($files) < 2)
+                            $msg = addslashes("Il semblerait qu'il n'y ait pas de devis signé dans la section documents. Etes-vous sûr de vouloir continuer ?");
+                        if ($msg != "")
+                            $onclick .= "if ( confirm( '" . $msg . "' ) ) {";
+                        $onclick .= $facture->getJsLoadModalForm('default', 'Création d\\\'une facture', $values, '', 'redirect');
+                        if ($msg != "")
+                            $onclick .= "}";
+
+                        $buttons[] = array(
+                            'label'   => 'Créer une facture',
+                            'icon'    => 'fas_file-invoice-dollar',
+                            'onclick' => $onclick
+                        );
+                    }
+                    else{
+                        // Créer facture / avoir
+                        if ($this->isActionAllowed('createInvoice') && $this->canSetAction('createInvoice')) {
+                            $url = DOL_URL_ROOT . '/compta/facture/card.php?action=create&origin=propal&originid=' . $this->id . '&socid=' . (int) $this->getData('fk_soc');
+                            $buttons[] = array(
+                                'label'   => 'Créer une facture ou un avoir',
+                                'icon'    => 'fas_file-invoice-dollar',
+        //                        'onclick' => $this->getJsActionOnclick('createInvoice')
+                                'onclick' => 'window.location = \'' . $url . '\''
+                            );
+                        }
+                    }
+                }
+
 //                // Créer contrat:
 //                if ($this->isActionAllowed('createContract') && $this->canSetAction('createContract')) {
 //                    $url = DOL_URL_ROOT . '/contrat/card.php?action=create&origin=propal&originid=' . $this->id . '&socid=' . (int) $this->getData('fk_soc');
@@ -536,16 +590,6 @@ class Bimp_Propal extends BimpComm
 //                    );
 //                }
 //                
-                // Créer facture / avoir
-                if ($this->isActionAllowed('createInvoice') && $this->canSetAction('createInvoice')) {
-                    $url = DOL_URL_ROOT . '/compta/facture/card.php?action=create&origin=propal&originid=' . $this->id . '&socid=' . (int) $this->getData('fk_soc');
-                    $buttons[] = array(
-                        'label'   => 'Créer une facture ou un avoir',
-                        'icon'    => 'fas_file-invoice-dollar',
-//                        'onclick' => $this->getJsActionOnclick('createInvoice')
-                        'onclick' => 'window.location = \'' . $url . '\''
-                    );
-                }
 
                 // Classer facturée
                 if ($this->isActionAllowed('classifyBilled') && $this->canSetAction('classifyBilled')) {
@@ -570,7 +614,15 @@ class Bimp_Propal extends BimpComm
                 }
             }
             //Créer un contrat
-            if ($conf->contrat->enabled && ($status == 1 || $status == 2 || $status = 4)) {
+            
+            $linked_contrat = getElementElement('propal', 'contrat', $this->id);
+            
+            if(count($linked_contrat))
+                $popover = 'Un contrat existe déjà pour cette proposition commerciale';
+            if($this->getData('fk_statut') == 0)
+                $popover = "Vous ne pouvez pas créer de contrat car cette proposition commercial est au statut brouillon";
+            
+            if (($conf->contrat->enabled && ($this->getData('fk_statut') == 2) && !count($linked_contrat))) {
                 $buttons[] = array(
                     'label'   => 'Créer un contrat',
                     'icon'    => 'fas_file-signature',
@@ -579,13 +631,14 @@ class Bimp_Propal extends BimpComm
                             )
                     )
                 );
-            } else {
+            }
+            else {
                 $buttons[] = array(
                     'label'    => 'Créer un contrat',
                     'icon'     => 'fas_file-contract',
                     'onclick'  => '',
                     'disabled' => 1,
-                    'popover'  => 'Vous n\'avez pas la permission'
+                    'popover'  => $popover
                 );
             }
         }
@@ -726,7 +779,7 @@ class Bimp_Propal extends BimpComm
         $newPropal->addNote('Révision de la proposition: ' . $this->getRef());
 
         // Copie des lignes: 
-        $warnings = array_merge($warnings, $newPropal->createLinesFromOrigin($this, array(
+        $warnings = BimpTools::merge_array($warnings, $newPropal->createLinesFromOrigin($this, array(
                     'is_review' => true
         )));
 

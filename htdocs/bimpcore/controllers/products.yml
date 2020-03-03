@@ -39,6 +39,10 @@ objects:
             bimp_object:
                 module: bimplogistique
                 name: Inventory
+    
+    BimpProductMouvement:
+        instance:
+            bimp_object: BimpProductMouvement
             
 sections:
     - type: tabs
@@ -93,3 +97,11 @@ sections:
                   list: 
                       panel: 1
                       object: inventory
+                      
+        mouvement:
+            label: Mouvements de stock
+            sections:
+                - type: list
+                  list: 
+                      panel: 1
+                      object: BimpProductMouvement  

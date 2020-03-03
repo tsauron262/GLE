@@ -19,10 +19,10 @@ class ObjectLine extends BimpObject
 
     public $desc = null;
     public $id_product = null;
+    public $product_type = 0;
     public $qty = 1;
     public $pu_ht = null;
     public $tva_tx = null;
-    public $product_type = 0;
     public $pa_ht = null;
     public $id_fourn_price = null;
     public $remise = null;
@@ -67,11 +67,11 @@ class ObjectLine extends BimpObject
     public $remises = null;
     public $bimp_line_only = false;
     protected $remises_total_infos = null;
-    
-    
-    public static function traiteSerialApple($serial){
-        if(stripos($serial, 'S') === 0){
-            return substr($serial,1);
+
+    public static function traiteSerialApple($serial)
+    {
+        if (stripos($serial, 'S') === 0) {
+            return substr($serial, 1);
         }
         return $serial;
     }
@@ -608,7 +608,7 @@ class ObjectLine extends BimpObject
             }
             if ($this->isParentEditable() && in_array((int) $this->getData('type'), array(self::LINE_PRODUCT, self::LINE_FREE)) && !(int) $this->getData('id_parent_line')) {
                 $line_instance = BimpObject::getInstance($this->module, $this->object_name);
-                $onclick = $line_instance->getJsLoadModalForm((is_a($this, 'FournObjectLine'))? 'fournline' : 'default', 'Ajout d\\\'une sous-ligne à la ligne n°' . $this->getData('position'), array(
+                $onclick = $line_instance->getJsLoadModalForm((is_a($this, 'FournObjectLine')) ? 'fournline' : 'default', 'Ajout d\\\'une sous-ligne à la ligne n°' . $this->getData('position'), array(
                     'objects' => array(
                         'remises' => $this->getClientDefaultRemiseFormValues()
                     ),
@@ -673,7 +673,7 @@ class ObjectLine extends BimpObject
         );
     }
 
-    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array())
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
     {
         switch ($field_name) {
             case 'categ1':
@@ -693,7 +693,7 @@ class ObjectLine extends BimpObject
                     'on'    => $alias . '.fk_product = ' . $line_alias . '.fk_product'
                 );
                 $filters[$alias . '.fk_categorie'] = array(
-                    'in' => $values
+                    ($excluded ? 'not_' : '') . 'in' => $values
                 );
                 return;
 
@@ -723,17 +723,26 @@ class ObjectLine extends BimpObject
 
                 if (!empty($ids)) {
                     $sql = '(typecont.element = \'' . static::$parent_comm_type . '\' AND typecont.source = \'internal\'';
-                    $sql .= ' AND typecont.code = \'SALESREPFOLL\' AND elemcont.fk_socpeople IN (' . implode(',', $ids) . '))';
+                    $sql .= ' AND typecont.code = \'SALESREPFOLL\' AND elemcont.fk_socpeople ' . ($excluded ? 'NOT ' : '') . 'IN (' . implode(',', $ids) . '))';
+
+                    if (!$empty && $excluded) {
+                        $sql .= ' OR (SELECT COUNT(ec2.fk_socpeople) FROM ' . MAIN_DB_PREFIX . 'element_contact ec2';
+                        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'c_type_contact tc2 ON tc2.rowid = ec2.fk_c_type_contact';
+                        $sql .= ' WHERE tc2.element = \'' . static::$parent_comm_type . '\'';
+                        $sql .= ' AND tc2.source = \'internal\'';
+                        $sql .= ' AND tc2.code = \'SALESREPFOLL\'';
+                        $sql .= ' AND ec2.element_id = a.id_obj) = 0';
+                    }
                 }
 
                 if ($empty) {
-                    $sql .= ($sql ? ' OR ' : '');
-                    $sql = '(SELECT COUNT(ec2.fk_socpeople) FROM ' . MAIN_DB_PREFIX . 'element_contact ec2';
+                    $sql .= ($sql ? ($excluded ? ' AND ' : ' OR ') : '');
+                    $sql .= '(SELECT COUNT(ec2.fk_socpeople) FROM ' . MAIN_DB_PREFIX . 'element_contact ec2';
                     $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'c_type_contact tc2 ON tc2.rowid = ec2.fk_c_type_contact';
                     $sql .= ' WHERE tc2.element = \'' . static::$parent_comm_type . '\'';
                     $sql .= ' AND tc2.source = \'internal\'';
                     $sql .= ' AND tc2.code = \'SALESREPFOLL\'';
-                    $sql .= ' AND ec2.element_id = a.id_obj) = 0';
+                    $sql .= ' AND ec2.element_id = a.id_obj) ' . ($excluded ? '>' : '=') . ' 0';
                 }
 
                 if ($sql) {
@@ -757,17 +766,17 @@ class ObjectLine extends BimpObject
                     'on'    => $alias . '.rowid = ' . $line_alias . '.fk_product'
                 );
 
-                $or_field = array();
+                $ref_filters = array();
                 foreach ($values as $value) {
-                    $filter = BC_Filter::getValuePartSqlFilter($value, "middle");
+                    $filter = BC_Filter::getValuePartSqlFilter($value, "middle", $excluded);
                     if (!empty($filter)) {
-                        $or_field[] = $filter;
+                        $ref_filters[] = $filter;
                     }
                 }
 
-                if (!empty($or_field)) {
+                if (!empty($ref_filters)) {
                     $filters[$alias . '.ref'] = array(
-                        'or_field' => $or_field
+                        ($excluded ? 'and' : 'or_field') => $ref_filters
                     );
                 }
                 break;
@@ -787,7 +796,7 @@ class ObjectLine extends BimpObject
                 );
 
                 $filters[$alias . '.fk_product_type'] = array(
-                    'in' => $values
+                    ($excluded ? 'not_' : '') . 'in' => $values
                 );
 
                 break;
@@ -811,12 +820,12 @@ class ObjectLine extends BimpObject
                 );
 
                 $filters[$alias . '.' . $field_name] = array(
-                    'in' => $values
+                    ($excluded ? 'not_' : '') . 'in' => $values
                 );
                 break;
         }
 
-        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors);
+        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
     }
 
     public function getCustomFilterValueLabel($field_name, $value)
@@ -2027,7 +2036,10 @@ class ObjectLine extends BimpObject
                 } else {
                     $parent_status = (int) $parent->getData('fk_statut');
                     $this->parent->set("fk_statut", 0);
-                    $this->fetch($id, $this->parent);
+                    if (!$this->fetch($id, $this->parent)) {
+                        $errors[] = BimpTools::ucfirst($this->getLabel('the')) . ' d\'ID ' . $id . ' semble avoir bien était enregistrée mais n\'a pas été trouvée';
+                        return $errors;
+                    }
 
                     if ($remisable && isset($line->remise_percent) && (float) $line->remise_percent) {
                         if (static::$parent_comm_type) {
@@ -4474,7 +4486,7 @@ class ObjectLine extends BimpObject
                 $this->delete($del_warnings, true);
             } else {
                 if ($this->equipment_required) {
-                    $warnings = array_merge($warnings, $this->createEquipmentsLines());
+                    $warnings = BimpTools::merge_array($warnings, $this->createEquipmentsLines());
 
                     if (!is_null($equipment)) {
                         $equipment_errors = $this->attributeEquipment((int) $equipment->id);
@@ -4636,7 +4648,7 @@ class ObjectLine extends BimpObject
                 }
             }
         } else {
-            $errors = array_merge($errors, $this->updateLine(false));
+            $errors = BimpTools::merge_array($errors, $this->updateLine(false));
 
             if (!is_null($prev_parent_status)) {
                 $parent->dol_object->statut = $prev_parent_status;

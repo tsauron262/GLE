@@ -1,0 +1,108 @@
+
+table: bl_inventory_expected
+
+            
+labels:
+    name: Attendus
+
+objects:
+    inventory: 
+        instance: 
+            bimp_object: Inventory2
+    warehouse_type: 
+        instance: 
+            bimp_object: InventoryWarehouse
+    product: 
+        instance: 
+            id_object: 
+                prop: id_product
+    package: 
+        instance: 
+            bimp_object: 
+                module: bimpequipment
+                name: BE_Package
+
+            
+                
+fields: 
+    id_inventory:
+        label: Id de l'inventaire
+        type: id_object
+        object: inventory
+        
+    id_wt:
+        label: Id de l'entrepôt/type
+        type: id_object
+        object: warehouse_type
+        
+    id_package:
+        label: Package
+        type: id_object
+        object: package
+        display: 
+            default: 
+                type: nom_url        
+    id_product: 
+        label: Produit
+        type: id_object
+        object: product
+        display: 
+            default: 
+                type: nom_url
+        
+    qty:
+        label: Attendu
+        type: int
+        
+    qty_scanned:
+        label: Scanné
+        type: int
+        edit: 0
+        default: 0
+        
+    ids_equipments:
+        label: Id des équipements
+        type: json
+        
+    serialisable:
+        label: Sérialisable
+        type: bool
+        
+            
+            
+lists:
+    default:
+        modal_view: default
+        view_btn: 1
+        cols:
+            id_product:
+                field: id_product
+            id_package:
+                field: id_package
+            qty:
+                field: qty
+            qty_scanned:
+                field: qty_scanned
+#            ids_equipments:
+#                field: ids_equipments
+        
+        
+fields_tables: 
+    default: 
+        title: Informations
+        icon: info-circle
+        rows:
+            - label: Equipement
+              value: 
+                  callback: renderEquipments
+            
+views:
+    default:
+        rows:
+            - cols: 
+                  - type: fields_table
+                    col_lg: 7
+                    col_md: 8
+                    col_sm: 12
+                    fields_table:
+                        name: default  

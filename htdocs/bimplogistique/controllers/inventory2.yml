@@ -4,6 +4,7 @@ title:
     callback: getPageTitle
 js:
     - /bimplogistique/views/js/inventory2.js
+    - /bimplogistique/views/js/create_inventory2.js
     
 objects:
     inventory2:

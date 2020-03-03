@@ -1,7 +1,7 @@
 <?php
 
 ini_set('max_execution_time', 6000);
-//ini_set('memory_limit', '512M');
+ini_set('memory_limit', '512M');
 
 class Bimp_Product extends BimpObject
 {
@@ -1438,6 +1438,22 @@ class Bimp_Product extends BimpObject
         $id_inventory = BimpTools::getValue('id');
         $inventory_sr = BimpCache::getBimpObjectInstance('bimplogistique', 'InventorySR', $id_inventory);
         return $inventory_sr->getStockProduct((int) $this->getData('id'));
+    }
+    
+    /* Ne peut être utilisé que dans l'affichage des listes à cause de $inventory->current_wt */
+    public function renderStock() {
+        $id_inventory = (int) BimpTools::getValue('id');
+        $inventory = BimpCache::getBimpObjectInstance('bimplogistique', 'Inventory2', $id_inventory);
+        $diff = $inventory->getDiffProduct($inventory->current_wt, $this->getData('id'));
+        return $diff['stock'];
+    }
+    
+    /* Ne peut être utilisé que dans l'affichage des listes à cause de $inventory->current_wt */
+    public function renderNbScanned() {
+        $id_inventory = (int) BimpTools::getValue('id');
+        $inventory = BimpCache::getBimpObjectInstance('bimplogistique', 'Inventory2', $id_inventory);
+        $diff = $inventory->getDiffProduct($inventory->current_wt, $this->getData('id'));
+        return $diff['nb_scan'];
     }
 
     public function displayCurrentPaHt()

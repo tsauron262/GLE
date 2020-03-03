@@ -88,6 +88,7 @@ var waitForElement = function (selector, callback, count) {
 
 // Ready
 $(document).ready(function () {
+    
     // Allow sound
     $('div#allow_sound').click(function(){
         var audio_ok = new Audio(DOL_URL_ROOT + '/bimplogistique/views/sound/bip_ok.mp3');

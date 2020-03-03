@@ -1,19 +1,17 @@
 table: bl_inventory_det_2
 
 parent_module: bimplogistique
-parent_object: Inventory
+parent_object: Inventory2
 parent_id_property: fk_inventory
 
-#object:
-#    warehouse_type: 
-#        relation: hasOne
-#        delete: 0
-#        instance: 
-#            bimp_object: 
-#                module: bimplogistique
-#                name: InventoryWarehouse
-#            id_object: 
-#                field_value: fk_warehouse_type
+
+
+objects:
+    package: 
+        instance: 
+            bimp_object: 
+                module: bimpequipment
+                name: BE_Package
     
 fields: 
     qty:
@@ -37,14 +35,19 @@ fields:
         
     fk_warehouse_type:
         label: Entrepôt/Type
-#        type: id_object
-#        object: warehouse_type
-#        content: 
-#            callback: renderWarehouseTypeName
         
+    fk_package:
+        label: Package
+        type: id_object
+        object: package
+        display: 
+            default: 
+                type: nom_url          
 lists:
     default:
-       objects_change_reload: Inventory
+       objects_change_reload: Inventory2
+       view_btn: 1
+       page_btn: 1
        delete_btn: 1
        sort_field: id
        sort_way: desc
@@ -63,25 +66,10 @@ lists:
                label: Entrepôt/Type
                value:
                    callback: renderWarehouseTypeName
+                   
+           fk_package:
+               field: fk_package
                
-#           fk_warehouse_type:
-#               field: fk_warehouse_type
-#               value: renderWarehouseTypeName
-#              object: warehouse_type
-#              label: Entrepôt/type
-#              callback: renderName
-
-#           nb_scanned:
-#               label: TODO entrepot/type
-#               object: warehouse_type
-#               value: TODO
-
-#           fk_warehouse_type: 
-#              custom: 1
-#              object: warehouse_type
-#              label: Entrepôt/Type
-#              content: 
-#                  callback: renderWarehouseType
            date_create:
                field: date_create
            user_create:

@@ -802,7 +802,6 @@ class BE_Package extends BimpObject
                 dol_syslog('[ERREUR STOCK] ' . $msg . ' - Ajout au Package #' . $this->id . ' - Produit #' . $product->id . ' - Qté à ajouter: ' . (int) $qty . ' - Entrepôt #' . $id_entrepot_dest, LOG_ERR);
             }
         }
-
         return $errors;
     }
 
@@ -909,6 +908,15 @@ class BE_Package extends BimpObject
         return $errors;
     }
 
+    /**
+     * 
+     * @param int $id_package_src
+     * @param int $id_package_dest
+     * @param array $products   array(id_product => qty);
+     *  si qty < 0       src => dest et dest => src
+     * @param array $equipments array(inutile    => id_equipment);
+     * @return array(errors)
+     */
     public static function moveElements($id_package_src, $id_package_dest, $products = array(), $equipments = array())
     {
         $errors = array();
@@ -927,15 +935,19 @@ class BE_Package extends BimpObject
             // Vérification des produits et de leurs quantité
             foreach ($products as $id_product => $qty) {
                 foreach ($p_products as $p_product) {
-                    if ((int) $id_product == (int) $p_product->getData('id_product'))
-                        $errors = array_merge($errors, self::moveProduct($p_product->id, $id_package_dest, $qty));
+                    if ((int) $id_product == (int) $p_product->getData('id_product')) {
+                        if($qty > 0)
+                            $errors = array_merge($errors, self::moveProduct($p_product->id, $id_package_dest, $qty, -1));
+                        else
+                            $errors = array_merge($errors, self::moveProduct($p_product->id, $id_package_src, $qty, -1));
+                    }
                 }
             }
-
+            
+            // Vérification des équipements
             $code_mvt = $package_src->getData('ref') . '-' . $id_package_dest;
             $stock_label = 'Déplacement de ' . $package_src->getData('ref') . ' au package n°' . $id_package_dest;
 
-            // Vérification des équipements
             foreach ($equipments as $id_equipment) {
                 $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $id_equipment);
                 $errors = array_merge($errors, $equipment->moveToPackage($id_package_dest, $code_mvt, $stock_label, 1));
@@ -945,6 +957,7 @@ class BE_Package extends BimpObject
         return $errors;
     }
 
+    // Si qty < 0 => inversion du sens du mouvement
     public static function moveProduct($id_package_product_src, $id_package_dest, $qty, $id_entrepot)
     {
         $errors = array();
@@ -957,7 +970,14 @@ class BE_Package extends BimpObject
             $errors[] = 'Package de destination non renseigné';
 
         if ($qty == 0)
-            $errors[] = 'Quantité non renseigné';
+            $errors[] = 'Quantité nulle';
+        
+        if((float) $qty < 0) {
+            $tmp = $id_package_product_src;
+            $id_package_product_src = $id_package_dest;
+            $id_package_dest = $tmp;
+            $qty *= -1;
+        }
 
         if (count($errors))
             return $errors;

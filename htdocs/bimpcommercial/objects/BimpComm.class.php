@@ -150,21 +150,6 @@ class BimpComm extends BimpDolObject
                 if (!BimpObject::objectLoaded($client)) {
                     $errors[] = 'Client absent';
                 } else {
-                    // Vérif de l'encours client: 
-                    $tmp = $client->dol_object->getOutstandingBills();
-                    $actuel=$tmp['opened'];
-//                    $actuel = $client->dol_object->get_OutstandingBill();
-
-                    if ($this->object_name === 'Bimp_Facture') {
-                        $actuel -= $this->dol_object->total_ttc;
-                    }
-                    $max = $client->dol_object->outstanding_limit;
-                    $futur = $actuel + $this->dol_object->total_ttc;
-
-                    if ($max > 0 && $this->dol_object->total_ttc > 0 && $max < $futur) {
-//                        $msg = "Montant encours client dépassé. Maximum : " . price($max) . " €. Actuel :" . price($actuel) . " €. Necessaire : " . price($futur) . " €.";
-//                        $errors[] = $msg;
-                    }
 
                     $errors = BimpTools::merge_array($errors, $this->checkContacts());
 
@@ -2323,7 +2308,7 @@ class BimpComm extends BimpDolObject
             }
 
             // Création des remises pour la ligne en cours:
-            $errors = BimpTools::merge_array($new_line->copyRemisesFromOrigin($line, $params['inverse_prices'], $params['copy_remises_globales']));
+            $errors = BimpTools::merge_array($errors, $new_line->copyRemisesFromOrigin($line, $params['inverse_prices'], $params['copy_remises_globales']));
         }
 
         // Attribution des lignes parentes: 

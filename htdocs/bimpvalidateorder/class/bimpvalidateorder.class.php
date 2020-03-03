@@ -202,7 +202,7 @@ class BimpValidateOrder
         
         
         if ($necessaire > 0 && $max_price < $necessaire) {
-            $this->extraMail[] = "Montant encours client dépassé. Encours authorisé : " . price($max) . "  possibilité de dépassement de l'User ".price($depassementPossible)." €. Encours actuel :" . price($actuel) . " €. Encours necessaire : " . price($futur) . " €.";
+            $this->extraMail[] = "Montant encours client dépassé. <br/>Encours authorisé : " . price($max) . "  <br/>Possibilité de dépassement de l'User ".price($depassementPossible)." €. <br/>Encours actuel :" . price($actuel) . " €. <br/>Encours necessaire : " . price($futur) . " €.";
         }
         
         

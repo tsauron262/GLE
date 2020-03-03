@@ -622,19 +622,31 @@ class Bimp_Propal extends BimpComm
             if($this->getData('fk_statut') == 0)
                 $popover = "Vous ne pouvez pas créer de contrat car cette proposition commercial est au statut brouillon";
             
-            if (($conf->contrat->enabled && ($this->getData('fk_statut') == 2) && !count($linked_contrat))) {
+            $files = $this->getFilesArray();
+            if (count($files) < 2)
+                $msg = addslashes("Il semblerait qu'il n'y ait pas de devis signé dans la section documents. Etes-vous sûr de vouloir continuer ?");
+            else
+                $msg = "Voulez vous créer un contrat ? Le statut de cette proposition commerciale va passer à Signée (à facturer)";
+            $label = 'Accepter et créer un contrat';
+            if($this->getData('fk_statut') == 2){
+                $label = 'Créer un contrat';
+            }
+            
+            if (($conf->contrat->enabled && (($this->getData('fk_statut') == 1) || $this->getData('fk_statut') == 2) && !count($linked_contrat))) {
+
                 $buttons[] = array(
-                    'label'   => 'Créer un contrat',
-                    'icon'    => 'fas_file-signature',
+                    'label'   => $label,
+                    'icon'    => 'fas_check',
                     'onclick' => $this->getJsActionOnclick('createContrat', array(), array(
-                        'form_name' => "contrat"
+                        'form_name' => "contrat",
+                        'confirm_msg' => $msg
                             )
                     )
                 );
             }
             else {
                 $buttons[] = array(
-                    'label'    => 'Créer un contrat',
+                    'label'    => $label,
                     'icon'     => 'fas_file-contract',
                     'onclick'  => '',
                     'disabled' => 1,
@@ -973,6 +985,7 @@ class Bimp_Propal extends BimpComm
         $id_new_contrat = $instance->createFromPropal($this, $data);
 
         if ($id_new_contrat > 0) {
+            $this->updateField('fk_statut', 2);
             $callback = 'window.location.href = "' . DOL_URL_ROOT . '/bimpcontract/index.php?fc=contrat&id=' . $id_new_contrat . '"';
         } else {
             $errors[] = "Le contrat n\'à pas été créer";

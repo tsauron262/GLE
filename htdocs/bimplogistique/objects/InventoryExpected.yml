@@ -73,6 +73,7 @@ fields:
 lists:
     default:
         modal_view: default
+        total_row: 1
         view_btn: 1
         cols:
             id_product:
@@ -81,8 +82,10 @@ lists:
                 field: id_package
             qty:
                 field: qty
+                has_total: 1
             qty_scanned:
                 field: qty_scanned
+                has_total: 1
 #            ids_equipments:
 #                field: ids_equipments
         
